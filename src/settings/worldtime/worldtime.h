@@ -1,49 +1,36 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #ifndef WORLDTIME_H
 #define WORLDTIME_H
- 
-#include <qlist.h>
-#include <qwidget.h>
-#include <qlabel.h>
-#include <qpushbutton.h>
 
-#include <qvbox.h>
+// Qt4 Headers
+#include <QStackedWidget>
+#include <QList>
+#include <QTimerEvent>
+#include <QPushButton>
+#include <QToolButton>
+
 #include "cityinfo.h"
-#include <qtopia/qpeglobal.h>
+#include <qtopiaglobal.h>
 
 
 const int CITIES = 6;    // the number of cities...
@@ -60,54 +47,58 @@ const int CITIES = 6;    // the number of cities...
 #define WORLDTIME_EXPORT
 #endif
 
-
-class ZoneMap;
-class QWidgetStack;
+class QTimeZone;
+class QWorldmap;
+class QStackedWidget;
 class QComboBox;
 
 class WORLDTIME_EXPORT WorldTime : public QWidget
 {
     Q_OBJECT
 public:
-    WorldTime(QWidget* parent = 0, const char *name = 0, WFlags fl = 0);
+    WorldTime(QWidget* parent = 0, Qt::WFlags fl = 0);
     ~WorldTime();
 
 public slots:
     void beginNewTz();
-    void slotNewTz( const QCString& zoneID);
+    void slotNewTz( const QTimeZone& zone );
+    void setZone( const int index );
+    void slotNewTzCancelled();
     void saveChanges();
     void cancelChanges();
 
 signals:
-    void timeZoneListChange(); 
+    void timeZoneListChange();
 
 protected:
     void timerEvent( QTimerEvent* );
 
 private slots:
     void showTime();
+    void editMode();
+    void viewMode();
 
 private:
     void readInTimes( void );   // a method to get information from the config
     void writeTimezoneChanges();
     QString strRealTz;  // save the TZ var
-    QString nameRealTz; // and what it is called
     bool bAdded;        // a flag to indicate things have been added...
     int timerId;
-    
+
     // a spot to hold the time zone for each city
     QString strCityTz[CITIES];
-    QList<QPushButton> listCities;
-    QList<CityInfo> listTimes;
-    QWidgetStack *mStack;
+    QList<QPushButton *> listCities;
+    QList<CityInfo *> listTimes;
+    QStackedWidget *mStack;
     QComboBox *mCombo;
     bool changed;
-    ZoneMap *frmMap;
+    QToolButton *tb;
+    QWorldmap *frmMap;
     enum SizeMode {
-	Minimal,
-	Tall,
-	Wide
-    } mMode; 
+        Minimal,
+        Tall,
+        Wide
+    } mMode;
 };
 
 #endif

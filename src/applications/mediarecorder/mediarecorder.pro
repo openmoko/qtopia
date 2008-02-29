@@ -1,44 +1,37 @@
-CONFIG		+= qtopiaapp
-HEADERS		= audioinput.h mediarecorder.h pluginlist.h \
-		  samplebuffer.h timeprogressbar.h confrecorder.h waveform.h
-SOURCES		= audioinput.cpp mediarecorder.cpp \
-		  pluginlist.cpp samplebuffer.cpp timeprogressbar.cpp \
-		  confrecorder.cpp waveform.cpp main.cpp
+qtopia_project(qtopia app)
+TARGET=mediarecorder
+CONFIG+=qtopia_main
 
-INTERFACES      = mediarecorderbase.ui confrecorderbase.ui
+FORMS      = mediarecorderbase.ui confrecorderbase.ui
+HEADERS		= mediarecorder.h pluginlist.h \
+		  samplebuffer.h timeprogressbar.h confrecorder.h waveform.h \
+                  audioparameters.h
+SOURCES		= mediarecorder.cpp pluginlist.cpp samplebuffer.cpp \
+                  timeprogressbar.cpp confrecorder.cpp waveform.cpp main.cpp \
+                  audioparameters.cpp
 
-TARGET		= mediarecorder
+depends(libraries/qtopiaaudio)
 
-DEPENDS         += mediaplayerbase
-INCLUDEPATH     += ../../libraries/mediaplayer
-DEPENDPATH      += ../../libraries/mediaplayer
-
-LIBS            += -lmediaplayer -lpthread
-
-TRANSLATABLES   = $$HEADERS \
-                    $$SOURCES \
-                    $$INTERFACES
-
-i18n.path=$${INSTALL_PREFIX}/i18n
-i18n.commands=$${COMMAND_HEADER}\
-    [ -z "$$TRANSLATIONS" ] || for lang in $$TRANSLATIONS; \
-    do \
-	for pkg in Categories-mediarecorder; \
-	do \
-	    $${DQTDIR}/bin/lrelease $${QTOPIA_DEPOT_PATH}/i18n/\$$lang/\$$pkg.ts \
-		-qm $(INSTALL_ROOT)/i18n/\$$lang/\$$pkg.qm; \
-	done; \
-    done
-desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Applications/voicerecorder.desktop
+desktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/mediarecorder.desktop
 desktop.path=/apps/Applications
-help.files=$${QTOPIA_DEPOT_PATH}/help/html/mediarecorder*
-help.path=/help/html
-pics.files=$${QTOPIA_DEPOT_PATH}/pics/mediarecorder/*
+desktop.hint=desktop
+help.source=$$QTOPIA_DEPOT_PATH/help
+help.files=mediarecorder*
+help.hint=help
+pics.files=$$QTOPIA_DEPOT_PATH/pics/mediarecorder/*
 pics.path=/pics/mediarecorder
-service.files=$${QTOPIA_DEPOT_PATH}/services/GetValue/audio/mediarecorder
-service.path=/services/GetValue/audio
-INSTALLS+=desktop help service
-PICS_INSTALLS+=pics
-!isEmpty(DQTDIR):INSTALLS+=i18n
+pics.hint=pics
+voicerecorderservice.files=$$QTOPIA_DEPOT_PATH/services/VoiceRecording/mediarecorder
+voicerecorderservice.path=/services/VoiceRecording
+qdsservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/VoiceRecording
+qdsservice.path=/etc/qds
+INSTALLS+=desktop help pics voicerecorderservice qdsservice
 
-PACKAGE_DESCRIPTION=The multimedia recorder for the Qtopia environment.
+# the server does this for us
+#categories.files=$$QTOPIA_DEPOT_PATH/etc/categories/mediarecorder.conf
+#categories.trtarget=QtopiaCategories
+#categories.hint=nct
+#INSTALLS+=categories
+
+pkg.desc=Media recorder for Qtopia.
+pkg.domain=window,qds,mediarecorder,mediasession,screensaver,cardreader,docapi{video/*:image/*:audio/*}

@@ -1,0 +1,586 @@
+/****************************************************************************
+**
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+**
+** This file is part of the Phone Edition of the Qtopia Toolkit.
+**
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
+
+#include "ringcontrol.h"
+#include <qtranslatablesettings.h>
+#include "phonelauncher.h"
+#include "callscreen.h"
+#include "dialercontrol.h"
+#include "messagecontrol.h"
+#include "servercontactmodel.h"
+#include <qtopia/pim/qcontactmodel.h>
+#include <qtopia/pim/qcontact.h>
+#include <qtopialog.h>
+#include <qvibrateaccessory.h>
+
+#ifdef MEDIA_SERVER
+#include <qsoundcontrol.h>
+#define SERVER_CHANNEL "QPE/MediaServer"
+#else
+#include <qsoundqss_qws.h>
+#endif
+
+// declare RingControlPrivate
+class RingControlPrivate
+{
+public:
+    RingControlPrivate() :
+        callEnabled(true),
+        msgEnabled(true),
+        messageCount(0),
+        msgTid(0),
+        vrbTid(0),
+        msgRingTime(10000),
+        vibrateTime(1600),
+        currentRingSource(RingControl::NotRinging),
+        lastRingVolume(0),
+        ringVolume(0),
+        profileManager(0),
+#ifdef MEDIA_SERVER
+        soundcontrol(0)
+#else
+        soundclient(0)
+#endif
+    {}
+
+    bool callEnabled;
+    bool msgEnabled;
+
+    int messageCount;
+    int msgTid;
+    int vrbTid;
+    int msgRingTime;
+    int vibrateTime;
+    QString curRingTone;
+    QPhoneProfile::AlertType curAlertType;
+    RingControl::RingType currentRingSource;
+    QTime ringtime;
+    int lastRingVolume;
+    int ringVolume;
+    bool vibrateActive;
+    QPhoneProfileManager *profileManager;
+#ifdef MEDIA_SERVER
+    QSoundControl *soundcontrol;
+#else
+    QWSSoundClient *soundclient;
+#endif
+};
+
+/*!
+  \class RingControl
+  \brief The RingControl class controls the system ring for incoming calls and
+         messages.
+  \ingroup QtopiaServer::Task
+
+  The RingControl class plays ring tones and enables vibration on incoming calls
+  and messages.  The specifics of the tones and vibrations generated are
+  controlled by the active QPhoneProfile.
+
+  The RingControl class only supports a single simultaneous ring tone.  If both
+  an incoming call and an incoming message are received together, the call ring
+  takes priority and the message ring is discarded.  Likewise, if a message ring
+  is in progress when an incoming call is received, the message ring is stopped
+  and the phone ring commenced.
+
+  The RingControl class provides the \c {RingControl} task.
+*/
+
+/*!
+  Sets whether call ring control is \a enabled.
+
+  \sa callRingEnabled()
+ */
+void RingControl::setCallRingEnabled(bool enabled)
+{
+    d->callEnabled = enabled;
+}
+
+/*!
+  Returns true if call ring control is enabled, otherwise false.  If enabled,
+  the RingControl class will play ring tones and vibrate subject to the rules
+  for call rings outlined above.  If disabled, the RingControl class will not
+  perform any ring control for calls.
+
+  By default, call ring control is enabled.
+ */
+bool RingControl::callRingEnabled() const
+{
+    return d->callEnabled;
+}
+
+/*!
+  Sets whether message ring control is \a enabled.
+
+  \sa messageRingEnabled()
+ */
+void RingControl::setMessageRingEnabled(bool enabled)
+{
+    d->msgEnabled = enabled;
+}
+
+/*!
+  Returns true if message ring control is enabled, otherwise false.  If enabled,
+  the RingControl class will play ring tones and vibrate subject to the rules
+  for message rings outlined above.  If disabled, the RingControl class will not
+  perform any ring control for messages.
+
+  By default, message ring control is enabled.
+ */
+bool RingControl::messageRingEnabled() const
+{
+    return d->msgEnabled;
+}
+
+/*!
+  Returns the in-progress ring tpe, or NotRinging if there is no in-progress
+  ring.
+ */
+RingControl::RingType RingControl::ringType() const
+{
+    return d->currentRingSource;
+}
+
+/*!
+  Sets the \a volume at which the rings will be played.  \a volume may be from
+  0 (silent) to 5 (loudest).
+
+  The ring volume only effects non-ascending rings.  Ascending rings always
+  commence at the lowest volume and slowly increase to the maximum volume.
+  Generally setVolume() should not be called directly as it will be overridden
+  by any change to the active QPhoneProfile.
+ */
+void RingControl::setVolume(int volume)
+{
+    d->ringVolume = volume;
+}
+
+/*!
+  \enum RingControl::RingType
+
+  The RingType enumeration represents the current in-progress ring type.
+
+  \value NotRinging There is no active ring.
+  \value Call The active ring is for an incoming call.
+  \value Msg The active ring is for a newly received message.
+ */
+
+int volmap[6] = {
+    0,
+    20,
+    40,
+    60,
+    80,
+    100,
+};
+
+/*!
+  Create a new RingControl instance with the specified \a parent.
+ */
+RingControl::RingControl(QObject *parent)
+: QObject(parent)
+{
+    d = new RingControlPrivate;
+
+    d->profileManager = new QPhoneProfileManager(this);
+    QPhoneProfile prof = d->profileManager->activeProfile();
+    setVolume(prof.volume());
+    setMsgRingTime(prof.msgAlertDuration());
+
+    connect(DialerControl::instance(), SIGNAL(stateChanged()),
+            this, SLOT(stateChanged()));
+    connect(MessageControl::instance(), SIGNAL(messageCount(int,bool,bool)),
+            this, SLOT(messageCountChanged(int)));
+
+    QObject::connect(d->profileManager,
+                     SIGNAL(activeProfileChanged(QPhoneProfile)),
+                     this,
+                     SLOT(profileChanged()));
+
+    //initSound();
+}
+
+/*!
+  Destroy the RingControl.
+ */
+RingControl::~RingControl()
+{
+    delete d;
+    d = 0;
+}
+
+/*!
+  Sets the \a duration in milliseconds of the vibration period.  When vibration
+  is active, the vibration will toggle on for \a duration then off for
+  \a duration milliseconds.
+ */
+void RingControl::setVibrateDuration(int duration)
+{
+    Q_ASSERT(duration >= 0);
+    d->vibrateTime = duration;
+}
+
+/*!
+  Return the duration of the vibration period in milliseconds.
+ */
+int RingControl::vibrateDuration() const
+{
+    return d->vibrateTime;
+}
+
+/*!
+  Set the message ring time to \a time milliseconds.
+ */
+void RingControl::setMsgRingTime(int time)
+{
+    Q_ASSERT(time >= 0);
+    d->msgRingTime = time;
+}
+
+/*!
+  Return the message ring time, in milliseconds.
+ */
+int RingControl::msgRingTime() const
+{
+    return d->msgRingTime;
+}
+
+/*!
+  Return the time, in milliseconds, the current ring has been in progress.  If
+  there is no in-progress ring, returns 0.
+ */
+int RingControl::ringTime() const
+{
+    return d->currentRingSource == NotRinging ?0:d->ringtime.elapsed();
+}
+
+void RingControl::startRinging(RingType t)
+{
+    stopRing();
+
+    if(t == Call && !d->callEnabled)
+        return;
+    else if(t == Msg && !d->msgEnabled)
+        return;
+
+    if(qLogEnabled(QtopiaServer)) {
+        QString type;
+        switch(t) {
+            case NotRinging:
+                type = "NotRinging";
+                break;
+            case Call:
+                type = "Call";
+                break;
+            case Msg:
+                type = "Message";
+                break;
+        }
+        qLog(QtopiaServer) << "RingControl: Ringing" << type;
+    }
+
+    if(t == NotRinging)
+        return;
+
+    d->ringtime.start();
+
+    QPhoneProfile profile = d->profileManager->activeProfile();
+
+    // try contact ringtone
+    if (t == Call) {
+        QString ringToneDoc;
+        ringToneDoc = findRingTone();
+        // try profile ringtone
+        // wrong way round, should head to doclnk sooner.
+        if (ringToneDoc.isEmpty())
+            ringToneDoc = profile.callTone().file();
+
+        d->curRingTone = QContent(ringToneDoc).file();
+        if (!QFile::exists(d->curRingTone)) {
+            // fall back if above settings lead to non-existent ringtone.
+            d->curRingTone = profile.systemCallTone().file();
+        }
+        d->curAlertType = profile.callAlert();
+    } else if (t == Msg) {
+        d->curAlertType = profile.msgAlert();
+        if (d->curAlertType == QPhoneProfile::Continuous
+                || d->curAlertType == QPhoneProfile::Ascending)
+            d->msgTid = startTimer(msgRingTime());
+        QString ringToneDoc;
+        ringToneDoc = profile.messageTone().file();
+
+        d->curRingTone = QContent(ringToneDoc).file();
+        if (!QFile::exists(d->curRingTone)) {
+            // fall back if above settings lead to non-existent ringtone.
+            d->curRingTone = profile.systemMessageTone().file();
+        }
+    }
+
+    if (profile.vibrate()) {
+        QVibrateAccessory vib;
+        vib.setVibrateNow( true );
+        d->vibrateActive = true;
+        d->vrbTid = startTimer(vibrateDuration());
+    }
+
+    if(d->curAlertType == QPhoneProfile::Ascending)
+        d->lastRingVolume = 1;
+    else
+        d->lastRingVolume = d->ringVolume;
+
+    d->currentRingSource = t;
+
+    if(d->lastRingVolume && d->curAlertType != QPhoneProfile::Off) {
+        initSound();
+#ifdef MEDIA_SERVER
+        if(d->soundcontrol) {
+            delete d->soundcontrol->sound();
+            delete d->soundcontrol;
+        }
+
+        d->soundcontrol = new QSoundControl(new QSound(d->curRingTone));
+        connect(d->soundcontrol, SIGNAL(done()), this, SLOT(nextRing()) );
+
+        d->soundcontrol->setPriority(QSoundControl::RingTone);
+        d->soundcontrol->setVolume(volmap[d->lastRingVolume]);
+
+        d->soundcontrol->sound()->play();
+#else
+        if(d->soundclient)
+            d->soundclient->play(0, d->curRingTone,
+                                 volmap[d->lastRingVolume],
+                                 QWSSoundClient::Priority);
+#endif
+    }
+
+    emit ringTypeChanged(d->currentRingSource);
+}
+
+QString RingControl::findRingTone()
+{
+    QString ringTone;
+    if(DialerControl::instance()->hasIncomingCall()) {
+        QPhoneCall call = DialerControl::instance()->incomingCall();
+        QString numberOrName = call.number();
+        QContact cnt;
+        QContactModel *m = ServerContactModel::instance();
+        if (!call.contact().isNull()) {
+            cnt = m->contact(call.contact());
+        } else if (!numberOrName.isEmpty()) {
+            cnt = m->matchPhoneNumber(numberOrName);
+        }
+
+        if (!cnt.uid().isNull()) {
+            numberOrName = cnt.label();
+            ringTone = cnt.customField( "tone" );
+        }
+    }
+
+    return ringTone;
+}
+
+/*!
+  Stop all ringing and vibration.  Does nothing if no ring is in progress.
+  */
+void RingControl::stopRing( )
+{
+    if(d->msgTid) {
+        killTimer(d->msgTid);
+        d->msgTid = 0;
+   }
+    if(d->vrbTid) {
+        killTimer(d->vrbTid);
+        d->vrbTid = 0;
+        d->vibrateActive = false;
+        QVibrateAccessory vib;
+        vib.setVibrateNow( false );
+    }
+#ifdef MEDIA_SERVER
+    if(d->soundcontrol) d->soundcontrol->sound()->stop();
+#else
+    if (d->soundclient) d->soundclient->stop(0);
+#endif
+    if(d->currentRingSource != NotRinging) {
+        d->currentRingSource = NotRinging;
+        emit ringTypeChanged(NotRinging);
+    }
+}
+
+/*!
+  \fn void RingControl::ringTypeChanged(RingControl::RingType type)
+
+  Emitted whenever the current ring type changes.  \a type will be the new
+  value.
+ */
+
+void RingControl::profileChanged()
+{
+    QPhoneProfile prof = d->profileManager->activeProfile();
+    setVolume(prof.volume());
+    setMsgRingTime(prof.msgAlertDuration());
+}
+
+// should eventually timeout.
+void RingControl::nextRing()
+{
+    if(d->currentRingSource != NotRinging &&
+       d->curAlertType != QPhoneProfile::Once) {
+
+        if(d->curAlertType == QPhoneProfile::Ascending && d->lastRingVolume < 5)
+            d->lastRingVolume++;
+    
+#ifdef MEDIA_SERVER
+    d->soundcontrol->setVolume( volmap[d->lastRingVolume] );
+    d->soundcontrol->sound()->play();
+#else
+    if(d->soundclient)
+        d->soundclient->play(0, d->curRingTone,
+                             volmap[d->lastRingVolume], QWSSoundClient::Priority);
+#endif
+    }
+    // we need to stop the vibration timer when using ring once
+    if ( d->curAlertType == QPhoneProfile::Once ) {
+        stopRing();
+    }
+}
+
+/*!
+  Play the \a soundFile.  The sound file will be played at the current ring
+  volume and terminated if another ring even occurs.  Sounds may only be played
+  through this API if the ring type is NotRinging.
+ */
+void RingControl::playSound(const QString &soundFile)
+{
+    if(NotRinging != ringType())
+        return;
+
+#ifdef MEDIA_SERVER
+    if(d->soundcontrol) {
+        delete d->soundcontrol->sound();
+        delete d->soundcontrol;
+    }
+
+    d->soundcontrol = new QSoundControl(new QSound(soundFile));
+    d->soundcontrol->setPriority(QSoundControl::RingTone);
+    d->soundcontrol->setVolume(volmap[d->ringVolume]);
+    d->soundcontrol->sound()->play();
+#else
+    if(d->soundclient)
+        d->soundclient->play(0, soundFile, volmap[d->ringVolume],
+                             QWSSoundClient::Priority);
+#endif
+}
+
+void RingControl::initSound()
+{
+#ifndef MEDIA_SERVER
+    if (!d->soundclient) {
+        d->soundclient = new QWSSoundClient(this);
+        connect(d->soundclient, SIGNAL(soundCompleted(int)),
+                this, SLOT(nextRing()));
+    }
+#endif
+}
+
+/*!
+  Stops audible ringing, but vibration will continue if it was already in
+  progress.  To stop both audible ringing and vibration, use stopRing().
+*/
+void RingControl::muteRing()
+{
+#ifdef MEDIA_SERVER
+    if(d->soundcontrol) d->soundcontrol->sound()->stop();
+#else
+    if (d->soundclient) d->soundclient->stop(0);
+#endif
+}
+
+void RingControl::timerEvent(QTimerEvent *e)
+{
+    if (e->timerId() == d->msgTid) {
+        if(ringType() == RingControl::Msg)
+            stopRing();
+    } else if (e->timerId() == d->vrbTid) {
+        QVibrateAccessory vib;
+        d->vibrateActive = !d->vibrateActive;
+        vib.setVibrateNow( d->vibrateActive );
+    }
+}
+
+void RingControl::stateChanged()
+{
+    DialerControl*  dialerControl = DialerControl::instance();
+
+    if(dialerControl->hasIncomingCall()) {
+        if(ringType() != RingControl::Call)
+            startRinging(Call);
+    } else {
+        if(ringType() == RingControl::Call)
+            stopRing();
+    }
+
+    initSound();
+
+    if (dialerControl->hasActiveCalls() ||
+        ringType() != RingControl::NotRinging) {
+#ifdef MEDIA_SERVER
+        QByteArray data;
+        {
+            QDataStream stream( &data, QIODevice::WriteOnly );
+            stream << QSoundControl::RingTone;
+        }
+
+        QCopChannel::send( SERVER_CHANNEL, "setPriority(int)", data );
+#else
+        // better checking...
+        if(d->soundclient)
+            d->soundclient->playPriorityOnly(true);
+#endif
+    }
+    else if (!dialerControl->hasCallsOnHold())
+    {
+#ifdef MEDIA_SERVER
+        QByteArray data;
+        {
+            QDataStream stream(&data, QIODevice::WriteOnly);
+            stream << QSoundControl::Default;
+        }
+
+        QCopChannel::send( SERVER_CHANNEL, "setPriority(int)", data );
+#else
+        if(d->soundclient)
+            d->soundclient->playPriorityOnly(false);
+#endif
+    }
+}
+
+void RingControl::messageCountChanged(int newMessageCount)
+{
+    // Doesn't apply if already ringing
+    if(newMessageCount > d->messageCount &&
+       ringType() == RingControl::NotRinging)
+        startRinging(Msg);
+
+    d->messageCount = newMessageCount;
+}
+
+QTOPIA_TASK(RingControl, RingControl);
+QTOPIA_TASK_PROVIDES(RingControl, RingControl);
+

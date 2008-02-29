@@ -1,61 +1,65 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qtimer.h>
-#include <qvbox.h>
+#include <QLabel>
+#include <QLayout>
+#include <QTimer>
 #include "graph.h"
 #include "storage.h"
-#include <qtopia/storage.h>
+
+#include <qstorage.h>
+#include <QScrollArea>
+#include <QFont>
+#include <QFontMetrics>
+#include <QKeyEvent>
+#include <QCoreApplication>
 
 #include <stdio.h>
-#if defined(_OS_LINUX_) || defined(Q_OS_LINUX)
+#ifdef Q_OS_LINUX
 #include <sys/vfs.h>
 #include <mntent.h>
 #include <errno.h>
 #endif
 
-StorageInfoView::StorageInfoView( QWidget *parent, const char *name )
-    : QWidget( parent, name ), vb(0)
+StorageInfoView::StorageInfoView( QWidget *parent )
+    : QWidget( parent ), area(0)
 {
-    sinfo = new StorageInfo(this);
-    vb = 0;
+    QTimer::singleShot(10, this, SLOT(init()));
+}
+
+void StorageInfoView::init()
+{
+    sinfo = new QStorageMetaInfo(this);
+    QLayout *layout = new QVBoxLayout( this );
+    layout->setSpacing( 0 );
+    layout->setMargin( 0 );
+    area = new QScrollArea;
+    layout->addWidget( area );
+
+    area->setFocusPolicy( Qt::NoFocus );
+    area->setFrameShape( QFrame::NoFrame );
+
     updateMounts();
     connect(sinfo, SIGNAL(disksChanged()), this, SLOT(updateMounts()));
-    startTimer(5000);
+    startTimer(60000);
 }
 
 void StorageInfoView::timerEvent(QTimerEvent*)
@@ -66,69 +70,54 @@ void StorageInfoView::timerEvent(QTimerEvent*)
     }
 }
 
-void StorageInfoView::resizeEvent(QResizeEvent*)
-{
-    if ( vb )
-	setVBGeom();
-}
-
-void StorageInfoView::setVBGeom()
-{
-    vb->setGeometry(4,0,width()-8,height());
-}
-
 QSize StorageInfoView::sizeHint() const
 {
-    QSize s = vb ? vb->sizeHint() : QSize();
+    QSize s = area ? area->sizeHint() : QSize();
     return QSize( s.width()+8, s.height() );
 }
 
-
 void StorageInfoView::updateMounts()
 {
-    const QList<FileSystem>& sifs(sinfo->fileSystems());
-    QListIterator<FileSystem> sit(sifs);
-
-    int n = sifs.count();
-    delete vb;
-    vb = new QVBox( this );
-    vb->setSpacing( n > 3 ? 1 : 5 );
-    bool frst=TRUE;
-    FileSystem* fs;
-    for ( ; (fs=sit.current()); ++sit ) {
-	if ( !frst ) {
-	    QFrame *f = new QFrame( vb );
-	    f->setFrameStyle( QFrame::HLine | QFrame::Sunken );
-	    f->show();
-	} else frst=FALSE;
-	MountInfo* mi = new MountInfo(fs, vb);
-	connect(this, SIGNAL(updated()), mi, SLOT(refresh()));
+    QList<QFileSystem*> sifs = sinfo->fileSystems( 0 );
+    if ( area->widget() )
+        delete area->takeWidget();
+    QWidget *vb = new QWidget;
+    area->setWidget( vb );
+    area->setWidgetResizable( true );
+    QVBoxLayout *vLayout = new QVBoxLayout(vb);
+    vLayout->setSpacing( 6 );
+    vLayout->setMargin(0);
+    foreach( QFileSystem *fs, sifs ) {
+        MountInfo* mi = new MountInfo(fs);
+        // Force the minimum size (or it gets squashed)
+        mi->setMinimumSize( mi->sizeHint() );
+        mi->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Fixed );
+        vLayout->addWidget(mi);
+        connect(this, SIGNAL(updated()), mi, SLOT(refresh()));
     }
-    if ( n < 3 ) // add a filler
-	(new QWidget(vb))->setSizePolicy(QSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding));
-    setVBGeom();
-    updateGeometry();
+    vLayout->addStretch( 1 );
+    vb->updateGeometry();
     vb->show();
 }
 
 
-MountInfo::MountInfo( const FileSystem* f, QWidget *parent, const char *name )
-    : QWidget( parent, name ), title(f->name())
+MountInfo::MountInfo( const QFileSystem* f, QWidget *parent )
+    : QWidget( parent ), title(f->name())
 {
     fs = f;
-    QVBoxLayout *vb = new QVBoxLayout( this, 7 );
-
-    totalSize = new QLabel( this );
+    QVBoxLayout *vb = new QVBoxLayout( this );
+    vb->setSpacing( 7 );
+    totalSize = new QLabel;
     vb->addWidget( totalSize );
 
     data = new GraphData();
 
-    graph = new BarGraph( this );
+    graph = new BarGraph;
     graph->setFrameStyle( QFrame::Panel | QFrame::Sunken );
-    vb->addWidget( graph, 1 );
+    vb->addWidget( graph );
     graph->setData( data );
 
-    legend = new GraphLegend( this );
+    legend = new GraphLegend;
     vb->addWidget( legend );
     legend->setData( data );
 
@@ -142,30 +131,47 @@ MountInfo::~MountInfo()
 
 void MountInfo::refresh()
 {
-    long mult = 0;
-    long div = 0;
-    if ( fs->blockSize() ) {
-	mult = fs->blockSize() / 1024;
-	div = 1024 / fs->blockSize();
-    }
-    if ( !mult ) mult = 1;
-    if ( !div ) div = 1;
-    long total = fs->totalBlocks() * mult / div;
-    long avail = fs->availBlocks() * mult / div;
-    long used = total - avail;
     data->clear();
-    if (total < 10240 ) {
-        totalSize->setText( title + ": " + tr("%1 kB").arg( total ) );
-        data->addItem( tr("Used (%1 kB)").arg(used), used );
-        data->addItem( tr("Free (%1 kB)").arg(avail), avail );
-    }
-    else {
-        totalSize->setText( title + ": " + tr("%1 MB").arg( total/1024 ) );
-        data->addItem( tr("Used (%1 MB)").arg(used/1024), used );
-        data->addItem( tr("Free (%1 MB)").arg(avail/1024), avail );
-    }
-    graph->repaint( FALSE );
+    double total = (double)fs->totalBlocks() * fs->blockSize();
+    QString totalString;
+    double free = (double)fs->availBlocks() * fs->blockSize();
+    QString freeString;
+    double used = (double)(fs->totalBlocks() - fs->availBlocks()) * fs->blockSize();
+    QString usedString;
+
+    getSizeString( total, totalString );
+    totalSize->setText( QString("%1: %2 %3").arg(title).arg(QString().sprintf("%0.2f", total)).arg(totalString) );
+
+    getSizeString( used, usedString );
+    data->addItem( tr("Used (%1 %2)", "1=size,2=B/KB/MB").arg(QString().sprintf("%0.2f", used)).arg(usedString), (fs->totalBlocks() - fs->availBlocks()) );
+
+    getSizeString( free, freeString );
+    data->addItem( tr("Free (%1 %2)", "1=size,2=B/KB/MB").arg(QString().sprintf("%0.2f", free)).arg(freeString), fs->availBlocks() );
+
+    graph->update();
     legend->update();
-    graph->show();
-    legend->show();
+}
+
+void MountInfo::getSizeString( double &size, QString &string )
+{
+    if ( size < 0 ) size = 0;
+    if ( size < 1024 ) {
+        string = tr("B","bytes");
+        return;
+    }
+    size /= 1024;
+    if ( size < 1024 ) {
+        string = tr("kB","kilobytes");
+        return;
+    }
+    size /= 1024;
+    if ( size < 1024 ) {
+        string = tr("MB","megabytes");
+        return;
+    }
+    size /= 1024;
+    if ( size < 1024 ) {
+        string = tr("GB","gigabytes");
+        return;
+    }
 }

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- Generator: Adobe Illustrator 12.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 51448)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" [
+	<!ENTITY ns_svg "http://www.w3.org/2000/svg">
+	<!ENTITY ns_xlink "http://www.w3.org/1999/xlink">
+]>
+<svg  version="1.1" id="&#xCD;_xBC__xB2_&#xE3;_x5F_1" xmlns="&ns_svg;" xmlns:xlink="&ns_xlink;" width="42.387" height="35.051"
+	 viewBox="0 0 42.387 35.051" style="overflow:visible;enable-background:new 0 0 42.387 35.051;" xml:space="preserve">
+<g>
+	
+		<ellipse transform="matrix(0.6906 -0.7233 0.7233 0.6906 -3.7393 32.4629)" style="fill:#B9DBE7;stroke:#949BA2;stroke-width:0.75;" cx="36.07" cy="20.602" rx="2.315" ry="7.907"/>
+	<path style="fill:#B9DBE7;stroke:#949BA2;" d="M36.353,32.686c-2.711,3.143-16.803,1.777-19.611-0.17
+		c-1.086-0.753,0.635-14.232,5.041-17.451c3.275-2.394,6.544-2.065,9.318-0.17C35.252,17.733,37.242,31.655,36.353,32.686z"/>
+	<path style="fill:#B9DBE7;stroke:#949BA2;stroke-width:0.75;" d="M25.396,22.745c0,0,5.011-6.142,4.759-8.333
+		c5.417,3.091,7.737,15.18,6.339,17.934c-1.419,2.795-11.309,2.16-11.309,2.16L25.396,22.745z"/>
+	<polygon style="fill:#B9DBE7;stroke:#949BA2;stroke-width:0.75;" points="26.903,17.491 25.76,17.491 25.463,16.157 27.158,16.157 
+			"/>
+	
+		<radialGradient id="XMLID_21_" cx="23.6453" cy="29.3218" r="10.2446" gradientTransform="matrix(1 0 0 -1 0 34.0518)" gradientUnits="userSpaceOnUse">
+		<stop  offset="0.0056" style="stop-color:#F5EACE"/>
+		<stop  offset="0.0796" style="stop-color:#F8E6BF"/>
+		<stop  offset="0.1842" style="stop-color:#F9E1AE"/>
+		<stop  offset="0.2528" style="stop-color:#FAE0A7"/>
+		<stop  offset="0.563" style="stop-color:#E3C382"/>
+		<stop  offset="0.823" style="stop-color:#D6B36E"/>
+		<stop  offset="1" style="stop-color:#D2AD67"/>
+	</radialGradient>
+	<circle style="fill:url(#XMLID_21_);stroke:#000000;" cx="26.639" cy="8.627" r="6.947"/>
+	<path style="fill:#B9DBE7;stroke:#949BA2;stroke-width:0.75;" d="M30.423,14.853c0.042,0.085,1.313,3.771,1.313,3.771L30,19.088
+		l-0.296,2.16l-3.938,1.313C25.764,22.562,29.534,17.648,30.423,14.853z"/>
+	<ellipse style="fill:#FFFFFF;stroke:#888F95;" cx="26.272" cy="25.378" rx="0.466" ry="0.445"/>
+	<ellipse style="fill:#FFFFFF;stroke:#888F95;" cx="26.272" cy="29.7" rx="0.508" ry="0.444"/>
+	
+		<ellipse transform="matrix(0.8262 0.5634 -0.5634 0.8262 12.5069 0.5579)" style="fill:#9299A0;stroke:#000000;" cx="5.349" cy="20.547" rx="2.316" ry="7.907"/>
+	<path style="fill:#FFFFFF;stroke:#000000;" d="M24.156,31.504c-2.711,3.144-16.801,1.779-19.611-0.17
+		C3.459,30.583,5.18,17.103,9.586,13.884c3.275-2.394,6.545-2.066,9.319-0.17C23.056,16.553,25.046,30.474,24.156,31.504z"/>
+	
+		<ellipse transform="matrix(0.6905 -0.7233 0.7233 0.6905 -6.6584 23.2793)" style="fill:#656D70;stroke:#000000;" cx="23.875" cy="19.421" rx="2.315" ry="7.907"/>
+	<polygon style="fill:#505859;stroke:#000000;" points="14.923,21.043 12.297,21.106 13.271,15.833 14.521,15.833 	"/>
+	<path style="fill:#8A9197;stroke:#000000;" d="M13.37,21.848c0,0-3.089-6.473-2.937-8.359c-5.31,3.275-8.585,15.517-5.817,17.845
+		c1.621,1.365,9.685,1.949,9.685,1.949L13.37,21.848z"/>
+	<path style="fill:#656D70;stroke:#000000;" d="M13.2,21.565c0,0,5.011-6.142,4.759-8.333c5.418,3.091,7.737,15.181,6.339,17.935
+		c-1.419,2.795-11.309,2.16-11.309,2.16L13.2,21.565z"/>
+	
+		<radialGradient id="XMLID_22_" cx="11.449" cy="30.5024" r="10.2453" gradientTransform="matrix(1 0 0 -1 0 34.0518)" gradientUnits="userSpaceOnUse">
+		<stop  offset="0.0056" style="stop-color:#F5EACE"/>
+		<stop  offset="0.0796" style="stop-color:#F8E6BF"/>
+		<stop  offset="0.1842" style="stop-color:#F9E1AE"/>
+		<stop  offset="0.2528" style="stop-color:#FAE0A7"/>
+		<stop  offset="0.563" style="stop-color:#E3C382"/>
+		<stop  offset="0.823" style="stop-color:#D6B36E"/>
+		<stop  offset="1" style="stop-color:#D2AD67"/>
+	</radialGradient>
+	<circle style="fill:url(#XMLID_22_);stroke:#000000;" cx="14.443" cy="7.446" r="6.947"/>
+	<path style="fill:#656D70;stroke:#000000;" d="M18.227,13.672c0.042,0.085,1.313,3.77,1.313,3.77l-1.736,0.466l-0.297,2.161
+		l-3.938,1.313C13.567,21.381,17.337,16.468,18.227,13.672z"/>
+	<path style="fill:#8A9197;stroke:#000000;" d="M10.306,13.418c-0.06,0.076-1.997,3.294-1.997,3.294l1.612,0.794l-0.129,2.177
+		l3.183,1.635C12.975,21.319,10.634,16.333,10.306,13.418z"/>
+	<ellipse style="fill:#FFFFFF;stroke:#888F95;" cx="14.076" cy="24.198" rx="0.466" ry="0.445"/>
+	<ellipse style="fill:#FFFFFF;stroke:#888F95;" cx="14.076" cy="28.519" rx="0.508" ry="0.444"/>
+	<polygon style="fill:#505859;stroke:#000000;" points="14.457,15.727 13.313,15.727 13.017,14.393 14.711,14.393 	"/>
+</g>
+</svg>

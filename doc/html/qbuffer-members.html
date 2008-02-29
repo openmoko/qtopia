@@ -1,78 +1,121 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
---></style>
-</head><body bgcolor="#ffffff">
-
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-
-<h1 align=center>Complete Member List for QBuffer</h1><br clear="all">
-<p>This is the complete list of member functions and enum types for
-<a href="qbuffer.html">QBuffer</a>, including all inherited members.
-
-<p>
-
-<ul>
-<li><a href="qbuffer.html#99d1f1">QBuffer</a>
-<li><a href="qbuffer.html#3c9864">at</a>
-<li><a href="qiodevice.html#d51a01">atEnd</a>
-<li><a href="qbuffer.html#6512d9">buffer</a>
-<li><a href="qbuffer.html#bcf8f3">close</a>
-<li><a href="qiodevice.html#6cd02d">flags</a>
-<li><a href="qbuffer.html#c73504">flush</a>
-<li><a href="qbuffer.html#9769c6">getch</a>
-<li><a href="qiodevice.html#7d84ac">isAsynchronous</a>
-<li><a href="qiodevice.html#38dfa5">isBuffered</a>
-<li><a href="qiodevice.html#663267">isCombinedAccess</a>
-<li><a href="qiodevice.html#39a85e">isDirectAccess</a>
-<li><a href="qiodevice.html#706edf">isInactive</a>
-<li><a href="qiodevice.html#1bc7b0">isOpen</a>
-<li><a href="qiodevice.html#d4dd04">isRaw</a>
-<li><a href="qiodevice.html#ed997c">isReadWrite</a>
-<li><a href="qiodevice.html#a109ae">isReadable</a>
-<li><a href="qiodevice.html#d264a5">isSequentialAccess</a>
-<li><a href="qiodevice.html#a5d52b">isSynchronous</a>
-<li><a href="qiodevice.html#8b6c51">isTranslated</a>
-<li><a href="qiodevice.html#67abcc">isWritable</a>
-<li><a href="qiodevice.html#ac5d91">mode</a>
-<li><a href="qbuffer.html#53d514">open</a>
-<li><a href="qbuffer.html#434945">putch</a>
-<li><a href="qiodevice.html#c272a4">readAll</a>
-<li><a href="qbuffer.html#9062f3">readBlock</a>
-<li><a href="qbuffer.html#07bef1">readLine</a>
-<li><a href="qiodevice.html#f119f6">reset</a>
-<li><a href="qiodevice.html#0fbc1d">resetStatus</a>
-<li><a href="qbuffer.html#9f0762">setBuffer</a>
-<li><a href="qiodevice.html#3975e7">setFlags</a>
-<li><a href="qiodevice.html#fff4ec">setMode</a>
-<li><a href="qiodevice.html#5af6f9">setState</a>
-<li><a href="qiodevice.html#b7a5e7">setStatus</a>
-<li><a href="qiodevice.html#4915ca">setType</a>
-<li><a href="qbuffer.html#c4d405">size</a>
-<li><a href="qiodevice.html#27e36d">state</a>
-<li><a href="qiodevice.html#494f6f">status</a>
-<li><a href="qbuffer.html#4788e0">ungetch</a>
-<li><a href="qbuffer.html#d0ec2c">writeBlock</a>
-<li><a href="qbuffer.html#a8c5d0">~QBuffer</a>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: List of All Members for QBuffer</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">List of All Members for QBuffer</h1>
+<p>This is the complete list of members for <a href="qbuffer.html">QBuffer</a>, including inherited members.</p>
+<p><table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td width="45%" valign="top"><ul>
+<li><div class="fn"/>flags <a href="qiodevice.html#OpenModeFlag-enum">OpenMode</a></li>
+<li><div class="fn"/>enum <a href="qiodevice.html#OpenModeFlag-enum">OpenModeFlag</a></li>
+<li><div class="fn"/><a href="qbuffer.html#QBuffer">QBuffer</a> ( QObject * )</li>
+<li><div class="fn"/><a href="qbuffer.html#QBuffer-2">QBuffer</a> ( QByteArray *, QObject * )</li>
+<li><div class="fn"/><a href="qbuffer.html#dtor.QBuffer">~QBuffer</a> ()</li>
+<li><div class="fn"/><a href="qiodevice.html#aboutToClose">aboutToClose</a> ()</li>
+<li><div class="fn"/><a href="qiodevice.html#atEnd">atEnd</a> () const : bool</li>
+<li><div class="fn"/><a href="qobject.html#blockSignals">blockSignals</a> ( bool ) : bool</li>
+<li><div class="fn"/><a href="qbuffer.html#buffer">buffer</a> () : QByteArray &amp;</li>
+<li><div class="fn"/><a href="qbuffer.html#buffer-2">buffer</a> () const : const QByteArray &amp;</li>
+<li><div class="fn"/><a href="qiodevice.html#bytesAvailable">bytesAvailable</a> () const : qint64</li>
+<li><div class="fn"/><a href="qiodevice.html#bytesToWrite">bytesToWrite</a> () const : qint64</li>
+<li><div class="fn"/><a href="qiodevice.html#bytesWritten">bytesWritten</a> ( qint64 )</li>
+<li><div class="fn"/><a href="qiodevice.html#canReadLine">canReadLine</a> () const : bool</li>
+<li><div class="fn"/><a href="qobject.html#childEvent">childEvent</a> ( QChildEvent * )</li>
+<li><div class="fn"/><a href="qobject.html#children">children</a> () const : const QObjectList &amp;</li>
+<li><div class="fn"/><a href="qiodevice.html#close">close</a> ()</li>
+<li><div class="fn"/><a href="qobject.html#connect">connect</a> ( const QObject *, const char *, const QObject *, const char *, Qt::ConnectionType ) : bool</li>
+<li><div class="fn"/><a href="qobject.html#connect-2">connect</a> ( const QObject *, const char *, const char *, Qt::ConnectionType ) const : bool</li>
+<li><div class="fn"/><a href="qobject.html#connectNotify">connectNotify</a> ( const char * )</li>
+<li><div class="fn"/><a href="qobject.html#customEvent">customEvent</a> ( QEvent * )</li>
+<li><div class="fn"/><a href="qbuffer.html#data">data</a> () const : const QByteArray &amp;</li>
+<li><div class="fn"/><a href="qobject.html#deleteLater">deleteLater</a> ()</li>
+<li><div class="fn"/><a href="qobject.html#destroyed">destroyed</a> ( QObject * )</li>
+<li><div class="fn"/><a href="qobject.html#disconnect">disconnect</a> ( const QObject *, const char *, const QObject *, const char * ) : bool</li>
+<li><div class="fn"/><a href="qobject.html#disconnect-2">disconnect</a> ( const char *, const QObject *, const char * ) : bool</li>
+<li><div class="fn"/><a href="qobject.html#disconnect-3">disconnect</a> ( const QObject *, const char * ) : bool</li>
+<li><div class="fn"/><a href="qobject.html#disconnectNotify">disconnectNotify</a> ( const char * )</li>
+<li><div class="fn"/><a href="qobject.html#dumpObjectInfo">dumpObjectInfo</a> ()</li>
+<li><div class="fn"/><a href="qobject.html#dumpObjectTree">dumpObjectTree</a> ()</li>
+<li><div class="fn"/><a href="qobject.html#dynamicPropertyNames">dynamicPropertyNames</a> () const : QList&lt;QByteArray&gt;</li>
+<li><div class="fn"/><a href="qiodevice.html#errorString">errorString</a> () const : QString</li>
+<li><div class="fn"/><a href="qobject.html#event">event</a> ( QEvent * ) : bool</li>
+<li><div class="fn"/><a href="qobject.html#eventFilter">eventFilter</a> ( QObject *, QEvent * ) : bool</li>
+<li><div class="fn"/><a href="qobject.html#findChild">findChild</a> ( const QString &amp; ) const : T</li>
+<li><div class="fn"/><a href="qobject.html#findChildren">findChildren</a> ( const QString &amp; ) const : QList&lt;T&gt;</li>
+<li><div class="fn"/><a href="qobject.html#findChildren-2">findChildren</a> ( const QRegExp &amp; ) const : QList&lt;T&gt;</li>
+<li><div class="fn"/><a href="qiodevice.html#getChar">getChar</a> ( char * ) : bool</li>
+<li><div class="fn"/><a href="qobject.html#inherits">inherits</a> ( const char * ) const : bool</li>
+<li><div class="fn"/><a href="qobject.html#installEventFilter">installEventFilter</a> ( QObject * )</li>
+<li><div class="fn"/><a href="qiodevice.html#isOpen">isOpen</a> () const : bool</li>
+<li><div class="fn"/><a href="qiodevice.html#isReadable">isReadable</a> () const : bool</li>
+<li><div class="fn"/><a href="qiodevice.html#isSequential">isSequential</a> () const : bool</li>
+<li><div class="fn"/><a href="qiodevice.html#isTextModeEnabled">isTextModeEnabled</a> () const : bool</li>
+<li><div class="fn"/><a href="qobject.html#isWidgetType">isWidgetType</a> () const : bool</li>
+<li><div class="fn"/><a href="qiodevice.html#isWritable">isWritable</a> () const : bool</li>
+<li><div class="fn"/><a href="qobject.html#killTimer">killTimer</a> ( int )</li>
+<li><div class="fn"/><a href="qobject.html#metaObject">metaObject</a> () const : const QMetaObject *</li>
+</ul></td><td valign="top"><ul>
+<li><div class="fn"/><a href="qobject.html#moveToThread">moveToThread</a> ( QThread * )</li>
+<li><div class="fn"/><a href="qobject.html#objectName-prop">objectName</a> () const : QString</li>
+<li><div class="fn"/><a href="qiodevice.html#open">open</a> ( OpenMode ) : bool</li>
+<li><div class="fn"/><a href="qiodevice.html#openMode">openMode</a> () const : OpenMode</li>
+<li><div class="fn"/><a href="qobject.html#parent">parent</a> () const : QObject *</li>
+<li><div class="fn"/><a href="qiodevice.html#peek">peek</a> ( char *, qint64 ) : qint64</li>
+<li><div class="fn"/><a href="qiodevice.html#peek-2">peek</a> ( qint64 ) : QByteArray</li>
+<li><div class="fn"/><a href="qiodevice.html#pos">pos</a> () const : qint64</li>
+<li><div class="fn"/><a href="qobject.html#property">property</a> ( const char * ) const : QVariant</li>
+<li><div class="fn"/><a href="qiodevice.html#putChar">putChar</a> ( char ) : bool</li>
+<li><div class="fn"/><a href="qiodevice.html#read">read</a> ( char *, qint64 ) : qint64</li>
+<li><div class="fn"/><a href="qiodevice.html#read-2">read</a> ( qint64 ) : QByteArray</li>
+<li><div class="fn"/><a href="qiodevice.html#readAll">readAll</a> () : QByteArray</li>
+<li><div class="fn"/><a href="qiodevice.html#readData">readData</a> ( char *, qint64 ) : qint64</li>
+<li><div class="fn"/><a href="qiodevice.html#readLine">readLine</a> ( char *, qint64 ) : qint64</li>
+<li><div class="fn"/><a href="qiodevice.html#readLine-2">readLine</a> ( qint64 ) : QByteArray</li>
+<li><div class="fn"/><a href="qiodevice.html#readLineData">readLineData</a> ( char *, qint64 ) : qint64</li>
+<li><div class="fn"/><a href="qiodevice.html#readyRead">readyRead</a> ()</li>
+<li><div class="fn"/><a href="qobject.html#receivers">receivers</a> ( const char * ) const : int</li>
+<li><div class="fn"/><a href="qobject.html#removeEventFilter">removeEventFilter</a> ( QObject * )</li>
+<li><div class="fn"/><a href="qiodevice.html#reset">reset</a> () : bool</li>
+<li><div class="fn"/><a href="qiodevice.html#seek">seek</a> ( qint64 ) : bool</li>
+<li><div class="fn"/><a href="qobject.html#sender">sender</a> () const : QObject *</li>
+<li><div class="fn"/><a href="qbuffer.html#setBuffer">setBuffer</a> ( QByteArray * )</li>
+<li><div class="fn"/><a href="qbuffer.html#setData">setData</a> ( const QByteArray &amp; )</li>
+<li><div class="fn"/><a href="qbuffer.html#setData-2">setData</a> ( const char *, int )</li>
+<li><div class="fn"/><a href="qiodevice.html#setErrorString">setErrorString</a> ( const QString &amp; )</li>
+<li><div class="fn"/><a href="qobject.html#objectName-prop">setObjectName</a> ( const QString &amp; )</li>
+<li><div class="fn"/><a href="qiodevice.html#setOpenMode">setOpenMode</a> ( OpenMode )</li>
+<li><div class="fn"/><a href="qobject.html#setParent">setParent</a> ( QObject * )</li>
+<li><div class="fn"/><a href="qobject.html#setProperty">setProperty</a> ( const char *, const QVariant &amp; ) : bool</li>
+<li><div class="fn"/><a href="qiodevice.html#setTextModeEnabled">setTextModeEnabled</a> ( bool )</li>
+<li><div class="fn"/><a href="qobject.html#signalsBlocked">signalsBlocked</a> () const : bool</li>
+<li><div class="fn"/><a href="qiodevice.html#size">size</a> () const : qint64</li>
+<li><div class="fn"/><a href="qobject.html#startTimer">startTimer</a> ( int ) : int</li>
+<li><div class="fn"/><a href="qobject.html#staticMetaObject-var">staticMetaObject</a> : const QMetaObject</li>
+<li><div class="fn"/><a href="qobject.html#thread">thread</a> () const : QThread *</li>
+<li><div class="fn"/><a href="qobject.html#timerEvent">timerEvent</a> ( QTimerEvent * )</li>
+<li><div class="fn"/><a href="qobject.html#tr">tr</a> ( const char *, const char *, int ) : QString</li>
+<li><div class="fn"/><a href="qobject.html#trUtf8">trUtf8</a> ( const char *, const char *, int ) : QString</li>
+<li><div class="fn"/><a href="qiodevice.html#ungetChar">ungetChar</a> ( char )</li>
+<li><div class="fn"/><a href="qiodevice.html#waitForBytesWritten">waitForBytesWritten</a> ( int ) : bool</li>
+<li><div class="fn"/><a href="qiodevice.html#waitForReadyRead">waitForReadyRead</a> ( int ) : bool</li>
+<li><div class="fn"/><a href="qiodevice.html#write">write</a> ( const char *, qint64 ) : qint64</li>
+<li><div class="fn"/><a href="qiodevice.html#write-2">write</a> ( const QByteArray &amp; ) : qint64</li>
+<li><div class="fn"/><a href="qiodevice.html#writeData">writeData</a> ( const char *, qint64 ) : qint64</li>
 </ul>
-<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+</td></tr>
+</table></p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

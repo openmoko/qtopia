@@ -1,105 +1,87 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #ifndef TODOMAINWINDOW_H
 #define TODOMAINWINDOW_H
 
-#include <qtopia/pim/task.h>
-#include <qtopia/fieldmapimpl.h>
+#include <qtopia/pim/qtask.h>
+#include <qtopiaabstractservice.h>
 
 #include <qtextbrowser.h>
 #include <qmainwindow.h>
 #include <qdialog.h>
-#include <qvbox.h>
+#include <qlayout.h>
+
+#include <QDSData>
+#include <QDLBrowserClient>
+#include <QStack>
 
 class TodoTable;
 class QAction;
 class QPopupMenu;
 class Ir;
-class CategorySelect;
+class QCategorySelector;
+class QCategoryFilter;
 class QLineEdit;
 class QLabel;
-class QPEToolBar;
-class ContextMenu;
-class CategorySelectDialog;
-#ifdef QTOPIA_DATA_LINKING
-class QDLClient;
-#endif
+class QMenu;
+class QCategoryDialog;
+class QStackedWidget;
+class QTaskModel;
+class QDSActionRequest;
 
-class TodoSettings: public QDialog
+class TodoView : public QDLBrowserClient
 {
     Q_OBJECT
 public:
-    TodoSettings(QWidget *parent = 0, const char *name = 0, bool modal = FALSE, WFlags fl = 0);
-    
-    void setCurrentFields(const QValueList<int> &);
-    QValueList<int> fields() { return map->fields(); }
+    TodoView( QWidget *parent = 0 );
 
-private:
-    FieldMap *map;
-};
+    void init( const QTask &task );
 
-class TodoView : public QTextBrowser
-{
-    Q_OBJECT
-public:
-    TodoView( QWidget *parent = 0, const char *name = 0);
+    QTask task() const { return mTask; }
 
-    void init( const PimTask &task );
-
-    void setSource( const QString &name );
 signals:
     void done();
     void previous();
     void next();
+
+protected:
+    void keyPressEvent( QKeyEvent *e );
+
 private:
-#ifdef QTOPIA_DATA_LINKING
-    QDLClient *mNotesQC; 
-#endif
+    QDLBrowserClient *mNotesQC;
+    QTask   mTask;
 };
 
 class TodoWindow : public QMainWindow
 {
     Q_OBJECT
+    friend class TasksService;
 
 public:
-    TodoWindow( QWidget *parent = 0, const char *name = 0, WFlags f = 0 );
+    TodoWindow( QWidget *parent = 0, Qt::WFlags f = 0 );
     ~TodoWindow();
 
 public slots:
-    void appMessage(const QCString &, const QByteArray &);
+    void appMessage(const QString &, const QByteArray &);
 
     void reload();
     void flush();
@@ -109,22 +91,28 @@ protected slots:
     void deleteCurrentEntry();
     void editCurrentEntry();
     void showListView();
-    void showDetailView();
+    void showDetailView(const QTask &);
     void viewPrevious();
     void viewNext();
     void setShowCompleted( int );
     void currentEntryChanged( );
+
     void showFindWidget( bool s );
-    void search();
+    void startNewSearch(const QString &);
+    void nextSearchItem();
+
     void findFound();
     void findNotFound();
     void findWrapped();
     void setDocument( const QString & );
     void beamCurrentEntry();
-    void beamDone( Ir * );
-    void catSelected(int);
-    void catChanged();
-    void configure();
+    void catSelected(const QCategoryFilter &);
+
+    void qdlActivateLink( const QDSActionRequest& request );
+    void qdlRequestLinks( const QDSActionRequest& request );
+
+private slots:
+    void doneDetailView();
 
 protected:
     void closeEvent( QCloseEvent *e );
@@ -141,9 +129,14 @@ private:
     bool receiveFile( const QString &filename );
     TodoView* todoView();
 
-#ifdef Q_WS_QWS
+    QDSData taskQDLLink( QTask& task );
+    void removeTaskQDLLink( QTask& task );
+    void removeTasksQDLLink( QList<QUniqueId>& taskIds );
+
     QString beamfile;
-#endif
+
+    QTaskModel *model;
+
     TodoTable *table;
     TodoView *tView;
     QAction *newAction;
@@ -152,17 +145,45 @@ private:
     QAction *deleteAction;
     QAction *findAction;
     QAction *beamAction;
-    QPEToolBar *searchBar;
+    QToolBar *searchBar;
     QLineEdit *searchEdit;
     QPopupMenu *catMenu;
-    CategorySelect *catSelect;
+    QCategorySelector *catSelect;
     QWidget *listView;
+    QStackedWidget *centralView;
+    QStack<QUniqueId> prevTasks;
 #ifdef QTOPIA_PHONE
-    ContextMenu *contextMenu;
+    QMenu *contextMenu;
     QAction *actionCategory;
-    CategorySelectDialog *categoryDlg;
+    QCategoryDialog *categoryDlg;
     QLabel *categoryLbl;
 #endif
+    bool closeAfterDetailView;
+};
+
+class TasksService : public QtopiaAbstractService
+{
+    Q_OBJECT
+    friend class TodoWindow;
+private:
+    TasksService( TodoWindow *parent )
+        : QtopiaAbstractService( "Tasks", parent )
+        { todo = parent; publishAll(); }
+
+public:
+    ~TasksService();
+
+public slots:
+    void newTask();
+    void addTask( const QTask& task );
+    void updateTask( const QTask& task );
+    void removeTask( const QTask& task );
+    void showTask( const QUniqueId& uid );
+    void activateLink( const QDSActionRequest& request );
+    void requestLinks( const QDSActionRequest& request );
+
+private:
+    TodoWindow *todo;
 };
 
 #endif

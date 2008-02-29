@@ -1,6 +1,7 @@
 [Desktop Entry]
-Name=CF Card monitor
-Comment=Monitors the CF card slot.
-Name[ja]=CFカードモニター
-Comment[ja]=CFカードスロットを監視します。
+Name[]=CF Card monitor
+Comment[]=Monitors the CF card slot.
 X-QPE-Library=libcardmonapplet.so
+[Translation]
+File=QtopiaPlugins
+Context=Applets

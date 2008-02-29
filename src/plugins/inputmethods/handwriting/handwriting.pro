@@ -1,7 +1,7 @@
-CONFIG	    += qtopiaplugin 
+qtopia_project(qtopia plugin)
+TARGET=qhandwriting
 
-TARGET	    = qhandwriting
-
+FORMS  = prefbase.ui
 HEADERS	    = handwritingimpl.h \
 		help.h \
 		penwidget.h \
@@ -13,29 +13,23 @@ SOURCES	    = handwritingimpl.cpp \
 		qimpeninput.cpp \
 		wordpick.cpp
 
-LIBS += -lqmstroke
+depends(libraries/handwriting)
 
-TRANSLATABLES = $${SOURCES} $${HEADERS}
-
-TRANSLATABLES +=  qimpeninput.cpp \
-                    qimpeninput.h
-
-
-INTERFACES  = prefbase.ui
-
-TRANSLATABLES += $${INTERFACES}
-
-etc.files = $${QTOPIA_DEPOT_PATH}/etc/qimpen/asciilower.qpt\
-	$${QTOPIA_DEPOT_PATH}/etc/qimpen/asciiupper.qpt\
-	$${QTOPIA_DEPOT_PATH}/etc/qimpen/combining.qpt\
-	$${QTOPIA_DEPOT_PATH}/etc/qimpen/numeric.qpt\
-	$${QTOPIA_DEPOT_PATH}/etc/qimpen/popup.conf
-
+etc.files = $$QTOPIA_DEPOT_PATH/etc/qimpen/asciilower.qpt\
+	$$QTOPIA_DEPOT_PATH/etc/qimpen/asciiupper.qpt\
+	$$QTOPIA_DEPOT_PATH/etc/qimpen/combining.qpt\
+	$$QTOPIA_DEPOT_PATH/etc/qimpen/numeric.qpt\
+	$$QTOPIA_DEPOT_PATH/etc/qimpen/popup.conf
 etc.path=/etc/qimpen/
-
-desktop.files=$${QTOPIA_DEPOT_PATH}/plugins/inputmethods/qhandwriting.desktop
+desktop.files=$$QTOPIA_DEPOT_PATH/plugins/inputmethods/qhandwriting.desktop
 desktop.path=/plugins/inputmethods/
-
+desktop.hint=desktop
 INSTALLS+=etc desktop
 
-PACKAGE_NAME = qpe-handwriting
+pics.files=$${QTOPIA_DEPOT_PATH}/pics/hw/*.png
+pics.path=/pics/hw
+
+INSTALLS += pics
+
+pkg.name=qpe-handwriting
+pkg.domain=libs

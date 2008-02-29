@@ -1,0 +1,83 @@
+# These are appended to in case a project has "extended" one of these.
+
+###
+### NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
+###
+### This code must match the logic found in bin/Qtopia/BlackMagic.pm
+###
+### NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
+###
+
+# Applications
+keyword.app.commands+=\
+    "TEMPLATE=app"\
+    "CONFIG*=app"
+PROJECT_KEYWORDS*=app
+
+# Libraries
+keyword.lib.commands+=\
+    "TEMPLATE=lib"\
+    "CONFIG*=lib"\
+    "CONFIG*=syncqtopia"
+PROJECT_KEYWORDS*=lib
+
+# Plugins
+keyword.plugin.commands+=\
+    "TEMPLATE=lib"\
+    "CONFIG*=plugin"
+PROJECT_KEYWORDS*=plugin
+
+# Subdirectories
+keyword.subdirs.equiv=external
+keyword.subdirs.commands+=\
+    "TEMPLATE=subdirs"\
+    "CONFIG*=subdirs no_install"\
+    "CONFIG-=depends"
+PROJECT_KEYWORDS*=subdirs
+
+# Dummy projects
+keyword.stub.equiv=external
+keyword.stub.commands+=\
+    "CONFIG*=stub no_target no_dest"
+PROJECT_KEYWORDS*=stub
+
+# Non-Qt projects
+keyword.external.commands+=\
+    "CONFIG-=qt"\
+    "CONFIG-=qtopia"\
+    "CONFIG-=qtopiadesktop"\
+    "CONFIG*=no_tr"
+PROJECT_KEYWORDS*=external
+
+# Qt/Embedded projects
+keyword.embedded.commands+=\
+    "CONFIG-=qtopia"\
+    "CONFIG-=qtopiadesktop"
+PROJECT_KEYWORDS*=embedded
+
+# Qt/Desktop projects
+keyword.desktop.commands+=\
+    "CONFIG-=qtopia"\
+    "CONFIG-=qtopiadesktop"\
+    "CONFIG*=desktop"
+PROJECT_KEYWORDS*=desktop
+
+# Core projects don't depend on the "usual" libs
+PROJECT_KEYWORDS*=core
+
+# Qtopia Core stuff is all redirected into the actual Qtopia Core tree
+keyword.qtopiacore.equiv=stub
+keyword.qtopiacore.commands+=\
+    "CONFIG+=qtopiacore"
+PROJECT_KEYWORDS*=qtopiacore
+
+# Qtopia project (for external projects)
+keyword.qtopia.commands+=\
+    "CONFIG+=qtopia part_of_qtopia"
+PROJECT_KEYWORDS*=qtopia
+
+# Qtopia Desktop project (for external projects)
+keyword.qtopiadesktop.commands+=\
+    "CONFIG+=qtopiadesktop part_of_qtopiadesktop"
+PROJECT_KEYWORDS*=qtopiadesktop
+

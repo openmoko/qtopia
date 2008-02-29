@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /usr/local/qtopia/qtopia-opensource-4.2.0/qtopiacore/qt/src/gui/graphicsview/qgraphicssceneevent.cpp -->
+<head>
+  <title>Qt 4.2: QGraphicsSceneWheelEvent Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QGraphicsSceneWheelEvent Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<pre> #include &lt;QGraphicsSceneWheelEvent&gt;</pre><p>Inherits <a href="qgraphicssceneevent.html">QGraphicsSceneEvent</a>.</p>
+<p>This class was introduced in Qt 4.2.</p>
+<ul>
+<li><a href="qgraphicsscenewheelevent-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qgraphicsscenewheelevent.html#QGraphicsSceneWheelEvent">QGraphicsSceneWheelEvent</a></b> ( Type <i>type</i> = None )</li>
+<li><div class="fn"/><b><a href="qgraphicsscenewheelevent.html#dtor.QGraphicsSceneWheelEvent">~QGraphicsSceneWheelEvent</a></b> ()</li>
+<li><div class="fn"/>Qt::MouseButtons <b><a href="qgraphicsscenewheelevent.html#buttons">buttons</a></b> () const</li>
+<li><div class="fn"/>int <b><a href="qgraphicsscenewheelevent.html#delta">delta</a></b> () const</li>
+<li><div class="fn"/>Qt::KeyboardModifiers <b><a href="qgraphicsscenewheelevent.html#modifiers">modifiers</a></b> () const</li>
+<li><div class="fn"/>QPointF <b><a href="qgraphicsscenewheelevent.html#pos">pos</a></b> () const</li>
+<li><div class="fn"/>QPointF <b><a href="qgraphicsscenewheelevent.html#scenePos">scenePos</a></b> () const</li>
+<li><div class="fn"/>QPoint <b><a href="qgraphicsscenewheelevent.html#screenPos">screenPos</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qgraphicsscenewheelevent.html#setButtons">setButtons</a></b> ( Qt::MouseButtons <i>buttons</i> )</li>
+<li><div class="fn"/>void <b><a href="qgraphicsscenewheelevent.html#setDelta">setDelta</a></b> ( int <i>delta</i> )</li>
+<li><div class="fn"/>void <b><a href="qgraphicsscenewheelevent.html#setModifiers">setModifiers</a></b> ( Qt::KeyboardModifiers <i>modifiers</i> )</li>
+<li><div class="fn"/>void <b><a href="qgraphicsscenewheelevent.html#setPos">setPos</a></b> ( const QPointF &amp; <i>pos</i> )</li>
+<li><div class="fn"/>void <b><a href="qgraphicsscenewheelevent.html#setScenePos">setScenePos</a></b> ( const QPointF &amp; <i>pos</i> )</li>
+<li><div class="fn"/>void <b><a href="qgraphicsscenewheelevent.html#setScreenPos">setScreenPos</a></b> ( const QPoint &amp; <i>pos</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>2 public functions inherited from <a href="qgraphicssceneevent.html#public-functions">QGraphicsSceneEvent</a></li>
+<li><div class="fn"/>6 public functions inherited from <a href="qevent.html#public-functions">QEvent</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>1 property inherited from <a href="qevent.html#properties">QEvent</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QGraphicsSceneWheelEvent"></a>QGraphicsSceneWheelEvent::QGraphicsSceneWheelEvent ( <a href="qevent.html#Type-enum">Type</a> <i>type</i> = None )</h3>
+<p>Constructs a <a href="qgraphicsscenewheelevent.html">QGraphicsSceneWheelEvent</a> of type <i>type</i>.</p>
+<h3 class="fn"><a name="dtor.QGraphicsSceneWheelEvent"></a>QGraphicsSceneWheelEvent::~QGraphicsSceneWheelEvent ()</h3>
+<p>Destroys the <a href="qgraphicsscenewheelevent.html">QGraphicsSceneWheelEvent</a>.</p>
+<h3 class="fn"><a name="buttons"></a><a href="qt.html#MouseButton-enum">Qt::MouseButtons</a> QGraphicsSceneWheelEvent::buttons () const</h3>
+<p>Returns the mouse buttons that were pressed when the wheel event occurred.</p>
+<p>See also <a href="qgraphicsscenewheelevent.html#setButtons">setButtons</a>() and <a href="qgraphicsscenewheelevent.html#modifiers">modifiers</a>().</p>
+<h3 class="fn"><a name="delta"></a>int QGraphicsSceneWheelEvent::delta () const</h3>
+<p>Returns the distance that the wheel is rotated, in eights of a degree. A positive value indicates that the wheel was rotated forwards away from the user; a negative value indicates that the wheel was rotated backwards toward the user.</p>
+<p>Most mouse types work in steps of 15 degrees, in which case the delta value is a multiple of 120 (== 15 * 8).</p>
+<p>See also <a href="qgraphicsscenewheelevent.html#setDelta">setDelta</a>().</p>
+<h3 class="fn"><a name="modifiers"></a><a href="qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a> QGraphicsSceneWheelEvent::modifiers () const</h3>
+<p>Returns the keyboard modifiers that were active when the wheel event occurred.</p>
+<p>See also <a href="qgraphicsscenewheelevent.html#setModifiers">setModifiers</a>() and <a href="qgraphicsscenewheelevent.html#buttons">buttons</a>().</p>
+<h3 class="fn"><a name="pos"></a><a href="qpointf.html">QPointF</a> QGraphicsSceneWheelEvent::pos () const</h3>
+<p>Returns the position of the cursor in item coordinates when the wheel event occurred.</p>
+<p>See also <a href="qgraphicsscenewheelevent.html#setPos">setPos</a>(), <a href="qgraphicsscenewheelevent.html#scenePos">scenePos</a>(), and <a href="qgraphicsscenewheelevent.html#screenPos">screenPos</a>().</p>
+<h3 class="fn"><a name="scenePos"></a><a href="qpointf.html">QPointF</a> QGraphicsSceneWheelEvent::scenePos () const</h3>
+<p>Returns the position of the cursor in item coordinates when the wheel event occurred.</p>
+<p>See also <a href="qgraphicsscenewheelevent.html#setScenePos">setScenePos</a>(), <a href="qgraphicsscenewheelevent.html#pos">pos</a>(), and <a href="qgraphicsscenewheelevent.html#screenPos">screenPos</a>().</p>
+<h3 class="fn"><a name="screenPos"></a><a href="qpoint.html">QPoint</a> QGraphicsSceneWheelEvent::screenPos () const</h3>
+<p>Returns the position of the cursor in screen coordinates when the wheel event occurred.</p>
+<p>See also <a href="qgraphicsscenewheelevent.html#setScreenPos">setScreenPos</a>(), <a href="qgraphicsscenewheelevent.html#pos">pos</a>(), and <a href="qgraphicsscenewheelevent.html#scenePos">scenePos</a>().</p>
+<h3 class="fn"><a name="setButtons"></a>void QGraphicsSceneWheelEvent::setButtons ( <a href="qt.html#MouseButton-enum">Qt::MouseButtons</a> <i>buttons</i> )</h3>
+<p>Sets the mouse buttons that were pressed when the wheel event occurred to <i>buttons</i>.</p>
+<p>See also <a href="qgraphicsscenewheelevent.html#buttons">buttons</a>() and <a href="qgraphicsscenewheelevent.html#setModifiers">setModifiers</a>().</p>
+<h3 class="fn"><a name="setDelta"></a>void QGraphicsSceneWheelEvent::setDelta ( int <i>delta</i> )</h3>
+<p>Sets the distance that the wheel is rotated to <i>delta</i>.</p>
+<p>See also <a href="qgraphicsscenewheelevent.html#delta">delta</a>().</p>
+<h3 class="fn"><a name="setModifiers"></a>void QGraphicsSceneWheelEvent::setModifiers ( <a href="qt.html#KeyboardModifier-enum">Qt::KeyboardModifiers</a> <i>modifiers</i> )</h3>
+<p>Sets the keyboard modifiers that were active when the wheel event occurred to <i>modifiers</i>.</p>
+<p>See also <a href="qgraphicsscenewheelevent.html#modifiers">modifiers</a>() and <a href="qgraphicsscenewheelevent.html#setButtons">setButtons</a>().</p>
+<h3 class="fn"><a name="setPos"></a>void QGraphicsSceneWheelEvent::setPos ( const <a href="qpointf.html">QPointF</a> &amp; <i>pos</i> )</h3>
+<p>Sets the position of the cursor in item coordinates when the wheel event occurred to <i>pos</i>.</p>
+<p>See also <a href="qgraphicsscenewheelevent.html#pos">pos</a>(), <a href="qgraphicsscenewheelevent.html#setScenePos">setScenePos</a>(), and <a href="qgraphicsscenewheelevent.html#setScreenPos">setScreenPos</a>().</p>
+<h3 class="fn"><a name="setScenePos"></a>void QGraphicsSceneWheelEvent::setScenePos ( const <a href="qpointf.html">QPointF</a> &amp; <i>pos</i> )</h3>
+<p>Sets the position of the cursor in scene coordinates when the wheel event occurred to <i>pos</i>.</p>
+<p>See also <a href="qgraphicsscenewheelevent.html#scenePos">scenePos</a>(), <a href="qgraphicsscenewheelevent.html#setPos">setPos</a>(), and <a href="qgraphicsscenewheelevent.html#setScreenPos">setScreenPos</a>().</p>
+<h3 class="fn"><a name="setScreenPos"></a>void QGraphicsSceneWheelEvent::setScreenPos ( const <a href="qpoint.html">QPoint</a> &amp; <i>pos</i> )</h3>
+<p>Sets the position of the cursor in screen coordinates when the wheel event occurred to <i>pos</i>.</p>
+<p>See also <a href="qgraphicsscenewheelevent.html#screenPos">screenPos</a>(), <a href="qgraphicsscenewheelevent.html#setPos">setPos</a>(), and <a href="qgraphicsscenewheelevent.html#setScenePos">setScenePos</a>().</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

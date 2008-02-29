@@ -1,0 +1,5 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/dbsave/QSQLITE">
+<file alias="4_1_6_import">resources/4_1_6_import.sql</file>
+</qresource>
+</RCC>

@@ -1,6 +1,7 @@
 [Desktop Entry]
-Name=Screen Resizer
-Comment=Developer utility to quickly test user interfaces on smaller screens.
-Name[ja]=画面リサイザー
-Comment[ja]=小さい画面ですばやくユーザーインターフェースをテストする開発者ユーティリティ。
+Name[]=Screen Resizer
+Comment[]=Developer utility to quickly test user interfaces on smaller screens.
 X-QPE-Library=libscreensizeapplet.so
+[Translation]
+File=QtopiaPlugins
+Context=Applets

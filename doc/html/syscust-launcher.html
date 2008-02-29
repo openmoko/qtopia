@@ -1,0 +1,49 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Customizing the Qtopia Launcher</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Customizing the Qtopia Launcher<br /><small></small></h1>
+<a name="top"></a><ul><li><a href="#replacing-the-qtopia-launcher">Replacing the Qtopia Launcher</a></li>
+<li><a href="#reusable-user-interface-components">Reusable User-Interface Components</a></li>
+</ul>
+<a name="replacing-the-qtopia-launcher"></a>
+<h2>Replacing the Qtopia Launcher</h2>
+<p>In some cases it is desirable to have a customized launcher interface better suited to the application on the target device. Qtopia supports custom launcher user interfaces via the <tt>ServerInterface</tt>. This interface provides the infrastructure necessary to implement a launcher while maintaining compatibility with the Qtopia application and document models.</p>
+<p>The launcher user interface is part of the Qtopia server - <tt>$QPEDIR/src/server</tt> which provides services such as syncing and file-system management.</p>
+<p>The default Qtopia launcher is implemented by the <tt>Launcher</tt> class. The first step when writing a user interface is to implement a class derived from <tt>ServerInterface</tt>. This interface provides the functionality to display the applications and documents available on a Qtopia device.</p>
+<p>The <tt>createGUI()</tt> and <tt>destroyGUI()</tt> functions must be implemented to create and show the launcher and any other user interface components.</p>
+<p>The functions provided by the <tt>ServerInterface</tt> manage the addition and removal of applications and documents as necessary. The <tt>ServerInterface</tt> documentation describes the functions in detail.</p>
+<a name="reusable-user-interface-components"></a>
+<h2>Reusable User-Interface Components</h2>
+<p>In addition to the launcher it is necessary to provide some system components, such as input methods and status display.</p>
+<p>There are several classes in the default Qtopia user interface that may be re-used in a custom interface. Most user interfaces make use of some of these classes to ensure a usable system:</p>
+<ul>
+<li><tt>InputMethods</tt> - loads and displays input methods.</li>
+<li><tt>RunningAppBar</tt> - displays running application icons.</li>
+<li><tt>SysTray</tt> - loads and displays applets.</li>
+<li><tt>StartMenu</tt> - provides menus for launcher tabs and accessory plug-ins.</li>
+</ul>
+<p>An interface providing these components will support the Qtopia launcher default functionality.</p>
+<p>The Qtopia libraries also assume that QPE/Taskbar QCOP channel is available and supports the following functions:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Function</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>message(QString)</tt></td><td>display a status message.</td></tr>
+<tr valign="top" class="even"><td><tt>reloadApplets()</tt></td><td>release and reload the applets.</td></tr>
+</table></p>
+<p>The default Qtopia launcher uses the <tt>TaskBar</tt> class to encapsulate the above functionality.</p>
+<p>The Qtopia libraries also assume that QPE/InputMethod QCOP channel is available and supports the messages in <a href="inputmethodservice.html">InputMethodService</a>.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

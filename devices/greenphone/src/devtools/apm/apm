@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if [ $1 = "--suspend" ]; then
+    usb-gadget.sh unload
+fi
+
+apm.bin "$@"
+
+if [ $1 = "--suspend" ]; then
+    echo -n 0x00000041 > /proc/bulverde/registers/PSSR
+    usb-gadget.sh ether
+fi

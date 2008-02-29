@@ -1,22 +1,24 @@
-CONFIG		+= qtopiaapp
+qtopia_project(qtopia app)
+TARGET=systemtime
+CONFIG+=qtopia_main
 
 HEADERS		= settime.h
 SOURCES		= settime.cpp main.cpp
-TRANSLATABLES = $${HEADERS} $${SOURCES} 
-TARGET		= systemtime
 
-help.files=$${QTOPIA_DEPOT_PATH}/help/html/systemtime*
-help.path=/help/html
-
-timeservice.files+=$${QTOPIA_DEPOT_PATH}/services/Time/systemtime
-dateservice.files+=$${QTOPIA_DEPOT_PATH}/services/Date/systemtime
+help.source=$$QTOPIA_DEPOT_PATH/help
+help.files=systemtime*
+help.hint=help
+timeservice.files+=$$QTOPIA_DEPOT_PATH/services/Time/systemtime
 timeservice.path=/services/Time
+dateservice.files+=$$QTOPIA_DEPOT_PATH/services/Date/systemtime
 dateservice.path=/services/Date
-desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Settings/datetime.desktop
+desktop.files=$$QTOPIA_DEPOT_PATH/apps/Settings/datetime.desktop
 desktop.path=/apps/Settings
-pics.files=$${QTOPIA_DEPOT_PATH}/pics/systemtime/*
+desktop.hint=desktop
+pics.files=$$QTOPIA_DEPOT_PATH/pics/systemtime/*
 pics.path=/pics/systemtime
-INSTALLS	+= desktop help dateservice timeservice
-PICS_INSTALLS+=pics
+pics.hint=pics
+INSTALLS+=help timeservice dateservice desktop pics
 
-PACKAGE_DESCRIPTION=Date/time setting dialog for the Qtopia environment.
+pkg.desc=Date/time setting dialog for Qtopia.
+pkg.domain=window,alarm,datetime,screensaver,launcher

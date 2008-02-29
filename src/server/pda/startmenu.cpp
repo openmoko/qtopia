@@ -1,79 +1,100 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
-
-#define INCLUDE_MENUITEM_DEF
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "startmenu.h"
-#include "documentlist.h"
+#include <qcontentset.h>
 
-#include <qtopia/qpeapplication.h>
-#include <qtopia/config.h>
-#include <qtopia/applnk.h>
-#include <qtopia/global.h>
-#include <qtopia/resource.h>
-#include <qtopia/mimetype.h>
+#include <qtopiaapplication.h>
+#include <qtranslatablesettings.h>
 
-#include <qdict.h>
-#include <qdir.h>
-#include <qpainter.h>
+#include <qmimetype.h>
+#include <qstartmenuaccessory.h>
+
+#include <QDir>
+#include <QKeyEvent>
+#include <QStyle>
 
 #include <stdlib.h>
 
+class StartPopupMenu : public QMenu
+{
+public:
+    StartPopupMenu( QWidget *parent ) : QMenu( parent ) {}
+protected:
+    void keyPressEvent( QKeyEvent *e );
+};
 
 void StartPopupMenu::keyPressEvent( QKeyEvent *e )
 {
-    if ( e->key() == Key_F33 || e->key() == Key_Space ) {
-	// "OK" button, little hacky
-	QKeyEvent ke(QEvent::KeyPress, Key_Enter, 13, 0);
-	QPopupMenu::keyPressEvent( &ke );
+    if ( e->key() == Qt::Key_F33 || e->key() == Qt::Key_Space ) {
+        // "OK" button, little hacky
+        QKeyEvent ke(QEvent::KeyPress, Qt::Key_Enter, 0);
+        QMenu::keyPressEvent( &ke );
     } else {
-	QPopupMenu::keyPressEvent( e );
+        QMenu::keyPressEvent( e );
     }
 }
 
 //---------------------------------------------------------------------------
+class StartMenuAction : public QAction
+{
+Q_OBJECT
+public:
+    StartMenuAction()
+        : QAction(0), type(Separator) { setSeparator(true); }
+
+    StartMenuAction(const QIcon &icon, const QString &text,
+                    const QString &_tab)
+        : QAction(icon, text,0), type(Tab), tab(_tab) {}
+
+    StartMenuAction(const QIcon &icon, const QString &text,
+                    QContent *_lnk)
+        : QAction(icon, text,0), type(Link), lnk(_lnk) {}
+
+    StartMenuAction(const QIcon &icon, const QString &text,
+                    QStartMenuAccessory *_acc)
+        : QAction(icon, text,0), type(AccessoryItem),
+          access(_acc) {}
+
+    virtual ~StartMenuAction() {
+        if(Link == type) delete lnk;
+    }
+
+    enum Type { Tab, Link, AccessoryItem, Separator };
+    Type type;
+    QString tab;
+    union {
+        QContent * lnk;
+        QStartMenuAccessory * access;
+    };
+};
 
 StartMenu::StartMenu(QWidget *parent) : QLabel( parent )
 {
     startButtonPixmap = "go"; // No tr
 
-    int sz = AppLnk::smallIconSize()+3;
-    QPixmap pm;
-    pm.convertFromImage(Resource::loadImage(startButtonPixmap).smoothScale(sz,sz));
+    int sz = qApp->style()->pixelMetric(QStyle::PM_SmallIconSize) + 3;
+    QPixmap pm = QPixmap::fromImage(QImage(":image/"+startButtonPixmap).scaled(sz,sz));
     setPixmap(pm);
-    setFocusPolicy( NoFocus );
+    setFocusPolicy( Qt::NoFocus );
 
     launchMenu = 0;
     refreshMenu();
@@ -85,7 +106,6 @@ void StartMenu::mousePressEvent( QMouseEvent * )
     launch();
 }
 
-
 StartMenu::~StartMenu()
 {
 }
@@ -95,104 +115,93 @@ void StartMenu::createMenu()
     delete launchMenu;
     launchMenu = new StartPopupMenu( this );
     loadMenu( launchMenu );
-    connect( launchMenu, SIGNAL(activated(int)), SLOT(itemSelected(int)) );
+    connect( launchMenu, SIGNAL(triggered(QAction*)), SLOT(itemSelected(QAction*)) );
 }
 
 void StartMenu::refreshMenu()
 {
-    Config cfg("Taskbar");
-    cfg.setGroup("Menu");
-    bool ltabs = cfg.readBoolEntry("LauncherTabs",TRUE);
-    bool lot = cfg.readBoolEntry("LauncherOther",TRUE);
+    QSettings cfg("Trolltech","Taskbar");
+    cfg.beginGroup("Menu");
+    bool ltabs = cfg.value("LauncherTabs",true).toBool();
+    bool lot = cfg.value("LauncherOther",true).toBool();
     bool lt = ltabs || lot;
+
     if ( launchMenu && !lt )
-	return; // nothing to do
+        return; // nothing to do
 
     if ( launchMenu ) {
-	int i;
-	for (i=0; i<(int)launchMenu->count(); i++) {
-	    QMenuItem* item = launchMenu->findItem(launchMenu->idAt(i));
-	    if ( item && item->id() >= 0 && item->id() < ntabs ) {
-		break;
-	    }
-	    if ( item && item->isSeparator() ) {
-		i++;
-		break;
-	    }
-	}
-	while (i<(int)launchMenu->count())
-	    launchMenu->removeItemAt(i);
-	loadMenu(launchMenu);
+        // remove non-applet added menu items...
+        for(int ii = items.count() - 1; ii >= 0; ii--) {
+            QAction * action = items.at(ii);
+            StartMenuAction * sma = qobject_cast<StartMenuAction *>(action);
+            if(sma && StartMenuAction::AccessoryItem != sma->type) {
+                launchMenu->removeAction(action);
+                delete action;
+                items.removeAt(ii);
+            }
+        }
+
+        // Now load all that stuff back in...
+        loadMenu(launchMenu);
     } else {
-	createMenu();
+        // We don't have a menu at the moment, so create one
+        createMenu();
     }
 }
 
-void StartMenu::itemSelected( int id )
+void StartMenu::itemSelected( QAction *a )
 {
-    if ( id >= 0 && id < ntabs ) {
-	emit tabSelected(tabs[id]);
-    } else if ( id >= 20 && id < 20+nother ) {
-	other.at(id-20)->execute();
+    StartMenuAction * sma = qobject_cast<StartMenuAction *>(a);
+    if(!sma) {
+        // Must be a accessory menu
+        return;
+    }
+
+    switch(sma->type) {
+        case StartMenuAction::Tab:
+            emit tabSelected(sma->tab);
+            break;
+        case StartMenuAction::Link:
+            sma->lnk->execute();
+            break;
+        case StartMenuAction::AccessoryItem:
+            // Need to let the accessory know...
+            emit sma->access->activated();
+            break;
+        case StartMenuAction::Separator:
+        default:
+            break;
     }
 }
 
-bool StartMenu::loadMenu( QPopupMenu *menu )
+bool StartMenu::loadMenu( QMenu *menu )
 {
-    Config cfg("Taskbar");
-    cfg.setGroup("Menu");
+    QSettings cfg("Trolltech","Taskbar");
+    cfg.beginGroup("Menu");
 
-    bool ltabs = cfg.readBoolEntry("LauncherTabs",TRUE);
-    bool lot = cfg.readBoolEntry("LauncherOther",TRUE);
-    bool sepfirst = !ltabs && !lot;
 
-    tabs.clear();
-    other.setAutoDelete(TRUE);
-    other.clear();
-    ntabs = 0;
-    nother = 0;
+    bool ltabs = cfg.value("LauncherTabs",true).toBool();
+    bool lot = cfg.value("LauncherOther",true).toBool();
 
-    bool f=TRUE;
-    if ( (ltabs || lot) && DocumentList::appLnkSet ) {
-	QDir dir( MimeType::appsFolderName(), QString::null, QDir::Name );
-	for (int i=0; i<(int)dir.count(); i++) {
-	    QString d = dir[i];
-	    Config cfg(dir.path()+"/"+d+"/.directory",Config::File);
-	    if ( cfg.isValid() ) {
-		QString nm = cfg.readEntry("Name");
-		QString ic = cfg.readEntry("Icon");
-		if ( !!nm && !!ic ) {
-		    tabs.append(d);
-		    const QPixmap &pm = DocumentList::appLnkSet->typePixmap(d);
-		    const QPixmap &bigPm = DocumentList::appLnkSet->typeBigPixmap(d);
-		    menu->insertItem( QIconSet(pm, bigPm), nm, ntabs++ );
-		}
-	    } else if ( lot && d.right(8)==".desktop") {
-		AppLnk* applnk = new AppLnk(dir.path()+"/"+d);
-		if ( applnk->isValid() ) {
-		    if ( applnk->type() == "Separator" ) { // No tr
-			if ( lot ) {
-			    menu->insertSeparator();
-			    sepfirst = f && !ltabs;
-			}
-			delete applnk;
-		    } else {
-			f = FALSE;
-			other.append(applnk);
-			menu->insertItem( Resource::loadIconSet(applnk->icon()),
-				applnk->name(), 20+nother++ );
-		    }
-		} else {
-		    delete applnk;
-		}
-	    }
-	}
+    int ntabs = 0;
+    int nother = 0;
 
-	if ( !menu->count() )
-	    sepfirst = TRUE;
+    // Add a separator if the item list is non-empty
+    if(items.count()) {
+        StartMenuAction * a = new StartMenuAction();
+        launchMenu->addAction(a);
+        items.append(a);
     }
 
-    launchMenu->setName(sepfirst ? "accessories" : "accessories_need_sep"); // No tr
+    bool f=true;
+    // !! move it over to a category filtered content set.
+    // this should be moved up to the constructor somewhere, so that we can possibly use the signals to update the start menu/tabs
+    QContentSet *als = new QContentSet( QContentFilter::Role, "Application" );  // NO TR
+    //const AppLnkSet *als = NULL;
+    if ( (ltabs || lot) && als )
+    {
+    // todo: emulate the .directory commands.
+    }
 
     bool result = nother || ntabs;
 
@@ -202,11 +211,79 @@ bool StartMenu::loadMenu( QPopupMenu *menu )
 
 void StartMenu::launch()
 {
-    int y = mapToGlobal( QPoint() ).y() - launchMenu->sizeHint().height();
-
-    if ( launchMenu->isVisible() ) 
+    if ( launchMenu->isVisible() )
         launchMenu->hide();
-    else
-        launchMenu->popup( QPoint( 1, y ) );
+    else {
+        QSize sh = launchMenu->sizeHint();
+        int y =mapToGlobal( QPoint() ).y() - sh.height();
+        bool rtl = QApplication::layoutDirection() == Qt::RightToLeft;
+        int x;
+        if ( rtl )
+            x = mapToGlobal( QPoint(width(), height())).x() - sh.width();
+        else
+            x = 1;
+
+        launchMenu->popup( QPoint( x, y ) );
+    }
 }
 
+void StartMenu::doSep()
+{
+    // Add a separator if the item list is non-empty, and the first entry
+    // in the list is not an accessory or a separator
+    return;
+    if(items.count()) {
+        StartMenuAction * sma = qobject_cast<StartMenuAction *>(items.at(0));
+        if(sma && StartMenuAction::AccessoryItem != sma->type &&
+           StartMenuAction::Separator != sma->type) {
+            StartMenuAction * a = new StartMenuAction();
+            launchMenu->insertAction(items.at(0), a);
+            items.prepend(a);
+        }
+    }
+}
+
+QAction * StartMenu::add(QStartMenuAccessory * a, const QIcon& i, const QString& t)
+{
+    doSep(); // Check for separator
+
+    StartMenuAction *ac = new StartMenuAction(i, t, a);
+    launchMenu->insertAction(items.count()?items.at(0):0, ac);
+    items.prepend(ac);
+    return ac;
+}
+
+QAction * StartMenu::add(const QIcon& i, const QString& t, QMenu * m)
+{
+    doSep(); // Check for separator
+
+    QAction * rv = launchMenu->insertMenu(items.count()?items.at(0):0, m);
+    rv->setIcon(i);
+    rv->setText(t);
+    items.prepend(rv);
+    return rv;
+}
+
+void StartMenu::rem(QAction * a)
+{
+    for(int ii = items.count() - 1; ii >= 0; ii--) {
+        QAction * action = items.at(ii);
+        if(action == a) {
+            launchMenu->removeAction(action);
+            delete action;
+            items.removeAt(ii);
+        }
+    }
+}
+
+StartMenu * StartMenu::create(QWidget * parent)
+{
+    static StartMenu * me = 0;
+    Q_ASSERT((parent && !me) ||
+             (!parent && me));
+
+    me = new StartMenu(parent);
+    return me;
+}
+
+#include "startmenu.moc"

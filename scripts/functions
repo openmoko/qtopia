@@ -1,0 +1,6 @@
+#!/bin/bash
+
+version()
+{
+  cat `pwd`/src/libraries/qtopiabase/version.h | grep QPE_VERSION |awk '{print $3}'|sed 's/"//g'
+}

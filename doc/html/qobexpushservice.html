@@ -1,0 +1,128 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QObexPushService Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QObexPushService Class Reference</h1>
+<p>The QObexPushService class encapsulates an OBEX PUSH service. <a href="#details">More...</a></p>
+<pre>    #include &lt;QObexPushService&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<ul>
+<li><a href="qobexpushservice-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qobexpushservice.html#QObexPushService">QObexPushService</a></b> ( QObexSocket * <i>socket</i>, QObject * <i>parent</i> = 0 )</li>
+<li><div class="fn"/><b><a href="qobexpushservice.html#dtor.QObexPushService">~QObexPushService</a></b> ()</li>
+<li><div class="fn"/>bool <b><a href="qobexpushservice.html#autoDelete">autoDelete</a></b> () const</li>
+<li><div class="fn"/>virtual QByteArray <b><a href="qobexpushservice.html#businessCard">businessCard</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qobexpushservice.html#close">close</a></b> ()</li>
+<li><div class="fn"/>QObex::Error <b><a href="qobexpushservice.html#error">error</a></b> () const</li>
+<li><div class="fn"/>const QString &amp; <b><a href="qobexpushservice.html#incomingDirectory">incomingDirectory</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qobexpushservice.html#setAutoDelete">setAutoDelete</a></b> ( bool <i>enable</i> )</li>
+<li><div class="fn"/>void <b><a href="qobexpushservice.html#setIncomingDirectory">setIncomingDirectory</a></b> ( const QString &amp; <i>dir</i> )</li>
+<li><div class="fn"/>QObexSocket * <b><a href="qobexpushservice.html#socket">socket</a></b> ()</li>
+<li><div class="fn"/>QObex::State <b><a href="qobexpushservice.html#state">state</a></b> () const</li>
+</ul>
+<ul>
+<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+</ul>
+<a name="signals"></a>
+<h3>Signals</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qobexpushservice.html#aboutToDelete">aboutToDelete</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qobexpushservice.html#done">done</a></b> ( bool <i>error</i> )</li>
+<li><div class="fn"/>void <b><a href="qobexpushservice.html#getRequest">getRequest</a></b> ( const QString &amp; <i>filename</i>, const QString &amp; <i>mimetype</i> )</li>
+<li><div class="fn"/>void <b><a href="qobexpushservice.html#progress">progress</a></b> ( qint64 <i>completed</i>, qint64 <i>total</i> )</li>
+<li><div class="fn"/>void <b><a href="qobexpushservice.html#putRequest">putRequest</a></b> ( const QString &amp; <i>filename</i>, const QString &amp; <i>mimetype</i> )</li>
+<li><div class="fn"/>void <b><a href="qobexpushservice.html#requestComplete">requestComplete</a></b> ( bool <i>error</i> )</li>
+<li><div class="fn"/>void <b><a href="qobexpushservice.html#stateChanged">stateChanged</a></b> ( QObex::State <i>state</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+</ul>
+<a name="protected-functions"></a>
+<h3>Protected Functions</h3>
+<ul>
+<li><div class="fn"/>virtual bool <b><a href="qobexpushservice.html#acceptFile">acceptFile</a></b> ( const QString &amp; <i>filename</i>, const QString &amp; <i>mimetype</i>, qint64 <i>size</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QObexPushService class encapsulates an OBEX PUSH service.</p>
+<p>The QObexPushService class can be used to provide OBEX PUSH services over Bluetooth, Infrared or any other OBEX capable transport. This class implements the Bluetooth Object Push Profile, and can also be used to implement the Infrared IrXfer service.</p>
+<p>See also <a href="qobexserver.html">QObexServer</a>.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QObexPushService"></a>QObexPushService::QObexPushService ( QObexSocket * <i>socket</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Constructor for <a href="qobexpushservice.html">QObexPushService</a>. The <i>socket</i> parameter specifies the OBEX socket to use. The socket is assumed to have been obtained from a <tt>QObexServer::nextPendingConnection</tt> call. The <i>parent</i> specifies the parent object.</p>
+<p>Note that the <a href="qobexpushservice.html">QObexPushService</a> takes ownership of the socket. When <a href="qobexpushservice.html">QObexPushService</a> object is deleted, <tt>socket</tt> is deleted as well.</p>
+<h3 class="fn"><a name="dtor.QObexPushService"></a>QObexPushService::~QObexPushService ()</h3>
+<p>Destructor.</p>
+<h3 class="fn"><a name="aboutToDelete"></a>void QObexPushService::aboutToDelete ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted whenever an object is about to delete itself. This will only happen if the <tt>autoDelete</tt> property is set.</p>
+<p>See also <a href="qobexpushservice.html#setAutoDelete">setAutoDelete</a>() and <a href="qobexpushservice.html#autoDelete">autoDelete</a>().</p>
+<h3 class="fn"><a name="acceptFile"></a>bool QObexPushService::acceptFile ( const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qstring.html">QString</a> &amp; <i>mimetype</i>, qint64 <i>size</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<p>Override this function to provide custom intelligence as to whether to accept an incoming file or not (e.g. popping a message box asking the user to accept, or using a file threshold, etc)</p>
+<p>The <i>filename</i> holds the name of the file, <i>mimetype</i> holds the mimetype. The <i>size</i> parameter holds the size of the file.</p>
+<p>The default implementation accepts all files unless no incoming directory is set.</p>
+<h3 class="fn"><a name="autoDelete"></a>bool QObexPushService::autoDelete () const</h3>
+<p>Returns true if autoDelete is enabled, returns false otherwise.</p>
+<p>See also <a href="qobexpushservice.html#setAutoDelete">setAutoDelete</a>().</p>
+<h3 class="fn"><a name="businessCard"></a><a href="qbytearray.html">QByteArray</a> QObexPushService::businessCard () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Clients should override this function to provide personal business card data in vCard format. This is required for Business Card exchange feature of the Bluetooth Object Push Profile. If an empty byte array is returned, the request for a business card will be rejected.</p>
+<h3 class="fn"><a name="close"></a>void QObexPushService::close ()</h3>
+<p>Stops the operation currently in progress, sets the state to Unconnected and if the autoDelete property is set to true, schedules deletion of the service.</p>
+<h3 class="fn"><a name="done"></a>void QObexPushService::done ( bool <i>error</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted whenever the client has disconnected from the service or the connection has been terminated. The <i>error</i> parameter reports whether an error occurred during processing.</p>
+<h3 class="fn"><a name="error"></a><a href="qobex.html#Error-enum">QObex::Error</a> QObexPushService::error () const</h3>
+<p>Returns the last error that has occurred.</p>
+<h3 class="fn"><a name="getRequest"></a>void QObexPushService::getRequest ( const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qstring.html">QString</a> &amp; <i>mimetype</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted whenever a new get request comes in from the client. The only requests supported by the OBEX Push Service are for the Business Card. As such, the <i>filename</i> will parameter will always be a null string, and the <i>mimetype</i> will always be &quot;text/x-vCard&quot;</p>
+<h3 class="fn"><a name="incomingDirectory"></a>const <a href="qstring.html">QString</a> &amp; QObexPushService::incomingDirectory () const</h3>
+<p>Returns the incoming directory.</p>
+<p>See also <a href="qobexpushservice.html#setIncomingDirectory">setIncomingDirectory</a>().</p>
+<h3 class="fn"><a name="progress"></a>void QObexPushService::progress ( qint64 <i>completed</i>, qint64 <i>total</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted reports the progress of the file send operation. The <i>completed</i> parameter reports how many bytes were sent, and <i>total</i> parameter reports the total number of bytes to send.</p>
+<h3 class="fn"><a name="putRequest"></a>void QObexPushService::putRequest ( const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qstring.html">QString</a> &amp; <i>mimetype</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted whenever a new put request comes in from the client. The <i>filename</i> parameter contains the filename, and <i>mimetype</i> contains the mimetype of the request.</p>
+<h3 class="fn"><a name="requestComplete"></a>void QObexPushService::requestComplete ( bool <i>error</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted whenever a request has been completed. The <i>error</i> parameter holds whether an error has occurred during a request</p>
+<h3 class="fn"><a name="setAutoDelete"></a>void QObexPushService::setAutoDelete ( bool <i>enable</i> )</h3>
+<p>Sets the autoDelete property to <i>enable</i>. If autoDelete is enabled, then the object is automatically scheduled for deletion when the object next enters the Unconnected state.</p>
+<p>See also <a href="qobexpushservice.html#autoDelete">autoDelete</a>().</p>
+<h3 class="fn"><a name="setIncomingDirectory"></a>void QObexPushService::setIncomingDirectory ( const <a href="qstring.html">QString</a> &amp; <i>dir</i> )</h3>
+<p>Sets the incomding directory to <i>dir</i>. This directory will be used to place all files which are being received by the service.</p>
+<p>See also <a href="qobexpushservice.html#incomingDirectory">incomingDirectory</a>().</p>
+<h3 class="fn"><a name="socket"></a>QObexSocket * QObexPushService::socket ()</h3>
+<p>Returns the socket associated with this service.</p>
+<h3 class="fn"><a name="state"></a><a href="qobex.html#State-enum">QObex::State</a> QObexPushService::state () const</h3>
+<p>Returns the current connection state of the object.</p>
+<h3 class="fn"><a name="stateChanged"></a>void QObexPushService::stateChanged ( <a href="qobex.html#State-enum">QObex::State</a> <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted whenever a service object changes state. The <i>state</i> parameter holds the current state.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

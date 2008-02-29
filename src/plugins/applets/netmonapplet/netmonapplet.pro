@@ -1,19 +1,17 @@
-CONFIG		+= qtopiaplugin
-
+qtopia_project(qtopia plugin)
 TARGET		= netmonapplet
 
+FORMS	= netpw.ui
 HEADERS		= netmon.h netmonappletimpl.h
 SOURCES		= netmon.cpp netmonappletimpl.cpp
 
-INTERFACES	= netpw.ui
-
-TRANSLATABLES = $${HEADERS} $${SOURCES} $${INTERFACES}
-
-pics.files=$${QTOPIA_DEPOT_PATH}/pics/netmon/*
+pics.files=$$QTOPIA_DEPOT_PATH/pics/netmon/*
 pics.path=/pics/netmon
-PICS_INSTALLS+=pics
+pics.hint=pics
+INSTALLS+=pics
 
-desktop.files=$${QTOPIA_DEPOT_PATH}/plugins/applets/netmonapplet.desktop
+desktop.files=$$QTOPIA_DEPOT_PATH/plugins/applets/netmonapplet.desktop
 desktop.path=/plugins/applets/
-
+desktop.hint=desktop
 INSTALLS+=desktop
+

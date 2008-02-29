@@ -1,13 +1,15 @@
-<qt title="Add a Note">
+<html>
+<head><title>Add a Note</title></head>
+<body>
 <h3>Add a Note</h3>
-%%PHONE%%
+<!--#if expr="$PHONESTYLE"-->
 <ul>
-<li>Press <img src="contextbar/options.png"> and select <b>New</b> from the menu.</li>
+<li>Press <img src=":icon/options"> </img> and select <b>New</b> from the menu.</li>
 <li>Use the keypad to enter the text.</li>
-<li>Press <img src="contextbar/back.png"> to save the task and exit.</li>
+<li>Press <img src=":icon/i18n/back"> </img> to save the task and exit.</li>
 </ul>
-@@PHONE@@
-%%PDA%%
+<!--#endif-->
+<!--#if expr="$PDASTYLE"-->
 <p><b>To create a new file:</b></p>
 <ul>
 <li>Tap <b>New</b>.</li>
@@ -15,6 +17,7 @@
 <li>Save the note and exit.</li>
 </ul>
 <p>Once you've opened or created a file the text editor will provide a menu and toolbar for working with the file.</p>
-@@PDA@@
+<!--#endif-->
 <p>See Also: <a href="qpe-symbolpicker.html">Symbol Picker</a>.
-</qt>
+</body>
+</html>

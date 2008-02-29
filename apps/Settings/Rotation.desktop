@@ -5,6 +5,6 @@ Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
 Type=Application
 Exec=rotation
-Icon=Rotation
-Name[]=Ro­ta­tion
+Icon=rotation/Rotation
+Name[]=Ro\xadta\xadtion
 CanFastload=0

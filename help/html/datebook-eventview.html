@@ -1,25 +1,31 @@
-%%TOUCH%%
-{or}={or}
-@@TOUCH@@
-<qt title="Event View">
-<h3>Event View</h3>
-<p>Shows an event.</p>
-<p><b>To edit / beam / delete:</b> use
-%%PDA%%
-<img src="edit.png">
-<img src="beam.png">
-<img src="trash.png">
-@@PDA@@
-%%PHONE%%
-<img src="contextbar/options.png">
-@@PHONE@@
+<!--#if expr="$TOUCH"-->
+<!--#set var="or" value="or"-->
+<!--#endif-->
+<html>
+<head><title>Event View</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h2>Event View</h2>
+<!--#else -->
+   <h3>Event View</h3>
+<!--#endif -->
+<p><b>Event View</b> shows an event.</p>
+<p><b>To edit / beam / delete </b> use
+<!--#if expr="$PDASTYLE"-->
+<img src=":icon/edit">
+<img src=":icon/beam">
+<img src=":icon/trash">
+<!--#endif-->
+<!--#if expr="$PHONESTYLE"-->
+<img src=":icon/options">
+<!--#endif-->
 </p>
 <p><b>To select a link:</b>
-%%PDA%% %%TOUCH%%
-click the link $${or}
-@@PDA@@ @@TOUCH@@
-%%PHONE%%
-scroll with <img src="up">/<img src="down">
-and press <img src="contextbar/select.png"> to activate the link.</p>
-@@PHONE@@
-</qt>
+<!--#if expr="$PDASTYLE || $TOUCH"-->
+click the link <!--#echo var="or"-->
+<!--#endif-->
+<!--#if expr="$PHONESTYLE"-->
+scroll with <img src=":icon/up">/<img src=":icon/down"> </img> and press <img src=":icon/select"> </img> to activate the link.</p>
+<!--#endif-->
+</body>
+</html>

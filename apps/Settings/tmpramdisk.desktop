@@ -1,0 +1,10 @@
+[Translation]
+File=QtopiaSettings
+Context=Temporary Storage
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
+[Desktop Entry]
+Type=Application
+Exec=tmpramdisk
+Icon=tmpramdisk/TmpRamdisk
+Name[]=Tem\xadpo\xadrary Stor\xad\x61ge
+CanFastload=0

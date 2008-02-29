@@ -1,37 +1,106 @@
-TEMPLATE	= lib
+qtopia_project(qtopia lib)
+TARGET=qtopiapim
+CONFIG+=qtopia_visibility
 
-TARGET		= qpepim
-DESTDIR		= $$(QPEDIR)/lib
+VERSION         = 4.0.0
 
-CONFIG		+= qtopia
-VERSION         = 1.6.3
+RESOURCES = qtopiapim.qrc
 
-include(qtopiapim.pri)
+enable_modem:depends(libraries/qtopiaphone)
+depends(libraries/qtopiacomm)
+depends(3rdparty/libraries/inputmatch)
 
-nocompat {
-    include($$QTOPIA_DEPOT_PATH/src/libraries/qtopiapim1/qtopiapim1.pro)
+QTOPIAPIM_HEADERS+=\
+    qpimrecord.h\
+    qtopiapimwinexport.h\
+    qtask.h\
+    qappointment.h\
+    qcontact.h\
+    qtaskmodel.h\
+    qappointmentmodel.h\
+    qcontactmodel.h\
+    qcontactview.h\
+    qtaskview.h\
+    qpimsource.h\
+    qpimsourcemodel.h\
+    qphonenumber.h
+
+QTOPIAPIM_PRIVATE_HEADERS+=\
+    qannotator_p.h\
+    vcc_yacc_p.h\
+    vobject_p.h\
+    qsqlpimtablemodel_p.h\
+    qtaskio_p.h\
+    qappointmentio_p.h\
+    qappointmentsqlio_p.h\
+    qcontactio_p.h\
+    qpimsqlio_p.h\
+    qrecordio_p.h\
+    qtasksqlio_p.h\
+    qcontactsqlio_p.h\
+    qrecordiomerge_p.h
+
+QTOPIAPIM_SOURCES+=\
+    qannotator.cpp\
+    vcc_yacc.cpp\
+    vobject.cpp\
+    qsqlpimtablemodel.cpp\
+    qpimrecord.cpp\
+    qtaskio.cpp\
+    qcontactio.cpp\
+    qappointmentio.cpp\
+    qtask.cpp\
+    qappointment.cpp\
+    qappointmentsqlio.cpp\
+    qcontact.cpp\
+    qtaskmodel.cpp\
+    qcontactmodel.cpp\
+    qappointmentmodel.cpp\
+    qcontactview.cpp\
+    qtaskview.cpp\
+    qpimsource.cpp\
+    qpimsqlio.cpp\
+    qtasksqlio.cpp\
+    qcontactsqlio.cpp\
+    qrecordiomerge.cpp\
+    qpimsourcemodel.cpp\
+    qphonenumber.cpp
+
+enable_ssl {
+    QTOPIAPIM_PRIVATE_HEADERS+=qgooglecontext_p.h
+    QTOPIAPIM_SOURCES+=qgooglecontext.cpp
+    DEFINES+=GOOGLE_CALENDAR_CONTEXT
 }
 
-HEADERS+=$$QTOPIAPIM_HEADERS $$QTOPIAPIM_PRIVATE_HEADERS
-SOURCES+=$$QTOPIAPIM_SOURCES
-TRANSLATABLES*=$$INTERFACES $$HEADERS $$SOURCES
+enable_cell {
+    QTOPIAPIM_PRIVATE_HEADERS+=qsimcontext_p.h
+    QTOPIAPIM_SOURCES+=qsimcontext.cpp
+}
+
+TRANSLATABLES+=\
+    qsimcontext_p.h\
+    qsimcontext.cpp\
+    qgooglecontext_p.h\
+    qgooglecontext.cpp
+
+PREFIX=QTOPIAPIM
+resolve_include()
 
 sdk_qtopiapim_headers.files=$${QTOPIAPIM_HEADERS}
 sdk_qtopiapim_headers.path=/include/qtopia/pim
-sdk_qtopiapim_headers.CONFIG+=no_default_install
+sdk_qtopiapim_headers.hint=sdk headers
 
 sdk_qtopiapim_private_headers.files=$${QTOPIAPIM_PRIVATE_HEADERS}
 sdk_qtopiapim_private_headers.path=/include/qtopia/pim/private
-sdk_qtopiapim_private_headers.CONFIG+=no_default_install
+sdk_qtopiapim_private_headers.hint=sdk headers
 
-devsdk_qtopiapim_sources.files=$${QTOPIAPIM_SOURCES} $$sdk_qtopiapim_headers.files $$sdk_qtopiapim_private_headers.files
-devsdk_qtopiapim_sources.path=/src/libraries/qtopiapim
-devsdk_qtopiapim_sources.CONFIG+=no_default_install
+pkg_qtopiapim_settings.files=$$QTOPIA_DEPOT_PATH/etc/default/Trolltech/Contacts.conf
+pkg_qtopiapim_settings.path=/etc/default/Trolltech
 
-INSTALLS+=sdk_qtopiapim_headers sdk_qtopiapim_private_headers devsdk_qtopiapim_sources
-sdk.depends+=install_sdk_qtopiapim_headers install_sdk_qtopiapim_private_headers
-devsdk.depends+=install_devsdk_qtopiapim_sources
+INSTALLS+=sdk_qtopiapim_headers sdk_qtopiapim_private_headers pkg_qtopiapim_settings
 
-PACKAGE_NAME = qpe-pim
-PACKAGE_DESCRIPTION = PIM Data access library
-PACKAGE_DEPENDS = qpe-libqtopia
+pkg.desc=PIM Data access library
+pkg.domain=libs
+
+idep(LIBS+=-l$$TARGET)
+qt_inc($$TARGET)

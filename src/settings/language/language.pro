@@ -1,19 +1,21 @@
-CONFIG		+= qtopiaapp
+qtopia_project(qtopia app)
+TARGET=language
+CONFIG+=qtopia_main no_quicklaunch
 
-HEADERS		= languagesettings.h
-SOURCES		= language.cpp main.cpp
-INTERFACES	= languagesettingsbase.ui
+FORMS	= languagesettingsbase.ui
+HEADERS		= languagesettings.h langmodel.h
+SOURCES		= language.cpp main.cpp langmodel.cpp
 
-TRANSLATABLES = $${HEADERS} $${SOURCES} $${INTERFACES}
-
-TARGET		= language
-
-help.files=$${QTOPIA_DEPOT_PATH}/help/html/language.html
-help.path=/help/html
-desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Settings/Language.desktop
+help.source=$$QTOPIA_DEPOT_PATH/help
+help.files=language.html
+help.hint=help
+desktop.files=$$QTOPIA_DEPOT_PATH/apps/Settings/Language.desktop
 desktop.path=/apps/Settings
-pics.files=$${QTOPIA_DEPOT_PATH}/pics/language/*
+desktop.hint=desktop
+pics.files=$$QTOPIA_DEPOT_PATH/pics/language/*
 pics.path=/pics/language
-INSTALLS	+= desktop help
-PICS_INSTALLS+=pics
+pics.hint=pics
+INSTALLS+=help desktop pics
 
+pkg.description=Language settings application
+pkg.domain=window,language

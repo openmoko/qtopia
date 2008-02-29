@@ -1,37 +1,16 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** $TROLLTECH_DUAL_LICENSE$
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
-**********************************************************************/
+****************************************************************************/
+
 /*
  * KAsteroids - Copyright (c) Martin R. Jones 1997
  *
@@ -40,112 +19,88 @@
 
 #include <qpainter.h>
 #include "ledmeter.h"
+#include <QtDebug>
 
-KALedMeter::KALedMeter( QWidget *parent ) : QFrame( parent )
+KALedMeter::KALedMeter(QWidget* parent) : QFrame(parent)
 {
-    mCRanges.setAutoDelete( TRUE );
-    mRange = 100;
-    mCount = 20;
-    mCurrentCount = 0;
-    mValue = 0;
-    setMinimumWidth( mCount * 2 + frameWidth() );
+    maxRawValue_ = 100;
+    currentMeterLevel_ = 0;
+    rawValue_ = 0;
+    meterLevels_ = 20;
+    setMinimumWidth(meterLevels_ * 2 + frameWidth());
 }
 
-void KALedMeter::setRange( int r )
+void KALedMeter::setMaxRawValue(int max)
 {
-    mRange = r;
-    if ( mRange < 1 )
-        mRange = 1;
-    setValue( mValue );
+    maxRawValue_ = max;
+    if (maxRawValue_ < 1)
+        maxRawValue_ = 1;
+    setValue(rawValue_);
     update();
 }
 
-void KALedMeter::setCount( int c )
+void KALedMeter::setMeterLevels(int count)
 {
-    mCount = c;
-    if ( mCount < 1 )
-        mCount = 1;
-    setMinimumWidth( mCount * 2 + frameWidth() );
-    calcColorRanges();
-    setValue( mValue );
+    meterLevels_ = count;
+    if (meterLevels_ < 1)
+        meterLevels_ = 1;
+    setMinimumWidth(meterLevels_ * 2 + frameWidth());
+    setValue(rawValue_);
     update();
 }
 
-void KALedMeter::setValue( int v )
+void KALedMeter::setValue(int v)
 {
-    mValue = v;
-    if ( mValue > mRange )
-        mValue = mRange;
-    else if ( mValue < 0 )
-        mValue = 0;
-    int c = ( mValue + mRange / mCount - 1 ) * mCount / mRange;
-    if ( c != mCurrentCount )
-    {
-        mCurrentCount = c;
+    if (v > maxRawValue())
+        v = maxRawValue();
+    else if (v < 0)
+        v = 0;
+    rawValue_ = v;
+    int c = (v + maxRawValue()/meterLevels() - 1) * meterLevels()/maxRawValue();
+    if (c != currentMeterLevel_) {
+        currentMeterLevel_ = c;
         update();
     }
 }
 
-void KALedMeter::addColorRange( int pc, const QColor &c )
+void KALedMeter::resizeEvent(QResizeEvent* e)
 {
-    ColorRange *cr = new ColorRange;
-    cr->mPc = pc;
-    cr->mColor = c;
-    mCRanges.append( cr );
-    calcColorRanges();
-}
-
-void KALedMeter::resizeEvent( QResizeEvent *e )
-{
-    QFrame::resizeEvent( e );
-    int w = ( width() - frameWidth() - 2 ) / mCount * mCount;
+    QFrame::resizeEvent(e);
+    int w = (width() - frameWidth() - 2) / meterLevels() * meterLevels();
     w += frameWidth() + 2;
-    setFrameRect( QRect( 0, 0, w, height() ) );
+    setFrameRect(QRect(0,0,w,height()));
 }
 
-void KALedMeter::drawContents( QPainter *p )
+void KALedMeter::paintEvent(QPaintEvent* event)
 {
+    QWidget::paintEvent(event);
+    drawContents();
+}
+
+void KALedMeter::drawContents()
+{
+    QPainter p(this);
     QRect b = contentsRect();
 
-    unsigned cidx = 0;
-    int ncol = mCount;
-    QColor col = colorGroup().foreground();
-   
-    if ( !mCRanges.isEmpty() )
-    {
-        col = mCRanges.at( cidx )->mColor;
-        ncol = mCRanges.at( cidx )->mValue;
-    }
-    p->setBrush( col );
-    p->setPen( col );
-
-    int lw = b.width() / mCount;
+    int lw = b.width() / meterLevels();
     int lx = b.left() + 1;
-    for ( int i = 0; i < mCurrentCount; i++, lx += lw )
-    {
-        if ( i > ncol )
-        {
-            if ( ++cidx < mCRanges.count() )
-            {
-                col = mCRanges.at( cidx )->mColor;
-                ncol = mCRanges.at( cidx )->mValue;
-                p->setBrush( col );
-                p->setPen( col );
-            }
+    p.setBrush(Qt::black);
+    p.setPen(Qt::green);
+    int i = 0;
+    if (currentMeterLevel_ > 0) {
+        while (i < currentMeterLevel_) {
+            p.drawRect(lx,b.top()+1,lw-1,b.height()-2);
+            ++i;
+            lx += lw;
         }
-
-        p->drawRect( lx, b.top() + 1, lw - 1, b.height() - 2 );
+        p.setPen(Qt::yellow);
     }
-}
-
-void KALedMeter::calcColorRanges()
-{
-    int prev = 0;
-    ColorRange *cr;
-    for ( cr = mCRanges.first(); cr; cr = mCRanges.next() )
-    {
-        cr->mValue = prev + cr->mPc * mCount / 100;
-        prev = cr->mValue;
+    else
+        p.setPen(Qt::red);
+    while (i < meterLevels()) {
+        p.drawRect(lx,b.top()+1,lw-1,b.height()-2);
+        ++i;
+        lx += lw;
     }
 }
 

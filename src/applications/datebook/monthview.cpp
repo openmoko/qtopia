@@ -1,61 +1,51 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 #include "monthview.h"
-#include <qtopia/calendar.h>
-#include <qtopia/config.h>
-#include <qpainter.h>
-#include <qvaluestack.h>
 
+#include <QSettings>
+#include <QPainter>
+#include <QResizeEvent>
+#include <QTimeString>
+
+#include <QDebug>
+
+static QColor repeatBgColor(0,0,0);
+static QColor normalBgColor(0,0,0);
 static QColor repeatColor(0,0,0);
 static QColor normalColor(0,0,0);
-static bool foundRColor = FALSE;
-static bool foundNColor = FALSE;
+static bool foundRColor = false;
+static bool foundNColor = false;
 
 // estimate cell height.
-void MonthView::resizeEvent( QResizeEvent *e )
+void MonthView::resizeAppointment( QResizeEvent *e )
 {
     int ch = e->size().height() / 7; // 6 cells, one more for header.
     if (ch > 0)
-	line_height = QMAX(5, ch / 6);
+        line_height = qMax(5, ch / 6);
     else
-	line_height = 5;
-    QPEDatePicker::resizeEvent(e);
+        line_height = 5;
+    QCalendarWidget::resizeEvent(e);
 }
 
-void MonthView::paintDayBackground( const QDate &cDay, QPainter *p,
-	const QRect &cr, const QColorGroup &cg )
+void MonthView::paintCell(QPainter *p, const QRect &cr, const QDate &cDay) const
 {
     // one color for repeating, one for not, one for travel.
     //
@@ -66,8 +56,8 @@ void MonthView::paintDayBackground( const QDate &cDay, QPainter *p,
     // e.g. work out the pixel values.  the lines.
 
     if (!paintCache.contains(cDay)) {
-	QPEDatePicker::paintDayBackground(cDay, p, cr, cg);
-	return;
+        QCalendarWidget::paintCell(p, cr, cDay);
+        return;
     }
 
     DayPaintCache *dpc = paintCache[cDay];
@@ -77,211 +67,210 @@ void MonthView::paintDayBackground( const QDate &cDay, QPainter *p,
     // and draw.
 
     if (dpc->nAllDay || dpc->rAllDay || dpc->tAllDay) {
-	p->save();
+        p->save();
 
-	if (dpc->nAllDay)
-	    if (dpc->rAllDay) {
-		p->fillRect( 0, 0, cr.width(), cr.height() / 2,
-			normalColor.light(175) );
-		p->fillRect( 0, cr.height() / 2, cr.width(), cr.height() / 2,
-			repeatColor.light(175) );
-	    } else
-		p->fillRect( 0, 0, cr.width(), cr.height(),
-			normalColor.light(175) );
-	else if (dpc->rAllDay)
-	    p->fillRect( 0, 0, cr.width(), cr.height(),
-		    repeatColor.light(175) );
+        if (dpc->nAllDay)
+            if (dpc->rAllDay) {
+                p->fillRect( cr.left(), cr.top(), cr.width(), cr.height() / 2,
+                        normalBgColor );
+                p->fillRect( cr.left(), cr.top() + (cr.height() / 2), cr.width(), cr.height() / 2,
+                        repeatBgColor );
+            } else
+                p->fillRect( cr.left(), cr.top(), cr.width(), cr.height(),
+                        normalBgColor );
+        else if (dpc->rAllDay)
+            p->fillRect( cr.left(), cr.top(), cr.width(), cr.height(),
+                    repeatBgColor );
 
-	p->restore();
-    } else
-	QPEDatePicker::paintDayBackground(cDay, p, cr, cg);
+        p->restore();
+    }
+    //else
+        //QCalendarWidget::paintCell(p, cr, cDay);
 
     // now for the lines.
     int h = line_height;
     int y = cr.height() / 2 - h;
 
 
-    QValueList<int>::Iterator it = dpc->nLine.begin();
+    QList<int>::Iterator it = dpc->nLine.begin();
     while (it != dpc->nLine.end()) {
-	int h1 = *it;
-	++it;
-	int h2 = *it;
-	++it;
+        int h1 = *it;
+        ++it;
+        int h2 = *it;
+        ++it;
 
-	//
-	// Divide up the available day into 24 hour chunks, and use
-	// 4 pixels to denote an event.  Be aware of the boundary case,
-	// and step back a little if we run over.
-	//
-	int x1, x2;
+        //
+        // Divide up the available day into 24 hour chunks, and use
+        // 4 pixels to denote an appointment.  Be aware of the boundary case,
+        // and step back a little if we run over.
+        //
+        int x1, x2;
 
-	x1 = h1 * cr.width() / 24;
-	x2 = (h2 * cr.width() / 24) + 4;
+        x1 = h1 * cr.width() / 24;
+        x2 = (h2 * cr.width() / 24) + 4;
 
-	if (x2 > cr.width()) {
-	    if (x1 > cr.width() - 4) {
-		x1 = cr.width() - 4;
-	    }
-	    x2 = cr.width();
-	}
+        if (x2 > cr.width()) {
+            if (x1 > cr.width() - 4) {
+                x1 = cr.width() - 4;
+            }
+            x2 = cr.width();
+        }
 
-	p->fillRect(x1, y, x2 - x1, h, normalColor);
+        p->fillRect(cr.left() + x1, cr.top() + y, x2 - x1, h, normalColor);
     }
 
     y += h;
 
     it = dpc->rLine.begin();
     while (it != dpc->rLine.end()) {
-	int h1 = *it;
-	++it;
-	int h2 = *it;
-	++it;
+        int h1 = *it;
+        ++it;
+        int h2 = *it;
+        ++it;
 
-	//
-	// Divide up the available day into 24 hour chunks, and use
-	// 4 pixels to denote an event.  Be aware of the boundary case,
-	// and step back a little if we run over.
-	//
-	int x1, x2;
+        //
+        // Divide up the available day into 24 hour chunks, and use
+        // 4 pixels to denote an appointment.  Be aware of the boundary case,
+        // and step back a little if we run over.
+        //
+        int x1;
+        int x2;
 
-	x1 = h1 * cr.width() / 24;
-	x2 = (h2 * cr.width() / 24) + 4;
-	if (x2 > cr.width()) {
-	    if (x1 > cr.width() - 4) {
-		x1 = cr.width() - 4;
-	    }
-	    x2 = cr.width();
-	}
+        x1 = h1 * cr.width() / 24;
+        x2 = (h2 * cr.width() / 24) + 4;
+        if (x2 > cr.width()) {
+            if (x1 > cr.width() - 4) {
+                x1 = cr.width() - 4;
+            }
+            x2 = cr.width();
+        }
 
-	p->fillRect(x1, y, x2 - x1, h, repeatColor);
+        p->fillRect(cr.left() + x1, cr.top() + y, x2 - x1, h, repeatColor);
     }
+    QCalendarWidget::paintCell(p, cr, cDay);
 }
 
-MonthView::MonthView( DateBookTable *db, QWidget *parent, const char *name)
-    : QPEDatePicker(parent, name), mDb(db), line_height(5)
+MonthView::MonthView(QWidget *parent)
+    : QCalendarWidget(parent), line_height(5)
 {
-    // we need to get events from the mdb, we need to watch for changes as
-    // well.
-    connect(mDb, SIGNAL(datebookUpdated()),
-	    this, SLOT(updateOccurrences()));
-    updateOccurrences();
+    setObjectName("monthview");
+
+    setVerticalHeaderFormat(NoVerticalHeader);
+    setFirstDayOfWeek( Qtopia::weekStartsOnMonday() ? Qt::Monday : Qt::Sunday );
+
+    QDate start = QDate::currentDate();
+    start.setYMD(start.year(), start.month(), 1);
+    QDate end = start.addDays(start.daysInMonth() - 1);
+
+    model = new QOccurrenceModel(QDateTime(start, QTime(0, 0, 0)), QDateTime(end.addDays(1), QTime(0, 0)), this);
+
+    connect(model, SIGNAL(modelReset()), this, SLOT(rebuildCache()));
+    connect(this, SIGNAL(currentPageChanged(int, int)), this, SLOT(updateModelRange(int, int)));
 }
 
-MonthView::~MonthView() {}
-
-void MonthView::updateOccurrences()
+MonthView::~MonthView()
 {
-    getEventsForMonth(selectedDate().year(), selectedDate().month());
-    updateContents();
 }
 
-void MonthView::getEventsForMonth(int y, int m)
+void MonthView::rebuildCache()
 {
     // Clear the old cache
-    QMap<QDate, DayPaintCache*>::Iterator ptit;
-    for (ptit = paintCache.begin(); ptit != paintCache.end(); ++ptit)
-	delete(*ptit);
+    qDeleteAll(paintCache);
     paintCache.clear();
 
-    // Get enough days that it won't matter if the start of week changes.
-    QDate from = Calendar::dateAtCoord(y, m, 0, 0, FALSE).addDays(-6);
-    QDate to = Calendar::dateAtCoord(y, m, 5, 6, TRUE).addDays(6);
+    for (int i = 0; i < model->rowCount(); ++i) {
+        QOccurrence o = model->occurrence(i);
+        QAppointment a = o.appointment();
 
-    daysEvents = mDb->getOccurrences(from, to);
+        if (a.hasRepeat()) {
+            if (!foundRColor) {
+                repeatColor = qvariant_cast<QColor>(model->data(model->index(i, 0), Qt::BackgroundColorRole));
+                repeatBgColor = repeatColor.light(170);
+                foundRColor = true;
+            }
+        } else {
+            if (!foundNColor) {
+                normalColor = qvariant_cast<QColor>(model->data(model->index(i, 0), Qt::BackgroundColorRole));
+                normalBgColor = normalColor.light(170);
+                foundNColor = true;
+            }
+        }
 
-    QValueListIterator<Occurrence> it = daysEvents.begin();
-    for ( ; it != daysEvents.end(); ++it ) {
-	PimEvent ev = (*it).event();
+        QDate f = o.startInCurrentTZ().date();
+        QDate t = o.endInCurrentTZ().date();
 
-	if ( ev.hasRepeat() ) {
-	    if ( !foundRColor ) {
-		repeatColor = ev.color();
-		foundRColor = TRUE;
-	    }
-	} else {
-	    if ( !foundNColor ) {
-		normalColor = ev.color();
-		foundNColor = TRUE;
-	    }
-	}
+        bool normalAllDay = false;
+        bool repeatAllDay = false;
+        int startPos = 0;
+        int endPos = 24;
+        if (a.isAllDay()) {
+            if (a.repeatRule() == QAppointment::NoRepeat)
+                normalAllDay = true;
+            else
+                repeatAllDay = true;
+        } else {
+            startPos =  a.startInCurrentTZ().time().hour();
+            endPos = a.endInCurrentTZ().time().hour();
+        }
 
-	QDate f = (*it).startInCurrentTZ().date();
-	QDate t = (*it).endInCurrentTZ().date();
+        for (QDate i = f; i <= t; i = i.addDays(1)) {
 
+            // get item.
+            DayPaintCache *dpc;
+            if (!paintCache.contains(i)) {
+                dpc = new DayPaintCache();
+                paintCache.insert(i, dpc);
+            } else {
+                dpc = paintCache[i];
+            }
 
-	bool normalAllDay = FALSE;
-	bool repeatAllDay = FALSE;
-	int startPos = 0;
-	int endPos = 24;
-	if (ev.isAllDay()) {
-	    if (ev.repeatType() == PimEvent::NoRepeat) {
-		normalAllDay = TRUE;
-	    } else {
-		repeatAllDay = TRUE;
-	    }
-	} else {
-	    startPos =  (*it).startInCurrentTZ().time().hour();
-	    endPos = (*it).endInCurrentTZ().time().hour();
-	}
+            if (normalAllDay)
+                dpc->nAllDay = true;
+            else if (repeatAllDay)
+                dpc->rAllDay = true;
+            else {
+                if (a.repeatRule() == QAppointment::NoRepeat) {
+                    if (i == f)
+                        dpc->nLine.append(startPos);
+                    else
+                        dpc->nLine.append(0);
 
-	if (f < from) {
-	    f = from;
-	    startPos = 0;
-	}
-	if (t > to) {
-	    t = to;
-	    endPos = 23;
-	}
-	if (t < f)
-	    continue;
+                    if (i == t)
+                        dpc->nLine.append(endPos);
+                    else
+                        dpc->nLine.append(24);
+                } else {
+                    if (i == f)
+                        dpc->rLine.append(startPos);
+                    else
+                        dpc->rLine.append(0);
 
-	for (QDate i = f; i <= t; i = i.addDays(1)) {
-
-	    // get item.
-	    DayPaintCache *dpc;
-	    if (!paintCache.contains(i)) {
-		dpc = new DayPaintCache();
-		paintCache.insert(i, dpc);
-	    } else {
-		dpc = paintCache[i];
-	    }
-
-	    if (normalAllDay) {
-		dpc->nAllDay = TRUE;
-	    } else if (repeatAllDay) {
-		dpc->rAllDay = TRUE;
-	    } else {
-		if (ev.repeatType() == PimEvent::NoRepeat) {
-		    if (i == f)
-			dpc->nLine.append(startPos);
-		    else
-			dpc->nLine.append(0);
-
-		    if (i == t)
-			dpc->nLine.append(endPos);
-		    else
-			dpc->nLine.append(24);
-		} else {
-		    if (i == f)
-			dpc->rLine.append(startPos);
-		    else
-			dpc->rLine.append(0);
-
-		    if (i == t)
-			dpc->rLine.append(endPos);
-		    else
-			dpc->rLine.append(24);
-		}
-	    }
-	}
+                    if (i == t)
+                        dpc->rLine.append(endPos);
+                    else
+                        dpc->rLine.append(24);
+                }
+            }
+        }
     }
+
+    update();
 }
 
-void MonthView::setDate( const QDate &date )
+void MonthView::updateModelRange(int year, int month)
 {
-    if (date.year() != selectedDate().year() || date.month() != selectedDate().month()) {
-	getEventsForMonth(date.year(), date.month());
-    }
-    QPEDatePicker::setDate(date);
-    updateContents();
+    QDate start(year, month, 1);
+    QDate end = start.addDays(start.daysInMonth() - 1);
+
+    model->setRange(QDateTime(start, QTime(0, 0, 0)), QDateTime(end.addDays(1), QTime(0, 0)));
 }
+
+
+
+
+
+
+
+
+
+

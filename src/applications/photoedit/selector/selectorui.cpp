@@ -1,115 +1,98 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "selectorui.h"
 
-#include <qtopia/resource.h>
 
 #include <qtoolbar.h>
 #include <qmenubar.h>
 #include <qstring.h>
-#include <qpopupmenu.h>
 
-SelectorUI::SelectorUI( QWidget* parent, const char* name, WFlags f )
-    : QMainWindow( parent, name, f )
+#include <QMenu>
+
+SelectorUI::SelectorUI( QWidget* parent, Qt::WFlags f )
+    : QMainWindow( parent, f )
 {
 #ifndef QTOPIA_PHONE
-    setToolBarsMovable( false );
-
     QToolBar *toolbar = new QToolBar( this );
-    toolbar->setHorizontalStretchable( true );
+    toolbar->setMovable( false );
+    // toolbar->setHorizontalStretchable( true );
     QMenuBar *menubar = new QMenuBar( toolbar );
-    toolbar = new QToolBar( this ); 
+    toolbar->addWidget( menubar );
+    addToolBar( toolbar );
+    toolbar = new QToolBar( this );
+    addToolBar( toolbar );
 
     // Make edit action
-    edit_action = new QAction( tr( "Edit" ),
-        Resource::loadIconSet( "edit" ), QString::null, 0, this );
+    edit_action = new QAction( QIcon( ":icon/edit" ) , tr( "Edit" ), this );
     edit_action->setWhatsThis( tr( "Edit the current image." ) );
-    connect( edit_action, SIGNAL( activated() ),
+    connect( edit_action, SIGNAL( triggered() ),
         this, SIGNAL( edit() ) );
-    
+
     // Make delete action
-    delete_action = new QAction( tr( "Delete" ),
-        Resource::loadIconSet( "trash" ), QString::null, 0, this );
+    delete_action = new QAction( QIcon( ":icon/trash" ), tr( "Delete" ), this );
     delete_action->setWhatsThis( tr( "Delete the current image." ) );
-    connect( delete_action, SIGNAL( activated() ),
+    connect( delete_action, SIGNAL( triggered() ),
         this, SIGNAL( remove() ) );
-    
+
     // Make beam action
-    beam_action = new QAction( tr( "Beam" ),
-        Resource::loadIconSet( "beam" ), QString::null, 0, this );
+    beam_action = new QAction( QIcon( ":icon/beam" ), tr( "Beam" ), this );
     beam_action->setWhatsThis( tr( "Beam the current image." ) );
-    connect( beam_action, SIGNAL( activated() ),
+    connect( beam_action, SIGNAL( triggered() ),
         this, SIGNAL( beam() ) );
-        
+
     // Make properties action
-    properties_action = new QAction( tr( "Properties" ),
-        Resource::loadIconSet( "info" ), QString::null, 0, this );
-    properties_action->setWhatsThis( 
+    properties_action = new QAction( QIcon( ":icon/info" ), tr( "Properties" ), this );
+    properties_action->setWhatsThis(
         tr( "Edit the properties of the current image." ) );
-    connect( properties_action, SIGNAL( activated() ),
+    connect( properties_action, SIGNAL( triggered() ),
         this, SIGNAL( properties() ) );
-    
+
     // Make slide show action
-    slide_show_action = new QAction( tr( "Slide Show..." ), 
-        Resource::loadIconSet( "slideshow"  ), QString::null, 0, this );
-    slide_show_action->setWhatsThis( 
+    slide_show_action = new QAction( QIcon( ":icon/slideshow" ), tr( "Slide Show..." ), this );
+    slide_show_action->setWhatsThis(
         tr( "View a slide show of the images in the current category." ) );
-    connect( slide_show_action, SIGNAL( activated() ), 
+    connect( slide_show_action, SIGNAL( triggered() ),
         this, SIGNAL( slideShow() ) );
-    
+
     // Construct menu bar
     // Construct image menu
-    QPopupMenu *image_menu = new QPopupMenu( this );
-    edit_action->addTo( image_menu );
-    delete_action->addTo( image_menu );
-    beam_action->addTo( image_menu );
-    properties_action->addTo( image_menu );
-    menubar->insertItem( tr( "Image" ), image_menu );
-    
+    QMenu *image_menu = new QMenu( tr( "Image" ), this );
+    image_menu->addAction( edit_action );
+    image_menu->addAction( delete_action );
+    image_menu->addAction( beam_action );
+    image_menu->addAction( properties_action );
+    menubar->addMenu( image_menu );
+
     // Construct view menu
-    QPopupMenu *view_menu = new QPopupMenu( this );
-    slide_show_action->addTo( view_menu );
-    menubar->insertItem( tr( "View" ), view_menu );
-    
+    QMenu *view_menu = new QMenu( tr( "View" ), this );
+    view_menu->addAction( slide_show_action );
+    menubar->addMenu( view_menu );
+
     // Construct tool button
-    edit_action->addTo( toolbar );
-    delete_action->addTo( toolbar );
-    beam_action->addTo( toolbar );
-    properties_action->addTo( toolbar );
-    slide_show_action->addTo( toolbar );
+    toolbar->addAction( edit_action );
+    toolbar->addAction( delete_action);
+    toolbar->addAction( beam_action );
+    toolbar->addAction( properties_action );
+    toolbar->addAction( slide_show_action );
 #endif
 }
 

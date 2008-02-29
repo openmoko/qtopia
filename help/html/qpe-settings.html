@@ -1,15 +1,18 @@
-<qt title="Settings Help">
+<html>
+<head><title>Settings Help</title></head>
+<body>
 <h3>Settings Help</h3>
-%%PDA%%
-<p> Tap <img src="qpe/SettingsIcon.png"> at the top of the screen to see the Settings controls.</p>
-@@PDA@@
-%%PHONE%%
-<p>Use the <img src="help/dpad.png"> buttons to highlight a setting, then press <img src="contextbar/select.png">.</p>
-@@PHONE@@
+<!--#if expr="$PDASTYLE"-->
+<p> Tap <img src=":icon/qpe/SettingsIcon"> </img> at the top of the screen to see the Settings controls.</p>
+<!--#endif-->
+<!--#if expr="$PHONESTYLE"-->
+<p>Use the <img src=":image/help/dpad"> </img> buttons to highlight a setting, then press <img src=":icon/select">.</p>
+<!--#endif-->
 <p>This page lists all Qtopia settings that can be changed.</p>
 
 <qtopia-settings>
- (generated list)
+(generated list)
 </qtopia-settings>
 
-</qt>
+</body>
+</html>

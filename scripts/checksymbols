@@ -1,12 +1,17 @@
 #!/usr/bin/perl
+#use strict;
+use warnings;
+
+use File::Basename;
+use lib ( dirname($0)."/../bin" );
+use Qtopia::Paths;
+
+Qtopia::Paths::get_paths();
+
 
 $filetocheck = shift;
 unless (defined ($filetocheck)) {
     die "couldn't get file to check.\nThe file to check must be passed as the first argument to this script\n";
-}
-
-unless (defined ($ENV{QPEDIR})) {
-    die "QPEDIR is not set.\nQPEDIR must be set for this script to work\n";
 }
 
 open (NM, "nm -C $filetocheck|");
@@ -25,7 +30,7 @@ while(<NM>) {
     }
 }
 
-foreach $checkagainst (`ls $ENV{QPEDIR}/lib/*.so.*.*.*`) {
+foreach $checkagainst (`ls $QPEDIR/lib/*.so.*.*.*`) {
     chomp $checkagainst;
     open (NM, "nm -C $checkagainst |");
     while (<NM>) {

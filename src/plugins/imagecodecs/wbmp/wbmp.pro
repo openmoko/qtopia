@@ -1,10 +1,10 @@
-CONFIG		+= qtopiaplugin
+qtopia_project(qtopia plugin)
+TARGET=wbmp
 
-TARGET		= wbmp
+CONFIG+=no_tr
 
-HEADERS		= wbmpimpl.h
-SOURCES		= wbmpimpl.cpp
+HEADERS		= wbmpimpl.h wbmphandler.h
+SOURCES		= wbmpimpl.cpp wbmphandler.cpp
 
-PACKAGE_NAME	= qpe-wbmp-imagecodec
-
-TRANSLATIONS=
+pkg.name=qpe-wbmp-imagecodec
+pkg.domain=libs

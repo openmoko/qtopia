@@ -1,0 +1,144 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QObexPushClient Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QObexPushClient Class Reference</h1>
+<p>The QObexPushClient class encapsulates an OBEX PUSH client. <a href="#details">More...</a></p>
+<pre>    #include &lt;QObexPushClient&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<ul>
+<li><a href="qobexpushclient-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qobexpushclient.html#QObexPushClient">QObexPushClient</a></b> ( QObexSocket * <i>socket</i>, QObject * <i>parent</i> = 0 )</li>
+<li><div class="fn"/>virtual <b><a href="qobexpushclient.html#dtor.QObexPushClient">~QObexPushClient</a></b> ()</li>
+<li><div class="fn"/>bool <b><a href="qobexpushclient.html#autoDelete">autoDelete</a></b> () const</li>
+<li><div class="fn"/>int <b><a href="qobexpushclient.html#close">close</a></b> ()</li>
+<li><div class="fn"/>int <b><a href="qobexpushclient.html#connect">connect</a></b> ()</li>
+<li><div class="fn"/>int <b><a href="qobexpushclient.html#disconnect">disconnect</a></b> ()</li>
+<li><div class="fn"/>QObex::Error <b><a href="qobexpushclient.html#error">error</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qobexpushclient.html#exchangeBusinessCard">exchangeBusinessCard</a></b> ( QIODevice * <i>mine</i>, QIODevice * <i>theirs</i>, int * <i>putId</i> = 0, int * <i>getId</i> = 0 )</li>
+<li><div class="fn"/>int <b><a href="qobexpushclient.html#requestBusinessCard">requestBusinessCard</a></b> ( QIODevice * <i>vcard</i> )</li>
+<li><div class="fn"/>int <b><a href="qobexpushclient.html#send">send</a></b> ( QIODevice * <i>device</i>, const QString &amp; <i>filename</i>, const QString &amp; <i>mimetype</i> = QString() )</li>
+<li><div class="fn"/>int <b><a href="qobexpushclient.html#send-2">send</a></b> ( const QByteArray &amp; <i>array</i>, const QString &amp; <i>filename</i>, const QString &amp; <i>mimetype</i> = QString() )</li>
+<li><div class="fn"/>int <b><a href="qobexpushclient.html#sendBusinessCard">sendBusinessCard</a></b> ( QIODevice * <i>vcard</i> )</li>
+<li><div class="fn"/>void <b><a href="qobexpushclient.html#setAutoDelete">setAutoDelete</a></b> ( bool <i>enable</i> )</li>
+<li><div class="fn"/>QObex::State <b><a href="qobexpushclient.html#state">state</a></b> () const</li>
+</ul>
+<ul>
+<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+</ul>
+<a name="public-slots"></a>
+<h3>Public Slots</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qobexpushclient.html#abort">abort</a></b> ()</li>
+</ul>
+<ul>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+</ul>
+<a name="signals"></a>
+<h3>Signals</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qobexpushclient.html#commandFinished">commandFinished</a></b> ( int <i>id</i>, bool <i>error</i> )</li>
+<li><div class="fn"/>void <b><a href="qobexpushclient.html#commandStarted">commandStarted</a></b> ( int <i>id</i> )</li>
+<li><div class="fn"/>void <b><a href="qobexpushclient.html#done">done</a></b> ( bool <i>error</i> )</li>
+<li><div class="fn"/>void <b><a href="qobexpushclient.html#progress">progress</a></b> ( qint64 <i>completed</i>, qint64 <i>total</i> )</li>
+<li><div class="fn"/>void <b><a href="qobexpushclient.html#stateChanged">stateChanged</a></b> ( QObex::State <i>state</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QObexPushClient class encapsulates an OBEX PUSH client.</p>
+<p>The QObexPushClient class can be used to send files to an OBEX Push server. The file sent can either be a business card (vCard), calendar (vCal), or any other file type. This class can also be used to request a business card, or a business card exchange.</p>
+<p>Here is an example of sending a file over Bluetooth</p>
+<pre>    QBluetoothObexSocket *sock =
+        new QBluetoothObexSocket(&quot;00:00:00:00:00:01&quot;, 1); <span class="comment">// Fake address, rfcomm channel 1</span>
+
+    if (sock-&gt;connect()) {
+        QObexPushService *sender = new QObexPushService(sock);
+        sender-&gt;setAutoDelete(true);
+        sender-&gt;connect();
+        QByteArray data = getSomeData();
+        sender-&gt;send(data, &quot;MyData.txt&quot;);
+        sender-&gt;disconnect();
+    }</pre>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QObexPushClient"></a>QObexPushClient::QObexPushClient ( QObexSocket * <i>socket</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs a new Bluetooth OBEX Client object. The OBEX socket to use is given by <i>socket</i>. The socket should generally be connected, however if it is not, the QObexSocket::connect method of the socket will be executed first. The <i>parent</i> parameter specifies the <tt>QObject</tt> parent.</p>
+<h3 class="fn"><a name="dtor.QObexPushClient"></a>QObexPushClient::~QObexPushClient ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Deconstructs a Bluetooth OBEX Sender.</p>
+<h3 class="fn"><a name="abort"></a>void QObexPushClient::abort ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Attempts to abort the file send operation.</p>
+<h3 class="fn"><a name="autoDelete"></a>bool QObexPushClient::autoDelete () const</h3>
+<p>Returns whether <tt>autoDelete</tt> property is enabled.</p>
+<p>See also <a href="qobexpushclient.html#setAutoDelete">setAutoDelete</a>().</p>
+<h3 class="fn"><a name="close"></a>int QObexPushClient::close ()</h3>
+<p>Disconnects from the server.</p>
+<h3 class="fn"><a name="commandFinished"></a>void QObexPushClient::commandFinished ( int <i>id</i>, bool <i>error</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted whenever a queued command has been performed. The <i>id</i> parameter holds the id of the command finished. The <i>error</i> parameter holds whether an error occurred.</p>
+<p>See also <a href="qobexpushclient.html#commandStarted">commandStarted</a>().</p>
+<h3 class="fn"><a name="commandStarted"></a>void QObexPushClient::commandStarted ( int <i>id</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted whenever a queued command has been started. The <i>id</i> parameter holds the id of the command.</p>
+<p>See also <a href="qobexpushclient.html#commandFinished">commandFinished</a>().</p>
+<h3 class="fn"><a name="connect"></a>int QObexPushClient::connect ()</h3>
+<p>Requests the client to connect to the server. The <tt>QObexSocket</tt> will be used to establish the connection if the socket is not yet connected. After this, the OBEX <b>CONNECT</b> command will be sent. This method returns immediately after queuing the command to be performed. One can track the progress of the command by using the commandFinished and commandStarted.</p>
+<p>See also <a href="qobexpushclient.html#disconnect">disconnect</a>().</p>
+<h3 class="fn"><a name="disconnect"></a>int QObexPushClient::disconnect ()</h3>
+<p>Queues a disconnect request. The OBEX <b>DISCONNECT</b> comand will be sent, after which the socket will be closed. This method returns immediately after queuing the command to be performed. One can track the progress of the command by using the commandFinished and commandStarted signals.</p>
+<p>Returns the id of the command.</p>
+<p>See also <a href="qobexpushclient.html#connect">connect</a>().</p>
+<h3 class="fn"><a name="done"></a>void QObexPushClient::done ( bool <i>error</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted whenever all pending requests have been completed. The <i>error</i> parameter reports whether an error occurred during processing.</p>
+<h3 class="fn"><a name="error"></a><a href="qobex.html#Error-enum">QObex::Error</a> QObexPushClient::error () const</h3>
+<p>Returns the error condition of the last command executed</p>
+<h3 class="fn"><a name="exchangeBusinessCard"></a>void QObexPushClient::exchangeBusinessCard ( <a href="qiodevice.html">QIODevice</a> * <i>mine</i>, <a href="qiodevice.html">QIODevice</a> * <i>theirs</i>, int * <i>putId</i> = 0, int * <i>getId</i> = 0 )</h3>
+<p>Performs a business card exchange operation, by first pushing own business card given by <i>mine</i>, and requesting a business card from the remote device. The results will be placed in <i>theirs</i>. The <b>PUT</b> command id is returned in <i>putId</i>. The <b>GET</b> command id is returned in <i>getId</i>.</p>
+<p>Note that this method is equivalent to first calling the <tt>sendBusinessCard</tt> method and then calling the <tt>requestBusinessCard</tt> method.</p>
+<h3 class="fn"><a name="progress"></a>void QObexPushClient::progress ( qint64 <i>completed</i>, qint64 <i>total</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted reports the progress of the file send operation. The <i>completed</i> parameter reports how many bytes were sent, and <i>total</i> parameter reports the total number of bytes to send.</p>
+<h3 class="fn"><a name="requestBusinessCard"></a>int QObexPushClient::requestBusinessCard ( <a href="qiodevice.html">QIODevice</a> * <i>vcard</i> )</h3>
+<p>Requests a business card from the server. The received contents will be put in <i>vcard</i>.</p>
+<h3 class="fn"><a name="send"></a>int QObexPushClient::send ( <a href="qiodevice.html">QIODevice</a> * <i>device</i>, const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qstring.html">QString</a> &amp; <i>mimetype</i> = QString() )</h3>
+<p>Initiates a new send request. The sender will connect to the server and perform a push operation with the contents of <i>device</i>. The <i>filename</i> is used for display purposes. If the <i>mimetype</i> is not provided (empty) then the mimetype will be guessed based on the file extension.</p>
+<p>This method returns a unique command id.</p>
+<h3 class="fn"><a name="send-2"></a>int QObexPushClient::send ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>array</i>, const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qstring.html">QString</a> &amp; <i>mimetype</i> = QString() )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>This is a convenience method. It functions essentially like the above method. The <i>array</i> contains the contents to be pushed to the server, while <i>filename</i> and <i>mimetype</i> function as in the above method.</p>
+<h3 class="fn"><a name="sendBusinessCard"></a>int QObexPushClient::sendBusinessCard ( <a href="qiodevice.html">QIODevice</a> * <i>vcard</i> )</h3>
+<p>Performs a push operation on a business card to the server. The contents of the business card are given by <i>vcard</i>.</p>
+<h3 class="fn"><a name="setAutoDelete"></a>void QObexPushClient::setAutoDelete ( bool <i>enable</i> )</h3>
+<p>Sets the object <tt>autoDelete</tt> property to <i>enable</i>. If <tt>autoDelete</tt> is enabled, then the sender object will automatically delete itself once it completes its request or is aborted. If <tt>autoDelete</tt> is disabled, the programmer has to manually handle the destruction of the object.</p>
+<p>See also <a href="qobexpushclient.html#autoDelete">autoDelete</a>().</p>
+<h3 class="fn"><a name="state"></a><a href="qobex.html#State-enum">QObex::State</a> QObexPushClient::state () const</h3>
+<p>Returns the current state of the object</p>
+<h3 class="fn"><a name="stateChanged"></a>void QObexPushClient::stateChanged ( <a href="qobex.html#State-enum">QObex::State</a> <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted whenever a sender object changes state. The <i>state</i> parameter holds the current state.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

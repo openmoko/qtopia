@@ -2,12 +2,12 @@
 File=QtopiaServices
 Context=Calendar
 [Service]
-Actions = raiseToday();newEvent();newEvent(QDataTime,QDataTime,QString,QString);addEvent(PimEvent);removeEvent(PimEvent);updateEvent(PimEvent);showEvent(Quuid);showEvent(QUuid,QDate)
-Icon = datebook_icon
+Actions = "activateLink(QDSActionRequest);raiseToday();requestLinks(QDSActionRequest);newAppointment()"
+Icon = datebook/DateBook
 Name[]=Calendar
-[newEvent()]
-Icon = datebook_icon
-Name[]=New event
+[newAppointment()]
+Icon = datebook/DateBook
+Name[]="New Appointment"
 [raiseToday()]
 Icon=today
-Name[]=Today's calendar
+Name[]="Today's Calendar"

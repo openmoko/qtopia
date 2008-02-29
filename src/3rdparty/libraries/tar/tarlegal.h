@@ -1,0 +1,5 @@
+class TarLegal
+{
+public:
+    TarLegal();
+}

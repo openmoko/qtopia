@@ -1,156 +1,67 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>QDL Class</title>
-<style type="text/css"><!--
-h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }
-body { background: #ffffff; color: black; }
---></style>
+  <title>QDL Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
-<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
-<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
-   <a href="index.html">Home</a>
- - <a href="qtopiaclasses.html">Classes</a>
- - <a href="qtopiahierarchy.html">Hierachy</a>
- - <a href="qtopiaannotated.html">Annotated</a>
- - <a href="qtopiafunctions.html">Functions</a>
- - <a href="qtindex.html">Qt Embedded</a>
-</td>
-<td align="right" valign="top">
-  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
-</td>
-</tr>
-</table><h1 align=center>QDL Class Reference</h1>
-
-<p>The QDL class provides general utility functions for use
-with Qtopia Data Linking.
-<a href="#details">More...</a>
-<p><tt>#include &lt;<a href="qdl-h.html">qtopia/qdl.h</a>&gt;</tt>
-<p><a href="qdl-members.html">List of all member functions.</a>
-<h2>Static Public Members</h2>
-<ul>
-<li><div class=fn>QList&lt;QDLClient&gt; <a href="#clients"><b>clients</b></a> ( QObject&nbsp;*&nbsp;parent )</div></li>
-<li><div class=fn>void <a href="#sendHeartBeat"><b>sendHeartBeat</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;clientID )</div></li>
-<li><div class=fn>void <a href="#loadLinks-2"><b>loadLinks</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;str, QDLClient&nbsp;*&nbsp;client )</div></li>
-<li><div class=fn>void <a href="#loadLinks"><b>loadLinks</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;str, QList&lt;QDLClient&gt;&nbsp;clientList )</div></li>
-<li><div class=fn>void <a href="#saveLinks-2"><b>saveLinks</b></a> ( QString&nbsp;&amp;&nbsp;str, QDLClient&nbsp;*&nbsp;client )</div></li>
-<li><div class=fn>void <a href="#saveLinks"><b>saveLinks</b></a> ( QString&nbsp;&amp;&nbsp;str, QList&lt;QDLClient&gt;&nbsp;clientList )</div></li>
-<li><div class=fn>void <a href="#activateLink"><b>activateLink</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;ahref, const&nbsp;QList&lt;QDLClient&gt;&nbsp;&amp;&nbsp;clientList )</div></li>
-<li><div class=fn>QString <a href="#encodeAhref"><b>encodeAhref</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;ahref )</div></li>
-<li><div class=fn>QString <a href="#decodeAhref"><b>decodeAhref</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;ahref )</div></li>
-<li><div class=fn>QString <a href="#lidsToAnchors"><b>lidsToAnchors</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;lidText, const&nbsp;QDLClient&nbsp;*&nbsp;client, bool&nbsp;withIcons = TRUE )</div></li>
-<li><div class=fn>QString <a href="#removeLids"><b>removeLids</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;lidText )</div></li>
-<li><div class=fn>uint <a href="#lidToUInt"><b>lidToUInt</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;lid )</div></li>
-<li><div class=fn>QString <a href="#lidFromUInt"><b>lidFromUInt</b></a> ( uint&nbsp;lid )</div></li>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QDL Class Reference</h1>
+<p>The QDL class provides general utility functions for use with Qtopia Data Linking. <a href="#details">More...</a></p>
+<pre>    #include &lt;QDL&gt;</pre><ul>
+<li><a href="qdl-members.html">List of all members, including inherited members</a></li>
 </ul>
-<hr><a name="details"></a><h2>Detailed Description</h2>
-
-
-The QDL class provides general utility functions for use
-with Qtopia Data Linking.
-<p> Qtopia Data Linking (QDL) enables a client to link to data in a source.
-A client may be a stand-alone object (<a href="qdlclient.html">QDLClient</a>) or attached to a
-widget (<a href="qdlwidgetclient.html">QDLWidgetClient</a>).
-A source can be any application which acts as a container for useful
-data and provides the QDL <a href="service.html">Service</a>. 
-<p> This class provides useful functions for loading and saving links
-and dealing with general QDL usage.
-<p> First availability: Qtopia 2.0
-<p> 
-<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
-
-<hr><h2>Member Function Documentation</h2>
-<h3 class=fn>void <a name="activateLink"></a>QDL::activateLink ( const&nbsp;QString&nbsp;&amp;&nbsp;ahref, const&nbsp;QList&lt;QDLClient&gt;&nbsp;&amp;&nbsp;clientList )<tt> [static]</tt>
-</h3>
-Activates the QDL link specified by <em>ahref</em>. 
-ahref should be in the form <pre> qdl://&lt;clientName&gt;:&lt;lid&gt; </pre>
- .
-Rich text links are usually generated by QDL::lidsToAnchors.
-<p> What 'activate' actually means is dependent on the source application.
-As an example, if <tt>the</tt> <a href="qdllink.html">QDLLink</a> points to a contact, the Contacts 
-application might display that particular contact.
-<p> <p>See also QDL::lidsToAnchors.
-
-<h3 class=fn>QList&lt;QDLClient&gt; <a name="clients"></a>QDL::clients ( QObject&nbsp;*&nbsp;parent )<tt> [static]</tt>
-</h3>
-Returns all <a href="qdlclient.html">QDLClient</a> objects that are children of <em>parent</em>.
-This is useful for automatically loading links into a bunch of clients eg.
-<p> <pre>
-    QDL::<a href="#loadLinks">loadLinks</a>( rec, QDL::clients( this ) );
-  </pre>
- 
-
-<h3 class=fn>QString <a name="decodeAhref"></a>QDL::decodeAhref ( const&nbsp;QString&nbsp;&amp;&nbsp;ahref )<tt> [static]</tt>
-</h3>
-Decodes the string <em>ahref</em> that was encoded as part of a QDL link.
-
-<h3 class=fn>QString <a name="encodeAhref"></a>QDL::encodeAhref ( const&nbsp;QString&nbsp;&amp;&nbsp;ahref )<tt> [static]</tt>
-</h3>
-Encodes the string <em>ahref</em> so that it may be included as part of a QDL link.
-
-<h3 class=fn>QString <a name="lidFromUInt"></a>QDL::lidFromUInt ( uint&nbsp;lid )<tt> [static]</tt>
-</h3>
-Converts the unsigned integer link identifier <em>lid</em> into an equivalent
-unicode superscript link identifier.
-
-<h3 class=fn>uint <a name="lidToUInt"></a>QDL::lidToUInt ( const&nbsp;QString&nbsp;&amp;&nbsp;lid )<tt> [static]</tt>
-</h3>
-Converts the unicode superscript link identifier <em>lid</em> into
-an equivalent unsigned integer link identifier.
-<p> <p>See also <a href="#lidFromUInt">lidFromUInt</a>().
-
-<h3 class=fn>QString <a name="lidsToAnchors"></a>QDL::lidsToAnchors ( const&nbsp;QString&nbsp;&amp;&nbsp;lidText, const&nbsp;<a href="qdlclient.html">QDLClient</a>&nbsp;*&nbsp;client, bool&nbsp;withIcons = TRUE )<tt> [static]</tt>
-</h3>
-Converts the unicode superscript link identifiers in <em>lidText</em> to rich text anchors 
-based on the links in <em>client</em>.
-<p> If <em>withIcons</em> is TRUE (the default), icons are included as part of the rich text links.
-
-<h3 class=fn>void <a name="loadLinks"></a>QDL::loadLinks ( const&nbsp;QString&nbsp;&amp;&nbsp;str, QList&lt;QDLClient&gt;&nbsp;clientList )<tt> [static]</tt>
-</h3>
-Loads the links stored in <em>str</em> into the clients in <em>clientList</em>.
-<em>str</em> is the base64 encoded binary data of the links.
-
-<h3 class=fn>void <a name="loadLinks-2"></a>QDL::loadLinks ( const&nbsp;QString&nbsp;&amp;&nbsp;str, <a href="qdlclient.html">QDLClient</a>&nbsp;*&nbsp;client )<tt> [static]</tt>
-</h3> This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
-<p> Loads the links stored in <em>str</em> into a single <em>client</em>.
-
-<h3 class=fn>QString <a name="removeLids"></a>QDL::removeLids ( const&nbsp;QString&nbsp;&amp;&nbsp;lidText )<tt> [static]</tt>
-</h3>
-Removes the unicode superscript link identifiers in <em>lidText</em>.
-
-<h3 class=fn>void <a name="saveLinks"></a>QDL::saveLinks ( QString&nbsp;&amp;&nbsp;str, QList&lt;QDLClient&gt;&nbsp;clientList )<tt> [static]</tt>
-</h3>
-Saves the links from <em>clientList</em> into <em>str</em>.
-<em>str</em> will be the base64 encoded binary link data.
-
-<h3 class=fn>void <a name="saveLinks-2"></a>QDL::saveLinks ( QString&nbsp;&amp;&nbsp;str, <a href="qdlclient.html">QDLClient</a>&nbsp;*&nbsp;client )<tt> [static]</tt>
-</h3> This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
-<p> Saves the links from the single <em>client</em> to <em>str</em>.
-
-<h3 class=fn>void <a name="sendHeartBeat"></a>QDL::sendHeartBeat ( const&nbsp;QString&nbsp;&amp;&nbsp;clientID )<tt> [static]</tt>
-</h3>
-Sends a heart beat to the client with the specified <em>clientID</em>.
-A heart beat is used by a source to let clients know that their request is still
-being actively processed. A client will stop waiting for a response if their request times out
-so this function should be called periodically to keep the request alive.
-<p> Normally you don't want to use this function directly, but the abstraction class <a href="qdlheartbeat.html">QDLHeartBeat</a>.
-<p> <p>See also <a href="qdlheartbeat.html">QDLHeartBeat</a>.
-
-<!-- eof -->
-<hr><p>
-This file is part of the <a href="index.html">Qtopia</a> platform,
-copyright &copy; 1995-2004
-<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0">
-<tr>
-<td>Copyright &copy; 2001-2005 Trolltech
-<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qtopia version 2.1.1</div>
-</table></div></address></body>
+<a name="static-public-members"></a>
+<h3>Static Public Members</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qdl.html#activateLink">activateLink</a></b> ( const QString &amp; <i>href</i>, const QList&lt;QDLClient *&gt; &amp; <i>clientList</i> )</li>
+<li><div class="fn"/>QList&lt;QDLClient *&gt; <b><a href="qdl.html#clients">clients</a></b> ( QObject * <i>parent</i> )</li>
+<li><div class="fn"/>void <b><a href="qdl.html#loadLinks">loadLinks</a></b> ( const QString &amp; <i>str</i>, QList&lt;QDLClient *&gt; <i>clientList</i> )</li>
+<li><div class="fn"/>void <b><a href="qdl.html#releaseLinks">releaseLinks</a></b> ( const QString &amp; <i>str</i> )</li>
+<li><div class="fn"/>void <b><a href="qdl.html#saveLinks">saveLinks</a></b> ( QString &amp; <i>str</i>, QList&lt;QDLClient *&gt; <i>clientList</i> )</li>
+</ul>
+<a name="related-non-members"></a>
+<h3>Related Non-Members</h3>
+<ul>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qdl.html#operator-lt-lt-63">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QList&lt;QDLClient *&gt; &amp; <i>clientList</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qdl.html#operator-gt-gt-58">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QList&lt;QDLClient *&gt; &amp; <i>clientList</i> )</li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QDL class provides general utility functions for use with Qtopia Data Linking.</p>
+<p>Qtopia Data Linking (QDL) allows a client to link to data in a source. A client may be a stand-alone object (<a href="qdlclient.html">QDLClient</a>) or attached to a widget (<a href="qdlbrowserclient.html">QDLBrowserClient</a> or <a href="qdleditclient.html">QDLEditClient</a>). A source can be any application which acts as a container for useful data and provides the QDL Service.</p>
+<p>This class provides useful functions for loading and saving links and dealing with general QDL usage.</p>
+<p>First availability: Qtopia 2.0</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="activateLink"></a>void QDL::activateLink ( const <a href="qstring.html">QString</a> &amp; <i>href</i>, const <a href="qlist.html">QList</a>&lt;<a href="qdlclient.html">QDLClient</a> *&gt; &amp; <i>clientList</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Activates the QDL link specified by <i>href</i>, which should be in the form <tt>QDL:<span class="comment">//&lt;clientName&gt;:&lt;linkId&gt;</span></tt>. The <i>clientList</i> should contain the QDL client which holds the link, and is identified by <tt>clientName</tt>.</p>
+<h3 class="fn"><a name="clients"></a><a href="qlist.html">QList</a>&lt;<a href="qdlclient.html">QDLClient</a> *&gt; QDL::clients ( <a href="qobject.html">QObject</a> * <i>parent</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns all <a href="qdlclient.html">QDLClient</a> objects that are children of <i>parent</i>, recursively. This is useful for automatically loading links into multiple clients, for example:</p>
+<pre>    QDL::loadLinks( rec, QDL::clients( this ) );</pre>
+<h3 class="fn"><a name="loadLinks"></a>void QDL::loadLinks ( const <a href="qstring.html">QString</a> &amp; <i>str</i>, <a href="qlist.html">QList</a>&lt;<a href="qdlclient.html">QDLClient</a> *&gt; <i>clientList</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Loads the links stored in <i>str</i> into the clients in <i>clientList</i>. <i>str</i> is the base64 encoded binary data of the links created by <a href="qdl.html#saveLinks">QDL::saveLinks</a>().</p>
+<h3 class="fn"><a name="releaseLinks"></a>void QDL::releaseLinks ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Releases all the QDLLinks stored in <i>str</i> generated by <a href="qdl.html#saveLinks">QDL::saveLinks</a>()</p>
+<h3 class="fn"><a name="saveLinks"></a>void QDL::saveLinks ( <a href="qstring.html">QString</a> &amp; <i>str</i>, <a href="qlist.html">QList</a>&lt;<a href="qdlclient.html">QDLClient</a> *&gt; <i>clientList</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Saves the links from the clients contained in <i>clientList</i> into <i>str</i>. <i>str</i> will be the base64 encoded binary link data.</p>
+<hr />
+<h2>Related Non-Members</h2>
+<h3 class="fn"><a name="operator-lt-lt-63"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const <a href="qlist.html">QList</a>&lt;<a href="qdlclient.html">QDLClient</a> *&gt; &amp; <i>clientList</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Writes <i>clientList</i> to <i>stream</i></p>
+<h3 class="fn"><a name="operator-gt-gt-58"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, <a href="qlist.html">QList</a>&lt;<a href="qdlclient.html">QDLClient</a> *&gt; &amp; <i>clientList</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Reads <i>clientList</i> from the <i>stream</i></p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
 </html>

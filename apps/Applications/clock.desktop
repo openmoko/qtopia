@@ -4,6 +4,6 @@ Context=Clock
 [Desktop Entry]
 Comment[]=A Clock Program
 Exec=clock
-Icon=Clock
+Icon=clock/Clock
 Type=Application
 Name[]=Clock

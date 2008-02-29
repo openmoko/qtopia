@@ -1,37 +1,16 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** $TROLLTECH_DUAL_LICENSE$
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
-**********************************************************************/
+****************************************************************************/
+
 /*
  * KAsteroids - Copyright (c) Martin R. Jones 1997
  *
@@ -43,133 +22,182 @@
 
 #include <qwidget.h>
 #include <qlist.h>
-#include <qintdict.h>
+#include <QHash>
 #include <qtimer.h>
-#include <qcanvas.h>
+#include <QGraphicsScene>
+#include <QGraphicsView>
 #include "sprites.h"
 
-#define QPtrList QList
-#define QPtrListIterator QListIterator
+#define MAX_SHIP_POWER_LEVEL          100
 
-#define MAX_POWER_LEVEL          1000
+class MyGraphicsView : public QGraphicsView
+{
+    Q_OBJECT
+ public:
+    MyGraphicsView(QGraphicsScene* scene, QWidget* parent = 0)
+        : QGraphicsView(scene,parent) { }
+
+ protected:
+    void resizeEvent(QResizeEvent* event);
+};
 
 class KAsteroidsView : public QWidget
 {
     Q_OBJECT
-public:
-    KAsteroidsView( QWidget *parent = 0, const char *name = 0 );
+ public:
+    KAsteroidsView(QWidget* parent = 0);
     virtual ~KAsteroidsView();
 
     int refreshRate;
 
     void reset();
-    void setRockSpeed( double rs ) { rockSpeed = rs; }
-    void addRocks( int num );
+    void setRockSpeed(double rs) { rockSpeed_ = rs; }
+    void addRocks(int count);
     void newGame();
     void endGame();
-    bool gameOver() const { return gameover; }
+    bool gameOver() const { return gameOver_; }
     void newShip();
 
-    void rotateLeft( bool r ) { rotateL = r; rotateSlow = 5; }
-    void rotateRight( bool r ) { rotateR = r; rotateSlow = 5; }
-    void thrust( bool t ) { thrustShip = t && shipPower > 0; }
-    void shoot( bool s ) { shootShip = s; shootDelay = 0; }
-    void setShield( bool s );
-    void teleport( bool te) { teleportShip = te && mTeleportCount; }
-    void brake( bool b );
-    void pause( bool p);
+    void decrementNextShotDelay() { if (nextShotDelay_) --nextShotDelay_; }
+    void delayShooting(int count) { nextShotDelay_ = count; }
+    void enableShooting() { nextShotDelay_ = 0; }
 
-    void showText( const QString &text, const QColor &color, bool scroll=TRUE );
+    bool engineIsOn() const { return engineIsOn_; }
+    void startEngine();
+    void stopEngine();
+
+#if 0
+    void startEngine() { engineIsOn_ = (shipPowerLevel_ > 0); }
+    void stopEngine() { engineIsOn_ = false; }
+#endif
+
+    void rotateShipLeft(bool r) { rotateShipLeft_ = r; rotatingSlowly_ = 5; }
+    void rotateShipRight(bool r) { rotateShipRight_ = r; rotatingSlowly_ = 5; }
+    void stopShipRotation();
+
+    bool shipIsBraking() const { return shipIsBraking_; }
+    void startBraking();
+    void stopBraking();
+
+ private:
+    void applyBrakes() { shipIsBraking_ = true; }
+    void releaseBrakes() { shipIsBraking_ = false; }
+    KPowerup* createPowerup(int type);
+
+ public:
+    bool shipCanShoot() const { return !nextShotDelay_; }
+    bool shipIsShooting() const { return shipIsShooting_; }
+    void startShooting() { shipIsShooting_ = true; enableShooting(); }
+    void stopShooting() { shipIsShooting_ = false; enableShooting(); }
+
+    void raiseShield();
+    void teleport();
+    void pause(bool p);
+
+    void showText(const QString &text, bool scroll=true);
     void hideText();
 
-    int shots() const { return shotsFired; }
-    int hits() const { return shotsHit; }
-    int power() const { return shipPower; }
+    int shotsFired() const { return shotsFired_; }
+    void incrementShotsFired() { ++shotsFired_; }
+    void clearShotsFired() { shotsFired_ = 0; }
+    int rocksHit() const { return rocksHit_; }
+    void incrementRocksHit() { ++rocksHit_; }
+    void clearRocksHit() { rocksHit_ = 0; }
+    int shipPowerLevel() const { return shipPowerLevel_; }
 
-    int teleportCount() const { return mTeleportCount; }
-    int brakeCount() const { return mBrakeCount; }
-    int shieldCount() const { return mShieldCount; }
-    int shootCount() const { return mShootCount; }
+    int teleportCount() const { return teleportCount_; }
+    int brakeForce() const { return brakeForce_; }
+    void incrementBrakeForce();
+    int shieldStrength() const { return shieldStrength_; }
+    int firePower() const { return firePower_; }
 
-signals:
+    void constructMessages(const QString& t);
+    void reportStartGame();
+    void reportShipKilled();
+    void reportGameOver();
+    int checksum() const;
+
+ signals:
     void missileFired();
     void shipKilled();
-    void rockHit( int size );
+    void rockHit(int size);
     void rocksRemoved();
     void updateVitals();
 
-private slots:
-    void hideShield();
+ private slots:
+    void dropShield();
 
-protected:
+ protected:
     void readSprites();
-    void wrapSprite( QCanvasItem * );
-    void rockHit( QCanvasItem * );
-    void reducePower( int val );
-    void addExhaust( double x, double y, double dx, double dy, int count );
+    void destroyRock(MyAnimation* );
+    void reducePower(int val);
+    void addExhaust(double x, double y, double dx, double dy, int count);
+    void processFragments();
     void processMissiles();
     void processShip();
     void processPowerups();
     void processShield();
     double randDouble();
-    int randInt( int range );
+    int randInt(int range);
 
-    virtual void resizeEvent( QResizeEvent *event );
-    virtual void timerEvent( QTimerEvent * );
+    virtual void timerEvent(QTimerEvent* );
 
-private:
-    QCanvas field;
-    QCanvasView view;
-    QIntDict<QCanvasPixmapArray> animation;
-    QPtrList<QCanvasSprite> rocks;
-    QPtrList<KMissile> missiles;
-    QPtrList<KBit> bits;
-    QPtrList<KExhaust> exhaust;
-    QPtrList<KPowerup> powerups;
-    KShield *shield;
-    QCanvasSprite *ship;
-    QCanvasText *textSprite;
+    bool textAboveScreen() const;
 
-    bool rotateL;
-    bool rotateR;
-    bool thrustShip;
-    bool shootShip;
-    bool teleportShip;
-    bool brakeShip;
-    bool pauseShip;
-    bool shieldOn;
+ private:
+    QGraphicsScene*             scene_;
+    MyGraphicsView*             view_;
+    QHash<int,QList<QPixmap> >  animation_;
+    QList<MyAnimation*>         rocks_;
+    QList<KMissile*>            missiles_;
+    QList<KFragment*>           ship_fragments_;
+    QList<KExhaust*>            exhaust_;
+    QList<KPowerup*>            powerups_;
+    KShield*                    shield_;
+    MyAnimation*                ship_;
+    QGraphicsTextItem*  textSprite_;
 
-    bool vitalsChanged;
-    bool gameover;
+    bool        started_;
+    bool        rotateShipLeft_;
+    bool        rotateShipRight_;
+    bool        engineIsOn_;
+    bool        shipIsShooting_;
+    bool        teleportShip_;
+    bool        shipIsBraking_;
+    bool        pauseShip;
+    bool        shieldIsUp_;
 
-    int  shipAngle;
-    int  rotateSlow;
-    int  rotateRate;
-    int  shipPower;
+    bool        vitalsChanged_;
+    bool        gameOver_;
 
-    int shotsFired;
-    int shotsHit;
-    int shootDelay;
+    int         shipAngleIndex_;
+    int         rotatingSlowly_;
+    int         rotationRate_;
+    int         shipPowerLevel_;
 
-    int mBrakeCount;
-    int mShieldCount;
-    int mTeleportCount;
-    int mShootCount;
+    int         shotsFired_;
+    int         rocksHit_;
+    int         nextShotDelay_;
 
-    double shipDx;
-    double shipDy;
+    int         brakeForce_;
+    int         shieldStrength_;
+    int         teleportCount_;
+    int         firePower_;
 
-    int  textDy;
-    int  mFrameNum;
-    bool mPaused;
-    int  mTimerId;
+    double      shipDx_;
+    double      shipDy_;
 
-    double rockSpeed;
-    double powerupSpeed;
+    int         textDy_;
+    int         timerEventCount_;
+    bool        paused_;
+    int         masterTimerId_;
 
-    bool can_destroy_powerups;
+    double      rockSpeed_;
+    QTimer*     shieldTimer_;
 
-    QTimer *shieldTimer;
+    QString     startGameMessage_;
+    QString     shipKilledMessage_;
+    QString     gameOverMessage_;
 };
 
 #endif

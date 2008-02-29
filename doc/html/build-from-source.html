@@ -1,317 +1,157 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Building Qtopia from Source</title>
-<style type="text/css"><!--
-h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }
-body { background: #ffffff; color: black; }
---></style>
+  <title>Building Qtopia from Source</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
-<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
-<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
-   <a href="index.html">Home</a>
- - <a href="qtopiaclasses.html">Classes</a>
- - <a href="qtopiahierarchy.html">Hierachy</a>
- - <a href="qtopiaannotated.html">Annotated</a>
- - <a href="qtopiafunctions.html">Functions</a>
- - <a href="qtindex.html">Qt Embedded</a>
-</td>
-<td align="right" valign="top">
-  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
-</td>
-</tr>
-</table><h1 align=center>Building Qtopia from Source</h1>
-
-
-<p> 
-<p> <a name="top"></a>
-<p> <!-- toc -->
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Building Qtopia from Source<br /><small></small></h1>
+<a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
+<li><a href="#installing-the-source-package">Installing the Source Package</a></li>
+<li><a href="#additional-add-on-source-packages">Additional add-on source packages</a></li>
+<li><a href="#how-to-build-qtopia">How to Build Qtopia</a></li>
+<ul><li><a href="#configure-options">Configure options</a></li>
+<li><a href="#use-of-the-qpedir-environment-variable">Use of the QPEDIR environment variable</a></li>
+<li><a href="#silently-building-qtopia">Silently building Qtopia</a></li>
+<li><a href="#configuring-for-a-device">Configuring for a Device</a></li>
+</ul>
+<li><a href="#now-what">Now What?</a></li>
+<li><a href="#installing-or-removing-an-rpm">Installing or Removing an RPM</a></li>
+</ul>
+<a name="introduction"></a>
+<h2>Introduction</h2>
+<p>This document describes how to build a Qtopia source package. It should be read after:</p>
 <ul>
-<li><a href="#"></a>
+<li><a href="getting-started.html">Getting Started </a> which explains the process of selecting and downloading a Qtopia source package.</li>
+<li>the section on <a href="tools-list.html">Tools </a> available in the package to help build and develop Qtopia and Qtopia-based applications.</li>
+</ul>
+<p>Before continuing, you must ensure that the necessary source packages have been downloaded and you are ready to build Qtopia from the source code.</p>
+<p><b>Note:</b> If you have downloaded an RPM package such as a <tt>qtopia-phone-sdk-suse82.i386.rpm</tt> then you need to:</p>
+<ol type="1">
+<li>read the <a href="#installing-an-rpm">Installing an RPM </a> section</li>
+<li>proceed to <a href="running-qtopia.html">Running Qtopia</a> or to <a href="howtobuild.html">How to Build Qtopia</a> for further information on building and compiling Qtopia applications from RPM packages.</li>
+</ol>
+<a name="installing-the-source-package"></a>
+<h2>Installing the Source Package</h2>
+<p>A Qtopia source package is a combination of Qtopia and Qt sources.</p>
+<p>Qtopia packages can be installed anywhere, as long as the user has read/write access to the directories. There are some limits to the acceptable characters in directories however; spaces and characters that can be interpreted as a regular expression (<tt>regexp</tt>) are not allowed and spaces in file and directory names are not supported.</p>
+<p>To install the package, <tt>cd</tt> into the directory where the package is to be installed and run the following command:</p>
+<pre>    tar -xzf mypackage (where 'mypackage' is the fully qualified path + filename of the package to be installed)</pre>
+<p>After execution of the <tt>tar</tt> command a sub-directory is created that forms the root directory of the Qtopia source package. For the various Qtopia products the product base directory name will be as follows:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Product</th><th>Directory Name</th></tr></thead>
+<tr valign="top" class="odd"><td>Qtopia Platform Edition</td><td>qtopia-platform-&lt;version&gt;</td></tr>
+<tr valign="top" class="even"><td>Qtopia Phone Edition</td><td>qtopia-phone-&lt;version&gt;</td></tr>
+</table></p>
+<p>For the rest of this documentation it is assumed that the package was unpacked in:</p>
+<pre>    ~/src/qtopia</pre>
+<p>and that the unpacked package was a phone source package. That is, there will now be a:</p>
+<pre>    ~/src/qtopia/qtopia-phone-&lt;version&gt;</pre>
+<p>directory, referred to as <tt>&lt;qtopia-depot-dir&gt;</tt>.</p>
+<p>The following sub-directories are found in <tt>&lt;qtopia-depot-dir&gt;</tt>:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Sub-directory</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td>doc/html</td><td>contains the reference documentation (you're reading it!).</td></tr>
+<tr valign="top" class="even"><td>help</td><td>contains the help files that will be installed on a device.</td></tr>
+<tr valign="top" class="odd"><td>bin</td><td>contains binaries and scripts needed to build Qtopia.</td></tr>
+<tr valign="top" class="even"><td>src</td><td>contains the Qtopia source files.</td></tr>
+<tr valign="top" class="odd"><td>scripts</td><td>contains additional scripts.</td></tr>
+<tr valign="top" class="even"><td>qtopiacore/qt</td><td>contains the Qtopia Core (and some X11) source files.</td></tr>
+</table></p>
+<p>The following files and scripts are also contained in <tt>&lt;qtopia-depot-dir&gt;</tt>:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>File/Script</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td>LICENSE</td><td>a text that describes the license that is applicable to the package. <b>Note:</b> For an evaluation package the LICENSE file will not be available until the configure command has been executed at least once.</td></tr>
+<tr valign="top" class="even"><td>LODI</td><td>List Of Deliverable Items, that is, a list of all files that can be found in the package.</td></tr>
+<tr valign="top" class="odd"><td>README.html</td><td>a basic introduction that guides the user to the help documentation.</td></tr>
+<tr valign="top" class="even"><td>configure</td><td>the script that is used to configure Qtopia.</td></tr>
+</table></p>
+<a name="additional-add-on-source-packages"></a>
+<h2>Additional add-on source packages</h2>
+<p>In addition to the Qtopia Edition source packages such as Qtopia Phone Trolltech also offers additional packages for:</p>
 <ul>
-<li><a href="#1"> Acceptable directory characters
-</a>
-<li><a href="#1-1"> The Easy Way
-</a>
-<li><a href="#1-2"> The Hard Way
-</a>
-<li><a href="#1-3"> Compiling Qtopia for the Device
-</a>
-<li><a href="#1-4"> Now what?
-</a>
-<li><a href="#1-5"> Touchscreen Phone Calibration
-</a>
-<li><a href="#1-6"> Troubleshooting
-</a>
+<li>specific devices</li>
+<li>Languages</li>
+<li>additional third party modules (such as Helix).</li>
 </ul>
-</ul>
-<!-- endtoc -->
-
-<p> This document should be read inconjunction with <a href="getting-started.html">Getting Started</a> which explains the process of downloading and installing Qtopia. It assumes that you have already gathered the necessary files and are ready to build Qtopia from the source code.
-<p> If you have installed Qtopia using an rpm then you cannot compile Qtopia yourself. Please proceed to <a href="running-qtopia.html">Running Qtopia</a> or go to the "Building and Compiling" section in the <a href="index.html">reference documentation</a> which tells you more about building and compiling your own Qtopia applications.
-<p> If you have access to the Qtopia Tools package then you do not need to build either Qt/X11-2.x or Qt/X-3.3.x and can skip to the <a href="#buildqte">Build Qt/Embedded</a> section.
-<p> To actually build Qtopia yourself you will need the software packages as described in the <a href="#install-proc">"Install procedures"</a> section. If you haven't installed all the packages yet, then please go through that section before proceeding.
-<p> If you have installed all the packages and have set the environment variables: <pre> TMAKEDIR, QT2DIR, DQTDIR, QTEDIR </pre>
-  and <pre> QPEDIR </pre>
-  then you are ready to build Qtopia.
-<p> Note: Qt/X11 2.3.2 will attempt to locate and use the freetype 1.x library for font smoothing (freetype 2.x is a different thing that doesn't work with Qt/X11 2.3.2). Unfortunately this can happen even if you don't have the freetype development library and headers installed. Either install the freetype-devel package or configure with <tt>-no-xft</tt>.
-<p> <h3> Acceptable directory characters
-</h3>
-<a name="1"></a><p> There are some limits to the acceptable characters in directories. The details are in the
-<a href="environment-setup-build.html">Build Environment</a> document.
-<p> <h3> The Easy Way
-</h3>
-<a name="1-1"></a><p> For your convenience we have provided a build script in the <tt>$QPEDIR/scripts</tt> subdirectory. Please understand that this script is just a starting point and may require some tweaking for your specific situation. We have also filled the script with lots of comments and added extra debugging output lines.
-<p> To run the script simply do the following:
-<pre>
-    $QPEDIR/scripts/build_qtopia
-</pre>
- 
-Depending on your package type this will build you a Qtopia Phone, a Qtopia PDA, or a Qtopia Core version.
-<p> In the event of trouble you may want to get in touch with us for help in resolving the issue. If that happens please pipe the output of the script into a file and send us that file together with the script that you actually used and any additional comments. This way we can solve your problem much faster and much more efficiently.
-To log the script output into a file do the following:
-<pre>
-    $QPEDIR/scripts/build_qtopia &gt; log.txt 2&gt;&amp;1
-</pre>
- 
-<p> <h3> The Hard Way
-</h3>
-<a name="1-2"></a><p> Although the script is nice for starters it is sometimes not enough, or maybe you just want to do it all by yourself. If so, then here are the instructions:
-<p> <ul>
-<li> Build Qt 3.3 + tools<br>
-To build Qt 3.3 and the tools you must do the following:
-<pre>
-    cd $DQTDIR
-    export QTDIR=$DQTDIR
-    export PATH=$QTDIR/bin:$PATH
-    export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
-    echo yes | ./configure -fast -thread
-    make sub-src
-    cd tools/linguist/lrelease
-    make
-    cd ../lupdate
-    make
-    cd ../../designer/uilib
-    make
-    cd ../uic
-    make
-</pre>
- 
-<p> <li> Build Qt 2.3.2<br>
-To build Qt 2.3.2 you must do the following:
-<pre>
-    cd $QT2DIR
-    export TMAKEPATH=$TMAKEDIR/lib/linux-g++
-    export QTDIR=$QT2DIR
-    export PATH=$QTDIR/bin:$PATH
-    export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
-    ./configure -no-xft
-    make
-    mkdir $QTEDIR/bin
-    cp bin/uic $QTEDIR/bin/
-</pre>
- 
-<p> <li> Build QVfb<br>
-In this step we build and link the qvfb sources from Qt 2.3.10 against the static Qt library from Qt 2.3.2.
-<pre>
-    export TMAKEPATH=$TMAKEDIR/lib/linux-g++
-    export QTDIR=$QT2DIR
-    export PATH=$QTDIR/bin:$PATH
-    export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
-    cd $QTEDIR/tools/qvfb
-    tmake -o Makefile qvfb.pro
-    make
-    mv qvfb $QTEDIR/bin/
-</pre>
- 
-<p> <!-- index buildqte --><a name="buildqte"></a><li> Build Qt/Embedded<br>
-<p> If you are using the Qtopia Tools package then first
-<pre>
-    export LD_LIBRARY_PATH=$QT2DIR/lib:$LD_LIBRARY_PATH
-    cp $QT2DIR/bin/qvfb $QTEDIR/bin/
-    cp $QT2DIR/bin/uic $QTEDIR/bin/
-</pre>
- 
-<p> To build Qt/Embedded you must do the following:
-<pre>
-    cd $QTEDIR
-    export TMAKEPATH=$TMAKEDIR/lib/qws/linux-x86-g++
-    export QTDIR=$QTEDIR
-    export PATH=$QTDIR/bin:$PATH
-    export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
-    cp $QPEDIR/src/qt/qconfig-qpe.h src/tools/
-    ./configure -system-jpeg -no-xft -qconfig qpe -keypad-mode -qvfb -depths 4,8,16,32 [extra options: see below]
-    make sub-src
-</pre>
- 
-<p> Warning: To build Qtopia the jpeg library and header files to suit the target system MUST be provided by your compiler tool chain or your system.
-<p> Extra options:
+<p>All of these packages are installed in exactly the same manner: cd into the directory where the qtopia sources are installed and then untar the package</p>
+<pre>    cd &lt;qtopia-depot-dir&gt;
+    tar -xzf my-add-on-package (where 'my-add-on-package' is the fully qualified path + filename of the package to be installed)</pre>
+<p>The file naming convention of the add on packages is as follows:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Add on product</th><th>File Name convention</th></tr></thead>
+<tr valign="top" class="odd"><td>Device package</td><td>qtopia-device-&lt;devicename&gt;-&lt;version&gt;.tar.gz</td></tr>
+<tr valign="top" class="even"><td>Language Pack</td><td>qtopia-language-&lt;language-name&gt;-&lt;version&gt;.tar.gz</td></tr>
+<tr valign="top" class="odd"><td>Thirdparty add-on</td><td>qtopia-&lt;thirdparty-product&gt;-[commercial|opensource]-&lt;version&gt;.tar.gz</td></tr>
+</table></p>
+<p>In all cases &lt;version&gt; refers to the Qtopia version number to which the add-on package is applicable. Generally speaking, the version number of the add-on package must match the version number of the installed Qtopia src package.</p>
+<p>For information on how to obtain add-on packages please contact <a href="mailto:sales@trolltech">sales@trolltech</a>.com</p>
+<a name="how-to-build-qtopia"></a>
+<h2>How to Build Qtopia</h2>
+<p>It is recommended to build Qtopia in a so called shadow build directory. This is a directory other than &lt;qtopia-depot-dir&gt; that will contain all the intermediate files (such as object files) and the produced binaries. When using a shadow build directory the &lt;qtopia-depot-dir&gt; will remain free of any build specific files and the same Qtopia sources can be used for many different configurations. For the rest of this documentation it is assumed that the build will be performed in</p>
+<pre>    ~/src/qtopia/build-&lt;version&gt;</pre>
+<p>, referred to as <tt>&lt;qtopia-build-dir&gt;</tt>.</p>
+<pre>     cd &lt;qtopia-build-dir&gt;
+     &lt;qtopia-depot-dir&gt;/configure -edition &lt;phone|platform&gt;
+     make
+     make install</pre>
+<p>That's it!</p>
+<p>There is obviously more to tell, so the next sections go into a little more detail.</p>
+<a name="configure-options"></a>
+<h3>Configure options</h3>
+<p>The configure script can build all configurations of Qtopia with additional configuration options controlled via command-line options to the <tt>configure</tt> script.</p>
+<p>For a full overview of all possible options use the following command:</p>
+<pre>    &lt;qtopia-depot-dir&gt;/configure -help -verbose</pre>
+<a name="use-of-the-qpedir-environment-variable"></a>
+<h3>Use of the QPEDIR environment variable</h3>
+<p>Starting with Qtopia 4.1.x the QPEDIR environment variable is deprecated when running configure. So please make sure that QPEDIR is unset when running configure by typing &quot;export QPEDIR=&quot; or &quot;unset QPEDIR&quot;. Please be advised that QPEDIR still <tt>must</tt> be set when running scripts though.</p>
+<a name="silently-building-qtopia"></a>
+<h3>Silently building Qtopia</h3>
+<p>It is possible to suppress most of the compiler command output by configuring Qtopia with the &quot;-silent&quot; option. The resulting make output is much more compact and 'friendly to the eye'. In ad-hoc situations where a more verbose output <tt>is</tt> required the verbose output can be re-enabled by adding 'loud' to the make command:</p>
+<pre>      make loud</pre>
+<a name="configuring-for-a-device"></a>
+<h3>Configuring for a Device</h3>
+<p>The default Qtopia configuration is to build for an x86 target, running from &lt;qtopia-build-dir&gt;/image/Qtopia. If you wish to configure Qtopia for your device at some stage, it is recommended to use a device-specific add-on package. These packages are provided by Trolltech or by the device manufacturer. You will also need to use the -prefix argument to configure to specify the location that Qtopia will run from. This is typically /opt/Qtopia though it may differ from device to device.</p>
+<p>As a rule, a device also requires a specific tool chain that allows cross-compiling for the specific device. These tool chains are usually provided by the device manufacturer or are freely available on the internet.</p>
+<p>Once the device package is installed a subdirectory for that device will exist in <tt>&lt;qtopia-depot-dir&gt;/devices</tt>. Building for a device is really simple:</p>
+<pre>      ./configure -edition &lt;phone|platform&gt; -device &lt;device-name&gt; -prefix /opt/Qtopia
+      make
+      make install</pre>
+<p>Please refer to the following links for further information:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Link</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><a href="qtopia-dependencies.html">Prerequisites</a></td><td>details the prerequisites for running Qtopia.</td></tr>
+<tr valign="top" class="even"><td><a href="syscust-index.html">System Customization </a></td><td>details how to customize many aspects of Qtopia.</td></tr>
+<tr valign="top" class="odd"><td><a href="buildsystem-user-guide.html">Build System User Guide</a></td><td>User guide for the build system. There is also a <a href="buildsystem-reference.html">Build System Reference</a>.</td></tr>
+</table></p>
+<a name="now-what"></a>
+<h2>Now What?</h2>
+<p>Once Qtopia is built you will have a set of Qtopia binaries that are ready to run! The binaries are located in <tt>&lt;qtopia-build-dir&gt;/image/Qtopia</tt>. This directory contains all the files (and <i>only</i> the files) that should be installed onto the device. Note that you should have passed -prefix to specify the location that Qtopia will run from. If you did not do this, Qtopia will be setup to run from &lt;qpedir&gt;/image/Qtopia and will not work when installed into /opt/Qtopia.</p>
+<p><b>Note:</b> Depending on the installation device, the following additional libraries may be required:</p>
 <ul>
-<li> The configure option <tt>-keypad-mode</tt>, which enables keypad widget navigation support, is required when building the Qtopia for a phone device, but it should not be used for a PDA build of Qtopia.
-<li> You may want to use the configure option <tt>-gif</tt> for gif support.
-<li> Run the command :
-<pre>
-         ./configure --help
-    </pre>
- 
-for additional configure options
+<li>libjpeg</li>
+<li>libc</li>
+<li>helix</li>
+<li>a drmagent</li>
 </ul>
-<p> <li> Build Qtopia<br>
-To build Qtopia phone you must do the following:
-<pre>
-    cd $QPEDIR
-    export QTDIR=$QTEDIR
-    export PATH=$QPEDIR/bin:$PATH
-    ./configure -edition phone -no-qtopiadesktop
-    make
-    make install
-</pre>
- 
-To make the PDA version you must do the following:
-<pre>
-    cd $QPEDIR
-    export QTDIR=$QTEDIR
-    export PATH=$QPEDIR/bin:$PATH
-    ./configure -edition pda -no-qtopiadesktop
-    make
-    make install
-</pre>
- 
-</ul>
-<p> <h3> Compiling Qtopia for the Device
-</h3>
-<a name="1-3"></a><p> This process is very similar to the steps taken for building Qtopia for the X11 capable host, the major difference is the arguments to configure.
-It is recommended, but not required, that fresh copies of Qtopia and Qt/Embedded be extracted to a location such as ~/dev/arm.
-<p> See <a href="system-integrators-guide.html">System Integrators' Guide</a> for additional details on customization qtopia to suit a new device.
-<p> <ul>
-<li> Re-using previous packages<br> 
-Qt 2.3.2, Qt 3.3 and tmake built/installed in the previous steps can
-be re-used. You will need to ensure that 
-<ul>
-<li> TMAKEDIR : points to the Tmake tool used for building Qt-Embedded
-<li> QT2DIR   : points to the Qt-X11 2.3.2 directory
-<li> DQTDIR   : points to the Qt-X11 3.3 directory
-<li> QTEDIR   : points to the Qt-Embedded 2.3.10 directory
-<li> QPEDIR   : points to the Qtopia source directory
-</ul>
-<p> <li> Copy uic<br>
-If you are using the Qtopia Tools package then :
-<pre>
-    mkdir $QTEDIR/bin/
-    cp $QT2DIR/bin/uic $QTEDIR/bin/
-</pre>
- 
-other wise :
-<pre>
-    cp $QT2DIR/lib/libqt.so* $QTEDIR/lib/
-    mkdir $QTEDIR/bin/
-    cp $QT2DIR/bin/uic $QTEDIR/bin/
-</pre>
- 
-<p> <li> Build Qt/Embedded for the device<br>
-To build Qt/Embedded for an arm device you must do the following:
-<pre>
-    cd $QTEDIR
-    export TMAKEPATH=$TMAKEDIR/lib/qws/linux-arm-g++
-    export QTDIR=$QTEDIR
-    export PATH=$QTDIR/bin:$PATH
-    export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
-    cp $QPEDIR/src/qt/qconfig-qpe.h src/tools/
-    ./configure -xplatform linux-arm-g++ -system-jpeg -no-xft -qconfig qpe -keypad-mode -no-qvfb -depths 4,8,16,32 [extra options: see below]
-    make sub-src
-</pre>
- 
-<p> Warning: To build Qtopia the uuid and jpeg library/header files to suit the target system MUST be provided by your compiler tool chain or your system.
-<p> Extra options:
-<ul>
-<li> See $QTEDIR/PLATFORMS for a complete list of platforms that can be passed to the -xplatform option
-<li> The configure option <tt>-keypad-mode</tt>, which enables keypad widget navigation support, is required when building the Qtopia for a phone device, but it should not be used for a PDA build of Qtopia.
-<li> You may want to use the configure option <tt>-gif</tt> for gif support.
-<li> Run the command :
-<pre>
-         ./configure --help
-    </pre>
- 
-for additional configure options
-</ul>
-<p> <li> Build Qtopia for the device<br>
-To build Qtopia phone you must do the following:
-<pre>
-    cd $QPEDIR
-    export QTDIR=$QTEDIR
-    export PATH=$QPEDIR/bin:$PATH
-    ./configure -xplatform linux-arm-g++ -edition phone -no-qtopiadesktop
-    make
-    make install
-</pre>
- 
-To make the PDA version you must do the following:
-<pre>
-    cd $QPEDIR
-    export QTDIR=$QTEDIR
-    export PATH=$QPEDIR/bin:$PATH
-    ./configure -xplatform linux-arm-g++ -edition pda -no-qtopiadesktop
-    make
-    make install
-</pre>
- 
-<p> <li> Build Qtopia packages the device<br>
-<pre>
-    cd $QPEDIR
-    make packages
-</pre>
- 
-</ul>
-<p> <h3> Now what?
-</h3>
-<a name="1-4"></a><p> After running the script or building Qtopia manually you should have a set of Qtopia binaries and be ready to run them.
-The binaries are put into places like <tt>$QPEDIR/bin</tt>, <tt>$QPEDIR/lib</tt> and <tt>$QPEDIR/plugins</tt> but these are not the ones you should install onto a device. In order to make integrating Qtopia on a device easier we have provided an image directory that contains all the files (and <em>only</em> those files) that should be installed onto the device.
-This image directory is located at <tt>$QPEDIR/image/opt/Qtopia</tt> and if you <tt>cd</tt> into it you'll see a <tt>bin</tt> dir, a <tt>lib</tt> dir and so on.
-<p> IMPORTANT:
-Depending on the device you are installing Qtopia on you may or may not need the additional libraries libjpeg and libc.
-For backward compatibility reasons we have provided these libraries in the arm/lib directory.
-If you run Qtopia on your device and you get error messages referring to one of these libraries then please move them to a different location and ensure that you have the correct version of these libraries on your device.
-<p> For information about running Qtopia please go to <a href="running-qtopia.html">Running Qtopia</a>
-<p> <h3> Touchscreen Phone Calibration
-</h3>
-<a name="1-5"></a><p> If you are building Qtopia Phone edition for a touchscreen device, you will need to calibrate the touchscreen manually as Calibration is not run automatically. With Qtopia Phone running, enter the following command to start Calibration.
-<p> <pre>
-qcop "QPE/System" "execute(QString)" "calibrate"
-</pre>
- 
-<p> This outputs calibration information to the $HOME/Settings/pointercal file which you should copy to /etc/ so you won't have to repeat this process.
-<p> NOTE : You must have QPE_NEED_CALIBRATION defined in your custom-&lt;platform-spec&gt;.h file.  See also <a href="devices.html">Qtopia - Customizing Qtopia for a Device</a> .
-<p> <h3> Troubleshooting
-</h3>
-<a name="1-6"></a><p> <ul>
-<li> If a Qt/Embedded application does not appear inside QVfb then try removing the old Qt/Embedded temporary data. For example:
-<p> <pre>
-    killall qpe quicklauncher qvfb
-    rm -rf "/tmp/qtembedded-$LOGNAME/"
-    rm -rf /tmp/qtembedded-0/
-    </pre>
- 
-<p> <li> If you are intending to connect your Qt/Embedded application to QVFb you must not configure  Qt/E-2.3.10 with the <tt>-no-qvfb</tt> command.
-<p> <li> If you are experiencing trouble with your Qtopia image then do a clean install of Qtopia via:
-<p> <pre>
-    cd $QPEDIR
-    make installclean</pre>
- 
-and try running your application again.
-</ul>
-<p> 
-<!-- eof -->
-<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0">
-<tr>
-<td>Copyright &copy; 2001-2005 Trolltech
-<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qtopia version 2.1.1</div>
-</table></div></address></body>
+<p>For backwards compatibility some of these libraries are provided in the <tt>arm/lib</tt> directory of the Qtopia SDK packages. More information about this can be found in the <a href="qtopia-dependencies.html">Prerequisites</a> section of the documentation.</p>
+<p>If an error referring to one of these libraries occurs when running Qtopia, please move the libraries to a different location and ensure that the correct version of the libraries is installed on your device.</p>
+<p>For further information about running Qtopia refer to <a href="running-qtopia.html">Running Qtopia</a>.</p>
+<a name="installing-an-rpm"></a><a name="installing-or-removing-an-rpm"></a>
+<h2>Installing or Removing an RPM</h2>
+<p>To install a RPM called <tt>&lt;PACKAGE&gt;</tt> run:</p>
+<pre>      su -c &quot;rpm -ivh &lt;PACKAGE&gt;&quot;</pre>
+<a name="remove-rpm"></a><p>To remove the RPM &lt;NAME&gt; run:</p>
+<pre>      su -c &quot;rpm -e &lt;NAME&gt;&quot;</pre>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
 </html>

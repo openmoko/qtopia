@@ -1,0 +1,12 @@
+--- helix/src/audio/device/platform/unix/audlinux_alsa.cpp	Tue Apr  4 05:42:02 2006
++++ helix/src/audio/device/platform/unix/audlinux_alsa.cpp	Tue Apr  4 05:42:02 2006
+@@ -1121,7 +1121,8 @@
+ 
+         case SND_PCM_STATE_DRAINING:
+         case SND_PCM_STATE_SUSPENDED:
+-        case SND_PCM_STATE_DISCONNECTED:
++	// SND_PCM_STATE_DISCONNECTED is not in older alsa libraries.
++        //case SND_PCM_STATE_DISCONNECTED:
+             HX_ASSERT(!"Not reached");
+             break;            
+         }

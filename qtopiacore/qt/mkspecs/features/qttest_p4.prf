@@ -1,0 +1,80 @@
+CONFIG          += qt warn_on console depend_includepath
+
+# find qtestlib's prl file and extract the librarie's name
+QTEST_LIB =
+mac:exists($$[QT_INSTALL_LIBS]/QtTest.framework):QTEST_LIB = QtTest.framework
+CONFIG(debug, debug|release) {
+    isEmpty(QTEST_LIB) {
+       win32 {
+          QTEST_LIB = $$fromfile($$[QT_INSTALL_LIBS]/QtTestd.prl, QMAKE_PRL_TARGET)4.dll
+       }
+       mac {
+          QTEST_LIB = $$fromfile($$[QT_INSTALL_LIBS]/libQtTest_debug.prl, QMAKE_PRL_TARGET)
+       }
+       unix:!mac {
+          QTEST_LIB = $$fromfile($$[QT_INSTALL_LIBS]/libQtTest.prl, QMAKE_PRL_TARGET)
+       }
+    }
+    OBJECTS_DIR     = tmp/debug
+    MOC_DIR         = tmp/debug
+} else {
+    isEmpty(QTEST_LIB) {
+       win32 {
+          QTEST_LIB = $$fromfile($$[QT_INSTALL_LIBS]/QtTest.prl, QMAKE_PRL_TARGET)4.dll
+       } else {
+          QTEST_LIB = $$fromfile($$[QT_INSTALL_LIBS]/libQtTest.prl, QMAKE_PRL_TARGET)
+       }
+    }
+    OBJECTS_DIR     = tmp/release
+    MOC_DIR         = tmp/release
+}
+isEmpty(QTEST_LIB) {
+    warning("Cannot find qtestlib's prl file, run qmake in $QTDIR/tools/qtestlib/src")
+    CONFIG += embed_testlib
+} else {
+    !exists($$[QT_INSTALL_LIBS]/$$QTEST_LIB):CONFIG += embed_testlib
+}
+
+# make sure the test is build according to your Qt configuration
+contains(QT_CONFIG, embedded):CONFIG += embedded
+
+embed_testlib {
+    QTESTDIR = $$(QTDIR)/tools/qtestlib/src
+    HEADERS += $${QTESTDIR}/qtesteventloop.h
+    SOURCES += $${QTESTDIR}/qasciikey.cpp \
+               $${QTESTDIR}/qabstracttestlogger.cpp \
+               $${QTESTDIR}/qsignaldumper.cpp \
+               $${QTESTDIR}/qtestdata.cpp \
+               $${QTESTDIR}/qtestresult.cpp \
+               $${QTESTDIR}/qxmltestlogger.cpp \
+               $${QTESTDIR}/qplaintestlogger.cpp \
+               $${QTESTDIR}/qtestcase.cpp \
+               $${QTESTDIR}/qtestlog.cpp \
+               $${QTESTDIR}/qtesttable.cpp
+    DEFINES += QTEST_EMBED QTEST_LIGHT
+} else {
+    CONFIG += qtestlib
+}
+
+embedded:QMAKE_CXXFLAGS+=-fno-rtti
+
+# prefix test binary with tst_
+!contains(TARGET, ^tst_.*):TARGET = $$join(TARGET,,"tst_")
+
+########################################################################
+# Use install rule to run test application.
+# This lets you do 'make install' on a test to both build and run it,
+# and lets you easily build and run all tests from the parent directory.
+# ----------------------------------------------------------------------
+
+runme.files                =
+runme.path                 = .
+!isEmpty(DESTDIR): runme.commands = cd ./$(DESTDIR) &&
+macx:      runme.commands += ./$(QMAKE_TARGET).app/Contents/MacOS/$(QMAKE_TARGET)
+else:unix: runme.commands += ./$(QMAKE_TARGET)
+else:      runme.commands += $(QMAKE_TARGET)
+embedded:  runme.commands += -qws
+INSTALLS += runme
+
+
+########################################################################

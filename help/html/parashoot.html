@@ -1,20 +1,23 @@
-<qt title="ParaShoot">
+<html>
+<head><title>ParaShoot</title></head>
+<body>
 <h3>ParaShoot</h3>
-<p><img src="parashoot/ParaShoot.png"></p>
+<p><img src=":image/parashoot/ParaShoot"></p>
 <p><b>Objective:</b> shoot the parachutists before they land.</p>
-%%PHONE%%
+<!--#if expr="$PHONESTYLE"-->
 <ul>
-<li>Use the <b>Left /Right</b> arrows of <img src="help/dpad"> to rotate and aim the cannon.</li>
-<li>Press <img src="contextbar/select.png"> to fire the cannon.</li>
-<li>Press <img src="contextbar/back.png"> to exit.</li>
+<li>Use the <b>Left /Right</b> arrows of <img src=":image/help/dpad"> </img> to rotate and aim the cannon.</li>
+<li>Press <img src=":icon/select"> </img> to fire the cannon.</li>
+<li>Press <img src=":icon/i18n/back"> </img> to exit.</li>
 </ul>
-@@PHONE@@
-%%PDA%%
+<!--#endif-->
+<!--#if expr="$PDASTYLE"-->
 <ul>
-<li>Press the left / right arrows to position the cannon. Press the up arrow to shoot. If three parachutists land the game is over.</li>
-<li>Tap <img src="parashoot/ParaShoot.png" width="16" height="16"> to start a new game.</li>
-<li>Tap <img src="qpe/pda/CloseButton.png"> to exit the game.</li>
+<li>Press the left / right arrows to position the cannon. Press the up arrow or OK to shoot. If three parachutists land the game is over.</li>
+<li>Tap <img src=":image/parashoot/ParaShoot" width="16" height="16"> </img> to start a new game.</li>
+<li>Tap <img src=":image/qpe/pda/CloseButton"> </img> to exit the game.</li>
 </ul>
-@@PDA@@
-</qt>
+<!--#endif-->
 
+</body>
+</html>

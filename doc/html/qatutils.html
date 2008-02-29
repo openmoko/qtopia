@@ -1,0 +1,76 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QAtUtils Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QAtUtils Class Reference</h1>
+<p>The QAtUtils class provides utility functions for use with AT modems <a href="#details">More...</a></p>
+<pre>    #include &lt;QAtUtils&gt;</pre><ul>
+<li><a href="qatutils-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="static-public-members"></a>
+<h3>Static Public Members</h3>
+<ul>
+<li><div class="fn"/>QTextCodec * <b><a href="qatutils.html#codec">codec</a></b> ( const QString &amp; <i>gsmCharset</i> )</li>
+<li><div class="fn"/>QString <b><a href="qatutils.html#decode">decode</a></b> ( const QString &amp; <i>str</i>, QTextCodec * <i>codec</i> )</li>
+<li><div class="fn"/>QString <b><a href="qatutils.html#decodeNumber">decodeNumber</a></b> ( const QString &amp; <i>value</i>, uint <i>type</i> )</li>
+<li><div class="fn"/>QString <b><a href="qatutils.html#decodeNumber-2">decodeNumber</a></b> ( QAtResultParser &amp; <i>parser</i> )</li>
+<li><div class="fn"/>QString <b><a href="qatutils.html#encodeNumber">encodeNumber</a></b> ( const QString &amp; <i>value</i>, bool <i>keepPlus</i> = false )</li>
+<li><div class="fn"/>QByteArray <b><a href="qatutils.html#fromHex">fromHex</a></b> ( const QString &amp; <i>hex</i> )</li>
+<li><div class="fn"/>QString <b><a href="qatutils.html#nextString">nextString</a></b> ( const QString &amp; <i>buf</i>, uint &amp; <i>posn</i> )</li>
+<li><div class="fn"/>uint <b><a href="qatutils.html#parseNumber">parseNumber</a></b> ( const QString &amp; <i>str</i>, uint &amp; <i>posn</i> )</li>
+<li><div class="fn"/>QString <b><a href="qatutils.html#quote">quote</a></b> ( const QString &amp; <i>str</i> )</li>
+<li><div class="fn"/>QString <b><a href="qatutils.html#quote-2">quote</a></b> ( const QString &amp; <i>str</i>, QTextCodec * <i>codec</i> )</li>
+<li><div class="fn"/>void <b><a href="qatutils.html#skipField">skipField</a></b> ( const QString &amp; <i>str</i>, uint &amp; <i>posn</i> )</li>
+<li><div class="fn"/>QString <b><a href="qatutils.html#stripNumber">stripNumber</a></b> ( const QString &amp; <i>number</i> )</li>
+<li><div class="fn"/>QString <b><a href="qatutils.html#toHex">toHex</a></b> ( const QByteArray &amp; <i>binary</i> )</li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QAtUtils class provides utility functions for use with AT modems</p>
+<p>The QAtUtils provides several utility functions to assist with using AT-based modem commands.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="codec"></a><a href="qtextcodec.html">QTextCodec</a> * QAtUtils::codec ( const <a href="qstring.html">QString</a> &amp; <i>gsmCharset</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Get the text codec for the GSM character set identifier <i>gsmCharset</i>.</p>
+<h3 class="fn"><a name="decode"></a><a href="qstring.html">QString</a> QAtUtils::decode ( const <a href="qstring.html">QString</a> &amp; <i>str</i>, <a href="qtextcodec.html">QTextCodec</a> * <i>codec</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Decode <i>str</i> according to <i>codec</i>. The string is assumed to have been retrieved from an AT modem using the facilities in <a href="qatchat.html">QAtChat</a> and <a href="qatresultparser.html">QAtResultParser</a>.</p>
+<h3 class="fn"><a name="decodeNumber"></a><a href="qstring.html">QString</a> QAtUtils::decodeNumber ( const <a href="qstring.html">QString</a> &amp; <i>value</i>, uint <i>type</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Decode a phone number from <i>value</i> and <i>type</i>. The <i>type</i> is a type of address octet, usually 145 for international numbers and 129 for local numbers. The return will normalize the value to include the <tt>+</tt> prefix for international numbers.</p>
+<h3 class="fn"><a name="decodeNumber-2"></a><a href="qstring.html">QString</a> QAtUtils::decodeNumber ( <a href="qatresultparser.html">QAtResultParser</a> &amp; <i>parser</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Read a string field and a numeric field from <i>parser</i> and then decode them into a properly normalized phone number.</p>
+<h3 class="fn"><a name="encodeNumber"></a><a href="qstring.html">QString</a> QAtUtils::encodeNumber ( const <a href="qstring.html">QString</a> &amp; <i>value</i>, bool <i>keepPlus</i> = false )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Encode the phone number in <i>value</i> into a string plus a type of address octet. International numbers that start with <tt>+</tt> become <tt>&quot;number&quot;,145</tt>, and local numbers become <tt>&quot;number&quot;,129</tt>. If <i>keepPlus</i> is true, then the <tt>+</tt> will be left on the resulting number, even if the type is 145.</p>
+<h3 class="fn"><a name="fromHex"></a><a href="qbytearray.html">QByteArray</a> QAtUtils::fromHex ( const <a href="qstring.html">QString</a> &amp; <i>hex</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Convert a hexadecimal string, <i>hex</i>, into a byte array.</p>
+<h3 class="fn"><a name="nextString"></a><a href="qstring.html">QString</a> QAtUtils::nextString ( const <a href="qstring.html">QString</a> &amp; <i>buf</i>, uint &amp; <i>posn</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Extract the next quoted string from <i>buf</i>, starting at <i>posn</i>.</p>
+<h3 class="fn"><a name="parseNumber"></a>uint QAtUtils::parseNumber ( const <a href="qstring.html">QString</a> &amp; <i>str</i>, uint &amp; <i>posn</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Utility function for parsing a number from position <i>posn</i> in <i>str</i>.</p>
+<h3 class="fn"><a name="quote"></a><a href="qstring.html">QString</a> QAtUtils::quote ( const <a href="qstring.html">QString</a> &amp; <i>str</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Quote <i>str</i> so that it is suitable to be sent as an AT command argument. The caller will need to add double quotes to the start and end of the return value to complete the AT command argument.</p>
+<h3 class="fn"><a name="quote-2"></a><a href="qstring.html">QString</a> QAtUtils::quote ( const <a href="qstring.html">QString</a> &amp; <i>str</i>, <a href="qtextcodec.html">QTextCodec</a> * <i>codec</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Quote <i>str</i> so that it is suitable to be sent as an AT command argument and use <i>codec</i> to encode the string. The caller will need to add double quotes to the start and end of the return value to complete the AT command argument.</p>
+<h3 class="fn"><a name="skipField"></a>void QAtUtils::skipField ( const <a href="qstring.html">QString</a> &amp; <i>str</i>, uint &amp; <i>posn</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Utility function for skipping a comma-delimited field starting at <i>posn</i> within <i>str</i>.</p>
+<h3 class="fn"><a name="stripNumber"></a><a href="qstring.html">QString</a> QAtUtils::stripNumber ( const <a href="qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Strip non-digit characters from <i>number</i> and normalize special characters.</p>
+<h3 class="fn"><a name="toHex"></a><a href="qstring.html">QString</a> QAtUtils::toHex ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>binary</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Convert the byte array, <i>binary</i>, into a hexadecimal string.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

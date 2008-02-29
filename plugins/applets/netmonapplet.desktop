@@ -1,6 +1,7 @@
 [Desktop Entry]
-Name=Dial-up Monitor
-Comment=Monitor for dial-up internet connections.
-Name[ja]=ダイアルアップモニター
-Comment[ja]=ダイアルアップのインターネット接続を監視します。
+Name[]=Dial-up Monitor
+Comment[]=Monitor for dial-up internet connections.
 X-QPE-Library=libnetmonapplet.so
+[Translation]
+File=QtopiaPlugins
+Context=Applets

@@ -1,0 +1,21 @@
+#!/bin/sh
+
+QTOPIA_INSTALL_PREFIX=/opt/Qtopia # set to the -prefix location at install time
+
+if [ "$1" = ram ]
+then
+    if [ grep -w -q /home/tmp /proc/mounts ]
+    then
+	umount /home/tmp # (lose old /tmp data)
+    fi
+
+    grep -v '^nodev	/home/tmp' /etc/fstab >/etc/fstab.tmp
+    echo "nodev	/home/tmp	ramfs	defaults    0	0" >>/etc/fstab.tmp
+    mv /etc/fstab.tmp /etc/fstab
+    mount /home/tmp
+else
+    grep -v '^nodev	/home/tmp' /etc/fstab >/etc/fstab.tmp
+    mv /etc/fstab.tmp /etc/fstab
+    umount /home/tmp
+fi
+

@@ -1,0 +1,39 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>SXE - Process Monitor</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">SXE - Process Monitor<br /><small></small></h1>
+<a name="introduction"></a>
+<h2>Introduction</h2>
+<p>As part of the SXE, a Qtopia system process acts as a Process Monitor. The monitor runs with a <tt>SCHED_RR</tt> priority scheduler using the system call <tt>sched_setscheduler</tt>. When the monitor process is scheduled on the processor it only runs for a short time, but executes a number of checks:</p>
+<ul>
+<li>can the framebuffer write lock be obtained?</li>
+<li>is memory or processor use very high?</li>
+<li>is the <i>hangup</i> button held down?</li>
+</ul>
+<p><b>Note:</b> Initially the Process Monitor is run as a thread inside the QPE server. Scheduling priority on this thread must be explicitly set.</p>
+<p>The Process Monitor will act if any of these quick checks reveals a problem situation. There are a range of configurable options if a problem situation is indicated.</p>
+<ul>
+<li>Framebuffer write lock:<p>The Process Monitor is advised of the current process holding the lock (if its in process with the Qtopia server simply a memory location, otherwise shared memory). A number of retry policies can be specified, for example, Exponential Backoff, N-Milliseconds. If the lock cannot be obtained and the same process is holding it, that process holding the lock is killed.</p>
+</li>
+<li>Resource use situation:<p>a similar scenario is followed as for the framebuffer write lock. The Process Monitor obtains its data from the <tt>/proc</tt> pseudo-file-system.</p>
+</li>
+<li><i>hangup</i> button:<p>the monitor can either poll the output from the keyboard driver (tty device) or if it is in process with the server get the processed keyboard events from the QTE layer. As soon as the button hits the number of milliseconds of press-down time the Process Monitor will kill all other applications except the server.</p>
+</li>
+</ul>
+<p><b>Note:</b> Other processes are prevented from changing their scheduler or priority as the CAP_SYS_NICE capability is globally denied, but allowed to the Process Monitor.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

@@ -5,6 +5,6 @@ Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
 Type=Application
 Exec=launchersettings
-Icon=launcher
-Name[]=Launch­er
+Icon=launchersettings/launcher
+Name[]=Launch\xad\x65r
 CanFastload=0

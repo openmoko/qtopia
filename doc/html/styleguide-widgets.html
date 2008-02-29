@@ -1,168 +1,133 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Qtopia Style Guide: Widgets</title>
-<style type="text/css"><!--
-h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }
-body { background: #ffffff; color: black; }
---></style>
+  <title>Qtopia Style Guide: Widgets</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
-<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
-<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
-   <a href="index.html">Home</a>
- - <a href="qtopiaclasses.html">Classes</a>
- - <a href="qtopiahierarchy.html">Hierachy</a>
- - <a href="qtopiaannotated.html">Annotated</a>
- - <a href="qtopiafunctions.html">Functions</a>
- - <a href="qtindex.html">Qt Embedded</a>
-</td>
-<td align="right" valign="top">
-  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
-</td>
-</tr>
-</table><h1 align=center>Qtopia Style Guide: Widgets</h1>
-
-
-
-<p> <!-- toc -->
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Qtopia Style Guide: Widgets<br /><small></small></h1>
+<ul><li><a href="#labels">Labels</a></li>
+<li><a href="#buttons">Buttons</a></li>
+<li><a href="#input-fields">Input Fields</a></li>
+<ul><li><a href="#text-fields">Text Fields</a></li>
+<li><a href="#number-fields">Number Fields</a></li>
+</ul>
+<li><a href="#tabs">Tabs</a></li>
+<li><a href="#lists">Lists</a></li>
+<li><a href="#menus">Menus</a></li>
+<ul><li><a href="#menu-names">Menu names</a></li>
+<li><a href="#menu-like-dialogs">Menu-like dialogs</a></li>
+</ul>
+<li><a href="#dialogs">Dialogs</a></li>
+<li><a href="#custom-widgets">Custom Widgets</a></li>
+</ul>
+<a name="labels-lnk"></a><a name="labels"></a>
+<h2>Labels</h2>
+<p>The rules listed below should be followed when creating a label:</p>
 <ul>
-<li><a href="#"></a>
+<li>no labels should have &quot;:&quot; appended</li>
+<li>there should never be a blank label listed in or for any widget</li>
+<li>all labels should conform to the <a href="styleguide-naming.html#naming-conventions">Naming conventions </a></li>
+<li>Text labels should be left aligned (non-semitic languages).</li>
+</ul>
+<p><b>note:</b>Please utilize the <a href="styleguide-naming.html#label-names">Currently used label names </a> table to keep labels consistent across applications.</p>
+<a name="buttons"></a>
+<h2>Buttons</h2>
 <ul>
-<li><a href="#1"> Labels
-</a>
-<li><a href="#1-1"> Buttons
-</a>
-<li><a href="#1-2"> Input fields
-</a>
+<li>Button labels should follow the same labeling scheme described in <a href="#labels-lnk">Labels </a> section.</li>
+<li>For some applications it is desirable to associate keypad keys to buttons displayed in the applications (as is done in the the <tt>Stopwatch/Clock</tt> application) this is not recommended however if it is necessary the label should include the associated keys label.</li>
+</ul>
+<a name="input-fields"></a>
+<h2>Input Fields</h2>
 <ul>
-<li><a href="#1-2-1"> Text fields
-</a>
-<li><a href="#1-2-2"> Number fields
-</a>
+<li>The <tt>Copy</tt> and <tt>Paste</tt> options should be available in all text input fields unless there is sufficient reason not to have these options listed.</li>
+<li>When the using the <tt>multitap</tt> input method pressing the <tt>1</tt> button displays a number of extended characters that are specific to the currently selected dialog.</li>
 </ul>
-<li><a href="#1-3"> Tabs
-</a>
-<li><a href="#1-4"> Lists
-</a>
-<li><a href="#1-5"> Menus
-</a>
+<p><b>Note:</b> When using the <tt>singletap</tt> input method and the field should always start with a capital letter, the first character should automatically be capitalized.</p>
+<a name="text-fields"></a>
+<h3>Text Fields</h3>
 <ul>
-<li><a href="#1-5-1"> Menu names
-</a>
-<li><a href="#1-5-2"> Menu-like dialogs
-</a>
+<li>Input fields should only remember the input type for that specific field (not all widgets of that type).</li>
+<li>By default <tt>singletap</tt> should be enabled in any text input field.</li>
 </ul>
-<li><a href="#1-6"> Dialogs
-</a>
-<li><a href="#1-7"> Custom widgets
-</a>
+<a name="number-fields"></a>
+<h3>Number Fields</h3>
+<p>No characters other than numbers are allowed in this field. Letters are appended as labels or combo-boxes where appropriate. For example, &quot;10 mins&quot; should only display &quot;10&quot; and have <i>mins</i> appended as a label.</p>
+<a name="tabs"></a>
+<h2>Tabs</h2>
+<p>Tab widgets should be able to gain focus from the user pressing either of the <i>up</i> or <i>down</i> directional pad buttons. When a user has the tab selected pressing the <tt>Select</tt> button should allow the them to proceed to the next available tab. Pressing the <i>up</i> or <i>down</i> directional pad buttons again will return the focus to the dialog, selecting the first or last element in the dialog.</p>
+<p>If the user presses either of the <i>left</i> or <i>right</i> directional pad buttons while in a tabbed dialog, the user should be able to change the tab with the focus shifting to the tab's label/icon.</p>
+<a name="lists"></a>
+<h2>Lists</h2>
+<ul>
+<li>A list is displayed as an icon while it is not selected but when the list is opened the icon and label display with the icon displayed.</li>
+<li>The default focus when opening a list should be on the item that the list was set to prior to opening.</li>
+<li>If the list allows the user to select a blank item then the blank item should be listed as blank that is, not use a label such as <i>blank</i> or <i>&lt;none&gt;</i>.</li>
+<li>List items that display additional dialogs when they are selected should simple list a &quot;...&quot; option.</li>
 </ul>
+<a name="menus"></a>
+<h2>Menus</h2>
+<p>The ordering of items in a menu must be based of the following ordering:</p>
+<ul>
+<li>New</li>
+<li>Edit</li>
+<li>Modify commands, e.g. <tt>Crop</tt></li>
+<li>Delete</li>
+<li>Action commands, e.g. <tt>Beam</tt>, <tt>Duplicate</tt>, <tt>Copy</tt>, <tt>Paste</tt></li>
+<li>View commands, e.g. <tt>Today</tt>, <tt>View</tt> Category...</li>
+<li>Options commands, e.g. <tt>Settings</tt></li>
+<li>(separator)</li>
+<li>Help (added by system)</li>
+<li>Cancel</li>
 </ul>
-<!-- endtoc -->
-
-<p> <h3> Labels
-</h3>
-<a name="1"></a><p> The rules listed below should be followed when creating a label:
-<p> <ul>
-<li> No labels should have ":" appended.
-<li> There should never be a blank label listed in or for any widget.
-<li> All labels should conform to the <a href="styleguide-naming.html#Naming-conventions">Naming conventions</a>.
-<li> Text labels should be left aligned (non-semitic languages).
+<p>When the selection of a menu item leads to a new dialog:</p>
+<ul>
+<li>the menu item label should only be suffixed with &quot;...&quot; if the command is being further refined. That is, the &quot;...&quot; extension should only be placed on the end of menu names when a selection of items is going to be offered or additional commands have to be specified.</li>
+<li>No space should be left between the first '.' and the last character of the menu name. Please refer to <a href="styleguide-naming.html#usingdotdotdot">Using the &quot;...&quot; label </a> label for a full explanation.</li>
 </ul>
-<p> Please utilize the Currently used label names table to keep labels consistent across applications.
-<p> <h3> Buttons
-</h3>
-<a name="1-1"></a><p> Button labels should follow the same labeling scheme described in Labels section.
-<p> For some applications it is desirable to associate keypad keys to buttons displayed in the applications (as is done in the the stopwatch/clock application) this is not recommended but if it must be done the label should include the associated keys label.
-<p> <h3> Input fields
-</h3>
-<a name="1-2"></a><p> The <em>Copy</em> and <em>Paste</em> options should be available in all text input fields unless there is sufficient reason not to have these options listed.
-<p> When the using the <em>multitap</em> input method pressing the 1 button should display a number of extended characters that are specific to the currently selected dialog.
-<p> Note: When using the <em>singletap</em> input method and the field should always start with a capital letter, the first character should automatically be capitalized.
-<p> <h4> Text fields
-</h4>
-<a name="1-2-1"></a><p> Input fields should only remember the input type for that specific field (not all widgets of that type).
-<p> By default <em>singletap</em> should be enabled in any text input field.
-<p> <h4> Number fields
-</h4>
-<a name="1-2-2"></a><p> No characters other than numbers should be allowed in this field. Letters should be appended as labels or combo-boxes where appropriate. For example, "10 mins" should only display "10" and have mins appended as a label.
-<p> <h3> Tabs
-</h3>
-<a name="1-3"></a><p> Tab widgets should be able to gain focus from the user pressing either of the <em>up</em> or <em>down</em> directional pad buttons. When a user has the tab selected pressing the <em>select</em> button should allow the them to proceed to the next available tab.
-Pressing the <em>up</em> or <em>down</em> directional pad buttons again will return the focus to the dialog, selecting the first or last element in the dialog.
-<p> If the user presses either of the <em>left</em> or <em>right</em> directional pad buttons while in a tabbed dialog, the user should be able to change the tab with the focus shifting to the tab's label/icon.
-<p> <h3> Lists
-</h3>
-<a name="1-4"></a><p> A list may be displayed as an icon while it is not selected but when the list is opened the icon and label should be displayed with the icon displayed.
-<p> The default focus when opening a list should be on the item that the list was set to prior to opening.
-<p> If the list allows the user to select a blank item then the blank item should be listed as blank ie. not use a label such as "blank" or <none>. List items that display additional dialogs when they are selected should simple list a "..." option.
-<p> <h3> Menus
-</h3>
-<a name="1-5"></a><p> The ordering of items in a menu must be based of the following ordering:
-<p> <ul>
-<li> New
-<li> Edit
-<li> Modify commands, e.g. <em>Crop</em>
-<li> Delete
-<li> Action commands, e.g. <em>Beam</em>, <em>Duplicate</em>, <em>Copy</em>, <em>Paste</em>
-<li> View commands, e.g. <em>Today</em>, <em>View</em> Category...
-<li> Options commands, e.g. <em>Settings</em>
-<li> (separator)
-<li> Help (added by system)
-<li> Cancel
+<p><b>:</b> {Note:} Application menu labels should not be appended with the type of item on which they are performing the action. For example, only <i>Edit</i> is required on the menu label, not <i>Edit Event</i>.</p>
+<ul>
+<li>Menu options should be hidden when unavailable</li>
+<li>A menu should have the top-most item selected by default</li>
+<li>A menu separator should be used to group options that perform <i>associated</i> functionality such as <tt>New</tt>, <tt>Edit</tt> and <tt>Delete</tt>.</li>
+<li>Menus with predefined names such as <tt>Cancel</tt> should use the appropriate icon.</li>
 </ul>
-<p> When the selection of a menu item leads to a new dialog, the menu item label should only be suffixed with  "..." if the command is being further refined. In other words, the "..." extension should only be placed on the end of menu names when a selection of items is going to be offered or additional commands have to be specified. No space should be left between the first '.' and the last character of the menu name. Please refer to Using the "..." label for a full explanation.
-<p> Note: Application menu labels should not be appended with the type of item on which they are performing the action. For example, only "Edit" is required on the menu label, not "Edit Event".
-<p> <ul>
-<li> Menu options should be hidden when unavailable.
-<li> A menu should have the top-most item selected by default.
-<li> A menu separator should be used to group options that perform <em>associated</em> functionality such as New, Edit and Delete.
-<li> Menus with predefined names such as <em>Cancel</em> should use the appropriate icon.
+<p>Where an application is structured as a <i>list of items</i> and selecting an item shows its details, the menu for the list should <i>not</i> include any actions that are directly related to a single item. Actions that are applied to an individual item (and never to a list) should be placed in the menu that becomes available when the details of an item are shown. (Menu, Down-past-New, Select-Edit is just as many steps as Select-Item, Menu, Select-Edit).</p>
+<p>When particular widgets are selected the context menu may change its option list. Promoting this functionality is not recommended.</p>
+<a name="menu-names"></a>
+<h3>Menu names</h3>
+<p>Menu names should follow all conventions found in the <a href="styleguide-naming.html#naming-conventions">Naming conventions </a>. An acronym or abbreviation for a menu item should only be used if the label doesn't fit on the screen OR if an acronym or abbreviation already exists for the current label (promotes consistency in the use of text labels).</p>
+<a name="menu-like-dialogs"></a>
+<h3>Menu-like dialogs</h3>
+<p>Some dialogs consist of a list of items, only one of which the user needs to select in order to complete an operation. In a small number of cases the user may wish to do more with the item, such as edit it via the menu.</p>
+<p>Such list dialogs are <i>Menu-like Dialogs</i>, and should behave like menus:</p>
+<ul>
+<li>Highlighting an item should have no long-term effect.</li>
+<li>Selecting an item should close the window and return to the previous view (even if that means closing the application).</li>
+<li>The <tt>ContextBar</tt> icon for <tt>Key_Back</tt> should be <tt>Cancel</tt>, not the usual <tt>Back</tt>.</li>
 </ul>
-<p> Where an application is structured as a <em>list of items</em> and selecting an item shows its details, the menu for the list should <em>not</em> include any actions that are directly related to a single item. Actions that are applied to an individual item (and never to a list) should be placed in the menu that becomes available when the details of an item are shown. (Menu, Down-past-New, Select-Edit is just as many steps as Select-Item, Menu, Select-Edit).
-<p> When particular widgets are selected the context menu may change its option list. Promoting this functionality is not recommended.
-<p> <h4> Menu names
-</h4>
-<a name="1-5-1"></a><p> Menu names should follow all conventions found in the <a href="styleguide-naming.html#Naming-conventions">Naming conventions</a>.
-<p> An acronym or abbreviation for a menu item should only be used if the label doesn't fit on the screen OR if an acronym or abbreviation already exists for the current label (promotes consistency in the use of text labels).
-<p> <h4> Menu-like dialogs
-</h4>
-<a name="1-5-2"></a><p> Some dialogs consist of a list of items, only one of which the user needs to select in order to complete an operation. In a small number of cases the user may wish to do more with the item, such as edit it via the menu.
-<p> Such list dialogs are <em>Menu-like Dialogs</em>, and should behave like menus:
-<p> <ul>
-<li> Highlighting an item should have no long-term effect.
-<li> Selecting an item should close the window and return to the
-previous view (even if that means closing the application).
-<li> The <a href="contextbar.html">ContextBar</a> icon for Key_Back should be Cancel, not the usual Back.
-</ul>
-<p> To assist in creating Menu-like dialogs you can call the function
-<p> <a href="qpeapplication.html#setMenuLike">QPEApplication::setMenuLike</a>();
-<p> which will map the context bar and menu correctly for the dialog.
-<p> If the dialog has a menu, consider having 'Activate', or 'Select' in the menu,
-but make sure that this command does <em>not</em> close the dialog.
-<p> Examples: Profile selection, Speed dial action selection.
-<p> <h3> Dialogs
-</h3>
-<a name="1-6"></a><p> A Dialogs title should describe the process that is currently taking place in the dialog. For example, "Editing event", "Creating event". A dialog title should not have its text appended with "...".
-<p> Message dialogs that allow a positive or negative response should be phrased such that the user can answer "Yes" or "No", rather than "OK" or "Cancel".
-<p> Informative Message dialogs should only allow the <em>Back/</em> <em>Done</em> context bar option.
-<p> <h3> Custom widgets
-</h3>
-<a name="1-7"></a><p> Well defined widgets (ie. those defined in qt) should always be used where possible. If a custom widget must be used, make sure that such a widget doesn't already exist.
-Ie. Time input widgets.
-<p> 
-<!-- eof -->
-<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0">
-<tr>
-<td>Copyright &copy; 2001-2005 Trolltech
-<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qtopia version 2.1.1</div>
-</table></div></address></body>
+<p>To assist in creating Menu-like dialogs use the function</p>
+<pre>    QtopiaApplication::setMenuLike();</pre>
+<p>which maps the context bar and menu correctly for the dialog.</p>
+<p>If the dialog has a menu, consider having <tt>Activate</tt>, or <tt>Select</tt> in the menu, but ensure this command does <i>not</i> close the dialog.</p>
+<p>Examples include: Profile selection, Speed dial action selection.</p>
+<a name="dialogs"></a>
+<h2>Dialogs</h2>
+<p>A <tt>Dialogs</tt> title should describe the process that is currently taking place in the dialog. For example, <i>Editing event</i>, <i>Creating event</i>. A dialog title should not have its text appended with &quot;...&quot;.</p>
+<p>Message dialogs that allow a positive or negative response should be phrased such that the user can answer <i>Yes</i> or <i>No</i>, rather than <tt>OK</tt> or <tt>Cancel</tt>.</p>
+<p>Informative Message dialogs should only allow the <tt>Back</tt> <tt>Done</tt> context bar option.</p>
+<a name="custom-widgets"></a>
+<h2>Custom Widgets</h2>
+<p>Well-defined widgets, that is, those defined in Qt, should always be used where possible. If a custom widget must be used, make sure that such a widget does not already exist.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
 </html>

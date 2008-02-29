@@ -1,0 +1,10 @@
+[Translation]
+File=QtopiaSettings
+Context=Backups
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
+[Desktop Entry]
+Exec=backuprestore
+Icon=backuprestore/BackupRestore
+Type=Application
+Name[]=Back\xadups
+CanFastload=0

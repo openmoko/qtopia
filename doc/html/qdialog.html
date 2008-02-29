@@ -1,236 +1,218 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
---></style>
-</head><body bgcolor="#ffffff">
-
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-
-<h1 align=center>QDialog Class Reference</h1><br clear="all">
-<p>
-The QDialog class is the base class of dialog windows.
-<a href="#details">More...</a>
-<p>
-<code>#include &lt;<a href="qdialog-h.html">qdialog.h</a>&gt;</code>
-<p>
-Inherits <a href="qwidget.html">QWidget</a>.
-<p>Inherited by <a href="qcolordialog.html">QColorDialog</a>, <a href="qfiledialog.html">QFileDialog</a>, <a href="qfontdialog.html">QFontDialog</a>, <a href="qinputdialog.html">QInputDialog</a>, <a href="qmessagebox.html">QMessageBox</a>, <a href="qprintdialog.html">QPrintDialog</a>, <a href="qtabdialog.html">QTabDialog</a> and <a href="qwizard.html">QWizard</a>.
-<p><a href="qdialog-members.html">List of all member functions.</a>
-<h2>Public Members</h2>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: QDialog Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QDialog Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<p>The QDialog class is the base class of dialog windows. <a href="#details">More...</a></p>
+<pre> #include &lt;QDialog&gt;</pre><p>Inherits <a href="qwidget.html">QWidget</a>.</p>
+<p>Inherited by <a href="q3filedialog.html">Q3FileDialog</a>, <a href="q3progressdialog.html">Q3ProgressDialog</a>, <a href="q3tabdialog.html">Q3TabDialog</a>, <a href="q3wizard.html">Q3Wizard</a>, <a href="qabstractprintdialog.html">QAbstractPrintDialog</a>, <a href="qcolordialog.html">QColorDialog</a>, <a href="qerrormessage.html">QErrorMessage</a>, <a href="qfiledialog.html">QFileDialog</a>, <a href="qfontdialog.html">QFontDialog</a>, <a href="qinputdialog.html">QInputDialog</a>, <a href="qmessagebox.html">QMessageBox</a>, <a href="qpagesetupdialog.html">QPageSetupDialog</a>, and <a href="qprogressdialog.html">QProgressDialog</a>.</p>
 <ul>
-<li><div class="fn"><a href="#3bf3ac"><b>QDialog</b></a> ( QWidget * parent=0, const char * name=0, bool modal=FALSE, WFlags f=0 ) </div>
-<li><div class="fn"><a href="#0d706a"><b>~QDialog</b></a> () </div>
-<li><div class="fn">enum <b>DialogCode</b> { Rejected, Accepted }</div>
-<li><div class="fn">int <a href="#0beb1a"><b>exec</b></a> () </div>
-<li><div class="fn">int <a href="#827937"><b>result</b></a> () const</div>
-<li><div class="fn">virtual void <a href="#bfe29c"><b>show</b></a> () </div>
-<li><div class="fn">void <a href="#aa7dae"><b>setOrientation</b></a> ( Orientation orientation ) </div>
-<li><div class="fn">Orientation <a href="#ba9c31"><b>orientation</b></a> () const</div>
-<li><div class="fn">void <a href="#e68e4c"><b>setExtension</b></a> ( QWidget * extension ) </div>
-<li><div class="fn">QWidget* <a href="#b361c0"><b>extension</b></a> () const</div>
-<li><div class="fn">void <a href="#0a585b"><b>setSizeGripEnabled</b></a> ( bool ) </div>
-<li><div class="fn">bool <a href="#6eaf00"><b>isSizeGripEnabled</b></a> () const</div>
+<li><a href="qdialog-members.html">List of all members, including inherited members</a></li>
+<li><a href="qdialog-obsolete.html">Obsolete members</a></li>
+<li><a href="qdialog-qt3.html">Qt 3 support members</a></li>
 </ul>
-<h2>Protected Members</h2>
+<a name="public-types"></a>
+<h3>Public Types</h3>
 <ul>
-<li><div class="fn">void <a href="#efd31d"><b>setResult</b></a> ( int r ) </div>
+<li><div class="fn"/>enum <b><a href="qdialog.html#DialogCode-enum">DialogCode</a></b> { Accepted, Rejected }</li>
 </ul>
-<h2>Protected Slots</h2>
+<a name="properties"></a>
+<h3>Properties</h3>
 <ul>
-<li><div class="fn">virtual void <a href="#a2afe3"><b>done</b></a> ( int ) </div>
-<li><div class="fn">virtual void <a href="#82d406"><b>accept</b></a> () </div>
-<li><div class="fn">virtual void <a href="#604679"><b>reject</b></a> () </div>
-<li><div class="fn">void <a href="#a1f41d"><b>showExtension</b></a> ( bool ) </div>
+<li><div class="fn"/><b><a href="qdialog.html#modal-prop">modal</a></b> : bool</li>
+<li><div class="fn"/><b><a href="qdialog.html#sizeGripEnabled-prop">sizeGripEnabled</a></b> : bool</li>
 </ul>
-<h2>Properties</h2>
-<table border=1 cellpadding=3 cellspacing=0>
-<tr><th>Type<th>Name<th>READ<th>WRITE<th>Options
-<tr><td>bool<td>sizeGripEnabled<td>isSizeGripEnabled<td>setSizeGripEnabled<td>&nbsp;
-</table>
-<hr><h2><a name="details"></a>Detailed Description</h2>
-The QDialog class is the base class of dialog windows.
-<p>
-A dialog window is a top-level window used for short-term tasks and
-brief communications with the user. QDialog offers mechanisms such
-as modality, default buttons, extensibility and a result value.
-<p>Modality means that the dialog blocks input to other windows: The
-user <em>has</em> to finish interacting with the dialog and close it
-before resuming work with the other window(s).  The only way to set
-modality is by using the constructor, and the default is
-modelessness.  For modal dialog, it's generally better to call
-<a href="#0beb1a">exec</a>() than show; exec() returns when the dialog has been closed and
-has a useful return value (see below).
-<p>The default button is the button that's pressed when the user
-presses Enter or Return, to accept the things done using this dialog
-and close it. QDialog uses <a href="qpushbutton.html#0a887a">QPushButton::autoDefault</a>(),
-<a href="qpushbutton.html#ee0b8c">QPushButton::isDefault</a>() and <a href="qpushbutton.html#d415f9">QPushButton::setDefault</a>() to make Enter
-or Return map to the right button at any time.
-<p>Extensibility is the ability to show more or less of the
-dialog. Typically, the dialog starts out small, has a "More" button,
-and when the user clicks "More", the dialog becomes bigger, and
-shows some less-used options.  QDialog supports this using
-<a href="#e68e4c">setExtension</a>(), <a href="#aa7dae">setOrientation</a>() and <a href="#a1f41d">showExtension</a>().
-<p>Since dialogs typically tend to have result value (pressing
-Enter/Return maps to one value and pressing Escape to the other),
-QDialog supports that.  A dialog can finish by calling the slots
-<a href="#82d406">accept</a>() or <a href="#604679">reject</a>(), and exec() returns that result.
-<p>Note that QDialog uses the parent widget a bit differently from
-other classes in Qt.  A dialog is always a top-level widget, but if
-it has a parent, its default location is on top of the parent, it
-shares taskbar entry with its parent, and there are some minor
-details.
-<p>QDialog also can provide a <a href="qsizegrip.html">QSizeGrip</a> in its lower-right corner. If
-you want that, call <a href="#0a585b">setSizeGripEnabled</a>( TRUE ).
-<p>See also  <a href="qtabdialog.html">QTabDialog</a>, <a href="qwidget.html">QWidget</a>, <a href="qsemimodal.html">QSemiModal</a> and <a href="guibooks.html#fowler">GUI Design Handbook: Dialogs, Standard.</a>
-<p>Examples:
- <a href="i18n-main-cpp.html#QDialog">i18n/main.cpp</a>
+<ul>
+<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qdialog.html#QDialog">QDialog</a></b> ( QWidget * <i>parent</i> = 0, Qt::WindowFlags <i>f</i> = 0 )</li>
+<li><div class="fn"/><b><a href="qdialog.html#dtor.QDialog">~QDialog</a></b> ()</li>
+<li><div class="fn"/>bool <b><a href="qdialog.html#sizeGripEnabled-prop">isSizeGripEnabled</a></b> () const</li>
+<li><div class="fn"/>int <b><a href="qdialog.html#result">result</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qdialog.html#modal-prop">setModal</a></b> ( bool <i>modal</i> )</li>
+<li><div class="fn"/>void <b><a href="qdialog.html#setResult">setResult</a></b> ( int <i>i</i> )</li>
+<li><div class="fn"/>void <b><a href="qdialog.html#sizeGripEnabled-prop">setSizeGripEnabled</a></b> ( bool )</li>
+</ul>
+<ul>
+<li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+</ul>
+<a name="public-slots"></a>
+<h3>Public Slots</h3>
+<ul>
+<li><div class="fn"/>virtual void <b><a href="qdialog.html#accept">accept</a></b> ()</li>
+<li><div class="fn"/>virtual void <b><a href="qdialog.html#done">done</a></b> ( int <i>r</i> )</li>
+<li><div class="fn"/>int <b><a href="qdialog.html#exec">exec</a></b> ()</li>
+<li><div class="fn"/>virtual void <b><a href="qdialog.html#reject">reject</a></b> ()</li>
+</ul>
+<ul>
+<li><div class="fn"/>19 public slots inherited from <a href="qwidget.html#public-slots">QWidget</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+</ul>
+<a name="signals"></a>
+<h3>Signals</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qdialog.html#accepted">accepted</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qdialog.html#finished">finished</a></b> ( int <i>result</i> )</li>
+<li><div class="fn"/>void <b><a href="qdialog.html#rejected">rejected</a></b> ()</li>
+</ul>
+<ul>
+<li><div class="fn"/>1 signal inherited from <a href="qwidget.html#signals">QWidget</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>4 static public members inherited from <a href="qwidget.html#static-public-members">QWidget</a></li>
+<li><div class="fn"/>5 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>38 protected functions inherited from <a href="qwidget.html#protected-functions">QWidget</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>1 protected function inherited from <a href="qpaintdevice.html#protected-functions">QPaintDevice</a></li>
+<li><div class="fn"/>1 protected slot inherited from <a href="qwidget.html#protected-slots">QWidget</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QDialog class is the base class of dialog windows.</p>
+<p>A dialog window is a top-level window mostly used for short-term tasks and brief communications with the user. QDialogs may be modal or modeless. QDialogs can provide a <a href="#return">return value</a>, and they can have <a href="#default">default buttons</a>. QDialogs can also have a <a href="qsizegrip.html">QSizeGrip</a> in their lower-right corner, using <a href="qdialog.html#sizeGripEnabled-prop">setSizeGripEnabled</a>().</p>
+<p>Note that QDialog (an any other widget that has type <a href="qt.html#WindowType-enum">Qt::Dialog</a>) uses the parent widget slightly differently from other classes in Qt. A dialog is always a top-level widget, but if it has a parent, its default location is centered on top of the parent's top-level widget (if it is not top-level itself). It will also share the parent's taskbar entry.</p>
+<p>Use the overload of the <a href="qwidget.html#setParent">QWidget::setParent</a>() function to change the ownership of a QDialog widget. This function allows you to explicitly set the window flags of the reparented widget; using the overloaded function will clear the window flags specifying the window-system properties for the widget (in particular it will reset the <a href="qt.html#WindowType-enum">Qt::Dialog</a> flag).</p>
+<a name="modal-dialogs"></a>
+<h3>Modal Dialogs</h3>
+<p>A <b>modal</b> dialog is a dialog that blocks input to other visible windows in the same application. Users must finish interacting with the dialog and close it before they can access any other window in the application. Dialogs that are used to request a file name from the user or that are used to set application preferences are usually modal.</p>
+<p>The most common way to display a modal dialog is to call its <a href="qdialog.html#exec">exec</a>() function. When the user closes the dialog, <a href="qdialog.html#exec">exec</a>() will provide a useful <a href="#return">return value</a>. Typically, to get the dialog to close and return the appropriate value, we connect a default button, e.g. <b>OK</b>, to the <a href="qdialog.html#accept">accept</a>() slot and a <b>Cancel</b> button to the <a href="qdialog.html#reject">reject</a>() slot. Alternatively you can call the <a href="qdialog.html#done">done</a>() slot with <tt>Accepted</tt> or <tt>Rejected</tt>.</p>
+<p>An alternative is to call setModal(true) or <a href="qwidget.html#windowModality-prop">setWindowModality</a>(), then <a href="qwidget.html#show">show</a>(). Unlike <a href="qdialog.html#exec">exec</a>(), <a href="qwidget.html#show">show</a>() returns control to the caller immediately. Calling setModal(true) is especially useful for progress dialogs, where the user must have the ability to interact with the dialog, e.g. to cancel a long running operation. If you use <a href="qwidget.html#show">show</a>() and setModal(true) together to perform a long operation, you must call <a href="qcoreapplication.html#processEvents">QApplication::processEvents</a>() periodically during processing to enable the user to interact with the dialog. (See <a href="qprogressdialog.html">QProgressDialog</a>.)</p>
+<a name="modeless-dialogs"></a>
+<h3>Modeless Dialogs</h3>
+<p>A <b>modeless</b> dialog is a dialog that operates independently of other windows in the same application. Find and replace dialogs in word-processors are often modeless to allow the user to interact with both the application's main window and with the dialog.</p>
+<p>Modeless dialogs are displayed using <a href="qwidget.html#show">show</a>(), which returns control to the caller immediately.</p>
+<a name="default"></a><a name="default-button"></a>
+<h3>Default Button</h3>
+<p>A dialog's <i>default</i> button is the button that's pressed when the user presses Enter (Return). This button is used to signify that the user accepts the dialog's settings and wants to close the dialog. Use <a href="qpushbutton.html#default-prop">QPushButton::setDefault</a>(), <a href="qpushbutton.html#default-prop">QPushButton::isDefault</a>() and <a href="qpushbutton.html#autoDefault-prop">QPushButton::autoDefault</a>() to set and control the dialog's default button.</p>
+<a name="escapekey"></a><a name="escape-key"></a>
+<h3>Escape Key</h3>
+<p>If the user presses the Esc key in a dialog, <a href="qdialog.html#reject">QDialog::reject</a>() will be called. This will cause the window to close: The <a href="qcloseevent.html">close event</a> cannot be <a href="qevent.html#ignore">ignored</a>.</p>
+<a name="extensibility"></a>
+<h3>Extensibility</h3>
+<p>Extensibility is the ability to show the dialog in two ways: a partial dialog that shows the most commonly used options, and a full dialog that shows all the options. Typically an extensible dialog will initially appear as a partial dialog, but with a <b>More</b> toggle button. If the user presses the <b>More</b> button down, the dialog is expanded. The Extension Example shows how to achieve extensible dialogs using Qt.</p>
+<a name="return"></a><a name="return-value-modal-dialogs"></a>
+<h3>Return Value (Modal Dialogs)</h3>
+<p>Modal dialogs are often used in situations where a return value is required, e.g. to indicate whether the user pressed <b>OK</b> or <b>Cancel</b>. A dialog can be closed by calling the <a href="qdialog.html#accept">accept</a>() or the <a href="qdialog.html#reject">reject</a>() slots, and <a href="qdialog.html#exec">exec</a>() will return <tt>Accepted</tt> or <tt>Rejected</tt> as appropriate. The <a href="qdialog.html#exec">exec</a>() call returns the result of the dialog. The result is also available from <a href="qdialog.html#result">result</a>() if the dialog has not been destroyed.</p>
+<a name="examples"></a><a name="code-examples"></a>
+<h3>Code Examples</h3>
+<p>A modal dialog:</p>
+<pre> void EditorWindow::countWords()
+ {
+     WordCountDialog dialog(this);
+     dialog.setWordCount(document().wordCount());
+     dialog.exec();
+ }</pre>
+<p>A modeless dialog:</p>
+<pre> void EditorWindow::find()
+ {
+     if (!findDialog) {
+         findDialog = new FindDialog(this);
+         connect(findDialog, SIGNAL(findNext()), this, SLOT(findNext()));
+     }
 
-<hr><h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="3bf3ac"></a>QDialog::QDialog ( <a href="qwidget.html">QWidget</a> * parent=0, const char * name=0, bool modal=FALSE, WFlags f=0 )</h3>
-<p>Constructs a dialog named <em>name,</em> which has a parent widget <em>parent.</em>
-<p>The dialog is modal (blocks input to other windows) if <em>modal</em> is
-TRUE, and modeless if <em>modal</em> is FALSE (this is the default).
-<p>The widget flags <em>f</em> are sent to the <a href="qwidget.html">QWidget</a> constructor, as usual.
-<p>If you e.g. don't want a What's this button in the titlebar of the dialog,
-pass WStyle_Customize | WStyle_NormalBorder | WStyle_Title | WStyle_SysMenu
-here.
-<p>We recommend always passing a parent.
-<p>See also  <a href="qwidget.html#9dd055">QWidget::setWFlags</a> and <a href="qt.html#WidgetFlags">Qt::WidgetFlags</a>.
-<h3 class="fn"><a name="0d706a"></a>QDialog::~QDialog ()</h3>
-<p>Destructs the QDialog, deleting all its children.
-<h3 class="fn">void <a name="82d406"></a>QDialog::accept () <code>[virtual protected slot]</code></h3>
-<p>Hides the dialog and sets the result code to <code>Accepted.</code>
-<h3 class="fn">void <a name="21ef0e"></a>QDialog::closeEvent ( <a href="qcloseevent.html">QCloseEvent</a> * e ) <code>[virtual protected]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qwidget.html#c04094">QWidget.</a>
-<h3 class="fn">void <a name="a2afe3"></a>QDialog::done ( int r ) <code>[virtual protected slot]</code></h3>
-<p>Hides the (modal) dialog and sets its result code to <em>r.</em> This
-uses the local event loop to finish and <a href="#0beb1a">exec</a>() to return <em>r.</em>
-<p>If the dialog has the <code>WDestructiveClose</code> flag set, done() also
-deletes the dialog. If the dialog is the applications's main widget,
-the application quits.
-<p>See also  <a href="#82d406">accept</a>(), <a href="#604679">reject</a>(), <a href="qapplication.html#85380c">QApplication::mainWidget</a>() and <a href="qapplication.html#1af5b8">QApplication::quit</a>().
-<p>Reimplemented in <a href="qfiledialog.html#81ccad">QFileDialog</a>.
-<h3 class="fn">int <a name="0beb1a"></a>QDialog::exec ()</h3>
-<p>Starts the (modal) dialog, waits, and returns the result code when
-it is done.
-<p>If the dialog is modeless, the behaviour of this function is
-undefined.
-<p>See also  <a href="#bfe29c">show</a>() and <a href="#827937">result</a>().
-<p>Examples:
- <a href="wizard-main-cpp.html#exec">wizard/main.cpp</a>
- <a href="i18n-main-cpp.html#exec">i18n/main.cpp</a>
-<h3 class="fn"><a href="qwidget.html">QWidget</a>* <a name="b361c0"></a>QDialog::extension () const</h3>
-<p>Returns the dialog's extension or 0 if no extension has been
-defined.
-<p>See also  <a href="#e68e4c">setExtension</a>().
-<h3 class="fn">void <a name="74d5c5"></a>QDialog::hide () <code>[virtual]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qwidget.html#410481">QWidget.</a>
-<h3 class="fn">bool <a name="6eaf00"></a>QDialog::isSizeGripEnabled () const</h3>
-<p>Returns TRUE if the QDialog has a <a href="qsizegrip.html">QSizeGrip</a> in the bottom right of
-the dialog, and FALSE if it does not.
-<p>See also  <a href="#0a585b">setSizeGripEnabled</a>().
-<h3 class="fn">void <a name="8acb39"></a>QDialog::keyPressEvent ( <a href="qkeyevent.html">QKeyEvent</a> * e ) <code>[virtual protected]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qwidget.html#0a4482">QWidget.</a>
-<h3 class="fn"><a href="qsize.html">QSize</a> <a name="e53930"></a>QDialog::minimumSizeHint () const <code>[virtual]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qwidget.html#553e08">QWidget.</a>
-<h3 class="fn">void <a name="89fdd4"></a>QDialog::move ( const <a href="qpoint.html">QPoint</a> &amp; p )</h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<h3 class="fn">void <a name="9c89b3"></a>QDialog::move ( int x, int y ) <code>[virtual]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qwidget.html#39930b">QWidget.</a>
-<h3 class="fn">Qt::Orientation <a name="ba9c31"></a>QDialog::orientation() const</h3>
-<p>Returns the extension direction of the dialog.
-<p>See also  <a href="#aa7dae">setOrientation</a>().
-<h3 class="fn">void <a name="604679"></a>QDialog::reject () <code>[virtual protected slot]</code></h3>
-<p>Hides the dialog and sets the result code to <code>Rejected.</code>
-<h3 class="fn">void <a name="9d0e95"></a>QDialog::resize ( const <a href="qsize.html">QSize</a> &amp; s )</h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<h3 class="fn">void <a name="d7e510"></a>QDialog::resize ( int w, int h ) <code>[virtual]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Examples:
- <a href="tabdialog-main-cpp.html#resize">tabdialog/main.cpp</a>
-<p>Reimplemented from <a href="qwidget.html#8fcbbe">QWidget.</a>
-<h3 class="fn">void <a name="fc5201"></a>QDialog::resizeEvent ( <a href="qresizeevent.html">QResizeEvent</a> * ) <code>[virtual protected]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qwidget.html#7d375f">QWidget.</a>
-<h3 class="fn">int <a name="827937"></a>QDialog::result () const</h3>
-<p>Returns the result code of the dialog.
-<h3 class="fn">void <a name="e68e4c"></a>QDialog::setExtension ( <a href="qwidget.html">QWidget</a> * extension )</h3>
-<p>Sets <em>extension</em> to be the dialog's extension, or deletes the
-extensions if <em>extension</em> is 0.
-<p>The dialogs takes over ownership of the extension. Any previously
-set extension is deleted.
-<p>This function can only be called while the dialog is hidden.
-<p>See also  <a href="#a1f41d">showExtension</a>(), <a href="#aa7dae">setOrientation</a>() and <a href="#b361c0">extension</a>().
-<h3 class="fn">void <a name="bba7b0"></a>QDialog::setGeometry ( const <a href="qrect.html">QRect</a> &amp; r ) <code>[virtual]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qwidget.html#5e9ab1">QWidget.</a>
-<h3 class="fn">void <a name="e54a1a"></a>QDialog::setGeometry ( int x, int y, int w, int h ) <code>[virtual]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qwidget.html#9ede68">QWidget.</a>
-<h3 class="fn">void <a name="aa7dae"></a>QDialog::setOrientation ( <a href="qt.html#Orientation">Orientation</a> orientation )</h3>
-<p>Sets the dialog to display its extension to the right of the main
-are if <em>orientation</em> is <code>Horizonal,</code> and to display it below the
-main area if <em>orientation</em> is <code>Vertical.</code>
-<p>See also  <a href="#ba9c31">orientation</a>() and <a href="#e68e4c">setExtension</a>().
-<h3 class="fn">void <a name="efd31d"></a>QDialog::setResult ( int ) <code>[protected]</code></h3>
-<p>Sets the result code of the dialog.
-<h3 class="fn">void <a name="0a585b"></a>QDialog::setSizeGripEnabled ( bool enabled )</h3>
-<p>Enables or disables the <a href="qsizegrip.html">QSizeGrip</a> in the bottom right of the dialog.
-By default, the size grip is disabled.
-<p>See also  <a href="#6eaf00">isSizeGripEnabled</a>().
-<h3 class="fn">void <a name="bfe29c"></a>QDialog::show () <code>[virtual]</code></h3>
-<p>Shows the dialog box on the screen, as <a href="qwidget.html#200ee5">QWidget::show</a>(), and
-selects a suitable position and size if none has been specified yet.<p><b>Warning:</b> In Qt 2.x, calling show() on a modal dialog enters a local event
-loop, and work like <a href="#0beb1a">exec</a>(), but not returning the result code exec()
-returns. Trolltech has always warned against doing this.
-<p>In Qt 3.0 and later, calling show() on a modal dialog will return
-immediately, <em>not</em> enter a local event loop. The dialog will of
-course be modal.
-<p>See also  <a href="#0beb1a">exec</a>().
-<p>Examples:
- <a href="movies-main-cpp.html#show">movies/main.cpp</a>
-<p>Reimplemented from <a href="qwidget.html#200ee5">QWidget.</a>
-<h3 class="fn">void <a name="a1f41d"></a>QDialog::showExtension ( bool showIt ) <code>[protected slot]</code></h3>
-<p>Extends the dialog to show its extension if <em>showIt</em> is TRUE
-and hides it else.
-<p>This slot is usually connected to the <a href="qbutton.html#4069b1">QButton::toggled()</a> signal
-of a <a href="qpushbutton.html">QPushButton</a>.
-<p>If the dialog is not visible, nothing happens.
-<p>See also  <a href="#bfe29c">show</a>(), <a href="#e68e4c">setExtension</a>() and <a href="#aa7dae">setOrientation</a>().
-<h3 class="fn"><a href="qsize.html">QSize</a> <a name="864e60"></a>QDialog::sizeHint () const <code>[virtual]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qwidget.html#4511d1">QWidget.</a>
-<hr><p>
-Search the documentation, FAQ, qt-interest archive and more (uses
-<a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
-<form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.10"><nobr>
-<input size="50" name="search"><input type=submit value="Search">
-</nobr></form><hr><p>
-This file is part of the <a href="index.html">Qt toolkit</a>,
-copyright &copy; 1995-2005
-<a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+     findDialog-&gt;show();
+     findDialog-&gt;raise();
+     findDialog-&gt;activateWindow();
+ }</pre>
+<p>See also <a href="qdialogbuttonbox.html">QDialogButtonBox</a>, <a href="porting4.html#qtabdialog">QTabDialog</a>, <a href="qwidget.html">QWidget</a>, <a href="qprogressdialog.html">QProgressDialog</a>, <a href="guibooks.html#fowler">GUI Design Handbook: Dialogs, Standard</a>, Extension Example, and Standard Dialogs Example.</p>
+<hr />
+<h2>Member Type Documentation</h2>
+<h3 class="fn"><a name="DialogCode-enum"></a>enum QDialog::DialogCode</h3>
+<p>The value returned by a modal dialog.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="40%">
+<tr><th width="60%">Constant</th><th width="40%">Value</th></tr>
+<tr><td valign="top"><tt>QDialog::Accepted</tt></td><td align="center" valign="top"><tt>1</tt></td></tr>
+<tr><td valign="top"><tt>QDialog::Rejected</tt></td><td align="center" valign="top"><tt>0</tt></td></tr>
+</table></p>
+<hr />
+<h2>Property Documentation</h2>
+<h3 class="fn"><a name="modal-prop"></a>modal : bool</h3>
+<p>This property holds whether show() should pop up the dialog as modal or modeless.</p>
+<p>By default, this property is false and <a href="qwidget.html#show">show</a>() pops up the dialog as modeless. Setting his property to true is equivalent to setting <a href="qwidget.html#windowModality-prop">QWidget::windowModality</a> to <a href="qt.html#WindowModality-enum">Qt::ApplicationModal</a>.</p>
+<p><a href="qdialog.html#exec">exec</a>() ignores the value of this property and always pops up the dialog as modal.</p>
+<p>Access functions:</p>
+<ul>
+<li><div class="fn"/><b>bool <a href="qwidget.html#modal-prop">isModal</a> () const</b></li>
+<li><div class="fn"/><b>void setModal ( bool <i>modal</i> )</b></li>
+</ul>
+<p>See also <a href="qwidget.html#windowModality-prop">QWidget::windowModality</a>, <a href="qwidget.html#show">show</a>(), and <a href="qdialog.html#exec">exec</a>().</p>
+<h3 class="fn"><a name="sizeGripEnabled-prop"></a>sizeGripEnabled : bool</h3>
+<p>This property holds whether the size grip is enabled.</p>
+<p>A <a href="qsizegrip.html">QSizeGrip</a> is placed in the bottom-right corner of the dialog when this property is enabled. By default, the size grip is disabled.</p>
+<p>Access functions:</p>
+<ul>
+<li><div class="fn"/><b>bool isSizeGripEnabled () const</b></li>
+<li><div class="fn"/><b>void setSizeGripEnabled ( bool )</b></li>
+</ul>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QDialog"></a>QDialog::QDialog ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )</h3>
+<p>Constructs a dialog with parent <i>parent</i>.</p>
+<p>A dialog is always a top-level widget, but if it has a parent, its default location is centered on top of the parent. It will also share the parent's taskbar entry.</p>
+<p>The widget flags <i>f</i> are passed on to the <a href="qwidget.html">QWidget</a> constructor. If, for example, you don't want a What's This button in the title bar of the dialog, pass <a href="qt.html#WindowType-enum">Qt::WindowTitleHint</a> | <a href="qt.html#WindowType-enum">Qt::WindowSystemMenuHint</a> in <i>f</i>.</p>
+<p>See also <a href="qwidget.html#windowFlags-prop">QWidget::setWindowFlags</a>().</p>
+<h3 class="fn"><a name="dtor.QDialog"></a>QDialog::~QDialog ()</h3>
+<p>Destroys the <a href="qdialog.html">QDialog</a>, deleting all its children.</p>
+<h3 class="fn"><a name="accept"></a>void QDialog::accept ()&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<p>Hides the modal dialog and sets the result code to <tt>Accepted</tt>.</p>
+<p>See also <a href="qdialog.html#reject">reject</a>() and <a href="qdialog.html#done">done</a>().</p>
+<h3 class="fn"><a name="accepted"></a>void QDialog::accepted ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted when the dialog has been accepted either by the user or by calling <a href="qdialog.html#accept">accept</a>() or <a href="qdialog.html#done">done</a>() with the <a href="qdialog.html#DialogCode-enum">QDialog::Accepted</a> argument.</p>
+<p>Note that this signal is <i>not</i> emitted when hiding the dialog with <a href="qwidget.html#hide">hide</a>() or setVisible(false). This includes deleting the dialog while it is visible.</p>
+<p>This function was introduced in Qt 4.1.</p>
+<p>See also <a href="qdialog.html#finished">finished</a>() and <a href="qdialog.html#rejected">rejected</a>().</p>
+<h3 class="fn"><a name="done"></a>void QDialog::done ( int <i>r</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<p>Closes the dialog and sets its result code to <i>r</i>. If this dialog is shown with <a href="qdialog.html#exec">exec</a>(), done() causes the local event loop to finish, and <a href="qdialog.html#exec">exec</a>() to return <i>r</i>.</p>
+<p>As with <a href="qwidget.html#close">QWidget::close</a>(), done() deletes the dialog if the <a href="qt.html#WidgetAttribute-enum">Qt::WA_DeleteOnClose</a> flag is set. If the dialog is the application's main widget, the application terminates. If the dialog is the last window closed, the <a href="qapplication.html#lastWindowClosed">QApplication::lastWindowClosed</a>() signal is emitted.</p>
+<p>See also <a href="qdialog.html#accept">accept</a>(), <a href="qdialog.html#reject">reject</a>(), <a href="qapplication.html#activeWindow">QApplication::activeWindow</a>(), and <a href="qcoreapplication.html#quit">QApplication::quit</a>().</p>
+<h3 class="fn"><a name="exec"></a>int QDialog::exec ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Shows the dialog as a <a href="qdialog.html#modal-dialogs">modal dialog</a>, blocking until the user closes it. The function returns a <a href="qdialog.html#DialogCode-enum">DialogCode</a> result.</p>
+<p>Users cannot interact with any other window in the same application until they close the dialog.</p>
+<p>See also <a href="qwidget.html#show">show</a>() and <a href="qdialog.html#result">result</a>().</p>
+<h3 class="fn"><a name="finished"></a>void QDialog::finished ( int <i>result</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted when the dialog's <i>result</i> code has been set, either by the user or by calling <a href="qdialog.html#done">done</a>(), <a href="qdialog.html#accept">accept</a>(), or <a href="qdialog.html#reject">reject</a>().</p>
+<p>Note that this signal is <i>not</i> emitted when hiding the dialog with <a href="qwidget.html#hide">hide</a>() or setVisible(false). This includes deleting the dialog while it is visible.</p>
+<p>This function was introduced in Qt 4.1.</p>
+<p>See also <a href="qdialog.html#accepted">accepted</a>() and <a href="qdialog.html#rejected">rejected</a>().</p>
+<h3 class="fn"><a name="reject"></a>void QDialog::reject ()&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<p>Hides the modal dialog and sets the result code to <tt>Rejected</tt>.</p>
+<p>See also <a href="qdialog.html#accept">accept</a>() and <a href="qdialog.html#done">done</a>().</p>
+<h3 class="fn"><a name="rejected"></a>void QDialog::rejected ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted when the dialog has been rejected either by the user or by calling <a href="qdialog.html#reject">reject</a>() or <a href="qdialog.html#done">done</a>() with the <a href="qdialog.html#DialogCode-enum">QDialog::Rejected</a> argument.</p>
+<p>Note that this signal is <i>not</i> emitted when hiding the dialog with <a href="qwidget.html#hide">hide</a>() or setVisible(false). This includes deleting the dialog while it is visible.</p>
+<p>This function was introduced in Qt 4.1.</p>
+<p>See also <a href="qdialog.html#finished">finished</a>() and <a href="qdialog.html#accepted">accepted</a>().</p>
+<h3 class="fn"><a name="result"></a>int QDialog::result () const</h3>
+<p>Returns the modal dialog's result code, <tt>Accepted</tt> or <tt>Rejected</tt>.</p>
+<p>Do not call this function if the dialog was constructed with the <a href="qt.html#WidgetAttribute-enum">Qt::WA_DeleteOnClose</a> attribute.</p>
+<p>See also <a href="qdialog.html#setResult">setResult</a>().</p>
+<h3 class="fn"><a name="setResult"></a>void QDialog::setResult ( int <i>i</i> )</h3>
+<p>Sets the modal dialog's result code to <i>i</i>.</p>
+<p>See also <a href="qdialog.html#result">result</a>().</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QDialog-2"></a>QDialog::QDialog ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i>, bool <i>modal</i> = false, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )</h3>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

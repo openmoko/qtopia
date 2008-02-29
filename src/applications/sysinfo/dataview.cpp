@@ -1,37 +1,23 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "dataview.h"
 #include "graph.h"
@@ -40,16 +26,33 @@
 #include <qdir.h>
 #include <qlayout.h>
 #include <qtimer.h>
-#include <qtopia/applnk.h>
-#include <qtopia/storage.h>
-#include <qtopia/global.h>
+#include <QLabel>
+#include <qcontent.h>
+#include <qcontentset.h>
+#include <qstorage.h>
+
+#include <qtopianamespace.h>
 
 
-DataView::DataView( QWidget *parent, const char *name, WFlags f) 
-    : QWidget(parent, name, f)
+DataView::DataView( QWidget *parent, Qt::WFlags f)
+    : QWidget(parent, f), data(0)
 {
-    storage = new StorageInfo( this );
-    QVBoxLayout *vb = new QVBoxLayout(this, 7);
+    QTimer::singleShot(40, this, SLOT(init()));
+}
+
+DataView::~DataView()
+{
+    if(data)
+        delete data;
+}
+
+void DataView::init()
+{
+    storage = new QStorageMetaInfo( this );
+    QVBoxLayout *vb = new QVBoxLayout(this);
+
+    QLabel * desc = new QLabel( tr("Data Types"), this );
+    vb->addWidget( desc);
 
     data = new GraphData();
 
@@ -69,11 +72,6 @@ DataView::DataView( QWidget *parent, const char *name, WFlags f)
     startTimer( 5000 );
 }
 
-DataView::~DataView()
-{
-    delete data;
-}
-
 void DataView::timerEvent(QTimerEvent *)
 {
     if (isVisible()) {
@@ -84,41 +82,28 @@ void DataView::timerEvent(QTimerEvent *)
 
 void DataView::updateData()
 {
-    const FileSystem *fs;
-    fs = storage->fileSystemOf(Global::homeDirPath());
-    long av = 0, to = -1;
-    if (fs)
-        fileSystemMetrics(fs, &av, &to);
-    long total = to;
-    long avail = av;
-    
-    const QList<FileSystem>& filesystems(storage->fileSystems());
-    QListIterator<FileSystem> iter(filesystems);
-    
-    for ( ; iter.current(); ++iter )
-    {
-        long av = 0, to = 0;
-        if ((*iter)->isRemovable()) {
-            fileSystemMetrics(*iter, &av, &to);
-            total += to;
-            avail += av;
-        }
+    long av = 0;
+    long to = -1;
+    long total = 0;
+    long avail = 0;
+
+    QFileSystemFilter fsf;
+    fsf.documents = QFileSystemFilter::Set;
+    foreach ( QFileSystem *fs, storage->fileSystems(&fsf) ) {
+        fileSystemMetrics( fs, &av, &to );
+        total += to;
+        avail += av;
     }
 
     int mail = 0;
-    QString dirName = Global::homeDirPath() + "/Applications/qtmail";
+    QString dirName = Qtopia::homePath() + "/Applications/qtmail";
     QDir mailDir(dirName);
-    const QFileInfoList *list = mailDir.entryInfoList();
-    if (list) {
-        QFileInfo * info;
-        QFileInfoListIterator it(*list);
-        while ((info = it.current())) {
-            mail += info->size()/1024;
-            ++it;
-        }
+    const QFileInfoList list = mailDir.entryInfoList();
+    foreach( const QFileInfo &info, list ){
+        mail += info.size()/1024;
     }
-   
-    QString filter = "image/*"; 
+
+    QString filter = "image/*";
     int images = documentSize(filter);
     filter = "audio/*";
     int audio = documentSize(filter);
@@ -126,22 +111,22 @@ void DataView::updateData()
     int video = documentSize(filter);
     filter = "text/*";
     int txt = documentSize(filter);
-    
+
     data->clear();
 
     QString unitKB = tr("kB"," short for kilobyte");
     QString unitMB = tr("MB", "short for megabyte");
-    
-    if (audio < 10240) 
+
+    if (audio < 10240)
         data->addItem(tr("Audio (%1 %2)").arg(audio).arg(unitKB), audio);
     else
         data->addItem(tr("Audio (%1 %2)").arg(audio/1024).arg(unitMB), audio);
-    
-    if (images < 10240) 
+
+    if (images < 10240)
         data->addItem(tr("Images (%1 %2)").arg(images).arg(unitKB), images);
     else
         data->addItem(tr("Images (%1 %2)").arg(images/1024).arg(unitMB), images);
-    
+
     if (mail < 10240)
         data->addItem(tr("Mailbox (%1 %2)").arg(mail).arg(unitKB), mail);
     else
@@ -151,7 +136,7 @@ void DataView::updateData()
         data->addItem(tr("Text (%1 %2)").arg(txt).arg(unitKB),txt);
     else
         data->addItem(tr("Text (%1 %2)").arg(txt/1024).arg(unitMB),txt);
-    
+
     if (video < 1024)
         data->addItem(tr("Video (%1 %2)").arg(video).arg(unitKB), video);
     else
@@ -162,30 +147,25 @@ void DataView::updateData()
             data->addItem(tr("Free (%1 %2)").arg(avail).arg(unitKB), avail);
         else
             data->addItem(tr("Free (%1 %2)").arg(avail/1024).arg(unitMB), avail);
-            
 
-    graph->repaint( FALSE );
+    graph->update();
     legend->update();
 }
 
-int DataView::documentSize(QString filter) 
+int DataView::documentSize(QString& filter)
 {
-    DocLnk *dl;
-    DocLnkSet allDocs;
-    Global::findDocuments( &allDocs, filter );
-    const QList<DocLnk> list = allDocs.children();
-    QListIterator<DocLnk> it(list);
-
     uint sum = 0;
-    while ((dl=it.current())) {
-        sum += QFileInfo(dl->file()).size()/1024;
-        ++it;
+    QContentSet allDocs(QContentFilter::MimeType, filter);
+    QList<QContent> list = allDocs.items();
+
+    foreach(const QContent &dl, list ) {
+        sum += QFileInfo(dl.file()).size()/1024;
     }
 
     return sum;
 }
 
-void DataView::fileSystemMetrics(const FileSystem *fs, long *avail, long *total)
+void DataView::fileSystemMetrics(const QFileSystem *fs, long *avail, long *total)
 {
     long mult = 0;
     long div = 0;

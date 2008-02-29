@@ -1,21 +1,23 @@
-CONFIG		+= qtopiaapp
+qtopia_project(qtopia app)
+TARGET=minesweep
+CONFIG+=qtopia_main no_quicklaunch
 
 HEADERS		= minefield.h \
-		  minesweep.h
+                  minesweep.h
 SOURCES		= minefield.cpp \
 		  minesweep.cpp \
 		  main.cpp
 
-TRANSLATABLES = $${SOURCES} $${HEADERS}
-                  
-TARGET		= minesweep
-
-
-help.files=$${QTOPIA_DEPOT_PATH}/help/html/minesweep.html
-help.path=/help/html
-desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Games/minesweep.desktop
+help.source=$$QTOPIA_DEPOT_PATH/help
+help.files=minesweep.html
+help.hint=help
+desktop.files=$$QTOPIA_DEPOT_PATH/apps/Games/minesweep.desktop
 desktop.path=/apps/Games
-pics.files=$${QTOPIA_DEPOT_PATH}/pics/minesweep/*
+desktop.hint=desktop
+pics.files=$$QTOPIA_DEPOT_PATH/pics/minesweep/*
 pics.path=/pics/minesweep
-INSTALLS+=desktop help
-PICS_INSTALLS+=pics
+pics.hint=pics
+INSTALLS+=help desktop pics
+
+pkg.description=A minesweeper game for Qtopia
+pkg.domain=window,games

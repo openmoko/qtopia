@@ -1,6 +1,7 @@
+[Translation]
+File=QtopiaPlugins
+Context=Input Methods
 [Desktop Entry]
-Name=Handwriting
-Comment=Natural handwriting input.
-Name[ja]=手書き
-Comment[ja]=自然な手書き入力
+Name[]=Handwriting
+Comment[]=Natural handwriting input.
 X-QPE-Library=libqhandwriting.so

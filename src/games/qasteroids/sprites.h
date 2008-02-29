@@ -1,37 +1,16 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** $TROLLTECH_DUAL_LICENSE$
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
-**********************************************************************/
+****************************************************************************/
+
 /*
  * KAsteroids - Copyright (c) Martin R. Jones 1997
  *
@@ -41,15 +20,31 @@
 #ifndef __SPRITES_H__
 #define __SPRITES_H__
 
-#include <qcanvas.h>
+#include <QGraphicsPixmapItem>
 
+#define ID_Base             QGraphicsItem::UserType
+#define ID_ROCK_LARGE       ID_Base + 1024
+#define ID_ROCK_MEDIUM      ID_Base + 1025
+#define ID_ROCK_SMALL       ID_Base + 1026
+#define ID_MISSILE          ID_Base + 1030
+#define ID_FRAGMENT         ID_Base + 1040
+#define ID_EXHAUST          ID_Base + 1041
+#define ID_ENERGY_POWERUP   ID_Base + 1310
+#define ID_TELEPORT_POWERUP ID_Base + 1311
+#define ID_BRAKE_POWERUP    ID_Base + 1312
+#define ID_SHIELD_POWERUP   ID_Base + 1313
+#define ID_SHOOT_POWERUP    ID_Base + 1314
+#define ID_SHIP             ID_Base + 1350
+#define ID_SHIELD           ID_Base + 1351
+
+#if 0
 #define ID_ROCK_LARGE           1024
 #define ID_ROCK_MEDIUM          1025
 #define ID_ROCK_SMALL           1026
 
 #define ID_MISSILE              1030
 
-#define ID_BIT                  1040
+#define ID_FRAGMENT             1040
 #define ID_EXHAUST              1041
 
 #define ID_ENERGY_POWERUP       1310
@@ -60,106 +55,146 @@
 
 #define ID_SHIP                 1350
 #define ID_SHIELD               1351
+#endif
 
 #define MAX_SHIELD_AGE          350
 #define MAX_POWERUP_AGE         500
-#define MAX_MISSILE_AGE         18
+#define EXPIRED_POWERUP         MAX_POWERUP_AGE+1
+#define MAX_MISSILE_AGE         25
 
-class KMissile : public QCanvasSprite
+class MyAnimation : public QGraphicsPixmapItem
 {
-public:
-    KMissile( QCanvasPixmapArray *s, QCanvas *c ) : QCanvasSprite( s, c )
-        { myAge = 0; dieAge = MAX_MISSILE_AGE; }
+ public:
+    MyAnimation(QList<QPixmap>* animation, QGraphicsScene* scene);
+    virtual ~MyAnimation();
+    virtual void incrementAge() { }
+    virtual bool isExpired() const { return false; }
+    virtual void setMaximumAge(int ) { }
+    virtual void advance(int phase);
+    virtual void advanceImage();
 
-    virtual int rtti() const { return ID_MISSILE; }
+    int currentImage() const { return current_image_; }
+    int imageCount() const { return images_->size(); }
+    void setImage(int index);
+    void resetImage();
+    void setVelocity(qreal vx, qreal vy) {
+        velocity_x_ = vx;
+        velocity_y_ = vy;
+    }
+    qreal velocityX() const { return velocity_x_; }
+    qreal velocityY() const { return velocity_y_; }
+    void wrap();
 
-    void growOlder() { myAge++; }
-    bool expired() { return myAge > dieAge; }
-    void setExpiry(int a) { dieAge = a; }
-
-private:
-    int myAge;
-    int dieAge;
+ private:
+    int current_image_;
+    QList<QPixmap>* images_;
+    qreal velocity_x_;
+    qreal velocity_y_;
 };
 
-class KBit : public QCanvasSprite
+class KMissile : public MyAnimation
 {
-public:
-    KBit( QCanvasPixmapArray *s, QCanvas *c ) : QCanvasSprite( s, c )
-	{  death = 7; }
+ public:
+    KMissile(QList<QPixmap>* s, QGraphicsScene* c)
+        : MyAnimation(s,c)
+        { currentAge_ = 0; maximumAge_ = MAX_MISSILE_AGE; }
 
-    virtual int rtti() const {  return ID_BIT; }
+    virtual int type() const { return ID_MISSILE; }
+    virtual void incrementAge() { currentAge_++; }
+    virtual bool isExpired() const { return currentAge_ > maximumAge_; }
+    virtual void setMaximumAge(int age) { maximumAge_ = age; }
 
-    void setDeath( int d ) { death = d; }
-    void growOlder() { death--; }
-    bool expired() { return death <= 0; }
-
-private:
-    int death;
+ private:
+    int currentAge_;
+    int maximumAge_;
 };
 
-class KExhaust : public QCanvasSprite
+class KFragment : public MyAnimation
 {
-public:
-    KExhaust( QCanvasPixmapArray *s, QCanvas *c ) : QCanvasSprite( s, c )
-	{  death = 1; }
+ public:
+    KFragment(QList<QPixmap>* s, QGraphicsScene* c)
+        : MyAnimation(s,c) {  maximumAge_ = 7; }
 
-    virtual int rtti() const {  return ID_EXHAUST; }
+    virtual int type() const {  return ID_FRAGMENT; }
+    virtual void incrementAge() { maximumAge_--; }
+    virtual bool isExpired() const { return maximumAge_ <= 0; }
+    virtual void setMaximumAge( int age ) { maximumAge_ = age; }
 
-    void setDeath( int d ) { death = d; }
-    void growOlder() { death--; }
-    bool expired() { return death <= 0; }
-
-private:
-    int death;
+ private:
+    int maximumAge_;
 };
 
-class KPowerup : public QCanvasSprite
+class KExhaust : public MyAnimation
 {
-public:
-  KPowerup( QCanvasPixmapArray *s, QCanvas *c, int t ) : QCanvasSprite( s, c ),
-        myAge( 0 ), type(t) { }
+ public:
+    KExhaust( QList<QPixmap> *s, QGraphicsScene *c )
+        : MyAnimation( s, c )
+        {  maximumAge_ = 1; }
 
-  virtual int rtti() const { return type; }
+    virtual int type() const {  return ID_EXHAUST; }
+    virtual void incrementAge() { maximumAge_--; }
+    virtual bool isExpired() const { return maximumAge_ <= 0; }
+    virtual void setMaximumAge(int age) { maximumAge_ = age; }
 
-  void growOlder() { myAge++; }
-  bool expired() const { return myAge > MAX_POWERUP_AGE; }
-
-protected:
-  int myAge;
-  int type;
+ private:
+    int maximumAge_;
 };
 
-class KRock : public QCanvasSprite
+class KPowerup : public MyAnimation
 {
-public:
-    KRock (QCanvasPixmapArray *s, QCanvas *c, int t, int sk, int st) : QCanvasSprite( s, c )
-        { type = t; skip = cskip = sk; step = st; }
+ public:
+    KPowerup(QList<QPixmap>* s, QGraphicsScene* c, int t);
+    ~KPowerup() { decrementCount(); }
 
-    void nextFrame()
-	{
-	    if (cskip-- <= 0) {
-		setFrame( (frame()+step+frameCount())%frameCount() );
-		cskip = QABS(skip);
-	    }
-	}
+  virtual int type() const { return type_; }
+  virtual void incrementAge() { currentAge_++; }
+  virtual bool isExpired() const { return currentAge_ > MAX_POWERUP_AGE; }
 
-    virtual int rtti() const { return type; }
+  void expire() { currentAge_ = EXPIRED_POWERUP; }
 
-private:
-    int type;
+  static void clearCounts();
+  static bool quotaFilled(int type);
+
+ private:
+  void incrementCount();
+  void decrementCount();
+
+ protected:
+  static int    energy_powerups_;
+  static int    teleport_powerups_;
+  static int    brake_powerups_;
+  static int    shield_powerups_;
+  static int    shoot_powerups_;
+
+ protected:
+  int           currentAge_;
+  int           type_;
+};
+
+class KRock : public MyAnimation
+{
+ public:
+    KRock (QList<QPixmap>* s, QGraphicsScene* c, int t, int sk, int st)
+        : MyAnimation(s,c)
+        { type_ = t; skip = cskip = sk; step = st; }
+
+    virtual void advanceImage();
+    virtual int type() const { return type_; }
+
+ private:
+    int type_;
     int skip;
     int cskip;
     int step;
 };
 
-class KShield : public QCanvasSprite
+class KShield : public MyAnimation
 {
-public:
-  KShield( QCanvasPixmapArray *s, QCanvas *c )
-      : QCanvasSprite( s, c ) {}
+ public:
+  KShield(QList<QPixmap>* s, QGraphicsScene* c)
+      : MyAnimation(s,c) { }
 
-  virtual int rtti() const { return ID_SHIELD; }
+  virtual int type() const { return ID_SHIELD; }
 };
 
 #endif

@@ -1,287 +1,233 @@
-<!DOCTYPE UI><UI>
-<class>SecurityBase</class>
-<widget>
-    <class>QWidget</class>
-    <property stdset="1">
-        <name>name</name>
-        <cstring>SecurityBase</cstring>
+<ui version="4.0" stdsetdef="1" >
+  <author></author>
+  <comment></comment>
+  <exportmacro></exportmacro>
+  <class>SecurityBase</class>
+  <widget class="QWidget" name="SecurityBase" >
+    <property name="objectName" >
+      <string notr="true" >SecurityBase</string>
     </property>
-    <property stdset="1">
-        <name>geometry</name>
-        <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>268</width>
-            <height>388</height>
-        </rect>
+    <property name="geometry" >
+      <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>268</width>
+        <height>388</height>
+      </rect>
     </property>
-    <property stdset="1">
-        <name>caption</name>
-        <string>Security</string>
+    <property name="windowTitle" >
+      <string>Security</string>
     </property>
-    <property>
-        <name>layoutMargin</name>
-    </property>
-    <property>
-        <name>layoutSpacing</name>
-    </property>
-    <vbox>
-        <property stdset="1">
-            <name>margin</name>
-            <number>0</number>
-        </property>
-        <property stdset="1">
-            <name>spacing</name>
-            <number>0</number>
-        </property>
-        <widget>
-            <class>QTabWidget</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>TabWidget2</cstring>
+    <layout class="QVBoxLayout" >
+      <property name="margin" >
+        <number>0</number>
+      </property>
+      <property name="spacing" >
+        <number>0</number>
+      </property>
+      <item>
+        <widget class="QTabWidget" name="TabWidget2" >
+          <property name="objectName" >
+            <string notr="true" >TabWidget2</string>
+          </property>
+          <widget class="QWidget" name="tab" >
+            <property name="objectName" >
+              <string notr="true" >tab</string>
             </property>
-            <property>
-                <name>layoutMargin</name>
+            <attribute name="title" >
+              <string>Locks</string>
+            </attribute>
+            <layout class="QVBoxLayout" >
+              <property name="margin" >
+                <number>6</number>
+              </property>
+              <property name="spacing" >
+                <number>6</number>
+              </property>
+              <item>
+                <widget class="QComboBox" name="pinSelection" >
+                  <property name="objectName" >
+                    <string notr="true" >pinSelection</string>
+                  </property>
+                  <item>
+                    <property name="text" >
+                      <string>SIM Lock</string>
+                    </property>
+                  </item>
+                  <item>
+                    <property name="text" >
+                      <string>Phone Lock</string>
+                    </property>
+                  </item>
+                </widget>
+              </item>
+              <item>
+                <widget class="QFrame" name="Frame3" >
+                  <property name="objectName" >
+                    <string notr="true" >Frame3</string>
+                  </property>
+                  <property name="frameShape" >
+                    <enum>StyledPanel</enum>
+                  </property>
+                  <property name="frameShadow" >
+                    <enum>Raised</enum>
+                  </property>
+                  <layout class="QGridLayout" >
+                    <property name="margin" >
+                      <number>6</number>
+                    </property>
+                    <property name="spacing" >
+                      <number>6</number>
+                    </property>
+                    <item row="2" column="1" >
+                      <spacer name="Spacer1" >
+                        <property name="sizeHint" >
+                          <size>
+                            <width>20</width>
+                            <height>20</height>
+                          </size>
+                        </property>
+                        <property name="sizeType" >
+                          <enum>Expanding</enum>
+                        </property>
+                        <property name="orientation" >
+                          <enum>Vertical</enum>
+                        </property>
+                      </spacer>
+                    </item>
+                    <item row="0" column="0" >
+                      <widget class="QPushButton" name="changepasscode" >
+                        <property name="objectName" >
+                          <string notr="true" >changepasscode</string>
+                        </property>
+                        <property name="text" >
+                          <string>Change</string>
+                        </property>
+                      </widget>
+                    </item>
+                    <item row="0" column="1" >
+                      <widget class="QPushButton" name="clearpasscode" >
+                        <property name="objectName" >
+                          <string notr="true" >clearpasscode</string>
+                        </property>
+                        <property name="text" >
+                          <string>Clear</string>
+                        </property>
+                      </widget>
+                    </item>
+                    <item rowspan="1" row="1" column="0" colspan="2" >
+                      <widget class="QCheckBox" name="passcode_poweron" >
+                        <property name="objectName" >
+                          <string notr="true" >passcode_poweron</string>
+                        </property>
+                        <property name="text" >
+                          <string>Protection On</string>
+                        </property>
+                        <property name="whatsThis" >
+                          <string>Pass code protection provides a minimal level of protection from casual access to this device.</string>
+                        </property>
+                      </widget>
+                    </item>
+                  </layout>
+                </widget>
+              </item>
+            </layout>
+          </widget>
+          <widget class="QWidget" name="tab" >
+            <property name="objectName" >
+              <string notr="true" >tab</string>
             </property>
-            <widget>
-                <class>QWidget</class>
-                <property stdset="1">
-                    <name>name</name>
-                    <cstring>tab</cstring>
-                </property>
-                <attribute>
-                    <name>title</name>
-                    <string>Locks</string>
-                </attribute>
-                <vbox>
-                    <property stdset="1">
-                        <name>margin</name>
-                        <number>6</number>
+            <attribute name="title" >
+              <string>Sync</string>
+            </attribute>
+            <layout class="QVBoxLayout" >
+              <property name="margin" >
+                <number>6</number>
+              </property>
+              <property name="spacing" >
+                <number>6</number>
+              </property>
+              <item>
+                <widget class="QLabel" name="TextLabel1_2" >
+                  <property name="objectName" >
+                    <string notr="true" >TextLabel1_2</string>
+                  </property>
+                  <property name="text" >
+                    <string>Accept sync from network:</string>
+                  </property>
+                  <property name="textFormat" >
+                    <enum>Qt::RichText</enum>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QComboBox" name="syncnet" >
+                  <property name="objectName" >
+                    <string notr="true" >syncnet</string>
+                  </property>
+                  <property name="editable" >
+                    <bool>true</bool>
+                  </property>
+                  <item>
+                    <property name="text" >
+                      <string>192.168.129.0/24 (default)</string>
                     </property>
-                    <property stdset="1">
-                        <name>spacing</name>
-                        <number>6</number>
+                  </item>
+                  <item>
+                    <property name="text" >
+                      <string>192.168.0.0/16</string>
                     </property>
-                    <widget>
-                        <class>QComboBox</class>
-                        <item>
-                            <property>
-                                <name>text</name>
-                                <string>SIM Lock</string>
-                            </property>
-                        </item>
-                        <item>
-                            <property>
-                                <name>text</name>
-                                <string>Phone Lock</string>
-                            </property>
-                        </item>
-                        <property stdset="1">
-                            <name>name</name>
-                            <cstring>pinSelection</cstring>
-                        </property>
-                    </widget>
-                    <widget>
-                        <class>QFrame</class>
-                        <property stdset="1">
-                            <name>name</name>
-                            <cstring>Frame3</cstring>
-                        </property>
-                        <property stdset="1">
-                            <name>frameShape</name>
-                            <enum>StyledPanel</enum>
-                        </property>
-                        <property stdset="1">
-                            <name>frameShadow</name>
-                            <enum>Raised</enum>
-                        </property>
-                        <property>
-                            <name>layoutMargin</name>
-                        </property>
-                        <grid>
-                            <property stdset="1">
-                                <name>margin</name>
-                                <number>6</number>
-                            </property>
-                            <property stdset="1">
-                                <name>spacing</name>
-                                <number>6</number>
-                            </property>
-                            <spacer row="2"  column="1" >
-                                <property>
-                                    <name>name</name>
-                                    <cstring>Spacer1</cstring>
-                                </property>
-                                <property stdset="1">
-                                    <name>orientation</name>
-                                    <enum>Vertical</enum>
-                                </property>
-                                <property stdset="1">
-                                    <name>sizeType</name>
-                                    <enum>Expanding</enum>
-                                </property>
-                                <property>
-                                    <name>sizeHint</name>
-                                    <size>
-                                        <width>20</width>
-                                        <height>20</height>
-                                    </size>
-                                </property>
-                            </spacer>
-                            <widget row="0"  column="0" >
-                                <class>QPushButton</class>
-                                <property stdset="1">
-                                    <name>name</name>
-                                    <cstring>changepasscode</cstring>
-                                </property>
-                                <property stdset="1">
-                                    <name>text</name>
-                                    <string>Change</string>
-                                </property>
-                            </widget>
-                            <widget row="0"  column="1" >
-                                <class>QPushButton</class>
-                                <property stdset="1">
-                                    <name>name</name>
-                                    <cstring>clearpasscode</cstring>
-                                </property>
-                                <property stdset="1">
-                                    <name>text</name>
-                                    <string>Clear</string>
-                                </property>
-                            </widget>
-                            <widget row="1"  column="0"  rowspan="1"  colspan="2" >
-                                <class>QCheckBox</class>
-                                <property stdset="1">
-                                    <name>name</name>
-                                    <cstring>passcode_poweron</cstring>
-                                </property>
-                                <property stdset="1">
-                                    <name>text</name>
-                                    <string>Protection On</string>
-                                </property>
-                                <property>
-                                    <name>whatsThis</name>
-                                    <string>Pass code protection provides a minimal level of protection from casual access to this device.</string>
-                                </property>
-                            </widget>
-                        </grid>
-                    </widget>
-                </vbox>
-            </widget>
-            <widget>
-                <class>QWidget</class>
-                <property stdset="1">
-                    <name>name</name>
-                    <cstring>tab</cstring>
-                </property>
-                <attribute>
-                    <name>title</name>
-                    <string>Sync</string>
-                </attribute>
-                <vbox>
-                    <property stdset="1">
-                        <name>margin</name>
-                        <number>6</number>
+                  </item>
+                  <item>
+                    <property name="text" >
+                      <string>172.16.0.0/12</string>
                     </property>
-                    <property stdset="1">
-                        <name>spacing</name>
-                        <number>6</number>
+                  </item>
+                  <item>
+                    <property name="text" >
+                      <string>10.0.0.0/8</string>
                     </property>
-                    <widget>
-                        <class>QLabel</class>
-                        <property stdset="1">
-                            <name>name</name>
-                            <cstring>TextLabel1_2</cstring>
-                        </property>
-                        <property stdset="1">
-                            <name>text</name>
-                            <string>Accept sync from network:</string>
-                        </property>
-                        <property stdset="1">
-                            <name>textFormat</name>
-                            <enum>RichText</enum>
-                        </property>
-                    </widget>
-                    <widget>
-                        <class>QComboBox</class>
-                        <item>
-                            <property>
-                                <name>text</name>
-                                <string>192.168.129.0/24 (default)</string>
-                            </property>
-                        </item>
-                        <item>
-                            <property>
-                                <name>text</name>
-                                <string>192.168.0.0/16</string>
-                            </property>
-                        </item>
-                        <item>
-                            <property>
-                                <name>text</name>
-                                <string>172.16.0.0/12</string>
-                            </property>
-                        </item>
-                        <item>
-                            <property>
-                                <name>text</name>
-                                <string>10.0.0.0/8</string>
-                            </property>
-                        </item>
-                        <item>
-                            <property>
-                                <name>text</name>
-                                <string>Any</string>
-                            </property>
-                        </item>
-                        <item>
-                            <property>
-                                <name>text</name>
-                                <string>None</string>
-                            </property>
-                        </item>
-                        <property stdset="1">
-                            <name>name</name>
-                            <cstring>syncnet</cstring>
-                        </property>
-                        <property stdset="1">
-                            <name>editable</name>
-                            <bool>true</bool>
-                        </property>
-                    </widget>
-                    <spacer>
-                        <property>
-                            <name>name</name>
-                            <cstring>Spacer2</cstring>
-                        </property>
-                        <property stdset="1">
-                            <name>orientation</name>
-                            <enum>Vertical</enum>
-                        </property>
-                        <property stdset="1">
-                            <name>sizeType</name>
-                            <enum>Expanding</enum>
-                        </property>
-                        <property>
-                            <name>sizeHint</name>
-                            <size>
-                                <width>20</width>
-                                <height>20</height>
-                            </size>
-                        </property>
-                    </spacer>
-                </vbox>
-            </widget>
+                  </item>
+                  <item>
+                    <property name="text" >
+                      <string>Any</string>
+                    </property>
+                  </item>
+                  <item>
+                    <property name="text" >
+                      <string>None</string>
+                    </property>
+                  </item>
+                </widget>
+              </item>
+              <item>
+                <spacer name="Spacer2" >
+                  <property name="sizeHint" >
+                    <size>
+                      <width>20</width>
+                      <height>20</height>
+                    </size>
+                  </property>
+                  <property name="sizeType" >
+                    <enum>Expanding</enum>
+                  </property>
+                  <property name="orientation" >
+                    <enum>Vertical</enum>
+                  </property>
+                </spacer>
+              </item>
+            </layout>
+          </widget>
         </widget>
-    </vbox>
-</widget>
-<tabstops>
+      </item>
+    </layout>
+  </widget>
+  <tabstops>
     <tabstop>TabWidget2</tabstop>
     <tabstop>pinSelection</tabstop>
     <tabstop>changepasscode</tabstop>
     <tabstop>clearpasscode</tabstop>
     <tabstop>passcode_poweron</tabstop>
     <tabstop>syncnet</tabstop>
-</tabstops>
-</UI>
+  </tabstops>
+</ui>

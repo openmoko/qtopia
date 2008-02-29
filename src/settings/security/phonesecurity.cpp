@@ -1,37 +1,23 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "phonesecurity.h"
 
@@ -53,60 +39,62 @@
 */
 
 // combo item to phone lock kind map.
-PhoneLine::QueryType lockKind[] = {
-    PhoneLine::LockSimCard,
-    PhoneLine::LockPhoneToSimCard
-};
-
-PhoneLine::QueryType changeKind[] = {
-    PhoneLine::ChangeLockSimCardPassword,
-    PhoneLine::ChangeLockPhoneToSimCardPassword
+static const char * const lockKind[] = {
+    "SIM PIN",
+    "PH-SIM PIN"
 };
 
 PhoneSecurity::PhoneSecurity(QObject * parent) :
     QObject(parent),
     locktype(0)
 {
-    line = new PhoneLine(QString::null, this);
-    connect(line, SIGNAL(notification(PhoneLine::QueryType, const QString &)),
-	    this, SLOT(handleNotification(PhoneLine::QueryType, const QString &)));
-    connect(line, SIGNAL(queryResult(PhoneLine::QueryType, const QString &)),
-	    this, SLOT(handleQueryResult(PhoneLine::QueryType, const QString &)));
-}
-
-void PhoneSecurity::handleNotification(PhoneLine::QueryType t, const QString &v)
-{
-    if ( t == changeKind[0] || t == changeKind[1] ) {
-	emit changed(v=="OK");
-    } else if ( t == lockKind[0] || t == lockKind[1] ) {
-	emit locked(v=="OK");
-    }
+    pinManager = new QPinManager(QString(), this );
+    connect( pinManager, SIGNAL(lockStatus(QString,bool)),
+             this, SLOT(lockStatus(QString,bool)) );
+    connect( pinManager, SIGNAL(setLockStatusResult(QString,bool)),
+             this, SLOT(setLockStatusResult(QString,bool)) );
+    connect( pinManager, SIGNAL(changePinResult(QString,bool)),
+             this, SLOT(changePinResult(QString,bool)) );
 }
 
 void PhoneSecurity::setLockType(int t)
 {
     locktype = t;
-    line->query(lockKind[t]);
+    pinManager->requestLockStatus(lockKind[t]);
 }
 
-void PhoneSecurity::handleQueryResult(PhoneLine::QueryType t, const QString &v)
+void PhoneSecurity::lockStatus(const QString& type, bool enabled )
 {
-    if ( t == lockKind[locktype] ) {
-	emit lockDone(v=="1");
+    if ( type == lockKind[locktype] ) {
+        emit lockDone(enabled);
+    }
+}
+
+void PhoneSecurity::setLockStatusResult(const QString& type, bool valid )
+{
+    if ( type == lockKind[0] || type == lockKind[1] ) {
+        emit locked(valid);
+    }
+}
+
+void PhoneSecurity::changePinResult(const QString& type, bool valid )
+{
+    if ( type == lockKind[0] || type == lockKind[1] ) {
+        emit changed(valid);
     }
 }
 
 void PhoneSecurity::markProtected(int t, bool b, const QString& pw)
 {
     locktype = t;
-    line->modify(lockKind[t], (b ? "1,\"" : "0,\"")+pw+"\""); // No tr
-    line->query(lockKind[t]);
+    pinManager->setLockStatus(lockKind[t], pw, b);
+    pinManager->requestLockStatus(lockKind[t]);
 }
 
 void PhoneSecurity::changePassword(int t, const QString& old, const QString& new2)
 {
     locktype = t;
-    line->modify(changeKind[t], PhoneLine::formatChangePassword(old, new2));
+    pinManager->changePin(lockKind[t], old, new2 );
 }
 
 

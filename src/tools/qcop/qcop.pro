@@ -1,16 +1,14 @@
-TEMPLATE	= app
-DESTDIR		= $$(QPEDIR)/bin
-
-CONFIG		+= qtopialib
+qtopia_project(qtopia core app)
+TARGET=qcop
+CONFIG+=no_tr singleexec_main
 
 HEADERS		= qcopimpl.h
 SOURCES		= main.cpp qcopimpl.cpp 
 
-target.path     = /bin
-INSTALLS        += target
-TARGET		= qcop
+enable_singleexec {
+    INCLUDEPATH+=$$QPEDIR/include/qtopia
+}
 
-PACKAGE_DESCRIPTION=Interprocess communication client for the Qtopia environment.
-PACKAGE_DEPEND+=qt-embedded (>=$${QTE_VERSION})
-
-TRANSLATIONS=
+pkg.desc=Interprocess communication client for Qtopia.
+#pkg.domain=comm
+pkg.domain=base

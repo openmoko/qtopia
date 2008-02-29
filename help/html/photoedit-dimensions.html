@@ -1,17 +1,20 @@
-<qt title="Picture Cropping">
+<html>
+<head><title>Picture Cropping</title></head>
+<body>
 <h3>Picture Cropping</h3>
 <p>You can trim the image with this operation.</p>
-%%PDA%%
-<p><img src="cut"> <b>To crop:</b> tap the icon and use the stylus to draw a rectangle over the area you want to keep. You can continue to draw until you are happy with the rectangle. To crop tap inside the rectangle. To cancel tap outside the rectangle.
+<!--#if expr="$PDASTYLE"-->
+<p><img src=":icon/cut"> </img> <b>To crop:</b> tap the icon and use the stylus to draw a rectangle over the area you want to keep. You can continue to draw until you are happy with the rectangle. To crop tap inside the rectangle. To cancel tap outside the rectangle.
 </p>
-@@PDA@@
-%%PHONE%%
-<p><b>To crop:</b> Press <img src="contextbar/options.png"> and select <img src="cut">. 
-@@PHONE@@
-%%TOUCH%%
+<!--#endif-->
+<!--#if expr="$PHONESTYLE"-->
+<p><b>To crop:</b> Press <img src=":icon/options"> </img> and select <img src=":icon/cut">.
+<!--#endif-->
+<!--#if expr="$TOUCH"-->
 Use the stylus to draw a rectangle over the area you want to keep. You can continue to draw until you are happy with the rectangle. To crop tap inside the rectangle. To cancel tap outside the rectangle.
-@@TOUCH@@
-%%KEYPAD%%
-Use the <img src="help/dpad"> to position the rectangle over the area you want to keep. To resize the rectangle press <img src="photoedit/resize.png"> and use the <img src="help/dpad"> to adjust the size. You can switch between moving and resizing by pressing <img src="photoedit/move.png"> and <img src="photoedit/resize.png">. To crop press <img src="contextbar/select.png">. To cancel press <img src="contextbar/cancel.png">.
-@@KEYPAD@@
-</qt>
+<!--#endif-->
+<!--#if expr="$KEYPAD"-->
+Use the <img src=":image/help/dpad"> </img> to position the rectangle over the area you want to keep. To resize the rectangle press <img src=":image/photoedit/resize"> </img> and use the <img src=":image/help/dpad"> </img> to adjust the size. You can switch between moving and resizing by pressing <img src=":image/photoedit/move"> </img> and <img src=":image/photoedit/resize">. To crop press <img src=":icon/select">. To cancel press <img src=":icon/cancel">.
+<!--#endif-->
+</body>
+</html>

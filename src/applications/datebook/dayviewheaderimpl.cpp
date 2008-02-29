@@ -1,70 +1,55 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 #include "dayviewheaderimpl.h"
 
-#include <qtopia/datetimeedit.h>
-#include <qtopia/resource.h>
-#include <qtopia/timestring.h>
+#include <qtimestring.h>
 
-#include <qbuttongroup.h>
-#include <qpopupmenu.h>
 #include <qstringlist.h>
 #include <qtimer.h>
 #include <qtoolbutton.h>
 #include <qdatetime.h>
 #include <qtimer.h>
 #include <qlayout.h>
+#include <QFrame>
+#include <QButtonGroup>
+#include <QDateTimeEdit>
 
 /*
  *  Constructs a DateBookDayHeader which is a child of 'parent', with the
  *  name 'name' and widget flags set to 'f'
  *
  *  The dialog will by default be modeless, unless you set 'modal' to
- *  TRUE to construct a modal dialog.
+ *  true to construct a modal dialog.
  */
-DayViewHeader::DayViewHeader( bool useMonday, QWidget* parent, const char *name )
-    : QWidget( parent, name ),
+DayViewHeader::DayViewHeader( bool useMonday, QWidget* parent )
+    : QWidget( parent ),
     bUseMonday( useMonday )
 {
     init();
 
-    setBackgroundMode( PaletteButton );
-    grpDays->setBackgroundMode( PaletteButton );
+    setBackgroundRole( QPalette::Button );
+    fraDays->setBackgroundRole( QPalette::Button );
 
     dButton->setDate( currDate );
-    connect(dButton,SIGNAL(valueChanged(const QDate&)),this,SIGNAL(dateChanged(const QDate&)));
+    connect(dButton,SIGNAL(dateChanged(const QDate&)),this,SIGNAL(dateChanged(const QDate&)));
 }
 
 /*
@@ -77,54 +62,55 @@ DayViewHeader::~DayViewHeader()
 
 void DayViewHeader::init()
 {
-    
+
     back = new QToolButton(this);
-    back->setIconSet(Resource::loadIconSet("back"));
-    back->setAutoRepeat( TRUE );
-    back->setAutoRaise( TRUE );
+    back->setIcon(QIcon(":icon/i18n/previous"));
+    back->setAutoRepeat( true );
+    back->setAutoRaise( true );
     connect( back, SIGNAL(clicked()), this, SLOT(goBack()) );
 
     forward = new QToolButton(this);
-    forward->setIconSet(Resource::loadIconSet("forward"));
-    forward->setAutoRepeat( TRUE );
-    forward->setAutoRaise( TRUE );
+    forward->setIcon(QIcon(":icon/i18n/next"));
+    forward->setAutoRepeat( true );
+    forward->setAutoRaise( true );
     connect( forward, SIGNAL(clicked()), this, SLOT(goForward()) );
 
+    fraDays = new QFrame(this);
     grpDays = new QButtonGroup(this);
-    grpDays->setExclusive( TRUE );
+    grpDays->setExclusive( true );
     connect( grpDays, SIGNAL(clicked(int)), this, SLOT(setDay(int)) );
 
-    cmdDay1 = new QToolButton(grpDays);
-    cmdDay2 = new QToolButton(grpDays);
-    cmdDay3 = new QToolButton(grpDays);
-    cmdDay4 = new QToolButton(grpDays);
-    cmdDay5 = new QToolButton(grpDays);
-    cmdDay6 = new QToolButton(grpDays);
-    cmdDay7 = new QToolButton(grpDays);
+    cmdDay1 = new QToolButton(fraDays);
+    cmdDay2 = new QToolButton(fraDays);
+    cmdDay3 = new QToolButton(fraDays);
+    cmdDay4 = new QToolButton(fraDays);
+    cmdDay5 = new QToolButton(fraDays);
+    cmdDay6 = new QToolButton(fraDays);
+    cmdDay7 = new QToolButton(fraDays);
     QToolButton *cmdDays[7] = { cmdDay1, cmdDay2, cmdDay3, cmdDay4, cmdDay5, cmdDay6, cmdDay7 };
     for ( int i = 0; i < 7; i++ ) {
-	cmdDays[i]->setAutoRaise( TRUE );
-	cmdDays[i]->setToggleButton( TRUE );
+        cmdDays[i]->setAutoRaise( true );
+        cmdDays[i]->setCheckable( true );
     }
 
     setupNames();
 
-    dButton = new QPEDateEdit(this);
+    dButton = new QDateEdit(this);
 
     QHBoxLayout *hbox = new QHBoxLayout( this );
-    hbox->add(back);
-    hbox->add(grpDays);
-    hbox->add(forward);
-    hbox->add(dButton);
+    hbox->addWidget(back);
+    hbox->addWidget(fraDays);
+    hbox->addWidget(forward);
+    hbox->addWidget(dButton);
 
-    hbox = new QHBoxLayout( grpDays );
-    hbox->add( cmdDay1 );
-    hbox->add( cmdDay2 );
-    hbox->add( cmdDay3 );
-    hbox->add( cmdDay4 );
-    hbox->add( cmdDay5 );
-    hbox->add( cmdDay6 );
-    hbox->add( cmdDay7 );
+    hbox = new QHBoxLayout( fraDays );
+    hbox->addWidget( cmdDay1 );
+    hbox->addWidget( cmdDay2 );
+    hbox->addWidget( cmdDay3 );
+    hbox->addWidget( cmdDay4 );
+    hbox->addWidget( cmdDay5 );
+    hbox->addWidget( cmdDay6 );
+    hbox->addWidget( cmdDay7 );
 }
 
 void DayViewHeader::setStartOfWeek( bool onMonday )
@@ -134,9 +120,9 @@ void DayViewHeader::setStartOfWeek( bool onMonday )
     setDate( currDate.year(), currDate.month(), currDate.day() );
 }
 
-static void setButton( QButton *btn, int day )
+static void setButton( QAbstractButton *btn, int day )
 {
-    btn->setText( TimeString::localDayOfWeek( day + 1, TimeString::Short ) );
+    btn->setText( QTimeString::nameOfWeekDay( day + 1, QTimeString::Short ) );
 }
 
 void DayViewHeader::setupNames()
@@ -180,12 +166,14 @@ void DayViewHeader::setDate( int y, int m, int d )
     int iDayOfWeek = currDate.dayOfWeek();
     // cleverly adjust the day depending on how we start the week
     if ( bUseMonday )
-	iDayOfWeek--;
+        iDayOfWeek--;
     else {
-	if ( iDayOfWeek == 7 )  // Sunday
-	    iDayOfWeek = 0;
+        if ( iDayOfWeek == 7 )  // Sunday
+            iDayOfWeek = 0;
     }
-    grpDays->setButton( iDayOfWeek );
+    QAbstractButton *btn = qobject_cast<QAbstractButton*>(grpDays->children()[iDayOfWeek]);
+    if ( btn )
+        btn->setChecked( true );
     emit dateChanged( currDate );
 }
 
@@ -199,24 +187,24 @@ void DayViewHeader::setDay( int day )
 
     // a little adjustment is needed...
     if ( bUseMonday )
-	realDay = day + 1 ;
+        realDay = day + 1 ;
     else if ( !bUseMonday && day == 0 ) // sunday
-	realDay = 7;
+        realDay = 7;
     else
-	realDay = day;
+        realDay = day;
     // special cases first...
     if ( realDay == 7 && !bUseMonday )  {
-	while ( currDate.dayOfWeek() != realDay )
-	    currDate = currDate.addDays( -1 );
+        while ( currDate.dayOfWeek() != realDay )
+            currDate = currDate.addDays( -1 );
     } else if ( !bUseMonday && dayOfWeek == 7 && dayOfWeek > realDay ) {
-	while ( currDate.dayOfWeek() != realDay )
-	    currDate = currDate.addDays( 1 );
+        while ( currDate.dayOfWeek() != realDay )
+            currDate = currDate.addDays( 1 );
     } else if ( dayOfWeek < realDay ) {
-	while ( currDate.dayOfWeek() < realDay )
-	    currDate = currDate.addDays( 1 );
+        while ( currDate.dayOfWeek() < realDay )
+            currDate = currDate.addDays( 1 );
     } else if ( dayOfWeek > realDay ) {
-	while ( currDate.dayOfWeek() > realDay )
-	    currDate = currDate.addDays( -1 );
+        while ( currDate.dayOfWeek() > realDay )
+            currDate = currDate.addDays( -1 );
     }
     // update the date...
     setDate( currDate.year(), currDate.month(), currDate.day() );

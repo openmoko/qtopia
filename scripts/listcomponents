@@ -1,0 +1,157 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use Cwd;
+use File::Basename;
+use lib ( dirname($0)."/../bin" );
+use Qtopia::Opt;
+
+use constant OUTPUT => 1;
+use constant DEBUG => 0;
+
+
+set_optvar( "help", +{
+    "set" => [ "%", "hidden" ],
+});
+
+set_optvar( "edition", +{
+    "set" => [ "%=s", "Select the edition to list components for." ],
+    "arg" => "edn",
+    "available" => [ "phone", "platform", "free" ],
+    "default" => "phone",
+});
+
+opt_sanity_check();
+opt_get_options();
+opt_apply_defaults();
+
+
+my @platform_config = ( "build_helix", "build_libamr" );
+my @free_config = ( );
+
+my @ignore_config = ( "media" );
+if ( opt("edition") eq "phone" ) {
+    push(@ignore_config, "!phone");
+}
+if ( opt("edition") eq "platform" ) {
+    push(@ignore_config, @platform_config);
+    push(@ignore_config, "!platform", "!phone");
+}
+if ( opt("edition") eq "free" ) {
+    push(@ignore_config, @free_config);
+    push(@ignore_config, "!phone");
+}
+
+my $scripts = dirname($0);
+chdir $scripts || die $!;
+$scripts = getcwd();
+my $depotpath = dirname($scripts);
+chdir $depotpath;
+
+my @files;
+push(@files, "src/general.pri");
+if ( opt("edition") ne "free" ) {
+    push(@files, "src/commercial.pri");
+}
+
+my @total_list;
+for my $file ( @files ) {
+    my @projects = processFile( "$depotpath/$file" );
+    @total_list = (@total_list, @projects);
+}
+@total_list = sort @total_list;
+OUTPUT and print join("\n", @total_list)."\n";
+
+exit 0;
+
+
+sub processFile
+{
+    my ( $file ) = @_;
+    my %projects;
+    open IN, $file or die $!;
+    my $line = "";
+    OUTER: while ( defined($_ = <IN>) ) {
+        # Strip comments
+        if ( s/\s*#.*// ) {
+            # Handle comments in continuations
+            next if ( $line && $_ eq "\n" );
+        }
+        # Collapse continuations
+        if ( s/\\\s*$// ) {
+            $line .= $_;
+            next;
+        } elsif ( $line ) {
+            $_ = $line.$_;
+            $line = "";
+        }
+        # Fix lineendings
+        chomp;
+        my $line = $_;
+        # Strip conditionals
+        if ( s/(.*)[:{]// ) {
+            my $conditionals = $1;
+            # Ignore certain CONFIG blocks
+            for my $config ( @ignore_config ) {
+                if ( $conditionals !~ /\Q!$config\E/ && $conditionals =~ /\Q$config\E/ ) {
+                    DEBUG and print "Reject ($config) $line\n";
+                    # Skip this line/block
+                    if ( $line =~ /{/ ) { # }
+                        DEBUG and print "Skipping a block\n";
+                        my $find = 0;
+                        while ( defined($_ = <IN>) ) {
+                            # Strip comments
+                            if ( s/\s*#.*// ) {
+                                # Handle comments in continuations
+                                next if ( $line && $_ eq "\n" );
+                            }
+                            # Collapse continuations
+                            if ( s/\\\s*$// ) {
+                                $line .= $_;
+                                next;
+                            } elsif ( $line ) {
+                                $_ = $line.$_;
+                                $line = "";
+                            }
+                            # Fix lineendings
+                            chomp;
+                            #DEBUG and print "skipping block line: $_";
+                            $find++ while ( s/{// );
+                            $find-- while ( s/}// );
+                            #DEBUG and print "find $find\n";
+                            last if ( $find == 0 );
+                        }
+
+                    }
+                    next OUTER;
+                }
+            }
+            DEBUG and print "Keep                   $line\n";
+        }
+        # Handle the phonevendors and multiplexers plugins
+        if ( /plugins\/(phonevendors|multiplexers)\/\$\$/ ) {
+            my @plugins;
+            map { push(@plugins, dirname($_)); } glob("src/plugins/$1/*/*.pro");
+            $_ = "PROJECTS+=".join(" ", @plugins);
+        }
+        # Skip variables
+        next if ( /\$\$/ );
+        # Make this variable PROJECTS
+        s/QTE_PROJECTS/PROJECTS/g;
+        # Strip stuff that's not modifying the actual project lists
+        next unless ( s/^\s*(PROJECTS|THEMES)[+-=*]+/$1 / );
+        my $base;
+        if ( $1 eq "PROJECTS" ) {
+            $base = "src/";
+        } elsif ( $1 eq "THEMES" ) {
+            $base = "etc/themes/";
+        }
+        my @bits = split(/\s+/, $_);
+        shift(@bits);
+        map { $projects{$base.$_} = 1; } @bits;
+    }
+    close IN;
+    return keys %projects;
+}
+

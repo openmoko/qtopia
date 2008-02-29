@@ -1,0 +1,6 @@
+win32-msvc2005:!equals(TEMPLATE_PREFIX, "vc"):equals(TEMPLATE, "app") {
+    QMAKE_LFLAGS += $$quote(/MANIFESTFILE:\"$${OBJECTS_DIR}\\$${TARGET}.intermediate.manifest\")
+    QMAKE_PREV_POST_LINK = $$QMAKE_POST_LINK
+    QMAKE_POST_LINK = $$quote(mt.exe -nologo -manifest \"$${OBJECTS_DIR}\\$${TARGET}.intermediate.manifest\" -outputresource:$(DESTDIR_TARGET);1$$escape_expand(\n\t))
+    QMAKE_POST_LINK += $$QMAKE_PREV_POST_LINK
+}

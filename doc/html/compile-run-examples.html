@@ -1,0 +1,72 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Compile and Run Example Application</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Compile and Run Example Application<br /><small></small></h1>
+<a name="top"></a><ul><li><a href="#compile-and-build-the-example">Compile and Build the Example</a></li>
+<li><a href="#install-and-run-the-example">Install and Run the Example</a></li>
+<li><a href="#uninstall-the-example">Uninstall the Example</a></li>
+<li><a href="#using-the-example-program-to-make-an-application">Using the Example Program to Make an Application</a></li>
+</ul>
+<a name="compile-and-build-the-example"></a>
+<h2>Compile and Build the Example</h2>
+<p>This section describes how to compile and build the <i>Example</i> application. A chronological list of the commands required is available at: <a href="tut-createappcmds.html">Creating the Example application</a>.</p>
+<p>To compile and build the example, follow these steps:</p>
+<ol type="1">
+<li>Create a copy of the example:<pre>    cd somewhere
+    cp -r $QPEDIR/examples/application .
+    chmod +w application/*
+    cd application</pre>
+</li>
+<li>Generate a Makefile:<pre>    $QTOPIA_DEPOT_PATH/bin/qtopiamake</pre>
+</li>
+<li>Build the Example:<pre>    make</pre>
+</li>
+</ol>
+<a name="install-and-run-the-example"></a>
+<h2>Install and Run the Example</h2>
+<p>Installing onto an SDK requires root privileges which are obtained using a utility such as <tt>su</tt>, <tt>sudo</tt>.</p>
+<p>To install and run the example follow these steps:</p>
+<ol type="1">
+<li>Install the Example using:<pre>    make install</pre>
+</li>
+<li>To run the example:<ul>
+<li>Run the Qt Virtual Framebuffer<pre>    qvfb &amp;</pre>
+</li>
+<li>Run the Qtopia environment:<pre>    qpe</pre>
+</li>
+</ul>
+<p>The application should now be available in the</p>
+</li>
+<li>Applications tab which is visible inside the Qt Virtual Framebuffer window.</li>
+</ol>
+<a name="uninstall-the-example"></a>
+<h2>Uninstall the Example</h2>
+<p>To unistall the example requires root privileges which are obtained using a utility such as <tt>su</tt>, <tt>sudo</tt>.</p>
+<p>The following command is used to uninstall the example:</p>
+<pre>    make uninstall</pre>
+<a name="using-the-example-program-to-make-an-application"></a>
+<h2>Using the Example Program to Make an Application</h2>
+<p>To <tt>make</tt> an application using the example program as a model:</p>
+<ul>
+<li>ensure that files added to the project are also added to the project file, <tt>application.pro</tt></li>
+<li>run <tt>make qmake</tt> to update the <tt>Makefile</tt> whenever the <tt>.pro</tt> file is updated.</li>
+</ul>
+<p><b>Note: </b> The <tt>make qmake</tt> step is not always required as the <tt>Makefile</tt> will automatically be re-built when the <tt>.pro</tt> file has changed.</p>
+<p>To make a package suitable for installing on a device ensure the compiler targets the correct CPU family then use the following command:</p>
+<pre>    make packages</pre>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

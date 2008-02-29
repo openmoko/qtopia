@@ -1,0 +1,8 @@
+[Desktop Entry]
+Comment[]=Simple ipkg Installer
+Exec=qipkg
+Icon=qipkg/qipkg-simple
+Type=ConsoleApplication
+Name[]=Package Installer
+MimeType="application/ipkg"
+MimeTypeIcons=qipkg/qipkg-simple

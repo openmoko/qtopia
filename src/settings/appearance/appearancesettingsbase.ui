@@ -1,245 +1,190 @@
-<!DOCTYPE UI><UI>
-<class>AppearanceSettingsBase</class>
-<widget>
-    <class>QDialog</class>
-    <property stdset="1">
-        <name>name</name>
-        <cstring>AppearanceSettingsBase</cstring>
+<ui version="4.0" stdsetdef="1" >
+  <author></author>
+  <comment></comment>
+  <exportmacro></exportmacro>
+  <class>AppearanceSettingsBase</class>
+  <widget class="QDialog" name="AppearanceSettingsBase" >
+    <property name="objectName" >
+      <string notr="true" >AppearanceSettingsBase</string>
     </property>
-    <property stdset="1">
-        <name>geometry</name>
-        <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>376</width>
-            <height>421</height>
-        </rect>
+    <property name="geometry" >
+      <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>376</width>
+        <height>421</height>
+      </rect>
     </property>
-    <property stdset="1">
-        <name>caption</name>
-        <string>Appearance</string>
+    <property name="windowTitle" >
+      <string>Appearance</string>
     </property>
-    <property>
-        <name>layoutMargin</name>
-    </property>
-    <property>
-        <name>layoutSpacing</name>
-    </property>
-    <vbox>
-        <property stdset="1">
-            <name>margin</name>
-            <number>6</number>
-        </property>
-        <property stdset="1">
-            <name>spacing</name>
-            <number>4</number>
-        </property>
-        <widget>
-            <class>QTabWidget</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>tabWidget</cstring>
+    <layout class="QVBoxLayout" >
+      <property name="margin" >
+        <number>6</number>
+      </property>
+      <property name="spacing" >
+        <number>4</number>
+      </property>
+      <item>
+        <widget class="QTabWidget" name="tabWidget" >
+          <property name="objectName" >
+            <string notr="true" >tabWidget</string>
+          </property>
+          <property name="whatsThis" >
+            <string/>
+          </property>
+          <widget class="QWidget" name="tab" >
+            <property name="objectName" >
+              <string notr="true" >tab</string>
             </property>
-            <property>
-                <name>layoutMargin</name>
+            <attribute name="title" >
+              <string>Colors</string>
+            </attribute>
+            <layout class="QVBoxLayout" >
+              <property name="margin" >
+                <number>6</number>
+              </property>
+              <property name="spacing" >
+                <number>6</number>
+              </property>
+              <item>
+                <widget class="QListWidget" name="colorList" >
+                  <property name="objectName" >
+                    <string notr="true" >colorList</string>
+                  </property>
+                  <property name="whatsThis" >
+                    <string>Select a color scheme.  The preview below shows a sample.</string>
+                  </property>
+                </widget>
+              </item>
+            </layout>
+          </widget>
+          <widget class="QWidget" name="tab" >
+            <property name="objectName" >
+              <string notr="true" >tab</string>
             </property>
-            <property>
-                <name>layoutSpacing</name>
+            <attribute name="title" >
+              <string>Style</string>
+            </attribute>
+            <layout class="QVBoxLayout" >
+              <property name="margin" >
+                <number>6</number>
+              </property>
+              <property name="spacing" >
+                <number>6</number>
+              </property>
+              <item>
+                <widget class="QListWidget" name="styleList" >
+                  <property name="objectName" >
+                    <string notr="true" >styleList</string>
+                  </property>
+                  <property name="whatsThis" >
+                    <string>Select a style.  The style determines the look of the user interface controls such as buttons and scrollbars.</string>
+                  </property>
+                </widget>
+              </item>
+            </layout>
+          </widget>
+          <widget class="QWidget" name="tab" >
+            <property name="objectName" >
+              <string notr="true" >tab</string>
             </property>
-            <property>
-                <name>whatsThis</name>
-                <string></string>
+            <attribute name="title" >
+              <string>Frame</string>
+            </attribute>
+            <layout class="QVBoxLayout" >
+              <property name="margin" >
+                <number>6</number>
+              </property>
+              <property name="spacing" >
+                <number>6</number>
+              </property>
+              <item>
+                <widget class="QListWidget" name="decorationList" >
+                  <property name="objectName" >
+                    <string notr="true" >decorationList</string>
+                  </property>
+                  <property name="whatsThis" >
+                    <string>Select a window decoration style.  A window style determines the look of the window's title bar and borders.</string>
+                  </property>
+                </widget>
+              </item>
+            </layout>
+          </widget>
+          <widget class="QWidget" name="tab" >
+            <property name="objectName" >
+              <string notr="true" >tab</string>
             </property>
-            <widget>
-                <class>QWidget</class>
-                <property stdset="1">
-                    <name>name</name>
-                    <cstring>tab</cstring>
-                </property>
-                <attribute>
-                    <name>title</name>
-                    <string>Colors</string>
-                </attribute>
-                <vbox>
-                    <property stdset="1">
-                        <name>margin</name>
-                        <number>6</number>
-                    </property>
-                    <property stdset="1">
-                        <name>spacing</name>
-                        <number>6</number>
-                    </property>
-                    <widget>
-                        <class>QListBox</class>
-                        <property stdset="1">
-                            <name>name</name>
-                            <cstring>colorList</cstring>
-                        </property>
-                        <property>
-                            <name>whatsThis</name>
-                            <string>Select a color scheme.  The preview below shows a sample.</string>
-                        </property>
+            <attribute name="title" >
+              <string>Font</string>
+            </attribute>
+            <layout class="QVBoxLayout" >
+              <property name="margin" >
+                <number>6</number>
+              </property>
+              <property name="spacing" >
+                <number>6</number>
+              </property>
+              <item>
+                <widget class="QListWidget" name="fontList" >
+                  <property name="objectName" >
+                    <string notr="true" >fontList</string>
+                  </property>
+                  <property name="whatsThis" >
+                    <string>Select the default font family.</string>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <layout class="QHBoxLayout" >
+                  <property name="margin" >
+                    <number>0</number>
+                  </property>
+                  <property name="spacing" >
+                    <number>6</number>
+                  </property>
+                  <item>
+                    <widget class="QLabel" name="fontSizeLabel" >
+                      <property name="objectName" >
+                        <string notr="true" >fontSizeLabel</string>
+                      </property>
+                      <property name="sizePolicy" >
+                        <sizepolicy>
+                          <hsizetype>7</hsizetype>
+                          <vsizetype>1</vsizetype>
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                        </sizepolicy>
+                      </property>
+                      <property name="text" >
+                        <string>Size:</string>
+                      </property>
                     </widget>
-                </vbox>
-            </widget>
-            <widget>
-                <class>QWidget</class>
-                <property stdset="1">
-                    <name>name</name>
-                    <cstring>tab</cstring>
-                </property>
-                <attribute>
-                    <name>title</name>
-                    <string>Style</string>
-                </attribute>
-                <vbox>
-                    <property stdset="1">
-                        <name>margin</name>
-                        <number>6</number>
-                    </property>
-                    <property stdset="1">
-                        <name>spacing</name>
-                        <number>6</number>
-                    </property>
-                    <widget>
-                        <class>QListBox</class>
-                        <property stdset="1">
-                            <name>name</name>
-                            <cstring>styleList</cstring>
-                        </property>
-                        <property>
-                            <name>whatsThis</name>
-                            <string>Select a style.  The style determines the look of the user interface controls such as buttons and scrollbars.</string>
-                        </property>
+                  </item>
+                  <item>
+                    <widget class="QComboBox" name="fontSize" >
+                      <property name="objectName" >
+                        <string notr="true" >fontSize</string>
+                      </property>
+                      <property name="whatsThis" >
+                        <string>Select the default font size.</string>
+                      </property>
                     </widget>
-                </vbox>
-            </widget>
-            <widget>
-                <class>QWidget</class>
-                <property stdset="1">
-                    <name>name</name>
-                    <cstring>tab</cstring>
-                </property>
-                <attribute>
-                    <name>title</name>
-                    <string>Frame</string>
-                </attribute>
-                <vbox>
-                    <property stdset="1">
-                        <name>margin</name>
-                        <number>6</number>
-                    </property>
-                    <property stdset="1">
-                        <name>spacing</name>
-                        <number>6</number>
-                    </property>
-                    <widget>
-                        <class>QListBox</class>
-                        <property stdset="1">
-                            <name>name</name>
-                            <cstring>decorationList</cstring>
-                        </property>
-                        <property>
-                            <name>whatsThis</name>
-                            <string>Select a window decoration style.  A window style determines the look of the window's title bar and borders.</string>
-                        </property>
-                    </widget>
-                </vbox>
-            </widget>
-            <widget>
-                <class>QWidget</class>
-                <property stdset="1">
-                    <name>name</name>
-                    <cstring>tab</cstring>
-                </property>
-                <attribute>
-                    <name>title</name>
-                    <string>Font</string>
-                </attribute>
-                <vbox>
-                    <property stdset="1">
-                        <name>margin</name>
-                        <number>6</number>
-                    </property>
-                    <property stdset="1">
-                        <name>spacing</name>
-                        <number>6</number>
-                    </property>
-                    <widget>
-                        <class>QListBox</class>
-                        <property stdset="1">
-                            <name>name</name>
-                            <cstring>fontList</cstring>
-                        </property>
-                        <property>
-                            <name>whatsThis</name>
-                            <string>Select the default font family.</string>
-                        </property>
-                    </widget>
-                    <widget>
-                        <class>QLayoutWidget</class>
-                        <property stdset="1">
-                            <name>name</name>
-                            <cstring>Layout1</cstring>
-                        </property>
-                        <hbox>
-                            <property stdset="1">
-                                <name>margin</name>
-                                <number>0</number>
-                            </property>
-                            <property stdset="1">
-                                <name>spacing</name>
-                                <number>6</number>
-                            </property>
-                            <widget>
-                                <class>QLabel</class>
-                                <property stdset="1">
-                                    <name>name</name>
-                                    <cstring>fontSizeLabel</cstring>
-                                </property>
-                                <property stdset="1">
-                                    <name>sizePolicy</name>
-                                    <sizepolicy>
-                                        <hsizetype>7</hsizetype>
-                                        <vsizetype>1</vsizetype>
-                                    </sizepolicy>
-                                </property>
-                                <property stdset="1">
-                                    <name>text</name>
-                                    <string>Size:</string>
-                                </property>
-                                <property stdset="1">
-                                    <name>alignment</name>
-                                    <set>AlignVCenter|AlignRight</set>
-                                </property>
-                                <property>
-                                    <name>hAlign</name>
-                                </property>
-                            </widget>
-                            <widget>
-                                <class>QComboBox</class>
-                                <property stdset="1">
-                                    <name>name</name>
-                                    <cstring>fontSize</cstring>
-                                </property>
-                                <property>
-                                    <name>whatsThis</name>
-                                    <string>Select the default font size.</string>
-                                </property>
-                            </widget>
-                        </hbox>
-                    </widget>
-                </vbox>
-            </widget>
+                  </item>
+                </layout>
+              </item>
+            </layout>
+          </widget>
         </widget>
-    </vbox>
-</widget>
-<tabstops>
+      </item>
+    </layout>
+  </widget>
+  <tabstops>
     <tabstop>colorList</tabstop>
     <tabstop>styleList</tabstop>
     <tabstop>decorationList</tabstop>
     <tabstop>fontList</tabstop>
     <tabstop>fontSize</tabstop>
     <tabstop>tabWidget</tabstop>
-</tabstops>
-</UI>
+  </tabstops>
+</ui>

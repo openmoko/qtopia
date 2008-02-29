@@ -1,17 +1,16 @@
-CONFIG		+= qtopiaplugin
-
+qtopia_project(qtopia plugin)
 TARGET		= mountmonapplet
 
 HEADERS	=	mountmon.h mountmonimpl.h
 SOURCES	=	mountmon.cpp mountmonimpl.cpp
 
-TRANSLATABLES = $${HEADERS} $${SOURCES}
-
-pics.files=$${QTOPIA_DEPOT_PATH}/pics/mountmon/*
+pics.files=$$QTOPIA_DEPOT_PATH/pics/mountmon/*
 pics.path=/pics/mountmon
-PICS_INSTALLS+=pics
+pics.hint=pics
+INSTALLS+=pics
 
-desktop.files=$${QTOPIA_DEPOT_PATH}/plugins/applets/mountmonapplet.desktop
+desktop.files=$$QTOPIA_DEPOT_PATH/plugins/applets/mountmonapplet.desktop
 desktop.path=/plugins/applets/
-
+desktop.hint=desktop
 INSTALLS+=desktop
+

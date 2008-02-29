@@ -1,17 +1,30 @@
-<qt title="Fifteen Pieces">
-<h3>Fifteen Pieces </h3>
-<p><img src="fifteen/Fifteen.png"></p>
+<html>
+<head><title>Fifteen Pieces</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h2>Fifteen Pieces <img src=":image/fifteen/Fifteen"></h2>
+<!--#else-->
+   <h3>Fifteen Pieces </h3>
+   <p><img src=":image/fifteen/Fifteen"></p>
+<!--#endif-->
 <p><b>Objective:</b> Slide the pieces around until they're in order from left to right, top to bottom.</p>
-%%PHONE%%
-<p>Use <img src="help/dpad"> to move the pieces until they are in the correct order.
-@@PHONE@@
-%%PDA%%
+<!--#if expr="$PHONESTYLE"-->
+<p>Use <img src=":image/help/dpad"> </img> to move the pieces until they are in the correct order.
+<p>Press <img src=":icon/options"> </img> for options:
+<p><b>Shuffle</b> - randomize the pieces.</p>
+<p><b> Reset Pieces</b> - reset the pieces.</p>
+<p><b>Load Image</b> - use your own image.</p>
+<p><b>Delete Image</b> - remove the image.</p>
+<p><b>Show Numbers</b> - display numbers over your image.</p>
+<!--#endif-->
+<!--#if expr="$PDASTYLE"-->
 <ul>
 <li>Tapping a piece will move it towards the empty square.</li>
 <li>Only pieces that are in the same row or column are available to be moved.</li>
 <li>All pieces between the one you tap and the empty square will move toward the empty square.</li>
-<li>Tap <img src="new"> for a new game.</li>
-<li>Tap <img src="qpe/pda/CloseButton.png" alt="X"> to exit the game.</li>
+<li>Tap <img src=":icon/new"> </img> for a new game.</li>
+<li>Tap <img src=":image/qpe/pda/CloseButton" alt="X"> </img> to exit the game.</li>
 </ul>
-@@PDA@@
-</qt>
+<!--#endif-->
+</body>
+</html>

@@ -1,885 +1,690 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
-#include <qtopia/qpeapplication.h>
-#include <qtopia/config.h>
-#include <qtopia/network.h>
-#ifdef QWS
-#include <qtopia/qcopenvelope_qws.h>
-#endif
-#include <qtopia/global.h>
-#include <qtopia/process.h>
-#include "../proxiespage.h"
-
-#include <qbuttongroup.h>
-#include <qvbox.h>
-#include <qradiobutton.h>
-#include <qlineedit.h>
-#include <qcombobox.h>
-#include <qcheckbox.h>
-#include <qlabel.h>
-#include <qvalidator.h>
-#include <qtextstream.h>
-#include <qfile.h>
-#include <qtabwidget.h>
-#include <qbuffer.h>
-#include <qspinbox.h>
-#include <qmessagebox.h>
-#include <qregexp.h>
 #include "lan.h"
-#include "lanstate.h"
-#include <qlayout.h>
+#include "config.h"
+#include "roamingmonitor.h"
 
-#include <stdlib.h>
+#include <custom.h>
+#include <qtopialog.h>
+#include <qtopianamespace.h>
 
-static const char* wlanopts = "/etc/pcmcia/wlan-ng.opts";
-static const char* wirelessopts = "/etc/pcmcia/wireless.opts";
+#include <QDebug>
 
-#define USE_SCHEMES
+#include <errno.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <linux/if.h>
+#ifndef NO_WIRELESS_LAN
+#include <linux/wireless.h>
+#endif
 
-#ifdef USE_SCHEMES
-static QString toSchemeId(const QString& s)
+static const QString lanScript = Qtopia::qtopiaDir()+"/bin/lan-network";
+static QMap<QString,QString>* devToConfig = 0;
+
+static void map_cleanup()
 {
-    QString r;
-    for (int i=0; i<(int)s.length(); i++) {
-	char c = s[i].lower().latin1();
-	if ( c>='a' && c<='z' || i>0 && c>='0' && c<='9' )
-	    r += s[i];
-	//else
-	    //r += "_U" + QString::number(s[i].unicode()) + "_";
-    }
-    return r;
-}
-#endif
-
-class SchemeChanger : public QObject {
-    Q_OBJECT
-public:
-    SchemeChanger(QObject* parent) :
-	QObject(parent)
-    {
-    }
-
-    static void changeLanScheme(const QString& lan_or_scheme)
-    {
-#ifdef USE_SCHEMES	
-	Config c("Network");
-	c.setGroup("Lan");
-	QString s = toSchemeId(lan_or_scheme);
-	c.writeEntry("Scheme",s);
-	system("cardctl scheme " + s);
-#else	
-	QStringList srv = Network::choices();
-	for (QStringList::ConstIterator it=srv.begin(); it!=srv.end(); ++it) {
-	    QString t = Network::serviceType(*it);
-	    if ( t == "lan" ) {
-		Config cfg(*it,Config::File);
-		cfg.setGroup("Info");
-		QString n = cfg.readEntry("Name");
-		if ( n == lan_or_scheme ) {
-		    Lan::writeNetworkOpts( cfg );
-		}
-	    }
-	}	
-#endif	
-#ifndef QT_NO_COP
-	QCopEnvelope e("QPE/Network","choicesChanged()");
-#endif
-    }
-
-public slots:
-    void changeLanSchemeSlot(const QString& lan_or_scheme)
-    {
-	changeLanScheme(lan_or_scheme);
+    if ( devToConfig ) {
+        devToConfig->clear();
+        delete devToConfig;
+        devToConfig = 0;
     }
 };
 
-class WepKeyValidator : public QValidator {
-public:
-    WepKeyValidator(QWidget* parent) :
-	QValidator(parent)
-    {
-    }
-
-    State validate( QString& key, int& curs ) const
-    {
-	QString k;
-	int hexes=0;
-	int ncurs=0;
-	for (int i=0; i<(int)key.length(); i++) {
-	    char c=key[i].lower().latin1();
-	    if ( c>='0' && c<='9' || c>='a' && c<='z' ) {
-		if ( hexes == 2 ) {
-		    hexes = 0;
-		    k += ':';
-		    if ( i<curs ) ncurs++;
-		}
-		k += c;
-		hexes++;
-		if ( i<curs ) ncurs++;
-	    } else if ( c == ':' && hexes==2 ) {
-		hexes = 0;
-		k += c;
-		if ( i<curs ) ncurs++;
-	    }
-	}
-	key = k;
-	curs = ncurs;
-	return Acceptable;
-    }
-
-    //void fixup( QString& key ) const
-    //{
-    //}
-};
-
-#include "../addscrollbars.cpp"
-
-Lan::Lan(Config& cfg, QWidget* parent) :
-    LanBase(parent,0,TRUE),
-    config(cfg)
-{
-    ipGroup = new QButtonGroup( this );
-    ipGroup->hide();
-    ipGroup->insert( manualIP );
-    ipGroup->insert( autoIP );
-    connect( ipGroup, SIGNAL(clicked(int)), this, SLOT(ipSelect(int)) );
-    ipGroup->setButton( 1 );
-
-    if ( !QFile::exists(wlanopts) && !QFile::exists(wirelessopts) )
-	tabs->setTabEnabled(wireless, FALSE);
-
-    QBoxLayout *proxyLayout  = new QVBoxLayout( tab_2 ); 
-    proxies = new ProxiesPage( tab_2 );
-    proxyLayout->addWidget( proxies );
-
-    addScrollBars(tabs);
-
-    connect(wep_passphrase, SIGNAL(textChanged(const QString&)), this, SLOT(chooseDefaultWepKey()));
-    connect(wep_key0, SIGNAL(textChanged(const QString&)), this, SLOT(chooseDefaultWepKey()));
-    connect(wep_key1, SIGNAL(textChanged(const QString&)), this, SLOT(chooseDefaultWepKey()));
-    connect(wep_key2, SIGNAL(textChanged(const QString&)), this, SLOT(chooseDefaultWepKey()));
-    connect(wep_key3, SIGNAL(textChanged(const QString&)), this, SLOT(chooseDefaultWepKey()));
-    connect(wep_type, SIGNAL(activated(int)), this, SLOT(wepTypeChanged(int)));
-    QValidator* key = new WepKeyValidator(this);
-    wep_key0->setValidator(key);
-    wep_key1->setValidator(key);
-    wep_key2->setValidator(key);
-    wep_key3->setValidator(key);
-
-    readConfig();
-}
-
-void Lan::wepTypeChanged(int i)
-{
-    wep_choice->setEnabled(i>0);
-}
-
-void Lan::chooseDefaultWepKey()
-{
-    if ( sender() == wep_passphrase )
-	wep_passphrase_on->setChecked(TRUE);
-    else if ( sender() == wep_key0 )
-	wep_key0_on->setChecked(TRUE);
-    else if ( sender() == wep_key1 )
-	wep_key1_on->setChecked(TRUE);
-    else if ( sender() == wep_key2 )
-	wep_key2_on->setChecked(TRUE);
-    else if ( sender() == wep_key3 )
-	wep_key3_on->setChecked(TRUE);
-}
-
-void Lan::ipSelect( int id )
-{
-    tabs->setTabEnabled( tcpip, id==0 );
-}
-
-void Lan::readConfig()
-{
-    int id = config.readEntry("DHCP","y") != "n";
-    ipGroup->setButton( id );
-    ipSelect( id );
-
-    config.setGroup("Info");
-    acname->setText(config.readEntry("Name","LAN"));
-
-    config.setGroup("Properties");
-    ip->setText( config.readEntry("IPADDR") );
-    subnet->setText( config.readEntry("NETMASK","255.255.255.0") );
-    broadcast->setText( config.readEntry("BROADCAST","") );
-    gateway->setText( config.readEntry("GATEWAY") );
-    dns1->setText( config.readEntry("DNS_1") );
-    dns2->setText( config.readEntry("DNS_2") );
-
-    QString ssid = config.readEntry("SSID");
-    if ( !ssid.isEmpty() ) {
-	wlan_ssid->insertItem(ssid);
-	wlan_ssid->setCurrentItem(wlan_ssid->count()-1);
-    }
-    bool ah=config.readEntry("IS_ADHOC").lower()=="y";
-    (ah ? wlan_adhoc : wlan_infrastructure)->setChecked(TRUE);
-    wlan_channel->setValue(config.readNumEntry("CHANNEL"));
-    wep_passphrase->setText(config.readEntry("PRIV_GENSTR"));
-    wep_key0->setText(config.readEntry("dot11WEPDefaultKey0"));
-    wep_key1->setText(config.readEntry("dot11WEPDefaultKey1"));
-    wep_key2->setText(config.readEntry("dot11WEPDefaultKey2"));
-    wep_key3->setText(config.readEntry("dot11WEPDefaultKey3"));
-    int weptype = config.readEntry("PRIV_KEY128")=="true" ? 2 : 1;
-    QString wep = config.readEntry("WEP");
-    if ( wep == "PP" )
-	wep_passphrase_on->setChecked(TRUE);
-    else if ( wep == "K0" )
-	wep_key0_on->setChecked(TRUE);
-    else if ( wep == "K1" )
-	wep_key1_on->setChecked(TRUE);
-    else if ( wep == "K2" )
-	wep_key2_on->setChecked(TRUE);
-    else if ( wep == "K3" )
-	wep_key3_on->setChecked(TRUE);
-    else
-	weptype=0;
-    wep_type->setCurrentItem(weptype);
-    wepTypeChanged(weptype);
-
-    config.setGroup("Proxy");
-    proxies->readConfig( config );
-}
-
-bool Lan::writeConfig()
-{
-    QString nm = acname->text();
-
-    // make sure we don't duplicate the name
-    QStringList srv = Network::choices();
-    for (QStringList::ConstIterator it=srv.begin(); it!=srv.end(); ++it) {
-	QString t = Network::serviceType(*it);
-	if ( t == "lan" ) {
-	    Config cfg(*it,Config::File);
-	    cfg.setGroup("Info");
-	    QString n = cfg.readEntry("Name");
-	    if ( (n == nm
-#ifdef USE_SCHEMES
-		|| toSchemeId(n) == toSchemeId(nm)
+LanImpl::LanImpl( const QString& confFile)
+    : configIface(0), ifaceStatus(Unknown)
+#ifndef NO_WIRELESS_LAN
+    , roaming( 0 )
 #endif
-		) && cfg != config
-	    ) {
-		QMessageBox::warning(0, tr("LAN Setup"), 
-				     tr( "<qt>This name already exists. Please choose a different name.</qt>") );
-		return FALSE;
-	    }
-	}
+    , netSpace( 0 ), delayedGatewayInstall( false )
+{
+    if ( !devToConfig ) {
+        devToConfig = new QMap<QString,QString>();
+        qAddPostRoutine(map_cleanup);
     }
 
-#ifdef USE_SCHEMES    
-    QString scheme;
-#endif
-    {
-	config.setGroup("Info");
-	config.writeEntry("Name",nm);
-#ifdef USE_SCHEMES    
-	scheme = toSchemeId(nm);
-	if ( scheme.isEmpty() )
-	    scheme = "*"; // The default config
-#endif    
-	config.setGroup("Properties");
+    qLog(Network) << "Creating LanImpl instance";
+    configIface = new LANConfig( confFile );
 
-	config.writeEntry("DHCP",autoIP->isChecked() ? "y" : "n");
-	config.writeEntry("IPADDR",ip->text());
-	config.writeEntry("NETMASK",subnet->text());
-	config.writeEntry("BROADCAST",broadcast->text());
-	config.writeEntry("GATEWAY",gateway->text());
-	config.writeEntry("DNS_1",dns1->text());
-	config.writeEntry("DNS_2",dns2->text());
-
-	config.writeEntry("WLAN_ENABLE","y");
-	config.writeEntry("SSID",wlan_ssid->currentText());
-	config.writeEntry("IS_ADHOC",wlan_adhoc->isChecked() ? "y" : "n");
-	config.writeEntry("PRIV_KEY128",wep_type->currentItem()==2 ? "true" : "false");
-	config.writeEntry("CHANNEL",wlan_channel->value());
-	config.writeEntry("PRIV_GENSTR", wep_passphrase->text());
-	config.writeEntry("dot11PrivacyInvoked", wep_type->currentItem()==0 ? "false" : "true");
-	config.writeEntry("AuthType", wep_type->currentItem()==0 ? "opensystem" : "sharedkey");
-	int defkey = wep_choice->id(wep_choice->selected());
-	if ( defkey < 1 || defkey > 4 )
-	    defkey = 1;
-	config.writeEntry("dot11WEPDefaultKeyID",defkey-1);
-	config.writeEntry("dot11WEPDefaultKey0", wep_key0->text());
-	config.writeEntry("dot11WEPDefaultKey1", wep_key1->text());
-	config.writeEntry("dot11WEPDefaultKey2", wep_key2->text());
-	config.writeEntry("dot11WEPDefaultKey3", wep_key3->text());
-	QString wep;
-	if ( wep_type->currentItem() == 0 ) {
-	    wep = "NO";
-	} else {
-	    if ( wep_passphrase_on->isChecked() )
-		wep = "PP";
-	    else if ( wep_key0_on->isChecked() )
-		wep = "K0";
-	    else if ( wep_key1_on->isChecked() )
-		wep = "K1";
-	    else if ( wep_key2_on->isChecked() )
-		wep = "K2";
-	    else if ( wep_key3_on->isChecked() )
-		wep = "K3";
-	    else
-		wep = "NO";
-	}
-	config.writeEntry("WEP",wep);
-
-	config.setGroup("Proxy");
-	proxies->writeConfig( config );
-    }
-
-#ifdef USE_SCHEMES    
-    return writeNetworkOpts( config, scheme );
-#else
-    return TRUE;
-#endif    
-}
-
-bool Lan::writeNetworkOpts( Config &config, QString scheme )
-{
-    // PCMCIA card will have "CardType = network" entry
-    config.setGroup("Properties");
-    QString cardType = config.readEntry("CardType");
-
-    if (cardType == "network") // No tr
-	return writePcmciaNetworkOpts(config, scheme);
-    else
-	return writeBuiltinNetworkOpts(config, scheme);
-}
-
-bool Lan::writeBuiltinNetworkOpts( Config &config, QString scheme )
-{
-    // Since no standard exists for configuring networks, this
-    // function must be implemented by the system integrator.
-    //
-    // The procedure is:
-    //  1. write the network configuration file to a tmp file.
-    //  2. stop the network.
-    //  3. move the tmp file to the network config file.
-    //  4. start the network.
-    Q_CONST_UNUSED(config);
-    Q_CONST_UNUSED(scheme);
-
-    return FALSE;
-}
-
-static QString ngToWireless(Config& config, const QString& key)
-{
-    if ( key == "ESSID" ) {
-	QString ssid = config.readEntry("SSID");
-	if ( ssid.isEmpty() )
-	    ssid = "any";
-	return ssid;
-    } else if ( key == "INFO" ) {
-	config.setGroup("Info");
-	QString nm = config.readEntry("Name");
-	config.setGroup("Properties");
-	return nm;
-    } else if ( key == "MODE" ) {
-	bool ah=config.readEntry("IS_ADHOC").lower()=="y";
-	if ( ah )
-	    return "Ad-Hoc";
-	else
-	    return "Managed";
-    } else if ( key == "KEY" ) {
-	QString wep = config.readEntry("WEP");
-	if ( wep == "PP" ) {
-	    return "s:"+config.readEntry("PRIV_GENSTR");
-	} else {
-	    QString v=config.readEntry("dot11WEPDefaultKey"+wep[1]);
-	    v.replace(QRegExp(":"),"");
-	    return v;
-	}
-    } else {
-	return config.readEntry(key);
-    }
-}
-
-bool Lan::writePcmciaNetworkOpts( Config &config, QString scheme )
-{
-    QString prev = "/etc/pcmcia/network.opts";
-    QFile prevFile(prev);
-    if ( !prevFile.open( IO_ReadOnly ) ) {
-	QMessageBox::warning(0, tr("LAN Setup"), 
-		     tr( "<qt>The file /etc/pcmcia/network.opts does not exist. Please restore this file.</qt>") );
-	return FALSE;
-    }
-
-    QString tmp = prev + "-qpe-new";
-    QFile tmpFile(tmp);
-    if ( !tmpFile.open( IO_WriteOnly ) )
-	return FALSE;
-
-    bool retval = TRUE;
-    
-    QTextStream in( &prevFile );
-    QTextStream out( &tmpFile );
-
-    config.setGroup("Info");
-    QString nm = config.readEntry( "Name" );
-
-    config.setGroup("Properties");
-
-    //For DHCP to work, we have to remove the TCP/IP fields
-    bool dhcp = config.readEntry("DHCP","y") != "n";
-    
-    QString line;
-    bool found=FALSE;
-    bool done=FALSE;
-    while ( !in.atEnd() ) {
-	QString line = in.readLine();
-	QString wline = line.simplifyWhiteSpace();
-	if ( !done ) {
-	    if ( found ) {
-		if ( wline == ";;" ) {
-		    done = TRUE;
-		} else {
-		    int eq=wline.find("=");
-		    QString k,s,v;
-		    if ( eq > 0 ) {
-			k = wline.left(eq);
-			s = "=";
-		    } else if ( wline.left(8) == "start_fn" ) {
-			k = wline.left(8);
-			s = " () ";
-		    } else if ( wline.left(7) == "stop_fn" ) {
-			k = wline.left(7);
-			s = " () ";
-		    }
-		    if ( !k.isNull() ) {
-			QString v = config.readEntry(k);
-			if ( eq > 0 ) {
-			    if ( dhcp && k.left(4) != "DHCP" )
-				v = "";
-			    else
-				v = Global::shellQuote(v);
-			} else {
-			    if ( v.isEmpty() )
-				v = "{ return; }"; // No tr
-			}
-			line = "    " + k + s + v;
-		    }
-		}
-	    } else {
-		if ( wline.left(scheme.length()+7) == scheme + ",*,*,*)" ) {
-		    found=TRUE;
-		} else if ( wline == "esac" || wline == "*,*,*,*)" ) {
-		    // end - add new entry
-		    // Not all fields have a GUI, but all are supported
-		    // in the network configuration files.
-		    static const char* txtfields[] = {
-			"IF_PORT", "DHCP_HOSTNAME", "NETWORK",
-			"DOMAIN", "SEARCH", "MOUNTS",
-			"MTU", "NO_CHECK", "NO_FUSER",
-			"IPADDR", "NETMASK", "BROADCAST", "GATEWAY",
-			"DNS_1", "DNS_2", "DNS_3", 0
-		    };
-		    out << scheme << ",*,*,*)" << "\n"
-			<< "    INFO=" << Global::shellQuote(nm) << "\n"
-			<< "    BOOTP=" << config.readEntry("BOOTP","n") << "\n"
-			<< "    DHCP=" << config.readEntry("DHCP","y") << "\n"
-			<< "    start_fn () " << config.readEntry("start_fn","{ return; }") << "\n"
-			<< "    stop_fn () " << config.readEntry("stop_fn","{ return; }") << "\n"
-			;
-		    const char** f = txtfields;
-		    while (*f) {
-			out << "    " << *f << "=" 
-			    << Global::shellQuote(dhcp ? QString("") : config.readEntry(*f,""))
-			    << "\n";
-			++f;
-		    }
-		    out << "    ;;\n";
-		    done = TRUE;
-		}
-	    }
-	}
-	out << line << "\n";
-    }
-
-    prevFile.close();
-    tmpFile.close();
-
-    QString prevng = wlanopts;
-    QString tmpng = prevng + "-qpe-new";
-    QString prevwl = wirelessopts;
-    QString tmpwl = prevwl + "-qpe-new";
-
-    for (int ng=0; ng<2; ng++) {
-	prevFile.setName(ng ? prevng : prevwl);
-	if ( !prevFile.open( IO_ReadOnly ) ) {
-	    if ( ng )
-		prevng = QString::null;
-	    else
-		prevwl = QString::null;
-	    break;
-	}
-
-	tmpFile.setName(ng ? tmpng : tmpwl);
-	if ( !tmpFile.open( IO_WriteOnly ) )
-	    return FALSE;
-
-	QTextStream win( &prevFile );
-	QTextStream wout( &tmpFile );
-
-	found=FALSE;
-	done=FALSE;
-	QString wep = config.readEntry("WEP");
-	while ( !win.atEnd() ) {
-	    QString line = win.readLine();
-	    QString wline = line.simplifyWhiteSpace();
-	    if ( !done ) {
-		if ( found ) {
-		    if ( wline == ";;" ) {
-			done = TRUE;
-		    } else {
-			int eq=wline.find("=");
-			QString k,v;
-			if ( eq > 0 ) {
-			    k = wline.left(eq);
-			}
-			if ( !k.isNull() ) {
-			    QString v;
-			    if ( ng )
-				v = config.readEntry(k);
-			    else
-				v = ngToWireless(config,k);
-			    line = "    " + k + "=" + Global::shellQuote(v);
-			}
-		    }
-		} else {
-		    if ( wline.left(scheme.length()+7) == scheme + ",*,*,*)" ) {
-			found=TRUE;
-		    } else if ( wline == "esac" || wline == "*,*,*,*)" ) {
-			// end - add new entry
-
-			wout << scheme << ",*,*,*)" << "\n";
-
-			const char** f;
-			if ( ng ) {
-			    // Not all fields have a GUI, but all are supported
-			    // in the wlan configuration files.
-			    static const char* txtfields[] = {
-				"WLAN_ENABLE",
-				"USER_MIBS", "dot11ExcludeUnencrypted", "PRIV_GENERATOR",
-				"PRIV_KEY128", "BCNINT", "BASICRATES", "OPRATES",
-				"SSID", "IS_ADHOC", "CHANNEL", "PRIV_GENSTR",
-				"dot11WEPDefaultKey0", "dot11WEPDefaultKey1",
-				"dot11WEPDefaultKey2", "dot11WEPDefaultKey3",
-				"AuthType", "dot11PrivacyInvoked", "dot11WEPDefaultKeyID",
-				0
-			    };
-			    f = txtfields;
-			} else {
-			    static const char* txtfields[] = {
-				"NWID", "CHANNEL", "FREQ", "SENS", "RATE", "RTS", "FRAG",
-				"IWCONFIG", "IWSPY", "IWPRIV",
-
-				// these need translation
-				"ESSID", "INFO", "MODE", "KEY", 
-				0
-			    };
-			    f = txtfields;
-			}
-
-			while (*f) {
-			    QString v;
-			    if ( ng )
-				v = config.readEntry(*f,"");
-			    else
-				v = ngToWireless(config,*f);
-			    wout << "    " << *f << "=" 
-				    << Global::shellQuote(v) << "\n";
-			    ++f;
-			}
-			wout << "    ;;\n";
-			done = TRUE;
-		    }
-		}
-	    }
-	    wout << line << "\n";
-	}
-
-	prevFile.close();
-	tmpFile.close();
-    }
-
-    //system("cardctl suspend");
-    system("cardctl eject");
-
-    if ( system( "mv " + tmp + " " + prev ) )
-	retval = FALSE;
-    if ( !prevng.isNull() && system( "mv " + tmpng + " " + prevng ) )
-	retval = FALSE;
-    if ( !prevwl.isNull() && system( "mv " + tmpwl + " " + prevwl ) )
-	retval = FALSE;
-#ifdef USE_SCHEMES
-    if ( retval )
-	SchemeChanger::changeLanScheme(scheme);
-#endif
-
-    //system("cardctl resume");
-    system("cardctl insert");
-
-    return retval;
-}
-
-void Lan::accept()
-{
-    if ( writeConfig() )
-	QDialog::accept();
-}
-
-static QStringList findLans(const QString& skip=QString::null)
-{
-    QStringList srv = Network::choices();
-    QStringList lans;
-    for (QStringList::ConstIterator it=srv.begin(); it!=srv.end(); ++it) {
-	QString t = Network::serviceType(*it);
-	if ( t == "lan" ) {
-	    Config cfg(*it,Config::File);
-	    cfg.setGroup("Info");
-	    QString n = cfg.readEntry("Name");
-	    if ( n != skip )
-		lans.append(n);
-	}
-    }
-    return lans;
-}
-
-static QString findScheme(const QStringList& lans)
-{
-    QString scheme;
-    if ( lans.count() > 0 ) {
-	{
-	    Config c("Network");
-	    c.setGroup("Lan");
-	    scheme = c.readEntry("Scheme");
-	}
-	bool found=FALSE;
-	for (QStringList::ConstIterator it=lans.begin(); !found && it!=lans.end(); ++it) {
-	    if ( toSchemeId(*it) == scheme )
-		found = TRUE;
-	}
-	if ( !found )
-	    SchemeChanger::changeLanScheme( lans[0] );
-    } else {
-	{
-	    Config c("Network");
-	    c.setGroup("Lan");
-	    c.writeEntry("Scheme","default"); // No tr
-	}
-	SchemeChanger::changeLanScheme( "default" ); // No tr
-    }
-    return scheme;
-}
-
-
-LanImpl::LanImpl()
-{
+    //update state of this interface after each script execution
+    connect( &thread, SIGNAL(scriptDone()), this, SLOT(updateState()));
 }
 
 LanImpl::~LanImpl()
 {
+    if (configIface)
+        delete configIface;
+    configIface = 0;
+    qLog(Network) << "Deleting LanImpl instance";
 }
 
-QRESULT LanImpl::queryInterface( const QUuid &uuid, QUnknownInterface **iface )
+QtopiaNetworkInterface::Status LanImpl::status()
 {
-    *iface = 0;
-    if ( uuid == IID_QUnknown )
-	*iface = this;
-    else if ( uuid == IID_Network )
-	*iface = this;
-    else
-	return QS_FALSE;
-
-    (*iface)->addRef();
-    return QS_OK;
-}
-
-Q_EXPORT_INTERFACE()
-{
-    Q_CREATE_INSTANCE( LanImpl )
-}
-
-bool LanImpl::doProperties( QWidget *parent, Config& cfg )
-{
-    Lan dialog(cfg,parent);
-    dialog.showMaximized();
-    return dialog.exec();
-}
-
-bool LanImpl::create( Config& cfg )
-{
-    QStringList lans = findLans();
-    QString nm = cfg.readEntry("Name");
-    int n=1;
-    while ( lans.contains(nm) ) {
-	nm = "LAN " + QString::number(++n);
+    //don't change status - initialize has not been called yet
+    if ( ifaceStatus == QtopiaNetworkInterface::Unknown) {
+        return ifaceStatus;
     }
-    cfg.writeEntry("Name",nm);
-    return TRUE;
+
+    QtopiaNetworkInterface::Status status = QtopiaNetworkInterface::Unavailable;
+
+    if ( isAvailable() ) {
+        status = QtopiaNetworkInterface::Down;
+
+        if ( thread.remainingTasks() > 0 ) {
+            //still some jobs to do -> don't do anything until they are done
+            status = ifaceStatus;
+        } else {
+            switch( ifaceStatus ) {
+                case QtopiaNetworkInterface::Demand:
+                    status = ifaceStatus;
+                    break;
+                case QtopiaNetworkInterface::Pending:
+                default:
+                    if ( isActive() )
+                        status = QtopiaNetworkInterface::Up;
+                    break;
+            }
+        }
+    }
+
+    ifaceStatus = status;
+    netSpace->setAttribute( "State", (int)ifaceStatus );
+    updateTrigger();
+    return ifaceStatus;
 }
 
-bool LanImpl::remove( Config& cfg )
+void LanImpl::initialize()
 {
-#ifdef USE_SCHEMES
-    // Switch to another
-    cfg.setGroup("Info");
-    QStringList lans = findLans(cfg.readEntry("Name"));
-    findScheme(lans);
+    if ( !netSpace ) {
+        QString  path = QString("/Network/Interfaces/%1").arg( qHash( configIface->configFile() ) );
+        netSpace = new QValueSpaceObject( path, this );
+        netSpace->setAttribute( "Config", configIface->configFile() );
+        netSpace->setAttribute( "State", ifaceStatus );
+        netSpace->setAttribute( "ErrorString", tr("Interface hasn't been initialized yet.") );
+        netSpace->setAttribute( "Error", QtopiaNetworkInterface::NotInitialized );
+        netSpace->setAttribute( "NetDevice", QVariant() );
+        netSpace->setAttribute( "UpdateTrigger" , 0 );
+    }
+
+    if ( isAvailable() ) {
+        ifaceStatus = QtopiaNetworkInterface::Down;
+        qLog(Network) << "LanImpl: Using network interface: " <<deviceName;
+    } else {
+        ifaceStatus = QtopiaNetworkInterface::Unavailable;
+        qLog(Network) << "LanImpl: interface not available";
+    }
+
+    netSpace->setAttribute( "State", ifaceStatus );
+    updateTrigger();
+#ifndef NO_WIRELESS_LAN
+    QtopiaNetwork::Type t = type();
+    if ( t & QtopiaNetwork::WirelessLAN ) {
+        roaming = new RoamingMonitor( configIface, this );
+        connect( roaming, SIGNAL(changeNetwork()), this, SLOT(reconnectWLAN()) );
+    }
 #endif
-    return TRUE;
 }
 
-bool LanImpl::start( Config& cfg )
+void LanImpl::cleanup()
 {
-    cfg.setGroup("Info");
-#ifdef USE_SCHEMES
-    QString scheme = toSchemeId(cfg.readEntry("Name"));
-    system( "cardctl scheme " + scheme );
-    return TRUE;
+    if ( ifaceStatus != QtopiaNetworkInterface::Unknown ) {
+        ifaceStatus = QtopiaNetworkInterface::Unknown;
+        netSpace->setAttribute( "State", ifaceStatus );
+        updateTrigger();
+    } else {
+        return;
+    }
+
+    QStringList params;
+    params << "cleanup"; //no tr
+    thread.addScriptToRun( lanScript, params );
+
+    //remove network device assigned to this config
+    QString key = devToConfig->key( configIface->configFile() );
+    if ( !key.isEmpty() )
+        devToConfig->remove( key );
+}
+
+/*
+   lan-network route <iface> [-gw <gateway-IP>]
+*/
+bool LanImpl::setDefaultGateway()
+{
+    if ( deviceName.isEmpty() ) {
+        updateTrigger( QtopiaNetworkInterface::UnknownError,
+                tr("Cannot set default gateway.") );
+        qLog(Network) << "Cannot set default gateway";
+        return false;
+    }
+
+    qLog(Network) << "Settings default gateway to" <<configIface->configFile();
+    QStringList args;
+    args << "route";
+    args << deviceName;
+    const bool dhcp  = configIface->property("Properties/DHCP").toString() != "n";
+    if ( !dhcp ) {
+        QString gateway = configIface->property("Properties/GATEWAY").toString();
+        args << "-gw";
+        args << gateway;
+    }
+    thread.addScriptToRun( lanScript, args );
+
+    //new gateway may require new dns
+    installDNS( dhcp );
+    return true;
+}
+
+void LanImpl::installDNS(bool dhcp)
+{
+    if ( deviceName.isEmpty() )
+        return;
+
+    // if dns server is passed use them otherwise assume dns info via dhcp
+    // ### install eth0 dns [<dns1> <dns2>]
+    QStringList list;
+    list << "install";
+    list << deviceName;
+    list << "dns";
+    if ( !dhcp ) {
+        list << configIface->property("Properties/DNS_1").toString();
+        list << configIface->property("Properties/DNS_2").toString();
+    }
+
+    //write dns info
+    thread.addScriptToRun( lanScript, list );
+}
+
+bool LanImpl::start( const QVariant options )
+{
+    const QtopiaNetworkProperties prop = configIface->getProperties();
+    const bool dhcp = prop.value("Properties/DHCP").toString() != "n";
+
+    bool writeToSystem = prop.value("Info/WriteToSystem").toBool();
+#ifndef NO_WIRELESS_LAN
+    int netIndex = 0;
+    QtopiaNetwork::Type t = type();
+    if ( t & QtopiaNetwork::WirelessLAN ) {
+        QString essid = options.toString();
+        netIndex = roaming->selectWLAN( essid );
+
+        if (netIndex <= 0) {
+            qLog(Network) << "Invalid WLAN selected";
+            return false;
+        }
+
+        writeToSystem = true; //we always have to update the config since we change it very often
+        roaming->activeNotification( true );
+    }
 #else
-    return Lan::writeNetworkOpts( cfg );
+    Q_UNUSED( options );
 #endif
+    if ( ifaceStatus != QtopiaNetworkInterface::Down || deviceName.isEmpty() ) {
+        switch ( ifaceStatus )
+        {
+            case QtopiaNetworkInterface::Unknown:
+                updateTrigger( QtopiaNetworkInterface::NotInitialized,
+                        tr("Interface hasn't been initialized yet.") );
+                break;
+            case QtopiaNetworkInterface::Unavailable:
+                updateTrigger( QtopiaNetworkInterface::NotAvailable,
+                        tr("Interface is not available.") );
+                break;
+            case QtopiaNetworkInterface::Up:
+            case QtopiaNetworkInterface::Pending:
+            case QtopiaNetworkInterface::Demand:
+                updateTrigger( QtopiaNetworkInterface::NotConnected,
+                        tr("Interface already started/active.") );
+                break;
+            default:
+                break;
+        }
+        qLog(Network) << "LAN interface cannot be started "
+            << configIface->configFile();
+        return false;
+    }
+
+
+    if ( writeToSystem ) {
+        qLog(Network) << "Installing new set of configuration for " << deviceName;
+
+        QStringList params;
+        params << "install";
+        params << deviceName;
+
+        if ( dhcp ) {
+            // ### install <iface> dhcp
+            // dhcp takes care of everything
+            params << "dhcp";
+        } else {
+            // ### install <iface> static <ip> <netmask> <broadcast> <gateway>
+            params << "static";
+
+            bool missingOption = false;
+
+            QString temp = prop.value("Properties/IPADDR").toString();
+            if ( temp.isEmpty() ) {
+                qLog(Network) << "IP address missing";
+                missingOption = true;
+            } else {
+                params << temp;
+            }
+
+            temp = prop.value("Properties/SUBNET").toString();
+            if ( temp.isEmpty() ) {
+                qLog(Network) << "Subnet mask missing";
+                missingOption = true;
+            } else {
+                params << temp;
+            }
+
+            temp = prop.value("Properties/BROADCAST").toString();
+            if ( temp.isEmpty() ) {
+                qLog(Network) << "Broadcast address missing";
+                missingOption = true;
+            } else {
+                params << temp;
+            }
+
+            temp = prop.value("Properties/GATEWAY").toString();
+            if ( temp.isEmpty() ) {
+                qLog(Network) << "Gateway address missing";
+                missingOption = true;
+            } else {
+                params << temp;
+            }
+
+            if ( missingOption )
+                return false;
+        }
+
+        thread.addScriptToRun( lanScript, params );
+
+#ifndef NO_WIRELESS_LAN
+        if ( t & QtopiaNetwork::WirelessLAN ) {
+            // ### install <iface> wireless
+            // ###    [-essid <ESSID>] [-mode <Master|Managed|Ad-Hoc>]
+            // ###    [-ap <AP>] [-bitrate <value>] [-nick <nickname>] [-channel <CHANNEL>]
+            // ###    [-authmode <open|shared> -multikey <defaultKey> <key1> <key2> <key3> <key4>]
+            // ###    [-authmode <open|shared> -phrase <passphrase> ]
+            // ###    [-authmode <none> -nokey ]
+            // ###    [-authmode <WPA-PSK> <password> ]
+            // ###    [-authmode <WPA-EAP> <TTLS|PEAP> <client cert> <server cert> ]
+            // ###    [-authmode <WPA-EAP> <TLS> <identity> <password> ]
+            // ###    [-keylength <128|64> ]
+
+            const QString keyPrefix = QString("WirelessNetworks/%1/").arg(netIndex);
+            params.clear();
+            params << "install";
+            params << deviceName;
+            params << "wireless";
+
+            QString temp = prop.value(keyPrefix+"WirelessMode").toString();
+            if ( !temp.isEmpty() ) {
+                params << "-mode";
+                params << temp;
+            }
+
+            temp = prop.value(keyPrefix+"ESSID").toString();
+            if ( !temp.isEmpty() ) {
+                params << "-essid";
+                params << Qtopia::shellQuote(temp);
+            }
+
+            params << "-ap";
+            params << Qtopia::shellQuote( prop.value(keyPrefix+"AccessPoint").toString() );
+
+            temp = prop.value(keyPrefix+"BitRate").toString();
+            if ( !temp.isEmpty() ) {
+                params << "-bitrate";
+                params << temp;
+            }
+
+            temp = prop.value(keyPrefix+"Nickname").toString();
+            if ( !temp.isEmpty() ) {
+                params << "-nick";
+                params << Qtopia::shellQuote(temp);
+            }
+
+            temp = prop.value(keyPrefix+"CHANNEL").toString();
+            if ( !temp.isEmpty() ) {
+                params << "-channel";
+                params << temp;
+            }
+
+            temp = prop.value(keyPrefix+"KeyLength", QString("128")).toString();
+            params << "-keylength";
+            params << temp;
+
+            QString encryptMode = prop.value(keyPrefix+"Encryption", QString("open")).toString();
+            params << "-authmode";
+            params << encryptMode;
+
+            if ( encryptMode == "open" || encryptMode == "shared" ) {
+                const QString defaultKey = prop.value(keyPrefix+"SelectedKey").toString();
+                const QString pw = prop.value(keyPrefix+"PRIV_GENSTR").toString();
+                const bool isPassPhrase = defaultKey == "PP";
+                if ( isPassPhrase ) {
+                    params << "-phrase";
+                    params << Qtopia::shellQuote(pw);
+                } else {
+                    params << "-multikey";
+                    params << defaultKey.right(1);
+                    for ( int i = 1; i<5; i++ ) {
+                        params << Qtopia::shellQuote(
+                            prop.value(keyPrefix+"WirelessKey_"+QString::number(i)).toString());
+                    }
+                }
+            } else if ( encryptMode == QLatin1String("none") ) {
+                params << "-nokey";
+            } else if ( encryptMode == QLatin1String("WPA-PSK") ) {
+                params << Qtopia::shellQuote(prop.value(keyPrefix+QLatin1String("PRIV_GENSTR"), QLatin1String("")).toString());
+            } else if ( encryptMode == QLatin1String("WPA-EAP") ) {
+               temp = prop.value(keyPrefix+QLatin1String("WPAEnterprise"), QLatin1String("TLS")).toString();
+               params << temp;
+               if ( temp == QLatin1String("TLS") ) {
+                   params << prop.value(keyPrefix+QLatin1String("Identity")).toString();
+                   params << prop.value(keyPrefix+QLatin1String("IdentityPassword")).toString();
+               } else if ( temp == QLatin1String("TTLS") || temp == QLatin1String("PEAP") ) {
+                   params << prop.value(keyPrefix+QLatin1String("ClientCert")).toString();
+                   params << prop.value(keyPrefix+QLatin1String("ServerCert")).toString();
+               } else {
+                   qLog(Network) << QLatin1String("Unknown encryption algorithm for WPA Enterprise");
+                   return false;
+               }
+            } else {
+                qLog(Network) << QLatin1String("Invalid encryption for WLAN:") << encryptMode;
+                return false;
+            }
+
+            thread.addScriptToRun( lanScript, params );
+        }
+#endif
+
+        //Remove WriteToSystem value
+        QtopiaNetworkProperties p;
+        p.insert("Info/WriteToSystem", false);
+        configIface->writeProperties( p );
+    }
+
+    QStringList args;
+    // ### start <iface>
+    args << "start";
+    args << deviceName;
+    thread.addScriptToRun( lanScript, args );
+    //we have to wait a bit until this interface is actually online
+    //->then it can become the default gateway ->installs dns details as well
+    ifaceStatus = QtopiaNetworkInterface::Pending;
+    netSpace->setAttribute( "State", ifaceStatus );
+    updateTrigger();
+    delayedGatewayInstall = true;
+    return true;
 }
 
-bool LanImpl::stop( Config& cfg )
+bool LanImpl::stop()
 {
-    // Not implemented
-    return !isActive(cfg);
+#ifndef NO_WIRELESS_LAN
+    if ( type() & QtopiaNetwork::WirelessLAN )
+        roaming->activeNotification( false );
+#endif
+    switch (ifaceStatus ) {
+        case QtopiaNetworkInterface::Pending:
+        case QtopiaNetworkInterface::Demand:
+        case QtopiaNetworkInterface::Up:
+            break;
+        case QtopiaNetworkInterface::Unknown:
+        case QtopiaNetworkInterface::Unavailable:
+        case QtopiaNetworkInterface::Down:
+        default:
+            updateTrigger( QtopiaNetworkInterface::UnknownError,
+                    tr("Interface is not running.") );
+            return true;
+    }
+
+    // ### stop eth0
+    QStringList args;
+    args << "stop";
+    args << deviceName;
+    thread.addScriptToRun( lanScript, args );
+    updateTrigger();
+    return true;
 }
 
-class LanStateImpl : public LanState {
-    Q_OBJECT
-public:
-    LanStateImpl(QWidget* parent, const QString &dev) : LanState(parent), device(dev)
-    {
-	QStringList lans = findLans();
-	QString scheme = findScheme(lans);
-	if ( lans.count() > 1 ) {
-	    services->insertStringList(lans);
-	    for(QStringList::Iterator it=lans.begin(); it!=lans.end(); ++it)
-		*it = toSchemeId(*it);
-	    services->setCurrentItem(lans.findIndex(scheme));
-	    SchemeChanger* sc = new SchemeChanger(this);
-	    QObject::connect(services,SIGNAL(activated(const QString&)),
-		sc,SLOT(changeLanSchemeSlot(const QString&)));
-	} else {
-	    services->hide();
-	    services_label->hide();
-	}
-	if ( !device[(int)device.length()-1].isDigit() )
-	    device += "0";
-	tid = startTimer(1000);
-	updateDisplay();
-    }
-
-    void timerEvent(QTimerEvent*)
-    {
-	updateDisplay();
-	if ( ipaddress->text()[0] != 'e' ) {
-	    // slow down
-	    killTimer(tid);
-	    tid = startTimer(5000);
-	}
-    }
-
-    bool ok() const
-    {
-	return !ipaddress->text().isEmpty();
-    }
-
-private slots:
-    void updateDisplay()
-    {
-	QString ipaddr;
-	Process p(QStringList() << "ifconfig" << device);
-	if ( p.exec( "", ipaddr ) ) {
-	    ipaddr.replace(QRegExp(".*inet addr:"),"");
-	    ipaddr.replace(QRegExp(" .*"),"");
-	    ipaddress->setText(ipaddr);
-	} else {
-	    ipaddress->setText("");
-	}
-    }
-
-private:
-    int tid;
-    QString device;
-};
-
-QWidget* LanImpl::addStateWidget( QWidget* parent, Config& cfg ) const
+QString LanImpl::device() const
 {
-    if ( isActive(cfg) ) {
-	cfg.setGroup( "Properties" );
-	QString dev = cfg.readEntry( "Device" );
-	LanStateImpl* state = new LanStateImpl(parent, dev);
-	if ( state->ok() )
-	    return state;
-	delete state;
-    }
-    return 0;
+    return deviceName;
 }
 
-bool LanImpl::isActive( Config& cfg ) const
+QtopiaNetwork::Type LanImpl::type() const
 {
-    if ( NetworkInterface::isActive(cfg) ) {
-	QString n,s;
-	{
-	    cfg.setGroup("Info");
-	    n = toSchemeId(cfg.readEntry("Name"));
-	    Config c("Network");
-	    c.setGroup("Lan");
-	    s = c.readEntry("Scheme");
-	}
-	if ( s.isNull() ) {
-	    s=n;
-	    SchemeChanger::changeLanScheme( s );
-	}
-	if ( s==n )
-	    return TRUE;
-    }
-    return FALSE;
+    return QtopiaNetwork::toType( configIface->configFile() );
 }
 
-bool LanImpl::isAvailable( Config& cfg ) const
+/*!
+  \internal
+
+  Returns true if \a dev is a PCMCIA device.
+*/
+bool LanImpl::isPCMCIADevice( const QString& dev ) const
 {
-    return NetworkInterface::isAvailable(cfg);
+    FILE* f = fopen("/var/run/stab", "r");
+    if (!f) f = fopen("/var/state/pcmcia/stab", "r");
+    if (!f) f = fopen("/var/lib/pcmcia/stab", "r");
+
+    if ( f ) {
+        char buffer[1024];
+        while ( fgets( buffer, 1024, f ) ) {
+            if ( strstr( buffer, "network") && strstr( buffer, dev.toAscii().constData() ) ) {
+                fclose( f );
+                return true;
+            }
+        }
+        fclose( f );
+    }
+
+    return false;
 }
 
+bool LanImpl::isAvailable() const
+{
+    const QtopiaNetwork::Type t = type();
+    const bool wireless = (t & QtopiaNetwork::WirelessLAN);
+    //const bool scannerRequested = configIface->property("WirelessNetworks/Timeout").toInt() > 0;
+    int sock = -1;
+    if ( (sock = socket( AF_INET, SOCK_DGRAM, 0)) < 0 ) {
+        qLog(Network) << "Cannot open INET socket";
+        return false;
+    }
 
-#include "lan.moc"
+    FILE* f = fopen("/proc/net/dev", "r");
+    if ( f ) {
+        char line[1024];
+        qLog(Network) << "LanImpl: Searching for (W)LAN network interfaces";
+        while ( fgets( line, 1024, f ) ) {
+            QString buffer(line);
+            int index = buffer.indexOf( QChar(':') );
+            if ( index >= 0 ) {
+                QString dev = buffer.left(index).trimmed();
+                if ( dev.startsWith( "eth" ) || dev.startsWith( "wlan" ) ) {
+                    //it is a wireless or ethernet
+                    int flags = 0;
+                    struct ifreq ifrq2;
+
+                    strcpy( ifrq2.ifr_name, dev.toLatin1().constData() );
+                    if ( ioctl( sock, SIOCGIFFLAGS, &ifrq2 ) < 0 ) {
+                        qLog(Network) << "SIOCGIFFLAGS failed";
+                        continue;
+                    }
+                    flags = ifrq2.ifr_flags;
+                    if ( (flags & IFF_BROADCAST) != IFF_BROADCAST ) //we want ethernet
+                        continue;
+
+                    bool isPCMCIA = isPCMCIADevice( dev );
+                    //PCMCIAMatch is true if the configuration file has the same
+                    //type as the device in /proc/net/dev <==> !(a^b)
+                    bool PCMCIAMatch =
+                             (isPCMCIA && (t & QtopiaNetwork::PCMCIA))
+                             || (!isPCMCIA && !(t & QtopiaNetwork::PCMCIA));
+
+#ifndef NO_WIRELESS_LAN
+                    struct iwreq wrq;
+                    strcpy( wrq.ifr_name, dev.toLatin1().constData() );
+                    int ret = ioctl( sock, SIOCGIWNAME, &wrq );
+                    //ret is <0 if this device is not a wireless device
+                    if ( ret < 0 ) {
+#endif
+                        if ( !wireless &&
+                            //check that nobody else apart from this config uses this device already
+                            (!devToConfig->contains( dev) || devToConfig->value(dev) == configIface->configFile() ))
+                        {
+                            if ( PCMCIAMatch )
+                            {
+                                qLog(Network) << "Using ethernet interface" << dev << (isPCMCIA ? "on PCMCIA device" : "");
+                                deviceName = dev;
+                                netSpace->setAttribute( "NetDevice", deviceName );
+                                devToConfig->insert( deviceName, configIface->configFile() );
+                                fclose( f );
+                                ::close( sock );
+                                return true;
+                            }
+                        }
+#ifndef NO_WIRELESS_LAN
+                    } else{
+                        if ( wireless &&
+                            //check that nobody else apart from this config uses this device already
+                            ( !devToConfig->contains( dev ) || devToConfig->value(dev) == configIface->configFile() ) )
+                        {
+                            if ( PCMCIAMatch )
+                            {
+                                qLog(Network) << "Using wireless interface" << dev << (isPCMCIA ? "on PCMCIA device" : "");
+                                deviceName = dev;
+                                netSpace->setAttribute( "NetDevice", deviceName );
+                                devToConfig->insert( deviceName, configIface->configFile() );
+                                fclose( f );
+                                ::close( sock );
+                                return true;
+                            }
+                        }
+                    }
+#endif
+                }
+            }
+        }
+        fclose( f );
+    }
+
+    //we couldn't find a suitable device ->
+    //make sure we don't have a device assigned to this config
+    if ( !deviceName.isEmpty()
+            && devToConfig->contains( deviceName )
+            && devToConfig->value( deviceName ) == configIface->configFile() ) {
+        //this deviceName was assigned to this plugin => remove it now so that
+        //we can assign it to a different plugin at a later stage
+       devToConfig->remove( deviceName );
+    }
+    deviceName = QString();
+    netSpace->setAttribute( "NetDevice", QVariant() );
+
+    ::close( sock );
+
+    qLog(Network) << "LanImpl: No (W)LAN network interface found";
+    return false;
+}
+
+bool LanImpl::isActive() const
+{
+    if (deviceName.isEmpty())
+        return false;
+
+    //TODO support for IPv4 only (PF_INET6)
+    int inetfd = socket( PF_INET, SOCK_DGRAM, 0 );
+    if ( inetfd == -1 )
+        return false;
+
+    int flags = 0;
+    struct ifreq ifreqst;
+    strcpy( ifreqst.ifr_name, deviceName.toLatin1().constData() );
+    int ret = ioctl( inetfd, SIOCGIFFLAGS, &ifreqst );
+    if ( ret == -1 ) {
+        int error = errno;
+        qLog(Network) << "LanImpl: " << strerror( error );
+        ::close( inetfd );
+        return false;
+    }
+
+
+    flags = ifreqst.ifr_flags;
+    if ( ( flags & IFF_UP ) == IFF_UP  &&
+            (flags & IFF_LOOPBACK) != IFF_LOOPBACK &&
+            (flags & IFF_BROADCAST) == IFF_BROADCAST ) {
+        //qLog(Network) << "LanImpl: " <<  deviceName << " is up and running";
+        ::close( inetfd );
+        return true;
+    }
+
+    qLog(Network) << "LanImpl: device is offline" ;
+    ::close( inetfd );
+    return false;
+}
+
+QtopiaNetworkConfiguration * LanImpl::configuration()
+{
+    return configIface;
+}
+
+void LanImpl::setProperties( const QtopiaNetworkProperties& properties )
+{
+    configIface->writeProperties(properties);
+}
+
+void LanImpl::updateTrigger( QtopiaNetworkInterface::Error code, const QString& desc )
+{
+    if ( !netSpace )
+        return;
+    trigger = (++trigger)%256;
+    if ( !desc.isEmpty() ) //do not override old error string if nothing to report
+        netSpace->setAttribute( "ErrorString", desc );
+    netSpace->setAttribute( "Error", code );
+    netSpace->setAttribute( "UpdateTrigger", trigger );
+}
+
+void LanImpl::reconnectWLAN()
+{
+    qLog(Network) << "Reconnecting WLAN on interface" << device();device();
+    stop();
+    start( QVariant() );
+}
+
+void LanImpl::updateState()
+{
+    status(); //update state first and then set new gateway
+    if ( delayedGatewayInstall ) {
+        if ( ifaceStatus == QtopiaNetworkInterface::Up ) {
+            QtopiaNetwork::setDefaultGateway( configIface->configFile() );
+            delayedGatewayInstall = false;
+        } else if ( ifaceStatus == QtopiaNetworkInterface::Down
+                || ifaceStatus == QtopiaNetworkInterface::Unavailable ) {
+            // do not update gateway when we suddenly drop out during the startup of the network
+            delayedGatewayInstall = false;
+        } // else { //wait until we are online }
+    }
+}

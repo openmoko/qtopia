@@ -1,0 +1,10 @@
+Files: bin/qtmail pics/qtmail/* apps/Applications/qtmail.desktop services/Email/qtmail
+Priority: optional
+Section: qpe
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: $CPU_ARCH
+Arch: $DEVICE_ARCH
+Version: $QPE_VERSION-19
+Depends: qpe-libqtopia qpe-qtopiamail qpe-pim
+Description: E-mail Application
+ The e-mail application for the Qtopia environment.

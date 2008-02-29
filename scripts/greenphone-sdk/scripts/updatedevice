@@ -1,0 +1,112 @@
+#!/bin/sh
+
+. /opt/Qtopia/SDK/scripts/functions
+
+QPEVER=`version`
+
+DEVICEIP=10.10.10.20
+
+prepare_device()
+{
+    cd $TEMPDIR
+    
+    HELPER=updatedevice_helper.sh
+    cat >$HELPER <<EOF
+#!/bin/sh
+export PATH=/mnt/user/tools:/opt/Qtopia/bin:/usr/bin:/bin:/sbin:/usr/sbin
+killall qpe.sh qpe quicklauncher sipagent qss netsetup
+LIST=\`ps |sed -n -e '/Qtopia/ s/root.*//p'\`
+for i in \$LIST 
+do 
+  kill $i
+done
+sleep 5
+umount /opt/Qtopia.rom
+echo "">/etc/resolv.conf
+/usr/local/bin/gifanim /mnt/user/tools/splash.gif &
+sleep 5
+rm -f /qtopia.cramfs 
+rm -f /qtopia_default.tgz
+sync
+EOF
+    expect -c 'set timeout 300;log_user 0; spawn telnet 10.10.10.20; expect root@; send "rm -rf /mnt/user_local/*\r"; expect root@'
+
+    ftpput -u anonymous $DEVICEIP / $HELPER
+    rm -f $HELPER
+    expect -c 'set timeout 300;log_user 0; spawn telnet 10.10.10.20; expect root@; send "chmod 555 /mnt/user_local/updatedevice_helper.sh\r"; expect root@; send "/mnt/user_local/updatedevice_helper.sh\r"; expect root@'
+}
+
+extract_image()
+{
+    tar -C $TEMPDIR -xzf $QTOPIA_IMAGE
+}
+
+upload_image()
+{  
+    cd $TEMPDIR
+    for i in * ; do
+        ftpput -u anonymous $DEVICEIP / $i
+    done
+    
+    HELPER=updatedevice_helper.sh
+    cat >$HELPER <<EOF
+#!/bin/sh
+umount /mnt/sd
+mount /dev/tffsd /mnt/sd
+chmod 555 /mnt/sd/trolltech_flash.sh
+/mnt/sd/trolltech_flash.sh --dont-reboot --remove-flash-files
+sleep 5
+sync
+echo "FLASHFINISHED!"
+EOF
+
+    ftpput -u anonymous $DEVICEIP / $HELPER
+    rm -f $HELPER
+}
+
+install_image()
+{
+    expect -c 'set timeout 800; log_user 0; spawn telnet 10.10.10.20; expect root@; send "chmod 555 /mnt/user_local/updatedevice_helper.sh\r"; expect root@; send "/mnt/user_local/updatedevice_helper.sh\r"; expect FLASHFINISHED'
+    expect -c 'set timeout 300;log_user 0; spawn telnet 10.10.10.20; expect root@; send "rm -f /mnt/user_local/trolltech_flash.sh; sync;reboot\r"; expect root@'
+}
+
+if [ $# -eq 0 ]; then
+    QTOPIA_IMAGE=/opt/Qtopia/SDK/$QPEVER/greenphone/qtopia-greenphone-update.tar.gz
+elif [ $# -eq 1 ]; then    
+    QTOPIA_IMAGE=$1
+else
+    echo "usage: $0 [image]"
+    exit 1
+fi
+
+rm -Rf /tmp/updatedevice.*
+
+TEMPDIR=`mktemp -d /tmp/updatedevice.XXXXXX`
+
+clear
+echo -n "WARNING: Updating the device will delete all Documents and Settings! Do you wish to continue? (y/n): "
+read option
+if [ "$option" != "y" ] ; then
+    echo "Update device aborted by user."
+    echo
+    exit
+fi
+
+if gph -net; then
+  echo "Network up, continue with flash"
+else
+  exit
+fi
+echo "Starting Flash process, please wait..."
+prepare_device
+echo "device prep stage complete."
+extract_image
+echo "extract stage complete."
+upload_image
+echo "uploading image stage complete."
+echo
+echo "Flashing begins..........please wait....."
+install_image
+echo "Image installed, phone will reset automatically and start Qtopia"
+echo
+echo

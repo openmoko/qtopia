@@ -1,6 +1,7 @@
 #!/bin/sh
 NEWTYPE=$1
 EXT=$2
+QTOPIA_INSTALL_PREFIX=/opt/Qtopia # set to the -prefix location at install time
 
 if [ -z "$NEWTYPE" -o -z "$EXT" ]
 then
@@ -13,24 +14,24 @@ fi
 T=${NEWTYPE%/*}
 S=${NEWTYPE#*/}
 
-grep -w $EXT $QPEDIR/etc/mime.types |
+grep -w '[[:space:]]'$EXT'\>' $QTOPIA_INSTALL_PREFIX/etc/mime.types |
 (
     read TYPE EXTS
     if [ -z "$TYPE" ]
     then
-	if grep -q "^$NEWTYPE[ 	]" $QPEDIR/etc/mime.types || grep -q "^$NEWTYPE$" $QPEDIR/etc/mime.types
+	if grep -q "^$NEWTYPE[ 	]" $QTOPIA_INSTALL_PREFIX/etc/mime.types || grep -q "^$NEWTYPE$" $QTOPIA_INSTALL_PREFIX/etc/mime.types
 	then
-	    if sed -e '/^'$T"\\/"$S'[ 	]/ s/$/ '$EXT'/' <$QPEDIR/etc/mime.types >$QPEDIR/etc/mime.types.new ||
-	       sed -e '/^'$T"\\/"$S'$/ s/$/		'$EXT'/' <$QPEDIR/etc/mime.types >$QPEDIR/etc/mime.types.new
+	    if sed -e '/^'$T"\\/"$S'[ 	]/ s/$/ '$EXT'/' <$QTOPIA_INSTALL_PREFIX/etc/mime.types >$QTOPIA_INSTALL_PREFIX/etc/mime.types.new ||
+	       sed -e '/^'$T"\\/"$S'$/ s/$/		'$EXT'/' <$QTOPIA_INSTALL_PREFIX/etc/mime.types >$QTOPIA_INSTALL_PREFIX/etc/mime.types.new
 	    then
-		mv $QPEDIR/etc/mime.types.new $QPEDIR/etc/mime.types
+		mv $QTOPIA_INSTALL_PREFIX/etc/mime.types.new $QTOPIA_INSTALL_PREFIX/etc/mime.types
 		exit 0
 	    else
 		echo >&2 "Internal MIME type update error" 
 		exit 1
 	    fi
 	else
-	    echo "$NEWTYPE		$EXT" >>$QPEDIR/etc/mime.types
+	    echo "$NEWTYPE		$EXT" >>$QTOPIA_INSTALL_PREFIX/etc/mime.types
 	    exit 0
 	fi
     elif [ "$TYPE" = "$NEWTYPE" ]

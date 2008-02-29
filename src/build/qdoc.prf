@@ -1,0 +1,35 @@
+exists($$QPEDIR/src/build/trace_on):message(qdoc.prf)
+# Run qdoc over the files in this project
+
+run_qdoc:exists($$DQTDIR/util/qdoc3/qdoc3) {
+    # We need a template .qdocconf file
+    QDOC_TEMPLATE=$$QTOPIA_DEPOT_PATH/src/build/qdoc_template.qdocconf
+    # The actual .qdocconf file to use
+    QDOC_FILE=$$OUT_PWD/make.qdocconf
+
+    # Create the actual .qdocconf file from the template
+    genqdoctemplate.input=QDOC_TEMPLATE
+    genqdoctemplate.output=dummy_genqdoctemplate
+    genqdoctemplate.name=genqdoctemplate
+    genqdoctemplate.commands=$$COMMAND_HEADER\
+        perl -pe 's,SRCDIR,$$SRCDIR,;s,OUT_PWD,$$OUT_PWD,' <${QMAKE_FILE_IN} >$$QDOC_FILE
+    genqdoctemplate.CONFIG=no_link no_clean combine
+    QMAKE_EXTRA_COMPILERS+=genqdoctemplate
+
+    # Run qdoc
+    runqdoc.input=QDOC_TEMPLATE
+    runqdoc.output=dummy_runqdoc
+    runqdoc.name=runqdoc
+    runqdoc.commands=\#$$COMMAND_HEADER\
+        QPEDIR=$$QPEDIR \
+        QTOPIA_DEPOT_PATH=$$QTOPIA_DEPOT_PATH \
+        QT_DEPOT_PATH=$$QTE_DEPOT_PATH \
+        $$DQTDIR/util/qdoc3/qdoc3 $$QDOC_FILE
+    runqdoc.CONFIG=no_link no_clean combine
+    runqdoc.depends=compiler_genqdoctemplate_make_all
+    QMAKE_EXTRA_COMPILERS+=runqdoc
+
+    # Make this a dependency of the 'all' target
+    ALL_DEPS+=compiler_runqdoc_make_all
+}
+

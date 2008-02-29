@@ -1,0 +1,24 @@
+#!/bin/sh
+
+if [ -d /opt/teambuilder ]; then
+    # our bin path has special wrapper scripts that set TEAMBUILDER_SYSTEM
+    export PATH="$DEVICE_CONFIG_PATH/bin:/opt/teambuilder/bin:/opt/toolchains/iwmmxt-vfp/arm-linux/bin:$PATH"
+    # remove any arm-linux-* stuff from TEAMBUILDER_CC_VERSION
+    export TEAMBUILDER_CC_VERSION="$(echo $TEAMBUILDER_CC_VERSION | sed 's/arm-linux-[^:]*:[[digit].][[digit].]*;*//')"
+    # check to see how the variable is set
+    if [ -n "$TEAMBUILDER_CC_VERSION" ]; then
+        echo "$TEAMBUILDER_CC_VERSION" | grep ':' >/dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            # handle the old-style setting (ie. just a version number)
+            export TEAMBUILDER_CC_VERSION="*:$TEAMBUILDER_CC_VERSION"
+        fi
+    fi
+    # set arm-linux-* to version 3.4.3, keeping the rest of the TEAMBUILDER_CC_VERSION (for the host compile)
+    export TEAMBUILDER_CC_VERSION="arm-linux-*:3.4.3;$TEAMBUILDER_CC_VERSION"
+    # this must not be set or cross compiles won't be farmed out
+    if [ "$TEAMBUILDER_SYSTEM" = 'iwmmxt:vfp' ]; then
+        unset TEAMBUILDER_SYSTEM
+    fi
+else
+    export PATH="/opt/toolchains/iwmmxt-vfp/arm-linux/bin:$PATH"
+fi

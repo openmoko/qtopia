@@ -1,158 +1,243 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
---></style>
-</head><body bgcolor="#ffffff">
-
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-
-<h1 align=center>QSizePolicy Class Reference</h1><br clear="all">
-<p>
-The QSizePolicy class is a layout attribute describing horizontal and vertical resizing.
-<a href="#details">More...</a>
-<p>
-<code>#include &lt;<a href="qsizepolicy-h.html">qsizepolicy.h</a>&gt;</code>
-<p><a href="qsizepolicy-members.html">List of all member functions.</a>
-<h2>Public Members</h2>
-<ul>
-<li><div class="fn">enum <a href="#SizeType"><b>SizeType</b></a> { Fixed = 0, Minimum = MayGrow, Maximum = MayShrink, Preferred = MayGrow|MayShrink, MinimumExpanding = Minimum|ExpMask, Expanding = MinimumExpanding|MayShrink }</div>
-<li><div class="fn">enum <a href="#ExpandData"><b>ExpandData</b></a> { NoDirection = 0, Horizontal = 1, Vertical = 2, BothDirections = Horizontal | Vertical }</div>
-<li><div class="fn"><a href="#de3d1c"><b>QSizePolicy</b></a> () </div>
-<li><div class="fn"><a href="#3f0af9"><b>QSizePolicy</b></a> ( SizeType hor, SizeType ver, bool hfw = FALSE ) </div>
-<li><div class="fn">SizeType <a href="#ba357c"><b>horData</b></a> () const</div>
-<li><div class="fn">SizeType <a href="#d1d60d"><b>verData</b></a> () const</div>
-<li><div class="fn">bool <a href="#431429"><b>mayShrinkHorizontally</b></a> () const</div>
-<li><div class="fn">bool <a href="#d5d737"><b>mayShrinkVertically</b></a> () const</div>
-<li><div class="fn">bool <a href="#1a99b2"><b>mayGrowHorizontally</b></a> () const</div>
-<li><div class="fn">bool <a href="#5cdd5f"><b>mayGrowVertically</b></a> () const</div>
-<li><div class="fn">ExpandData <a href="#46a792"><b>expanding</b></a> () const</div>
-<li><div class="fn">void <a href="#da085a"><b>setHorData</b></a> ( SizeType d ) </div>
-<li><div class="fn">void <a href="#365c40"><b>setVerData</b></a> ( SizeType d ) </div>
-<li><div class="fn">void <a href="#49bc86"><b>setHeightForWidth</b></a> ( bool b ) </div>
-<li><div class="fn">bool <a href="#445766"><b>hasHeightForWidth</b></a> () const</div>
-<li><div class="fn">bool <b>operator==</b> ( const QSizePolicy &amp; s ) const</div>
-<li><div class="fn">bool <b>operator!=</b> ( const QSizePolicy &amp; s ) const</div>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: QSizePolicy Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QSizePolicy Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<p>The QSizePolicy class is a layout attribute describing horizontal and vertical resizing policy. <a href="#details">More...</a></p>
+<pre> #include &lt;QSizePolicy&gt;</pre><ul>
+<li><a href="qsizepolicy-members.html">List of all members, including inherited members</a></li>
+<li><a href="qsizepolicy-qt3.html">Qt 3 support members</a></li>
 </ul>
-<hr><h2><a name="details"></a>Detailed Description</h2>
-The QSizePolicy class is a layout attribute describing horizontal and vertical resizing.
-<p>
-The size policy of a widget is an expression of its willingness to
-be resized in various ways.
-<p>Widgets which reimplement <a href="qwidget.html#23726d">QWidget::sizePolicy</a>() return a QSizePolicy
-describing the horizontal and vertical resizing policy best used
-when laying out the widget.  Only <a href="#interesting">one of the
-constructors</a> is of interest in most applications.
-<p>QSizePolicy contains two independent <a href="#SizeType">SizeType</a> objects, one which describes
-the widgets's horizontal size policy and one which describes its
-vertical size policy, and it contains a flag to indicate whether the
-height and width of its preferred size are related.
-<p>The per-dimension SizeType objects are set in the usual constructor,
-and can be queried using a variety of functions, none of which are
-really interesting to application programmers.
-<p>The <a href="#445766">hasHeightForWidth</a>() flag indicates whether the widget's sizeHint()
-is width-dependent (like a word-wrapping label).
-<p>See also  <a href="#SizeType">QSizePolicy::SizeType</a>.
-<p>Examples:
- <a href="xform-xform-cpp.html#QSizePolicy">xform/xform.cpp</a>
-
-<hr><h2>Member Type Documentation</h2>
-<h3 class="fn"><a name="ExpandData">QSizePolicy::ExpandData</a></h3>
-This enum type describes in which directions a widget can make use of
-extra space.  There are four possible values: <ul>
-<li> <code>NoDirection</code> - the widget cannot make us of extra space in any
-direction.
-<li> <code>Horizontal</code> - the widget can usefully be wider than sizeHint()
-says.
-<li> <code>Vertical</code> - the widget can usefully be taller than sizeHint()
-says.
-<li> <code>BothDirections</code> - the widget can usefully be both wider and
-taller than sizeHint() says.
-<p></ul>
-<h3 class="fn"><a name="SizeType">QSizePolicy::SizeType</a></h3>
-The per-dimension sizing types used when constructing a QSizePolicy
-are: <ul>
-<li> <code>Fixed</code> - the sizeHint() is the only acceptable alternative, so
-widget can never grow or shrink (eg. the vertical direction of a
-pushbutton).
-<li> <code>Minimum</code> - the sizeHint() is minimal, and sufficient. The
-widget can be expanded, but there is no advantage to it being
-larger (eg. the horizontal direction of a pushbutton).
-<li> <code>Maximum</code> - the sizeHint() is a maximum.  The widget can be
-shrunk any amount without detriment if other widgets need the space
-(eg. a separator line).
-<li> <code>Preferred</code> - the sizeHint() is best, but the widget can be
-shrunk below that and still be useful. The widget can be expanded, but
-there is no advantage to it being larger than sizeHint() (the default
-<a href="qwidget.html">QWidget</a> policy).
-<li> <code>MinimumExpanding</code> - the sizeHint() is a minimum.  The widget
-can make use of extra space, so it should get as much space as
-possible (not currently used by any standard Qt widgets).
-<li> <code>Expanding</code> - the sizeHint() is a sensible size, but the
-widget can be shrunk below that and still be useful. The widget can
-make use of extra space, so it should get as much space as
-possible (eg. the horizontal direction of a slider).
-<p></ul>
-<hr><h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="de3d1c"></a>QSizePolicy::QSizePolicy ()</h3>
-<p>Default constructor, produces a minimally initialized QSizePolicy.
-<h3 class="fn"><a name="3f0af9"></a>QSizePolicy::QSizePolicy ( <a href="qsizepolicy.html#SizeType">SizeType</a> hor, <a href="qsizepolicy.html#SizeType">SizeType</a> ver, bool hfw = FALSE )</h3>
-<p><a name="interesting"></a>
-This is the constructor normally used to return a value in the
-overridden <a href="qwidget.html#23726d">QWidget::sizePolicy()</a> function of a <a href="qwidget.html">QWidget</a> subclass.
-<p>It constructs a QSizePolicy with independent horizontal and vertical
-sizing types, <em>hor</em> and <em>ver</em> respectively.  These <a href="#SizeType">sizing types</a> affect how the widget is
-treated by the <a href="qlayout.html">layout engine</a>.
-<p>If <em>hfw</em> is TRUE, the preferred height of the widget is dependent on the
-width of the widget (for example, a <a href="qlabel.html">QLabel</a> with automatic word-breaking).
-<h3 class="fn">QSizePolicy::ExpandData <a name="46a792"></a>QSizePolicy::expanding() const</h3>
-<p>Returns a value indicating if the widget can make use of extra space
-(ie. if it "wants" to grow) horizontally and/or vertically.
-<h3 class="fn">bool <a name="445766"></a>QSizePolicy::hasHeightForWidth () const</h3>
-<p>Returns TRUE if the widget's preferred height depends on its width.
-<h3 class="fn">QSizePolicy::SizeType <a name="ba357c"></a>QSizePolicy::horData() const</h3>
-<p>Returns the horizontal component of the size policy.
-<h3 class="fn">bool <a name="1a99b2"></a>QSizePolicy::mayGrowHorizontally () const</h3>
-<p>Returns TRUE if the widget can sensibly be wider than its sizeHint().
-<h3 class="fn">bool <a name="5cdd5f"></a>QSizePolicy::mayGrowVertically () const</h3>
-<p>Returns TRUE if the widget can sensibly be taller than its sizeHint().
-<h3 class="fn">bool <a name="431429"></a>QSizePolicy::mayShrinkHorizontally () const</h3>
-<p>Returns TRUE if the widget can sensibly be narrower than its sizeHint().
-<h3 class="fn">bool <a name="d5d737"></a>QSizePolicy::mayShrinkVertically () const</h3>
-<p>Returns TRUE if the widget can sensibly be lower than its sizeHint().
-<h3 class="fn">void <a name="49bc86"></a>QSizePolicy::setHeightForWidth ( bool b )</h3>
-<p>Sets the <a href="#445766">hasHeightForWidth</a>() flag to <em>b.</em>
-<h3 class="fn">void <a name="da085a"></a>QSizePolicy::setHorData ( <a href="qsizepolicy.html#SizeType">SizeType</a> d )</h3>
-<p>Sets the horizontal component of the size policy to <em>d.</em>
-<h3 class="fn">void <a name="365c40"></a>QSizePolicy::setVerData ( <a href="qsizepolicy.html#SizeType">SizeType</a> d )</h3>
-<p>Sets the vertical component of the size policy to <em>d.</em>
-<h3 class="fn">QSizePolicy::SizeType <a name="d1d60d"></a>QSizePolicy::verData() const</h3>
-<p>Returns the vertical component of the size policy.
-<hr><p>
-Search the documentation, FAQ, qt-interest archive and more (uses
-<a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
-<form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.10"><nobr>
-<input size="50" name="search"><input type=submit value="Search">
-</nobr></form><hr><p>
-This file is part of the <a href="index.html">Qt toolkit</a>,
-copyright &copy; 1995-2005
-<a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+<a name="public-types"></a>
+<h3>Public Types</h3>
+<ul>
+<li><div class="fn"/>enum <b><a href="qsizepolicy.html#Policy-enum">Policy</a></b> { Fixed, Minimum, Maximum, Preferred, ..., Ignored }</li>
+<li><div class="fn"/>enum <b><a href="qsizepolicy.html#PolicyFlag-enum">PolicyFlag</a></b> { GrowFlag, ExpandFlag, ShrinkFlag, IgnoreFlag }</li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qsizepolicy.html#QSizePolicy">QSizePolicy</a></b> ()</li>
+<li><div class="fn"/><b><a href="qsizepolicy.html#QSizePolicy-2">QSizePolicy</a></b> ( Policy <i>horizontal</i>, Policy <i>vertical</i> )</li>
+<li><div class="fn"/>Qt::Orientations <b><a href="qsizepolicy.html#expandingDirections">expandingDirections</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qsizepolicy.html#hasHeightForWidth">hasHeightForWidth</a></b> () const</li>
+<li><div class="fn"/>Policy <b><a href="qsizepolicy.html#horizontalPolicy">horizontalPolicy</a></b> () const</li>
+<li><div class="fn"/>int <b><a href="qsizepolicy.html#horizontalStretch">horizontalStretch</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qsizepolicy.html#setHeightForWidth">setHeightForWidth</a></b> ( bool <i>dependent</i> )</li>
+<li><div class="fn"/>void <b><a href="qsizepolicy.html#setHorizontalPolicy">setHorizontalPolicy</a></b> ( Policy <i>policy</i> )</li>
+<li><div class="fn"/>void <b><a href="qsizepolicy.html#setHorizontalStretch">setHorizontalStretch</a></b> ( uchar <i>stretchFactor</i> )</li>
+<li><div class="fn"/>void <b><a href="qsizepolicy.html#setVerticalPolicy">setVerticalPolicy</a></b> ( Policy <i>policy</i> )</li>
+<li><div class="fn"/>void <b><a href="qsizepolicy.html#setVerticalStretch">setVerticalStretch</a></b> ( uchar <i>stretchFactor</i> )</li>
+<li><div class="fn"/>void <b><a href="qsizepolicy.html#transpose">transpose</a></b> ()</li>
+<li><div class="fn"/>Policy <b><a href="qsizepolicy.html#verticalPolicy">verticalPolicy</a></b> () const</li>
+<li><div class="fn"/>int <b><a href="qsizepolicy.html#verticalStretch">verticalStretch</a></b> () const</li>
+<li><div class="fn"/><b><a href="qsizepolicy.html#operator-QVariant">operator QVariant</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qsizepolicy.html#operator-not-eq">operator!=</a></b> ( const QSizePolicy &amp; <i>other</i> ) const</li>
+<li><div class="fn"/>bool <b><a href="qsizepolicy.html#operator-eq-eq">operator==</a></b> ( const QSizePolicy &amp; <i>other</i> ) const</li>
+</ul>
+<a name="related-non-members"></a>
+<h3>Related Non-Members</h3>
+<ul>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qsizepolicy.html#operator-lt-lt-81">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QSizePolicy &amp; <i>policy</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qsizepolicy.html#operator-gt-gt-48">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QSizePolicy &amp; <i>policy</i> )</li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QSizePolicy class is a layout attribute describing horizontal and vertical resizing policy.</p>
+<p>The size policy of a widget is an expression of its willingness to be resized in various ways, and affects how the widget is treated by the <a href="geomanagement.html">layout engine</a>. Widgets that reimplement <a href="qwidget.html#sizePolicy-prop">QWidget::sizePolicy</a>() return a QSizePolicy that describes the horizontal and vertical resizing policy they prefer when being laid out.</p>
+<p>QSizePolicy contains two independent <a href="qsizepolicy.html#Policy-enum">QSizePolicy::Policy</a> values and two stretch factors; one describes the widgets's horizontal size policy, and the other describes its vertical size policy. It also contains a flag to indicate whether the height and width of its preferred size are related.</p>
+<p>The horizontal and vertical policies can be set in the constructor, and altered using the <a href="qsizepolicy.html#setHorizontalPolicy">setHorizontalPolicy</a>() and <a href="qsizepolicy.html#setVerticalPolicy">setVerticalPolicy</a>() functions. The stretch factors can be set using the <a href="qsizepolicy.html#setHorizontalStretch">setHorizontalStretch</a>() and <a href="qsizepolicy.html#setVerticalStretch">setVerticalStretch</a>() functions. The flag indicating whether the widget's <a href="qwidget.html#sizeHint-prop">sizeHint()</a> is width-dependent (such as a menu bar or a word-wrapping label) can be set using the <a href="qsizepolicy.html#setHeightForWidth">setHeightForWidth</a>() function.</p>
+<p>The current size policies and stretch factors be retrieved using the <a href="qsizepolicy.html#horizontalPolicy">horizontalPolicy</a>(), <a href="qsizepolicy.html#verticalPolicy">verticalPolicy</a>(), <a href="qsizepolicy.html#horizontalStretch">horizontalStretch</a>() and <a href="qsizepolicy.html#verticalStretch">verticalStretch</a>() functions. Alternatively, use the <a href="qsizepolicy.html#transpose">transpose</a>() function to swap the horizontal and vertical policies and stretches. The <a href="qsizepolicy.html#hasHeightForWidth">hasHeightForWidth</a>() function returns the current status of the flag indicating the size hint dependencies.</p>
+<p>Use the <a href="qsizepolicy.html#expandingDirections">expandingDirections</a>() function to determine whether the associated widget can make use of more space than its <a href="qwidget.html#sizeHint-prop">sizeHint()</a> function indicates, as well as find out in which directions it can expand.</p>
+<p>Finally, the QSizePolicy class provides operators comparing this size policy to a given policy, as well as a <a href="qvariant.html">QVariant</a> operator storing this QSizePolicy as a <a href="qvariant.html">QVariant</a> object.</p>
+<p>See also <a href="qsize.html">QSize</a>, <a href="qwidget.html#sizeHint-prop">QWidget::sizeHint</a>(), <a href="qwidget.html#sizePolicy-prop">QWidget::sizePolicy</a>(), and <a href="qlayoutitem.html#sizeHint">QLayoutItem::sizeHint</a>().</p>
+<hr />
+<h2>Member Type Documentation</h2>
+<h3 class="fn"><a name="Policy-enum"></a>enum QSizePolicy::Policy</h3>
+<p>This enum describes the various per-dimension sizing types used when constructing a <a href="qsizepolicy.html">QSizePolicy</a>.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QSizePolicy::Fixed</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The <a href="qwidget.html#sizeHint-prop">QWidget::sizeHint</a>() is the only acceptable alternative, so the widget can never grow or shrink (e.g. the vertical direction of a push button).</td></tr>
+<tr><td valign="top"><tt>QSizePolicy::Minimum</tt></td><td align="center" valign="top"><tt>GrowFlag</tt></td><td valign="top">The sizeHint() is minimal, and sufficient. The widget can be expanded, but there is no advantage to it being larger (e.g. the horizontal direction of a push button). It cannot be smaller than the size provided by sizeHint().</td></tr>
+<tr><td valign="top"><tt>QSizePolicy::Maximum</tt></td><td align="center" valign="top"><tt>ShrinkFlag</tt></td><td valign="top">The sizeHint() is a maximum. The widget can be shrunk any amount without detriment if other widgets need the space (e.g. a separator line). It cannot be larger than the size provided by sizeHint().</td></tr>
+<tr><td valign="top"><tt>QSizePolicy::Preferred</tt></td><td align="center" valign="top"><tt>GrowFlag | ShrinkFlag</tt></td><td valign="top">The sizeHint() is best, but the widget can be shrunk and still be useful. The widget can be expanded, but there is no advantage to it being larger than sizeHint() (the default <a href="qwidget.html">QWidget</a> policy).</td></tr>
+<tr><td valign="top"><tt>QSizePolicy::Expanding</tt></td><td align="center" valign="top"><tt>GrowFlag | ShrinkFlag | ExpandFlag</tt></td><td valign="top">The sizeHint() is a sensible size, but the widget can be shrunk and still be useful. The widget can make use of extra space, so it should get as much space as possible (e.g. the horizontal direction of a slider).</td></tr>
+<tr><td valign="top"><tt>QSizePolicy::MinimumExpanding</tt></td><td align="center" valign="top"><tt>GrowFlag | ExpandFlag</tt></td><td valign="top">The sizeHint() is minimal, and sufficient. The widget can make use of extra space, so it should get as much space as possible (e.g. the horizontal direction of a slider).</td></tr>
+<tr><td valign="top"><tt>QSizePolicy::Ignored</tt></td><td align="center" valign="top"><tt>ShrinkFlag | GrowFlag | IgnoreFlag</tt></td><td valign="top">The sizeHint() is ignored. The widget will get as much space as possible.</td></tr>
+</table></p>
+<p>See also <a href="qsizepolicy.html#PolicyFlag-enum">PolicyFlag</a>, <a href="qsizepolicy.html#setHorizontalPolicy">setHorizontalPolicy</a>(), and <a href="qsizepolicy.html#setVerticalPolicy">setVerticalPolicy</a>().</p>
+<h3 class="fn"><a name="PolicyFlag-enum"></a>enum QSizePolicy::PolicyFlag</h3>
+<p>These flags are combined together to form the various <a href="qsizepolicy.html#Policy-enum">Policy</a> values:</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QSizePolicy::GrowFlag</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The widget can grow beyond its size hint if necessary.</td></tr>
+<tr><td valign="top"><tt>QSizePolicy::ExpandFlag</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The widget should get as much space as possible.</td></tr>
+<tr><td valign="top"><tt>QSizePolicy::ShrinkFlag</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">The widget can shrink below its size hint if necessary.</td></tr>
+<tr><td valign="top"><tt>QSizePolicy::IgnoreFlag</tt></td><td align="center" valign="top"><tt>8</tt></td><td valign="top">The widget's size hint is ignored. The widget will get as much space as possible.</td></tr>
+</table></p>
+<p>See also <a href="qsizepolicy.html#Policy-enum">Policy</a>.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QSizePolicy"></a>QSizePolicy::QSizePolicy ()</h3>
+<p>Constructs a <a href="qsizepolicy.html">QSizePolicy</a> object with <a href="qsizepolicy.html#Policy-enum">Fixed</a> as its horizontal and vertical policies.</p>
+<p>The policies can be altered using the <a href="qsizepolicy.html#setHorizontalPolicy">setHorizontalPolicy</a>() and <a href="qsizepolicy.html#setVerticalPolicy">setVerticalPolicy</a>() functions. Use the <a href="qsizepolicy.html#setHeightForWidth">setHeightForWidth</a>() function if the preferred height of the widget is dependent on the width of the widget (for example, a <a href="qlabel.html">QLabel</a> with line wrapping).</p>
+<p>See also <a href="qsizepolicy.html#setHorizontalStretch">setHorizontalStretch</a>() and <a href="qsizepolicy.html#setVerticalStretch">setVerticalStretch</a>().</p>
+<h3 class="fn"><a name="QSizePolicy-2"></a>QSizePolicy::QSizePolicy ( <a href="qsizepolicy.html#Policy-enum">Policy</a> <i>horizontal</i>, <a href="qsizepolicy.html#Policy-enum">Policy</a> <i>vertical</i> )</h3>
+<p>Constructs a <a href="qsizepolicy.html">QSizePolicy</a> object with the given <i>horizontal</i> and <i>vertical</i> policies.</p>
+<p>Use <a href="qsizepolicy.html#setHeightForWidth">setHeightForWidth</a>() if the preferred height of the widget is dependent on the width of the widget (for example, a <a href="qlabel.html">QLabel</a> with line wrapping).</p>
+<p>See also <a href="qsizepolicy.html#setHorizontalStretch">setHorizontalStretch</a>() and <a href="qsizepolicy.html#setVerticalStretch">setVerticalStretch</a>().</p>
+<h3 class="fn"><a name="expandingDirections"></a><a href="qt.html#Orientation-enum">Qt::Orientations</a> QSizePolicy::expandingDirections () const</h3>
+<p>Returns whether a widget can make use of more space than the <a href="qwidget.html#sizeHint-prop">QWidget::sizeHint</a>() function indicates.</p>
+<p>A value of <a href="qt.html#Orientation-enum">Qt::Horizontal</a> or <a href="qt.html#Orientation-enum">Qt::Vertical</a> means that the widget can grow horizontally or vertically (i.e., the horizontal or vertical policy is <a href="qsizepolicy.html#Policy-enum">Expanding</a> or <a href="qsizepolicy.html#Policy-enum">MinimumExpanding</a>), whereas <a href="qt.html#Orientation-enum">Qt::Horizontal</a> | <a href="qt.html#Orientation-enum">Qt::Vertical</a> means that it can grow in both dimensions.</p>
+<p>See also <a href="qsizepolicy.html#horizontalPolicy">horizontalPolicy</a>() and <a href="qsizepolicy.html#verticalPolicy">verticalPolicy</a>().</p>
+<h3 class="fn"><a name="hasHeightForWidth"></a>bool QSizePolicy::hasHeightForWidth () const</h3>
+<p>Returns true if the widget's preferred height depends on its width; otherwise returns false.</p>
+<p>See also <a href="qsizepolicy.html#setHeightForWidth">setHeightForWidth</a>().</p>
+<h3 class="fn"><a name="horizontalPolicy"></a><a href="qsizepolicy.html#Policy-enum">Policy</a> QSizePolicy::horizontalPolicy () const</h3>
+<p>Returns the horizontal component of the size policy.</p>
+<p>See also <a href="qsizepolicy.html#setHorizontalPolicy">setHorizontalPolicy</a>(), <a href="qsizepolicy.html#verticalPolicy">verticalPolicy</a>(), and <a href="qsizepolicy.html#horizontalStretch">horizontalStretch</a>().</p>
+<h3 class="fn"><a name="horizontalStretch"></a>int QSizePolicy::horizontalStretch () const</h3>
+<p>Returns the horizontal stretch factor of the size policy.</p>
+<p>See also <a href="qsizepolicy.html#setHorizontalStretch">setHorizontalStretch</a>(), <a href="qsizepolicy.html#verticalStretch">verticalStretch</a>(), and <a href="qsizepolicy.html#horizontalPolicy">horizontalPolicy</a>().</p>
+<h3 class="fn"><a name="setHeightForWidth"></a>void QSizePolicy::setHeightForWidth ( bool <i>dependent</i> )</h3>
+<p>Sets the flag determining whether the widget's preferred height depends on its width, to <i>dependent</i>.</p>
+<p>See also <a href="qsizepolicy.html#hasHeightForWidth">hasHeightForWidth</a>().</p>
+<h3 class="fn"><a name="setHorizontalPolicy"></a>void QSizePolicy::setHorizontalPolicy ( <a href="qsizepolicy.html#Policy-enum">Policy</a> <i>policy</i> )</h3>
+<p>Sets the horizontal component to the given <i>policy</i>.</p>
+<p>See also <a href="qsizepolicy.html#horizontalPolicy">horizontalPolicy</a>(), <a href="qsizepolicy.html#setVerticalPolicy">setVerticalPolicy</a>(), and <a href="qsizepolicy.html#setHorizontalStretch">setHorizontalStretch</a>().</p>
+<h3 class="fn"><a name="setHorizontalStretch"></a>void QSizePolicy::setHorizontalStretch ( <a href="qtglobal.html#uchar-typedef">uchar</a> <i>stretchFactor</i> )</h3>
+<p>Sets the horizontal stretch factor of the size policy to the given <i>stretchFactor</i>.</p>
+<p>See also <a href="qsizepolicy.html#horizontalStretch">horizontalStretch</a>(), <a href="qsizepolicy.html#setVerticalStretch">setVerticalStretch</a>(), and <a href="qsizepolicy.html#setHorizontalPolicy">setHorizontalPolicy</a>().</p>
+<h3 class="fn"><a name="setVerticalPolicy"></a>void QSizePolicy::setVerticalPolicy ( <a href="qsizepolicy.html#Policy-enum">Policy</a> <i>policy</i> )</h3>
+<p>Sets the vertical component to the given <i>policy</i>.</p>
+<p>See also <a href="qsizepolicy.html#verticalPolicy">verticalPolicy</a>(), <a href="qsizepolicy.html#setHorizontalPolicy">setHorizontalPolicy</a>(), and <a href="qsizepolicy.html#setVerticalStretch">setVerticalStretch</a>().</p>
+<h3 class="fn"><a name="setVerticalStretch"></a>void QSizePolicy::setVerticalStretch ( <a href="qtglobal.html#uchar-typedef">uchar</a> <i>stretchFactor</i> )</h3>
+<p>Sets the vertical stretch factor of the size policy to the given <i>stretchFactor</i>.</p>
+<p>See also <a href="qsizepolicy.html#verticalStretch">verticalStretch</a>(), <a href="qsizepolicy.html#setHorizontalStretch">setHorizontalStretch</a>(), and <a href="qsizepolicy.html#setVerticalPolicy">setVerticalPolicy</a>().</p>
+<h3 class="fn"><a name="transpose"></a>void QSizePolicy::transpose ()</h3>
+<p>Swaps the horizontal and vertical policies and stretches.</p>
+<h3 class="fn"><a name="verticalPolicy"></a><a href="qsizepolicy.html#Policy-enum">Policy</a> QSizePolicy::verticalPolicy () const</h3>
+<p>Returns the vertical component of the size policy.</p>
+<p>See also <a href="qsizepolicy.html#setVerticalPolicy">setVerticalPolicy</a>(), <a href="qsizepolicy.html#horizontalPolicy">horizontalPolicy</a>(), and <a href="qsizepolicy.html#verticalStretch">verticalStretch</a>().</p>
+<h3 class="fn"><a name="verticalStretch"></a>int QSizePolicy::verticalStretch () const</h3>
+<p>Returns the vertical stretch factor of the size policy.</p>
+<p>See also <a href="qsizepolicy.html#setVerticalStretch">setVerticalStretch</a>(), <a href="qsizepolicy.html#horizontalStretch">horizontalStretch</a>(), and <a href="qsizepolicy.html#verticalPolicy">verticalPolicy</a>().</p>
+<h3 class="fn"><a name="operator-QVariant"></a>QSizePolicy::operator QVariant () const</h3>
+<p>Returns a <a href="qvariant.html">QVariant</a> storing this <a href="qsizepolicy.html">QSizePolicy</a>.</p>
+<h3 class="fn"><a name="operator-not-eq"></a>bool QSizePolicy::operator!= ( const QSizePolicy &amp; <i>other</i> ) const</h3>
+<p>Returns true if this policy is different from <i>other</i>; otherwise returns false.</p>
+<p>See also <a href="qsizepolicy.html#operator-eq-eq">operator==</a>().</p>
+<h3 class="fn"><a name="operator-eq-eq"></a>bool QSizePolicy::operator== ( const QSizePolicy &amp; <i>other</i> ) const</h3>
+<p>Returns true if this policy is equal to <i>other</i>; otherwise returns false.</p>
+<p>See also <a href="qsizepolicy.html#operator-not-eq">operator!=</a>().</p>
+<hr />
+<h2>Related Non-Members</h2>
+<h3 class="fn"><a name="operator-lt-lt-81"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QSizePolicy &amp; <i>policy</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Writes the size <i>policy</i> to the data stream <i>stream</i>.</p>
+<p>This function was introduced in Qt 4.2.</p>
+<p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
+<h3 class="fn"><a name="operator-gt-gt-48"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QSizePolicy &amp; <i>policy</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Reads the size <i>policy</i> from the data stream <i>stream</i>.</p>
+<p>This function was introduced in Qt 4.2.</p>
+<p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
+<hr />
+<h2>Member Type Documentation</h2>
+<h3 class="fn"><a name="ExpandData-enum"></a>enum QSizePolicy::ExpandData</h3>
+<p>Use the <a href="qt.html#Orientation-enum">Qt::Orientations</a> enum instead.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QSizePolicy::NoDirection</tt></td><td align="center" valign="top"><tt>0x0</tt></td><td valign="top">Use 0 instead.</td></tr>
+<tr><td valign="top"><tt>QSizePolicy::Horizontally</tt></td><td align="center" valign="top"><tt>0x1</tt></td><td valign="top">Use <a href="qt.html#Orientation-enum">Qt::Horizontal</a> instead.</td></tr>
+<tr><td valign="top"><tt>QSizePolicy::Vertically</tt></td><td align="center" valign="top"><tt>0x2</tt></td><td valign="top">Use <a href="qt.html#Orientation-enum">Qt::Vertical</a> instead.</td></tr>
+<tr><td valign="top"><tt>QSizePolicy::BothDirections</tt></td><td align="center" valign="top"><tt>0x3</tt></td><td valign="top">Use <a href="qt.html#Orientation-enum">Qt::Horizontal</a> | <a href="qt.html#Orientation-enum">Qt::Vertical</a> instead.</td></tr>
+</table></p>
+<h3 class="fn"><a name="SizeType-typedef"></a>typedef QSizePolicy::SizeType</h3>
+<p>Use the <a href="qsizepolicy.html#Policy-enum">QSizePolicy::Policy</a> enum instead.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QSizePolicy-3"></a>QSizePolicy::QSizePolicy ( <a href="qsizepolicy.html#Policy-enum">Policy</a> <i>horizontal</i>, <a href="qsizepolicy.html#Policy-enum">Policy</a> <i>vertical</i>, bool <i>dependent</i> )</h3>
+<p>Use the <a href="qsizepolicy.html#QSizePolicy">QSizePolicy</a>() constructor and the <a href="qsizepolicy.html#setHeightForWidth">setHeightForWidth</a>() function instead.</p>
+<p>For example, if you have code like</p>
+<pre><font color="#404040"> QSizePolicy *policy = new QSizePolicy(horizontal, vertical, dependent);</font></pre>
+<p>you can rewrite it as</p>
+<pre> QSizePolicy *policy = new QSizePolicy(horizontal, vertical);
+ policy-&gt;setHeightForWidth(dependent);</pre>
+<h3 class="fn"><a name="QSizePolicy-4"></a>QSizePolicy::QSizePolicy ( <a href="qsizepolicy.html#Policy-enum">Policy</a> <i>horizontal</i>, <a href="qsizepolicy.html#Policy-enum">Policy</a> <i>vertical</i>, <a href="qtglobal.html#uchar-typedef">uchar</a> <i>horizontalStretch</i>, <a href="qtglobal.html#uchar-typedef">uchar</a> <i>verticalStretch</i>, bool <i>dependent</i> = false )</h3>
+<p>Use the <a href="qsizepolicy.html#QSizePolicy">QSizePolicy</a>() constructor and call the <a href="qsizepolicy.html#setHorizontalStretch">setHorizontalStretch</a>(), <a href="qsizepolicy.html#setVerticalStretch">setVerticalStretch</a>(), and <a href="qsizepolicy.html#setHeightForWidth">setHeightForWidth</a>() functions instead.</p>
+<p>For example, if you have code like</p>
+<pre><font color="#404040"> QSizePolicy *policy = new QSizePolicy(horizontal, vertical,
+                                                          horizontalStretch, verticalStretch,
+                                                          dependent);</font></pre>
+<p>you can rewrite it as</p>
+<pre> QSizePolicy *policy = new QSizePolicy(horizontal, vertical);
+ policy-&gt;setHorizontalStretch(horizontalStretch);
+ policy-&gt;setVerticalStretch(verticalStretch);
+ policy-&gt;setHeightForWidth(dependent);</pre>
+<h3 class="fn"><a name="expanding"></a><a href="qt.html#Orientation-enum">Qt::Orientations</a> QSizePolicy::expanding () const</h3>
+<p>Use <a href="qsizepolicy.html#expandingDirections">expandingDirections</a>() instead.</p>
+<h3 class="fn"><a name="horData"></a><a href="qsizepolicy.html#Policy-enum">Policy</a> QSizePolicy::horData () const</h3>
+<p>Use <a href="qsizepolicy.html#horizontalPolicy">horizontalPolicy</a>() instead.</p>
+<p>See also <a href="qsizepolicy-qt3.html#setHorData">setHorData</a>().</p>
+<h3 class="fn"><a name="horStretch"></a><a href="qtglobal.html#uint-typedef">uint</a> QSizePolicy::horStretch () const</h3>
+<p>Use <a href="qsizepolicy.html#horizontalStretch">horizontalStretch</a>() instead.</p>
+<p>See also <a href="qsizepolicy-qt3.html#setHorStretch">setHorStretch</a>().</p>
+<h3 class="fn"><a name="mayGrowHorizontally"></a>bool QSizePolicy::mayGrowHorizontally () const</h3>
+<p>Use the <a href="qsizepolicy.html#horizontalPolicy">horizontalPolicy</a>() function combined with the <a href="qsizepolicy.html#PolicyFlag-enum">QSizePolicy::PolicyFlag</a> enum instead.</p>
+<p>For example, if you have code like</p>
+<pre><font color="#404040"> bool policy = mayGrowHorizontally();</font></pre>
+<p>you can rewrite it as</p>
+<pre> bool policy = horizontalPolicy() &amp; QSizePolicy::GrowFlag;</pre>
+<h3 class="fn"><a name="mayGrowVertically"></a>bool QSizePolicy::mayGrowVertically () const</h3>
+<p>Use the <a href="qsizepolicy.html#verticalPolicy">verticalPolicy</a>() function combined with the <a href="qsizepolicy.html#PolicyFlag-enum">QSizePolicy::PolicyFlag</a> enum instead.</p>
+<p>For example, if you have code like</p>
+<pre><font color="#404040"> bool policy = mayGrowVertically();</font></pre>
+<p>you can rewrite it as</p>
+<pre> bool policy = verticalPolicy() &amp; QSizePolicy::GrowFlag;</pre>
+<h3 class="fn"><a name="mayShrinkHorizontally"></a>bool QSizePolicy::mayShrinkHorizontally () const</h3>
+<p>Use the <a href="qsizepolicy.html#horizontalPolicy">horizontalPolicy</a>() function combined with the <a href="qsizepolicy.html#PolicyFlag-enum">QSizePolicy::PolicyFlag</a> enum instead.</p>
+<p>For example, if you have code like</p>
+<pre><font color="#404040"> bool policy = mayShrinkHorizontally();</font></pre>
+<p>you can rewrite it as</p>
+<pre> bool policy = horizontalPolicy() &amp; QSizePolicy::ShrinkFlag;</pre>
+<h3 class="fn"><a name="mayShrinkVertically"></a>bool QSizePolicy::mayShrinkVertically () const</h3>
+<p>Use the <a href="qsizepolicy.html#verticalPolicy">verticalPolicy</a>() function combined with the <a href="qsizepolicy.html#PolicyFlag-enum">QSizePolicy::PolicyFlag</a> enum instead.</p>
+<p>For example, if you have code like</p>
+<pre><font color="#404040"> bool policy = mayShrinkVertically();</font></pre>
+<p>you can rewrite it as</p>
+<pre> bool policy = verticalPolicy() &amp; QSizePolicy::ShrinkFlag;</pre>
+<h3 class="fn"><a name="setHorData"></a>void QSizePolicy::setHorData ( <a href="qsizepolicy.html#Policy-enum">Policy</a> <i>policy</i> )</h3>
+<p>Use <a href="qsizepolicy.html#setHorizontalPolicy">setHorizontalPolicy</a>() instead.</p>
+<p>See also <a href="qsizepolicy-qt3.html#horData">horData</a>().</p>
+<h3 class="fn"><a name="setHorStretch"></a>void QSizePolicy::setHorStretch ( <a href="qtglobal.html#uchar-typedef">uchar</a> <i>stretch</i> )</h3>
+<p>Use <a href="qsizepolicy.html#setHorizontalStretch">setHorizontalStretch</a>() instead.</p>
+<p>See also <a href="qsizepolicy-qt3.html#horStretch">horStretch</a>().</p>
+<h3 class="fn"><a name="setVerData"></a>void QSizePolicy::setVerData ( <a href="qsizepolicy.html#Policy-enum">Policy</a> <i>policy</i> )</h3>
+<p>Use <a href="qsizepolicy.html#setVerticalPolicy">setVerticalPolicy</a>() instead.</p>
+<p>See also <a href="qsizepolicy-qt3.html#verData">verData</a>().</p>
+<h3 class="fn"><a name="setVerStretch"></a>void QSizePolicy::setVerStretch ( <a href="qtglobal.html#uchar-typedef">uchar</a> <i>stretch</i> )</h3>
+<p>Use <a href="qsizepolicy.html#setVerticalStretch">setVerticalStretch</a>() instead.</p>
+<p>See also <a href="qsizepolicy-qt3.html#verStretch">verStretch</a>().</p>
+<h3 class="fn"><a name="verData"></a><a href="qsizepolicy.html#Policy-enum">Policy</a> QSizePolicy::verData () const</h3>
+<p>Use <a href="qsizepolicy.html#verticalPolicy">verticalPolicy</a>() instead.</p>
+<p>See also <a href="qsizepolicy-qt3.html#setVerData">setVerData</a>().</p>
+<h3 class="fn"><a name="verStretch"></a><a href="qtglobal.html#uint-typedef">uint</a> QSizePolicy::verStretch () const</h3>
+<p>Use <a href="qsizepolicy.html#verticalStretch">verticalStretch</a>() instead.</p>
+<p>See also <a href="qsizepolicy-qt3.html#setVerStretch">setVerStretch</a>().</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

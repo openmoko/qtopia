@@ -1,23 +1,26 @@
-<qt title="Editing Note">
+<html>
+<head><title>Editing Note</title></head>
+<body>
 <h3>Editing Note</h3>
-%%PDA%%
+<!--#if expr="$PDASTYLE"-->
 <p>The <b>File</b> and <b>Edit</b> menus provide commands for opening existing documents into edit mode, displaying documents <a href="textedit-properties.html">properties</a>, cutting, copying and pasting text, and a find command to search for text.</p>
-<p>These commands are all available on the toolbar. When editing a document selected text can be, <img src="cut"> cut or <img src="copy"> copied and then <img src="paste"> pasted to a new location in a document.</p>
+<p>These commands are all available on the toolbar. When editing a document selected text can be, <img src=":icon/cut"> </img> cut or <img src=":icon/copy"> </img> copied and then <img src=":icon/paste"> </img> pasted to a new location in a document.</p>
 <p><b>To edit an existing note:</b></p>
 <ul>
-<li>Tap the note, then <img src="edit"> <b>Edit</b>.</li>
+<li>Tap the note, then <img src=":icon/edit"> </img> <b>Edit</b>.</li>
 <li>Modify the content.</li>
 <li>Open a new note or exit to save your changes.</li>
 </ul>
-@@PDA@@
-%%PHONE%%
+<!--#endif-->
+<!--#if expr="$PHONESTYLE"-->
 <p><b>To edit an existing task:</b></p>
 <ul>
-<li>Use <img src="help/dpad"> to highlight the note title and press <img src="contextbar/select.png"> to display the note.</li>
-<li>Use <img src="help/dpad"> to position the cursor and <img src="contextbar/backspace.png"> to backspace and delete the text, then use the keypad to enter new text.</li>
-<li>Press <img src="contextbar/ok.png"> to accept new text.</li>
-<li>Press <img src="contextbar/back.png"> to save the task and exit.</li>
+<li>Use <img src=":image/help/dpad"> </img> to highlight the note title and press <img src=":icon/select"> </img> to display the note.</li>
+<li>Use <img src=":image/help/dpad"> </img> to position the cursor and <img src=":icon/i18n/backspace"> </img> to backspace and delete the text, then use the keypad to enter new text.</li>
+<li>Press <img src=":icon/ok"> </img> to accept new text.</li>
+<li>Press <img src=":icon/i18n/back"> </img> to save the task and exit.</li>
 </ul>
-@@PHONE@@
+<!--#endif-->
 <p>See Also: <a href="help-selecting.html">Selecting Text</a></p>
-</qt>
+</body>
+</html>

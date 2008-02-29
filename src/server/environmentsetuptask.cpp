@@ -1,0 +1,186 @@
+/****************************************************************************
+**
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+**
+** This file is part of the Phone Edition of the Qtopia Toolkit.
+**
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
+
+#include "environmentsetuptask.h"
+
+#include <QSettings>
+#include <QString>
+#include <QPixmapCache>
+#include <qwindowsystem_qws.h>
+#include <QRegExp>
+#include <stdlib.h>
+#include "qtopiaserverapplication.h"
+#include <qtopialog.h>
+
+#if defined(Q_OS_UNIX) && defined(Q_WS_QWS)
+extern int qws_display_id;
+#endif
+
+/*!
+  \class EnvironmentSetupTask
+  \ingroup QtopiaServer::Task
+  \brief The EnvironmentSetupTask class initializes the basic system environment required by Qtopia.
+
+  The EnvironmentSetupTask configures the basic environment variables required
+  by Qtopia.  It should execute before QtopiaApplication or any other task in
+  the system.
+
+  The EnvironmentSetupTask class provides the \c {EnvironmentSetup} task.
+ */
+
+/*! \internal */
+void EnvironmentSetupTask::initEnvironment()
+{
+    int argc = QtopiaServerApplication::argc();
+    char **argv = QtopiaServerApplication::argv();
+
+    QSettings config("Trolltech","locale");
+    config.beginGroup( "Location" );
+    QString tz = config.value( "Timezone", getenv("TZ") ).toString().trimmed();
+
+    setenv( "TZ", tz.toLatin1(), 1 );
+
+    config.endGroup();
+
+    config.beginGroup( "Language" );
+    QString lang = config.value( "Language", getenv("LANG") ).toString().trimmed();
+    if( lang.isNull() || lang.isEmpty())
+        lang = "en_US";
+    lang += ".UTF-8";
+
+    setenv( "LANG", lang.toLatin1().constData(), 1 );
+
+    /*
+       Figure out what QWS_DISPLAY should be set to.
+       The algorithm goes like this:
+
+       1) -display <arg> overrides QWS_DISPLAY, which overrides defaultbuttons.conf::Environment::QWS_DISPLAY
+
+       It's expected that a device would have a defaultbuttons.conf::Environment::QWS_DISPLAY like one of
+       these:
+       LinuxFb:mmWidth34:mmHeight44:0 -- single screen device
+       Multi: LinuxFb:mmHeight57:0 LinxFb:offset=0,320:1 :0  -- multi-screen device
+    */
+
+    // Start with QWS_DISPLAY
+    QString qws_display = getenv("QWS_DISPLAY");
+    // -display overrides QWS_DISPLAY
+    for (int i = 1; i<argc; i++) {
+        QString arg = argv[i];
+        if (arg == "-display") {
+            if (++i < argc) {
+                qws_display = argv[i];
+                break;
+            }
+        }
+    }
+    if ( qws_display.isEmpty() ) {
+        // fall back to defaultbuttons.conf (doesn't work with QVFb skins but runqtopia figures it out)
+        QSettings env(Qtopia::defaultButtonsFile(), QSettings::IniFormat);
+        env.beginGroup("Environment");
+        qws_display = env.value("QWS_DISPLAY").toString();
+    }
+
+    // final fall back, :0
+    if ( qws_display.isEmpty() )
+        qws_display = ":0";
+
+    // Let the search for defaultbuttons.conf (below) work for QVFb's defaultbuttons.conf
+    QRegExp display(":(\\d+)$");
+    if ( display.indexIn( qws_display ) != -1 )
+        qws_display_id = QVariant(display.cap(1)).toInt();
+
+    qLog(QtopiaServer) << "QWS_DISPLAY" << qws_display;
+    setenv( "QWS_DISPLAY", qws_display.toLocal8Bit().constData(), 1 );
+
+    // We know we'll have lots of cached pixmaps due to App/DocLnks
+    QPixmapCache::setCacheLimit(512);
+
+    //Turn off green screen frame buffer init
+    QWSServer::setBackground(Qt::NoBrush);
+
+    // Set other, miscellaneous environment
+    QSettings env(Qtopia::defaultButtonsFile(), QSettings::IniFormat);
+    env.beginGroup("Environment");
+    QStringList envKeys = env.childKeys();
+    for(int ii = 0; ii < envKeys.count(); ++ii) {
+        const QString & key = envKeys.at(ii);
+        // QWS_DISPLAY is handled above
+        if ( key == "QWS_DISPLAY" ) continue;
+        QString value = env.value(key).toString();
+        setenv(key.toAscii().constData(), value.toAscii().constData(), 1);
+    }
+
+    // Ensure the selected theme is present, pick an available one if it isn't.
+    validateTheme();
+}
+
+void EnvironmentSetupTask::validateTheme()
+{
+    QString themeDir = Qtopia::qtopiaDir() + QLatin1String("etc/themes/");
+    QSettings config(QLatin1String("Trolltech"),QLatin1String("qpe"));
+    config.beginGroup( QLatin1String("Appearance") );
+    bool setTheme = false;
+
+    // Start by asking QSettings normally
+    QString newTheme = config.value("Theme", QString()).toString();
+    newTheme = newTheme.replace(QRegExp("\\.desktop"), ".conf");  // backwards compat
+
+    if ( !newTheme.isEmpty() && !QFile::exists(themeDir + newTheme)) {
+        qWarning() << "Selected theme" << newTheme << "does not exist.";
+        // Get the default theme (could be the same as the theme we got before)
+        QSettings defSettings( Qtopia::qtopiaDir() + "etc/default/Trolltech/qpe.conf", QSettings::IniFormat );
+        defSettings.beginGroup("Appearance");
+        newTheme = defSettings.value("Theme", QString()).toString();
+        setTheme = true;
+    }
+    if ( newTheme.isEmpty() ) {
+        qWarning("No default theme specified in qpe.conf");
+    }
+
+    if ( !newTheme.isEmpty() && !QFile::exists(themeDir + newTheme) ) {
+        qWarning() << "Default theme" << newTheme << "does not exist.";
+        newTheme = QString();
+    }
+
+    if ( newTheme.isEmpty() ) {
+        // Catastrophic failure. Don't bail just yet though because tere might be a
+        // .conf file we can use on the system.
+        QStringList confFiles = QDir(Qtopia::qtopiaDir() + "etc/themes/").entryList(QStringList() << "*.conf");
+        if ( confFiles.count() == 0 ) {
+            // Qtopia doesn't work without a theme!
+            qFatal("No theme files found!");
+        }
+        // Arbitrary choice here, pick the first entry (if there's more than one).
+        newTheme = confFiles[0];
+        setTheme = true;
+        qWarning() << "Found theme" << newTheme;
+    }
+
+    if ( setTheme ) {
+        // Since QSettings can't be used to pull out a valid theme, we need to set the theme now.
+        // This lets the rest of the code that uses the theme avoid doing all the checks above.
+        config.setValue("Theme", newTheme);
+    }
+}
+
+QTOPIA_STATIC_TASK(EnvironmentSetup, EnvironmentSetupTask::initEnvironment());
+

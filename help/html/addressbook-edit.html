@@ -1,38 +1,50 @@
-<qt title="Editing Contacts">
-<h3>Editing Contacts</h3>
+<html>
+<head><title>Editing Contacts</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h2>Edit Contacts</h2>
+<!--#else-->
+   <h3>Editing Contacts</h3>
+<!--#endif -->
 <p>Four information tabs are available for recording different contact details.</p>
 <b>To enter information:</b>
-%%PDA%%
+<!--#if expr="$PDASTYLE"-->
 <ul>
 <li>Tap the tab you wish to view with the stylus.</li>
 <li>Tap the field you wish to edit.</li>
 <li>Select the Input Method you want to use to edit the field.</li>
 <li>On the <b>Other Details</b> tab you can change the contact's category by tapping the <b>Categories</b> field.</li>
-<li>Select <img src="qpe/pda/OKButton"> to save or <img src="qpe/pda/CloseButton"> to abandon your changes.</li>
+<li>Select <img src=":image/qpe/pda/OKButton"> </img> to save or <img src=":image/qpe/pda/CloseButton"> </img> to abandon your changes.</li>
 </ul>
-@@PDA@@
-%%PHONE%%
+<!--#endif-->
+<!--#if expr="$PHONESTYLE"-->
 <p>
-%%KEYPAD%%
-Use <img src="left">/<img src="right"> buttons 
-@@KEYPAD@@
-%%TOUCH%%
-Press tabs 
-@@TOUCH@@
+<!--#if expr="$KEYPAD"-->
+Use <img src=":icon/left">/<img src=":icon/right"> </img> buttons
+<!--#endif-->
+<!--#if expr="$TOUCH"-->
+Press tabs
+<!--#endif-->
 to select General, Business, Home or Notes pages.
 </p>
-<p><img src="addressbook/contactdetails.png"> <b>General:</b></p>
-<p><b>Name:</b> shows on contact list.</p>
-<p><b>Emails:</b> email address.</p>
-<p><b>Business contact:</b> turn on to show company and title on this screen.</p>
-<p><b>Cmpny:</b> company name.</p>
-<p><b>Title:</b> job title.</p>
-<p><img src="addressbook/business.png"> <b>Business:</b> Cmpny, Title show same as on General page. Phone, Mobile, Fax, Pager also show same business numbers as set on General page.</p>
-<p><img src="addressbook/home.png"> <b>Home:</b> Phone, Mobile, Fax show same home numbers as set on General page.</p>
-<p><img src="addressbook/notes.png"> <b>Notes:</b> use this to add free-text notes.</p>
-<p><b>Photo:</b> shows on Contacts list, shows when this person calls you.  To add or change a photo, highlight and select.</p>
-<p><b>Ringtone:</b> will sound when this person calls.</p>
-<p><b>Category:</b> used to group this to similar records.</p>
-@@PHONE@@
+<p><img src=":icon/addressbook/contactdetails"> </img> <b>General:</b></p>
+<ul>
+<li><b>Name:</b> shows on contact list.</li>
+<li><b>Emails:</b> email address.</li>
+<li><b>Business contact:</b> turn on to show company and title on this screen.</li>
+<li><b>Company:</b> company name.</li>
+<li><b>Title:</b> job title.</li>
+</ul>
+<p><img src=":image/addressbook/business"> </img> <b>Business:</b> Cmpny, Title show same as on ,<b>General</b> page. Phone, Mobile, Fax, Pager also show the same business numbers as set on the <b>General</b> page.</p>
+<p><img src=":icon/addressbook/home"> </img> <b>Home:</b> Phone, Mobile, Fax show same home numbers as set on <b>General</b> page.</p>
+<p><img src=":icon/addressbook/notes"> </img> <b>Notes:</b> use this to add free-text notes.</p>
+<ul>
+<li><b>Photo:</b> shows on Contacts list<!--#if expr="$TELEPHONY"-->, shows when this person calls you<!--#endif-->.  To add or change a photo, highlight and select.</li>
+<!--#if expr="$TELEPHONY"-->
+<li><b>Ringtone:</b> will sound when this person calls.</li>
+<!--#endif-->
+<li><b>Category:</b> used to group this to similar records.</li>
+<!--#endif-->
 <p>See Also: <a href="qpe-categories.html">Categories</a></p>
-</qt>
+</body>
+</html>

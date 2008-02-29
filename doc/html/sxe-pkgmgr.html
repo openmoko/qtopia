@@ -1,0 +1,40 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>SXE - Installer/Package Manager Overview</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">SXE - Installer/Package Manager Overview<br /><small></small></h1>
+<p>Qtopia provides a simplified package system in a system binary called <tt>packagemanger</tt>. This binary reduces the dependency on the <tt>ipkg</tt> utility and extends <tt>qipkg</tt> to meet the requirements of safe execution.</p>
+<p>Additionally to create safe execution images using the <tt>make install</tt> command during development and when readying a device image for shipping, on a device, the installer tool <tt>sxe_installer</tt> is provided.</p>
+<p>The following features are provided:</p>
+<ul>
+<li>fetch Package list from remote server via HTTP</li>
+<li>display package information, in particular categories</li>
+<li><tt>ungzip</tt>, <tt>untar</tt> and install of <tt>ipkg</tt> format packages</li>
+<li>modifications to the two SXE policy rules tables</li>
+<li>installation of run-time keys into binaries</li>
+<li>provide uninstall capability.</li>
+</ul>
+<p><b>Note:</b> there is no feature planned to check for dependencies on other packages.</p>
+<p>Programs packaged for Qtopia 4.1 and later depend simply on the Qtopia version number, and architecture.</p>
+<p>Packages which do not fit the version requirement or architecture requirement, will not be presented for download or installation. The device architecture control file information will be used to present the user first with packages known and tested for that device (eg sl5600), if desired the user can navigate to additional packages which are not tested on that device.</p>
+<p>Applications which are not certified run with the <tt>SANDBOX</tt> attribute which means that only files specifically allowed may be accessed. Applications are by default installed in <tt>/usr/local/&lt;app-name&gt;</tt> and have by default read-only access to all system libraries, and read-write access to a <tt>/tmp/&lt;app-name&gt;</tt> directory and the <tt>/usr/local/&lt;app-name&gt;</tt> directory. During package installation the <tt>PackageManager</tt> will update Qtopia's mime-types to reflect any values from the Domain field. This will have two effects:</p>
+<ol type="1">
+<li>the packaged application will be registered as being available to handle files of that mime-type</li>
+<li>it will be allowed read-only access to those documents in the users document collection at run-time via the <a href="docsys-overview.html">Document System</a></li>
+</ol>
+<p>If the package also has the <i>editor</i> Domain value, the application will be allowed read-write access.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

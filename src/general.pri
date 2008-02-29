@@ -1,184 +1,232 @@
-#These are in all packages, free and commercial
+# This file contains projects that are eligable for inclusion in the Free Edition.
 
-SERVER=server
+# Qtopia Core files
+QTE_PROJECTS=\
+    tools/qtopiacore/moc\
+    tools/qtopiacore/uic\
+    tools/qtopiacore/rcc\
+    libraries/qtopiacore/corelib\
+    libraries/qtopiacore/gui\
+    libraries/qtopiacore/network\
+    #libraries/qtopiacore/opengl\
+    libraries/qtopiacore/sql\
+    libraries/qtopiacore/xml\
+    plugins/qtopiacore
+!equals(QTE_MINOR_VERSION,1):QTE_PROJECTS+=libraries/qtopiacore/svg
+PROJECTS*=$$QTE_PROJECTS
 
-CORE_LIBRARY_PROJECTS += qt libraries/qtopia
+# Qtopia Platform files
+PROJECTS*=\
+    # A placeholder for installing Qt files
+    qt\
+    server\
+    libraries/qtopia\
+    libraries/qtopiail\
+    libraries/qtopiacomm\
+    libraries/qtopiaaudio\
 
-CORE_LIBRARY_PROJECTS+=libraries/qtopia1
-QTOPIA_SQL:LIBRARY_PROJECTS += libraries/qtopiasql
-CORE_LIBRARY_PROJECTS+=libraries/qtopia2
+# Dummy entries (finegrained dependencies, retained in case libqtopiacomm is ever split up)
+PROJECTS*=\
+    libraries/qtopiacomm/bluetooth\
+    libraries/qtopiacomm/ir\
+    libraries/qtopiacomm/network\
+    libraries/qtopiacomm/obex\
+    libraries/qtopiacomm/serial\
+    libraries/qtopiacomm/vpn
 
-!buildSingleexec:LIBRARY_PROJECTS+=3rdparty/plugins/obex/openobex
-!buildSingleexec:PLUGIN_PROJECTS+=3rdparty/plugins/obex
+# 3rdparty stuff
+PROJECTS*=\
+    3rdparty/libraries/zlib\
+    3rdparty/libraries/alsa\
+    3rdparty/libraries/md5\
+    3rdparty/libraries/tar\
+    #obex
+    3rdparty/libraries/openobex\
+    3rdparty/libraries/inputmatch
 
-!QTOPIA_CORE {
-    LIBRARY_PROJECTS+=\
-	libraries/qtopiapim\
-	libraries/mediaplayer\
-	libraries/qtopiacalc
+enable_ssl:PROJECTS*=\
+    3rdparty/libraries/openssl/crypto\
+    3rdparty/libraries/openssl/ssl
 
-    !QTOPIA_PHONE:THEME_PROJECTS+=mediaplayer/techno
+# input methods that are available in all editions
+PROJECTS*=\
+    plugins/inputmethods/keyboard\
+    plugins/inputmethods/dockedkeyboard
 
-    LIBRARY_PROJECTS+=libraries/qtopiapim1
+!media:PROJECTS*=\
+    libraries/qtopiapim
+
+enable_qtopiabase {
+    PROJECTS*=libraries/qtopiabase
+    PROJECTS-=libraries/qtopiail
 }
 
-BUILD_LIBFREETYPE:LIBRARY_PROJECTS += 3rdparty/libraries/freetype
+qtopiatest:PROJECTS*=\
+    libraries/qtopiatest/qtesttools/host \
+    libraries/qtopiatest/qtesttools/target \
+    libraries/qtopiatest/qunittest \
+    libraries/qtopiatest/qsystemtest \
+    libraries/qtopiatest/qtestslave \
+    libraries/qtopiatest/qsystemtestslave \
+    libraries/qtopiatest/qtopiasystemtestslave \
+    tools/validator \
+    tools/validator/3rdparty/qscintilla
 
-QTOPIA_SQLITE {
-    LIBRARY_PROJECTS+=3rdparty/libraries/sqlite
-    PLUGIN_PROJECTS+=plugins/sqldrivers/sqlite
-}
-
-# in everything
-buildPointerApps {
-
-# these are in core and pda, but not phone.  mostly because they don't work
-# with phone.  that may change.
-    !QTOPIA_PHONE {
-	PLUGIN_PROJECTS += plugins/inputmethods/handwriting\
-	    plugins/inputmethods/keyboard\
-	    plugins/inputmethods/unikeyboard
-    }
-}
-
-!QTOPIA_CORE {
-    APP_PROJECTS+=\
-	applications/addressbook \
+# non-platform stuff
+!platform:!media {
+    PROJECTS*=\
+        applications/addressbook \
+        applications/datebook \
+        applications/todo\
 	applications/calculator \
 	applications/camera \
 	applications/clock \
-	applications/datebook \
 	applications/mediarecorder \
-	applications/music \
-	applications/videos \
 	applications/photoedit \
 	applications/sysinfo \
 	applications/textedit \
-	applications/todo\
-	games/fifteen\
-	games/minesweep\
-	games/parashoot\
 	games/qasteroids\
-	games/snake\
-	games/solitaire
-    !free_package:APP_PROJECTS+=settings/words
+	games/fifteen\
+        games/snake\
+        games/minesweep\
+        plugins/content/id3 \
+        plugins/content/exif
+
+    build_helix {
+        PROJECTS*=\
+            3rdparty/libraries/helix \
+            3rdparty/libraries/libtimidity \
+            3rdparty/plugins/codecs/libtimidity \
+            plugins/mediadevices/builtin \
+            libraries/qtopiamedia \
+            tools/mediaserver \
+            applications/mediaplayer
+    }
 }
 
-APP_PROJECTS+=\
-    applications/qss \
+PROJECTS*=\
     settings/appearance\
     settings/language \
+    settings/logging \
     settings/network \
-    settings/security \
     settings/systemtime \
     settings/worldtime \
     settings/light-and-power \
+    settings/packagemanager\
     applications/helpbrowser \
-    tools/quicklauncher \
     tools/qcop \
-    tools/symlinker
+    tools/vsexplorer \
+    tools/symlinker \
+    tools/qdawggen
 
-contains(QTOPIA_ARCH,sharp):APP_PROJECTS+=3rdparty/tools/atd
+!build_helix:PROJECTS*=tools/qss
 
-qtest {
-    INCLUDEPATH	+= $$(QTESTDIR)/qtopia $$(QTESTDIR)/qtestremote
-}
+!media:PROJECTS*=\
+    settings/security
 
-QTOPIA_LIBMAD:PLUGIN_PROJECTS+=3rdparty/plugins/codecs/libmad
-QTOPIA_LIBFFMPEG:PLUGIN_PROJECTS+=3rdparty/plugins/codecs/libffmpeg
-QTOPIA_LIBAMR:PLUGIN_PROJECTS+=3rdparty/plugins/codecs/libamr
+!no_quicklaunch|enable_singleexec:PROJECTS*=tools/quicklauncher
 
-PLUGIN_PROJECTS+=\
-    plugins/decorations/flat\
-    plugins/fontfactories/freetype\
-    plugins/imagecodecs/notepad\
-    plugins/imagecodecs/wbmp\
-    plugins/imagecodecs/ota\
-    plugins/textcodecs/simple8\
-    plugins/network/dialup\
-    plugins/network/lan\
-    3rdparty/plugins/textcodecs/jp
+PROJECTS*=tools/content_installer
 
-QTOPIA_PDA {
-    APP_PROJECTS+=\
-	applications/today \
-	games/mindbreaker\
-	settings/appservices \
-	settings/buttoneditor \
-	settings/launchersettings \
-	settings/rotation \
-	settings/sound \
-	settings/pluginmgr \
-	settings/qipkg \
-	3rdparty/applications/embeddedkonsole\
-	3rdparty/applications/keypebble
+build_libamr:PROJECTS*=\
+    3rdparty/libraries/amr\
+    3rdparty/plugins/codecs/libamr
 
-    PLUGIN_PROJECTS+=\
-	plugins/applets/batteryapplet\
-	plugins/applets/brightness\
-	plugins/applets/clipboardapplet\
-	plugins/applets/clockapplet\
-	plugins/applets/irreceiver\
-	plugins/applets/netmonapplet\
-	plugins/applets/volumeapplet\
-	plugins/applets/mountmon\
-	plugins/decorations/polished\
-	plugins/styles/fresh\
-	plugins/today/datebook\
-	plugins/today/todo\
-	plugins/calculator/fraction\
-	plugins/calculator/conversion\
-	plugins/calculator/simple\
-	plugins/calculator/advanced\
-	3rdparty/plugins/applets/cardmon
+PROJECTS*=\
+    plugins/network/lan \
+    plugins/network/dialing \
+    plugins/qtopiacore/iconengines/qtopiaiconengine \
+    plugins/qtopiacore/iconengines/qtopiasvgiconengine
 
-    buildPointerApps:PLUGIN_PROJECTS+=3rdparty/plugins/inputmethods/pickboard
-}
-
-# Things that dont work or are not needed in the singleexec build
-buildSingleexec {
-    APP_PROJECTS-=\
-	tools/quicklauncher\
-	tools/qcop\
-	tools/symlinker\
+media {
+    PROJECTS*=\
+	applications/camera \
+	applications/clock \
 	applications/mediarecorder \
-	applications/scribble \
-	settings/pluginmgr \
-	settings/qipkg \
-	3rdparty/applications/embeddedkonsole\
-	3rdparty/applications/keypebble
+	applications/photoedit \
+        plugins/content/id3
 
-    LIBRARY_PROJECTS-=\
-	3rdparty/libraries/freetype
-
-    PLUGIN_PROJECTS-=\
-	3rdparty/plugins/codecs/libmad\
-	plugins/fontfactories/freetype\
-	3rdparty/plugins/inputmethods/pickboard
+    build_helix {
+        PROJECTS*=\
+            3rdparty/libraries/helix \
+            libraries/qtopiamedia \
+            applications/mediaplayer
+    }
 }
 
-# Projects which exist only to fulfill dependancies
-contains(APP_PROJECTS,applications/mediarecorder) {
-    PLUGIN_PROJECTS+=\
-	plugins/codecs/wavplugin\
-	plugins/codecs/wavrecord
+PROJECTS*=\
+    libraries/qtopiaprinting \
+    tools/printserver
+
+enable_bluetooth:PROJECTS*=\
+    plugins/qtopiaprinting/bluetooth
+
+enable_infrared:PROJECTS*=\
+    settings/beaming
+
+enable_bluetooth:PROJECTS*=\
+    3rdparty/libraries/bluez \
+    3rdparty/tools/sdptool \
+    settings/btsettings \
+    plugins/network/bluetooth
+
+enable_dbus {
+    PROJECTS*=\
+    3rdparty/libraries/dbus \
+    3rdparty/libraries/qtdbus
 }
 
-contains(PLUGIN_PROJECTS,3rdparty/plugins/codecs/libffmpeg) | contains(PLUGIN_PROJECTS,3rdparty/plugins/codecs/libamr) {
-    LIBRARY_PROJECTS+=\
-	3rdparty/libraries/amr
+enable_dbusipc {
+    PROJECTS*=\
+    3rdparty/applications/dbus \
+    tools/qtopia-dbus-launcher
 }
 
-contains(PLUGIN_PROJECTS,3rdparty/plugins/codecs/libffmpeg) {
-    LIBRARY_PROJECTS+=\
-	3rdparty/libraries/libavcodec\
-	3rdparty/libraries/libavformat
+enable_singleexec:PROJECTS*=\
+    plugins/qtopiacore/imageformats/jpeg\
+    plugins/qtopiacore/imageformats/mng\
+    plugins/qtopiacore/imageformats/svg
+
+PROJECTS*=\
+    libraries/handwriting\
+    settings/handwriting\
+    3rdparty/plugins/inputmethods/pkim
+
+THEMES *= smart
+
+phone {
+    PROJECTS*=\
+        3rdparty/libraries/gsm\
+        libraries/qtopiasmil\
+        settings/ringprofile\
+        settings/speeddial\
+        plugins/codecs/wavrecord\
+
+    enable_infrared:PROJECTS*=\
+        settings/beaming
+
+    enable_voip:PROJECTS*=\
+        3rdparty/libraries/dissipate2\
+        tools/sipagent \
+        settings/sipsettings
+
+    # Phone Themes
+    THEMES*=\
+        crisp\
+        qtopia\
+        portal
+        # broken in 4.2.0
+        # gel
 }
 
-contains(PLUGIN_PROJECTS,plugins/codecs/wavplugin) | contains(PLUGIN_PROJECTS,plugins/codecs/wavrecord):LIBRARY_PROJECTS+=3rdparty/libraries/gsm
+!platform {
+    PROJECTS*=settings/words
 
-contains(PLUGIN_PROJECTS,plugins/inputmethods/handwriting) {
-    LIBRARY_PROJECTS += libraries/handwriting
-    APP_PROJECTS += settings/handwriting
+    # Qtmail stuff
+    !media:PROJECTS*=\
+        libraries/qtopiamail\
+        applications/qtmail
 }
+
+enable_samples:PROJECTS+=settings/serverwidgets
 

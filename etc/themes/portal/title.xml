@@ -1,0 +1,31 @@
+<page name="title" base="themes/portal" rect="0,0,0x15.45%" transparent="yes">
+  <image rect="0,0,0x0" src="titlebg_0" stretch="88,89" scale="vertical" transparent="yes"/>
+  <rect name="reserved" rect="0,0,0x0" color="None" brush="None" transparent="yes" />
+  <level name="signal" rect="3.4%,14.7%,7.39%x38.24%" src="signal" scale="yes" count="5" onclick="color=Highlight" interactive="yes" min="0" max="100" active="expr:@/Telephony/Status/SignalLevel/modem">
+	    expr:@/Telephony/Status/SignalLevel/modem
+	</level>
+        <exclusive>
+          <level name="battery" rect="-12.5%,11.76%,6.81%x41.18%" src="battery" scale="yes" onclick="color=Highlight" count="5" interactive="yes" min="0" max="100" delay="1000" loop="0" play="expr:@/Accessories/Battery/Charging == true">
+		expr:@/Accessories/Battery/VisualCharge
+	    </level>
+            <widget name="inputmethod" rect="-12.5%,8.82%,9.66%x50%" transient="yes" active="expr:@/UI/IMVisible"/>
+        </exclusive>
+
+	<image rect="19.5%,9%,61.5%x71%" src="titleoverlay" color="Highlight" scale="yes" />
+
+	<status name="roaming" rect="72,14,11x14" imageon="roaming" onclick="coloron=Highlight" interactive="yes" on="expr:@/Telephony/Status/Roaming"/>
+	<status name="call_active" rect="84,14,9x13" imageon="incall_small" onclick="coloron=Highlight" interactive="yes" on="expr:@/Communications/Calls/ActiveCalls > 0" />
+	<status name="messages" rect="53.98%,47.06%,8.52%x26.47%" scale="yes" imageon="message_alert_small" onclick="coloron=Highlight" interactive="yes" on="expr:@/Communications/Messages/NewMessages > 0"/>
+
+	<text name="time" rect="20%,5.88%,18%x40%" size="6" color="HighlightedText" bold="yes" interactive="yes">
+	    expr:@/UI/DisplayTime/Time
+	</text>
+	<exclusive rect="38%,5.88%,42%x40%">
+	    <text name="date" size="6" color="HighlightedText" align="right" bold="yes" interactive="yes">
+		expr:@/UI/DisplayTime/Date
+	    </text>
+	    <text name="caption" size="6" color="HighlightedText" align="right" transient="yes" bold="yes" elided="right" active="expr:@/UI/ActiveWindow/Caption != false">
+		expr:@/UI/ActiveWindow/Caption
+	    </text>
+	</exclusive>
+</page>

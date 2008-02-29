@@ -1,0 +1,30 @@
+#!/bin/sh
+
+update_resolv_conf()
+{
+	[ -n "$domain" ] && echo search $domain > /etc/resolv.conf.udhcpc
+
+	for i in $dns; do
+		echo nameserver $i >> /etc/resolv.conf.udhcpc
+	done
+}
+
+case $1 in
+	deconfig)
+		ifconfig $interface 0.0.0.0
+		;;
+	bound)
+		ifconfig $interface $ip broadcast $broadcast netmask $subnet
+		route add default gw $router
+		update_resolv_conf
+		;;
+	renew)
+		ifconfig $interface $ip broadcast $broadcast netmask $subnet
+		route add default gw $router
+		update_resolv_conf
+		;;
+	nak)
+		echo NAK:$message
+		;;
+esac
+

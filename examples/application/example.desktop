@@ -5,6 +5,6 @@ Context=Example
 [Desktop Entry]
 Comment[]=An Example Program
 Exec=example
-Icon=Example
+Icon=example/Example
 Type=Application
 Name[]=Example

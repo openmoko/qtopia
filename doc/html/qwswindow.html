@@ -1,111 +1,72 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
---></style>
-</head><body bgcolor="#ffffff">
-
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-
-<h1 align=center>QWSWindow Class Reference</h1><br clear="all">
-<p>
-Server-specific functionality in Qt/Embedded
-<a href="#details">More...</a>
-<p>
-<code>#include &lt;<a href="qwindowsystem_qws-h.html">qwindowsystem_qws.h</a>&gt;</code>
-<p><a href="qwswindow-members.html">List of all member functions.</a>
-<h2>Public Members</h2>
-<ul>
-<li><div class="fn"><b>QWSWindow</b> ( int i, QWSClient * client ) (internal)</div>
-<li><div class="fn"><b>~QWSWindow</b> () (internal)</div>
-<li><div class="fn">int <a href="#b65bf4"><b>winId</b></a> () const</div>
-<li><div class="fn">const QString&amp; <a href="#8a7dd9"><b>name</b></a> () const</div>
-<li><div class="fn">const QString&amp; <a href="#38a088"><b>caption</b></a> () const</div>
-<li><div class="fn">QWSClient* <a href="#319e1c"><b>client</b></a> () const</div>
-<li><div class="fn">QRegion <a href="#f5e141"><b>requested</b></a> () const</div>
-<li><div class="fn">QRegion <a href="#de4921"><b>allocation</b></a> () const</div>
-<li><div class="fn">bool <a href="#ee7f97"><b>isVisible</b></a> () const</div>
-<li><div class="fn">bool <a href="#ea72de"><b>isPartiallyObscured</b></a> () const</div>
-<li><div class="fn">bool <a href="#92606c"><b>isFullyObscured</b></a> () const</div>
-<li><div class="fn">void <a href="#cd50df"><b>raise</b></a> () </div>
-<li><div class="fn">void <a href="#98ee03"><b>lower</b></a> () </div>
-<li><div class="fn">void <a href="#d2c43a"><b>show</b></a> () </div>
-<li><div class="fn">void <a href="#9cc510"><b>hide</b></a> () </div>
-<li><div class="fn">void <a href="#a2e35c"><b>setActiveWindow</b></a> () </div>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: QWSWindow Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QWSWindow Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<p>The QWSWindow class encapsulates a top-level window in Qtopia Core. <a href="#details">More...</a></p>
+<pre> #include &lt;QWSWindow&gt;</pre><ul>
+<li><a href="qwswindow-members.html">List of all members, including inherited members</a></li>
 </ul>
-<hr><h2><a name="details"></a>Detailed Description</h2>
-Server-specific functionality in Qt/Embedded
-<p>
-When you run a Qt/Embedded application, it either runs as a server
-or connects to an existing server. If it runs as a server, some additional
-operations are provided via the <a href="qwsserver.html">QWSServer</a> class.
-<p>This class maintains information about each window and allows operations
-to be performed on the windows.
-
-<hr><h2>Member Function Documentation</h2>
-<h3 class="fn"><a href="qregion.html">QRegion</a> <a name="de4921"></a>QWSWindow::allocation () const</h3>
-<p>Returns the region that the window is allowed to draw into including
-any window decorations and excluding regions covered by other windows.
-<p>See also  <a href="#f5e141">requested</a>().
-<h3 class="fn">const <a href="qstring.html">QString</a> &amp; <a name="38a088"></a>QWSWindow::caption () const</h3>
-<p>Returns this windows caption.
-<h3 class="fn">QWSClient* <a name="319e1c"></a>QWSWindow::client () const</h3>
-<p>Returns the QWSClient that owns this window.
-<h3 class="fn">void <a name="9cc510"></a>QWSWindow::hide ()</h3>
-<p>Hides the window.
-<h3 class="fn">bool <a name="92606c"></a>QWSWindow::isFullyObscured () const</h3>
-<p>Returns TRUE is the window is completely obsured by another window or
-the bounds of the screen.
-<h3 class="fn">bool <a name="ea72de"></a>QWSWindow::isPartiallyObscured () const</h3>
-<p>Returns TRUE is the window is partially obsured by another window or
-the bounds of the screen.
-<h3 class="fn">bool <a name="ee7f97"></a>QWSWindow::isVisible () const</h3>
-<p>Returns TRUE if the window is visible.
-<h3 class="fn">void <a name="98ee03"></a>QWSWindow::lower ()</h3>
-<p>Lowers the window below other windows.
-<h3 class="fn">const <a href="qstring.html">QString</a> &amp; <a name="8a7dd9"></a>QWSWindow::name () const</h3>
-<p>Returns the name of this window.
-<h3 class="fn">void <a name="cd50df"></a>QWSWindow::raise ()</h3>
-<p>Raises the window above all other windows except "Stay on top" windows.
-<h3 class="fn"><a href="qregion.html">QRegion</a> <a name="f5e141"></a>QWSWindow::requested () const</h3>
-<p>Returns the region that the window has requested to draw into including
-any window decorations.
-<p>See also  <a href="#de4921">allocation</a>().
-<h3 class="fn">void <a name="a2e35c"></a>QWSWindow::setActiveWindow ()</h3>
-<p>Make this the active window (i.e. sets keyboard focus).
-<h3 class="fn">void <a name="d2c43a"></a>QWSWindow::show ()</h3>
-<p>Shows the window.
-<h3 class="fn">int <a name="b65bf4"></a>QWSWindow::winId () const</h3>
-<p>Returns the Id of this window.
-<h3 class="fn"><a name="e41db4"></a>QWSWindow::QWSWindow ( int i, QWSClient * client )</h3>
-<p>For internal use only.
-<h3 class="fn"><a name="13a12e"></a>QWSWindow::~QWSWindow ()</h3>
-<p>For internal use only.
-<hr><p>
-Search the documentation, FAQ, qt-interest archive and more (uses
-<a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
-<form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.10"><nobr>
-<input size="50" name="search"><input type=submit value="Search">
-</nobr></form><hr><p>
-This file is part of the <a href="index.html">Qt toolkit</a>,
-copyright &copy; 1995-2005
-<a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/>const QString &amp; <b><a href="qwswindow.html#caption">caption</a></b> () const</li>
+<li><div class="fn"/>QWSClient * <b><a href="qwswindow.html#client">client</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qwswindow.html#isFullyObscured">isFullyObscured</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qwswindow.html#isOpaque">isOpaque</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qwswindow.html#isVisible">isVisible</a></b> () const</li>
+<li><div class="fn"/>const QString &amp; <b><a href="qwswindow.html#name">name</a></b> () const</li>
+<li><div class="fn"/>uint <b><a href="qwswindow.html#opacity">opacity</a></b> () const</li>
+<li><div class="fn"/>const QRegion &amp; <b><a href="qwswindow.html#requestedRegion">requestedRegion</a></b> () const</li>
+<li><div class="fn"/>int <b><a href="qwswindow.html#winId">winId</a></b> () const</li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QWSWindow class encapsulates a top-level window in Qtopia Core.</p>
+<p>When running a <a href="qtopiacore.html">Qtopia Core</a> application, it either runs as a server or connects to an existing server. As applications add and remove widgets, the <a href="qwsserver.html">QWSServer</a> class maintains information about each window. Note that you should never construct the QWSWindow class yourself; the current top-level windows can be retrieved using the <a href="qwsserver.html#clientWindows">QWSServer::clientWindows</a>() function.</p>
+<p>QWSWindow provides functions returning various information about the window: its <a href="qwswindow.html#caption">caption</a>(), <a href="qwswindow.html#name">name</a>(), <a href="qwswindow.html#opacity">opacity</a>() and <a href="qwswindow.html#winId">winId</a>() along with the <a href="qwswindow.html#client">client</a>() that owns the window.</p>
+<p>In addition, it is possible to determine whether the window is visible using the <a href="qwswindow.html#isVisible">isVisible</a>() function, if the window is completely obscured by another window or by the bounds of the screen using the <a href="qwswindow.html#isFullyObscured">isFullyObscured</a>() function, and whether the window has an alpha channel different from 255 using the <a href="qwswindow.html#isOpaque">isOpaque</a>() function. Finally, QWSWindow provides the <a href="qwswindow.html#requestedRegion">requestedRegion</a>() function that returns the region of the display the window wants to draw on.</p>
+<p>See also <a href="qwsserver.html">QWSServer</a> and <a href="qtopiacore-running.html">Running Qtopia Core Applications</a>.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="caption"></a>const <a href="qstring.html">QString</a> &amp; QWSWindow::caption () const</h3>
+<p>Returns the window's caption.</p>
+<p>See also <a href="qwswindow.html#name">name</a>() and <a href="qwswindow.html#winId">winId</a>().</p>
+<h3 class="fn"><a name="client"></a><a href="qwsclient.html">QWSClient</a> * QWSWindow::client () const</h3>
+<p>Returns a reference to the <a href="qwsclient.html">QWSClient</a> object that owns this window.</p>
+<h3 class="fn"><a name="isFullyObscured"></a>bool QWSWindow::isFullyObscured () const</h3>
+<p>Returns true if the window is completely obsured by another window or by the bounds of the screen; otherwise returns false.</p>
+<p>See also <a href="qwswindow.html#isVisible">isVisible</a>().</p>
+<h3 class="fn"><a name="isOpaque"></a>bool QWSWindow::isOpaque () const</h3>
+<p>Returns true if the window is opaque, i.e. if its alpha channel equals 255; otherwise returns false.</p>
+<p>See also <a href="qwswindow.html#opacity">opacity</a>().</p>
+<h3 class="fn"><a name="isVisible"></a>bool QWSWindow::isVisible () const</h3>
+<p>Returns true if the window is visible; otherwise returns false.</p>
+<p>See also <a href="qwswindow.html#isFullyObscured">isFullyObscured</a>().</p>
+<h3 class="fn"><a name="name"></a>const <a href="qstring.html">QString</a> &amp; QWSWindow::name () const</h3>
+<p>Returns the window's name.</p>
+<p>See also <a href="qwswindow.html#caption">caption</a>() and <a href="qwswindow.html#winId">winId</a>().</p>
+<h3 class="fn"><a name="opacity"></a><a href="qtglobal.html#uint-typedef">uint</a> QWSWindow::opacity () const</h3>
+<p>Returns the window's alpha channel value.</p>
+<p>See also <a href="qwswindow.html#isOpaque">isOpaque</a>().</p>
+<h3 class="fn"><a name="requestedRegion"></a>const <a href="qregion.html">QRegion</a> &amp; QWSWindow::requestedRegion () const</h3>
+<p>Returns the region that the window has requested to draw onto, including any window decorations.</p>
+<h3 class="fn"><a name="winId"></a>int QWSWindow::winId () const</h3>
+<p>Returns the window's ID.</p>
+<p>See also <a href="qwswindow.html#name">name</a>() and <a href="qwswindow.html#caption">caption</a>().</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

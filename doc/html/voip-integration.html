@@ -1,0 +1,128 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qtopia VoIP Integration</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Qtopia VoIP Integration<br /><small></small></h1>
+<a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
+<li><a href="#connection-establishment">Connection Establishment</a></li>
+<li><a href="#conventions-and-command-encoding">Conventions and Command Encoding</a></li>
+<li><a href="#qtopia-to-handler-requests">Qtopia to Handler Requests</a></li>
+<li><a href="#handler-to-qtopia-requests">Handler to Qtopia Requests</a></li>
+<li><a href="#commands-in-either-direction">Commands in Either Direction</a></li>
+<li><a href="#relevant-code">Relevant Code</a></li>
+</ul>
+<a name="introduction"></a>
+<h2>Introduction</h2>
+<p>This document describes how to integrate a third-party Voice over IP (VoIP) handler into Qtopia.</p>
+<p>Third parties need to supply at least two programs as follows:</p>
+<ol type="1">
+<li>phone call handler that provides the call management facilities</li>
+<li>settings program that allows the user to configure the VoIP options for the phone call handler.</li>
+</ol>
+<p>The phone call handler must be registered as a VoIP service in the <tt>$QPEDIR/services/VoIP</tt> directory. For example, if the phone call handler binary is called &quot;foovoip&quot;, you would create a file called <tt>$QPEDIR/services/VoIP/foovoip</tt> that contains the following:</p>
+<pre>    [Extensions]
+    [Standard]
+    Version = 100</pre>
+<p>Qtopia will then launch the handler at the correct time.</p>
+<a name="connection-establishment"></a>
+<h2>Connection Establishment</h2>
+<p>When the Qtopia Phone Server is started, it binds to a Unix domain socket and listens for incoming connections. Phone call handlers connect to this socket and announce themselves with an <tt>INIT</tt> message. After that, all call requests of that type are redirected to the handler process.</p>
+<p>The connection is made to <tt>/tmp/qtopia-N/call-manager</tt>, where <tt>N</tt> is the QWS display identifier (usually 0). When using Qtopia Core, the display identifier can be obtained from the <tt>qws_display_id</tt> variable at runtime. The following code demonstrates how to construct the name of the Unix domain socket to use:</p>
+<pre>    extern int qws_display_id;
+    struct sockaddr_un addr;
+    ::memset( &amp;addr, 0, sizeof(addr) );
+    addr.sun_family = AF_UNIX;
+    strncpy( addr.sun_path,
+             (Qtopia::tempDir()+&quot;call-manager&quot;).toLatin1(),
+             sizeof( addr.sun_path ));</pre>
+<p>If the phone call handler is not using Qtopia Core, you can obtain the display identifier from the <tt>QWS_DISPLAY</tt> environment variable, which has the form <tt>name:N</tt>.</p>
+<a name="conventions-and-command-encoding"></a>
+<h2>Conventions and Command Encoding</h2>
+<p>In the commnand descriptions below <tt>[X]</tt> indicates that <tt>X</tt> is optional. <tt>(A|B)</tt> indicates that either <tt>A</tt> or <tt>B</tt> should be sent (without parentheses). The following conventions apply:</p>
+<ul>
+<li>arguments to a command are separated by one or more space characters (0x20).</li>
+<li>arguments may be sent quoted or unquoted and have the following rules:<ul>
+<li>unquoted arguments must not contain spaces, characters with codes less than 0x20, a double quote (&quot;) or a backslash (\).</li>
+<li>quoted arguments are surrounded by double quotes and may contain \&quot; to escape an embedded double quote, \\ to escape a backslash, or \NNN for the octal encoding of non-printable characters below 0x20. The character set is UTF-8. An 8-bit clean transport is assumed.</li>
+</ul>
+</li>
+<li>any argument that may be sent unquoted can also be sent quoted, but not all quoted arguments can be sent unquoted.</li>
+<li>Ordinary characters can be escaped with <tt>\\</tt>, and stand for the character themselves. For example, <tt>\\n</tt> is the letter <i>n</i>, although it would be more efficient to simply send the <tt>n</tt> as-is. An embedded line feed would be sent as <tt>\\012</tt>.</li>
+<li>lines can be of arbitrary length, and are terminated with CRLF.</li>
+<li>command names and arguments are case-sensitive.</li>
+</ul>
+<a name="qtopia-to-handler-requests"></a>
+<h2>Qtopia to Handler Requests</h2>
+<p>This section describes the requests that are sent from Qtopia to the phone call handler.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Request</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>DIAL identifier number type [restrict]</tt>:</td><td>Dial a number on a new call called <tt>identifier</tt>. The <tt>number</tt> argument may be a URI for VoIP (e.g. <tt>sip:name@hostname</tt>).<p>If the <tt>restrict</tt> flag is present, then the handler should prevent caller id information from being sent. If there is no way to prevent caller id information from being sent, the flag should be ignored.</p>
+<p>The <tt>type</tt> will usually be <tt>voip</tt>. This may change in future versions of Qtopia to support multiple phone call handlers.</p>
+<p>Call identifiers should be globally-unique identifiers which are never reused. In Qtopia, <tt>Global::generateUuid().toString()</tt> can be used to generate such an identifier.</p>
+</td></tr>
+<tr valign="top" class="even"><td><tt>HANGUP identifier (callonly|group)</tt>:</td><td>Hang up the call associated with <tt>identifier</tt>. If the <tt>callonly</tt> flag is supplied and the call is part of a multi-party conference group, then only this call will be hung up - all other parties remain connected. If the <tt>group</tt> flag is supplied, then all calls in the group are hung up. If the phone call handler does not support multi-party conference groups, the flag should be ignored.</td></tr>
+<tr valign="top" class="odd"><td><tt>ACCEPT identifier</tt>:</td><td>Accept the incoming call associated with <tt>identifier</tt>. The phone call handler sends a <tt>STATUS</tt> message to Qtopia to inform it about the incoming call. See below for more details.</td></tr>
+<tr valign="top" class="even"><td><tt>HOLD identifier</tt>:</td><td>Place the call associated with <tt>identifier</tt> on hold. If the phone call handler does not support call hold, the handler should respond with a <tt>FAIL</tt> message.</td></tr>
+<tr valign="top" class="odd"><td><tt>ACTIVATE identifier (callonly|group)</tt>:</td><td>Re-activate the call associated with <tt>identifier</tt> that was on hold. If the <tt>callonly</tt> flag is supplied and the call is part of a multi-party conference group, then only this call is taken off hold, removing it from the multi-party conversation. If the <tt>group</tt> flag is supplied, then all calls in the multi-party conference group are re-activated.</td></tr>
+<tr valign="top" class="even"><td><tt>JOIN identifier [detach]</tt>:</td><td>Join the call associated with <tt>identifier</tt> (which is on hold) to the currently active conversation for three-way communication. If the <tt>detach</tt> flag is present, then the two calls are connected and then the local user is detached. To &quot;unjoin&quot; a call, <tt>ACTIVATE id callonly</tt> is used on the call.</td></tr>
+<tr valign="top" class="odd"><td><tt>DTMF identifier tones</tt>:</td><td>Send DTMF tones on the call associated with <tt>identifier</tt>.</td></tr>
+<tr valign="top" class="even"><td><tt>TRANSFER identifier number</tt></td><td>Transfer the call associated with <tt>identifier</tt> to <tt>number</tt>.</td></tr>
+<tr valign="top" class="odd"><td><tt>REGISTER</tt></td><td>Register with the network. If the phone call handler requires authentication credentials (e.g. user name and password), it must obtain this information from the user or a configuration file.</td></tr>
+<tr valign="top" class="even"><td><tt>DEREGISTER</tt></td><td>De-register from the network.</td></tr>
+<tr valign="top" class="odd"><td><tt>STARTMONITOR who</tt></td><td>Start monitoring the presence status on <tt>who</tt>. Whenever the status changes, the handler sends a <tt>MONITOR</tt> message.</td></tr>
+<tr valign="top" class="even"><td><tt>STOPMONITOR who</tt></td><td>Stop monitoring the presence status on <tt>who</tt>.</td></tr>
+<tr valign="top" class="odd"><td><tt>GETPRESENCE</tt></td><td>Get the presence state of the local user. The handler should respond with a <tt>PRESENCE</tt> message.</td></tr>
+<tr valign="top" class="even"><td><tt>SETPRESENCE (available|unavailable)</tt></td><td>Set the presence state of the local user to <tt>available</tt> or <tt>unavailable</tt>.</td></tr>
+<tr valign="top" class="odd"><td><tt>UPDATECONFIG category</tt></td><td>Update the handler's configuration. The <tt>category</tt> indicates what category of configuration values to update, if there multiple. This is typically sent by VoIP settings programs.</td></tr>
+<tr valign="top" class="even"><td><tt>GET name</tt></td><td>Get the auxillary setting <tt>name</tt>.</td></tr>
+<tr valign="top" class="odd"><td><tt>SET name value</tt></td><td>Set the auxillary setting <tt>name</tt> to <tt>value</tt>.</td></tr>
+</table></p>
+<p><b>Note:</b> <tt>DIAL</tt>, <tt>HANGUP</tt>, <tt>ACCEPT</tt>, <tt>HOLD</tt>, <tt>ACTIVATE</tt>, and <tt>JOIN</tt> should respond with <tt>STATUS</tt> messages to indicate how the status of the call has changed. e.g. <tt>DIAL</tt> will respond with a <tt>dialing</tt> status, followed by a <tt>connected</tt> status once the call connects.</p>
+<p>Sometimes a phone operation may have unwanted effects on other calls. For example, taking a background call off hold will put the foreground call on hold. The handler should send extra <tt>STATUS</tt> messages to indicate the changes in the other calls affected.</p>
+<p><b>Note:</b> If a <tt>DIAL</tt> command fails, the correct response is to send a <tt>STATUS</tt> message, not a <tt>FAIL</tt> message. <tt>FAIL</tt> is intended for gross protocol failures such as <i>command not supported</i>.</p>
+<a name="handler-to-qtopia-requests"></a>
+<h2>Handler to Qtopia Requests</h2>
+<p>This section describes the messages that are sent from phone call handler to Qtopia.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Request</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>INIT type1 [type2 ...]</tt></td><td>Sent just after connection to indicate the types of calls that are handled by this phone call handler. The only type that is supported at present is <tt>voip</tt>.<p>After sending <tt>INIT</tt>, if there are pre-existing calls in progress, the handler must send <tt>STATUS</tt> messages for all existing calls to inform Qtopia about them.</p>
+</td></tr>
+<tr valign="top" class="even"><td><tt>STATUS identifier status type [number]</tt></td><td>Indicates a change in status on the call associated with <tt>identifier</tt>. The <tt>status</tt> must be one of <tt>incoming</tt>, <tt>dialing</tt>, <tt>alerting</tt>, <tt>connected</tt>, <tt>hold</tt>, <tt>hanguplocal</tt>, <tt>hangupremote</tt>, <tt>missed</tt>, <tt>networkfailure</tt>, <tt>otherfailure</tt>, <tt>servicehangup</tt>.<p>The <tt>number</tt> will usually be present on incoming calls to indicate the caller's identity.</p>
+</td></tr>
+<tr valign="top" class="odd"><td><tt>NAME identifier name</tt></td><td>Indicate that the real name of the user on the call associated with <tt>identifier</tt> is <tt>name</tt>.</td></tr>
+<tr valign="top" class="even"><td><tt>REMOTEHOLD identifier value</tt></td><td>Indicate that the remote party has requested that the call associated with <tt>identifier</tt> be put on hold or taken off hold. The <tt>value</tt> will be either <tt>hold</tt> or <tt>unhold</tt> depending upon the requested operation from the remote party.</td></tr>
+<tr valign="top" class="odd"><td><tt>GROUP identifier groupid</tt></td><td>The call associated with <tt>identifier</tt> has changed its hold group. This is affected by <tt>HOLD</tt>, <tt>JOIN</tt>, and other multi-party conference call commands. If a call does not have an explicit group identifier yet, then its call identifier is its group.</td></tr>
+<tr valign="top" class="even"><td><tt>REGISTRATION type</tt></td><td>Indicate a change in network registration. The <tt>type</tt> must be one of <tt>unregistered</tt>, <tt>home</tt>, <tt>searching</tt>, <tt>denied</tt>, <tt>unknown</tt>, or <tt>roaming</tt>.</td></tr>
+<tr valign="top" class="odd"><td><tt>OPERATOR name</tt></td><td>Name of the network operator that was registered.</td></tr>
+<tr valign="top" class="even"><td><tt>PRESENCE status</tt></td><td>Report presence information on the local user, in response to a <tt>GETPRESENCE</tt> command. The <tt>status</tt> is <tt>available</tt> or <tt>unavailable</tt>.</td></tr>
+<tr valign="top" class="odd"><td><tt>MONITOR who status</tt></td><td>Change in presence information on <tt>who</tt>. The <tt>status</tt> is <tt>available</tt> or <tt>unavailable</tt>.</td></tr>
+<tr valign="top" class="even"><td><tt>VALUE name value</tt></td><td>This is a response to the <tt>GET</tt> command. It can also be used to notify applications of an unsolicited change in the value of <tt>name</tt>.</td></tr>
+</table></p>
+<a name="commands-in-either-direction"></a>
+<h2>Commands in Either Direction</h2>
+<p>The following commands may be sent in either direction.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Request</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>FAIL reason cmd [arg1 ...]</tt></td><td>Report that the command indicated by <tt>cmd arg1 ...</tt> failed for the specified <tt>reason</tt>. The only reason that is currently supported is <tt>unknown-command</tt>.</td></tr>
+<tr valign="top" class="even"><td><tt>TEST cmd1 [cmd2 ...]</tt></td><td>Test to see if <tt>cmd1</tt>, <tt>cmd2</tt>, etc are supported. The other side responds with a <tt>SUPPORTS</tt> message. This can also test if commands in the reverse direction are supported. For example, sending <tt>TEST DIAL STATUS</tt> to the handler will test if it can receive the <tt>DIAL</tt> command and will report <tt>STATUS</tt> messages.</td></tr>
+<tr valign="top" class="odd"><td><tt>SUPPORTS cmd1 [cmd2 ...]</tt></td><td>Response to <tt>TEST</tt> to see if a command is supported. Command names that are not supported start with <tt>!</tt>. For example, <tt>TEST ACCEPT HOLD</tt> may respond with <tt>SUPPORTS ACCEPT !HOLD</tt>.</td></tr>
+</table></p>
+<a name="relevant-code"></a>
+<h2>Relevant Code</h2>
+<p>A sample SIP stack and VoIP user agent can be found in <tt>$QPEDIR/src/tools/sipagent</tt>. It is based around the LGPL'ed <tt>libdissipate2</tt> library, which provides the SIP functionality. The <tt>sipagent</tt> program also implements audio transport via the Real Time Protocol (RTP), using the freely available G711u, G711a, GSM, and iLBC codecs.</p>
+<p>The Qtopia side of the protocol communication can be found in the source file <tt>$QPEDIR/src/libraries/qtopiaphone/qvoipline.cpp</tt>. This can be used as a guide for implementing the protocol. You can also make use of the <tt>QPhoneSocket</tt> class, declared in <tt>qphonesocket.h</tt>, to simplify the communication if your handler is based on Qt.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

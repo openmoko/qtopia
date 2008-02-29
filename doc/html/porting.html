@@ -1,1030 +1,233 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Qt Toolkit -  Porting to Qt 2.x</title><style type="text/css"><!--
-a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
---></style></head><body bgcolor="#ffffff">
-<p>
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-<h1 align="center"> Porting to Qt 2.x</h1><br clear="all">
-<p>
-You're probably looking at this page because you want to port
-your application from Qt 1.x to Qt 2.x, but to be sure, let's
-review the good reasons to do this:
-<ul>
- <li>To get access to all the new Qt 2.x features like the rich text
-        HTML subset for formatted labels, tooltips, online help etc.
-        and the much easier to use layout classes and widgets.
- <li>To make your application truly international, with support
-        for Unicode and translations for the languages of the world.
- <li>To allow your application to fit into the new look of the
-        Unix desktop with configurable, very powerful "themes". The
-        extended style system also integrates Qt applications better
-        on MS-Windows desktops. Qt will automatically chose the right
-        colors and fonts and obey global system setting changes.
- <li>To stay up-to-date with the version of Qt that gets all the
-        new features and bug-fixes.
- <li>To get more speed and smoother widgets display with all the
-        new anti-flicker changes in Qt.
- <li>Most of all though, you want to port to Qt 2.x
-        so that your Wheel Mouse works!
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Porting - Qtopia 2 to Qtopia 4</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Porting - Qtopia 2 to Qtopia 4<br /><small></small></h1>
+<a name="top"></a><ul><li><a href="#overview">Overview</a></li>
+<li><a href="#basic-conversions">Basic Conversions</a></li>
+<li><a href="#designer-and-uic">Designer and UIC</a></li>
+<li><a href="#qprocess">QProcess</a></li>
+<li><a href="#qmenu-and-qactiongroup">QMenu and QActionGroup</a></li>
+<li><a href="#qaction-for-regular-menu-items">QAction for Regular Menu Items</a></li>
+<li><a href="#qimage-qpixmap-smoothscale">QImage/QPixmap::smoothScale</a></li>
+<li><a href="#qstyle">QStyle</a></li>
+<li><a href="#qcanvas">QCanvas</a></li>
+<li><a href="#quuid">QUuid</a></li>
+<li><a href="#plug-ins">Plug-ins</a></li>
+<li><a href="#resource">Resource</a></li>
+<li><a href="#config">Config</a></li>
+<li><a href="#vscrollview">VScrollView</a></li>
 </ul>
-<p>
-The Qt 2.x series is not binary compatible with the 1.x series.
-This means programs compiled for Qt 1.x must be recompiled to work
-with Qt 2.x.  Qt 2.x is also not completely <em>source</em> compatible
-with 1.x, however all points of incompatibility cause
-compiler errors (rather than mysterious results), or produce run-time
-messages.  The result is that Qt 2.x includes many additional features,
-discards obsolete functionality that is easily converted to use the new
-features, and that porting an application from Qt 1.x to Qt 2.x is
-a simple task well worth the amount of effort required.
-<p>
-To port code using Qt 1.x to use Qt 2.x:
-<p>
+<a name="overview"></a>
+<h2>Overview</h2>
+<p>Porting an application from Qtopia 2 to Qtopia 4 involves changing the application code corresponding to how the API for Qtopia has changed.</p>
+<p>Primarily, porting changes will relate to the changes in the Qt API. Qtopia does <i>not</i> support the <a href="http://doc.trolltech.com/4.1/qt3support.html">Qt 3 Support</a> module, so the task of porting from Qtopia 2 to Qtopia 4 takes more work than porting from Qt 2 to Qt 4, however the key documents remain:</p>
 <ul>
- <li> Briefly read the porting notes below to get an idea of what to expect.
- <li> Be sure your code compiles and runs well on all your target platforms with Qt 1.x.
- <li> Recompile with Qt 2.x.  For each error, search below for related
-        identifiers (eg. function names, class names) - this documented is
-        structured to mention all relevant identifiers to facilitate such
-        searching, even if that makes it a little verbose.
- <li> If you get stuck, ask on the qt-interest mailing list, or
-        Trolltech Technical Support if you're a Professional Edition
-        licensee.
+<li><a href="http://doc.trolltech.com/3.3/porting.html">Porting Qt 2 to Qt 3</a></li>
+<li><a href="porting4.html">Porting Qt 3 to Qt 4</a></li>
+<li><a href="qtopiacore-porting-device.html">Porting Qtopia Core to a New Architecture</a></li>
+<li><a href="qtopiacore-porting-operatingsystem.html">Porting Qtopia Core to Another Operating System</a></li>
 </ul>
-<p>
-Many very major projects, such as <a href=http://www.kde.org>KDE</a>
-have been port, so there is plenty of expertise in the collective conscious
-that is the Qt Developer Community!
-</p>
-<p>
-<hr>
-<p>
-<h2 align=center>The Porting Notes</h2>
-<p>
+<p>In addition to these documents, the sections below provide some additional tips.</p>
+<a name="basic-conversions"></a>
+<h2>Basic Conversions</h2>
+<p>If a previously used Qt function is not available and is not listed below or in the above documents, check if it is declared in the relevant header file, but within <tt>#ifdef QT3_SUPPORT</tt> bracketing.</p>
+<p>If it is, check the in-line code for the function for the corresponding Qt 4 code.</p>
+<p>For example:</p>
+<p><tt>QComboBox::setCurrentItem(int)</tt> is in Qt3_SUPPORT, but it is an in-line function that simply calls the renamed function, <tt>QComboBox::setCurrentIndex(int)</tt>.</p>
+<p>The table below lists the function conversions for porting to Qtopia 4.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Qtopia 2</th><th>Qtopia 4</th></tr></thead>
+<tr valign="top" class="odd"><td>AppLnk</td><td><a href="qcontent.html">QContent</a> and <a href="qcontentset.html">QContentSet</a></td></tr>
+<tr valign="top" class="even"><td><tt>ContextBar</tt></td><td><a href="qsoftmenubar.html">QSoftMenuBar</a></td></tr>
+<tr valign="top" class="odd"><td><tt>ContextMenu</tt></td><td><a href="qmenu.html">QMenu</a> and <a href="qsoftmenubar.html#addMenuTo">QSoftMenuBar::addMenuTo</a>()</td></tr>
+<tr valign="top" class="even"><td>DocLnk</td><td><a href="qcontent.html">QContent</a> and <a href="qcontentset.html">QContentSet</a></td></tr>
+<tr valign="top" class="odd"><td><tt>FileSelector</tt></td><td><a href="qdocumentselector.html">QDocumentSelector</a></td></tr>
+<tr valign="top" class="even"><td><tt>Global::decodeBase64(bytearray)</tt></td><td><a href="qbytearray.html#fromBase64">QByteArray::fromBase64</a>()</td></tr>
+<tr valign="top" class="odd"><td><tt>Global::encodeBase64(bytearray)</tt></td><td><a href="qbytearray.html#toBase64">QByteArray::toBase64</a>()</td></tr>
+<tr valign="top" class="even"><td><tt>ImageSelector</tt></td><td><a href="qimagedocumentselector.html">QImageDocumentSelector</a></td></tr>
+<tr valign="top" class="odd"><td><tt>QArray</tt></td><td><a href="qlist.html">QList</a></td></tr>
+<tr valign="top" class="even"><td><tt>QCString</tt></td><td><a href="qstring.html">QString</a> or <a href="qbytearray.html">QByteArray</a>.<p><b>Note:</b> <a href="qcopchannel.html">QCopChannel</a> connections use <a href="qstring.html">QString</a></p>
+</td></tr>
+<tr valign="top" class="odd"><td><tt>QColorGroup::base()</tt></td><td><a href="qpalette.html#color">QPalette::color(QPalette::Base)</a></td></tr>
+<tr valign="top" class="even"><td><tt>QDataStream::ds(bytearray, QIODevice::ReadOnly)</tt></td><td><a href="qdatastream.html#QDataStream">QDataStream::ds(bytearray)</a> - it is always read only</td></tr>
+<tr valign="top" class="odd"><td><tt>QDialog::dlg(parent,name,modal)</tt></td><td><a href="qdialog.html#QDialog">QDialog::dlg(parent,name)</a>; <a href="qdialog.html#QDialog">QDialog::dlg.setModal(TRUE)</a></td></tr>
+<tr valign="top" class="even"><td><tt>QDir::cleanDirPath()</tt></td><td><a href="qdir.html#cleanPath">QDir::cleanPath</a>()</td></tr>
+<tr valign="top" class="odd"><td><tt>QFileInfo::dirPath()</tt></td><td><a href="qfileinfo.html#absolutePath">QFileInfo::absolutePath</a>()</td></tr>
+<tr valign="top" class="even"><td><tt>QFileInfo::extension()</tt></td><td><a href="qfileinfo.html#completeSuffix">QFileInfo::completeSuffix</a>()</td></tr>
+<tr valign="top" class="odd"><td><tt>QIconView</tt></td><td><a href="qlistview.html">QListView</a>.</td></tr>
+<tr valign="top" class="even"><td><tt>QList::remove()</tt></td><td><a href="qlist.html#removeAll">QList::removeAll</a>()</td></tr>
+<tr valign="top" class="odd"><td><tt>QList&lt;T&gt;</tt></td><td><a href="qlist.html">QList</a>&lt;T*&gt;</td></tr>
+<tr valign="top" class="even"><td><tt>QListBox</tt></td><td><a href="qlistview.html">QListView</a></td></tr>
+<tr valign="top" class="odd"><td><tt>QListIterator&lt;T&gt;</tt></td><td><a href="qlist.html">QList</a>&lt;T&gt;::iterator; also consider using <a href="containers.html#foreach">foreach</a></td></tr>
+<tr valign="top" class="even"><td><tt>QListView</tt></td><td><a href="qtreeview.html">QTreeView</a> if hierarchical, otherwise <a href="qlistview.html">QListView</a></td></tr>
+<tr valign="top" class="odd"><td><tt>QPEToolBar</tt></td><td><a href="qtoolbar.html">QToolBar</a></td></tr>
+<tr valign="top" class="even"><td><tt>QScrollView</tt></td><td><a href="qscrollarea.html">QScrollArea</a></td></tr>
+<tr valign="top" class="odd"><td><tt>QValueList</tt></td><td><a href="qlist.html">QList</a></td></tr>
+<tr valign="top" class="even"><td><tt>Qtopia::escapeMultiLineString</tt></td><td><a href="qt.html#convertFromPlainText">Qt::convertFromPlainText</a>()</td></tr>
+<tr valign="top" class="odd"><td><tt>Qtopia::escapeString</tt></td><td><a href="qt.html#escape">Qt::escape</a>()</td></tr>
+<tr valign="top" class="even"><td><tt>StorageInfo</tt></td><td><a href="qfilesystem.html">QFileSystem</a> and <a href="qstoragemetainfo.html">QStorageMetaInfo</a></td></tr>
+<tr valign="top" class="odd"><td><tt>Sound::soundAlarm()</tt></td><td>Qtopia::soundAlarm()</td></tr>
+</table></p>
+<a name="designer-and-uic"></a>
+<h2>Designer and UIC</h2>
+<p>UIC can convert Qt 2/3 UI files to Qt 4, however, it generates code that uses Qt 3 support classes if the <tt>.ui</tt> file specifies either a <i>class</i> or a <i>property</i> on a class which is in the Qt 3 Support module.</p>
+<p>For example, if <tt>QButtonGroup</tt> is used, it will generally convert trivially to <tt>QButtonGroup</tt> which is also in Qt 4, however, <tt>QButtonGroup</tt> in Qt 3 inherited <tt>QGroupBox</tt> which in turn inherited <tt>QFrame</tt>. So if the <tt>.ui</tt> file specifies <tt>QFrame</tt> properties on a <tt>QButtonGroup</tt>, then Qt 3 Support code will be generated.</p>
+<p>To port <tt>.ui</tt> files:</p>
 <ul>
- <li><b><a href="#Namespace">Namespace</a></b>
- <li><b><a href="#Virtual">Virtual Functions</a></b>
- <li><b><a href="#Collection">Collection classes</a></b>
- <li><b><a href="#DefaultParent">No Default 0 Parent Widget</a></b>
- <li><b><a href="#DebugVsRelease">Debug vs. Release</a></b>
-<li><b><a href="#QApplication">QApplication</a></b>
- <li><b><a href="#QClipboard">QClipboard</a></b>
- <li><b><a href="#QColor">QColor</a></b>
- <li><b><a href="#QDataStream">QDataStream</a></b>
- <li><b><a href="#QDialog">QDialog</a></b>
- <li><b><a href="#QDropSite">QDropSite</a></b>
- <li><b><a href="#QEvent">QEvent</a></b>
- <li><b><a href="#QFile">QFile</a></b>
- <li><b><a href="#QFontMetrics">QFontMetrics</a></b>
- <li><b><a href="#QIODevice">QIODevice</a></b>
- <li><b><a href="#QLabel">QLabel</a></b>
- <li><b><a href="#QLayout">QLayout</a></b>
- <li><b><a href="#QListView">QListView</a></b>
- <li><b><a href="#QMenuData">QMenuData</a></b>
- <li><b><a href="#QMenuData">QPopupMenu</a></b>
- <li><b><a href="#QMultiLineEdit">QMultiLineEdit</a></b>
- <li><b><a href="#QPainter">QPainter</a></b>
- <li><b><a href="#QPicture">QPicture</a></b>
- <li><b><a href="#QPoint">QPoint, QPointArray, QSize and QRect</a></b>
- <li><b><a href="#QPixmap">QPixmap</a></b>
- <li><b><a href="#QRgb">QRgb</a></b>
- <li><b><a href="#QScrollView">QScrollView</a></b>
- <li><b><a href="#QStrList">QStrList</a></b>
- <li><b><a href="#QString">QString</a></b>
- <li><b><a href="#QTextStream">QTextStream</a></b>
- <li><b><a href="#QUriDrag">QUriDrag / QUrlDrag</a></b>
- <li><b><a href="#QValidator">QComboBox</a></b>
- <li><b><a href="#QValidator">QLineEdit</a></b>
- <li><b><a href="#QValidator">QSpinBox</a></b>
- <li><b><a href="#QValidator">QValidator</a></b>
- <li><b><a href="#QWidget">QWidget</a></b>
- <li><b><a href="#QWindow">QWindow</a></b>
+<li>Run: <tt>uic3 -convert oldfile.ui &gt;newfile.ui</tt></li>
+<li>Edit/check <tt>newfile.ui</tt> - for example class names may have been lowercased MyDialog -&gt; mydialog</li>
+<li>Remove use of Qt 3 support classes (look for &quot;Q3&quot;), and use Qt 4 classes as described above.</li>
 </ul>
-<p>
-<hr>
-<p>
-<h3><a name=Namespace>Namespace</a></h3>
-<p> Qt 2.x is namespace-clean, unlike 1.x. Qt now uses very few
-global identifiers. Identifiers like <code>red, blue, LeftButton,
-AlignRight, Key_Up, Key_Down, NoBrush</code> etc. are now part of a
-special class <code>Qt</code> (defined in qnamespace.h),
-which is inherited by
-most Qt classes.  Member functions of classes that inherit from QWidget,
-etc. are totally unaffected, but code that is
-<em>not</em> in functions of classes inherited from <code>Qt</code>,
-you must qualify these identifiers like this: <code>Qt::red,
-Qt::LeftButton, Qt::AlignRight</code>, etc.
-<p>The <code>qt/bin/qt20fix</code> script helps to fix the code that
-needs adaption, though most code does not need changing.
-<p>
-Compiling with -DQT1COMPATIBILITY will help you get going with Qt 2.x
-- it allows all the old "dirty namespace" identifiers from Qt 1.x to
-continue working.  Without it, you'll get compile errors that can
-easily be fixed by searching this page for the clean identifiers.
-<p>
-<h3><a name=DefaultParent>No Default 0 Parent Widget</a></h3>
-<p>
-In Qt 1.x, all widget constructors were defined with a default value
-of 0 for the parent widget. However, only the main window of the
-application should be created with a 0 parent, all other widgets
-should have parents. Having the 0 default made it too simple to create
-bugs by forgetting to specify the parent of non-mainwindow
-widgets. Such widgets would typically never be deleted (causing memory
-leaks), and they would become top-level widgets, confusing the window
-managers. Therefore, in Qt 2.x the 0 default parent has been removed
-for the widget classes that are not likely to be used as main windows.
-<p>
-Note also that programs no longer need (or should) use 0 parent just
-to indicate that a widget should be top-level. See
-<pre> <a href="qwidget.html#17338a">QWidget::isTopLevel</a>()
-</pre>
- for details. See also the notes about
-<a href=#QMenuData>QPopupMenu</a> and <a href=#QDialog>QDialog</a>
-below.
-<p>
-<h3><a name=Virtual>Virtual Functions</a></h3>
-<p> Some virtual functions have changed signature in Qt 2.x.
-If you override them in derived classes, you must change the signature
-of your functions accordingly.
-<p>
-<!-- warwick can check for additions to this with his qt-2-report -->
-<ul>
- <li><pre> <a href="qwidget.html#287f79">QWidget::setStyle</a>(GUIStyle)</pre>
-<li><pre> <a href="qlistview.html#2323b8">QListView::addColumn</a>(const char *, int)</pre>
-<li><pre> <a href="qlistview.html#251e98">QListView::setColumnText</a>(int, const char *)</pre>
-<li><pre> <a href="qlistviewitem.html#808e84">QListViewItem::setText</a>(int, const char *)</pre>
-<li><pre> <a href="qmultilineedit.html#e13115">QMultiLineEdit::insertLine</a>(const char *, int)</pre>
-<li><pre> <a href="qmultilineedit.html#56c164">QMultiLineEdit::insertAt</a>(const char *, int, int, bool)</pre>
-<li><pre> <a href="qspinbox.html#eccb7d">QSpinBox::setPrefix</a>(const char *)</pre>
-<li><pre> <a href="qspinbox.html#36bd02">QSpinBox::setSuffix</a>(const char *)</pre>
-<li><pre> <a href="qtoolbutton.html#51354a">QToolButton::setTextLabel</a>(const char *, bool)</pre>
-<li><pre> <a href="qdoublevalidator.html#81476e">QDoubleValidator::validate</a>(<a href="qstring.html">QString</a> &amp;, int &amp;)</pre>
-<li><pre> <a href="qintvalidator.html#91b7e2">QIntValidator::validate</a>(<a href="qstring.html">QString</a> &amp;, int &amp;)</pre>
-<li><pre> <a href="qvalidator.html#3fa523">QValidator::fixup</a>(<a href="qstring.html">QString</a> &amp;)</pre>
-<li><pre> <a href="qslider.html#904afa">QSlider::paintSlider</a>(<a href="qpainter.html">QPainter</a> *, const QRect &amp;)</pre>
-<p>
-</ul>
-<p>
-This is one class of changes that are
-not detected by the compiler,
-so you should mechanically search for each of
-these function names in your header files, eg.
-<p>
-<pre>egrep -w 'setStyle|addColumn|setColumnText|setText...' *.h
-</pre>
-<p>
-Of course, you'll get a few false positives (eg. if you have a setText
-function that is not in a subclass of QListViewItem).
-<p>
-<h3><a name=Collection>Collection classes</a></h3>
-<p> The collection classes include generic
-classes such as QGDict, QGList, and
-the subclasses such as QDict and QList.
-<p> The macro-based Qt collection classes are obsolete; use the
-template-based classes instead. Simply remove includes of qgeneric.h and
-replace e.g. Q_DECLARE(QCache,QPixmap) with QCache<QPixmap>.
-<p> The GCI global typedef is replaced by QCollection::Item.  Only if you
-make your own subclasses of the undocumented generic collection classes
-will you have GCI in your code.
-This change has been made to avoid collisions with other namespaces.
-<p> The GCF global typedef is removed (it was not used in Qt).
-<p>
-<h3><a name=DebugVsRelease>Debug vs. Release</a></h3>
-<p>The ASSERT macro is now a null expression if the CHECK_STATE flag
-is not set (i.e. if the NO_CHECK flag is defined).
-<p>The debug() function now outputs nothing if Qt was compiled with
-the NO_DEBUG macro defined.
-<p>
-<h3><a name=QString>QString</a></h3>
-<p>
-QString has undergone major changes internally, and although it is highly
-backward compatible, it is worth studying in detail when porting to Qt 2.x.
-The Qt 1.x QString class has been renamed to QCString in Qt 2.x, though if
-you use that you will incur a performance penalty since all Qt functions
-that took const char* now take const QString&.
-<p>
-To take full advantage of the new Internationalization
-functionality in Qt 2.x, the following steps are required:
-<p>
-    <ul>
-     <li> Start converting all uses of "const char*" in parameters to
-            "const QString&" - this can often be done mechanically, eg.
-            using Perl.  Convert usage of char[] for temporary string
-            building to QString (much software already uses QString for
-            this purpose as it offers many more facilities).
-<p>
-            If you find that you are mixing usage of QCString, QString,
-            and QByteArray, this causes lots of unnecessary copying and
-            might indicate that the true nature of the data you are
-            dealing with is uncertain.  If the data is NUL-terminated
-            8-bit data, use QCString; if it is unterminated (ie.
-            contains NULs) 8-bit data, use QByteArray; if it is text,
-            use QString.
-            </p>
-<li> Put a breakpoint in <pre> <a href="qstring.html#ea8169">QString::latin1</a>()</pre>
-<p>
-            to catch places where
-            Unicode information is being converted to ASCII (loosing
-            information if your user in not using Latin1).  Qt has
-            a small number of calls to this - ignore those.  As a stricter
-            alternative, compile your code with QT_NO_ASCII_CAST defined,
-            which hides the automatic conversion of QString to const char*,
-            so you can catch problems at compile time.
-            </p>
-<li> See the Qt <a href="i18n.html">Internationalization page</a>
-            for information about the full process of internationalizing
-            your software.
-    </ul>
-<p>
-Points to note about the new QString are:
-<p>
-<dl compact>
-<dt><b>Unicode</b></dt>
-<dd>
- Qt now uses Unicode throughout.
- data() now returns a <em>const</em> reference to an ASCII version
- of the string - you cannot directly access the
- string as an array of bytes, because it isn't one.  Often, latin1() is
- what you want rather than data(), or just leave it to convert to
- const char* automatically.  data() is only used now to aide porting to Qt 2.x,
- and ideally you'll only need latin1() or implicit conversion when interfacing
- to facilities that do not have Unicode support.
-<p>
-<dt><b>Automatic-expanding</b></dt>
-<dd>
-A big advantage of the new QString is that it automatically expands
-when you write to an indexed position.
-<p>
-<dt><b>QChar and QCharRef</b></dt>
-<dd>
-QChar are the Unicode characters that make up a QString.  A QCharRef is
-a temporary reference to a QChar in a QString that when assigned to
-ensures that the implicit sharing semantics of the QString are maintained.
-You are unlikely to use QCharRef in your own code - but so that you
-understand compiler error messages, just know that <tt>mystring[123]</tt>
-is a QCharRef whenever <tt>mystring</tt> is not a constant string. A QCharRef
-has basically the same functionality as a QChar, except it is more restricted
-in what you can assign to it and cast it to (to avoid programming errors).
-<p>
-<dt><b>Use QString</b></dt>
-<dd>
-Try to always use QString.  If you <em>must</em>, use QCString which is the
-old implementation from Qt 1.x.
-<p>
-<dt><b>Unicode vs. ASCII</b></dt>
-<dd>
-Every conversion to and from ASCII is wasted time, so try to use QString
- as much as possible rather than const char*.  This also ensures you have
- full 16-bit support.
-<p>
-<dt><b>Convertion to ASCII</b></dt>
-<dd>
-The return value from operator const char*() is transient - don't expect
- it to remain valid while you make deep function calls.
- It is valid for as long as you don't modify or destroy the QString.
-<p>
-<dt><b>QString is simpler</b></dt>
-<dd>
-Expect your code to become simpler with the new QString, especially
- places where you have used a char* to wander over the string rather
- than using indexes into the string.
-<p>
-<dt><b>Some hacks don't work</b></dt>
-<dd>
-This hack:
-  use_sub_string( &my_string[index] )
- should be replaced by:
-  use_sub_string( my_string.mid(index) )
-<p>
-<dt><b>QString(const char*, int) is removed</b></dt>
-<dd>
-The QString constructor taking a const char* and an integer is removed.
-Use of this constructor was error-prone, since the length included the
-'\0' terminator. Use QString::left(int) or QString::fromLatin1( const char*,
-int ) -- in both cases the int parameter signifies the number of characters.
-<p>
-<dt><b>QString(int) is private</b></dt>
-<dd>
-The QString constructor taking an integer is now private.  This function
-is not meaningful anymore, since QString does all space allocation
-automatically.  99% of cases can simple be changed to use the
-default constructor, QString().
-<p>
-In Qt 1.x the constructor was used in two ways:  accidentally,
-by attempting to convert a char to a QString (the char converts to int!) -
-giving strange bugs, and as a way to make a QString big enough prior to
-calling <pre> <a href="qstring.html#926f67">QString::sprintf</a>()</pre>
-.  In Qt 2.x, the accidental bug case is
-prevented (you will get a compilation error) and QString::sprintf has
-been made safe - you no longer need to pre-allocate space (though for
-other reasons, sprintf is still a poor choice - eg. it doesn't pass Unicode).
-The only remaining common case is conversion of 0 (NULL) to QString, which
-would usually give expected results in Qt 1.x.  For Qt 2.x the correct
-syntax is to use QString::null, though note that
-the default constructor, QString(), creates a null string too.
-Assignment of 0 to a QString is ambiguous - assign
-QString::null; you'll mainly find these in code that has been converted
-from const char* types to QString.
-This also prevents a common error case from Qt 1.x - in
-that version, mystr = 'X' would <em>not</em> produce the expected
-results and was always a programming error; in Qt 2.x, it works - making
-a single-character string.
-<p>
-Also see <a href=#QStrList>QStrList</a>.
-<p>
-<dt><b>Signals and Slots</b></dt>
-<dd>
-Many signal/slots have changed from const char* to QString.  You will
- get run-time errors when you try to <pre> <a href="qobject.html#7f8e37">QObject::connect</a>()</pre>
-<p>
- to the old
- signals and slots, usually with a message indicating the const QString&
- replacement signal/slot.
-<p>
-<dt><b>Optimize with Q2HELPER</b></dt>
-<dd>
-In qt/src/tools/qstring.cpp there is a Q2HELPER - define it for some
-extra debugging/optimizing features (don't leave it it - it kills performance).
-You'll get an extra function, qt_qstring_stats(), which will print a
-summary of how much your application is doing Unicode and ASCII
-back-and-forth conversions.
-<p>
-<dt><b>QString::detach() is obsolete and removed</b></dt>
-<dd>
-Since QString is now always shared, this function does nothing.
-Remove calls to QString::detach().
-<p>
-<dt><b>QString::resize(int size) is obsolete and removed</b></dt>
-<dd>
-Code using this to truncate a string should use
-    <a href="qstring.html#bbfcaf">truncate(size-1)</a>.
-Code using qstr.resize(0) should use qstr = QString::null.
-Code calling resize(n) prior to using
-    <a href="qstring.html#4c6de5">operator[]</a> up to n just remove
-the resize(n) completely.
-<p>
-<dt><b>QString::size() is obsolete and removed</b></dt>
-<dd>
-Calls to this function must be replaced by
-<a href="qstring.html#0ecbda">length()</a>+1.
-<p>
-<dt><b>QString::setStr(const char*) is removed</b></dt>
-<dd>Try to understand why you were using this.
-If you just meant assignment, use that.  Otherwise,
-you are probably using QString as an array of bytes, in which case use
-QByteArray or QCString instead.
-<p>
-<dt><b>QString is not an array of bytes</b></dt>
-<dd>
-Code that uses QString as an array of bytes should use QByteArray
-or a char[], <em>then</em> convert that to a QString if needed.
-<p>
-<dt><b>"string = 0"</b></dt>
-<dd>
-Assigning 0 to a QString should be assigning the null string,
-ie. string = QString::null.
-<p>
-<dt><b>System functions</b></dt>
-<dd>
-You may find yourself needing latin1() for passing to the operating system
- or other libraries, and be tempted to use QCString to save the conversion,
- but you are better off using Unicode throughout, then when the operating
- system supports Unicode, you'll be prepared. Some Unix operating systems
- are now beginning to have basic Unicode support, and Qt will be tracking
- these improvements as they become more widespread.
-<p>
-<dt><b>Bugs removed</b></dt>
-<dd>
-toShort() returns 0 (and sets *ok to false) on error.
-toUInt() now works for big valid unsigned integers.
-insert() now works into the same string.
-<p>
-<dt><b>NULL pointers</b></dt>
-<dd>
-When converting "const char*" usage to QString in order to make your
- application fully Unicode-aware, use QString::null for the null value
- where you would have used 0 with char pointers.
-<p>
-<dt><b>QString is not null terminated</b></dt>
-<dd>
-This means that inserting a 0-character
- in the middle of the string does <em>not</em> change the length().  ie.
- <pre>   <a href="qstring.html">QString</a> s = "fred";
-   s[1] = '\0';
-     // s.<a href="qstring.html#0ecbda">length</a>() == 4
-     // s == "f\0ed"
-     // s.<a href="qstring.html#ea8169">latin1</a>() == "f"
-   s[1] = 'r';
-     // s == "fred"
-     // s.<a href="qstring.html#ea8169">latin1</a>() == "fred"
-</pre>
-<p>
- Especially look out for this type of code:
- <pre>   <a href="qstring.html">QString</a> s(2);
-   s[0] = '?';
-   s[1] = 0;
-</pre>
-<p>
- This creates a string 2 characters long.
- To find these problems while converting, you might like to
- add ASSERT(strlen(d->ascii)==d->len) inside
- <pre> <a href="qstring.html#ea8169">QString::latin1</a>()</pre>
-.
-<p>
-<dt><b>QString or Standard C++ string?</b></dt>
-<dd>
-<p>
-The Standard C++ Library string is not Unicode.  Nor is wstring defined
-to be so (for the small number of platforms where it is defined at all).
-This is the same mistake made over and over
-in the history of C - only when non-8-bit characters are <em>the norm</em>
-do programmers find them usable. Though it is possible to convert between
-string and QString, it is less efficient than using QString throughout.
-For example, when using:
-<pre>    <a href="qlabel.html#bc5ea6">QLabel::setText</a>( const QString&amp; )
-</pre>
-<p>
-if you use string, like this:
-<pre>    void myclass::dostuffwithtext( const string&amp; str )
-    {
-        mylabel.setText( <a href="qstring.html">QString</a>(str.c_str()) );
-    }
-</pre>
-<p>
-that will create a (ASCII only) copy of str, stored in mylabel.
-But this:
-<pre>    void myclass::dostuffwithtext( const QString&amp; str )
-    {
-        mylabel.setText( str );
-    }
-</pre>
-<p>
-will make an implicitly shared reference to str in the QLabel - no copying
-at all.  This function might be 10 nested function calls away from something
-like this:
-<pre>    void toplevelclass::initializationstuff()
-    {
-        doStuff( tr("Okay") );
-    }
-</pre>
-<p>
-At this point, in Qt 2.x, the tr() does a very fast dictionary lookup
-through memory-mapped message files, returning some Unicode QString for
-the appropriate language (the default being to just make a QString out
-of the text, of course - you're not <em>forced</em> to use any of these
-features), and that <em>same</em> memory mapped Unicode will be passed
-though the system.  All occurrences of the translation of "Okay" can
-potentially be shared.
-<p>
-</dl>
-<p>
-<h3><a name=QApplication>QApplication</a></h3>
-<p>
-In the function <pre> <a href="qapplication.html#1ee2d1">QApplication::setColorSpec</a>()</pre>
-,
-PrivateColor and TrueColor are obsolete.  Use ManyColor instead.
-<p>
-<h3><a name=QColor>QColor</a></h3>
-<p>
-All colors
-(color0,
-color1,
-black,
-white,
-darkGray,
-gray,
-lightGray,
-red,
-green,
-blue,
-cyan,
-magenta,
-yellow,
-darkRed,
-darkGreen,
-darkBlue,
-darkCyan,
-darkMagenta,
-and
-darkYellow)
-are in the Qt namespace.
-In members of classes that inherit the Qt namespace-class (eg. QWidget
-subclasses), you can use the unqualified names as before, but in global
-functions (eg. main()), you need to qualify them:  Qt::red, Qt::white, etc.
-See also the <a href=#QRgb>QRgb</a> section below.
-<p>
-<h3><a name=QRgb>QRgb</a></h3>
-<p>
-In QRgb (a typedef of long), the order of the RGB channels has changed to
-be in the more efficient order (for typical contemporary hardware).  If your
-code made assumptions about the order, you will get blue where you expect
-red and vice versa (you'll not notice the problem if you use shades of
-grey, green, or magenta).  You should port your code to use the
-creator function qRgb(int r,int g,int b) and the
-access functions qRed(QRgb), qBlue(QRgb), and qGreen(QRgb).
-If you are using the alpha channel, it hasn't moved, but you should use
-the functions qRgba(int,int,int,int) and qAlpha(QRgb). Note also that
-QColor::pixel() does <i>not</i> return a QRgb (it never did on all platforms,
-but your code may have assumed so on your platform) - this may also produce
-strange color results - use QColor::rgb() if you want a QRgb.
-<p>
-<h3><a name=QDataStream>QDataStream</a></h3>
-<p>The QDatastream serialization format of most Qt classes is changed
-in Qt 2.x. Use <pre> <a href="qdatastream.html#364c56">QDataStream::setVersion</a>( 1 )</pre>
- to get a
-datastream object that can read and write Qt 1.x format data streams.
-<p>If you want to write Qt 1.x format datastreams, note the following
-compatibility issues:
-        <ul>
-        <li>QString: Qt 1.x has no Unicode support, so strings will be
-        serialized by writing the classic C string returned by <pre>        <a href="qstring.html#ea8169">QString::latin1</a>().</pre>
-<li><a href=#QPoint>QPoint & al.</a>: Coordinates will be
-        truncated to the Qt 1.x 16 bit format.
-        </ul>
-<p>
-<h3><a name=QWidget>QWidget</a></h3>
-<p>
-<h4>QWidget::recreate()</h4>
-<p>
-This function is now called <a href="qwidget.html#4591aa">reparent()</a>.
-<p>
-<h4>QWidget::setAcceptFocus(bool)</h4>
-<p>
-This function is removed.
-Calls like QWidget::setAcceptFocus(TRUE) should be replaced by
-    <pre> <a href="qwidget.html#f92b0f">QWidget::setFocusPolicy</a>(StrongFocus)</pre>
-, and
-calls like QWidget::setAcceptFocus(FALSE) should be replaced by
-    <pre> <a href="qwidget.html#f92b0f">QWidget::setFocusPolicy</a>(NoFocus)</pre>
-.
-Additional policies are TabFocus and ClickFocus.
-<p>
-<h4>QWidget::paintEvent()</h4>
-<p>
-paintEvent(0) is not permitted - subclasses need not check for
-a null event, and might crash.
-Never pass 0 as the argument to paintEvent().  You probably
-just want repaint() or update() instead.
-<p>
-When processing a paintEvent, painting is only permitted within
-the update region specified in the event. Any painting outside will be
-clipped away. This shouldn't break any code (it was always like this
-on MS-Windows) but makes many explicit calls to
-QPainter::setClipRegion() superfluous. Apart from the improved
-consistency, the change is likely to reduce flicker and to make Qt
-event slightly faster.
-<p>
-<h3><a name=QIODevice>QIODevice</a></h3>
-<p>
-The protected member QIODevice::index is renamed to QIODevice::ioIndex
-to avoid warnings and to allow compilation with bad C libraries that
-check every occurrence of the string "index" in the implementation, since
-a compiler will not always catch cases like <pre>(uint)index</pre>
-<p>
-that need to be changed.
-<p>
-<h3><a name=QLabel>QLabel</a></h3>
-<p>
-<h4><pre> <a href="qframe.html#b11d00">QLabel::setMargin</a>()</pre>
-</h4>
-<p>
-<pre> <a href="qframe.html#b11d00">QLabel::setMargin</a>()</pre>
- and<pre> <a href="qframe.html#cb5472">QLabel::margin</a>()</pre>
-<p>
-have been renamed to <pre> <a href="qlabel.html#9077ed">QLabel::setIndent</a>()</pre>
- and
-<pre> <a href="qlabel.html#f68b83">QLabel::indent</a>()</pre>
-, respectively. This was done to avoid
-collision with QFrame::setMargin(), which is now virtual.
-<p>
-<h4><pre> <a href="qlabel.html#fb7d9d">QLabel::setMovie</a>()</pre>
-</h4>
-<p>
-Previously, setting a movie on a label cleared the value of text().
-Now it doesn't.  If you somehow used <tt>QLabel::text()</tt>
-to detect if a
-movie was set, you might have trouble.  This is unlikely.
-<p>
-<h3><a name=QDialog>QDialog</a></h3>
-<p> The semantics of the parent pointer changed for non-modal dialogs:
-In Qt-2.x, dialogs are always toplevel windows. The parent, however,
-takes the ownership of the dialog, i.e. it will delete the dialog at
-destruction if it has not been explicitly deleted
-already. Furthermore, the window system will be able to tell that both
-the dialog and the parent belong together. Some X11 window managers
-will for instance provide a common taskbar entry in that case.
-<p>
-If the dialog belongs to a toplevel main window
-of your application, pass this main window as parent to the dialog's
-constructor. Old code (with 0 pointer) will still run. Old code that
-included QDialogs as child widgets will no longer work (it never really did).
-If you think you might be doing this, put a breakpoint in
-QDialog::QDialog() conditional on parent not being 0.
-<p>
-<h3><a name=QStrList>QStrList</a></h3>
-<p>
-Many methods that took a QStrList can now instead take a QStringList,
-which is a real list of QString values.
-<p>
-To use QStringList rather than QStrList, change loops that look like this:
-<pre>    <a href="qstrlist.html">QStrList</a> list = ...;
-    const char* s;
-    for ( s = list.<a href="qlist.html#e625f9">first</a>(); s; s = list.<a href="qlist.html#f95ddd">next</a>() ) {
-        process(s);
-    }
-</pre>
-<p>
-to be like this:
-<pre>    <a href="qstringlist.html">QStringList</a> list = ...;
-    QStringList::ConstIterator i;
-    for ( i = list.begin(); i != list.end(); ++i ) {
-        process(*i);
-    }
-</pre>
-<p>
-In general, the QStrList functions are less efficient, building a temporary QStringList.
-<p>
-The following functions now use QStringList rather than QStrList
-for return types/parameters.
-<p>
-<ul>
- <li><tt>void QFileDialog::setFilters(const QStrList&)</tt>
-      becomes <tt>void QFileDialog::setFilters(const QStringList&)</tt>
- <li><tt>QStrList QFileDialog::getOpenFileNames(...)</tt>
-      becomes <tt>QStringList QFileDialog::getOpenFileNames(...)</tt>
- <li><tt>bool QUrlDrag::decodeLocalFiles(QMimeSource*, QStrList&)</tt>
-      becomes <tt>bool QUriDrag::decodeLocalFiles(QMimeSource*, QStringList&)</tt>
- <li><tt>const QStrList *QDir::entryList(...) const</tt>
-      becomes <tt>QStringList QDir::entryList(...) const</tt>
-        (note that the return type is no longer a pointer).  You may also
-        choose to use encodedEntryList().
-</ul>
-<p>
-The following functions are added:
-<ul>
- <li><tt>QComboBox::insertStringList(const QStringList &, int index=-1)</tt>
- <li><tt>QListBox::insertStringList(const QStringList &,int index=-1)</tt>
-</ul>
-<p>
-The rarely used static function <tt>void
-QFont::listSubstitutions(QStrList*)</tt> is replaced by <tt>QStringList
-QFont::substitutions()</tt>.
-<p>
-<h3><a name=QLayout>QLayout</a></h3>
-<p> Calling resize(0,0) or resize(1,1) will no longer work magically.
-Remove all such calls. The default size of toplevel widgets will be their
-<a href="qwidget.html#4511d1">sizeHint()</a>.
-<p> The default implementation of QWidget::sizeHint() will no longer
-return just an invalid size; if the widget has a layout, it will return
-the layout's preferred size.
-<p> The special maximum MaximumHeight/Width is now QWIDGETSIZE_MAX,
-not QCOORD_MAX.
-<p> <a href="qboxlayout.html#ebba99">QBoxLayout::addWidget()</a>
-now interprets the <em>alignment</em> parameter more aggressively.  A
-non-default alignment now indicates that the widget should not grow to
-fill the available space, but should be sized according to sizeHint().
-If a widget is too small, set the alignment to 0. (Zero indicates no
-alignment, and is the default.)
-<p> The class QGManager is removed. Subclasses of QLayout need to be rewritten
-to use the new, much simpler <a href="qlayout.html">QLayout API</a>.
-<p> For typical layouts, all use of
-<a href="qwidget.html#c0b5fb">setMinimumSize()</a>
-and
-<a href="qwidget.html#87e3f4">setFixedSize()</a>
-can be removed.
-<a href="qlayout.html#1cb33d">activate()</a> is no longer necessary.
-<p>
-You might like to look at the QGrid, QVBox, and QHBox widgets - they offer
-a simple way to build nested widget structures.
-<p>
-<h3><a name=QListView>QListView</a></h3>
-<p>In Qt 1.x mouse events to the viewport where redirected to the
-event handlers for the listview; in Qt 2.x, this functionality is
-in QScrollView where mouse (and other position-oriented) events are
-redirected to viewportMousePressEvent() etc, which in turn translate
-the event to the coordinate system of the contents and call
-contentsMousePressEvent() etc, thus providing events in the most
-convenient coordinate system.  If you overrode QListView::MouseButtonPress(),
-QListView::mouseDoubleClickEvent(), QListView::mouseMoveEvent(), or
-QListView::mouseReleaseEvent() you must instead override
-viewportMousePressEvent(),
-viewportMouseDoubleClickEvent(), viewportMouseMoveEvent(), or
-viewportMouseReleaseEvent() respectively.  New code will usually override
-contentsMousePressEvent() etc.
-<p>The signal QListView::selectionChanged(QListViewItem *) can now be
-emitted with a null pointer as parameter. Programs that use the
-argument without checking for 0, may crash.
-<p>
-<h3><a name=QMultiLineEdit>QMultiLineEdit</a></h3>
-<p>
-The protected function
-<pre> <a href="qmultilineedit.html#a97ed4">QMultiLineEdit::textWidth</a>(<a href="qstring.html">QString</a>*)</pre>
-<p>
-changed to
-<pre> <a href="qmultilineedit.html#a97ed4">QMultiLineEdit::textWidth</a>(const QString&amp;)</pre>
-.
-This is unlikely to be a problem, and you'll get a compile error
-if you called it.
-<p>
-<h3><a name=QClipboard>QClipboard</a></h3>
-<p>
-<pre> <a href="qclipboard.html#905cbc">QClipboard::pixmap</a>()</pre>
- now returns a QPixmap, not a QPixmap*.
-The pixmap
-will be <a href="qpixmap.html#7803c4">null</a> if no pixmap is on the
-clipboard.  QClipboard now offers powerful MIME-based types on the
-clipboard, just like drag-and-drop (in fact, you can reuse most of your
-drag-and-drop code with clipboard operations).
-<p>
-<h3><a name=QDropSite>QDropSite</a></h3>
-<p>
-<P>
-QDropSite is obsolete.  If you simply passed <tt>this</tt>, just remove
-the inheritance of QDropSite and call
-<a href="qwidget.html#8169cb">setAcceptDrops(TRUE)</a> in the class
-constructor.
-If you passed something other than <tt>this</tt>,
-your code will not work.  A common case is passing
-the
-<a href="qscrollview.html#26f2bf">viewport()</a> of a QListView,
-in which case,
-override the
-<a href="qscrollview.html#f54ca8">viewportDragMoveEvent()</a>,
-etc.
-functions rather than QListView's dragMoveEvent() etc.  For other
-cases, you will need to use an event filter to act on the drag/drop events
-of another widget (as is the usual way to intercept foreign events).
-<p>
-<h3><a name=QScrollView>QScrollView</a></h3>
-<p>
-The parameters in the signal
-<a href="qscrollview.html#479944">contentsMoving(int,int)</a>
-are now positive rather than negative values, coinciding with
-<a href="qscrollview.html#15a368">setContentsPos()</a>.  Search for
-connections you make to this signal, and either change the slot they are
-connected to such that it also expects positive rather than negative
-values, or introduce an intermediate slot and signal that negates them.
-<p>
-If you used drag and drop with QScrollView, you may experience the problem
-described for <a href=#QDropSite>QDropSite</a>.
-<p>
-<h3><a name=QTextStream>QTextStream</a></h3>
-<p>
-<pre> operator&lt;&lt;(<a href="qtextstream.html">QTextStream</a>&amp;, QChar&amp;)</pre>
- does not skip whitespace.
-<pre> operator&lt;&lt;(<a href="qtextstream.html">QTextStream</a>&amp;, char&amp;)</pre>
- does,
-    as was the case with Qt 1.x.  This is for backward compatibility.
-<p>
-<h3><a name=QUriDrag>QUriDrag</a></h3>
-<p>
-The class QUrlDrag is renamed to QUriDrag, and the API has been
-broadened to include additional conversion routines, including
-conversions to Unicode filenames (see the class documentation
-for details).  Note that in Qt 1.x
-the QUrlDrag class used the non-standard MIME type "url/url",
-while QUriDrag uses the standardized "text/uri-list" type.  Other
-identifiers affected by the Url to Uri change are
-QUrlDrag::setUrls() and QUrlDrag::urlToLocalFile().
-<p>
-<h3><a name=QPainter>QPainter</a></h3>
-<p> The GrayText painter flag has been removed. Use
-<a href="qpainter.html#0183e4">setPen( palette().disabled().foreground() )</a>
-instead.
-<p> The RasterOp enum
-(CopyROP,
-        OrROP,
-        XorROP,
-        NotAndROP,
-        EraseROP,
-        NotCopyROP,
-        NotOrROP,
-        NotXorROP,
-        AndROP, NotEraseROP,
-        NotROP,
-        ClearROP,
-        SetROP,
-        NopROP,
-        AndNotROP,
-        OrNotROP,
-        NandROP,
-        NorROP, LastROP)
-is now part of the Qt namespace class, so if you
-use it outside a member function, you'll need to prefix with Qt::.
-<p>
-<h3><a name=QPicture>QPicture</a></h3>
-<p>The binary storage format of QPicture is changed, but the Qt 2.x
-QPicture class can both read and write Qt 1.x format QPictures. No
-special handling is required for reading; QPicture will automatically
-detect the version number. In order to write a Qt 1.x format QPicture,
-set the formatVersion parameter to 1 in the QPicture constructor.
-<p>For writing Qt 1.x format QPictures, the compatibility issues of <a
-href=#QDataStream>QDataStream</a> applies.
-<p>It is safe to try to read a QPicture file generated with Qt 2.x
-(without formatVersion set to 1) with a program compiled with Qt
-1.x. The program will not crash, it will just issue the warning
-"QPicture::play: Incompatible version 2.x" and refuse to load the
-picture.
-<p>
-<h3><a name=QPoint>QPoint, QPointArray, QSize and QRect</a></h3>
-<p>The basic coordinate datatype in these classes, QCOORD, is now 32
-bit (int) instead of a 16 bit (short). The const values QCOORD_MIN and
-QCOORD_MAX have changed accordingly.
-<p>QPointArray is now actually, not only seemingly, a QArray of QPoint
-objects. The semi-internal workaround classes QPointData and QPointVal
-are removed since they are no longer needed; QPoint is used directly
-instead. The function <pre> <a href="qpointarray.html#0dbaa7">QPointArray::shortPoints</a>()</pre>
-<p>
-provides the point array converted to short (16bit) coordinates for
-use with external functions that demand that format.
-<p>
-<h3><a name=QImage>QImage</a></h3>
-<p>
-QImage uses QRgb for the colors - see <a href=#QRgb>the changes to that</a>.
-<p>
-<h3><a name=QPixmap>QPixmap</a></h3>
-<p>
-<pre> <a href="qpixmap.html#8c5f15">QPixmap::convertToImage</a>()</pre>
- with bitmaps now guarantees that color0 pixels
-become color(0) in the resulting QImage.  If you worked around the lack of
-this, you may be able to simplify your code.  If you made assumptions
-about the previous undefined behavior, the symptom will be inverted
-bitmaps (eg. "inside-out" masks).
-<p>
-<pre> QPixmap::optimize(TRUE)</pre>
-<p>
-is replaced by
-<pre> <a href="qpixmap.html#e6ae80">QPixmap::setOptimization</a>(QPixmap::NormalOptim)</pre>
-<p>
-or
-<pre> <a href="qpixmap.html#e6ae80">QPixmap::setOptimization</a>(QPixmap::BestOptim)</pre>
-<p>
-- see the documentation
-to choose which is best for your application.  NormalOptim is most like
-the Qt 1.x "TRUE" optimization.
-<p>
-<h3><a name=QMenuData>QMenuData / QPopupMenu</a></h3>
-<p>
-In Qt 1.x, new menu items were assigned either an application-wide
-unique identifier or an identifier equal to the index of the item, depending on the
-<a href="qmenudata.html#a0155e">insertItem(...)</a> function used.
-In Qt 2.x this confusing
-situation has been cleaned up: generated identifiers are always
-unique across the entire application.
-<p>
-If your code depends on generated ids
-being equal to the item's index, a quick fix is to use
-<pre> <a href="qmenudata.html#49862d">QMenuData::indexOf</a>(int id)</pre>
-<p>
-in the handling function instead. You may alternatively pass
-<pre> <a href="qmenudata.html#e3e249">QMenuData::count</a>()</pre>
-<p>
-as identifier when you insert the items.
-<p>
-Furthermore, QPopupMenus can (and should!) be created with a parent
-widget now, for example the main window that is used to display the
-popup. This way, the popup will automatically be destroyed together
-with its main window. Otherwise you'll have to take care of the
-ownership manually.
-<p>
-QPopupMenus are also reusable in 2.x. They may occur in different
-locations within one menu structure or be used as both a menubar
-drop-down and as a context popup-menu.  This should make it possible to
-significantly simplify many applications.
-<p>
-Last but not least, QPopupMenu no longer inherits QTableView. Instead,
-it directly inherits QFrame.
-<p>
-<h3><a name=QValidator>QValidator (QLineEdit, QComboBox, QSpinBox) </a></h3>
-<p>
-<pre> <a href="qvalidator.html#da4f8c">QValidator::validate</a>(...)</pre>
-<p>
-and
-<pre> <a href="qvalidator.html#3fa523">QValidator::fixup</a>( <a href="qstring.html">QString</a> &amp; )</pre>
-<p>
-are now const
-functions. If your subclass reimplements validate() as a
-non-const function,
-you will get a compile error (validate was pure virtual).
-<p>
-In QLineEdit, QComboBox, and QSpinBox,
-setValidator(...) now takes a const pointer to a QValidator, and
-validator() returns a const pointer. This change highlights the fact
-that the widgets do not take the ownership of the validator (a validator is
-a QObject on its own, with its own parent - you can easily set the same validator
-object on many different widgets), so changing the state of
-such an object or deleting it is very likely a bug.
-<p>
-<h3><a name=QFile>QFile, QFileInfo, QDir</a></h3>
-<p>
-File and directory names are now always Unicode strings (ie. QString).  If you used QString
-in the past for the simplicity it offers, you'll probably have little consequence.  However,
-if you pass filenames to system functions rather than using Qt functions (eg. if you use the
-Unix <tt>unlink()</tt> function rather than <tt>QFile::remove()</tt>, your code will probably
-only work for Latin1 locales (eg. Western Europe, the U.S.).  To ensure your code will support
-filenames in other locales, either use the Qt functions, or convert the filenames via
-<pre> QFile::encodeFilename()</pre>
- and <pre> QFile::decodeFilename()</pre>
- - but do it
-<em>just</em> as you call the system function - code that mixes encoded and unencoded filenames
-is very error prone.  See the comments in QString, such as regarding QT_NO_ASCII_CAST that
-can help find potential problems.
-<p>
-<h3><a name=QFontMetrics>QFontMetrics</a></h3>
-<p>
-boundingRect(char) is replaced by
-boundingRect(QChar), but since
-char auto-converts to QChar, you're not likely to run into problems
-with this.
-<p>
-<h3><a name=QWindow>QWindow</a></h3>
-<p>
-This class (which was just QWidget under a different name) has been
-removed.  If you used it, do a global search-and-replace of the word
-"QWindow" with "QWidget".
-<p>
-<h3><a name=QEvent>QEvent</a></h3>
-<p> The global #define macros in qevent.h have been replaced by an
-enum in QEvent.  Use e.g. QEvent::Paint instead of Event_Paint. Same
-for all of:
-Event_None,
-Event_Timer,
-Event_MouseButtonPress,
-Event_MouseButtonRelease,
-Event_MouseButtonDblClick,
-Event_MouseMove,
-Event_KeyPress,
-Event_KeyRelease,
-Event_FocusIn,
-Event_FocusOut,
-Event_Enter,
-Event_Leave,
-Event_Paint,
-Event_Move,
-Event_Resize,
-Event_Create,
-Event_Destroy,
-Event_Show,
-Event_Hide,
-Event_Close,
-Event_Quit,
-Event_Accel,
-Event_Clipboard,
-Event_SockAct,
-Event_DragEnter,
-Event_DragMove,
-Event_DragLeave,
-Event_Drop,
-Event_DragResponse,
-Event_ChildInserted,
-Event_ChildRemoved,
-Event_LayoutHint,
-Event_ActivateControl,
-Event_DeactivateControl,
-and
-Event_User.
-<p> The Q_*_EVENT macros in qevent.h have been deleted.  Use an
-explicit cast instead. The macros were:
-Q_TIMER_EVENT,
-Q_MOUSE_EVENT,
-Q_KEY_EVENT,
-Q_FOCUS_EVENT,
-Q_PAINT_EVENT,
-Q_MOVE_EVENT,
-Q_RESIZE_EVENT,
-Q_CLOSE_EVENT,
-Q_SHOW_EVENT,
-Q_HIDE_EVENT,
-and
-Q_CUSTOM_EVENT.
-<p> QChildEvents are now sent for all QObjects, not just QWidgets.
-You may need to add extra checking if you use a QChildEvent without
-much testing of its values.
-<p>
-<h3>All the removed functions</h3>
-<p>
-All <a href="removed20.html">these functions</a> have been removed in
-Qt 2.x.  Most are simply cases where "const char*" has changed to
-"const QString&", or when an enumeration type has moved into the Qt::
-namespace (which, technically, is a new name, but your code will
-compile just the same anyway).  This list is provided for completeness.
+<p><b>Note:</b> converted <tt>.ui</tt> files contain an <tt>objectName</tt> property that matches the widget's name. While there may be a few cases where an <tt>objectName</tt> should be set, most cases are redundant and just take up space. You may choose to remove this property (in Designer or by editing the <tt>.ui</tt> file).</p>
+<a name="qprocess"></a>
+<h2>QProcess</h2>
+<p><tt>QProcess</tt> is now subclassed from <tt>QIODevice</tt>, so instead of <tt>readStderr()</tt> and <tt>read|write</tt>Stdin() you access output as follows:</p>
+<pre>    myproc.setInputChannel( QProcess::StandardOutput );
+    QTextStream procstream( myproc );
+    procStream &gt;&gt; theResults;  <span class="comment">// get into a string</span>
+    myproc.setInputChannel( QProcess::StandardError );
+    procStream &gt;&gt; someError;</pre>
+<p>There is also <tt>readAllStandardError()</tt>, and to write to <tt>stdin</tt>, there are the <tt>QIODevice</tt> methods, such as <tt>myproc.write(&lt;some text&gt;)</tt>.</p>
+<p>The signal <tt>wroteToStdin()</tt> should be replaced by usage of <tt>QIODevice::bytesWritten(int)</tt>.</p>
+<a name="qmenu-and-qactiongroup"></a>
+<h2>QMenu and QActionGroup</h2>
+<p>Mutually exclusive checkable menu items are implemented with <tt>QActionGroup</tt>.</p>
+<p><b>Note:</b> <tt>addAction()</tt> is now a method of <tt>QWidget</tt>:</p>
+<pre>     QMenu* menu = new QMenu;
+     menu-&gt;setCheckable( TRUE );
+     QActionGroup *grp = new QActionGroup;
+     for (int i = 0; i &lt;= myLastItem; ++i )
+     {
+         items[i] = new QAction( QString( &quot;option %1&quot; ).arg( i ), grp );
+         items[i]-&gt;setCheckable( TRUE );
+     }
+     items[myDefault]-&gt;setChecked( TRUE );
+     menu-&gt;addActions( grp-&gt;actions() );</pre>
+<a name="qaction-for-regular-menu-items"></a>
+<h2>QAction for Regular Menu Items</h2>
+<p>In the past, you may have used something like the following to create regular menu items:</p>
+<pre>    a_settings = new QAction( tr(&quot;Settings...&quot;),
+                              theicon,
+                              QString::null, 0, this, 0 );
+    connect( a_settings, SIGNAL( activated() ),
+             this, SLOT( doSettings() ) );
+    a_settings-&gt;addTo( menu );</pre>
+<p>The new sequence looks like this:</p>
+<pre>    a_settings = new QAction( theicon,
+                              tr(&quot;Settings...&quot;), this );
+    connect( a_settings, SIGNAL( triggered() ),
+             this, SLOT( doSettings() ) );
+    menu-&gt;addAction( a_settings );</pre>
+<p><b>Note:</b> the transposition of the first two arguments to the <tt>QAction</tt> constructor, and the use of the <tt>triggered()</tt> slot rather than <tt>activated()</tt>.</p>
+<a name="qimage-qpixmap-smoothscale"></a>
+<h2>QImage/QPixmap::smoothScale</h2>
+<p>Qt 2 code:</p>
+<pre>        img = img.smoothScale( 5, 5 );</pre>
+<p>becomes:</p>
+<pre>        img.scale( 5, 5, Qt::KeepAspectRatio, Qt::SmoothTransformation );</pre>
+<a name="qstyle"></a>
+<h2>QStyle</h2>
+<p>In tune with other parts of Qt, <tt>query</tt> and <tt>paint</tt> methods are now parameterized by enums instead of having specific names. Search the <a href="qstyle.html">QStyle documentation</a> for the name you want to query or paint, to find the enum and the method you need.</p>
+<p>Qt 2 code:</p>
+<pre>    QRect r = style().pushButtonContentsRect( this );
+    int sx, sy;
+    style().getButtonShift(sx, sy);
+    int dx = style().menuButtonIndicatorWidth( height() );
+    style().drawArrow( p, DownArrow, FALSE, x+w-dx, y+2, dx-4, h-4,
+             colorGroup(), isEnabled() );</pre>
+<p>becomes:</p>
+<pre>    QStyleOptionButton sob;
+    sob.init( this );  <span class="comment">// copies this-&gt;rect() and this-&gt;state, this's StyleFlags</span>
+    QRect r = style()-&gt;subRect( QStyle::SR_PushButtonContents, &amp;sob );
+    int sx = style()-&gt;pixelMetric( QStyle::PM_ButtonShiftHorizontal, &amp;sob );
+    int sy = style()-&gt;pixelMetric( QStyle::PM_ButtonShiftVertical, &amp;sob );
+    int dx = style()-&gt;pixelMetric( QStyle::PM_MenuButtonIndicator, &amp;sob );
+    QStyleOptionButton arrowStyle = sob;
+    arrowStyle.rect.setLeft( sob.rect.right() - h) );  <span class="comment">// a small square at RHS</span>
+    style()-&gt;drawPrimitive( QStyle::PE_IndicatorArrowDown, &amp;arrowStyle, p );</pre>
+<a name="qcanvas"></a>
+<h2>QCanvas</h2>
+<p>There is no <tt>QCanvas</tt> in Qt 4 (it is in the unavailable Qt 3 Support module), but it <b>is</b> available in Qtopia 4 - instead of including <tt>qcanvas.h</tt> or <tt>Qt/qcanvas.h</tt>, use <tt>qtopia/canvas/qcanvas.h</tt>.</p>
+<p>However, note that this class is intended to be obsoleted in Qtopia 4.2 by a new Qt class.</p>
+<a name="quuid"></a>
+<h2>QUuid</h2>
+<p><tt>QUuid</tt> is in Qt 4, so include <tt>Qt/quuid.h</tt>, not <tt>qtopia/quuid.h</tt>.</p>
+<a name="plug-ins"></a>
+<h2>Plug-ins</h2>
+<p>Qtopia 4 uses the standard Qt 4 mechanisms for plug-ins.</p>
+<p>The code below shows the pattern used for Qtopia plug-ins. Replace <i>MyPlugin</i> with the name of the type of plug-in you are writing,such as <tt>InputMethod</tt>. The pure virtual functions are those functions you want your plug-in to provide and the keys function should return the name of the plug-in implementation. For example, <tt>keys()</tt> would return <i>Handwriting</i> for the handwriting plug-in, or <i>Handwriting</i>, <i>Fullscreen Handwriting</i> if both plug-ins are provided).</p>
+<pre>    #include &lt;qplugin.h&gt;
+    #include &lt;qfactoryinterface.h&gt;
+    #include &lt;qobject.h&gt;
 
-<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+    struct QMyPluginFactoryInterface : public QFactoryInterface
+    {
+        <span class="comment">// pure virtual functions</span>
+    };
+
+    Q_DECLARE_INTERFACE(QMyPluginFactoryInterface, &quot;http:<span class="comment">//trolltech.com/Qtopia/QMyPluginFactoryInterface&quot;)</span>
+
+    class QMyPluginPlugin : public QObject, public QMyPluginFactoryInterface
+    {
+        Q_OBJECT
+        Q_INTERFACES(QMyPluginFactoryInterface:QFactoryInterface)
+    public:
+        QMyPluginPlugin(QObject *parent=0);
+        ~QMyPluginPlugin();
+
+        virtual QStringList keys() const = 0;
+        <span class="comment">// pure virtual functions</span>
+    };</pre>
+<a name="resource"></a>
+<h2>Resource</h2>
+<p>Resources are now found using the Qt 4 <tt>QFileEngine</tt> mechanism, where in all places where a filename may be used, a special name starting with a colon (&quot;:&quot;) is used instead to refer to a resource. In Qt this is only used to refer to compiled-in resources, but in Qtopia, they may be actual files in predetermined places in the filesystem, that is, as <tt>Resource</tt> provided in Qtopia 2.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Qtopia 2</th><th>Qtopia 4</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>Resource::loadPixmap(&quot;open&quot;)</tt></td><td><tt>QPixmap(&quot;:image/open&quot;)</tt></td></tr>
+<tr valign="top" class="even"><td><tt>Resource::loadIconSet(&quot;add&quot;)</tt></td><td><tt>QIcon(&quot;:icon/add&quot;)</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>Resource::findPixmap(&quot;addressbook/homephone&quot;)</tt></td><td><tt>&quot;:image/addressbook/homephone&quot;</tt></td></tr>
+<tr valign="top" class="even"><td><tt>Resource::findPixmap(&quot;new&quot;)</tt></td><td><tt>&quot;:image/new&quot;</tt></td></tr>
+<tr valign="top" class="odd"><td><tt>&lt;img src=&quot;addressbook/home.png&quot;&gt;</tt></td><td><tt>&lt;img src=&quot;:icon/addressbook/home&quot;&gt;</tt></td></tr>
+</table></p>
+<p>You can use scripts/porting-resources to automate the changes.</p>
+<a name="config"></a>
+<h2>Config</h2>
+<p>Use <tt>QSettings</tt> instead.</p>
+<p>Where <tt>Config</tt> files include translations (i.e. keys with []) <b>and</b> you need to read those keys, use <tt>QTranslatableSettings</tt> instead.</p>
+<p>Rather than <tt>Config::setGroup()</tt>, you should use <tt>QSettings::beginGroup()..endGroup()</tt> spans.</p>
+<p><b>Note:</b></p>
+<ul>
+<li><tt>Config</tt> only used end-of-line for string termination.</li>
+<li><tt>QSettings</tt> has different quoting rules. Where <tt>Config</tt> contains quotes (&quot;), this should be considered.</li>
+<li><tt>Config::isValid()</tt> was FALSE if the file did not yet exist, whereas <tt>QSettings::status()</tt> is TRUE.</li>
+</ul>
+<p>You can use scripts/porting-config to automate the changes, however:</p>
+<p><b>Note:</b> <i>clever</i> use of <tt>Config::setGroup()</tt> can confuse that script.</p>
+<p>The settings files are now stored in <tt>~/Settings/Trolltech/</tt> or $QPEDIR/etc/default/Trolltech/.</p>
+<a name="vscrollview"></a>
+<h2>VScrollView</h2>
+<p>Use <tt>QScrollArea</tt> instead.</p>
+<p>Keypad mode will work correctly provided you set the focus policy of <tt>QScrollArea</tt> to <tt>Qt::NoFocus.o</tt></p>
+<p>For example:</p>
+<pre>        QScrollArea *sa = new QScrollArea(...);
+        sa-&gt;setFocusPolicy(Qt::NoFocus);
+        QWidget *view = new QWidget;
+        sa-&gt;setWidget(view);
+        sa-&gt;setWidgetResizable(true);
+        <span class="comment">// add children to view.</span></pre>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

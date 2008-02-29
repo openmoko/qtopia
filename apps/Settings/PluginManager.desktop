@@ -5,6 +5,6 @@ Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
 Type=Application
 Exec=pluginmanager
-Icon=PluginManager
-Name[]=Plug­in Man­ager
+Icon=pluginmanager/PluginManager
+Name[]=Plug\xadin Man\xad\x61ger
 CanFastload=0

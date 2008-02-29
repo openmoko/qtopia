@@ -1,0 +1,66 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>  Document Management </title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">  Document Management <br><small>Functional Description</small></h1>
+<p />
+The Qtopia document system integrates with Digital Rights Management (<a href="fd-DRM.html" class="twikiLink">DRM</a>) and the  Safe Execution Environment providing an enabling layer to enhance file-handling across all applications. Files are displayed by category rather than as a hierarchy which provides application-specific file displays. For example, if the user selects <em>Mediaplayer</em>, only the files able to be used by the <em>Mediaplayer</em> are displayed for selection.
+<p />
+
+<p />
+<h2><a name="Features"></a> Features </h2>
+<p />
+The Document Management architecture of Qtopia provides a system-wide approach to management of user-visible documents such as images and music files.  This allows efficient navigation of documents, removable storage media, and complex document types such as Digital Rights Management (<a href="fd-DRM.html" class="twikiLink">DRM</a>) files.  The <a href="fd-SafeExecution.html" class="twikiLink">SafeExecution</a> system Document Server also relies on the Document Management system to control access to documents.
+<p />
+<h3><a name="API"></a> API </h3>
+<p />
+The document API framework provides the basis for the Document Management system and enables the browsing and launching of Digital Rights Management (<a href="fd-DRM.html" class="twikiLink">DRM</a>) files.  An SQL database backs the framework allowing for flexible document management services.
+<p />
+The framework includes a scanning algorithm designed to run in the background and allow the user interface to continue to operate during document discovery.  Qtopia applications in the launcher are also managed via the API.
+<p />
+Loading, saving and other file operations performed by Qtopia applications are channeled through the Document Management systems File Manager functionality.  This allows management of <a href="fd-DRM.html" class="twikiLink">DRM</a> content for example, which must not be saved to external storage devices in plain-text format.
+<p />
+See the <a href="docsys-overview.html" target="_top">Document System API Documentation</a> for further details.
+<p />
+<h3><a name="Optimization_of_existing_framewo"></a> Optimization of existing framework </h3>
+<p />
+Work has been done to reduce startup times and overhead involved with the new document system, including first run, through initial startup times, to general usage.  Much of this related to the operation of the actual database engine on the device file-system, but also included SQL and other optimizations.
+<p />
+<h3><a name="Cleanup_of_Public_Facing_API"></a> Cleanup of Public Facing API </h3>
+<p />
+Work has been done to clean up the public facing API of the Document System, to make it a complete and stable API.  The intent is to enable Application Binary Compatibility through the 4.x Qtopia series, with as much planning for future features as possible.  This is backed by a more efficient location storage and notification framework.
+<p />
+<h3><a name="Model_View_Framework_for_launche"></a> Model View Framework for launcher displays. </h3>
+<p />
+The previous LauncherView/LauncherIconView framework for displaying Applications/Documents/Games/Settings has been moved to a new Model/View framework, backed by QContentSet::model().  This provides better performance and "just-in-time" fetching of content data.
+<p />
+In line with the new QCopObject content channel notification architecture fewer messages are now passed for updates of the sets and thus the views.
+<p />
+A content filter expression system is integrated with the Document view/model.  The system also handles the Qtopia application views (Applications, Games, Settings etc) and a visual notification of scanning for documents is provided.
+<p />
+<h3><a name="Media_Management"></a> Media Management </h3>
+<p />
+There is now provision for media management such as playlists, supporting MP3 ID3 tags, EXIF tags in JPEG photos etc.
+<p />
+A navigation view for documents tab, in cases where there are thousands of documents, a hierarchical (drill down) menu approach is used.  Full-featured navigation by type and category is available.
+<p />
+This facility also allows selecting content on the SD Card.
+<p />
+<h3><a name="Reworking_of_Image_DocumentSelec"></a> Reworking of Image/DocumentSelectors </h3>
+<p />
+Image and Document selector widgets available for use in other applications, now use the above optimized and full-featured framework.
+<p />
+<hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div>

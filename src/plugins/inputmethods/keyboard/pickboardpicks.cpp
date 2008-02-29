@@ -1,62 +1,48 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 #include "pickboardpicks.h"
 #include "pickboardcfg.h"
 
-#include <qtopia/global.h>
 
-#include <qpainter.h>
-#include <qlist.h>
-#include <qbitmap.h>
-#include <qlayout.h>
-#include <qvbox.h>
-#include <qdialog.h>
-#include <qscrollview.h>
-#include <qpopupmenu.h>
-#include <qhbuttongroup.h>
-#include <qpushbutton.h>
-#include <qmessagebox.h>
-#ifdef QWS
+
+#include <QPainter>
+#include <QList>
+#include <QBitmap>
+#include <QLayout>
+#include <QDialog>
+#include <QMenu>
+#include <QPushButton>
+#include <QMessageBox>
+#ifdef Q_WS_QWS
+#include <QWSServer>
 #include <qwindowsystem_qws.h>
 #endif
+
+#include <QMouseEvent>
 
 void PickboardPicks::doMenu()
 {
     QWidget* cause = (QWidget*)sender(); // evil
 
-    QPopupMenu popup(this);
+    QMenu popup(this);
     config()->fillMenu(popup);
 
     QPoint pos = cause->mapToGlobal(cause->rect().topRight());
@@ -262,8 +248,8 @@ static const char *Space_xpm[] = {
 "aaaaaaaaa"
 };
 
-PickboardPicks::PickboardPicks(QWidget* parent, const char* name, WFlags f ) :
-    QFrame(parent,name,f)
+PickboardPicks::PickboardPicks(QWidget* parent, Qt::WFlags f ) :
+    QFrame(parent,f)
 {
 }
 
@@ -273,9 +259,8 @@ void PickboardPicks::initialise(void)
     mode = 0;
 
     DictFilterConfig* dc = new DictFilterConfig(this);
-    QStringList sets_a = QStringList::split(' ',tr("ABC DEF GHI JKL MNO PQR STU VWX YZ-'"));
-    QStringList sets = QStringList::split(' ',
-	tr("ABCÀÁÂÃÄÅÆÇ DEFÐÈÉÊË GHIÌÍÎÏ JKL MNOÑÒÓÔÕÖØ PQRÞ STUßÙÚÛÜ VWX YZ-'Ýÿ"));
+    QStringList sets_a = tr("ABC DEF GHI JKL MNO PQR STU VWX YZ-'").split(' ');
+    QStringList sets = tr("ABCÀÁÂÃÄÅÆÇ DEFÐÈÉÊË GHIÌÍÎÏ JKL MNOÑÒÓÔÕÖØ PQRÞ STUßÙÚÛÜ VWX YZ-'Ýÿ").split(' ');
     for (QStringList::ConstIterator it = sets.begin(), it_a = sets_a.begin(); it!=sets.end(); ++it,++it_a)
 	dc->addSet(*it_a,*it);
     dc->addMode("123");
@@ -354,39 +339,39 @@ void PickboardPicks::initialise(void)
     configs.append(punc);
 
     KeycodeConfig* keys = new KeycodeConfig(this);
-    keys->addKey(0,QPixmap(Esc_xpm),Key_Escape);
-    keys->addKey(0,QPixmap(BS_xpm),Key_Backspace);
+    keys->addKey(0,QPixmap(Esc_xpm),Qt::Key_Escape, 27);
+    keys->addKey(0,QPixmap(BS_xpm),Qt::Key_Backspace, 8);
     keys->addGap(0,10);
 
-    keys->addKey(0,QPixmap(Ins_xpm),Key_Insert);
-    keys->addKey(0,QPixmap(Home_xpm),Key_Home);
-    keys->addKey(0,QPixmap(PgUp_xpm),Key_PageUp);
+    keys->addKey(0,QPixmap(Ins_xpm),Qt::Key_Insert);
+    keys->addKey(0,QPixmap(Home_xpm),Qt::Key_Home);
+    keys->addKey(0,QPixmap(PgUp_xpm),Qt::Key_PageUp);
 
     keys->addGap(0,25);
-    keys->addKey(0,QPixmap(Up_xpm),Key_Up);
+    keys->addKey(0,QPixmap(Up_xpm),Qt::Key_Up);
     keys->addGap(0,15);
 
-    keys->addKey(1,QPixmap(BackTab_xpm),Key_Tab);
+    keys->addKey(1,QPixmap(BackTab_xpm),Qt::Key_Tab, 9);
     keys->addGap(1,3);
-    keys->addKey(1,QPixmap(Tab_xpm),Key_Tab);
+    keys->addKey(1,QPixmap(Tab_xpm),Qt::Key_Tab, 9);
     keys->addGap(1,10);
 
-    keys->addKey(1,QPixmap(Del_xpm),Key_Delete);
+    keys->addKey(1,QPixmap(Del_xpm),Qt::Key_Delete);
     keys->addGap(1,2);
-    keys->addKey(1,QPixmap(End_xpm),Key_End);
+    keys->addKey(1,QPixmap(End_xpm),Qt::Key_End);
     keys->addGap(1,3);
-    keys->addKey(1,QPixmap(PgDn_xpm),Key_PageDown);
+    keys->addKey(1,QPixmap(PgDn_xpm),Qt::Key_PageDown);
 
     keys->addGap(1,10);
-    keys->addKey(1,QPixmap(Left_xpm),Key_Left);
-    keys->addKey(1,QPixmap(Down_xpm),Key_Down);
-    keys->addKey(1,QPixmap(Right_xpm),Key_Right);
+    keys->addKey(1,QPixmap(Left_xpm),Qt::Key_Left);
+    keys->addKey(1,QPixmap(Down_xpm),Qt::Key_Down);
+    keys->addKey(1,QPixmap(Right_xpm),Qt::Key_Right);
 
     keys->addGap(1,13);
-    keys->addKey(1,QPixmap(Space_xpm),Key_Space);
+    keys->addKey(1,QPixmap(Space_xpm),Qt::Key_Space, ' ');
 
     keys->addGap(0,10);
-    keys->addKey(0,QPixmap(Enter_xpm),Key_Return);
+    keys->addKey(0,QPixmap(Enter_xpm),Qt::Key_Return, 13);
 
     configs.append(keys);
 }
@@ -407,17 +392,17 @@ void PickboardPicks::drawContents(QPainter* p)
 
 void PickboardPicks::mousePressEvent(QMouseEvent* e)
 {
-    config()->pickPoint(e->pos(),TRUE);
+    config()->pickPoint(e->pos(),true);
 }
 
 void PickboardPicks::mouseDoubleClickEvent(QMouseEvent* e)
 {
-    config()->pickPoint(e->pos(),TRUE);
+    config()->pickPoint(e->pos(),true);
 }
 
 void PickboardPicks::mouseReleaseEvent(QMouseEvent* e)
 {
-    config()->pickPoint(e->pos(),FALSE);
+    config()->pickPoint(e->pos(),false);
 }
 
 void PickboardPicks::setMode(int m)
@@ -427,5 +412,5 @@ void PickboardPicks::setMode(int m)
 
 void PickboardPicks::resetState()
 {
-    config()->doMenu(100);
+    config()->reset();
 }

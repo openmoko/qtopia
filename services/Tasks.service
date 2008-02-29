@@ -2,18 +2,18 @@
 File=QtopiaServices
 Context=Todo List
 [Service]
-Actions = newTask();addTask(PimTask);removeTask(PimTask);updateTask(PimTask);showTask(QUuid)
-Icon = task
+Actions = "activateLink(QDSActionRequest);newTask();addTask(QTask);removeTask(QTask);requestLinks(QDSActionRequest);updateTask(QTask)"
+Icon = todolist/TodoList
 Name[]=Todo List
 [newTask()]
-Icon = task
-Name[]=New task in todo list
-[addTask(PimTask)]
-Icon = task
-Name[]=Add task to todo list
-[removeTask(PimTask)]
-Icon = task
-Name[]=Remove task from todo list
-[updateTask(PimTask)]
-Icon = task
-Name[]=Update task in todo list
+Icon = todolist/TodoList
+Name[]="New Task in Todo List"
+[addTask(QTask)]
+Icon = todolist/TodoList
+Name[]="Add Task to Todo List"
+[removeTask(QTask)]
+Icon = todolist/TodoList
+Name[]="Remove Task from Todo List"
+[updateTask(QTask)]
+Icon = todolist/TodoList
+Name[]="Update Task in Todo List"

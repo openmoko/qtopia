@@ -1,37 +1,23 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "clock.h"
 #include "stopwatch.h"
@@ -39,69 +25,77 @@
 #include "analogclock.h"
 #include "clockmain.h"
 
-#include <qtopia/qpeapplication.h>
-#ifdef QWS
-#include <qtopia/qcopenvelope_qws.h>
-#endif
-#include <qtopia/config.h>
-#include <qtopia/timestring.h>
-#include <qtopia/alarmserver.h>
-#include <qtopia/sound.h>
-#include <qtopia/resource.h>
+#include <qtopiaapplication.h>
+#include <qtopiaipcenvelope.h>
+#include <qsettings.h>
+#include <qtimestring.h>
 #ifdef QTOPIA_PHONE
-#include <qtopia/contextmenu.h>
+#include <qsoftmenubar.h>
 #endif
 
 #include <qtabwidget.h>
-#include <qwidgetstack.h>
+#include <qstackedwidget.h>
 #include <qmessagebox.h>
+#include <qmenu.h>
 
 static void toggleScreenSaver( bool on )
 {
-    QPEApplication::setTempScreenSaverMode(on ? QPEApplication::Enable : QPEApplication::DisableSuspend);  
+    QtopiaApplication::setPowerConstraint(on ? QtopiaApplication::Enable : QtopiaApplication::DisableSuspend);
 }
 
-ClockMain::ClockMain(QWidget *parent, const char *name, WFlags f)
-    : QVBox(parent, name, f)
+ClockMain::ClockMain(QWidget *parent, Qt::WFlags f)
+    : QWidget(parent, f)
+    , clockIndex(-1)
+    , stopwatchIndex(-1)
+    , alarmIndex(-1)
 {
+    QVBoxLayout* layout = new QVBoxLayout(this);
+
 #ifndef QTOPIA_PHONE
     tabWidget = new QTabWidget(this);
+    layout->addWidget(tabWidget);
     clock = new Clock(tabWidget);
     stopWatch = new StopWatch(tabWidget);
     alarm = new Alarm(tabWidget);
 
-    tabWidget->addTab(clock, tr("Clock"));
-    tabWidget->addTab(stopWatch, tr("Stop Watch"));
-    tabWidget->addTab(alarm, tr("Alarm"));
+    // Add each widget to the tabbed widget, and save the index for each so that
+    // we can refer to it later.
+    clockIndex = tabWidget->addTab(clock, tr("Clock"));
+    stopwatchIndex = tabWidget->addTab(stopWatch, tr("Stop Watch"));
+    alarmIndex = tabWidget->addTab(alarm, tr("Alarm"));
 
-    connect(tabWidget, SIGNAL(currentChanged(QWidget*)),
-	    this, SLOT(pageRaised(QWidget*)));
+    connect(tabWidget, SIGNAL(currentChanged(int)),
+            this, SLOT(pageRaised(int)));
 #else
-    stack = new QWidgetStack(this);
+    stack = new QStackedWidget(this);
+    layout->addWidget(stack);
     clock = new Clock(stack);
     stopWatch = new StopWatch(stack);
     alarm = new Alarm(stack);
 
-    stack->addWidget(clock, 0);
-    stack->addWidget(stopWatch, 1);
-    stack->addWidget(alarm, 2);
-    connect(stack, SIGNAL(aboutToShow(QWidget*)),
-	    this, SLOT(pageRaised(QWidget*)));
+    // Add each widget to the stacked widget, and save the index for each so that
+    // we can refer to it later.
+    clockIndex = stack->addWidget(clock);
+    stopwatchIndex = stack->addWidget(stopWatch);
+    alarmIndex = stack->addWidget(alarm);
+    connect(stack, SIGNAL(currentChanged(int)), this, SLOT(pageRaised(int)));
 
-    contextMenu = new ContextMenu(this);
-    connect(contextMenu, SIGNAL(activated(int)), this, SLOT(raisePage(int)));
-    contextMenu->insertItem(tr("Clock"), 0);
-    contextMenu->insertItem(tr("Stop Watch"), 1);
-    contextMenu->insertItem(tr("Alarm"), 2);
-    stack->raiseWidget(0);
+    contextMenu = QSoftMenuBar::menuFor(this);
+    connect(contextMenu, SIGNAL(triggered(QAction*)), this, SLOT(raisePage(QAction*)));
+    actionClock = contextMenu->addAction(tr("Clock"));
+    actionStopWatch = contextMenu->addAction(tr("Stop Watch"));
+    actionAlarm = contextMenu->addAction(QIcon(":icon/alarmbell"), tr("Alarm"));
+    stack->setCurrentIndex(clockIndex);
+
+    QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Back);
 #endif
 
-#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
-    connect( qApp, SIGNAL(appMessage(const QCString&,const QByteArray&)),
-	    this, SLOT(appMessage(const QCString&,const QByteArray&)) );
-#endif
+    connect( qApp, SIGNAL(appMessage(const QString&,const QByteArray&)),
+            this, SLOT(appMessage(const QString&,const QByteArray&)) );
+    new ClockService(this);
+    new AlarmService(this);
 
-    setCaption(tr("Clock"));
+    setWindowTitle(tr("Clock"));
 }
 
 ClockMain::~ClockMain()
@@ -109,65 +103,156 @@ ClockMain::~ClockMain()
     toggleScreenSaver( true );
 }
 
-void ClockMain::appMessage( const QCString &msg, const QByteArray &data )
+void ClockMain::showClock()
+{
+#ifndef QTOPIA_PHONE
+    tabWidget->setCurrentIndex(clockIndex);
+#else
+    stack->setCurrentIndex(clockIndex);
+#endif
+}
+
+void ClockMain::editAlarm()
+{
+#ifndef QTOPIA_PHONE
+    tabWidget->setCurrentIndex(alarmIndex);
+#else
+    stack->setCurrentIndex(alarmIndex);
+#endif
+}
+
+void ClockMain::setDailyEnabled( bool enable )
+{
+    alarm->setDailyEnabled( enable );
+}
+
+void ClockMain::appMessage( const QString &msg, const QByteArray &data )
 {
     if ( msg == "alarm(QDateTime,int)" ) {
-	QDataStream ds(data,IO_ReadOnly);
-	QDateTime when;
-	int t;
-	ds >> when >> t;
-	alarm->triggerAlarm(when, t);
-    } else if ( msg == "setDailyEnabled(int)" ) {
-	QDataStream ds(data,IO_ReadOnly);
-	int enableDaily;
-	ds >> enableDaily;
-	alarm->setDailyEnabled(enableDaily);
-    } else if ( msg == "editAlarm()" || msg == "editDailyAlarm()" ) {
-#ifndef QTOPIA_PHONE
-	tabWidget->setCurrentPage(2);
-#else
-	stack->raiseWidget(2);
-#endif
-	QPEApplication::setKeepRunning();
-    } else if (msg == "showClock()") {
-	qDebug("showclock");
-#ifndef QTOPIA_PHONE
-	tabWidget->setCurrentPage(0);
-#else
-	stack->raiseWidget(0);
-#endif
-	QPEApplication::setKeepRunning();
+        QDataStream ds(data);
+        QDateTime when;
+        int t;
+        ds >> when >> t;
+        alarm->triggerAlarm(when, t);
     }
 }
 
-void ClockMain::raisePage(int p)
+void ClockMain::raisePage(QAction *a)
 {
 #ifdef QTOPIA_PHONE
-    if (stack->visibleWidget() != stack->widget(p)) {
-	stack->raiseWidget(p);
-    }
+    int page = clockIndex;
+    if (a == actionStopWatch)
+        page = stopwatchIndex;
+    else if (a == actionAlarm)
+        page = alarmIndex;
+    if (stack->currentWidget() != stack->widget(page))
+        stack->setCurrentIndex(page);
 #else
-    Q_UNUSED(p);
+    Q_UNUSED(a);
 #endif
 }
 
-void ClockMain::pageRaised(QWidget *w)
+void ClockMain::pageRaised(int idx)
 {
-    if (w == clock)
-	setName("clock"); // No tr
-    else if (w == alarm)
-	setName("alarm"); // No tr
-    else if (w == stopWatch)
-	setName("stopwatch"); // No tr
+    if (idx == clockIndex)
+        setObjectName("clock"); // No tr
+    else if (idx == alarmIndex) {
+        setObjectName("alarms"); // No tr
+    }
+    else if (idx == stopwatchIndex)
+        setObjectName("stopwatch"); // No tr
 }
 
 void ClockMain::closeEvent( QCloseEvent *e )
 {
     if (!alarm->isValid()) {
-	QMessageBox::warning(this, tr("Select Day"),
-	    tr("<qt>Daily alarm requires at least one day to be selected.</qt>"));
+        QMessageBox::warning(this, tr("Select Day"),
+            tr("<qt>Daily alarm requires at least one day to be selected.</qt>"));
     } else {
-	QWidget::closeEvent(e);
+        QWidget::closeEvent(e);
     }
 }
 
+/*!
+    \service ClockService Clock
+    \brief Provides the Qtopia Clock service.
+
+    The \i Clock service enables applications to pop up the clock on
+    the user's display by sending it a \c{showClock()} message.
+
+    Client applications can request the \i Clock service with the
+    following code:
+
+    \code
+    QtopiaServiceRequest req( "Clock", "showClock()" );
+    req.send();
+    \endcode
+
+    \sa AlarmService
+*/
+
+/*!
+    \internal
+*/
+ClockService::~ClockService()
+{
+}
+
+/*!
+    Instruct the \i Clock service to pop up the clock on the
+    user's display.
+
+    This slot corresponds to the QCop service message \c{Clock::showClock()}.
+*/
+void ClockService::showClock()
+{
+    parent->showClock();
+}
+
+/*!
+    \service AlarmService Alarm
+    \brief Provides the Qtopia Alarm service.
+
+    The \i Alarm service enables applications to pop up a dialog on
+    the user's display to edit the alarm time.
+
+    Client applications can request the \i Alarm service with the
+    following code:
+
+    \code
+    QtopiaServiceRequest req( "Alarm", "editAlarm()" );
+    req.send();
+    \endcode
+
+    \sa ClockService
+*/
+
+/*!
+    \internal
+*/
+AlarmService::~AlarmService()
+{
+}
+
+/*!
+    Instruct the \i Alarm service to pop up a dialog box that permits
+    editing of the alarm.
+
+    This slot corresponds to the QCop service message \c{Alarm::editAlarm()}.
+*/
+void AlarmService::editAlarm()
+{
+    parent->editAlarm();
+}
+
+/*!
+    Instruct the \i Alarm service to enable or disable the daily alarm
+    according to \a flag.
+
+    This slot corresponds to the QCop service message
+    \c{Alarm::setDailyEnabled(int)}.
+*/
+void AlarmService::setDailyEnabled( int flag )
+{
+    parent->setDailyEnabled( flag != 0 );
+}

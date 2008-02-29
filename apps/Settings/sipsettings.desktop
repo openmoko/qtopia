@@ -1,0 +1,10 @@
+[Translation]
+File=QtopiaSettings
+Context=VoIP
+[Desktop Entry]
+Comment[]=A VoIP Settings Application
+Exec=sipsettings
+Icon=sipsettings/SIP
+Type=Application
+Name[]=VoIP
+CanFastload=0

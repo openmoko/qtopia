@@ -1,0 +1,85 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QFileSystem Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QFileSystem Class Reference</h1>
+<p>The QFileSystem class describes a single mount point. <a href="#details">More...</a></p>
+<pre>    #include &lt;QFileSystem&gt;</pre><ul>
+<li><a href="qfilesystem-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/>bool <b><a href="qfilesystem.html#applications">applications</a></b> () const</li>
+<li><div class="fn"/>long <b><a href="qfilesystem.html#availBlocks">availBlocks</a></b> () const</li>
+<li><div class="fn"/>long <b><a href="qfilesystem.html#blockSize">blockSize</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qfilesystem.html#contentDatabase">contentDatabase</a></b> () const</li>
+<li><div class="fn"/>const QString &amp; <b><a href="qfilesystem.html#disk">disk</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qfilesystem.html#documents">documents</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qfilesystem.html#isConnected">isConnected</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qfilesystem.html#isRemovable">isRemovable</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qfilesystem.html#isWritable">isWritable</a></b> () const</li>
+<li><div class="fn"/>const QString &amp; <b><a href="qfilesystem.html#name">name</a></b> () const</li>
+<li><div class="fn"/>const QString &amp; <b><a href="qfilesystem.html#options">options</a></b> () const</li>
+<li><div class="fn"/>const QString &amp; <b><a href="qfilesystem.html#path">path</a></b> () const</li>
+<li><div class="fn"/>const QString &amp; <b><a href="qfilesystem.html#prevPath">prevPath</a></b> () const</li>
+<li><div class="fn"/>long <b><a href="qfilesystem.html#totalBlocks">totalBlocks</a></b> () const</li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QFileSystem class describes a single mount point.</p>
+<p>This class returns mount point information including:</p>
+<ul>
+<li>file system name</li>
+<li>mount point</li>
+<li>human readable name</li>
+<li>size information</li>
+<li>mount options.</li>
+</ul>
+<p>See also <a href="qstoragemetainfo.html">QStorageMetaInfo</a>.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="applications"></a>bool QFileSystem::applications () const</h3>
+<p>Returns flag indicating if the file system can contain applications.</p>
+<h3 class="fn"><a name="availBlocks"></a>long QFileSystem::availBlocks () const</h3>
+<p>Returns the number of available blocks on the file system</p>
+<h3 class="fn"><a name="blockSize"></a>long QFileSystem::blockSize () const</h3>
+<p>Returns the size of each block on the file system.</p>
+<h3 class="fn"><a name="contentDatabase"></a>bool QFileSystem::contentDatabase () const</h3>
+<p>Returns flag indicating if the file system has it's own content database stored.</p>
+<h3 class="fn"><a name="disk"></a>const <a href="qstring.html">QString</a> &amp; QFileSystem::disk () const</h3>
+<p>Returns the file system name, such as /dev/hda3</p>
+<h3 class="fn"><a name="documents"></a>bool QFileSystem::documents () const</h3>
+<p>Returns flag indicating if the file system can contain documents.</p>
+<h3 class="fn"><a name="isConnected"></a>bool QFileSystem::isConnected () const</h3>
+<p>Returns flag indicating if the file system is currently connected.</p>
+<h3 class="fn"><a name="isRemovable"></a>bool QFileSystem::isRemovable () const</h3>
+<p>Returns flag indicating if the file system can be removed. For example, a CF card would be removable, but the internal memory would not.</p>
+<h3 class="fn"><a name="isWritable"></a>bool QFileSystem::isWritable () const</h3>
+<p>Returns flag indicating if the file system is mounted as writable or read-only. Returns false if read-only, true if read and write.</p>
+<h3 class="fn"><a name="name"></a>const <a href="qstring.html">QString</a> &amp; QFileSystem::name () const</h3>
+<p>Returns the translated, human readable name for the mount directory.</p>
+<h3 class="fn"><a name="options"></a>const <a href="qstring.html">QString</a> &amp; QFileSystem::options () const</h3>
+<p>Returns the mount options</p>
+<h3 class="fn"><a name="path"></a>const <a href="qstring.html">QString</a> &amp; QFileSystem::path () const</h3>
+<p>Returns the mount path, such as /home</p>
+<h3 class="fn"><a name="prevPath"></a>const <a href="qstring.html">QString</a> &amp; QFileSystem::prevPath () const</h3>
+<p>Returns the previous mount path, such as /home (useful when a filesystem has been unmounted)</p>
+<h3 class="fn"><a name="totalBlocks"></a>long QFileSystem::totalBlocks () const</h3>
+<p>Returns the total number of blocks on the file system</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

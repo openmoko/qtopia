@@ -1,0 +1,45 @@
+#!/bin/sh
+
+. /opt/Qtopia/SDK/scripts/functions
+
+QPEVER=`version`
+
+qw_display=0
+start_phonesim=0
+
+source /opt/Qtopia/SDK/scripts/devel-x86.sh
+
+export BASEDIR=/opt/Qtopia/SDK/$QPEVER/x86
+
+export QPEDIR=$BASEDIR
+export QTDIR=$BASEDIR/qtopiacore/host
+export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+
+export SXV_DISCOVERY_MODE=1
+
+export QTOPIA_PHONE_DEVICE="sim:localhost"
+
+#PHONESKINNAME=Trolltech-Keypad.skin
+PHONESKINNAME=Greenphone.skin
+
+echo "Using qvfb skin $PHONESKINNAME"
+
+PHONESKIN=/opt/Qtopia/SDK/$QPEVER/greenphone/qtopiacore/qt/tools/qvfb/$PHONESKINNAME
+
+
+function start_qvfb() {
+if [ ! -e /tmp/.qtvfb_keyboard-$1 ]; then
+  echo "Starting qvfb... "
+  echo "$QTDIR/bin/qvfb :$1 -skin $PHONESKIN"
+  killall qvfb
+  qvfb -qwsdisplay :$1 -skin $PHONESKIN &
+fi
+}
+
+
+start_qvfb $qw_display
+
+
+
+
+

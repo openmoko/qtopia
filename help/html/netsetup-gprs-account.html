@@ -1,10 +1,24 @@
-<qt title="GPRS Account">
-<h3>GPRS Account</h3>
+<html>
+<head><title>GPRS Account</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h3>GPRS Account</h3>
+<!--#else -->
+   <h3>GPRS Account</h3>
+<!--#endif -->
 <p>Complete the form by entering the information into the following fields:</p>
+<p><b>Name:</b> the name you wish to give this account.</p>
+
+<p><b>Startup mode:</b> the following modes are available:</p>
+
 <ul>
-<li><b>Name:</b> the name you wish to give this account.</li>
-<li><b>Username:</b> used to logon.</li>
-<li><b>Password:</b> used to logon.</li>
-<li><b>APN:</b> Access Point Name - provided by ISP.</li>
+<li>When needed (the service needs to be started manually)</li>
+<li>Always online (the service is started in demand mode and connects
+automatically when a data request occurs)</li>
 </ul>
-</qt>
+
+<p><b>APN:</b> Access Point Name - provided by ISP.</p>
+<p><b>Username:</b> used to logon.</p>
+<p><b>Password:</b> used to logon.</p>
+</body>
+</html>

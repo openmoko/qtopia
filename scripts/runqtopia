@@ -1,0 +1,305 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use File::Basename;
+use lib ( dirname($0)."/../bin" );
+use Qtopia::Paths;
+use Qtopia::Opt;
+use Hash::Ordered;
+use File::Path;
+
+Qtopia::Paths::get_paths();
+
+
+use constant DEBUG => 1,
+
+set_optvar( "help", +{
+    "set" => [ "%", "hidden" ],
+});
+
+set_optvar( "display", +{
+    "set" => [ "%=s", "Use display number <num>" ],
+    "arg" => "num",
+    "default" => sub {
+        my $def;
+        if ( ! $ENV{QWS_DISPLAY} ) {
+            $def = "0";
+        } else {
+            $def = $ENV{QWS_DISPLAY};
+            $def =~ s/.*://;
+        }
+        $def;
+    },
+    "showauto" => 1,
+});
+
+=pod
+# This doesn't work (multi assumes the next number, not a configurable number)
+set_optvar( "display2", +{
+    "set" => [ "%=s", "Use display number <num> as the second display (on multi-screen skins)" ],
+    "arg" => "num",
+    "default" => sub {
+        my $def;
+        if ( ! $ENV{QWS_DISPLAY} ) {
+            $def = "0";
+        } else {
+            $def = $ENV{QWS_DISPLAY};
+            $def =~ s/.*://;
+            $def++;
+        }
+        $def;
+    },
+});
+=cut
+
+set_optvar( "skin", +{
+    "set" => [ "%=s", "Use QVFb skin <skin>" ],
+    "arg" => "skin",
+    "available" => sub {
+        my %avail;
+        tie %avail, 'Hash::Ordered';
+        for ( glob("$qt_depot_path/tools/qvfb/*.skin"), glob("$depotpath/devices/*/*.skin") ) {
+            s/\.skin$//;
+            $avail{basename($_)} = 1;
+        }
+        keys %avail;
+    },
+    "default" => sub {
+        my %avail;
+        tie %avail, 'Hash::Ordered';
+        map { $avail{$_} = 1; } Qtopia::Opt::_resolve_to_array(opt("skin", "available"));
+        my $def = (keys %avail)[0];
+        for ( "Greenphone", "Trolltech-Keypad", "Trolltech-Touchscreen" ) {
+            if ( $avail{$_} ) {
+                $def = $_;
+                last;
+            }
+        }
+        $def;
+    },
+    "showauto" => 1,
+});
+
+set_optvar( "rotation", +{
+    "set" => [ "%=s", "Use rotation <angle>" ],
+    "arg" => "angle",
+    "available" => [ "0", "90", "180", "270" ],
+    "default" => "0",
+});
+
+set_optvar( "home", +{
+    "set" => [ "%=s", "Use HOME <home>" ],
+    "arg" => "home",
+    "default" => sub {
+        my $def;
+        if ( ! $ENV{QPEHOME} ) {
+            $def = "$QPEDIR/home";
+        } else {
+            $def = $ENV{QPEHOME};
+        }
+        $def;
+    },
+    "showauto" => 1,
+});
+
+set_optvar( "sxe_discovery", +{
+    "set" => [ "%", "Enable SXE_DISCOVERY_MODE." ],
+    "default" => "0",
+});
+
+set_optvar( "qvfb", +{
+    "set" => [ "%=s", "Extra arguments for QVFb" ],
+    "value" => "",
+});
+
+set_optvar( "qvfb_only", +{
+    "set" => [ "%", "Only run QVFb" ],
+    "default" => 0,
+});
+
+add_note("For arguments to the 'runqpe' part of this script, use [script arguemnts] -- [runqpe arguments]");
+
+opt_get_options();
+opt_apply_defaults();
+opt_print_autodetect();
+
+
+my $skin;
+for ( glob("$qt_depot_path/tools/qvfb/*.skin"), glob("$depotpath/devices/*/*.skin") ) {
+    s/\.skin$//;
+    if ( basename($_) eq opt("skin") ) {
+        $skin = $_.".skin";
+        last;
+    }
+}
+
+my $QWS_DISPLAY;
+if ( opt("rotation") != 0 ) {
+    $QWS_DISPLAY = "Transformed:Rot".opt("rotation").":";
+}
+$QWS_DISPLAY .= "QVFb:";
+if ( open IN, "$skin/defaultbuttons.conf" ) {
+    while ( defined($_ = <IN>) ) {
+        if ( /QWS_DISPLAY=(.*)/ ) {
+            $_ = $1;
+            if ( /Multi: (.*) (.*) :\d+$/ ) {
+                my $screen1 = $1;
+                my $screen2 = $2;
+                $screen1 =~ s/:\d+$//;
+                $screen1 =~ s/^LinuxFb://;
+                $screen2 =~ s/:\d+$//;
+                $screen2 =~ s/^LinuxFb://;
+                $QWS_DISPLAY = "Multi: $QWS_DISPLAY$screen1:".opt("display")." QVFb:$screen2:".(opt("display")+1)." :";
+                last;
+            } else {
+                my $screen1 = $_;
+                $screen1 =~ s/:\d+$//;
+                $screen1 =~ s/^LinuxFb://;
+                $QWS_DISPLAY = "$QWS_DISPLAY$screen1:";
+            }
+        }
+    }
+    close IN;
+}
+$QWS_DISPLAY .= opt("display");
+
+DEBUG and print "export QWS_DISPLAY=\"$QWS_DISPLAY\"\n";
+$ENV{QWS_DISPLAY} = $QWS_DISPLAY;
+
+run_qvfb();
+if ( !opt("qvfb_only") ) {
+    run_qtopia();
+}
+
+exit 0;
+
+
+sub run_qvfb
+{
+    if ( -e "/tmp/.qtvfb_mouse-".opt("display") ) {
+        return;
+    }
+    my $qvfb_path = "$DQTDIR/bin/qvfb";
+    my $skin_path = "$qt_depot_path/tools/qvfb";
+
+    my $qvfb_command = "$qvfb_path -qwsdisplay :".opt("display")." -skin $skin ".opt("qvfb")." >/dev/null 2>&1 &";
+    my $mapfile = "/tmp/.qtvfb_mouse-".opt("display");
+    # we'll wait for this file so remove it now (if it exists)
+    if ( -e $mapfile ) {
+        unlink $mapfile;
+    }
+    DEBUG and print "$qvfb_command\n";
+    chdir $skin_path;
+    system($qvfb_command);
+    # wait for qvfb to come up
+    while ( ! -e $mapfile ) {
+        sleep 1;
+    }
+}
+
+sub run_qtopia
+{
+    open IN, "$QPEDIR/config.cache" or die $!;
+    my $prefix;
+    while ( defined($_ = <IN>) ) {
+        if ( /^opt\.prefix\.value=(.*)/ ) {
+            $prefix = $1;
+            last;
+        }
+    }
+    close IN;
+    if ( !$prefix ) {
+        die "Can't read opt.prefix.value from $QPEDIR/config.cache!";
+    }
+
+    mkpath(opt("home"));
+    print "\n".
+          "**********************************************************\n".
+          "* Qtopia is using HOME=".opt("home")."\n".
+          "**********************************************************\n".
+          "\n";
+
+    $ENV{HOME} = opt("home");
+    delete $ENV{QPEDIR};
+    if ( opt("sxe_discovery") ) {
+        $ENV{SXE_DISCOVERY_MODE} = "1";
+    }
+    $ENV{QTOPIA_PREFIX} = $prefix;
+
+    chdir($prefix);
+
+    my $script = "/tmp/runqtopia.$$";
+    open OUT, ">$script" or die $!;
+    print OUT <<'END';
+#!/bin/sh
+
+# Set some ulimits to prevent runaway processes
+ulimit -Sd 100000          # max data size of a program is 100 MB
+ulimit -Ss 4000            # max stack size of a program is 4 MB
+ulimit -Sm 100000          # max resident set size is 100 MB
+
+if [ -f bin/qtopia-dbus-daemon ]; then
+   echo "Killing all previous qtopia-dbus-daemons..."
+   killall qtopia-dbus-daemon
+   echo "Launching bin/qtopia-dbus-daemon..."
+   export DBUS_SESSION_BUS_ADDRESS=`qtopia-dbus-daemon`
+   echo "DBUS address is: $DBUS_SESSION_BUS_ADDRESS"
+fi
+
+if [ "$1" = "-exec" ]; then
+    shift
+    export PATH=$QTOPIA_PREFIX/bin:$PATH
+    echo exec "$@"
+    exec "$@"
+elif [ "$1" = "-gdb" ]; then
+    if [ "$2" = "-exec" ]; then
+        shift
+        shift
+        export PATH=$QTOPIA_PREFIX/bin:$PATH
+        echo gdb "$@"
+        gdb "$@"
+    else
+        gdb bin/qpe
+    fi
+elif [ "$1" = "-profile" ]; then
+    LD_PRELOAD=$PREFIX/lib/gprof-helper.so bin/qpe
+elif [ "$1" = "-callgrind" ]; then
+    shift
+    echo callgrind "$@" bin/qpe
+    callgrind "$@" bin/qpe
+elif [ "$1" = "-valgrind" ]; then
+    shift
+    echo valgrind --tool=memcheck "$@" bin/qpe
+    valgrind --tool=memcheck "$@" bin/qpe
+elif [ "$1" = "-strace" ]; then
+    shift
+    export PATH=$QTOPIA_PREFIX/bin:$PATH
+    tracebin=qpe
+    if [ "$1" = "-exec" ]; then
+        shift
+        tracebin=$1
+    fi
+    echo "******* See $PWD/$tracebin.out for strace output ********"
+    sleep 1
+    strace -o $tracebin.out $tracebin
+elif [ "$1" = "-performance" ]; then
+    TIME=`date +%H:%M:%S.%N`
+    echo "Performance :  runqpe :  Starting qpe... :  $TIME"
+    exec bin/qpe "$@"    
+else
+    touch /tmp/restart-qtopia
+    while [ -f /tmp/restart-qtopia ]; do
+        bin/qpe "$@"
+        if [ "$?" != 0 ]; then
+            break
+        fi
+    done
+fi
+END
+    close OUT;
+    chmod 0755, $script;
+    system($script." ".join(" ", @ARGV));
+    unlink $script;
+}
+

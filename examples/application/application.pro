@@ -1,32 +1,29 @@
-TEMPLATE	= app
+qtopia_project(qtopia app) # see buildsystem.html for more project keywords
+TARGET=example
+CONFIG+=qtopia_main no_singleexec no_quicklaunch no_tr
 
-CONFIG		+= qtopiaapp
+FORMS=examplebase.ui
+HEADERS=example.h
+SOURCES=main.cpp example.cpp
 
-# comment the following line to enable building the example application 
-# as a quicklaunch application.
-# quicklaunch applications need to be installed before they can be run,
-# But can be faster to start running in Qtopia.
-CONFIG		-= buildQuicklaunch
+desktop.files=example.desktop
+desktop.path=/apps/Applications
+desktop.trtarget=example-nct
+desktop.hint=nct desktop
 
-HEADERS		= example.h
-SOURCES		= main.cpp example.cpp
-INTERFACES	= examplebase.ui
-TARGET		= example
-
-TARGET.path = /bin
-
-desktop.files = example.desktop
-desktop.path = /apps/Applications
-INSTALLS += desktop
-
-pics.files=Example.png
+pics.files=pics/*
 pics.path=/pics/example
-INSTALLS+=pics
+pics.hint=pics
 
+help.source=help
 help.files=example.html
-help.path=/help/html
-INSTALLS+=help
+help.hint=help
 
-TRANSLATABLES = $$HEADERS $$SOURCES $$INTERFACES
-NON_CODE_TRANSLATABLES = $$desktop.files
-NON_CODE_TRTARGETS = example-nct
+INSTALLS+=desktop pics help
+
+pkg.name=example
+pkg.desc=Example Application
+pkg.version=1.0.0-1
+pkg.maintainer=Trolltech (www.trolltech.com)
+pkg.license=Commercial
+pkg.domain=window

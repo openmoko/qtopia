@@ -1,26 +1,50 @@
-HEADERS+=mainwindow.h
-SOURCES+=mainwindow.cpp main.cpp
+qtopia_project(qtopia app)
+TARGET=todolist
+CONFIG+=qtopia_main
 
-include (todo.pri)
+PHONE_FORMS=\
+    taskphonedetail.ui
+PDA_FORMS=\
+    taskdetail.ui
 
-CONFIG+=pimlib
+TRANSLATABLES+=$$PHONE_FORMS $$PDA_FORMS
 
+phone:FORMS+=$$PHONE_FORMS
+else:FORMS+=$$PDA_FORMS 
 
-service.files=$${QTOPIA_DEPOT_PATH}/services/Tasks/todolist
+HEADERS+=\
+    todotable.h\
+    taskdelegate.h\
+    todoentryimpl.h\
+    todocategoryselector.h\
+    mainwindow.h
+
+SOURCES+=\
+    todotable.cpp\
+    taskdelegate.cpp\
+    todoentryimpl.cpp\
+    mainwindow.cpp\
+    main.cpp
+
+depends(libraries/qtopiapim)
+
+service.files=$$QTOPIA_DEPOT_PATH/services/Tasks/todolist
 service.path=/services/Tasks
-recservice.files=$${QTOPIA_DEPOT_PATH}/services/Receive/text/x-vCalendar-Tasks/todolist
-recservice.path=/services/Receive/text/x-vCalendar-Tasks
-qdlservice.files=$${QTOPIA_DEPOT_PATH}/services/qdl/todolist
-qdlservice.path=/services/qdl
-desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Applications/todolist.desktop
+qdsservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/Tasks
+qdsservice.path=/etc/qds
+recservice.files=$$QTOPIA_DEPOT_PATH/services/Receive/text/x-vcalendar-Tasks/todolist
+recservice.path=/services/Receive/text/x-vcalendar-Tasks
+desktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/todolist.desktop
 desktop.path=/apps/Applications
-help.files=$${QTOPIA_DEPOT_PATH}/help/html/todo*
-help.path=/help/html
-pics.files=$${QTOPIA_DEPOT_PATH}/pics/todolist/*
+desktop.hint=desktop
+help.source=$$QTOPIA_DEPOT_PATH/help
+help.files=todo*
+help.hint=help
+pics.files=$$QTOPIA_DEPOT_PATH/pics/todolist/*
 pics.path=/pics/todolist
-INSTALLS+=service recservice qdlservice desktop help
-PICS_INSTALLS+=pics
+pics.hint=pics
+INSTALLS+=service qdsservice desktop help pics recservice
 
-PACKAGE_NAME=qpe-todo
-PACKAGE_DESCRIPTION=Todo helps you manage your list of tasks.
-PACKAGE_DEPENDS+=qpe-libqtopiapim1
+pkg.name=qpe-todo
+pkg.desc=Todo helps you manage your list of tasks.
+pkg.domain=window,beaming,qdl,qds,docapi,pim,bluetooth

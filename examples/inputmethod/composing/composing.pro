@@ -5,22 +5,10 @@
 
 # coment the following line if you want to make the input method as an
 # application
-CONFIG += composeim_as_plugin
 
-TARGET       = composeim
+TARGET=composeim
 
-composeim_as_plugin {
-    CONFIG      += qtopiaplugin
-    HEADERS      = composeim.h composeimpl.h
-    SOURCES      = composeim.cpp composeimpl.cpp
-} else {
-    CONFIG      += qtopiaapp
-    CONFIG	-= buildQuicklaunch
-    HEADERS      = composeim.h
-    SOURCES      = composeim.cpp main.cpp
-}
-
-TRANSLATABLES=$$HEADERS $$SOURCES
-
-composeim_as_plugin:QTOPIA_PROJECT_TYPE=inputmethods
-
+qtopia_project(qtopia plugin)
+HEADERS      = composeim.h composeimpl.h
+SOURCES      = composeim.cpp composeimpl.cpp
+plugin_type  = inputmethods

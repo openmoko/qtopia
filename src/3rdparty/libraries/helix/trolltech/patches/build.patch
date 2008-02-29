@@ -1,0 +1,97 @@
+This patch includes the changes to Helix for including the Qtopia filesystem
+access type. Change helix config file to generate 32bit binaries and use rpath
+if applicable.
+
+--- helix/src/build/BIF/build.bif 	Fri Mar 17 18:12:22 EST 2006
++++ helix/src/build/BIF/build.bif 	Fri Mar 17 18:12:22 EST 2006
+@@ -1643,6 +1643,31 @@
+       </dependlist>
+     </module>
+ 
++    <!-- FILESYSTEM/QTOPIA -->
++    <module id="filesystem_qtopia" name="filesystem/qtopia" group="core">
++      <cvs root="helix"/>
++      <includeplatforms>
++        unix
++      </includeplatforms>
++
++      <excludeprofiles>
++        helix-client-net-ra
++      </excludeprofiles>
++
++      <source_dependlist>
++          common_include
++      </source_dependlist>
++
++      <dependlist>
++          common_container
++          common_util
++          common_system
++          common_fileio
++          common_dbgtool
++          common_runtime
++      </dependlist>
++    </module>
++
+     <!-- FILESYSTEM/MEMORY -->
+     <module id="filesystem_memory" name="filesystem/memory" group="core">
+       <cvs root="helix"/>
+@@ -6603,6 +6628,7 @@
+           client_resource
+ 		  client_xres
+           filesystem_local
++          filesystem_qtopia
+           filesystem_http
+           protocol_sdp
+           video_site
+
+
+
+--- helix/src/build/umakecf/linux-2.2-libc6-gcc32-i586.cf	Fri Jul 21 03:38:12 2006
++++ helix/src/build/umakecf/linux-2.2-libc6-gcc32-i586.cf	Fri Jul 21 03:38:12 2006
+@@ -56,6 +56,9 @@
+ ## list of PCF files to run
+ platform.pcf_prefix_list = ["unix", "linux2", "linux-2.2-libc6-gcc32-i586"]
+ 
++# -m32 for gcc32
++platform.cc.cmd = "gcc -m32"
++platform.cxx.cmd = "g++ -m32"
+ 
+ platform.cxx.args["default"] = platform.cxx.args["default"] + " " + \
+     "-march=pentium -mcpu=pentium" 
+
+
+--- helix/src/build/umakecf/linux-linker.cf	Thu Jul 27 08:18:26 2006
++++ helix/src/build/umakecf/linux-linker.cf	Thu Jul 27 08:18:26 2006
+@@ -142,6 +142,30 @@
+     def make_lib_static(self, lib):
+         return "-Wl,-Bstatic %s -Wl,-Bdynamic" % lib
+ 
+-platform.link = LinuxLinker()
++# use rpaths in linking
++class RPathLinker(LinuxLinker):
++    def __init__(self, rpath):
++        LinuxLinker.__init__(self)
++        self.rpath = rpath
++
++    def LinkDLL(self, target_path, objects, static_libs, dynamic_libs):
++
++        cmd_list = LinuxLinker.LinkDLL(self, target_path, objects, static_libs, dynamic_libs)
++
++        cmd_list[1] = cmd_list[1].replace(platform.cxx.cmd, '%s %s' % (platform.cxx.cmd, self.rpath), 1)
++
++        return cmd_list
+ 
+     
++try:
++
++    qtopia_rpath_opt = project.qtopia_rpath_opt
++    if len(qtopia_rpath_opt) != 0:
++        platform.link = RPathLinker(qtopia_rpath_opt)
++    else:
++        platform.link = LinuxLinker()
++
++except:
++    platform.link = LinuxLinker()   # go back to default
++ 
++

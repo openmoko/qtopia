@@ -1,13 +1,8 @@
-TEMPLATE	= app
-CONFIG		+= qtopia
-TARGET		= qtopia-update-symlinks
-DESTDIR		= $$(QPEDIR)/bin
+qtopia_project(qtopia app)
+TARGET=qtopia-update-symlinks
+CONFIG+=no_tr no_singleexec
 
-HEADERS		= 
 SOURCES		= main.cpp
-INTERFACES	= 
 
-target.path=/bin
-INSTALLS+=target
-
-TRANSLATIONS=
+pkg.desc=Update symbolic links in Qtopia
+pkg.domain=none

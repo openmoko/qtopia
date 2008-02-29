@@ -1,0 +1,11 @@
+<page name="secondarytitle" base="themes/qtopia" rect="0,0,0x17">
+    <image rect="0,0,0x17" src="titlebar-gradient" tile="yes" color="Highlight" scale="vertical"/>
+    <group>
+        <level name="battery" rect="2,2,44x11" src="battery-big" count="6" min="0" max="100">
+            expr:@/Accessories/Battery/VisualCharge
+        </level>
+        <level name="signal" rect="-46,2,44x11" src="signal-big" count="6" min="0" max="100" active="expr:@/Telephony/Status/SignalLevel/modem">
+            expr:@/Telephony/Status/SignalLevel/modem
+        </level>
+    </group>
+</page>

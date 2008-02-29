@@ -1,0 +1,91 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>  Multimedia </title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">  Multimedia <br><small>Functional Description</small></h1>
+<p />
+
+<p />
+Qtopia includes a multimedia framework for applications that playback music and videos. Features include simple and abstracted multimedia playback APIs together with  reusable control widgets. The reference integration of the Helix DNA Client codec library is provided with Qtopia and supports development for various file system, file format and datatype plug-ins. Simplified APIs provide simple playback interfaces and avoid the requirement to call into the Helix DNA Client directly.
+<p />
+
+<p />
+<h2><a name="Features"></a> Features </h2>
+<p />
+<h3><a name="Multimedia_Architecture"></a> Multimedia Architecture </h3>
+<p />
+<h4><a name="Helix_DNA_Client"></a> Helix DNA Client </h4>
+<p />
+A reference integration of the Helix DNA Client multimedia library is provided with Qtopia and a snapshot of the Helix DNA Client libraries, pre-integrated with the Qtopia build system is available. The following multimedia formats are supported:
+<p /> <ul>
+<li> 3GP
+</li> <li> WAV
+</li> <li> AMR-NB
+</li> <li> MP3
+</li> <li> H.263
+</li></ul> 
+<p />
+For a list of all formats supported by the Helix DNA Client library refer to: <a href="http://datatype.helixcommunity.org" target="_top">http://datatype.helixcommunity.org</a>.
+<p />
+The Helix DNA Client library features:
+<p /> <ul>
+<li> Open source
+</li> <li> Commercial quality
+</li> <li> COM-like modular architecture <ul>
+<li> for easy assembly of components to extend capabilities for differentiation e.g. third-party modules for accelerated decoding 
+</li></ul> 
+</li> <li> Optimized codecs for ARM architecture
+</li></ul> 
+<p />
+<strong>Note:</strong> The Helix DNA framework is under constant development. Please refer to: <a href="http://www.helixcommunity.org" target="_top">http://www.helixcommunity.org</a> for current functionality and licensing information.
+<p />
+<h4><a name="Simplified_APIs"></a> Simplified APIs </h4>
+<p />
+Rather than calling into Helix DNA directly applications can use QSound for a simple audio playback interface. QSound can playback all audio file formats supported by Helix DNA.
+<p />
+<h3><a name="Common_Application_Framework"></a> Common Application Framework </h3>
+<p />
+The multimedia architecture provides a common framework for applications that playback music and videos. The common application framework will form the basis of the <a href="fd-MediaPlayer.html" class="twikiLink">Media Player</a> application. Some features of the framework include:
+<p /> <ul>
+<li> Multimedia playback API
+</li> <li> Control widgets
+</li></ul> 
+<p />
+<h3><a name="Qtopia_Multimedia_Strategy"></a> Qtopia Multimedia Strategy </h3>
+<p /> <ul>
+<li> Convergence of various multimedia applications under one architecture
+</li> <li> Rich library to support media management: <ul>
+<li> audio and video player
+</li> <li> Camcorder, etc.
+</li></ul> 
+</li> <li> highly productive reusable multimedia capabilities  <ul>
+<li> e.g. through provision of multi-format audio and video player widgets that can easily be incorporated into applications
+</li></ul> 
+</li></ul> 
+<p />
+<h3><a name="Qtopia_Multimedia_Architecture"></a> Qtopia Multimedia Architecture </h3>
+<p /> <ul>
+<li> Modular Low Level Architecture <ul>
+<li> Highly modular architecture of reusable components
+</li> <li> Extensibility through pluggable components <ul>
+<li> Codecs, acceleration, drivers etc. 
+</li></ul> 
+</li></ul> 
+</li> <li> High Level APIs for easy access to common multimedia functions e.g. content playback and capture
+</li> <li> Integrate with a standards compliant <a href="fd-DRM.html" class="twikiLink">DRM</a> implementation
+</li></ul> 
+<p />
+<hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div>

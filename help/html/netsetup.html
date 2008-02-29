@@ -1,17 +1,49 @@
-<qt title="Internet Help">
-<h3>Internet Help</h3>
-<p><img src="netsetup/PPPConnect.png"></p>
+<html>
+<head><title>Internet Help</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h2>Internet <img src=":image/netsetup/PPPConnect"></h2>
+<!--#else -->
+   <h3>Internet Help</h3>
+<p><img src=":image/netsetup/PPPConnect"></p>
+<!--#endif -->
 <p>Used to manually define the network settings for your <i>Qtopia</i> device, or to show settings that have been sent to your device by your network operator.</p>
+<!--#if expr="$USERGUIDE"-->
+   <h3>Internet services</h3>
+<!--#else -->
+   <h4>Internet services</h4>
+<!--#endif -->
+<p>The Internet settings application has two tabulator pages. The first tabulator pages allows the configuration of internet services and displays details about which network services are running and their status.</p>
+
 <ul>
-<li><a href="netsetup-dialup.html">Dial-Up Help</a></li>
-<li><a href="netsetup-lan.html">LAN Help</a></li>
-<li><a href="netsetup-gprs.html">GPRS Help</a></li>
+<li><a href="netsetup-dialup-menu.html">Dial-up Help</a></li>
+<li><a href="netsetup-lan-menu.html">LAN Help</a></li>
+<li><a href="netsetup-bluetooth-menu.html">Bluetooth Help</a></li>
 </ul>
 
-<p>See Also: <a href="netsetup-current.html">Current Network</a> and <a href="netsetup-add-service.html">Add Service</a>
+<p>See Also: <a href="netsetup-add-service.html">New Service</a>
 
-%%PDA%%
+<!--#if expr="$USERGUIDE"-->
+   <h3>Wireless Access Protocol (WAP)</h3>
+<!--#else -->
+   <h4>Wireless Access Protocol (WAP)</h4>
+<!--#endif -->
+<p>The second tab shows all existing WAP accounts. The user can add, remove and configure new accounts. The default account is marked bold.</p>
+<p>For details see <a href="netsetup-wap-menu.html">WAP details</a>
+
+<!--#if expr="$PDASTYLE"-->
 and <a href="qipkg.html">Software Packages</a>
-@@PDA@@
+<!--#endif -->
 </p>
-</qt>
+
+<!--#if expr="$USERGUIDE"-->
+   <h3>Virtual Private Network (VPN)</h3>
+<!--#else -->
+   <h4>Virtual Private Network (VPN)</h4>
+<!--#endif -->
+
+<p>The third tab shows all existing VPN accounts. The user can add, remove and configure new accounts.</p>
+<p>For more details see <a href="netsetup-vpn.html">VPN details</a></p>
+
+</body>
+</html>

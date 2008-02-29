@@ -3,8 +3,8 @@ File=QtopiaApplications
 Context=System Info
 Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
-Name[]=Sys­tem Info
+Name[]=Sys\xadtem Info
 Exec=sysinfo
 Type=Application
 Comment[]=System Information
-Icon=SystemInfo
+Icon=sysinfo/SystemInfo

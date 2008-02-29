@@ -1,0 +1,231 @@
+<ui version="4.0" >
+ <class>SearchViewBase</class>
+ <widget class="QWidget" name="SearchViewBase" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>250</width>
+    <height>327</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Search</string>
+  </property>
+  <layout class="QGridLayout" >
+   <property name="margin" >
+    <number>9</number>
+   </property>
+   <property name="spacing" >
+    <number>6</number>
+   </property>
+   <item row="0" column="0" >
+    <widget class="QFrame" name="searchFrame" >
+     <property name="frameShape" >
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow" >
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QGridLayout" >
+      <property name="margin" >
+       <number>6</number>
+      </property>
+      <property name="spacing" >
+       <number>4</number>
+      </property>
+      <item row="7" column="2" colspan="2" >
+       <widget class="QLineEdit" name="nameLine" >
+        <property name="whatsThis" >
+         <string>Set the name for your query.</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0" colspan="2" >
+       <widget class="QLabel" name="nameLabel" >
+        <property name="text" >
+         <string>Name</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" colspan="3" >
+       <widget class="QComboBox" name="status" >
+        <property name="whatsThis" >
+         <string>Find mail with a matching status.</string>
+        </property>
+        <item>
+         <property name="text" >
+          <string>Any</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>Read</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>Unread</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>Replied</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="1" colspan="3" >
+       <widget class="QComboBox" name="mailbox" >
+        <property name="whatsThis" >
+         <string>Select the mailbox to search for mail in.</string>
+        </property>
+        <item>
+         <property name="text" >
+          <string>Inbox</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>Outbox</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>Drafts</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>Sent</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>Trash</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="4" column="1" colspan="3" >
+       <widget class="QLineEdit" name="subjectLine" >
+        <property name="whatsThis" >
+         <string>Input text that must occur in the subject.</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1" colspan="3" >
+       <widget class="QLineEdit" name="toLine" >
+        <property name="whatsThis" >
+         <string>Input text that must occur in the to field.</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1" colspan="3" >
+       <widget class="QLineEdit" name="bodyLine" >
+        <property name="whatsThis" >
+         <string>Input text that must occur in the body.  Bear in mind that searching the body can be very slow.</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" >
+       <widget class="QLabel" name="TextLabel1_2" >
+        <property name="text" >
+         <string>Mail status</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0" >
+       <widget class="QLabel" name="TextLabel1_2_2_3" >
+        <property name="text" >
+         <string>Subject</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" colspan="3" >
+       <widget class="QLineEdit" name="fromLine" >
+        <property name="whatsThis" >
+         <string>Input text that must occur in the from field.</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0" >
+       <widget class="QLabel" name="TextLabel1_2_2_4" >
+        <property name="text" >
+         <string>Body</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" >
+       <widget class="QLabel" name="TextLabel1" >
+        <property name="text" >
+         <string>Search in</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" >
+       <widget class="QLabel" name="TextLabel1_2_2_2" >
+        <property name="text" >
+         <string>To</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" >
+       <widget class="QLabel" name="TextLabel1_2_2" >
+        <property name="text" >
+         <string>From</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0" colspan="4" >
+       <widget class="QGroupBox" name="box" >
+        <property name="title" >
+         <string>Date</string>
+        </property>
+        <property name="alignment" >
+         <set>Qt::AlignLeading</set>
+        </property>
+        <layout class="QGridLayout" >
+         <property name="margin" >
+          <number>11</number>
+         </property>
+         <property name="spacing" >
+          <number>6</number>
+         </property>
+         <item row="1" column="0" >
+          <widget class="QCheckBox" name="dateBeforeBox" >
+           <property name="whatsThis" >
+            <string>Include only mails before this date.</string>
+           </property>
+           <property name="text" >
+            <string>before</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0" >
+          <widget class="QCheckBox" name="dateAfterBox" >
+           <property name="whatsThis" >
+            <string>Include only mails after this date.</string>
+           </property>
+           <property name="text" >
+            <string>after</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1" >
+          <widget class="QDateEdit" name="dateBeforeButton" />
+         </item>
+         <item row="0" column="1" >
+          <widget class="QDateEdit" name="dateAfterButton" />
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

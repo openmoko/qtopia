@@ -1,154 +1,119 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>QDLClient Class</title>
-<style type="text/css"><!--
-h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }
-body { background: #ffffff; color: black; }
---></style>
+  <title>QDLClient Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
-<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
-<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
-   <a href="index.html">Home</a>
- - <a href="qtopiaclasses.html">Classes</a>
- - <a href="qtopiahierarchy.html">Hierachy</a>
- - <a href="qtopiaannotated.html">Annotated</a>
- - <a href="qtopiafunctions.html">Functions</a>
- - <a href="qtindex.html">Qt Embedded</a>
-</td>
-<td align="right" valign="top">
-  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
-</td>
-</tr>
-</table><h1 align=center>QDLClient Class Reference</h1>
-
-<p>The QDLClient class provides a set of links and communication with a data source.
-<a href="#details">More...</a>
-<p><tt>#include &lt;<a href="qdl-h.html">qtopia/qdl.h</a>&gt;</tt>
-<p>Inherited by <a href="qdlwidgetclient.html">QDLWidgetClient</a> and <a href="qdlwidgetclient.html">QDLWidgetClient</a>.
-<p><a href="qdlclient-members.html">List of all member functions.</a>
-<h2>Public Members</h2>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QDLClient Class Reference</h1>
+<p>The QDLClient class manages a set of QDLLinks for a client object. <a href="#details">More...</a></p>
+<pre>    #include &lt;QDLClient&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<p>Inherited by <a href="qdleditclient.html">QDLEditClient</a>.</p>
 <ul>
-<li><div class=fn><a href="#QDLClient"><b>QDLClient</b></a> ( QObject&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name )</div></li>
-<li><div class=fn>bool <a href="#isRequestActive"><b>isRequestActive</b></a> () const</div></li>
-<li><div class=fn>QDLLink <a href="#link"><b>link</b></a> ( uint&nbsp;lid ) const</div></li>
-<li><div class=fn>QMap&lt;uint, QDLLink&gt; <a href="#links"><b>links</b></a> () const</div></li>
-<li><div class=fn>uint <a href="#count"><b>count</b></a> () const</div></li>
-<li><div class=fn>virtual void <a href="#addLink"><b>addLink</b></a> ( const&nbsp;QDLLink&nbsp;&amp;&nbsp;newLink )</div></li>
-<li><div class=fn>virtual void <a href="#setLink"><b>setLink</b></a> ( uint&nbsp;lid, const&nbsp;QDLLink&nbsp;&amp;&nbsp;newLink )</div></li>
-<li><div class=fn>virtual void <a href="#removeLink"><b>removeLink</b></a> ( uint&nbsp;lid )</div></li>
-<li><div class=fn>QString <a href="#hint"><b>hint</b></a> () const</div></li>
-<li><div class=fn>void <a href="#setHint"><b>setHint</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;hint )</div></li>
+<li><a href="qdlclient-members.html">List of all members, including inherited members</a></li>
 </ul>
-<h2>Public Slots</h2>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
 <ul>
-<li><div class=fn>virtual void <a href="#clear"><b>clear</b></a> ()</div></li>
-<li><div class=fn>virtual void <a href="#verifyLinks"><b>verifyLinks</b></a> ()</div></li>
-<li><div class=fn>void <a href="#requestLink-2"><b>requestLink</b></a> ( QWidget&nbsp;*&nbsp;parent )</div></li>
-<li><div class=fn>void <a href="#requestLink"><b>requestLink</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;channel )</div></li>
+<li><div class="fn"/><b><a href="qdlclient.html#QDLClient">QDLClient</a></b> ( QObject * <i>parent</i>, const QString &amp; <i>name</i> )</li>
+<li><div class="fn"/>virtual int <b><a href="qdlclient.html#addLink">addLink</a></b> ( QDSData &amp; <i>link</i> )</li>
+<li><div class="fn"/>void <b><a href="qdlclient.html#breakLink">breakLink</a></b> ( const int <i>linkId</i>, const bool <i>broken</i> = true )</li>
+<li><div class="fn"/>QString <b><a href="qdlclient.html#hint">hint</a></b> () const</li>
+<li><div class="fn"/>QDLLink <b><a href="qdlclient.html#link">link</a></b> ( const int <i>linkId</i> ) const</li>
+<li><div class="fn"/>QString <b><a href="qdlclient.html#linkAnchorText">linkAnchorText</a></b> ( const int <i>linkId</i>, const bool <i>noIcon</i> = false ) const</li>
+<li><div class="fn"/>QList&lt;int&gt; <b><a href="qdlclient.html#linkIds">linkIds</a></b> () const</li>
+<li><div class="fn"/>virtual void <b><a href="qdlclient.html#loadLinks">loadLinks</a></b> ( QDataStream &amp; <i>stream</i> )</li>
+<li><div class="fn"/>virtual void <b><a href="qdlclient.html#removeLink">removeLink</a></b> ( const int <i>linkId</i> )</li>
+<li><div class="fn"/>void <b><a href="qdlclient.html#saveLinks">saveLinks</a></b> ( QDataStream &amp; <i>stream</i> ) const</li>
+<li><div class="fn"/>void <b><a href="qdlclient.html#setHint">setHint</a></b> ( const QString &amp; <i>hint</i> )</li>
+<li><div class="fn"/>virtual void <b><a href="qdlclient.html#setLink">setLink</a></b> ( const int <i>linkId</i>, const QDLLink &amp; <i>link</i> )</li>
+<li><div class="fn"/>bool <b><a href="qdlclient.html#validLinkId">validLinkId</a></b> ( const int <i>linkId</i> ) const</li>
 </ul>
-<hr><a name="details"></a><h2>Detailed Description</h2>
-
-
-The QDLClient class provides a set of links and communication with a data source.
-<p> A QDLClient contains a set of links and handles communication with a data source.
-<p> A single client can have an unlimited number of links. To load and save links to and from a client
-you can use the utility functions <a href="qdl.html#loadLinks">QDL::loadLinks</a>() and <a href="qdl.html#saveLinks">QDL::saveLinks</a>() respectively.
-<p> This class operates independently of any other object. The subclass <a href="qdlwidgetclient.html">QDLWidgetClient</a> extends 
-this class to operate on a widget and its text dependently.
-<p> <p>See also <a href="qdlwidgetclient.html">QDLWidgetClient</a> and <a href="qtopiaemb.html">Qtopia Classes</a>.
-
-<p> 
-
-<hr><h2>Member Function Documentation</h2>
-<h3 class=fn><a name="QDLClient"></a>QDLClient::QDLClient ( QObject&nbsp;*&nbsp;parent, const&nbsp;char&nbsp;*&nbsp;name )
-</h3>
-Constructs a QDLClient. <em>parent</em> and <em>name</em> are passed on to QObject.
-
-<h3 class=fn>void <a name="addLink"></a>QDLClient::addLink ( const&nbsp;<a href="qdllink.html">QDLLink</a>&nbsp;&amp;&nbsp;newLink )<tt> [virtual]</tt>
-</h3>
-Adds <em>newLink</em> to the client. A new link identifier is generated.
-
-<p>Reimplemented in <a href="qdlwidgetclient.html#addLink">QDLWidgetClient</a>.
-<h3 class=fn>void <a name="clear"></a>QDLClient::clear ()<tt> [virtual slot]</tt>
-</h3>
-Clears all links in the client.
-
-<h3 class=fn>uint <a name="count"></a>QDLClient::count () const
-</h3>
-Returns the number of links in the client.
-
-<h3 class=fn>QString <a name="hint"></a>QDLClient::hint () const
-</h3>
-Returns the request hint for this client.
-<p> Subclasses may override this function if they wish to dynamically determine a hint.
-<p> <p>See also <a href="qdlwidgetclient.html#hint">QDLWidgetClient::hint</a>().
-
-<h3 class=fn>bool <a name="isRequestActive"></a>QDLClient::isRequestActive () const
-</h3>
-Returns TRUE if a request for links is active, otherwise returns FALSE.
-
-<h3 class=fn><a href="qdllink.html">QDLLink</a> <a name="link"></a>QDLClient::link ( uint&nbsp;lid ) const
-</h3>
-Returns the link specified by the link identifier <em>lid</em>.
-If no such link exists a null link is returned. 
-
-<h3 class=fn>QMap&lt;uint, QDLLink&gt; <a name="links"></a>QDLClient::links () const
-</h3>
-Returns a link identifier to <a href="qdllink.html">QDLLink</a> map of all links in the client.
-
-<h3 class=fn>void <a name="removeLink"></a>QDLClient::removeLink ( uint&nbsp;lid )<tt> [virtual]</tt>
-</h3> 
-Removes the link specified by the link identifier <em>lid</em>.
-
-<p>Reimplemented in <a href="qdlwidgetclient.html#removeLink">QDLWidgetClient</a>.
-<h3 class=fn>void <a name="requestLink"></a>QDLClient::requestLink ( const&nbsp;QString&nbsp;&amp;&nbsp;channel )<tt> [slot]</tt>
-</h3>
-Sends a request for links to the data source listening on <em>channel</em>.
-
-<h3 class=fn>void <a name="requestLink-2"></a>QDLClient::requestLink ( QWidget&nbsp;*&nbsp;parent )<tt> [slot]</tt>
-</h3> This is an overloaded member function, provided for convenience. It behaves essentially like the above function.
-<p> Prompts the user to select a data source application, determines source
-application's channel
-based on the user's selection, and then passes it to the above function.
-<em>parent</em> is the parent of the dialog used.
-
-<h3 class=fn>void <a name="setHint"></a>QDLClient::setHint ( const&nbsp;QString&nbsp;&amp;&nbsp;hint )
-</h3>
-Sets the request hint for the client to <em>hint</em>.
-A hint is sent to a data source as part of the request to help it determine 
-pertinent data.
-<p> A hint can only be used with a QDLClient by calling <a href="#setHint">setHint</a>() explicitly.
-<p> <p>See also <a href="qdlwidgetclient.html">QDLWidgetClient</a>.
-
-<h3 class=fn>void <a name="setLink"></a>QDLClient::setLink ( uint&nbsp;lid, const&nbsp;<a href="qdllink.html">QDLLink</a>&nbsp;&amp;&nbsp;newLink )<tt> [virtual]</tt>
-</h3> 
-Sets the link specified by the link identifier <em>lid</em> to <em>newLink</em>.
-If no link for <em>lid</em> currently exists, it is created.
-
-<p>Reimplemented in <a href="qdlwidgetclient.html#setLink">QDLWidgetClient</a>.
-<h3 class=fn>void <a name="verifyLinks"></a>QDLClient::verifyLinks ()<tt> [virtual slot]</tt>
-</h3>
-Verifies that all links in the client are valid. The default implementation does nothing,
-This function is called from <a href="qdl.html#saveLinks">QDL::saveLinks</a>().
-<p> Subclasses that wish to perform any verification processing should override this function.
-
-<p>Reimplemented in <a href="qdlwidgetclient.html#verifyLinks">QDLWidgetClient</a>.
-<!-- eof -->
-<hr><p>
-This file is part of the <a href="index.html">Qtopia</a> platform,
-copyright &copy; 1995-2004
-<a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0">
-<tr>
-<td>Copyright &copy; 2001-2005 Trolltech
-<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qtopia version 2.1.1</div>
-</table></div></address></body>
+<ul>
+<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+</ul>
+<a name="public-slots"></a>
+<h3>Public Slots</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qdlclient.html#activateLink">activateLink</a></b> ( const int <i>linkId</i> )</li>
+<li><div class="fn"/>void <b><a href="qdlclient.html#clear">clear</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qdlclient.html#requestLinks">requestLinks</a></b> ( QWidget * <i>parent</i> )</li>
+<li><div class="fn"/>void <b><a href="qdlclient.html#requestLinks-2">requestLinks</a></b> ( const QDSServiceInfo &amp; <i>qdlService</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QDLClient class manages a set of QDLLinks for a client object.</p>
+<p>The QDLClient class stores a set of QDLLinks for a client object. QDLClient manages the stored QDLLinks, allows links to be requested from QDL data sources and to activate a link on a QDL source.</p>
+<p>The links managed by the client object can be saved using <a href="qdlclient.html#saveLinks">QDLClient::saveLinks</a>() and can be restored using <a href="qdlclient.html#loadLinks">QDLClient::loadLinks</a>(). Alternatively if the client object belongs to a group, QDLClients::saveLinks() and <a href="qdl.html#loadLinks">QDL::loadLinks</a>() should be used for convenience.</p>
+<p>This class operates independently of any other object. The subclasses <a href="qdlbrowserclient.html">QDLBrowserClient</a> and <a href="qdleditclient.html">QDLEditClient</a> extends this class to operate on a widget and its text dependently.</p>
+<p>See also <a href="qdlbrowserclient.html">QDLBrowserClient</a> and <a href="qdleditclient.html">QDLEditClient</a>.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QDLClient"></a>QDLClient::QDLClient ( <a href="qobject.html">QObject</a> * <i>parent</i>, const <a href="qstring.html">QString</a> &amp; <i>name</i> )</h3>
+<p>Constructs a <a href="qdlclient.html">QDLClient</a>, <i>parent</i> is passed on to <a href="qobject.html">QObject</a> to establish the parent child relationship. The <a href="qdlclient.html">QDLClient</a> is identified by <i>name</i>, which should be unique within a group of QDLClients. <i>name</i> should only contain alpha-numeric characters, underscores and spaces.</p>
+<h3 class="fn"><a name="activateLink"></a>void QDLClient::activateLink ( const int <i>linkId</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Activates the stored <a href="qdllink.html">QDLLink</a> identified by <i>linkId</i> on the QDL data source.</p>
+<h3 class="fn"><a name="addLink"></a>int QDLClient::addLink ( <a href="qdsdata.html">QDSData</a> &amp; <i>link</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Adds <i>link</i> to the client object.</p>
+<h3 class="fn"><a name="breakLink"></a>void QDLClient::breakLink ( const int <i>linkId</i>, const bool <i>broken</i> = true )</h3>
+<p>Sets the broken state of the stored <a href="qdllink.html">QDLLink</a> identified by <i>linkId</i> to <i>broken</i>, which is used to indicate that the data item at the source is no longer available.</p>
+<h3 class="fn"><a name="clear"></a>void QDLClient::clear ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Removes all links from the client object.</p>
+<h3 class="fn"><a name="hint"></a><a href="qstring.html">QString</a> QDLClient::hint () const</h3>
+<p>Returns the hint used when requesting QDLLinks</p>
+<p>See also <a href="qdlclient.html#setHint">setHint</a>().</p>
+<h3 class="fn"><a name="link"></a><a href="qdllink.html">QDLLink</a> QDLClient::link ( const int <i>linkId</i> ) const</h3>
+<p>Retrieves a copy of the stored <a href="qdllink.html">QDLLink</a> identified by <i>linkId</i>. If the copy of the <a href="qdllink.html">QDLLink</a> is modified, <a href="qdlclient.html#setLink">QDLClient::setLink</a>() should be used to update the stored <a href="qdllink.html">QDLLink</a>.</p>
+<p>If <i>linkId</i> is invalid a null <a href="qdllink.html">QDLLink</a> will be returned.</p>
+<p>See also <a href="qdlclient.html#setLink">QDLClient::setLink</a>().</p>
+<h3 class="fn"><a name="linkAnchorText"></a><a href="qstring.html">QString</a> QDLClient::linkAnchorText ( const int <i>linkId</i>, const bool <i>noIcon</i> = false ) const</h3>
+<p>Generates the rich-text anchor for the <a href="qdllink.html">QDLLink</a> identified by <i>linkId</i>. The anchor will not contain the <a href="qdllink.html">QDLLink</a> icon if <i>noIcon</i> is true.</p>
+<h3 class="fn"><a name="linkIds"></a><a href="qlist.html">QList</a>&lt;int&gt; QDLClient::linkIds () const</h3>
+<p>Returns a list of all the stored Link IDs.</p>
+<h3 class="fn"><a name="loadLinks"></a>void QDLClient::loadLinks ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Loads the links in <i>stream</i> into the client object. <i>stream</i> is generated by <a href="qdlclient.html#saveLinks">QDLClient::saveLinks</a>().</p>
+<p>See also <a href="qdlclient.html#saveLinks">QDLClient::saveLinks</a>().</p>
+<h3 class="fn"><a name="removeLink"></a>void QDLClient::removeLink ( const int <i>linkId</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Removes the stored <a href="qdllink.html">QDLLink</a> identified by <i>linkId</i>.</p>
+<h3 class="fn"><a name="requestLinks"></a>void QDLClient::requestLinks ( <a href="qwidget.html">QWidget</a> * <i>parent</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Requests QDL links from a source. The user selects the desired source from a list of available QDL sources, the list is a modal dialog connected to <i>parent</i>.</p>
+<h3 class="fn"><a name="requestLinks-2"></a>void QDLClient::requestLinks ( const <a href="qdsserviceinfo.html">QDSServiceInfo</a> &amp; <i>qdlService</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Requests QDL links from the QDL source described in <i>qdlService</i>. This method can be used when the QDL source is known.</p>
+<h3 class="fn"><a name="saveLinks"></a>void QDLClient::saveLinks ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i> ) const</h3>
+<p>Saves the stored links to <i>stream</i>.</p>
+<p>See also <a href="qdlclient.html#loadLinks">QDLClient::loadLinks</a>().</p>
+<h3 class="fn"><a name="setHint"></a>void QDLClient::setHint ( const <a href="qstring.html">QString</a> &amp; <i>hint</i> )</h3>
+<p>Sets the <i>hint</i> used when requesting QDLLinks</p>
+<p>See also <a href="qdlclient.html#hint">hint</a>().</p>
+<h3 class="fn"><a name="setLink"></a>void QDLClient::setLink ( const int <i>linkId</i>, const <a href="qdllink.html">QDLLink</a> &amp; <i>link</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Modifies the stored <a href="qdllink.html">QDLLink</a> identified by <i>linkId</i> with <i>link</i>.</p>
+<p>See also <a href="qdlclient.html#link">link</a>().</p>
+<h3 class="fn"><a name="validLinkId"></a>bool QDLClient::validLinkId ( const int <i>linkId</i> ) const</h3>
+<p>Determines if <i>linkId</i> identifies a stored <a href="qdllink.html">QDLLink</a>.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
 </html>

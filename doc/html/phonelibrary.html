@@ -1,394 +1,145 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Qtopia Phone Library</title>
-<style type="text/css"><!--
-h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }
-body { background: #ffffff; color: black; }
---></style>
+  <title>Qtopia Phone Library</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
-<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
-<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
-   <a href="index.html">Home</a>
- - <a href="qtopiaclasses.html">Classes</a>
- - <a href="qtopiahierarchy.html">Hierachy</a>
- - <a href="qtopiaannotated.html">Annotated</a>
- - <a href="qtopiafunctions.html">Functions</a>
- - <a href="qtindex.html">Qt Embedded</a>
-</td>
-<td align="right" valign="top">
-  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
-</td>
-</tr>
-</table><h1 align=center>Qtopia Phone Library</h1>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Qtopia Phone Library<br /><small></small></h1>
+<a name="top"></a><ul><li><a href="#services-and-interfaces">Services and Interfaces</a></li>
+<li><a href="#using-telephony-interfaces">Using Telephony Interfaces</a></li>
+<li><a href="#implementing-telephony-interfaces">Implementing Telephony Interfaces</a></li>
+<li><a href="#automatic-starting-of-telephony-services">Automatic Starting of Telephony Services</a></li>
+<li><a href="#modem-services">Modem Services</a></li>
+</ul>
+<p>This document describes the design of the Qtopia Phone Library. The complete list of library classes can be found on the <a href="qtopiaphone.html">Phone Classes</a> page.</p>
+<a name="services-and-interfaces"></a>
+<h2>Services and Interfaces</h2>
+<p>Handlers in the telephony system are referred to as <i>services</i>. Each service has a unique name, such as <tt>modem</tt>, <tt>voip</tt>, etc. By convention, service names are lower case. Within each service is a list of interfaces for functionality areas such as network registration, phone calls, SMS, SIM Application Toolkit, etc.</p>
+<p>Interface names correspond to class names in the Qtopia Telephony API. For example, the QNetworkRegistration interface provides access to network registration features, and the QSMSSender interface provides methods to send SMS messages. The following table summarises the interfaces in the Qtopia Phone Library:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Interface</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td>QAdviceOfCharge</td><td>Advice of charge information during a call.</td></tr>
+<tr valign="top" class="even"><td>QBandSelection</td><td>Selection of GSM bands - 850 MHz, 900 MHz, 1800 MHz, 1900 MHz, dual, and tri-band.</td></tr>
+<tr valign="top" class="odd"><td>QCallBarring</td><td>Settings related to call barring.</td></tr>
+<tr valign="top" class="even"><td>QCallForwarding</td><td>Settings related to call forwarding.</td></tr>
+<tr valign="top" class="odd"><td>QCallSettings</td><td>Other call settings: call waiting and caller ID restrictriction.</td></tr>
+<tr valign="top" class="even"><td>QCellBroadcast</td><td>Access to cell broadcast messages.</td></tr>
+<tr valign="top" class="odd"><td>QGprsNetworkRegistration</td><td>Notification of GPRS registration state.</td></tr>
+<tr valign="top" class="even"><td>QNetworkRegistration</td><td>Notification of general network registration state, plus operator selection.</td></tr>
+<tr valign="top" class="odd"><td>QPhoneBook</td><td>Access to phone books that are stored on a SIM.</td></tr>
+<tr valign="top" class="even"><td>QPhoneCallManager</td><td>Making and receiving calls: voice, data, fax, etc.</td></tr>
+<tr valign="top" class="odd"><td>QPhoneRfFunctionality</td><td>Manipulation of the RF functionality level for selecting airplane and non-airplane modes.</td></tr>
+<tr valign="top" class="even"><td>QPinManager</td><td>Notification of PIN requests, and PIN management (change, lock, unlock, etc).</td></tr>
+<tr valign="top" class="odd"><td>QPreferredNetworkOperators</td><td>Access to the preferred network operator list in a SIM.</td></tr>
+<tr valign="top" class="even"><td>QPresence</td><td>VoIP presence information.</td></tr>
+<tr valign="top" class="odd"><td>QServiceChecker</td><td>Check that a service was started and has sufficient resources to perform operations.</td></tr>
+<tr valign="top" class="even"><td>QServiceNumbers</td><td>Access to service numbers such as SMS service center and the voice mail number.</td></tr>
+<tr valign="top" class="odd"><td>QSimFiles</td><td>Raw access to files on the SIM.</td></tr>
+<tr valign="top" class="even"><td>QSimInfo</td><td>Information about the SIM's identity and whether or not it is currently inserted.</td></tr>
+<tr valign="top" class="odd"><td>QSimToolkit</td><td>Access to SIM Application Toolkit features of the SIM.</td></tr>
+<tr valign="top" class="even"><td>QSMSReader</td><td>Access to the incoming SMS message queue.</td></tr>
+<tr valign="top" class="odd"><td>QSMSSender</td><td>Access to the outgoing SMS message queue.</td></tr>
+<tr valign="top" class="even"><td>QSupplementaryServices</td><td>SS and USSD support for GSM networks.</td></tr>
+<tr valign="top" class="odd"><td>QTelephonyConfiguration</td><td>Service configuration interface and miscellaneous settings.</td></tr>
+</table></p>
+<p>Not all services have all of these interfaces. For example, VoIP services may only have QNetworkRegistration, QPresence, QPhoneCallManager, and QTelephonyConfiguration. GSM services will not typically have QPresence, and may not have QSimToolkit if the modem does not support it.</p>
+<p>Client applications can use the <a href="qcommservicemanager.html">QCommServiceManager</a> class to determine if an interface is supported by a service:</p>
+<pre>    QCommServiceManager mgr;
+    if ( mgr.supports&lt;QSimToolkit&gt;( &quot;modem&quot; ) ) {
+       ...
+    }</pre>
+<a name="using-telephony-interfaces"></a>
+<h2>Using Telephony Interfaces</h2>
+<p>Client applications access the features of an interface by creating an instance of the corresponding class. For example, the following can be used to send an SMS message using the default service that supports the QSMSSender interface:</p>
+<pre>    QSMSSender sender;
+    QSMSMessage msg;
+    msg.setRecipient( &quot;1234567&quot; );
+    msg.setText( &quot;Hello!&quot; );
+    sender.send( msg );</pre>
+<p>When creating an interface instance, the client application can specify an explicit service name, if more than one service implements the same interface, or leave the service name empty to use the default service for that interface. For example, if the VoIP implementation supported SMS over SIP, then the following could be used to send the same message via the <tt>voip</tt> service:</p>
+<pre>    QSMSSender sender( &quot;voip&quot; );
+    if ( sender.serviceAvailable() ) {
+        QSMSMessage msg;
+        msg.setRecipient( &quot;1234567&quot; );
+        msg.setText( &quot;Hello!&quot; );
+        sender.send( msg );
+    } else {
+        QMessageBox::warning( 0, tr(&quot;SMS&quot;), tr(&quot;SMS over SIP is not available&quot;) );
+    }</pre>
+<p>This time, we have checked that the service is available before trying to send the message. The <a href="qcommservicemanager.html">QCommServiceManager</a> class can be used to locate all services that implement a particular interface, to allow the user to select which one they want to use:</p>
+<pre>    QCommServiceManager mgr;
+    QStringList services = mgr.supports&lt;QSMSSender&gt;();</pre>
+<a name="implementing-telephony-interfaces"></a>
+<h2>Implementing Telephony Interfaces</h2>
+<p>Telephony services implement interfaces by inheriting from the client-side class and overriding its public slots with a new implementation. To demonstrate how this works, we will implement the hypothetical &quot;SMS over SIP&quot; referred to in the previous section.</p>
+<pre>    class VoIPSMSSender : public QSMSSender
+    {
+        Q_OBJECT
+    public:
+        VoIPSMSSender( QObject *parent = 0 )
+            : QSMSSender( &quot;voip&quot;, parent, QCommInterface::Server ) {}
+        ~VoIPSMSSender() {}
 
+    public slots:
+        void send( const QString&amp; id, const QSMSMessage&amp; msg );
+    };
 
-<p> 
-<a name="top"></a>
-<!-- toc -->
-<ul>
-<li><a href="#1"> Introduction
-</a>
-<li><a href="#2"> Basic architecture
-</a>
-<li><a href="#3"> Dialing a number
-</a>
-<li><a href="#4"> Receiving an incoming SMS message
-</a>
-<li><a href="#5"> Adding a new handler
-</a>
-<li><a href="#6"> AT control commands used by Qtopia Phone Edition
-</a>
-<ul>
-<li><a href="#6-1"> General commands (GSM 07.07, section 5)
-</a>
-<li><a href="#6-2"> Call control commands (GSM 07.07, section 6)
-</a>
-<li><a href="#6-3"> Network service related commands (GSM 07.07, section 7)
-</a>
-<li><a href="#6-4"> Mobile equipment control and status commands (GSM 07.07, section 8)
-</a>
-<li><a href="#6-5"> SMS commands (GSM 07.05)
-</a>
-<li><a href="#6-6"> Other commands
-</a>
-<li><a href="#6-7"> Phone-specific commands
-</a>
-</ul>
-</ul>
-<!-- endtoc -->
+    void VoIPSMSSender::send( const QString&amp; id, const QSMSMessage&amp; msg )
+    {
+        ...
+    }</pre>
+<p>The VoIP service creates an instance of <tt>VoIPSMSSender</tt>, passing the <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Server</a> flag to the base class constructor. This tells the Qtopia Phone Library to advertise <tt>VoIPSMSSender</tt> as the implementation of the interface QSMSSender for the service <tt>voip</tt>. The Qtopia Phone Library uses <a href="qcop.html">QCop</a> and the <a href="valuespace.html">value space</a> to effect communication between the client application and the service. There is more information on how this process works in the documentation for <a href="qabstractipcinterface.html">QAbstractIpcInterface</a>, which is the base class for all telephony interfaces.</p>
+<p>The <tt>VoIPSMSSender</tt> instance can be created anywhere in the system, usually in the daemon that implements the VoIP telephony service. The example VoIP implementation that comes with Qtopia is implemented by the <tt>sipagent</tt> daemon.</p>
+<p>Telephony services do not need to be part of the <tt>qpe</tt> process, or any other special Qtopia application, although they can be. The default implementation of the GSM <tt>modem</tt> service is created by <tt>qpe</tt>, but other modem implementations could be in separate daemons.</p>
+<p>Most telephony services will have more than one interface. The QTelephonyService class makes it easy to create large numbers of related interfaces within a service. Our VoIP implementation would look something like this:</p>
+<pre>    class VoIPService : public QTelephonyService
+    {
+        Q_OBJECT
+    public:
+        VoIPService( QObject *parent = 0 )
+            : QTelephonyService( &quot;voip&quot;, parent ) {}
+        ~VoIPService() {}
 
-<p> <h2> Introduction
-</h2>
-<a name="1"></a><p> This document describes the architecture of the "qtopiaphone" library,
-which is used to access the phone hardware to make and receive calls,
-send SMS messages, access the SIM card, and so on.
-<p> <h2> Basic architecture
-</h2>
-<a name="2"></a><p> The basic architecture is demonstrated in the following diagram:
-<p> <center><img src="phonelibrary.png" width="276" height="310"></center> 
-<p> An application, such as the dialer, uses C++ APIs to access information
-about a phone line, the phone book in the SIM card, or the SMS message
-system.
-<p> Requests are transmitted to the phone server, which co-ordinates access
-to the phone functionality from multiple applications.  This allows the
-dialer and the SMS messaging client to both access the phone hardware
-at the same time.
-<p> The phone server then passes the requests on to the device handler,
-which communicates with the hardware device to effect the requests.
-Responses and status messages are passed back in the reverse direction.
-<p> Currently, we have implemented a device handler based on "AT" commands.
-The actual device itself is accessed via a serial port.  This is the
-recommended way to interface phone functionality with Qtopia Phone.
-<p> If "AT" commands are not available, the backend handler can be replaced
-with code that effects the requests in some other manner.
-<p> In the remainder of this document, we will demonstrate how requests and
-responses flow through the system with two examples: dialing a number, and
-receiving an incoming SMS message.
-<p> <h2> Dialing a number
-</h2>
-<a name="3"></a><p> When the application wishes to dial a phone number, it performs the following
-actions:
-<p> <ul>
-<li> Create an instance of the "<tt>PhoneLine</tt>" class.
-<li> Call the "<tt>PhoneLine::createCall</tt>" method to get an
-instance of the "<tt>PhoneCall</tt>" class that represents
-the call.
-<li> Call the "<tt>PhoneCall::dial</tt>" method to dial the number.
-<li> "<tt>PhoneCall::dial</tt>" then transmits the request to the
-phone server.
-</ul>
-<p> There will normally be only one instance of the "<tt>PhoneLine</tt>"
-class per application.  There may be multiple instances of
-"<tt>PhoneCall</tt>" if there are calls on hold or a multi-party
-conference call is in progress.
-<p> The phone library will transmit the dial request to the phone server using
-<a href="http://doc.trolltech.com/qtopia1.6/html/qcop.html">QCop</a>.  The
-phone server will then take the following actions:
-<p> <ul>
-<li> Obtain an instance of "<tt>PhoneLineAt</tt>", which represents
-the AT command handler for the phone line.
-<li> Call the "<tt>PhoneLineAt::createCall</tt>" method to create
-an instance of the "<tt>PhoneCallAt</tt>" class.
-<li> Call the "<tt>PhoneCallAt::dial</tt>" method to dial the
-number.
-<li> "<tt>PhoneCallAt::dial</tt>" will then send the "<tt>ATD</tt>"
-command to the phone device to effect the dial request.
-</ul>
-<p> As can be seen, the sequence of operations directly mirrors the sequence
-in the application.  The only difference is the final step: the application
-side sends the request to the phone server, and the handler side performs the
-low-level device operations directly.
-<p> If your device does not support AT commands, you would write new handler
-classes, modelled on the structure of "<tt>PhoneLineAt</tt>" and
-"<tt>PhoneCallAt</tt>".  The exact details of how your device effects
-the dial command is beyond the scope of this document.
-<p> <h2> Receiving an incoming SMS message
-</h2>
-<a name="4"></a><p> When the AT command handler starts up, it registers for new message
-indications using the "<tt>AT+CNMI</tt>" command.  This causes the
-phone device to send "<tt>+CMTI</tt>" indications whenever a new
-message arrives at the device.
-<p> In the code, "<tt>+CMTI</tt>" is detected by
-"<tt>SMSRequestAt::notification</tt>", and causes the AT command
-handler to initiate a message count check ("<tt>SMSRequestAt::check</tt>").
-Once the check completes, the number of messages is transmitted to the
-application via the "<tt>SMSRequestPrivate::messageCount</tt>" signal.
-<p> An alternative device handler would similarly need to arrange for the
-"<tt>SMSRequestPrivate::messageCount</tt>" signal to be emitted
-when new messages arrive.
-<p> This signal is broadcast on the "<tt>QPE/Phone</tt>" QCop channel.
-Applications can listen on this channel to receive notification of
-new messages.  More than one application can listen for new message
-notifications, but only one (usually the mail client) should subsequently
-retrieve the message contents.
-<p> When the mail client receives the signal, it calls the
-"<tt>SMSRequest::firstMessage</tt>" and
-"<tt>SMSRequest::nextMessage</tt>" methods to retrieve the
-SMS message contents from the incoming queue.  Each message is returned to
-the application via the "<tt>SMSRequestPrivate::fetched</tt>"
-signal.
-<p> Finally, once the application has received the message, it will delete
-it from the incoming queue using "<tt>SMSRequest::deleteMessage</tt>".
-The application (usually the mail client) will save the message in
-another location so that the message is never permanently lost
-(the message store in the device is treated as a temporary buffer
-in our system).
-<p> Note: we always use signals to pass messages and status reports back to
-the application rather than function returns.  This is because the entire
-phone system is asynchronous: the information may not be available
-when the request is made and so must be transmitted later.
-<p> <h2> Adding a new handler
-</h2>
-<a name="5"></a><p> If you wish to add a new phone device handler, you should inherit the
-class "<tt>PhoneLinePrivate</tt>" and override all of the functionality
-that is specified therein.  The "<tt>PhoneLineAt</tt>" class can be
-used as a guide to the necessary structure.
-<p> You will also need to modify the "<tt>PhoneLinePrivate::create</tt>"
-method to return an instance of your class instead of
-"<tt>PhoneLineAt</tt>".
-<p> <h2> AT control commands used by Qtopia Phone Edition
-</h2>
-<a name="6"></a><p> This following sections list the "AT" control commands that we expect the
-device to support.  Most of them are from the <a href="gsm.html">GSM</a> specifications.
-<p> The device may support more commands than are listed here.  For
-example, some phones support both "<tt>AT+CGMI</tt>" and "<tt>AT+GMI</tt>" to get
-the manufacturer name.  We only require "<tt>AT+CGMI</tt>" but there is
-no harm in the device supporting both.
-<p> In the future, we may need to additional commands from the GSM
-specifications 07.05 and 07.07, so we recommend that all device
-manufacturers fully comply with those specifications.
-<p> <h3> General commands (GSM 07.07, section 5)
-</h3>
-<a name="6-1"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
-<tr bgcolor="#a2c511"> <th valign="top">Command <th valign="top">Description
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>AT+CGMI</tt>
-<td valign="top">Identify manufacturer
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>AT+CGMM</tt>
-<td valign="top">Identify model
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>AT+CGMR</tt>
-<td valign="top">Identify revision
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>AT+CGSN</tt>
-<td valign="top">Identify serial number (of device, not SIM card)
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>AT+CSCS</tt>
-<td valign="top">Select character set
-</table></center>
-<p> <h3> Call control commands (<a href="gsm.html">GSM</a> 07.07, section 6)
-</h3>
-<a name="6-2"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
-<tr bgcolor="#a2c511"> <th valign="top">Command <th valign="top">Description
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>ATDnnn;</tt>
-<td valign="top">Dial "nnn" in voice mode.
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>ATH</tt>
-<td valign="top">Hangup the current call.
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>ATA</tt>
-<td valign="top">Answer an incoming call.
-</table></center>
-<p> Note: when the "<tt>ATD</tt>" command is used with a trailing ';', it must
-immediately return to command mode after processing the command.
-Some phones have been known to wait until the other party answers
-the call, or busy is detected, before returning to command mode.
-Such phones are not compliant with the GSM specification and we
-will not be supporting them.
-<p> The GSM specification allows "<tt>ATD</tt>" to be used in a special mode
-for dialing directly from phone books.  We do not need this mode
-as we implement our own algorithm for converting phone book entries
-into numbers.
-<p> It is important that "<tt>ATD</tt>" recognise numbers starting with "<tt>+</tt>"
-as international, and all other numbers as being local.
-<p> <h3> Network service related commands (<a href="gsm.html">GSM</a> 07.07, section 7)
-</h3>
-<a name="6-3"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
-<tr bgcolor="#a2c511"> <th valign="top">Command <th valign="top">Description
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>AT+CNUM</tt>
-<td valign="top">Subscriber number
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>AT+CREG</tt>
-<td valign="top">Network registration
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>AT+COPS</tt>
-<td valign="top">Operator selection
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>AT+CLIP</tt>
-<td valign="top">Enable caller line identification
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>AT+CLIR</tt>
-<td valign="top">Caller ID restriction
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>AT+CCFC</tt>
-<td valign="top">Call forwarding number and conditions
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>AT+CCWA</tt>
-<td valign="top">Call waiting
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>AT+CHLD</tt>
-<td valign="top">Call hold and multiparty
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>AT+CTFR</tt>
-<td valign="top">Call transfer
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>AT+CAOC</tt>
-<td valign="top">Advice of charge
-</table></center>
-<p> <h3> Mobile equipment control and status commands (<a href="gsm.html">GSM</a> 07.07, section 8)
-</h3>
-<a name="6-4"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
-<tr bgcolor="#a2c511"> <th valign="top">Command <th valign="top">Description
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>AT+CPAS</tt>
-<td valign="top">Phone activity status
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>AT+CBC</tt>
-<td valign="top">Battery charge
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>AT+CSQ</tt>
-<td valign="top">Signal quality
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>AT+CPBS</tt>
-<td valign="top">Select phonebook memory storage
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>AT+CPBR</tt>
-<td valign="top">Read phonebook entries
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>AT+CPBF</tt>
-<td valign="top">Find phonebook entries
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>AT+CPBW</tt>
-<td valign="top">Write phonebook entries
-</table></center>
-<p> The phonebook commands are intended for accessing phone books stored
-on SIM cards.  The Qtopia Phone software has its own mechanisms for
-managing phone books that are stored in the phone's memory.
-<p> <h3> SMS commands (<a href="gsm.html">GSM</a> 07.05)
-</h3>
-<a name="6-5"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
-<tr bgcolor="#a2c511"> <th valign="top">Command <th valign="top">Description
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>AT+CPMS</tt>
-<td valign="top">Preferred message storage
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>AT+CMGF</tt>
-<td valign="top">Message format (we use format 0: PDU)
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>AT+CSCA</tt>
-<td valign="top">Service centre address
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>AT+CNMI</tt>
-<td valign="top">Enable new message indications
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>AT+CMGL</tt>
-<td valign="top">List messages
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>AT+CMGR</tt>
-<td valign="top">Read message
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>AT+CMGS</tt>
-<td valign="top">Send message
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>AT+CMGD</tt>
-<td valign="top">Delete message
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>+CMTI</tt>
-<td valign="top">Notification of SMS message delivery.
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>+CBMI</tt>
-<td valign="top">Notification of a cell broadcast message.
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>+CDSI</tt>
-<td valign="top">Notification of an SMS status report message.
-</table></center>
-<p> We assume that incoming SMS messages are stored into a temporary
-storage area on the device from which our software will retrieve
-the messages using the "<tt>AT+CMGL</tt>" and "<tt>AT+CMGR</tt>" commands.
-<p> <h3> Other commands
-</h3>
-<a name="6-6"></a><p> <center><table cellpadding="4" cellspacing="2" border="0">
-<tr bgcolor="#a2c511"> <th valign="top">Command <th valign="top">Description
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>AT+VTS</tt>
-<td valign="top">DTMF and tone generation (<a href="gsm.html">GSM</a> 07.07, Appendix C)
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>AT+CVIB</tt>
-<td valign="top">Select vibrate mode
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>AT+CPUC</tt>
-<td valign="top">Price per unit
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>AT+CIMI</tt>
-<td valign="top">SIM identity
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>AT+CHSC</tt>
-<td valign="top">Get phone status (only needed if AT+CPAS is not available)
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>AT+CLCC</tt>
-<td valign="top">List active calls
-</table></center>
-<p> <h3> Phone-specific commands
-</h3>
-<a name="6-7"></a><p> The GSM specification is lacking some functionality that we require
-to round out the feature set.  The most important of these is "call
-monitoring".  When an outgoing dial request is made, we need some
-way to detect when the other party accepts the call, if it rejected
-due to the other party being busy, or some other failure.
-<p> Ericsson phones have a "<tt>AT*ECAM</tt>" command that is used to turn on
-supplementary call monitoring events: every time a call's status
-changes, the phone emits a "<tt>*ECAV</tt>" message with the details.
-We recommend that device manufacturers provide these commands,
-or something very similar to them.
-<p> <center><table cellpadding="4" cellspacing="2" border="0">
-<tr bgcolor="#a2c511"> <th valign="top">Command <th valign="top">Description
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>AT*ECAM</tt>
-<td valign="top">Turn on call monitoring
-<tr bgcolor="#d0d0d0">
-<td valign="top"><tt>AT*ESIL</tt>
-<td valign="top">Select silent mode
-<tr bgcolor="#f0f0f0">
-<td valign="top"><tt>*ECAV</tt>
-<td valign="top">Unsolicited response for <tt>AT*ECAM</tt>
-</table></center>
-<p> 
-<!-- eof -->
-<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0">
-<tr>
-<td>Copyright &copy; 2001-2005 Trolltech
-<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qtopia version 2.1.1</div>
-</table></div></address></body>
+        void initialize();
+    };
+
+    void VoIPService::initialize()
+    {
+        if ( !supports&lt;QSMSSender&gt;() )
+            addInterface( new VoIPSMSSender( this ) );
+
+        ...
+
+        QTelephonyService::initialize();
+    }</pre>
+<p>The VoIP daemon creates an instance of <tt>VoIPService</tt>, and then calls the <tt>initialize()</tt> method to complete the initialization process.</p>
+<p>In the example above, we call <tt>supports()</tt> to first check if there is an existing implementation of QSMSSender before creating the new one. This style of interface creation supports inheritance of services. A better version of the VoIP service could inherit from <tt>VoIPService</tt>, override <tt>initialize()</tt>, and create a new implementation of the QSMSSender interface that replaces the original.</p>
+<a name="automatic-starting-of-telephony-services"></a>
+<h2>Automatic Starting of Telephony Services</h2>
+<p>Third-party telephony services can be easily added to Qtopia by adding a file to the directory <tt>$QPEDIR/services/Telephony</tt> whose name is the same as the daemon binary. Its contents should be as follows:</p>
+<pre>    [Extensions]
+    [Standard]
+    Version = 100</pre>
+<p>When Qtopia starts up, any daemons that are registered under <tt>$QPEDIR/services/Telephony</tt> will be automatically started by sending the service a <tt>start()</tt> message. The services then create instances of every interface that they support and wait for requests to arrive from client applications.</p>
+<p>The example VoIP implementation that comes with Qtopia, <tt>sipagent</tt>, demonstrates how to write such a service and integrate it with the rest of Qtopia.</p>
+<p>Because telephony services do not normally have a user interface associated with them, it is necessary to register the daemon as a running task to prevent Qtopia from telling it to exit soon after startup. You should place a line of code in your startup logic such as the following:</p>
+<pre>    QtopiaApplication::instance()-&gt;registerRunningTask( &quot;Telephony&quot;, obj );</pre>
+<p>where <tt>obj</tt> is a <a href="qobject.html">QObject</a> in your application that will stay in existence while the telephony service is running (the QTelephonyService instance may be a good candidate).</p>
+<a name="modem-services"></a>
+<h2>Modem Services</h2>
+<p>AT-based GSM <tt>modem</tt> telephony services have special support in Qtopia. Most of the time, Qtopia's implementation will be fine as-is, but there are slight variations in GSM modems that may need additional support.</p>
+<p>The systems integrator can elect to write their own modem telephony service from scratch, but this is usually very time-consuming. A better way is to use the existing Qtopia implementation in <tt>src/libraries/qtopiaphonemodem</tt> and just override the pieces that are different in a modem vendor plugin.</p>
+<p>The <a href="syscust-gsm.html">GSM Modem Integration</a> page describes how to write a modem vendor plugin.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
 </html>

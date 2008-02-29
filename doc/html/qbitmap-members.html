@@ -1,75 +1,98 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
---></style>
-</head><body bgcolor="#ffffff">
-
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-
-<h1 align=center>Complete Member List for QBitmap</h1><br clear="all">
-<p>This is the complete list of member functions and enum types for
-<a href="qbitmap.html">QBitmap</a>, including all inherited members.
-
-<p>
-
-<ul>
-<li><a href="qbitmap.html#12bed2">QBitmap</a>
-<li><a href="qpaintdevice.html#4d4225">cmd</a>
-<li><a href="qpixmap.html#b6a662">convertFromImage</a>
-<li><a href="qpixmap.html#8c5f15">convertToImage</a>
-<li><a href="qpixmap.html#20dfb1">createHeuristicMask</a>
-<li><a href="qpixmap.html#e194ad">defaultDepth</a>
-<li><a href="qpixmap.html#3ad81f">defaultOptimization</a>
-<li><a href="qpixmap.html#3c91c2">depth</a>
-<li><a href="qpixmap.html#81b941">detach</a>
-<li><a href="qpaintdevice.html#754791">devType</a>
-<li><a href="qpixmap.html#6910a0">fill</a>
-<li><a href="qpaintdevice.html#269e25">fontInf</a>
-<li><a href="qpaintdevice.html#935a9c">fontMet</a>
-<li><a href="qpixmap.html#e492b7">grabWidget</a>
-<li><a href="qpixmap.html#a7861f">grabWindow</a>
-<li><a href="qpixmap.html#d5bb33">height</a>
-<li><a href="qpixmap.html#360626">imageFormat</a>
-<li><a href="qpaintdevice.html#350135">isExtDev</a>
-<li><a href="qpixmap.html#7803c4">isNull</a>
-<li><a href="qpixmap.html#c0b272">isQBitmap</a>
-<li><a href="qpixmap.html#a728cf">load</a>
-<li><a href="qpixmap.html#32699f">loadFromData</a>
-<li><a href="qpixmap.html#99119c">mask</a>
-<li><a href="qpixmap.html#fa32cf">metric</a>
-<li><a href="qbitmap.html#57c2bf">operator=</a>
-<li><a href="qpixmap.html#ae6199">optimization</a>
-<li><a href="qpaintdevice.html#11c528">paintingActive</a>
-<li><a href="qpixmap.html#fbdfe3">rect</a>
-<li><a href="qpixmap.html#b4f156">resize</a>
-<li><a href="qpixmap.html#a38b1c">save</a>
-<li><a href="qpixmap.html#848613">selfMask</a>
-<li><a href="qpixmap.html#4f47d9">serialNumber</a>
-<li><a href="qpixmap.html#7675b8">setDefaultOptimization</a>
-<li><a href="qpixmap.html#68a75d">setMask</a>
-<li><a href="qpixmap.html#60b65f">size</a>
-<li><a href="qpixmap.html#952384">trueMatrix</a>
-<li><a href="qpixmap.html#86dbc5">width</a>
-<li><a href="qbitmap.html#33c04b">xForm</a>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: List of All Members for QBitmap</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">List of All Members for QBitmap</h1>
+<p>This is the complete list of members for <a href="qbitmap.html">QBitmap</a>, including inherited members.</p>
+<p><table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td width="45%" valign="top"><ul>
+<li><div class="fn"/>enum <a href="qpixmap.html#HBitmapFormat-enum">HBitmapFormat</a></li>
+<li><div class="fn"/>enum <a href="qpaintdevice.html#PaintDeviceMetric-enum">PaintDeviceMetric</a></li>
+<li><div class="fn"/><a href="qbitmap.html#QBitmap">QBitmap</a> ()</li>
+<li><div class="fn"/><a href="qbitmap.html#QBitmap-2">QBitmap</a> ( const QPixmap &amp; )</li>
+<li><div class="fn"/><a href="qbitmap.html#QBitmap-3">QBitmap</a> ( int, int )</li>
+<li><div class="fn"/><a href="qbitmap.html#QBitmap-4">QBitmap</a> ( const QSize &amp; )</li>
+<li><div class="fn"/><a href="qbitmap.html#QBitmap-5">QBitmap</a> ( const QString &amp;, const char * )</li>
+<li><div class="fn"/><a href="qbitmap.html#dtor.QBitmap">~QBitmap</a> ()</li>
+<li><div class="fn"/><a href="qpixmap.html#alphaChannel">alphaChannel</a> () const : QPixmap</li>
+<li><div class="fn"/><a href="qbitmap.html#clear">clear</a> ()</li>
+<li><div class="fn"/><a href="qpixmap.html#copy">copy</a> ( const QRect &amp; ) const : QPixmap</li>
+<li><div class="fn"/><a href="qpixmap.html#copy-2">copy</a> ( int, int, int, int ) const : QPixmap</li>
+<li><div class="fn"/><a href="qpixmap.html#createHeuristicMask">createHeuristicMask</a> ( bool ) const : QBitmap</li>
+<li><div class="fn"/><a href="qpixmap.html#createMaskFromColor">createMaskFromColor</a> ( const QColor &amp; ) const : QBitmap</li>
+<li><div class="fn"/><a href="qpixmap.html#defaultDepth">defaultDepth</a> () : int</li>
+<li><div class="fn"/><a href="qpixmap.html#depth">depth</a> () const : int</li>
+<li><div class="fn"/><a href="qpixmap.html#detach">detach</a> ()</li>
+<li><div class="fn"/><a href="qpixmap.html#fill">fill</a> ( const QColor &amp; )</li>
+<li><div class="fn"/><a href="qpixmap.html#fill-2">fill</a> ( const QWidget *, const QPoint &amp; )</li>
+<li><div class="fn"/><a href="qpixmap.html#fill-3">fill</a> ( const QWidget *, int, int )</li>
+<li><div class="fn"/><a href="qbitmap.html#fromData">fromData</a> ( const QSize &amp;, const uchar *, QImage::Format ) : QBitmap</li>
+<li><div class="fn"/><a href="qbitmap.html#fromImage">fromImage</a> ( const QImage &amp;, Qt::ImageConversionFlags ) : QBitmap</li>
+<li><div class="fn"/><a href="qpixmap.html#fromMacCGImageRef">fromMacCGImageRef</a> ( CGImageRef ) : QPixmap</li>
+<li><div class="fn"/><a href="qpixmap.html#fromWinHBITMAP">fromWinHBITMAP</a> ( HBITMAP, HBitmapFormat ) : QPixmap</li>
+<li><div class="fn"/><a href="qpaintdevice.html#getDC">getDC</a> () const : HDC</li>
+<li><div class="fn"/><a href="qpixmap.html#grabWidget">grabWidget</a> ( QWidget *, const QRect &amp; ) : QPixmap</li>
+<li><div class="fn"/><a href="qpixmap.html#grabWidget-2">grabWidget</a> ( QWidget *, int, int, int, int ) : QPixmap</li>
+<li><div class="fn"/><a href="qpixmap.html#grabWindow">grabWindow</a> ( WId, int, int, int, int ) : QPixmap</li>
+<li><div class="fn"/><a href="qpixmap.html#handle">handle</a> () const : Qt::HANDLE</li>
+<li><div class="fn"/><a href="qpixmap.html#hasAlpha">hasAlpha</a> () const : bool</li>
+<li><div class="fn"/><a href="qpixmap.html#hasAlphaChannel">hasAlphaChannel</a> () const : bool</li>
+<li><div class="fn"/><a href="qpixmap.html#height">height</a> () const : int</li>
+<li><div class="fn"/><a href="qpaintdevice.html#heightMM">heightMM</a> () const : int</li>
+<li><div class="fn"/><a href="qpixmap.html#isNull">isNull</a> () const : bool</li>
+<li><div class="fn"/><a href="qpixmap.html#isQBitmap">isQBitmap</a> () const : bool</li>
+<li><div class="fn"/><a href="qpixmap.html#load">load</a> ( const QString &amp;, const char *, Qt::ImageConversionFlags ) : bool</li>
+</ul></td><td valign="top"><ul>
+<li><div class="fn"/><a href="qpixmap.html#loadFromData">loadFromData</a> ( const uchar *, uint, const char *, Qt::ImageConversionFlags ) : bool</li>
+<li><div class="fn"/><a href="qpixmap.html#loadFromData-3">loadFromData</a> ( const QByteArray &amp;, const char *, Qt::ImageConversionFlags ) : bool</li>
+<li><div class="fn"/><a href="qpaintdevice.html#logicalDpiX">logicalDpiX</a> () const : int</li>
+<li><div class="fn"/><a href="qpaintdevice.html#logicalDpiY">logicalDpiY</a> () const : int</li>
+<li><div class="fn"/><a href="qpixmap.html#mask">mask</a> () const : QBitmap</li>
+<li><div class="fn"/><a href="qpaintdevice.html#metric">metric</a> ( PaintDeviceMetric ) const : int</li>
+<li><div class="fn"/><a href="qpaintdevice.html#numColors">numColors</a> () const : int</li>
+<li><div class="fn"/><a href="qpixmap.html#paintEngine">paintEngine</a> () const : QPaintEngine *</li>
+<li><div class="fn"/><a href="qpaintdevice.html#paintingActive">paintingActive</a> () const : bool</li>
+<li><div class="fn"/><a href="qpaintdevice.html#physicalDpiX">physicalDpiX</a> () const : int</li>
+<li><div class="fn"/><a href="qpaintdevice.html#physicalDpiY">physicalDpiY</a> () const : int</li>
+<li><div class="fn"/><a href="qpixmap.html#rect">rect</a> () const : QRect</li>
+<li><div class="fn"/><a href="qpaintdevice.html#releaseDC">releaseDC</a> ( HDC ) const</li>
+<li><div class="fn"/><a href="qpixmap.html#save">save</a> ( const QString &amp;, const char *, int ) const : bool</li>
+<li><div class="fn"/><a href="qpixmap.html#save-2">save</a> ( QIODevice *, const char *, int ) const : bool</li>
+<li><div class="fn"/><a href="qpixmap.html#scaled">scaled</a> ( const QSize &amp;, Qt::AspectRatioMode, Qt::TransformationMode ) const : QPixmap</li>
+<li><div class="fn"/><a href="qpixmap.html#scaled-2">scaled</a> ( int, int, Qt::AspectRatioMode, Qt::TransformationMode ) const : QPixmap</li>
+<li><div class="fn"/><a href="qpixmap.html#scaledToHeight">scaledToHeight</a> ( int, Qt::TransformationMode ) const : QPixmap</li>
+<li><div class="fn"/><a href="qpixmap.html#scaledToWidth">scaledToWidth</a> ( int, Qt::TransformationMode ) const : QPixmap</li>
+<li><div class="fn"/><a href="qpixmap.html#serialNumber">serialNumber</a> () const : int</li>
+<li><div class="fn"/><a href="qpixmap.html#setAlphaChannel">setAlphaChannel</a> ( const QPixmap &amp; )</li>
+<li><div class="fn"/><a href="qpixmap.html#setMask">setMask</a> ( const QBitmap &amp; )</li>
+<li><div class="fn"/><a href="qpixmap.html#size">size</a> () const : QSize</li>
+<li><div class="fn"/><a href="qpixmap.html#toImage">toImage</a> () const : QImage</li>
+<li><div class="fn"/><a href="qpixmap.html#toMacCGImageRef">toMacCGImageRef</a> () const : CGImageRef</li>
+<li><div class="fn"/><a href="qpixmap.html#toWinHBITMAP">toWinHBITMAP</a> ( HBitmapFormat ) const : HBITMAP</li>
+<li><div class="fn"/><a href="qbitmap.html#transformed">transformed</a> ( const QMatrix &amp; ) const : QBitmap</li>
+<li><div class="fn"/><a href="qpixmap.html#trueMatrix">trueMatrix</a> ( const QMatrix &amp;, int, int ) : QMatrix</li>
+<li><div class="fn"/><a href="qpixmap.html#width">width</a> () const : int</li>
+<li><div class="fn"/><a href="qpaintdevice.html#widthMM">widthMM</a> () const : int</li>
+<li><div class="fn"/><a href="qpixmap.html#x11Info">x11Info</a> () const : const QX11Info &amp;</li>
+<li><div class="fn"/><a href="qpixmap.html#x11PictureHandle">x11PictureHandle</a> () const : Qt::HANDLE</li>
+<li><div class="fn"/><a href="qbitmap.html#operator-QVariant">operator QVariant</a> () const</li>
+<li><div class="fn"/><a href="qpixmap.html#operator-not">operator!</a> () const : bool</li>
+<li><div class="fn"/><a href="qbitmap.html#operator-eq">operator=</a> ( const QPixmap &amp; ) : QBitmap &amp;</li>
 </ul>
-<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+</td></tr>
+</table></p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

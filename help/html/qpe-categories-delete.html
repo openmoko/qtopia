@@ -1,30 +1,33 @@
-<qt title="Deleting Categories">
+<html>
+<head><title>Deleting Categories</title></head>
+<body>
 <h3>Deleting Categories</h3>
 <p>Categories can only be deleted from an application that uses categories. Default categories cannot be deleted.</p>
 <p>Items in a deleted category become <b>Unfiled</b>.</p>
 <p><b>Delete a Category</b></p>
-%%PHONE%%
+<!--#if expr="$PHONESTYLE"-->
 <ul>
-<li>Launch <b>Documents</b> by using <img src="help/dpad"> and pressing <img src="contextbar/select.png">.</li>
+<li>Launch <b>Documents</b> by using <img src=":image/help/dpad"> </img> and pressing <img src=":icon/select">.</li>
 <li>Select a document and view it.</li>
-<li>Press <img src="contextbar/options.png"> and select <b>Properties</b>.</li>
-<li>Use <img src="help/dpad"> to highlight the <b>Cat</b> field and press <img src="contextbar/select.png">, then select the <b>...</b> option.</li>
-<li>When the list of available categories is displayed, use <img src="help/dpad"> to highlight the category to be deleted.</li>
-<li>Press <img src="contextbar/options.png"> and select <b>Delete</b>.</li>
+<li>Press <img src=":icon/options"> </img> and select <b>Properties</b>.</li>
+<li>Use <img src=":image/help/dpad"> </img> to highlight the <b>Cat</b> field and press <img src=":icon/select">, then select the <b>...</b> option.</li>
+<li>When the list of available categories is displayed, use <img src=":image/help/dpad"> </img> to highlight the category to be deleted.</li>
+<li>Press <img src=":icon/options"> </img> and select <b>Delete</b>.</li>
 <li>Confirm the deletion.</li>
-<li>Press <img src="contextbar/back.png"> to save and exit.</li>
-<li>Press <img src="contextbar/back.png"> again and exit <b>Documents</b>.</li>
+<li>Press <img src=":icon/i18n/back"> </img> to save and exit.</li>
+<li>Press <img src=":icon/i18n/back"> </img> again and exit <b>Documents</b>.</li>
 </ul>
-@@PHONE@@
-%%PDA%%
+<!--#endif-->
+<!--#if expr="$PDASTYLE"-->
 <ul>
 <li>Launch <b>Documents</b>.</li>
 <li>Select a document from the list and view it.</li>
 <li>Tap <b>File</b> and select <b>Properties</b>.</li>
 <li>Select the category field and choose the <b>...</b> option.</li>
-<li>Select the name of the category, then tap <img src="trash">.</li>
+<li>Select the name of the category, then tap <img src=":icon/trash">.</li>
 <li>Save and exit.</li>
 </ul>
-@@PDA@@
-</qt>
+<!--#endif-->
 
+</body>
+</html>

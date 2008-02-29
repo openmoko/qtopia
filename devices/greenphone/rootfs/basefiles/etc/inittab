@@ -1,0 +1,33 @@
+# /etc/inittab
+#
+# Copyright (C) 2001 Erik Andersen <andersen@codepoet.org>
+#
+# Note: BusyBox init doesn't support runlevels.  The runlevels field is
+# completely ignored by BusyBox init. If you want runlevels, use
+# sysvinit.
+#
+# Format for each entry: <id>:<runlevels>:<action>:<process>
+#
+# id        == tty to run on, or empty for /dev/console
+# runlevels == ignored
+# action    == one of sysinit, respawn, askfirst, wait, and once
+# process   == program to run
+
+# Startup the system
+::sysinit:/etc/rc.d/rc.filesystems
+::sysinit:/etc/rc.d/rc.newrootfs
+::sysinit:/etc/rc.d/rc.modules
+::sysinit:/etc/rc.d/rc.sysinit
+::sysinit:/etc/rc.d/rc.services
+
+# Start serial console
+ttyS2::respawn:-/bin/sh
+
+# Start Qtopia
+::respawn:/bin/nice -n 19 /etc/rc.d/syslog
+::respawn:/bin/nice -n 19 /usr/sbin/atd /var/spool/at >/dev/null 2>/dev/null
+::sysinit:/mnt/user/etc/trolltech_startup.sh
+
+# Shutdown the system
+::shutdown:/etc/rc.d/rc.shutdown
+

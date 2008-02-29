@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /usr/local/qtopia/qtopia-opensource-4.2.0/qtopiacore/qt/doc/src/emb-framebuffer-howto.qdoc -->
+<head>
+  <title>Qt 4.2: Testing the Linux Framebuffer</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Testing the Linux Framebuffer<br /><small>for Qtopia Core</small></h1>
+<p>To test that the Linux framebuffer is set up correctly, and that the device permissions are correct, use the program below which opens the frame buffer and draws a gradient-filled red square:</p>
+<pre> #include &lt;stdlib.h&gt;
+ #include &lt;unistd.h&gt;
+ #include &lt;stdio.h&gt;
+ #include &lt;fcntl.h&gt;
+ #include &lt;linux/fb.h&gt;
+ #include &lt;sys/mman.h&gt;
+ #include &lt;sys/ioctl.h&gt;
+
+ int main()
+ {
+     int fbfd = 0;
+     struct fb_var_screeninfo vinfo;
+     struct fb_fix_screeninfo finfo;
+     long int screensize = 0;
+     char *fbp = 0;
+     int x = 0, y = 0;
+     long int location = 0;
+
+     <span class="comment">// Open the file for reading and writing</span>
+     fbfd = open(&quot;/dev/fb0&quot;, O_RDWR);
+     if (fbfd == -1) {
+         perror(&quot;Error: cannot open framebuffer device&quot;);
+         exit(1);
+     }
+     printf(&quot;The framebuffer device was opened successfully.\n&quot;);
+
+     <span class="comment">// Get fixed screen information</span>
+     if (ioctl(fbfd, FBIOGET_FSCREENINFO, &amp;finfo) == -1) {
+         perror(&quot;Error reading fixed information&quot;);
+         exit(2);
+     }
+
+     <span class="comment">// Get variable screen information</span>
+     if (ioctl(fbfd, FBIOGET_VSCREENINFO, &amp;vinfo) == -1) {
+         perror(&quot;Error reading variable information&quot;);
+         exit(3);
+     }
+
+     printf(&quot;%dx%d, %dbpp\n&quot;, vinfo.xres, vinfo.yres, vinfo.bits_per_pixel);
+
+     <span class="comment">// Figure out the size of the screen in bytes</span>
+     screensize = vinfo.xres * vinfo.yres * vinfo.bits_per_pixel / 8;
+
+     <span class="comment">// Map the device to memory</span>
+     fbp = (char *)mmap(0, screensize, PROT_READ | PROT_WRITE, MAP_SHARED,
+                        fbfd, 0);
+     if ((int)fbp == -1) {
+         perror(&quot;Error: failed to map framebuffer device to memory&quot;);
+         exit(4);
+     }
+     printf(&quot;The framebuffer device was mapped to memory successfully.\n&quot;);
+
+     x = 100; y = 100;       <span class="comment">// Where we are going to put the pixel</span>
+
+     <span class="comment">// Figure out where in memory to put the pixel</span>
+     for (y = 100; y &lt; 300; y++)
+         for (x = 100; x &lt; 300; x++) {
+
+             location = (x+vinfo.xoffset) * (vinfo.bits_per_pixel/8) +
+                        (y+vinfo.yoffset) * finfo.line_length;
+
+             if (vinfo.bits_per_pixel == 32) {
+                 *(fbp + location) = 100;        <span class="comment">// Some blue</span>
+                 *(fbp + location + 1) = 15+(x-100)/2;     <span class="comment">// A little green</span>
+                 *(fbp + location + 2) = 200-(y-100)/5;    <span class="comment">// A lot of red</span>
+                 *(fbp + location + 3) = 0;      <span class="comment">// No transparency</span>
+             } else  { <span class="comment">//assume 16bpp</span>
+                 int b = 10;
+                 int g = (x-100)/6;     <span class="comment">// A little green</span>
+                 int r = 31-(y-100)/16;    <span class="comment">// A lot of red</span>
+                 unsigned short int t = r&lt;&lt;11 | g &lt;&lt; 5 | b;
+                 *((unsigned short int*)(fbp + location)) = t;
+             }
+
+         }
+     munmap(fbp, screensize);
+     close(fbfd);
+     return 0;
+ }</pre>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

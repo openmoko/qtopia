@@ -1,0 +1,11 @@
+<page name="secondarytitle" base="themes/default" rect="0,0,0x17">
+    <rect rect="0,0,0x17" brush="Highlight"/>
+    <group>
+        <level name="battery" rect="-25,2,21x14" src="default/battery" count="5" min="0" max="100">
+            expr:@/Accessories/Battery/VisualCharge
+        </level>
+        <level name="signal" rect="-48,2,21x14" src="default/signal" count="5" min="0" max="100">
+            expr:@/Telephony/Status/SignalLevel/modem
+        </level>
+    </group>
+</page>

@@ -1,0 +1,68 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QSDAPSearchResult Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QSDAPSearchResult Class Reference</h1>
+<p>The QSDAPSearchResult class encapsulates a result of a SDAP query. <a href="#details">More...</a></p>
+<pre>    #include &lt;QSDAPSearchResult&gt;</pre><ul>
+<li><a href="qsdapsearchresult-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qsdapsearchresult.html#QSDAPSearchResult">QSDAPSearchResult</a></b> ()</li>
+<li><div class="fn"/><b><a href="qsdapsearchresult.html#QSDAPSearchResult-2">QSDAPSearchResult</a></b> ( const QSDAPSearchResult &amp; <i>other</i> )</li>
+<li><div class="fn"/>void <b><a href="qsdapsearchresult.html#addService">addService</a></b> ( const QSDPService &amp; <i>service</i> )</li>
+<li><div class="fn"/>void <b><a href="qsdapsearchresult.html#clear">clear</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qsdapsearchresult.html#clearError">clearError</a></b> ()</li>
+<li><div class="fn"/>QString <b><a href="qsdapsearchresult.html#error">error</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qsdapsearchresult.html#errorOccurred">errorOccurred</a></b> () const</li>
+<li><div class="fn"/>const QList&lt;QSDPService&gt; &amp; <b><a href="qsdapsearchresult.html#services">services</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qsdapsearchresult.html#setError">setError</a></b> ( const QString &amp; <i>error</i> )</li>
+<li><div class="fn"/>QSDAPSearchResult &amp; <b><a href="qsdapsearchresult.html#operator-eq">operator=</a></b> ( const QSDAPSearchResult &amp; <i>other</i> )</li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QSDAPSearchResult class encapsulates a result of a SDAP query.</p>
+<p>The QSDAPSearchResult class encapsulates a result of a SDAP query, which is returned by the QSDAP object. The query consists of a list of <tt>QSDPService</tt> objects.</p>
+<p>See also <a href="qsdap.html">QSDAP</a> and <a href="qsdpservice.html">QSDPService</a>.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QSDAPSearchResult"></a>QSDAPSearchResult::QSDAPSearchResult ()</h3>
+<p>Constructs an empty <a href="qsdapsearchresult.html">QSDAPSearchResult</a> object.</p>
+<h3 class="fn"><a name="QSDAPSearchResult-2"></a>QSDAPSearchResult::QSDAPSearchResult ( const QSDAPSearchResult &amp; <i>other</i> )</h3>
+<p>Construct a SDAPSearchResult, copying contents from <i>other</i>.</p>
+<h3 class="fn"><a name="addService"></a>void QSDAPSearchResult::addService ( const <a href="qsdpservice.html">QSDPService</a> &amp; <i>service</i> )</h3>
+<p>Adds a <i>service</i> to the search result.</p>
+<h3 class="fn"><a name="clear"></a>void QSDAPSearchResult::clear ()</h3>
+<p>Clears the service list.</p>
+<h3 class="fn"><a name="clearError"></a>void QSDAPSearchResult::clearError ()</h3>
+<p>Clears the error condition.</p>
+<h3 class="fn"><a name="error"></a><a href="qstring.html">QString</a> QSDAPSearchResult::error () const</h3>
+<p>Returns the error string, if any. If no error occurred, a null string is returned.</p>
+<p>See also <a href="qsdapsearchresult.html#setError">setError</a>().</p>
+<h3 class="fn"><a name="errorOccurred"></a>bool QSDAPSearchResult::errorOccurred () const</h3>
+<p>Returns whether an error occurred during the SDAP search.</p>
+<h3 class="fn"><a name="services"></a>const <a href="qlist.html">QList</a>&lt;<a href="qsdpservice.html">QSDPService</a>&gt; &amp; QSDAPSearchResult::services () const</h3>
+<p>Returns a list of services found during a SDAP query.</p>
+<h3 class="fn"><a name="setError"></a>void QSDAPSearchResult::setError ( const <a href="qstring.html">QString</a> &amp; <i>error</i> )</h3>
+<p>Flags that an error occurred during a SDAP query and sets the error string to <i>error</i>.</p>
+<p>See also <a href="qsdapsearchresult.html#error">error</a>().</p>
+<h3 class="fn"><a name="operator-eq"></a>QSDAPSearchResult &amp; QSDAPSearchResult::operator= ( const QSDAPSearchResult &amp; <i>other</i> )</h3>
+<p>Assign the contents of <i>other</i> to the current SDAPSearchResult.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

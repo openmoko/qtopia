@@ -1,0 +1,231 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QDocumentSelector Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QDocumentSelector Class Reference</h1>
+<p>The QDocumentSelector widget allows the user to select documents from a list of documents available on the device. <a href="#details">More...</a></p>
+<pre>    #include &lt;QDocumentSelector&gt;</pre><p>Inherits <a href="qwidget.html">QWidget</a>.</p>
+<ul>
+<li><a href="qdocumentselector-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h3>Public Types</h3>
+<ul>
+<li><div class="fn"/>enum <b><a href="qdocumentselector.html#Option-enum">Option</a></b> { None, NewDocument, TypeSelector, NestTypes, ContextMenu }</li>
+<li><div class="fn"/>flags <b><a href="qdocumentselector.html#Option-enum">Options</a></b></li>
+<li><div class="fn"/>enum <b><a href="qdocumentselector.html#Selection-enum">Selection</a></b> { NewSelected, DocumentSelected, Cancelled }</li>
+<li><div class="fn"/>enum <b><a href="qdocumentselector.html#SortMode-enum">SortMode</a></b> { Alphabetical, ReverseAlphabetical, Chronological, ReverseChronological }</li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qdocumentselector.html#QDocumentSelector">QDocumentSelector</a></b> ( QWidget * <i>parent</i> = 0 )</li>
+<li><div class="fn"/><b><a href="qdocumentselector.html#dtor.QDocumentSelector">~QDocumentSelector</a></b> ()</li>
+<li><div class="fn"/>QContent <b><a href="qdocumentselector.html#currentDocument">currentDocument</a></b> () const</li>
+<li><div class="fn"/>QStringList <b><a href="qdocumentselector.html#defaultCategories">defaultCategories</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qdocumentselector.html#disableOptions">disableOptions</a></b> ( Options <i>options</i> )</li>
+<li><div class="fn"/>const QContentSet &amp; <b><a href="qdocumentselector.html#documents">documents</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qdocumentselector.html#enableOptions">enableOptions</a></b> ( Options <i>options</i> )</li>
+<li><div class="fn"/>QContentFilter <b><a href="qdocumentselector.html#filter">filter</a></b> () const</li>
+<li><div class="fn"/>QDrmRights::Permissions <b><a href="qdocumentselector.html#mandatoryPermissions">mandatoryPermissions</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qdocumentselector.html#newCurrent">newCurrent</a></b> () const</li>
+<li><div class="fn"/>Options <b><a href="qdocumentselector.html#options">options</a></b> () const</li>
+<li><div class="fn"/>QDrmRights::Permission <b><a href="qdocumentselector.html#selectPermission">selectPermission</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qdocumentselector.html#setDefaultCategories">setDefaultCategories</a></b> ( const QStringList &amp; <i>categories</i> )</li>
+<li><div class="fn"/>void <b><a href="qdocumentselector.html#setFilter">setFilter</a></b> ( const QContentFilter &amp; <i>filter</i> )</li>
+<li><div class="fn"/>void <b><a href="qdocumentselector.html#setMandatoryPermissions">setMandatoryPermissions</a></b> ( QDrmRights::Permissions <i>permissions</i> )</li>
+<li><div class="fn"/>void <b><a href="qdocumentselector.html#setOptions">setOptions</a></b> ( Options <i>options</i> )</li>
+<li><div class="fn"/>void <b><a href="qdocumentselector.html#setSelectPermission">setSelectPermission</a></b> ( QDrmRights::Permission <i>permission</i> )</li>
+<li><div class="fn"/>void <b><a href="qdocumentselector.html#setSortMode">setSortMode</a></b> ( SortMode <i>mode</i> )</li>
+<li><div class="fn"/>SortMode <b><a href="qdocumentselector.html#sortMode">sortMode</a></b> () const</li>
+</ul>
+<ul>
+<li><div class="fn"/>258 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>22 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+</ul>
+<a name="signals"></a>
+<h3>Signals</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qdocumentselector.html#documentSelected">documentSelected</a></b> ( const QContent &amp; <i>content</i> )</li>
+<li><div class="fn"/>void <b><a href="qdocumentselector.html#documentsChanged">documentsChanged</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qdocumentselector.html#newSelected">newSelected</a></b> ()</li>
+</ul>
+<ul>
+<li><div class="fn"/>1 signal inherited from <a href="qwidget.html#signals">QWidget</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+</ul>
+<a name="static-public-members"></a>
+<h3>Static Public Members</h3>
+<ul>
+<li><div class="fn"/>Selection <b><a href="qdocumentselector.html#select">select</a></b> ( QWidget * <i>parent</i>, QContent * <i>content</i>, QDrmRights::Permission <i>permission</i>, const QString &amp; <i>title</i>, const QContentFilter &amp; <i>filter</i>, Options <i>options</i> = ContextMenu, SortMode <i>sortMode</i> = Alphabetical )</li>
+<li><div class="fn"/>Selection <b><a href="qdocumentselector.html#select-2">select</a></b> ( QWidget * <i>parent</i>, QContent * <i>content</i>, const QString &amp; <i>title</i>, const QContentFilter &amp; <i>filter</i>, Options <i>options</i> = ContextMenu, SortMode <i>sortMode</i> = Alphabetical )</li>
+</ul>
+<ul>
+<li><div class="fn"/>5 static public members inherited from <a href="qwidget.html#static-public-members">QWidget</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>13 static public members inherited from <a href="qpaintdevice.html#static-public-members">QPaintDevice</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>20 public slots inherited from <a href="qwidget.html#public-slots">QWidget</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>39 protected functions inherited from <a href="qwidget.html#protected-functions">QWidget</a></li>
+<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>1 protected function inherited from <a href="qpaintdevice.html#protected-functions">QPaintDevice</a></li>
+<li><div class="fn"/>1 protected slot inherited from <a href="qwidget.html#protected-slots">QWidget</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 protected type inherited from <a href="qpaintdevice.html#protected-variables">QPaintDevice</a></li>
+<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QDocumentSelector widget allows the user to select documents from a list of documents available on the device.</p>
+<p>The QDocumentSelector widget builds the list of documents by using a supplied content filter. If no filter is set a default filter which searches for all documents on the device is used.</p>
+<p>The following functionality is provided:</p>
+<ul>
+<li><tt>setFilter()</tt> : filter the list of documents using a content filter</li>
+<li><tt>filter()</tt> : retrieve the current content filter</li>
+<li><tt>setSortMode()</tt> : control the sorting of the list of documents</li>
+<li><tt>QDocumentSelector::SortMode</tt> : provide a list of supported sort modes</li>
+<li><tt>sortMode()</tt> : retrieve the current sort mode</li>
+<li><tt>currentDocument()</tt> : retrieve the current selected document</li>
+<li><tt>newCurrent()</tt> : indicates whether the new document list item is selected</li>
+<li><tt>QDocumentSelector::Option</tt> : provides a list of document selector configuration options.</li>
+<li><tt>options</tt> : retrieve the enabled document selector options.</li>
+<li><tt>setOptions()</tt> : set the enabled document selector options.</li>
+<li><tt>enableOptions()</tt> : enable one or more document selector options.</li>
+<li><tt>disableOptions()</tt> : disable one or more document selector options.</li>
+</ul>
+<p>When the <tt>NewDocument</tt> options is enabled QDocumentSelector adds a new document icon to the selection widget. When the icon is selected the newDocument() signal is emitted.</p>
+<p>When a document is selected, QDocumentSelector emits a <a href="qdocumentselector.html#documentSelected">documentSelected</a>() signal and a <a href="qcontent.html">QContent</a> for the selected document is passed with the signal and the selected document is retrieved using selectedDocument().</p>
+<p>The following code is an example of how to:</p>
+<ul>
+<li>select a document from the chronologically ordered list on the device</li>
+<li>create new documents</li>
+</ul>
+<pre>    QDocumentSelector *selector = new QDocumentSelector( this );
+    selector-&gt;setSortMode( QDocumentSelector::Chronological );
+    selector-&gt;enableOption( QDocumentSelector::NewDocument );
+
+    connect( selector, SIGNAL(newSelected()), this, SLOT(newDocument()) );
+    connect( selector, SIGNAL(documentSelected(const QContent&amp;)),
+    this, SLOT(openDocument(const QContent&amp;)) );</pre>
+<p>QDocumentSelector is often the first widget seen in a <a href="docwidget.html">document-oriented application </a>. Used in combination with <a href="qstackedwidget.html">QStackedWidget</a>, a typical application allows selecton of a document using the selector before revealing the document viewer or editor.</p>
+<p>See also <a href="qimagedocumentselector.html">QImageDocumentSelector</a>.</p>
+<hr />
+<h2>Member Type Documentation</h2>
+<h3 class="flags"><a name="Option-enum"></a>enum QDocumentSelector::Option<br />flags QDocumentSelector::Options</h3>
+<p>Options for configuring a <a href="qdocumentselector.html">QDocumentSelector</a>.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QDocumentSelector::None</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">No special configuration options.</td></tr>
+<tr><td valign="top"><tt>QDocumentSelector::NewDocument</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The first item in the content list selects a new document.</td></tr>
+<tr><td valign="top"><tt>QDocumentSelector::TypeSelector</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">A 'Select Type' menu item is available in the context menu which allows the user to restrict the visible content types.</td></tr>
+<tr><td valign="top"><tt>QDocumentSelector::NestTypes</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">The type selector widget common mime types together as a single type. Individual types are accessible through a sub menu.</td></tr>
+<tr><td valign="top"><tt>QDocumentSelector::ContextMenu</tt></td><td align="center" valign="top"><tt>8</tt></td><td valign="top">The selector has a context menu.</td></tr>
+</table></p>
+<p>The Options type is a typedef for <a href="qflags.html">QFlags</a>&lt;Option&gt;. It stores an OR combination of Option values.</p>
+<h3 class="fn"><a name="Selection-enum"></a>enum QDocumentSelector::Selection</h3>
+<p>This enum indicates the result of diplaying a document selector dialog.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QDocumentSelector::NewSelected</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The user selected the new document option.</td></tr>
+<tr><td valign="top"><tt>QDocumentSelector::DocumentSelected</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The user selected an existing document.</td></tr>
+<tr><td valign="top"><tt>QDocumentSelector::Cancelled</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The user cancelled the dialog.</td></tr>
+</table></p>
+<h3 class="fn"><a name="SortMode-enum"></a>enum QDocumentSelector::SortMode</h3>
+<p>This enum specifies the sort order of the documents.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="40%">
+<tr><th width="60%">Constant</th><th width="40%">Value</th></tr>
+<tr><td valign="top"><tt>QDocumentSelector::Alphabetical</tt></td><td align="center" valign="top"><tt>0</tt></td></tr>
+<tr><td valign="top"><tt>QDocumentSelector::ReverseAlphabetical</tt></td><td align="center" valign="top"><tt>1</tt></td></tr>
+<tr><td valign="top"><tt>QDocumentSelector::Chronological</tt></td><td align="center" valign="top"><tt>2</tt></td></tr>
+<tr><td valign="top"><tt>QDocumentSelector::ReverseChronological</tt></td><td align="center" valign="top"><tt>3</tt></td></tr>
+</table></p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QDocumentSelector"></a>QDocumentSelector::QDocumentSelector ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs a new content selector widget with the given <i>parent</i>.</p>
+<h3 class="fn"><a name="dtor.QDocumentSelector"></a>QDocumentSelector::~QDocumentSelector ()</h3>
+<p>Destroys the selector.</p>
+<h3 class="fn"><a name="currentDocument"></a><a href="qcontent.html">QContent</a> QDocumentSelector::currentDocument () const</h3>
+<p>Returns the content currently selected in the view.</p>
+<h3 class="fn"><a name="defaultCategories"></a><a href="qstringlist.html">QStringList</a> QDocumentSelector::defaultCategories () const</h3>
+<p>Returns the categories selected by default in the document selector's category filter dialog.</p>
+<p>See also <a href="qdocumentselector.html#setDefaultCategories">setDefaultCategories</a>().</p>
+<h3 class="fn"><a name="disableOptions"></a>void QDocumentSelector::disableOptions ( <a href="qdocumentselector.html#Option-enum">Options</a> <i>options</i> )</h3>
+<p>Disables the document selector options <i>options</i>.</p>
+<h3 class="fn"><a name="documentSelected"></a>void QDocumentSelector::documentSelected ( const <a href="qcontent.html">QContent</a> &amp; <i>content</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Signals that the user has selected the <a href="qcontent.html">QContent</a> <i>content</i>.</p>
+<h3 class="fn"><a name="documents"></a>const <a href="qcontentset.html">QContentSet</a> &amp; QDocumentSelector::documents () const</h3>
+<p>Returns the content set being displayed by the selector.</p>
+<h3 class="fn"><a name="documentsChanged"></a>void QDocumentSelector::documentsChanged ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Signals that the documents visible in the selector have changed.</p>
+<h3 class="fn"><a name="enableOptions"></a>void QDocumentSelector::enableOptions ( <a href="qdocumentselector.html#Option-enum">Options</a> <i>options</i> )</h3>
+<p>Enables the document selector options <i>options</i>.</p>
+<h3 class="fn"><a name="filter"></a><a href="qcontentfilter.html">QContentFilter</a> QDocumentSelector::filter () const</h3>
+<p>Returns the filter which defines the subset of content on the device the user can select from.</p>
+<p>See also <a href="qcontentset.html#filter">QContentSet::filter</a>() and <a href="qdocumentselector.html#setFilter">setFilter</a>().</p>
+<h3 class="fn"><a name="mandatoryPermissions"></a><a href="qdrmrights.html#Permission-enum">QDrmRights::Permissions</a> QDocumentSelector::mandatoryPermissions () const</h3>
+<p>Returns the permissions a document must have in order to be selectable in the document selector.</p>
+<p>See also <a href="qdocumentselector.html#setMandatoryPermissions">setMandatoryPermissions</a>().</p>
+<h3 class="fn"><a name="newCurrent"></a>bool QDocumentSelector::newCurrent () const</h3>
+<p>Returns true if the new document option is currently selected.</p>
+<h3 class="fn"><a name="newSelected"></a>void QDocumentSelector::newSelected ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Signals that the user selected the new document option.</p>
+<h3 class="fn"><a name="options"></a><a href="qdocumentselector.html#Option-enum">Options</a> QDocumentSelector::options () const</h3>
+<p>Returns the enabled document selector options.</p>
+<p>See also <a href="qdocumentselector.html#setOptions">setOptions</a>().</p>
+<h3 class="fn"><a name="select"></a><a href="qdocumentselector.html#Selection-enum">Selection</a> QDocumentSelector::select ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, <a href="qcontent.html">QContent</a> * <i>content</i>, <a href="qdrmrights.html#Permission-enum">QDrmRights::Permission</a> <i>permission</i>, const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filter</i>, <a href="qdocumentselector.html#Option-enum">Options</a> <i>options</i> = ContextMenu, <a href="qdocumentselector.html#SortMode-enum">SortMode</a> <i>sortMode</i> = Alphabetical )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Displays a document selector dialog with the parent <i>parent</i> and window title <i>title</i>, configured with the standard selector options <i>filter</i>, <i>options</i> and <i>sortMode</i>. Selecting a document will assign the document to <i>content</i> if it can be rendered with the given <i>permission</i>.</p>
+<h3 class="fn"><a name="select-2"></a><a href="qdocumentselector.html#Selection-enum">Selection</a> QDocumentSelector::select ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, <a href="qcontent.html">QContent</a> * <i>content</i>, const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filter</i>, <a href="qdocumentselector.html#Option-enum">Options</a> <i>options</i> = ContextMenu, <a href="qdocumentselector.html#SortMode-enum">SortMode</a> <i>sortMode</i> = Alphabetical )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Displays a document selector dialog with the parent <i>parent</i> and window title <i>title</i>, configured with the standard selector options <i>filter</i>, <i>options</i> and <i>sortMode</i>. Selecting a document will assign the document to <i>content</i>.</p>
+<h3 class="fn"><a name="selectPermission"></a><a href="qdrmrights.html#Permission-enum">QDrmRights::Permission</a> QDocumentSelector::selectPermission () const</h3>
+<p>Returns the intended usage of the selected document.</p>
+<p>See also <a href="qdocumentselector.html#setSelectPermission">setSelectPermission</a>().</p>
+<h3 class="fn"><a name="setDefaultCategories"></a>void QDocumentSelector::setDefaultCategories ( const <a href="qstringlist.html">QStringList</a> &amp; <i>categories</i> )</h3>
+<p>Sets the <i>categories</i> selected by default in the document selector's category filter dialog.</p>
+<p>If a default category does not appear in the category filter dialog then the content of the document selector will not be filtered on that category. If a default category is added to the list after the category selector has been initialized it will not be automatically selected.</p>
+<p>See also <a href="qdocumentselector.html#defaultCategories">defaultCategories</a>().</p>
+<h3 class="fn"><a name="setFilter"></a>void QDocumentSelector::setFilter ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filter</i> )</h3>
+<p>Sets the <i>filter</i> which defines the subset of content on the device the user can select from.</p>
+<p>See also <a href="qdocumentselector.html#filter">filter</a>().</p>
+<h3 class="fn"><a name="setMandatoryPermissions"></a>void QDocumentSelector::setMandatoryPermissions ( <a href="qdrmrights.html#Permission-enum">QDrmRights::Permissions</a> <i>permissions</i> )</h3>
+<p>Sets the <i>permissions</i> a document must have in order to be selectable in the document selector.</p>
+<p>Unlike the select permission if a document is missing a mandatory permission it is simply unselectable and can not be activated.</p>
+<p>See also <a href="qdocumentselector.html#mandatoryPermissions">mandatoryPermissions</a>() and <a href="qdocumentselector.html#setSelectPermission">setSelectPermission</a>().</p>
+<h3 class="fn"><a name="setOptions"></a>void QDocumentSelector::setOptions ( <a href="qdocumentselector.html#Option-enum">Options</a> <i>options</i> )</h3>
+<p>Sets the enabled selector <i>options</i>.</p>
+<p>See also <a href="qdocumentselector.html#options">options</a>().</p>
+<h3 class="fn"><a name="setSelectPermission"></a>void QDocumentSelector::setSelectPermission ( <a href="qdrmrights.html#Permission-enum">QDrmRights::Permission</a> <i>permission</i> )</h3>
+<p>Sets the intended usage of the selected document. If the document does not have the <i>permission</i> the document selector will attempt to activate before the selection succeeds. If the document cannot be activated with that permission, it will not be selectable.</p>
+<p>If the permission is <a href="qdrmrights.html#Permission-enum">QDrmRights::InvalidPermission</a> the default permission for the content is used.</p>
+<p>See also <a href="qdocumentselector.html#selectPermission">selectPermission</a>().</p>
+<h3 class="fn"><a name="setSortMode"></a>void QDocumentSelector::setSortMode ( <a href="qdocumentselector.html#SortMode-enum">SortMode</a> <i>mode</i> )</h3>
+<p>Sets the document sort mode to <i>mode</i>.</p>
+<p>The default mode is <a href="qdocumentselector.html#SortMode-enum">QDocumentSelector::Alphabetical</a>.</p>
+<p>See also <a href="qdocumentselector.html#sortMode">sortMode</a>().</p>
+<h3 class="fn"><a name="sortMode"></a><a href="qdocumentselector.html#SortMode-enum">SortMode</a> QDocumentSelector::sortMode () const</h3>
+<p>Returns the current document sort mode.</p>
+<p>See also <a href="qdocumentselector.html#setSortMode">setSortMode</a>().</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

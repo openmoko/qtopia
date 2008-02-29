@@ -1,0 +1,8 @@
+[Translation]
+File=QtopiaSettings
+Context=StartupFlags
+[Desktop Entry]
+Type=Application
+Exec=startupflags
+Icon=startupflags/startupflags
+Name[]=Startup Flags

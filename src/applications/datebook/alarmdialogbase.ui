@@ -1,283 +1,183 @@
-<!DOCTYPE UI><UI>
-<class>AlarmDialogBase</class>
-<widget>
-    <class>QDialog</class>
-    <property stdset="1">
-        <name>name</name>
-        <cstring>AlarmDialogBase</cstring>
+<ui version="4.0" stdsetdef="1" >
+  <author></author>
+  <comment></comment>
+  <exportmacro></exportmacro>
+  <class>AlarmDialogBase</class>
+  <widget class="QDialog" name="AlarmDialogBase" >
+    <property name="geometry" >
+      <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>187</width>
+        <height>232</height>
+      </rect>
     </property>
-    <property stdset="1">
-        <name>geometry</name>
-        <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>187</width>
-            <height>232</height>
-        </rect>
+    <property name="windowTitle" >
+      <string>Reminder</string>
     </property>
-    <property stdset="1">
-        <name>caption</name>
-        <string>Reminder</string>
-    </property>
-    <property>
-        <name>layoutMargin</name>
-    </property>
-    <property>
-        <name>layoutSpacing</name>
-    </property>
-    <vbox>
-        <property stdset="1">
-            <name>margin</name>
-            <number>3</number>
-        </property>
-        <property stdset="1">
-            <name>spacing</name>
-            <number>3</number>
-        </property>
-        <widget>
-            <class>QLayoutWidget</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>Layout8</cstring>
-            </property>
-            <hbox>
-                <property stdset="1">
-                    <name>margin</name>
-                    <number>0</number>
-                </property>
-                <property stdset="1">
-                    <name>spacing</name>
-                    <number>6</number>
-                </property>
-                <widget>
-                    <class>QLayoutWidget</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>Layout4</cstring>
-                    </property>
-                    <vbox>
-                        <property stdset="1">
-                            <name>margin</name>
-                            <number>0</number>
-                        </property>
-                        <property stdset="1">
-                            <name>spacing</name>
-                            <number>6</number>
-                        </property>
-                        <widget>
-                            <class>QLabel</class>
-                            <property stdset="1">
-                                <name>name</name>
-                                <cstring>pmIcon</cstring>
-                            </property>
-                            <property stdset="1">
-                                <name>sizePolicy</name>
-                                <sizepolicy>
-                                    <hsizetype>0</hsizetype>
-                                    <vsizetype>0</vsizetype>
-                                </sizepolicy>
-                            </property>
-                            <property stdset="1">
-                                <name>minimumSize</name>
-                                <size>
-                                    <width>32</width>
-                                    <height>32</height>
-                                </size>
-                            </property>
-                            <property stdset="1">
-                                <name>maximumSize</name>
-                                <size>
-                                    <width>32</width>
-                                    <height>32</height>
-                                </size>
-                            </property>
-                            <property stdset="1">
-                                <name>scaledContents</name>
-                                <bool>true</bool>
-                            </property>
-                        </widget>
-                        <spacer>
-                            <property>
-                                <name>name</name>
-                                <cstring>Spacer1</cstring>
-                            </property>
-                            <property stdset="1">
-                                <name>orientation</name>
-                                <enum>Vertical</enum>
-                            </property>
-                            <property stdset="1">
-                                <name>sizeType</name>
-                                <enum>Expanding</enum>
-                            </property>
-                            <property>
-                                <name>sizeHint</name>
-                                <size>
-                                    <width>20</width>
-                                    <height>20</height>
-                                </size>
-                            </property>
-                        </spacer>
-                    </vbox>
+    <layout class="QVBoxLayout" >
+      <property name="margin" >
+        <number>3</number>
+      </property>
+      <property name="spacing" >
+        <number>3</number>
+      </property>
+      <item>
+        <layout class="QHBoxLayout" >
+          <property name="margin" >
+            <number>0</number>
+          </property>
+          <property name="spacing" >
+            <number>6</number>
+          </property>
+          <item>
+            <layout class="QVBoxLayout" >
+              <property name="margin" >
+                <number>0</number>
+              </property>
+              <property name="spacing" >
+                <number>6</number>
+              </property>
+              <item>
+                <widget class="QLabel" name="pmIcon" >
+                  <property name="sizePolicy" >
+                    <sizepolicy>
+                      <hsizetype>0</hsizetype>
+                      <vsizetype>0</vsizetype>
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                    </sizepolicy>
+                  </property>
+                  <property name="minimumSize" >
+                    <size>
+                      <width>32</width>
+                      <height>32</height>
+                    </size>
+                  </property>
+                  <property name="maximumSize" >
+                    <size>
+                      <width>32</width>
+                      <height>32</height>
+                    </size>
+                  </property>
+                  <property name="scaledContents" >
+                    <bool>true</bool>
+                  </property>
                 </widget>
-                <widget>
-                    <class>QLayoutWidget</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>Layout6</cstring>
-                    </property>
-                    <vbox>
-                        <property stdset="1">
-                            <name>margin</name>
-                            <number>0</number>
-                        </property>
-                        <property stdset="1">
-                            <name>spacing</name>
-                            <number>6</number>
-                        </property>
-                        <widget>
-                            <class>QLabel</class>
-                            <property stdset="1">
-                                <name>name</name>
-                                <cstring>lblDescription</cstring>
-                            </property>
-                            <property stdset="1">
-                                <name>sizePolicy</name>
-                                <sizepolicy>
-                                    <hsizetype>3</hsizetype>
-                                    <vsizetype>1</vsizetype>
-                                </sizepolicy>
-                            </property>
-                            <property stdset="1">
-                                <name>text</name>
-                                <string>Meeting</string>
-                            </property>
-                        </widget>
-                        <widget>
-                            <class>QLabel</class>
-                            <property stdset="1">
-                                <name>name</name>
-                                <cstring>lblLocation</cstring>
-                            </property>
-                            <property stdset="1">
-                                <name>text</name>
-                                <string>Cafe</string>
-                            </property>
-                        </widget>
-                        <widget>
-                            <class>QLabel</class>
-                            <property stdset="1">
-                                <name>name</name>
-                                <cstring>lblApptTime</cstring>
-                            </property>
-                            <property stdset="1">
-                                <name>text</name>
-                                <string>1:45 pm</string>
-                            </property>
-                        </widget>
-                        <widget>
-                            <class>QLabel</class>
-                            <property stdset="1">
-                                <name>name</name>
-                                <cstring>lblApptDate</cstring>
-                            </property>
-                            <property stdset="1">
-                                <name>text</name>
-                                <string>12/01/2004</string>
-                            </property>
-                        </widget>
-                        <widget>
-                            <class>QPushButton</class>
-                            <property stdset="1">
-                                <name>name</name>
-                                <cstring>btnDetails</cstring>
-                            </property>
-                            <property stdset="1">
-                                <name>text</name>
-                                <string>Show Details</string>
-                            </property>
-                        </widget>
-                    </vbox>
+              </item>
+              <item>
+                <spacer name="Spacer1" >
+                  <property name="sizeHint" >
+                    <size>
+                      <width>20</width>
+                      <height>20</height>
+                    </size>
+                  </property>
+                  <property name="sizeType" >
+                    <enum>Expanding</enum>
+                  </property>
+                  <property name="orientation" >
+                    <enum>Vertical</enum>
+                  </property>
+                </spacer>
+              </item>
+            </layout>
+          </item>
+          <item>
+            <layout class="QVBoxLayout" >
+              <property name="margin" >
+                <number>0</number>
+              </property>
+              <property name="spacing" >
+                <number>6</number>
+              </property>
+              <item>
+                <widget class="QLabel" name="lblDescription" >
+                  <property name="sizePolicy" >
+                    <sizepolicy>
+                      <hsizetype>3</hsizetype>
+                      <vsizetype>1</vsizetype>
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                    </sizepolicy>
+                  </property>
+                  <property name="text" >
+                    <string>Meeting</string>
+                  </property>
                 </widget>
-            </hbox>
+              </item>
+              <item>
+                <widget class="QLabel" name="lblLocation" >
+                  <property name="text" >
+                    <string>Cafe</string>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QLabel" name="lblApptTime" >
+                  <property name="text" >
+                    <string>1:45 pm</string>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QLabel" name="lblApptDate" >
+                  <property name="text" >
+                    <string>12/01/2004</string>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QPushButton" name="btnDetails" >
+                  <property name="text" >
+                    <string>Show Details</string>
+                  </property>
+                </widget>
+              </item>
+            </layout>
+          </item>
+        </layout>
+      </item>
+      <item>
+        <layout class="QHBoxLayout" >
+          <property name="margin" >
+            <number>0</number>
+          </property>
+          <property name="spacing" >
+            <number>6</number>
+          </property>
+          <item>
+            <widget class="QSpinBox" name="spinSnooze" >
+              <property name="suffix" >
+                <string> mins</string>
+              </property>
+              <property name="maximum" >
+                <number>60</number>
+              </property>
+              <property name="minimum" >
+                <number>5</number>
+              </property>
+              <property name="singleStep" >
+                <number>5</number>
+              </property>
+            </widget>
+          </item>
+          <item>
+            <widget class="QPushButton" name="btnSnooze" >
+              <property name="text" >
+                <string>Snooze</string>
+              </property>
+            </widget>
+          </item>
+        </layout>
+      </item>
+      <item>
+        <widget class="QCheckBox" name="chkSkipDialogs" >
+          <property name="text" >
+            <string>Clear All Reminders</string>
+          </property>
         </widget>
-        <widget>
-            <class>QLayoutWidget</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>Layout9</cstring>
-            </property>
-            <hbox>
-                <property stdset="1">
-                    <name>margin</name>
-                    <number>0</number>
-                </property>
-                <property stdset="1">
-                    <name>spacing</name>
-                    <number>6</number>
-                </property>
-                <widget>
-                    <class>QSpinBox</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>spinSnooze</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>suffix</name>
-                        <string> mins</string>
-                    </property>
-                    <property stdset="1">
-                        <name>maxValue</name>
-                        <number>60</number>
-                    </property>
-                    <property stdset="1">
-                        <name>minValue</name>
-                        <number>5</number>
-                    </property>
-                    <property stdset="1">
-                        <name>lineStep</name>
-                        <number>5</number>
-                    </property>
-                </widget>
-                <widget>
-                    <class>QPushButton</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>btnSnooze</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Snooze</string>
-                    </property>
-                </widget>
-            </hbox>
-        </widget>
-        <widget>
-            <class>QCheckBox</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>chkSkipDialogs</cstring>
-            </property>
-            <property stdset="1">
-                <name>text</name>
-                <string>Clear All Reminders</string>
-            </property>
-        </widget>
-    </vbox>
-</widget>
-<connections>
-    <connection>
-        <sender>btnSnooze</sender>
-        <signal>clicked()</signal>
-        <receiver>AlarmDialogBase</receiver>
-        <slot>snoozeClicked()</slot>
-    </connection>
-    <connection>
-        <sender>btnDetails</sender>
-        <signal>clicked()</signal>
-        <receiver>AlarmDialogBase</receiver>
-        <slot>detailsClicked()</slot>
-    </connection>
-    <slot access="public">detailsClicked()</slot>
-    <slot access="public">snoozeClicked()</slot>
-</connections>
-</UI>
+      </item>
+    </layout>
+  </widget>
+</ui>

@@ -5,6 +5,6 @@ Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
 Comment[]=Shoot the rocks
 Exec=qasteroids
-Icon=Asteroids
+Icon=qasteroids/Asteroids
 Type=Application
-Name[]=As­ter­oids
+Name[]=As\xadter\xadoids

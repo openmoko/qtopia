@@ -1,31 +1,55 @@
-CONFIG		+= qtopiaplugin
+qtopia_project(qtopia plugin)
+TARGET=lan
 
-TARGET		= lan
+depends(libraries/qtopiacomm/network)
+!enable_qtopiabase:depends(libraries/qtopiail)
 
-HEADERS		= lan.h
-!buildSingleexec:HEADERS += ../proxiespage.h
-SOURCES		= lan.cpp
-!buildSingleexec:SOURCES += ../proxiespage.cpp
-INTERFACES	= lanbase.ui lanstate.ui
-!buildSingleexec:INTERFACES += ../proxiespagebase_p.ui
+# Packaged by settings/network
+CONFIG+=no_pkg
 
-# Supported, but not enabled (tested hardward doesn't have Ethernet)
-!QTOPIA_PHONE {
-conf.files	= $${QTOPIA_DEPOT_PATH}/etc/network/LAN.conf
+FORMS       = wirelessbase.ui \
+              wirelessencryptbase.ui \
+              roamingbase.ui
+
+HEADERS	    = lanplugin.h \
+              lan.h \
+              config.h \
+              wirelessconfig.h \
+              encryptionconfig.h \
+              wirelessscan.h \
+              roamingconfig.h \
+              roamingmonitor.h \
+              wnet.h
+                
+SOURCES	    = lanplugin.cpp \
+              lan.cpp \
+              config.cpp \
+              wirelessconfig.cpp \
+              encryptionconfig.cpp \
+              wirelessscan.cpp \
+              roamingconfig.cpp \
+              roamingmonitor.cpp \
+              wnet.cpp
+
+conf.files	= $$QTOPIA_DEPOT_PATH/etc/network/lan.conf \
+                  $$QTOPIA_DEPOT_PATH/etc/network/lan-pcmcia.conf \
+                  $$QTOPIA_DEPOT_PATH/etc/network/wlan-pcmcia.conf \
+                  $$QTOPIA_DEPOT_PATH/etc/network/wlan.conf 
+                  
 conf.path	= /etc/network
 INSTALLS += conf
-}
 
-pics.files	= $${QTOPIA_DEPOT_PATH}/pics/Network/lan.png $${QTOPIA_DEPOT_PATH}/pics/Network/proxies.png
-pics.path	= /pics/Network
+bin.files   = $$QTOPIA_DEPOT_PATH/src/plugins/network/lan/lan-network 
+bin.path    = /bin
+bin.hint=script
+INSTALLS +=bin
 
-PICS_INSTALLS	+= pics
+pics.files	= $$QTOPIA_DEPOT_PATH/pics/Network/lan/* 
+pics.path	= /pics/Network/lan
+pics.hint=pics
 
-TRANSLATABLES = lan.h \
-                ../proxiespage.h \
-                lan.cpp \
-                lanbase.ui \
-                lanstate.ui \
-                ../proxiespage.cpp \
-                ../proxiespagebase_p.ui
+icons.files     = $$QTOPIA_DEPOT_PATH/pics/Network/icons/*
+icons.path      = /pics/Network/icons
+icons.hint=pics
+INSTALLS	+= pics icons
 

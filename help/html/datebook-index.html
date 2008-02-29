@@ -1,22 +1,25 @@
-<qt title="More Calendar Help">
+<html>
+<head><title>More Calendar Help</title></head>
+<body>
 <h3>More Calendar Help</h3>
 <ul>
 <li><a href="datebook-categories.html">Calendar Categories</a></li>
 <li><a href="datebook-settings.html">Calendar Settings</a></li>
 <li><a href="datebook-views.html">Calendar Views</a></li>
-%%PDA%%
+<!--#if expr="$PDASTYLE"-->
 <li><a href="popup-calendar.html">Pop-Up Calendar</a></li>
-@@PDA@@
-%%PDA%% %%TOUCH%%
+<!--#endif-->
+<!--#if expr="$PDASTYLE || $TOUCH"-->
 <li><a href="datebook-eventview.html">Event View</a></li>
-@@PDA@@ @@TOUCH@@
+<!--#endif-->
 <li><a href="datebook-adding.html">Adding Events</a></li>
 <li><a href="datebook-edit-event.html">Edit an Event</a></li>
 <li><a href="datebook-event-alarm.html">Event Alarm</a></li>
 <li><a href="datebook-event-repeat.html">Repeating Events</a></li>
 <li><a href="datebook-purge.html">Purge Events</a></li>
 </ul>
-%%PDA%%
+<!--#if expr="$PDASTYLE"-->
 <p>See Also: <a href="today.html">Today Help</a></p>
-@@PDA@@
-</qt>
+<!--#endif-->
+</body>
+</html>

@@ -1,90 +1,63 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
---></style>
-</head><body bgcolor="#ffffff">
-
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-
-<h1 align=center>QDomText Class Reference<br><small>[ <a href="xml.html">XML module</a> ]</small></h1><br clear="all">
-<p>
-The QDomText class represents textual data in the parsed XML document.
-<a href="#details">More...</a>
-<p>
-<code>#include &lt;<a href="qdom-h.html">qdom.h</a>&gt;</code>
-<p>
-Inherits <a href="qdomcharacterdata.html">QDomCharacterData</a>.
-<p>Inherited by <a href="qdomcdatasection.html">QDomCDATASection</a>.
-<p><a href="qdomtext-members.html">List of all member functions.</a>
-<h2>Public Members</h2>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: QDomText Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QDomText Class Reference<br /><sup><sup>[<a href="qtxml.html">QtXml</a> module]</sup></sup></h1>
+<p>The QDomText class represents text data in the parsed XML document. <a href="#details">More...</a></p>
+<pre> #include &lt;QDomText&gt;</pre><p>Inherits <a href="qdomcharacterdata.html">QDomCharacterData</a>.</p>
+<p>Inherited by <a href="qdomcdatasection.html">QDomCDATASection</a>.</p>
+<p><b>Note:</b> All the functions in this class are <a href="threads.html#reentrant">reentrant</a>.</p>
 <ul>
-<li><div class="fn"><a href="#2c1153"><b>QDomText</b></a> () </div>
-<li><div class="fn"><a href="#cc0bef"><b>QDomText</b></a> ( const QDomText &amp; x ) </div>
-<li><div class="fn">QDomText&amp; <a href="#9d31a9"><b>operator=</b></a> ( const QDomText &amp; ) </div>
-<li><div class="fn"><a href="#b0fd7e"><b>~QDomText</b></a> () </div>
-<li><div class="fn">QDomText <a href="#764c66"><b>splitText</b></a> ( int offset ) </div>
-<li><div class="fn">virtual QDomNode::NodeType <a href="#3a04e5"><b>nodeType</b></a> () const</div>
-<li><div class="fn">virtual bool <a href="#92c2d4"><b>isText</b></a> () const</div>
+<li><a href="qdomtext-members.html">List of all members, including inherited members</a></li>
 </ul>
-<hr><h2><a name="details"></a>Detailed Description</h2>
-The QDomText class represents textual data in the parsed XML document.
-<p>
-For further information about the Document Objct Model see
-<a href="http://www.w3.org/TR/REC-DOM-Level-1/">http://www.w3.org/TR/REC-DOM-Level-1/</a>.
-For a more general introduction of the DOM implementation see the
-<a href="qdomdocument.html">QDomDocument</a> documentation.
-
-<hr><h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="2c1153"></a>QDomText::QDomText ()</h3>
-<p>Constructs an empty QDomText object.
-<p>To construct a QDomText with content, use <a href="qdomdocument.html#95c9fe">QDomDocument::createTextNode</a>().
-<h3 class="fn"><a name="cc0bef"></a>QDomText::QDomText ( const QDomText &amp; x )</h3>
-<p>Copy constructor.
-<p>The data of the copy is shared: modifying one will also change the other. If
-you want to make a real copy, use <a href="qdomnode.html#8f17f1">cloneNode</a>() instead.
-<h3 class="fn"><a name="b0fd7e"></a>QDomText::~QDomText ()</h3>
-<p>Destructor.
-<h3 class="fn">bool <a name="92c2d4"></a>QDomText::isText () const <code>[virtual]</code></h3>
-<p>Returns TRUE.
-<p>Reimplemented from <a href="qdomnode.html#b5b9d5">QDomNode.</a>
-<h3 class="fn">QDomNode::NodeType <a name="3a04e5"></a>QDomText::nodeType() const <code>[virtual]</code></h3>
-<p>Returns <code>TextNode.</code>
-<p>Reimplemented from <a href="qdomnode.html#46495e">QDomNode.</a>
-<h3 class="fn">QDomText&amp; <a name="9d31a9"></a>QDomText::operator= ( const QDomText &amp; x )</h3>
-<p>Assignment operator.
-<p>The data of the copy is shared: modifying one will also change the other. If
-you want to make a real copy, use <a href="qdomnode.html#8f17f1">cloneNode</a>() instead.
-<h3 class="fn">QDomText <a name="764c66"></a>QDomText::splitText ( int offset )</h3>
-<p>Splits this object at position <em>offset</em> into two QDomText objects. The newly
-created object is inserted into the document tree after this object.
-<p>The function returns the newly created object.
-<p>See also  <a href="qdomelement.html#b07957">QDomElement::normalize</a>().
-<hr><p>
-Search the documentation, FAQ, qt-interest archive and more (uses
-<a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
-<form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.10"><nobr>
-<input size="50" name="search"><input type=submit value="Search">
-</nobr></form><hr><p>
-This file is part of the <a href="index.html">Qt toolkit</a>,
-copyright &copy; 1995-2005
-<a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qdomtext.html#QDomText">QDomText</a></b> ()</li>
+<li><div class="fn"/><b><a href="qdomtext.html#QDomText-2">QDomText</a></b> ( const QDomText &amp; <i>x</i> )</li>
+<li><div class="fn"/>QDomNode::NodeType <b><a href="qdomtext.html#nodeType">nodeType</a></b> () const</li>
+<li><div class="fn"/>QDomText <b><a href="qdomtext.html#splitText">splitText</a></b> ( int <i>offset</i> )</li>
+<li><div class="fn"/>QDomText &amp; <b><a href="qdomtext.html#operator-eq">operator=</a></b> ( const QDomText &amp; <i>x</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>10 public functions inherited from <a href="qdomcharacterdata.html#public-functions">QDomCharacterData</a></li>
+<li><div class="fn"/>65 public functions inherited from <a href="qdomnode.html#public-functions">QDomNode</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QDomText class represents text data in the parsed XML document.</p>
+<p>You can split the text in a QDomText object over two QDomText objecs with <a href="qdomtext.html#splitText">splitText</a>().</p>
+<p>For further information about the Document Object Model see <a href="http://www.w3.org/TR/REC-DOM-Level-1/">Level 1</a> and <a href="http://www.w3.org/TR/DOM-Level-2-Core/">Level 2 Core</a>. For a more general introduction of the DOM implementation see the <a href="qdomdocument.html">QDomDocument</a> documentation.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QDomText"></a>QDomText::QDomText ()</h3>
+<p>Constructs an empty <a href="qdomtext.html">QDomText</a> object.</p>
+<p>To construct a <a href="qdomtext.html">QDomText</a> with content, use <a href="qdomdocument.html#createTextNode">QDomDocument::createTextNode</a>().</p>
+<h3 class="fn"><a name="QDomText-2"></a>QDomText::QDomText ( const QDomText &amp; <i>x</i> )</h3>
+<p>Constructs a copy of <i>x</i>.</p>
+<p>The data of the copy is shared (shallow copy): modifying one node will also change the other. If you want to make a deep copy, use <a href="qdomnode.html#cloneNode">cloneNode</a>().</p>
+<h3 class="fn"><a name="nodeType"></a><a href="qdomnode.html#NodeType-enum">QDomNode::NodeType</a> QDomText::nodeType () const</h3>
+<p>Returns <tt>TextNode</tt>.</p>
+<h3 class="fn"><a name="splitText"></a>QDomText QDomText::splitText ( int <i>offset</i> )</h3>
+<p>Splits this DOM text object into two <a href="qdomtext.html">QDomText</a> objects. This object keeps its first <i>offset</i> characters and the second (newly created) object is inserted into the document tree after this object with the remaining characters.</p>
+<p>The function returns the newly created object.</p>
+<p>See also <a href="qdomnode.html#normalize">QDomNode::normalize</a>().</p>
+<h3 class="fn"><a name="operator-eq"></a>QDomText &amp; QDomText::operator= ( const QDomText &amp; <i>x</i> )</h3>
+<p>Assigns <i>x</i> to this DOM text.</p>
+<p>The data of the copy is shared (shallow copy): modifying one node will also change the other. If you want to make a deep copy, use <a href="qdomnode.html#cloneNode">cloneNode</a>().</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

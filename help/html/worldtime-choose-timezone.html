@@ -1,9 +1,15 @@
-<qt title="Choose Time Zone">
-<h3>Choose Time Zone</h3>
-%%PHONE%%
-<p>Press <img src="contextbar/select.png"> to activate the map, then the <img src="help/dpad.png"> buttons to find a city; press <img src="contextbar/select.png"> again to set the time zone.</p>
-@@PHONE@@
-%%PDA%%
+<html>
+<head><title>Choose Time Zone</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h2>Choose Time Zone</h2>
+<!--#else-->
+   <h3>Choose Time Zone</h3>
+<!--#endif-->
+<!--#if expr="$PHONESTYLE"-->
+<p>Press <img src=":icon/select"> </img> to activate the map, then the <img src=":image/help/dpad"> </img> buttons to find a city; press <img src=":icon/select"> </img> again to set the time zone.</p>
+<!--#endif-->
+<!--#if expr="$PDASTYLE"-->
 <p><b>To set your current time zone:</b></p>
 <ul>
 <li>Tap the <b>Time Zone</b> drop-down list, then tap the time zone you are in.</li>
@@ -13,8 +19,9 @@
 <ul>
 <li>Tap the world icon to the right of the drop-down list.</li>
 <li>Add your closest city to the list of <b>Preset Cities</b>.</li>
-<li>Tap <img src="qpe/pda/CloseButton.png" alt="X"> to close the <b>World Time Map</b> screen.</li>
+<li>Tap <img src=":image/qpe/pda/CloseButton" alt="X"> </img> to close the <b>World Time Map</b> screen.</li>
 </ul>
 <p>Your new time zone will now be available in the drop-down list.</P>
-@@PDA@@
-</qt>
+<!--#endif-->
+</body>
+</html>

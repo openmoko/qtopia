@@ -1,0 +1,29 @@
+<html>
+<head><title>Edit Tasks</title></head>
+<body>
+<h3>Edit Tasks</h3>
+<!--#if expr="$PHONESTYLE"-->
+<p>Use the <img src=":icon/left">/<img src=":icon/right"> </img> to choose Task details or Notes.</p>
+<!--#endif-->
+<p>You can record and modify the following information:</p>
+<ul>
+<li><b>Description:</b> enter a brief description (shown as title in the list).</li>
+<li><b>Priority:</b> to help you prioritize your tasks: <br>
+1 = Very High, 2 = High, 3 = Normal, 4 = Low, 5 = Very Low</li>
+<li><b>Status:</b> to indicate the current status of the task: <br>
+Not Started, In Progress, Completed, Waiting, Deferred. Completed tasks have a check mark in the list; all tasks can have a percentage complete (except Not Started).</li>
+<li><b>Due:</b> check this option and select a date from the drop-down list if the task has a due date; tasks of equal priority will be sorted by due date.</li>
+<li><b>Started Date:</b> the starting date can only be set for In Progress tasks.</li>
+<li><b>Completed Date:</b> entered automatically when a task is marked complete.</li>
+<li><b>Category:</b> used to group like tasks. </li>
+<li><b>Notes:</b> enter more detailed information for a task.</li>
+</ul>
+<!--#if expr="$PDASTYLE"-->
+<p>Tap <img src=":image/qpe/pda/OKButton" alt="OK"> </img> to save the task or changes you have made to a task or <img src=":image/qpe/pda/CloseButton" alt="X"> </img> to cancel.</p>
+<!--#endif-->
+<!--#if expr="$PHONESTYLE"-->
+<p>Press <img src=":icon/i18n/back"> </img> to save changes to the task or <img src=":icon/options"> </img> then <b>Cancel</b> from the menu.</p>
+<!--#endif-->
+<p>See Also: <a href="qpe-categories.html">Category Help</a>
+</body>
+</html>

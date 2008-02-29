@@ -1,15 +1,21 @@
-TEMPLATE	= app
+qtopia_project(qtopia app)
+TARGET=quicklauncher
+CONFIG+=no_tr
+CONFIG+=singleexec_main
 
-TARGET		= quicklauncher
-DESTDIR         = $$(QPEDIR)/bin
+requires(!equals(LAUNCH_METHOD,normal))
+depends(libraries/qtopiapim)
 
-CONFIG		+= qtopialib
-SOURCES		= main.cpp
+equals(LAUNCH_METHOD,quicklaunch) {
+    HEADERS+=quicklaunch.h
+    SOURCES+=quicklaunch.cpp
+} else {
+    HEADERS+=quicklaunchforked.h
+    SOURCES+=quicklaunchforked.cpp
+    DEFINES+=QUICKLAUNCHER_FORKED
+}
 
-target.path	= /bin
-INSTALLS	+= target
+SOURCES+=main.cpp
 
-PACKAGE_DESCRIPTION=Quicklauncher stub for quicklaunch enabled applications.
-PACKAGE_DEPENDS=qpe-libqtopia2
-
-TRANSLATIONS=
+pkg.desc=Quicklauncher stub for quicklaunch enabled applications.
+pkg.domain=quicklauncher

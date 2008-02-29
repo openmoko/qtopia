@@ -1,113 +1,44 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Qt Toolkit -  Window Geometry</title><style type="text/css"><!--
-a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
---></style></head><body bgcolor="#ffffff">
-<p>
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-<h1 align="center"> Window Geometry</h1><br clear="all">
-<h2> Overview</h2>
-<p>
-QWidget provides several functions that deal with a widget's
-geometry.  Some of these functions operate on the pure client area
-(i.e. the window excluding the window frame), others include the
-window frame. The differentiation is done in a way that covers the
-most common usage transparently.
-<p>
-<dl>
-  <dt><strong>Including the window frame:</strong>
-  <dd>x(), y(), frameGeometry(), pos() and move()
-  <dt><strong>Excluding the window frame:</strong>
-  <dd> geometry(), width(), height(), rect() and size()
-</dl>
-<p>
-Note that the distinction only matters for decorated top-level
-widgets. For all child widgets, the frame geometry is equal to the
-widget's client geometry.
-<p>
-This image shows most of the functions in use:
-<center><img src="geometry.png" alt="Illustrating image"></center>
-<p>
-<h2> Unix/X11 peculiarities </h2>
-<p>
-On Unix/X11, a window does not have a frame until the window manager
-decorates it. This happens asynchronously at some point in time after
-calling show() and the first paint event the window receives - or it
-does not happen at all. Keep in mind that X11 is policy-free (others
-call it flexible). Thus you cannot make any safe assumption about the
-decoration frame your window will get. Basic rule: There's always one
-user who uses a window manager that breaks your assumption, and who
-will complain to you.
-<p>
-Furthermore, a toolkit cannot simply place windows on the screen. All
-Qt can do is to send certain hints to the window manager. The window
-manager, a separate process, may either obey, ignore or misunderstand
-them. Due to the partially unclear Inter-Client Communication
-Conventions Manual (ICCCM), window placement is handled quite
-differently in existing window managers.
-<p>
-X11 provides no standard or easy way to get the frame geometry once
-the window got decorated. Qt solves this problem with nifty heuristics
-and clever code that works on a wide range of window managers that
-exist today. Don't be surprised if you find one where frameGeometry()
-returns bogus results, though.
-<p>
-X11 also does not provide a way to maximize a window. The
-showMaximized() function in Qt therefore has to emulate the
-feature. Its result depends totally on the result of frameGeometry()
-and the capability of the window manager to do proper window
-placement, both of which cannot be guaranteed.
-<p>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: Window Geometry</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Window Geometry<br /><small></small></h1>
+<p><a href="qwidget.html">QWidget</a> provides several functions that deal with a widget's geometry. Some of these functions operate on the pure client area (i.e. the window excluding the window frame), others include the window frame. The differentiation is done in a way that covers the most common usage transparently.</p>
+<ul>
+<li><b>Including the window frame:</b> <a href="qwidget.html#x-prop">x()</a>, <a href="qwidget.html#y-prop">y()</a>, <a href="qwidget.html#frameGeometry-prop">frameGeometry()</a>, <a href="qwidget.html#pos-prop">pos()</a>, and <a href="qwidget.html#pos-prop">move()</a>.</li>
+<li><b>Excluding the window frame:</b> <a href="qwidget.html#geometry-prop">geometry()</a>, <a href="qwidget.html#width-prop">width()</a>, <a href="qwidget.html#height-prop">height()</a>, <a href="qwidget.html#rect-prop">rect()</a>, and <a href="qwidget.html#size-prop">size()</a>.</li>
+</ul>
+<p>Note that the distinction only matters for decorated top-level widgets. For all child widgets, the frame geometry is equal to the widget's client geometry.</p>
+<p>This diagram shows most of the functions in use:</p>
+<p align="center"><img src="images/geometry.png" alt="Geometry diagram" /></p><p>Topics:</p>
+<ul><li><a href="#x11-peculiarities">X11 Peculiarities</a></li>
+<li><a href="#restoring-a-window-s-geometry">Restoring a Window's Geometry</a></li>
+</ul>
+<a name="x11-peculiarities"></a>
+<h2>X11 Peculiarities</h2>
+<p>On X11, a window does not have a frame until the window manager decorates it. This happens asynchronously at some point in time after calling <a href="qwidget.html#show">QWidget::show</a>() and the first paint event the window receives, or it does not happen at all. Bear in mind that X11 is policy-free (others call it flexible). Thus you cannot make any safe assumption about the decoration frame your window will get. Basic rule: There's always one user who uses a window manager that breaks your assumption, and who will complain to you.</p>
+<p>Furthermore, a toolkit cannot simply place windows on the screen. All Qt can do is to send certain hints to the window manager. The window manager, a separate process, may either obey, ignore or misunderstand them. Due to the partially unclear Inter-Client Communication Conventions Manual (ICCCM), window placement is handled quite differently in existing window managers.</p>
+<p>X11 provides no standard or easy way to get the frame geometry once the window is decorated. Qt solves this problem with nifty heuristics and clever code that works on a wide range of window managers that exist today. Don't be surprised if you find one where <a href="qwidget.html#frameGeometry-prop">QWidget::frameGeometry</a>() returns wrong results though.</p>
+<p>Nor does X11 provide a way to maximize a window. <a href="qwidget.html#showMaximized">QWidget::showMaximized</a>() has to emulate the feature. Its result depends on the result of <a href="qwidget.html#frameGeometry-prop">QWidget::frameGeometry</a>() and the capability of the window manager to do proper window placement, neither of which can be guaranteed.</p>
+<a name="restoring-a-window-s-geometry"></a>
 <h2>Restoring a Window's Geometry</h2>
-<p>
-A common task in modern applications is to restore a window's geometry
-in a later session. On Windows, this is basically storing the result
-of geometry() and calling setGeometry() in the next session before
-doing show(). On X11, this won't work because an invisible window
-doesn't have a frame yet. The window manager would decorate the window
-later. When this happens, the window shifts towards the bottom/right
-corner of the screen depending on the size of the decoration frame. X
-theoretically provides a way to avoid this shift. Our tests have
-shown, though, that almost all window managers fail to implement this
-feature.
-<p>
- A workaround is to call setGeometry() after show(). This has the
- two disadvantages that the widget appears at a wrong place for a
- millisecond (results in flashing) and that currently only every
- second window manager gets it right. A safer solution is to store
- both pos() and size() and to restore the geometry using resize() and
- move() before calling show(), as demonstrated in the following
- example:
-<p>
-<pre>        MyWidget* widget = new MyWidget
-        ...
-        <a href="qpoint.html">QPoint</a> p = widget-&gt;pos();       // store position
-        <a href="qsize.html">QSize</a> s = widget-&gt;size();       // store size
-        ...
-        widget = new MyWidget;
-        widget-&gt;resize( s );    // restore size
-        widget-&gt;move( p );      // restore position
-        widget-&gt;show();         // show widget
-</pre>
-<p>
-This method works on both MS-Windows and most existing X11 window
-managers.
-
-<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+<p>Since version 4.2, Qt provides functions that saves and restores a window's geometry and state for you. <a href="qwidget.html#saveGeometry">QWidget::saveGeometry</a>() saves the window geometry and maximized/fullscreen state, while <a href="qwidget.html#restoreGeometry">QWidget::restoreGeometry</a>() restores it. The restore function also checks if the restored geometry is outside the available screen geometry, and modifies it as appropriate if it is.</p>
+<p>The rest of this document describes how to save and restore the geometry using the geometry properties. On Windows, this is basically storing the result of <a href="qwidget.html#geometry-prop">QWidget::geometry</a>() and calling <a href="qwidget.html#geometry-prop">QWidget::setGeometry</a>() in the next session before calling <a href="qwidget.html#show">show()</a>. On X11, this won't work because an invisible window doesn't have a frame yet. The window manager will decorate the window later. When this happens, the window shifts towards the bottom/right corner of the screen depending on the size of the decoration frame. Although X provides a way to avoid this shift, most window managers fail to implement this feature.</p>
+<p>A workaround is to call <a href="qwidget.html#geometry-prop">setGeometry()</a> after <a href="qwidget.html#show">show()</a>. This has the two disadvantages that the widget appears at a wrong place for a millisecond (results in flashing) and that currently only every second window manager gets it right. A safer solution is to store both <a href="qwidget.html#pos-prop">pos()</a> and <a href="qwidget.html#size-prop">size()</a> and to restore the geometry using <a href="qwidget.html#size-prop">QWidget::resize</a>() and <a href="qwidget.html#pos-prop">move()</a> before calling <a href="qwidget.html#show">show()</a>, as demonstrated in the following code snippets (from the Application example):</p>
+<pre></pre>
+<p>This method works on Windows, Mac OS X, and most X11 window managers.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

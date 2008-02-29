@@ -1,0 +1,172 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>  Tasks </title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">  Tasks <br><small>Functional Description</small></h1>
+<p />
+The <strong>Tasks</strong> application allows the user to prioritize tasks,
+manage due dates and, when appropriate, mark tasks as completed.
+<p />
+
+<p />
+<h2><a name="Data"></a> Data </h2>
+<p />
+A task consists of the following data:
+<p /> <ul>
+<li> A single line text description.
+</li> <li> A priority ranging from 1 as the highest priority to 5 as the lowest priority.
+</li> <li> A multi-line text note.
+</li> <li> A status consisting of: <ul>
+<li> Not started
+</li> <li> In Progress
+</li> <li> Completed
+</li> <li> Waiting
+</li> <li> Deferred
+</li></ul> 
+</li></ul> 
+<p /> <ul>
+<li> A percentage completed. Not applicable if task status is Not Started or Completed.
+</li> <li> The date the task is due for completion. This is optional.
+</li> <li> The date the task was started. Not applicable if the task status is Not Started.
+</li> <li> The date the task was completed. Only applicable if the task status is Completed.
+</li> <li> One or more categories. If the task is not assigned any category it is marked as <em>unfiled</em>.
+</li></ul> 
+<p />
+<p />
+<h2><a name="Application_Views"></a> Application Views </h2>
+<p />
+It is possible to view tasks in the following three ways:
+<p /> <ul>
+<li> As a sorted list of tasks.
+</li> <li> A detailed view of a single task.
+</li> <li> A task opened for editing.
+</li></ul> 
+<p />
+<p />
+<h3><a name="Sorted_List"></a> Sorted List </h3>
+<p />
+The primary display of the application shows a sorted list of tasks. In this
+list a user is able to change the priority of a task, mark a task Completed
+or view additional details of the task.
+<p />
+The sorting order of the tasks is:
+<p /> <ul>
+<li> Completed: incomplete tasks are shown first.
+</li> <li> Priority: tasks with a priority closer to 1 are shown first.
+</li> <li> Description: tasks are shown in alphabetic order.
+</li></ul> 
+<p />
+<p />
+From the sorted list view the user is able to:
+<p /> <ul>
+<li> Create a new task through the Edit View of the task.
+</li> <li> View the details for the task through the Detailed View of the task.
+</li> <li> Mark tasks as completed.
+</li> <li> Change the priority of a task
+</li> <li> Filter the list of tasks shown according to a specified category.
+</li></ul> 
+<p />
+<p />
+<h3><a name="Detailed_View"></a> Detailed View </h3>
+<p />
+The detailed view of a task shows data for a single task.  This is shown as
+rich text.  All the information for the task is formatted for optimum readability.
+<p />
+From the sorted list view the user is able to:
+<p /> <ul>
+<li> Edit the current task through the Edit View of the task.
+</li> <li> Delete the current task.
+</li> <li> Beam the current task using IR.
+</li></ul> 
+<p />
+<p />
+<h3><a name="Edit_View"></a> Edit View </h3>
+<p />
+The edit view of a task allows the user to specify the data for a new task
+or modify that of an old task.
+<p />
+Non-applicable values are disabled. For example, the start date field is disabled if the the task status is marked as Not Started.
+<p />
+When the editing has been completed the user is able to either accept or cancel the changes they have made.
+<p />
+<h2><a name="Features"></a> Features </h2>
+<p />
+<h3><a name="Add_Task"></a> Add Task </h3>
+<p />
+It is possible to add tasks. The application does not add a task without a description.
+<p />
+<h3><a name="Delete_Task"></a> Delete Task </h3>
+<p />
+It is possible to delete tasks. The application prompts the user to confirm the deletion of a task.
+<p />
+<h3><a name="Edit_Task"></a> Edit Task </h3>
+<p />
+It is possible to modify tasks. This includes changing the status and adding notes.
+<p />
+<h3><a name="Beaming"></a> Beaming </h3>
+<p />
+It is possible to beam a single task to or from another device using IR.
+<p />
+<h3><a name="Priorities"></a> Priorities </h3>
+<p />
+It is possible to prioritize tasks using the scale of 1 as the highest and 5 as the lowest.
+<p />
+<h3><a name="Categories"></a> Categories </h3>
+<p />
+It is possible to categorize tasks.
+<p />
+<h3><a name="Filtering"></a> Filtering </h3>
+<p />
+It is possible to filter the view of tasks by category.
+<p />
+<h3><a name="Maximum_Number_of_Tasks"></a> Maximum Number of Tasks </h3>
+<p />
+The maximum number of tasks is determined by the available device memory. Once this limit is reached it is only possible to delete tasks; they cannot be edited nor can any new tasks be added.
+<p />
+<h3><a name="Storage"></a> Storage </h3>
+<p />
+Each event requires approximately 100 bytes of storage plus UTF-8 string
+storage for the description, plus approximately 16 bytes per category membership, plus approximately 50 bytes if a due date is specified.
+<p />
+
+<p />
+<h3><a name="Memory"></a> Memory </h3>
+<p />
+While running, each event requires approximately 300 bytes of storage,
+plus UTF-16 string storage for the description, plus approximately 80 bytes per category membership.
+<p />
+
+<p />
+<h3><a name="QDL_Support"></a> QDL Support </h3>
+<p />
+It is possible to access tasks from other applications via the QDL service interface.
+When activated the <strong>Tasks</strong> application runs and shows linked tasks.
+<p />
+QDL links are embedded into the notes of a task.  When in the Detailed View,
+clicking on a QDL link activates the link's application.
+<p />
+<h2><a name="Config"></a> Config </h2>
+<p />
+The Phone Edition's <strong>Task</strong> application does not store any configuration-related data.
+<p />
+<h2><a name="Services"></a> Services </h2>
+<p /> <ul>
+<li> IR Receive text/x-vCalendar-Tasks
+</li> <li> Tasks - allows editing of tasks via <a href="fd-PIM.html" class="twikiLink">PIM</a> Library interface.
+</li> <li> QDL
+</li></ul> 
+<p />
+<hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div>

@@ -1,0 +1,13 @@
+<page name="contextbar" base="themes/gel" rect="0,0,0x18" stretch="32,144" scale="vertical" mask="botbar_mask">
+    <image name="reserved" rect="0,0,0x0" src="botbar" stretch="32,144" color="Highlight"/>
+    <layout>
+	<image expanding="yes" name="button0" rect="0,2,0x16" interactive="yes"/>
+	<image expanding="yes" name="button1" rect="0,2,0x16" interactive="yes"/>
+	<image expanding="yes" name="button2" rect="0,2,0x16" interactive="yes"/>
+    </layout>
+    <layout>
+	<text expanding="yes" name="button0" rect="0,2,0x16" size="7" bold="yes" align="hcenter" color="HighlightedText" interactive="yes"/>
+	<text expanding="yes" name="button1" rect="0,2,0x16" size="7" bold="yes" align="hcenter" color="HighlightedText" interactive="yes"/>
+	<text expanding="yes" name="button2" rect="0,2,0x16" size="7" bold="yes" align="hcenter" color="HighlightedText" interactive="yes"/>
+    </layout>
+</page>

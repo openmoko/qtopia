@@ -1,1051 +1,485 @@
-/**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
 **
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "launcherview.h"
-
-#include <qtopia/qpeapplication.h>
-#include <qtopia/applnk.h>
-#include <qtopia/qpedebug.h>
-#include <qtopia/categories.h>
-#include <qtopia/categoryselect.h>
-#include <qtopia/menubutton.h>
-#include <qtopia/mimetype.h>
-#include <qtopia/resource.h>
-#include <qtopia/qpetoolbar.h>
-//#include <qtopia/private/palmtoprecord.h>
-
-#include <qtimer.h>
-#include <qtextstream.h>
-#include <qdict.h>
-#include <qfile.h>
-#include <qfileinfo.h>
-#include <qhbox.h>
-#include <qiconview.h>
-#include <qwidgetstack.h>
-#include <qpainter.h>
-#include <qregexp.h>
-#include <qtoolbutton.h>
-#include <qimage.h>
-#include <qlabel.h>
-#include <qobjectlist.h>
+#include <QtopiaApplication>
+#include <QVBoxLayout>
+#include <QResizeEvent>
+#include <QSoftMenuBar>
+#include <QtopiaServiceRequest>
+#include <QMenu>
+#include <QDesktopWidget>
+#include <QSpeedDial>
+#include <QPainter>
+#include <QSet>
+#include <QSortFilterProxyModel>
+#include <QPixmap>
+#include <QItemDelegate>
 
 
-// These define how the busy icon is animated and highlighted
-#define BRIGHTEN_BUSY_ICON
-//#define ALPHA_FADE_BUSY_ICON
-//#define USE_ANIMATED_BUSY_ICON_OVERLAY
-#define BOUNCE_BUSY_ICON
-
-
-class BgPixmap
+LauncherViewListView::LauncherViewListView( QWidget *parent )
+    : QListView( parent )
 {
-public:
-    BgPixmap( const QPixmap &p ) : pm(p), ref(1) {}
-    QPixmap pm;
-    int ref;
-};
-
-static QMap<QString,BgPixmap*> *bgCache = 0;
-
-static void cleanup_cache()
-{
-    QMap<QString,BgPixmap*>::Iterator it = bgCache->begin();
-    while ( it != bgCache->end() ) {
-	QMap<QString,BgPixmap*>::Iterator curr = it;
-	++it;
-	delete (*curr);
-	bgCache->remove( curr );
-    }
-    delete bgCache;
-    bgCache = 0;
 }
 
-
-class LauncherItem : public QIconViewItem
+void LauncherViewListView::currentChanged( const QModelIndex &current, const QModelIndex &previous )
 {
+    QListView::currentChanged( current, previous );
+
+    emit currentIndexChanged( current, previous );
+}
+
+void LauncherViewListView::focusOutEvent(QFocusEvent *)
+{
+    // Do nothing.  Don't need an update.
+}
+
+bool LauncherViewListView::viewportEvent(QEvent *e)
+{
+    switch (e->type()) {
+    case QEvent::WindowActivate:
+    case QEvent::WindowDeactivate:
+        // suppress unneeded viewport update
+        return true;
+    default:
+        break;
+    }
+
+    return QListView::viewportEvent(e);
+}
+
+class QLauncherProxyModel : public QSortFilterProxyModel
+{
+
 public:
-    LauncherItem( QIconView *parent, AppLnk* applnk, bool bigIcon=TRUE );
-    ~LauncherItem();
+    QLauncherProxyModel(QObject *parent=0) : QSortFilterProxyModel(parent), bouncePos(0), sortingStyle(LauncherView::NoSorting) { }
+    virtual QVariant data ( const QModelIndex & index, int role = Qt::DisplayRole ) const;
 
-    AppLnk *appLnk() const { return app; }
-    AppLnk *takeAppLnk() { AppLnk* r=app; app=0; return r; }
+    void setItem(const QModelIndex&);
+    void clearItems();
+    bool hasBouncer() const {return items.count() != 0;}
+    void doBounceTick();
+    void setSorting(LauncherView::SortingStyle);
 
-    void animateIcon();
-    void resetIcon();
-
-    virtual int compare ( QIconViewItem * i ) const;
-    void paintItem( QPainter *p, const QColorGroup &cg );
-protected:
-    bool isBigIcon;
-    int iteration;
-    AppLnk* app;
-private:
-    void paintAnimatedIcon( QPainter *p );
-};
-
-
-class LauncherIconView : public QIconView {
-public:
-    LauncherIconView( QWidget* parent, const char* name=0 ) :
-	QIconView(parent,name),
-	tf(""),
-	cf(0),
-	bsy(0),
-	busyTimer(0),
-	bigIcns(TRUE),
-	bgColor(white)
-    {
-	sortmeth = Name;
-	hidden.setAutoDelete(TRUE);
-	ike = FALSE;
-	calculateGrid( Bottom );
-    }
-
-    ~LauncherIconView()
-    {
-#if 0 // debuggery
-	QListIterator<AppLnk> it(hidden);
-	AppLnk* l;
-	while ((l=it.current())) {
-	    ++it;
-	    //qDebug("%p: hidden (should remove)",l);
-	}
-#endif
-    }
-
-    QIconViewItem* busyItem() const { return bsy; }
-#ifdef USE_ANIMATED_BUSY_ICON_OVERLAY
-    QPixmap busyPixmap() const { return busyPix; }
-#endif
-    void setBigIcons( bool bi ) {
-	bigIcns = bi;
-#ifdef USE_ANIMATED_BUSY_ICON_OVERLAY
-	busyPix.resize(0,0);
-#endif
-    }
-
-    void updateCategoriesAndMimeTypes();
-
-    void doAutoScroll()
-    {
-	// We don't want rubberbanding (yet)
-    }
-
-    void setBusy(bool on)
-    {
-#ifdef USE_ANIMATED_BUSY_ICON_OVERLAY
-	if ( busyPix.isNull() ) {
-	    int size = ( bigIcns ) ? AppLnk::bigIconSize() : AppLnk::smallIconSize();
-	    busyPix.convertFromImage( Resource::loadImage( "busy" ).smoothScale( size * 16, size ) );
-	}
-#endif
-
-	if ( on ) {
-	    busyTimer = startTimer( 100 );
-	} else {
-	    if ( busyTimer ) {
-	        killTimer( busyTimer );
-		busyTimer = 0;
-	    }
-	}
-
-	LauncherItem *c = on ? (LauncherItem*)currentItem() : 0;
-
-	if ( bsy != c ) {
-	    LauncherItem *oldBusy = bsy;
-	    bsy = c;
-	    if ( oldBusy )
-		oldBusy->resetIcon();
-	    if ( bsy )
-		bsy->animateIcon();
-	}
-    }
-
-    bool inKeyEvent() const { return ike; }
-    void keyPressEvent(QKeyEvent* e)
-    {
-	ike = TRUE;
-	if ( e->key() == Key_F33 /* OK button */ || e->key() == Key_Space ) {
-	    if ( (e->state() & ShiftButton) )
-		emit mouseButtonPressed(ShiftButton, currentItem(), QPoint() );
-	    else
-		returnPressed(currentItem());
-	}
-
-	QIconView::keyPressEvent(e);
-	ike = FALSE;
-    }
-
-    void addItem(AppLnk* app, bool resort=TRUE);
-    bool removeLink(const QString& linkfile);
-
-    QStringList mimeTypes() const;
-    QStringList categories() const;
-
-    void clear()
-    {
-	mimes.clear();
-	cats.clear();
-	QIconView::clear();
-	hidden.clear();
-    }
-
-    void addCatsAndMimes(AppLnk* app)
-    {
-	// 	QStringList c = app->categories();
-	// 	for (QStringList::ConstIterator cit=c.begin(); cit!=c.end(); ++cit) {
-	// 	    cats.replace(*cit,(void*)1);
-	// 	}
-	QString maj=app->type();
-	int sl=maj.find('/');
-	if (sl>=0) {
-	    QString k;
-	    k = maj.left(12) == "application/" ? maj : maj.left(sl);
-	    mimes.replace(k,(void*)1);
-	}
-    }
-
-    void setBackgroundOrigin( QWidget::BackgroundOrigin ) {
-    }
-
-    void setBackgroundPixmap( const QPixmap &pm ) {
-	bgPixmap = pm;
-    }
-
-    void setBackgroundColor( const QColor &c ) {
-	bgColor = c;
-    }
-
-    void drawBackground( QPainter *p, const QRect &r )
-    {
-	if ( !bgPixmap.isNull() ) {
-           p->drawTiledPixmap( r, bgPixmap,
-                   QPoint( (r.x() + contentsX()) % bgPixmap.width(),
-                           (r.y() + contentsY()) % bgPixmap.height() ) );
-	} else {
-	    p->fillRect( r, bgColor );
-	}
-    }
-
-    void setItemTextPos( ItemTextPos pos )
-    {
-	calculateGrid( pos );
-	QIconView::setItemTextPos( pos );
-    }
-
-    void hideOrShowItems(bool resort);
-
-    void setTypeFilter(const QString& typefilter, bool resort)
-    {
-	tf = QRegExp(typefilter,FALSE,TRUE);
-	hideOrShowItems(resort);
-    }
-
-    void setCategoryFilter( int catfilter, bool resort )
-    {
-	Categories cat;
-	cat.load( categoryFileName() );
-	QString str;
-	if ( catfilter == -2 )
-	    cf = 0;
-	else
-	    cf = catfilter;
-	hideOrShowItems(resort);
-    }
-
-    enum SortMethod { Name, Date, Type };
-
-    void setSortMethod( SortMethod m )
-    {
-	if ( sortmeth != m ) {
-	    sortmeth = m;
-	    sort();
-	}
-    }
-
-    int compare(const AppLnk* a, const AppLnk* b)
-    {
-	switch (sortmeth) {
-	case Name:
-	    return a->name().lower().compare(b->name().lower());
-	case Date: {
-	    QFileInfo fa(a->linkFileKnown() ? a->linkFile() : a->file());
-	    QFileInfo fb(b->linkFileKnown() ? b->linkFile() : b->file());
-	    return fa.lastModified().secsTo(fb.lastModified());
-	}
-	case Type:
-	    return a->type().compare(b->type());
-	}
-	return 0;
-    }
-
-protected:
-
-    void timerEvent( QTimerEvent *te )
-    {
-	if ( te->timerId() == busyTimer ) {
-	    if ( bsy )
-		bsy->animateIcon();
-	} else {
-	    QIconView::timerEvent( te );
-	}
-    }
-
-    void styleChange( QStyle &old )
-    {
-	QIconView::styleChange( old );
-	calculateGrid( itemTextPos() );
-    }
-
-    void calculateGrid( ItemTextPos pos )
-    {
-	int dw = QApplication::desktop()->width();
-	int viewerWidth = dw-style().scrollBarExtent().width();
-	if ( pos == Bottom ) {
-	    int cols = 3;
-	    if ( viewerWidth <= 200 )
-		cols = 2;
-	    else if ( viewerWidth >= 400 )
-		 cols = viewerWidth/96;
-	    setSpacing( 4 );
-	    setGridX( (viewerWidth-(cols+1)*spacing())/cols );
-	    setGridY( fontMetrics().height()*2+24 );
-	} else {
-	    int cols = 2;
-	    if ( viewerWidth < 150 )
-		cols = 1;
-	    else if ( viewerWidth >= 400 )
-		 cols = viewerWidth/150;
-	    setSpacing( 2 );
-	    setGridX( (viewerWidth-(cols+1)*spacing())/cols );
-	    setGridY( fontMetrics().height()+2 );
-	}
-    }
-
-    void focusInEvent( QFocusEvent * ) {}
-    void focusOutEvent( QFocusEvent * ) {}
+    enum Roles { BusyRole = Qt::UserRole+1 };
 
 private:
-    QList<AppLnk> hidden;
-    QDict<void> mimes;
-    QDict<void> cats;
-    SortMethod sortmeth;
-    QRegExp tf;
-    int cf;
-    LauncherItem* bsy;
-    int busyTimer;
-    bool ike;
-    bool bigIcns;
-    QPixmap bgPixmap;
-    QColor bgColor;
-#ifdef USE_ANIMATED_BUSY_ICON_OVERLAY
-    QPixmap busyPix;
-#endif
+    QMap<QPair<int,int>, QModelIndex> items;
+    int bouncePos;
+    LauncherView::SortingStyle sortingStyle;
 };
 
-
-bool LauncherView::bsy=FALSE;
-
-void LauncherView::setBusy(bool on)
+QVariant QLauncherProxyModel::data ( const QModelIndex & index, int role ) const
 {
-    icons->setBusy(on);
-}
-
-LauncherItem::LauncherItem( QIconView *parent, AppLnk *applnk, bool bigIcon )
-    : QIconViewItem( parent, applnk->name(),
-           bigIcon ? applnk->bigPixmap() :applnk->pixmap() ),
-	isBigIcon( bigIcon ),
-	iteration(0),
-	app(applnk) // Takes ownership
-{
-}
-
-LauncherItem::~LauncherItem()
-{
-    LauncherIconView* liv = (LauncherIconView*)iconView();
-    if ( liv->busyItem() == this )
-	liv->setBusy(FALSE);
-    delete app;
-}
-
-int LauncherItem::compare ( QIconViewItem * i ) const
-{
-    LauncherIconView* view = (LauncherIconView*)iconView();
-    return view->compare(app,((LauncherItem *)i)->appLnk());
-}
-
-void LauncherItem::paintItem( QPainter *p, const QColorGroup &cg )
-{
-    LauncherIconView* liv = (LauncherIconView*)iconView();
-    QBrush oldBrush( liv->itemTextBackground() );
-    QColorGroup mycg( cg );
-    if ( liv->currentItem() == this ) {
-	liv->setItemTextBackground( cg.brush( QColorGroup::Highlight ) );
-	mycg.setColor( QColorGroup::Text, cg.color( QColorGroup::HighlightedText ) );
-    }
-
-    QIconViewItem::paintItem(p,mycg);
-
-    // Paint animation overlay
-    if ( liv->busyItem() == this ) 
-	paintAnimatedIcon(p);
-
-    if ( liv->currentItem() == this )
-	liv->setItemTextBackground( oldBrush );
-}
-
-void LauncherItem::paintAnimatedIcon( QPainter *p )
-{
-    LauncherIconView* liv = (LauncherIconView*)iconView();
-    int pic = iteration % 16;
-    int w = pixmap()->width(), h = pixmap()->height();
-    QPixmap dblBuf( w, h + 4 );
-    QPainter p2( &dblBuf );
-    int x1, y1;
-    if ( liv->itemTextPos() == QIconView::Bottom ) {
-	x1 = x() + (width() - w) / 2 - liv->contentsX();
-	y1 = y() - liv->contentsY();
-    } else {
-	x1 = x() - liv->contentsX();
-	y1 = y() + (height() - h) / 2 - liv->contentsY();
-    }
-    y1 -= 2;
-    p2.translate(-x1,-y1);
-    liv->drawBackground( &p2, QRect(x1,y1,w,h+4) );
-    int bounceY = 2;
-#ifdef BOUNCE_BUSY_ICON
-    bounceY = 4 - ((iteration+2)%8);
-    bounceY = bounceY < 0 ? -bounceY : bounceY;
-#endif
-    p2.drawPixmap( x1, y1 + bounceY, *pixmap() );
-#ifdef USE_ANIMATED_BUSY_ICON_OVERLAY
-    p2.drawPixmap( x1, y1 + bounceY, liv->busyPixmap(), w * pic, 0, w, h );
-#endif
-    p->drawPixmap( x1, y1, dblBuf );
-}
-
-void LauncherItem::animateIcon()
-{
-    LauncherIconView* liv = (LauncherIconView*)iconView();
-
-    if ( liv->busyItem() != this || !app )
-	return;
-
-    // Highlight the icon
-    if ( iteration == 0 ) {
-	QPixmap src = isBigIcon ? app->bigPixmap() : app->pixmap();
-	QImage img = src.convertToImage();
-	QRgb *rgb;
-	int count;
-	if ( img.depth() == 32 ) {
-	    rgb = (QRgb*)img.bits();
-	    count = img.bytesPerLine()/sizeof(QRgb)*img.height();
-	} else {
-	    rgb = img.colorTable();
-	    count = img.numColors();
-	}
-	for ( int r = 0; r < count; r++, rgb++ ) {
-#if defined(BRIGHTEN_BUSY_ICON)
-	    QColor c(*rgb);
-	    int h, s, v;
-	    c.hsv(&h,&s,&v);
-	    c.setHsv(h,QMAX(s-24,0),QMIN(v+48,255));
-	    *rgb = qRgba(c.red(),c.green(),c.blue(),qAlpha(*rgb));
-#elif defined(ALPHA_FADE_BUSY_ICON)
-	    *rgb = qRgba(qRed(*rgb),qGreen(*rgb),qBlue(*rgb),qAlpha(*rgb)/2);
-#endif
-	}
-	src.convertFromImage( img );
-	setPixmap( src );
-    }
-
-    iteration++;
-
-    // Paint animation overlay
-    QPainter p( liv->viewport() );
-    paintAnimatedIcon( &p );
-}
-
-void LauncherItem::resetIcon()
-{
-    iteration = 0;
-    setPixmap( isBigIcon ? app->bigPixmap() : app->pixmap() );
-}
-
-//===========================================================================
-
-QStringList LauncherIconView::mimeTypes() const
-{
-    QStringList r;
-    QDictIterator<void> it(mimes);
-    while (it.current()) {
-	r.append(it.currentKey());
-	++it;
-    }
-    r.sort();
-    return r;
-}
-
-void LauncherIconView::addItem(AppLnk* app, bool resort)
-{
-    addCatsAndMimes(app);
-
-    if ( (tf.isEmpty() || tf.match(app->type()) >= 0)
-	 && (cf == 0 || app->categories().contains(cf)
-	     || cf == -1 && app->categories().count() == 0 ) )
-	(void) new LauncherItem( this, app, bigIcns );
+    static int offSets[] = { 0, 1, 2, 1, 0, -1, -2, -1};
+    if (role == QLauncherProxyModel::BusyRole)
+        return QVariant(hasBouncer() && items.contains(qMakePair<int, int>(index.row(), index.column())));
     else
-	hidden.append(app);
-    if ( resort )
-	sort();
+        return QSortFilterProxyModel::data(index, role);
 }
 
-void LauncherIconView::updateCategoriesAndMimeTypes()
+void QLauncherProxyModel::setItem(const QModelIndex& index)
 {
-    mimes.clear();
-    cats.clear();
-    LauncherItem* item = (LauncherItem*)firstItem();
-    while (item) {
-	addCatsAndMimes(item->appLnk());
-	item = (LauncherItem*)item->nextItem();
-    }
-    QListIterator<AppLnk> it(hidden);
-    AppLnk* l;
-    while ((l=it.current())) {
-	addCatsAndMimes(l);
-	++it;
+    clearItems();
+    items.insert(QPair<int, int>(index.row(), index.column()), index);
+}
+
+void QLauncherProxyModel::clearItems()
+{
+    bouncePos=0;
+    QMap<QPair<int,int>, QModelIndex> olditems=items;
+    items.clear();
+    foreach(QModelIndex item, olditems)
+    {
+        emit dataChanged(item, item);
     }
 }
 
-void LauncherIconView::hideOrShowItems(bool resort)
+void QLauncherProxyModel::doBounceTick()
 {
-    viewport()->setUpdatesEnabled( FALSE );
-    hidden.setAutoDelete(FALSE);
-    QList<AppLnk> links=hidden;
-    hidden.clear();
-    hidden.setAutoDelete(TRUE);
-    LauncherItem* item = (LauncherItem*)firstItem();
-    while (item) {
-	links.append(item->takeAppLnk());
-	item = (LauncherItem*)item->nextItem();
+    bouncePos++;
+    bouncePos%=8;
+    foreach(QModelIndex item, items)
+    {
+        emit dataChanged(item, item);
     }
-    clear();
-    QListIterator<AppLnk> it(links);
-    AppLnk* l;
-    while ((l=it.current())) {
-	addItem(l,FALSE);
-	++it;
-    }
-    if ( resort && !autoArrange() )
-	sort();
-    viewport()->setUpdatesEnabled( TRUE );
 }
 
-bool LauncherIconView::removeLink(const QString& linkfile)
+void QLauncherProxyModel::setSorting(LauncherView::SortingStyle style)
 {
-    LauncherItem* item = (LauncherItem*)firstItem();
-    AppLnk* l;
-    bool did = FALSE;
-    DocLnk dl(linkfile);
-    while (item) {
-	l = item->appLnk();
-	LauncherItem *nextItem = (LauncherItem *)item->nextItem();
-	if (  l->linkFileKnown() && l->linkFile() == linkfile
-		|| l->fileKnown() && (
-		    l->file() == linkfile
-		    || dl.isValid() && dl.file() == l->file() ) ) {
-	    delete item;
-	    did = TRUE;
-	}
-	item = nextItem;
+    sortingStyle=style;
+    if(style==LauncherView::LanguageAwareSorting)
+    {
+        sort(0);
+        setDynamicSortFilter(true);
     }
-    QListIterator<AppLnk> it(hidden);
-    while ((l=it.current())) {
-	++it;
-	if ( l->linkFileKnown() && l->linkFile() == linkfile
-		|| l->file() == linkfile
-		|| dl.isValid() && dl.file() == l->file() ) {
-	    hidden.removeRef(l);
-	   did = TRUE;
-	}
-    }
-    return did;
+    else
+        setDynamicSortFilter(false);
 }
 
-//===========================================================================
-
-LauncherView::LauncherView( QWidget* parent, const char* name, WFlags fl )
-    : QVBox( parent, name, fl )
+class LauncherViewDelegate : public QItemDelegate
 {
-    catmb = 0;
-    icons = new LauncherIconView( this );
+public:
+    LauncherViewDelegate(QObject *parent=0) : QItemDelegate(parent) {}
+    virtual void paint(QPainter *painter, const QStyleOptionViewItem &opt, const QModelIndex &index) const
+    {
+        QItemDelegate::paint(painter, opt, index); 
+        QVariant value = index.data(QLauncherProxyModel::BusyRole);
+        if (value.toBool()) {
+            int size = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
+            QPixmap pm = QIcon(":icon/wait").pixmap(size,size);
+            painter->drawPixmap(opt.rect.right()-size, opt.rect.top(), pm);
+        }
+    }
+};
+
+
+////////////////////////////////////////////////////////////////
+//
+// LauncherView implementation
+#include <QStringListModel>
+LauncherView::LauncherView( QWidget* parent, Qt::WFlags fl )
+    : QWidget(parent, fl)
+        , icons(NULL)
+        , model(NULL)
+        , nColumns(1)
+        , busyTimer(0)
+        , bpModel(NULL)
+{
+    QVBoxLayout *vbl = new QVBoxLayout(this);
+    vbl->setMargin(0);
+    vbl->setSpacing(0);
+    icons = new LauncherViewListView(this);
+    icons->setItemDelegate(new LauncherViewDelegate(icons));
+    vbl->addWidget(icons);
     setFocusProxy(icons);
-    QPEApplication::setStylusOperation( icons->viewport(), QPEApplication::RightOnHold );
 
-    icons->setItemsMovable( FALSE );
-    icons->setAutoArrange( TRUE );
-    icons->setSorting( TRUE );
+    QtopiaApplication::setStylusOperation( icons->viewport(), QtopiaApplication::RightOnHold );
+
     icons->setFrameStyle( QFrame::NoFrame );
-    icons->setMargin( 0 );
-    icons->setSelectionMode( QIconView::NoSelection );
-    icons->setBackgroundMode( PaletteBase );
-    icons->setResizeMode( QIconView::Fixed );
-    vmode = (ViewMode)-1;
-    setViewMode( Icon );
+    icons->setResizeMode( QListView::Fixed );
+    icons->setSelectionMode( QAbstractItemView::SingleSelection );
+    icons->setSelectionBehavior( QAbstractItemView::SelectItems );
+    //icons->setUniformItemSizes( true );
+    icons->setLayoutMode(QListView::Batched);
+//    icons->setWordWrap( true );
 
-    connect( icons, SIGNAL(mouseButtonClicked(int, QIconViewItem *, const QPoint&)),
-		   SLOT(itemClicked(int, QIconViewItem *)) );
-    connect( icons, SIGNAL(selectionChanged()),
-		   SLOT(selectionChanged()) );
-    connect( icons, SIGNAL(returnPressed(QIconViewItem *)),
-		   SLOT(returnPressed(QIconViewItem *)) );
-    connect( icons, SIGNAL(mouseButtonPressed(int, QIconViewItem *, const QPoint&)),
-		   SLOT(itemPressed(int, QIconViewItem *)) );
+    contentSet = new QContentSet(this);
+    contentSet->setSortOrder(QStringList() << "name");
+    bpModel = new QLauncherProxyModel(this);
+    model = new QContentSetModel(contentSet, bpModel);
+    bpModel->setSourceModel(model);
 
-    tools = 0;
-    setBackgroundType( Ruled, QString::null );
+//    setViewMode(QListView::IconMode);
+    setViewMode(QListView::ListMode);
+
+    connect( icons, SIGNAL(clicked(const QModelIndex &)),
+             SLOT(itemClicked(const QModelIndex &)));
+    connect( icons, SIGNAL(activated(const QModelIndex &)),
+             SLOT(returnPressed(const QModelIndex &)) );
+    connect( icons, SIGNAL(pressed(const QModelIndex &)),
+             SLOT(itemPressed(const QModelIndex &)));
+
+#ifndef QTOPIA_PHONE
+    setBackgroundType( Ruled, QString() );
+#endif
+
+    icons->setModel(bpModel);
 }
 
 LauncherView::~LauncherView()
 {
-    if ( bgCache && bgCache->contains( bgName ) )
-	(*bgCache)[bgName]->ref--;
 }
 
-void LauncherView::hideIcons()
+void LauncherView::setBusy(bool on)
 {
-    icons->hide();
+    setBusy(icons->currentIndex(), on);
 }
 
-void LauncherView::setToolsEnabled(bool y)
+void LauncherView::setBusy(const QModelIndex &index, bool on)
 {
-    if ( !y != !tools ) {
-	if ( y ) {
-	    tools = new QHBox(this);
-
-	    // Type filter
-	    typemb = new QComboBox(tools);
-	    QSizePolicy p = typemb->sizePolicy();
-	    p.setHorData(QSizePolicy::Expanding);
-	    typemb->setSizePolicy(p);
-
-	    // Category filter
-	    updateTools();
-	    tools->show();
-
-	    // Always show vscrollbar
-	    icons->setVScrollBarMode( QScrollView::AlwaysOn );
-	} else {
-	    delete tools;
-	    tools = 0;
-	}
+    if ( on )
+    {
+        bpModel->setItem(index);
+        bpModel->doBounceTick();
+    }
+    else
+    {
+        bpModel->clearItems();
     }
 }
 
-void LauncherView::updateTools()
+void LauncherView::timerEvent ( QTimerEvent * event )
 {
-    disconnect( typemb, SIGNAL(activated(int)),
-	        this, SLOT(showType(int)) );
-    if ( catmb ) disconnect( catmb, SIGNAL(signalSelected(int)),
-	        this, SLOT(showCategory(int)) );
-
-    // ### I want to remove this
-    icons->updateCategoriesAndMimeTypes();
-
-    QString prev;
-
-    // Type filter
-    QStringList types;
-    typelist = icons->mimeTypes();
-    for (QStringList::ConstIterator it = typelist.begin(); it!=typelist.end(); ++it) {
-	QString t = *it;
-	if ( t.left(12) == "application/" ) {
-	    MimeType mt(t);
-	    const AppLnk* app = mt.application();
-	    if ( app )
-		t = app->name();
-	    else
-		t = t.mid(12);
-	} else {
-	    t[0] = t[0].upper();
-	}
-	types += t;
-    }
-    types << tr("All types");
-    prev = typemb->currentText();
-    typemb->clear();
-    typemb->insertStringList(types);
-    for (int i=0; i<typemb->count(); i++) {
-	if ( typemb->text(i) == prev ) {
-	    typemb->setCurrentItem(i);
-	    break;
-	}
-    }
-    if ( prev.isNull() )
-	typemb->setCurrentItem(typemb->count()-1);
-
-    int pcat = catmb ? catmb->currentCategory() : -2;
-    if ( !catmb )
-	catmb = new CategorySelect(tools);
-    Categories cats( 0 );
-    cats.load( categoryFileName() );
-    QArray<int> vl( 0 );
-    catmb->setCategories( vl, "Document View", // No tr
-	tr("Document View") );
-    catmb->setRemoveCategoryEdit( TRUE );
-    catmb->setAllCategories( TRUE );
-    catmb->setCurrentCategory(pcat);
-
-    // if type has changed we need to redisplay
-    if ( typemb->currentText() != prev )
-	showType( typemb->currentItem() );
-
-    connect(typemb, SIGNAL(activated(int)), this, SLOT(showType(int)));
-    connect(catmb, SIGNAL(signalSelected(int)), this, SLOT(showCategory(int)));
-}
-
-void LauncherView::sortBy(int s)
-{
-    icons->setSortMethod((LauncherIconView::SortMethod)s);
-}
-
-void LauncherView::showType(int t)
-{
-    if ( t >= (int)typelist.count() ) {
-	icons->setTypeFilter("",TRUE);
+    if ( event->timerId() == busyTimer ) {
+        bpModel->doBounceTick();
     } else {
-	QString ty = typelist[t];
-	if ( !ty.contains('/') )
-	    ty += "/*";
-	icons->setTypeFilter(ty,TRUE);
+        QWidget::timerEvent( event );
     }
 }
 
-void LauncherView::showCategory( int c )
+void LauncherView::setViewMode( QListView::ViewMode m )
 {
-    icons->setCategoryFilter( c, TRUE );
+    Q_ASSERT(icons);
+    if(m==QListView::ListMode)
+        icons->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    else
+        icons->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    icons->setViewMode(m);
+    calculateGridSize();
 }
 
-void LauncherView::setViewMode( ViewMode m )
+QListView::ViewMode LauncherView::viewMode() const
 {
-    if ( vmode != m ) {
-	bool bigIcons = m == Icon;
-	icons->viewport()->setUpdatesEnabled( FALSE );
-	icons->setBigIcons( bigIcons );
-	switch ( m ) {
-	    case List:
-		icons->setItemTextPos( QIconView::Right );
-		break;
-	    case Icon:
-		icons->setItemTextPos( QIconView::Bottom );
-		break;
-	}
-	icons->hideOrShowItems( FALSE );
-	icons->viewport()->setUpdatesEnabled( TRUE );
-	vmode = m;
-    }
-}
-
-//
-// User images may require scaling.
-//
-QImage LauncherView::loadBackgroundImage(QString &bgName)
-{
-    QImageIO imgio;
-    QSize   ds = qApp->desktop()->size();   // should be launcher, not desktop
-    bool    further_scaling = TRUE;
-
-    imgio.setFileName( bgName );
-    imgio.setParameters("GetHeaderInformation");
-
-    if (imgio.read() == FALSE) {
-	return imgio.image();
-    }
-
-    if (imgio.image().width() < ds.width() &&
-	    imgio.image().height() < ds.height()) {
-	further_scaling = FALSE;
-    }
-
-    if (!imgio.image().bits()) {
-	//
-	// Scale and load.  Note we don't scale up.
-	//
-	QString param( "Scale( %1, %2, ScaleMin )" ); // No tr
-	imgio.setParameters(further_scaling ?
-	    param.arg(ds.width()).arg(ds.height()).latin1() :
-	    "");
-	imgio.read();
-    } else {
-	if (further_scaling) {
-	    int	t1 = imgio.image().width() * ds.height();
-	    int t2 = imgio.image().height() * ds.width();
-	    int dsth = ds.height();
-	    int dstw = ds.width();
-
-	    if (t1 > t2) {
-		dsth = t2 / imgio.image().width();
-	    } else {
-		dstw = t1 / imgio.image().height();
-	    }
-
-	    //
-	    // Loader didn't scale for us.  Do it manually.
-	    //
-	    return imgio.image().smoothScale(dstw, dsth);
-	}
-    }
-
-    return imgio.image();
-}
-
-void LauncherView::setBackgroundType( BackgroundType t, const QString &val )
-{
-    if ( !bgCache ) {
-	bgCache = new QMap<QString,BgPixmap*>;
-	qAddPostRoutine( cleanup_cache );
-    }
-
-    if ( bgCache->contains( bgName ) )
-	(*bgCache)[bgName]->ref--;
-    bgName = "";
-
-    QPixmap bg;
-
-    switch ( t ) {
-	case Ruled: {
-	    bgName = QString("Ruled_%1").arg(colorGroup().background().name()); // No tr
-	    if ( bgCache->contains( bgName ) ) {
-		(*bgCache)[bgName]->ref++;
-		bg = (*bgCache)[bgName]->pm;
-	    } else {
-		bg.resize( width(), 9 );
-		QPainter painter( &bg );
-		for ( int i = 0; i < 3; i++ ) {
-		    painter.setPen( white );
-		    painter.drawLine( 0, i*3, width()-1, i*3 );
-		    painter.drawLine( 0, i*3+1, width()-1, i*3+1 );
-		    painter.setPen( colorGroup().background().light(105) );
-		    painter.drawLine( 0, i*3+2, width()-1, i*3+2 );
-		}
-		painter.end();
-		bgCache->insert( bgName, new BgPixmap(bg) );
-	    }
-	    break;
-	}
-
-	case Image:
-	    if (!val.isEmpty()) {
-		bgName = val;
-		if ( bgCache->contains( bgName ) ) {
-		    (*bgCache)[bgName]->ref++;
-		    bg = (*bgCache)[bgName]->pm;
-		} else {
-		    QString imgFile = bgName;
-		    bool tile = FALSE;
-		    if ( imgFile[0]!='/' || !QFile::exists(imgFile) ) {
-			imgFile = Resource::findPixmap( "wallpaper/" + imgFile );
-			tile = TRUE;
-		    }
-		    QImage img = loadBackgroundImage(imgFile);
-
-
-		    if ( img.depth() == 1 )
-			img = img.convertDepth(8);
-		    img.setAlphaBuffer(FALSE);
-		    bg.convertFromImage(img);
-		    bgCache->insert( bgName, new BgPixmap(bg) );
-		}
-	    }
-	    break;
-
-	case SolidColor:
-	default:
-	    break;
-    }
-
-    const QObjectList *list = queryList( "QWidget", 0, FALSE );
-    QObject *obj;
-    for ( QObjectListIt it( *list ); (obj=it.current()); ++it ) {
-	if ( obj->isWidgetType() ) {
-	    QWidget *w = (QWidget*)obj;
-	    w->setBackgroundPixmap( bg );
-	    if ( bgName.isEmpty() ) {
-		// Solid Color
-		if ( val.isEmpty() ) 
-		    w->setBackgroundColor( colorGroup().base() );
-		else 
-		    w->setBackgroundColor( val );
-	    } else {
-		// Ruled or Image pixmap
-		w->setBackgroundOrigin( ParentOrigin );
-	    }
-	}
-    }
-    delete list;
-
-    bgType = t;
-    icons->viewport()->update();
-
-    QTimer::singleShot( 1000, this, SLOT(flushBgCache()) );
-}
-
-void LauncherView::setTextColor( const QColor &tc )
-{
-    textCol = tc;
-    QColorGroup cg = icons->colorGroup();
-    cg.setColor( QColorGroup::Text, tc );
-    icons->setPalette( QPalette(cg,cg,cg) );
-    icons->viewport()->update();
-}
-
-void LauncherView::setViewFont( const QFont &f )
-{
-    icons->setFont( f );
-    icons->hideOrShowItems( FALSE );
-}
-
-void LauncherView::clearViewFont()
-{
-    icons->unsetFont();
-    icons->hideOrShowItems( FALSE );
-}
-
-void LauncherView::resizeEvent(QResizeEvent *e)
-{
-    QVBox::resizeEvent( e );
-    if ( e->size().width() != e->oldSize().width() )
-	sort();
-}
-
-void LauncherView::selectionChanged()
-{
-    QIconViewItem* item = icons->currentItem();
-    if ( item && item->isSelected() ) {
-	AppLnk *appLnk = ((LauncherItem *)item)->appLnk();
-	if ( icons->inKeyEvent() ) // not for mouse press
-	    emit clicked( appLnk );
-	item->setSelected(FALSE);
-    }
-}
-
-void LauncherView::returnPressed( QIconViewItem *item )
-{
-    if ( item ) {
-	AppLnk *appLnk = ((LauncherItem *)item)->appLnk();
-	emit clicked( appLnk );
-    }
-}
-
-void LauncherView::itemClicked( int btn, QIconViewItem *item )
-{
-    if ( item ) {
-	AppLnk *appLnk = ((LauncherItem *)item)->appLnk();
-	if ( btn == LeftButton ) {
-	    // Make sure it's the item we execute that gets highlighted
-	    icons->setCurrentItem( item );
-	    emit clicked( appLnk );
-	}
-	item->setSelected(FALSE);
-    }
-}
-
-void LauncherView::itemPressed( int btn, QIconViewItem *item )
-{
-    if ( item ) {
-	AppLnk *appLnk = ((LauncherItem *)item)->appLnk();
-	if ( btn == RightButton )
-	    emit rightPressed( appLnk );
-	else if ( btn == ShiftButton )
-	    emit rightPressed( appLnk );
-	item->setSelected(FALSE);
-    }
+    Q_ASSERT(icons);
+    return icons->viewMode();
 }
 
 void LauncherView::removeAllItems()
 {
-    icons->clear();
+    contentSet->clear();
 }
 
-bool LauncherView::removeLink(const QString& linkfile)
+void LauncherView::addItem(QContent* app, bool resort)
 {
-    return icons->removeLink(linkfile);
+    Q_UNUSED(resort);
+    if(app == NULL)
+        return;
+    contentSet->add( *app );
+    if(resort)
+        bpModel->sort(0);
 }
 
-void LauncherView::setSortEnabled( bool v )
+void LauncherView::removeItem(const QContent &app)
 {
-    icons->setSorting( v );
-    if ( v )
-	sort();
+    contentSet->remove(app);
 }
 
-void LauncherView::setUpdatesEnabled( bool u )
+
+void LauncherView::returnPressed(const QModelIndex &item)
 {
-    icons->setUpdatesEnabled( u );
+    emit clicked(model->content(bpModel->mapToSource(item)));
 }
 
-void LauncherView::sort()
+void LauncherView::itemClicked(const QModelIndex & index)
 {
-    icons->sort();
-}
-
-void LauncherView::addItem(AppLnk* app, bool resort)
-{
-    icons->addItem(app,resort);
-}
-
-void LauncherView::paletteChange( const QPalette &p )
-{
-    icons->unsetPalette();
-    QVBox::paletteChange( p );
-    if ( bgType == Ruled )
-	setBackgroundType( Ruled, QString::null );
-    QColorGroup cg = icons->colorGroup();
-    cg.setColor( QColorGroup::Text, textCol );
-    icons->setPalette( QPalette(cg,cg,cg) );
-}
-
-void LauncherView::fontChanged(const QFont&)
-{
-    qDebug("LauncherView::fontChanged()");
-    icons->hideOrShowItems( FALSE );
-}
-
-void LauncherView::relayout(void)
-{
-    icons->hideOrShowItems(FALSE);
-}
-
-void LauncherView::flushBgCache()
-{
-    if ( !bgCache )
-	return;
-    // remove unreferenced backgrounds.
-    QMap<QString,BgPixmap*>::Iterator it = bgCache->begin();
-    while ( it != bgCache->end() ) {
-	QMap<QString,BgPixmap*>::Iterator curr = it;
-	++it;
-	if ( (*curr)->ref == 0 ) {
-	    delete (*curr);
-	    bgCache->remove( curr );
-	}
+    if(QApplication::mouseButtons () == Qt::LeftButton)
+    {
+        icons->setCurrentIndex( index );
+        emit clicked(model->content(bpModel->mapToSource(index)));
     }
 }
 
+void LauncherView::itemPressed(const QModelIndex & index)
+{
+    if(QApplication::mouseButtons () == Qt::RightButton)
+    {
+        icons->setCurrentIndex( index );
+        emit rightPressed(model->content(bpModel->mapToSource(index)));
+    }
+}
+
+void LauncherView::resizeEvent(QResizeEvent *e)
+{
+    QWidget::resizeEvent( e );
+    calculateGridSize();
+}
+
+void LauncherView::changeEvent(QEvent *e)
+{
+    if (e->type() == QEvent::PaletteChange) {
+#ifndef QTOPIA_PHONE
+        setBackgroundType( Ruled, QString() );
+#endif
+        QPalette pal(palette());
+        //pal.setColor(QPalette::Text, textCol);    // todo later, include text color setting. Not necessary for now.
+        icons->setPalette(pal);
+    }
+    if (e->type() == QEvent::StyleChange)
+        calculateGridSize();
+    QWidget::changeEvent(e);
+}
+
+void LauncherView::showEvent(QShowEvent *e)
+{
+    QWidget::showEvent(e);
+
+    resize(size().width(), size().height()+1); // HACK: to get around rtl bug for QListView in Qt 4.2.2
+}
+
+void LauncherView::setColumns(int columns)
+{
+    nColumns = columns;
+    calculateGridSize();
+}
+
+void LauncherView::setFilter(const QContentFilter &filter)
+{
+    if( filter != mainFilter )
+    {
+        mainFilter = filter;
+
+        contentSet->setCriteria( mainFilter & typeFilter & categoryFilter );
+        resetSelection();
+    }
+}
+
+const QContent LauncherView::currentItem() const
+{
+    return model->content(bpModel->mapToSource(icons->currentIndex()));
+}
+
+void LauncherView::calculateGridSize()
+{
+    QSize grSize;
+    Q_ASSERT(model);
+    Q_ASSERT(icons);
+
+    int dw = width();
+    int viewerWidth = dw-style()->pixelMetric(QStyle::PM_ScrollBarExtent)-6;
+    int lineHeight=0;
+    if ( viewMode() == QListView::IconMode ) {
+        icons->setSpacing( 2 );
+
+        int width = viewerWidth/nColumns;
+        int iconHeight = width - fontMetrics().height() * 2;
+
+        grSize = QSize(width, width);
+        QSize icoSize = QSize(iconHeight, iconHeight);
+        icons->setIconSize(icoSize);
+    } else {
+        icons->setSpacing( 1 );
+        lineHeight = style()->pixelMetric(QStyle::PM_ListViewIconSize) + 4;
+        grSize = QSize((viewerWidth-(nColumns+1)*icons->spacing())/nColumns,
+                        lineHeight);
+        icons->setIconSize(QSize());
+    }
+
+    icons->setGridSize(grSize);
+}
+
+void LauncherView::showType( const QContentFilter &filter )
+{
+    if( filter != typeFilter )
+    {
+        typeFilter = filter;
+
+        contentSet->setCriteria( mainFilter & typeFilter & categoryFilter );
+        resetSelection();
+    }
+}
+
+void LauncherView::showCategory( const QContentFilter &filter )
+{
+    if( filter != categoryFilter )
+    {
+        categoryFilter = filter;
+
+        contentSet->setCriteria( mainFilter & typeFilter & categoryFilter );
+        resetSelection();
+    }
+}
+
+void LauncherView::resetSelection()
+{
+    if (icons && model && icons->model()->rowCount()) // && !icons->currentItem())
+    {
+        icons->setCurrentIndex(icons->model()->index(0,0));
+    }
+}
+
+void LauncherView::setSorting(SortingStyle style)
+{
+    Q_ASSERT(bpModel);
+    bpModel->setSorting(style);
+}
+
+////////////////////////////////////////////////////////////////
+//
+// ApplicationLauncherView implementation
+
+ApplicationLauncherView::ApplicationLauncherView(QWidget *parent)
+    : LauncherView(parent), rightMenu(0)
+{
+#ifdef QTOPIA_KEYPAD_NAVIGATION
+    QMenu * softMenu = QSoftMenuBar::menuFor(this);
+#endif
+    rightMenu = new QMenu(this);
+#ifdef QTOPIA_PHONE
+    QAction *a_speed = new QAction(QIcon(":icon/phone/speeddial"),
+                                   tr("Add to Speed Dial..."), this );
+    connect( a_speed, SIGNAL(triggered()), this, SLOT(addSpeedDial()));
+
+    softMenu->addAction(a_speed);
+    rightMenu->addAction(a_speed);
+#endif
+
+    QObject::connect(this, SIGNAL(rightPressed(QContent)),
+                     this, SLOT(launcherRightPressed(QContent)));
+    setViewMode(QListView::ListMode);
+    bpModel->setSorting(LauncherView::LanguageAwareSorting);
+}
+
+
+ApplicationLauncherView::ApplicationLauncherView(const QString &category, QWidget *parent)
+    : LauncherView(parent), rightMenu(0)
+{
+#ifdef QTOPIA_KEYPAD_NAVIGATION
+    QMenu * softMenu = QSoftMenuBar::menuFor(this);
+#endif
+    rightMenu = new QMenu(this);
+#ifdef QTOPIA_PHONE
+    QAction *a_speed = new QAction(QIcon(":icon/phone/speeddial"),
+                                   tr("Add to Speed Dial..."), this );
+    connect( a_speed, SIGNAL(triggered()), this, SLOT(addSpeedDial()));
+
+    softMenu->addAction(a_speed);
+    rightMenu->addAction(a_speed);
+#endif
+
+    QObject::connect(this, SIGNAL(rightPressed(QContent)),
+                     this, SLOT(launcherRightPressed(QContent)));
+
+    QContentFilter filters = QContentFilter( QContent::Application )
+            & QContentFilter( QContentFilter::Category, category );
+contentSet->setCriteria( filters );
+
+    bpModel->setSorting(LauncherView::LanguageAwareSorting);
+}
+
+void ApplicationLauncherView::launcherRightPressed(QContent lnk)
+{
+    if(!lnk.isValid())
+        return;
+
+    rightMenu->popup(QCursor::pos());
+}
+
+#ifdef QTOPIA_PHONE
+void ApplicationLauncherView::addSpeedDial()
+{
+    const QContent lnk(currentItem());
+    QtopiaServiceRequest sreq;
+    sreq = QtopiaServiceRequest("Launcher","execute(QString)");
+    sreq << lnk.executableName();
+    QSpeedDial::addWithDialog(Qtopia::dehyphenate(lnk.name()), lnk.iconName(), sreq, this);
+}
+#endif

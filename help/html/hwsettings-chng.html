@@ -1,19 +1,26 @@
-<qt title="Changing a Handwriting Setting">
-<h3>Changing a Handwriting Setting</h3>
+<html>
+<head><title>Changing a Handwriting Setting</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h3>Changing a Handwriting Setting</h3>
+<!--#else -->
+   <h3>Changing a Handwriting Setting</h3>
+<!--#endif -->
 <p>You can change existing characters in Qtopia's range using the options in the <b>Handwriting Settings</b>.</p>
 <ul>
-<li>Tap <img width="16" height="16" src="hwsettings/recognition_settings.png"> to launch <b>Handwriting Settings.</b></li>
+<li>Tap <img width="16" height="16" src=":image/hwsettings/recognition_settings"> to launch <b>Handwriting Settings.</b></li>
 <li>Select the type of screen and character from the list, eg. <b>Fullscreen Numeric</b>.</li>
 <li>Locate and tap the character to be changed.</li>
-<li>Tap <img src="hwsettings/new_stroke.png"> and draw character. The indicator will update to 2/2 (2nd of a total of 2).</li>
-<li>You can now compare the new and old versions of the character by tapping the <img src="up"> / <img src="down"> arrows located next to the input area.</li>
-<li>If you are happy with the changed version, then remove the old one. To discard the previous version, display it then tap <img src="trash"> to remove it.</li>
-<li>To discard the new version and re-instate the original Qtopia character, tap <img src="systemowned">. This reverts the setting for that character.</li>
-%%PDA%%
-<li>Tap <img src="qpe/pda/OKButton.png"> to accept the new character and <img src="qpe/pda/CloseButton.png"> to exit.</li>
-@@PDA@@
-%%PHONE%%
-<li>Tap <img src="contextbar/back.png"> to accept the new character and exit.</li>
-@@PHONE@@
+<li>Tap <img src=":image/hwsettings/new_stroke"> </img> and draw character. The indicator will update to 2/2 (2nd of a total of 2).</li>
+<li>You can now compare the new and old versions of the character by tapping the <img src=":icon/up"> </img> / <img src=":icon/down"> </img> arrows located next to the input area.</li>
+<li>If you are happy with the changed version, then remove the old one. To discard the previous version, display it then tap <img src=":icon/trash"> </img> to remove it.</li>
+<li>To discard the new version and re-instate the original Qtopia character, tap <img src=":icon/systemowned">. This reverts the setting for that character.</li>
+<!--#if expr="$PDASTYLE"-->
+<li>Tap <img src=":image/qpe/pda/OKButton"> </img> to accept the new character and <img src=":image/qpe/pda/CloseButton"> </img> to exit.</li>
+<!--#endif-->
+<!--#if expr="$PHONESTYLE"-->
+<li>Tap <img src=":icon/i18n/back"> </img> to accept the new character and exit.</li>
+<!--#endif-->
 </ul>
-</qt>
+</body>
+</html>

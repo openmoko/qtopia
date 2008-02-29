@@ -25,6 +25,15 @@ application/powerpoint		ppt
 application/remote-printing
 application/rtf			rtf
 application/slate
+application/vnd.oma.drm.content dcf
+application/vnd.oma.drm.dcf     odf
+application/vnd.oma.drm.message dm
+application/vnd.oma.drm.rights+xml dr
+application/vnd.oma.drm.rights+wbxml drc
+application/vnd.oma.drm.roap-pdu+xml oru
+application/vnd.oma.drm.roap-trigger+xml ort
+application/vnd.oma.drm.ro+xml  oro
+application/vnd.pwg-xhtml-print+xml xhtml
 application/wita
 application/wordperfect5.1	wp5
 application/x-123		wk
@@ -72,17 +81,21 @@ audio/prs.sid			sid psid
 audio/basic			au snd
 audio/midi			mid midi kar
 audio/mpeg			mp3 mpga mp2
+audio/3gpp			3gp
 audio/x-aiff			aif aifc aiff
 audio/x-pn-realaudio		ra ram
 audio/x-pn-realaudio-plugin
 audio/x-realaudio		ra
 audio/x-wav			wav
 audio/amr			amr
+audio/mpegurl       m3u
+audio/x-scpls       pls
 chemical/x-pdb			xyz
 image/gif			gif
 image/ief			ief
 image/jpeg			jpeg jpg jpe
 image/png			png
+image/mng			mng
 image/tiff			tiff tif
 image/x-bmp			bmp
 image/x-cmu-raster		ras
@@ -124,6 +137,7 @@ video/gl			gl
 video/mpeg			mpeg mp2 mpe mpg
 video/mp4			mp4 m4v
 video/quicktime			mov qt
+video/3gpp			3gp
 video/x-msvideo			avi
 video/x-sgi-movie		movie
 x-conference/x-cooltalk		ice

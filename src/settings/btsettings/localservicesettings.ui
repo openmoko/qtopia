@@ -1,0 +1,53 @@
+<ui version="4.0" >
+ <class>ServiceSettings</class>
+ <widget class="QWidget" name="ServiceSettings" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>290</width>
+    <height>222</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Service Settings</string>
+  </property>
+  <layout class="QGridLayout" >
+   <property name="margin" >
+    <number>4</number>
+   </property>
+   <property name="spacing" >
+    <number>5</number>
+   </property>
+   <item row="1" column="0" >
+    <widget class="QCheckBox" name="authCheckBox" >
+     <property name="text" >
+      <string>&amp;Authenticate devices</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" >
+    <widget class="QCheckBox" name="encryptCheckBox" >
+     <property name="text" >
+      <string>&amp;Encrypt transmissions</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" >
+    <spacer>
+     <property name="orientation" >
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" >
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

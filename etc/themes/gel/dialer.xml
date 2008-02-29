@@ -1,0 +1,78 @@
+<page name="dialer" base="themes/gel" keypad="0">
+    <rect color="None" brush="Background" />
+    <widget name="dialernumber" rect="0,0,0x-1" bold="yes" colorGroup="Base=Background;"  size="16"/>
+    <layout name="vertical" rect="0,20,0,0" orientation="vertical" spacing="-1" align="vcenter">
+	<layout name="horizontal" rect="0,0,0x33" orientation="horizontal" spacing="-1" align="hcenter">
+	    <group rect="0,0,44x33" name="one" interactive="yes" onclick="message=VirtualKeyboard,keyPress(int),1">
+		<image rect="0,0,0,0" name="one_bg" src="button" color="Highlight" onclick="src=buttonp;color=Highlight" scale="yes" />
+		<image rect="5,6,-5,-5" name="one_fg" src="default/1" scale="yes"/>
+	    </group>
+	    <group rect="0,0,44x33" name="two" interactive="yes" onclick="message=VirtualKeyboard,keyPress(int),2">
+		<image rect="0,0,0,0" name="two_bg" src="button" color="Highlight" onclick="src=buttonp;color=Highlight" scale="yes" />
+		<image rect="5,6,-5,-5" name="two_fg" src="default/2" scale="yes"/>
+	    </group>
+	    <group rect="0,0,44x33" name="three" interactive="yes" onclick="message=VirtualKeyboard,keyPress(int),3">
+		<image rect="0,0,0,0" name="three_bg" src="button" color="Highlight" onclick="src=buttonp;color=Highlight" scale="yes" />
+		<image rect="5,6,-5,-5" name="three_fg" src="default/3" scale="yes"/>
+	    </group>
+	    <group rect="0,0,44x33" name="selectcontact" interactive="yes" onclick="message=Qtopia/Phone/TouchscreenDialer,selectContact()">
+		<image rect="0,0,0,0" name="contact_bg" src="button" color="Highlight"  onclick="src=buttonp;color=Highlight" scale="yes" />
+		<image rect="11,7,-11,-6" name="contact_fg" src="default/contacts" scale="yes"/>
+	    </group>
+	</layout>
+	<layout rect="0,0,0x33" orientation="horizontal" spacing="-1" align="hcenter">
+	    <group rect="0,0,44x33" name="four" interactive="yes" onclick="message=VirtualKeyboard,keyPress(int),4">
+		<image rect="0,0,0,0" name="four_bg" src="button" color="Highlight" onclick="src=buttonp;color=Highlight" scale="yes" />
+		<image rect="5,6,-5,-5" name="four_fg" src="default/4" scale="yes"/>
+	    </group>
+	    <group rect="0,0,44x33" name="five" interactive="yes" onclick="message=VirtualKeyboard,keyPress(int),5">
+		<image rect="0,0,0,0" name="five_bg" src="button" color="Highlight" onclick="src=buttonp;color=Highlight" scale="yes" />
+		<image rect="5,6,-5,-5" name="five_fg" src="default/5" scale="yes"/>
+	    </group>
+	    <group rect="0,0,44x33" name="six" interactive="yes" onclick="message=VirtualKeyboard,keyPress(int),6">
+		<image rect="0,0,0,0" name="six_bg" src="button" color="Highlight" onclick="src=buttonp;color=Highlight" scale="yes" />
+		<image rect="5,6,-5,-5" name="six_fg" src="default/6" scale="yes"/>
+	    </group>
+	    <group rect="0,0,44x33" name="messages" interactive="yes" onclick="message=Qtopia/Phone/TouchscreenDialer,sms()">
+		<image rect="0,0,0,0" name="messages_bg" src="button" color="Highlight" onclick="src=buttonp;color=Highlight" scale="yes" />
+		<image rect="11,10,-11,-9" name="messages_fg" src="default/messages" scale="yes"/>
+	    </group>
+	</layout>
+	<layout rect="0,0,0x33" orientation="horizontal" spacing="-1" align="hcenter">
+	    <group rect="0,0,44x33" name="seven" interactive="yes" onclick="message=VirtualKeyboard,keyPress(int),7">
+		<image rect="0,0,0,0" name="seven_bg" src="button" color="Highlight" onclick="src=buttonp;color=Highlight" scale="yes" />
+		<image rect="5,6,-5,-5" name="seven_fg" src="default/7" scale="yes"/>
+	    </group>
+	    <group rect="0,0,44x33" name="eight" interactive="yes" onclick="message=VirtualKeyboard,keyPress(int),8">
+		<image rect="0,0,0,0" name="eight_bg" src="button" color="Highlight" onclick="src=buttonp;color=Highlight" scale="yes" />
+		<image rect="5,6,-5,-5" name="eight_fg" src="default/8" scale="yes"/>
+	    </group>
+	    <group rect="0,0,44x33" name="nine" interactive="yes" onclick="message=VirtualKeyboard,keyPress(int),9">
+		<image rect="0,0,0,0" name="nine_bg" src="button" color="Highlight"  onclick="src=buttonp;color=Highlight" scale="yes" />
+		<image rect="5,6,-5,-5" name="nine_fg" src="default/9" scale="yes"/>
+	    </group>
+	    <group rect="0,0,44x33" name="callhistory" interactive="yes" onclick="message=Qtopia/Phone/TouchscreenDialer,showCallHistory()">
+		<image rect="0,0,0,0" name="calls_bg" src="button" color="Highlight"  onclick="src=buttonp;color=Highlight" scale="yes" />
+		<image rect="11,7,-11,-6" name="calls_fg" src="default/callhistory" scale="yes"/>
+	    </group>
+	</layout>
+	<layout rect="0,0,0x33" orientation="horizontal" spacing="-1" align="hcenter">
+	    <group rect="0,0,44x33" name="star" interactive="yes" onclick="message=VirtualKeyboard,keyPress(int),*">
+		<image rect="0,0,0,0" name="star_bg" src="button" color="Highlight" onclick="src=buttonp;color=Highlight" scale="yes" />
+		<image rect="5,6,-5,-5" name="star_fg" src="default/star" scale="yes"/>
+	    </group>
+	    <group rect="0,0,44x33" name="zero" interactive="yes" onclick="message=VirtualKeyboard,keyPress(int),0">
+		<image rect="0,0,0,0" name="zero_bg" src="button" color="Highlight" onclick="src=buttonp;color=Highlight" scale="yes" />
+		<image rect="5,6,-5,-5" name="zero_fg" src="default/0" scale="yes"/>
+	    </group>
+	    <group rect="0,0,44x33" name="hash" interactive="yes" onclick="message=VirtualKeyboard,keyPress(int),#">
+		<image rect="0,0,0,0" name="hash_bg" src="button" color="Highlight" onclick="src=buttonp;color=Highlight" scale="yes" />
+		<image rect="5,6,-5,-5" name="hash_fg" src="default/hash" scale="yes"/>
+	    </group>
+	    <group rect="0,0,44x33" name="hangup" interactive="yes" onclick="message=Qtopia/Phone/TouchscreenDialer,hangup()">
+		<image rect="0,0,0,0" name="hangup_bg" src="button" color="Highlight" onclick="src=buttonp;color=Highlight" scale="yes" />
+		<image rect="11,7,-11,-6" name="hangup_fg" src="default/hangup" scale="yes"/>
+	    </group>
+	</layout>
+    </layout>
+</page>

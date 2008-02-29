@@ -1,10 +1,10 @@
-CONFIG		+= qtopiaplugin
+qtopia_project(qtopia plugin)
+TARGET=ota
 
-TARGET		= ota
+CONFIG+=no_tr
 
-HEADERS		= otaimpl.h
-SOURCES		= otaimpl.cpp
+HEADERS		= otaimpl.h otahandler.h
+SOURCES		= otaimpl.cpp otahandler.cpp
 
-PACKAGE_NAME	= qpe-ota-imagecodec
-
-TRANSLATIONS=
+pkg.name=qpe-ota-imagecodec
+pkg.domain=libs

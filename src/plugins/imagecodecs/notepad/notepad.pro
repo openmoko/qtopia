@@ -1,10 +1,10 @@
-CONFIG		+= qtopiaplugin
+qtopia_project(qtopia plugin)
+TARGET=notepad
 
-TARGET		= notepad
+CONFIG+=no_tr
 
 HEADERS		= notepadimpl.h
 SOURCES		= notepadimpl.cpp
 
-PACKAGE_NAME	= qpe-notepad-imagecodec
-
-TRANSLATIONS=
+pkg.name=qpe-notepad-imagecodec
+pkg.domain=libs

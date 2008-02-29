@@ -1,0 +1,102 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>  Full Screen Stroke Recognition </title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">  Full Screen Stroke Recognition <br><small>Functional Description</small></h1>
+<p />
+  The <strong>Full-screen Handwriting Input</strong> plug-in allows the user to draw
+  characters for text input over the top of dialogs. In addition the plug-in also
+  allows the user to customize it to their requirements.
+<p />
+
+<p />
+<h2><a name="Features"></a> Features </h2>
+<p />
+<h3><a name="Smart_Activation"></a> Smart Activation </h3>
+<p />
+  <strong>Full-screen Handwriting</strong> is only active when an element that accepts
+  text input has focus. When it is active it:
+<p />
+<p /> <ul>
+<li> Passes screen taps through to the underlying application unless they are made immediately following a previous stroke.
+</li> <li> Passes screen strokes through to the underlying application if they are preceded by a pausing movement of the stylus for a short period of time.
+</li></ul> 
+<p />
+<p />
+  <strong>Full-screen Handwriting</strong> always ignores strokes that are started
+  within the area designated for a scrollbar on the right side of the screen.
+<p />
+<h3><a name="Input_Hinting"></a> Input Hinting </h3>
+<p />
+  <strong>Full-screen Handwriting</strong> is able to take input hints from text input
+  elements in applications and use the input hint information to improve
+  accuracy in recognizing characters for that text input.
+<p />
+<h3><a name="Input_Mode"></a> Input Mode </h3>
+<p />
+  The user is able to specify the type of input apart from that
+  suggested by the text element, and hence modify how the plug-in recognizes
+  drawn characters.
+<p />
+<h3><a name="Word_Recognition"></a> Word Recognition </h3>
+<p />
+  <strong>Full-screen Handwriting</strong> prioritizes the recognition of characters as part
+  of its attempts to find a matching word. If a drawn character closely matches two or more characters,
+  then the plug-in biases towards characters that make up complete words.
+  For this reason a set of digits is also considered to be a word.
+<p />
+  If no word is matched, then the plug-in uses the most closely matched
+  characters as they are drawn.
+<p />
+For example, a character drawn on the screen might be either an 'n' or an 'h'
+and even though it might most closely resemble a 'h' the word recognition
+feature waits to determine the character until the second character
+is entered. If the second character is an 'o' then the application
+assumes that the first character was an 'n'. However if a third character
+is added such as 'w' then since the first character more closely resembled
+a 'h' then the recognition feature should suggest 'how' and provide 'now' as
+a secondary option.
+<p />
+If characters are added until no word in the dictionary matches, then the
+application reverts to spelling the word with 'h' since it was the most likely letter.
+<p />
+Words consisting of more than two characters that are not in the dictionary are added to the list of recognized words.
+<p />
+<h3><a name="Word_Selection"></a> Word Selection </h3>
+<p />
+  The user is able to open a pop-up of all possible matches to
+  the set of characters they have drawn.
+<p />
+<h3><a name="Next_Word"></a> Next Word </h3>
+<p />
+  The user is able change the recognized word to the next most likely
+  word.
+<p />
+<h3><a name="Dictionary_Selection"></a> Dictionary Selection </h3>
+<p />
+  The user is able to specify an alternate language to be used for
+  word recognition.
+<p />
+<h3><a name="Symbol_Input"></a> Symbol Input </h3>
+<p />
+  The user is able to open a pop-up of additional symbols.
+<p />
+<h2><a name="Dependencies"></a> Dependencies </h2>
+<p />
+  This application is dependent on the device being equipped with a
+  touchscreen.
+<p />
+<hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div>

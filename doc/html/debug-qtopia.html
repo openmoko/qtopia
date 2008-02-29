@@ -1,0 +1,120 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Debugging Qtopia Applications</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Debugging Qtopia Applications<br /><small></small></h1>
+<a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
+<ul><li><a href="#using-gdb">Using gdb</a></li>
+<ul><li><a href="#build-the-application-with-debug-symbols">Build the Application with Debug Symbols</a></li>
+<li><a href="#run-the-debugging-environment">Run the Debugging Environment</a></li>
+<li><a href="#debug-crashes">Debug Crashes</a></li>
+</ul>
+<li><a href="#qlog-categorized-logging">qLog - Categorized Logging</a></li>
+</ul>
+<li><a href="#references">References</a></li>
+</ul>
+<a name="introduction"></a>
+<h2>Introduction</h2>
+<p>Qtopia provides GNU Debugger <tt>gdb</tt> to monitor program execution and to examine program status in the event of a crash and the <tt>qLog</tt> function to provide categorized logging of debug information. The following sections describe how to used <tt>gdb</tt> in a Linux environment and how to call implement the <tt>qLog</tt> function.</p>
+<a name="using-gdb"></a>
+<h3>Using gdb</h3>
+<p>This section provides instructions on how to debug Qtopia applications using i<tt>gdb</tt> in a Linux environment.</p>
+<a name="build-the-application-with-debug-symbols"></a>
+<h4>Build the Application with Debug Symbols</h4>
+<p>To build an application with debug symbols:</p>
+<ul>
+<li>pass <tt>-debug</tt> to configure or add debug to the <tt>.pro</tt> file CONFIG settings as follows:<pre>    CONFIG += debug</pre>
+</li>
+<li>build the application and install the application binary into the <tt>/opt/Qtopia/bin</tt> directory using the following commands:<pre>    $ make clean
+    $ make
+    $ make install</pre>
+</li>
+</ul>
+<a name="run-the-debugging-environment"></a>
+<h4>Run the Debugging Environment</h4>
+<p>To run the debugging environmnent:</p>
+<ul>
+<li>start the virtual framebuffer environment</li>
+<li>start the Qtopia environment</li>
+<li>start gdb</li>
+</ul>
+<p>using the following commands:</p>
+<pre>    $ qvfb &amp;
+    $ qpe &amp;
+    $ gdb theProgram
+    (gdb) r # run</pre>
+<p>Alternatively to debug an application outside of the Qtopia environment:</p>
+<ul>
+<li>start the virtual framebuffer environment</li>
+<li>ensure the application hooks into the virtual frame buffer</li>
+</ul>
+<p>using the following commands:</p>
+<pre>    $ qvfb &amp;
+    $ gdb theProgram
+    (gdb) set args - qws # we need this to hook to the virtual frame buffer.
+    (gdb) list # if you want to list the main.cpp file
+    (gdb) b 6 # break at line six
+    (gdb) r # run
+    (gdb) s # step into
+    (gdb) r # continue</pre>
+<a name="debug-crashes"></a>
+<h4>Debug Crashes</h4>
+<p>If an application built with debug crashes, a <tt>core</tt> file is produced. Use the following commands to examine the core file contents:</p>
+<pre>    $ gdb theapplication core
+    (gdb) backtrace full</pre>
+<a name="qlog"></a><a name="qlog-categorized-logging"></a>
+<h3>qLog - Categorized Logging</h3>
+<p>Qtopia provides the <tt>qLog(CategoryIdentifier)</tt> function for categorized logging, built on top of the <tt>QDebug</tt> class in Qtopia Core.</p>
+<p>To turn on <tt>qLog</tt> edit the file:</p>
+<pre>        $HOME/Settings/Trolltech/Log.conf</pre>
+<p>If the file does not exist:</p>
+<ol type="1">
+<li>run the <tt>Settings-&gt;Logging</tt> application from Qtopia.</li>
+<li>select <tt>Context Menu-&gt;Categories</tt> and enable the option</li>
+<li>exit to create <tt>Log.conf</tt>.</li>
+</ol>
+<p><b>Note:</b> To implement a <tt>qLog</tt> change you must restart Qtopia.</p>
+<p>Log messages are displayed if the <tt>CategoryIdentifier</tt> has been enabled in the <tt>qtopia-config.h</tt> file. For example, the following enables logging messages related to the user interface:</p>
+<pre>    [UI]
+    Enabled = 1
+    Name[] = User interface
+    Help[] = Anything to do with the user interface.</pre>
+<p>The following is an example of using a log message in the source code:</p>
+<pre>    #include &lt;qtopialog.h&gt;
+
+    qLog(Type) &lt;&lt;&quot;Test&quot;;
+    qLog(Type) &lt;&lt;&quot;string=&quot;&lt;&lt;str &lt;&lt;&quot;,int=&quot;&lt;&lt;i;</pre>
+<p>where <tt>Type</tt> is the category as defined in <tt>qtopialog-config.h</tt>.</p>
+<p>The categories are declared by using one of the following macros:</p>
+<ul>
+<li><tt>QLOG_DISABLE(CategoryIdentifier)</tt> - no logging code is generated.</li>
+<li><tt>QLOG_ENABLE(CategoryIdentifier)</tt> - logging code is always generated and invoked.</li>
+<li><tt>QLOG_OPTION(CategoryIdentifier,expr)</tt> - logging code is always generated, invoked if <i>expr</i> is true at the time the log is issued, <i>expr</i> may be cached.</li>
+<li><tt>QLOG_OPTION_VOLATILE(CategoryIdentifier,expr)</tt> - as above, but <i>expr</i> is not cached.</li>
+</ul>
+<p>The <tt>CategoryIdentifier</tt> has <tt>_QLog</tt> appended within the macros, so it can be any identifier you choose. The associated type name might be a useful choice:</p>
+<pre>        qLog(QWidget) &lt;&lt; &quot;Created&quot; &lt;&lt; name;</pre>
+<p>To assist field testing, there is a Logging settings application. It uses the <tt>logread</tt> program to interface with the <tt>BusyBox syslogd</tt> output. To forward Qtopia's output to <tt>syslogd</tt>, use the <tt>logger</tt> program:</p>
+<pre>        qpe 2&gt;&amp;1 | logger -t 'Qtopia'</pre>
+<a name="references"></a>
+<h2>References</h2>
+<ul>
+<li><a href="debug.html">Qt Debugging Techniques</a></li>
+<li><a href="http://www.gnu.org/software/gdb/gdb.html">gdb: The GNU Project Debugger</a> - (http://www.gnu.org/software/gdb/gdb.html)</li>
+<li><a href="http://www.refcards.com">gdb Reference Card</a> - (http://www.refcards.com)</li>
+</ul>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

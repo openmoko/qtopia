@@ -4,6 +4,6 @@ Context=Beaming
 [Desktop Entry]
 Type=Application
 Exec=beaming
-Icon=Infrared
+Icon=beaming/Infrared
 Name[]=Beaming
 CanFastload=0

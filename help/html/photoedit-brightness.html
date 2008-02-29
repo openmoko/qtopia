@@ -1,22 +1,25 @@
-<qt title="Picture Brightness">
+<html>
+<head><title>Picture Brightness</title></head>
+<body>
 <h3>Picture Brightness</h3>
 <p>You can make the image lighter or darker with this operation.</p>
-%%PHONE%%
-<p><b>To adjust brightness:</b> Press <img src="contextbar/options.png"> and select <img src="color">. Use
-%%TOUCH%%
+<!--#if expr="$PHONESTYLE"-->
+<p><b>To adjust brightness:</b> Press <img src=":icon/options"> </img> and select <img src=":icon/color">. Use
+<!--#if expr="$TOUCH"-->
 the stylus or
-@@TOUCH@@
-<img src="help/dpad"> to control the slidebar.
-%%KEYPAD%%
-Press <img src="contextbar/ok.png"> when you have finished OR <img src="contextbar/cancel.png"> to revert to the original brightness.
-@@KEYPAD@@
-%%TOUCH%%
-Tap the image or press <img src="contextbar/back.png"> when you have finished.
-@@TOUCH@@
+<!--#endif-->
+<img src=":image/help/dpad"> </img> to control the slide bar.
+<!--#if expr="$KEYPAD"-->
+Press <img src=":icon/ok"> </img> when you have finished OR <img src=":icon/cancel"> </img> to revert to the original brightness.
+<!--#endif-->
+<!--#if expr="$TOUCH"-->
+Tap the image or press <img src=":icon/i18n/back"> </img> when you have finished.
+<!--#endif-->
 </p>
-@@PHONE@@
+<!--#endif-->
 
-%%PDA%%
-<p><img src="color"> <b>To adjust brightness:</b> tap the icon and use the stylus to control the slidebar. Tap the image when you have finished.</p>
-@@PDA@@
-</qt>
+<!--#if expr="$PDASTYLE"-->
+<p><img src=":icon/color"> </img> <b>To adjust brightness:</b> tap the icon and use the stylus to control the slide bar. Tap the image when you have finished.</p>
+<!--#endif-->
+</body>
+</html>

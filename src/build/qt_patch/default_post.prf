@@ -1,0 +1,100 @@
+QPE_CONFIG=$$(QPE_CONFIG)
+QTOPIACORE_CONFIG=$$(QTOPIACORE_CONFIG)
+QPE_TARGET=$$(QPE_TARGET)
+
+QMAKE_QUIRKS=
+
+foo="bar"
+bar=bar
+!equals(foo,$$bar):QMAKE_QUIRKS+=keep_quotes
+
+foo="foo bar"
+contains(QMAKE_QUIRKS,keep_quotes) {
+    foo~=s/^"//
+    foo~=s/"$//
+}
+bar=$$foo
+count(bar,2):QMAKE_QUIRKS+=var_split
+
+!contains(QMAKE_QUIRKS,var_split) {
+    QPE_CONFIG=$$split(QPE_CONFIG," ")
+    QTOPIACORE_CONFIG=$$split(QTOPIACORE_CONFIG," ")
+}
+
+unix:contains(QTOPIACORE_CONFIG,rpath) {
+    # Don't hit other targets
+    equals(TARGET,$$QPE_TARGET) {
+	rp=$$QMAKE_RPATH
+        #!isEmpty(rp):LIBS+=$${rp}$$[QT_INSTALL_LIBS]
+        !contains(QTOPIACORE_CONFIG,no_symlink) {
+            copytoqpedir.commands=@\
+                if echo $(TARGET) | grep '^\/' >/dev/null 2>&1; then\
+                    target=$(TARGET);\
+                else\
+                    target=$$OUT_PWD/$(TARGET);\
+                fi;\
+                mkdir -p \$$QPEDIR/bin;\
+                echo ln -sf \$$target \$$QPEDIR/bin;\
+                ln -sf \$$target \$$QPEDIR/bin
+            copytoqpedir.depends=$(TARGET)
+            QMAKE_EXTRA_TARGETS+=copytoqpedir
+            ALL_DEPS+=copytoqpedir
+        }
+    }
+}
+
+# If these libs are disabled, don't actually build them
+MAYBE_REMOVE=qt3support opengl
+QT_CONF=$$QT_CONFIG
+equals(TEMPLATE,lib):contains(MAYBE_REMOVE,$$QPE_TARGET):!contains(QT_CONF,$$QPE_TARGET) {
+    HEADERS=
+    SOURCES=
+    FORMS=
+    LIBS=
+    QT=
+    CONFIG-=qt
+    silent:QMAKE_LINK=true
+    else:QMAKE_LINK=@true
+}
+
+LINE_SEP=$$quote(\n\t)
+foo=$$quote(\n)
+equals(foo,\n):LINE_SEP=$$escape_expand(\n\t)
+
+contains(QTOPIACORE_CONFIG,subdirs) {
+    win32 {
+        remove_target.commands+=@$(MAKE) clean
+    } else {
+        remove_target.commands=
+        for(dir,SUBDIRS) {
+            !isEmpty(remove_target.commands):remove_target.commands+=$$LINE_SEP
+            remove_target.commands+=@$(MAKE) -C $$dir remove_target
+        }
+    }
+    QMAKE_EXTRA_TARGETS+=remove_target
+} else {
+    # remove_target removes the TARGET file
+    unix:equals(TEMPLATE,app) {
+        cmds=@\
+            if echo $(TARGET) | grep '^\/' >/dev/null 2>&1; then\
+                target=$(TARGET);\
+            else\
+                target=$$OUT_PWD/$(TARGET);\
+            fi;\
+            echo rm -f \$$target;\
+            rm -f \$$target
+    } else {
+        cmds=-$(DEL_FILE) $(DESTDIR)$(TARGET)
+    }
+    !build_all|build_pass:remove_target.commands=$$cmds
+    remove_target.CONFIG+=recursive
+    QMAKE_EXTRA_TARGETS+=remove_target
+}
+
+# Disable the SVG iconengine
+equals(TEMPLATE,subdirs):contains(SUBDIRS,svgiconengine) {
+    SUBDIRS-=svgiconengine
+}
+
+# Get Qt's version of this file
+load(default_post)

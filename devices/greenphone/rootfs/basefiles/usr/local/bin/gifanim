@@ -1,0 +1,2 @@
+#!/bin/sh
+echo q|fbv -c "$@" >/dev/null

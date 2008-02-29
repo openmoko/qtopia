@@ -1,148 +1,110 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 #ifndef Addressbook_H
 #define Addressbook_H
 
-#include <qmainwindow.h>
-#include <qdialog.h>
-#include <qstringlist.h>
-#include <qmap.h>
-#include <qaction.h>
-#include <qlineedit.h>
+#include <QMainWindow>
+#include <QDialog>
+#include <QStringList>
+#include <QSet>
+#include <QAction>
+#include <QLineEdit>
+#include <QVBoxLayout>
+#include <QRadioButton>
+#include <QStringList>
 
-#include <qtopia/pim/private/contactxmlio_p.h>
-#include <qtopia/categories.h>
-#include <qtopia/fieldmapimpl.h>
-#ifdef QTOPIA_PHONE
-#include <qtopia/contextmenu.h>
-#endif
-
-#ifndef QTOPIA_DESKTOP
-#include "sendcontactservice.h"
-#endif
+#include <qcategorymanager.h>
+#include <qtopia/pim/qcontact.h>
+#include <qtopia/pim/qpimsource.h>
+#include <qtopiaabstractservice.h>
 
 #ifndef QTOPIA_PHONE
-#ifndef QTOPIA_DESKTOP
-#ifndef AB_PDA
-#define AB_PDA
-#endif
-#endif
+#       ifndef AB_PDA
+#           define AB_PDA
+#       endif
 #endif
 
 #ifdef QTOPIA_PHONE
-#include <qtopia/phone/phone.h>
-#include <qtopia/phone/phonebook.h>
-#else
-/*
-HACK - not including the above headers yields errors for
-phonebookChanged() because it takes PhoneLine and PhoneBookEntry 
-objects as arguments, but it's a slot so I can't ifdef it out. define these 
-dummy objects on non phone so the metaobject references on non QTOPIA_PHONE 
-still work.
-*/
-class PhoneLine { public: enum QueryType {}; };
-class PhoneBookEntry {};
+#   include <qtopia/qsoftmenubar.h>
+#ifdef QTOPIA_CELL
+#   include <qtopiaphone/qphonebook.h>
+#endif
 #endif
 
 class AbEditor;
 class AbLabel;
-class AbTable;
-class QPEToolBar;
 class QPopupMenu;
 class QToolButton;
 class QLineEdit;
 class QDialog;
 class QLabel;
-class Ir;
-class CategorySelect;
-class QVBox;
-class CategorySelectDialog;
+class QCategorySelector;
+class QContactListView;
 class QButtonGroup;
-#ifdef QTOPIA_PHONE
-class LoadIndicator;
-#endif
-
-class AbSettings : public QDialog
-{
-    Q_OBJECT
-public:
-    AbSettings(QWidget *parent = 0, const char *name = 0, bool modal = TRUE, WFlags = 0);
-    virtual ~AbSettings();
+class QStackedWidget;
+class QContact;
+class QContactModel;
+class QContactDelegate;
+class QUniqueId;
+class QDSData;
+class QDSActionRequest;
 
 #ifdef QTOPIA_PHONE
-    void saveFormat();
-
-private:
-    QButtonGroup* bg;
-#else
-    void setCurrentFields(const QValueList<int> &);
-    QValueList<int> fields() { return map->fields(); }
-
-private:
-    FieldMap *map;
+class QLineEditWithPreeditNotification;
 #endif
-};
 
-class AddressbookWindow: public QMainWindow
+class AddressbookWindow : public QMainWindow
 {
     Q_OBJECT
+    friend class ContactsService;
+    friend class ContactsPhoneService;
 public:
-    AddressbookWindow( QWidget *parent = 0, const char *name = 0, WFlags f = 0 );
+    AddressbookWindow(QWidget *parent = 0, Qt::WFlags f = 0);
     virtual ~AddressbookWindow();
 
 protected:
-    void resizeEvent( QResizeEvent * e );
+    void resizeEvent(QResizeEvent * e);
     void newEntry();
-    void newEntry( const PimContact &cnt );
-    void editEntry( const PimContact &cnt );
-    void closeEvent( QCloseEvent *e );
+    void newEntry(const QContact &cnt);
+    void editEntry(const QContact &cnt);
+    void closeEvent(QCloseEvent *e);
     void keyPressEvent(QKeyEvent *);
     AbEditor *editor();
-    void showEvent( QShowEvent *e );
+    void showEvent(QShowEvent *e);
 
 #ifdef QTOPIA_PHONE
-    bool eventFilter( QObject *o, QEvent *e );
+    bool eventFilter(QObject *o, QEvent *e);
 #endif
 
 public slots:
-    void appMessage(const QCString &, const QByteArray &);
-    void setDocument( const QString & );
+    void appMessage(const QString &, const QByteArray &);
+    void setDocument(const QString &);
     void reload();
     void flush();
+#ifdef QTOPIA_CELL
+    void vcardDatagram( const QByteArray& data );
+#endif
 
 private slots:
+    void delayedInit();
     void sendContact();
     void sendContactCat();
     void selectClicked();
@@ -154,112 +116,251 @@ private slots:
     void slotViewEdit();
     void slotPersonalView();
     void editPersonal();
-    void viewNext();
-    void viewPrevious();
+    void addPhoneNumberToContact(const QString& phoneNumber);
+    void createNewContact(const QString& phoneNumber);
+    void setContactImage(const QString& filename);
     void markCurrentAsPersonal();
-    void beamDone( Ir * );
     void slotFind(bool);
     void search( const QString &k );
-    void slotSetCategory( int );
-    void catChanged();
+    void showCategory( const QCategoryFilter &);
     void updateIcons();
-    /* simply disabled for now although this might be useful
-    void contactFilterSelected( int idx );
-    */
     void selectAll();
     void configure();
     void selectCategory();
-    void viewOpened( const PimContact &entry );
+    void viewOpened( const QContact &entry );
     void viewClosed();
     void addToSpeedDial();
-    void storeOnSim(bool);
     void setHighlightedLink(const QString&);
-    void setSimFieldLimits( PhoneLine::QueryType, const QString &value );
-    void phonebookChanged( const PhoneLine& line, const QString& store, const QValueList<PhoneBookEntry>& list );
-    
+    void selectSources();
+    void importAllFromSim();
+    void exportAllToSim();
+
+    void importCurrentFromSim();
+    void exportCurrentToSim();
+#ifdef QTOPIA_CELL
+    void phonebookChanged( const QString& store );
+#endif
+    void setContactImage( const QDSActionRequest& request );
+    void qdlActivateLink( const QDSActionRequest& request );
+    void qdlRequestLinks( const QDSActionRequest& request );
+    /* simply disabled for now although this might be useful
+    void contactFilterSelected( int idx );
+    */
+
+    void contactsChanged();
+
 private:
-#ifdef QTOPIA_PHONE
+#ifdef QTOPIA_CELL
     void smsBusinessCard();
 #endif
-    void receiveFile( const QString & );
+
+private:
+    void createViewMenu();
+    void createDetailedView();
+
+    void receiveFile(const QString &filename, const QString &mimetype = QString());
+
     void readConfig();
     void writeConfig();
-    QString categoryLabel( int id );
-    AbLabel *abView();
-    void showView();
-    void deleteContacts(QValueList<QUuid> &);
-    void beamContacts(const QString& description, const QValueList<PimContact>& list);
-    void beamVCard( const QCString &filename, const QString &description = QString::null );
-    void sendContacts(const QString& description, const QValueList<PimContact>& list);
-    void showJustItem(const QUuid& uid);
 
-#ifdef QTOPIA_DATA_LINKING
-    QValueList<PimContact> mContactViewStack;
-#endif
-    bool allowCloseEvent;
+    void showView();
+
+    void showJustItem(const QUniqueId &uid);
+
+    bool checkSyncing();
+
+    QDSData contactQDLLink( QContact& contact );
+    void removeContactQDLLink( QContact& contact );
+    void removeSpeedDial( QContact& contact );
+
+    enum Panes
+    {
+        paneList = 0,
+        paneView,
+        paneEdit
+    };
+
+    QContactModel *contacts;
+
+    bool mAllowCloseEvent;
     bool mResetKeyChars;
     bool mCloseAfterView;
-    ContactXmlIO contacts;
-    Categories cats;
-    QPEToolBar *listTools;
+    bool mFindMode;
+    bool mHasSim;
+
+    QStackedWidget *centralView;
+    QToolBar *listTools;
     QToolButton *deleteButton;
-    CategorySelect *catSelect;
-    enum Panes { paneList=0, paneView, paneEdit };
-    QVBox *listView;
+    QCategorySelector *catSelect;
+
+    QWidget *listView;
+    QVBoxLayout *listViewLayout;
     AbEditor *abEditor;
     AbLabel *mView;
-    AbTable *abList;
+    QContactListView *abList;
 
-    QPEToolBar *searchBar;
+    QToolBar *searchBar;
     QLineEdit *searchEdit;
     QPopupMenu *viewmenu;
 
-#ifndef QTOPIA_DESKTOP
-    SendContactService *mSendService;
+    QAction *actionNew,
+            *actionEdit,
+            *actionTrash,
+            *actionFind,
+            *actionPersonal,
+            *actionSetPersonal,
+            *actionResetPersonal,
+            *actionSettings
+#ifdef QTOPIA_PHONE
+            , *actionShowSources,
+            *actionExportSim,
+            *actionImportSim
+#endif
+            ;
+
+    int viewMargin;
+
+
+    bool syncing;
+    bool showingPersonal;
+
+    QString sel_href;
+
+    QContactDelegate* contactDelegate;
+
     QAction *actionSend;
     QAction *actionSendCat;
-#endif
-
-    QAction *actionNew, *actionEdit, *actionTrash, *actionFind,
-	*actionPersonal, *actionSetPersonal, 
-	*actionSettings;
 
 #ifdef AB_PDA
     QAction *actionBack;
 #endif
 
 #ifdef QTOPIA_PHONE
-    PhoneLine *mPhoneLine;
-    QValueList<PhoneBookEntry> mPhoneBookEntries;
-
-    ContextMenu *contextMenu;
-    QAction *actionCategory, *actionSpeedDial, *actionOnSim;
+    QAction *actionCategory, *actionSpeedDial;
 
     bool mToggleInternal;
-    CategorySelectDialog *categoryDlg;
     QLabel *categoryLbl;
 
-    QLineEdit *mFindLE;
+    QLineEditWithPreeditNotification* mFindLE;
 #endif
 
-    int viewMargin;
-
-    bool checkSyncing();
-    bool syncing;
-    bool showingPersonal;
-    /*
-    QMap<int,int> contactMap;
-    */
-
-    QString sel_href;
-
-#ifdef QTOPIA_PHONE
+#ifdef QTOPIA_CELL
     QLabel *mSimIndicator;
     bool mGotSimEntries;
 #endif
-#ifdef Q_WS_QWS
-    QString beamfile;
+    QContact mCurrentContact;
+    QList<QContact> mContactViewStack;
+};
+
+class AbDisplaySettings : public QDialog
+{
+    Q_OBJECT
+
+public:
+    AbDisplaySettings(QWidget *parent);
+
+#ifdef QTOPIA_PHONE
+    void saveFormat();
+    QString format();
+
+protected:
+    void keyPressEvent(QKeyEvent* e);
+/*#else
+    void setCurrentFields(const QList<int> &);
+    QValueList<int> fields() { return map->fields() }*/
+#endif
+
+private:
+    QVBoxLayout* layout;
+#ifdef QTOPIA_PHONE
+    QButtonGroup* bg;
 #endif
 };
+
+#ifdef QTOPIA_PHONE
+//  Included only in Qtopia Phone for now - may be useful for PDA
+//  or desktop some time down the track.
+class AbSourcesDialog : public QDialog
+{
+    Q_OBJECT
+
+public:
+    AbSourcesDialog(QWidget *parent, const QSet<QPimSource> &availSources);
+    void setSources(const QSet<QPimSource> &sources);
+    QSet<QPimSource> sources() const;
+
+signals:
+    void importFromSimTriggered();
+    void exportToSimTriggered();
+
+protected:
+    void keyPressEvent(QKeyEvent* e);
+
+private:
+    QVBoxLayout* layout;
+    QButtonGroup* bg;
+    QRadioButton* phoneButton;
+    QRadioButton* simButton;
+    QRadioButton* bothButton;
+    QSet<QPimSource> availableSources;
+};
+#endif
+
+class ContactsService : public QtopiaAbstractService
+{
+    Q_OBJECT
+    friend class AddressbookWindow;
+private:
+    ContactsService( AddressbookWindow *parent )
+        : QtopiaAbstractService( "Contacts", parent )
+        { this->parent = parent; publishAll(); }
+
+public:
+    ~ContactsService();
+
+public slots:
+    void editPersonal();
+    void editPersonalAndClose();
+    void addContact(const QContact& contact);
+    void removeContact(const QContact& contact);
+    void updateContact(const QContact& contact);
+    void addAndEditContact(const QContact& contact);
+    void addPhoneNumberToContact(const QString& phoneNumber);
+    void createNewContact(const QString& phoneNumber);
+    void showContact(const QUniqueId& uid);
+    void setContactImage(const QString& filename);
+    void setContactImage( const QDSActionRequest& request );
+    void activateLink( const QDSActionRequest& request );
+    void requestLinks( const QDSActionRequest& request );
+
+private:
+    AddressbookWindow *parent;
+};
+
+#ifdef QTOPIA_PHONE
+
+class ContactsPhoneService : public QtopiaAbstractService
+{
+    Q_OBJECT
+    friend class AddressbookWindow;
+private:
+    ContactsPhoneService( AddressbookWindow *parent )
+        : QtopiaAbstractService( "ContactsPhone", parent )
+        { this->parent = parent; publishAll(); }
+
+public:
+    ~ContactsPhoneService();
+
+public slots:
+#ifdef QTOPIA_CELL
+    void smsBusinessCard();
+    void pushVCard( const QDSActionRequest& request );
+#endif
+
+private:
+    AddressbookWindow *parent;
+};
+
+#endif
 
 #endif

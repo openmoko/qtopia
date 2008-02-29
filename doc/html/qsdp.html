@@ -1,0 +1,53 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QSDP Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QSDP Class Reference</h1>
+<p>The QSDP class allows interaction with the local SDP server. <a href="#details">More...</a></p>
+<pre>    #include &lt;QSDP&gt;</pre><ul>
+<li><a href="qsdp-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qsdp.html#QSDP">QSDP</a></b> ()</li>
+<li><div class="fn"/><b><a href="qsdp.html#dtor.QSDP">~QSDP</a></b> ()</li>
+<li><div class="fn"/>QString <b><a href="qsdp.html#error">error</a></b> ()</li>
+<li><div class="fn"/>bool <b><a href="qsdp.html#registerService">registerService</a></b> ( const QBluetoothLocalDevice &amp; <i>device</i>, QBluetooth::SDPProfile <i>profile</i>, int <i>channel</i> = -1 )</li>
+<li><div class="fn"/>bool <b><a href="qsdp.html#unregisterService">unregisterService</a></b> ( const QBluetoothLocalDevice &amp; <i>device</i>, const QSDPService &amp; <i>service</i> )</li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QSDP class allows interaction with the local SDP server.</p>
+<p>The QSDP class provides access to the local SDP server. It allows registration and de-registration of Bluetooth services.</p>
+<p>See also <a href="qsdap.html">QSDAP</a> and <a href="qsdpservice.html">QSDPService</a>.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QSDP"></a>QSDP::QSDP ()</h3>
+<p>Constructs a new QSDP object.</p>
+<h3 class="fn"><a name="dtor.QSDP"></a>QSDP::~QSDP ()</h3>
+<p>Deconstructs a QSDP object.</p>
+<h3 class="fn"><a name="error"></a><a href="qstring.html">QString</a> QSDP::error ()</h3>
+<p>This method returns the last error that occurred.</p>
+<h3 class="fn"><a name="registerService"></a>bool QSDP::registerService ( const <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> &amp; <i>device</i>, <a href="qbluetooth.html#SDPProfile-enum">QBluetooth::SDPProfile</a> <i>profile</i>, int <i>channel</i> = -1 )</h3>
+<p>Registers a profile with the local SDP server. If <i>channel</i> is not provided, a unique channel is picked. The local device for which this service is registered is given by the <i>device</i> parameter. The profile to register with the server is given by the <i>profile</i> parameter.</p>
+<p>This method returns true if the service was registered successfully, false otherwise.</p>
+<h3 class="fn"><a name="unregisterService"></a>bool QSDP::unregisterService ( const <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> &amp; <i>device</i>, const <a href="qsdpservice.html">QSDPService</a> &amp; <i>service</i> )</h3>
+<p>Unregisters a service from the local SDP server. The device to unregister the service from is given by <i>device</i>. The service to unregister is given by <i>service</i>. Note that the service needs to be a valid Bluetooth service that is currently registered on the local SDP server, e.g. obtained by using <tt>QSDAP::browseLocal()</tt>.</p>
+<p>This method returns true if the de-registration was completed successfully, false otherwise.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

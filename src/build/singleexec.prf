@@ -1,0 +1,51 @@
+exists($$QPEDIR/src/build/trace_on):message(singleexec.prf)
+# Handle the singleexec stuff
+
+enable_singleexec {
+    # Bail out early if the project doesn't support singleexec
+    requires(!no_singleexec)
+
+    isEmpty(TRTARGET):TRTARGET=$$TARGET
+
+    contains(PROJECT_TYPE,app) {
+        instsymlink.path=$$bindir
+        instsymlink.commands=$$COMMAND_HEADER\
+            rm -f $(INSTALL_ROOT)$$instsymlink.path/$$ORIG_TARGET $$LINE_SEP_VERBOSE\
+            ln -s qpe $(INSTALL_ROOT)$$instsymlink.path/$$ORIG_TARGET
+        INSTALLS+=instsymlink
+        TARGET=app_$$TARGET
+    }
+
+    contains(PROJECT_TYPE,plugin) {
+        TARGET=plugin_$${plugin_type}_$$TARGET
+        DEFINES+=QTOPIA_PLUGIN_TYPE=$$LITERAL_ESCAPED_QUOTE$${plugin_type}$$LITERAL_ESCAPED_QUOTE
+        DEFINES+=QTOPIA_PLUGIN_NAME=$$LITERAL_ESCAPED_QUOTE$${ORIG_TARGET}$$LITERAL_ESCAPED_QUOTE
+        DEFINES+=QT_STATICPLUGIN
+    }
+
+    DEFINES*=SINGLE_EXEC QTOPIA_NO_MAIN QTOPIA_APP_INTERFACE QTOPIA_INTERNAL_INITAPP
+
+    TEMPLATE=lib
+    CONFIG-=shared
+    CONFIG-=plugin
+    CONFIG+=static staticlib no_target
+    target.path=
+    !no_dest:DESTDIR=$$QPEDIR/lib
+
+    # We might need some additional stuff on our link line
+    qt {
+        readqconfig()
+        contains(QT_CONFIG,system-jpeg):LIBS+=-ljpeg
+        contains(QT_CONFIG,system-png):LIBS+=-lpng
+        contains(QT_CONFIG,system-mng):LIBS+=-lmng
+        contains(QT_CONFIG,system-zlib):LIBS+=-lz
+        contains(QT_CONFIG,system-freetype) {
+            include($$QT_SOURCE_TREE/config.tests/unix/freetype/freetype.pri)
+            LIBS+=-lfreetype
+        }
+    }
+
+    # This is rediculous. Just ignore it.
+    CONFIG-=link_prl
+}
+

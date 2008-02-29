@@ -1,0 +1,15 @@
+VERSION
+{
+  local:
+  extern "C++"
+  {
+	Q*Private::*;
+        Q*Private?virtual?table;
+     	Q*Private?type_info?node;
+        Q*Private?type_info?function;
+        vtable?for?Q*Private;
+        typeinfo?for?Q*Private;
+        non-virtual?thunk?to?Q*Private::*
+   };
+};
+

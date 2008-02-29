@@ -1,360 +1,116 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Getting Started</title>
-<style type="text/css"><!--
-h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }
-body { background: #ffffff; color: black; }
---></style>
+  <title>Getting Started</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
-<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
-<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
-   <a href="index.html">Home</a>
- - <a href="qtopiaclasses.html">Classes</a>
- - <a href="qtopiahierarchy.html">Hierachy</a>
- - <a href="qtopiaannotated.html">Annotated</a>
- - <a href="qtopiafunctions.html">Functions</a>
- - <a href="qtindex.html">Qt Embedded</a>
-</td>
-<td align="right" valign="top">
-  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
-</td>
-</tr>
-</table><h1 align=center>Getting Started</h1>
-
-
-<p> 
-<p> <a name="top"></a>
-<p> <!-- toc -->
-<ul>
-<li><a href="#1"> Introduction
-</a>
-<li><a href="#2"> Acceptable directory characters
-</a>
-<li><a href="#3"> Source or rpm?
-</a>
-<li><a href="#4"> Download Procedure
-</a>
-<li><a href="#5"> Qtopia Dependencies / Prerequisites
-</a>
-<ul>
-<li><a href="#5-1"> Video4Linux
-</a>
-<li><a href="#5-2"> zlib
-</a>
-<li><a href="#5-3"> libuuid (aka luuid)
-</a>
-<li><a href="#5-4"> libjpeg
-</a>
-<li><a href="#5-5"> xorg or x11
-</a>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Getting Started<br /><small></small></h1>
+<a name="top"></a><ul><li><a href="#how-to-obtain-qtopia-products">How to Obtain Qtopia Products</a></li>
+<ul><li><a href="#free-editions">Free Editions</a></li>
+<li><a href="#licensed-editions">Licensed Editions</a></li>
 </ul>
-<li><a href="#6"> Install Procedures (for newbies)
-</a>
+<li><a href="#package-naming-conventions">Package Naming Conventions</a></li>
+<ul><li><a href="#naming-convention-tags">Naming Convention Tags</a></li>
+</ul>
+<li><a href="#installing-and-building-qtopia">Installing and Building Qtopia</a></li>
+</ul>
+<p>Welcome to Qtopia! This document provides information about how to download and install Qtopia products. If you are uncertain about which package is required please refer to:</p>
 <ul>
-<li><a href="#6-1"> Installing rpm Packages
-</a>
-<li><a href="#6-2"> Installing Source (.tar.*) Packages
-</a>
+<li><a href="http://www.trolltech.com/products/qtopia/">Qtopia Products </a></li>
+<li><a href="qtopia-packages.html">Qtopia Packages</a>.</li>
 </ul>
-<li><a href="#7"> Unpacking and Installing Qtopia
-</a>
-</ul>
-<!-- endtoc -->
-
-<p> <h2> Introduction
-</h2>
-<a name="1"></a><p> Qtopia is available in several different packages. Each package has a different license and is targeted at a different type of customer. Some packages contain the full source code, others only contain binaries, and some contain a mixture of binaries and source code. The documentation is the same for all packages.
-<p> The documentation is intended to be the one stop shopping point for the majority of your questions. You can find the documentation in the <tt>doc/html</tt> directory of your Qtopia package. You can also visit <a href="http://doc.trolltech.com">http://doc.trolltech.com</a> and go to the <a href="http://doc.trolltech.com/qtopia2.1/html/index.html">Qtopia 2.1 section</a> to browse through the latest version of the documentation.
-<p> For information about compiling and running the SDK example application, please refer to the <a href="compile_run_examples.html">Compile and Run SDK Example Application</a> document. See also <a href="running-qtopia.html">Running Qtopia</a>.
-<p> <h2> Acceptable directory characters
-</h2>
-<a name="2"></a><p> There are some limits to the acceptable characters in directories. The details are in the
-Build Environment document.
-<p> <h2> Source or rpm?
-</h2>
-<a name="3"></a><p> You can download and install either a Qtopia rpm or a Qtopia source package.
-<p> Using an rpm will save you compile time and allow you to start developing your own Qtopia applications sooner. To download an rpm, go to the <a href="http://www.trolltech.com/download/qtopia/index.html">Qtopia Download Page</a> and select the rpm for your platform, but please be advised that commercial packages are not available here. Please contact a Trolltech sales representative via <a href="mailto:sales@trolltech.com">sales@trolltech.com</a> if you require a commercial package.
-<p> RPM packages are built for a specific Linux distribution. At the time of writing we produce rpm packages for Red Hat 9, SuSE 8.2 and SuSE 8.0. The differences between the rpm packages relate to file locations and such: from a functional point of view the packages are exactly the same. When you download a package you should select a package that matches your distribution.
-<p> The rpm packages generally do not contain any source code, however if some has been included for demonstartion purposes it will not be the full source code. For instance <tt>qtopia-phone-demo-2.1.1-suse82.i386.rpm</tt> is a binary only package. You can download and install it and it will run a demo version of Qtopia Phone on your desktop machine. You cannot use this package to create your own Qtopia based application or to deploy Qtopia Phone on a device.
-<p> If you have any questions regarding which package will best meet your needs please contact <a href="mailto:sales@trolltech.com">sales@trolltech.com</a> and they will assist you in making a choice.
-<p> A Qtopia source package is, as the name implies, a package of source code. It contains all the source code and scripts that you need in order to build your own Qtopia binaries. Having access to all the source code is also great for debugging and (depending on your license) for enhancing the code.
-<p> <h2> Download Procedure
-</h2>
-<a name="4"></a><p> There are several ways to download Qtopia packages. You can download free packages from the public Trolltech server or if you have a valid license you will have access to your own personalized site on our distribution server or you may have been given access to our temporary ftp server.
-<p> HINT: If you know all about downloading files and using <tt>md5sum</tt> then you can safely skip the rest of this section. To proceed to the next section <a href="#install-proc">click here.</a>
-<p> On the download site you will see a list of files that have been made available. Just select the files you need and download them to an empty directory on your system. Usually 'selecting' means right-clicking on a file and clicking the "Save As..." option.
-<p> In the list there will be a file named <tt>md5sum.txt</tt>. This file contains checksums for all the available files and it is strongly recommended that you download this file along with the others.
-When you have downloaded all files, including <tt>md5sum.txt</tt> simply run:
-<pre>
-    md5sum -c md5sum.txt
-</pre>
- 
-This will generate checksums for all the files that you have downloaded and compare them with the checksum that is given in the <tt>md5sum.txt</tt> file. If the checksums are the same you'll get something like:
-<pre>
-    README.html: OK
-    build_qtopiaphone: OK
-    qt-embedded-2.3.10-commercial.tar.gz: OK
-    qt-x11-2.3.2-commercial.tar.gz: OK
-    qt-x11-commercial-3.3.0.tar.gz: OK
-    tmake-1.13.tar.gz: OK
-</pre>
- 
-<p> If on the other hand a file was corrupted during downloading the report will look something like this:
-<pre>
-    README.html: FAILED
-    build_qtopiaphone: OK
-    md5sum: WARNING: 1 of 2 computed checksums did NOT match
-</pre>
- 
-If this happens, please remove the bad file from your system and try downloading it again.
-If problems persist, please contact Trolltech.
-<p> If you haven't downloaded all files from the ftp site then the <tt>md5sum.txt</tt> file will contain more checksums than are generated on your system. In this case you'll get something like:
-<pre>
-    md5sum: README.html: No such file or directory
-    README.html: FAILED open or read
-    qtopia-phone-source-2.1.1.tar.gz: OK
-    md5sum: WARNING: 1 of 2 listed files could not be read
-</pre>
- 
-If you didn't download the README.html file (and didn't intend to) then just ignore the message or else download the missing file(s) and try again.
-<p> Now that you have downloaded all files and put them in an empty directory on your system it's time to unpack the packages.
-<p> <a name="dependencies"></a>
-<p> <!-- index QtopiaDependencies --><a name="QtopiaDependencies"></a><h2> Qtopia Dependencies / Prerequisites
-</h2>
-<a name="5"></a><p> In order for Qtopia to run as intended the following prerequisites must be satisfied:
+<p>If you have any further questions regarding the Qtopia product to best meet your requirements, please contact us at: <a href="mailto:sales@trolltech.com">sales@trolltech.com</a>.</p>
+<a name="how-to-obtain-qtopia-products"></a>
+<h2>How to Obtain Qtopia Products</h2>
+<p>Trolltech provides both licensed and free editions of Qtopia. Details of how to obtain these editions is provided below. For specific licensing information please refer to: <a href="qtopia-licensing.html">Qtopia Licensing</a>.</p>
+<a name="free-editions"></a>
+<h3>Free Editions</h3>
+<p>Qtopia packages for the OpenSource, GPL License community, can be downloaded from: <a href="ftp://ftp.trolltech.com/pub/qtopia/source">Trolltech's FTP site</a>.</p>
+<a name="licensed-editions"></a>
+<h3>Licensed Editions</h3>
+<p>After becoming a Qtopia customer an email will be sent from <a href="mailto:sales@trolltech.com">sales@trolltech.com </a> confirming your license details. The details include:</p>
 <ul>
-<li> Linux kernel that provides shared memory, mmap, and sockets.
-<li> Linux with framebuffer support.
-<li> Linux with OSS sound support, or ALSA sound support with OSS compatability. Refer to <a href="http://www.trolltech.com/developer/faqs/qtopia-av-appear-faq.html#q115">The Qtopia A/V & Appearance FAQ</a> for further details.
+<li>Customer ID</li>
+<li>License ID</li>
+<li>Qtopia package download FTP site location.</li>
 </ul>
-<p> The following libraries are also required:
+<p>Once you have received these details login to the FTP site using any browser and download the packages. Depending on your license the FTP site provides either a:</p>
 <ul>
-<li> <a href="#video4linux">Video4Linux</a>
-<li> <a href="#zlib">zlib</a>
-<li> <a href="#libuuid">libuuid (aka luuid)</a>
-<li> <a href="#libjpeg">libjpeg</a>
-<li> <a href="#xorg">xorg or x11</a>
+<li><i>qtopia</i> source package</li>
+<li><i>qtopia</i> sdk package</li>
 </ul>
-<p> Note also that <em>freetype</em> <a href="http://freetype.sourceforge.net/index2.html">http://freetype.sourceforge.net/index2.html</a> is recommended though not required.
-<p> <a name="video4linux"></a>
-<h3> Video4Linux
-</h3>
-<a name="5-1"></a><p> The Camera application requires a kernel with Video4Linux version 1 support. This is not provided with Qtopia.
-<p> Please refer to the official <a href="http://www.exploits.org/v4l/">Video for Linux</a> resources site for details about this API.
-<p> <a name="zlib"></a>
-<h3> zlib
-</h3>
-<a name="5-2"></a><p> The zlib library can be downloaded from the <a href="http://www.gzip.org/zlib/">http://www.gzip.org/zlib/</a> site.
-<p> <a name="libuuid"></a>
-<h3> libuuid (aka luuid)
-</h3>
-<a name="5-3"></a><p> The uuid library is not provided with Qtopia. It can be downloaded from the <a href="http://e2fsprogs.sourceforge.net/">http://e2fsprogs.sourceforge.net/</a> site.
-<p> Alternately if you have a Suse linux distribution it is likely to be provided by the
-package <tt>e2fsprogs-devel</tt>. On Debian it is provided by <tt>uuid-dev</tt>. The library should be in the standard location, eg /usr/lib/libuuid.so.
-<p> To check that the package is installed use your package management tool, for example <pre> rpm -qa | grep e2fsprogs </pre>
- . If it is not there then install it (and any
-dependencies) from your distributor's CD's or local mirror. For example, if
-you have suse 9.1 then go use <a href="
-http://ds.thn.htu.se/linux/suse/9.1/suse/i586/e2fsprogs-devel-1.34-115.i586.rpm">http://ds.thn.htu.se/linux/suse/9.1/suse/i586/e2fsprogs-devel-1.34-115.i586.rpm</a> to download the <tt>e2fsprogs</tt>.
-<p> Note that not having this will produce the following linker error:
-<pre>
-/usr/lib/gcc-lib/i586-suse-linux/3.3.3/../../../../i586-suse-linux/bin/ld:
-cannot find -luuid
-</pre>
- 
-<p> If the library is installed and you still experienced this linker error then check your -L and -R settings to Qtopia's <tt>./configure</tt> script and make sure the actual location of the library is set in the script.
-<p> Information about cross compiling libuuid can be found in the <a href="system-integrators-guide.html#libuuid">System Integrator's Guide</a>.
-<p> <a name="libjpeg"></a>
-<h3> libjpeg
-</h3>
-<a name="5-4"></a><p> The jpeg library is not provided with Qtopia. Qtopia requires that Qt/Embedded is configured with JPEG support.
-<p> The libjpeg library can be downloaded from the <a href="http://www.ijg.org/">http://www.ijg.org/</a> site.
-<p> Alternately if you have a Suse linux distribution it is likely to be provided by the
-package <tt>libjpeg</tt>. The library should be in the standard location, eg /usr/lib/libjpeg.so.
-<p> To check that the package is installed use your package management tool, for example <pre> rpm -qa | grep libjpeg </pre>
- .
-If it is not there then install it (and any dependencies) from your distributor's CD's or local mirror.
-<p> Information about cross compiling libjpeg can be found in the <a href="system-integrators-guide.html#libjpeg">System Integrator's Guide</a>.
-<p> <a name="xorg"></a>
-<h3> xorg or x11
-</h3>
-<a name="5-5"></a><p> These development packages are available from the following sites:
-<ul>
-<li> <a href="http://www.xfree86.org/">http://www.xfree86.org/</a>
-<li> <a href="http://xorg.freedesktop.org/">http://xorg.freedesktop.org</a>
+<p>The FTP directory is available for the full duration of the contract, and will be updated regularly with new releases. Customers are notified via email about each new release that is relevant to their account.</p>
+<p><b>Note:</b> The FTP site may also provide access to other files such as various Qt versions, snapshots of packages, language packages and much more, however, this document refers only to the Qtopia specific-files available on the FTP site.</p>
+<a name="package-naming-conventions"></a>
+<h2>Package Naming Conventions</h2>
+<p>The FTP download directory contains multiple packages and at first it may be unclear which packages are required. Depending on the type of license you have, one or more of the following packages is needed:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Package</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td>qtopia-[edition]-[commercial|opensource]-src-[x.y.z].[zip]</td><td><b>Full source package</b>: this package contains all sources to build Qtopia, including the prerequisite source for Qt.</td></tr>
+<tr valign="top" class="even"><td>qtopia-device-[devicename]-src-[x.y.z].[zip]</td><td><b>Device source package</b>: this package contains additional sources that are required to build Qtopia for a specific device. A device package is installed 'on top' of the Qtopia source package. Multiple device packages can be installed.</td></tr>
+<tr valign="top" class="odd"><td>qtopia-language-[languagename]-[x.y.z].[zip]</td><td><b>Language package</b>: this package contains translations for a specific language. A language package is installed 'on top' of the Qtopia source package. Multiple language packages can be installed.</td></tr>
+<tr valign="top" class="even"><td>qtopia-[thirdparty-addon]-[commercial|opensource]-src-[x.y.z].[zip]</td><td><b>Thirdparty add-on source package</b>: this package contains sources for a thirdparty add-on module that can be used to enhance Qtopia. A thirdparty add-on package is installed 'on top' of the Qtopia source package. Multiple add-on packages can be installed.</td></tr>
+<tr valign="top" class="odd"><td>qtopia-[edition]-sdk-[x.y.z]-[distro].i386.rpm</td><td><b> Software Development Kit (SDK) package</b>: this package contains a combination of pre-built binaries and library header files. SDK packages are typically built for a specific distribution, for example, RedHat, SuSE, etc.</td></tr>
+<tr valign="top" class="even"><td>qtopia-[edition]-sdk-devel-[x.y.z]-[distro].i386.rpm</td><td><b>SDK extension package</b>: containing Qtopia library source files. The development package is installed 'on top' of the SDK package.</td></tr>
+</table></p>
+<a name="naming-convention-tags"></a>
+<h3>Naming Convention Tags</h3>
+<p>In the above list the following tags have been used:</p>
+<p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Tag</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td>[edition]</td><td>Qtopia product name, one of:<ul>
+<li>core</li>
+<li>platform</li>
+<li>phone</li>
+<li>refboard.</li>
 </ul>
-<p> <a name="install-proc"></a>
-<p> <h2> Install Procedures (for newbies)
-</h2>
-<a name="6"></a><p> We again have to differentiate between rpm packages and source <tt>(.tar.gz)</tt> packages.
-Whatever the package type, once you have installed the package there will be a LICENSE file and a README file in the root package directory. The LICENSE file will describe all your rights and obligations and the README file will address any last minute issues that may have arisen. Please take the time to read both files.
-<p> To read only a specific installation section select from the following: <a href="#rpm-pack-install">rpm package installation</a> or <a href="#tar-pack-install">tar.gz package installation</a> .
-<p> <a name="rpm-pack-install"></a>
-<h3> Installing rpm Packages
-</h3>
-<a name="6-1"></a><p> An rpm package is easy to install. You can either use the GUI tools that are provided by your specific distribution or use command line tools. The GUI tools are different for each distribution so we won't even try to describe them in detail. Generally speaking it would be something like opening your file browser and clicking on an rpm file. The file browser should recognize the rpm file, open a dialog and ask you if you want to install the rpm. To actually install the rpm you need to enter the root (administrator) password somewhere and the system will handle the rest for you. Any error situations will be reported to you, but if all goes well you'll be ready to proceed once this is done.
-<p> Qtopia rpm packages are usually installed in <tt>/opt/Qtopia</tt>. There will be a bin directory that contains all the binaries and several other directories that contain libraries, configuration files and so on.
-<p> If your rpm is a Software Development Kit (SDK) package it may also contain an <tt>arm</tt> subdirectory. In this subdir you will find a copy of everything in <tt>/opt/Qtopia</tt> with the exception that all the binaries will have been built for an ARM device.
-<p> HINT: If you know all about using <tt>rpm</tt> you can skip the rest of this section. To proceed to the next section (Installing Qtopia) <a href="#install-qtopia">click here.</a>
-<p> To install an rpm package from the command line you do the following:
-<ul>
-<li> First you need to log in as root:
-<pre>
-    su and enter the root password upon request to log in as root
-</pre>
- 
-<p> <li> Make sure that there isn't already an installed Qtopia rpm package on your system. For example, you cannot install both a Qtopia Developer SDK and a Qtopia Commercial SDK rpm package. The only exception to this rule is Qtopia Desktop which can be combined with any other Qtopia rpm package, but you cannot install Qtopia Desktop if an older version of Qtopia Desktop is already installed. To check which Qtopia packages are installed on your system do the following:
-<pre>
-    rpm -qa | grep qtopia to get a list of all currently installed Qtopia rpms on your system
-</pre>
- 
-<p> <li> If another Qtopia package is installed, or if an older version of your package is installed then uninstall it before proceeding. To uninstall a package use:
-<pre>
-    rpm -e packagename
-</pre>
- 
-The "packagename" is the name of the package as the rpm 'knows' it and it is slightly different from the file name. If you use the <tt>rpm -qa</tt> command as described before you will get the exact name of the package that you need in order to uninstall the package.
-<p> <li> The rpm tool also provides an option to upgrade an existing package. Technically this means that if an older version of the package already exists on your system you don't have to uninstall it, instead you can choose to update the files that have changed.
-<p> To avoid potential problems however, we recommend that you ALWAYS uninstall the old package before installing the new package.
-<li> Now that we have removed all old packages it is time to install the new package:
-<pre>
-    rpm -ivh package-file-name
-</pre>
- 
-<p> <li> Log out as root:
-<pre>
-    exit
-</pre>
- 
+</td></tr>
+<tr valign="top" class="even"><td>[x.y.z]</td><td>Product version number, for example 4.1.3</td></tr>
+<tr valign="top" class="odd"><td>[zip]</td><td>Indicates that a package is made available as <b>a</b> compressed package such as:<ul>
+<li>tar.gz</li>
+<li>tar.bz2.</li>
 </ul>
-If all went well your package has now been installed and is ready to run!
-<p> For information about running Qtopia please go to <a href="running-qtopia.html">Running Qtopia</a>
-<p> For more help with the rpm command please type <tt>man rpm</tt> on the command line and you get all the information you need.
-<p> <a name="tar-pack-install"></a>
-<h3> Installing Source (.tar.*) Packages
-</h3>
-<a name="6-2"></a><p> Source packages come in two varieties: <tt>.tar.gz</tt> and <tt>.tar.bz2</tt> files.
-The contents of the packages is exactly the same and the different file extensions are simply the result of the two different compression algoritms used to make the packages. Some people prefer <tt>gz</tt> (faster), some prefer <tt>bz2</tt> (smaller). Choose one of the two, but don't download both packages as that will just cost you bandwith without adding any benefit.
-<p> HINT: If you know all about using <tt>tar</tt> this section is probably a bit boring. To proceed to the next section (Installing Qtopia) <a href="#install-qtopia">click here.</a>
-<p> To unpack a <tt>.tar.gz</tt> package you have to do the following:
-<pre>
-    cd into the directory where you want to install the package
-    tar -xzf package-file-name
-</pre>
- 
-<p> To unpack a <tt>.tar.bz2</tt> package you have to do the following:
-<pre>
-    cd into the directory where you want to install the package
-    tar -xjf package-file-name
-</pre>
- 
-<p> For more help with the tar command please type <tt>man tar</tt> on the command line and you will get all the information you need.
-In both cases (<tt>.tar.gz</tt> and <tt>.tar.bz2</tt>) the tar package will be unpacked in a new subdirectory. The name of the subdirectory is defined in the package and is usually a close match to the package name. For example, the package <tt>qtopia-phone-source-2.1.1.tar.gz</tt> will be unpacked into a subdir named <tt>qtopia-phone-2.1.1</tt> and <tt>qtopia-refboard-2.1.1.tar.gz</tt> will be unpacked into a subdir named <tt>qtopia-refboard-2.1.1</tt>.
-<p> <a name="install-qtopia"></a>
-<h2> Unpacking and Installing Qtopia
-</h2>
-<a name="7"></a><p> If you only have a Qtopia rpm package then you just have to follow the guidelines provided in the <a href="#rpm-pack-install">"Installing rpm packages"</a> section and you're done.
-<p> If you are adding support for a new device then first read <a href="system-integrators-guide.html">system-integrators-guide.html</a>.
-<p> It is also possible that the ftp site provides you with both rpm packages and source packages. In this case the rpm package is most likely a demo version of Qtopia which you have to install using the guidelines provided in the "Installing rpm packages" section. You also have to install the source packages using the following guidelines.
-<p> To install and build Qtopia from the source code you actually need several packages. These packages are:
-<ul>
-<li> Qtopia 2.x
-<li> Qt/Embedded 2.3.10 (or higher, but always a 2.3 version)
-<li> <a href="#libuuid">libuuid (aka luuid)
-  &#92;i JPEG library and header files. These can be obtained from &#92;link http://www.ijg.org the Independent JPEG Group</a> site.
+</td></tr>
+<tr valign="top" class="even"><td>[distro]</td><td>Operating system or distribution on which the package can be used, for example:<ul>
+<li>redhat9</li>
+<li>suse82</li>
+<li>suse9</li>
+<li>macosx</li>
+<li>win etc...</li>
 </ul>
-<p> The remaining packages are available to commercial licence holders as a Qtopia Tools package. They can also be individually installed and built. 
-If you are  using the Qtopia Tools package then you can skip to the section <a href="getting-started.html#qteunpack">Install Qt/Embedded</a> . 
-These remaining packages are required:
-<ul>
-<li> Qt 2.3.2 for X11 (for emulated desktop development)
-<li> Qt 3.3.0 (or higher) for X11 (required for the language tools and the phone simulator)
-<li> tmake 1.13 (or higher)
+</td></tr>
+<tr valign="top" class="odd"><td>[exe]</td><td>Package type, one of:<ul>
+<li>.rpm</li>
+<li>.dmg</li>
+<li>.tar.gz</li>
+<li>.exe.</li>
 </ul>
-The Qtopia source package comes in several flavours. At the time of writing there is a PDA version, a Phone version and a Core version.
-The install procedure for all three is exactly the same, it is only the filenames which are slightly different. In this example we assume you are installing Qtopia Phone. For Qtopia PDA please replace "phone" with "pda" where appropriate.
-<p> Packages for the United States have a different license file. These packages have a "-us" somewhere in the filename, so please use that file instead if it is appropriate for your geographic location. Once installed the package will be in exactly the same place as the "rest of the world" package, it is only the LICENSE file that is different.
-<p> In this document we will assume that you have downloaded all packages into <tt>~/dev</tt> and are using that as the base directory for the installation and build processes.
-<p> To install the packages do the following:
-<ul>
-<li> Install TMake<br>
-TMake is used for building Qt/Embedded. Qtopia is built using QMake, which is included in the Qtopia source package.
-<pre>
-    cd ~/dev
-    tar -xzf tmake-1.13.tar.gz
-    export TMAKEDIR=$PWD/tmake-1.13
-</pre>
- 
-<li> Install Qt 2.3.2<br>
-Qt 2.3.2 is required to build tools like qvfb that are used to simulate an embedded device on your desktop machine. This library is NOT used on the embedded device.
-<pre>
-    cd ~/dev
-    tar -xzf qt-x11-2.3.2-commercial.tar.gz
-    export QT2DIR=$PWD/qt-2.3.2
-</pre>
- 
-<li> Install Qt 3.3<br>
-Qt 3.3 is used to build more tools like the phone simulator and translation tools. The first is only relevant for a Qtopia Phone package, the second is important for all Qtopia products. You can use it to internationalize your product to any language you wish.
-We assume that you have the commercial version of Qt 3.3-X11. Please adjust the filenames if you have a different package.
-<pre>
-    cd ~/dev
-    tar -xzf qt-x11-commercial-3.3.0.tar.gz
-    export DQTDIR=$PWD/qt-x11-commercial-3.3.0
-</pre>
- 
-<!-- index qteunpack --><a name="qteunpack"></a><li> Install Qt/Embedded<br>
-We assume you have the commercial Qt/Embedded package. If you use the free package you should adjust the filenames accordingly. We also assume you have Qt/Embedded 2.3.10 (which was the Qt/Embedded version released with Qtopia 2.1.1). If you have a newer version of Qt/Embedded then please replace the version number below as appropriate.
-Please be advised that Qtopia 2.1 does NOT compile with version 3.0 or above of Qt/Embedded.
-If you are using the Qtopia Tools package then
-<pre>
-    export TMAKEDIR=/opt/QtopiaTools/tmake
-    export QT2DIR=/opt/QtopiaTools/qt2
-    export DQTDIR=/opt/QtopiaTools/qt3
-</pre>
- 
-<p> All users will need to 
-<pre>
-    cd ~/dev
-    tar -xzf qt-embedded-2.3.10-commercial.tar.gz
-    export QTEDIR=$PWD/qt-2.3.10
-</pre>
- 
-<p> <li> Install Qtopia<br>
-We assume that you have the Qtopia Phone source package. Please adjust the filenames if you have a different Qtopia package. For example, <tt>qtopia-pda-source-2.1.1.tar.gz</tt> etc.
-<pre>
-    cd ~/dev
-    tar -xzf qtopia-phone-source-2.1.1.tar.gz
-    export QPEDIR=$PWD/qtopia-phone-2.1.1
-</pre>
- 
-</ul>
-<p> You should now have installed all required packages. Each package is in it's own subdirectory, but you will be spending most of the time dealing with the <tt>Qtopia</tt> subdirectory. As long as you have set the environment variables for the other packages correctly you need not worry about them.
-<p> IMPORTANT:
-After you have installed all packages you should have a set of environment variables that point to each and every package that you installed. These environment variables are crucial for building Qtopia, so please verify that they are all correct.
-You should have the following environment variables set:
-<ul>
-<li> TMAKEDIR : points to the Tmake tool used for building Qt-Embedded
-<li> QT2DIR   : points to the Qt-X11 2.3.2 directory
-<li> DQTDIR   : points to the Qt-X11 3.3 directory
-<li> QTEDIR   : points to the Qt-Embedded 2.3.10 directory
-<li> QPEDIR   : points to the Qtopia source directory
-</ul>
-<p> After you have installed all packages you no longer need the tar files. These files can be deleted or kept somewhere safe just in case you decide to reinstall everything from scratch.
-<p> You are now ready to build Qtopia. For instructions please refer to <a href="build-from-source.html">Building Qtopia from Source</a> .
-<p> 
-<!-- eof -->
-<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0">
-<tr>
-<td>Copyright &copy; 2001-2005 Trolltech
-<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qtopia version 2.1.1</div>
-</table></div></address></body>
+</td></tr>
+</table></p>
+<a name="installing-and-building-qtopia"></a>
+<h2>Installing and Building Qtopia</h2>
+<p>Once the required source package has been downloaded some additional tools are required to build Qtopia or develop applications for Qtopia. These tools are provided in the packages as either pre-built binaries or as source code. The following links provide all the information required to install, build and run Qtopia:</p>
+<ol type="1">
+<li><a href="build-from-source.html">Build From Source</a> - Build Source Package</li>
+<li><a href="build-from-source.html#installing-an-rpm">Installing an RPM</a> - Build RPM Package</li>
+<li><a href="tools-list.html">Tools</a> - Additional Tools</li>
+<li><a href="running-qtopia.html">Running Qtopia</a> - Run Qtopia.</li>
+</ol>
+<p>For further Qtopia information refer to:</p>
+<ol type="1">
+<li><a href="http://www.doc.trolltech.com/qtopia">Latest Qtopia Reference Documentation</a></li>
+<li><a href="http://www.trolltech.com/developer/faqs">FAQs</a>.</li>
+</ol>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
 </html>

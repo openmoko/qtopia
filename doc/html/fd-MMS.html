@@ -1,0 +1,69 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title> MMS </title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center"> MMS <br><small>Functional Description</small></h1>
+<p />
+
+<p />
+<h2><a name="Features"></a> Features </h2>
+<p />
+<h3><a name="Standards_Compliance"></a> Standards Compliance </h3>
+<p />
+Qtopia MMS provides conformance with OMA MMS 1.2 for the Image Basic content class.
+<p />
+<h3><a name="Composition"></a> Composition </h3>
+<p />
+Standard MMS slide-shows consisting of text, images and speech audio can be composed.  There is currently no support for video.
+<p />
+<h3><a name="Viewing"></a> Viewing </h3>
+<p />
+The MMS viewer is able to render MMS messages containing "MMS SMIL" - a subset of "SMIL Basic" (see <a href="http://member.openmobilealliance.org/ftp/Public_documents/MWG/MMS/Permanent_documents/OMA-MMS-CONF-V1_2-20040219-C.zip" target="_top">http://member.openmobilealliance.org/ftp/Public_documents/MWG/MMS/Permanent_documents/OMA-MMS-CONF-V1_2-20040219-C.zip</a>).  There is currently no support for video.
+<p />
+<h3><a name="Transports"></a> Transports </h3>
+<p />
+A transport abstraction layer allows integration with 3rd party WAP stacks.  A sample implementation using HTTP over TCP/IP is included as a sample.
+<p />
+<h3><a name="Viewing_MMS_Messages"></a> Viewing MMS Messages </h3>
+<p />
+The following features are provided:
+<p />
+<p /> <ul>
+<li> Display of images and text and playing sounds.
+</li> <li> Playing MMS messages containing SMIL presentation.
+</li> <li> Reply: it is possible to reply to or forward the currently viewed message.
+</li> <li> Delete: it is possible to delete the currently viewed message
+</li></ul> 
+<p />
+<h3><a name="Writing_MMS_Messages"></a> Writing MMS Messages </h3>
+<p />
+The following writing-related features are provided:
+<p /> <ul>
+<li> Fields: it is possible to specify To/Cc/Bcc/subject. It is possible to request delivery report and read reply.
+</li> <li> Composing: a standard slide-show with SMIL presentation is supported by the MMS composer. One image, text field and audio file are allowed per page of the slide-show.  Slide background color can be changed and applies to all slides.
+</li> <li> Modify: it is possible to make changes as necessary to mails in the drafts and outbox folder.
+</li> <li> Auto save: modified mails are automatically be saved unless they are explicitly discarded.
+</li> <li> Store: draft mails are stored in the Drafts folder and mails ready to send are stored in the Outbox folder.
+</li></ul> 
+<p />
+<h3><a name="Retrieving_MMS_Messages"></a> Retrieving MMS Messages </h3>
+<p />
+The user is notified of the arrival of an MMS message.  The user may
+then download and view the message immediately, or defer downloading to
+a later date.
+<p />
+<p />
+<hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div>

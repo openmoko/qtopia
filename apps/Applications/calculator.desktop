@@ -5,6 +5,6 @@ Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
 Comment[]=A Calculator Program
 Exec=calculator
-Icon=Calculator
+Icon=calculator/Calculator
 Type=Application
-Name[]=Cal­cu­la­tor
+Name[]=Cal\xad\x63u\xadla\xadtor

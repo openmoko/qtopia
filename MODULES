@@ -1,0 +1,91 @@
+The following modules can be found in this Qtopia source package
+
+devices: 
+    example
+    gcc411
+    greenphone
+    omap730
+    pxa27x
+    s3c24a0
+    x86_gcc4
+    zylonite
+etc: 
+    themes: crisp, portal, qtopia
+3rdparty: 
+    applications: dbus
+    libraries: alsa, amr, bluez, dbus, dissipate2, gsm, helix, inputmatch, libtimidity, md5, openobex, openssl (crypto, ssl), qtdbus, tar, zlib
+    plugins: codecs (libamr, libtimidity), inputmethods (pkim)
+    tools: sdptool
+applications: 
+    addressbook
+    calculator
+    camera
+    clock
+    datebook
+    helpbrowser
+    mediaplayer
+    mediarecorder
+    photoedit
+    qtmail
+    sysinfo
+    textedit
+    todo
+games: 
+    fifteen
+    minesweep
+    qasteroids
+    snake
+libraries: 
+    handwriting
+    qtopia
+    qtopiaaudio
+    qtopiabase
+    qtopiacomm
+    qtopiacore: corelib, gui, network, sql, svg, xml
+    qtopiail
+    qtopiamail
+    qtopiamedia
+    qtopiapim
+    qtopiaprinting
+    qtopiasmil
+plugins: 
+    codecs: wavrecord
+    content: exif, id3
+    inputmethods: dockedkeyboard, keyboard
+    mediadevices: builtin
+    network: bluetooth, dialing, lan
+    qtopiacore
+    qtopiaprinting: bluetooth
+qt: 
+server: 
+settings: 
+    appearance
+    beaming
+    btsettings
+    handwriting
+    language
+    light-and-power
+    logging
+    network
+    packagemanager
+    ringprofile
+    security
+    serverwidgets
+    sipsettings
+    speeddial
+    systemtime
+    words
+    worldtime
+tools: 
+    content_installer
+    mediaserver
+    printserver
+    qcop
+    qdawggen
+    qss
+    qtopia-dbus-launcher
+    qtopiacore: moc, rcc, uic
+    quicklauncher
+    sipagent
+    symlinker
+    vsexplorer

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name[]=Simple
+Comment[]=Very simple Calculator
+X-QPE-Library=libsimple.so
+[Translation]
+File=QtopiaPlugins
+Context=Calculator

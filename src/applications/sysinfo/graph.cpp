@@ -1,40 +1,27 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
-#include <qpainter.h>
-#include <qpixmap.h>
+#include <QPainter>
+#include <QPixmap>
+#include <QBrush>
 #include "graph.h"
 
 void GraphData::clear()
@@ -50,42 +37,48 @@ void GraphData::addItem( const QString &name, int value )
     values[values.size()-1] = value;
 }
 
-Graph::Graph(QWidget *parent, const char *name, WFlags f )
-    : QFrame( parent, name, f )
+Graph::Graph(QWidget *parent, Qt::WFlags f )
+    : QFrame( parent, f )
 {
 }
 
-PieGraph::PieGraph(QWidget *parent, const char *name, WFlags f )
-    : Graph( parent, name, f )
+void Graph::paintEvent(QPaintEvent *pe) {
+    QFrame::paintEvent(pe);
+    QPainter p(this);
+    drawContents( &p );
+}
+
+PieGraph::PieGraph(QWidget *parent, Qt::WFlags f )
+    : Graph( parent, f )
 {
 }
 
 void PieGraph::drawContents( QPainter *p )
 {
-    int size = QMIN( contentsRect().width(), contentsRect().height() ) - 1;
+    int size = qMin( contentsRect().width(), contentsRect().height() ) - 1;
 
     int total = 0;
-    for ( unsigned i = 0; i < data->count(); i++ )
-	total += data->value(i);
+    for ( int i = 0; i < data->count(); i++ )
+        total += data->value(i);
 
     int angle = 0;
-    for ( unsigned i = 0; i < data->count(); i++ ) {
-	int len;
-	if ( i == data->count() - 1 || !total )
-	    len = 5760 - angle;
-	else
-	    len = data->value(i) * 5760 / total;
-	QColor col;
-	col.setHsv( i * 360 / data->count(), 255, 255 );
-	p->setBrush( col );
-	p->drawPie ( contentsRect().x(), contentsRect().y(),
-		     size, size, angle, len+32 );
-	angle += len;
+    for ( int i = 0; i < data->count(); i++ ) {
+        int len;
+        if ( i == data->count() - 1 || !total )
+            len = 5760 - angle;
+        else
+            len = data->value(i) * 5760 / total;
+        QColor col;
+        col.setHsv( i * 360 / data->count(), 255, 255 );
+        p->setBrush( col );
+        p->drawPie ( contentsRect().x(), contentsRect().y(),
+                     size, size, angle, len+32 );
+        angle += len;
     }
 }
 
-BarGraph::BarGraph(QWidget *parent, const char *name, WFlags f )
-    : Graph( parent, name, f )
+BarGraph::BarGraph(QWidget *parent, Qt::WFlags f )
+    : Graph( parent, f )
 {
     setMinimumHeight( 10 );
     setMaximumHeight( 45 );
@@ -97,95 +90,74 @@ void BarGraph::drawContents( QPainter *p )
     int y = contentsRect().top();
 
     int total = 0;
-    for ( unsigned i = 0; i < data->count(); i++ )
-	total += data->value(i);
+    for ( int i = 0; i < data->count(); i++ )
+        total += data->value(i);
 
     int pos = 0;
-    for ( unsigned i = 0; i < data->count(); i++ ) {
-	int len;
-	if ( i == data->count() - 1 || !total )
-	    len = contentsRect().width() - pos;
-	else
-	    len = (uint)data->value(i) * contentsRect().width() / total;
-	QColor col;
-	col.setHsv( i * 360 / data->count(), 255, 255 );
-	drawSegment( p, QRect(contentsRect().x() + pos, y, len, h), col );
-	pos += len;
+    p->setPen(Qt::NoPen);
+    QRect r = contentsRect();
+    for ( int i = 0; i < data->count(); i++ ) {
+        int len;
+        if ( i == data->count() - 1 || !total )
+            len = r.width() - pos;
+        else
+            len = (uint)data->value(i) * r.width() / total;
+        QColor col;
+        col.setHsv( i * 360 / data->count(), 255, 255 );
+        if ( layoutDirection() == Qt::LeftToRight )
+            drawSegment( p, QRect(r.x() + pos, y, len, h), col );
+        else
+            drawSegment( p, QRect(r.width()+ r.x()-pos-len ,y,len,h), col );
+        pos += len;
     }
 }
 
 void BarGraph::drawSegment( QPainter *p, const QRect &r, const QColor &c )
 {
     if ( QPixmap::defaultDepth() > 8 ) {
-	QColor topgrad = c.light(170);
-	QColor botgrad = c.dark();
+        QColor topgrad = c.light(180);
 
-	int h1, h2, s1, s2, v1, v2;
-	topgrad.hsv( &h1, &s1, &v1 );
-	botgrad.hsv( &h2, &s2, &v2 );
-	int ng = r.height();
-	for ( int j =0; j < ng; j++ ) {
-	    p->setPen( QColor( h1 + ((h2-h1)*j)/(ng-1),
-			s1 + ((s2-s1)*j)/(ng-1),
-			v1 + ((v2-v1)*j)/(ng-1),  QColor::Hsv ) );
-	    p->drawLine( r.x(), r.top()+j, r.x()+r.width(), r.top()+j );
-	}
-    } else {
-	p->fillRect( r.x(), r.top(), r.width(), r.height(), c );
+        QLinearGradient grad (QPointF(r.x()+r.width()/2, r.y()),
+                QPointF(r.x()+r.width()/2, r.y()+r.height()));
+        grad.setColorAt(0,topgrad);
+        grad.setColorAt(0.5,c);
+        grad.setColorAt(1,topgrad);
+        QBrush topBrush(grad);
+        p->setBrush(topBrush);
+        p->drawRect(r.x(), r.y(), r.width(), r.height());
+   } else {
+        p->fillRect( r.x(), r.top(), r.width(), r.height(), c );
+        p->setPen(Qt::SolidLine);
     }
 }
 
 
-GraphLegend::GraphLegend( QWidget *parent, const char *name, WFlags f )
-    : QFrame( parent, name, f )
+GraphLegend::GraphLegend( QWidget *parent, Qt::WFlags f )
+    : QFrame( parent, f )
 {
-    horz = FALSE;
+    horz = false;
 }
 
-void GraphLegend::setOrientation(Orientation o)
+void GraphLegend::setOrientation(Qt::Orientation o)
 {
-    horz = o == Horizontal;
-}
-
-void GraphLegend::drawContents( QPainter *p )
-{
-    int total = 0;
-    for ( unsigned i = 0; i < data->count(); i++ )
-	total += data->value(i);
-
-    int tw = width()/data->count()-1;
-    int th = height()/(horz ? 1 : data->count());
-    if ( th > p->fontMetrics().height() )
-	th = p->fontMetrics().height();
-    int x = 0;
-    int y = 0;
-    for ( unsigned i = 0; i < data->count(); i++ ) {
-	QColor col;
-	col.setHsv( i * 360 / data->count(), 255, 255 );
-	p->setBrush( col );
-	p->drawRect( x+1, y+1, th - 2, th - 2 );
-	p->drawText( x+th + 1, y + p->fontMetrics().ascent()+1, data->name(i) );
-	if ( horz ) {
-	    x += tw;
-	} else {
-	    y += th;
-	}
-    }
+    horz = o == Qt::Horizontal;
 }
 
 QSize GraphLegend::sizeHint() const
 {
-    int th = fontMetrics().height() + 2;
+    // For some reason, the painted text is bigger than the normal font
+    // so we need to add some extra pixels or the text will get clipped
+    int th = fontMetrics().height() + 4;
     int maxw = 0;
-    for ( unsigned i = 0; i < data->count(); i++ ) {
-	int w = fontMetrics().width( data->name(i) );
-	if ( w > maxw )
-	    maxw = w;
+    for ( int i = 0; i < data->count(); i++ ) {
+        int w = fontMetrics().width( data->name(i) );
+        if ( w > maxw )
+            maxw = w;
     }
     if ( 0 && horz ) {
-	return QSize( maxw * data->count(), th );
+        return QSize( maxw * data->count(), th );
     } else {
-	return QSize( maxw, th * data->count() );
+        return QSize( maxw, th * data->count() );
     }
 }
 
@@ -195,4 +167,40 @@ void GraphLegend::setData( const GraphData *p )
     int th = fontMetrics().height();
     setMinimumHeight( th * ( horz ? 1 : data->count() ) );
     updateGeometry();
+}
+
+void GraphLegend::paintEvent( QPaintEvent *)
+{
+    QPainter p(this);
+
+    int total = 0;
+    for ( int i = 0; i < data->count(); i++ )
+        total += data->value(i);
+
+    int tw = width()/data->count()-1;
+    int th = height()/(horz ? 1 : data->count());
+    if ( th > p.fontMetrics().height() )
+        th = p.fontMetrics().height();
+    int x = 0;
+    int y = 0;
+    for ( int i = 0; i < data->count(); i++ ) {
+        QColor col;
+        col.setHsv( i * 360 / data->count(), 255, 255 );
+
+        p.setBrush( col );
+        if ( layoutDirection() == Qt::LeftToRight ) {
+            p.drawRect( x+1, y+1, th - 2, th - 2 );
+            p.drawText( x+th + 1, y + p.fontMetrics().ascent()+1, data->name(i) );
+        } else {
+            p.drawRect( width()-(th-2)-1, y+1, th-2, th-2 );
+            p.drawText( x+1, y + 1,
+                    width()-(th-2)-3, p.fontMetrics().ascent()+1,
+                    Qt::AlignLeft, data->name(i) );
+        }
+        if ( horz ) {
+            x += tw;
+        } else {
+            y += th;
+        }
+    }
 }

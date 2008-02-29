@@ -1,7 +1,26 @@
-<qt title="Add Service">
-<h3>Add Service</h3>
-<p>This screen displays a list of available network services. </p>
-<p>Select the service you wish to use, then tap <b>Add</b>. This will open the 
-<a href="netsetup-dialup.html">Dial Up</a> settings screen, or the
-<a href="netsetup-lan.html">LAN</a> settings screen depending on the service that is being added.</p>
-</qt>
+<html>
+<head><title>New Service</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h3>New Service</h3>
+<!--#else-->
+   <h3>New Service</h3>
+<!--#endif-->
+<p>This screen displays a list of available network services.</p>
+
+<!--#if expr="$PDASTYLE"-->
+<p>Select the service you wish to use, then tap <img src=":image/qpe/pda/OKButton"> </img> to add the service or <img src=":image/qpe/pda/CloseButton"> </img> to cancel.</p>
+<!--#endif-->
+<!--#if expr="$PHONESTYLE"-->
+<p>Select the service you wish to use, then press <img src=":icon/select"> </img> to add the service or <img src=":icon/cancel"> </img> to cancel.</p>
+<!--#endif-->
+
+<p>This will open the
+<ul>
+<li><a href="netsetup-dialup-menu.html">Dial Up</a> settings screen</li>
+<li><a href="netsetup-lan-menu.html">LAN</a> settings screen</li>
+<li><a href="netsetup-bluetooth-menu.html">Bluetooth</a> settings screen</li>
+</ul>
+depending on the service that is being added.</p>
+</body>
+</html>

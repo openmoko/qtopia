@@ -6,6 +6,8 @@ Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 Comment[]=A Photo Editor
 Exec=photoedit
 MimeType=image/*
-Icon=ImageViewer
+Icon=photoedit/ImageViewer
 Type=Application
-Name[]=Pic­tures
+Name[]=Pic\xadtures
+[DRM]
+MimeTypePermissions=Display

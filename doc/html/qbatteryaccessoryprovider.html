@@ -1,0 +1,80 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QBatteryAccessoryProvider Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QBatteryAccessoryProvider Class Reference</h1>
+<p>The QBatteryAccessoryProvider class provides an interface for battery devices to integrate into Qtopia. <a href="#details">More...</a></p>
+<pre>    #include &lt;QBatteryAccessoryProvider&gt;</pre><p>Inherits <a href="qbatteryaccessory.html">QBatteryAccessory</a>.</p>
+<ul>
+<li><a href="qbatteryaccessoryprovider-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qbatteryaccessoryprovider.html#QBatteryAccessoryProvider">QBatteryAccessoryProvider</a></b> ( const QString &amp; <i>id</i>, QObject * <i>parent</i> = 0 )</li>
+<li><div class="fn"/><b><a href="qbatteryaccessoryprovider.html#dtor.QBatteryAccessoryProvider">~QBatteryAccessoryProvider</a></b> ()</li>
+</ul>
+<ul>
+<li><div class="fn"/>4 public functions inherited from <a href="qbatteryaccessory.html#public-functions">QBatteryAccessory</a></li>
+<li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
+<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+</ul>
+<a name="public-slots"></a>
+<h3>Public Slots</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qbatteryaccessoryprovider.html#setCharge">setCharge</a></b> ( int <i>charge</i> )</li>
+<li><div class="fn"/>void <b><a href="qbatteryaccessoryprovider.html#setCharging">setCharging</a></b> ( bool <i>charging</i> )</li>
+<li><div class="fn"/>void <b><a href="qbatteryaccessoryprovider.html#setGood">setGood</a></b> ( bool <i>good</i> )</li>
+<li><div class="fn"/>void <b><a href="qbatteryaccessoryprovider.html#setTimeRemaining">setTimeRemaining</a></b> ( int <i>timeRemaining</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>4 signals inherited from <a href="qbatteryaccessory.html#signals">QBatteryAccessory</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
+<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QBatteryAccessoryProvider class provides an interface for battery devices to integrate into Qtopia.</p>
+<p>The QBatteryAccessoryProvider class provides an interface for battery devices to integrate into Qtopia. Battery devices inherit from this and call <a href="qbatteryaccessoryprovider.html#setCharging">setCharging</a>(), <a href="qbatteryaccessoryprovider.html#setGood">setGood</a>(), setCharge and <a href="qbatteryaccessoryprovider.html#setTimeRemaining">setTimeRemaining</a>() to indicate the level of functionality that is supported.</p>
+<p>See also <a href="qbatteryaccessory.html">QBatteryAccessory</a>.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QBatteryAccessoryProvider"></a>QBatteryAccessoryProvider::QBatteryAccessoryProvider ( const <a href="qstring.html">QString</a> &amp; <i>id</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Create a battey accessory called <i>id</i> and attach it to <i>parent</i>.</p>
+<h3 class="fn"><a name="dtor.QBatteryAccessoryProvider"></a>QBatteryAccessoryProvider::~QBatteryAccessoryProvider ()</h3>
+<p>Destroy this battery accessory provider.</p>
+<h3 class="fn"><a name="setCharge"></a>void QBatteryAccessoryProvider::setCharge ( int <i>charge</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Sets the available charge in the battery to <i>charge</i> percent.</p>
+<h3 class="fn"><a name="setCharging"></a>void QBatteryAccessoryProvider::setCharging ( bool <i>charging</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Sets the charging attribute to <i>charging</i>.</p>
+<h3 class="fn"><a name="setGood"></a>void QBatteryAccessoryProvider::setGood ( bool <i>good</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Sets the physical condition of the battery to <i>good</i>.</p>
+<h3 class="fn"><a name="setTimeRemaining"></a>void QBatteryAccessoryProvider::setTimeRemaining ( int <i>timeRemaining</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Sets the number of seconds of time remaining in the battery to <i>timeRemaining</i>.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

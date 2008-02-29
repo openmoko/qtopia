@@ -1,139 +1,169 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
-#include <qtopia/resource.h>
-#include <qtopia/global.h>
+#include <qtopianamespace.h>
+#include <qthumbnail.h>
 
-#include <qlabel.h>
-#include <qpixmap.h>
-#include <qpainter.h>
-#include <qimage.h>
-#include <qtimer.h>
-#include <qfile.h>
-#include <qtextstream.h>
-#include <qlayout.h>
-#include <qapplication.h>
+#include <QLabel>
+#include <QPixmap>
+#include <QPainter>
+#include <QImage>
+#include <QTimer>
+#include <QFile>
+#include <QTextStream>
+#include <QLayout>
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QDebug>
 #include "versioninfo.h"
 
-VersionInfo::VersionInfo( QWidget *parent, const char *name, WFlags f )
-    : QWidget( parent, name, f )
+VersionInfo::VersionInfo( QWidget *parent, Qt::WFlags f )
+    : QWidget( parent, f )
 {
-    if (QApplication::desktop()->width() > 240)
-	setMinimumSize( 200, 150 );
-
-    QVBoxLayout *vb = new QVBoxLayout( this, 4 );
-    QString lineBreak;
-#ifdef QTOPIA_PHONE
-    lineBreak = "<br>";
-#else
-    Q_UNUSED(lineBreak);
-#endif
-
-#ifdef SYSINFO_GEEK_MODE
-    QString kernelVersionString;
-    QFile file( "/proc/version" );
-    if ( file.open( IO_ReadOnly ) ) {
-	QTextStream t( &file );
-	QString v;
-	t >> v; t >> v; t >> v;
-	v = v.left( 20 );
-	kernelVersionString = tr( "<b>Linux Kernel</b><p>Version:%1 " ).arg(lineBreak) 
-                            + v + "<p>";
-	t >> v;
-	kernelVersionString += tr( "Compiled by: " ) + v;
-	file.close();
-    }
-#endif
-
-    QString qtopiaVersionString;
-    qtopiaVersionString = tr( "<b>Qtopia</b><p>Version: " ) + Global::version() + "<p>";
-    qtopiaVersionString += tr( "Copyright &copy; %1 %2%3", "%1 = 'year', %2 = 'conditional linebreak - ignore for translation', %3 = 'company'" )
-			    .arg(2004).arg(lineBreak)
-			    .arg("Trolltech&nbsp;AS");
-#ifdef SYSINFO_GEEK_MODE
-    qtopiaVersionString += "<p>" + tr( "Built on: %1" ).arg(lineBreak) + __DATE__;
-#endif
-
-    
-    QHBoxLayout *hb1 = new QHBoxLayout( vb );
-    hb1->setSpacing( 2 );
-
-    double imageScale = ((double)QApplication::desktop()->width())/290.0;
-    if (imageScale > 1.0)
-	imageScale = 1.0;
-    int imageSize = (int)(55 * imageScale);
-    int finalSize = (int)(60 * imageScale);
-    QLabel *qtopiaLogo = new QLabel( this );
-    QImage logo1 = Resource::loadImage( "qpe-logo" );
-    logo1 = logo1.smoothScale( imageSize , imageSize );
-    QPixmap logo1Pixmap;
-    logo1Pixmap.convertFromImage( logo1 );
-    qtopiaLogo->setPixmap( logo1Pixmap );
-    qtopiaLogo->setFixedSize( finalSize, finalSize );
-    hb1->addWidget( qtopiaLogo, 0, Qt::AlignTop + Qt::AlignLeft );
-    
-    QLabel *qtopiaVersion = new QLabel( this );
-    qtopiaVersion->setText( qtopiaVersionString  );
-    hb1->addWidget( qtopiaVersion, 1, Qt::AlignTop + Qt::AlignLeft );
-    hb1->setSpacing( 2 );
-    
-#ifdef SYSINFO_GEEK_MODE
-    QHBoxLayout *hb2 = new QHBoxLayout( vb );
-    QLabel *linuxLogo = new QLabel( this );
-
-    // Need to do this extra qpainter code with this image becuase for some
-    // reason it doesn't alpha belnd if directly converted to a pixmap
-    QPixmap logo2Pixmap( finalSize , finalSize );
-    QColor bgColor = colorGroup().background();
-    QPainter painter( &logo2Pixmap );
-    painter.fillRect( QRect( 0, 0, finalSize, finalSize ), QBrush( bgColor ) );
-    QImage logo2 = Resource::loadImage( "tux-logo" );
-    logo2 = logo2.smoothScale( imageSize, imageSize );
-    painter.drawImage( 0, 0, logo2 );
-    painter.end();
-    linuxLogo->setPixmap( logo2Pixmap );
-    linuxLogo->setFixedSize( finalSize, finalSize );
-    hb2->addWidget( linuxLogo, 0, Qt::AlignTop + Qt::AlignLeft );
-    
-    QLabel *kernelVersion = new QLabel( this );
-    kernelVersion->setText( kernelVersionString );
-    hb2->addWidget( kernelVersion, 1, Qt::AlignTop + Qt::AlignLeft );
-#endif
+    //QTimer::singleShot(1, this, SLOT(init()));
+    init();
 }
 
 VersionInfo::~VersionInfo()
 {
 }
 
+void VersionInfo::init()
+{
+#ifdef SYSINFO_GEEK_MODE
+    //setMinimumSize(QSize(16,350));
+#endif
+    QFont boldFont = this->font();
+    boldFont.setBold(true);
+
+    QDesktopWidget *desktop = QApplication::desktop();
+    double imageScale = ((double)desktop->availableGeometry(desktop->screenNumber(this)).width())/400.0;
+    if (imageScale > 1.0)
+        imageScale = 1.0;
+    int imageSize = (int)(55 * imageScale);
+    int finalSize = (int)(60 * imageScale);
+
+    QVBoxLayout *vBoxLayout = new QVBoxLayout(this);
+
+    QGridLayout *gridLayout1 = new QGridLayout;
+
+    QLabel *qtopiaLogo = new QLabel(this);
+    QThumbnail thumbnail(":image/qpe-logo");
+    qtopiaLogo->setPixmap(thumbnail.pixmap(QSize(imageSize, imageSize)));
+    qtopiaLogo->setFixedSize( finalSize, finalSize );
+    gridLayout1->addWidget(qtopiaLogo, 0, 0, 1, 1);
+
+    QSpacerItem *spacerItem1 = new QSpacerItem(20, 90, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    gridLayout1->addItem(spacerItem1, 1, 0, 1, 1);
+
+    QVBoxLayout *vBoxLayout1 = new QVBoxLayout;
+    QLabel *qtopiaName = new QLabel(this);
+    qtopiaName->setFont(boldFont);
+    qtopiaName->setText(tr("Qtopia"));
+    vBoxLayout1->addWidget(qtopiaName);
+
+    QLabel *qtopiaVersion = new QLabel(this);
+    qtopiaVersion->setWordWrap(true);
+    qtopiaVersion->setText(tr("Version:") + " " + Qtopia::version());
+    vBoxLayout1->addWidget(qtopiaVersion);
+    QLabel *qtopiaSpacerLabel1 = new QLabel(this);
+    vBoxLayout1->addWidget(qtopiaSpacerLabel1);
+
+    QLabel *qtopiaCopyright = new QLabel(this);
+    qtopiaCopyright->setWordWrap(true);
+    qtopiaCopyright->setTextFormat(Qt::PlainText);
+    qtopiaCopyright->setText(tr( "Copyright \251 %1 %2", "%1 = 'year',%2 = 'company'" ).arg(2006).arg("Trolltech ASA"));
+//    qtopiaCopyright->setText(tr( "Copyright (c) %1 %2", "%1 = 'year',%2 = 'company'" ).arg(2006).arg("Trolltech ASA"));
+    vBoxLayout1->addWidget(qtopiaCopyright);
+
+#ifdef SYSINFO_GEEK_MODE
+    QLabel *qtopiaSpacerLabel2 = new QLabel(this);
+    vBoxLayout1->addWidget(qtopiaSpacerLabel2);
+
+    QLabel *qtopiaBuild = new QLabel(this);
+    qtopiaBuild->setWordWrap(true);
+    qtopiaBuild->setText(tr("Built by %1","1=name@host").arg(BUILDER));
+    vBoxLayout1->addWidget(qtopiaBuild);
+
+    qtopiaBuild = new QLabel(this);
+    qtopiaBuild->setWordWrap(true);
+    qtopiaBuild->setText(tr("Built on %1","1=date").arg(__DATE__));
+    vBoxLayout1->addWidget(qtopiaBuild);
+#endif
+
+    QSpacerItem *spacerItem = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    vBoxLayout1->addItem(spacerItem);
+    gridLayout1->addLayout(vBoxLayout1, 0, 1, 2, 1);
+    vBoxLayout->addLayout(gridLayout1);
+
+#ifdef SYSINFO_GEEK_MODE
+    QGridLayout *gridLayout2 = new QGridLayout;
+    QLabel *linuxLogo = new QLabel(this);
+    QThumbnail thumbnail2(":image/tux-logo");
+    linuxLogo->setPixmap(thumbnail2.pixmap(QSize(imageSize, imageSize)));
+    linuxLogo->setFixedSize( finalSize, finalSize );
+    gridLayout2->addWidget(linuxLogo, 0, 0, 1, 1);
+
+    QSpacerItem *spacerItem2 = new QSpacerItem(20, 126, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    gridLayout2->addItem(spacerItem2, 1, 0, 1, 1);
+
+    QVBoxLayout *vBoxLayout2 = new QVBoxLayout;
+    QLabel *linuxName = new QLabel(this);
+    linuxName->setFont(boldFont);
+    linuxName->setText(tr("Linux Kernel"));
+    vBoxLayout2->addWidget(linuxName);
+
+    QString kernelVersionString;
+    QString compiledByString;
+    QFile file("/proc/version");
+    if(file.open(QFile::ReadOnly))
+    {
+        QTextStream t( &file );
+        QString v;
+        t >> v; t >> v; t >> v;
+        kernelVersionString = v.left( 20 );
+        t >> v;
+        compiledByString = v;
+        file.close();
+    }
+    QLabel *linuxVersion = new QLabel(this);
+    linuxVersion->setWordWrap(true);
+    linuxVersion->setText(tr("Version:")+ " " + kernelVersionString);
+    vBoxLayout2->addWidget(linuxVersion);
+
+    if (desktop->screenGeometry(desktop->screenNumber(this)).height() >= 220)
+    {
+        QLabel *linuxSpacerLabel1 = new QLabel(this);
+        vBoxLayout2->addWidget(linuxSpacerLabel1);
+    }
+
+    QLabel *linuxCompiledBy = new QLabel(this);
+    linuxCompiledBy->setWordWrap(true);
+    linuxCompiledBy->setText(tr("Compiled by:") + " " + compiledByString);
+    vBoxLayout2->addWidget(linuxCompiledBy);
+
+    QSpacerItem *spacerItem3 = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    vBoxLayout2->addItem(spacerItem3);
+
+    gridLayout2->addLayout(vBoxLayout2, 0, 1, 2, 1);
+    vBoxLayout->addLayout(gridLayout2);
+#endif
+}

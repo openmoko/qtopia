@@ -1,0 +1,273 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Configure Options</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Configure Options<br /><small></small></h1>
+<a name="top"></a><ul><li><a href="#configure-options">Configure Options</a></li>
+<ul><li><a href="#basic-options">Basic Options</a></li>
+<li><a href="#complete-options-list">Complete Options List</a></li>
+<ul><li><a href="#usage-combinations">Usage Combinations</a></li>
+</ul>
+</ul>
+</ul>
+<p>Qtopia <tt>configure</tt> allows a number of command line options to customize Qtopia for your device. To support building VoIP-only phones, that is, phones that do not have GSM functionality, the <tt>-no-modem</tt> option is required. This options turns off both cellular functionality and AT-based modems as Qtopia only supports AT-modems for cellular functionality at this time.</p>
+<p>If you are new to Qtopia, <a href="#table1">Table 1</a> lists some basic options to get you started.</p>
+<p><a href="#table2">Table 2</a> lists all available used options and <a href="#table3">Table 3</a> lists usage combinations.</p>
+<a name="configure-options"></a>
+<h2>Configure Options</h2>
+<p><tt>configure</tt> usage is as follows:</p>
+<pre>    configure [options]</pre>
+<p>For a complete and up-to-date list of options, run <tt>configure</tt> using:</p>
+<pre>     configure -help -verbose</pre>
+<a name="table1"></a><a name="basic-options"></a>
+<h3>Basic Options</h3>
+<p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th colspan="2">Table 1: Basic Options</th></tr>
+<tr valign="top" class="qt-style"><th>Option</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td>-edition &lt;edn&gt;</td><td><ul>
+<li>Build Qtopia edn Edition.</li>
+<li>Default: phone</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td>-debug</td><td>Create a debug build.</td></tr>
+<tr valign="top" class="odd"><td>* -clean</td><td>Clean the build tree.</td></tr>
+<tr valign="top" class="even"><td>-no-clean</td><td>Do not clean the build tree.</td></tr>
+<tr valign="top" class="odd"><td>-profile</td><td>Create a build with profiling.</td></tr>
+<tr valign="top" class="even"><td>* -modem</td><td>Enable Modem communication.</td></tr>
+<tr valign="top" class="odd"><td>-no-modem</td><td>Disable Modem communication.</td></tr>
+<tr valign="top" class="even"><td>* -voip</td><td>Enable VoIP (Voice over IP) communication.</td></tr>
+<tr valign="top" class="odd"><td>-no-voip</td><td>Disable VoIP communication.</td></tr>
+</table></p>
+<a name="table2"></a><a name="complete-options-list"></a>
+<h3>Complete Options List</h3>
+<p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th colspan="2">Table 2: Complete Options List</th></tr>
+<tr valign="top" class="qt-style"><th>Option</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td colspan="2"><b>Note:</b> The asterisk <tt>*</tt> indicates default options</td></tr>
+<tr valign="top" class="even"><td>-help</td><td>Print help and usage information.</td></tr>
+<tr valign="top" class="odd"><td>-verbose</td><td>Print out extra information while configuring.</td></tr>
+<tr valign="top" class="even"><td>* -release</td><td>Create a release build.</td></tr>
+<tr valign="top" class="odd"><td>-debug</td><td>Create a debug build.</td></tr>
+<tr valign="top" class="even"><td>-I &lt;dir&gt;</td><td>Add an explicit include path.</td></tr>
+<tr valign="top" class="odd"><td>-L &lt;dir&gt;</td><td>Add Add an explicit library path.</td></tr>
+<tr valign="top" class="even"><td>-l &lt;lib&gt;</td><td>Add Add an explicit library.</td></tr>
+<tr valign="top" class="odd"><td>-R &lt;dir&gt;</td><td>Add an explicit dynamic library runtime search path.</td></tr>
+<tr valign="top" class="even"><td>-D &lt;def&gt;</td><td><ul>
+<li>Add an explicit define to the build.</li>
+<li>Use <tt>-D &quot;FOO=bar&quot;</tt> to give it a value.</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td>-device &lt;device&gt;</td><td><ul>
+<li>Configure for a particular device using the configuration files in <tt>&lt;qtopia-root-dir&gt;/devices/&lt;device&gt;</tt></li>
+<li>Using -device will cause many defaults to change.</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td>-edition &lt;edn&gt;</td><td><ul>
+<li>Build Qtopia &lt;edn&gt; Edition</li>
+<li>Default &lt;edn&gt;: phone</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td>-qtopiadesktop</td><td>Build Qtopia Desktop.</td></tr>
+<tr valign="top" class="even"><td>-platform &lt;host&gt;</td><td><ul>
+<li>The host platform that you are compiling on.</li>
+<li>If not specified, configure will attempt to autodetect the host.</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td>-xplatform &lt;target&gt;</td><td><ul>
+<li>The target platform that you are compiling for.</li>
+<li>If not specified, configure will attempt to autodetect the target based on the host.</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td>-arch &lt;architecture&gt;</td><td>The CPU family you are building for.</td></tr>
+<tr valign="top" class="odd"><td>-defaultbuttons arg</td><td>Use <tt>defaultbuttons-arg.conf</tt></td></tr>
+<tr valign="top" class="even"><td>-prefix &lt;dir&gt;</td><td><ul>
+<li>Set the runtime location of Qtopia to &lt;dir&gt;.</li>
+<li>Default: &lt;qtopia-root-dir&gt;/image/opt/ Qtopia</li>
+<li><b>Note:</b> The default value will not be useful when building for a device.</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td>* -qvfb</td><td>Enable QVfb support.</td></tr>
+<tr valign="top" class="even"><td>-no-qvfb</td><td>Disable QVfb support.</td></tr>
+<tr valign="top" class="odd"><td>* -quicklaunch</td><td><ul>
+<li>Use the <tt>quicklaunch</tt> method of speeding up application loading.</li>
+<li>Applications that allow it are built as plug-ins.</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td>-no-quicklaunch</td><td>Do not use the <tt>quicklaunch</tt> method of application loading.</td></tr>
+<tr valign="top" class="odd"><td>-quicklaunch2</td><td><ul>
+<li>Use the <tt>quicklaunch2</tt> method of speeding up application loading.</li>
+<li>Applications that allow it are built as plug-ins.</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td>* -no-quicklaunch2</td><td>Do not use the <tt>quicklaunch2</tt> method of application loading.</td></tr>
+<tr valign="top" class="odd"><td>-singleexec</td><td>Qtopia is compiled into a single binary that contains all libraries, plug-ins and applications. This implies <tt>-no-sxe</tt>.</td></tr>
+<tr valign="top" class="even"><td>* -shared</td><td>Qtopia is compiled as a collection of libraries, plug-ins and applications.</td></tr>
+<tr valign="top" class="odd"><td>-languages &lt;lang&gt;</td><td><ul>
+<li>Resources (translations, dictionary files, icons) &lt;lang&gt; are updated/installed for the specified languages.</li>
+<li>Default: en_US en_SU</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td>-iconsizes &lt;size&gt;</td><td><ul>
+<li>Icons are installed at the requested sizes.</li>
+<li>Sizes &lt;size&gt; can be a single number (for square sizes) or WxH.</li>
+<li>Default: 14 16 22</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td>-displaysize WxH[-WxH]</td><td><ul>
+<li>Resources (images) suitable for the requested size are installed.</li>
+<li>Size can be a single width and height or a minimum and maximum width and height.</li>
+<li>Default: 160-240</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td>-displayrot &lt;angle&gt;</td><td><ul>
+<li>Resources (fonts) are installed for the requested &lt;angle&gt; rotations. Angle can be one or more of the following values separated by a space: 0 90 180 270</li>
+<li>Default: 0</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td>-fontsizes &lt;size&gt;</td><td><ul>
+<li>Fonts are installed that match the requested sizes &lt;size&gt;</li>
+<li>Sizes are expressed as: 180 for 18 point fonts.</li>
+<li>Use <i>all</i> to install all available sizes.</li>
+<li>Default: 80 100 120 140 180</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td>-fontfamilies &quot;family ... family&quot;</td><td><ul>
+<li>Fonts are installed that match the requested families.</li>
+<li>Default: helvetica fixed</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td>-fontstyles &quot;style ... style&quot;</td><td><ul>
+<li>Fonts are installed that match the requested styles. The styles are as follows:<ul>
+<li>50 = normal</li>
+<li>75 = bold</li>
+<li>i = italic <b>Note:</b>Italic can be applied to normal or bold (eg. 50i, 75i).</li>
+<li>Default: 50 50i 75 75i</li>
+</ul>
+</li>
+<li>Unless you have changed the Qtopia Core configuration, fonts must be in <tt>.qpf</tt> format.</li>
+<li>Fonts are searched for in <tt>&lt;qtopia-root-dir&gt;/qtopiacore/qt/dist/embedded/lib/fonts</tt>.</li>
+<li>One file is installed for each combination of <i>family</i>, <i>size</i>, <i>style</i> and <i>rotation</i>.</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td>-make makecmd</td><td><ul>
+<li>Use <tt>makecmd</tt> when building.</li>
+<li>Default: <tt>make</tt></li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td>-build &lt;dir&gt;</td><td><ul>
+<li>Add directory &lt;dir&gt; to the Qtopia build system.</li>
+<li>For example, <tt>-build /path/to/myapp</tt> will add <tt>/path/to/myapp</tt> to the build system.</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td>-run-qdoc</td><td>Run <tt>qdoc</tt> at make time to provide documentation warnings and errors.</td></tr>
+<tr valign="top" class="odd"><td>* -no-run-qdoc</td><td>Do not run <tt>qdoc</tt> at make time.</td></tr>
+<tr valign="top" class="even"><td>* -qtmail-ssl</td><td>Enable SSL and SMTP authentication support in messages.</td></tr>
+<tr valign="top" class="odd"><td>-no-qtmail-ssl</td><td>Disable SSL and SMTP authentication support in messages.</td></tr>
+<tr valign="top" class="even"><td>-sxe</td><td>Enable the Safe Execution Environment so that native third party applications can run safely.</td></tr>
+<tr valign="top" class="odd"><td>* -no-sxe</td><td>Disable the Safe Execution Environment.</td></tr>
+<tr valign="top" class="even"><td>* -sxe-discovery</td><td><ul>
+<li>Turn on support for SXE discovery mode so that new policy rules can be tested.</li>
+<li>To utilize SXE discovery mode you must set the <tt>SXE_DISCOVERY_MODE</tt> environment variable to 1.</li>
+<li><b>WARNING:</b> This option creates a security hole and should only be used when creating new policy rules.</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td>-no-sxe-discovery</td><td>Turn off support for SXE discovery mode.</td></tr>
+<tr valign="top" class="even"><td>* -bluetooth</td><td>Enable Bluetooth.</td></tr>
+<tr valign="top" class="odd"><td>-no-bluetooth</td><td>Disable Bluetooth.</td></tr>
+<tr valign="top" class="even"><td>* -drm</td><td>Enable support for DRM (Using the Beep Science DRM Agent v2.3).</td></tr>
+<tr valign="top" class="odd"><td>-no-drm</td><td>Disable support for DRM.</td></tr>
+<tr valign="top" class="even"><td>* -modem</td><td>Enable Modem communication.</td></tr>
+<tr valign="top" class="odd"><td>-no-modem</td><td>Disable Modem communication.</td></tr>
+<tr valign="top" class="even"><td>* -voip</td><td>Enable VoIP (Voice over IP) communication.</td></tr>
+<tr valign="top" class="odd"><td>-no-voip</td><td><ul>
+<li>Disable VoIP communication.</li>
+<li>Modem and VoIP communication are not exclusive or mandatory. You can enable one, both or none.</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td>* -helix</td><td>Enable the Helix media player.</td></tr>
+<tr valign="top" class="odd"><td>-no-helix</td><td>Disable the Helix media player.</td></tr>
+<tr valign="top" class="even"><td>-helix-system-id</td><td><ul>
+<li>Use <tt>SYSTEM_ID</tt> when building Helix.</li>
+<li>For further information refer to: <a href="syscust-mediaplayer.html">Qtopia Helix Integration</a>.</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td>-helix-output ss</td><td><ul>
+<li>Force the use of ALSA or OSS when building Helix.</li>
+<li>This might be needed if your toolchain has ALSA but your kernel does not.</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td>-error</td><td><ul>
+<li>Treat warnings as errors when compiling Qtopia.</li>
+<li><b>Note:</b> Except for code in <tt>/src/3rdparty</tt>.</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td>* -no-error</td><td>Do not treate warnings as errors.</td></tr>
+<tr valign="top" class="even"><td>-enable-kde</td><td><ul>
+<li>Enable KDE 3.x integration.</li>
+<li>This requires KDE 3.x headers and libraries to be installed.</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td>* -disable-kde</td><td>Disable KDE 3.x integration.</td></tr>
+<tr valign="top" class="even"><td>-qtopiacore-config &lt;arg&gt;</td><td>Override the Qt/Embedded <tt>configure</tt> command line</td></tr>
+<tr valign="top" class="odd"><td>-extra-qtopiacore-config &lt;arg&gt;</td><td>Add to the Qt/Embedded configure command line</td></tr>
+<tr valign="top" class="even"><td>-qt-config &lt;arg&gt;</td><td>Override the Qt configure command line</td></tr>
+<tr valign="top" class="odd"><td>-extra-qt-config &lt;arg&gt;</td><td>Add something to the Qt configure command line</td></tr>
+<tr valign="top" class="even"><td>-with-module</td><td><ul>
+<li>Build module.</li>
+<li>Available modules: *libamr *gif</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td>-without-module</td><td>Do not build module.</td></tr>
+<tr valign="top" class="even"><td>-reduce-exports</td><td><ul>
+<li>Enable/Disable gcc4 symbol visibility</li>
+<li>Valid options: auto (default), yes, no</li>
+</ul>
+</td></tr>
+</table></p>
+<a name="table3"></a><a name="usage-combinations"></a>
+<h4>Usage Combinations</h4>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th colspan="2">Configure Usage</th></tr></thead>
+<tr valign="top" class="odd"><td>Usage: configure</td><td>[ -help ] [ -verbose ] [ -release | -debug ]</td></tr>
+<tr valign="top" class="even"><td></td><td>[ -I dir ] [ -L dir ] [ -l lib ] [ -R dir ] [ -D def ]</td></tr>
+<tr valign="top" class="odd"><td></td><td>[ -device device ]</td></tr>
+<tr valign="top" class="even"><td></td><td>[ -edition edn ] [ -qtopiadesktop ]</td></tr>
+<tr valign="top" class="odd"><td></td><td>[ -platform host ] [ -xplatform target ]</td></tr>
+<tr valign="top" class="even"><td></td><td>[ -arch architecture ] [ -defaultbuttons arg ]</td></tr>
+<tr valign="top" class="odd"><td></td><td>[ -prefix dir ]</td></tr>
+<tr valign="top" class="even"><td></td><td>[ -qvfb | -no-qvfb ] [ -quicklaunch | -no-quicklaunch ]</td></tr>
+<tr valign="top" class="odd"><td></td><td>[ -quicklaunch2 | -no-quicklaunch2 ]</td></tr>
+<tr valign="top" class="even"><td></td><td>[ -singleexec | -shared ] [ -languages &quot;lang ... lang&quot; ]</td></tr>
+<tr valign="top" class="odd"><td></td><td>[ -iconsizes &quot;size ... size&quot; ] [ -displaysize WxH[-WxH] ]</td></tr>
+<tr valign="top" class="even"><td></td><td>[ -displayrot &quot;angle ... angle&quot; ]</td></tr>
+<tr valign="top" class="odd"><td></td><td>[ -fontsizes &quot;size ... size&quot; ]</td></tr>
+<tr valign="top" class="even"><td></td><td>[ -fontfamilies &quot;family ... family&quot; ]</td></tr>
+<tr valign="top" class="odd"><td></td><td>[ -fontstyles &quot;style ... style&quot; ]</td></tr>
+<tr valign="top" class="even"><td></td><td>[ -make makecmd ] [ -build dir ]</td></tr>
+<tr valign="top" class="odd"><td></td><td>[ -run-qdoc | -no-run-qdoc ]</td></tr>
+<tr valign="top" class="even"><td></td><td>[ -qtmail-ssl | -no-qtmail-ssl ] [ -sxe | -no-sxe ]</td></tr>
+<tr valign="top" class="odd"><td></td><td>[ -sxe-discovery | -no-sxe-discovery ]</td></tr>
+<tr valign="top" class="even"><td></td><td>[ -bluetooth | -no-bluetooth ] [ -drm | -no-drm ]</td></tr>
+<tr valign="top" class="odd"><td></td><td>[ -modem | -no-modem ] [ -voip | -no-voip ]</td></tr>
+<tr valign="top" class="even"><td></td><td>[ -helix | -no-helix ] [ -helix-system-id SYSTEM_ID ]</td></tr>
+<tr valign="top" class="odd"><td></td><td>[ -helix-output ss ] [reduce-exports &quot;auto|yes|no&quot; ]</td></tr>
+<tr valign="top" class="even"><td></td><td>[ -enable-kde | -disable-kde ]</td></tr>
+<tr valign="top" class="odd"><td></td><td>[ -qtopiacore-config arg ] [ -extra-qtopiacore-config arg ]</td></tr>
+<tr valign="top" class="even"><td></td><td>[ -qt-config arg ] [ -extra-qt-config arg ]</td></tr>
+<tr valign="top" class="odd"><td></td><td>[ -with-module | -without-module ]</td></tr>
+</table></p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

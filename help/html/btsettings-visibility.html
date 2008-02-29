@@ -1,0 +1,26 @@
+<html>
+<head><title>Visibility Options</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h2>Visibility Options</h2>
+<!--#else -->
+   <h3>Visibility Options</h3>
+<!--#endif-->
+<p>You can control the visibility of your Bluetooth enabled device while it is on.
+If the device is in discoverable mode, then all other Bluetooth devices in the
+immediate vicinity can detect your device, and attempt to pair, inquire about services,
+and otherwise attempt to use services provided by your device.  Setting the device to not discoverable will ensure that only devices which have previously known of your device's existence can communicate with your device.</p>
+<p><b>To enable discoverable mode:</b></p>
+<ul>
+<!--#if expr="$PHONESTYLE"-->
+<li>Select the <b>Show Device</b> button</li>
+<!--#endif-->
+</ul>
+<p><b>To turn discoverable mode off:</b></p>
+<ul>
+<!--#if expr="$PHONESTYLE"-->
+<li>Select the <b>Hide Device</b> button</li>
+<!--#endif-->
+</ul>
+</body>
+</html>

@@ -8,23 +8,28 @@ use constant DEBUG => 0;
 my $opt_config;
 my $opt_help;
 my $opt_outdir;
+my $opt_inputdir;
 my $opt_icon;
 
 my @optl;
 push(@optl, "c=s" => \$opt_config);
 push(@optl, "h" => \$opt_help);
 push(@optl, "o=s" => \$opt_outdir);
+push(@optl, "C=s" => \$opt_inputdir);
 push(@optl, "i=s" => \$opt_icon);
 Getopt::Long::Configure("bundling_override");
 if (!GetOptions(@optl) or $opt_help or !$opt_config ) {
     my $progname = $0;
     $progname =~ s,.*/(.*),$1,;
-    print "Usage:  $progname -c \"CONFIG VALUES\" [-o outputdir] [-i iconSize] [files]\n";
+    print "Usage:  $progname -c \"CONFIG VALUES\" [-C inputdir] [-o outputdir] [-i iconSize] [files]\n";
     exit 2;
 }
 
 my @config = split(/\s+/, $opt_config);
 my %replace;
+if ( $opt_inputdir ) {
+    chdir $opt_inputdir or die "Can't enter $opt_inputdir\n";
+}
 
 while(my $file = shift) {
     unless ( open(INFILE, "<$file") ) {
@@ -40,6 +45,7 @@ while(my $file = shift) {
 
 	@tag = ();
 	$found = 0;
+        # Open a scope
 	while ( s/%%([^%]+)%%// ) {
 	    $found = 1;
 	    push( @tag, $1 );
@@ -57,6 +63,7 @@ while(my $file = shift) {
 
 	@tag = ();
 	$found = 0;
+        # Close a scope
 	while ( s/@@([^@]+)@@// ) {
 	    $found = 1;
 	    push( @tag, $1 );
@@ -72,6 +79,7 @@ while(my $file = shift) {
 	    next if ( /^\s*$/ );
 	}
 
+        # Only print if all the scope words are in the config
 	my $print = 0;
 	for my $word ( keys %skip ) {
 	    my $found = 0;
@@ -89,20 +97,26 @@ while(my $file = shift) {
 
 	next if ( $print != scalar(keys %skip) );
 
+        # Initialize a variable
 	if ( /^\{(\w+)\}=\{([^}]+)\}$/ ) {
+            DEBUG and print "Adding variable $1 with contents $2\n";
 	    $replace{$1} = $2;
 	    next;
 	}
 
+        # Print a variable
 	# special case that the next one can't handle
 	if ( /^\$\$\{(\w+)\}/ ) {
-	    my $replacement = defined($replace{$1})?$replace{$1}:"";
+	    my $replacement = (defined($replace{$1})?$replace{$1}:"");
+            DEBUG and print "Replacing variable $1 with contents $replacement\n";
 	    s/^\$\$\{(\w+)\}/$replacement/;
 	}
 	while ( /([^\\])\$\$\{(\w+)\}/ ) {
-	    my $replacement = $1.defined($replace{$2})?defined($replace{$2}):"";
+	    my $replacement = $1.(defined($replace{$2})?$replace{$2}:"");
+            DEBUG and print "Replacing variable $2 with contents $replacement\n";
 	    s/([^\\])\$\$\{(\w+)\}/$replacement/;
 	}
+        # Escaped variables
 	s/\\(\$\$\{\w+\})/$1/g;
 
 	$text .= $_;
@@ -111,7 +125,7 @@ while(my $file = shift) {
 
     close INFILE;
     if ($opt_outdir && $text !~ /^\s*$/) {
-	open(OUTFILE, ">$opt_outdir/$file");
+	open(OUTFILE, ">$opt_outdir/$file") or warn "Could not open for writing file $opt_outdir/$file";
 	print OUTFILE $text;
 	close OUTFILE;
     } else {

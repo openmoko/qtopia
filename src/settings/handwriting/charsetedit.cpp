@@ -1,43 +1,28 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "pensettingswidget.h"
 #include "charsetedit.h"
 #include "uniselect.h"
 
-#include <qlistbox.h>
 #include <qlabel.h>
 #include <qlineedit.h>
 #include <qpushbutton.h>
@@ -52,25 +37,23 @@
 #include <qapplication.h>
 #include <qaction.h>
 #include <qtoolbutton.h>
-#include <qpopupmenu.h>
 #include <qmenubar.h>
-#ifndef QTOPIA_PHONE
-#include <qhbox.h>
-#include <qtopia/qpemenubar.h>
-#endif
+#include <qlayout.h>
+#include <QDebug>
 
-#include <qtopia/contextmenu.h>
-#include <qtopia/qpeapplication.h>
-#include <qtopia/resource.h>
+#include <qsoftmenubar.h>
+#include <qtopiaapplication.h>
 
 QIMPenInputCharDlg::QIMPenInputCharDlg( QWidget *parent, const char *name,
-	bool modal, bool isFS, int WFlags)
-    : QDialog( parent, name, modal, WFlags )
+        bool modal, bool isFS, Qt::WFlags f )
+    : QDialog( parent, f )
 {
-    setCaption( tr("New character") );
+    setWindowTitle( tr("New character") );
+    setObjectName( name );
+    setModal( modal );
     uni = 0;
 
-    QVBoxLayout *vb = new QVBoxLayout( this, 10 );
+    QVBoxLayout *vb = new QVBoxLayout( this );
     vb->setMargin(4);
     vb->setSpacing(4);
 
@@ -82,10 +65,10 @@ QIMPenInputCharDlg::QIMPenInputCharDlg( QWidget *parent, const char *name,
     hb->addWidget( label );
 
     QLineEdit *currentChar = new QLineEdit(this);
-    currentChar->setAlignment(AlignHCenter);
-    currentChar->setReadOnly(TRUE);
+    currentChar->setAlignment( Qt::AlignHCenter );
+    currentChar->setReadOnly(true);
     hb->addWidget( currentChar );
-    QPEApplication::setInputMethodHint(currentChar, QPEApplication::AlwaysOff);
+    QtopiaApplication::setInputMethodHint(currentChar, QtopiaApplication::AlwaysOff);
 
     vb->addItem(hb);
 
@@ -105,9 +88,9 @@ QIMPenInputCharDlg::QIMPenInputCharDlg( QWidget *parent, const char *name,
     vb->addWidget(u);
 
     connect(u, SIGNAL(selected(const QString &)),
-	    currentChar, SLOT(setText(const QString &)));
+            currentChar, SLOT(setText(const QString &)));
     connect(u, SIGNAL(selected(uint)),
-	    this, SLOT(setCharacter(uint)));
+            this, SLOT(setCharacter(uint)));
 
 #ifndef QTOPIA_PHONE
     QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
@@ -154,23 +137,23 @@ const int fsComboSel[] = {
 void QIMPenInputCharDlg::addSpecial( bool isFS )
 {
     int i = 0;
-    while ( comboSel[i] != Key_unknown ) {
-	QIMPenChar c;
-	c.setCharacter(comboSel[i] << 16);
-	u->addSpecial(c.character(), c.name());
-	i++;
+    while ( comboSel[i] != Qt::Key_unknown ) {
+        QIMPenChar c;
+        c.setKey(comboSel[i]);
+        u->addSpecial(c.key(), c.name());
+        i++;
     }
     const int *extraSel;
     if (isFS)
-	extraSel = fsComboSel;
+        extraSel = fsComboSel;
     else
-	extraSel = popupComboSel;
+        extraSel = popupComboSel;
     i = 0;
-    while ( extraSel[i] != Key_unknown ) {
-	QIMPenChar c;
-	c.setCharacter(extraSel[i] << 16);
-	u->addSpecial(c.character(), c.name());
-	i++;
+    while ( extraSel[i] != Qt::Key_unknown ) {
+        QIMPenChar c;
+        c.setKey(extraSel[i]);
+        u->addSpecial(c.key(), c.name());
+        i++;
     }
 }
 
@@ -180,9 +163,11 @@ void QIMPenInputCharDlg::setCharacter( uint sp )
 }
 
 CharSetDlg::CharSetDlg( QWidget *parent, const char *name,
-	    bool modal, int WFlags ): QDialog(parent, name, modal, WFlags)
+            bool modal, Qt::WFlags f ): QDialog(parent, f )
 {
-    setCaption(tr("Handwriting"));
+    setObjectName( name );
+    setModal( modal );
+    setWindowTitle(tr("Handwriting"));
     QVBoxLayout *vl = new QVBoxLayout(this);
 
     edit = new CharSetEdit(this);
@@ -200,7 +185,7 @@ void CharSetDlg::accept()
 
 void CharSetDlg::reject()
 {
-    edit->checkStoreMatch();
+    edit->clearMatch();
     QDialog::reject();
 }
 
@@ -216,26 +201,29 @@ QIMPenCharSet *CharSetDlg::charSet() const
 
 
 CharSetEdit::CharSetEdit( QWidget *parent, const char *name )
-    : CharSetEditBase( parent, name ), currentSet(0),
-	    lastCs(1), lastCh(0), addFlag(FALSE), mIsFS(FALSE)
+    : QFrame( parent ), currentSet(0),
+            lastCs(1), lastCh(0), addFlag(false), mIsFS(false)
 {
+    setupUi( this );
+    setObjectName( name );
     init();
 }
 
 CharSetEdit::CharSetEdit( QIMPenCharSet *c, QWidget *parent,
                 const char *name )
-    : CharSetEditBase( parent, name ), currentSet(0),
-	    lastCs(1), lastCh(0), addFlag(FALSE)
+    : QFrame( parent ), currentSet(0),
+            lastCs(1), lastCh(0), addFlag(false)
 {
+    setupUi( this );
+    setObjectName( name );
     init();
     setCharSet(c);
 }
 
 void CharSetEdit::init()
 {
-    pw->setReadOnly(TRUE);
+    pw->setReadOnly(true);
     currentChar = 0;
-    currentCode = 0;
     matchCount = 0;
     matchIndex = 0;
     inputChar = new QIMPenChar();
@@ -244,7 +232,8 @@ void CharSetEdit::init()
     connect( delCharBtn, SIGNAL(clicked()), this, SLOT(removeChar())) ;
     connect( resetCharBtn, SIGNAL(clicked()), this, SLOT(resetMatches())) ;
 
-    connect( charList, SIGNAL(highlighted(int)), SLOT(selectCode(int)) );
+    connect( charList, SIGNAL(currentItemChanged ( QListWidgetItem *, QListWidgetItem *)),
+            SLOT(selectItemCode(QListWidgetItem *, QListWidgetItem *)) );
 
     pw->setFixedHeight( 75 );
     connect( pw, SIGNAL(stroke(QIMPenStroke*)),
@@ -269,7 +258,8 @@ void CharSetEdit::setCharSet( QIMPenCharSet *c )
     pw->insertCharSet( currentSet );
     inputChar->clear();
     if ( charList->count() ) {
-        charList->setSelected( 0, TRUE );
+        charList->setItemSelected( charList->item(0), true );
+        charList->setCurrentItem( charList->item(0) );
         selectCode(0);
     }
 }
@@ -279,18 +269,35 @@ QIMPenCharSet *CharSetEdit::charSet() const
     return currentSet;
 }
 
-class CharListItem : public QListBoxText
+class CharListItem : public QListWidgetItem
 {
 public:
-    CharListItem( const QString &text, uint c )
-	: QListBoxText( text ), _code(c) {}
+    CharListItem( const QString &text, const QIMPenChar &c )
+        : QListWidgetItem( text )
+    {
+        setChar(c);
+    }
 
-    uint code() const { return _code; }
+    void setChar(const QIMPenChar &ch) {
+        _code = ch.key();
+        _char = ch.repCharacter();
+    }
+
+    bool testChar(const QIMPenChar &ch) const {
+        return ch.key() == _code && ch.repCharacter() == _char;
+    }
+
+    bool testEquivalent(const CharListItem *other) const {
+        return other->key() == _code && other->character() == _char;
+    }
+
+    uint key() const { return _code; }
+    QChar character() const { return _char; }
 
 protected:
     uint _code;
+    QChar _char;
 };
-
 
 /*!
   Fill the character list box with the characters.  Duplicates are not
@@ -299,28 +306,61 @@ protected:
 void CharSetEdit::fillCharList()
 {
     charList->clear();
-    QIMPenCharIterator it( currentSet->characters() );
+    QIMPenCharIterator it = currentSet->characters().begin();
     CharListItem *li = 0;
-    for ( ; it.current(); ++it ) {
-	uint ch = it.current()->character();
-	QString n = it.current()->name();
-	if ( !n.isEmpty() )
-	    li = new CharListItem( n, ch );
-	if ( li ) {
-	    CharListItem *i = (CharListItem *)charList->findItem( li->text() );
-	    if ( !i || i->code() != ch ) {
-		charList->insertItem( li );
-	    } else {
-		delete li;
-		li = 0;
-	    }
-	}
+    for ( ; it != currentSet->characters().end(); ++it ) {
+        QIMPenChar *p = (*it);
+        QString n = p->name();
+        if ( (n != " " && n.trimmed().isEmpty()) || !n[0].isPrint() ) continue;
+
+        QList<QListWidgetItem *>items = charList->findItems( n, Qt::MatchExactly );
+        // duplicates, cannot ever be more than 1, we dont add if found
+        if (( items.count() > 0 )
+                && ((CharListItem *)(items[0]))->testChar(*p))
+        {
+            continue;
+        }
+        li = new CharListItem( n, *p );
+        charList->addItem( li );
     }
     currentChar = 0;
 }
 
 void CharSetEdit::enableButtons()
 {
+    addBtn->setEnabled(!addFlag);
+
+    bool haveSystem = false;
+    bool haveChanged = addFlag;
+    bool haveChar = addFlag;
+    CharListItem *ch = (CharListItem *)charList->currentItem();
+    if(!ch)
+    {
+        resetCharBtn->setEnabled(false);
+        return;
+    };
+    QIMPenCharIterator it = currentSet->characters().begin();
+    for ( ; it != currentSet->characters().end() && !(haveSystem && haveChanged && haveChar); ++it ) {
+        if(ch->testChar(**it))
+        {
+            if ((*it)->testFlag(QIMPenChar::System))
+            {
+                haveSystem = true;
+                if((*it)->testFlag(QIMPenChar::Deleted))
+                    haveChanged = true;
+                else
+                    haveChar = true;
+            } else if (!(*it)->testFlag(QIMPenChar::Deleted))
+            {
+                haveChanged = true;
+                haveChar = true;
+            }
+        }
+    }
+
+    removeBtn->setEnabled(haveChar || addFlag);
+    resetCharBtn->setEnabled(haveSystem && haveChanged);
+    updateLabel(); // this is probably redundant most of the time
 }
 
 /*!
@@ -330,17 +370,23 @@ void CharSetEdit::enableButtons()
 QIMPenChar *CharSetEdit::findPrev()
 {
     if ( !currentChar )
-	return 0;
-    QIMPenCharIterator it( currentSet->characters() );
-    bool found = FALSE;
-    for ( it.toLast(); it.current(); --it ) {
-        if ( !found && it.current() == currentChar )
-            found = TRUE;
-        else if ( found && it.current()->character() == currentCode &&
-                !it.current()->testFlag( QIMPenChar::Deleted ) ) {
-            return it.current();
+        return 0;
+    QIMPenCharIterator it = currentSet->characters().end();
+    CharListItem *ch = (CharListItem *)charList->currentItem();
+    bool found = false;
+    do  // probably should use reverse iterator here
+    {
+        --it;
+        if ( !found && (*it) == currentChar )
+        {
+            found = true;
         }
-    }
+        else if ( found && ch->testChar(*(*it)) &&
+                !(*it)->testFlag( QIMPenChar::Deleted ) )
+        {
+            return (*it);
+        }
+    } while ( it != currentSet->characters().begin() );
 
     return 0;
 }
@@ -352,16 +398,17 @@ QIMPenChar *CharSetEdit::findPrev()
 QIMPenChar *CharSetEdit::findNext()
 {
     if ( !currentChar )
-	return 0;
-    QIMPenCharIterator it( currentSet->characters() );
-    bool found = FALSE;
-    for ( ; it.current(); ++it ) {
-	if ( !found && it.current() == currentChar )
-	    found = TRUE;
-	else if ( found && it.current()->character() == currentCode &&
-		    !it.current()->testFlag( QIMPenChar::Deleted ) ) {
-	    return it.current();
-	}
+        return 0;
+    QIMPenCharIterator it = currentSet->characters().begin();
+    CharListItem *ch = (CharListItem *)charList->currentItem();
+    bool found = false;
+    for ( ; it != currentSet->characters().end(); ++it ) {
+        if ( !found && (*it) == currentChar )
+            found = true;
+        else if ( found && ch->testChar(*(*it)) &&
+                    !(*it)->testFlag( QIMPenChar::Deleted ) ) {
+            return (*it);
+        }
     }
 
     return 0;
@@ -369,36 +416,37 @@ QIMPenChar *CharSetEdit::findNext()
 
 void CharSetEdit::setCurrentChar( QIMPenChar *pc )
 {
+    CharListItem *ch = (CharListItem *)charList->currentItem();
     currentChar = pc;
     pw->showCharacter( currentChar );
     if ( currentChar ) {
-	if (currentChar->testFlag(QIMPenChar::System)) {
-	    delCharBtn->setEnabled(FALSE);
-	    resetCharBtn->setEnabled(FALSE);
+        if (currentChar->testFlag(QIMPenChar::System)) {
+            delCharBtn->setEnabled(false);
+            resetCharBtn->setEnabled(false);
 
-	    bool haveMissing = FALSE;
-	    QIMPenCharIterator it(currentSet->characters() );
-	    for ( ; it.current(); ++it ) {
-		if ( it.current()->character() == currentCode &&
-			it.current()->testFlag( QIMPenChar::Deleted ) ) {
-		    haveMissing = TRUE;
-		    break;
-		}
-	    }
-	    resetCharBtn->setEnabled(haveMissing);
-	} else {
-	    bool haveSystem = FALSE;
-	    QIMPenCharIterator it(currentSet->characters() );
-	    for ( ; it.current(); ++it ) {
-		if ( it.current()->character() == currentCode &&
-			it.current()->testFlag( QIMPenChar::System ) ) {
-		    haveSystem = TRUE;
-		    break;
-		}
-	    }
-	    delCharBtn->setEnabled(!haveSystem);
-	    resetCharBtn->setEnabled(haveSystem);
-	}
+            bool haveMissing = false;
+            QIMPenCharIterator it = currentSet->characters().begin();
+            for ( ; it != currentSet->characters().end(); ++it ) {
+                if ( ch && ch->testChar(*(*it)) &&
+                        (*it)->testFlag( QIMPenChar::Deleted ) ) {
+                    haveMissing = true;
+                    break;
+                }
+            }
+            resetCharBtn->setEnabled(haveMissing);
+        } else {
+            bool haveSystem = false;
+            QIMPenCharIterator it = currentSet->characters().begin();
+            for ( ; it != currentSet->characters().end(); ++it ) {
+                if ( ch && ch->testChar(*(*it)) &&
+                        (*it)->testFlag( QIMPenChar::System ) ) {
+                    haveSystem = true;
+                    break;
+                }
+            }
+            delCharBtn->setEnabled(!haveSystem);
+            resetCharBtn->setEnabled(haveSystem);
+        }
 
     }
 }
@@ -407,90 +455,115 @@ void CharSetEdit::prevMatch()
 {
     // if not adding, or adding and something to add.
     if (!addFlag || !inputChar->isEmpty()) {
-	if (addFlag) {
-	    appendMatch();
-	    pw->setReadOnly(TRUE);
-	    addFlag = FALSE;
-	}
-	QIMPenChar *pc = findPrev();
-	if ( pc ) {
-	    setCurrentChar( pc );
-	    --matchIndex;
-	}
+        if (addFlag) {
+            appendMatch();
+            pw->setReadOnly(true);
+            addFlag = false;
+        }
+        QIMPenChar *pc = findPrev();
+        if ( pc ) {
+            setCurrentChar( pc );
+            --matchIndex;
+        }
     } else if (addFlag) {
-	// adding and something to add, (or would have met prev)
-	matchCount--;
-	matchIndex = matchCount;
-	pw->showCharacter(currentChar);
-	pw->setReadOnly(TRUE);
-	addFlag = FALSE;
+        // adding and something to add, (or would have met prev)
+        matchCount--;
+        matchIndex = matchCount;
+        pw->showCharacter(currentChar);
+        pw->setReadOnly(true);
+        addFlag = false;
+        addBtn->setEnabled(true);
     }
     updateLabel();
+    enableButtons();
 }
 
 void CharSetEdit::nextMatch()
 {
     QIMPenChar *pc = findNext();
     if ( pc ) {
-	setCurrentChar( pc );
-	++matchIndex;
-	updateLabel();
+        setCurrentChar( pc );
+        ++matchIndex;
+        updateLabel();
     }
+    enableButtons();
 }
 
 void CharSetEdit::firstMatch()
 {
-    QIMPenCharIterator it( currentSet->characters() );
-    for ( ; it.current(); ++it ) {
-	if ( it.current()->character() == currentCode) {
-	    if (it.current() != currentChar)
-		setCurrentChar(it.current());
-	    return;
-	}
+    CharListItem *ch = (CharListItem *)charList->currentItem();
+    QIMPenCharIterator it = currentSet->characters().begin();
+    for ( ; it != currentSet->characters().end(); ++it ) {
+        if ( ch->testChar(*(*it))) {
+            if ( *it != currentChar)
+                setCurrentChar( *it );
+            return;
+        }
     }
 }
 
 void CharSetEdit::lastMatch()
 {
-    QIMPenCharIterator it( currentSet->characters() );
+    CharListItem *ch = (CharListItem *)charList->currentItem();
+    QIMPenCharIterator it = currentSet->characters().begin();
     QIMPenChar *lastFound = 0;
-    for ( ; it.current(); ++it ) {
-	if ( it.current()->character() == currentCode) {
-	    lastFound = it.current();
-	}
+    for ( ; it != currentSet->characters().end(); ++it ) {
+        if ( ch->testChar(*(*it))) {
+            lastFound = *it;
+        }
     }
     if (lastFound && lastFound != currentChar)
-	setCurrentChar(lastFound);
+        setCurrentChar(lastFound);
+    else
+        setCurrentChar(lastFound);
 }
 
 void CharSetEdit::clearMatch()
 {
     inputChar->clear();
     pw->clear();
+    addFlag = false;
     enableButtons();
+}
+
+void CharSetEdit::selectItemCode( QListWidgetItem *item, QListWidgetItem *previous )
+{
+    if (addFlag && !inputChar->isEmpty()) {
+        // adding and something to add,
+        appendMatch(previous);
+    };
+    if (addFlag){
+        pw->setReadOnly(true);
+        addFlag = false;
+    };
+
+    if ( item == NULL ) return;
+    int index = charList->row( item );
+    if ( index >= 0 )
+        selectCode( index );
 }
 
 void CharSetEdit::selectCode( int i )
 {
     checkStoreMatch();
     currentChar = 0;
-    currentCode = ((CharListItem *)charList->item(i))->code();
-    QIMPenCharIterator it(currentSet->characters() );
+    CharListItem *ch = (CharListItem *)charList->item(i);
+    QIMPenCharIterator it = currentSet->characters().begin();
     matchCount = 0;
     matchIndex = 0;
-    for ( ; it.current(); ++it ) {
-	if ( it.current()->character() == currentCode &&
-	     !it.current()->testFlag( QIMPenChar::Deleted ) ) {
-	    if (matchCount == 0) {
-		setCurrentChar( it.current() );
-		matchIndex = 1;
-	    }
-	    matchCount++;
-	}
+    for ( ; it != currentSet->characters().end(); ++it ) {
+        if ( ch->testChar(*(*it)) &&
+             !(*it)->testFlag( QIMPenChar::Deleted ) ) {
+            if (matchCount == 0) {
+                setCurrentChar( *it );
+                matchIndex = 1;
+            }
+            matchCount++;
+        }
     }
     updateLabel();
     if ( matchCount == 0 )
-	setCurrentChar( 0 );
+        setCurrentChar( 0 );
     inputChar->clear();
     enableButtons();
     lastCh = i;
@@ -515,52 +588,61 @@ void CharSetEdit::addMatch()
 {
     checkStoreMatch();
     lastMatch();
-    pw->setReadOnly(FALSE);
-    addFlag = TRUE;
+    pw->setReadOnly(false);
     matchCount++;
     matchIndex = matchCount;
     updateLabel();
     clearMatch();
-    addBtn->setEnabled(FALSE);
+    addFlag = true;
+    addBtn->setEnabled(false);
+    pw->greyStroke();
 }
-    
+
 void CharSetEdit::checkStoreMatch()
 {
     if (addFlag) {
-	addFlag = FALSE;
-	appendMatch();
-	pw->setReadOnly(TRUE);
+        addFlag = false;
+        appendMatch();
+        pw->setReadOnly(true);
     }
 }
 
-void CharSetEdit::appendMatch()
+void CharSetEdit::appendMatch(QListWidgetItem *item)
 {
+    CharListItem *ch;
+    if (item)
+        ch = static_cast<CharListItem*>(item);
+    else
+        ch = (CharListItem *)charList->currentItem();
+
     // should be more of an assert.
     if ( !inputChar->isEmpty() ) {
         QIMPenChar *pc = new QIMPenChar( *inputChar );
-        pc->setCharacter( currentCode );
+        pc->setRepCharacter( ch->character() );
+        pc->setKey( ch->key() );
 
-	// User characters override all matching system characters.
-	// Copy and mark deleted identical system characters.
-	QIMPenCharIterator it(currentSet->characters() );
-	QIMPenChar *sc = 0;
-	while ( (sc = it.current()) != 0 ) {
-	    ++it;
-	    if ( sc->character() == currentCode &&
-		 sc->testFlag( QIMPenChar::System ) &&
-		 !sc->testFlag( QIMPenChar::Deleted ) )
-	    {
-		QIMPenChar *cc = new QIMPenChar( *sc );
-		cc->clearFlag( QIMPenChar::System );
-		currentSet->addChar( cc );
-		sc->setFlag( QIMPenChar::Deleted );
-	    }
-	}
+        // User characters override all matching system characters.
+        // Copy and mark deleted identical system characters.
+        QIMPenCharIterator it = currentSet->characters().begin();
+        QIMPenChar *sc = 0;
+        while ( it != currentSet->characters().end() )
+        {
+            sc = *it++;
+            if ( ch->testChar(*sc) &&
+                 sc->testFlag( QIMPenChar::System ) &&
+                 !sc->testFlag( QIMPenChar::Deleted ) )
+            {
+                QIMPenChar *cc = new QIMPenChar( *sc );
+                cc->clearFlag( QIMPenChar::System );
+                currentSet->addChar( cc );
+                sc->setFlag( QIMPenChar::Deleted );
+            }
+        }
 
         currentSet->addChar( pc );
         setCurrentChar( pc );
         inputChar->clear();
-	enableButtons();
+        enableButtons();
     }
 }
 
@@ -568,55 +650,66 @@ void CharSetEdit::appendMatch()
 void CharSetEdit::addChar()
 {
     checkStoreMatch();
+
     //if ( !inputChar->isEmpty() ) {
-    QIMPenInputCharDlg dlg( 0, "newchar", TRUE , mIsFS );
-    if (QPEApplication::execDialog(&dlg)) {
-	currentCode = dlg.unicode();
-	// update combo now?  disable combo?
-	// if added an existing char, do a new 'match'
-	// if new code, then add code, set to current, add new match.
-	bool foundMatch = FALSE;
-	for (uint i = 0; i < charList->count(); ++i) {
-	    if (((CharListItem *)charList->item(i))->code() == currentCode) {
-		foundMatch = TRUE;
-		charList->setCurrentItem(charList->item(i));
-		break;
-	    }
-	}
-	if (!foundMatch) {
-	    // create a blank one.
-	    QIMPenChar *pc = new QIMPenChar( *inputChar );
-	    pc->setCharacter( currentCode );
-	    CharListItem *cli = new CharListItem( pc->name(), currentCode);
-	    charList->insertItem(cli);
-	    charList->setCurrentItem(cli);
-	}
-	addMatch();
-	updateLabel();
+    QIMPenInputCharDlg dlg( 0, "newchar", true , mIsFS );
+    if (QtopiaApplication::execDialog(&dlg)) {
+
+        uint key = dlg.unicode();
+        // if its a special...
+        QChar c;
+        if (!(key & 0xffff0000))
+            c = key;
+
+        QIMPenChar currentCode;
+        currentCode.setKey(key);
+        currentCode.setRepCharacter(c);
+
+        // update combo now?  disable combo?
+        // if added an existing char, do a new 'match'
+        // if new code, then add code, set to current, add new match.
+        bool foundMatch = false;
+        for (int i = 0; i < charList->count(); ++i) {
+            if (((CharListItem *)charList->item(i))->testChar(currentCode)) {
+                foundMatch = true;
+                charList->setCurrentItem(charList->item(i));
+                break;
+            }
+        }
+        if (!foundMatch) {
+            // create a blank one.
+            QIMPenChar *pc = new QIMPenChar( *inputChar );
+            pc->setKey( currentCode.key() );
+            pc->setRepCharacter( currentCode.repCharacter() );
+            CharListItem *cli = new CharListItem( pc->name(), *pc);
+            charList->addItem(cli);
+            charList->setCurrentItem(cli);
+        }
+        addMatch();
+        updateLabel();
     }
 }
 
 /* removes a user added char */
 void CharSetEdit::removeChar()
 {
-    addFlag = FALSE; // if was adding, just removed the char... can't add now
-    pw->setReadOnly(TRUE);
-    QIMPenCharIterator it(currentSet->characters() );
-    it.toFirst();
-    while ( it.current() ) {
-	QIMPenChar *pc = it.current();
-	++it;
-	if ( pc->character() == currentCode ) {
-	    if ( !pc->testFlag( QIMPenChar::System ) ) {
-		currentSet->removeChar( pc );
-	    }
-	}
+    addFlag = false; // if was adding, just removed the char... can't add now
+    pw->setReadOnly(true);
+    QIMPenCharIterator it = currentSet->characters().begin();
+    CharListItem *ch = (CharListItem *)charList->currentItem();
+    while ( it != currentSet->characters().end() ) {
+        QIMPenChar *pc = *it++;
+        if ( ch->testChar(*pc) ) {
+            if ( !pc->testFlag( QIMPenChar::System ) ) {
+                currentSet->removeChar( pc );
+            }
+        }
     }
-    for (uint i = 0; i < charList->count();++i) {
-	if (((CharListItem *)charList->item(i))->code() == currentCode) {
-	    charList->removeItem(i);
-	    break;
-	}
+    for (int i = 0; i < charList->count();++i) {
+        if (((CharListItem *)charList->item(i))->testEquivalent(ch)) {
+            delete charList->takeItem(i);
+            break;
+        }
     }
     updateLabel();
 }
@@ -624,90 +717,97 @@ void CharSetEdit::removeChar()
 void CharSetEdit::removeMatch()
 {
     if (addFlag) {
-	// assume user meant cancel add match
-	/// same as match prev when not added...
-	//matchCount--;
-	//matchIndex = matchCount;
-	pw->showCharacter(currentChar);
-	pw->setReadOnly(TRUE);
-	addFlag = FALSE;
+        // assume user meant cancel add match
+        /// same as match prev when not added...
+        //matchCount--;
+        //matchIndex = matchCount;
+        pw->showCharacter(currentChar);
+        pw->setReadOnly(true);
+        addFlag = false;
     } else {
-	if ( currentChar ) {
-	    QIMPenChar *pc = findPrev();
-	    if ( !pc ) pc = findNext();
-	    if ( currentChar->testFlag( QIMPenChar::System ) )
-		currentChar->setFlag( QIMPenChar::Deleted );
-	    else
-		currentSet->removeChar( currentChar );
-	    setCurrentChar( pc );
-	}
+        if ( currentChar ) {
+            QIMPenChar *pc = findPrev();
+            if ( !pc ) pc = findNext();
+            else matchIndex--;
+            if ( currentChar->testFlag( QIMPenChar::System ) )
+                currentChar->setFlag( QIMPenChar::Deleted );
+            else
+                currentSet->removeChar( currentChar );
+            setCurrentChar( pc );
+        }
     }
     if (matchIndex == matchCount)
-	matchIndex--;
+        matchIndex--;
     matchCount--;
     updateLabel();
+    enableButtons();
 }
 
 void CharSetEdit::resetMatches()
 {
     if (addFlag) {
-	addFlag = FALSE;
-	pw->setReadOnly(TRUE);
+        addFlag = false;
+        pw->setReadOnly(true);
     }
-    if ( currentCode ) {
-	currentChar = 0;
-	bool haveSystem = FALSE;
-	QIMPenCharIterator it(currentSet->characters() );
-	for ( ; it.current(); ++it ) {
-	    if ( it.current()->character() == currentCode &&
-		 it.current()->testFlag( QIMPenChar::System ) ) {
-		haveSystem = TRUE;
-		break;
-	    }
-	}
-	if ( haveSystem ) {
-	    it.toFirst();
-	    while ( it.current() ) {
-		QIMPenChar *pc = it.current();
-		++it;
-		if ( pc->character() == currentCode ) {
-		    if ( pc->testFlag( QIMPenChar::System ) ) {
-			pc->clearFlag( QIMPenChar::Deleted );
-			if ( !currentChar )
-			    currentChar = pc;
-		    } else {
-			currentSet->removeChar( pc );
-		    }
-		}
-	    }
-	    setCurrentChar( currentChar );
-	}
+    CharListItem *ch = (CharListItem *)charList->currentItem();
+    if ( ch ) {
+        currentChar = 0;
+        bool haveSystem = false;
+        QIMPenCharIterator it = currentSet->characters().begin();
+        for ( ; it != currentSet->characters().end(); ++it ) {
+            if ( ch->testChar(*(*it)) &&
+                 (*it)->testFlag( QIMPenChar::System ) ) {
+                haveSystem = true;
+                break;
+            }
+        }
+        if ( haveSystem ) {
+            it = currentSet->characters().begin();
+            while ( it != currentSet->characters().end() ) {
+                QIMPenChar *pc = (*it);
+                if ( ch->testChar(*pc) ) {
+                    if ( pc->testFlag( QIMPenChar::System ) ) {
+                        pc->clearFlag( QIMPenChar::Deleted );
+                        if ( !currentChar )
+                            currentChar = pc;
+                        ++it;
+                    } else {
+                        currentSet->removeChar( pc );
+                    }
+                } else {
+                    ++it;
+                }
+            }
+            setCurrentChar( currentChar );
+        }
     }
-    selectCode(charList->currentItem());
+    selectCode( charList->row( charList->currentItem() ));
+    addBtn->setEnabled(true);
 }
 
 void CharSetEdit::newStroke( QIMPenStroke *st )
 {
     inputChar->addStroke( st );
 
-    addBtn->setEnabled(TRUE);
+    CharListItem *ch = (CharListItem *)charList->currentItem();
+    addBtn->setEnabled(true);
     if ( currentChar ) {
-	bool haveSystem = FALSE;
-	QIMPenCharIterator it(currentSet->characters() );
-	for ( ; it.current(); ++it ) {
-	    if ( it.current()->character() == currentCode &&
-		    it.current()->testFlag( QIMPenChar::System ) ) {
-		haveSystem = TRUE;
-		break;
-	    }
-	}
-	delCharBtn->setEnabled(!haveSystem);
-	resetCharBtn->setEnabled(haveSystem);
+        bool haveSystem = false;
+        QIMPenCharIterator it = currentSet->characters().begin();
+        for ( ; it != currentSet->characters().end(); ++it ) {
+            if ( ch->testChar(*(*it)) &&
+                    (*it)->testFlag( QIMPenChar::System ) ) {
+                haveSystem = true;
+                break;
+            }
+        }
+        delCharBtn->setEnabled(!haveSystem);
+        resetCharBtn->setEnabled(haveSystem);
     } else {
-	// new Stroke on a new character....
-	// can delete and delets troke and add match etc.
-	delCharBtn->setEnabled(TRUE);
-	resetCharBtn->setEnabled(FALSE);
+        // new Stroke on a new character....
+        // can delete and delets troke and add match etc.
+        delCharBtn->setEnabled(true);
+        resetCharBtn->setEnabled(false);
     }
 }
 

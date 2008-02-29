@@ -1,0 +1,59 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Integrator Provided Components</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Integrator Provided Components<br /><small></small></h1>
+<a name="top"></a><ul><li><a href="#multimedia-messaging">Multimedia Messaging</a></li>
+<li><a href="#multimedia-messaging-viewer-smil">Multimedia Messaging Viewer (SMIL)</a></li>
+<ul><li><a href="#wap-stack-integration">WAP Stack Integration</a></li>
+<li><a href="#amr-encoder">AMR Encoder</a></li>
+</ul>
+</ul>
+<p>A number of Qtopia components are stubs, or functionless interfaces that provide a convenient abstraction for integrators to produce their own implementation. Integrators must implement these stubs before the particular Qtopia component will work correctly.</p>
+<a name="mms"></a><a name="multimedia-messaging"></a>
+<h2>Multimedia Messaging</h2>
+<p>Qtopia includes MMS functionality in the messages client but does not include a WAP stack implementation that would be needed to send or receive such messages.</p>
+<a name="mmsviewer"></a><a name="multimedia-messaging-viewer-smil"></a>
+<h2>Multimedia Messaging Viewer (SMIL)</h2>
+<p>Qtopia includes a <tt>SMIL</tt> 2.0 parser/viewer in directory: <tt>$QPEDIR/src/libraries/qtopiasmil/</tt>.</p>
+<p>This SMIL viewer is intended for use with an MMS viewer and is currently only used by the Messages application.</p>
+<p>The SMIL viewer:</p>
+<ul>
+<li>covers a subset of SMIL 2.0 basic</li>
+<li>can be modified to implement SMIL 2.0 basic language specification</li>
+<li>implements functionality as required by: <i>MMS Conformance Document 1.2 Candidate Version 29-September-2003 (OMA-MMS-CONF-v1_2-20030929-C)</i>.</li>
+</ul>
+<a name="wap-stack-integration"></a><a name="wap-stack-integration"></a>
+<h3>WAP Stack Integration</h3>
+<p>Qtopia does not include a WAP stack with the MMS client. Instead, an interface is provided which allows any WAP stack to be integrated. The <tt>MmsComms</tt> class must be subclassed and the virtual functions implemented and signals emitted as appropriate.</p>
+<p>The <tt>MmsCommsHttp</tt> class provides a sample implementation using HTTP over TCP/IP.</p>
+<p>Refer to: <tt>$QPEDIR/src/applications/qtmail/mmscomms_http.cpp</tt> and <tt>$QPEDIR/src/applications/qtmail/mmscomms_http.h</tt>.</p>
+<p>To choose an alternate WAP stack connection method:</p>
+<ol type="1">
+<li>to choose the <tt>MmsComms</tt> implementation:<ul>
+<li>modify the <tt>MmsClient::setAccount</tt> function in <tt>$QPEDIR/src/applications/qtmail/mmsclient.cpp</tt></li>
+</ul>
+</li>
+<li>to list the source/header files for the Mmscomms implementation:<ul>
+<li>modify <tt>MMSCOMMS_HEADERS</tt> and <tt>MSCOMMS_SOURCES</tt> in <tt>$QPEDIR/src/applications/qtmail/qtmail.pri</tt></li>
+</ul>
+</li>
+</ol>
+<a name="amr-encoder"></a>
+<h3>AMR Encoder</h3>
+<p>The AMR encoder included with Qtopia is a reference implementation only. It is recommended that an encoder optimized for the target platform be installed. The media recorder plug-in interface provides a convenient method of integrating the codec.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

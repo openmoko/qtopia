@@ -1,112 +1,85 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
---></style>
-</head><body bgcolor="#ffffff">
-
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-
-<h1 align=center>QXmlLexicalHandler Class Reference<br><small>[ <a href="xml.html">XML module</a> ]</small></h1><br clear="all">
-<p>
-The QXmlLexicalHandler class provides an interface to report lexical content of XML data.
-<a href="#details">More...</a>
-<p>
-<code>#include &lt;<a href="qxml-h.html">qxml.h</a>&gt;</code>
-<p>Inherited by <a href="qxmldefaulthandler.html">QXmlDefaultHandler</a>.
-<p><a href="qxmllexicalhandler-members.html">List of all member functions.</a>
-<h2>Public Members</h2>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: QXmlLexicalHandler Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QXmlLexicalHandler Class Reference<br /><sup><sup>[<a href="qtxml.html">QtXml</a> module]</sup></sup></h1>
+<p>The QXmlLexicalHandler class provides an interface to report the lexical content of XML data. <a href="#details">More...</a></p>
+<pre> #include &lt;QXmlLexicalHandler&gt;</pre><p>Inherited by <a href="qxmldefaulthandler.html">QXmlDefaultHandler</a>.</p>
+<p><b>Note:</b> All the functions in this class are <a href="threads.html#reentrant">reentrant</a>.</p>
 <ul>
-<li><div class="fn">virtual bool <a href="#34ad43"><b>startDTD</b></a> ( const QString &amp; name, const QString &amp; publicId, const QString &amp; systemId ) </div>
-<li><div class="fn">virtual bool <a href="#ea7abc"><b>endDTD</b></a> () </div>
-<li><div class="fn">virtual bool <a href="#bf36d3"><b>startCDATA</b></a> () </div>
-<li><div class="fn">virtual bool <a href="#10354f"><b>endCDATA</b></a> () </div>
-<li><div class="fn">virtual bool <a href="#6a0a71"><b>comment</b></a> ( const QString &amp; ch ) </div>
-<li><div class="fn">virtual QString <a href="#b06ef5"><b>errorString</b></a> () </div>
+<li><a href="qxmllexicalhandler-members.html">List of all members, including inherited members</a></li>
 </ul>
-<hr><h2><a name="details"></a>Detailed Description</h2>
-The QXmlLexicalHandler class provides an interface to report lexical content of XML data.
-<p>
-The events in the lexical handler apply to the entire document, not just to
-the document element, and all lexical handler events appear between the
-content handler's startDocument and endDocument events.
-<p>You can set the lexical handler with <a href="qxmlreader.html#6c0ebe">QXmlReader::setLexicalHandler</a>().
-<p>This interface is designed after the SAX2 extension LexicalHandler. The
-functions startEntity() and endEntity() are not included though.
-<p>See also the <a href="xml.html#introSAX2">Introduction to SAX2</a>.
-<p>See also  <a href="qxmldtdhandler.html">QXmlDTDHandler</a>, <a href="qxmldeclhandler.html">QXmlDeclHandler</a>, <a href="qxmlcontenthandler.html">QXmlContentHandler</a>, <a href="qxmlentityresolver.html">QXmlEntityResolver</a> and <a href="qxmlerrorhandler.html">QXmlErrorHandler</a>.
-
-<hr><h2>Member Function Documentation</h2>
-<h3 class="fn">bool <a name="6a0a71"></a>QXmlLexicalHandler::comment ( const <a href="qstring.html">QString</a> &amp; ch ) <code>[virtual]</code></h3>
-<p>The reader calls this function to report an XML comment anywhere in the
-document.
-<p>If this function returns FALSE the reader will stop parsing and will report
-an error. The reader will use the function <a href="#b06ef5">errorString</a>() to get the error
-message that will be used for reporting the error.
-<p>Reimplemented in <a href="qxmldefaulthandler.html#706e09">QXmlDefaultHandler</a>.
-<h3 class="fn">bool <a name="10354f"></a>QXmlLexicalHandler::endCDATA () <code>[virtual]</code></h3>
-<p>The reader calls this function to report the end of a CDATA section.
-<p>If this function returns FALSE the reader will stop parsing and will report
-an error. The reader will use the function <a href="#b06ef5">errorString</a>() to get the error
-message that will be used for reporting the error.
-<p>See also  <a href="#bf36d3">startCDATA</a>().
-<p>Reimplemented in <a href="qxmldefaulthandler.html#1c9f6b">QXmlDefaultHandler</a>.
-<h3 class="fn">bool <a name="ea7abc"></a>QXmlLexicalHandler::endDTD () <code>[virtual]</code></h3>
-<p>The reader calls this function to report the end of a DTD declaration, if
-any.
-<p>If this function returns FALSE the reader will stop parsing and will report
-an error. The reader will use the function <a href="#b06ef5">errorString</a>() to get the error
-message that will be used for reporting the error.
-<p>See also  <a href="#34ad43">startDTD</a>().
-<p>Reimplemented in <a href="qxmldefaulthandler.html#dd3b9b">QXmlDefaultHandler</a>.
-<h3 class="fn"><a href="qstring.html">QString</a> <a name="b06ef5"></a>QXmlLexicalHandler::errorString () <code>[virtual]</code></h3>
-<p>The reader calls this function to get an error string if any of the handler
-functions returns FALSE to him.
-<h3 class="fn">bool <a name="bf36d3"></a>QXmlLexicalHandler::startCDATA () <code>[virtual]</code></h3>
-<p>The reader calls this function to report the start of a CDATA section. The
-content of the CDATA section will be reported through the regular
-<a href="qxmlcontenthandler.html#c63930">QXmlContentHandler::characters</a>(). This function is intended only to report
-the boundary.
-<p>If this function returns FALSE the reader will stop parsing and will report
-an error. The reader will use the function <a href="#b06ef5">errorString</a>() to get the error
-message that will be used for reporting the error.
-<p>See also  <a href="#10354f">endCDATA</a>().
-<p>Reimplemented in <a href="qxmldefaulthandler.html#b2aa60">QXmlDefaultHandler</a>.
-<h3 class="fn">bool <a name="34ad43"></a>QXmlLexicalHandler::startDTD ( const <a href="qstring.html">QString</a> &amp; name, const <a href="qstring.html">QString</a> &amp; publicId, const <a href="qstring.html">QString</a> &amp; systemId ) <code>[virtual]</code></h3>
-<p>The reader calls this function to report the start of a DTD declaration, if
-any.
-<p>All declarations reported through <a href="qxmldtdhandler.html">QXmlDTDHandler</a> or <a href="qxmldeclhandler.html">QXmlDeclHandler</a> appear
-between the startDTD() and <a href="#ea7abc">endDTD</a>() calls.
-<p>If this function returns FALSE the reader will stop parsing and will report
-an error. The reader will use the function <a href="#b06ef5">errorString</a>() to get the error
-message that will be used for reporting the error.
-<p>See also  <a href="#ea7abc">endDTD</a>().
-<p>Reimplemented in <a href="qxmldefaulthandler.html#0ce7aa">QXmlDefaultHandler</a>.
-<hr><p>
-Search the documentation, FAQ, qt-interest archive and more (uses
-<a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
-<form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.10"><nobr>
-<input size="50" name="search"><input type=submit value="Search">
-</nobr></form><hr><p>
-This file is part of the <a href="index.html">Qt toolkit</a>,
-copyright &copy; 1995-2005
-<a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/>virtual <b><a href="qxmllexicalhandler.html#dtor.QXmlLexicalHandler">~QXmlLexicalHandler</a></b> ()</li>
+<li><div class="fn"/>virtual bool <b><a href="qxmllexicalhandler.html#comment">comment</a></b> ( const QString &amp; <i>ch</i> ) = 0</li>
+<li><div class="fn"/>virtual bool <b><a href="qxmllexicalhandler.html#endCDATA">endCDATA</a></b> () = 0</li>
+<li><div class="fn"/>virtual bool <b><a href="qxmllexicalhandler.html#endDTD">endDTD</a></b> () = 0</li>
+<li><div class="fn"/>virtual bool <b><a href="qxmllexicalhandler.html#endEntity">endEntity</a></b> ( const QString &amp; <i>name</i> ) = 0</li>
+<li><div class="fn"/>virtual QString <b><a href="qxmllexicalhandler.html#errorString">errorString</a></b> () const = 0</li>
+<li><div class="fn"/>virtual bool <b><a href="qxmllexicalhandler.html#startCDATA">startCDATA</a></b> () = 0</li>
+<li><div class="fn"/>virtual bool <b><a href="qxmllexicalhandler.html#startDTD">startDTD</a></b> ( const QString &amp; <i>name</i>, const QString &amp; <i>publicId</i>, const QString &amp; <i>systemId</i> ) = 0</li>
+<li><div class="fn"/>virtual bool <b><a href="qxmllexicalhandler.html#startEntity">startEntity</a></b> ( const QString &amp; <i>name</i> ) = 0</li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QXmlLexicalHandler class provides an interface to report the lexical content of XML data.</p>
+<p>The events in the lexical handler apply to the entire document, not just to the document element, and all lexical handler events appear between the content handler's startDocument and endDocument events.</p>
+<p>You can set the lexical handler with <a href="qxmlreader.html#setLexicalHandler">QXmlReader::setLexicalHandler</a>().</p>
+<p>This interface's design is based on the the SAX2 extension LexicalHandler.</p>
+<p>The interface provides the <a href="qxmllexicalhandler.html#startDTD">startDTD</a>(), <a href="qxmllexicalhandler.html#endDTD">endDTD</a>(), <a href="qxmllexicalhandler.html#startEntity">startEntity</a>(), <a href="qxmllexicalhandler.html#endEntity">endEntity</a>(), <a href="qxmllexicalhandler.html#startCDATA">startCDATA</a>(), <a href="qxmllexicalhandler.html#endCDATA">endCDATA</a>() and <a href="qxmllexicalhandler.html#comment">comment</a>() functions.</p>
+<p>See also <a href="qxmldtdhandler.html">QXmlDTDHandler</a>, <a href="qxmldeclhandler.html">QXmlDeclHandler</a>, <a href="qxmlcontenthandler.html">QXmlContentHandler</a>, <a href="qxmlentityresolver.html">QXmlEntityResolver</a>, <a href="qxmlerrorhandler.html">QXmlErrorHandler</a>, and <a href="qtxml.html#introduction-to-sax2">Introduction to SAX2</a>.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="dtor.QXmlLexicalHandler"></a>QXmlLexicalHandler::~QXmlLexicalHandler ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Destroys the lexical handler.</p>
+<h3 class="fn"><a name="comment"></a>bool QXmlLexicalHandler::comment ( const <a href="qstring.html">QString</a> &amp; <i>ch</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>The reader calls this function to report an XML comment anywhere in the document. It reports the text of the comment in <i>ch</i>.</p>
+<p>If this function returns false the reader stops parsing and reports an error. The reader uses the function <a href="qxmllexicalhandler.html#errorString">errorString</a>() to get the error message.</p>
+<h3 class="fn"><a name="endCDATA"></a>bool QXmlLexicalHandler::endCDATA ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>The reader calls this function to report the end of a CDATA section.</p>
+<p>If this function returns false the reader stops parsing and reports an error. The reader uses the function <a href="qxmllexicalhandler.html#errorString">errorString</a>() to get the error message.</p>
+<p>See also <a href="qxmllexicalhandler.html#startCDATA">startCDATA</a>() and <a href="qxmlcontenthandler.html#characters">QXmlContentHandler::characters</a>().</p>
+<h3 class="fn"><a name="endDTD"></a>bool QXmlLexicalHandler::endDTD ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>The reader calls this function to report the end of a DTD declaration, if any.</p>
+<p>If this function returns false the reader stops parsing and reports an error. The reader uses the function <a href="qxmllexicalhandler.html#errorString">errorString</a>() to get the error message.</p>
+<p>See also <a href="qxmllexicalhandler.html#startDTD">startDTD</a>().</p>
+<h3 class="fn"><a name="endEntity"></a>bool QXmlLexicalHandler::endEntity ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>The reader calls this function to report the end of an entity called <i>name</i>.</p>
+<p>For every <a href="qxmllexicalhandler.html#startEntity">startEntity</a>() call, there is a corresponding endEntity() call. The calls to <a href="qxmllexicalhandler.html#startEntity">startEntity</a>() and endEntity() are properly nested.</p>
+<p>If this function returns false the reader stops parsing and reports an error. The reader uses the function <a href="qxmllexicalhandler.html#errorString">errorString</a>() to get the error message.</p>
+<p>See also <a href="qxmllexicalhandler.html#startEntity">startEntity</a>(), <a href="qxmlcontenthandler.html#skippedEntity">QXmlContentHandler::skippedEntity</a>(), and <a href="qxmlsimplereader.html#setFeature">QXmlSimpleReader::setFeature</a>().</p>
+<h3 class="fn"><a name="errorString"></a><a href="qstring.html">QString</a> QXmlLexicalHandler::errorString () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>The reader calls this function to get an error string if any of the handler functions returns false.</p>
+<h3 class="fn"><a name="startCDATA"></a>bool QXmlLexicalHandler::startCDATA ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>The reader calls this function to report the start of a CDATA section. The content of the CDATA section is reported through the <a href="qxmlcontenthandler.html#characters">QXmlContentHandler::characters</a>() function. This function is intended only to report the boundary.</p>
+<p>If this function returns false the reader stops parsing and reports an error. The reader uses the function <a href="qxmllexicalhandler.html#errorString">errorString</a>() to get the error message.</p>
+<p>See also <a href="qxmllexicalhandler.html#endCDATA">endCDATA</a>().</p>
+<h3 class="fn"><a name="startDTD"></a>bool QXmlLexicalHandler::startDTD ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qstring.html">QString</a> &amp; <i>publicId</i>, const <a href="qstring.html">QString</a> &amp; <i>systemId</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>The reader calls this function to report the start of a DTD declaration, if any. It reports the name of the document type in <i>name</i>, the public identifier in <i>publicId</i> and the system identifier in <i>systemId</i>.</p>
+<p>If the public identifier is missing, <i>publicId</i> is set to an empty string. If the system identifier is missing, <i>systemId</i> is set to an empty string. Note that it is not valid XML to have a public identifier but no system identifier; in such cases a parse error will occur.</p>
+<p>All declarations reported through <a href="qxmldtdhandler.html">QXmlDTDHandler</a> or <a href="qxmldeclhandler.html">QXmlDeclHandler</a> appear between the startDTD() and <a href="qxmllexicalhandler.html#endDTD">endDTD</a>() calls.</p>
+<p>If this function returns false the reader stops parsing and reports an error. The reader uses the function <a href="qxmllexicalhandler.html#errorString">errorString</a>() to get the error message.</p>
+<p>See also <a href="qxmllexicalhandler.html#endDTD">endDTD</a>().</p>
+<h3 class="fn"><a name="startEntity"></a>bool QXmlLexicalHandler::startEntity ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>The reader calls this function to report the start of an entity called <i>name</i>.</p>
+<p>Note that if the entity is unknown, the reader reports it through <a href="qxmlcontenthandler.html#skippedEntity">QXmlContentHandler::skippedEntity</a>() and not through this function.</p>
+<p>If this function returns false the reader stops parsing and reports an error. The reader uses the function <a href="qxmllexicalhandler.html#errorString">errorString</a>() to get the error message.</p>
+<p>See also <a href="qxmllexicalhandler.html#endEntity">endEntity</a>() and <a href="qxmlsimplereader.html#setFeature">QXmlSimpleReader::setFeature</a>().</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

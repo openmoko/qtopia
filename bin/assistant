@@ -1,0 +1,29 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use File::Glob;
+use File::Copy;
+use File::Path;
+use Cwd;
+use File::Basename;
+use lib ( dirname($0) );
+use Qtopia::Paths;
+use Qtopia::Vars;
+use Qtopia::File;
+
+Qtopia::Paths::get_paths();
+
+# Windows depot builds use the perl scripts directly rather than the compiled code
+if ( $isWindows ) {
+    check_script($0, "$depotpath/bin", $ARGV[0]);
+}
+
+
+# Load the Qtopia content file
+if ( -f "$depotpath/doc/html/qtopia.dcf" ) {
+    system("$DQTDIR/bin/assistant", "-addContentFile", "$depotpath/doc/html/qtopia.dcf");
+}
+my $ret = system("$DQTDIR/bin/assistant", @ARGV);
+exit $ret;
+

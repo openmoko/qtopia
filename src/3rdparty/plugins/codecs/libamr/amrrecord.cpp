@@ -1,45 +1,13 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
-**
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
-**
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
-**
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
-**
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
-**
-**********************************************************************/
 #include "amrrecord.h"
+#undef TRUE
+#undef FALSE
 
 extern "C" {
-#include "typedef.h"
-#include "frame.h"
-#include "sp_enc.h"
-#include "sid_sync.h"
-#include "e_homing.h"
+#include "../../../libraries/amr/typedef.h"
+#include "../../../libraries/amr/frame.h"
+#include "../../../libraries/amr/sp_enc.h"
+#include "../../../libraries/amr/sid_sync.h"
+#include "../../../libraries/amr/e_homing.h"
 };
 
 
@@ -239,7 +207,7 @@ AmrRecorderPlugin::AmrRecorderPlugin()
     device = 0;
     channels = 0;
     frequency = 0;
-    writtenHeader = FALSE;
+    writtenHeader = false;
     blockLen = 0;
     amrState = 0;
     sidSync = 0;
@@ -251,48 +219,48 @@ bool AmrRecorderPlugin::begin( QIODevice *_device, const QString& )
 {
     // Bail out if we are already recording.
     if ( device )
-        return FALSE;
+        return false;
     
     // Bail out if the new device is invalid.
     if ( !_device )
-        return FALSE;
+        return false;
 
     // Initialize the AMR encoding routines.
     Speech_Encode_FrameState *state;
     sid_syncState *sid;
     if ( Speech_Encode_Frame_init( &state, 0, "encoder" ) != 0 ) {
-	return FALSE;
+	return false;
     }
     if ( sid_sync_init( &sid ) != 0 ) {
 	Speech_Encode_Frame_exit( &state );
-	return FALSE;
+	return false;
     }
     amrState = (void *)state;
     sidSync = (void *)sid;
     device = _device;
-    return TRUE;
+    return true;
 }
 
 
 bool AmrRecorderPlugin::end()
 {
-    bool result = TRUE;
+    bool result = true;
 
     // Bail out if we were not recording.
     if ( !device )
-        return FALSE;
+        return false;
 
     // Flush the last AMR block if necessary.  If there were no blocks
     // in the stream at all, then add at least one silence block.
     if ( blockLen > 0 || !writtenHeader ) {
 	if ( !writtenHeader ) {
 	    if ( !writeHeader() )
-		result = FALSE;
-	    writtenHeader = TRUE;
+		result = false;
+	    writtenHeader = true;
 	}
 	memset( block + blockLen, 0, sizeof(short) * (160 - blockLen) );
 	if ( result && !amrFlush() )
-	    result = FALSE;
+	    result = false;
     }
 
     // Destroy the AMR state record.
@@ -305,7 +273,7 @@ bool AmrRecorderPlugin::end()
     device = 0;
     channels = 0;
     frequency = 0;
-    writtenHeader = FALSE;
+    writtenHeader = false;
     blockLen = 0;
     amrState = 0;
     sidSync = 0;
@@ -321,9 +289,9 @@ bool AmrRecorderPlugin::setAudioChannels( int _channels )
     if ( device && !writtenHeader &&
          ( _channels == 1 || _channels == 2 ) ) {
         channels = _channels;
-        return TRUE;
+        return true;
     } else {
-        return FALSE;
+        return false;
     }
 }
 
@@ -332,9 +300,9 @@ bool AmrRecorderPlugin::setAudioFrequency( int _frequency )
 {
     if ( device && !writtenHeader && _frequency > 0 ) {
         frequency = _frequency;
-        return TRUE;
+        return true;
     } else {
-        return FALSE;
+        return false;
     }
 }
 
@@ -343,13 +311,13 @@ bool AmrRecorderPlugin::writeAudioSamples( const short *samples, long numSamples
 {
     // Bail out if we are not currently recording.
     if ( !device )
-        return FALSE;
+        return false;
 
     // Write the header if necessary.
     if ( !writtenHeader ) {
         if ( !writeHeader() )
-            return FALSE;
-        writtenHeader = TRUE;
+            return false;
+        writtenHeader = true;
     }
 
     if ( handler ) {
@@ -371,7 +339,7 @@ bool AmrRecorderPlugin::writeAudioSamples( const short *samples, long numSamples
 		if ( blockLen >= 160 ) {
 		    blockLen = 0;
 		    if ( !amrFlush() )
-			return FALSE;
+			return false;
 		}
 	    }
 	}
@@ -384,14 +352,14 @@ bool AmrRecorderPlugin::writeAudioSamples( const short *samples, long numSamples
 	    if ( blockLen >= 160 ) {
 		blockLen = 0;
 		if ( !amrFlush() )
-		    return FALSE;
+		    return false;
 	    }
 	    --numSamples;
 	}
 
     }
 
-    return TRUE;
+    return true;
 }
 
 
@@ -417,7 +385,7 @@ bool AmrRecorderPlugin::writeHeader()
 
     // Write the header.
     static char header[] = "#!AMR\n";
-    return ( device->writeBlock( header, 6 ) == 6 );
+    return ( device->write( header, 6 ) == 6 );
 }
 
 
@@ -443,6 +411,6 @@ bool AmrRecorderPlugin::amrFlush()
     }
 
     // Write the frame to the output device.
-    return ( device->writeBlock( (char *)frame, size ) == size );
+    return ( device->write( (char *)frame, size ) == size );
 }
 

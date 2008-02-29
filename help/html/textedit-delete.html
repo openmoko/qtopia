@@ -1,19 +1,22 @@
-<qt title="Deleting a Note">
+<html>
+<head><title>Deleting a Note</title></head>
+<body>
 <h3>Deleting a Note</h3>
-%%PHONE%%
+<!--#if expr="$PHONESTYLE"-->
 <p><b>To delete a note:</b></p>
 <ul>
 <li>Highlight the note you want to delete.</li>
-<li>Press <img src="contextbar/options.png"> and select <img src="trash">.</li>
+<li>Press <img src=":icon/options"> </img> and select <img src=":icon/trash">.</li>
 <li>Press <b>Yes</b> to confirm the deletion.</li>
 </ul>
-@@PHONE@@
-%%PDA%%
+<!--#endif-->
+<!--#if expr="$PDASTYLE"-->
 <p><b>To delete a note:</b></p>
 <ul>
 <li>Press and hold the note you want to delete..</li>
-<li>Select <b>Delete</b> from the popup menu.</li>
+<li>Select <b>Delete</b> from the pop-up menu.</li>
 <li>Tap <b>Yes</b> to confirm the deletion.</li>
 </ul>
-@@PDA@@
-</qt>
+<!--#endif-->
+</body>
+</html>

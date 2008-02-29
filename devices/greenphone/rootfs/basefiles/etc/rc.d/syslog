@@ -1,0 +1,6 @@
+#!/bin/sh
+
+. /mnt/user/etc/syslog.conf
+
+/sbin/syslogd -n $LOGOPT $IPCLOG $LOCALLOG $REMOTELOG >/dev/null 2>/dev/null
+

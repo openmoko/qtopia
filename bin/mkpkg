@@ -1,0 +1,287 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use File::Copy;
+use File::Path;
+use File::Find;
+use File::Basename;
+use lib ( dirname($0) );
+use Qtopia::Paths;
+use Qtopia::Vars;
+use Qtopia::File;
+
+Qtopia::Paths::get_paths();
+
+# Windows depot builds use the perl scripts directly rather than the compiled code
+if ( $isWindows ) {
+    check_script("$0", "$depotpath/bin", $ARGV[0]);
+}
+
+
+use constant DEBUG => 0;
+
+my $print_usage = 0;
+
+# This list must match what is in the for loop below!
+my (  $make, $format, $working_path, $arch, $project_root, $languages,
+      $pkg_path, $srcdir, $out_pwd,
+      $pkg_name, $pkg_desc, $domain, $pkg_deps, $pkg_multi, $pkg_version, $pkg_trust,
+      $pkg_license, $pkg_maintainer, $pkg_targets ) = ();
+
+for ( $make, $format, $working_path, $arch, $project_root, $languages,
+      $pkg_path, $srcdir, $out_pwd,
+      $pkg_name, $pkg_desc, $domain, $pkg_deps, $pkg_multi, $pkg_version, $pkg_trust,
+      $pkg_license, $pkg_maintainer, $pkg_targets ) {
+    $_ = shift(@ARGV);
+    if ( !defined($_) ) {
+        $print_usage = 1;
+        last;
+    }
+}
+
+# Defaults
+if ( !$format ) { $format = "ipk"; }
+
+if ( DEBUG )
+{
+    print <<DUMP_END;
+    Make:          $make
+    Format:        $format
+    Work path:     $working_path
+    Arch:          $arch
+    Project root:  $project_root
+    Languages:     $languages
+    Package path:  $pkg_path
+    Source dir:    $srcdir
+    Out word dir:  $out_pwd
+    Package name:  $pkg_name
+    Package desc:  $pkg_desc
+    SXE domain:    $domain
+    Package deps:  $pkg_deps
+    Package multi: $pkg_multi
+    Package ver:   $pkg_version
+    Trust:         $pkg_trust
+    License:       $pkg_license
+    Maintainer:    $pkg_maintainer
+    Targets:       $pkg_targets
+DUMP_END
+}
+
+if ( $print_usage ) {
+    usage();
+}
+
+my $data_path = "$working_path/data";
+my $prefix = "$data_path";
+
+rmrf($working_path);
+mkpath($data_path);
+
+sub run($)
+{
+    my $cmd = shift;
+    if ( DEBUG )
+    {
+        print "mkpkg debug:  $cmd\n";
+    }
+    system( "$cmd" );
+}
+
+# IPK variables
+my $deb_version = "2.0";
+my $control_path;
+if ( $format eq "ipk" )
+{
+    $control_path = "$working_path/control";
+}
+else # $format is "qpk"
+{
+    $control_path = "$working_path";
+}
+my $control_file = "$control_path/control";
+my $tar_options = "-cz --owner=0 --group=0"; #"--remove-files -cz --owner=0 --group=0";
+
+my @scripts;
+if ( $format eq "ipk" )
+{
+    @scripts = qw(preinst postinst prerm postrm);
+}
+
+print "\n\nInstalling files...\n\n";
+
+for my $dir ( split(/\s+/, $pkg_multi) ) {
+    $dir =~ s/^s+//;
+    $dir =~ s/s+$//;
+    next unless ( $dir && -d "$project_root/$dir" );
+    chdir "$project_root/$dir" or die "chdir $project_root/$dir : $!\n";
+    run "$make install IMAGE=$prefix";
+}
+for my $target ( split(/\s+/, $pkg_targets) ) {
+    chdir $out_pwd;
+    run "$make $target IMAGE=$prefix";
+}
+
+print "\n\nCreating packages...\n\n";
+for my $lang ( split(/\s+/, $languages) ) {
+    my $suffix = "_i18n_$lang";
+    my $deps = $pkg_name;
+    # this looks like a nasty hack - what is it doing??
+    if ( $pkg_name =~ /^qpe-/ && $pkg_name ne "qpe-taskbar" ) {
+        $pkg_deps .= " qpe-taskbar_i18n_$lang";
+    }
+    my $path = "$prefix/i18n/$lang";
+    mkdir "$prefix/i18n" unless ( -d "$prefix/i18n" );
+    mkdir $path unless ( -d $path );
+    make_pkg($suffix, $deps, $path);
+}
+
+# remove i18n stuff so it doesn't get in the regular package
+if ( -d "$prefix/i18n" ) {
+    rmrf("$prefix/i18n");
+}
+
+make_pkg("", $pkg_deps, $prefix);
+rmrf($working_path);
+print "\n\n";
+
+
+exit 0;
+
+
+sub usage
+{
+    print "Usage:  $make packages [FORMAT=qpk|ipk|rpm]\n";
+    exit 2;
+}
+
+
+sub make_pkg
+{
+    my ( $suffix, $deps, $path ) = @_;
+    if ( ! -d $path ) {
+        warn "$path directory not found\n";
+        return;
+    }
+    chdir $data_path;
+    if ( $path eq $data_path ) {
+        $path = ".";
+    } else {
+        $path =~ s,^\Q$data_path\E/,,;
+    }
+
+    my @files = ();
+    find(sub {
+            my $file = $File::Find::name;
+            if ( -f $file || -l $file ) {
+                $file =~ s/^\Q$data_path\E//;
+                push(@files, $file);
+            }
+        }, "$data_path/$path");
+
+    if ( !@files ) {
+        return;
+    }
+
+    if ( $format eq "ipk" || $format eq "qpk" ) {
+        mkpath($control_path);
+        # WTF does this do?
+        #echo "${p.deps}" | sed 's/\( [^(]\)/,\1/g' >> ${CONTROL_PATH}/DEPS
+
+        my $scripts = "";
+        for ( @scripts ) {
+            my $script = "$srcdir/$pkg_name.$_";
+            if ( -e $script ) {
+                $scripts .= " ./$_";
+                copy("$script", "$working_path/$_");
+            }
+        }
+
+        open OUT, ">$control_file" or die "Can't open $control_file\n";
+        print OUT "Package: $pkg_name$suffix\n";
+        print OUT "Description: $pkg_desc\n";
+        print OUT "Maintainer: $pkg_maintainer\n";
+        print OUT "License: $pkg_license\n";
+        print OUT "Version: $pkg_version\n";
+        print OUT "Trust: $pkg_trust\n";
+        print OUT "Arch: $arch\n";
+        print OUT "Architecture: $arch\n";
+        print OUT "Depends: $deps\n";
+        if ( $format eq "qpk" )
+        {
+            print OUT "Domain: $domain\n";
+        }
+        print OUT "Files: ".join(" ", @files)."\n";
+        print OUT "Installed-Size: ".`du -sh $path | awk '{print \$1}'`;
+        close OUT;
+
+        if ( DEBUG )
+        {
+            print "\n\nControl file\n";
+            print "------------8< ---------------------------\n";
+            system( "cat $control_file" );
+            print "------------8< ---------------------------\n";
+        }
+
+        my $cmd = "tar $tar_options -f $pkg_path/${pkg_name}_${pkg_version}_$arch$suffix.$format ";
+
+        if ( $format eq "ipk" )
+        {
+            open OUT, ">$working_path/debian-binary" or die "Can't open $working_path/debian-binary\n";
+            print OUT "2.0\n";
+            close OUT;
+
+            chdir $control_path;
+            run "tar $tar_options -f $working_path/control.tar.gz ./control";
+
+            $cmd .= "./debian-binary ./control.tar.gz ./data.tar.gz $scripts";
+        }
+        else
+        {
+            $cmd .= "./control ./data.tar.gz";
+        }
+        chdir $data_path;
+        run "tar $tar_options -f $working_path/data.tar.gz $path";
+
+        mkpath($pkg_path);
+        chdir $working_path;
+        run "$cmd";
+        print "Created $pkg_path/${pkg_name}_${pkg_version}_$arch$suffix.$format\n";
+    } elsif ( $format eq "rpm" ) {
+        my $spec = "$working_path/$pkg_name.spec";
+        my $ver;
+        my $rel;
+        if ( $pkg_version =~ /-/ ) {
+            ( $ver ) = ( $pkg_version =~ /(.*)-/ );
+            ( $rel ) = ( $pkg_version =~ /-(.*)/ );
+        } else {
+            $ver = $pkg_version;
+            $rel = "1";
+        }
+        open OUT, ">$spec" or die "Can't open $spec\n";
+	print OUT "Summary: $pkg_desc\n";
+	print OUT "Name: $pkg_name$suffix\n";
+        print OUT "Group: none\n";
+        print OUT "License: $pkg_license\n";
+	print OUT "Version: $ver\n";
+        print OUT "Release: $rel\n";
+	print OUT "%description\n$pkg_desc\n";
+	print OUT "%files\n";
+	print OUT "%defattr(-,root,root)\n".join("\n", @files)."\n";
+        close OUT;
+        my $output = `rpmbuild -bb --root=$data_path --target=$arch-unknown-linux $spec`;
+        my $rpm;
+        for ( split(/\n/, $output) ) {
+            if ( /Wrote: (.*)/ ) {
+                $rpm = $1;
+                last;
+            }
+        }
+        if ( $rpm ) {
+            copy($rpm, "$pkg_path/".basename($rpm));
+            unlink $rpm;
+            print "Created $pkg_path/".basename($rpm)."\n";
+        }
+    }
+}
+

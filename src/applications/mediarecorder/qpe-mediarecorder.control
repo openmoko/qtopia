@@ -1,4 +1,4 @@
-Files: bin/mediarecorder apps/Applications/voicerecorder.desktop pics/record-blank.png pics/record-light.png
+Files: bin/mediarecorder apps/Applications/mediarecorder.desktop pics/record-blank.png pics/record-light.png
 Priority: optional
 Section: qpe/applications
 Maintainer: Trolltech (www.trolltech.com)

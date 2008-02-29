@@ -1,0 +1,16 @@
+This package has been modified by Trolltech to add the following features:
+
+- Fix a small bug in hciconfig (hciconfig.c)
+  which prevents it from displaying the correct 
+  category of  Peripheral or Imaging or Uncategorized device class devices 
+  (reports as invalid).
+
+   This change has been accepted into CVS post 2.25 build
+
+- Small display issue / bug fix in sdptool.c regarding classification of 128bit UUIDs.  
+- Capability for sdptool to perform searches by 16/32/128 bit uuids
+
+- Add capability for hcitool to list paired devices, and remove currently bonded devices
+  This functionality was ported from the bluez DBUS api, and is not scheduled to be
+  accepted into bluez main tree.  Backported common/textfile.c and 
+  common/textfile.h from cvs into 2.25.

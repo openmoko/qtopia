@@ -1,0 +1,7 @@
+#!/bin/sh
+if [ "$TEAMBUILDER_SYSTEM" = 'arm:9tdmi' ]; then
+    exec /opt/toolchains/arm9tdmi/arm-linux/gcc-3.3.3-glibc-2.3.2/bin/arm-linux-g++ "$@"
+else
+    export TEAMBUILDER_SYSTEM='arm:9tdmi'
+    exec /opt/teambuilder/bin/arm-linux-g++ "$@"
+fi

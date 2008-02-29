@@ -1,115 +1,90 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "samplewindow.h"
-#include <qtopia/global.h>
-#include <qtopia/fontdatabase.h>
-#include <qtopia/config.h>
-#include <qtopia/applnk.h>
-#include <qtopia/qpeapplication.h>
-#include <qtopia/pluginloader.h>
-#include <qtopia/styleinterface.h>
-#include <qtopia/windowdecorationinterface.h>
-#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
-#include <qtopia/qcopenvelope_qws.h>
-#endif
+#include <QFontDatabase>
+#include <QSettings>
+#include <qtopiaapplication.h>
+#include <qpluginmanager.h>
+#include <qwindowdecorationinterface.h>
+#include <qtopiaipcenvelope.h>
 #ifdef QTOPIA_PHONE
 # include <qtopia/private/phonedecoration_p.h>
-# include <qtopia/contextbar.h>
+# include <qtopia/qsoftmenubar.h>
 # include <qtopia/phonestyle.h>
 #else
-# include <qtopia/qpestyle.h>
+# include <qtopia/qtopiastyle.h>
 #endif
 
-#include <qlabel.h>
-#include <qcheckbox.h>
-#include <qradiobutton.h>
-#include <qtabwidget.h>
-#include <qslider.h>
-#include <qfile.h>
-#include <qtextstream.h>
-#include <qdatastream.h>
-#include <qmessagebox.h>
-#include <qcombobox.h>
-#include <qlistbox.h>
-#include <qdir.h>
-#include <qgroupbox.h>
-#include <qwindowsstyle.h>
-#include <qobjectlist.h>
-#include <qlayout.h>
-#include <qvbox.h>
-#include <qmenubar.h>
-#include <qpushbutton.h>
-#include <qcheckbox.h>
-#include <qwhatsthis.h>
-#include <qpixmapcache.h>
-#if QT_VERSION >= 0x030000
-#include <qstylefactory.h>
-#endif
-#include <qaccel.h>
+#include <QLabel>
+#include <QCheckBox>
+#include <QRadioButton>
+#include <QTabWidget>
+#include <QSlider>
+#include <QFile>
+#include <QTextStream>
+#include <QDataStream>
+#include <QMessageBox>
+#include <QComboBox>
+#include <QListWidget>
+#include <QDir>
+#include <QGroupBox>
+#include <QScrollBar>
+#include <QWindowsStyle>
+#include <QLayout>
+#include <QMenuBar>
+#include <QPushButton>
+#include <QWhatsThis>
+#include <QPixmapCache>
+#include <QStyleFactory>
+#include <QPainter>
+#include <QDesktopWidget>
 
 #include <stdlib.h>
 
-#define SAMPLE_HEIGHT	115
+#define SAMPLE_HEIGHT   115
 
 class SampleText : public QWidget
 {
 public:
     SampleText( const QString &t, bool h, QWidget *parent )
-	: QWidget( parent ), hl(h), text(t)
+        : QWidget( parent ), hl(h), text(t)
     {
-	if ( hl )
-	    setBackgroundMode( PaletteHighlight );
-	else
-	    setBackgroundMode( PaletteBase );
     }
 
     QSize sizeHint() const
     {
-	QFontMetrics fm(font());
-	return QSize( fm.width(text)+10, fm.height()+4 );
+        QFontMetrics fm(font());
+        return QSize( fm.width(text)+10, fm.height()+4 );
     }
 
     void paintEvent( QPaintEvent * )
     {
-	QPainter p(this);
-	if ( hl )
-	    p.setPen( colorGroup().highlightedText() );
-	else
-	    p.setPen( colorGroup().text() );
-	p.drawText( rect(), AlignLeft | AlignVCenter, text );
+        QPainter p(this);
+        if ( hl ) {
+            p.setPen( palette().color(QPalette::HighlightedText) );
+            p.fillRect( rect(), QBrush( QColor( palette().color( QPalette::Highlight) ) ) );
+        } else
+            p.setPen( palette().color(QPalette::Text) );
+        p.drawText( rect(), Qt::AlignLeft | Qt::AlignVCenter, text );
     }
 
 private:
@@ -120,41 +95,41 @@ private:
 //-------------------------------------------------------------------------
 
 SampleWindow::SampleWindow( QWidget *parent )
-    : QWidget(parent), iface(0), popup(0)
+    : QWidget(parent), iface(0), popup(0), mb(0)
 {
-    setSizePolicy( QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum) );
+    setSizePolicy( QSizePolicy( QSizePolicy::Preferred, QSizePolicy::Minimum ) );
     init();
 }
 
 QSize SampleWindow::sizeHint() const
 {
-    int w = QMIN(container->sizeHint().width() + 10, qApp->desktop()->width()-10);
+    int w = qMin( container->sizeHint().width() + 10, desktopSize.width()-10 );
     int h = container->sizeHint().height() + 30;
-    return QSize( w, QMAX(SAMPLE_HEIGHT,h) );
+    return QSize( w, qMax(SAMPLE_HEIGHT,h) );
 }
 
 void SampleWindow::setFont( const QFont &f )
 {
     QWidget::setFont( f );
     if (popup)
-	popup->setFont( f );
+        popup->setFont( f );
 }
 
-void SampleWindow::setDecoration( WindowDecorationInterface *i )
+void SampleWindow::setDecoration( QWindowDecorationInterface *i )
 {
     iface = i;
     wd.rect = QRect( 0, 0, 150, 75 );
     wd.caption = tr("Sample");
     wd.palette = palette();
-    wd.flags = WindowDecorationInterface::WindowData::Dialog |
-	       WindowDecorationInterface::WindowData::Active;
+    wd.flags = QWindowDecorationInterface::WindowData::Dialog
+                | QWindowDecorationInterface::WindowData::Active;
     wd.reserved = 1;
 
-    th = iface->metric(WindowDecorationInterface::TitleHeight, &wd);
-    tb = iface->metric(WindowDecorationInterface::TopBorder, &wd);
-    lb = iface->metric(WindowDecorationInterface::LeftBorder, &wd);
-    rb = iface->metric(WindowDecorationInterface::RightBorder, &wd);
-    bb = iface->metric(WindowDecorationInterface::BottomBorder, &wd);
+    th = iface->metric(QWindowDecorationInterface::TitleHeight, &wd);
+    tb = iface->metric(QWindowDecorationInterface::TopBorder, &wd);
+    lb = iface->metric(QWindowDecorationInterface::LeftBorder, &wd);
+    rb = iface->metric(QWindowDecorationInterface::RightBorder, &wd);
+    bb = iface->metric(QWindowDecorationInterface::BottomBorder, &wd);
 
     int yoff = th + tb;
     int xoff = lb;
@@ -164,118 +139,134 @@ void SampleWindow::setDecoration( WindowDecorationInterface *i )
     wd.rect.setY( 0 );
     wd.rect.setHeight( height() - yoff - bb );
 
-    container->setGeometry( xoff, yoff, wd.rect.width(), wd.rect.height() );
-    setMinimumSize( QMIN(container->sizeHint().width()+lb+rb, qApp->desktop()->width()-10),
-		    QMAX(SAMPLE_HEIGHT,container->sizeHint().height()+tb+th+bb) );
+    container->setGeometry( QRect( xoff, yoff, wd.rect.width(), wd.rect.height() ) );
+    setMinimumSize( qMin(container->sizeHint().width()+lb+rb, desktopSize.width()-10),
+                    qMax(SAMPLE_HEIGHT,container->sizeHint().height()+tb+th+bb) );
 }
 
 void SampleWindow::paintEvent( QPaintEvent * )
 {
     if ( !iface )
-	return;
+        return;
 
     QPainter p( this );
 
     p.translate( lb, th+tb );
 
-    iface->drawArea(WindowDecorationInterface::Border, &p, &wd);
-    iface->drawArea(WindowDecorationInterface::Title, &p, &wd);
+    iface->drawArea(QWindowDecorationInterface::Border, &p, &wd);
+    iface->drawArea(QWindowDecorationInterface::Title, &p, &wd);
 
-    p.setPen(palette().active().color(QColorGroup::HighlightedText));
+    p.setPen(palette().color(QPalette::HighlightedText));
     QFont f( font() );
     f.setWeight( QFont::Bold );
     p.setFont(f);
-    iface->drawArea(WindowDecorationInterface::TitleText, &p, &wd);
+    iface->drawArea(QWindowDecorationInterface::TitleText, &p, &wd);
 
-    QRect brect( 0, -th, iface->metric(WindowDecorationInterface::HelpWidth,&wd), th );
-    iface->drawButton( WindowDecorationInterface::Help, &p, &wd,
-	brect.x(), brect.y(), brect.width(), brect.height(), (QWSButton::State)0 );
-    brect.moveBy( wd.rect.width() -
-	iface->metric(WindowDecorationInterface::OKWidth,&wd) -
-	iface->metric(WindowDecorationInterface::CloseWidth,&wd), 0 );
-    iface->drawButton( WindowDecorationInterface::Close, &p, &wd,
-	brect.x(), brect.y(), brect.width(), brect.height(), (QWSButton::State)0 );
-    brect.moveBy( iface->metric(WindowDecorationInterface::CloseWidth,&wd), 0 );
-    iface->drawButton( WindowDecorationInterface::OK, &p, &wd,
-	brect.x(), brect.y(), brect.width(), brect.height(), (QWSButton::State)0 );
+    QRect brect( 0, -th, iface->metric(QWindowDecorationInterface::HelpWidth,&wd), th );
+    iface->drawButton( QWindowDecorationInterface::Help, &p, &wd,
+        brect.x(), brect.y(), brect.width(), brect.height(), (QDecoration::DecorationState)0 );
+    brect.translate( wd.rect.width() -
+        iface->metric(QWindowDecorationInterface::OKWidth,&wd) -
+        iface->metric(QWindowDecorationInterface::CloseWidth,&wd), 0 );
+    iface->drawButton( QWindowDecorationInterface::Close, &p, &wd,
+        brect.x(), brect.y(), brect.width(), brect.height(), (QDecoration::DecorationState)0 );
+    brect.translate( iface->metric(QWindowDecorationInterface::CloseWidth,&wd), 0 );
+    iface->drawButton( QWindowDecorationInterface::OK, &p, &wd,
+        brect.x(), brect.y(), brect.width(), brect.height(), (QDecoration::DecorationState)0 );
 }
 
 void SampleWindow::init()
 {
-    int dheight = QApplication::desktop()->height();
-    int dwidth = QApplication::desktop()->width();
+    QDesktopWidget *desktop = QApplication::desktop();
+    desktopSize = desktop->availableGeometry(desktop->primaryScreen()).size();
+    int dheight = desktopSize.height();
+    int dwidth = desktopSize.width();
     bool wide = ( dheight < 300 && dwidth > dheight );
 
-    container = new QVBox( this );
-    popup = new QPopupMenu( container );
-    popup->insertItem( tr("Normal Item"), 1 );
-    popup->insertItem( tr("Disabled Item"), 2 );
-    popup->setItemEnabled(2, FALSE);
-    QMenuBar *mb = new QMenuBar( container );
-    mb->insertItem( tr("Menu"), popup );
-    QHBox *hb = new QHBox( container );
-    QWidget *w = new QWidget( hb );
-    (void)new QScrollBar( 0, 0, 0, 0, 0, Vertical, hb );
+    container = new QWidget( this );
+    QVBoxLayout *vbLayout = new QVBoxLayout;
+
+    popup = new QMenu( tr("Menu") );
+    popup->addAction( tr("Normal Item") );
+    QAction *action = popup->addAction( tr("Disabled Item") );
+    action->setEnabled(false);
+    mb = new QMenuBar();
+    mb->addMenu( popup );
+    vbLayout->setMenuBar( mb );
+
+    QWidget *hb = new QWidget( this );
+    QHBoxLayout *hbLayout = new QHBoxLayout;
+
+    QWidget *w = new QWidget();
 
     int m = 4;
-    if (qApp->desktop()->width() < 200)
-	m = 2;
+    if ( desktopSize.width() < 200 )
+        m = 2;
 
-    QGridLayout *gl;
-    if ( wide )
-	gl = new QGridLayout( w, 4, 1, m );
-    else
-	gl = new QGridLayout( w, 2, 2, m );
+    QGridLayout *gl = new QGridLayout( w );
+    gl->setMargin(m);
 
-    SampleText *t1 = new SampleText( tr("Normal Text"), FALSE, w );
+    SampleText *t1 = new SampleText( tr("Normal Text"), false, w );
 
-    SampleText *t2 = new SampleText( tr("Highlighted Text"), TRUE, w );
+    SampleText *t2 = new SampleText( tr("Highlighted Text"), true, w );
 
     QPushButton *pb = new QPushButton( tr("Button"), w );
-    pb->setFocusPolicy( NoFocus );
+    pb->setFocusPolicy( Qt::NoFocus );
 
     QCheckBox *cb = new QCheckBox( tr("Check Box"), w );
-    cb->setFocusPolicy( NoFocus );
-    cb->setChecked( TRUE );
+    cb->setFocusPolicy( Qt::NoFocus );
+    cb->setChecked( true );
 
     if ( wide ) {
-	gl->addWidget( t1, 0, 0 );
-	gl->addWidget( t2, 1, 0 );
-	gl->addWidget( pb, 2, 0 );
-	gl->addWidget( cb, 3, 0 );
+        gl->addWidget( t1, 0, 0 );
+        gl->addWidget( t2, 1, 0 );
+        gl->addWidget( pb, 2, 0 );
+        gl->addWidget( cb, 3, 0 );
     } else {
-	gl->addWidget( t1, 0, 0 );
-	gl->addWidget( t2, 1, 0 );
-	gl->addWidget( pb, 0, 1 );
-	gl->addWidget( cb, 1, 1 );
+        gl->addWidget( t1, 0, 0 );
+        gl->addWidget( t2, 1, 0 );
+        gl->addWidget( pb, 0, 1 );
+        gl->addWidget( cb, 1, 1 );
     }
 
-    QWhatsThis::add( this, tr("Sample window using the selected settings.") );
+    hbLayout->addWidget(w);
+    hbLayout->addWidget( new QScrollBar() );
+
+    hb->setLayout( hbLayout );
+
+    vbLayout->addWidget( hb );
+    container->setLayout( vbLayout );
+
+    setWhatsThis( tr("Sample window using the selected settings.") );
 }
 
 bool SampleWindow::eventFilter( QObject *, QEvent *e )
 {
     switch ( e->type() ) {
-	case QEvent::MouseButtonPress:
-	case QEvent::MouseButtonRelease:
-	case QEvent::MouseButtonDblClick:
-	case QEvent::MouseMove:
-	case QEvent::KeyPress:
-	case QEvent::KeyRelease:
-	    return TRUE;
-	default:
-	    break;
+        case QEvent::MouseButtonPress:
+        case QEvent::MouseButtonRelease:
+        case QEvent::MouseButtonDblClick:
+        case QEvent::MouseMove:
+        case QEvent::KeyPress:
+        case QEvent::KeyRelease:
+            return true;
+        default:
+            break;
     }
 
-    return FALSE;
+    return false;
 }
 
-void SampleWindow::paletteChange( const QPalette &old )
+void SampleWindow::changeEvent( QEvent *e )
 {
-    QWidget::paletteChange( old );
-    wd.palette = palette();
-    if (popup)
-	popup->setPalette( palette() );
+    QWidget::changeEvent(e);
+    if (e->type() == QEvent::PaletteChange) {
+        wd.palette = palette();
+        if (mb)
+            mb->update();
+        if (popup)
+            popup->setPalette(palette());
+    }
 }
 
 void SampleWindow::resizeEvent( QResizeEvent *re )
@@ -285,29 +276,27 @@ void SampleWindow::resizeEvent( QResizeEvent *re )
     wd.rect.setY( 0 );
     wd.rect.setHeight( height() - th - tb - bb );
 
-    container->setGeometry( lb, th+tb, wd.rect.width(), wd.rect.height() );
+    container->setGeometry( QRect( lb, th+tb, wd.rect.width(), wd.rect.height() ) );
     QWidget::resizeEvent( re );
 }
 
 void SampleWindow::setUpdatesEnabled( bool e )
 {
     QWidget::setUpdatesEnabled( e );
-    const QObjectList *ol = children();
-    if ( ol) {
-	QObjectListIt it( *ol );
-	for ( ; it.current(); ++it ) {
-	    QObject *o = *it;
-	    if( o->isWidgetType() ) {
-		((QWidget *)o)->setUpdatesEnabled( e );
-	    }
-	}
+    QObjectList ol = children();
+    QObjectList::ConstIterator it;
+    for ( it = ol.begin(); it != ol.end(); ++it ) {
+        QObject *o = *it;
+        if( o->isWidgetType() ) {
+            ((QWidget *)o)->setUpdatesEnabled( e );
+        }
     }
 }
 
 void SampleWindow::fixGeometry()
 {
-    int w = QMIN(container->sizeHint().width()+lb+rb, qApp->desktop()->width()-10);
+    int w = qMin(container->sizeHint().width()+lb+rb, desktopSize.width()-10);
     int h = container->sizeHint().height()+tb+th+bb;
-    setMinimumSize( w, QMAX(SAMPLE_HEIGHT,h) );
+    setMinimumSize( w, qMax(SAMPLE_HEIGHT,h) );
 }
 

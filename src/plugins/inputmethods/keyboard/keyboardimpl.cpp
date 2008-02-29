@@ -1,41 +1,31 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
+
+#include <QWSServer>
 #include <qapplication.h>
 #include <qpixmap.h>
 #include "keyboard.h"
 #include "keyboardimpl.h"
+#include <qtopialog.h>
+#include <QVariant>
 
 /* XPM */
 static const char * kb_xpm[] = {
@@ -58,67 +48,121 @@ static const char * kb_xpm[] = {
 " .+@@@.+@@@@@@@@@@@@@.+@@@. ",
 " .......................... "};
 
-
-KeyboardImpl::KeyboardImpl()
-    : input(0), icn(0), ref(0)
+KeyboardInputMethod::KeyboardInputMethod(QObject *parent)
+    : QtopiaInputMethod(parent), input(0)
 {
 }
 
-KeyboardImpl::~KeyboardImpl()
+KeyboardInputMethod::~KeyboardInputMethod()
 {
     delete input;
-    delete icn;
+    while(!keyboardActionDescriptionList.isEmpty())
+        delete keyboardActionDescriptionList.takeLast();
 }
 
-QWidget *KeyboardImpl::inputMethod( QWidget *parent, Qt::WFlags f )
+QWidget *KeyboardInputMethod::inputWidget( QWidget *parent )
 {
-    if ( !input )
-	input = new Keyboard( parent, "Keyboard", f ); // No tr
-    return input;
+    if ( !input ) {
+        input = new Keyboard( parent );
+        connect(input->frame(), SIGNAL(showing()), this, SIGNAL(stateChanged()));
+        connect(input->frame(), SIGNAL(hiding()), this, SIGNAL(stateChanged()));
+    }
+    return input->frame();
 }
 
-void KeyboardImpl::resetState()
+void KeyboardInputMethod::reset()
 {
     if ( input )
-	input->resetState();
+        input->resetState();
 }
 
-QPixmap *KeyboardImpl::icon()
+QIcon KeyboardInputMethod::icon() const
 {
-    if ( !icn )
-	icn = new QPixmap( (const char **)kb_xpm );
-    return icn;
+    QIcon i;
+    i.addPixmap(QPixmap((const char **)kb_xpm));
+    return i;
 }
 
-QString KeyboardImpl::name()
+QString KeyboardInputMethod::name() const
 {
     return qApp->translate( "InputMethods", "Keyboard" );
 //    return qApp->translate( "InputMethods", "Opti" );
 }
 
-void KeyboardImpl::onKeyPress( QObject *receiver, const char *slot )
+QString KeyboardInputMethod::identifier() const
 {
-    if ( input )
-	QObject::connect( input, SIGNAL(key(ushort,ushort,ushort,bool,bool)), receiver, slot );
+    return "http://trolltech.com/Qtopia/KeyboardInputMethod";
 }
 
-#ifndef QT_NO_COMPONENT
-QRESULT KeyboardImpl::queryInterface( const QUuid &uuid, QUnknownInterface **iface )
+QString KeyboardInputMethod::version() const
 {
-    *iface = 0;
-    if ( uuid == IID_QUnknown )
-	*iface = this;
-    else if ( uuid == IID_InputMethod )
-	*iface = this;
-    else
-	return QS_FALSE;
-
-    (*iface)->addRef();
-    return QS_OK;
+    return "4.0.0";
 }
 
-Q_EXPORT_INTERFACE()
+QtopiaInputMethod::State KeyboardInputMethod::state() const
 {
-    Q_CREATE_INSTANCE( KeyboardImpl )
+    if (input && input->frame()->isVisible())
+        return Ready;
+  else
+    return Sleeping;
 }
-#endif
+void KeyboardInputMethod::sendKeyPress(ushort k, ushort u, ushort, bool p, bool a)
+{
+    QWSServer::sendKeyEvent(k, u, 0, p, a);
+}
+
+QWSInputMethod *KeyboardInputMethod::inputModifier( )
+{
+    if ( !input ) {
+        qLog(Input) << "KeyboardInPutMethod::inputModifier";
+        input = new Keyboard();
+        connect (input, SIGNAL(stateChanged()), this, SIGNAL(stateChanged()));
+    }
+    return input;
+}
+
+void KeyboardInputMethod::menuActionActivated(int v)
+{
+    input->menuActionActivated(v);
+};
+
+void KeyboardInputMethod::setHint(const QString &hint, bool)
+{
+    if(input && hint.isEmpty() && input->frame())
+    {
+        input->resetState();
+    }
+    if (input)
+        input->checkMicroFocus();
+}
+
+QList<QIMActionDescription*> KeyboardInputMethod::menuDescription()
+{
+    QList<QIMActionDescription*> descriptionList;
+    QIMActionDescription* keyboardActionDescription = new QIMActionDescription;
+    // First item of more than one is the menu item, and will never be called
+    keyboardActionDescription->setId(-1);
+    keyboardActionDescription->setLabel(tr("Keyboard"));
+    keyboardActionDescription->setIconFileName(QString(":icon/keyboard"));
+    descriptionList.append(keyboardActionDescription);
+
+    keyboardActionDescription = new QIMActionDescription(1,tr("Swap Keyboard Postion"),QString(":icon/rotate"));
+    descriptionList.append(keyboardActionDescription);
+
+    if(input->frame()->isVisible()){
+        keyboardActionDescription = new QIMActionDescription;        
+        keyboardActionDescription->setId(3);
+        keyboardActionDescription->setLabel(("Hide Keyboard"));
+        keyboardActionDescription->setIconFileName(QString(":icon/stop"));
+        descriptionList.append(keyboardActionDescription);
+    } else {
+        keyboardActionDescription = new QIMActionDescription(2, tr("Show Keyboard"), QString(":icon/keyboard"));
+        descriptionList.append(keyboardActionDescription);
+    };
+
+    return descriptionList;
+
+};
+
+
+QTOPIA_EXPORT_PLUGIN(KeyboardInputMethod);

@@ -1,24 +1,3 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS and its licensors.
-** All rights reserved.
-**
-** This file is part of the Qtopia Environment.
-**
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
-** See below for additional copyright and license information
-**
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
-**
-**********************************************************************/
 /*
  *	Lightweight At Daemon
  *
@@ -55,7 +34,7 @@
 #include "atd.h"
 
 /*!
- \class atd atd.h
+ \class atd
  \brief The atd class is a placeholder for licensing information.
  \legalese
  The atd program is based on Russ Nelson's lightweight At daemon.
@@ -63,23 +42,33 @@
  The atd program is based on Russ Nelson's lightweight At daemon.
  The At daemon will run a program at a specified time.
  It is distributed under the terms of the GNU General Public License.
+
+  \ingroup qtopia3rdparty
 */
 
+/*!
+    \internal
+*/
 atd::atd()
 {
 }
 
 
-#ifdef QT_QWS_SL5XXX
+#if defined(QT_QWS_SL5XXX)
 #include <asm/sharp_apm.h>
 #include <asm/hardware.h>
 
+# define DAEMON
+# define BUGGY_RTC_SELECT
+#elif defined(QT_QWS_GREENPHONE)
+# include "greenphone.h"
+# define NO_LINUX_RTC
 # define BUGGY_RTC_SELECT
 #else
 # define BROKEN_RTC_ALARM
+# define DAEMON
 #endif
 
-#define DAEMON
 
 int compare_rtc_to_tm(struct rtc_time *rtc, struct tm *tm)
 {
@@ -112,8 +101,9 @@ void waitfor(time_t t) {
 #else
   printf("waitfor %ld\n", t);
 #endif
-  rtcfd = open ("/dev/rtc", O_RDONLY);
 
+#ifndef NO_LINUX_RTC
+  rtcfd = open ("/dev/rtc", O_RDONLY);
   if (rtcfd ==  -1) {
 #ifdef DAEMON
     syslog(LOG_ERR, "/dev/rtc: %m\n");
@@ -123,6 +113,7 @@ void waitfor(time_t t) {
 #endif
     exit(errno);
   }
+#endif
 
   tfd = open ("trigger", O_RDWR);
 
@@ -137,6 +128,7 @@ void waitfor(time_t t) {
   }
 
   /* Read the RTC time/date */
+#ifndef NO_LINUX_RTC
   retval = ioctl(rtcfd, RTC_RD_TIME, &rtc_tm);
   if (retval == -1) {
 #ifdef DAEMON
@@ -147,6 +139,9 @@ void waitfor(time_t t) {
 #endif
       exit(errno);
   }
+#elif defined(QT_QWS_GREENPHONE)
+  greenphone_read_time(&rtc_tm);
+#endif
 
 #ifdef DAEMON
   syslog(LOG_DEBUG, "Current RTC date/time is %d-%d-%d, %02d:%02d:%02d.\n",
@@ -170,7 +165,9 @@ void waitfor(time_t t) {
 #endif
 
   if (t && compare_rtc_to_tm(&rtc_tm, tm) >= 0) {
+#ifndef NO_LINUX_RTC
     close(rtcfd);
+#endif
     close(tfd);
     return;
   }
@@ -197,6 +194,8 @@ void waitfor(time_t t) {
     rtc_tm.tm_sec = tm->tm_sec;
     rtc_tm.tm_min = tm->tm_min;
     rtc_tm.tm_hour = tm->tm_hour;
+
+#ifndef NO_LINUX_RTC
     retval = ioctl(rtcfd, RTC_ALM_SET, &rtc_tm);
     if (retval == -1) {
 #ifdef DAEMON
@@ -207,8 +206,12 @@ void waitfor(time_t t) {
 #endif
       exit(errno);
     }
+#elif defined(QT_QWS_GREENPHONE)
+    greenphone_set_alarm(&rtc_tm);
+#endif
 
     /* Read the current alarm settings */
+#ifndef NO_LINUX_RTC
     retval = ioctl(rtcfd, RTC_ALM_READ, &rtc_tm);
     if (retval == -1) {
 #ifdef DAEMON
@@ -219,6 +222,9 @@ void waitfor(time_t t) {
 #endif
       exit(errno);
     }
+#elif defined(QT_QWS_GREENPHONE)
+    greenphone_read_alarm(&rtc_tm);
+#endif
 
 #ifdef DAEMON
     syslog(LOG_DEBUG, "Alarm time now set to %d-%02d-%02d %02d:%02d:%02d.\n",
@@ -231,6 +237,7 @@ void waitfor(time_t t) {
 #endif
 
     /* Enable alarm interrupts */
+#ifndef NO_LINUX_RTC
     retval = ioctl(rtcfd, RTC_AIE_ON, 0);
     if (retval == -1) {
 #ifdef DAEMON
@@ -241,6 +248,7 @@ void waitfor(time_t t) {
 #endif
       exit(errno);
     }
+#endif
   }
 
 #ifdef DAEMON
@@ -255,8 +263,12 @@ void waitfor(time_t t) {
   if (t) FD_SET(rtcfd, &afds);
 #endif
   FD_SET(tfd, &afds);
-  nfds = rtcfd+1;
-  if (tfd > rtcfd) nfds = tfd + 1;
+
+  nfds = tfd + 1;
+#ifndef NO_LINUX_RTC
+  if (rtcfd > tfd) nfds = rtcfd + 1;
+#endif
+
 #ifndef BUGGY_RTC_SELECT
   /* Wait up to ten minutes. */
   tv.tv_sec = 10*60;
@@ -278,6 +290,7 @@ void waitfor(time_t t) {
       exit(errno);
   }
 
+#ifndef NO_LINUX_RTC
   if (FD_ISSET(rtcfd, &afds)) {
     retval = read(rtcfd, &data, sizeof(unsigned long));
     if (retval == -1) {
@@ -290,6 +303,8 @@ void waitfor(time_t t) {
       exit(errno);
     }
   }
+#endif
+
   if (FD_ISSET(tfd, &afds)) {
       char buf[8];
       int i;
@@ -335,6 +350,8 @@ void waitfor(time_t t) {
       rtc_tm.tm_hour = tm->tm_hour;
       rtc_tm.tm_min = tm->tm_min;
       rtc_tm.tm_sec = tm->tm_sec;
+
+#ifndef NO_LINUX_RTC
       retval = ioctl(rtcfd, RTC_SET_TIME, &rtc_tm);
       if (retval == -1) {
 #ifdef DAEMON
@@ -345,12 +362,20 @@ void waitfor(time_t t) {
 #endif
 	  exit(errno);
       }
+#else
+#ifdef DAEMON
+      syslog(LOG_ERR, "not setting time\n");
+#else
+      printf("not setting time\n");
+#endif
+#endif
   }
 
 
 
 
   /* Disable alarm interrupts */
+#ifndef NO_LINUX_RTC
   retval = ioctl(rtcfd, RTC_AIE_OFF, 0);
   if (retval == -1) {
 #ifdef DAEMON
@@ -361,8 +386,11 @@ void waitfor(time_t t) {
 #endif
     exit(errno);
   }
-
   close(rtcfd);
+#elif defined(QT_QWS_GREENPHONE)
+  greenphone_disable_alarm();
+#endif
+
   close(tfd);
 
 }

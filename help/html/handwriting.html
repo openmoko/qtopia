@@ -1,8 +1,15 @@
-<qt title="Handwriting Help">
-<h3>Handwriting Help</h3>
-%%TOUCH%%
-<p>Handwriting is only an input method option for touchscreen phones.</p>
-@@TOUCH@@
+<html>
+<head><title>Handwriting Help</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h2>Handwriting Help</h2>
+<!--#else-->
+   <h3>Handwriting Help</h3>
+<!--#endif-->
+<!--#if expr="$TOUCH"-->
+<p>Handwriting is only an input method option for touch screen phones.</p>
+<!--#endif-->
 <p>The Qtopia handwriting feature can be personalized through the device settings that provide a comprehensive guide to drawing letters, numbers and other characters.</p>
 <p>For more details about the handwriting input method, please select a topic from <a href="handwriting-index.html">More Handwriting Help</a>.</p>
-</qt>
+</body>
+</html>

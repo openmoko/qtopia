@@ -1,0 +1,24 @@
+#!/bin/sh
+
+FVISIBILITY_SUPPORT=no
+COMPILER=$1
+VERBOSE=$2
+
+cat >>fvisibility.c << EOF
+__attribute__((visibility("default"))) void blah();
+#if defined(__GNUC__) && __GNUC__ < 4
+#error GCC3 with backported visibility patch is known to miscompile Qt
+#endif
+EOF
+
+"$COMPILER" -c -fvisibility=hidden fvisibility.c >/dev/null 2>&1 && FVISIBILITY_SUPPORT=yes
+rm -f fvisibility.c fvisibility.o
+
+# done
+if [ "$FVISIBILITY_SUPPORT" != "yes" ]; then
+    [ "$VERBOSE" = "yes" ] && echo "-fvisibility support disabled."
+    exit 0
+else
+    [ "$VERBOSE" = "yes" ] && echo "-fvisibility support enabled."
+    exit 1
+fi

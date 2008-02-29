@@ -1,0 +1,7 @@
+#!/bin/sh
+if [ "$TEAMBUILDER_SYSTEM" = 'arm:greenphone' ]; then
+    exec /opt/toolchains/greenphone/gcc-4.1.1-glibc-2.3.6/arm-linux/bin/arm-linux-gcc "$@"
+else
+    export TEAMBUILDER_SYSTEM='arm:greenphone'
+    exec /opt/teambuilder/bin/arm-linux-gcc "$@"
+fi

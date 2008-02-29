@@ -4,6 +4,6 @@ Context=Sound
 [Desktop Entry]
 Type=Application
 Exec=sound
-Icon=Sound
+Icon=sound/Sound
 Name[]=Sound
 CanFastload=0

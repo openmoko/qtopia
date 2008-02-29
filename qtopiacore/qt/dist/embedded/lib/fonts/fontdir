@@ -1,0 +1,102 @@
+# See qtopiacore-fonts.html for more information on this file.
+#
+# The format is
+#
+# name file renderer italic weight size [flags [sizerange]]
+#
+# set size as 0 to use sizerange.  flags are option if no sizerange
+# name is the name of the resulting font
+# file is the file to generate or render the font from
+# renderer is either FT or BDF indicating the rendering engine to use
+# italic is y for an italic font, n for not italic
+# weight is 50 for regular font, 75 for bold
+# size is 10* point size.  e.g. 120 for 12pt font.
+# flags include
+#    u = unicode font.  characters from 0-65535
+#    a = ascii font.  characters from 0-127
+#      <neither of the above is font with characters 0-255>
+#    s = smooth or blended font.
+# flags is optional if no sizerange is to be used (size is 0)
+# sizerange is optional unless size is 0.
+#    sizerange is comma separated list of font sizes to generate
+#
+fixed 5x7.bdf BDF n 50 70 u
+fixed 6x13.bdf BDF n 50 120
+micro micro.bdf BDF n 50 40
+helvetica helvB08.bdf BDF n 75 80
+helvetica helvB10.bdf BDF n 75 100
+helvetica helvB12.bdf BDF n 75 120
+helvetica helvB14.bdf BDF n 75 140
+helvetica helvB18.bdf BDF n 75 180
+helvetica helvB24.bdf BDF n 75 240
+helvetica helvBO08.bdf BDF y 75 80
+helvetica helvBO10.bdf BDF y 75 100
+helvetica helvBO12.bdf BDF y 75 120
+helvetica helvBO14.bdf BDF y 75 140
+helvetica helvBO18.bdf BDF y 75 180
+helvetica helvBO24.bdf BDF y 75 240
+helvetica helvO08.bdf BDF y 50 80
+helvetica helvO10.bdf BDF y 50 100
+helvetica helvO12.bdf BDF y 50 120
+helvetica helvO14.bdf BDF y 50 140
+helvetica helvO18.bdf BDF y 50 180
+helvetica helvO24.bdf BDF y 50 240
+helvetica helvR08.bdf BDF n 50 80
+helvetica helvR10.bdf BDF n 50 100
+helvetica helvR12.bdf BDF n 50 120
+helvetica helvR14.bdf BDF n 50 140
+helvetica helvR18.bdf BDF n 50 180
+helvetica helvR24.bdf BDF n 50 240
+# Small basic demonstration font...
+japanese helvR12ja.bdf BDF n 50 230 u
+#Chinese character font from http://wqy.sourceforge.net/en
+wenquanyi wenquanyi_12pt.bdf BDF n 50 120 u
+wenquanyi wenquanyi_13pt.bdf BDF n 50 130 u
+wenquanyi wenquanyi_15pt.bdf BDF n 50 150 u
+wenquanyi wenquanyi_16pt.bdf BDF n 50 160 u
+wenquanyi wenquanyi_12ptb.bdf BDF n 75 120 u
+wenquanyi wenquanyi_13ptb.bdf BDF n 75 130 u
+wenquanyi wenquanyi_15ptb.bdf BDF n 75 150 u
+wenquanyi wenquanyi_16ptb.bdf BDF n 75 160 u
+# Unifont is available in source form from http://czyborra.com/unifont/
+unifont unifont.bdf BDF n 50 160 u
+babelfish babelfish.ttf FT n 50 0 s
+utopia UTBI____.pfa FT y 75 0 s
+utopia UTB_____.pfa FT n 75 0 s
+utopia UTI_____.pfa FT y 50 0 s
+utopia UTRG____.pfa FT n 50 0 s
+courier c0419bt_.pfb FT n 50 0 s
+courier c0582bt_.pfb FT y 50 0 s
+courier c0583bt_.pfb FT n 75 0 s
+courier c0611bt_.pfb FT y 75 0 s
+charter c0632bt_.pfb FT n 75 0 s
+charter c0633bt_.pfb FT y 75 0 s
+charter c0648bt_.pfb FT n 50 0 s
+charter c0649bt_.pfb FT y 50 0 s
+courier cour.pfa FT n 50 0 s
+courier courb.pfa FT n 75 0 s
+courier courbi.pfa FT y 75 0 s
+courier couri.pfa FT y 50 0 s
+cursor cursor.pfa FT n 50 0 s
+luxi_mono l047013t.pfa FT n 50 0 s
+luxi_mono l047016t.pfa FT n 75 0 s
+luxi_mono l047033t.pfa FT y 50 0 s
+luxi_mono l047036t.pfa FT y 75 0 s
+luxi_sans l048013t.pfa FT n 50 0 s
+luxi_sans l048016t.pfa FT n 75 0 s
+luxi_sans l048033t.pfa FT y 50 0 s
+luxi_sans l048036t.pfa FT y 75 0 s
+luxi_serif l049013t.pfa FT n 50 0 s
+luxi_serif l049016t.pfa FT n 75 0 s
+luxi_serif l049033t.pfa FT y 50 0 s
+luxi_serif l049036t.pfa FT y 75 0 s
+vera_sans Vera.ttf FT n 50 0 s
+vera_sans VeraBd.ttf FT n 75 0 s
+vera_sans VeraIt.ttf FT y 50 0 s
+vera_sans VeraBI.ttf FT y 75 0 s
+vera_serif VeraSe.ttf FT n 50 0 s
+vera_serif VeraSeBd.ttf FT n 75 0 s
+vera_mono VeraMono.ttf FT n 50 0 s
+vera_mono VeraMoBd.ttf FT n 75 0 s
+vera_mono VeraMoIt.ttf FT y 50 0 s
+vera_mono VeraMoBI.ttf FT y 75 0 s

@@ -5,7 +5,7 @@ Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
 Comment[]=An Address Book Program
 Exec=addressbook
-Icon=AddressBook
+Icon=addressbook/AddressBook
 Type=Application
 MimeType=text/x-vcard
-Name[]=Con­tacts
+Name[]=Con\xadtacts

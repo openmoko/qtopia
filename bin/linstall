@@ -1,41 +1,15 @@
 #!/usr/bin/perl
-
 use strict;
-package main;
+use warnings;
 
-use File::stat;
-use File::Glob;
-use File::Copy;
-use File::Basename;
 use File::Path;
+use File::Basename;
+use lib ( dirname($0) );
+use Qtopia::Paths;
+use Qtopia::Vars;
+use Qtopia::File;
 
-use constant DEBUG => 0;
-
-my $isWindows = ( $^O eq "MSWin32" || $^O eq "cygwin" );
-
-# Dummy variables (used in common.pm)
-my $opt_verbose = 0;
-my $shadow = 0;
-my $outpath = $ENV{QPEDIR};
-
-# Find the depot path
-my $depotpath = undef;
-open IN, "$outpath/src/config.pri" or die "Cannot open $outpath/src/config.pri\n";
-while ( defined($_ = <IN>) ) {
-    if ( /QTOPIA_DEPOT_PATH=(.*)/ ) {
-	$depotpath = $1;
-	last;
-    }
-}
-close IN;
-if ( !defined($depotpath) ) {
-    die "Can't find the depot path in $outpath/src/config.pri\n";
-}
-
-# Load some subs
-open IN, "$depotpath/bin/common.pm" or die "Cannot open $depotpath/bin/common.pm\n";
-eval join("", <IN>) or die "Error while evaluating common.pm: $!\n";
-close IN;
+Qtopia::Paths::get_paths();
 
 # Windows depot builds use the perl scripts directly rather than the compiled code
 if ( $isWindows ) {
@@ -43,7 +17,9 @@ if ( $isWindows ) {
 }
 
 
-if ( scalar(@ARGV) != 6 ) {
+use constant DEBUG => 0;
+
+if ( scalar(@ARGV) != 5 ) {
     usage();
 }
 
@@ -51,12 +27,10 @@ my $trtarget = shift;
 DEBUG and print "TRTARGET = $trtarget\n";
 my @translations = split(/\s+/, shift);
 DEBUG and print "TRANSLATIONS = ".join(" ", @translations)."\n";
-my @pdatargets = split(/\s+/, shift);
-DEBUG and print "PDATARGETS = ".join(" ", @pdatargets)."\n";
 my $dqtdir = shift;
 DEBUG and print "DQTDIR = $dqtdir\n";
-my $optqtopia = shift;
-DEBUG and print "OPTQTOPIA = $optqtopia\n";
+my $instprefix = shift;
+DEBUG and print "INSTPREFIX = $instprefix\n";
 my $srcdir = shift;
 DEBUG and print "SRCDIR = $srcdir\n";
 
@@ -64,14 +38,14 @@ DEBUG and print "SRCDIR = $srcdir\n";
 chdir $srcdir;
 for my $lang ( @translations ) {
     my @tsfiles;
-    for my $target ( $trtarget, @pdatargets ) {
+    for my $target ( $trtarget ) {
         DEBUG and print "$target-$lang.ts\n";
         if ( -f "$target-$lang.ts" ) {
             push(@tsfiles, "$target-$lang.ts");
         }
     }
     if ( @tsfiles ) {
-        my $destfile = "$optqtopia/i18n/$lang/$trtarget.qm";
+        my $destfile = "$instprefix/$lang/$trtarget.qm";
         if ( ! -d dirname($destfile) ) {
             mkpath(dirname($destfile));
         }
@@ -88,7 +62,7 @@ for my $lang ( @translations ) {
             system($cmd);
         }
     } else {
-        print "No .ts files found. Please run make lupdate in $srcdir.\n";
+        print "No .ts files found to suit language \"$lang\". Please run make lupdate in $srcdir.\n";
         exit 1;
     }
 }
@@ -97,7 +71,7 @@ exit 0;
 
 sub usage
 {
-    print "Usage:  ".script_name($0)." trtarget \"translations\" \"pdatargets\" dqtdir optqtopia srcdir\n";
+    print "Usage:  ".script_name($0)." trtarget \"translations\" dqtdir instprefix srcdir\n";
     exit 2;
 }
 

@@ -1,0 +1,1147 @@
+The Project Gutenberg Etext of American Newspaper, by C. D. Warner
+#14 in our series by Charles Dudley Warner
+
+Copyright laws are changing all over the world, be sure to check
+the laws for your country before redistributing these files!!!!!
+
+Please take a look at the important information in this header.
+We encourage you to keep this file on your own disk, keeping an
+electronic path open for the next readers.
+
+Please do not remove this.
+
+This should be the first thing seen when anyone opens the book.
+Do not change or edit it without written permission. The words
+are carefully chosen to provide users with the information they
+need about what they can legally do with the texts.
+
+
+**Welcome To The World of Free Plain Vanilla Electronic Texts**
+
+**Etexts Readable By Both Humans and By Computers, Since 1971**
+
+*****These Etexts Are Prepared By Thousands of Volunteers!*****
+
+Information on contacting Project Gutenberg to get Etexts, and
+further information is included below, including for donations.
+
+The Project Gutenberg Literary Archive Foundation is a 501(c)(3)
+organization with EIN [Employee Identification Number] 64-6221541
+
+
+Title: American Newspaper
+
+Author: Charles Dudley Warner
+
+Release Date: March, 2002  [Etext #3110]
+[Yes, we are about one year ahead of schedule]
+[The actual date this file first posted = 01/10/01]
+[Last modified date = 11/26/01]
+
+Edition: 11
+
+Language: English
+
+The Project Gutenberg Etext of American Newspaper by C. D. Warner
+******This file should be named cwanp11.txt or cwanp11.zip*******
+
+Corrected EDITIONS of our etexts get a new NUMBER, cwanp12.txt
+VERSIONS based on separate sources get new LETTER, cwanp11a.txt
+
+This etext was produced by David Widger <widger@cecomet.net>
+
+Project Gutenberg Etexts are usually created from multiple editions,
+all of which are in the Public Domain in the United States, unless a
+copyright notice is included. Therefore, we usually do NOT keep any
+of these books in compliance with any particular paper edition.
+
+We are now trying to release all our books one year in advance
+of the official release dates, leaving time for better editing.
+Please be encouraged to send us error messages even years after
+the official publication date.
+
+Please note neither this listing nor its contents are final til
+midnight of the last day of the month of any such announcement.
+The official release date of all Project Gutenberg Etexts is at
+Midnight, Central Time, of the last day of the stated month. A
+preliminary version may often be posted for suggestion, comment
+and editing by those who wish to do so.
+
+Most people start at our sites at:
+http://gutenberg.net
+http://promo.net/pg
+
+
+Those of you who want to download any Etext before announcement
+can surf to them as follows, and just download by date; this is
+also a good way to get them instantly upon announcement, as the
+indexes our cataloguers produce obviously take a while after an
+announcement goes out in the Project Gutenberg Newsletter.
+
+http://www.ibiblio.org/gutenberg/etext03
+or
+ftp://ftp.ibiblio.org/pub/docs/books/gutenberg/etext03
+
+Or /etext02, 01, 00, 99, 98, 97, 96, 95, 94, 93, 92, 92, 91 or 90
+
+Just search by the first five letters of the filename you want,
+as it appears in our Newsletters.
+
+
+Information about Project Gutenberg (one page)
+
+We produce about two million dollars for each hour we work. The
+time it takes us, a rather conservative estimate, is fifty hours
+to get any etext selected, entered, proofread, edited, copyright
+searched and analyzed, the copyright letters written, etc. This
+projected audience is one hundred million readers. If our value
+per text is nominally estimated at one dollar then we produce $2
+million dollars per hour this year as we release fifty new Etext
+files per month, or 500 more Etexts in 2000 for a total of 3000+
+If they reach just 1-2% of the world's population then the total
+should reach over 300 billion Etexts given away by year's end.
+
+The Goal of Project Gutenberg is to Give Away One Trillion Etext
+Files by December 31, 2001. [10,000 x 100,000,000 = 1 Trillion]
+This is ten thousand titles each to one hundred million readers,
+which is only about 4% of the present number of computer users.
+
+At our revised rates of production, we will reach only one-third
+of that goal by the end of 2001, or about 4,000 Etexts unless we
+manage to get some real funding.
+
+The Project Gutenberg Literary Archive Foundation has been created
+to secure a future for Project Gutenberg into the next millennium.
+
+We need your donations more than ever!
+
+As of 10/28/01 contributions are only being solicited from people in:
+Alabama, Arkansas, Connecticut, Delaware, Florida, Georgia, Idaho,
+Illinois, Indiana, Iowa, Kansas, Kentucky, Louisiana, Maine, Michigan,
+Missouri, Montana, Nebraska, Nevada, New Hampshire, New Jersey, New Mexico,
+New York, North Carolina, South Carolina, Oklahoma, Oregon, Pennsylvania,
+Rhode Island, South Carolina, South Dakota, Tennessee, Texas, Utah, Vermont,
+Virginia, Washington, Wisconsin, and Wyoming
+
+We have filed in about 45 states now, but these are the only ones
+that have responded.
+
+As the requirements for other states are met,
+additions to this list will be made and fund raising
+will begin in the additional states. Please feel
+free to ask to check the status of your state.
+
+In answer to various questions we have received on this:
+
+We are constantly working on finishing the paperwork
+to legally request donations in all 50 states. If
+your state is not listed and you would like to know
+if we have added it since the list you have, just ask.
+
+While we cannot solicit donations from people in
+states where we are not yet registered, we know
+of no prohibition against accepting donations
+from donors in these states who approach us with
+an offer to donate.
+
+
+International donations are accepted,
+but we don't know ANYTHING about how
+to make them tax-deductible, or
+even if they CAN be made deductible,
+and don't have the staff to handle it
+even if there are ways.
+
+All donations should be made to:
+
+Project Gutenberg Literary Archive Foundation
+PMB 113
+1739 University Ave.
+Oxford, MS 38655-4109
+
+
+The Project Gutenberg Literary Archive Foundation is a 501(c)(3)
+organization with EIN [Employee Identification Number] 64-6221541,
+and has been approved as a 501(c)(3) organization by the US Internal
+Revenue Service (IRS). Donations are tax-deductible to the maximum
+extent permitted by law. As the requirements for other states are met,
+additions to this list will be made and fund raising will begin in the
+additional states.
+
+We need your donations more than ever!
+
+You can get up to date donation information at:
+
+http://www.gutenberg.net/donation.html
+
+
+***
+
+If you can't reach Project Gutenberg,
+you can always email directly to:
+
+Michael S. Hart <hart@pobox.com>
+
+hart@pobox.com forwards to hart@prairienet.org and archive.org
+if your mail bounces from archive.org, I will still see it, if
+it bounces from prairienet.org, better resend later on. . . .
+
+Prof. Hart will answer or forward your message.
+
+We would prefer to send you information by email.
+
+
+***
+
+
+Example command-line FTP session:
+
+ftp ftp.ibiblio.org
+login: anonymous
+password: your@login
+cd pub/docs/books/gutenberg
+cd etext90 through etext99 or etext00 through etext02, etc.
+dir [to see files]
+get or mget [to get files. . .set bin for zip files]
+GET GUTINDEX.?? [to get a year's listing of books, e.g., GUTINDEX.99]
+GET GUTINDEX.ALL [to get a listing of ALL books]
+
+
+**The Legal Small Print**
+
+
+(Three Pages)
+
+***START**THE SMALL PRINT!**FOR PUBLIC DOMAIN ETEXTS**START***
+Why is this "Small Print!" statement here? You know: lawyers.
+They tell us you might sue us if there is something wrong with
+your copy of this etext, even if you got it for free from
+someone other than us, and even if what's wrong is not our
+fault. So, among other things, this "Small Print!" statement
+disclaims most of our liability to you. It also tells you how
+you may distribute copies of this etext if you want to.
+
+*BEFORE!* YOU USE OR READ THIS ETEXT
+By using or reading any part of this PROJECT GUTENBERG-tm
+etext, you indicate that you understand, agree to and accept
+this "Small Print!" statement. If you do not, you can receive
+a refund of the money (if any) you paid for this etext by
+sending a request within 30 days of receiving it to the person
+you got it from. If you received this etext on a physical
+medium (such as a disk), you must return it with your request.
+
+ABOUT PROJECT GUTENBERG-TM ETEXTS
+This PROJECT GUTENBERG-tm etext, like most PROJECT GUTENBERG-tm etexts,
+is a "public domain" work distributed by Professor Michael S. Hart
+through the Project Gutenberg Association (the "Project").
+Among other things, this means that no one owns a United States copyright
+on or for this work, so the Project (and you!) can copy and
+distribute it in the United States without permission and
+without paying copyright royalties. Special rules, set forth
+below, apply if you wish to copy and distribute this etext
+under the "PROJECT GUTENBERG" trademark.
+
+Please do not use the "PROJECT GUTENBERG" trademark to market
+any commercial products without permission.
+
+To create these etexts, the Project expends considerable
+efforts to identify, transcribe and proofread public domain
+works. Despite these efforts, the Project's etexts and any
+medium they may be on may contain "Defects". Among other
+things, Defects may take the form of incomplete, inaccurate or
+corrupt data, transcription errors, a copyright or other
+intellectual property infringement, a defective or damaged
+disk or other etext medium, a computer virus, or computer
+codes that damage or cannot be read by your equipment.
+
+LIMITED WARRANTY; DISCLAIMER OF DAMAGES
+But for the "Right of Replacement or Refund" described below,
+[1] Michael Hart and the Foundation (and any other party you may
+receive this etext from as a PROJECT GUTENBERG-tm etext) disclaims
+all liability to you for damages, costs and expenses, including
+legal fees, and [2] YOU HAVE NO REMEDIES FOR NEGLIGENCE OR
+UNDER STRICT LIABILITY, OR FOR BREACH OF WARRANTY OR CONTRACT,
+INCLUDING BUT NOT LIMITED TO INDIRECT, CONSEQUENTIAL, PUNITIVE
+OR INCIDENTAL DAMAGES, EVEN IF YOU GIVE NOTICE OF THE
+POSSIBILITY OF SUCH DAMAGES.
+
+If you discover a Defect in this etext within 90 days of
+receiving it, you can receive a refund of the money (if any)
+you paid for it by sending an explanatory note within that
+time to the person you received it from. If you received it
+on a physical medium, you must return it with your note, and
+such person may choose to alternatively give you a replacement
+copy. If you received it electronically, such person may
+choose to alternatively give you a second opportunity to
+receive it electronically.
+
+THIS ETEXT IS OTHERWISE PROVIDED TO YOU "AS-IS". NO OTHER
+WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, ARE MADE TO YOU AS
+TO THE ETEXT OR ANY MEDIUM IT MAY BE ON, INCLUDING BUT NOT
+LIMITED TO WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A
+PARTICULAR PURPOSE.
+
+Some states do not allow disclaimers of implied warranties or
+the exclusion or limitation of consequential damages, so the
+above disclaimers and exclusions may not apply to you, and you
+may have other legal rights.
+
+INDEMNITY
+You will indemnify and hold Michael Hart, the Foundation,
+and its trustees and agents, and any volunteers associated
+with the production and distribution of Project Gutenberg-tm
+texts harmless, from all liability, cost and expense, including
+legal fees, that arise directly or indirectly from any of the
+following that you do or cause:  [1] distribution of this etext,
+[2] alteration, modification, or addition to the etext,
+or [3] any Defect.
+
+DISTRIBUTION UNDER "PROJECT GUTENBERG-tm"
+You may distribute copies of this etext electronically, or by
+disk, book or any other medium if you either delete this
+"Small Print!" and all other references to Project Gutenberg,
+or:
+
+[1]  Only give exact copies of it.  Among other things, this
+     requires that you do not remove, alter or modify the
+     etext or this "small print!" statement.  You may however,
+     if you wish, distribute this etext in machine readable
+     binary, compressed, mark-up, or proprietary form,
+     including any form resulting from conversion by word
+     processing or hypertext software, but only so long as
+     *EITHER*:
+
+     [*]  The etext, when displayed, is clearly readable, and
+          does *not* contain characters other than those
+          intended by the author of the work, although tilde
+          (~), asterisk (*) and underline (_) characters may
+          be used to convey punctuation intended by the
+          author, and additional characters may be used to
+          indicate hypertext links; OR
+
+     [*]  The etext may be readily converted by the reader at
+          no expense into plain ASCII, EBCDIC or equivalent
+          form by the program that displays the etext (as is
+          the case, for instance, with most word processors);
+          OR
+
+     [*]  You provide, or agree to also provide on request at
+          no additional cost, fee or expense, a copy of the
+          etext in its original plain ASCII form (or in EBCDIC
+          or other equivalent proprietary form).
+
+[2]  Honor the etext refund and replacement provisions of this
+     "Small Print!" statement.
+
+[3]  Pay a trademark license fee to the Foundation of 20% of the
+     gross profits you derive calculated using the method you
+     already use to calculate your applicable taxes.  If you
+     don't derive profits, no royalty is due.  Royalties are
+     payable to "Project Gutenberg Literary Archive Foundation"
+     the 60 days following each date you prepare (or were
+     legally required to prepare) your annual (or equivalent
+     periodic) tax return.  Please contact us beforehand to
+     let us know your plans and to work out the details.
+
+WHAT IF YOU *WANT* TO SEND MONEY EVEN IF YOU DON'T HAVE TO?
+Project Gutenberg is dedicated to increasing the number of
+public domain and licensed works that can be freely distributed
+in machine readable form.
+
+The Project gratefully accepts contributions of money, time,
+public domain materials, or royalty free copyright licenses.
+Money should be paid to the:
+"Project Gutenberg Literary Archive Foundation."
+
+If you are interested in contributing scanning equipment or
+software or other items, please contact Michael Hart at:
+hart@pobox.com
+
+[Portions of this header are copyright (C) 2001 by Michael S. Hart
+and may be reprinted only when these Etexts are free of all fees.]
+[Project Gutenberg is a TradeMark and may not be used in any sales
+of Project Gutenberg Etexts or other materials be they hardware or
+software or any other related product without express permission.]
+
+*END THE SMALL PRINT! FOR PUBLIC DOMAIN ETEXTS*Ver.10/04/01*END*
+
+
+
+
+
+This etext was produced by David Widger <widger@cecomet.net>
+
+
+
+
+
+THE AMERICAN NEWSPAPER
+
+By Charles Dudley Warner
+
+
+
+Our theme for the hour is the American Newspaper.  It is a subject in
+which everybody is interested, and about which it is not polite to say
+that anybody is not well informed; for, although there are scattered
+through the land many persons, I am sorry to say, unable to pay for a
+newspaper, I have never yet heard of anybody unable to edit one.
+
+The topic has many points of view, and invites various study and comment.
+In our limited time we must select one only.  We have heard a great deal
+about the power, the opportunity, the duty, the "mission," of the press.
+The time has come for a more philosophical treatment of it, for an
+inquiry into its relations to our complex civilization, for some ethical
+account of it as one of the developments of our day, and for some
+discussion of the effect it is producing, and likely to produce, on the
+education of the people.  Has the time come, or is it near at hand, when
+we can point to a person who is alert, superficial, ready and shallow,
+self-confident and half-informed, and say, "There is a product of the
+American newspaper"?  The newspaper is not a willful creation, nor an
+isolated phenomenon, but the legitimate outcome of our age, as much as
+our system of popular education.  And I trust that some competent
+observer will make, perhaps for this association, a philosophical study
+of it.  My task here is a much humbler one.  I have thought that it may
+not be unprofitable to treat the newspaper from a practical and even
+somewhat mechanical point of view.
+
+The newspaper is a private enterprise.  Its object is to make money for
+its owner.  Whatever motive may be given out for starting a newspaper,
+expectation of profit by it is the real one, whether the newspaper is
+religious, political, scientific, or literary.  The exceptional cases of
+newspapers devoted to ideas or "causes" without regard to profit are so
+few as not to affect the rule.  Commonly, the cause, the sect, the party,
+the trade, the delusion, the idea, gets its newspaper, its organ, its
+advocate, only when some individual thinks he can see a pecuniary return
+in establishing it.
+
+This motive is not lower than that which leads people into any other
+occupation or profession.  To make a living, and to have a career, is the
+original incentive in all cases.  Even in purely philanthropical
+enterprises the driving-wheel that keeps them in motion for any length of
+time is the salary paid the working members.  So powerful is this
+incentive that sometimes the wheel will continue to turn round when there
+is no grist to grind.  It sometimes happens that the friction of the
+philanthropic machinery is so great that but very little power is
+transmitted to the object for which the machinery was made.  I knew a
+devoted agent of the American Colonization Society, who, for several
+years, collected in Connecticut just enough, for the cause, to buy his
+clothes, and pay his board at a good hotel.
+
+It is scarcely necessary to say, except to prevent a possible
+misapprehension, that the editor who has no high ideals, no intention of
+benefiting his fellow-men by his newspaper, and uses it unscrupulously as
+a means of money-making only, sinks to the level of the physician and the
+lawyer who have no higher conception of their callings than that they
+offer opportunities for getting money by appeals to credulity, and by
+assisting in evasions of the law.
+
+If the excellence of a newspaper is not always measured by its
+profitableness, it is generally true that, if it does not pay its owner,
+it is valueless to the public.  Not all newspapers which make money are
+good, for some succeed by catering to the lowest tastes of respectable
+people, and to the prejudice, ignorance, and passion of the lowest class;
+but, as a rule, the successful journal pecuniarily is the best journal.
+The reasons for this are on the surface.  The impecunious newspaper
+cannot give its readers promptly the news, nor able discussion of the
+news, and, still worse, it cannot be independent.  The political journal
+that relies for support upon drippings of party favor or patronage, the
+general newspaper that finds it necessary to existence to manipulate
+stock reports, the religious weekly that draws precarious support from
+puffing doubtful enterprises, the literary paper that depends upon the
+approval of publishers, are poor affairs, and, in the long run or short
+run, come to grief.  Some newspapers do succeed by sensationalism, as
+some preachers do; by a kind of quackery, as some doctors do; by trimming
+and shifting to any momentary popular prejudice, as some politicians do;
+by becoming the paid advocate of a personal ambition or a corporate
+enterprise, as some lawyers do: but the newspaper only becomes a real
+power when it is able, on the basis of pecuniary independence, to free
+itself from all such entanglements.  An editor who stands with hat in
+hand has the respect accorded to any other beggar.
+
+The recognition of the fact that the newspaper is a private and purely
+business enterprise will help to define the mutual relations of the
+editor and the public.  His claim upon the public is exactly that of any
+manufacturer or dealer.  It is that of the man who makes cloth, or the
+grocer who opens a shop--neither has a right to complain if the public
+does not buy of him.  If the buyer does not like a cloth half shoddy, or
+coffee half-chicory, he will go elsewhere.  If the subscriber does not
+like one newspaper, he takes another, or none.  The appeal for newspaper
+support on the ground that such a journal ought to be sustained by an
+enlightened community, or on any other ground than that it is a good
+article that people want,--or would want if they knew its value,--is
+purely childish in this age of the world.  If any person wants to start a
+periodical devoted to decorated teapots, with the noble view of inducing
+the people to live up to his idea of a teapot, very good; but he has no
+right to complain if he fails.
+
+On the other hand, the public has no rights in the newspaper except what
+it pays for; even the "old subscriber" has none, except to drop the paper
+if it ceases to please him.  The notion that the subscriber has a right
+to interfere in the conduct of the paper, or the reader to direct its
+opinions, is based on a misconception of what the newspaper is.  The
+claim of the public to have its communications printed in the paper is
+equally baseless.  Whether they shall be printed or not rests in the
+discretion of the editor, having reference to his own private interest,
+and to his apprehension of the public good.  Nor is he bound to give any
+reason for his refusal.  It is purely in his discretion whether he will
+admit a reply to any thing that has appeared in his columns.  No one has
+a right to demand it.  Courtesy and policy may grant it; but the right to
+it does not exist.  If any one is injured, he may seek his remedy at law;
+and I should like to see the law of libel such and so administered that
+any person injured by a libel in the newspaper, as well as by slander out
+of it, could be sure of prompt redress.  While the subscribes acquires no
+right to dictate to the newspaper, we can imagine an extreme case when he
+should have his money back which had been paid in advance, if the
+newspaper totally changed its character.  If he had contracted with a
+dealer to supply him with hard coal during the winter, he might have a
+remedy if the dealer delivered only charcoal in the coldest weather; and
+so if he paid for a Roman Catholic journal which suddenly became an organ
+of the spiritists.
+
+The advertiser acquires no more rights in the newspaper than the
+subscriber.  He is entitled to use the space for which he pays by the
+insertion of such material as is approved by the editor.  He gains no
+interest in any other part of the paper, and has no more claim to any
+space in the editorial columns, than any other one of the public.  To
+give him such space would be unbusiness-like, and the extension of a
+preference which would be unjust to the rest of the public.  Nothing more
+quickly destroys the character of a journal, begets distrust of it, and
+so reduces its value, than the well-founded suspicion that its editorial
+columns are the property of advertisers.  Even a religious journal will,
+after a while, be injured by this.
+
+Yet it must be confessed that here is one of the greatest difficulties of
+modern journalism.  The newspaper must be cheap.  It is, considering the
+immense cost to produce it, the cheapest product ever offered to man.
+Most newspapers cost more than they sell for; they could not live by
+subscriptions; for any profits, they certainly depend upon
+advertisements.  The advertisements depend upon the circulation; the
+circulation is likely to dwindle if too much space is occupied by
+advertisements, or if it is evident that the paper belongs to its favored
+advertisers.  The counting-room desires to conciliate the advertisers;
+the editor looks to making a paper satisfactory to his readers.  Between
+this see-saw of the necessary subscriber and the necessary advertiser, a
+good many newspapers go down.  This difficulty would be measurably
+removed by the admission of the truth that the newspaper is a strictly
+business enterprise, depending for success upon a 'quid pro quo' between
+all parties connected with it, and upon integrity in its management.
+
+Akin to the false notion that the newspaper is a sort of open channel
+that the public may use as it chooses, is the conception of it as a
+charitable institution.  The newspaper, which is the property of a
+private person as much as a drug-shop is, is expected to perform for
+nothing services which would be asked of no other private person.  There
+is scarcely a charitable enterprise to which it is not asked to
+contribute of its space, which is money, ten times more than other
+persons in the community, who are ten times as able as the owner of the
+newspaper, contribute.  The journal is considered "mean" if it will not
+surrender its columns freely to notices and announcements of this sort.
+If a manager has a new hen-coop or a new singer he wishes to introduce to
+the public, he comes to the newspaper, expecting to have his enterprise
+extolled for nothing, and probably never thinks that it would be just as
+proper for him to go to one of the regular advertisers in the paper and
+ask him to give up his space.  Anything, from a church picnic to a brass-
+band concert for the benefit of the widow of the triangles, asks the
+newspaper to contribute.  The party in politics, whose principles the
+editor advocates, has no doubt of its rightful claim upon him, not only
+upon the editorial columns, but upon the whole newspaper.  It asks
+without hesitation that the newspaper should take up its valuable space
+by printing hundreds and often thousands of dollars' worth of political
+announcements in the course of a protracted campaign, when it never would
+think of getting its halls, its speakers, and its brass bands, free of
+expense.  Churches, as well as parties, expect this sort of charity.
+I have known rich churches, to whose members it was a convenience to have
+their Sunday and other services announced, withdraw the announcements
+when the editor declined any longer to contribute a weekly fifty-cents'
+worth of space.  No private persons contribute so much to charity, in
+proportion to ability, as the newspaper.  Perhaps it will get credit for
+this in the next world: it certainly never does in this.
+
+The chief function of the newspaper is to collect and print the news.
+Upon the kind of news that should be gathered and published, we shall
+remark farther on.  The second function is to elucidate the news, and
+comment on it, and show its relations.  A third function is to furnish
+reading-matter to the general public.
+
+Nothing is so difficult for the manager as to know what news is: the
+instinct for it is a sort of sixth sense.  To discern out of the mass of
+materials collected not only what is most likely to interest the public,
+but what phase and aspect of it will attract most attention, and the
+relative importance of it; to tell the day before or at midnight what the
+world will be talking about in the morning, and what it will want the
+fullest details of, and to meet that want in advance,--requires a
+peculiar talent.  There is always some topic on which the public wants
+instant information.  It is easy enough when the news is developed, and
+everybody is discussing it, for the editor to fall in; but the success of
+the news printed depends upon a pre-apprehension of all this.  Some
+papers, which nevertheless print all the news, are always a day behind,
+do not appreciate the popular drift till it has gone to something else,
+and err as much by clinging to a subject after it is dead as by not
+taking it up before it was fairly born.  The public craves eagerly for
+only one thing at a time, and soon wearies of that; and it is to the
+newspaper's profit to seize the exact point of a debate, the thrilling
+moment of an accident, the pith of an important discourse; to throw
+itself into it as if life depended on it, and for the hour to flood the
+popular curiosity with it as an engine deluges a fire.
+
+Scarcely less important than promptly seizing and printing the news is
+the attractive arrangement of it, its effective presentation to the eye.
+Two papers may have exactly the same important intelligence, identically
+the same despatches: the one will be called bright, attractive, "newsy";
+the other, dull and stupid.
+
+We have said nothing yet about that, which, to most people, is the most
+important aspect of the newspaper,--the editor's responsibility to the
+public for its contents.  It is sufficient briefly to say here, that it
+is exactly the responsibility of every other person in society,--the full
+responsibility of his opportunity.  He has voluntarily taken a position
+in which he can do a great deal of good or a great deal of evil, and he,
+should be held and judged by his opportunity: it is greater than that of
+the preacher, the teacher, the congressman, the physician.  He occupies
+the loftiest pulpit; he is in his teacher's desk seven days in the week;
+his voice can be heard farther than that of the most lusty fog-horn
+politician; and often, I am sorry to say, his columns outshine the
+shelves of the druggist in display of proprietary medicines.  Nothing
+else ever invented has the public attention as the newspaper has, or is
+an influence so constant and universal.  It is this large opportunity
+that has given the impression that the newspaper is a public rather than
+a private enterprise.
+
+It was a nebulous but suggestive remark that the newspaper occupies the
+borderland between literature and common sense.  Literature it certainly
+is not, and in the popular apprehension it seems often too erratic and
+variable to be credited with the balance-wheel of sense; but it must have
+something of the charm of the one, and the steadiness and sagacity of the
+other, or it will fail to please.  The model editor, I believe, has yet
+to appear.  Notwithstanding the traditional reputation of certain editors
+in the past, they could not be called great editors by our standards; for
+the elements of modern journalism did not exist in their time.  The old
+newspaper was a broadside of stale news, with a moral essay attached.
+Perhaps Benjamin Franklin, with our facilities, would have been very near
+the ideal editor.  There was nothing he did not wish to know; and no one
+excelled him in the ability to communicate what he found out to the
+average mind.  He came as near as anybody ever did to marrying common
+sense to literature: he had it in him to make it sufficient for
+journalistic purposes.  He was what somebody said Carlyle was, and what
+the American editor ought to be,--a vernacular man.
+
+The assertion has been made recently, publicly, and with evidence
+adduced, that the American newspaper is the best in the world.  It is
+like the assertion that the American government is the best in the world;
+no doubt it is, for the American people.
+
+Judged by broad standards, it may safely be admitted that the American
+newspaper is susceptible of some improvement, and that it has something
+to learn from the journals of other nations.  We shall be better employed
+in correcting its weaknesses than in complacently contemplating its
+excellences.
+
+Let us examine it in its three departments already named,--its news,
+editorials, and miscellaneous reading-matter.
+
+In particularity and comprehensiveness of news-collecting, it may be
+admitted that the American newspapers for a time led the world.  I mean
+in the picking-up of local intelligence, and the use of the telegraph to
+make it general.  And with this arose the odd notion that news is made
+important by the mere fact of its rapid transmission over the wire.  The
+English journals followed, speedily overtook, and some of the wealthier
+ones perhaps surpassed, the American in the use of the telegraph, and in
+the presentation of some sorts of local news; not of casualties, and
+small city and neighborhood events, and social gossip (until very
+recently), but certainly in the business of the law courts, and the
+crimes and mishaps that come within police and legal supervision.  The
+leading papers of the German press, though strong in correspondence and
+in discussion of affairs, are far less comprehensive in their news than
+the American or the English.  The French journals, we are accustomed to
+say, are not newspapers at all.  And this is true as we use the word.
+Until recently, nothing has been of importance to the Frenchman except
+himself; and what happened outside of France, not directly affecting his
+glory, his profit, or his pleasure, did not interest him: hence, one
+could nowhere so securely intrench himself against the news of the world
+as behind the barricade of the Paris journals.  But let us not make a
+mistake in this matter.  We may have more to learn from the Paris
+journals than from any others.  If they do not give what we call news--
+local news, events, casualties, the happenings of the day,--they do give
+ideas, opinions; they do discuss politics, the social drift; they give
+the intellectual ferment of Paris; they supply the material that Paris
+likes to talk over, the badinage of the boulevard, the wit of the salon,
+the sensation of the stage, the new movement in literature and in
+politics.  This may be important, or it may be trivial: it is commonly
+more interesting than much of that which we call news.
+
+Our very facility and enterprise in news-gathering have overwhelmed our
+newspapers, and it may be remarked that editorial discrimination has not
+kept pace with the facilities.  We are overpowered with a mass of
+undigested intelligence, collected for the mast part without regard to
+value.  The force of the newspaper is expended in extending these
+facilities, with little regard to discriminating selection.  The burden
+is already too heavy for the newspaper, and wearisome to the public.
+
+The publication of the news is the most important function of the paper.
+How is it gathered?  We must confess that it is gathered very much by
+chance.  A drag-net is thrown out, and whatever comes is taken.  An
+examination into the process of collecting shows what sort of news we are
+likely to get, and that nine-tenths of that printed is collected without
+much intelligence exercised in selection.  The alliance of the associated
+press with the telegraph company is a fruitful source of news of an
+inferior quality.  Of course, it is for the interest of the telegraph
+company to swell the volume to be transmitted.  It is impossible for the
+associated press to have an agent in every place to which the telegraph
+penetrates: therefore the telegraphic operators often act as its
+purveyors.  It is for their interest to send something; and their
+judgment of what is important is not only biased, but is formed by purely
+local standards.  Our news, therefore, is largely set in motion by
+telegraphic operators, by agents trained to regard only the accidental,
+the startling, the abnormal, as news; it is picked up by sharp prowlers
+about town, whose pay depends upon finding something, who are looking for
+something spicy and sensational, or which may be dressed up and
+exaggerated to satisfy an appetite for novelty and high flavor, and who
+regard casualties as the chief news.  Our newspapers every day are loaded
+with accidents, casualties, and crimes concerning people of whom we never
+heard before and never shall hear again, the reading of which is of no
+earthly use to any human being.
+
+What is news?  What is it that an intelligent public should care to hear
+of and talk about?  Run your eye down the columns of your journal.  There
+was a drunken squabble last night in a New York groggery; there is a
+petty but carefully elaborated village scandal about a foolish girl; a
+woman accidentally dropped her baby out of a fourth-story window in
+Maine; in Connecticut, a wife, by mistake, got into the same railway
+train with another woman's husband; a child fell into a well in New
+Jersey; there is a column about a peripatetic horse-race, which exhibits,
+like a circus, from city to city; a laborer in a remote town in
+Pennsylvania had a sunstroke; there is an edifying dying speech of a
+murderer, the love-letter of a suicide, the set-to of a couple of
+congressmen; and there are columns about a gigantic war of half a dozen
+politicians over the appointment of a sugar-gauger.  Granted that this
+pabulum is desired by the reader, why not save the expense of
+transmission by having several columns of it stereotyped, to be
+reproduced at proper intervals?  With the date changed, it would always,
+have its original value, and perfectly satisfy the demand, if a demand
+exists, for this sort of news.
+
+This is not, as you see, a description of your journal: it is a
+description of only one portion of it.  It is a complex and wonderful
+creation.  Every morning it is a mirror of the world, more or less
+distorted and imperfect, but such a mirror as it never had held up to it
+before.  But consider how much space is taken up with mere trivialities
+and vulgarities under the name of news.  And this evil is likely to
+continue and increase until news-gatherers learn that more important than
+the reports of accidents and casualties is the intelligence of opinions
+and thoughts, the moral and intellectual movements of modern life.  A
+horrible assassination in India is instantly telegraphed; but the
+progress of such a vast movement as that of the Wahabee revival in Islam,
+which may change the destiny of great provinces, never gets itself put
+upon the wires.  We hear promptly of a landslide in Switzerland, but only
+very slowly of a political agitation that is changing the constitution of
+the republic.  It should be said, however, that the daily newspaper is
+not alone responsible for this: it is what the age and the community
+where it is published make it.  So far as I have observed, the majority
+of the readers in America peruses eagerly three columns about a mill
+between an English and a naturalized American prize-fighter, but will
+only glance at a column report of a debate in the English parliament
+which involves a radical change in the whole policy of England; and
+devours a page about the Chantilly races, while it ignores a paragraph
+concerning the suppression of the Jesuit schools.
+
+Our newspapers are overwhelmed with material that is of no importance.
+The obvious remedy for this would be more intelligent direction in the
+collection of news, and more careful sifting and supervision of it when
+gathered.  It becomes every day more apparent to every manager that such
+discrimination is more necessary.  There is no limit to the various
+intelligence and gossip that our complex life offers--no paper is big
+enough to contain it; no reader has time enough to read it.  And the
+journal must cease to be a sort of waste-basket at the end of a telegraph
+wire, into which any reporter, telegraph operator, or gossip-monger can
+dump whatever he pleases.  We must get rid of the superstition that value
+is given to an unimportant "item" by sending it a thousand miles over a
+wire.
+
+Perhaps the most striking feature of the American newspaper, especially
+of the country weekly, is its enormous development of local and
+neighborhood news.  It is of recent date.  Horace Greeley used to advise
+the country editors to give small space to the general news of the world,
+but to cultivate assiduously the home field, to glean every possible
+detail of private life in the circuit of the county, and print it.  The
+advice was shrewd for a metropolitan editor, and it was not without its
+profit to the country editor.  It was founded on a deep knowledge of
+human nature; namely, upon the fact that people read most eagerly that
+which they already know, if it is about themselves or their neighbors, if
+it is a report of something they have been concerned in, a lecture they
+have heard, a fair, or festival, or wedding, or funeral, or barn-raising
+they have attended.  The result is column after column of short
+paragraphs of gossip and trivialities, chips, chips, chips.  Mr. Sales is
+contemplating erecting a new counter in his store; his rival opposite has
+a new sign; Miss Bumps of Gath is visiting her cousin, Miss Smith of
+Bozrah; the sheriff has painted his fence; Farmer Brown has lost his cow;
+the eminent member from Neopolis has put an ell on one end of his
+mansion, and a mortgage on the other.
+
+On the face of it nothing is so vapid and profitless as column after
+column of this reading.  These "items" have very little interest, except
+to those who already know the facts; but those concerned like to see them
+in print, and take the newspaper on that account.  This sort of inanity
+takes the place of reading-matter that might be of benefit, and its
+effect must be to belittle and contract the mind.  But this is not the
+most serious objection to the publication of these worthless details.
+It cultivates self-consciousness in the community, and love of notoriety;
+it develops vanity and self-importance, and elevates the trivial in life
+above the essential.
+
+And this brings me to speak of the mania in this age, and especially in
+America, for notoriety in social life as well as in politics.  The
+newspapers are the vehicle of it, sometimes the occasion, but not the
+cause.  The newspaper may have fostered--it has not created--this hunger
+for publicity.  Almost everybody talks about the violation of decency and
+the sanctity of private life by the newspaper in the publication of
+personalities and the gossip of society; and the very people who make
+these strictures are often those who regard the paper as without
+enterprise and dull, if it does not report in detail their weddings,
+their balls and parties, the distinguished persons present, the dress of
+the ladies, the sumptuousness of the entertainment, if it does not
+celebrate their church services and festivities, their social meetings,
+their new house, their distinguished arrivals at this or that watering-
+place.  I believe every newspaper manager will bear me out in saying that
+there is a constant pressure on him to print much more of such private
+matter than his judgment and taste permit or approve, and that the gossip
+which is brought to his notice, with the hope that he will violate the
+sensitiveness of social life by printing it, is far away larger in amount
+than all that he publishes.
+
+To return for a moment to the subject of general news.  The
+characteristic of our modern civilization is sensitiveness, or, as the
+doctors say, nervousness.  Perhaps the philanthropist would term it
+sympathy.  No doubt an exciting cause of it is the adaptation of
+electricity to the transmission of facts and ideas.  The telegraph, we
+say, has put us in sympathy with all the world.  And we reckon this
+enlargement of nerve contact somehow a gain.  Our bared nerves are played
+upon by a thousand wires.  Nature, no doubt, has a method of hardening or
+deadening them to these shocks; but nevertheless, every person who reads
+is a focus for the excitements, the ills, the troubles, of all the world.
+In addition to his local pleasures and annoyances, he is in a manner
+compelled to be a sharer in the universal uneasiness.  It might be worth
+while to inquire what effect this exciting accumulation of the news of
+the world upon an individual or a community has upon happiness and upon
+character.  Is the New England man any better able to bear or deal with
+his extraordinary climate by the daily knowledge of the weather all over
+the globe?  Is a man happier, or improved in character, by the woful tale
+of a world's distress and apprehension that greets him every morning at
+breakfast?  Knowledge, we know, increases sorrow; but I suppose the
+offset to that is, that strength only comes through suffering.  But this
+is a digression.
+
+Not second in importance to any department of the journal is the
+reporting; that is, the special reporting as distinguished from the more
+general news-gathering.  I mean the reports of proceedings in Congress,
+in conventions, assemblies, and conferences, public conversations,
+lectures, sermons, investigations, law trials, and occurrences of all
+sorts that rise into general importance.  These reports are the basis of
+our knowledge and opinions.  If they are false or exaggerated, we are
+ignorant of what is taking place, and misled.  It is of infinitely more
+importance that they should be absolutely trustworthy than that the
+editorial comments should be sound and wise.  If the reports on affairs
+can be depended on, the public can form its own opinion, and act
+intelligently.  And; if the public has a right to demand anything of a
+newspaper, it is that its reports of what occurs shall be faithfully
+accurate, unprejudiced, and colorless.  They ought not, to be editorials,
+or the vehicles of personal opinion and feeling.  The interpretation of,
+the facts they give should be left to the editor and the public.  There
+should be a sharp line drawn between the report and the editorial.
+
+I am inclined to think that the reporting department is the weakest in
+the American newspaper, and that there is just ground for the admitted
+public distrust of it.  Too often, if a person would know what has taken
+place in a given case, he must read the reports in half a dozen journals,
+then strike a general average of probabilities, allowing for the personal
+equation, and then--suspend his judgment.  Of course, there is much
+excellent reporting, and there are many able men engaged in it who
+reflect the highest honor upon their occupation.  And the press of no
+other country shows more occasional brilliant feats in reporting than
+ours: these are on occasions when the newspapers make special efforts.
+Take the last two national party conventions.  The fullness, the
+accuracy, the vividness, with which their proceedings were reported in
+the leading journals, were marvelous triumphs of knowledge, skill, and
+expense.  The conventions were so photographed by hundreds of pens, that
+the public outside saw them almost as distinctly as the crowd in
+attendance.  This result was attained because the editors determined that
+it should be, sent able men to report, and demanded the best work.  But
+take an opposite and a daily illustration of reporting, that of the
+debates and proceedings in Congress.  I do not refer to the specials of
+various journals which are good, bad, or indifferent, as the case may be,
+and commonly colored by partisan considerations, but the regular synopsis
+sent to the country at large.  Now, for some years it has been
+inadequate, frequently unintelligible, often grossly misleading, failing
+wholly to give the real spirit and meaning of the most important
+discussions; and it is as dry as chips besides.  To be both stupid and
+inaccurate is the unpardonable sin in journalism.  Contrast these reports
+with the lively and faithful pictures of the French Assembly which are
+served to the Paris papers.
+
+Before speaking of the reasons for the public distrust in reports, it is
+proper to put in one qualification.  The public itself, and not the
+newspapers, is the great factory of baseless rumors and untruths.
+Although the newspaper unavoidably gives currency to some of these, it is
+the great corrector of popular rumors.  Concerning any event, a hundred
+different versions and conflicting accounts are instantly set afloat.
+These would run on, and become settled but unfounded beliefs, as private
+whispered scandals do run, if the newspaper did not intervene.  It is the
+business of the newspaper, on every occurrence of moment, to chase down
+the rumors, and to find out the facts and print them, and set the public
+mind at rest.  The newspaper publishes them under a sense of
+responsibility for its statements.  It is not by any means always
+correct; but I know that it is the aim of most newspapers to discharge
+this important public function faithfully.  When this country had few
+newspapers it was ten times more the prey of false reports and delusions
+than it is now.
+
+Reporting requires as high ability as editorial writing; perhaps of a
+different kind, though in the history of American journalism the best
+reporters have often become the best editors.  Talent of this kind must
+be adequately paid; and it happens that in America the reporting field is
+so vast that few journals can afford to make the reporting department
+correspond in ability to the editorial, and I doubt if the importance of
+doing so is yet fully realized.  An intelligent and representative
+synopsis of a lecture or other public performance is rare.  The ability
+to grasp a speaker's meaning, or to follow a long discourse, and
+reproduce either in spirit, and fairly, in a short space, is not common.
+When the public which has been present reads the inaccurate report, it
+loses confidence in the newspaper.
+
+Its confidence is again undermined when it learns that an "interview"
+which it has read with interest was manufactured; that the report of the
+movements and sayings of a distinguished stranger was a pure piece of
+ingenious invention; that a thrilling adventure alongshore, or in a
+balloon, or in a horse-car, was what is called a sensational article,
+concocted by some brilliant genius, and spun out by the yard according to
+his necessities.  These reports are entertaining, and often more readable
+than anything else in the newspaper; and, if they were put into a
+department with an appropriate heading, the public would be less
+suspicious that all the news in the journal was colored and heightened by
+a lively imagination.
+
+Intelligent and honest reporting of whatever interests the public is the
+sound basis of all journalism.  And yet so careless have editors been of
+all this that a reporter has been sent to attend the sessions of a
+philological convention who had not the least linguistic knowledge,
+having always been employed on marine disasters.  Another reporter, who
+was assigned to inform the public of the results of a difficult
+archeological investigation, frankly confessed his inability to
+understand what was going on; for his ordinary business, he said, was
+cattle.  A story is told of a metropolitan journal, which illustrates
+another difficulty the public has in keeping up its confidence in
+newspaper infallibility.  It may not be true for history, but answers for
+an illustration.  The annual November meteors were expected on a certain
+night.  The journal prepared an elaborate article, several columns in
+length, on meteoric displays in general, and on the display of that night
+in particular, giving in detail the appearance of the heavens from the
+metropolitan roofs in various parts of the city, the shooting of the
+meteors amid the blazing constellations, the size and times of flight of
+the fiery bodies; in short, a most vivid and scientific account of the
+lofty fireworks.  Unfortunately the night was cloudy.  The article was in
+type and ready; but the clouds would not break.  The last moment for
+going to press arrived: there was a probability that the clouds would
+lift before daylight and the manager took the risk.  The article that
+appeared was very interesting; but its scientific value was impaired by
+the fact that the heavens were obscured the whole night, and the meteors,
+if any arrived, were invisible.  The reasonable excuse of the editor
+would be that he could not control the elements.
+
+If the reporting department needs strengthening and reduction to order in
+the American journal, we may also query whether the department of
+correspondence sustains the boast that the American, newspaper is the
+best in the world.  We have a good deal of excellent correspondence, both
+foreign and domestic; and our "specials" have won distinction, at least
+for liveliness and enterprise.  I cannot dwell upon this feature; but I
+suggest a comparison with the correspondence of some of the German, and
+with that especially of the London journals, from the various capitals of
+Europe, and from the occasional seats of war.  How surpassing able much
+of it is!
+
+How full of information, of philosophic observation, of accurate
+knowledge!  It appears to be written by men of trained intellect and of
+experience,--educated men of the world, who, by reason of their position
+and character, have access to the highest sources of information.
+
+The editorials of our journals seem to me better than formerly, improved
+in tone, in courtesy, in self-respect,--though you may not have to go far
+or search long for the provincial note and the easy grace of the
+frontier,--and they are better written.  This is because the newspaper
+has become more profitable, and is able to pay for talent, and has
+attracted to it educated young men.  There is a sort of editorial
+ability, of facility, of force, that can only be acquired by practice and
+in the newspaper office: no school can ever teach it; but the young
+editor who has a broad basis of general education, of information in
+history, political economy, the classics, and polite literature, has an
+immense advantage over the man who has merely practical experience.  For
+the editorial, if it is to hold its place, must be more and more the
+product of information, culture, and reflection, as well as of sagacity
+and alertness.  Ignorance of foreign affairs, and of economic science,
+the American people have in times past winked at; but they will not
+always wink at it.
+
+It is the belief of some shrewd observers that editorials, the long
+editorials, are not much read, except by editors themselves.  A cynic
+says that, if you have a secret you are very anxious to keep from the
+female portion of the population, the safest place to put it is in an
+editorial.  It seems to me that editorials are not conned as attentively
+as they once were; and I am sure they have not so much influence as
+formerly.  People are not so easily or so visibly led; that is to say,
+the editorial influence is not so dogmatic and direct.  The editor does
+not expect to form public opinion so much by arguments and appeals as by
+the news he presents and his manner of presenting it, by the iteration of
+an idea until it becomes familiar, by the reading-matter selected, and by
+the quotations of opinions as news, and not professedly to influence the
+reader.  And this influence is all the more potent because it is
+indirect, and not perceived-by the reader.
+
+There is an editorial tradition--it might almost be termed a
+superstition--which I think will have to be abandoned.  It is that a
+certain space in the journal must be filled with editorial, and that some
+of the editorials must be long, without any reference to the news or the
+necessity of comment on it, or the capacity of the editor at the moment
+to fill the space with original matter that is readable.  There is the
+sacred space, and it must be filled.  The London journals are perfect
+types of this custom.  The result is often a wearisome page of words and
+rhetoric.  It may be good rhetoric; but life is too short for so much of
+it.  The necessity of filling this space causes the writer, instead of
+stating his idea in the shortest compass in which it can be made
+perspicuous and telling, to beat it out thin, and make it cover as much
+ground as possible.  This, also, is vanity.  In the economy of room,
+which our journals will more and more be compelled to cultivate, I
+venture to say that this tradition will be set aside.  I think that we
+may fairly claim a superiority in our journals over the English dailies
+in our habit of making brief, pointed editorial paragraphs.  They are the
+life of the editorial page.  A cultivation of these until they are as
+finished and pregnant as the paragraphs of "The London Spectator" and
+"The New-York Nation," the printing of long editorials only when the
+elucidation of a subject demands length, and the use of the space thus
+saved for more interesting reading, is probably the line of our editorial
+evolution.
+
+To continue the comparison of our journals as a class, with the English
+as a class, ours are more lively, also more flippant, and less restrained
+by a sense of responsibility or by the laws of libel.  We furnish, now
+and again, as good editorial writing for its purpose; but it commonly
+lacks the dignity, the thoroughness, the wide sweep and knowledge, that
+characterizes the best English discussion of political and social topics.
+
+The third department of the newspaper is that of miscellaneous reading-
+matter.  Whether this is the survival of the period when the paper
+contained little else except "selections," and other printed matter was
+scarce, or whether it is only the beginning of a development that shall
+supply the public nearly all its literature, I do not know.  Far as our
+newspapers have already gone in this direction, I am inclined to think
+that in their evolution they must drop this adjunct, and print simply the
+news of the day.  Some of the leading journals of the world already do
+this.
+
+In America I am sure the papers are printing too much miscellaneous
+reading.  The perusal of this smattering of everything, these scraps of
+information and snatches of literature, this infinite variety and medley,
+in which no subject is adequately treated, is distracting and
+debilitating to the mind.  It prevents the reading of anything in full,
+and its satisfactory assimilation.  It is said that the majority of
+Americans read nothing except the paper.  If they read that thoroughly,
+they have time for nothing else.  What is its reader to do when his
+journal thrusts upon him every day the amount contained in a fair-sized
+duodecimo volume, and on Sundays the amount of two of them?  Granted that
+this miscellaneous hodge-podge is the cream of current literature, is it
+profitable to the reader?  Is it a means of anything but superficial
+culture and fragmentary information?  Besides, it stimulates an unnatural
+appetite, a liking for the striking, the brilliant, the sensational only;
+for our selections from current literature are, usually the "plums"; and
+plums are not a wholesome-diet for anybody.  A person accustomed to this
+finds it difficult to sit down patiently to the mastery of a book or a
+subject, to the study of history, the perusal of extended biography, or
+to acquire that intellectual development and strength which comes from
+thorough reading and reflection.
+
+The subject has another aspect.  Nobody chooses his own reading; and a
+whole community perusing substantially the same material tends to a
+mental uniformity.  The editor has the more than royal power of selecting
+the intellectual food of a large public.  It is a responsibility
+infinitely greater than that of the compiler of schoolbooks, great as
+that is.  The taste of the editor, or of some assistant who uses the
+scissors, is in a manner forced upon thousands of people, who see little
+other printed matter than that which he gives them.  Suppose his taste
+runs to murders and abnormal crimes, and to the sensational in
+literature: what will be the moral effect upon a community of reading
+this year after year?
+
+If this excess of daily miscellany is deleterious to the public, I doubt
+if it will be, in the long run, profitable to the newspaper, which has a
+field broad enough in reporting and commenting upon the movement of the
+world, without attempting to absorb the whole reading field.
+
+I should like to say a word, if time permitted, upon the form of the
+journal, and about advertisements.  I look to see advertisements shorter,
+printed with less display, and more numerous.  In addition to the use now
+made of the newspaper by the classes called "advertisers," I expect it to
+become the handy medium of the entire public, the means of ready
+communication in regard to all wants and exchanges.
+
+Several years ago, the attention of the publishers of American newspapers
+was called to the convenient form of certain daily journals in South
+Germany, which were made up in small pages, the number of which varied
+from day to day, according to the pressure of news or of advertisements.
+The suggestion as to form has been adopted bit many of our religious,
+literary, and special weeklies, to the great convenience of the readers,
+and I doubt not of the publishers also.  Nothing is more unwieldy than
+our big blanket-sheets: they are awkward to handle, inconvenient to read,
+unhandy to bind and preserve.  It is difficult to classify matter in
+them.  In dull seasons they are too large; in times of brisk advertising,
+and in the sudden access of important news, they are too small.  To
+enlarge them for the occasion, resort is had to a troublesome fly-sheet,
+or, if they are doubled, there is more space to be filled than is needed.
+It seems to me that the inevitable remedy is a newspaper of small pages
+or forms, indefinite in number, that can at any hour be increased or
+diminished according to necessity, to be folded, stitched, and cut by
+machinery.
+
+We have thus rapidly run over a prolific field, touching only upon some
+of the relations of the newspaper to our civilization, and omitting many
+of the more important and grave.  The truth is that the development of
+the modern journal has been so sudden and marvelous that its conductors
+find themselves in possession of a machine that they scarcely know how to
+manage or direct.  The change in the newspaper caused by the telegraph,
+the cable, and by a public demand for news created by wars, by
+discoveries, and by a new outburst of the spirit of doubt and inquiry, is
+enormous.  The public mind is confused about it, and alternately
+overestimates and underestimates the press, failing to see how integral
+and representative a part it is of modern life.
+
+"The power of the press," as something to be feared or admired, is a
+favorite theme of dinner-table orators and clergymen.  One would think it
+was some compactly wielded energy, like that of an organized religious
+order, with a possible danger in it to the public welfare.
+Discrimination is not made between the power of the printed word--which
+is limitless--and the influence that a newspaper, as such, exerts.  The
+power of the press is in its facility for making public opinions and
+events.  I should say it is a medium of force rather than force itself.
+I confess that I am oftener impressed with the powerlessness of the press
+than otherwise, its slight influence in bringing about any reform, or in
+inducing the public to do what is for its own good and what it is
+disinclined to do.  Talk about the power of the press, say, in a
+legislature, when once the members are suspicious that somebody is trying
+to influence them, and see how the press will retire, with what grace it
+can, before an invincible and virtuous lobby.  The fear of the
+combination of the press for any improper purpose, or long for any proper
+purpose, is chimerical.  Whomever the newspapers agree with, they do  not
+agree with each other.  The public itself never takes so many conflicting
+views of any topic or event as the ingenious rival journals are certain
+to discover.  It is impossible, in their nature, for them to combine.
+I should as soon expect agreement among doctors in their empirical
+profession.  And there is scarcely ever a cause, or an opinion, or a man,
+that does not get somewhere in the press a hearer and a defender.  We
+will drop the subject with one remark for the benefit of whom it may
+concern.  With all its faults, I believe the moral tone of the American
+newspaper is higher, as a rule, than that of the community in which it is
+published.
+
+
+
+
+End of this Project Gutenberg Etext of The American Newspaper
+by Charles Dudley Warner
+

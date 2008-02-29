@@ -1,156 +1,115 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
---></style>
-</head><body bgcolor="#ffffff">
-
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-
-<h1 align=center>QInputDialog Class Reference</h1><br clear="all">
-<p>
-A convenience dialog to get a simple input from the user
-<a href="#details">More...</a>
-<p>
-<code>#include &lt;<a href="qinputdialog-h.html">qinputdialog.h</a>&gt;</code>
-<p>
-Inherits <a href="qdialog.html">QDialog</a>.
-<p><a href="qinputdialog-members.html">List of all member functions.</a>
-<h2>Static Public Members</h2>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: QInputDialog Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QInputDialog Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<p>The QInputDialog class provides a simple convenience dialog to get a single value from the user. <a href="#details">More...</a></p>
+<pre> #include &lt;QInputDialog&gt;</pre><p>Inherits <a href="qdialog.html">QDialog</a>.</p>
 <ul>
-<li><div class="fn">QString <a href="#2c38f4"><b>getText</b></a> ( const QString &amp; caption, const QString &amp; label, const QString &amp; text = QString::null, bool * ok = 0, QWidget * parent = 0, const char * name = 0 ) </div>
-<li><div class="fn">QString <a href="#832521"><b>getText</b></a> ( const QString &amp; caption, const QString &amp; label, QLineEdit::EchoMode echo, const QString &amp; text = QString::null, bool * ok = 0, QWidget * parent = 0, const char * name = 0 ) </div>
-<li><div class="fn">int <a href="#85646d"><b>getInteger</b></a> ( const QString &amp; caption, const QString &amp; label, int num = 0, int from = -2147483647, int to = 2147483647, int step = 1, bool * ok = 0, QWidget * parent = 0, const char * name = 0 ) </div>
-<li><div class="fn">double <a href="#b45cb9"><b>getDouble</b></a> ( const QString &amp; caption, const QString &amp; label, double num = 0, double from = -2147483647, double to = 2147483647, int decimals = 1, bool * ok = 0, QWidget * parent = 0, const char * name = 0 ) </div>
-<li><div class="fn">QString <a href="#c78831"><b>getItem</b></a> ( const QString &amp; caption, const QString &amp; label, const QStringList &amp; list, int current = 0, bool editable = TRUE, bool * ok = 0, QWidget * parent = 0, const char * name = 0 ) </div>
+<li><a href="qinputdialog-members.html">List of all members, including inherited members</a></li>
+<li><a href="qinputdialog-qt3.html">Qt 3 support members</a></li>
 </ul>
-<hr><h2><a name="details"></a>Detailed Description</h2>
-A convenience dialog to get a simple input from the user
-<p>
-The QInputDialog is a simple dialog which can be used if you
-need a simple input from the user. This can be text, a number or
-an item from a list. Also a label has to be set to tell the user
-what he/she should input.
-<p>In this Qt version only the 4 static convenience functions
-<a href="#2c38f4">getText</a>(), <a href="#85646d">getInteger</a>(), <a href="#b45cb9">getDouble</a>() and <a href="#c78831">getItem</a>() of QInputDialog
-are available.
-<p>Use it like this:
-<p><pre>  bool ok = FALSE;
-  <a href="qstring.html">QString</a> text = QInputDialog::getText( tr( "Make an input" ), tr( "Please enter your name" ), QString::null, &amp;ok, this );
-  if ( ok &amp;&amp; !text.<a href="qstring.html#c62623">isEmpty</a>() )
-      ;// user entered something and pressed ok
-  else
-      ;// user entered nothing or pressed cancel
-</pre>
-<p>There are more static convenience methods!
-<p>See also  <a href="#2c38f4">getText</a>(), <a href="#85646d">getInteger</a>(), <a href="#b45cb9">getDouble</a>() and <a href="#c78831">getItem</a>().
-
-<hr><h2>Member Function Documentation</h2>
-<h3 class="fn">double <a name="b45cb9"></a>QInputDialog::getDouble ( const <a href="qstring.html">QString</a> &amp; caption, const <a href="qstring.html">QString</a> &amp; label, double num = 0, double from = -2147483647, double to = 2147483647, int decimals = 1, bool * ok = 0, <a href="qwidget.html">QWidget</a> * parent = 0, const char * name = 0 ) <code>[static]</code></h3>
-<p>Static convenience function to get a decimal input from the user. <em>caption</em> is the text
-which is displayed in the title bar of the dialog. <em>label</em> is the text which
-is shown to the user (it should mention to the user what he/she should input), <em>num</em>
-the default decimal number which will be initially set to the line edit, <em>from</em> and <em>to</em> the
-range in which the entered number has to be, <em>decimals</em> the number of decimal which
-the number may have, <em>ok</em> a pointer to
-a bool which will be (if not 0!) set to TRUE if the user pressed ok or to FALSE if the
-user pressed cancel, <em>parent</em> the parent widget of the dialog and <em>name</em>
-the name of it. The dialogs pops up modally!
-<p>This method returns the number which has been entered by the user.
-<p>You will use this static method like this:
-<p><pre>  bool ok = FALSE;
-  double res = QInputDialog::getDouble( tr( "Please enter a decimal number" ), 33.7, 0, 1000, 2, &amp;ok, this );
-  if ( ok )
-      ;// user entered something and pressed ok
-  else
-      ;// user pressed cancel
-</pre>
-<h3 class="fn">int <a name="85646d"></a>QInputDialog::getInteger ( const <a href="qstring.html">QString</a> &amp; caption, const <a href="qstring.html">QString</a> &amp; label, int num = 0, int from = -2147483647, int to = 2147483647, int step = 1, bool * ok = 0, <a href="qwidget.html">QWidget</a> * parent = 0, const char * name = 0 ) <code>[static]</code></h3>
-<p>Static convenience function to get an integral input from the user. <em>caption</em> is the text
-which is displayed in the title bar of the dialog. <em>label</em> is the text which
-is shown to the user (it should mention to the user what he/she should input), <em>num</em>
-the default number which will be initially set to the spinbox, <em>from</em> and <em>to</em> the
-range in which the entered number has to be, <em>step</em> the step in which the number can
-be increased/decreased by the spinbox, <em>ok</em> a pointer to
-a bool which will be (if not 0!) set to TRUE if the user pressed ok or to FALSE if the
-user pressed cancel, <em>parent</em> the parent widget of the dialog and <em>name</em>
-the name of it. The dialogs pops up modally!
-<p>This method returns the number which has been entered by the user.
-<p>You will use this static method like this:
-<p><pre>  bool ok = FALSE;
-  int res = QInputDialog::getInteger( tr( "Please enter a number" ), 22, 0, 1000, 2, &amp;ok, this );
-  if ( ok )
-      ;// user entered something and pressed ok
-  else
-      ;// user pressed cancel
-</pre>
-<h3 class="fn"><a href="qstring.html">QString</a> <a name="c78831"></a>QInputDialog::getItem ( const <a href="qstring.html">QString</a> &amp; caption, const <a href="qstring.html">QString</a> &amp; label, const <a href="qstringlist.html">QStringList</a> &amp; list, int current = 0, bool editable = TRUE, bool * ok = 0, <a href="qwidget.html">QWidget</a> * parent = 0, const char * name = 0 ) <code>[static]</code></h3>
-<p>Static convenience function to let the user select an item from a string list. <em>caption</em> is the text
-which is displayed in the title bar of the dialog. <em>label</em> is the text which
-is shown to the user (it should mention to the user what he/she should input), <em>list</em> the
-string list which is inserted into the combobox, <em>current</em> the number of the item which should
-be initially the current item, <em>editable</em> specifies if the combobox should be editable (if it is TRUE)
-or read-only (if <em>editable</em> is FALSE), <em>ok</em> a pointer to
-a bool which will be (if not 0!) set to TRUE if the user pressed ok or to FALSE if the
-user pressed cancel, <em>parent</em> the parent widget of the dialog and <em>name</em>
-the name of it. The dialogs pops up modally!
-<p>This method returns the text of the current item, or if <em>editable</em> was TRUE, the current
-text of the combobox.
-<p>You will use this static method like this:
-<p><pre>  <a href="qstringlist.html">QStringList</a> lst;
-  lst &lt;&lt; "First" &lt;&lt; "Second" &lt;&lt; "Third" &lt;&lt; "Fourth" &lt;&lt; "Fifth";
-  bool ok = FALSE;
-  <a href="qstring.html">QString</a> res = QInputDialog::getItem( tr( "Please select an item" ), lst, 1, TRUE, &amp;ok, this );
-  if ( ok )
-      ;// user selected an item and pressed ok
-  else
-      ;// user pressed cancel
-</pre>
-<h3 class="fn"><a href="qstring.html">QString</a> <a name="832521"></a>QInputDialog::getText ( const <a href="qstring.html">QString</a> &amp; caption, const <a href="qstring.html">QString</a> &amp; label, <a href="qlineedit.html#EchoMode">QLineEdit::EchoMode</a> mode, const <a href="qstring.html">QString</a> &amp; text = QString::null, bool * ok = 0, <a href="qwidget.html">QWidget</a> * parent = 0, const char * name = 0 ) <code>[static]</code></h3>
-<p>Like above, but accepts an a <em>mode</em> which the line edit will use to display text.
-<p>See also  <a href="#2c38f4">getText</a>().
-<h3 class="fn"><a href="qstring.html">QString</a> <a name="2c38f4"></a>QInputDialog::getText ( const <a href="qstring.html">QString</a> &amp; caption, const <a href="qstring.html">QString</a> &amp; label, const <a href="qstring.html">QString</a> &amp; text = QString::null, bool * ok = 0, <a href="qwidget.html">QWidget</a> * parent = 0, const char * name = 0 ) <code>[static]</code></h3>
-<p>Static convenience function to get a textual input from the user. <em>caption</em> is the text
-which is displayed in the title bar of the dialog. <em>label</em> is the text which
-is shown to the user (it should mention to the user what he/she should input), <em>text</em>
-the default text which will be initially set to the line edit, <em>ok</em> a pointer to
-a bool which will be (if not 0!) set to TRUE if the user pressed ok or to FALSE if the
-user pressed cancel, <em>parent</em> the parent widget of the dialog and <em>name</em>
-the name of it. The dialogs pops up modally!
-<p>This method returns the text which has been entered in the line edit.
-<p>You will use this static method like this:
-<p><pre>  bool ok = FALSE;
-  <a href="qstring.html">QString</a> text = QInputDialog::getText( tr( "Please enter your name" ), QString::null, &amp;ok, this );
-  if ( ok &amp;&amp; !text.<a href="qstring.html#c62623">isEmpty</a>() )
-      ;// user entered something and pressed ok
-  else
-      ;// user entered nothing or pressed cancel
-</pre>
-<hr><p>
-Search the documentation, FAQ, qt-interest archive and more (uses
-<a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
-<form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.10"><nobr>
-<input size="50" name="search"><input type=submit value="Search">
-</nobr></form><hr><p>
-This file is part of the <a href="index.html">Qt toolkit</a>,
-copyright &copy; 1995-2005
-<a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+<a name="static-public-members"></a>
+<h3>Static Public Members</h3>
+<ul>
+<li><div class="fn"/>double <b><a href="qinputdialog.html#getDouble">getDouble</a></b> ( QWidget * <i>parent</i>, const QString &amp; <i>title</i>, const QString &amp; <i>label</i>, double <i>value</i> = 0, double <i>minValue</i> = -2147483647, double <i>maxValue</i> = 2147483647, int <i>decimals</i> = 1, bool * <i>ok</i> = 0, Qt::WindowFlags <i>f</i> = 0 )</li>
+<li><div class="fn"/>int <b><a href="qinputdialog.html#getInteger">getInteger</a></b> ( QWidget * <i>parent</i>, const QString &amp; <i>title</i>, const QString &amp; <i>label</i>, int <i>value</i> = 0, int <i>minValue</i> = -2147483647, int <i>maxValue</i> = 2147483647, int <i>step</i> = 1, bool * <i>ok</i> = 0, Qt::WindowFlags <i>f</i> = 0 )</li>
+<li><div class="fn"/>QString <b><a href="qinputdialog.html#getItem">getItem</a></b> ( QWidget * <i>parent</i>, const QString &amp; <i>title</i>, const QString &amp; <i>label</i>, const QStringList &amp; <i>list</i>, int <i>current</i> = 0, bool <i>editable</i> = true, bool * <i>ok</i> = 0, Qt::WindowFlags <i>f</i> = 0 )</li>
+<li><div class="fn"/>QString <b><a href="qinputdialog.html#getText">getText</a></b> ( QWidget * <i>parent</i>, const QString &amp; <i>title</i>, const QString &amp; <i>label</i>, QLineEdit::EchoMode <i>mode</i> = QLineEdit::Normal, const QString &amp; <i>text</i> = QString(), bool * <i>ok</i> = 0, Qt::WindowFlags <i>f</i> = 0 )</li>
+</ul>
+<ul>
+<li><div class="fn"/>4 static public members inherited from <a href="qwidget.html#static-public-members">QWidget</a></li>
+<li><div class="fn"/>5 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>2 properties inherited from <a href="qdialog.html#properties">QDialog</a></li>
+<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>5 public functions inherited from <a href="qdialog.html#public-functions">QDialog</a></li>
+<li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>4 public slots inherited from <a href="qdialog.html#public-slots">QDialog</a></li>
+<li><div class="fn"/>19 public slots inherited from <a href="qwidget.html#public-slots">QWidget</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>3 signals inherited from <a href="qdialog.html#signals">QDialog</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qwidget.html#signals">QWidget</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>38 protected functions inherited from <a href="qwidget.html#protected-functions">QWidget</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>1 protected function inherited from <a href="qpaintdevice.html#protected-functions">QPaintDevice</a></li>
+<li><div class="fn"/>1 protected slot inherited from <a href="qwidget.html#protected-slots">QWidget</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QInputDialog class provides a simple convenience dialog to get a single value from the user.</p>
+<p>The input value can be a string, a number or an item from a list. A label must be set to tell the user what they should enter.</p>
+<p>Four static convenience functions are provided: <a href="qinputdialog.html#getText">getText</a>(), <a href="qinputdialog.html#getInteger">getInteger</a>(), <a href="qinputdialog.html#getDouble">getDouble</a>() and <a href="qinputdialog.html#getItem">getItem</a>(). All the functions can be used in a similar way, for example:</p>
+<pre></pre>
+<p>The <tt>ok</tt> variable is set to true if the user clicks <b>OK</b>; otherwise it is set to false.</p>
+<p align="center"><img src="images/inputdialogs.png" alt="Input Dialogs" /></p><p>The Standard Dialogs example shows how to use QInputDialog as well as other built-in Qt dialogs.</p>
+<p>See also <a href="qmessagebox.html">QMessageBox</a> and Standard Dialogs Example.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="getDouble"></a>double QInputDialog::getDouble ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qstring.html">QString</a> &amp; <i>label</i>, double <i>value</i> = 0, double <i>minValue</i> = -2147483647, double <i>maxValue</i> = 2147483647, int <i>decimals</i> = 1, bool * <i>ok</i> = 0, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Static convenience function to get a floating point number from the user. <i>title</i> is the text which is displayed in the title bar of the dialog. <i>label</i> is the text which is shown to the user (it should say what should be entered). <i>value</i> is the default floating point number that the line edit will be set to. <i>minValue</i> and <i>maxValue</i> are the minimum and maximum values the user may choose, and <i>decimals</i> is the maximum number of decimal places the number may have.</p>
+<p>If <i>ok</i> is non-null, *<i>ok</i> will be set to true if the user pressed OK and to false if the user pressed <b>Cancel</b>. The dialog's parent is <i>parent</i>. The dialog will be modal and uses the widget flags <i>f</i>.</p>
+<p>This function returns the floating point number which has been entered by the user.</p>
+<p>Use this static function like this:</p>
+<pre></pre>
+<p>See also <a href="qinputdialog.html#getText">getText</a>(), <a href="qinputdialog.html#getInteger">getInteger</a>(), and <a href="qinputdialog.html#getItem">getItem</a>().</p>
+<h3 class="fn"><a name="getInteger"></a>int QInputDialog::getInteger ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qstring.html">QString</a> &amp; <i>label</i>, int <i>value</i> = 0, int <i>minValue</i> = -2147483647, int <i>maxValue</i> = 2147483647, int <i>step</i> = 1, bool * <i>ok</i> = 0, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Static convenience function to get an integer input from the user. <i>title</i> is the text which is displayed in the title bar of the dialog. <i>label</i> is the text which is shown to the user (it should say what should be entered). <i>value</i> is the default integer which the spinbox will be set to. <i>minValue</i> and <i>maxValue</i> are the minimum and maximum values the user may choose, and <i>step</i> is the amount by which the values change as the user presses the arrow buttons to increment or decrement the value.</p>
+<p>If <i>ok</i> is non-null *<i>ok</i> will be set to true if the user pressed <b>OK</b> and to false if the user pressed <b>Cancel</b>. The dialog's parent is <i>parent</i>. The dialog will be modal and uses the widget flags <i>f</i>.</p>
+<p>This function returns the integer which has been entered by the user.</p>
+<p>Use this static function like this:</p>
+<pre></pre>
+<p>See also <a href="qinputdialog.html#getText">getText</a>(), <a href="qinputdialog.html#getDouble">getDouble</a>(), and <a href="qinputdialog.html#getItem">getItem</a>().</p>
+<h3 class="fn"><a name="getItem"></a><a href="qstring.html">QString</a> QInputDialog::getItem ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qstring.html">QString</a> &amp; <i>label</i>, const <a href="qstringlist.html">QStringList</a> &amp; <i>list</i>, int <i>current</i> = 0, bool <i>editable</i> = true, bool * <i>ok</i> = 0, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Static convenience function to let the user select an item from a string list. <i>title</i> is the text which is displayed in the title bar of the dialog. <i>label</i> is the text which is shown to the user (it should say what should be entered). <i>list</i> is the string list which is inserted into the combobox, and <i>current</i> is the number of the item which should be the current item. If <i>editable</i> is true the user can enter their own text; if <i>editable</i> is false the user may only select one of the existing items.</p>
+<p>If <i>ok</i> is non-null <i>*a</i> ok will be set to true if the user pressed OK and to false if the user pressed <b>Cancel</b>. The dialog's parent is <i>parent</i>. The dialog will be modal and uses the widget flags <i>f</i>.</p>
+<p>This function returns the text of the current item, or if <i>editable</i> is true, the current text of the combobox.</p>
+<p>Use this static function like this:</p>
+<pre></pre>
+<p>See also <a href="qinputdialog.html#getText">getText</a>(), <a href="qinputdialog.html#getInteger">getInteger</a>(), and <a href="qinputdialog.html#getDouble">getDouble</a>().</p>
+<h3 class="fn"><a name="getText"></a><a href="qstring.html">QString</a> QInputDialog::getText ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qstring.html">QString</a> &amp; <i>label</i>, <a href="qlineedit.html#EchoMode-enum">QLineEdit::EchoMode</a> <i>mode</i> = QLineEdit::Normal, const <a href="qstring.html">QString</a> &amp; <i>text</i> = QString(), bool * <i>ok</i> = 0, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Static convenience function to get a string from the user. <i>title</i> is the text which is displayed in the title bar of the dialog. <i>label</i> is the text which is shown to the user (it should say what should be entered). <i>text</i> is the default text which is placed in the line edit. The <i>mode</i> is the echo mode the line edit will use. If <i>ok</i> is non-null <i>*a</i> ok will be set to true if the user pressed <b>OK</b> and to false if the user pressed <b>Cancel</b>. The dialog's parent is <i>parent</i>. The dialog will be modal and uses the widget flags <i>f</i>.</p>
+<p>This function returns the text which has been entered in the line edit. It will not return an empty string.</p>
+<p>Use this static function like this:</p>
+<pre></pre>
+<p>See also <a href="qinputdialog.html#getInteger">getInteger</a>(), <a href="qinputdialog.html#getDouble">getDouble</a>(), and <a href="qinputdialog.html#getItem">getItem</a>().</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="getDouble-2"></a>double QInputDialog::getDouble ( const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qstring.html">QString</a> &amp; <i>label</i>, double <i>value</i> = 0, double <i>minValue</i> = -2147483647, double <i>maxValue</i> = 2147483647, int <i>decimals</i> = 1, bool * <i>ok</i> = 0, <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, const char * <i>name</i> = 0, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Call getDouble(<i>parent</i>, <i>title</i>, <i>label</i>, <i>value</i>, <i>minValue</i>, <i>maxValue</i>, <i>decimals</i>, <i>ok</i>, <i>f</i>).</p>
+<p>The <i>name</i> parameter is ignored.</p>
+<h3 class="fn"><a name="getInteger-2"></a>int QInputDialog::getInteger ( const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qstring.html">QString</a> &amp; <i>label</i>, int <i>value</i> = 0, int <i>minValue</i> = -2147483647, int <i>maxValue</i> = 2147483647, int <i>step</i> = 1, bool * <i>ok</i> = 0, <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, const char * <i>name</i> = 0, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Call getInteger(<i>parent</i>, <i>title</i>, <i>label</i>, <i>value</i>, <i>minValue</i>, <i>maxValue</i>, <i>step</i>, <i>ok</i>, <i>f</i>) instead.</p>
+<p>The <i>name</i> parameter is ignored.</p>
+<h3 class="fn"><a name="getItem-2"></a><a href="qstring.html">QString</a> QInputDialog::getItem ( const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qstring.html">QString</a> &amp; <i>label</i>, const <a href="qstringlist.html">QStringList</a> &amp; <i>list</i>, int <i>current</i> = 0, bool <i>editable</i> = true, bool * <i>ok</i> = 0, <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, const char * <i>name</i> = 0, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Call getItem(<i>parent</i>, <i>title</i>, <i>label</i>, <i>list</i>, <i>current</i>, <i>editable</i>, <i>ok</i>, <i>f</i>) instead.</p>
+<p>The <i>name</i> parameter is ignored.</p>
+<h3 class="fn"><a name="getText-2"></a><a href="qstring.html">QString</a> QInputDialog::getText ( const <a href="qstring.html">QString</a> &amp; <i>title</i>, const <a href="qstring.html">QString</a> &amp; <i>label</i>, <a href="qlineedit.html#EchoMode-enum">QLineEdit::EchoMode</a> <i>echo</i> = QLineEdit::Normal, const <a href="qstring.html">QString</a> &amp; <i>text</i> = QString(), bool * <i>ok</i> = 0, <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, const char * <i>name</i> = 0, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>f</i> = 0 )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Call getText(<i>parent</i>, <i>title</i>, <i>label</i>, <i>echo</i>, <i>text</i>, <i>ok</i>, <i>f</i>) instead.</p>
+<p>The <i>name</i> parameter is ignored.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

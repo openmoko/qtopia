@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# stop other services
+for file in /etc/rc.d/*.sh; do
+    if [ "$file" != "/etc/rc.d/*.sh" ]; then
+        eval $file stop
+    fi
+done
+
+# unmount all file systems
+/bin/umount -a -r
+

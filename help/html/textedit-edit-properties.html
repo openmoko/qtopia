@@ -1,23 +1,26 @@
-<qt title="Edit Note Properties">
+<html>
+<head><title>Edit Note Properties</title></head>
+<body>
 <h3>Edit Note Properties</h3>
-%%PHONE%%
+<!--#if expr="$PHONESTYLE"-->
 <ul>
-<li>Use <img src="help/dpad"> to highlight the note title and press <img src="contextbar/select.png"> to display the note.</li>
-<li>Press <img src="contextbar/options.png"> and use <img src="help/dpad"> to highlight <b>Properties</b>, then press <img src="contextbar/select.png">.</li>
-<li>Use <img src="help/dpad"> and <img src="contextbar/select.png"> to open fields for editing.</li>
-<li>Use <img src="contextbar/backspace.png"> to backspace and delete the text, then use the keypad to enter new text.</li>
-<li>Press <img src="contextbar/ok.png"> to accept new text.</li>
-<li>Press <img src="contextbar/back.png"> to save the task and exit.</li>
+<li>Use <img src=":image/help/dpad"> </img> to highlight the note title and press <img src=":icon/select"> </img> to display the note.</li>
+<li>Press <img src=":icon/options"> </img> and use <img src=":image/help/dpad"> </img> to highlight <b>Properties</b>, then press <img src=":icon/select">.</li>
+<li>Use <img src=":image/help/dpad"> </img> and <img src=":icon/select"> </img> to open fields for editing.</li>
+<li>Use <img src=":icon/i18n/backspace"> </img> to backspace and delete the text, then use the keypad to enter new text.</li>
+<li>Press <img src=":icon/ok"> </img> to accept new text.</li>
+<li>Press <img src=":icon/i18n/back"> </img> to save the task and exit.</li>
 </ul>
 
-@@PHONE@@
+<!--#endif-->
 
-%%PDA%%
+<!--#if expr="$PDASTYLE"-->
 <ul>
 <li>Tap the note to view it.</li>
 <li>Tap <b>File</b> and select <b>Properties</b> from the menu.</li>
 <li>Modify the fields as required.</li>
-<li>Tap <img src="qpe/pda/OKButton.png" alt="OK"> to save your changes, or <img src="qpe/pda/CloseButton.png" alt="X"> to cancel.</li>
+<li>Tap <img src=":image/qpe/pda/OKButton" alt="OK"> </img> to save your changes, or <img src=":image/qpe/pda/CloseButton" alt="X"> </img> to cancel.</li>
 </ul>
-@@PDA@@
-</qt>
+<!--#endif-->
+</body>
+</html>

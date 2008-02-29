@@ -1,0 +1,140 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QBluetoothAbstractServer Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QBluetoothAbstractServer Class Reference</h1>
+<p>The QBluetoothAbstractServer class represents an abstract Bluetooth server socket. <a href="#details">More...</a></p>
+<pre>    #include &lt;QBluetoothAbstractServer&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
+<p>Inherited by <a href="qbluetoothrfcommserver.html">QBluetoothRfcommServer</a> and <a href="qbluetoothscoserver.html">QBluetoothScoServer</a>.</p>
+<ul>
+<li><a href="qbluetoothabstractserver-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h3>Public Types</h3>
+<ul>
+<li><div class="fn"/>enum <b><a href="qbluetoothabstractserver.html#ServerError-enum">ServerError</a></b> { NoError, ResourceError, BindError, ListenError, UnknownError }</li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qbluetoothabstractserver.html#QBluetoothAbstractServer">QBluetoothAbstractServer</a></b> ( QObject * <i>parent</i> = 0 )</li>
+<li><div class="fn"/><b><a href="qbluetoothabstractserver.html#dtor.QBluetoothAbstractServer">~QBluetoothAbstractServer</a></b> ()</li>
+<li><div class="fn"/>virtual void <b><a href="qbluetoothabstractserver.html#close">close</a></b> ()</li>
+<li><div class="fn"/>bool <b><a href="qbluetoothabstractserver.html#hasPendingConnections">hasPendingConnections</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qbluetoothabstractserver.html#isListening">isListening</a></b> () const</li>
+<li><div class="fn"/>QBluetoothAbstractServer::ServerError <b><a href="qbluetoothabstractserver.html#lastError">lastError</a></b> () const</li>
+<li><div class="fn"/>int <b><a href="qbluetoothabstractserver.html#maxPendingConnections">maxPendingConnections</a></b> () const</li>
+<li><div class="fn"/>QBluetoothAbstractSocket * <b><a href="qbluetoothabstractserver.html#nextPendingConnection">nextPendingConnection</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qbluetoothabstractserver.html#setMaxPendingConnections">setMaxPendingConnections</a></b> ( int <i>numConnections</i> )</li>
+<li><div class="fn"/>int <b><a href="qbluetoothabstractserver.html#socketDescriptor">socketDescriptor</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qbluetoothabstractserver.html#waitForNewConnection">waitForNewConnection</a></b> ( int <i>msecs</i> = 0, bool * <i>timedOut</i> = 0 )</li>
+</ul>
+<ul>
+<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+</ul>
+<a name="signals"></a>
+<h3>Signals</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qbluetoothabstractserver.html#newConnection">newConnection</a></b> ()</li>
+</ul>
+<ul>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+</ul>
+<a name="protected-functions"></a>
+<h3>Protected Functions</h3>
+<ul>
+<li><div class="fn"/>virtual QBluetoothAbstractSocket * <b><a href="qbluetoothabstractserver.html#createSocket">createSocket</a></b> () = 0</li>
+<li><div class="fn"/>bool <b><a href="qbluetoothabstractserver.html#initiateListen">initiateListen</a></b> ( int <i>socket</i>, sockaddr * <i>addr</i>, int <i>len</i> )</li>
+<li><div class="fn"/>void <b><a href="qbluetoothabstractserver.html#setError">setError</a></b> ( const QBluetoothAbstractServer::ServerError &amp; <i>error</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QBluetoothAbstractServer class represents an abstract Bluetooth server socket.</p>
+<p>This class makes it possible to accept incoming Bluetooth connections.</p>
+<p>Call the subclass listen() implementation to have the server listen for incoming connections. The <a href="qbluetoothabstractserver.html#newConnection">newConnection</a>() signal is emitted each time a client connects to the server.</p>
+<p>Call <a href="qbluetoothabstractserver.html#nextPendingConnection">nextPendingConnection</a>() to accept the pending connection as a connected <a href="qbluetoothabstractsocket.html">QBluetoothAbstractSocket</a>. The actual socket type depends on the type of the server. E.g. the <a href="qbluetoothrfcommserver.html">QBluetoothRfcommServer</a> class will return <a href="qbluetoothrfcommsocket.html">QBluetoothRfcommSocket</a> sockets. The function returns a pointer to a <a href="qbluetoothabstractsocket.html">QBluetoothAbstractSocket</a> in <a href="qbluetoothabstractsocket.html#SocketState-enum">QBluetoothAbstractSocket::ConnectedState</a> that you can use for communicating with the client.</p>
+<p>If an error occurs, <a href="qbluetoothabstractserver.html#lastError">lastError</a>() returns the type of error that has occurred.</p>
+<p>Calling <a href="qbluetoothabstractserver.html#close">close</a>() makes the QBluetoothAbstractServer stop listening for incoming connections.</p>
+<hr />
+<h2>Member Type Documentation</h2>
+<h3 class="fn"><a name="ServerError-enum"></a>enum QBluetoothAbstractServer::ServerError</h3>
+<p>The error that has occurred on the server.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QBluetoothAbstractServer::NoError</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">No error.</td></tr>
+<tr><td valign="top"><tt>QBluetoothAbstractServer::ResourceError</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The system has run out of sockets.</td></tr>
+<tr><td valign="top"><tt>QBluetoothAbstractServer::BindError</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">The socket could not be bound to the address provided.</td></tr>
+<tr><td valign="top"><tt>QBluetoothAbstractServer::ListenError</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The socket could not be listened on.</td></tr>
+<tr><td valign="top"><tt>QBluetoothAbstractServer::UnknownError</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">An unknown error has occurred.</td></tr>
+</table></p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QBluetoothAbstractServer"></a>QBluetoothAbstractServer::QBluetoothAbstractServer ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs a new <a href="qbluetoothabstractserver.html">QBluetoothAbstractServer</a> with parent <i>parent</i>. The server is in the UnconnectedState.</p>
+<h3 class="fn"><a name="dtor.QBluetoothAbstractServer"></a>QBluetoothAbstractServer::~QBluetoothAbstractServer ()</h3>
+<p>Destructor.</p>
+<h3 class="fn"><a name="close"></a>void QBluetoothAbstractServer::close ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Closes the server. The server will no longer listen for incoming connections.</p>
+<h3 class="fn"><a name="createSocket"></a><a href="qbluetoothabstractsocket.html">QBluetoothAbstractSocket</a> * QBluetoothAbstractServer::createSocket ()&nbsp;&nbsp;<tt> [pure virtual protected]</tt></h3>
+<p>Clients of this class should override this function to provide sockets specific to the protocol that the client server implements.</p>
+<h3 class="fn"><a name="hasPendingConnections"></a>bool QBluetoothAbstractServer::hasPendingConnections () const</h3>
+<p>Returns true if the server has a pending connection; otherwise returns false.</p>
+<p>See also <a href="qbluetoothabstractserver.html#nextPendingConnection">nextPendingConnection</a>() and <a href="qbluetoothabstractserver.html#setMaxPendingConnections">setMaxPendingConnections</a>().</p>
+<h3 class="fn"><a name="initiateListen"></a>bool QBluetoothAbstractServer::initiateListen ( int <i>socket</i>, sockaddr * <i>addr</i>, int <i>len</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<p>Subclasses of this class should call this function and hand off the server socket that will be used for accepting connections. The <i>socket</i> parameter contains the socket file descriptor, the <i>addr</i> parameter contains the sockaddr structure of the address to bind and listen on. The <i>len</i> contains the length of the <i>addr</i> structure.</p>
+<p>See also <a href="qbluetoothabstractserver.html#isListening">isListening</a>().</p>
+<h3 class="fn"><a name="isListening"></a>bool QBluetoothAbstractServer::isListening () const</h3>
+<p>Returns true if the server is currently listening for remote connections, and false otherwise.</p>
+<h3 class="fn"><a name="lastError"></a><a href="qbluetoothabstractserver.html#ServerError-enum">QBluetoothAbstractServer::ServerError</a> QBluetoothAbstractServer::lastError () const</h3>
+<p>Returns the last error that has occurred.</p>
+<h3 class="fn"><a name="maxPendingConnections"></a>int QBluetoothAbstractServer::maxPendingConnections () const</h3>
+<p>Returns the maximum number of pending accepted connections. The default is 7.</p>
+<p>See also <a href="qbluetoothabstractserver.html#setMaxPendingConnections">setMaxPendingConnections</a>() and <a href="qbluetoothabstractserver.html#hasPendingConnections">hasPendingConnections</a>().</p>
+<h3 class="fn"><a name="newConnection"></a>void QBluetoothAbstractServer::newConnection ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted every time a new connection is available.</p>
+<p>See also <a href="qbluetoothabstractserver.html#hasPendingConnections">hasPendingConnections</a>() and <a href="qbluetoothabstractserver.html#nextPendingConnection">nextPendingConnection</a>().</p>
+<h3 class="fn"><a name="nextPendingConnection"></a><a href="qbluetoothabstractsocket.html">QBluetoothAbstractSocket</a> * QBluetoothAbstractServer::nextPendingConnection ()</h3>
+<p>Returns the next pending connection as a connected <a href="qbluetoothrfcommsocket.html">QBluetoothRfcommSocket</a> object.</p>
+<p>The socket is created as a child of the server, which means that it is automatically deleted when the <a href="qbluetoothscoserver.html">QBluetoothScoServer</a> object is destroyed. It is still a good idea to delete the object explicitly when you are done with it, to avoid wasting memory.</p>
+<p>0 is returned if this function is called when there are no pending connections.</p>
+<p>See also <a href="qbluetoothabstractserver.html#hasPendingConnections">hasPendingConnections</a>().</p>
+<h3 class="fn"><a name="setError"></a>void QBluetoothAbstractServer::setError ( const <a href="qbluetoothabstractserver.html#ServerError-enum">QBluetoothAbstractServer::ServerError</a> &amp; <i>error</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<p>Sets the last error that has occurred to <i>error</i>.</p>
+<h3 class="fn"><a name="setMaxPendingConnections"></a>void QBluetoothAbstractServer::setMaxPendingConnections ( int <i>numConnections</i> )</h3>
+<p>Sets the maximum number of pending accepted connections to <i>numConnections</i>. <a href="qbluetoothscoserver.html">QBluetoothScoServer</a> will accept no more than <i>numConnections</i> incoming connections before <a href="qbluetoothabstractserver.html#nextPendingConnection">nextPendingConnection</a>() is called. By default, the limit is 1 pending connection.</p>
+<p>See also <a href="qbluetoothabstractserver.html#maxPendingConnections">maxPendingConnections</a>().</p>
+<h3 class="fn"><a name="socketDescriptor"></a>int QBluetoothAbstractServer::socketDescriptor () const</h3>
+<p>Returns the socket descriptor the server is currently listening on. If the server is not listening, then -1 is returned.</p>
+<h3 class="fn"><a name="waitForNewConnection"></a>bool QBluetoothAbstractServer::waitForNewConnection ( int <i>msecs</i> = 0, bool * <i>timedOut</i> = 0 )</h3>
+<p>Waits for at most <i>msecs</i> milliseconds or until an incoming connection is available. Returns true if a connection is available; otherwise returns false. If the operation timed out and <i>timedOut</i> is not 0, *<i>timedOut</i> will be set to true.</p>
+<p>This is a blocking function call. Its use is disadvised in a single-threaded GUI application, since the whole application will stop responding until the function returns. waitForNewConnection() is mostly useful when there is no event loop available.</p>
+<p>The non-blocking alternative is to connect to the <a href="qbluetoothabstractserver.html#newConnection">newConnection</a>() signal.</p>
+<p>See also <a href="qbluetoothabstractserver.html#hasPendingConnections">hasPendingConnections</a>() and <a href="qbluetoothabstractserver.html#nextPendingConnection">nextPendingConnection</a>().</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

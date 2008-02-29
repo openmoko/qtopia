@@ -1,299 +1,276 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
+
 #include "launchertab.h"
-#include <qapplication.h>
-#include <qstyle.h>
-#include <qpainter.h>
-#include <qbitmap.h>
+#include <QVariant>
+#include <QStyle>
 
-
-LauncherTabBar::LauncherTabBar( QWidget *parent, const char *name )
-    : QTabBar( parent, name )
+class LauncherTabStyle : public QWindowsStyle
 {
-    setFocusPolicy( NoFocus );
-    connect( this, SIGNAL( selected(int) ), this, SLOT( layoutTabs() ) );
+public:
+    void drawControl(ControlElement element, const QStyleOption *option,
+                     QPainter *painter, const QWidget *widget=0) const;
+    QSize sizeFromContents(ContentsType type, const QStyleOption *option,
+                           const QSize &contentsSize, const QWidget *widget=0) const;
+};
+
+void LauncherTabStyle::drawControl(ControlElement element, const QStyleOption *option,
+                                   QPainter *painter, const QWidget *widget) const
+{
+    if (element == CE_TabBarTab || element == CE_TabBarTabLabel) {
+        const QStyleOptionTab *topt = qstyleoption_cast<const QStyleOptionTab*>(option);
+
+        // We have to use the text as a key to work out which tab we're drawing.
+        // There has to be a better way... :(
+        const LauncherTabBar * tb = static_cast<const LauncherTabBar *>(widget);
+        LauncherTab * tab = tb->lookup(topt->text);
+        Q_ASSERT(tab);
+
+        QStyleOptionTab opt = *topt;
+
+        if(LauncherTabBar::NamesOff == tb->m_mode &&
+           !(topt->state & State_Selected)) {
+            opt.text = QString();
+        } else {
+            opt.text = tab->visibleLabel;
+        }
+
+        if(tab->fgColor.isValid() || tab->bgColor.isValid()) {
+            if(tab->fgColor.isValid()) {
+                opt.palette.setColor(QPalette::Active,
+                                QPalette::Foreground,
+                                tab->fgColor);
+                opt.palette.setColor(QPalette::Active,
+                                QPalette::Text,
+                                tab->fgColor);
+                opt.palette.setColor(QPalette::Inactive,
+                                QPalette::Foreground,
+                                tab->fgColor);
+                opt.palette.setColor(QPalette::Inactive,
+                                QPalette::Text,
+                                tab->fgColor);
+            }
+            if(tab->bgColor.isValid()) {
+                opt.palette.setColor(QPalette::Active,
+                                QPalette::Background,
+                                tab->bgColor);
+                opt.palette.setColor(QPalette::Active,
+                                QPalette::Button,
+                                tab->bgColor);
+                opt.palette.setColor(QPalette::Inactive,
+                                QPalette::Background,
+                                tab->bgColor);
+                opt.palette.setColor(QPalette::Inactive,
+                                QPalette::Button,
+                                tab->bgColor);
+            }
+        }
+
+        qApp->style()->drawControl(element, &opt, painter, widget);
+        return;
+    }
+
+    qApp->style()->drawControl(element, option, painter, widget);
+}
+
+QSize LauncherTabStyle::sizeFromContents(ContentsType type, const QStyleOption *option,
+                                         const QSize &contentsSize, const QWidget *widget) const
+{
+    if (type == CT_TabBarTab) {
+        const QStyleOptionTab *topt = qstyleoption_cast<const QStyleOptionTab *>(option);
+
+        const LauncherTabBar * tb = static_cast<const LauncherTabBar *>(widget);
+
+        if(topt->state & State_Selected) {
+            QSize s = qApp->style()->sizeFromContents(CT_TabBarTab, option, contentsSize, widget);
+
+            if(-1 != tb->m_selectedSize) {
+                s.setWidth(tb->m_selectedSize);
+            }
+
+            return s;
+        } else {
+
+            if(LauncherTabBar::NamesOff == tb->m_mode) {
+                int iconSizeWidth = qApp->style()->pixelMetric(QStyle::PM_SmallIconSize);
+                QSize csz(iconSizeWidth+10, contentsSize.height());
+
+                return qApp->style()->sizeFromContents(CT_TabBarTab, option, csz, widget);
+            }
+
+        }
+    }
+
+    return qApp->style()->sizeFromContents(type, option, contentsSize, widget);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// LauncherTabBar
+///////////////////////////////////////////////////////////////////////////////
+LauncherTabBar::LauncherTabBar(QWidget *parent)
+    : QTabBar(parent), m_itemsOnEnd(0), m_mode(NamesOn), m_selectedSize(-1)
+{
+    setStyle(new LauncherTabStyle);
+    connect(this, SIGNAL(currentChanged(int)), this, SLOT(changed(int)));
 }
 
 LauncherTabBar::~LauncherTabBar()
 {
 }
 
-void LauncherTabBar::insertTab( LauncherTab *t, int index )
+void LauncherTabBar::changed(int idx)
 {
-    if ( index < 0 )
-	items.append( t );
+    Q_UNUSED(idx);
+    layoutTabs();
+    resizeEvent(0);
+}
+
+LauncherTab * LauncherTabBar::addTab(const QString &type,
+                                     const QString &visibleText,
+                                     const QIcon &icon,
+                                     bool forceToEnd)
+{
+    LauncherTab * tab = new LauncherTab(visibleText);
+    if(forceToEnd) {
+        m_items += tab;
+        ++m_itemsOnEnd;
+        Q_ASSERT(m_tabs.find(type) == m_tabs.end());
+        m_tabs.insert(type, tab);
+        QTabBar::addTab(icon, type);
+    } else {
+        int tabNum = m_items.count() - m_itemsOnEnd;
+        m_items.insert(tabNum, tab);
+        m_tabs.insert(type, tab);
+        QTabBar::insertTab(tabNum, icon, type);
+    }
+
+    layoutTabs();
+    resizeEvent(0);
+    return tab;
+}
+
+void LauncherTabBar::removeTab(const QString &type)
+{
+    QMap<QString, LauncherTab *>::iterator iter = m_tabs.find(type);
+    if(m_tabs.end() == iter) return; // Removing non-existent type
+
+    LauncherTab * tab = *iter;
+    m_tabs.erase(iter);
+
+    // Find the appropriate tab number - as this is a rare operation and there
+    // are never many tabs, a linear search will be fine.  There should only
+    // ever be one entry for each type
+    for(int ii = 0; ii < m_items.count(); ii++) {
+        if(tab == m_items.at(ii)) {
+            QTabBar::removeTab(ii);
+            m_items.removeAt(ii);
+            break; // Success
+        }
+    }
+
+    layoutTabs();
+    resizeEvent(0);
+    if(tab) delete tab;
+}
+
+LauncherTab * LauncherTabBar::lookup(const QString &type) const
+{
+    QMap<QString, LauncherTab *>::const_iterator iter = m_tabs.find(type);
+    if(m_tabs.end() != iter)
+        return *iter;
     else
-	items.insert( (uint)index, t );
-    tabs.insert( t->type, t );
-    QTabBar::insertTab( t, index );
+        return 0;
 }
 
-void LauncherTabBar::removeTab( QTab *tab )
+LauncherTab * LauncherTabBar::lookup(int num) const
 {
-    LauncherTab *t = (LauncherTab *)tab;
-    tabs.remove( t->type );
-    items.remove( t );
-    QTabBar::removeTab( t );
+    if(num < m_items.count())
+        return m_items.at(num);
+    else
+        return 0;
 }
 
-void LauncherTabBar::prevTab()
+LauncherTab * LauncherTabBar::currentTab() const
 {
-    int n = count();
-    int tab = currentTab();
-    if ( tab >= 0 )
-	setCurrentTab( (tab - 1 + n)%n );
+    if(-1 == currentIndex()) return 0;
+    else return m_items.at(currentIndex());
 }
 
-void LauncherTabBar::nextTab()
+void LauncherTabBar::setCurrentTab(const QString &type)
 {
-    int n = count();
-    int tab = currentTab();
-    setCurrentTab( (tab + 1)%n );
-}
+    QMap<QString, LauncherTab *>::iterator iter = m_tabs.find(type);
+    if(m_tabs.end() == iter) return; // Non-existent type
 
-void LauncherTabBar::showTab( const QString& id )
-{
-    setCurrentTab( tabs[id] );
+    LauncherTab * tab = *iter;
+
+    // Find the appropriate tab number - as this is a rare operation and there
+    // are never many tabs, a linear search will be fine.  There should only
+    // ever be one entry for each type
+    for(int ii = 0; ii < m_items.count(); ii++) {
+        if(tab == m_items.at(ii)) {
+            QTabBar::setCurrentIndex(ii);
+            break; // Success
+        }
+    }
 }
 
 void LauncherTabBar::layoutTabs()
 {
-    if ( !count() )
-	return;
+    // Always try and layout with the names on first
+    m_mode = NamesOn;
+    // Can't have the size adjustment affecting anything
+    m_selectedSize = -1;
 
-    int available = width()-1;
+    int required = requiredSpace();
 
-    QFontMetrics fm = fontMetrics();
-    int hiddenTabWidth = -12;
-    LauncherTab *current = currentLauncherTab();
-    int hframe, vframe, overlap;
-    style().tabbarMetrics( this, hframe, vframe, overlap );
-    int x = 0;
-    QRect r;
-    LauncherTab *t;
-    QListIterator< LauncherTab > it( items );
-    int required = 0;
-    int eventabwidth = (width()-1)/count();
-    enum Mode { HideBackText, Pack, Even } mode=Even;
-    for (it.toFirst(); it.current(); ++it ) {
-	t = it.current();
-	if ( !t )
-	    continue;
-	int iw = fm.width( t->text() ) + hframe - overlap;
-	if ( t != current ) {
-	    available -= hiddenTabWidth + hframe - overlap;
-	    if ( t->iconSet() != 0 )
-		available -= t->iconSet()->pixmap( QIconSet::Small, QIconSet::Normal ).width();
-	}
-	if ( t->iconSet() != 0 )
-	    iw += t->iconSet()->pixmap( QIconSet::Small, QIconSet::Normal ).width();
-	required += iw;
-	// As space gets tight, packed looks better than even. "10" must be at least 0.
-	if ( iw >= eventabwidth-10 )
-	    mode = Pack;
-    }
-    if ( mode == Pack && required > width()-1 )
-	mode = HideBackText;
-    for ( it.toFirst(); it.current(); ++it ) {
-	t = it.current();
-	if ( !t )
-	    continue;
-	if ( mode != HideBackText ) {
-	    int w = fm.width( t->text() );
-	    int ih = 0;
-	    if ( t->iconSet() != 0 ) {
-		w += t->iconSet()->pixmap( QIconSet::Small, QIconSet::Normal ).width();
-		ih = t->iconSet()->pixmap( QIconSet::Small, QIconSet::Normal ).height();
-	    }
-	    int h = QMAX( fm.height(), ih );
-	    h = QMAX( h, QApplication::globalStrut().height() );
-
-	    h += vframe;
-	    w += hframe;
-
-	    QRect totr(x, 0,
-		mode == Even ? eventabwidth : w * (width()-1)/required, h);
-	    t->setRect(totr);
-	    x += totr.width() - overlap;
-	    r = r.unite(totr);
-	} else if ( t != current ) {
-	    int w = hiddenTabWidth;
-	    int ih = 0;
-	    if ( t->iconSet() != 0 ) {
-		w += t->iconSet()->pixmap( QIconSet::Small, QIconSet::Normal ).width();
-		ih = t->iconSet()->pixmap( QIconSet::Small, QIconSet::Normal ).height();
-	    }
-	    int h = QMAX( fm.height(), ih );
-	    h = QMAX( h, QApplication::globalStrut().height() );
-
-	    h += vframe;
-	    w += hframe;
-
-	    t->setRect( QRect(x, 0, w, h) );
-	    x += t->rect().width() - overlap;
-	    r = r.unite( t->rect() );
-	} else {
-	    int ih = 0;
-	    if ( t->iconSet() != 0 ) {
-		ih = t->iconSet()->pixmap( QIconSet::Small, QIconSet::Normal ).height();
-	    }
-	    int h = QMAX( fm.height(), ih );
-	    h = QMAX( h, QApplication::globalStrut().height() );
-
-	    h += vframe;
-
-	    t->setRect( QRect(x, 0, available, h) );
-	    x += t->rect().width() - overlap;
-	    r = r.unite( t->rect() );
-	}
-    }
-
-    t = it.toLast();
-    if (t) {
-	QRect rr = t->rect();
-	rr.setRight(width()-1);
-	t->setRect( rr );
-    }
-
-    for (it.toFirst(); it.current(); ++it ) {
-	t = it.current();
-	QRect tr = t->rect();
-	tr.setHeight( r.height() );
-	t->setRect( tr );
-    }
-
-    update();
-}
-
-void LauncherTabBar::paint( QPainter * p, QTab * t, bool selected ) const
-{
-    LauncherTabBar *that = (LauncherTabBar *) this;
-    LauncherTab *ct = (LauncherTab *)t;
-    QPalette pal = palette();
-    bool setPal = FALSE;
-    if ( ct->bgColor.isValid() ) {
-	pal.setColor( QPalette::Active, QColorGroup::Background, ct->bgColor );
-	pal.setColor( QPalette::Active, QColorGroup::Button, ct->bgColor );
-	pal.setColor( QPalette::Inactive, QColorGroup::Background, ct->bgColor );
-	pal.setColor( QPalette::Inactive, QColorGroup::Button, ct->bgColor );
-	that->setUpdatesEnabled( FALSE );
-	that->setPalette( pal );
-	setPal = TRUE;
-    }
-#if QT_VERSION >= 0x030000
-    QStyle::SFlags flags = QStyle::Style_Default;
-    if ( selected )
-        flags |= QStyle::Style_Selected;
-    style().drawControl( QStyle::CE_TabBarTab, p, this, t->rect(),
-                         colorGroup(), flags, QStyleOption(t) );
-#else
-    style().drawTab( p, this, t, selected );
-#endif
-
-    QRect r( t->rect() );
-    QFont f( font() );
-    if ( selected )
-	f.setBold( TRUE );
-    p->setFont( f );
-
-    if ( ct->fgColor.isValid() ) {
-	pal.setColor( QPalette::Active, QColorGroup::Foreground, ct->fgColor );
-	pal.setColor( QPalette::Inactive, QColorGroup::Foreground, ct->fgColor );
-	that->setUpdatesEnabled( FALSE );
-	that->setPalette( pal );
-	setPal = TRUE;
-    }
-    int iw = 0;
-    int ih = 0;
-    if ( t->iconSet() != 0 ) {
-	iw = t->iconSet()->pixmap( QIconSet::Small, QIconSet::Normal ).width() + 2;
-	ih = t->iconSet()->pixmap( QIconSet::Small, QIconSet::Normal ).height();
-    }
-    int w = iw + p->fontMetrics().width( t->text() ) + 4;
-    int h = QMAX(p->fontMetrics().height() + 4, ih );
-    paintLabel( p, QRect( r.left() + (r.width()-w)/2 - 3,
-			    r.top() + (r.height()-h)/2, w, h ), t,
-#if QT_VERSION >= 0x030000
-			    t->identifier() == keyboardFocusTab()
-#else
-			    t->identitifer() == keyboardFocusTab()
-#endif
-		);
-    if ( setPal ) {
-	that->unsetPalette();
-	that->setUpdatesEnabled( TRUE );
-    }
-}
-
-void LauncherTabBar::paintLabel( QPainter* p, const QRect&,
-			  QTab* t, bool has_focus ) const
-{
-    QRect r = t->rect();
-    //    if ( t->id != currentTab() )
-    //r.moveBy( 1, 1 );
-    //
-    if ( t->iconSet() ) {
-	// the tab has an iconset, draw it in the right mode
-	QIconSet::Mode mode = (t->isEnabled() && isEnabled()) ? QIconSet::Normal : QIconSet::Disabled;
-	if ( mode == QIconSet::Normal && has_focus )
-	    mode = QIconSet::Active;
-	QPixmap pixmap = t->iconSet()->pixmap( QIconSet::Small, mode );
-	int pixw = pixmap.width();
-	int pixh = pixmap.height();
-	p->drawPixmap( r.left() + 6, r.center().y() - pixh / 2 + 1, pixmap );
-	r.setLeft( r.left() + pixw + 5 );
-    }
-
-    QRect tr = r;
-
-    if ( r.width() < 20 )
-	return;
-
-    if ( t->isEnabled() && isEnabled()  ) {
-#if defined(_WS_WIN32_)
-	if ( colorGroup().brush( QColorGroup::Button ) == colorGroup().brush( QColorGroup::Background ) )
-	    p->setPen( colorGroup().buttonText() );
-	else
-	    p->setPen( colorGroup().foreground() );
-#else
-	p->setPen( colorGroup().foreground() );
-#endif
-	p->drawText( tr, AlignCenter | AlignVCenter | ShowPrefix, t->text() );
+    if(required == width()) {
+        // Wow - what a coincidence
+    } else if(required < width()) {
+        // Cool, we can make the selected tab fill the rest
+        m_selectedSize = width() - (required - tabSizeHint(currentIndex()).width());
     } else {
-	p->setPen( palette().disabled().foreground() );
-	p->drawText( tr, AlignCenter | AlignVCenter | ShowPrefix, t->text() );
+        // width() > required
+        m_mode = NamesOff;
+        required = requiredSpace();
+
+        // We can try to make the selected tab fill the rest
+        m_selectedSize = width() - (required - tabSizeHint(currentIndex()).width());
+        if(m_selectedSize < tabSizeHint(currentIndex()).width())
+            m_selectedSize = -1; // Not enough space
     }
+}
+
+void LauncherTabBar::resizeEvent(QResizeEvent * e)
+{
+    layoutTabs();
+    QTabBar::resizeEvent(e);
+}
+
+int LauncherTabBar::requiredSpace() const
+{
+    int requiredSpace = 0;
+
+    for(int ii = 0; ii < count(); ii++)
+        requiredSpace += tabSizeHint(ii).width();
+
+    return requiredSpace;
 }
 

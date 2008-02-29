@@ -1,126 +1,34 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
-#include <qapplication.h>
-#include <qstringlist.h>
-#include <qlabel.h>
+#include <QStringList>
+#include <QDebug>
 #include "composeimpl.h"
 #include "composeim.h"
 
 /*
    Constructs the ComposeImpl
 */
-ComposeImpl::ComposeImpl()
-    : input(0), icn(0), statWid(0), ref(0)
-{
-}
-
-/*
-   Destroys the ComposeImpl
-*/
-ComposeImpl::~ComposeImpl()
-{
-    if (input)
-	delete input;
-    if (icn)
-	delete icn;
-    if (statWid)
-	delete statWid;
-}
-
-/*
-   If uuid is a valid id for this plugin, sets \a iface to point to the
-   Input Method provided and returns QS_OK.  Otherwise sets iface to 0
-   and returns QS_FALSE
-*/
-QRESULT ComposeImpl::queryInterface( const QUuid &uuid, QUnknownInterface **iface )
-{
-    *iface = 0;
-    if ( uuid == IID_QUnknown )
-	*iface = this;
-    else if ( uuid == IID_ExtInputMethod )
-	*iface = this;
-    else
-	return QS_FALSE;
-
-    (*iface)->addRef();
-    return QS_OK;
-}
-
-/*
-   Exports the interface so can be loaded by Qtopia
-*/
-Q_EXPORT_INTERFACE()
-{
-    Q_CREATE_INSTANCE( ComposeImpl )
-}
-
-/*
-   Returns 0 for a composing input method plugin.
-*/
-QWidget *ComposeImpl::keyboardWidget( QWidget *, Qt::WFlags )
-{
-    return 0;
-}
-
-
-/*
-   Returns the QWSInputMethod provided by the plugin.
-*/
-QWSInputMethod *ComposeImpl::inputMethod( )
-{
-    if ( !input )
-	input = new ComposeIM( );
-    return input;
-}
-
-
-/*
-   Resets the state of the input method.
-*/
-void ComposeImpl::resetState()
-{
-    if ( input )
-	input->reset();
-}
-
-
-/*
-   Returns the icon for the input method plugin
-*/
-QPixmap *ComposeImpl::icon()
+ComposeImpl::ComposeImpl(QObject *parent)
+    : QtopiaInputMethod(parent), input(0), ref(0)
 {
     /* XPM */
     static const char * pix_xpm[] = {
@@ -141,56 +49,110 @@ QPixmap *ComposeImpl::icon()
 	"   #........#   ",
 	"    ##....##    ",
 	"      ####      "};
+    icn = QIcon(QPixmap((const char **)pix_xpm));
+}
 
-    if (!icn)
-	icn = new QPixmap( pix_xpm );
+/*
+   Destroys the ComposeImpl
+*/
+ComposeImpl::~ComposeImpl()
+{
+    if (input)
+	delete input;
+}
+
+/*
+   Returns the QWSInputMethod provided by the plugin.
+*/
+QWSInputMethod *ComposeImpl::inputModifier( )
+{
+    if ( !input )
+	input = new ComposeIM( );
+    return input;
+}
+
+void ComposeImpl::setHint(const QString &hint, bool)
+{
+    inputModifier();
+    if (hint.isEmpty() || hint == "numbers" || hint == "phone") {
+        if (input->active()) {
+            input->setActive(false);
+            emit stateChanged(Sleeping);
+        }
+    } else if (!input->active()) {
+        input->setActive(true);
+        emit stateChanged(Ready);
+    }
+}
+
+/*
+   Resets the state of the input method.
+*/
+void ComposeImpl::reset()
+{
+    if ( input )
+	input->reset();
+}
+
+/*
+   Returns the state of the input method. this allows
+   the server to hide the input method icon if no
+   input methods are active.
+*/
+QtopiaInputMethod::State ComposeImpl::state() const
+{
+    return (input && input->active()) ? Ready : Sleeping;
+}
+
+/*
+   Returns the icon for the input method plugin
+*/
+QIcon ComposeImpl::icon() const
+{
     return icn;
 }
 
 
 /*
-   Returns the name of the input method plugin
+   Returns the name of the input method plugin suitable
+   for displaying to the user.
 */
-QString ComposeImpl::name()
+QString ComposeImpl::name() const
 {
     return qApp->translate( "InputMethods", "Compose" );
 }
 
 /*
-For a composing input method, the widget returned by statusWidget()
-will be placed in the taskbar when the input method is selected. This
-widget is typically used to display status, and can also be used to
-let the user interact with the input method.
+   Returns the name of the input method plugin suitable
+   for using to identify it in code
 */
-QWidget *ComposeImpl::statusWidget( QWidget *parent, Qt::WFlags flags )
+QString ComposeImpl::identifier() const
 {
-    if (!statWid) {
-	statWid = new QLabel( parent, 0, flags );
-	statWid->setPixmap(*icon());
-    }
-    return statWid;
+    return "Compose";
 }
-
-
 
 /*
-The compatible() function can be used to say that this input method is
-only compatible with certain other input methods. In this case, there
-are no restrictions.
+  Returns the version string for the input method.
 */
-QStringList ComposeImpl::compatible( )
+QString ComposeImpl::version() const
 {
-    return QStringList();
+    return "4.0.0";
 }
-
 
 /*
-In qcopReceive(), we get notified when there is an event on the
-inputmethod channel.
+  Returns the properties describing the capability and
+  requirements of the input method.
+
+  In this case indicates that the input method should
+  only be loaded if there is a keypad present and
+  that the input method will modify key or mouse input.
 */
-void ComposeImpl::qcopReceive( const QCString &, const QByteArray & )
+int ComposeImpl::properties() const
 {
-    //process QCop event
+    return RequireKeypad | InputModifier;
 }
 
-
+/* Required to make the plugin loadable.  not also the 
+   ref member and initializing ref to 0 in the constructor
+*/
+QTOPIA_EXPORT_PLUGIN(ComposeImpl)

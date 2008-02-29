@@ -1,169 +1,103 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
---></style>
-</head><body bgcolor="#ffffff">
-
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-
-<h1 align=center>QWaitCondition Class Reference</h1><br clear="all">
-<p>
-The QWaitCondition class allows waiting/waking for conditions between threads
-<a href="#details">More...</a>
-<p>
-<code>#include &lt;<a href="qthread-h.html">qthread.h</a>&gt;</code>
-<p>
-Inherits <a href="qt.html">Qt</a>.
-<p><a href="qwaitcondition-members.html">List of all member functions.</a>
-<h2>Public Members</h2>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: QWaitCondition Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QWaitCondition Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<p>The QWaitCondition class provides a condition variable for synchronizing threads. <a href="#details">More...</a></p>
+<pre> #include &lt;QWaitCondition&gt;</pre><p><b>Note:</b> All the functions in this class are <a href="threads.html#thread-safe">thread-safe</a>.</p>
 <ul>
-<li><div class="fn"><a href="#eee0a1"><b>QWaitCondition</b></a> () </div>
-<li><div class="fn">virtual <a href="#ee5dc6"><b>~QWaitCondition</b></a> () </div>
-<li><div class="fn">bool <a href="#d24199"><b>wait</b></a> ( unsigned long time = ULONG_MAX ) </div>
-<li><div class="fn">bool <a href="#e72dde"><b>wait</b></a> ( QMutex * mutex, unsigned long time = ULONG_MAX ) </div>
-<li><div class="fn">void <a href="#57c32e"><b>wakeOne</b></a> () </div>
-<li><div class="fn">void <a href="#3b1793"><b>wakeAll</b></a> () </div>
+<li><a href="qwaitcondition-members.html">List of all members, including inherited members</a></li>
 </ul>
-<hr><h2><a name="details"></a>Detailed Description</h2>
-The QWaitCondition class allows waiting/waking for conditions between threads
-<p>
-QWaitConditions allow a thread to tell other threads that some sort of
-condition has been met; one or many threads can block waiting for a
-QWaitCondition to set a condition with <a href="#57c32e">wakeOne</a>() or wakeAll.  Use
-wakeOne() to wake one randomly-selected event or <a href="#3b1793">wakeAll</a>() to wake them
-all. For example, say we have three tasks that should be performed every
-time the user presses a key; each task could be split into a thread, each
-of which would have a run() body like so:
-<p><pre>  <a href="qwaitcondition.html">QWaitCondition</a> key_pressed;
-
-  for (;;) {
-     key_pressed.<a href="#d24199">wait</a>();    // This is a QWaitCondition global variable
-     // Key was pressed, do something interesting
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qwaitcondition.html#QWaitCondition">QWaitCondition</a></b> ()</li>
+<li><div class="fn"/><b><a href="qwaitcondition.html#dtor.QWaitCondition">~QWaitCondition</a></b> ()</li>
+<li><div class="fn"/>bool <b><a href="qwaitcondition.html#wait">wait</a></b> ( QMutex * <i>mutex</i>, unsigned long <i>time</i> = ULONG_MAX )</li>
+<li><div class="fn"/>void <b><a href="qwaitcondition.html#wakeAll">wakeAll</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qwaitcondition.html#wakeOne">wakeOne</a></b> ()</li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QWaitCondition class provides a condition variable for synchronizing threads.</p>
+<p>QWaitCondition allows a thread to tell other threads that some sort of condition has been met. One or many threads can block waiting for a QWaitCondition to set a condition with <a href="qwaitcondition.html#wakeOne">wakeOne</a>() or <a href="qwaitcondition.html#wakeAll">wakeAll</a>(). Use <a href="qwaitcondition.html#wakeOne">wakeOne</a>() to wake one randomly selected condition or <a href="qwaitcondition.html#wakeAll">wakeAll</a>() to wake them all.</p>
+<p>For example, let's suppose that we have three tasks that should be performed whenever the user presses a key. Each task could be split into a thread, each of which would have a <a href="qthread.html#run">run()</a> body like this:</p>
+<pre> forever {
+     mutex.lock();
+     keyPressed.wait(&amp;mutex);
      do_something();
-  }
-</pre>
-<p>A fourth thread would read key presses and wake the other three threads
-up every time it receives one, like so:
-<p><pre>  <a href="qwaitcondition.html">QWaitCondition</a> key_pressed;
-
-  for (;;) {
+     mutex.unlock();
+ }</pre>
+<p>Here, the <tt>keyPressed</tt> variable is a global variable of type QWaitCondition.</p>
+<p>A fourth thread would read key presses and wake the other three threads up every time it receives one, like this:</p>
+<pre> forever {
      getchar();
-     // Causes any thread in key_pressed.<a href="#d24199">wait</a>() to return from
-     // that method and continue processing
-     key_pressed.<a href="#3b1793">wakeAll</a>();
-  }
-</pre>
-<p>Note that the order the three threads are woken up in is undefined,
-and that if some or all of the threads are still in do_something()
-when the key is pressed, they won't be woken up (since they're not
-waiting on the condition variable) and so the task will not be performed
-for that key press.  This can be avoided by, for example, doing something
-like this:
-<p><pre>  <a href="qmutex.html">QMutex</a> mymutex;
-  <a href="qwaitcondition.html">QWaitCondition</a> key_pressed;
-  int mycount=0;
+     keyPressed.wakeAll();
+ }</pre>
+<p>The order in which the three threads are woken up is undefined. Also, if some of the threads are still in <tt>do_something()</tt> when the key is pressed, they won't be woken up (since they're not waiting on the condition variable) and so the task will not be performed for that key press. This issue can be solved using a counter and a <a href="qmutex.html">QMutex</a> to guard it. For example, here's the new code for the worker threads:</p>
+<pre> forever {
+     mutex.lock();
+     keyPressed.wait(&amp;mutex);
+     ++count;
+     mutex.unlock();
 
-  // Worker thread code
-  for (;;) {
-     key_pressed.<a href="#d24199">wait</a>();    // This is a QWaitCondition global variable
-     mymutex.<a href="qmutex.html#4e6e5d">lock</a>();
-     mycount++;
-     mymutex.<a href="qmutex.html#da15c3">unlock</a>();
      do_something();
-     mymutex.<a href="qmutex.html#4e6e5d">lock</a>();
-     mycount--;
-     mymutex.<a href="qmutex.html#da15c3">unlock</a>();
-  }
 
-  // Key reading thread code
-  for (;;) {
+     mutex.lock();
+     --count;
+     mutex.unlock();
+ }</pre>
+<p>Here's the code for the fourth thread:</p>
+<pre> forever {
      getchar();
-     mymutex.<a href="qmutex.html#4e6e5d">lock</a>();
-     // Sleep until there are no busy worker threads
-     while(count&gt;0) {
-       mymutex.<a href="qmutex.html#da15c3">unlock</a>();
-       sleep(1);
-       mymutex.<a href="qmutex.html#4e6e5d">lock</a>();
+
+     mutex.lock();
+     <span class="comment">// Sleep until there are no busy worker threads</span>
+     while (count &gt; 0) {
+         mutex.unlock();
+         sleep(1);
+         mutex.lock();
      }
-     mymutex.<a href="qmutex.html#da15c3">unlock</a>();
-     key_pressed.<a href="#3b1793">wakeAll</a>();
-  }
-</pre>
-<p>The mutexes are necessary because the results if two threads
-attempt to change the value of the same variable simultaneously
-are unpredictable.
-
-<hr><h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="eee0a1"></a>QWaitCondition::QWaitCondition ()</h3>
-<p>Constructs a new event signalling object.
-<h3 class="fn"><a name="ee5dc6"></a>QWaitCondition::~QWaitCondition () <code>[virtual]</code></h3>
-<p>Deletes the event signalling object.
-<h3 class="fn">bool <a name="e72dde"></a>QWaitCondition::wait ( <a href="qmutex.html">QMutex</a> * mutex, unsigned long time = ULONG_MAX )</h3>
-<p>Release the locked <em>mutex</em> and wait on the thread event object. The
-<em>mutex</em> must be initially locked by the calling thread.  If <em>mutex</em>
-is not in a locked state, this function returns immediately.  The
-<em>mutex</em> will be unlocked, and the thread calling will block until
-one of 2 conditions is met:
+     mutex.unlock();
+     keyPressed.wakeAll();
+ }</pre>
+<p>The mutex is necessary because the results of two threads attempting to change the value of the same variable simultaneously are unpredictable.</p>
+<p>Wait conditions are a powerful thread synchronization primitive. The Wait Conditions example shows how to use QWaitCondition as an alternative to <a href="qsemaphore.html">QSemaphore</a> for controlling access to a circular buffer shared by a producer thread and a consumer thread.</p>
+<p>See also <a href="qmutex.html">QMutex</a>, <a href="qsemaphore.html">QSemaphore</a>, <a href="qthread.html">QThread</a>, and Wait Conditions Example.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QWaitCondition"></a>QWaitCondition::QWaitCondition ()</h3>
+<p>Constructs a new wait condition object.</p>
+<h3 class="fn"><a name="dtor.QWaitCondition"></a>QWaitCondition::~QWaitCondition ()</h3>
+<p>Destroys the wait condition object.</p>
+<h3 class="fn"><a name="wait"></a>bool QWaitCondition::wait ( <a href="qmutex.html">QMutex</a> * <i>mutex</i>, unsigned long <i>time</i> = ULONG_MAX )</h3>
+<p>Releases the locked <i>mutex</i> and wait on the wait condition. The <i>mutex</i> must be initially locked by the calling thread. If <i>mutex</i> is not in a locked state, this function returns immediately. If <i>mutex</i> is a recursive mutex, this function returns immediately. The <i>mutex</i> will be unlocked, and the calling thread will block until either of these conditions is met:</p>
 <ul>
-<li> Another thread signals it using <a href="#57c32e">wakeOne</a>() or <a href="#3b1793">wakeAll</a>(). This
-function will return TRUE in this case.
-<li> <em>time</em> milliseconds has elapsed.  If <em>time</em> is ULONG_MAX (default
-argument), then the wait will never timeout (the event must
-signalled).  This function will return FALSE if the
-wait timed out.
+<li>Another thread signals it using <a href="qwaitcondition.html#wakeOne">wakeOne</a>() or <a href="qwaitcondition.html#wakeAll">wakeAll</a>(). This function will return true in this case.</li>
+<li><i>time</i> milliseconds has elapsed. If <i>time</i> is <tt>ULONG_MAX</tt> (the default), then the wait will never timeout (the event must be signalled). This function will return false if the wait timed out.</li>
 </ul>
-<p>The mutex will be returned to the same locked state.  This function is
-provided to allow the atomic transition from the locked state to the
-wait state.
-<p>See also  <a href="#57c32e">wakeOne</a>() and <a href="#3b1793">wakeAll</a>().
-<h3 class="fn">bool <a name="d24199"></a>QWaitCondition::wait ( unsigned long time = ULONG_MAX )</h3>
-<p>Wait on the thread event object. The thread calling this will block
-until one of 2 conditions is met:
-<ul>
-<li> Another thread signals it using <a href="#57c32e">wakeOne</a>() or <a href="#3b1793">wakeAll</a>(). This
-function will return TRUE in this case.
-<li> <em>time</em> milliseconds has elapsed.  If <em>time</em> is ULONG_MAX (default
-argument), then the wait will never timeout (the event must
-signalled).  This function will return FALSE if the
-wait timed out.
-</ul>
-<p>See also  <a href="#57c32e">wakeOne</a>() and <a href="#3b1793">wakeAll</a>().
-<h3 class="fn">void <a name="3b1793"></a>QWaitCondition::wakeAll ()</h3>
-<p>This wakes all threads waiting on the QWaitCondition.  The order in
-which the threads are woken up depends on the operating system's
-scheduling policies, and cannot be controlled or predicted.
-<p>See also  <a href="#57c32e">wakeOne</a>().
-<h3 class="fn">void <a name="57c32e"></a>QWaitCondition::wakeOne ()</h3>
-<p>This wakes one thread waiting on the QWaitCondition.  The thread that
-woken up depends on the operating system's scheduling policies, and
-cannot be controlled or predicted.
-<p>See also  <a href="#3b1793">wakeAll</a>().
-<hr><p>
-Search the documentation, FAQ, qt-interest archive and more (uses
-<a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
-<form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.10"><nobr>
-<input size="50" name="search"><input type=submit value="Search">
-</nobr></form><hr><p>
-This file is part of the <a href="index.html">Qt toolkit</a>,
-copyright &copy; 1995-2005
-<a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+<p>The mutex will be returned to the same locked state. This function is provided to allow the atomic transition from the locked state to the wait state.</p>
+<p>See also <a href="qwaitcondition.html#wakeOne">wakeOne</a>() and <a href="qwaitcondition.html#wakeAll">wakeAll</a>().</p>
+<h3 class="fn"><a name="wakeAll"></a>void QWaitCondition::wakeAll ()</h3>
+<p>Wakes all threads waiting on the wait condition. The order in which the threads are woken up depends on the operating system's scheduling policies and cannot be controlled or predicted.</p>
+<p>See also <a href="qwaitcondition.html#wakeOne">wakeOne</a>().</p>
+<h3 class="fn"><a name="wakeOne"></a>void QWaitCondition::wakeOne ()</h3>
+<p>Wakes one thread waiting on the wait condition. The thread that is woken up depends on the operating system's scheduling policies, and cannot be controlled or predicted.</p>
+<p>If you want to wake up a specific thread, the solution is typically to use different wait conditions and have different threads wait on different conditions.</p>
+<p>See also <a href="qwaitcondition.html#wakeAll">wakeAll</a>().</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

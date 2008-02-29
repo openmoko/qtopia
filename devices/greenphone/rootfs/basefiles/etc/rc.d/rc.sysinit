@@ -1,0 +1,15 @@
+#!/bin/sh
+
+/bin/hostname -F /etc/HOSTNAME
+/sbin/ifconfig lo 127.0.0.1 up
+/sbin/route add -net 127.0.0.0 netmask 255.0.0.0 lo
+
+[ "`date +%Y`" = "1970" ] && date -s 100112002006
+
+touch /var/run/utmp
+touch /var/log/wtmp
+chgrp utmp /var/run/utmp /var/log/wtmp
+chmod 0664 /var/run/utmp /var/log/wtmp
+
+dmesg > /var/log/dmesg
+

@@ -2,7 +2,7 @@
 File=QtopiaServices
 Context=Play Media
 [Service]
-Actions = openURL(QString,QString)
+Actions = "openURL(QString,QString)"
 Icon = multimedia
 Name[]=Play Media
 [openURL(QString,QString)]

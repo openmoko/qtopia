@@ -1,47 +1,33 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
-#include <qtopia/qpeapplication.h>
-#include <qtopia/qlibrary.h>
-#include <qtopia/config.h>
-#include <qtopia/pluginloader.h>
+#include <qtopiaapplication.h>
+#include <qpluginmanager.h>
+#include <qtopialog.h>
 
-#include <qlayout.h>
-#include <qdir.h>
-#include <qmessagebox.h>
-#include <qtranslator.h>
+#include <QDir>
+#include <QLayout>
+#include <QMessageBox>
+#include <QSettings>
+#include <QTranslator>
 
 #include "systray.h"
 
@@ -51,7 +37,7 @@
 #include "../plugins/applets/clockapplet/clockappletimpl.h"
 #endif
 
-SysTray::SysTray( QWidget *parent ) : QFrame( parent ), layout(0), loader(0)
+SysTray::SysTray( QWidget *parent ) : QFrame( parent ), trayLayout(0), loader(0)
 {
     loadApplets();
 }
@@ -81,18 +67,19 @@ void SysTray::clearApplets()
 {
 #ifndef QT_NO_COMPONENTS
     if ( loader ) {
-	QValueList<TaskbarApplet*>::Iterator mit;
-	for ( mit = appletList.begin(); mit != appletList.end(); ++mit ) {
-	    loader->releaseInterface( (*mit)->iface );
-	    delete (*mit);
-	}
+        QList<TaskbarApplet*>::Iterator mit;
+        for ( mit = appletList.begin(); mit != appletList.end(); ++mit ) {
+            delete (*mit)->instance;
+            delete (*mit);
+        }
     }
 #endif
     appletList.clear();
-    if ( layout )
-	delete layout;
-    layout = new QHBoxLayout( this, 0, 1 );
-    layout->setAutoAdd(TRUE);
+    if ( trayLayout )
+        delete trayLayout;
+    trayLayout = new QHBoxLayout(this);
+    trayLayout->setMargin(0);
+    trayLayout->setSpacing(1);
     delete loader;
     loader = 0;
 }
@@ -101,7 +88,7 @@ void SysTray::addApplets()
 {
     hide();
     delete loader;
-    loader = new PluginLoader( "applets" );
+    loader = new QPluginManager( "applets" );
 #ifndef QT_NO_COMPONENTS
     QStringList faulty;
 
@@ -110,41 +97,46 @@ void SysTray::addApplets()
     QStringList::Iterator it;
     int napplets=0;
     for ( it = list.begin(); it != list.end(); ++it ) {
-	TaskbarAppletInterface *iface = 0;
-	if ( loader->queryInterface( *it, IID_TaskbarApplet, (QUnknownInterface**)&iface ) == QS_OK ) {
-	    TaskbarApplet *applet = new TaskbarApplet;
-	    applets[napplets++] = applet;
-	    applet->iface = iface;
-	    applet->name = *it;
-	} else {
+        QObject *instance = loader->instance(*it);
+        QTaskbarAppletPlugin *iface = 0;
+        iface = qobject_cast<QTaskbarAppletPlugin*>(instance);
+        if ( iface ) {
+            TaskbarApplet *applet = new TaskbarApplet;
+            applets[napplets++] = applet;
+            applet->instance = instance;
+            applet->iface = iface;
+            applet->name = *it;
+            qLog(UI) << "Added applet: " <<  applet->name.toAscii();
+        } else {
 #ifndef Q_OS_WIN32
-	    // Same as Taskbar settings uses
-	    QString name = (*it).mid(3);
-            int sep = name.find( ".so" );
+            // Same as Taskbar settings uses
+            QString name = (*it).mid(3);
+            int sep = name.indexOf( ".so" );
 #else
-	    QString name = (*it);
-            int sep = name.find( ".dll" );
+            QString name = (*it);
+            int sep = name.indexOf( ".dll" );
 #endif
             if ( sep > 0 )
                 name.truncate( sep );
-            sep = name.find( "applet" );
+            sep = name.indexOf( "applet" );
             if ( sep == (int)name.length() - 6 )
                 name.truncate( sep );
-            name[0] = name[0].upper();
-	    faulty += name; 
-	    // we don't do anything with faulty anymore -
-	    // maybe we should.
-	}
+            name[0] = name[0].toUpper();
+            faulty += name;
+            // we don't do anything with faulty anymore -
+            // maybe we should.
+        }
     }
 
     qsort(applets,napplets,sizeof(applets[0]),compareAppletPositions);
     while (napplets--) {
-	TaskbarApplet *applet = applets[napplets];
-	applet->applet = applet->iface->applet( this );
-	applet->applet->setBackgroundMode( PaletteButton );
-	if ( applet->applet->maximumSize().width() <= 1 )
-	    applet->applet->hide();
-	appletList.append(applet);
+        TaskbarApplet *applet = applets[napplets];
+        applet->applet = applet->iface->applet( this );
+        applet->applet->setBackgroundRole( QPalette::Button );
+        if ( applet->applet->maximumSize().width() <= 1 )
+            applet->applet->hide();
+        appletList.append(applet);
+        trayLayout->addWidget(applet->applet);
     }
     delete [] applets;
 #else

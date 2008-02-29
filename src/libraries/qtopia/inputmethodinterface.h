@@ -1,90 +1,136 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #ifndef INPUTMETHODINTERFACE_H
 #define INPUTMETHODINTERFACE_H
 
-#include <qtopia/qcom.h>
+#include <qplugin.h>
+#include <qfactoryinterface.h>
+#include <qicon.h>
 
-#include <qnamespace.h>
-#include <qstring.h>
+#include <QStringList>
+#include <QObject>
 
-#ifndef QT_NO_COMPONENT
-// {637A8A14-AF98-41DA-969A-2BD16ECDA8C7}
-# ifndef IID_InputMethod
-#  define IID_InputMethod QUuid( 0x637a8a14, 0xaf98, 0x41da, 0x96, 0x9a, 0x2b, 0xd1, 0x6e, 0xcd, 0xa8, 0xc7)
-# endif
-#endif
+#include <qtopiaglobal.h>
+#include <qtopiaipcmarshal.h>
+#include <QSharedDataPointer>
 
 class QWidget;
-class QPixmap;
-class QObject;
 class QWSInputMethod;
 class QWSGestureMethod;
+class QMenu;
+class QAction;
 
-struct InputMethodInterface : public QUnknownInterface
+class QIMActionDescriptionPrivate;
+
+class QTOPIA_EXPORT QIMActionDescription
 {
-    virtual QWidget *inputMethod( QWidget *parent, Qt::WFlags f ) = 0;
-    virtual void resetState() = 0;
-    virtual QPixmap *icon() = 0;
-    virtual QString name() = 0;
-    virtual void onKeyPress( QObject *receiver, const char *slot ) = 0;
+public:
+    int id() const;
+    void setId(const int);
+    QString label() const;
+    void setLabel(const QString&);
+    QString iconFileName() const;
+    void setIconFileName(const QString&);
+    explicit QIMActionDescription(int id=0, QString label = QString(), 
+        QString iconFileName=QString());
+    QIMActionDescription(const QIMActionDescription& original) ;
+
+template <typename T> 
+    void serialize(T &stream) const;
+
+template <typename T>
+    void deserialize(T &stream);
+
+    ~QIMActionDescription();
+protected:
+    QIMActionDescription(QIMActionDescriptionPrivate &dd);
+private:
+    QSharedDataPointer<QIMActionDescriptionPrivate> d;
 };
 
-// {70F0991C-8282-4625-A279-BD9D7D959FF6} 
-#ifndef IID_ExtInputMethod
-#define IID_ExtInputMethod QUuid( 0x70f0991c, 0x8282, 0x4625, 0xa2, 0x79, 0xbd, 0x9d, 0x7d, 0x95, 0x9f, 0xf6)
-#endif
+Q_DECLARE_USER_METATYPE ( QIMActionDescription )
+Q_DECLARE_USER_METATYPE (QList<QIMActionDescription>)
 
-struct ExtInputMethodInterface : public QUnknownInterface
+class QTOPIA_EXPORT QtopiaInputMethod : public QObject
 {
+    Q_OBJECT
+public:
+    explicit QtopiaInputMethod(QObject *parent = 0) : QObject(parent) {}
+    virtual ~QtopiaInputMethod() {}
+
+    enum Properties {
+        RequireMouse = 0x0001,
+        RequireKeypad = 0x0002,
+        InputModifier = 0x0004,
+        InteractiveIcon = 0x0008,
+        InputWidget = 0x0010,
+        DockedInputWidget = 0x0030,  // 0x30 = 0x20|0x10, as docking makes little sense without an inputwidget.
+        MenuItem = 0x0040
+    };
+
+    // changes based of the hint.
+    enum State {
+        Sleeping,
+        Ready
+    };
+
     //identifying functions.
-    virtual QString name() = 0;
-    virtual QPixmap *icon() = 0;
+    virtual QString name() const = 0;
+
+    virtual QString identifier() const = 0;
+    virtual QString version() const = 0;
+
+    virtual State state() const = 0;
+    // should return flag object, not int.
+    virtual int properties() const = 0;
+
+    bool testProperty(int) const;
+
+    virtual QIcon icon() const = 0;
 
     // state managment.
-    virtual void resetState() = 0;
+    virtual void reset() = 0;
 
-    virtual QWidget *keyboardWidget( QWidget *parent, Qt::WFlags f ) = 0;
-    // filenames, not menu names.
-    virtual QStringList compatible() = 0;
+    virtual QWidget *statusWidget( QWidget *parent = 0);
+    virtual QWidget *inputWidget( QWidget *parent = 0);
+    virtual QWSInputMethod *inputModifier();
 
-    virtual QWSInputMethod *inputMethod() = 0;
-    virtual QWidget *statusWidget( QWidget *parent, Qt::WFlags f )= 0;
+    virtual void setHint(const QString &, bool restrictToHint) = 0;
+    virtual bool restrictedToHint() const;
+    virtual bool passwordHint() const;
 
-    virtual void qcopReceive( const QCString &msg, const QByteArray &data )= 0;
-};
+    virtual QList<QIMActionDescription*> menuDescription();
+signals:
+    void stateChanged();
+    void updateMenuAction(bool showMenuAction); // Not currently used by the system
+
+public slots:
+    // only called on widgets that do not have an inputWidget.
+    virtual void clicked();
+    virtual void focusChanged();
+    virtual void menuActionActivated(int data);
+
+private:
+    // internal helper functions
+    };
 
 #endif

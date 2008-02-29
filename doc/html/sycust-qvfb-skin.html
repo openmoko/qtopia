@@ -1,0 +1,53 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Customizing a Skin for QVFb</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Customizing a Skin for QVFb<br /><small></small></h1>
+<a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
+<li><a href="#understanding-the-skin-file">Understanding the .skin File</a></li>
+<ul><li><a href="#coordinates">Coordinates</a></li>
+<li><a href="#defaultbuttons-conf">defaultbuttons.conf</a></li>
+</ul>
+<li><a href="#specifying-screen-size-independent-of-skin">Specifying Screen Size Independent of Skin</a></li>
+</ul>
+<a name="introduction"></a>
+<h2>Introduction</h2>
+<p>This document explains how to customize the QVFb skin for a specific project.</p>
+<p>The virtual framebuffer is located in <tt>$QTDIR/tools/qvfb</tt>.</p>
+<p>QVFb is a development tool only. No security issues have been considered in the virtual framebuffer design. It should not be used in a production environment and <tt>QT_NO_QWS_VFB</tt> should always be defined in production libraries.</p>
+<a name="understanding-the-skin-file"></a>
+<h2>Understanding the .skin File</h2>
+<p>The <tt>.skin</tt> file consists of the following:</p>
+<ul>
+<li>it specifies 2 files, one for the &quot;normal&quot; skin and one for the &quot;activated&quot; skin.</li>
+<li>the next 2 lines specify the offset and size of the virtual screen.</li>
+<li>last comes the button definition. There is a number to specify how many buttons are available followed by the buttons. The format is name, keycode, coordinates.</li>
+</ul>
+<a name="coordinates"></a>
+<h3>Coordinates</h3>
+<p>The coordinates are a list of at least 2 points in a clockwise order that define a shape for the button. Two points are treated as opposite edges of a rectangle. Any click inside the points will be treated as a click on that button. While pressed, the pixels for the button are redrawn from the &quot;activated&quot; skin.</p>
+<p>You can examine <tt>SmartPhone.skin</tt> and <tt>SmartPhone2.skin</tt> in $QTDIR/tools/QVFb to get an idea of how it all works.</p>
+<a name="defaultbuttons-conf"></a>
+<h3>defaultbuttons.conf</h3>
+<p>You can also include a <tt>defaultbuttons.conf</tt> file. This file customizes the launch screen applications and the ordering of the soft keys. There are also input method hints in this file.</p>
+<a name="specifying-screen-size-independent-of-skin"></a>
+<h2>Specifying Screen Size Independent of Skin</h2>
+<p>QVFb allows the screen size to be specified independently of the skin. For example, you can use the SmartPhone.skin but specify a screen size of 240x320 pixels. The skin (if command-line arguments are used) or screen (if Configure is used) will be scaled accordingly. For example:</p>
+<pre>    QVFb -skin SmartPhone.skin -width 240 -height 320 -zoom 0.7</pre>
+<p>The above example uses the SmartPhone.skin (screen area 176x208 skin pixels) but with a 240x320 pixel virtual framebuffer (ie. what Qtopia draws to). The screen is scaled down by 0.7 resulting in a display that is a smooth-scaled 168x224 pixels.</p>
+<p>Note that the SmartPhone.skin is 176x208, not 3:4 which means that 3:4 pixel screens are slightly distorted (but still pixel-correct).</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

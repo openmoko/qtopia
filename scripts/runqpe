@@ -1,0 +1,89 @@
+#!/bin/sh
+# get the paths
+if [ -f "$(dirname $0)/getpaths.sh" ]; then . "$(dirname $0)/getpaths.sh"; else echo "Could not find getpaths.sh"; exit 1; fi
+
+# This script is no longer capable of running Qtopia 1.x or 2.x. Please use the runqpe scripts in those packages.
+
+PREFIX="$(grep '^opt\.prefix\.value=' $QPEDIR/config.cache | sed 's/^opt\.prefix\.value=//')"
+
+# set an alternate value for HOME (to keep different Qtopia versions' files separate)
+if [ -n "$QPEHOME" ]; then
+    export HOME=$QPEHOME
+else
+    export HOME=$QPEDIR/home
+fi
+mkdir -p $HOME
+echo ""
+echo "**********************************************************"
+echo "* Qtopia is using HOME=$HOME"
+echo "**********************************************************"
+echo ""
+
+# These should not be needed (unset them so we have an error if they are used)
+unset QPEDIR
+
+# This seems to be needed for Helix. It could be required for user-installed apps too.
+#export LD_LIBRARY_PATH=$PREFIX/lib
+
+# If you want to force all SXE tests to be logged but to succeed (eg. when creating new policies)
+# you must configure Qtopia with the -sxe-discovery switch and then set SXE_DISCOVERY_MODE to 1.
+#export SXE_DISCOVERY_MODE=1
+
+# Grab QWS_DISPLAY from qpe.conf if it's unset. This lets rotation stuff work.
+if [ -z "$QWS_DISPLAY" -a -f $HOME/Settings/Trolltech/qpe.conf ]; then
+    QWS_DISPLAY="$(awk -F= '/Screen=QVFb/{print $2}' $HOME/Settings/Trolltech/qpe.conf)"
+fi
+# Force the use of QVFb:0 is QWS_DISPLAY is unset (match the 'algorithm' in runqvfb).
+# This 'breaks' the rotation settings because Qtopia normally uses a QWS_DISPLAY from a settings
+# file if it's unset. If you need to test rotation settings, disable these lines.
+QWS_DISPLAY=${QWS_DISPLAY:=QVFb:0}
+export QWS_DISPLAY
+
+cd $PREFIX
+
+# Set some ulimits to prevent runaway processes
+ulimit -Sd 100000          # max data size of a program is 100 MB
+ulimit -Ss 4000            # max stack size of a program is 4 MB
+ulimit -Sm 100000          # max resident set size is 100 MB
+
+if [ -f bin/qtopia-dbus-daemon ]; then
+   echo "Killing all previous qtopia-dbus-daemons..."
+   killall qtopia-dbus-daemon
+   echo "Launching bin/qtopia-dbus-daemon..."
+   export DBUS_SESSION_BUS_ADDRESS=`qtopia-dbus-daemon`
+   echo "DBUS address is: $DBUS_SESSION_BUS_ADDRESS"
+fi
+
+if [ "$1" = "-exec" ]; then
+    shift
+    export PATH=$PREFIX/bin:$PATH
+    echo exec "$@"
+    exec "$@"
+elif [ "$1" = "-gdb" ]; then
+    gdb bin/qpe
+elif [ "$1" = "-profile" ]; then
+    LD_PRELOAD=$PREFIX/lib/gprof-helper.so bin/qpe
+elif [ "$1" = "-callgrind" ]; then
+    shift
+    echo callgrind "$@" bin/qpe
+    callgrind "$@" bin/qpe
+elif [ "$1" = "-valgrind" ]; then
+    shift
+    echo valgrind --tool=memcheck "$@" bin/qpe
+    valgrind --tool=memcheck "$@" bin/qpe
+elif [ "$1" = "-strace" ]; then
+    strace bin/qpe
+elif [ "$1" = "-performance" ]; then
+    TIME=`date +%H:%M:%S.%N`
+    echo "Performance :  runqpe :  Starting qpe... :  $TIME"
+    exec bin/qpe "$@"    
+else
+    touch /tmp/restart-qtopia
+    while [ -f /tmp/restart-qtopia ]; do
+        bin/qpe "$@"
+        if [ "$?" != 0 ]; then
+            break
+        fi
+    done
+fi
+

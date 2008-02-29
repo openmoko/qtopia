@@ -1,5 +1,9 @@
-TEMPLATE	=   lib
-CONFIG		-= qt
+qtopia_project(external lib)
+license(FREEWARE)
+TARGET		=   gsm
+VERSION		=   1.0.0
+CONFIG-=warn_on
+
 HEADERS		=   gsm.h
 SOURCES		=   add.c \
 		    code.c \
@@ -15,10 +19,11 @@ SOURCES		=   add.c \
 		    rpe.c \
 		    short_term.c \
 		    table.c
-TARGET		=   gsm
-DESTDIR		=   $$(QPEDIR)/lib
-VERSION		=   1.0.0
 DEFINES    +=  FAST SASR WAV49
-PACKAGE_NAME=gsm
 
-TRANSLATIONS=
+pkg.desc=GSM library
+pkg.domain=lib
+
+# FIXME "make syncqtopia"
+dep(INCLUDEPATH+=$$PWD)
+idep(LIBS+=-l$$TARGET)

@@ -1,99 +1,84 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 #include "security.h"
 
-#include <qtopia/config.h>
-#include <qtopia/qpeapplication.h>
-#include <qtopia/password.h>
-#include <qtopia/qpedialog.h>
-#include <qtopia/qcopenvelope_qws.h>
-#ifdef QTOPIA_PHONE
-#include <qtopia/contextbar.h>
-#include <qtopia/private/contextkeymanager_p.h>
-#include <qtopia/contextmenu.h>
+#include <qtopiaapplication.h>
+#include <qpassworddialog.h>
+#include <qtopiaipcenvelope.h>
+#ifdef QTOPIA_CELL
+#include <qsoftmenubar.h>
 #include "phonesecurity.h"
 #endif
 
-#include <qcheckbox.h>
-#include <qpushbutton.h>
-#include <qlabel.h>
-#include <qcombobox.h>
-#include <qmessagebox.h>
-#include <qtimer.h>
-#include <qhostaddress.h>
+#include <QCheckBox>
+#include <QPushButton>
+#include <QLabel>
+#include <QComboBox>
+#include <QMessageBox>
+#include <QTimer>
+#include <QHostAddress>
+#include <QCloseEvent>
+#include <QSettings>
+#include <QDebug>
 
 
 class WaitScreen : public QLabel
 {
     Q_OBJECT
 public:
-    WaitScreen(QWidget *parent, char *name = 0) : QLabel(parent, name)
+    WaitScreen( QWidget *parent ) : QLabel( parent )
     {
-	setText(tr("Please wait ..."));
-#ifdef QTOPIA_PHONE
-	ContextBar::clearLabel(this, Key_Back);
+        setText(tr("Please wait ..."));
+#ifdef QTOPIA_CELL
+        QSoftMenuBar::clearLabel(this, Qt::Key_Back);
 #endif
     }
 
 public slots:
     void makeClosable()
     {
-	canClose = TRUE;
-	close();
+        canClose = true;
+        close();
     }
 protected:
-    void show() 
+    void show()
     {
-	canClose = FALSE;
-	// should show error if it timesout.
-	QTimer::singleShot(5000, this, SLOT(makeClosable()));
-	QLabel::show();
+        canClose = false;
+        // should show error if it timesout.
+        QTimer::singleShot(5000, this, SLOT(makeClosable()));
+        QLabel::show();
     }
 
     void closeEvent(QCloseEvent *e){
-	// great way to appear to freeze device
-	if (canClose)
-	    e->accept();
-	else
-	    e->ignore();
+        // great way to appear to freeze device
+        if (canClose)
+            e->accept();
+        else
+            e->ignore();
     }
 
     void keyPressEvent(QKeyEvent *e)
     {
-	// great way to appear to freeze device
-	e->accept();
+        // great way to appear to freeze device
+        e->accept();
     }
 
 private:
@@ -101,60 +86,71 @@ private:
 
 };
 
-Security::Security( QWidget* parent,  const char* name, WFlags fl )
-#ifdef QTOPIA_PHONE
-    : SecurityBase( parent, name, fl ), mStatus(0)
-#else
-    : SecurityBase( parent, name, TRUE, fl )
-#endif
+Security::Security( QWidget* parent, Qt::WFlags fl )
+#ifdef QTOPIA_CELL
+    : QDialog( parent, fl ), mStatus(0)
 {
-    valid=FALSE;
-    Config cfg("Security");
-    cfg.setGroup("Passcode");
-    passcode = cfg.readEntry("passcode");
-#ifdef QTOPIA_PHONE
+#else
+    : QDialog( parent, fl )
+{
+    setModal( true );
+#endif
+    setupUi( this );
+    valid=false;
+    QSettings cfg("Trolltech","Security");
+    cfg.beginGroup("Passcode");
+    passcode = cfg.value("passcode").toString();
+#ifdef QTOPIA_CELL
     connect(passcode_poweron, SIGNAL(toggled(bool)), SLOT(markProtected(bool)));
 #else
-    passcode_poweron->setChecked(cfg.readBoolEntry("passcode_poweron",FALSE));
+    passcode_poweron->setChecked(cfg.value("passcode_poweron",false).toBool());
 #endif
-    cfg.setGroup("Sync");
+    cfg.endGroup();
+    cfg.beginGroup("Sync");
     QHostAddress allowed;
-    allowed.setAddress(cfg.readEntry("auth_peer","192.168.0.0"));
-    uint auth_peer = allowed.ip4Addr();
-    int auth_peer_bits = cfg.readNumEntry("auth_peer_bits",16);
+    allowed.setAddress(cfg.value("auth_peer","192.168.0.0").toString());
+    uint auth_peer = allowed.toIPv4Address();
+    int auth_peer_bits = cfg.value("auth_peer_bits",16).toInt();
     selectNet(auth_peer,auth_peer_bits);
-    connect(syncnet, SIGNAL(textChanged(const QString&)),
-	    this, SLOT(setSyncNet(const QString&)));
-#ifdef QTOPIA_PHONE
-    QPEApplication::setInputMethodHint(syncnet,QPEApplication::Named,"netmask");
+    connect(syncnet, SIGNAL(editTextChanged(const QString&)),
+            this, SLOT(setSyncNet(const QString&)));
+#ifdef QTOPIA_CELL
+    QtopiaApplication::setInputMethodHint(syncnet,QtopiaApplication::Named,"netmask");
     phonesec = new PhoneSecurity(this);
     connect(phonesec,SIGNAL(changed(bool)),this,SLOT(phoneChanged(bool)));
     connect(phonesec,SIGNAL(locked(bool)),this,SLOT(phoneLocked(bool)));
     connect(phonesec,SIGNAL(lockDone(bool)),this,SLOT(phoneLockDone(bool)));
 
-    //ContextMenu *cm = new ContextMenu(this);
+    (void)QSoftMenuBar::menuFor(this); // just to get help
 #endif
 
     /*
-    cfg.setGroup("Remote");
+    { cfg.endGroup(); cfg.beginGroup("Remote"); };
     if ( telnetAvailable() )
-	telnet->setChecked(cfg.readEntry("allow_telnet"));
+        telnet->setChecked(cfg.value("allow_telnet").toString());
     else
-	telnet->hide();
+        telnet->hide();
 
     if ( sshAvailable() )
-	ssh->setChecked(cfg.readEntry("allow_ssh"));
+        ssh->setChecked(cfg.value("allow_ssh").toString());
     else
-	ssh->hide();
+        ssh->hide();
     */
 
     connect(changepasscode,SIGNAL(clicked()), this, SLOT(changePassCode()));
     connect(clearpasscode,SIGNAL(clicked()), this, SLOT(clearPassCode()));
-#ifdef QTOPIA_PHONE
+
+#ifndef QTOPIA_DESKTOP
+#ifdef QTOPIA_CELL
     connect(pinSelection, SIGNAL(activated(int)), this, SLOT(updateGUI()));
+    // XXX hide sync tab until Qtopia desktop is ported
+    TabWidget2->removeTab( 1 );
 #else
-    dl = new QPEDialogListener(this);
-#endif
+    // Hide sync tab until Qtopia desktop is ported.
+    GroupBox1->hide();
+#endif  // QTOPIA_CELL
+#endif // QTOPIA_DESKTOP
+
     updateGUI();
 }
 
@@ -164,12 +160,12 @@ Security::~Security()
 
 void Security::phoneChanged(bool success)
 {
-#ifdef QTOPIA_PHONE
+#ifdef QTOPIA_CELL
     mStatus->makeClosable();
     if (success)
-	QMessageBox::information(this, tr("Sucess"), tr("<p>Successfully changed PIN."));
+        QMessageBox::information(this, tr("Success"), tr("<p>Successfully changed PIN."));
     else
-	QMessageBox::warning(this, tr("Failure"), tr("<p>Could not change PIN."));
+        QMessageBox::warning(this, tr("Failure"), tr("<p>Could not change PIN."));
 #else
     Q_UNUSED(success);
 #endif
@@ -177,9 +173,9 @@ void Security::phoneChanged(bool success)
 
 void Security::phoneLocked(bool success)
 {
-#ifdef QTOPIA_PHONE
+#ifdef QTOPIA_CELL
     if (!success)
-	QMessageBox::warning(this, tr("Failure"), tr("<p>Could not change protection state."));
+        QMessageBox::warning(this, tr("Failure"), tr("<p>Could not change protection state."));
 #else
     Q_UNUSED(success);
 #endif
@@ -187,24 +183,24 @@ void Security::phoneLocked(bool success)
 
 void Security::phoneLockDone(bool success)
 {
-    passcode_poweron->blockSignals(TRUE);
+    passcode_poweron->blockSignals(true);
     passcode_poweron->setChecked(success);
-    passcode_poweron->blockSignals(FALSE);
-    passcode_poweron->setEnabled(TRUE);
+    passcode_poweron->blockSignals(false);
+    passcode_poweron->setEnabled(true);
 }
 
 void Security::updateGUI()
 {
-#ifdef QTOPIA_PHONE
+#ifdef QTOPIA_CELL
     // phone passcode.  they are never 'cleared'
     clearpasscode->hide();
-    passcode_poweron->setEnabled(FALSE);
-    phonesec->setLockType(pinSelection->currentItem());
+    passcode_poweron->setEnabled(false);
+    phonesec->setLockType(pinSelection->currentIndex());
 #else
     bool empty = passcode.isEmpty();
 
-    changepasscode->setText( empty ? tr("Set code" ) 
-			     : tr("Change code" )  );
+    changepasscode->setText( empty ? tr("Set code" )
+                             : tr("Change code" )  );
     passcode_poweron->setEnabled( !empty );
     clearpasscode->setEnabled( !empty );
 #endif
@@ -212,62 +208,60 @@ void Security::updateGUI()
 
 void Security::markProtected(bool b)
 {
-#ifdef QTOPIA_PHONE
-    ContextKeyManager::instance()->setClassStandardLabel("PasswordDialog",
-	    Key_Back, ContextBar::Back, ContextBar::ModalAndNonModal);
-    passcode_poweron->setEnabled(FALSE);
+#ifdef QTOPIA_CELL
+    passcode_poweron->setEnabled(false);
     QString p;
-    if (pinSelection->currentItem() == 0) {
-	p = enterPassCode(tr("Enter SIM PIN"), FALSE);
+    if (pinSelection->currentIndex() == 0) {
+        p = enterPassCode(tr("Enter SIM PIN"), false);
     } else {
-	p = enterPassCode(tr("Enter Phone PIN"), FALSE);
+        p = enterPassCode(tr("Enter Phone PIN"), false);
     }
-    if (!p.isNull())
-	phonesec->markProtected(pinSelection->currentItem(), b, p);
+    if (!p.isNull()) {
+        phonesec->markProtected(pinSelection->currentIndex(), b, p);
+    } else {
+        passcode_poweron->setEnabled( true );
+        passcode_poweron->setChecked( !b );
+    }
+
 #else
     Q_UNUSED(b);
 #endif
 }
 
-void Security::show()
+void Security::setVisible(bool vis)
 {
-    valid=FALSE;
-    setEnabled(FALSE);
-    SecurityBase::show();
-#ifndef QTOPIA_PHONE
-    if ( passcode.isEmpty() ) {
-	// could insist...
-	//changePassCode();
-	//if ( passcode.isEmpty() )
-	    //reject();
-    } else if ( timeout.isNull() || timeout.elapsed() > 2000 ) {
-	// Insist on re-entry of passcode if more than 2 seconds have elapsed.
-	/*
-	ContextKeyManager::instance()->setClassStandardLabel("PasswordDialog",
-		Key_Back, ContextBar::Next, ContextBar::ModalAndNonModal);
-	*/
-	QString pc = enterPassCode(tr("Enter Security passcode"));
-	if ( pc != passcode ) {
-	    QMessageBox::critical(this, tr("Passcode incorrect"), 
-		    tr("<qt>The passcode entered is incorrect. Access denied</qt>"));
-//	    reject();
-	    qApp->quit();
-	    return;
-	}
-	timeout.start();
+#ifndef QTOPIA_CELL
+    if (vis) {
+        valid=false;
+        setEnabled(false);
+        QDialog::setVisible(vis);
+        if ( passcode.isEmpty() ) {
+            // could insist...
+            //changePassCode();
+            //if ( passcode.isEmpty() )
+            //reject();
+        } else if ( timeout.isNull() || timeout.elapsed() > 2000 ) {
+            // Insist on re-entry of passcode if more than 2 seconds have elapsed.
+            QString pc = enterPassCode(tr("Enter Security passcode"));
+            if ( pc != passcode ) {
+                QMessageBox::critical(this, tr("Passcode incorrect"),
+                        tr("<qt>The passcode entered is incorrect. Access denied</qt>"));
+                //          reject();
+                qApp->quit();
+                return;
+            }
+            timeout.start();
+        }
+        setEnabled(true);
+    } else {
+        QDialog::setVisible(vis);
     }
+#else
+    QWidget::setVisible(vis);
 #endif
-    setEnabled(TRUE);
-    valid=TRUE;
+    valid=true;
 }
 
-#ifdef QTOPIA_PHONE
-bool Security::close(bool b)
-{
-    applySecurity();
-    return QWidget::close(b);
-}
-#else
 void Security::accept()
 {
     applySecurity();
@@ -279,67 +273,66 @@ void Security::done(int r)
     QDialog::done(r);
     close();
 }
-#endif
 
 void Security::selectNet(int auth_peer,int auth_peer_bits)
 {
     QString sn;
     if ( auth_peer_bits == 0 && auth_peer == 0 ) {
-	sn = tr("Any");
+        sn = tr("Any");
     } else if ( auth_peer_bits == 32 && auth_peer == 0 ) {
-	sn = tr("None");
+        sn = tr("None");
     } else {
-	sn =
-	    QString::number((auth_peer>>24)&0xff) + "."
-	    + QString::number((auth_peer>>16)&0xff) + "."
-	    + QString::number((auth_peer>>8)&0xff) + "."
-	    + QString::number((auth_peer>>0)&0xff) + "/"
-	    + QString::number(auth_peer_bits);
+        sn =
+            QString::number((auth_peer>>24)&0xff) + "."
+            + QString::number((auth_peer>>16)&0xff) + "."
+            + QString::number((auth_peer>>8)&0xff) + "."
+            + QString::number((auth_peer>>0)&0xff) + "/"
+            + QString::number(auth_peer_bits);
     }
     for (int i=0; i<syncnet->count(); i++) {
-	if ( sn == syncnet->text(i) || syncnet->text(i).left(sn.length()+1) == sn+" " )
-	{
-	    syncnet->setCurrentItem(i);
-	    return;
-	}
+        if ( sn == syncnet->itemText(i) || syncnet->itemText(i).left(sn.length()+1) == sn+" " )
+        {
+            syncnet->setCurrentIndex(i);
+            return;
+        }
     }
-    syncnet->insertItem(sn);
-    syncnet->setCurrentItem(syncnet->count()-1);
+    syncnet->addItem(sn);
+    syncnet->setCurrentIndex(syncnet->count()-1);
 }
 
 bool Security::parseNet(const QString& sn,int& auth_peer,int& auth_peer_bits)
 {
     auth_peer=0;
     if ( sn == tr("Any") ) {
-	auth_peer = 0;
-	auth_peer_bits = 0;
-	return TRUE;
+        auth_peer = 0;
+        auth_peer_bits = 0;
+        return true;
     } else if ( sn == tr("None") ) {
-	auth_peer = 0;
-	auth_peer_bits = 32;
-	return TRUE;
+        auth_peer = 0;
+        auth_peer_bits = 32;
+        return true;
     } else {
-	QString a;
-	int sl = sn.find('/');
-	if ( sl < 0 ) {
-	    auth_peer_bits = 32;
-	    a = sn;
-	} else {
-	    int n=(uint)sn.find(' ',sl);
-	    if ( n>sl ) n-=sl;
-	    auth_peer_bits = sn.mid(sl+1,(uint)n).toInt();
-	    a = sn.left(sl);
-	}
-	QStringList b=QStringList::split(QChar('.'),a);
-	if ( b.count() != 4 )
-	    return FALSE;
-	int x=1<<24;
-	auth_peer = 0;
-	for (QStringList::ConstIterator it=b.begin(); it!=b.end(); ++it) {
-	    auth_peer += (*it).toInt()*x;
-	    x >>= 8;
-	}
-	return x!=0 && auth_peer_bits && auth_peer;
+        QString a;
+        int sl = sn.indexOf('/');
+        if ( sl < 0 ) {
+            auth_peer_bits = 32;
+            a = sn;
+        } else {
+            int n=(uint)sn.indexOf(' ',sl);
+            if ( n>sl ) n-=sl;
+            auth_peer_bits = sn.mid(sl+1,(uint)n).toInt();
+            a = sn.left(sl);
+        }
+        QStringList b= a.split( QChar( '.' ));
+        if ( b.count() != 4 )
+            return false;
+        int x=1<<24;
+        auth_peer = 0;
+        for (QStringList::ConstIterator it=b.begin(); it!=b.end(); ++it) {
+            auth_peer += (*it).toInt()*x;
+            x >>= 8;
+        }
+        return x!=0 && auth_peer_bits && auth_peer;
     }
 }
 
@@ -347,39 +340,40 @@ void Security::setSyncNet(const QString& sn)
 {
     int auth_peer,auth_peer_bits;
     if ( parseNet(sn,auth_peer,auth_peer_bits) )
-	selectNet(auth_peer,auth_peer_bits);
+        selectNet(auth_peer,auth_peer_bits);
 }
 
 void Security::applySecurity()
 {
     if ( valid ) {
-	Config cfg("Security");
-#ifndef QTOPIA_PHONE
-	cfg.setGroup("Passcode");
-	cfg.writeEntry("passcode",passcode);
-	cfg.writeEntry("passcode_poweron",passcode_poweron->isChecked());
+        QSettings cfg("Trolltech","Security");
+#ifndef QTOPIA_CELL
+        cfg.beginGroup("Passcode");
+        cfg.setValue("passcode",passcode);
+        cfg.setValue("passcode_poweron",passcode_poweron->isChecked());
 #endif
-	cfg.setGroup("Sync");
-	int auth_peer=0;
-	int auth_peer_bits;
-	QString sn = syncnet->currentText();
-	parseNet(sn,auth_peer,auth_peer_bits);
-	
-	QHostAddress allowed((Q_UINT32)auth_peer);
-	cfg.writeEntry("auth_peer",allowed.toString());
-	cfg.writeEntry("auth_peer_bits",auth_peer_bits);
-	
-	/*
-	cfg.setGroup("Remote");
-	if ( telnetAvailable() )
-	    cfg.writeEntry("allow_telnet",telnet->isChecked());
-	if ( sshAvailable() )
-	    cfg.writeEntry("allow_ssh",ssh->isChecked());
-	// ### write ssh/telnet sys config files
-	*/
+        cfg.endGroup();
+        cfg.beginGroup("Sync");
+        int auth_peer=0;
+        int auth_peer_bits;
+        QString sn = syncnet->currentText();
+        parseNet(sn,auth_peer,auth_peer_bits);
+
+        QHostAddress allowed((quint32)auth_peer);
+        cfg.setValue("auth_peer",allowed.toString());
+        cfg.setValue("auth_peer_bits",auth_peer_bits);
+
+        /*
+        { cfg.endGroup(); cfg.beginGroup("Remote"); };
+        if ( telnetAvailable() )
+            cfg.setValue("allow_telnet",telnet->isChecked());
+        if ( sshAvailable() )
+            cfg.setValue("allow_ssh",ssh->isChecked());
+        // ### write ssh/telnet sys config files
+        */
     }
 
-    QCopEnvelope("QPE/System", "securityChanged()");
+    QtopiaIpcEnvelope("QPE/System", "securityChanged()");
 }
 
 // for the phone, it requires: once to check old, (even though in
@@ -388,69 +382,65 @@ void Security::applySecurity()
 // or security pin as required.
 void Security::changePassCode()
 {
-#ifdef QTOPIA_PHONE
+#ifdef QTOPIA_CELL
     QString old;
 #endif
     QString new1;
     QString new2;
-    bool    mismatch = FALSE;
-    bool    valid = TRUE;
+    bool    mismatch = false;
+    bool    valid = true;
 
     do {
-#ifdef QTOPIA_PHONE
-	ContextKeyManager::instance()->setClassStandardLabel("PasswordDialog",
-		Key_Back, ContextBar::Next, ContextBar::ModalAndNonModal);
-	// should check current pin first, may not be set.
-	if (old.isNull()) {
-	    old = enterPassCode(tr("Enter current PIN"), FALSE);
-	    // indicates dialog was canceled.
-	    if ( old.isNull() )
-		return;
-	}
-	if (mismatch) {
-	    new1 = enterPassCode(tr("Mismatch: Retry new PIN"), FALSE);
-	} else if (!valid) {
-	    new1 = enterPassCode(tr("Invalid: Retry new PIN"), FALSE);
-	} else {
-	    new1 = enterPassCode(tr("Enter new passcode"), FALSE);
-	}
+#ifdef QTOPIA_CELL
+        // should check current pin first, may not be set.
+        if (old.isNull()) {
+            old = enterPassCode(tr("Enter current PIN"), false, false);
+            // indicates dialog was canceled.
+            if ( old.isNull() )
+                return;
+        }
+        if (mismatch) {
+            new1 = enterPassCode(tr("Mismatch: Retry new PIN"), false);
+        } else if (!valid) {
+            new1 = enterPassCode(tr("Invalid: Retry new PIN"), false);
+        } else {
+            new1 = enterPassCode(tr("Enter new passcode"), false);
+        }
 #else
-	if (mismatch) {
-	    new1 = enterPassCode(tr("Mismatch: Retry new code"), TRUE);
-	} else if (!valid) {
-	    new1 = enterPassCode(tr("Invalid: Retry new code"), TRUE);
-	} else {
-	    new1 = enterPassCode(tr("Enter new passcode"), TRUE);
-	}
+        if (mismatch) {
+            new1 = enterPassCode(tr("Mismatch: Retry new code"), true);
+        } else if (!valid) {
+            new1 = enterPassCode(tr("Invalid: Retry new code"), true);
+        } else {
+            new1 = enterPassCode(tr("Enter new passcode"), true);
+        }
 #endif
-	// indicates dialog was canceled.
-	if ( new1.isNull() )
-	    return;
+        // indicates dialog was canceled.
+        if ( new1.isNull() )
+            return;
 
-	if (new1.isEmpty()) {
-	    valid = FALSE;
-	} else {
-#ifdef QTOPIA_PHONE
-	    ContextKeyManager::instance()->setClassStandardLabel("PasswordDialog",
-		    Key_Back, ContextBar::Back, ContextBar::ModalAndNonModal);
-	    new2 = enterPassCode(tr("Re-enter new PIN"), FALSE);
+        if (new1.isEmpty()) {
+            valid = false;
+        } else {
+#ifdef QTOPIA_CELL
+            new2 = enterPassCode(tr("Re-enter new PIN"), false);
 #else
-	    new2 = enterPassCode(tr("Re-enter new passcode"), TRUE);
+            new2 = enterPassCode(tr("Re-enter new passcode"), true);
 #endif
-	    if ( new2.isNull() )
-		return;
+            if ( new2.isNull() )
+                return;
 
-	    valid = !new2.isEmpty();
-	    mismatch = new1 != new2;
-	}
+            valid = !new2.isEmpty();
+            mismatch = new1 != new2;
+        }
 
     } while (mismatch || !valid);
 
-#ifdef QTOPIA_PHONE
-    phonesec->changePassword(pinSelection->currentItem(),old,new2);
-	
+#ifdef QTOPIA_CELL
+    phonesec->changePassword(pinSelection->currentIndex(),old,new2);
+
     if (!mStatus)
-	mStatus = new WaitScreen(0);
+        mStatus = new WaitScreen(0);
     mStatus->showMaximized();
 #else
     passcode = new1;
@@ -460,30 +450,26 @@ void Security::changePassCode()
 
 void Security::clearPassCode()
 {
-    passcode = QString::null;
+    passcode = QString();
     updateGUI();
 }
 
 
-QString Security::enterPassCode(const QString& prompt, bool encrypt)
+QString Security::enterPassCode(const QString& prompt, bool encrypt, bool last)
 {
-    // magic to stop it crypting.
-    if (encrypt)
-	return Password::getPassword(prompt);
-    else
-	return Password::getPassword("@:" + prompt); // Magic, No tr.
+    return QPasswordDialog::getPassword(this, prompt, encrypt ? QPasswordDialog::Crypted : QPasswordDialog::Plain, last);
 }
 
 bool Security::telnetAvailable() const
 {
     // ### not implemented
-    return FALSE;
+    return false;
 }
 
 bool Security::sshAvailable() const
 {
     // ### not implemented
-    return FALSE;
+    return false;
 }
 
 #include "security.moc"

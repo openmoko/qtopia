@@ -1,0 +1,8 @@
+[Desktop Entry]
+Exec=audiosettings
+Icon=audiosettings/SoundPlayer
+Type=Application
+Name[]=Audio Settings
+[Translation]
+File=QtopiaSettings
+Context=Audio Settings

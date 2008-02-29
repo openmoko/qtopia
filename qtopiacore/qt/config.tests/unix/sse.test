@@ -1,0 +1,25 @@
+#!/bin/sh
+
+FVISIBILITY_SUPPORT=no
+COMPILER=$1
+VERBOSE=$2
+
+cat >>sse.c << EOF
+#include <mmintrin.h>
+#include <xmmintrin.h>
+#if defined(__GNUC__) && __GNUC__ < 4 && __GNUC_MINOR__ < 3
+#error GCC < 3.2 is known to create internal compiler errors with our MMX code
+#endif
+EOF
+
+$COMPILER -c -msse sse.c >/dev/null 2>&1 && SSE_SUPPORT=yes
+rm -f sse.c sse.o
+
+# done
+if [ "$SSE_SUPPORT" != "yes" ]; then
+    [ "$VERBOSE" = "yes" ] && echo "sse support disabled."
+    exit 0
+else
+    [ "$VERBOSE" = "yes" ] && echo "sse support enabled."
+    exit 1
+fi

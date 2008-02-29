@@ -1,76 +1,62 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include <qfile.h>
-#include <qtl.h>
+#include <QtAlgorithms>
+// #include <qtl.h>
 #include <math.h>
 #include <limits.h>
 #include <qdatastream.h>
 #include "stroke.h"
 
 #define QIMPEN_CORRELATION_POINTS   25
-//#define DEBUG_QIMPEN
 
 /*!
-  \class QIMPenStroke qimpenstroke.h
+  \class QIMPenStroke
   \brief The QIMPenStroke class handles a single stroke.
 
   Can calculate closeness of match to
   another stroke.
+  \ingroup qtopiahandwriting
 */
 
-bool QIMPenStroke::useVertPos = TRUE;
+bool QIMPenStroke::useVertPos = true;
 
 QIMPenStroke::QIMPenStroke() : cheight(75)
 {
 }
 
-QIMPenStroke::QIMPenStroke( const QIMPenStroke &st ) : cheight(st.cheight)
+QIMPenStroke::QIMPenStroke( const QIMPenStroke &st )
+    : startPoint( st.startPoint ), lastPoint( st.lastPoint ),
+    links( st.links ), cheight(st.cheight)
 {
-    startPoint = st.startPoint;
-    lastPoint = st.lastPoint;
-    links = st.links.copy();
 }
 
 QIMPenStroke &QIMPenStroke::operator=( const QIMPenStroke &s )
 {
     clear();
-    //qDebug( "copy strokes %d", s.links.count() );
     startPoint = s.startPoint;
     lastPoint = s.lastPoint;
-    links = s.links.copy();
+    qCopy( s.links.begin(), s.links.end(), this->links.begin() );
+    // links = s.links.copy();
     cheight = s.cheight;
 
     return *this;
@@ -99,60 +85,60 @@ void QIMPenStroke::beginInput( QPoint p )
 
 /*!
   Add a point \a p to the stroke's shape.
-  Returns TRUE if the point was successfully added.
+  Returns true if the point was successfully added.
 */
 bool QIMPenStroke::addPoint( QPoint p )
 {
     if ( links.count() > 500 ) // sanity check (that the user is sane).
-        return FALSE;
+        return false;
 
     int dx = p.x() - lastPoint.x();
     int dy = p.y() - lastPoint.y();
-    if ( QABS( dx ) > 1 || QABS( dy ) > 1 ) {
-	// The point is not adjacent to the previous point, so we fill
-	// in with a straight line.  Some kind of non-linear
-	// interpolation might be better.
-	int x = lastPoint.x();
-	int y = lastPoint.y();
-	int ix = 1;
-	int iy = 1;
-	if ( dx < 0 ) {
-	    ix = -1;
-	    dx = -dx;
-	}
-	if ( dy < 0 ) {
-	    iy = -1;
-	    dy = -dy;
-	}
-	int d = 0;
-	if ( dx < dy ) {
-	    d = dx;
-	    do {
-		y += iy;
-		d += dx;
-		if ( d > dy ) {
-		    x += ix;
-		    d -= dy;
-		}
-		internalAddPoint( QPoint( x, y ) );
-	    } while ( y != p.y() );
-	} else {
-	    d = dy;
-	    do {
-		x += ix;
-		d += dy;
-		if ( d > dx ) {
-		    y += iy;
-		    d -= dx;
-		}
-		internalAddPoint( QPoint( x, y ) );
-	    } while ( x != p.x() );
-	}
+    if ( qAbs( dx ) > 1 || qAbs( dy ) > 1 ) {
+        // The point is not adjacent to the previous point, so we fill
+        // in with a straight line.  Some kind of non-linear
+        // interpolation might be better.
+        int x = lastPoint.x();
+        int y = lastPoint.y();
+        int ix = 1;
+        int iy = 1;
+        if ( dx < 0 ) {
+            ix = -1;
+            dx = -dx;
+        }
+        if ( dy < 0 ) {
+            iy = -1;
+            dy = -dy;
+        }
+        int d = 0;
+        if ( dx < dy ) {
+            d = dx;
+            do {
+                y += iy;
+                d += dx;
+                if ( d > dy ) {
+                    x += ix;
+                    d -= dy;
+                }
+                internalAddPoint( QPoint( x, y ) );
+            } while ( y != p.y() );
+        } else {
+            d = dy;
+            do {
+                x += ix;
+                d += dy;
+                if ( d > dx ) {
+                    y += iy;
+                    d -= dx;
+                }
+                internalAddPoint( QPoint( x, y ) );
+            } while ( x != p.x() );
+        }
     } else {
-	internalAddPoint( p );
+        internalAddPoint( p );
     }
 
-    return TRUE;
+    return true;
 }
 
 /*!
@@ -161,14 +147,12 @@ bool QIMPenStroke::addPoint( QPoint p )
 void QIMPenStroke::endInput()
 {
     if ( links.count() < 3 ) {
-	QIMPenGlyphLink gl;
-	links.resize(1);
-	gl.dx = 1;
-	gl.dy = 0;
-	links[0] = gl;
+        QIMPenGlyphLink gl;
+        links.resize(1);
+        gl.dx = 1;
+        gl.dy = 0;
+        links[0] = gl;
     }
-
-    //qDebug("Points: %d", links.count() );
 }
 
 /*!
@@ -180,17 +164,14 @@ unsigned int QIMPenStroke::match( QIMPenStroke *pen )
     double lratio;
 
     if ( links.count() > pen->links.count() )
-	lratio = (links.count()+2) / (pen->links.count()+2);
+        lratio = (links.count()+2) / (pen->links.count()+2);
     else
-	lratio =  (pen->links.count()+2) / (links.count()+2);
+        lratio =  (pen->links.count()+2) / (links.count()+2);
 
     lratio -= 1.0;
 
     if ( lratio > 2.0 ) {
-#ifdef DEBUG_QIMPEN
-	qDebug( "stroke length too different" );
-#endif
-	return 400000;
+        return 400000;
     }
 
     createSignatures();
@@ -201,45 +182,45 @@ unsigned int QIMPenStroke::match( QIMPenStroke *pen )
 
     int vdiff, evdiff;
     if (!useVertPos) {
-	// if they are different, need a differnt way of measureing
-	int h = boundingRect().height();
-	int ph = pen->boundingRect().height();
+        // if they are different, need a differnt way of measureing
+        int h = boundingRect().height();
+        int ph = pen->boundingRect().height();
 
-	int sh = h * 75 / ch;
-	int sph = ph * 75 / pch;
+        int sh = h * 75 / ch;
+        int sph = ph * 75 / pch;
 
-	if (((sh << 1) < sph && sph > 4)
-		|| ((sph << 1) < ph && ph > 4)) {
-	    return 400000;
-	}
-	vdiff = 0;
-	evdiff = 0;
+        if (((sh << 1) < sph && sph > 4)
+                || ((sph << 1) < ph && ph > 4)) {
+            return 400000;
+        }
+        vdiff = 0;
+        evdiff = 0;
     } else {
-	int sp = startPoint.y();
-	int psp = pen->startPoint.y();
-	vdiff = QABS(sp - psp);
+        int sp = startPoint.y();
+        int psp = pen->startPoint.y();
+        vdiff = qAbs(sp - psp);
 
-	// Insanely offset?
-	if ( vdiff > 18 ) {
-	    return 400000;
-	}
+        // Insanely offset?
+        if ( vdiff > 18 ) {
+            return 400000;
+        }
 
-	vdiff -= 4;
-	if ( vdiff < 0 )
-	    vdiff = 0;
+        vdiff -= 4;
+        if ( vdiff < 0 )
+            vdiff = 0;
 
-	// Ending point offset
-	int lp = lastPoint.y();
-	int plp = pen->lastPoint.y();
-	evdiff = QABS(lp - plp);
-	// Insanely offset?
-	if ( evdiff > 20 ) {
-	    return 400000;
-	}
+        // Ending point offset
+        int lp = lastPoint.y();
+        int plp = pen->lastPoint.y();
+        evdiff = qAbs(lp - plp);
+        // Insanely offset?
+        if ( evdiff > 20 ) {
+            return 400000;
+        }
 
-	evdiff -= 5;
-	if ( evdiff < 0 )
-	    evdiff = 0;
+        evdiff -= 5;
+        if ( evdiff < 0 )
+            evdiff = 0;
     }
 
     // do a correlation with the three available signatures.
@@ -249,27 +230,18 @@ unsigned int QIMPenStroke::match( QIMPenStroke *pen )
 
     err1 = tsig.calcError(pen->tsig);
     if ( err1 > tsig.maxError() ) {  // no need for more matching
-#ifdef DEBUG_QIMPEN
-	qDebug( "tsig too great: %d", err1 );
-#endif
         return 400000;
     }
 
     // maybe a sliding window is worthwhile for these too.
     err2 = dsig.calcError( pen->dsig );
     if ( err2 > dsig.maxError() ) {
-#ifdef DEBUG_QIMPEN
-	qDebug( "dsig too great: %d", err2 );
-#endif
-	return 400000;
+        return 400000;
     }
 
     err3 = asig.calcError( pen->asig );
     if ( err3 > asig.maxError() ) {
-#ifdef DEBUG_QIMPEN
-	qDebug( "asig too great: %d", err3 );
-#endif
-	return 400000;
+        return 400000;
     }
 
     // Some magic numbers here - the addition reduces the weighting of
@@ -278,14 +250,10 @@ unsigned int QIMPenStroke::match( QIMPenStroke *pen )
     // has the most weight.  This ain't rocket science.
     // Basically, these numbers are the tuning factors.
     unsigned int err = ( err1 + tsig.weight() )
-	    * ( err2 + dsig.weight() )
-	    * ( err3 + asig.weight() )
-	    + vdiff * 1000 + evdiff * 500
-	    + (unsigned int)(lratio * 5000.0);
-
-#ifdef DEBUG_QIMPEN
-    qDebug( "err %d   ( %d, %d, %d, %d)", err, err1, err2, err3, vdiff);
-#endif
+            * ( err2 + dsig.weight() )
+            * ( err3 + asig.weight() )
+            + vdiff * 1000 + evdiff * 500
+            + (unsigned int)(lratio * 5000.0);
 
     return err;
 }
@@ -296,22 +264,22 @@ unsigned int QIMPenStroke::match( QIMPenStroke *pen )
 QRect QIMPenStroke::boundingRect() const
 {
     if ( !bounding.isValid() ) {
-	int x = startPoint.x();
-	int y = startPoint.y();
-	bounding = QRect( x, y, 1, 1 );
+        int x = startPoint.x();
+        int y = startPoint.y();
+        bounding = QRect( x, y, 1, 1 );
 
-	for ( int i = 0; i < (int)links.count(); i++ ) {
-	    x += links[i].dx;
-	    y += links[i].dy;
-	    if ( x < bounding.left() )
-		bounding.setLeft( x );
-	    if ( x > bounding.right() )
-		bounding.setRight( x );
-	    if ( y < bounding.top() )
-		bounding.setTop( y );
-	    if ( y > bounding.bottom() )
-		bounding.setBottom( y );
-	}
+        for ( int i = 0; i < (int)links.count(); i++ ) {
+            x += links[i].dx;
+            y += links[i].dy;
+            if ( x < bounding.left() )
+                bounding.setLeft( x );
+            if ( x > bounding.right() )
+                bounding.setRight( x );
+            if ( y < bounding.top() )
+                bounding.setTop( y );
+            if ( y > bounding.bottom() )
+                bounding.setBottom( y );
+        }
     }
 
     return bounding;
@@ -324,11 +292,11 @@ QRect QIMPenStroke::boundingRect() const
 void QIMPenStroke::createSignatures()
 {
     if ( tsig.isEmpty() )
-	tsig.setStroke(*this);
+        tsig.setStroke(*this);
     if ( asig.isEmpty() )
-	asig.setStroke(*this);
+        asig.setStroke(*this);
     if ( dsig.isEmpty() )
-	dsig.setStroke(*this);
+        dsig.setStroke(*this);
 }
 
 /*!
@@ -344,7 +312,7 @@ void QIMPenStroke::internalAddPoint( QPoint p )
         gl.dx = p.x() - lastPoint.x();
         gl.dy = p.y() - lastPoint.y();
 
-	/*ALARM BELLS*/
+        /*ALARM BELLS*/
         links.resize( links.size() + 1 );   //### resize by 1 is bad
         links[(int)links.size() - 1] = gl;
     }
@@ -382,8 +350,8 @@ QDataStream &operator<< (QDataStream &s, const QIMPenStroke &ws)
     s << ws.startPoint;
     s << ws.links.count();
     for ( int i = 0; i < (int)ws.links.count(); i++ ) {
-        s << (Q_INT8)ws.links[i].dx;
-        s << (Q_INT8)ws.links[i].dy;
+        s << (qint8)ws.links[i].dx;
+        s << (qint8)ws.links[i].dy;
     }
 
     return s;
@@ -394,7 +362,7 @@ QDataStream &operator<< (QDataStream &s, const QIMPenStroke &ws)
 */
 QDataStream &operator>> (QDataStream &s, QIMPenStroke &ws)
 {
-    Q_INT8 i8;
+    qint8 i8;
     s >> ws.startPoint;
     ws.lastPoint = ws.startPoint;
     unsigned size;
@@ -402,10 +370,10 @@ QDataStream &operator>> (QDataStream &s, QIMPenStroke &ws)
     ws.links.resize( size );
     for ( int i = 0; i < (int)size; i++ ) {
         s >> i8;
-	ws.links[i].dx = i8;
+        ws.links[i].dx = i8;
         s >> i8;
-	ws.links[i].dy = i8;
-	ws.lastPoint += QPoint( ws.links[i].dx, ws.links[i].dy );
+        ws.links[i].dy = i8;
+        ws.lastPoint += QPoint( ws.links[i].dx, ws.links[i].dy );
     }
 
     return s;

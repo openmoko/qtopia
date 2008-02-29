@@ -1,0 +1,143 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Document Storage</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Document Storage<br /><small></small></h1>
+<a name="top"></a><ul><li><a href="#storage-conf">Storage.conf</a></li>
+<li><a href="#what-do-we-want-to-do">What do we want <tt>Storage.conf</tt> to do?</a></li>
+<li><a href="#filtering">Filtering</a></li>
+<li><a href="#non-removable-vs-removable-storage">Non-removable vs Removable Storage</a></li>
+<li><a href="#using-read-only-file-systems">Using Read-only File Systems</a></li>
+</ul>
+<a name="removable-storage-cards"></a><a name="storageconf"></a><p>Qtopia identifies storage locations through the <tt>Storage.conf</tt> configuration file.</p>
+<a name="storage-conf"></a>
+<h2>Storage.conf</h2>
+<p>Devices are mapped to human-readable names using the <tt>Storage.conf</tt> configuration file. The file will also indicate whether or not a given device is removable or not.</p>
+<p>For example:</p>
+<pre>    [/dev/hda1]
+    Name = Internal Storage
+    Removable = 0</pre>
+<p>The device can be anything that appears in the first column of <tt>/etc/mtab</tt>, for example, <tt><span class="comment">//server/path/to/nfsmount</span></tt> is a valid device.</p>
+<p><tt>Storage.conf</tt> refers to devices but Qtopia uses path names and <tt>mtab</tt> is consulted to determine which device a given path is on. There is <i>special case</i> code for <tt>$HOME</tt> and the non-removable storage location should be located at <tt>$HOME</tt>. By removing the <i>special case</i> status of <tt>$HOME</tt> the requirement to have only one non-removable location is removed.</p>
+<a name="what-do-we-want-to-do"></a>
+<h2>What do we want <tt>Storage.conf</tt> to do?</h2>
+<p><tt>Storage.conf</tt> must:</p>
+<ol type="1">
+<li>Identify the various locations that exist on the device.<ul>
+<li>HOME</li>
+<li>Non-removable devices (eg /dev/hda1)</li>
+<li>Removable devices (eg /dev/cf)</li>
+</ul>
+</li>
+<li>Indicate if a given area allows documents and/or applications to be placed there.</li>
+</ol>
+<p>For example:</p>
+<pre>    [Translation]
+    File=QtopiaDefaults
+    Context=Storage
+
+    [HOME]
+    Name[] = HOME Storage
+    Removable = 0
+    Applications = 0
+    Documents = 1
+    Options = rw
+
+    [/dev/hda2]
+    Name[] = Program Storage
+    Removable = 0
+    Applications = 1
+    Documents = 0
+
+    [/dev/cf]
+    Name[] = CF card
+    Removable = 1
+    Applications = 0
+    Documents = 1
+
+    [/dev/loop1]
+    Name[] = Virtual CF
+    Removable = 1
+    Applications = 1
+    Documents = 1</pre>
+<p>The real system this <tt>Storage.conf</tt> represents could be as follows:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Path</th><th>Device</th><th>Info</th></tr></thead>
+<tr valign="top" class="odd"><td>/</td><td><tt>/dev/hda1</tt></td><td><tt>jffs2</tt> root (easy upgrades)</td></tr>
+<tr valign="top" class="even"><td><tt>/home/root</tt></td><td><tt>HOME</tt></td><td>This is on <tt>/dev/hda1</tt> but it is treated separately</td></tr>
+<tr valign="top" class="odd"><td><tt>/progfs</tt></td><td><tt>/dev/hda2</tt></td><td>Applications are placed here - separated from the base system</td></tr>
+<tr valign="top" class="even"><td><tt>/mnt/cf</tt></td><td><tt>/dev/cf</tt></td><td><tt>CF</tt> card (no applicationss for security reasons)</td></tr>
+<tr valign="top" class="odd"><td><tt>/mnt/vcf</tt></td><td><tt>/dev/loop1</tt></td><td>The loop back image that is pretending to be a CF card for testing purposes.</td></tr>
+</table></p>
+<p>The allowable parameters are:</p>
+<ul>
+<li><tt>Name[]</tt> - the translatable name shown to the user.</li>
+<li><tt>Removable</tt> - indicates if the location is removable</li>
+<li><tt>Applications</tt> - indicates if the location hold applications</li>
+<li><tt>Documents</tt> - indicates if the location hold documents</li>
+<li><tt>Options</tt> - values override the mount options in <tt>/etc/mtab</tt>.</li>
+</ul>
+<p>The <tt>HOME</tt> location defaults to <tt>rw</tt> for its Options value. Qtopia assumes a location is writable only if <tt>Options</tt> contains <tt>rw</tt>. A location's <tt>Options</tt> might need to be overwritten if they don't include <tt>rw</tt> but are writable. For example, SMB mounts on a machine have Options of 0 or if they are overly complex <tt>cardInfoString()</tt> and <tt>installLocationsString()</tt> encode the Options as part of a <tt>;</tt> delimited string.</p>
+<a name="filtering"></a>
+<h2>Filtering</h2>
+<p>The <tt>StorageInfo::filesytems()</tt> function provide filtering functionality.</p>
+<p>For example, to extend the <i>Documents</i> file systems use the following:</p>
+<pre>    FileSystemFilter fsf;
+    fsf.documents == FileSystemFilter::Set;
+    QList&lt;FileSystem*&gt; filesystems = storage-&gt;filesystems( &amp;fsf );</pre>
+<p>The <tt>FileSystemFilter</tt> is then easily extended as follows:</p>
+<pre>    class WriteableFileSystemFilter : public FileSystemFilter
+    {
+    public:
+        WriteableFileSystemFilter()
+            : writable( Either )
+        {
+        }
+
+        bool filter( FileSystem *fs )
+        {
+            if ( (writable == Set &amp;&amp; !fs-&gt;isWritable()) ||
+                 (writable == NotSet &amp;&amp; fs-&gt;isWritable()) )
+                return false;
+            return FileSystemFilter::filter();
+        }
+
+        FileSystemFilter::FilterOption writable;
+    };</pre>
+<p>This is a simple example however more complex rules can be incorporated. So, putting it all together:</p>
+<ol type="1">
+<li><tt>cardInfoString()</tt> and <tt>installLocationsString()</tt> are now implemented as a filter and a <tt>FileSystem</tt> list to the <tt>String</tt> function.</li>
+<li><tt>LocationCombo</tt> has a new <tt>setFilter()</tt> function used to limit the types of file systems it shows.</li>
+<li>All code using <tt>StorageInfo::fileSystems()</tt> is updated and the filter argument is mandatory.</li>
+</ol>
+<a name="non-removable-vs-removable-storage"></a>
+<h2>Non-removable vs Removable Storage</h2>
+<p>Application data is stored in the non-removable location, however documents can be stored in any location. Removable locations are re-scanned on insertion and removal.</p>
+<p>The scanning is triggered when the Qtopia library receives one of the following messages via the <tt>QPE/Card</tt> QCOP channel:</p>
+<ul>
+<li><tt>mtabChanged()</tt> - sent when <tt>/etc/mtab</tt> has changed.</li>
+<li><tt>stabChanged()</tt> - sent when <tt>/var/run/stab</tt>, <tt>/var/state/pcmcia/stab</tt>, or <tt>/var/lib/pcmcia/stab</tt> have changed.</li>
+</ul>
+<p>If <tt>QPE_SYSTEM_SYSFILEMONITOR</tt> is defined, Qtopia assumes that the surrounding system generates these messages, for example, by using the <tt>qcop</tt> command in the system <tt>HotPlug</tt> scripts. Otherwise, Qtopia polls every few seconds (wasting CPU).</p>
+<a name="using-read-only-file-systems"></a>
+<h2>Using Read-only File Systems</h2>
+<p>Using read-only file systems have a number of benefitsa:</p>
+<ul>
+<li>compressed read-only file systems such as <tt>cramfs</tt> and <tt>squashfs</tt> have better compression than read-write file systems such as <tt>jffs2</tt></li>
+<li>read-only file systems provide a measure of protection for system files.</li>
+</ul>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

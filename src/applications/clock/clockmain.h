@@ -1,71 +1,112 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 #ifndef CLOCKMAINWINDOW_H
 #define CLOCKMAINWINDOW_H
 
-#include <qvbox.h>
+#include <qwidget.h>
+#include <qtopiaabstractservice.h>
 
 class Clock;
 class StopWatch;
 class Alarm;
 class QTabWidget;
-class QWidgetStack;
-class ContextMenu;
+class QStackedWidget;
+class QMenu;
+class QAction;
 
-class ClockMain : public QVBox
+class ClockMain : public QWidget
 {
     Q_OBJECT
 public:
-    ClockMain( QWidget *parent=0, const char *name=0, WFlags fl=0 );
+    ClockMain( QWidget *parent=0, Qt::WFlags fl=0 );
     ~ClockMain();
-    
+
 private slots:
-    void appMessage(const QCString& msg, const QByteArray& data);
-    void raisePage(int);
-    void pageRaised(QWidget *);
+    void appMessage(const QString& msg, const QByteArray& data);
+    void raisePage(QAction *);
+    void pageRaised(int);
+
+public slots:
+    void showClock();
+    void editAlarm();
+    void setDailyEnabled( bool enable );
 
 protected:
     void closeEvent(QCloseEvent *);
 
 private:
     QTabWidget *tabWidget;
-    QWidgetStack *stack;
+    QStackedWidget *stack;
     Clock *clock;
     StopWatch *stopWatch;
     Alarm *alarm;
-    ContextMenu *contextMenu;
+#ifdef QTOPIA_PHONE
+    QMenu *contextMenu;
+    QAction *actionClock;
+    QAction *actionStopWatch;
+    QAction *actionAlarm;
+#endif
+
+    int clockIndex;
+    int stopwatchIndex;
+    int alarmIndex;
+};
+
+class ClockService : public QtopiaAbstractService
+{
+    Q_OBJECT
+    friend class ClockMain;
+private:
+    ClockService( ClockMain *parent )
+        : QtopiaAbstractService( "Clock", parent )
+        { this->parent = parent; publishAll(); }
+
+public:
+    ~ClockService();
+
+public slots:
+    void showClock();
+
+private:
+    ClockMain *parent;
+};
+
+class AlarmService : public QtopiaAbstractService
+{
+    Q_OBJECT
+    friend class ClockMain;
+private:
+    AlarmService( ClockMain *parent )
+        : QtopiaAbstractService( "Alarm", parent )
+        { this->parent = parent; publishAll(); }
+
+public:
+    ~AlarmService();
+
+public slots:
+    void editAlarm();
+    void setDailyEnabled( int flag );
+
+private:
+    ClockMain *parent;
 };
 
 #endif

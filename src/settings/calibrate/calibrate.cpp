@@ -1,66 +1,50 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
+
+#include <math.h>
 
 #include "calibrate.h"
 
-#include <qtopia/resource.h>
+#if defined(Q_WS_QWS)
 
-#include <qapplication.h>
+#include <QScreen>
+#include <QPainter>
+#include <QDesktopWidget>
+#include <QApplication>
 
-#if defined(Q_WS_QWS) || defined(_WS_QWS_)
-
-#include <qpainter.h>
-#include <qfile.h>
-#include <qtimer.h>
-#include <qmessagebox.h>
-#include <qwindowsystem_qws.h>
-#include <qgfx_qws.h>
-#include <qsimplerichtext.h>
-#include <stdlib.h>
+#include <qtopialog.h>
 
 
-Calibrate::Calibrate(QWidget* parent, const char * name, WFlags wf) :
-    QDialog( parent, name, TRUE, wf | WStyle_Customize | WStyle_StaysOnTop )
+Calibrate::Calibrate(QWidget* parent, Qt::WFlags f)
+    : QDialog( parent, f )
 {
-    init();
-
+    setObjectName("_fullscreen_");
+    setWindowFlags(Qt::Dialog | Qt::WindowStaysOnTopHint);
+    setWindowState(Qt::WindowFullScreen);
+    activateWindow();
+    raise();
     timer = new QTimer( this );
     connect( timer, SIGNAL(timeout()), this, SLOT(timeout()) );
 
-    setFocusPolicy( StrongFocus );
-    setFocus();
+    qWarning("Starting Calibrate!");
 }
 
 Calibrate::~Calibrate()
@@ -68,20 +52,21 @@ Calibrate::~Calibrate()
     store();
 }
 
-void
-Calibrate::init(void)
+void Calibrate::showEvent(QShowEvent *e )
 {
-    showCross = TRUE;
-    pressed = FALSE;
-    anygood = FALSE;
+    qLog(Input) << "Calibrate::showEvent()";
+    showCross = true;
+    pressed = false;
+    anygood = false;
     const int offset = 30;
-    QRect desk = qApp->desktop()->geometry();
-    setGeometry( 0, 0, desk.width(), desk.height() );
+
+    QDesktopWidget *desktop = QApplication::desktop();
+    QRect desk = desktop->screenGeometry(desktop->primaryScreen());
+    setGeometry(desk);
     if ( desk.height() < 250 ) {
-	int w = desk.height()/3;
-	logo.convertFromImage(Resource::loadImage("qpelogo").smoothScale(w,w));
+      logo = QPixmap(":image/qpelogo");
     } else {
-	logo = Resource::loadPixmap( "qpelogo" );
+      logo = QPixmap( ":image/qpelogo" );
     }
     cd.screenPoints[QWSPointerCalibrationData::TopLeft] = QPoint( offset, offset );
     cd.screenPoints[QWSPointerCalibrationData::BottomLeft] = QPoint( offset, qt_screen->deviceHeight() - offset );
@@ -90,46 +75,57 @@ Calibrate::init(void)
     cd.screenPoints[QWSPointerCalibrationData::Center] = QPoint( qt_screen->deviceWidth()/2, qt_screen->deviceHeight()/2 );
     goodcd = cd;
     reset();
-}
 
-void Calibrate::show()
-{
-    if ( !isVisible() && QWSServer::mouseHandler() ) {
-	init();
-	anygood = QFile::exists("/etc/pointercal");
-	QWSServer::mouseHandler()->getCalibration(&goodcd);
-	QWSServer::mouseHandler()->clearCalibration();
+    if ( QWSServer::mouseHandler() ) {
+      QString calFile = qgetenv("POINTERCAL_FILE");
+      if (calFile.isEmpty())
+        calFile = "/etc/pointercal";
+
+      qLog(Input) << "Using calibration file " << calFile;
+      anygood = QFile::exists(calFile);
+      QWSServer::mouseHandler()->getCalibration(&goodcd);
+      QWSServer::mouseHandler()->clearCalibration();
     }
-    QDialog::show();
-    setActiveWindow();
+    QDialog::showEvent(e);
+    setVisible(true);
+    setFocusPolicy( Qt::StrongFocus );
+    setFocus();
+    showFullScreen();
     QTimer::singleShot(0, this, SLOT(doGrab()) );
 }
 
 void Calibrate::store()
 {
-    if ( QWSServer::mouseHandler() && anygood )
-	QWSServer::mouseHandler()->calibrate( &goodcd );
-    reset();
+    if ( QWSServer::mouseHandler() && anygood ) {
+      qLog(Input) << "Store calibration data to file";
+      QWSServer::mouseHandler()->calibrate( &goodcd );
+    }
 }
 
-void Calibrate::hide()
+void Calibrate::hideEvent(QHideEvent *e )
 {
-    if ( isVisible() )
-	store();
+    qLog(Input) << "Calibrate::hideEvent()";
+    store();
+    reset();
     QDialog::hide();
+    QDialog::reject();
+    QDialog::hideEvent(e);
 }
 
 void Calibrate::reset()
 {
+    qLog(Input) << "Calibrate::reset()";
     penPos = QPoint();
     location = QWSPointerCalibrationData::TopLeft;
     crossPos = fromDevice( cd.screenPoints[location] );
+    releaseMouse();
+    releaseKeyboard();
 }
 
 QPoint Calibrate::fromDevice( const QPoint &p )
 {
     return qt_screen->mapFromDevice( p,
-		QSize(qt_screen->deviceWidth(), qt_screen->deviceHeight()) );
+           QSize(qt_screen->deviceWidth(), qt_screen->deviceHeight()) );
 }
 
 bool Calibrate::sanityCheck()
@@ -139,62 +135,34 @@ bool Calibrate::sanityCheck()
     QPoint bl = cd.devPoints[QWSPointerCalibrationData::BottomLeft];
     QPoint br = cd.devPoints[QWSPointerCalibrationData::BottomRight];
 
-    int vl = QABS( tl.y() - bl.y() );
-    int vr = QABS( tr.y() - br.y() );
-    int diff = QABS( vl - vr );
-    int avg = ( vl + vr ) / 2;
-    if ( diff > avg / 20 ) // 5% leeway
-	return FALSE;
+    int p1 = (br.x() - tl.x()) * (br.x() - tl.x()) +
+             (br.y() - tl.y()) * (br.y() - tl.y());
 
-    int ht = QABS( tl.x() - tr.x() );
-    int hb = QABS( br.x() - bl.x() );
-    diff = QABS( ht - hb );
-    avg = ( ht + hb ) / 2;
-    if ( diff > avg / 20 ) // 5% leeway
-	return FALSE;
+    int p2 = (bl.x() - tr.x()) * (bl.x() - tr.x()) +
+             (bl.y() - tr.y()) * (bl.y() - tr.y());
 
-    return TRUE;
-}
+    int d1 = (int)sqrt(p1);
+    int d2 = (int)sqrt(p2);
 
-bool Calibrate::checkTouch()
-{
-    QString proto = getenv( "QWS_MOUSE_PROTO" );
-    bool touch = proto.contains("tpanel", FALSE);
-    if ( !touch ) {
-	QWSMouseHandler *h = QWSServer::mouseHandler();
-	if ( h && h->inherits("QCalibratedMouseHandler") )
-	    touch = TRUE;
+    int avg = abs(d1 + d2) / 2;
+    int tol= (int)avg/50; // tolerance of 2% in calibration points
+    // Decrease 50 to increase percentage tolerance
+
+    qLog(Input)<<"sanityCheck() d1="<<d1<<", d2="<<d2<<", avg="<<avg<<", tol="<<tol;
+    if( (d1 >= avg-tol) && (d1 <= avg+tol) ) {
+      if( (d2 >= avg-tol) && (d2 <= avg+tol) )
+        return true;
     }
-    if ( !touch ) {
-	bool grab = QWidget::mouseGrabber() == this;
-	releaseMouse();
-	hide();
-	QMessageBox::warning( this, tr("Calibrate"), 
-	    tr("<qt>Calibration can only be performed on a touch screen.") );
-	if ( grab )
-	    grabMouse();
-	reject();
-    }
-
-    return touch;
+    return false;
 }
 
 void Calibrate::moveCrosshair( QPoint pt )
 {
-/*
-    QPainter p( this );
-    p.drawPixmap( crossPos.x()-8, crossPos.y()-8, saveUnder );
-    saveUnder = QPixmap::grabWindow( winId(), pt.x()-8, pt.y()-8, 16, 16 );
-    p.drawRect( pt.x()-1, pt.y()-8, 2, 7 );
-    p.drawRect( pt.x()-1, pt.y()+1, 2, 7 );
-    p.drawRect( pt.x()-8, pt.y()-1, 7, 2 );
-    p.drawRect( pt.x()+1, pt.y()-1, 7, 2 );
-*/
-    showCross = FALSE;
-    repaint( crossPos.x()-8, crossPos.y()-8, 16, 16 );
-    showCross = TRUE;
+    showCross = false;
+    repaint( crossPos.x()-8, crossPos.y()-8, 17, 17 );
+    showCross = true;
     crossPos = pt;
-    repaint( crossPos.x()-8, crossPos.y()-8, 16, 16 );
+    repaint( crossPos.x()-8, crossPos.y()-8, 17, 17 );
 }
 
 void Calibrate::paintEvent( QPaintEvent * )
@@ -204,110 +172,120 @@ void Calibrate::paintEvent( QPaintEvent * )
     int y = height()/4;
 
     if ( !logo.isNull() ) {
-	y = height() / 2 - (logo.height()+p.font().pixelSize()) - 15;
-	p.drawPixmap( (width() - logo.width())/2, y, logo );
-	y += logo.height()+5;
+      y = height() / 2 - (logo.height()+p.font().pixelSize()) - 15;
+      p.drawPixmap( (width() - logo.width())/2, y, logo );
+      y += logo.height()+5;
     }
 
-    QFont f = p.font(); f.setBold(TRUE);
+    QFont f = p.font(); f.setBold(true);
     p.setFont( f );
-    p.drawText( 0, y, width(), height() - y, AlignHCenter|WordBreak, 
-	    tr("Welcome to Qtopia") );
+    p.drawText( 0, y, width(), height() - y, Qt::AlignHCenter|Qt::TextWordWrap,
+        tr("Welcome to Qtopia") );
 
-    y = height() / 2 + 10;
+    y = height() / 2 + 20;
 
-    QSimpleRichText rt(tr("<qt><center>Touch the crosshairs firmly and accurately to calibrate your screen.</center></qt>"),
-			font());
-    rt.setWidth(width()-60);
-    rt.draw(&p, 30, y,
-	    QRegion(0, y, width(), height() - y), colorGroup());
-
-/*
-    saveUnder = QPixmap::grabWindow( winId(), crossPos.x()-8, crossPos.y()-8,
-				     16, 16 );
-    moveCrosshair( crossPos );
-*/
+    f.setBold(false);
+    p.setFont( f );
+    QString rt(tr("Touch the crosshairs firmly and accurately to calibrate your screen."));
+    p.drawText( 20, y, width()-40, height()-y, Qt::AlignHCenter|Qt::TextWordWrap, rt);
     if ( showCross ) {
-	p.drawRect( crossPos.x()-1, crossPos.y()-8, 2, 7 );
-	p.drawRect( crossPos.x()-1, crossPos.y()+1, 2, 7 );
-	p.drawRect( crossPos.x()-8, crossPos.y()-1, 7, 2 );
-	p.drawRect( crossPos.x()+1, crossPos.y()-1, 7, 2 );
+      p.drawRect( crossPos.x()-1, crossPos.y()-8, 2, 7 );
+      p.drawRect( crossPos.x()-1, crossPos.y()+1, 2, 7 );
+      p.drawRect( crossPos.x()-8, crossPos.y()-1, 7, 2 );
+      p.drawRect( crossPos.x()+1, crossPos.y()-1, 7, 2 );
     }
 }
 
 void Calibrate::keyPressEvent( QKeyEvent *e )
 {
-    if ( e->key() == Key_Escape )
-	QDialog::keyPressEvent( e );
+    // Because we're a full-screen application, we don't want another
+    // program to start (as it will be hidden behind us) or receive key
+    // events, so we must handle all key events. The only key events
+    // that are meaningful to us are those that will cause us to exit -
+    // all others are accepted and not acted on, except for the Hangup key.
+    // The Hangup key is special because we must exit and then pass it
+    // on to the server (by pretending to ignore it), so that the server
+    // can terminate all other applications too.
+
+    if (( e->key() == Qt::Key_Escape ) || ( e->key() == Qt::Key_Back ) ||
+        ( e->key() == Qt::Key_Hangup )) {
+        reset();
+        QDialog::hide();
+    }
+
+    if ( e->key() == Qt::Key_Hangup )
+        e->ignore();
+    else
+        e->accept();
 }
 
 void Calibrate::keyReleaseEvent( QKeyEvent *e )
 {
-    if ( e->key() == Key_Escape )
-	QDialog::keyReleaseEvent( e );
+    // Accept all key releases to prevent them getting passed to anything
+    // that is hidden behind us.
+    e->accept();
 }
 
 void Calibrate::mousePressEvent( QMouseEvent *e )
 {
-    pressed = TRUE;
+    qLog(Input) << "Calibrate::mousePressEvent( QMouseEvent *e )";
+    pressed = true;
     // map to device coordinates
     QPoint devPos = qt_screen->mapToDevice( e->pos(),
-			QSize(qt_screen->width(), qt_screen->height()) );
+           QSize(qt_screen->width(), qt_screen->height()) );
     if ( penPos.isNull() )
-	penPos = devPos;
+      penPos = devPos;
     else
-	penPos = QPoint( (penPos.x() + devPos.x())/2,
-			 (penPos.y() + devPos.y())/2 );
+      penPos = QPoint( (penPos.x() + devPos.x())/2,
+                     (penPos.y() + devPos.y())/2 );
 }
 
 void Calibrate::mouseMoveEvent( QMouseEvent *e )
 {
+    qLog(Input) << "Calibrate::mouseMoveEvent( QMouseEvent *e )";
     if ( !pressed )
-	return;
+      return;
     // map to device coordinates
     QPoint devPos = qt_screen->mapToDevice( e->pos(),
-			QSize(qt_screen->width(), qt_screen->height()) );
+                    QSize(qt_screen->width(), qt_screen->height()) );
     if ( penPos.isNull() )
-	penPos = devPos;
+      penPos = devPos;
     else
-	penPos = QPoint( (penPos.x() + devPos.x())/2,
-			 (penPos.y() + devPos.y())/2 );
+      penPos = QPoint( (penPos.x() + devPos.x())/2,
+                     (penPos.y() + devPos.y())/2 );
 }
 
 void Calibrate::mouseReleaseEvent( QMouseEvent * )
 {
+    qLog(Input) << "Calibrate::mouseReleaseEvent( QMouseEvent *e )";
     if ( !pressed )
-	return;
-    pressed = FALSE;
+      return;
+    pressed = false;
     if ( timer->isActive() )
-	return;
+      return;
 
-    if ( !checkTouch() )
-	return;
-
-    bool doMove = TRUE;
+    bool doMove = true;
 
     cd.devPoints[location] = penPos;
     if ( location < QWSPointerCalibrationData::LastLocation ) {
-	location = (QWSPointerCalibrationData::Location)((int)location + 1);
+      location = (QWSPointerCalibrationData::Location)((int)location + 1);
     } else {
-	if ( sanityCheck() ) {
-	    reset();
-	    anygood = TRUE;
-	    goodcd = cd;
-	    hide();
-	    emit accept();
-	    doMove = FALSE;
-	} else {
-	    location = QWSPointerCalibrationData::TopLeft;
-	}
+      if ( sanityCheck() ) {
+        reset();
+        anygood = true;
+        goodcd = cd;
+        hide();
+        doMove = false;
+      } else {
+        location = QWSPointerCalibrationData::TopLeft;
+      }
     }
-	    
+
     if ( doMove ) {
-	QPoint target = fromDevice( cd.screenPoints[location] );
-	dx = (target.x() - crossPos.x())/10;
-	dy = (target.y() - crossPos.y())/10;
-	timer->start( 30 );
+      QPoint target = fromDevice( cd.screenPoints[location] );
+      dx = (target.x() - crossPos.x())/10;
+      dy = (target.y() - crossPos.y())/10;
+      timer->start( 30 );
     }
 }
 
@@ -315,36 +293,40 @@ void Calibrate::timeout()
 {
     QPoint target = fromDevice( cd.screenPoints[location] );
 
-    bool doneX = FALSE;
-    bool doneY = FALSE;
+    bool doneX = false;
+    bool doneY = false;
     QPoint newPos( crossPos.x() + dx, crossPos.y() + dy );
 
-    if ( QABS(crossPos.x() - target.x()) <= QABS(dx) ) {
-	newPos.setX( target.x() );
-	doneX = TRUE;
+    if ( abs(crossPos.x() - target.x()) <= abs(dx) ) {
+      newPos.setX( target.x() );
+      doneX = true;
     }
 
-    if ( QABS(crossPos.y() - target.y()) <= QABS(dy) ) {
-	newPos.setY(target.y());
-	doneY = TRUE;
+    if ( abs(crossPos.y() - target.y()) <= abs(dy) ) {
+      newPos.setY(target.y());
+      doneY = true;
     }
 
     if ( doneX && doneY ) {
-	penPos = QPoint();
-	timer->stop();
+      penPos = QPoint();
+      timer->stop();
     }
-
     moveCrosshair( newPos );
 }
 
 void Calibrate::doGrab()
 {
+    qLog(Input) << "Calibrate::doGrab()";
+/*
     if ( !QWidget::mouseGrabber() ) {
-	if ( checkTouch() )
-	    grabMouse();
+      grabMouse();
+      keyboardGrabber();
     } else {
-	QTimer::singleShot( 50, this, SLOT(doGrab()) );
+      QTimer::singleShot( 50, this, SLOT(doGrab()) );
     }
+*/
+    grabMouse();
+    keyboardGrabber();
 }
 
-#endif // _WS_QWS_
+#endif // Q_WS_QWS

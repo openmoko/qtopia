@@ -1,0 +1,663 @@
+/****************************************************************************
+**
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+**
+** This file is part of the Phone Edition of the Qtopia Toolkit.
+**
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
+
+#include "timedview.h"
+
+#include <qtopia/pim/qappointment.h>
+#include <qtimestring.h>
+#include <qtopialog.h>
+
+#include <QList>
+#include <QPainter>
+#include <QPaintEvent>
+#include <QStyleOptionViewItem>
+#include <QStyleOption>
+
+class LayoutItem
+{
+public:
+    LayoutItem( const QOccurrence &e, const QModelIndex &i )
+        : mOccurrence(e), mIndex(i), mOffset(0), mWidth(1) { }
+
+    void setOffset(int i) { mOffset = i; }
+    void setWidth(int i) { mWidth = i; }
+    int offset() const { return mOffset; }
+    int width() const { return mWidth; }
+
+    QOccurrence occurrence() const { return mOccurrence; }
+    QAppointment appointment() const { return mOccurrence.appointment(); }
+    QModelIndex modelIndex() const { return mIndex; }
+
+private:
+    QOccurrence mOccurrence;
+    QModelIndex mIndex;
+    int mOffset;
+    int mWidth;
+};
+
+class TimeManagerData
+{
+public:
+    int mMinHeight;
+    QMap<int, int> mMarks;
+    int ds;
+    int de;
+};
+
+TimeManager::TimeManager(QWidget *parent) : QWidget(parent)
+{
+    d = new TimeManagerData();
+    d->ds = 60*8;
+    d->de = 60*17;
+
+    resetMarks(); // actually puts in default marks as well.
+    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+}
+
+TimeManager::~TimeManager()
+{
+    delete d;
+}
+
+int TimeManager::minimumGapHeight() const
+{
+    QFontMetrics fm(font());
+    return fm.height() + fm.descent() + 1;
+}
+
+int TimeManager::minimumHeight() const
+{
+    int mGap = minimumGapHeight();
+    if (d->mMarks.count() < 2)
+        return 0;
+    return mGap * (d->mMarks.count() + 1);
+}
+
+QSize TimeManager::minimumSizeHint() const
+{
+    QFontMetrics fm(font());
+    QSize result(fm.width(QTimeString::localHM(QTime(23, 0), QTimeString::Short)) + 6, minimumHeight());
+    qLog(UI) << "Return minimum size" << result;
+    return result;
+}
+
+void TimeManager::resetMarks()
+{
+    clearMarks();
+    populateMarks();
+}
+
+void TimeManager::clearMarks()
+{
+    d->mMarks.clear();
+
+    //  Ensure that the beginning and end of the day will always be displayed
+    d->mMarks.insert(d->ds, -1);
+    d->mMarks.insert(d->de, -1);
+}
+
+void TimeManager::populateMarks()
+{
+    for (int i = 0; i <= 24; ++i)
+        d->mMarks.insert(i*60, -1);
+    cacheLayout();
+}
+
+void TimeManager::addMark(int minutes)
+{
+    if (d->mMarks.contains(minutes))
+        return;
+    d->mMarks.insert(minutes, -1);
+}
+
+int TimeManager::markPosition(int minutes) const
+{
+    return d->mMarks.value(minutes, -1);
+}
+
+QList<int> TimeManager::marks() const
+{
+    return d->mMarks.keys();
+}
+
+void TimeManager::changeEvent(QEvent *e)
+{
+    switch(e->type()) {
+        case QEvent::FontChange:
+            cacheLayout();
+            break;
+        default:
+            break;
+    }
+}
+
+void TimeManager::paintEvent(QPaintEvent *e)
+{
+    qLog(UI) << "TimeManger::paintEvent";
+    // repaint the items.  can be overriddent? should be done via delegate?
+    // style?
+    // shift up half a block for where drawn, (e.g. on line, not just above)
+    // block height? the same.
+
+    int ctop = e->rect().top();
+    int cbottom = e->rect().bottom();
+
+    QPainter painter(this);
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(palette().base());
+    painter.drawRect(e->rect());
+
+    int hmgap = minimumGapHeight() >> 1;
+    int top = -1;
+    int bottom = -1;
+    int minutes = -1;
+
+    QMutableMapIterator<int, int> it(d->mMarks);
+    while(it.hasNext()) {
+        it.next();
+        qLog(UI) << "calculate mark information for mark" << it.key() << it.value();
+
+        top = it.value()-hmgap;
+        bottom = it.value()+hmgap;
+        minutes = it.key();
+
+        qLog(UI) << "check to see if in range" << minutes << bottom << ctop << top << cbottom;
+        // have a bottom and a top
+        if (bottom >= ctop && top <= cbottom) {
+            QRect itemR(0, top, width(), bottom-top);
+            drawItem(&painter, itemR, minutes, bottom-hmgap);
+        }
+    }
+}
+
+void TimeManager::drawItem(QPainter *painter, const QRect &rect, int minutes, int markpos)
+{
+    qLog(UI) << "drawItem" << rect << minutes << markpos;
+    // TODO might need changing for rtl
+    static QTextOption o( Qt::AlignRight );
+
+    QRect r( rect.x() + 3, rect.y(), rect.width() - 6, rect.height() );
+
+    QString s = QTimeString::localHM( QTime( minutes/60, minutes % 60 ), QTimeString::Short );
+    painter->setPen( palette().color( QPalette::Text ) );
+    painter->drawText( r, s, o );
+}
+
+void TimeManager::resizeEvent(QResizeEvent *)
+{
+    qLog(UI) << "Resize event" << size();
+    cacheLayout();
+}
+
+void TimeManager::cacheLayout()
+{
+    updateGeometry();
+
+    // NOTE these lines dictate how far apart marks are placed.
+    // can also include extra marks at this point.
+    int mgap = minimumGapHeight();
+    int theight = height();
+    int c = d->mMarks.count();
+
+    int e;
+    int es;
+    int er;
+    if (c > 0) {
+        e = theight - c*mgap;
+        es = e/c;
+        er = e%c;
+    } else {
+        e = 0;
+        es = 0;
+        er = 0;
+    }
+    qLog(UI) << "Extra" << e << theight << c << mgap;
+
+    int firstgap = (mgap + es) >> 1;
+    // as only stretches downwards, just look for the -1 entry and
+    // continue.
+    int last = -1;
+    QMutableMapIterator<int, int> it(d->mMarks);
+    while(it.hasNext()) {
+        it.next();
+        int v = it.value();
+        if (last == -1) {
+            v = firstgap;
+        } else {
+            // might have to make previous wider.
+            // gap = what?
+            v = last + mgap + es;
+            qLog(UI) << v << last << mgap << es;
+        }
+        if (er > 0) {
+            --er;
+            ++v;
+        }
+        last = v;
+        it.setValue(v);
+    }
+
+    update();
+}
+
+void TimeManager::setDaySpan(int daystart, int dayend)
+{
+    // NOTE, there is an argument for allowing a span exceeding a day.
+    daystart = qBound(0, daystart, 24*60);
+    dayend = qBound(daystart, dayend, 24*60);
+
+    d->ds = daystart;
+    d->de = dayend;
+
+    cacheLayout();
+}
+
+int TimeManager::dayStart() const
+{
+    return d->ds;
+}
+
+int TimeManager::dayEnd() const
+{
+    return d->de;
+}
+
+class CompressedTimeManagerData
+{
+public:
+    int mIdealHeight;
+};
+
+CompressedTimeManager::CompressedTimeManager(QWidget *parent)
+    : TimeManager(parent)
+{
+    d = new CompressedTimeManagerData;
+    d->mIdealHeight = -1;
+}
+
+void CompressedTimeManager::setIdealHeight(int ideal)
+{
+    d->mIdealHeight = ideal;
+    cacheLayout();
+    populateMarks();
+}
+
+int CompressedTimeManager::idealHeight() const
+{
+    return d->mIdealHeight;
+}
+
+void CompressedTimeManager::populateMarks()
+{
+    if (d->mIdealHeight >= 0) {
+        QList<int> m = marks();
+        int goalLineCount = ( d->mIdealHeight / minimumGapHeight() ) - 1;
+        int minutes = dayEnd() - dayStart();
+        int hours = minutes / 60;
+        int currentMinute = dayStart();
+        int currentCount = m.count();
+        int increment;
+        int closeEnough;
+
+        //  Show only hours if there is not much room. If enough room even show 30 or 15 minute gaps
+        if (goalLineCount >= (hours << 1)) {
+            if (goalLineCount >= (hours << 2) ) {
+                increment = 15;
+                closeEnough = 5;
+            } else {
+                increment = 30;
+                closeEnough = 10;
+            }
+        } else {
+            increment = 60;
+            closeEnough = 15;
+        }
+
+        //  Insert marks, skip ones that already have something near them
+        QList<int>::ConstIterator it = m.constBegin();
+        while (currentCount < goalLineCount && currentMinute < dayEnd()) {
+            while (it != m.constEnd() && *it < currentMinute - closeEnough)
+                ++it;
+
+            if (it == m.constEnd() || *it > currentMinute + closeEnough) {
+                addMark(currentMinute);
+                currentCount++;
+            }
+
+            currentMinute += increment;
+        }
+        cacheLayout();
+    }
+}
+
+class TimedViewData
+{
+public:
+    TimedViewData()
+        : model(0), timeManager(0),
+        delegate(0), shownDate(QDate::currentDate())
+    {}
+
+    QOccurrenceModel *model;
+    TimeManager *timeManager;
+    QAbstractItemDelegate *delegate;
+    QDate shownDate;
+    QModelIndex currentIndex;
+
+    QDateTime start() const
+    { return QDateTime(shownDate, QTime(0,0)); }
+
+    QDateTime end() const
+    { return QDateTime(shownDate, QTime(23,59)); }
+
+    void addMarksFor(const QOccurrence &o)
+    {
+        if (!timeManager)
+            return;
+
+        if (o.startInCurrentTZ() >= start())
+            timeManager->addMark( dateTimeInMinutes( o.startInCurrentTZ() ) );
+        else if (o.startInCurrentTZ() < start())
+            timeManager->addMark( dateTimeInMinutes( start() ) );
+
+        if (o.endInCurrentTZ() <= end())
+            timeManager->addMark( dateTimeInMinutes( o.endInCurrentTZ() ) );
+        else if (o.endInCurrentTZ() > end())
+            timeManager->addMark( dateTimeInMinutes( end() ) );
+    }
+
+    inline int dateTimeInMinutes( const QDateTime &dt )
+    {
+        return ( dt.time().hour() * 60 + dt.time().minute() ) - ( dt.date().daysTo( shownDate ) * 24 * 60 );
+    }
+
+    void updateMarks();
+
+    QList<LayoutItem> layoutItems;
+};
+
+void TimedViewData::updateMarks()
+{
+    if (!model || !timeManager || !shownDate.isValid())
+        return;
+
+    // ensure any changes to the model have updated the cache
+    timeManager->clearMarks();
+
+    // iterate trough the model, and for each item that has an end or
+    // start intersecting with the current date add to the time manager.
+
+    int blockBegin = 0;
+    int maxColumns = 0;
+    layoutItems.clear();
+    QMultiMap<QDateTime, int> columns;
+    for( int i = 0; i < model->rowCount(); i++ ) {
+        QOccurrence o = model->occurrence( i );
+        if( o.appointment().isAllDay() || !o.conflicts( start(), end() ) )
+            continue;
+
+        addMarksFor( o );
+        LayoutItem l( o, model->index( i, 0 ) );
+
+        //  Check for any columns that will have emptied by this point
+        QMap<QDateTime, int>::iterator cit;
+        for( cit = columns.begin(); cit != columns.end(); cit++ )
+        {
+            if( cit.key() != QDateTime() )
+            {
+                while( cit != columns.end() && cit.key() <= o.startInCurrentTZ() )
+                {
+                    columns.insert( QDateTime(), cit.value() );
+                    cit = columns.erase( cit );
+                }
+
+                break;
+            }
+        }
+
+        //  If all the columns are empty, reset the column calculations.
+        if( columns.count() && ( columns.end() - 1 ).key() == QDateTime() ) {
+            for( int j = blockBegin; j < i; ++j )
+                layoutItems[j].setWidth( maxColumns );
+            columns.clear();
+            blockBegin = i;
+            maxColumns = 0;
+        }
+
+        //  Is there an empty column to put this item into?
+        if( columns.contains( QDateTime() ) ) {
+            l.setOffset( columns.take( QDateTime() ) );
+            columns.insert( o.endInCurrentTZ(), l.offset() );
+        } else {
+            l.setOffset( columns.count() );
+            columns.insert( o.endInCurrentTZ(), columns.count() );
+            if( columns.count() > maxColumns )
+                maxColumns = columns.count();
+        }
+
+        layoutItems.append(l);
+    }
+
+    for( int j = blockBegin; j < layoutItems.count(); ++j )
+        layoutItems[j].setWidth( maxColumns );
+
+    timeManager->populateMarks();
+}
+
+TimedView::TimedView(QWidget *parent)
+    : QWidget(parent)
+{
+    d = new TimedViewData();
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+}
+
+TimedView::~TimedView()
+{
+    delete d;
+}
+
+void TimedView::setDate(const QDate &date)
+{
+    Q_ASSERT(date.isValid());
+
+    QDateTime start(date, QTime(0,0));
+    QDateTime end(date.addDays(1), QTime(0,0));
+
+    d->shownDate = date;
+    d->model->setRange(start, end);
+}
+
+void TimedView::reset()
+{
+    d->currentIndex = QModelIndex();
+    d->updateMarks();
+    update();
+}
+
+QDate TimedView::date() const
+{
+    return d->shownDate;
+}
+
+QDateTime TimedView::start() const
+{
+    return d->start();
+}
+
+QDateTime TimedView::end() const
+{
+    return d->end();
+}
+
+void TimedView::setModel(QOccurrenceModel *m)
+{
+    d->model = m;
+    connect( d->model, SIGNAL(modelReset()), this, SLOT(reset()) );
+
+    reset();
+}
+
+void TimedView::setTimeManager(TimeManager *m)
+{
+    d->timeManager = m;
+    reset();
+}
+
+
+QOccurrenceModel *TimedView::model() const
+{
+    return d->model;
+}
+
+TimeManager *TimedView::timeManager() const
+{
+    return d->timeManager;
+}
+
+QModelIndex TimedView::index(const QPoint& point) const
+{
+    QPoint mappedPoint = mapFromGlobal(point);
+
+    int itemCount = d->layoutItems.count();
+    for (int i = 0; i < itemCount; i++) {
+        LayoutItem item = d->layoutItems[i];
+
+        int top = d->timeManager->markPosition(
+            d->dateTimeInMinutes( item.occurrence().startInCurrentTZ() ) );
+
+        int bottom = d->timeManager->markPosition(
+            d->dateTimeInMinutes( item.occurrence().endInCurrentTZ() ) );
+
+        if( top == -1 )
+            top = 0;
+        if( bottom == -1 )
+            bottom = height();
+
+        int w = width() / item.width();
+        int left = item.offset() * w;
+        QRect rect(left, top, w, bottom - top);
+
+        if (rect.contains( mappedPoint ) ) {
+            return item.modelIndex();
+        }
+    }
+
+    return QModelIndex();
+}
+
+void TimedView::paintEvent(QPaintEvent *e)
+{
+    QPainter painter(this);
+
+    // base background
+    painter.fillRect( e->rect(), palette().base() );
+
+    // and for each mark...
+    painter.setPen(Qt::gray);
+    if (d->timeManager) {
+        QList<int> marks = d->timeManager->marks();
+        foreach (int mark, marks) {
+            int position = d->timeManager->markPosition(mark);
+            painter.drawLine(0, position, width(), position);
+        }
+    }
+
+    // draw in each of the precalc'd appointments / occurrences
+    QStyleOptionViewItem option;
+    int itemCount = d->layoutItems.count();
+    for(int i = 0; i < itemCount; i++) {
+        LayoutItem item = d->layoutItems[i];
+        int top = d->timeManager->markPosition(d->dateTimeInMinutes(item.occurrence().startInCurrentTZ()));
+        int bottom = d->timeManager->markPosition(d->dateTimeInMinutes(item.occurrence().endInCurrentTZ()));
+
+        if (top == -1)
+            top = 0;
+        if (bottom == -1)
+            bottom = height();
+
+        int w = width() / item.width();
+        int left = item.offset() * w;
+
+        bool selected = (d->currentIndex == item.modelIndex());
+        if (selected)
+            option.state |= QStyle::State_Selected;
+
+        option.rect.setCoords(left, top, left + w, bottom);
+
+        d->delegate->paint(&painter, option, item.modelIndex());
+
+        if (selected)
+            option.state &= ~QStyle::State_Selected;
+    }
+}
+
+QModelIndex TimedView::currentIndex() const
+{
+    return d->currentIndex;
+}
+
+void TimedView::setCurrentIndex(const QModelIndex &i)
+{
+    d->currentIndex = i;
+    emit selectionChanged(i);
+    update();
+}
+
+void TimedView::resizeEvent(QResizeEvent *)
+{
+    qLog(UI) << "TimedView::resizeEvent()" << size();
+}
+
+void TimedView::setItemDelegate(QAbstractItemDelegate *delegate)
+{
+    d->delegate = delegate;
+}
+
+QAbstractItemDelegate *TimedView::itemDelegate() const
+{
+    return d->delegate;
+}
+
+QRect TimedView::occurrenceRect(const QModelIndex &index) const
+{
+    int itemCount = d->layoutItems.count();
+    for (int i = 0; i < itemCount; i++) {
+        LayoutItem item = d->layoutItems[i];
+        if (item.modelIndex() == index) {
+            int top = d->timeManager->markPosition( d->dateTimeInMinutes( item.occurrence().startInCurrentTZ() ) );
+            int bottom = d->timeManager->markPosition( d->dateTimeInMinutes( item.occurrence().endInCurrentTZ() ) );
+
+            if( top == -1 )
+                top = 0;
+            if( bottom == -1 )
+                bottom = height();
+
+            int w = width() / item.width();
+            int left = item.offset() * w;
+
+            return QRect(left, top, w, bottom - top);
+        }
+    }
+
+    return QRect();
+}
+
+

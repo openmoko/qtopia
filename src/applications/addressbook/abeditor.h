@@ -1,65 +1,48 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 #ifndef ABEDITOR_H
 #define ABEDITOR_H
 
-#include <qtopia/pim/contact.h>
+#include <qtopia/pim/qcontact.h>
+#include <qtopia/pim/qcontactmodel.h>
 
-#include <qdialog.h>
-#include <qlist.h>
-#include <qmap.h>
-#include <qstring.h>
-#include <qstringlist.h>
-#include <qwidgetstack.h>
-#include <qcombobox.h>
-#include <qpixmap.h>
-#include <qpushbutton.h>
-#include <qlineedit.h>
+#include <QDialog>
+#include <QList>
+#include <QMap>
+#include <QString>
+#include <QStringList>
+#include <QComboBox>
+#include <QPixmap>
+#include <QPushButton>
+#include <QLineEdit>
 
-#if defined(QTOPIA_PHONE) && !defined(QTOPIA_DESKTOP)
+#ifdef QTOPIA_CELL
 #include "../../settings/ringprofile/ringtoneeditor.h"
 #endif
 
-class IconSelect;
-class PixmapDisplay;
+class QIconSelector;
 class QVBoxLayout;
 class QShowEvent;
 class QKeyEvent;
 class QPaintEvent;
-class QScrollView;
-class QMultiLineEdit;
 class QLineEdit;
 class QCheckBox;
 class QLabel;
@@ -68,52 +51,23 @@ class QRadioButton;
 class QButtonGroup;
 class QHBox;
 class QTabWidget;
-class CategorySelect;
-class QPEDateEdit;
+class QToolButton;
+class QCategorySelector;
+class QDateEdit;
+class QGroupBox;
 class QTextEdit;
-class AbDetailEditor;
-class FileAsCombo;
-class VScrollView;
 class AbDetailEditor;
 class QGridLayout;
 class QAction;
+class QScrollArea;
 #ifdef QTOPIA_PHONE
-class ContextMenu;
+class QMenu;
 #endif
+class QDLEditClient;
 
-QPixmap scalePixmapToMax( QPixmap &, const double &, const double & );
 
-class FileAsCombo : public QComboBox
-{
-    Q_OBJECT
-public:
-    FileAsCombo( QWidget *parent );
-    void setSelected( const QString &fileAs );
-    QString selected() const;
 
-public slots:
-    void setPrefix( const QString &prefix );
-    void setSuffix( const QString &suffix );
-    void setFirstName( const QString &firstName );
-    void setMiddleName( const QString &middleName );
-    void setLastName( const QString &lastName );
-    void setNickName( const QString &nickName );
-    void setFirstNamePro( const QString &firstNamePro );
-    void setLastNamePro( const QString &lastNamePro );
-    void update();
-
-private slots:
-    void customFileAs( int );
-
-private:
-    QString fillTemplate( const QString &t, bool allowEmpty = FALSE );
-    QMap<QString,QString> mTemplateVars;
-    QStringList mTemplates;
-    QString mDefaultTemplate;
-    QStringList mCustomEntries;
-};
-
-//--------------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 
 class PhoneFieldType
 {
@@ -122,24 +76,25 @@ public:
     PhoneFieldType( const QString &id, const QString &str );
     PhoneFieldType( const PhoneFieldType &other );
     PhoneFieldType &operator=( const PhoneFieldType &other );
-    bool  operator==( const PhoneFieldType &other ) const;
+    bool operator==( const PhoneFieldType &other ) const;
     bool operator!=( const PhoneFieldType &other ) const;
     bool isNull() const { return id.isEmpty(); }
 
     QString id;
-    QPixmap pixmap;
+    QIcon icon;
     QString name;
 };
 
-// PhoneField comprising a lineedit for the number and a combobox for the type
-class PhoneField : public QObject 
+//-----------------------------------------------------------------------
+
+class PhoneField : public QObject
 {
     Q_OBJECT
 public:
-    PhoneField( QGridLayout *l, int &rowCount, QWidget *parent = 0, const char *name = 0 );
+    PhoneField( QGridLayout *l, int &rowCount, QWidget *parent = 0 );
     ~PhoneField();
 
-    void setTypes( const QValueList<PhoneFieldType> &newTypes );
+    void setTypes( const QList<PhoneFieldType> &newTypes );
 
     void setType( const PhoneFieldType &newType );
     PhoneFieldType type();
@@ -148,14 +103,8 @@ public:
     bool isEmpty() const;
     void setNumber( const QString &newNumber );
 
-#ifdef QTOPIA_PHONE
-    void setOnSim( bool onSim );
-    bool onSim() const;
-    void setHaveSim( bool b );
-#endif
-
+    void remove();
 protected slots:
-    void emitFieldOnSim( bool f );
     void emitFieldChanged();
     void userChangedType( int idx );
 signals:
@@ -164,28 +113,23 @@ signals:
     void internalChangedType(const PhoneFieldType&);
     void numberChanged(const QString&);
     void fieldChanged(const QString&,const PhoneFieldType&);
-    void fieldOnSim(bool,const PhoneFieldType&); 
 protected:
-//    QLabel *label;
    QLineEdit *numberLE;
-#ifdef QTOPIA_DESKTOP
-    QComboBox 
-#else
-    IconSelect 
-#endif
-    *typeIS;
-private:
-#ifdef QTOPIA_PHONE
-    QAction *simAction;
-#endif
 
-    QValueList<PhoneFieldType> mTypes;
+    QIconSelector *typeIS;
+
+private:
+
+    QList<PhoneFieldType> mTypes;
 };
+
+//-----------------------------------------------------------------------
 
 // manages the creation of PhoneField children and provides an interface to access them
 class PhoneFieldManager : public QObject
 {
     Q_OBJECT
+
 public:
     PhoneFieldManager( QWidget *parent, QGridLayout *layout, int rc );
     ~PhoneFieldManager();
@@ -195,85 +139,82 @@ public:
     void addEmpty();
     bool isFull() const;
 
-    void setTypes( const QValueList<PhoneFieldType> &newTypes );
-    QValueList<PhoneFieldType> types() const;
+    void setTypes( const QList<PhoneFieldType> &newTypes );
+    QList<PhoneFieldType> types() const;
 
     void setNumberFromType( const PhoneFieldType &type, const QString &newNumber );
     QString numberFromType( const PhoneFieldType &type );
 
-#ifdef QTOPIA_PHONE
-    void setFieldOnSim( const PhoneFieldType &type, bool onSim );
-    bool fieldOnSim( const PhoneFieldType &type ) const;
-    void setHaveSim( bool b );
-#endif
-public slots:
+    void clear();
+
 protected slots:
     void emitFieldChanged( const QString &number, const PhoneFieldType &type );
 
-    //controls the available types phonefields have when the user changes the type of one of them
+    //  controls the available types phonefields have when the user changes
+    //  the type of one of them
     void updateTypes( const PhoneFieldType &newType );
-    void checkForAdd(); //a field has changed, check to see if we need to add()
+    void checkForAdd(); //  a field has changed, check to see if we need to add()
+
 signals:
     void fieldChanged(const QString&, const PhoneFieldType&);
-    void fieldOnSim(bool,const PhoneFieldType&); 
+
 protected:
     QGridLayout *parLayout;
     int rowCount;
-    QList<PhoneField> phoneFields;
-    QValueList<PhoneFieldType> mTypes;
+    int firstRow;
+    QList<PhoneField*> phoneFields;
+    QList<PhoneFieldType> mTypes;
 
 private:
     bool mEmitFieldChanged;
 };
 
+//-----------------------------------------------------------------------
+
 // detail editor ; constructs a dialog to edit fields specified by a key => value map
 class AbDetailEditor : public QDialog
 {
-    friend class FileAsCombo;
     Q_OBJECT
 public:
-    AbDetailEditor( QWidget *parent = 0, const char *name = 0, WFlags fl = 
-#ifdef QTOPIA_DESKTOP
-    WStyle_Customize | WStyle_DialogBorder | WStyle_Title 
-#else
-    0
-#endif    
-    );
+    AbDetailEditor( QWidget *parent = 0, Qt::WFlags fl = 0 );
     ~AbDetailEditor();
 
-    QValueList<PimContact::ContactFields> guiValueList( const QMap<PimContact::ContactFields, QString> &f ) const;
-    void setFields( const QMap<PimContact::ContactFields, QString> &f );
-    QMap<PimContact::ContactFields, QString> fields() const;
-    
+    QList<QContactModel::Field> guiList( const QMap<QContactModel::Field, QString> &f ) const;
+    void setFields( const QMap<QContactModel::Field, QString> &f );
+    QMap<QContactModel::Field, QString> fields() const;
+
 public slots:
 protected slots:
     void accept();
 protected:
-    virtual const QMap<PimContact::ContactFields, QString> displayNames() const;
+    bool eventFilter( QObject *receiver, QEvent *event );
 
-    QMap<PimContact::ContactFields, QString> myFields;
-    FileAsCombo *fileAsCombo;
+    virtual const QMap<QContactModel::Field, QString> displayNames() const;
+
+    QMap<QContactModel::Field, QString> myFields;
     QComboBox *suffixCombo;
     QComboBox *titleCombo;
 
-    QMap<PimContact::ContactFields, QLineEdit *> lineEdits;
+    QMap<QContactModel::Field, QLineEdit *> lineEdits;
 private:
-    VScrollView *mView;
+    QScrollArea *mView;
     QVBoxLayout *editorLayout;
 };
 
-class AbstractField : public QWidget
+//-----------------------------------------------------------------------
+
+class AbstractField : public QLineEdit
 {
     Q_OBJECT
 public:
-    AbstractField( QWidget *parent = 0, const char *name = 0 );
+    AbstractField( QWidget *parent = 0 );
     ~AbstractField();
 
-    void setFields( const QMap<PimContact::ContactFields, QString> &fields );
-    QMap<PimContact::ContactFields, QString> fields() const;
+    void setFields( const QMap<QContactModel::Field, QString> &fields );
+    QMap<QContactModel::Field, QString> fields() const;
 
     virtual bool isEmpty() const;
-    
+
     QStringList tokenize( const QString &newText ) const;
 
     virtual QString fieldName() const = 0;
@@ -287,25 +228,22 @@ public slots:
     void details();
 
 protected:
-    QMap<PimContact::ContactFields, QString> myFields;
+    QMap<QContactModel::Field, QString> myFields;
     bool mModified;
-    bool mHaveFieldsPrevChanged;
 
 private:
     AbDetailEditor *detailEditor;
 };
 
+//-----------------------------------------------------------------------
+
 // AbstractName field handles parsing of user input and calls subdialog to handle details
-class AbstractName : public AbstractField 
+class AbstractName : public AbstractField
 {
     Q_OBJECT
 public:
-    AbstractName( QWidget *parent = 0, const char *name = 0 );
+    AbstractName( QWidget *parent = 0 );
     ~AbstractName();
-
-    bool isQuote( QChar c ) const;
-    QString stripQuotes( const QString & );
-    QString formattedAffix( const QString &str, QStringList &affixes );
 
     QString fieldName() const;
 
@@ -317,179 +255,194 @@ public slots:
 
 private slots:
     void textChanged();
-protected:
-    QStringList prefixes, suffixes;
 private:
-    QLineEdit *mainWidget;
+    bool m_preventModified;
 };
 
-//--------------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 
 class AbEditor : public QDialog
 {
     Q_OBJECT
 public:
-    AbEditor( QWidget* parent = 0, const char* name = 0,  WFlags fl = 
-#ifdef QTOPIA_DESKTOP
-    WStyle_Customize | WStyle_DialogBorder | WStyle_Title 
-#else
-    0
-#endif    
-    );
+    AbEditor( QWidget* parent = 0, Qt::WFlags fl = 0 );
     ~AbEditor();
 
     void setCategory(int);
     void setNameFocus();
-    PimContact entry() const { return ent; }
+    QContact entry() const { return ent; }
 
-#ifdef QTOPIA_DESKTOP
-    void updateCategories();
-    CategorySelect *categorySelect() { return cmbCat; }
-#endif
-
-#ifdef QTOPIA_PHONE
-    bool hasNonSimFields() const;
-    void setHaveSim( bool b );
-#endif
-
-    static QString createContactImage( QPixmap pix );
-    static QString createContactImage( const QString &fn );
+    bool isEmpty();
 
     bool imageModified() const;
- signals:
+
+signals:
     void categoriesChanged(); // for Qtopia Desktop only
 
-
 public slots:
-    void setEntry( const PimContact &entry, bool newEntry = FALSE );
+    void setEntry(const QContact &entry, bool newEntry = false
+#ifdef QTOPIA_PHONE
+        , bool simEntry = false
+#endif
+        );
 
 protected slots:
-
     void editPhoto();
 
     void showSpecWidgets( bool s );
     void catCheckBoxChanged( bool b );
-    void categorySelectChanged( int catid );
+    void categorySelectChanged(const QList<QString>& cats);
 
     //Communication between Contact tab and details on other tabs
 
     void specFieldsFilter( const QString &newValue );
     void phoneFieldsToDetailsFilter( const QString &newNumber, const PhoneFieldType &newType );
     void detailsToPhoneFieldsFilter( const QString &newNumber );
-    void detailSimFilter( bool onSim );
-    void phoneManagerSimFilter( bool onSim, const PhoneFieldType &type );
 
     void accept();
     void reject();
     void tabClicked( QWidget *tab );
     void editEmails();
+    void tabChanged(int);
 
 protected:
     void closeEvent(QCloseEvent *e);
     void showEvent( QShowEvent *e );
-    
+
+#ifdef QTOPIA_PHONE
+    void keyPressEvent(QKeyEvent *e);
+#endif
+
 private:
     void init();
-    void setupTabs();
-    void setupPhoneFields( QWidget *parent = 0 );
-    void setupSpecWidgets( QWidget *parent );
-    void buildLineEditList();
+    void initMainUI();
 
-    void contactFromFields(PimContact &);
-    bool isEmpty();
-    void setTabOrders(void);
+#if QTOPIA_PHONE
+    void initSimUI();
+#endif
+
+    void setupTabs();
+    void setupTabOther();
+    void setupPhoneFields( QWidget *parent = 0 );
+    void buildLineEditList();
+    void setEntryOther();
+
+    void contactFromFields(QContact &);
 
 private:
     bool mImageModified;
-#ifdef QTOPIA_PHONE
-    QMap<int,QAction *> simActions;
-    bool mHaveSim;
-#endif
     bool mNewEntry;
 
     QPixmap mContactImage;
 
-    PimContact ent;
-    QMultiLineEdit *txtNote;
+    QContact ent;
+    QTextEdit *txtNote;
+    QDLEditClient *txtNoteQC;
     QTabWidget *tabs;
-    VScrollView *contactTab, *businessTab, *personalTab, *otherTab;
+    QScrollArea *contactTab, *businessTab, *personalTab, *otherTab;
     QWidget *summaryTab;
     QTextEdit *summary;
 
-#if 0
-    QPixmap *hpPM, *hfPM, *hmPM, *bpPM, *bfPM, *bmPM, *bpaPM;
+    bool mainUIInit;
+#ifdef QTOPIA_PHONE
+    bool simUIInit;
 #endif
-    PhoneFieldType mHPType, mHMType, mHFType, mBPType, mBMType, mBFType, mBPAType;
 
+    PhoneFieldType  mHPType, mHMType, mHFType, mBPType, mBMType,
+                    mBFType, mBPAType;
 
     bool lastUpdateInternal;
 
-    QValueList<PhoneFieldType> phoneTypes;
+    QList<PhoneFieldType> phoneTypes;
 
-    QMap<PimContact::ContactFields, QLineEdit *> lineEdits;
+    QMap<QContactModel::Field, QLineEdit *> lineEdits;
 
-    //Contact tab 
-    QGridLayout *mainGL;
+    QVBoxLayout* mainVBox;
+
+    //
+    //  SIM-plified contact dialog
+    //
+
+#ifdef QTOPIA_PHONE
+    QWidget *simEditor;
+    QLineEdit *simName;
+    QLineEdit *simNumber;
+    bool editingSim;
+#endif
+
+    //
+    //  Contact Tab
+    //
+
     AbstractName *abName;
     QLineEdit *phoneLE, *mobileLE;
-    CategorySelect *cmbCat;
+    QCategorySelector *cmbCat;
     QComboBox *genderCombo;
     QCheckBox *categoryCB;
     QLineEdit *emailLE;
     QPushButton *emailBtn;
-    QPEDateEdit *bdayButton;
-    QPEDateEdit *anniversaryButton;
+    QDateEdit *bdayEdit;
+    QDateEdit *anniversaryEdit;
+    QGroupBox *bdayCheck;
+    QGroupBox *anniversaryCheck;
     QHBox *ehb;
     bool quitExplicitly;
 
-    // widgets specific to the contact type
-    QLineEdit *specCompanyLE, *specJobTitleLE;
-    QLabel *specCompanyLA, *specJobTitleLA;
-    int specRow;
-
-    //Phone Manager
-    int phoneManRow;
-    bool phoneManOld;
-
-    //Business tab widgets
-    QLineEdit *companyLE, *companyProLE, *jobTitleLE, *busPhoneLE, *busFaxLE, 
-	      *busMobileLE, *busPagerLE, *busWebPageLE, *deptLE, *officeLE,
-	      *professionLE, *managerLE, *assistantLE;
-
-    //Home tab widgets
-    QLineEdit *homePhoneLE, *homeFaxLE, *homeMobileLE, *homeWebPageLE, 
-	      *spouseLE, *anniversaryLE, *childrenLE;
-
-    QMultiLineEdit *busStreetME, *homeStreetME;
-    QLineEdit *busCityLE, *busStateLE, *busZipLE, *busCountryLE,
-	      *homeCityLE, *homeStateLE, *homeZipLE, *homeCountryLE;
-
-#ifdef QTOPIA_PHONE
-    QAction *homePhoneOnSim, *homeFaxOnSim, *homeMobileOnSim,
-	    *busPhoneOnSim, *busMobileOnSim, *busFaxOnSim, *busPagerOnSim;
+#ifdef QTOPIA_VOIP
+    QLineEdit *voipIdLE;
 #endif
 
+    //
+    //  Widgets specific to the contact type
+    //
+
+    QLineEdit *specCompanyLE, *specJobTitleLE;
+    QLabel *specCompanyLA, *specJobTitleLA;
+
+    //
+    //  Business tab widgets
+    //
+
+    QLineEdit *companyLE, *companyProLE, *jobTitleLE, *busPhoneLE, *busFaxLE,
+              *busMobileLE, *busPagerLE, *busWebPageLE, *deptLE, *officeLE,
+              *professionLE, *managerLE, *assistantLE;
+
+    //Home tab widgets
+    QLineEdit *homePhoneLE, *homeFaxLE, *homeMobileLE, *homeWebPageLE,
+              *spouseLE, *anniversaryLE, *childrenLE;
+
+    QTextEdit *busStreetME, *homeStreetME;
+    QLineEdit *busCityLE, *busStateLE, *busZipLE, *busCountryLE,
+              *homeCityLE, *homeStateLE, *homeZipLE, *homeCountryLE;
+
+    QToolButton *photoPB;
     PhoneFieldManager *phoneMan;
 
 #ifdef QTOPIA_PHONE
-    ContextMenu *emailContextMenu;
     QAction *actionEmailDetails;
 #endif
-#if defined(QTOPIA_PHONE) && !defined(QTOPIA_DESKTOP)
+#ifdef QTOPIA_CELL
     RingToneButton *editTonePB;
 #endif
-    PixmapDisplay *photoPB;
+    bool tabOtherInit;
+    QWidget *wOtherTab;
+    QWidget *wBusinessTab;
+    QWidget *wPersonalTab;
 };
 
-class IconSelect;
+//-----------------------------------------------------------------------
+
 class PhoneFieldLineEdit : public QLineEdit
 {
     Q_OBJECT
+
 public:
-    PhoneFieldLineEdit( QWidget *typeSibling, QWidget *parent, const char *name = 0 );
+    PhoneFieldLineEdit( QWidget *typeSibling, QWidget *parent );
     bool eventFilter( QObject *o, QEvent *e );
+
 public slots:
     void appendText( const QString &txt );
+
 private:
     QWidget *mTypeSibling;
 };

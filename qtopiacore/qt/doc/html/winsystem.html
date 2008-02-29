@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /usr/local/qtopia/qtopia-opensource-4.2.0/qtopiacore/qt/doc/src/winsystem.qdoc -->
+<head>
+  <title>Qt 4.2: Window System Specific Notes</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Window System Specific Notes<br /><small></small></h1>
+<p>Qt is a cross-platform GUI toolkit, so almost the entire API is the same on all platforms and window systems. If you wish to use platform-specific features, and still maintain a platform-independent source tree, you should protect the platform-specific code using the appropriate <tt>#ifdef</tt> directives (see below).</p>
+<p>Qt provides a few low-level global functions for fine-tuning applications on specific platforms. See <a href="exportedfunctions.html">Special-Purpose Global Functions Exported by Qt</a> for details.</p>
+<ul><li><a href="#qt-x11">Qt/X11</a></li>
+<li><a href="#qt-windows">Qt/Windows</a></li>
+<li><a href="#qt-mac-os-x">Qt/Mac OS X</a></li>
+<li><a href="#qtopia-core-qt-for-embedded-linux">Qtopia Core (Qt for Embedded Linux)</a></li>
+</ul>
+<p>For information about which platforms are supported by Qt, see the <a href="http://www.trolltech.com/developer/notes/platforms">Platform Notes</a>. For information on distributing Qt applications, see <a href="deployment.html">Deploying Qt Applications</a>.</p>
+<a name="x11"></a><a name="qt-x11"></a>
+<h2>Qt/X11</h2>
+<p>When compiling for this platform, the macro <tt>Q_WS_X11</tt> is defined.</p>
+<p><i>Not documented here. Please contact Trolltech Technical Support if you have queries.</i></p>
+<p align="center"><img src="images/dependencies.png" alt="Qt/X11 Dependencies" /></p><p>Note: You must compile with XRender support to get alpha transparency support for pixmaps and images.</p>
+<a name="win"></a><a name="qt-windows"></a>
+<h2>Qt/Windows</h2>
+<p>When compiling for this platform, the macro <tt>Q_WS_WIN</tt> is defined.</p>
+<p><i>Not documented here. Please contact Trolltech Technical Support if you have queries.</i></p>
+<a name="macosx"></a><a name="qt-mac-os-x"></a>
+<h2>Qt/Mac OS X</h2>
+<p>When compiling for this platform, the macro <tt>Q_WS_MAC</tt> is defined.</p>
+<ul>
+<li><a href="mac-differences.html">Qt/Mac-Specific Issues</a></li>
+<li><a href="qtmac-as-native.html">Qt/Mac is Mac OS X Native</a></li>
+</ul>
+<a name="qws"></a><a name="qtopia-core-qt-for-embedded-linux"></a>
+<h2>Qtopia Core (Qt for Embedded Linux)</h2>
+<p>When compiling for this platform, the macro <tt>Q_WS_QWS</tt> is defined (the window system is literally the Qt Window System). See the <a href="qtopiacore.html">Qtopia Core</a> documentation for more information.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

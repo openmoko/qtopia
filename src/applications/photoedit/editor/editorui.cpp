@@ -1,181 +1,163 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "editorui.h"
 
-#include <qtopia/resource.h>
-#include <qtopia/contextbar.h>
+#include <qsoftmenubar.h>
 
 #include <qstring.h>
-#include <qpopupmenu.h>
 
-EditorUI::EditorUI( QWidget* parent, const char* name, WFlags f )
-    : QMainWindow( parent, name, f )
+#include <QMenu>
+#include <QCloseEvent>
+#include <QtDebug>
+
+EditorUI::EditorUI( QWidget* parent, Qt::WFlags f )
+    : QMainWindow( parent, f )
 {
     // Make open action
-    open_action = new QAction( tr( "Open" ),
-        Resource::loadIconSet( "fileopen" ), QString::null, 0, this );
-    connect( open_action, SIGNAL( activated() ), this, SIGNAL( open() ) );
+    open_action = new QAction( QIcon( ":icon/fileopen" ), tr( "Open" ), this );
+    connect( open_action, SIGNAL( triggered() ), this, SIGNAL( open() ) );
     open_action->setWhatsThis( tr( "Open an image." ) );
-        
+
     // Make crop action
 #ifdef QTOPIA_PHONE
     QAction *crop_action;
 #endif
-    crop_action = new QAction( tr( "Crop" ), 
-        Resource::loadIconSet( "cut" ), QString::null, 0, this );
+    crop_action = new QAction( QIcon( ":icon/cut" ), tr( "Crop" ), this );
     crop_action->setWhatsThis( tr( "Crop the image." ) );
-    connect( crop_action, SIGNAL( activated() ), 
+    connect( crop_action, SIGNAL( triggered() ),
         this, SIGNAL( crop() ) );
-    
+
     // Make brightness action
 #ifdef QTOPIA_PHONE
     QAction *brightness_action;
 #endif
-    brightness_action = new QAction( tr( "Brightness" ),
-        Resource::loadIconSet( "color" ), QString::null, 0, this );
+    brightness_action = new QAction( QIcon( ":icon/color" ), tr( "Brightness" ), this );
     brightness_action->setWhatsThis( tr( "Adjust the image brightness." ) );
-    connect( brightness_action, SIGNAL( activated() ),
+    connect( brightness_action, SIGNAL( triggered() ),
         this, SIGNAL( brightness() ) );
-    
+
     // Make rotate actions
 #ifdef QTOPIA_PHONE
     QAction *rotate_action;
 #endif
-    rotate_action = new QAction( tr( "Rotate" ),
-        Resource::loadIconSet( "rotate" ), QString::null, 0, this );
+    rotate_action = new QAction( QIcon( ":icon/rotate" ), tr( "Rotate" ), this );
     rotate_action->setWhatsThis( tr( "Rotate the image." ) );
-    connect( rotate_action, SIGNAL( activated() ),
+    connect( rotate_action, SIGNAL( triggered() ),
         this, SIGNAL( rotate() ) );
-       
+
     // Make zoom action
 #ifdef QTOPIA_PHONE
     QAction *zoom_action;
 #endif
-    zoom_action = new QAction( tr( "Zoom" ),
-        Resource::loadIconSet( "find" ), QString::null, 0, this );
+    zoom_action = new QAction( QIcon( ":icon/find" ), tr( "Zoom" ), this );
     zoom_action->setWhatsThis( tr( "Zoom in and out." ) );
-    connect( zoom_action, SIGNAL( activated() ),
-        this, SIGNAL( zoom() ) );    
-    
+    connect( zoom_action, SIGNAL( triggered() ),
+        this, SIGNAL( zoom() ) );
+
     // Make fullscreen action
 #ifdef QTOPIA_PHONE
     QAction *fullscreen_action;
 #endif
-    fullscreen_action = new QAction( tr( "Full Screen" ), 
-        Resource::loadIconSet( "fullscreen" ), QString::null, 0, this );
+    fullscreen_action = new QAction( QIcon( ":icon/fullscreen" ), tr( "Full Screen" ), this );
     fullscreen_action->setWhatsThis( tr( "View the image in full screen." ) );
-    connect( fullscreen_action, SIGNAL( activated() ),
+    connect( fullscreen_action, SIGNAL( triggered() ),
         this, SIGNAL( fullScreen() ) );
-    
+
 #ifdef QTOPIA_PHONE
     // Clear context bar
-    ContextBar::setLabel( this, Qt::Key_Select, ContextBar::NoLabel );
-    
+    QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::NoLabel );
+
     // Construct context menu
-    context_menu = new ContextMenu( this );
-    context_menu->setEnableHelp( false );
-    crop_action->addTo( context_menu );
-    brightness_action->addTo( context_menu );
-    rotate_action->addTo( context_menu );
-    context_menu->insertSeparator();
-    zoom_action->addTo( context_menu );
-    fullscreen_action->addTo( context_menu );
-    context_menu->insertSeparator();
-    context_menu->insertItem( Resource::loadIconSet( "help_icon" ),
-        tr( "Help" ), context_menu, SLOT( help() ) );
-    context_menu->insertItem( Resource::loadIconSet( "close" ),
+    context_menu = QSoftMenuBar::menuFor( this );
+    QSoftMenuBar::setHelpEnabled( this, true );
+    context_menu->addAction( crop_action );
+    context_menu->addAction( brightness_action );
+    context_menu->addAction( rotate_action );
+    context_menu->addSeparator();
+    context_menu->addAction( zoom_action );
+    context_menu->addAction( fullscreen_action );
+    context_menu->addSeparator();
+
+    QMenu* menu = (QMenu*)context_menu;
+    menu->addAction( QIcon( ":icon/cancel" ),
         tr( "Cancel" ), this, SIGNAL( cancel() ) );
 #else
     // Construct menu bar
-    setToolBarsMovable( false );
     toolbar = new QToolBar( this );
-    toolbar->setHorizontalStretchable( true );
+    toolbar->setMovable( false );
+    // toolbar->setHorizontalStretchable( true );
     menubar = new QMenuBar( toolbar );
+    toolbar->addWidget( menubar );
+    addToolBar( toolbar );
     toolbar = new QToolBar( this );
-    
+    addToolBar( toolbar );
+
     // Construct file menu
-    file_menu = new QPopupMenu( this );
-    open_action->addTo( file_menu );
-    file_menu_id = menubar->insertItem( tr( "File" ), file_menu );
-    
+    file_menu = new QMenu( tr( "File" ), this );
+    file_menu->addAction( open_action );
+    menubar->addMenu( file_menu );
+
     // Construct edit menu
-    QPopupMenu *edit_menu = new QPopupMenu( this );
-    brightness_action->addTo( edit_menu );
-    rotate_action->addTo( edit_menu );
-    crop_action->addTo( edit_menu );
-    menubar->insertItem( tr( "Edit" ), edit_menu );
-    
+    QMenu *edit_menu = new QMenu( tr( "Edit" ), this );
+    edit_menu->addAction( brightness_action );
+    edit_menu->addAction( rotate_action );
+    edit_menu->addAction( crop_action );
+    menubar->addMenu( edit_menu );
+
     // Construct view menu
-    QPopupMenu *view_menu = new QPopupMenu( this );
-    zoom_action->addTo( view_menu );
-    fullscreen_action->addTo( view_menu );
-    menubar->insertItem( tr( "View" ), view_menu );
-    
+    QMenu *view_menu = new QMenu( tr( "View" ), this );
+    view_menu->addAction( zoom_action );
+    view_menu->addAction( fullscreen_action );
+    menubar->addMenu( view_menu );
+
     // Construct tool buttons
-    open_action->addTo( toolbar );
-    brightness_action->addTo( toolbar );
-    rotate_action->addTo( toolbar );
-    crop_action->addTo( toolbar );
-    zoom_action->addTo( toolbar );
+    toolbar->addAction( open_action );
+    toolbar->addAction( brightness_action );
+    toolbar->addAction( rotate_action );
+    toolbar->addAction( crop_action );
+    toolbar->addAction( zoom_action );
 #endif
 }
 
 #ifndef QTOPIA_PHONE
 void EditorUI::addFileItems()
 {
-    // Add file menu
-    file_menu_id = menubar->insertItem( tr( "File" ), file_menu, -1, 0 );
-    // Remove tool buttons
-    brightness_action->removeFrom( toolbar );
-    rotate_action->removeFrom( toolbar );
-    crop_action->removeFrom( toolbar );
-    zoom_action->removeFrom( toolbar );
-    // Add tool buttons
-    open_action->addTo( toolbar );
-    brightness_action->addTo( toolbar );
-    rotate_action->addTo( toolbar );
-    crop_action->addTo( toolbar );
-    zoom_action->addTo( toolbar );
+    file_menu->menuAction()->setVisible( true );
+    open_action->setVisible( true );
 }
 #endif
 
 #ifndef QTOPIA_PHONE
 void EditorUI::removeFileItems()
 {
-    open_action->removeFrom( toolbar );
-    menubar->removeItem( file_menu_id );
+    file_menu->menuAction()->setVisible( false );
+    open_action->setVisible( false );
 }
 #endif
+
+
+void EditorUI::closeEvent( QCloseEvent *e )
+{
+    parentWidget()->close();
+    e->ignore();
+}
+

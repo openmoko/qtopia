@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+        <xs:element name="ui" type="UI"/>
+
+        <xs:complexType name="UI">
+                <xs:sequence>
+                        <xs:element name="author" type="xs:string" />
+                        <xs:element name="comment" type="xs:string" />
+                        <xs:element name="exportMacro" type="xs:string" />
+                        <xs:element name="class" type="xs:string" />
+                        <xs:element name="widget" type="Widget" />
+                        <xs:element name="layoutDefault" type="LayoutDefault" />
+                        <xs:element name="layoutFunction" type="LayoutFunction" />
+                        <xs:element name="pixmapFunction" type="xs:string" />
+                        <xs:element name="customWidgets" type="CustomWidgets" />
+                        <xs:element name="tabStops" type="TabStops" />
+                        <xs:element name="images" type="Images" />
+                        <xs:element name="includes" type="Includes" />
+                        <xs:element name="resources" type="Resources" />
+                        <xs:element name="connections" type="Connections" />
+                </xs:sequence>
+                <xs:attribute name="version" type="xs:string" />
+                <xs:attribute name="stdSetDef" type="xs:integer" />
+        </xs:complexType>
+
+<!-- include begin -->
+        <xs:complexType name="Includes">
+                <xs:sequence maxOccurs="unbounded">
+                        <xs:element name="include" type="Include" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="Include">
+                <xs:sequence/>
+                <xs:attribute name="location" type="xs:string" />
+                <xs:attribute name="impldecl" type="xs:string" />
+        </xs:complexType>
+<!-- include end -->
+
+<!-- resource begin -->
+        <xs:complexType name="Resources">
+                <xs:sequence maxOccurs="unbounded">
+                        <xs:element name="include" type="Resource" />
+                </xs:sequence>
+                <xs:attribute name="name" type="xs:string" />
+        </xs:complexType>
+
+        <xs:complexType name="Resource">
+                <xs:sequence/>
+                <xs:attribute name="location" type="xs:string" />
+        </xs:complexType>
+<!-- resource end -->
+
+<!-- actions begin -->
+        <xs:complexType name="ActionGroup">
+                <xs:sequence maxOccurs="unbounded">
+                        <xs:element name="action" type="Action" />
+                        <xs:element name="actionGroup" type="ActionGroup" />
+                        <xs:element name="property" type="Property" />
+                        <xs:element name="attribute" type="Property" />
+                </xs:sequence>
+                <xs:attribute name="name" type="xs:string" />
+        </xs:complexType>
+
+        <xs:complexType name="Action">
+                <xs:sequence maxOccurs="unbounded">
+                        <xs:element name="property" type="Property" />
+                        <xs:element name="attribute" type="Property" />
+                </xs:sequence>
+                <xs:attribute name="name" type="xs:string" />
+                <xs:attribute name="menu" type="xs:string" />
+        </xs:complexType>
+
+        <xs:complexType name="ActionRef">
+                <xs:sequence />
+                <xs:attribute name="name" type="xs:string" />
+        </xs:complexType>
+<!-- actions end -->
+
+<!-- images begin -->
+        <xs:complexType name="Images">
+                <xs:sequence maxOccurs="unbounded">
+                        <xs:element name="image" type="Image" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="Image">
+                <xs:sequence>
+                        <xs:element name="data" type="ImageData" />
+                </xs:sequence>
+                <xs:attribute name="name" type="xs:string" />
+        </xs:complexType>
+
+        <xs:complexType name="ImageData">
+                <xs:sequence/>
+                <xs:attribute name="format" type="xs:string" />
+                <xs:attribute name="length" type="xs:integer" />
+        </xs:complexType>
+<!-- images end -->
+
+<!-- custom widget support begin -->
+        <xs:complexType name="CustomWidgets">
+                <xs:sequence maxOccurs="unbounded">
+                        <xs:element name="customWidget" type="CustomWidget" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="Header">
+                <xs:attribute name="location" type="xs:string" />  <!-- local or global -->
+        </xs:complexType>
+
+        <xs:complexType name="CustomWidget">
+                <xs:sequence>
+                        <xs:element name="class" type="xs:string" />
+                        <xs:element name="extends" type="xs:string" />
+                        <xs:element name="header" type="Header" />
+                        <xs:element name="sizeHint" type="Size" />
+                        <xs:element name="container" type="xs:integer" />
+                        <xs:element name="sizePolicy" type="SizePolicyData" />
+                        <xs:element name="pixmap" type="xs:string" />
+                        <xs:element name="properties" type="Properties" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="Properties">
+                <xs:sequence maxOccurs="unbounded">
+                        <xs:element name="property" type="PropertyData" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="PropertyData">
+                <xs:sequence />
+                <xs:attribute name="type" type="xs:string" />
+        </xs:complexType>
+
+        <xs:complexType name="SizePolicyData">
+                <xs:sequence>
+                        <xs:element name="horData" type="xs:integer" />
+                        <xs:element name="verData" type="xs:integer" />
+                </xs:sequence>
+        </xs:complexType>
+
+<!-- custom widget support end -->
+
+        <xs:complexType name="LayoutDefault">
+                <xs:sequence />
+                <xs:attribute name="spacing" type="xs:integer" />
+                <xs:attribute name="margin" type="xs:integer" />
+        </xs:complexType>
+
+        <xs:complexType name="LayoutFunction">
+                <xs:sequence />
+                <xs:attribute name="spacing" type="xs:string" />
+                <xs:attribute name="margin" type="xs:string" />
+        </xs:complexType>
+
+        <xs:complexType name="TabStops">
+                <xs:sequence maxOccurs="unbounded">
+                        <xs:element name="tabStop" type="xs:string" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="Layout">
+                <xs:sequence maxOccurs="unbounded">
+                        <xs:element name="property" type="Property" />
+                        <xs:element name="attribute" type="Property" />
+                        <xs:element name="item" type="LayoutItem" />
+                </xs:sequence>
+                <xs:attribute name="class" type="xs:string" />
+        </xs:complexType>
+
+        <xs:complexType name="LayoutItem">
+                <xs:choice>
+                        <xs:element name="widget" type="Widget" />
+                        <xs:element name="layout" type="Layout" />
+                        <xs:element name="spacer" type="Spacer" />
+                </xs:choice>
+                <xs:attribute name="row" type="xs:integer" />
+                <xs:attribute name="column" type="xs:integer" />
+                <xs:attribute name="rowSpan" type="xs:integer" />
+                <xs:attribute name="colSpan" type="xs:integer" />
+        </xs:complexType>
+
+<!-- item view begin -->
+        <xs:complexType name="Row">
+                <xs:sequence maxOccurs="unbounded">
+                        <xs:element name="property" type="Property" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="Column">
+                <xs:sequence maxOccurs="unbounded">
+                        <xs:element name="property" type="Property" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="Item">
+                <xs:sequence maxOccurs="unbounded">
+                        <xs:element name="property" type="Property" />
+                        <xs:element name="item" type="Item" />
+                </xs:sequence>
+                <xs:attribute name="row" type="xs:integer"/>
+                <xs:attribute name="column" type="xs:integer"/>
+        </xs:complexType>
+<!-- item view end -->
+
+        <xs:complexType name="Widget">
+                <xs:sequence maxOccurs="unbounded">
+                        <xs:element name="class" type="xs:string" />
+                        <xs:element name="property" type="Property" />
+                        <xs:element name="attribute" type="Property" />
+<!-- item view begin -->
+                        <xs:element name="row" type="Row" />
+                        <xs:element name="column" type="Column" />
+                        <xs:element name="item" type="Item" />
+<!-- item view end -->
+                        <xs:element name="layout" type="Layout" />
+                        <xs:element name="widget" type="Widget" />
+                        <xs:element name="action" type="Action" />
+                        <xs:element name="actionGroup" type="ActionGroup" />
+                        <xs:element name="addAction" type="ActionRef" />
+                </xs:sequence>
+                <xs:attribute name="class" type="xs:string" />
+                <xs:attribute name="name" type="xs:string" />
+                <xs:attribute name="native" type="xs:boolean" />
+        </xs:complexType>
+
+        <xs:complexType name="Spacer">
+                <xs:sequence maxOccurs="unbounded">
+                        <xs:element name="property" type="Property" />
+                </xs:sequence>
+                <xs:attribute name="name" type="xs:string" />
+        </xs:complexType>
+
+        <xs:complexType name="Color">
+                <xs:sequence>
+                    <xs:element name="red" type="xs:integer" />
+                    <xs:element name="green" type="xs:integer" />
+                    <xs:element name="blue" type="xs:integer" />
+                </xs:sequence>
+                <xs:attribute name="alpha" type="xs:integer" />
+        </xs:complexType>
+
+        <xs:complexType name="GradientStop">
+                <xs:sequence>
+                    <xs:element name="color" type="Color" />
+                </xs:sequence>
+                <xs:attribute name="position" type="xs:double" />
+        </xs:complexType>
+
+        <xs:complexType name="Gradient">
+                <xs:sequence maxOccurs="unbounded">
+                    <xs:element name="gradientStop" type="GradientStop" />
+                </xs:sequence>
+                <xs:attribute name="startX" type="xs:double" />
+                <xs:attribute name="startY" type="xs:double" />
+                <xs:attribute name="endX" type="xs:double" />
+                <xs:attribute name="endY" type="xs:double" />
+                <xs:attribute name="centralX" type="xs:double" />
+                <xs:attribute name="centralY" type="xs:double" />
+                <xs:attribute name="focalX" type="xs:double" />
+                <xs:attribute name="focalY" type="xs:double" />
+                <xs:attribute name="radius" type="xs:double" />
+                <xs:attribute name="angle" type="xs:double" />
+                <xs:attribute name="type" type="xs:string" />
+                <xs:attribute name="spread" type="xs:string" />
+                <xs:attribute name="coordinateMode" type="xs:string" />
+        </xs:complexType>
+
+        <xs:complexType name="Brush">
+                <xs:choice>
+                    <xs:element name="color" type="Color" />
+                    <xs:element name="texture" type="Property" />
+                    <xs:element name="gradient" type="Gradient" />
+                </xs:choice>
+                <xs:attribute name="brushStyle" type="xs:string" />
+        </xs:complexType>
+
+        <xs:complexType name="ColorRole">
+                <xs:sequence>
+                    <xs:element name="brush" type="Brush" />
+                </xs:sequence>
+                <xs:attribute name="role" type="xs:string" />
+        </xs:complexType>
+
+        <xs:complexType name="ColorGroup">
+                <xs:sequence maxOccurs="unbounded">
+                        <xs:element name="colorRole" type="ColorRole" />
+                        <xs:element name="color" type="Color" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="Palette">
+                <xs:sequence>
+                        <xs:element name="active" type="ColorGroup" />
+                        <xs:element name="inactive" type="ColorGroup" />
+                        <xs:element name="disabled" type="ColorGroup" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="Font">
+                <xs:sequence>
+                        <xs:element name="family" type="xs:string" />
+                        <xs:element name="pointSize" type="xs:integer" />
+                        <xs:element name="weight" type="xs:integer" />
+                        <xs:element name="italic" type="xs:boolean" />
+                        <xs:element name="bold" type="xs:boolean" />
+                        <xs:element name="underline" type="xs:boolean" />
+                        <xs:element name="strikeOut" type="xs:boolean" />
+                        <xs:element name="antialiasing" type="xs:boolean" />
+                        <xs:element name="kerning" type="xs:boolean" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="Point">
+                <xs:sequence>
+                        <xs:element name="x" type="xs:integer" />
+                        <xs:element name="y" type="xs:integer" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="Rect">
+                <xs:sequence>
+                        <xs:element name="x" type="xs:integer" />
+                        <xs:element name="y" type="xs:integer" />
+                        <xs:element name="width" type="xs:integer" />
+                        <xs:element name="height" type="xs:integer" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="SizePolicy">
+                <xs:sequence>
+                        <xs:element name="hSizeType" type="xs:integer" />
+                        <xs:element name="vSizeType" type="xs:integer" />
+                        <xs:element name="horStretch" type="xs:integer" />
+                        <xs:element name="verStretch" type="xs:integer" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="Size">
+                <xs:sequence>
+                        <xs:element name="width" type="xs:integer" />
+                        <xs:element name="height" type="xs:integer" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="Date">
+                <xs:sequence>
+                        <xs:element name="year" type="xs:integer" />
+                        <xs:element name="month" type="xs:integer" />
+                        <xs:element name="day" type="xs:integer" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="Time">
+                <xs:sequence>
+                        <xs:element name="hour" type="xs:integer" />
+                        <xs:element name="minute" type="xs:integer" />
+                        <xs:element name="second" type="xs:integer" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="DateTime">
+                <xs:sequence>
+                        <xs:element name="hour" type="xs:integer" />
+                        <xs:element name="minute" type="xs:integer" />
+                        <xs:element name="second" type="xs:integer" />
+                        <xs:element name="year" type="xs:integer" />
+                        <xs:element name="month" type="xs:integer" />
+                        <xs:element name="day" type="xs:integer" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="StringList">
+                <xs:sequence maxOccurs="unbounded">
+                        <xs:element name="string" type="xs:string" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="ResourcePixmap">
+                <xs:sequence/>
+                <xs:attribute name="resource" type="xs:string" />
+                <xs:attribute name="alias" type="xs:string" />
+        </xs:complexType>
+
+        <xs:complexType name="String">
+                <xs:sequence/>
+                <xs:attribute name="notr" type="xs:string" />
+                <xs:attribute name="comment" type="xs:string" />
+        </xs:complexType>
+
+        <xs:complexType name="PointF">
+                <xs:sequence>
+                        <xs:element name="x" type="xs:double" />
+                        <xs:element name="y" type="xs:double" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="RectF">
+                <xs:sequence>
+                        <xs:element name="x" type="xs:double" />
+                        <xs:element name="y" type="xs:double" />
+                        <xs:element name="width" type="xs:double" />
+                        <xs:element name="height" type="xs:double" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="SizeF">
+                <xs:sequence>
+                        <xs:element name="width" type="xs:double" />
+                        <xs:element name="height" type="xs:double" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="Char">
+                <xs:sequence>
+                        <xs:element name="unicode" type="xs:integer" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="Url">
+                <xs:sequence>
+                        <xs:element name="string" type="String" />
+                </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="Property">
+                <xs:choice>
+                        <xs:element name="bool" type="xs:string" />
+                        <xs:element name="color" type="Color" />
+                        <xs:element name="cstring" type="xs:string" />
+                        <xs:element name="cursor" type="xs:integer" />
+                        <xs:element name="enum" type="xs:string" />
+                        <xs:element name="font" type ="Font" />
+                        <xs:element name="iconSet" type="ResourcePixmap" />
+                        <xs:element name="pixmap" type="ResourcePixmap" />
+                        <xs:element name="palette" type="Palette" />
+                        <xs:element name="point" type="Point" />
+                        <xs:element name="rect" type="Rect" />
+                        <xs:element name="set" type="xs:string" />
+                        <xs:element name="sizePolicy" type="SizePolicy" />
+                        <xs:element name="size" type="Size" />
+                        <xs:element name="string" type="String" />
+                        <xs:element name="stringList" type="StringList" />
+                        <xs:element name="number" type="xs:integer" />
+                        <xs:element name="float" type="xs:float" />
+                        <xs:element name="double" type="xs:double" />
+                        <xs:element name="date" type="Date" />
+                        <xs:element name="time" type="Time" />
+                        <xs:element name="dateTime" type="DateTime" />
+                        <xs:element name="pointF" type="PointF" />
+                        <xs:element name="rectF" type="RectF" />
+                        <xs:element name="sizeF" type="SizeF" />
+                        <xs:element name="longLong" type="xs:longlong" />
+                        <xs:element name="char" type="Char" />
+                        <xs:element name="url" type="Url" />
+                </xs:choice>
+                <xs:attribute name="name" type="xs:string" />
+                <xs:attribute name="stdset" type="xs:integer" />
+        </xs:complexType>
+
+        <xs:complexType name="Connections">
+            <xs:sequence maxOccurs="unbounded">
+                    <xs:element name="connection" type="Connection" />
+            </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="Connection">
+            <xs:sequence>
+                <xs:element name="sender" type="xs:string"/>
+                <xs:element name="signal" type="xs:string"/>
+                <xs:element name="receiver" type="xs:string"/>
+                <xs:element name="slot" type="xs:string"/>
+                <xs:element name="hints" type="ConnectionHints"/>
+            </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="ConnectionHints">
+            <xs:sequence maxOccurs="unbounded">
+                <xs:element name="hint" type="ConnectionHint" />
+            </xs:sequence>
+        </xs:complexType>
+
+        <xs:complexType name="ConnectionHint">
+            <xs:sequence>
+                <xs:element name="x" type="xs:integer"/>
+                <xs:element name="y" type="xs:integer"/>
+            </xs:sequence>
+            <xs:attribute name="type" type="xs:string" />
+        </xs:complexType>
+</xs:schema>

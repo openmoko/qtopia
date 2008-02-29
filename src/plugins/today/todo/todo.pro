@@ -1,20 +1,16 @@
-CONFIG += qtopiaplugin 
+qtopia_project(qtopia plugin)
+TARGET=todoplugin
 
-TARGET = todoplugin
+FORMS = todooptionsbase.ui
+HEADERS = todoplugin.h todopluginoptions.h
+SOURCES = todoplugin.cpp todopluginoptions.cpp
 
-HEADERS = todoplugin.h todopluginimpl.h todopluginoptions.h
-SOURCES = todoplugin.cpp todopluginimpl.cpp todopluginoptions.cpp
-INTERFACES = todooptionsbase.ui
+depends(libraries/qtopiapim)
 
-TRANSLATABLES = $${HEADERS} $${SOURCES} $${INTERFACES}
-INCLUDEPATH     += ../ ../library
-DEPENDPATH      += ../ ../library
-
-CONFIG+=pimlib
-
-desktop.files=$${QTOPIA_DEPOT_PATH}/plugins/today/todoplugin.desktop
+desktop.files=$$QTOPIA_DEPOT_PATH/plugins/today/todoplugin.desktop
 desktop.path=/plugins/today/
-
+desktop.hint=desktop
 INSTALLS+=desktop
 
-PACKAGE_NAME	= qpe-today-todoplugin
+pkg.name=qpe-today-todoplugin
+pkg.domain=libs

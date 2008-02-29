@@ -1,0 +1,15 @@
+[Decoration]
+Name = Portal
+Base = themes/portal
+
+[Maximized]
+TitleHeight = 0
+TitleColor = None
+
+[Normal]
+TitleHeight = 8.63%
+TitlePixmap = titlebox
+TitleOffsets = "8,56"
+OverlayPixmap = titlebox_overlay
+OverlayOffsets = "16,48"
+

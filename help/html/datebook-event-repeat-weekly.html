@@ -1,16 +1,23 @@
-%%PDA%%
-{Tap}={Tap}
-{OkButton}={qpe/pda/OKButton.png}
-{CancelButton}={qpe/pda/CloseButton.png}
-@@PDA@@
-%%PHONE%%
-{Tap}={Press}
-{OkButton}={contextbar/ok.png}
-{CancelButton}={contextbar/cancel.png}
-@@PHONE@@
-<qt title="Repeating Weekly Events">
-<h3>Repeating Weekly Events</h3>
+<!--#if expr="$PDASTYLE"-->
+<!--#set var="Tap" value="Tap"-->
+<!--#set var="OkButton" value=":image/qpe/pda/OKButton"-->
+<!--#set var="CancelButton" value=":image/qpe/pda/CloseButton"-->
+<!--#endif-->
+<!--#if expr="$PHONESTYLE"-->
+<!--#set var="Tap" value="Press"-->
+<!--#set var="OkButton" value=":icon/ok"-->
+<!--#set var="CancelButton" value=":icon/cancel"-->
+<!--#endif-->
+<html>
+<head><title>Repeating Weekly Events</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h2>Repeating Weekly Events</h2>
+<!--#else -->
+   <h3>Repeating Weekly Events</h3>
+<!--#endif -->
 <p>Use the up/down arrows beside the <b>Every</b> no. weeks box to set the interval between each repeat.</p>
 <p>Select the appropriate buttons for the days of the week that event should repeat on.</p>
-<p>$${Tap} <img src="$${OkButton}" alt="OK"> to confirm the repeat or <img src="$${CancelButton}" alt="X"> to cancel.</p>
-</qt>
+<p><!--#echo var="Tap"--> <img src="<!--#echo var="OkButton"-->" alt="OK"> </img> to confirm the repeat or <img src="<!--#echo var="CancelButton"-->" alt="X"> </img> to cancel.</p>
+</body>
+</html>

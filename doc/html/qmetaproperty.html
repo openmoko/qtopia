@@ -1,142 +1,119 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
---></style>
-</head><body bgcolor="#ffffff">
-
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-
-<h1 align=center>QMetaProperty Class Reference</h1><br clear="all">
-<p>
-The QMetaProperty class stores meta data about a property.
-<a href="#details">More...</a>
-<p>
-<code>#include &lt;<a href="qmetaobject-h.html">qmetaobject.h</a>&gt;</code>
-<p><a href="qmetaproperty-members.html">List of all member functions.</a>
-<h2>Public Members</h2>
-<ul>
-<li><div class="fn"><b>QMetaProperty</b> () (internal)</div>
-<li><div class="fn"><b>~QMetaProperty</b> () (internal)</div>
-<li><div class="fn">const char* <a href="#53b6f5"><b>type</b></a> () const</div>
-<li><div class="fn">const char* <a href="#7cd19b"><b>name</b></a> () const</div>
-<li><div class="fn">bool <a href="#321ceb"><b>writable</b></a> () const</div>
-<li><div class="fn">bool <b>writeable</b> () const</div>
-<li><div class="fn">bool <b>isValid</b> () const (internal)</div>
-<li><div class="fn">bool <a href="#714204"><b>isSetType</b></a> () const</div>
-<li><div class="fn">bool <a href="#a4ef0b"><b>isEnumType</b></a> () const</div>
-<li><div class="fn">QStrList <a href="#b5f959"><b>enumKeys</b></a> () const</div>
-<li><div class="fn">int <a href="#bce997"><b>keyToValue</b></a> ( const char * key ) const</div>
-<li><div class="fn">const char* <a href="#0110d3"><b>valueToKey</b></a> ( int value ) const</div>
-<li><div class="fn">int <a href="#c82d03"><b>keysToValue</b></a> ( const QStrList &amp; keys ) const</div>
-<li><div class="fn">QStrList <a href="#03038c"><b>valueToKeys</b></a> ( int value ) const</div>
-<li><div class="fn">bool <a href="#a694ca"><b>stored</b></a> ( QObject * ) const</div>
-<li><div class="fn">bool <a href="#d5aedf"><b>designable</b></a> () const</div>
-<li><div class="fn">enum <a href="#Specification"><b>Specification</b></a> { Unspecified, Class, Reference, Pointer, ConstCharStar }</div>
-<li><div class="fn">enum <a href="#Flags"><b>Flags</b></a> { UnresolvedEnum = 0x00000001, UnresolvedSet = 0x00000002, UnresolvedEnumOrSet = 0x00000004, UnresolvedStored = 0x00000008, UnresolvedDesignable = 0x00000010, NotDesignable = 0x00000020, NotStored = 0x00000040, StdSet = 0x00000080 }</div>
-<li><div class="fn">bool <a href="#caa3ce"><b>testFlags</b></a> ( uint f ) const</div>
-<li><div class="fn">void <a href="#fe9ab3"><b>setFlags</b></a> ( uint f ) </div>
-<li><div class="fn">void <a href="#90e616"><b>clearFlags</b></a> ( uint f ) </div>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: QMetaProperty Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QMetaProperty Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<p>The QMetaProperty class provides meta-data about a property. <a href="#details">More...</a></p>
+<pre> #include &lt;QMetaProperty&gt;</pre><ul>
+<li><a href="qmetaproperty-members.html">List of all members, including inherited members</a></li>
+<li><a href="qmetaproperty-obsolete.html">Obsolete members</a></li>
 </ul>
-<hr><h2><a name="details"></a>Detailed Description</h2>
-The QMetaProperty class stores meta data about a property.
-<p>
-Property meta data mainly consists of a <a href="#53b6f5">type</a>(), a <a href="#7cd19b">name</a>() and the
-fact, whether a property is <a href="#321ceb">writable</a>(), <a href="#d5aedf">designable</a>() or <a href="#a694ca">stored</a>().
-<p>The functions <a href="#714204">isSetType</a>(), <a href="#a4ef0b">isEnumType</a>() and <a href="#b5f959">enumKeys</a>() provide
-further information about a property's type. The conversion
-functions <a href="#bce997">keyToValue</a>(), <a href="#0110d3">valueToKey</a>(), <a href="#c82d03">keysToValue</a>() and
-<a href="#03038c">valueToKeys</a>() allow to convert between the integer representation of
-an enumeration or set value and its literal representation.
-<p>Actual property values are set and received through <a href="qobject.html">QObject</a>'s set
-and get functions.  See <a href="qobject.html#72ec3f">QObject::setProperty</a>() and
-<a href="qobject.html#a110be">QObject::property</a>() for details.
-<p>You receive meta property data through an object's meta object. See
-<a href="qmetaobject.html#843ead">QMetaObject::property</a>() and <a href="qmetaobject.html#8c9b9c">QMetaObject::propertyNames</a>() for details.
-
-<hr><h2>Member Type Documentation</h2>
-<h3 class="fn"><a name="Flags">QMetaProperty::Flags</a></h3>
-For internal use only.
-<h3 class="fn"><a name="Specification">QMetaProperty::Specification</a></h3>
-For internal use only.
-<hr><h2>Member Function Documentation</h2>
-<h3 class="fn">void <a name="90e616"></a>QMetaProperty::clearFlags ( uint f )</h3>
-<p>For internal use only.
-<h3 class="fn">bool <a name="d5aedf"></a>QMetaProperty::designable () const</h3>
-<p>Returns whether the property is considered to be designable or not.
-<h3 class="fn"><a href="qstrlist.html">QStrList</a> <a name="b5f959"></a>QMetaProperty::enumKeys () const</h3>
-<p>Returns the possible enumeration keys if this property is an
-enumeration type (or a set type).
-<p>See also  <a href="#a4ef0b">isEnumType</a>().
-<h3 class="fn">bool <a name="a4ef0b"></a>QMetaProperty::isEnumType () const</h3>
-<p>Returns whether the property's type is an enumeration value.
-<p>See also  <a href="#714204">isSetType</a>() and <a href="#b5f959">enumKeys</a>().
-<h3 class="fn">bool <a name="714204"></a>QMetaProperty::isSetType () const</h3>
-<p>Returns whether the property's type is an enumeration value that is
-used as set, i.e. the enumeration values can be or'ed together.  A
-set type is implicitely also an enum type.
-<p>See also  <a href="#a4ef0b">isEnumType</a>() and <a href="#b5f959">enumKeys</a>().
-<h3 class="fn">int <a name="bce997"></a>QMetaProperty::keyToValue ( const char * key ) const</h3>
-<p>Converts the enumeration key <em>key</em> to its integer
-value.
-<p>For set types, use <a href="#c82d03">keysToValue</a>().
-<p>See also  <a href="#0110d3">valueToKey</a>(), <a href="#714204">isSetType</a>() and <a href="#c82d03">keysToValue</a>().
-<h3 class="fn">int <a name="c82d03"></a>QMetaProperty::keysToValue ( const <a href="qstrlist.html">QStrList</a> &amp; keys ) const</h3>
-<p>Converts the list of keys <em>keys</em> to their combined integer
-value.
-<p>See also  <a href="#714204">isSetType</a>(), <a href="#0110d3">valueToKey</a>() and keysToValue().
-<h3 class="fn">const char* <a name="7cd19b"></a>QMetaProperty::name () const</h3>
-<p>Returns the name of the property.
-<h3 class="fn">void <a name="fe9ab3"></a>QMetaProperty::setFlags ( uint f )</h3>
-<p>For internal use only.
-<h3 class="fn">bool <a name="a694ca"></a>QMetaProperty::stored ( <a href="qobject.html">QObject</a> * o ) const</h3>
-<p>Returns whether the property shall be stored for object <em>o</em> or
-not.
-<h3 class="fn">bool <a name="caa3ce"></a>QMetaProperty::testFlags ( uint f ) const</h3>
-<p>For internal use only.
-<h3 class="fn">const char* <a name="53b6f5"></a>QMetaProperty::type () const</h3>
-<p>Returns the type of the property.
-<h3 class="fn">const char* <a name="0110d3"></a>QMetaProperty::valueToKey ( int value ) const</h3>
-<p>Converts the enumeration value <em>value</em> to its literal key.
-<p>For set types, use <a href="#03038c">valueToKeys</a>().
-<p>See also  valueToKey(), <a href="#714204">isSetType</a>() and <a href="#03038c">valueToKeys</a>().
-<h3 class="fn"><a href="qstrlist.html">QStrList</a> <a name="03038c"></a>QMetaProperty::valueToKeys ( int value ) const</h3>
-<p>Converts the set value <em>value</em> to a list of keys.
-<p>See also  <a href="#714204">isSetType</a>(), <a href="#0110d3">valueToKey</a>() and valueToKeys().
-<h3 class="fn">bool <a name="321ceb"></a>QMetaProperty::writable () const</h3>
-<p>Returns whether the property is writable or not.
-<p>See also  <a href="#af964d">isValid</a>().
-<h3 class="fn"><a name="1ef13f"></a>QMetaProperty::QMetaProperty ()</h3>
-<p>For internal use only.
-<h3 class="fn"><a name="b86f69"></a>QMetaProperty::~QMetaProperty ()</h3>
-<p>For internal use only.
-<h3 class="fn">bool <a name="af964d"></a>QMetaProperty::isValid () const</h3>
-<p>For internal use only.
-<hr><p>
-Search the documentation, FAQ, qt-interest archive and more (uses
-<a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
-<form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.10"><nobr>
-<input size="50" name="search"><input type=submit value="Search">
-</nobr></form><hr><p>
-This file is part of the <a href="index.html">Qt toolkit</a>,
-copyright &copy; 1995-2005
-<a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/>QMetaEnum <b><a href="qmetaproperty.html#enumerator">enumerator</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qmetaproperty.html#isDesignable">isDesignable</a></b> ( const QObject * <i>object</i> = 0 ) const</li>
+<li><div class="fn"/>bool <b><a href="qmetaproperty.html#isEnumType">isEnumType</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qmetaproperty.html#isFlagType">isFlagType</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qmetaproperty.html#isReadable">isReadable</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qmetaproperty.html#isResettable">isResettable</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qmetaproperty.html#isScriptable">isScriptable</a></b> ( const QObject * <i>object</i> = 0 ) const</li>
+<li><div class="fn"/>bool <b><a href="qmetaproperty.html#isStored">isStored</a></b> ( const QObject * <i>object</i> = 0 ) const</li>
+<li><div class="fn"/>bool <b><a href="qmetaproperty.html#isUser">isUser</a></b> ( const QObject * <i>object</i> = 0 ) const</li>
+<li><div class="fn"/>bool <b><a href="qmetaproperty.html#isValid">isValid</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qmetaproperty.html#isWritable">isWritable</a></b> () const</li>
+<li><div class="fn"/>const char * <b><a href="qmetaproperty.html#name">name</a></b> () const</li>
+<li><div class="fn"/>QVariant <b><a href="qmetaproperty.html#read">read</a></b> ( const QObject * <i>object</i> ) const</li>
+<li><div class="fn"/>bool <b><a href="qmetaproperty.html#reset">reset</a></b> ( QObject * <i>object</i> ) const</li>
+<li><div class="fn"/>QVariant::Type <b><a href="qmetaproperty.html#type">type</a></b> () const</li>
+<li><div class="fn"/>const char * <b><a href="qmetaproperty.html#typeName">typeName</a></b> () const</li>
+<li><div class="fn"/>int <b><a href="qmetaproperty.html#userType">userType</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qmetaproperty.html#write">write</a></b> ( QObject * <i>object</i>, const QVariant &amp; <i>value</i> ) const</li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QMetaProperty class provides meta-data about a property.</p>
+<p>A property has a <a href="qmetaproperty.html#name">name</a>() and a <a href="qmetaproperty.html#type">type</a>(), as well as various attributes that specify its behavior: <a href="qmetaproperty.html#isReadable">isReadable</a>(), <a href="qmetaproperty.html#isWritable">isWritable</a>(), <a href="qmetaproperty.html#isDesignable">isDesignable</a>(), <a href="qmetaproperty.html#isScriptable">isScriptable</a>(), and <a href="qmetaproperty.html#isStored">isStored</a>().</p>
+<p>If the property is an enumeration, <a href="qmetaproperty.html#isEnumType">isEnumType</a>() returns true; if the property is an enumeration that is also a flag (i.e. its values can be combined using the OR operator), <a href="qmetaproperty.html#isEnumType">isEnumType</a>() and <a href="qmetaproperty.html#isFlagType">isFlagType</a>() both return true. The enumerator for these types is available from <a href="qmetaproperty.html#enumerator">enumerator</a>().</p>
+<p>The property's values are set and retrieved with <a href="qmetaproperty.html#read">read</a>(), <a href="qmetaproperty.html#write">write</a>(), and <a href="qmetaproperty.html#reset">reset</a>(); they can also be changed through <a href="qobject.html">QObject</a>'s set and get functions. See <a href="qobject.html#setProperty">QObject::setProperty</a>() and <a href="qobject.html#property">QObject::property</a>() for details.</p>
+<p>You get property meta-data through an object's meta-object. See <a href="qmetaobject.html#property">QMetaObject::property</a>() and <a href="qmetaobject.html#propertyCount">QMetaObject::propertyCount</a>() for details.</p>
+<p>See also <a href="qmetaobject.html">QMetaObject</a>, <a href="qmetaenum.html">QMetaEnum</a>, <a href="qmetamethod.html">QMetaMethod</a>, and <a href="properties.html">Qt's Property System</a>.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="enumerator"></a><a href="qmetaenum.html">QMetaEnum</a> QMetaProperty::enumerator () const</h3>
+<p>Returns the enumerator if this property's type is an enumerator type; otherwise the returned value is undefined.</p>
+<p>See also <a href="qmetaproperty.html#isEnumType">isEnumType</a>() and <a href="qmetaproperty.html#isFlagType">isFlagType</a>().</p>
+<h3 class="fn"><a name="isDesignable"></a>bool QMetaProperty::isDesignable ( const <a href="qobject.html">QObject</a> * <i>object</i> = 0 ) const</h3>
+<p>Returns true if this property is designable for the given <i>object</i>; otherwise returns false.</p>
+<p>If no <i>object</i> is given, the function returns false if the <tt>Q_PROPERTY()</tt>'s <tt>DESIGNABLE</tt> attribute is false; otherwise returns true (if the attribute is true or is a function or expression).</p>
+<p>See also <a href="qmetaproperty.html#isScriptable">isScriptable</a>() and <a href="qmetaproperty.html#isStored">isStored</a>().</p>
+<h3 class="fn"><a name="isEnumType"></a>bool QMetaProperty::isEnumType () const</h3>
+<p>Returns true if the property's type is an enumeration value; otherwise returns false.</p>
+<p>See also <a href="qmetaproperty.html#enumerator">enumerator</a>() and <a href="qmetaproperty.html#isFlagType">isFlagType</a>().</p>
+<h3 class="fn"><a name="isFlagType"></a>bool QMetaProperty::isFlagType () const</h3>
+<p>Returns true if the property's type is an enumeration value that is used as a flag; otherwise returns false.</p>
+<p>Flags can be combined using the OR operator. A flag type is implicitly also an enum type.</p>
+<p>See also <a href="qmetaproperty.html#isEnumType">isEnumType</a>(), <a href="qmetaproperty.html#enumerator">enumerator</a>(), and <a href="qmetaenum.html#isFlag">QMetaEnum::isFlag</a>().</p>
+<h3 class="fn"><a name="isReadable"></a>bool QMetaProperty::isReadable () const</h3>
+<p>Returns true if this property is readable; otherwise returns false.</p>
+<p>See also <a href="qmetaproperty.html#isWritable">isWritable</a>(), <a href="qmetaproperty.html#read">read</a>(), and <a href="qmetaproperty.html#isValid">isValid</a>().</p>
+<h3 class="fn"><a name="isResettable"></a>bool QMetaProperty::isResettable () const</h3>
+<p>Returns true if this property can be reset to a default value; otherwise returns false.</p>
+<p>See also <a href="qmetaproperty.html#reset">reset</a>().</p>
+<h3 class="fn"><a name="isScriptable"></a>bool QMetaProperty::isScriptable ( const <a href="qobject.html">QObject</a> * <i>object</i> = 0 ) const</h3>
+<p>Returns true if the property is scriptable for the given <i>object</i>; otherwise returns false.</p>
+<p>If no <i>object</i> is given, the function returns false if the <tt>Q_PROPERTY()</tt>'s <tt>SCRIPTABLE</tt> attribute is false; otherwise returns true (if the attribute is true or is a function or expression).</p>
+<p>See also <a href="qmetaproperty.html#isDesignable">isDesignable</a>() and <a href="qmetaproperty.html#isStored">isStored</a>().</p>
+<h3 class="fn"><a name="isStored"></a>bool QMetaProperty::isStored ( const <a href="qobject.html">QObject</a> * <i>object</i> = 0 ) const</h3>
+<p>Returns true if the property is stored for <i>object</i>; otherwise returns false.</p>
+<p>If no <i>object</i> is given, the function returns false if the <tt>Q_PROPERTY()</tt>'s <tt>STORED</tt> attribute is false; otherwise returns true (if the attribute is true or is a function or expression).</p>
+<p>See also <a href="qmetaproperty.html#isDesignable">isDesignable</a>() and <a href="qmetaproperty.html#isScriptable">isScriptable</a>().</p>
+<h3 class="fn"><a name="isUser"></a>bool QMetaProperty::isUser ( const <a href="qobject.html">QObject</a> * <i>object</i> = 0 ) const</h3>
+<p>Returns true if this is the property that the user can editable for <i>object</i>; otherwise returns false. I.e. the text property is the user editable property of a <a href="qlineedit.html">QLineEdit</a>.</p>
+<p>If no <i>object</i> is given, the function returns false if the <tt>Q_PROPERTY()</tt>'s <tt>USER</tt> attribute is false; otherwise returns true (if the attribute is true or is a function or expression).</p>
+<p>See also <a href="qmetaobject.html#userProperty">QMetaObject::userProperty</a>(), <a href="qmetaproperty.html#isDesignable">isDesignable</a>(), and <a href="qmetaproperty.html#isScriptable">isScriptable</a>().</p>
+<h3 class="fn"><a name="isValid"></a>bool QMetaProperty::isValid () const</h3>
+<p>Returns true if this property is valid (readable); otherwise returns false.</p>
+<p>See also <a href="qmetaproperty.html#isReadable">isReadable</a>().</p>
+<h3 class="fn"><a name="isWritable"></a>bool QMetaProperty::isWritable () const</h3>
+<p>Returns true if this property is writable; otherwise returns false.</p>
+<p>See also <a href="qmetaproperty.html#isReadable">isReadable</a>() and <a href="qmetaproperty.html#write">write</a>().</p>
+<h3 class="fn"><a name="name"></a>const char * QMetaProperty::name () const</h3>
+<p>Returns this property's name.</p>
+<p>See also <a href="qmetaproperty.html#type">type</a>() and <a href="qmetaproperty.html#typeName">typeName</a>().</p>
+<h3 class="fn"><a name="read"></a><a href="qvariant.html">QVariant</a> QMetaProperty::read ( const <a href="qobject.html">QObject</a> * <i>object</i> ) const</h3>
+<p>Reads the property's value from the given <i>object</i>. Returns the value if it was able to read it; otherwise returns an invalid variant.</p>
+<p>See also <a href="qmetaproperty.html#write">write</a>(), <a href="qmetaproperty.html#reset">reset</a>(), and <a href="qmetaproperty.html#isReadable">isReadable</a>().</p>
+<h3 class="fn"><a name="reset"></a>bool QMetaProperty::reset ( <a href="qobject.html">QObject</a> * <i>object</i> ) const</h3>
+<p>Resets the property for the given <i>object</i> with a reset method. Returns true if the reset worked; otherwise returns false.</p>
+<p>Reset methods are optional; only a few properties support them.</p>
+<p>See also <a href="qmetaproperty.html#read">read</a>() and <a href="qmetaproperty.html#write">write</a>().</p>
+<h3 class="fn"><a name="type"></a><a href="qvariant.html#Type-enum">QVariant::Type</a> QMetaProperty::type () const</h3>
+<p>Returns this property's type. The return value is one of the values of the <a href="qvariant.html#Type-enum">QVariant::Type</a> enumeration.</p>
+<p>See also <a href="qmetaproperty.html#userType">userType</a>(), <a href="qmetaproperty.html#typeName">typeName</a>(), and <a href="qmetaproperty.html#name">name</a>().</p>
+<h3 class="fn"><a name="typeName"></a>const char * QMetaProperty::typeName () const</h3>
+<p>Returns the name of this property's type.</p>
+<p>See also <a href="qmetaproperty.html#type">type</a>() and <a href="qmetaproperty.html#name">name</a>().</p>
+<h3 class="fn"><a name="userType"></a>int QMetaProperty::userType () const</h3>
+<p>Returns this property's user type. The return value is one of the values that are registered with <a href="qmetatype.html">QMetaType</a>, or 0 if the type is not registered.</p>
+<p>This function was introduced in Qt 4.2.</p>
+<p>See also <a href="qmetaproperty.html#type">type</a>(), <a href="qmetatype.html">QMetaType</a>, and <a href="qmetaproperty.html#typeName">typeName</a>().</p>
+<h3 class="fn"><a name="write"></a>bool QMetaProperty::write ( <a href="qobject.html">QObject</a> * <i>object</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>value</i> ) const</h3>
+<p>Writes <i>value</i> as the property's value to the given <i>object</i>. Returns true if the write succeeded; otherwise returns false.</p>
+<p>See also <a href="qmetaproperty.html#read">read</a>(), <a href="qmetaproperty.html#reset">reset</a>(), and <a href="qmetaproperty.html#isWritable">isWritable</a>().</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

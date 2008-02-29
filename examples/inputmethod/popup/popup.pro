@@ -11,25 +11,23 @@ CONFIG += popupim_as_plugin
 # and older style InputMethodInterface, compatible with Qtopia 1.5
 CONFIG += popupim_extended_interface
 
-TARGET       = popupim
+TARGET=popupim
 
 popupim_as_plugin {
-    CONFIG      += qtopiaplugin
+    qtopia_project(qtopia qtopia plugin)
+    HEADERS      = popupim.h
+    SOURCES      = popupim.cpp
     popupim_extended_interface {
-	HEADERS      = popupim.h popupextimpl.h
-	SOURCES      = popupim.cpp popupextimpl.cpp
+	HEADERS += popupextimpl.h
+	SOURCES += popupextimpl.cpp
     } else {
-	HEADERS      = popupim.h popupimpl.h
-	SOURCES      = popupim.cpp popupimpl.cpp
+	HEADERS += popupimpl.h
+	SOURCES += popupimpl.cpp
     }
+    plugin_type  = inputmethods
 } else {
-    CONFIG      += qtopiaapp
-    CONFIG	-= buildQuicklaunch
+    qtopia_project(qtopia qtopia app)
     HEADERS      = popupim.h
     SOURCES      = popupim.cpp main.cpp
 }
-
-TRANSLATABLES=$$HEADERS $$SOURCES
-
-popupim_as_plugin:QTOPIA_PROJECT_TYPE=inputmethods
 

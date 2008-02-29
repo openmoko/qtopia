@@ -1,32 +1,39 @@
-<qt title="Sending Contacts">
-<h3>Sending Contacts</h3>
-<p>Contact details can be sent from one device to another in different ways, ie. via 
-%%PHONE%%
+<html>
+<head><title>Sending Contacts</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h2>Sending Contacts</h2>
+<!--#else -->
+   <h3>Sending Contacts</h3>
+<!--#endif -->
+<p>Contact details can be sent from one device to another in different ways, ie. via
+<!--#if expr="$PHONESTYLE"-->
 SMS
-@@PHONE@@
-%%PDA%%
+<!--#endif-->
+<!--#if expr="$PDASTYLE"-->
 infra-red
-@@PDA@@
+<!--#endif-->
 .</p>
 <p><b>To Send a Contact Entry:</b></p>
 <ul>
-%%PDA%%
+<!--#if expr="$PDASTYLE"-->
 <li>Select the name of the contact to send.</li>
-<li>Tap <b>Contact</b>, then <img src="beam"> <b>Send</b>.</li>
-@@PDA@@
-%%PHONE%%
+<li>Tap <b>Contact</b>, then <img src=":icon/beam"> </img> <b>Send</b>.</li>
+<!--#endif-->
+<!--#if expr="$PHONESTYLE"-->
 <li>View the contact to send. (See <a href="addressbook-viewing.html">Viewing Contacts</a>)</li>
-<li>Press <img src="contextbar/options.png"> and select <b>Send</b> from the menu.</li>
-@@PHONE@@
-<li>Select the method to send the contact, ie. 
-%%PHONE%%
+<li>Press <img src=":icon/options"> </img> and select <b>Send</b> from the menu.</li>
+<!--#endif-->
+<li>Select the method to send the contact, ie.
+<!--#if expr="$PHONESTYLE"-->
 SMS
-@@PHONE@@
-%%PDA%%
+<!--#endif-->
+<!--#if expr="$PDASTYLE"-->
 infra-red
-@@PDA@@
+<!--#endif-->
 .</li>
 </ul>
-<p>An electronic <a href="addressbook-businesscard.html">Business Card</a> can also be transmitted quickly and easily from one device to another using the Business Card feature.</p>
+<p>An electronic <a href="addressbook-businesscard.html">Business Card</a> can also be transmitted quickly and easily from one device to another using the <b>Business Card</b> feature.</p>
 <p>See Also: <a href="beaming.html">Beaming</a></p>
-</qt>
+</body>
+</html>

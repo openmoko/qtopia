@@ -1,54 +1,43 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 #ifndef ENTRYDIALOG_H
 #define ENTRYDIALOG_H
 
 #ifdef QTOPIA_PHONE
-#include "entrydetails_phone.h"
+#include "ui_entrydetails_phone.h"
 #else
-#include "entrydetails.h"
+#include "ui_entrydetails.h"
 #endif
 
-#include <qtopia/pim/event.h>
+#include <qtopia/pim/qappointment.h>
 
-#include <qdatetime.h>
-#include <qdialog.h>
+#include <QDateTime>
+#include <QDialog>
+#include <QScrollArea>
 
-class QMultiLineEdit;
-class EventView;
+class QTextEdit;
+class AppointmentDetails;
 class QTabWidget;
+class EntryDetails;
+class QDLEditClient;
 
 class EntryDialog : public QDialog
 {
@@ -56,26 +45,27 @@ class EntryDialog : public QDialog
 
 public:
     EntryDialog( bool startOnMonday, const QDateTime &start, const QDateTime &end,
-	         QWidget *parent = 0, const char *name = 0, bool modal = FALSE, WFlags f = 0 );
-    EntryDialog( bool startOnMonday, const PimEvent &event,
-	         QWidget *parent = 0, const char *name = 0, bool modal = FALSE, WFlags f = 0 );
+                 QWidget *parent = 0, Qt::WFlags f = 0 );
+    EntryDialog( bool startOnMonday, const QAppointment &appointment,
+                 QWidget *parent = 0, Qt::WFlags f = 0 );
     ~EntryDialog();
 
-    PimEvent event();
+    QAppointment appointment( const bool includeQdlLinks = true);
 
 #ifdef QTOPIA_DESKTOP
     const EntryDetails *entryDetails() { return entry; }
 #endif
 
 signals:
-    void categoriesChanged();
+    void categorymanagerChanged();
 
 public slots:
-    void endDateTimeChanged( const QDateTime & );
-    void startDateTimeChanged( const QDateTime & );
-    void slotRepeat();
+    void updateStartDateTime();
+    void updateStartTime();
+    void updateEndDateTime();
+    void updateEndTime();
+    void editCustomRepeat();
     void setWeekStartsMonday( bool );
-    void allDayToggled( bool );
     void configureTimeZones();
 
     void turnOnAlarm();
@@ -84,8 +74,13 @@ public slots:
     void updateCategories();
     void showSummary();
 
+#ifndef QTOPIA_DESKTOP
+protected:
+    bool eventFilter( QObject *receiver, QEvent *event );
+#endif
+
 private slots:
-    void setRepeatType(int);
+    void setRepeatRule(int);
     void setEndDate(const QDate &);
     void tabChanged( QWidget *tab );
 
@@ -95,14 +90,27 @@ private:
     void setRepeatLabel();
     void accept();
 
-    PimEvent mEvent;
-    PimEvent mOrigEvent;
+#ifndef QTOPIA_DESKTOP
+    QScrollArea *scrollArea;
+#endif
+
+    QAppointment mAppointment;
+    QAppointment mOrigAppointment;
     bool startWeekOnMonday;
     EntryDetails *entry;
-    QMultiLineEdit *editNote;
-    EventView *eventView;
+    QTextEdit *editNote;
+    QDLEditClient *editnoteQC;
+    AppointmentDetails *appointmentDetails;
     QTabWidget *tw;
 };
 
+// ====================================================================
+
+class EntryDetails : public QWidget, public Ui::EntryDetailsBase
+{
+public:
+    EntryDetails( QWidget *parent );
+    virtual ~EntryDetails();
+};
 
 #endif // ENTRYDIALOG_H

@@ -1,76 +1,45 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
---></style>
-</head><body bgcolor="#ffffff">
-
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-
-<h1 align=center>QConstString Class Reference</h1><br clear="all">
-<p>
-The QConstString class is a <a href="qstring.html">QString</a> which uses constant Unicode data.
-<a href="#details">More...</a>
-<p>
-<code>#include &lt;<a href="qstring-h.html">qstring.h</a>&gt;</code>
-<p><a href="qconststring-members.html">List of all member functions.</a>
-<h2>Public Members</h2>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: QConstString Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QConstString Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<p>The QConstString class is a wrapper for constant Unicode string data. <a href="#details">More...</a></p>
+<pre> #include &lt;QConstString&gt;</pre><p><b>This class is part of the Qt 3 support library.</b> It is provided to keep old source code working. We strongly advise against using it in new code. See <a href="porting4.html">Porting to Qt 4</a> for more information.</p>
+<p>Inherits <a href="qstring.html">QString</a>.</p>
 <ul>
-<li><div class="fn"><a href="#2d7f6e"><b>QConstString</b></a> ( QChar * unicode, uint length ) </div>
-<li><div class="fn"><a href="#99a079"><b>~QConstString</b></a> () </div>
-<li><div class="fn">const QString&amp; <a href="#3f739a"><b>string</b></a> () const</div>
+<li><a href="qconststring-members.html">List of all members, including inherited members</a></li>
+<li><a href="qconststring-qt3.html">Qt 3 support members</a></li>
 </ul>
-<hr><h2><a name="details"></a>Detailed Description</h2>
-The QConstString class is a <a href="qstring.html">QString</a> which uses constant Unicode data.
-<p>
-In order to minimize copying, highly optimized applications can use
-QConstString to provide a QString-compatible object from existing
-Unicode data.  It is then the user's responsibility to make sure
-that the Unicode data must exist for the entire lifetime of the
-QConstString object.
-
-<hr><h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="2d7f6e"></a>QConstString::QConstString ( <a href="qchar.html">QChar</a> * unicode, uint length )</h3>
-<p>Constructs a QConstString that uses the first <em>length</em> Unicode
-characters in the array <em>unicode.</em>  Any attempt to modify
-copies of the string will cause it to create a copy of the
-data, thus it remains forever unmodified.
-<p>Note that <em>unicode</em> is <em>not copied.</em>  The caller <em>must</em> be
-able to guarantee that <em>unicode</em> will not be deleted or
-modified. Since that is generally not the case with <code>const</code> strings
-(they are references), this constructor demands a non-const pointer
-even though it never modifies <em>unicode.</em>
-<h3 class="fn"><a name="99a079"></a>QConstString::~QConstString ()</h3>
-<p>Destroys the QConstString, creating a copy of the data if
-other strings are still using it.
-<h3 class="fn">const <a href="qstring.html">QString</a>&amp; <a name="3f739a"></a>QConstString::string () const</h3>
-<p>Returns a constant string referencing the data passed during
-construction.
-<hr><p>
-Search the documentation, FAQ, qt-interest archive and more (uses
-<a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
-<form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.10"><nobr>
-<input size="50" name="search"><input type=submit value="Search">
-</nobr></form><hr><p>
-This file is part of the <a href="index.html">Qt toolkit</a>,
-copyright &copy; 1995-2005
-<a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>174 public functions inherited from <a href="qstring.html#public-functions">QString</a></li>
+<li><div class="fn"/>22 static public members inherited from <a href="qstring.html#static-public-members">QString</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QConstString class is a wrapper for constant Unicode string data.</p>
+<p>In Qt 4, QConstString is replaced by <a href="qstring.html#fromRawData">QString::fromRawData</a>(), a static function that constructs a <a href="qstring.html">QString</a> object based on Unicode string data.</p>
+<p>Because <a href="qstring.html#fromRawData">QString::fromRawData</a>() has slightly more stringent constranints than QConstString had in Qt 3, the new QConstString class takes a deep copy of the string data.</p>
+<p>See also <a href="qstring.html#fromRawData">QString::fromRawData</a>().</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QConstString"></a>QConstString::QConstString ( const <a href="qchar.html">QChar</a> * <i>unicode</i>, int <i>size</i> )</h3>
+<p>Use <a href="qstring.html">QString</a>(<i>unicode</i>, <i>size</i>) or QString::fromRawData(<i>unicode</i>, <i>size</i>) instead.</p>
+<h3 class="fn"><a name="string"></a>const <a href="qstring.html">QString</a> &amp; QConstString::string () const</h3>
+<p>Returns <tt>*this</tt>. Not necessary in Qt 4.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

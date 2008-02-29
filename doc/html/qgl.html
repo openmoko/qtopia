@@ -1,61 +1,62 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
---></style>
-</head><body bgcolor="#ffffff">
-
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-
-<h1 align=center>QGL Class Reference<br><small>[ <a href="opengl.html">OpenGL module</a> ]</small></h1><br clear="all">
-<p>
-The QGL class is a namespace for miscellaneous identifiers in the Qt OpenGL module.
-<a href="#details">More...</a>
-<p>
-<code>#include &lt;<a href="qgl-h.html">qgl.h</a>&gt;</code>
-<p>Inherited by <a href="qglcontext.html">QGLContext</a>, <a href="qglformat.html">QGLFormat</a> and <a href="qglwidget.html">QGLWidget</a>.
-<p><a href="qgl-members.html">List of all member functions.</a>
-<h2>Public Members</h2>
-<ul>
-<li><div class="fn">enum <b>FormatOption</b> { DoubleBuffer = 0x0001, DepthBuffer = 0x0002, Rgba = 0x0004, AlphaChannel = 0x0008, AccumBuffer = 0x0010, StencilBuffer = 0x0020, StereoBuffers = 0x0040, DirectRendering = 0x0080, HasOverlay = 0x0100, SingleBuffer = DoubleBuffer &lt;&lt; 16, NoDepthBuffer = DepthBuffer &lt;&lt; 16, ColorIndex = Rgba &lt;&lt; 16, NoAlphaChannel = AlphaChannel &lt;&lt; 16, NoAccumBuffer = AccumBuffer &lt;&lt; 16, NoStencilBuffer = StencilBuffer &lt;&lt; 16, NoStereoBuffers = StereoBuffers &lt;&lt; 16, IndirectRendering = DirectRendering &lt;&lt; 16, NoOverlay = HasOverlay &lt;&lt; 16 }</div>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: QGL Namespace Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QGL Namespace Reference<br /><sup><sup>[<a href="qtopengl.html">QtOpenGL</a> module]</sup></sup></h1>
+<p>The QGL namespace specifies miscellaneous identifiers used in the Qt OpenGL module. <a href="#details">More...</a></p>
+<pre> #include &lt;QGL&gt;</pre><ul>
 </ul>
-<hr><h2><a name="details"></a>Detailed Description</h2>
-The QGL class is a namespace for miscellaneous identifiers in the Qt OpenGL module.
-<p>
-Normally, you can ignore this class. <a href="qglwidget.html">QGLWidget</a> and the other OpenGL
-module classes inherit it, so when you make your own QGLWidget
-subclass, you can use the identifiers in the QGL namespace without
-qualification.
-<p>However, occasionally you may find yourself in situations where you
-need ot refer to these identifiers from outside the QGL namespace
-scope, e.g. in static utility functions. In such cases, simply write
-e.g. <code>QGL::DoubleBuffer</code> instead just <code>DoubleBuffer.</code>
-
-<hr><p>
-Search the documentation, FAQ, qt-interest archive and more (uses
-<a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
-<form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.10"><nobr>
-<input size="50" name="search"><input type=submit value="Search">
-</nobr></form><hr><p>
-This file is part of the <a href="index.html">Qt toolkit</a>,
-copyright &copy; 1995-2005
-<a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+<a name="types"></a>
+<h3>Types</h3>
+<ul>
+<li><div class="fn"/>enum <b><a href="qgl.html#FormatOption-enum">FormatOption</a></b> { DoubleBuffer, DepthBuffer, Rgba, AlphaChannel, ..., NoSampleBuffers }</li>
+<li><div class="fn"/>flags <b><a href="qgl.html#FormatOption-enum">FormatOptions</a></b></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QGL namespace specifies miscellaneous identifiers used in the Qt OpenGL module.</p>
+<hr />
+<h2>Type Documentation</h2>
+<h3 class="flags"><a name="FormatOption-enum"></a>enum QGL::FormatOption<br />flags QGL::FormatOptions</h3>
+<p>This enum specifies the format options.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="40%">
+<tr><th width="60%">Constant</th><th width="40%">Value</th></tr>
+<tr><td valign="top"><tt>QGL::DoubleBuffer</tt></td><td align="center" valign="top"><tt>0x0001</tt></td></tr>
+<tr><td valign="top"><tt>QGL::DepthBuffer</tt></td><td align="center" valign="top"><tt>0x0002</tt></td></tr>
+<tr><td valign="top"><tt>QGL::Rgba</tt></td><td align="center" valign="top"><tt>0x0004</tt></td></tr>
+<tr><td valign="top"><tt>QGL::AlphaChannel</tt></td><td align="center" valign="top"><tt>0x0008</tt></td></tr>
+<tr><td valign="top"><tt>QGL::AccumBuffer</tt></td><td align="center" valign="top"><tt>0x0010</tt></td></tr>
+<tr><td valign="top"><tt>QGL::StencilBuffer</tt></td><td align="center" valign="top"><tt>0x0020</tt></td></tr>
+<tr><td valign="top"><tt>QGL::StereoBuffers</tt></td><td align="center" valign="top"><tt>0x0040</tt></td></tr>
+<tr><td valign="top"><tt>QGL::DirectRendering</tt></td><td align="center" valign="top"><tt>0x0080</tt></td></tr>
+<tr><td valign="top"><tt>QGL::HasOverlay</tt></td><td align="center" valign="top"><tt>0x0100</tt></td></tr>
+<tr><td valign="top"><tt>QGL::SampleBuffers</tt></td><td align="center" valign="top"><tt>0x0200</tt></td></tr>
+<tr><td valign="top"><tt>QGL::SingleBuffer</tt></td><td align="center" valign="top"><tt>DoubleBuffer&lt;&lt;16</tt></td></tr>
+<tr><td valign="top"><tt>QGL::NoDepthBuffer</tt></td><td align="center" valign="top"><tt>DepthBuffer&lt;&lt;16</tt></td></tr>
+<tr><td valign="top"><tt>QGL::ColorIndex</tt></td><td align="center" valign="top"><tt>Rgba&lt;&lt;16</tt></td></tr>
+<tr><td valign="top"><tt>QGL::NoAlphaChannel</tt></td><td align="center" valign="top"><tt>AlphaChannel&lt;&lt;16</tt></td></tr>
+<tr><td valign="top"><tt>QGL::NoAccumBuffer</tt></td><td align="center" valign="top"><tt>AccumBuffer&lt;&lt;16</tt></td></tr>
+<tr><td valign="top"><tt>QGL::NoStencilBuffer</tt></td><td align="center" valign="top"><tt>StencilBuffer&lt;&lt;16</tt></td></tr>
+<tr><td valign="top"><tt>QGL::NoStereoBuffers</tt></td><td align="center" valign="top"><tt>StereoBuffers&lt;&lt;16</tt></td></tr>
+<tr><td valign="top"><tt>QGL::IndirectRendering</tt></td><td align="center" valign="top"><tt>DirectRendering&lt;&lt;16</tt></td></tr>
+<tr><td valign="top"><tt>QGL::NoOverlay</tt></td><td align="center" valign="top"><tt>HasOverlay&lt;&lt;16</tt></td></tr>
+<tr><td valign="top"><tt>QGL::NoSampleBuffers</tt></td><td align="center" valign="top"><tt>SampleBuffers&lt;&lt;16</tt></td></tr>
+</table></p>
+<p>The FormatOptions type is a typedef for <a href="qflags.html">QFlags</a>&lt;FormatOption&gt;. It stores an OR combination of FormatOption values.</p>
+<p>See also Sample Buffers Example.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

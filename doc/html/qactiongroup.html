@@ -1,115 +1,176 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
---></style>
-</head><body bgcolor="#ffffff">
-
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-
-<h1 align=center>QActionGroup Class Reference</h1><br clear="all">
-<p>
-The QActionGroup class combines actions to a group.
-<a href="#details">More...</a>
-<p>
-<code>#include &lt;<a href="qaction-h.html">qaction.h</a>&gt;</code>
-<p>
-Inherits <a href="qaction.html">QAction</a>.
-<p><a href="qactiongroup-members.html">List of all member functions.</a>
-<h2>Public Members</h2>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: QActionGroup Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QActionGroup Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<p>The QActionGroup class groups actions together. <a href="#details">More...</a></p>
+<pre> #include &lt;QActionGroup&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
-<li><div class="fn"><a href="#05d8e0"><b>QActionGroup</b></a> ( QWidget * parent, const char * name = 0, bool exclusive = TRUE ) </div>
-<li><div class="fn"><a href="#98c340"><b>~QActionGroup</b></a> () </div>
-<li><div class="fn">void <a href="#584335"><b>setExclusive</b></a> ( bool ) </div>
-<li><div class="fn">bool <a href="#44a842"><b>isExclusive</b></a> () const</div>
-<li><div class="fn">void <a href="#2c3afa"><b>insert</b></a> ( QAction * ) </div>
+<li><a href="qactiongroup-members.html">List of all members, including inherited members</a></li>
+<li><a href="qactiongroup-qt3.html">Qt 3 support members</a></li>
 </ul>
-<h2>Signals</h2>
+<a name="properties"></a>
+<h3>Properties</h3>
 <ul>
-<li><div class="fn">void <a href="#14ea92"><b>selected</b></a> ( QAction * ) </div>
+<li><div class="fn"/><b><a href="qactiongroup.html#enabled-prop">enabled</a></b> : bool</li>
+<li><div class="fn"/><b><a href="qactiongroup.html#exclusive-prop">exclusive</a></b> : bool</li>
+<li><div class="fn"/><b><a href="qactiongroup.html#visible-prop">visible</a></b> : bool</li>
 </ul>
-<h2>Properties</h2>
-<table border=1 cellpadding=3 cellspacing=0>
-<tr><th>Type<th>Name<th>READ<th>WRITE<th>Options
-<tr><td>bool<td>exclusive<td>isExclusive<td>setExclusive<td>&nbsp;
-</table>
-<hr><h2><a name="details"></a>Detailed Description</h2>
-The QActionGroup class combines actions to a group.
-<p>
-An action group makes it easier to deal with groups of actions. It
-allows to add, remove or activate its children with a single call
-and provides radio semantics ("one of many" choice) for toggle
-actions.
-<p>QActionGroup is an action by its own and thus can be treated as
-such. Standard action functions like <a href="#113ed9">addTo</a>(), <a href="#01e8fd">removeFrom</a>() and
-<a href="#24497a">setEnabled</a>() are automatically performed on all members of the
-group, i.e. for example that adding a group to a toolbar creates a
-tool button for each child action.
-<p>Toggle action handling is controlled with the <a href="#584335">setExclusive</a>() flag,
-with the default being TRUE. An exclusive group switches off all
-toggle actions except the one that was activated. This results in a
-"one of many" choice similar to a group of radio buttons (see
-<a href="qradiobutton.html">QRadioButton</a>). An exclusive group emits the signal <a href="#14ea92">selected</a>()
-whenever the current child action changes.
-
-<hr><h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="05d8e0"></a>QActionGroup::QActionGroup ( <a href="qwidget.html">QWidget</a> * parent, const char * name = 0, bool exclusive = TRUE )</h3>
-<p>Constructs an action group with parent <em>parent</em> and name <em>name.</em>
-<p>If <em>exclusive</em> is TRUE, any toggle action that is a member of this
-group is toggled off by another action being toggled on.
-<h3 class="fn"><a name="98c340"></a>QActionGroup::~QActionGroup ()</h3>
-<p>Destroys the object and frees any allocated resources.
-<h3 class="fn">bool <a name="113ed9"></a>QActionGroup::addTo ( <a href="qwidget.html">QWidget</a> * w ) <code>[virtual]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qaction.html#780f84">QAction.</a>
-<h3 class="fn">void <a name="2c3afa"></a>QActionGroup::insert ( <a href="qaction.html">QAction</a> * action )</h3>
-<p>Inserts action <em>action</em> to the group.
-<p>It is not necessary to manually insert actions that have this action
-group as their parent object.
-<h3 class="fn">bool <a name="44a842"></a>QActionGroup::isExclusive () const</h3>
-<p>Returns TRUE if the action group is exclusive, otherwise FALSE.
-<p>See also  <a href="#584335">setExclusive</a>().
-<h3 class="fn">bool <a name="01e8fd"></a>QActionGroup::removeFrom ( <a href="qwidget.html">QWidget</a> * w ) <code>[virtual]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qaction.html#80c814">QAction.</a>
-<h3 class="fn">void <a name="14ea92"></a>QActionGroup::selected ( <a href="qaction.html">QAction</a> * ) <code>[signal]</code></h3>
-<p>This signal is emitted in exclusive groups when the current toggle
-action changes.
-<p>See also  <a href="#584335">setExclusive</a>().
-<h3 class="fn">void <a name="24497a"></a>QActionGroup::setEnabled ( bool enable ) <code>[virtual]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qaction.html#a536b2">QAction.</a>
-<h3 class="fn">void <a name="584335"></a>QActionGroup::setExclusive ( bool enable )</h3>
-<p>Sets the action group to be exclusive if <em>enable</em> is TRUE,
-or to be non-exclusive if <em>enable</em> is FALSE.
-<p>In an exclusive group, any toggle action that is a member of this
-group is toggled off by another action being toggled on.
-<p>See also  <a href="#44a842">isExclusive</a>().
-<hr><p>
-Search the documentation, FAQ, qt-interest archive and more (uses
-<a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
-<form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.10"><nobr>
-<input size="50" name="search"><input type=submit value="Search">
-</nobr></form><hr><p>
-This file is part of the <a href="index.html">Qt toolkit</a>,
-copyright &copy; 1995-2005
-<a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+<ul>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qactiongroup.html#QActionGroup">QActionGroup</a></b> ( QObject * <i>parent</i> )</li>
+<li><div class="fn"/><b><a href="qactiongroup.html#dtor.QActionGroup">~QActionGroup</a></b> ()</li>
+<li><div class="fn"/>QList&lt;QAction *&gt; <b><a href="qactiongroup.html#actions">actions</a></b> () const</li>
+<li><div class="fn"/>QAction * <b><a href="qactiongroup.html#addAction">addAction</a></b> ( QAction * <i>action</i> )</li>
+<li><div class="fn"/>QAction * <b><a href="qactiongroup.html#addAction-2">addAction</a></b> ( const QString &amp; <i>text</i> )</li>
+<li><div class="fn"/>QAction * <b><a href="qactiongroup.html#addAction-3">addAction</a></b> ( const QIcon &amp; <i>icon</i>, const QString &amp; <i>text</i> )</li>
+<li><div class="fn"/>QAction * <b><a href="qactiongroup.html#checkedAction">checkedAction</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qactiongroup.html#enabled-prop">isEnabled</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qactiongroup.html#exclusive-prop">isExclusive</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qactiongroup.html#visible-prop">isVisible</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qactiongroup.html#removeAction">removeAction</a></b> ( QAction * <i>action</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+</ul>
+<a name="public-slots"></a>
+<h3>Public Slots</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qactiongroup.html#setDisabled">setDisabled</a></b> ( bool <i>b</i> )</li>
+<li><div class="fn"/>void <b><a href="qactiongroup.html#enabled-prop">setEnabled</a></b> ( bool )</li>
+<li><div class="fn"/>void <b><a href="qactiongroup.html#exclusive-prop">setExclusive</a></b> ( bool )</li>
+<li><div class="fn"/>void <b><a href="qactiongroup.html#visible-prop">setVisible</a></b> ( bool )</li>
+</ul>
+<ul>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+</ul>
+<a name="signals"></a>
+<h3>Signals</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qactiongroup.html#hovered">hovered</a></b> ( QAction * <i>action</i> )</li>
+<li><div class="fn"/>void <b><a href="qactiongroup.html#triggered">triggered</a></b> ( QAction * <i>action</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>5 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QActionGroup class groups actions together.</p>
+<p>In some situations it is useful to group actions together. For example, if you have a <b>Left Align</b> action, a <b>Right Align</b> action, a <b>Justify</b> action, and a <b>Center</b> action, only one of these actions should be active at any one time. One simple way of achieving this is to group the actions together in an action group.</p>
+<p>Here's a example (from the Menus example):</p>
+<pre></pre>
+<p>Here we create a new action group. Since the action group is exclusive by default, only one of the actions in the group is checked at any one time.</p>
+<p align="center"><img src="images/qactiongroup-align.png" alt="Alignment options in a QMenu" /></p><p>A QActionGroup emits an <a href="qactiongroup.html#triggered">triggered</a>() signal when one of its actions is chosen. Each action in an action group emits its <a href="qactiongroup.html#triggered">triggered</a>() signal as usual.</p>
+<p>As stated above, an action group is <a href="qactiongroup.html#exclusive-prop">exclusive</a> by default; it ensures that only one checkable action is active at any one time. If you want to group checkable actions without making them exclusive, you can turn of exclusiveness by calling setExclusive(false).</p>
+<p>Actions can be added to an action group using <a href="qactiongroup.html#addAction">addAction</a>(), but it is usually more convenient to specify a group when creating actions; this ensures that actions are automatically created with a parent. Actions can be visually separated from each other by adding a separator action to the group; create an action and use <a href="qaction.html">QAction</a>'s <a href="qaction.html#setSeparator">setSeparator()</a> function to make it considered a separator. Action groups are added to widgets with the <a href="qwidget.html#addActions">QWidget::addActions</a>() function.</p>
+<p>See also <a href="qaction.html">QAction</a>.</p>
+<hr />
+<h2>Property Documentation</h2>
+<h3 class="fn"><a name="enabled-prop"></a>enabled : bool</h3>
+<p>This property holds whether the action group is enabled.</p>
+<p>Each action in the group will be enabled or disabled unless it has been explicitly disabled.</p>
+<p>Access functions:</p>
+<ul>
+<li><div class="fn"/><b>bool isEnabled () const</b></li>
+<li><div class="fn"/><b>void setEnabled ( bool )</b></li>
+</ul>
+<p>See also <a href="qaction.html#enabled-prop">QAction::setEnabled</a>().</p>
+<h3 class="fn"><a name="exclusive-prop"></a>exclusive : bool</h3>
+<p>This property holds whether the action group does exclusive checking.</p>
+<p>If exclusive is true, only one checkable action in the action group can ever be active at any time. If the user chooses another checkable action in the group, the one they chose becomes active and the one that was active becomes inactive.</p>
+<p>Access functions:</p>
+<ul>
+<li><div class="fn"/><b>bool isExclusive () const</b></li>
+<li><div class="fn"/><b>void setExclusive ( bool )</b></li>
+</ul>
+<p>See also <a href="qaction.html#checkable-prop">QAction::checkable</a>.</p>
+<h3 class="fn"><a name="visible-prop"></a>visible : bool</h3>
+<p>This property holds whether the action group is visible.</p>
+<p>Each action in the action group will match the visible state of this group unless it has been explicitly hidden.</p>
+<p>Access functions:</p>
+<ul>
+<li><div class="fn"/><b>bool isVisible () const</b></li>
+<li><div class="fn"/><b>void setVisible ( bool )</b></li>
+</ul>
+<p>See also <a href="qaction.html#enabled-prop">QAction::setEnabled</a>().</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QActionGroup"></a>QActionGroup::QActionGroup ( <a href="qobject.html">QObject</a> * <i>parent</i> )</h3>
+<p>Constructs an action group for the <i>parent</i> object.</p>
+<p>The action group is exclusive by default. Call setExclusive(false) to make the action group non-exclusive.</p>
+<h3 class="fn"><a name="dtor.QActionGroup"></a>QActionGroup::~QActionGroup ()</h3>
+<p>Destroys the action group.</p>
+<h3 class="fn"><a name="actions"></a><a href="qlist.html">QList</a>&lt;<a href="qaction.html">QAction</a> *&gt; QActionGroup::actions () const</h3>
+<p>Returns the list of this groups's actions. This may be empty.</p>
+<h3 class="fn"><a name="addAction"></a><a href="qaction.html">QAction</a> * QActionGroup::addAction ( <a href="qaction.html">QAction</a> * <i>action</i> )</h3>
+<p>Adds the <i>action</i> to this group, and returns it.</p>
+<p>Normally an action is added to a group by creating it with the group as its parent, so this function is not usually used.</p>
+<p>See also <a href="qaction.html#setActionGroup">QAction::setActionGroup</a>().</p>
+<h3 class="fn"><a name="addAction-2"></a><a href="qaction.html">QAction</a> * QActionGroup::addAction ( const <a href="qstring.html">QString</a> &amp; <i>text</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Creates and returns an action with <i>text</i>. The newly created action is a child of this action group.</p>
+<p>Normally an action is added to a group by creating it with the group as parent, so this function is not usually used.</p>
+<p>See also <a href="qaction.html#setActionGroup">QAction::setActionGroup</a>().</p>
+<h3 class="fn"><a name="addAction-3"></a><a href="qaction.html">QAction</a> * QActionGroup::addAction ( const <a href="qicon.html">QIcon</a> &amp; <i>icon</i>, const <a href="qstring.html">QString</a> &amp; <i>text</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Creates and returns an action with <i>text</i> and an <i>icon</i>. The newly created action is a child of this action group.</p>
+<p>Normally an action is added to a group by creating it with the group as its parent, so this function is not usually used.</p>
+<p>See also <a href="qaction.html#setActionGroup">QAction::setActionGroup</a>().</p>
+<h3 class="fn"><a name="checkedAction"></a><a href="qaction.html">QAction</a> * QActionGroup::checkedAction () const</h3>
+<p>Returns the currently checked action in the group, or 0 if none are checked.</p>
+<h3 class="fn"><a name="hovered"></a>void QActionGroup::hovered ( <a href="qaction.html">QAction</a> * <i>action</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted when the given <i>action</i> in the action group is highlighted by the user; for example, when the user pauses with the cursor over a menu option, toolbar button, or presses an action's shortcut key combination.</p>
+<p>See also <a href="qaction.html#activate">QAction::activate</a>().</p>
+<h3 class="fn"><a name="removeAction"></a>void QActionGroup::removeAction ( <a href="qaction.html">QAction</a> * <i>action</i> )</h3>
+<p>Removes the <i>action</i> from this group. The action will have no parent as a result.</p>
+<p>See also <a href="qaction.html#setActionGroup">QAction::setActionGroup</a>().</p>
+<h3 class="fn"><a name="setDisabled"></a>void QActionGroup::setDisabled ( bool <i>b</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>This is a convenience function for the <a href="qactiongroup.html#enabled-prop">enabled</a> property, that is useful for signals--slots connections. If <i>b</i> is true the action group is disabled; otherwise it is enabled.</p>
+<h3 class="fn"><a name="triggered"></a>void QActionGroup::triggered ( <a href="qaction.html">QAction</a> * <i>action</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted when the given <i>action</i> in the action group is activated by the user; for example, when the user clicks a menu option, toolbar button, or presses an action's shortcut key combination.</p>
+<p>Connect to this signal for command actions.</p>
+<p>See also <a href="qaction.html#activate">QAction::activate</a>().</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="add"></a>void QActionGroup::add ( <a href="qaction.html">QAction</a> * <i>a</i> )</h3>
+<p>Use <a href="qactiongroup.html#addAction">addAction</a>() instead.</p>
+<h3 class="fn"><a name="addSeparator"></a>void QActionGroup::addSeparator ()</h3>
+<p>Normally you add a separator to the menus or widgets to which actions are added, so this function is very rarely needed.</p>
+<p>For example, if you have code like</p>
+<pre><font color="#404040"> actionGroup-&gt;addSeparator();</font></pre>
+<p>you can rewrite it as</p>
+<pre> QAction *separator = new QAction(this);
+ separator-&gt;setSeparator(true);
+ actionGroup-&gt;addAction(separator);</pre>
+<h3 class="fn"><a name="addTo"></a>bool QActionGroup::addTo ( <a href="qwidget.html">QWidget</a> * <i>widget</i> )</h3>
+<p>For example, if you have code like</p>
+<pre><font color="#404040"> actionGroup-&gt;addTo(widget);</font></pre>
+<p>you can rewrite it as</p>
+<pre> widget-&gt;addActions(actionGroup-&gt;actions());</pre>
+<h3 class="fn"><a name="selected"></a>void QActionGroup::selected ( <a href="qaction.html">QAction</a> * <i>action</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>Use <a href="qactiongroup.html#triggered">triggered</a>() instead.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

@@ -1,55 +1,43 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "minesweep.h"
 #include "minefield.h"
+//#include "mineframe.h"
 
-#include <qtopia/qpeapplication.h>
-#include <qtopia/resource.h>
-#include <qtopia/config.h>
+#include <qtopiaapplication.h>
+#include <QSettings>
+
+#include <QMenu>
+#include <QScrollArea>
 
 #ifdef QTOPIA_PHONE
-#include <qtopia/contextmenu.h>
-#include <qtopia/contextbar.h>
-#include <qaction.h>
+#include <qsoftmenubar.h>
+#include <QAction>
+#include <QPushButton>
 #else
-#include <qtopia/qpetoolbar.h>
-#include <qtopia/qpemenubar.h>
-#include <qpopupmenu.h>
-#include <qlcdnumber.h>
-#include <qpushbutton.h>
+#include <QToolbar>
+#include <QMenuBar>
+#include <QLCDnumber>
+#include <QPushButton>
 #endif
 #include <qmessagebox.h>
 #ifndef QTOPIA_PHONE
@@ -59,21 +47,22 @@
 #include <qapplication.h>
 #include <qlayout.h>
 #include <qlabel.h>
+#include <qdesktopwidget.h>
 
 #include <stdlib.h>
 #include <time.h>
 
 class ResultIndicator : private QLabel
 {
-public:   
+public:
     static void showResult( QWidget *ref, bool won );
     static ResultIndicator* getInstance();
-private:    
-    ResultIndicator( QWidget *parent, const char *name, WFlags f)
-	:QLabel( parent, name, f ) {}
-    
+private:
+    ResultIndicator( QWidget *parent, Qt::WFlags f)
+        :QLabel( parent, f ) {}
+
     static ResultIndicator* pInstance;
-    
+
     void timerEvent( QTimerEvent *);
     void center();
     bool twoStage;
@@ -82,34 +71,34 @@ private:
 
 ResultIndicator* ResultIndicator::pInstance = 0;
 
-ResultIndicator* ResultIndicator::getInstance() 
+ResultIndicator* ResultIndicator::getInstance()
 {
     return ResultIndicator::pInstance;
 }
 
 void ResultIndicator::showResult( QWidget *ref, bool won )
 {
-    if (pInstance != 0) 
+    if (pInstance != 0)
         delete pInstance;
-    pInstance = new ResultIndicator( ref, 0, WStyle_Customize | WStyle_Tool | WType_TopLevel );
-    
-    pInstance->setAlignment( AlignCenter );
+    pInstance = new ResultIndicator( ref,Qt::Window | Qt::Tool );
+
+    pInstance->setAlignment( Qt::AlignCenter );
     pInstance->setFrameStyle( Sunken|StyledPanel );
     if ( won ) {
-	pInstance->setText( MineSweep::tr("You won!") );
-	pInstance->center();
-	pInstance->show();
-	pInstance->twoStage = FALSE;
-	pInstance->timerId = pInstance->startTimer(1500);
+        pInstance->setText( MineSweep::tr("You won!") );
+        pInstance->center();
+        pInstance->show();
+        pInstance->twoStage = false;
+        pInstance->timerId = pInstance->startTimer(1500);
     } else {
-	QPalette p( red );
-	pInstance->setPalette( p );
-	pInstance->setText( MineSweep::tr("You exploded!") );
-	pInstance->resize( ref->size() );
-	pInstance->move( ref->mapToGlobal(QPoint(0,0)) );
-	pInstance->show();
-	pInstance->twoStage = TRUE;
-	pInstance->timerId =pInstance->startTimer(200);
+        QPalette p( Qt::red );
+        pInstance->setPalette( p );
+        pInstance->setText( MineSweep::tr("You exploded!") );
+        pInstance->resize( ref->size() );
+        pInstance->move( ref->mapToGlobal(QPoint(0,0)) );
+        pInstance->show();
+        pInstance->twoStage = true;
+        pInstance->timerId =pInstance->startTimer(200);
     }
 }
 
@@ -117,147 +106,139 @@ void ResultIndicator::center()
 {
     QWidget *w = parentWidget();
 
-    QPoint pp = w->mapToGlobal( QPoint(0,0) ); 
-    QSize s = sizeHint()*3;
-    s.setWidth( QMIN(s.width(), w->width()) );
+    QPoint pp = w->mapToGlobal( QPoint(0,0) );
+    QSize s = sizeHint()*3.0;
+    s.setWidth( qMin(s.width(), w->width()) );
     pp = QPoint( pp.x() + w->width()/2 - s.width()/2,
-		pp.y() + w->height()/ 2 - s.height()/2 );
+                pp.y() + w->height()/ 2 - s.height()/2 );
 
     setGeometry( QRect(pp, s) );
-    
+
 }
 
 void ResultIndicator::timerEvent( QTimerEvent *te )
 {
     if ( te->timerId() != timerId )
-	return;
+        return;
     killTimer( timerId );
     if ( twoStage ) {
-	center();
-	twoStage = FALSE;
-	timerId = startTimer( 1000 );
+        center();
+        twoStage = false;
+        timerId = startTimer( 1000 );
     } else {
         pInstance = 0;
-	delete this;
+        delete this;
     }
 }
 
 
-class MineFrame : public QFrame
+MineSweep::MineSweep( QWidget* parent, Qt::WFlags f )
+: QMainWindow( parent, f )
 {
-public:
-    MineFrame( QWidget *parent, const char *name = 0 )
-	:QFrame( parent, name ), field(0) {
-	setFrameStyle(NoFrame);
-        //setBackgroundMode(NoBackground);
-    }
-    void setField( MineField *f ) {
-	field = f;
-	setMinimumSize( field->sizeHint() );
-    }
-protected:
-    void resizeEvent( QResizeEvent *e ) {
-	field->setAvailableRect( contentsRect());
-	QFrame::resizeEvent(e); 
-    }
-    
-private:
-    MineField *field;
-};
-
-
-
-MineSweep::MineSweep( QWidget* parent, const char* name, WFlags f )
-: QMainWindow( parent, name, f )
-{
-    QPEApplication::setInputMethodHint(this,QPEApplication::AlwaysOff);
+    QtopiaApplication::setInputMethodHint(this,QtopiaApplication::AlwaysOff);
     srand(::time(0));
-    setCaption( tr("Mine Hunt") );
-    setIcon( Resource::loadPixmap( "MineHunt" ) );
+    setWindowTitle( tr("Mine Hunt") );
+    setWindowIcon( QPixmap( ":image/MineHunt" ) );
 
 #ifndef QTOPIA_PHONE
-    QPEToolBar *toolBar = new QPEToolBar( this );
-    toolBar->setHorizontalStretchable( TRUE );
+    mWorriedPM = QPixmap( ":image/worried" );
+    mNewPM = QPixmap( ":image/new" );
+    mHappyPM = QPixmap( ":image/happy" );
+    mDeadPM = QPixmap( ":image/dead" );
 
-    QPEMenuBar *menuBar = new QPEMenuBar( toolBar );
+    QToolBar *toolBar = new QToolBar( this );
 
-    QPopupMenu *gameMenu = new QPopupMenu( this );
+    QMenuBar *menuBar = new QMenuBar( toolBar );
+
+    QMenu *gameMenu = new QMenu( this );
     gameMenu->insertItem( tr("Beginner"), this, SLOT( beginner() ) );
     gameMenu->insertItem( tr("Advanced"), this, SLOT( advanced() ) );
 
-    if (qApp->desktop()->width() >= 240) {
-	gameMenu->insertItem( tr("Expert"), this, SLOT( expert() ) );
+    QDesktopWidget *desktop = QApplication::desktop();
+    if (desktop->screenGeometry(desktop->primaryScreen()).width() >= 240) {
+        gameMenu->insertItem( tr("Expert"), this, SLOT( expert() ) );
     }
 
     menuBar->insertItem( tr("Game"), gameMenu );
-    
-    guessLCD = new QLCDNumber( toolBar );
-    toolBar->setStretchableWidget( guessLCD );
 
-    QPalette lcdPal( red );
+    guessLCD = new QLCDNumber( toolBar );
+    toolBar->addWidget( guessLCD );
+
+    QPalette lcdPal( Qt::red );
     lcdPal.setColor( QColorGroup::Background, QApplication::palette().active().background() );
     lcdPal.setColor( QColorGroup::Button, QApplication::palette().active().button() );
-    
+
 //    guessLCD->setPalette( lcdPal );
     guessLCD->setSegmentStyle( QLCDNumber::Flat );
     guessLCD->setFrameStyle( QFrame::NoFrame );
     guessLCD->setNumDigits( 2 );
-    guessLCD->setBackgroundMode( PaletteButton );
+    guessLCD->setBackgroundMode( Qt::PaletteButton );
     newGameButton = new QPushButton( toolBar );
     newGameButton->setPixmap( mNewPM );
-    newGameButton->setFocusPolicy(QWidget::NoFocus);
+    newGameButton->setFocusPolicy(Qt::NoFocus);
     connect( newGameButton, SIGNAL(clicked()), this, SLOT(newGame()) );
-    
+
     timeLCD = new QLCDNumber( toolBar );
 //    timeLCD->setPalette( lcdPal );
     timeLCD->setSegmentStyle( QLCDNumber::Flat );
     timeLCD->setFrameStyle( QFrame::NoFrame );
     timeLCD->setNumDigits( 5 ); // "mm:ss"
-    timeLCD->setBackgroundMode( PaletteButton );
-    
-    setToolBarsMovable ( FALSE );
+    timeLCD->setBackgroundMode( Qt::PaletteButton );
+
+    toolBar->setMovable ( false );
 
     addToolBar( toolBar );
 #endif
 
-    MineFrame *mainframe = new MineFrame( this );
 
-    field = new MineField( mainframe );
+    scroll = new QScrollArea(this);
+    setCentralWidget(scroll);
+
+    layoutHolder = new QWidget();
+    scroll->setWidget(layoutHolder);
+    layout = new QHBoxLayout();
+    field = new MineField();
+    layout->setMargin(0);
+    layout->addWidget(field);
+    layoutHolder->setLayout(layout);
+    layoutHolder->setFocusProxy(field);
+    layoutHolder->setBackgroundRole ( QPalette::Dark );
+    QSize layoutSize = layout->sizeHint();
+
+    layout->setAlignment(Qt::AlignCenter);
+//    if(!Qtopia::mousePreferred())
+        scroll->setFocusPolicy ( Qt::NoFocus );
+
+    scroll->setWidgetResizable(true);
+
+    field->setFocus();
+
 #ifdef QTOPIA_PHONE
     connect( field, SIGNAL(newGameSelected()), this, SLOT(newGame()) );
+    QSoftMenuBar::setLabel((QWidget*)field, Qt::Key_Select, QSoftMenuBar::Select, QSoftMenuBar::AnyFocus);
 #endif
-    mainframe->setField( field );
-
     QFont fnt = field->font();
-    fnt.setBold( TRUE );
+    fnt.setBold( true );
     field->setFont( QFont( fnt ) );
-    field->setFocus();
-    setCentralWidget( mainframe );
-    
+
     connect( field, SIGNAL( gameOver(bool) ), this, SLOT( gameOver(bool) ) );
     connect( field, SIGNAL( mineCount(int) ), this, SLOT( setCounter(int) ) );
     connect( field, SIGNAL( gameStarted()), this, SLOT( startPlaying() ) );
 
-#ifdef QTOPIA_PHONE
-    ContextMenu *contextMenu = new ContextMenu(field);
+    connect( field, SIGNAL( currentPointChanged(QPoint)), this, SLOT(showPoint(QPoint)));
 
-    QAction *beginnerAction = new QAction( tr( "Beginner" ), QString::null, 0, this, 0 );
-    QAction *advancedAction = new QAction( tr( "Advanced" ), QString::null, 0, this, 0 );
-    connect( beginnerAction, SIGNAL(activated()), this, SLOT(beginner()) );
-    connect( advancedAction, SIGNAL(activated()), this, SLOT(advanced()) );
-    beginnerAction->addTo( contextMenu );
-    advancedAction->addTo( contextMenu );
+#ifdef QTOPIA_PHONE
+    QMenu *contextMenu = QSoftMenuBar::menuFor(this);
+
+    contextMenu->addAction( QIcon(":image/dead"), tr( "Expert" ), this, SLOT(expert()) );
+    contextMenu->addAction( QIcon(":image/worried"), tr( "Advanced" ), this, SLOT(advanced()) );
+    contextMenu->addAction( QIcon(":image/happy") , tr( "Beginner" ), this, SLOT(beginner()) );
 #endif
 
 #ifndef QTOPIA_PHONE
     timer = new QTimer( this );
     connect( timer, SIGNAL( timeout() ), this, SLOT( updateTime() ) );
 #endif
-
-    mWorriedPM = Resource::loadPixmap( "worried" );
-    mNewPM = Resource::loadPixmap( "new" );
-    mHappyPM = Resource::loadPixmap( "happy" );
-    mDeadPM = Resource::loadPixmap( "dead" );
 
     readConfig();
 }
@@ -280,15 +261,15 @@ void MineSweep::gameOver( bool won )
     field->showMines();
     if ( won ) {
 #ifndef QTOPIA_PHONE
-	newGameButton->setPixmap( mHappyPM );
+        newGameButton->setPixmap( mHappyPM );
 #else
-	ContextBar::setLabel( field, Qt::Key_Select, "happy", QString::null );
+        //QSoftMenuBar::setLabel( field, Qt::Key_Select, "happy", QString(), QSoftMenuBar::AnyFocus); //needs 16x16 icons
 #endif
     } else {
 #ifndef QTOPIA_PHONE
-	newGameButton->setPixmap( mDeadPM );
+        newGameButton->setPixmap( mDeadPM );
 #else
-	ContextBar::setLabel( field, Qt::Key_Select, "dead", QString::null );
+//        QSoftMenuBar::setLabel((QWidget*)field, Qt::Key_Select, QSoftMenuBar::Select, QSoftMenuBar::AnyFocus); // using minesweep/dead would be better here, if we had the 16x16 icon
 #endif
     }
     ResultIndicator::showResult( this, won );
@@ -312,7 +293,9 @@ void MineSweep::newGame(int level)
     newGameButton->setPixmap( mNewPM );
     timer->stop();
 #else
-	ContextBar::setLabel( field, Qt::Key_Select, "new", QString::null );
+    // using minesweep icons would be better here, if we had the 16x16 icon
+    //QSoftMenuBar::setLabel( field, Qt::Key_Select, "minesweep/happy", QString() );
+    QSoftMenuBar::setLabel((QWidget*)field, Qt::Key_Select, QSoftMenuBar::Select, QSoftMenuBar::AnyFocus);
 #endif
 }
 
@@ -323,7 +306,7 @@ void MineSweep::startPlaying()
     starttime = QDateTime::currentDateTime();
     timer->start( 1000 );
 #else
-	ContextBar::setLabel( field, Qt::Key_Select, "worried", QString::null );
+        //QSoftMenuBar::setLabel( field, Qt::Key_Select, "minesweep/worried", QString() ); // This needs 16x16 icons
 #endif
 }
 
@@ -346,9 +329,12 @@ void MineSweep::setCounter( int c )
 {
 #ifndef QTOPIA_PHONE
     if ( !guessLCD )
-	return;
+        return;
 
     guessLCD->display( c );
+#else
+//suppress warning
+    Q_UNUSED(c);
 #endif
 }
 
@@ -356,40 +342,53 @@ void MineSweep::updateTime()
 {
 #ifndef QTOPIA_PHONE
     if ( !timeLCD )
-	return;
+        return;
 
     int s = starttime.secsTo(QDateTime::currentDateTime());
     if ( s/60 > 99 )
-	timeLCD->display( "-----" );
+        timeLCD->display( "-----" );
     else
-	timeLCD->display( QString().sprintf("%2d:%02d",s/60,s%60) );
+        timeLCD->display( QString().sprintf("%2d:%02d",s/60,s%60) );
 #endif
 }
 
 void MineSweep::writeConfig() const
 {
-    Config cfg("MineSweep");
-    cfg.setGroup("Panel");
+    QSettings cfg("Trolltech","MineSweep");
+    cfg.beginGroup("Panel");
 #ifndef QTOPIA_PHONE
-    cfg.writeEntry("Time",
-	    timer->isActive() ? starttime.secsTo(QDateTime::currentDateTime()) : -1);
+    cfg.setValue("Time",
+            timer->isActive() ? starttime.secsTo(QDateTime::currentDateTime()) : -1);
 #endif
     field->writeConfig(cfg);
 }
 
 void MineSweep::readConfig()
 {
-    Config cfg("MineSweep");
+    QSettings cfg("Trolltech","MineSweep");
     field->readConfig(cfg);
-    cfg.setGroup("Panel");
-    int s = cfg.readNumEntry("Time",-1);
+    cfg.beginGroup("Panel");
+    int s = cfg.value("Time",-1).toInt();
     if ( s<0 ) {
-	newGame();
+        newGame();
     } else {
-	startPlaying();
+        startPlaying();
 #ifndef QTOPIA_PHONE
-	starttime = QDateTime::currentDateTime().addSecs(-s);
+        starttime = QDateTime::currentDateTime().addSecs(-s);
 #endif
-	updateTime();
+        updateTime();
     }
+}
+
+void MineSweep::showPoint(QPoint point){
+    // 16/1/01:  At time of writing the qt code for this ensureVisible()
+    // is bugged, resulting in incorrect scrolling in this program.
+    // Fix has been proposed.
+    scroll->ensureVisible(point.x(), point.y());
+}
+
+void MineSweep::resizeEvent( QResizeEvent *e ) {
+    QMainWindow::resizeEvent(e);
+    QRect scrollRect=(scroll->geometry());
+    field->setAvailableRect( scrollRect);
 }

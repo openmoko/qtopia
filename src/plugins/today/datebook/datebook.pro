@@ -1,21 +1,16 @@
-CONFIG += qtopiaplugin 
+qtopia_project(qtopia plugin)
+TARGET=datebookplugin
 
-TARGET = datebookplugin
+FORMS = datebookoptionsbase.ui
+HEADERS = datebookplugin.h datebookpluginoptions.h
+SOURCES = datebookplugin.cpp datebookpluginoptions.cpp
 
-HEADERS = datebookplugin.h datebookpluginimpl.h datebookpluginoptions.h
-SOURCES = datebookplugin.cpp datebookpluginimpl.cpp datebookpluginoptions.cpp
-INTERFACES = datebookoptionsbase.ui
+depends(libraries/qtopiapim)
 
-TRANSLATABLES = $${HEADERS} $${SOURCES} $${INTERFACES}
-
-INCLUDEPATH     += ../ ../library
-DEPENDPATH      += ../ ../library
-
-CONFIG+=pimlib
-
-desktop.files=$${QTOPIA_DEPOT_PATH}/plugins/today/datebookplugin.desktop
+desktop.files=$$QTOPIA_DEPOT_PATH/plugins/today/datebookplugin.desktop
 desktop.path=/plugins/today/
-
+desktop.hint=desktop
 INSTALLS+=desktop
 
-PACKAGE_NAME	= qpe-today-datebookplugin
+pkg.name=qpe-today-datebookplugin
+pkg.domain=libs

@@ -1,37 +1,23 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "imageprocessor.h"
 
@@ -64,17 +50,16 @@ inline QRect operator/( const QRect& rect, double d )
 inline QImage scale( const QImage& image, int width, int height )
 {
 #define PRECISION 16
-   
-    QImage buffer( width, height, image.depth() );
-    buffer.setAlphaBuffer( image.hasAlphaBuffer() );
-    
+
+    QImage buffer( width, height, image.format() );
+
     if( width && height ) {
         // Calculate mapping factors
         uint factor_x = ( image.width() << PRECISION ) / width;
         uint factor_y = ( image.height() << PRECISION ) / height;
-     
-        QRgb **src = ( QRgb** )image.jumpTable();
-        QRgb **dest = ( QRgb** )buffer.jumpTable();
+
+        QRgb *src = ( QRgb* )image.bits();
+        QRgb *dest = ( QRgb* )buffer.bits();
         // For each pixel in buffer
         uint y = 0;
         for( int j = 0; j < buffer.height(); ++j ) {
@@ -83,7 +68,7 @@ inline QImage scale( const QImage& image, int width, int height )
             for( int i = 0; i < buffer.width(); ++i ) {
                 // Calculate position in image
                 // Copy pixel value from image into buffer
-                dest[ j ][ i ] = src[ yd ][ x >> PRECISION ];
+                *(dest + j*buffer.width() + i) = *(src + yd*image.width() + (x >> PRECISION));
                 x += factor_x;
             }
             y += factor_y;
@@ -93,11 +78,10 @@ inline QImage scale( const QImage& image, int width, int height )
    return buffer;
 }
 
-ImageProcessor::ImageProcessor( ImageIO* iio, QObject* parent, 
-    const char* name )
-    : QObject( parent, name ), image_io( iio ), brightness_factor( 0 ),
+ImageProcessor::ImageProcessor( ImageIO* iio, QObject* parent )
+    : QObject( parent ), image_io( iio ), brightness_factor( 0 ),
     zoom_factor( 1.0 )
-{ 
+{
     // Clear transformations when image changes in image io
     connect( image_io, SIGNAL( changed() ), this, SLOT( reset() ) );
 }
@@ -106,7 +90,7 @@ void ImageProcessor::crop( const QRect& rect )
 {
     // Crop image to area within rect
     viewport = unmap( rect ).intersect( viewport );
-    
+
     // Notify of change to image
     emit changed();
 }
@@ -117,7 +101,7 @@ QPoint ImageProcessor::map( const QPoint& point ) const
     // Apply transformations to point
     p = transformation_matrix.map( p );
     // Calculate displacement to make transformed image positive
-    QRect space( transformation_matrix.map( viewport ).normalize() );
+    QRect space( transformation_matrix.map( viewport ).normalized() );
     // Apply displacement to point
     // Scale point by zoom factor
     p.setX( (int)floor( ( p.x() - space.x() ) * zoom_factor ) );
@@ -128,10 +112,10 @@ QPoint ImageProcessor::map( const QPoint& point ) const
 QPoint ImageProcessor::unmap( const QPoint& point ) const
 {
     // Sacle point by inverse of zoom factor
-    QPoint p( (int)ceil( point.x() / zoom_factor ), 
+    QPoint p( (int)ceil( point.x() / zoom_factor ),
         (int)ceil( point.y() / zoom_factor ) );
     // Calculate displacement to make transformed image positive
-    QRect space( transformation_matrix.map( viewport ).normalize() );
+    QRect space( transformation_matrix.map( viewport ).normalized() );
     // Reverse displacement of point
     p.setX( p.x() + space.x() );
     p.setY( p.y() + space.y() );
@@ -144,21 +128,32 @@ const QPixmap& ImageProcessor::preview( const QRect& rect ) const
     // Reverse transformations to rect
     // Limit area to within viewport
     QRect area( unmap( rect ).intersect( viewport ) );
-    
+
     // Retrive sample from image io
     QImage sample = image_io->image( area, image_io->level( zoom_factor ) );
+    if ( sample.isNull() ) {
+        _preview = QPixmap();
+    } else {
 
-    // Apply transformations to image
-    sample = transform( sample, sample.rect() );
-    
-    // Scale up
-    area = map( area );
-    return _preview = scale( sample, area.width(), area.height() );
+        // Apply transformations to image
+        sample = transform( sample, sample.rect() );
+        // Scale up
+        area = map( area );
+
+        _preview = QPixmap::fromImage( scale( sample, area.width(), area.height() ) );
+    }
+
+    return _preview;
 }
 
 QImage ImageProcessor::image() const
 {
-    return transform( image_io->image(), viewport );
+    QImage img = image_io->image();
+    if ( img.isNull() ) {
+        return img;
+    } else {
+        return transform( image_io->image(), viewport );
+    }
 }
 
 QImage ImageProcessor::image( const QSize& target ) const
@@ -166,27 +161,27 @@ QImage ImageProcessor::image( const QSize& target ) const
 #define REDUCTION_RATIO( dw, dh, sw, sh ) \
     ( (dw)*(sh) > (dh)*(sw) ? (double)(dh)/(double)(sh) : \
     (double)(dw)/(double)(sw) )
-    
+
     // Determine reduction ratio for tranformed image
-    QSize transformed( transformation_matrix.map( viewport ).normalize().
+    QSize transformed( transformation_matrix.map( viewport ).normalized().
         size() );
     double reduction_ratio = REDUCTION_RATIO( target.width(), target.height(),
         transformed.width(), transformed.height() );
     // Determine image level closest to reduction ratio
     int closest_level = image_io->level( reduction_ratio );
-    
+
     // Reduce viewport by the factor of the closest level
     double level_factor = image_io->factor( closest_level );
     QRect reduced_viewport( viewport.topLeft() * level_factor,
         viewport.bottomRight() * level_factor );
-    
+
     // Retrive image at closest level and apply transformations
     QImage sample( transform( image_io->image( closest_level ),
         reduced_viewport ) );
-        
+
     // Scale image up to size
     double scale_factor = reduction_ratio / level_factor;
-    return sample.smoothScale( (int)( sample.width() * scale_factor ), 
+    return sample.scaled( (int)( sample.width() * scale_factor ),
         (int)( sample.height() * scale_factor ) );
 }
 
@@ -195,8 +190,8 @@ QSize ImageProcessor::size() const
     int width, height;
     transformation_matrix.map( viewport.width(), viewport.height(),
         &width, &height );
-    return QSize( QABS( (int)( width * zoom_factor ) ), 
-        QABS( (int)( height * zoom_factor ) ) );
+    return QSize( qAbs( (int)( width * zoom_factor ) ),
+        qAbs( (int)( height * zoom_factor ) ) );
 }
 
 bool ImageProcessor::isChanged() const
@@ -209,7 +204,7 @@ void ImageProcessor::setZoom( double factor )
 {
     // Set zoom factor
     zoom_factor = factor;
-    
+
     // Notify of change to image
     emit changed();
 }
@@ -218,7 +213,7 @@ void ImageProcessor::setBrightness( double factor )
 {
     // Set brightness factor
     brightness_factor = factor;
-    
+
     // Notify of change to image
     emit changed();
 }
@@ -247,11 +242,11 @@ void ImageProcessor::reset()
 QRect ImageProcessor::map( const QRect& rect ) const
 {
     // Apply transformations to rect
-    QRect r( transformation_matrix.map( rect ).normalize() );
+    QRect r( transformation_matrix.map( rect ).normalized() );
     // Calculate displacement to make transformed image positive
-    QRect space( transformation_matrix.map( viewport ).normalize() );
+    QRect space( transformation_matrix.map( viewport ).normalized() );
     // Apply displacement to rect
-    r.moveBy( -space.x(), -space.y() );
+    r.translate( -space.x(), -space.y() );
     // Scale rect by zoom factor
     return r * zoom_factor;
 }
@@ -261,11 +256,11 @@ QRect ImageProcessor::unmap( const QRect& rect ) const
     // Sacle rect by inverse of zoom factor
     QRect r( rect / zoom_factor );
     // Calculate displacement to make transformed image positive
-    QRect space( transformation_matrix.map( viewport ).normalize() );
+    QRect space( transformation_matrix.map( viewport ).normalized() );
     // Reverse displacement of rect
-    r.moveBy( space.x(), space.y() );
+    r.translate( space.x(), space.y() );
     // Apply the inverse transformations to rect
-    return transformation_matrix.inverse().map( r ).normalize();
+    return transformation_matrix.inverse().map( r ).normalized();
 }
 
 QImage ImageProcessor::transform( const QImage& image, const QRect& area ) const
@@ -275,19 +270,18 @@ QImage ImageProcessor::transform( const QImage& image, const QRect& area ) const
 
     // Determine size of final image
     // Calculate displacement to make transformed image positive
-    QRect space( transformation_matrix.map( area ).normalize() );
-    
+    QRect space( transformation_matrix.map( area ).normalized() );
+
     // Construct image buffer
-    QImage buffer( space.width(), space.height(), image.depth() );
-    buffer.setAlphaBuffer( image.hasAlphaBuffer() );
-        
+    QImage buffer( space.width(), space.height(), image.format() );
+
     int brightness = (int)( RGB_MAX * brightness_factor );
     // For each pixel in area
-    QRgb **src = ( QRgb** )image.jumpTable();
-    QRgb **dest = ( QRgb** )buffer.jumpTable();
-    int bottom = QMIN( area.bottom() + 1, image.height() );
-    int right = QMIN( area.right() + 1, image.width() );
-    
+    QRgb *src = ( QRgb* )image.bits();
+    QRgb *dest = ( QRgb* )buffer.bits();
+    int bottom = qMin( area.bottom() + 1, image.height() );
+    int right = qMin( area.right() + 1, image.width() );
+
     // xd = a*x + c*y + dx
     // yd = b*x + d*y + dy
     int cx = area.left() * transformation_matrix.a() + area.top() * transformation_matrix.c() - space.x();
@@ -298,12 +292,12 @@ QImage ImageProcessor::transform( const QImage& image, const QRect& area ) const
         for( int i = area.left(); i < right; ++i ) {
             // Determine location of pixel after transformations applied
             // Apply transfromations and store in image buffer
-            QRgb pixel = src[ j ][ i ];
+            QRgb pixel = *(src + j*image.width() + i);
             int r = qRed( pixel ) + brightness;
-            int g = qGreen( pixel ) + brightness; 
+            int g = qGreen( pixel ) + brightness;
             int b = qBlue( pixel ) + brightness;
-            dest[ y ][ x ] = ( pixel & 0xff000000 ) | 
-                ( LIMIT( r, RGB_MIN, RGB_MAX ) << 16 ) | 
+            *(dest + y*buffer.width() + x) = ( pixel & 0xff000000 ) |
+                ( LIMIT( r, RGB_MIN, RGB_MAX ) << 16 ) |
                 ( LIMIT( g, RGB_MIN, RGB_MAX ) << 8 ) |
                 LIMIT( b, RGB_MIN, RGB_MAX );
             x += transformation_matrix.a();
@@ -312,6 +306,6 @@ QImage ImageProcessor::transform( const QImage& image, const QRect& area ) const
         cx += transformation_matrix.c();
         cy += transformation_matrix.d();
     }
-    
+
     return buffer;
 }

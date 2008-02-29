@@ -1,41 +1,66 @@
-CONFIG		+= qtopiaapp
-HEADERS		= mainwindow.h \
-		    thumbbutton.h \
-		    videocaptureview.h
-SOURCES		= mainwindow.cpp\
-		    videocaptureview.cpp \
-		    main.cpp
+qtopia_project(qtopia app)
+TARGET=camera
+CONFIG+=qtopia_main
 
-TARGET		= camera
+FORMS=camerabase.ui camerasettings.ui
 
-TRANSLATABLES   =   $$HEADERS \
-                    $$SOURCES \
-                    camerabase.ui \
-                    camerasettings.ui \
+HEADERS = mainwindow.h \
+          thumbbutton.h \
+          videocaptureview.h \
+          videocapturedevice.h \
+          videocapturedevicefactory.h \
+          formatconverter.h \
+          bayerconverter.h \
+          phototimer.h
 
+SOURCES = mainwindow.cpp \
+          videocaptureview.cpp \
+          formatconverter.cpp \
+          bayerconverter.cpp \
+          main.cpp \
+          phototimer.cpp
 
-i18n.path=$${INSTALL_PREFIX}/i18n
-i18n.commands=$${COMMAND_HEADER}\
-    [ -z "$$TRANSLATIONS" ] || for lang in $$TRANSLATIONS; do \
-	for pkg in Categories-camera; do \
-	    $${DQTDIR}/bin/lrelease $${QTOPIA_DEPOT_PATH}/i18n/\$$lang/\$$pkg.ts \
-		-qm $(INSTALL_ROOT)/i18n/\$$lang/\$$pkg.qm; \
-	done; \
-    done
-desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Applications/camera.desktop
+!isEmpty(DEVICE_CONFIG_PATH) {
+    DEVICE_HEADERS=$$files($$DEVICE_CONFIG_PATH/camera/*.h)
+    DEVICE_SOURCES=$$files($$DEVICE_CONFIG_PATH/camera/*.cpp)
+}
+
+!isEmpty(DEVICE_SOURCES) {
+    HEADERS+=$$DEVICE_HEADERS
+    SOURCES+=$$DEVICE_SOURCES
+} else {
+    HEADERS+=\
+            dummyvideocapturedevice.h \
+            v4l1videocapturedevice.h \
+            v4l2videocapturedevice.h \
+            nodevice.h
+    SOURCES+=\
+            videocapturedevicefactory.cpp \
+            dummyvideocapturedevice.cpp \
+            v4l1videocapturedevice.cpp \
+            v4l2videocapturedevice.cpp
+}
+
+desktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/camera.desktop
 desktop.path=/apps/Applications
-
-help.files=$${QTOPIA_DEPOT_PATH}/help/html/camera*
-help.path=/help/html/
-
-pics.files=$${QTOPIA_DEPOT_PATH}/pics/camera/*
+desktop.hint=desktop
+help.source=$$QTOPIA_DEPOT_PATH/help
+help.files=camera*
+help.hint=help
+pics.files=$$QTOPIA_DEPOT_PATH/pics/camera/*
 pics.path=/pics/camera
-service.files=$${QTOPIA_DEPOT_PATH}/services/GetValue/image/camera
-service.path=/services/GetValue/image
-INSTALLS+=desktop service help
-PICS_INSTALLS+=pics
-!isEmpty(DQTDIR):INSTALLS+=i18n
+pics.hint=pics
+service.files=$$QTOPIA_DEPOT_PATH/services/Camera/camera
+service.path=/services/Camera
+qdsservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/Camera
+qdsservice.path=/etc/qds
+INSTALLS+=desktop help pics service qdsservice
 
-INTERFACES=camerabase.ui camerasettings.ui
+# the server does this for us
+#categories.files=$$QTOPIA_DEPOT_PATH/etc/categories/camera.conf
+#categories.trtarget=QtopiaCategories
+#categories.hint=nct
+#INSTALLS+=categories
 
-PACKAGE_DESCRIPTION=A bogo-camera to fill a hole in the phone launcher.
+pkg.desc=Camera
+pkg.domain=window,msg,pim,qds,cardreader,pictures,launcher,docapi{video/*:image/*},camera

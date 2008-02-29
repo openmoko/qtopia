@@ -1,39 +1,46 @@
-<qt title="Messaging Contacts">
-<h3>Messaging Contacts</h3>
-<p>Messages can be created and addressed quickly from Contacts.</p>
+<html>
+<head><title>Messaging Contacts</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h2>Messaging Contacts</h3>
+<!--#else -->
+   <h3>Messaging Contacts</h3>
+<!--#endif -->
+<p>Messages can be created and addressed quickly from <b>Contacts</b>.</p>
 <p><b>To Create and Address a Message:</b></p>
 <ul>
 <li>View the contact you want to message. (See <a href="addressbook-viewing.html">Viewing Contacts</a>)</li>
-<li>Select the 
-%%PHONE%%
-mobile phone(<img src="addressbook/homemessage">,<img src="addressbook/businessmessage">) or
-@@PHONE@@
-email address (<img height="16" width="16" src="qtmail/EMail.png">) to message by
-%%PHONE%%
-%%KEYPAD%%
-highlighting it and pressing <img src="contextbar/select.png">
-@@KEYPAD@@
-%%TOUCH%%
-pressing it
-@@TOUCH@@
-@@PHONE@@
-%%PDA%%
-tapping it
-@@PDA@@
+<li>Select the
+<!--#if expr="$PHONESTYLE"-->
+mobile phone(<img src=":icon/addressbook/homemessage">,<img src=":icon/addressbook/businessmessage">) or
+<!--#endif-->
+email address (<img height="16" width="16" src=":image/qtmail/EMail">) to message by
+<!--#if expr="$PHONESTYLE"-->
+<!--#if expr="$KEYPAD"-->
+highlighting it and pressing <img src=":icon/select">.
+<!--#endif-->
+<!--#if expr="$TOUCH"-->
+pressing it.
+<!--#endif-->
+<!--#endif-->
+<!--#if expr="$PDASTYLE"-->
+tapping it.
+<!--#endif-->
 .</li>
-%%PHONE%%
-<li>When sending to a mobile phone you must select the message type ie. SMS<img src="txt"> or MMS<img src="multimedia">.</li>
-@@PHONE@@
+<!--#if expr="$PHONESTYLE"-->
+<li>When sending to a mobile phone you must select the message type ie. SMS <img src=":icon/txt"> </img> or MMS <img src=":icon/multimedia">.</li>
+<!--#endif-->
 <li>Complete and send the message.</li>
 </ul>
-<p><i>This command can only be used with contacts that have 
-%%PHONE%%
+<p><i>This command can only be used with contacts that have
+<!--#if expr="$PHONESTYLE"-->
 a mobile phone or
-@@PHONE@@
+<!--#endif-->
 an email address.</i></p>
-<p>See Also: 
-%%PHONE%%
+<p>See Also:
+<!--#if expr="$PHONESTYLE"-->
 <br>
-@@PHONE@@
+<!--#endif-->
 <a href="qtmail-write-mail.html">Creating Messages</a></p>
-</qt>
+</body>
+</html>

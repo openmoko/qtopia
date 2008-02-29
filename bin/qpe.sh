@@ -5,9 +5,11 @@
 # Instead of using a script like this, you may instead set
 # the defaults for these variables in the file:
 #
-#    src/libraries/qtopia/custom-<platform>.h
+#    src/libraries/qtopiabase/custom-<platform>.h
 #
 # for your platform.
+
+QTOPIA_INSTALL_PREFIX=/opt/Qtopia # set to the -prefix location at install time
 
 cmd=$0
 speed=""
@@ -36,4 +38,4 @@ then
     export QTOPIA_PHONE_DEVICE="$QTOPIA_PHONE_DEVICE:$speed"
 fi
 
-$QPEDIR/bin/qpe
+$QTOPIA_INSTALL_PREFIX/bin/qpe

@@ -4,6 +4,6 @@ Context=Tasks
 [Desktop Entry]
 Comment[]=A Todo List Program
 Exec=todolist
-Icon=TodoList
+Icon=todolist/TodoList
 Type=Application
 Name[]=Tasks

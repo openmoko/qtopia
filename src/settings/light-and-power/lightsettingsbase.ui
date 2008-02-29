@@ -1,604 +1,375 @@
-<!DOCTYPE UI><UI>
-<class>LightSettingsBase</class>
-<widget>
-    <class>QWidget</class>
-    <property stdset="1">
-        <name>name</name>
-        <cstring>LightSettingsBase</cstring>
-    </property>
-    <property stdset="1">
-        <name>geometry</name>
-        <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>239</width>
-            <height>428</height>
-        </rect>
-    </property>
-    <property stdset="1">
-        <name>caption</name>
-        <string>Power Management</string>
-    </property>
-    <property>
-        <name>layoutMargin</name>
-    </property>
-    <property>
-        <name>layoutSpacing</name>
-    </property>
-    <vbox>
-        <property stdset="1">
-            <name>margin</name>
-            <number>6</number>
+<ui version="4.0" >
+ <author></author>
+ <comment></comment>
+ <exportmacro></exportmacro>
+ <class>LightSettingsBase</class>
+ <widget class="QWidget" name="LightSettingsBase" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>423</width>
+    <height>461</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Power Management</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <property name="margin" >
+    <number>4</number>
+   </property>
+   <property name="spacing" >
+    <number>3</number>
+   </property>
+   <item>
+    <widget class="QGroupBox" name="powerSourceGroupBox" >
+     <property name="sizePolicy" >
+      <sizepolicy>
+       <hsizetype>5</hsizetype>
+       <vsizetype>0</vsizetype>
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title" >
+      <string>Power source</string>
+     </property>
+     <layout class="QHBoxLayout" >
+      <property name="margin" >
+       <number>4</number>
+      </property>
+      <property name="spacing" >
+       <number>2</number>
+      </property>
+      <item>
+       <widget class="QRadioButton" name="batteryButton" >
+        <property name="text" >
+         <string>Battery</string>
         </property>
-        <property stdset="1">
-            <name>spacing</name>
-            <number>3</number>
+        <property name="checked" >
+         <bool>true</bool>
         </property>
-        <widget>
-            <class>QCheckBox</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>auto_brightness</cstring>
-            </property>
-            <property stdset="1">
-                <name>text</name>
-                <string>Adjust to environment</string>
-            </property>
-            <property>
-                <name>whatsThis</name>
-                <string>By sensing the ambient light where you are using your device, the screen light can be adjusted automatically. The brightness setting still affects the average brightness.</string>
-            </property>
-        </widget>
-        <widget>
-            <class>QButtonGroup</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>powerSource</cstring>
-            </property>
-            <property stdset="1">
-                <name>frameShape</name>
-                <enum>Box</enum>
-            </property>
-            <property stdset="1">
-                <name>frameShadow</name>
-                <enum>Sunken</enum>
-            </property>
-            <property stdset="1">
-                <name>title</name>
-                <string>On power source</string>
-            </property>
-            <property stdset="1">
-                <name>exclusive</name>
-                <bool>true</bool>
-            </property>
-            <property>
-                <name>layoutMargin</name>
-            </property>
-            <property>
-                <name>layoutSpacing</name>
-            </property>
-            <hbox>
-                <property stdset="1">
-                    <name>margin</name>
-                    <number>6</number>
-                </property>
-                <property stdset="1">
-                    <name>spacing</name>
-                    <number>2</number>
-                </property>
-                <widget>
-                    <class>QRadioButton</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>batteryButton</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Battery</string>
-                    </property>
-                    <property stdset="1">
-                        <name>checked</name>
-                        <bool>true</bool>
-                    </property>
-                </widget>
-                <widget>
-                    <class>QRadioButton</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>externalButton</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>External</string>
-                    </property>
-                </widget>
-            </hbox>
-        </widget>
-        <widget>
-            <class>QGroupBox</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>GroupBox3</cstring>
-            </property>
-            <property stdset="1">
-                <name>frameShape</name>
-                <enum>Box</enum>
-            </property>
-            <property stdset="1">
-                <name>frameShadow</name>
-                <enum>Sunken</enum>
-            </property>
-            <property stdset="1">
-                <name>title</name>
-                <string>Power saving</string>
-            </property>
-            <property>
-                <name>layoutMargin</name>
-            </property>
-            <property>
-                <name>layoutSpacing</name>
-            </property>
-            <grid>
-                <property stdset="1">
-                    <name>margin</name>
-                    <number>11</number>
-                </property>
-                <property stdset="1">
-                    <name>spacing</name>
-                    <number>6</number>
-                </property>
-                <spacer row="0"  column="0" >
-                    <property>
-                        <name>name</name>
-                        <cstring>Spacer6</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>orientation</name>
-                        <enum>Horizontal</enum>
-                    </property>
-                    <property stdset="1">
-                        <name>sizeType</name>
-                        <enum>Expanding</enum>
-                    </property>
-                    <property>
-                        <name>sizeHint</name>
-                        <size>
-                            <width>20</width>
-                            <height>20</height>
-                        </size>
-                    </property>
-                </spacer>
-                <widget row="0"  column="0" >
-                    <class>QCheckBox</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>screensaver_dim</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>sizePolicy</name>
-                        <sizepolicy>
-                            <hsizetype>1</hsizetype>
-                            <vsizetype>0</vsizetype>
-                        </sizepolicy>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Dim light</string>
-                    </property>
-                    <property stdset="1">
-                        <name>checked</name>
-                        <bool>true</bool>
-                    </property>
-                </widget>
-                <widget row="4"  column="0"  rowspan="1"  colspan="3" >
-                    <class>QCheckBox</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>notnetworkedsuspend</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Disable suspend while online</string>
-                    </property>
-                </widget>
-                <widget row="1"  column="0" >
-                    <class>QCheckBox</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>screensaver_lightoff</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>sizePolicy</name>
-                        <sizepolicy>
-                            <hsizetype>1</hsizetype>
-                            <vsizetype>0</vsizetype>
-                        </sizepolicy>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Light off</string>
-                    </property>
-                    <property stdset="1">
-                        <name>checked</name>
-                        <bool>true</bool>
-                    </property>
-                </widget>
-                <widget row="1"  column="2" >
-                    <class>QLabel</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>TextLabel2</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>seconds</string>
-                    </property>
-                </widget>
-                <widget row="0"  column="2" >
-                    <class>QLabel</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>TextLabel1</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>seconds</string>
-                    </property>
-                </widget>
-                <widget row="2"  column="2" >
-                    <class>QLabel</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>TextLabel3</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>seconds</string>
-                    </property>
-                </widget>
-                <widget row="2"  column="1" >
-                    <class>QSpinBox</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>interval_suspend</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>sizePolicy</name>
-                        <sizepolicy>
-                            <hsizetype>5</hsizetype>
-                            <vsizetype>0</vsizetype>
-                        </sizepolicy>
-                    </property>
-                    <property stdset="1">
-                        <name>buttonSymbols</name>
-                        <enum>UpDownArrows</enum>
-                    </property>
-                    <property stdset="1">
-                        <name>maxValue</name>
-                        <number>3600</number>
-                    </property>
-                    <property stdset="1">
-                        <name>minValue</name>
-                        <number>10</number>
-                    </property>
-                    <property stdset="1">
-                        <name>lineStep</name>
-                        <number>15</number>
-                    </property>
-                </widget>
-                <widget row="1"  column="1" >
-                    <class>QSpinBox</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>interval_lightoff</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>sizePolicy</name>
-                        <sizepolicy>
-                            <hsizetype>5</hsizetype>
-                            <vsizetype>0</vsizetype>
-                        </sizepolicy>
-                    </property>
-                    <property stdset="1">
-                        <name>buttonSymbols</name>
-                        <enum>UpDownArrows</enum>
-                    </property>
-                    <property stdset="1">
-                        <name>maxValue</name>
-                        <number>3600</number>
-                    </property>
-                    <property stdset="1">
-                        <name>minValue</name>
-                        <number>10</number>
-                    </property>
-                    <property stdset="1">
-                        <name>lineStep</name>
-                        <number>15</number>
-                    </property>
-                </widget>
-                <widget row="0"  column="1" >
-                    <class>QSpinBox</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>interval_dim</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>sizePolicy</name>
-                        <sizepolicy>
-                            <hsizetype>5</hsizetype>
-                            <vsizetype>0</vsizetype>
-                        </sizepolicy>
-                    </property>
-                    <property stdset="1">
-                        <name>buttonSymbols</name>
-                        <enum>UpDownArrows</enum>
-                    </property>
-                    <property stdset="1">
-                        <name>maxValue</name>
-                        <number>3600</number>
-                    </property>
-                    <property stdset="1">
-                        <name>minValue</name>
-                        <number>10</number>
-                    </property>
-                    <property stdset="1">
-                        <name>lineStep</name>
-                        <number>15</number>
-                    </property>
-                </widget>
-                <widget row="2"  column="0" >
-                    <class>QCheckBox</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>screensaver_suspend</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>enabled</name>
-                        <bool>false</bool>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Suspend</string>
-                    </property>
-                    <property stdset="1">
-                        <name>checked</name>
-                        <bool>true</bool>
-                    </property>
-                </widget>
-            </grid>
-        </widget>
-        <widget>
-            <class>QSlider</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>brightness</cstring>
-            </property>
-            <property stdset="1">
-                <name>maxValue</name>
-                <number>255</number>
-            </property>
-            <property stdset="1">
-                <name>lineStep</name>
-                <number>16</number>
-            </property>
-            <property stdset="1">
-                <name>pageStep</name>
-                <number>16</number>
-            </property>
-            <property stdset="1">
-                <name>orientation</name>
-                <enum>Horizontal</enum>
-            </property>
-            <property stdset="1">
-                <name>tickmarks</name>
-                <enum>Right</enum>
-            </property>
-            <property stdset="1">
-                <name>tickInterval</name>
-                <number>32</number>
-            </property>
-        </widget>
-        <widget>
-            <class>QLayoutWidget</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>Layout5</cstring>
-            </property>
-            <hbox>
-                <property stdset="1">
-                    <name>margin</name>
-                    <number>0</number>
-                </property>
-                <property stdset="1">
-                    <name>spacing</name>
-                    <number>6</number>
-                </property>
-                <widget>
-                    <class>QLabel</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>officon</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>pixmap</name>
-                        <pixmap>image0</pixmap>
-                    </property>
-                    <property stdset="1">
-                        <name>scaledContents</name>
-                        <bool>false</bool>
-                    </property>
-                </widget>
-                <widget>
-                    <class>QLabel</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>offlabel</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Off</string>
-                    </property>
-                    <property stdset="1">
-                        <name>alignment</name>
-                        <set>AlignVCenter|AlignLeft</set>
-                    </property>
-                    <property>
-                        <name>vAlign</name>
-                    </property>
-                </widget>
-                <spacer>
-                    <property>
-                        <name>name</name>
-                        <cstring>Spacer3</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>orientation</name>
-                        <enum>Horizontal</enum>
-                    </property>
-                    <property stdset="1">
-                        <name>sizeType</name>
-                        <enum>Expanding</enum>
-                    </property>
-                    <property>
-                        <name>sizeHint</name>
-                        <size>
-                            <width>20</width>
-                            <height>20</height>
-                        </size>
-                    </property>
-                </spacer>
-                <widget>
-                    <class>QLabel</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>brightlabel</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Bright</string>
-                    </property>
-                </widget>
-                <widget>
-                    <class>QLabel</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>brighticon</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>pixmap</name>
-                        <pixmap>image1</pixmap>
-                    </property>
-                    <property stdset="1">
-                        <name>scaledContents</name>
-                        <bool>false</bool>
-                    </property>
-                </widget>
-            </hbox>
-        </widget>
-        <widget>
-            <class>QLabel</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>biginfo</cstring>
-            </property>
-            <property stdset="1">
-                <name>sizePolicy</name>
-                <sizepolicy>
-                    <hsizetype>5</hsizetype>
-                    <vsizetype>7</vsizetype>
-                </sizepolicy>
-            </property>
-            <property stdset="1">
-                <name>text</name>
-                <string>The brighter the screen light, the more battery power is used.</string>
-            </property>
-            <property stdset="1">
-                <name>alignment</name>
-                <set>WordBreak|AlignCenter</set>
-            </property>
-            <property>
-                <name>hAlign</name>
-            </property>
-            <property>
-                <name>wordwrap</name>
-            </property>
-        </widget>
-        <spacer>
-            <property>
-                <name>name</name>
-                <cstring>Spacer2</cstring>
-            </property>
-            <property stdset="1">
-                <name>orientation</name>
-                <enum>Vertical</enum>
-            </property>
-            <property stdset="1">
-                <name>sizeType</name>
-                <enum>Expanding</enum>
-            </property>
-            <property>
-                <name>sizeHint</name>
-                <size>
-                    <width>20</width>
-                    <height>20</height>
-                </size>
-            </property>
-        </spacer>
-    </vbox>
-</widget>
-<images>
-    <image>
-        <name>image0</name>
-        <data format="XPM.GZ" length="424">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade6523234530022130543251d2e253d856405bffcbc54105b19c856360003103711c4354b344b314b04719340dcb434b31488ac1e1a2020a6acac8c2ea60cc54862606ea232b218541b5810452c3111432c510f550c22886a1e482c115d0c2c88e6168818babaa4a42462c48082cae8e68102011a06b5d65c0041d3518e</data>
-    </image>
-    <image>
-        <name>image1</name>
-        <data format="XPM.GZ" length="439">789c6d8ec10ac2300c86ef7b8ad0ff36a4730777111f41f1288887b4b3e8610a3a0f22bebb6dd3d54d0ca5cdffe54f9aaaa4dd764d6555dc7beecf96ec896f54b68fae7bee0fab57a1ea86fc5950ad6685d2646973bd1c43ce3ec73c46903648e79a5624443a27d20cd2b9382704747e124382f11a7c5e30b364b957b331866331b3800c38f70282121c7c628367c098c1e0eb03121ccd4b46fcb0f80b26bb4833987f76b6d6f274de5fe6a1a031d30969f55e161fe4715f7b</data>
-    </image>
-</images>
-<connections>
-    <connection>
-        <sender>screensaver_dim</sender>
-        <signal>toggled(bool)</signal>
-        <receiver>interval_dim</receiver>
-        <slot>setEnabled(bool)</slot>
-    </connection>
-    <connection>
-        <sender>screensaver_lightoff</sender>
-        <signal>toggled(bool)</signal>
-        <receiver>interval_lightoff</receiver>
-        <slot>setEnabled(bool)</slot>
-    </connection>
-    <connection>
-        <sender>externalButton</sender>
-        <signal>toggled(bool)</signal>
-        <receiver>screensaver_suspend</receiver>
-        <slot>setEnabled(bool)</slot>
-    </connection>
-    <connection>
-        <sender>screensaver_suspend</sender>
-        <signal>toggled(bool)</signal>
-        <receiver>interval_suspend</receiver>
-        <slot>setEnabled(bool)</slot>
-    </connection>
-    <connection>
-        <sender>screensaver_suspend</sender>
-        <signal>toggled(bool)</signal>
-        <receiver>notnetworkedsuspend</receiver>
-        <slot>setEnabled(bool)</slot>
-    </connection>
-</connections>
-<tabstops>
-    <tabstop>batteryButton</tabstop>
-    <tabstop>externalButton</tabstop>
-    <tabstop>screensaver_dim</tabstop>
-    <tabstop>interval_dim</tabstop>
-    <tabstop>screensaver_lightoff</tabstop>
-    <tabstop>interval_lightoff</tabstop>
-    <tabstop>screensaver_suspend</tabstop>
-    <tabstop>interval_suspend</tabstop>
-    <tabstop>notnetworkedsuspend</tabstop>
-    <tabstop>brightness</tabstop>
-    <tabstop>auto_brightness</tabstop>
-</tabstops>
-</UI>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="externalButton" >
+        <property name="text" >
+         <string>External</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="GroupBox3" >
+     <property name="sizePolicy" >
+      <sizepolicy>
+       <hsizetype>5</hsizetype>
+       <vsizetype>0</vsizetype>
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title" >
+      <string>Power saving</string>
+     </property>
+     <layout class="QGridLayout" >
+      <property name="margin" >
+       <number>4</number>
+      </property>
+      <property name="spacing" >
+       <number>3</number>
+      </property>
+      <item row="0" column="0" >
+       <spacer>
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" >
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="0" >
+       <widget class="QCheckBox" name="screensaver_dim" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>1</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text" >
+         <string>Dim light</string>
+        </property>
+        <property name="checked" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" >
+       <widget class="QCheckBox" name="screensaver_lightoff" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>1</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text" >
+         <string>Display off</string>
+        </property>
+        <property name="checked" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" >
+       <widget class="QSpinBox" name="interval_suspend" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>5</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="buttonSymbols" >
+         <enum>QAbstractSpinBox::UpDownArrows</enum>
+        </property>
+        <property name="suffix" >
+         <string comment="seconds" >s</string>
+        </property>
+        <property name="maximum" >
+         <number>3600</number>
+        </property>
+        <property name="minimum" >
+         <number>10</number>
+        </property>
+        <property name="singleStep" >
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1" >
+       <widget class="QSpinBox" name="interval_lightoff" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>5</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="buttonSymbols" >
+         <enum>QAbstractSpinBox::UpDownArrows</enum>
+        </property>
+        <property name="suffix" >
+         <string comment="seconds" >s</string>
+        </property>
+        <property name="maximum" >
+         <number>3600</number>
+        </property>
+        <property name="minimum" >
+         <number>10</number>
+        </property>
+        <property name="singleStep" >
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1" >
+       <widget class="QSpinBox" name="interval_dim" >
+        <property name="sizePolicy" >
+         <sizepolicy>
+          <hsizetype>5</hsizetype>
+          <vsizetype>0</vsizetype>
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="buttonSymbols" >
+         <enum>QAbstractSpinBox::UpDownArrows</enum>
+        </property>
+        <property name="suffix" >
+         <string comment="seconds" >s</string>
+        </property>
+        <property name="maximum" >
+         <number>3600</number>
+        </property>
+        <property name="minimum" >
+         <number>10</number>
+        </property>
+        <property name="singleStep" >
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" >
+       <widget class="QCheckBox" name="screensaver_suspend" >
+        <property name="enabled" >
+         <bool>false</bool>
+        </property>
+        <property name="text" >
+         <string>Suspend</string>
+        </property>
+        <property name="checked" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0" colspan="3" >
+       <widget class="QCheckBox" name="notnetworkedsuspend" >
+        <property name="text" >
+         <string>Disable suspend while online</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QSlider" name="brightness" >
+     <property name="minimum" >
+      <number>100</number>
+     </property>
+     <property name="maximum" >
+      <number>255</number>
+     </property>
+     <property name="singleStep" >
+      <number>16</number>
+     </property>
+     <property name="pageStep" >
+      <number>16</number>
+     </property>
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="tickInterval" >
+      <number>32</number>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="officon" >
+       <property name="scaledContents" >
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="offlabel" >
+       <property name="sizePolicy" >
+        <sizepolicy>
+         <hsizetype>5</hsizetype>
+         <vsizetype>0</vsizetype>
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text" >
+        <string>Dim</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType" >
+        <enum>QSizePolicy::Expanding</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="brightlabel" >
+       <property name="sizePolicy" >
+        <sizepolicy>
+         <hsizetype>5</hsizetype>
+         <vsizetype>0</vsizetype>
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text" >
+        <string>Bright</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="brighticon" >
+       <property name="scaledContents" >
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="biginfo" >
+     <property name="sizePolicy" >
+      <sizepolicy>
+       <hsizetype>5</hsizetype>
+       <vsizetype>0</vsizetype>
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text" >
+      <string>The brighter the screen light, the more battery power is used.</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer>
+     <property name="orientation" >
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" >
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <pixmapfunction></pixmapfunction>
+ <tabstops>
+  <tabstop>batteryButton</tabstop>
+  <tabstop>externalButton</tabstop>
+  <tabstop>screensaver_dim</tabstop>
+  <tabstop>interval_dim</tabstop>
+  <tabstop>screensaver_lightoff</tabstop>
+  <tabstop>interval_lightoff</tabstop>
+  <tabstop>screensaver_suspend</tabstop>
+  <tabstop>interval_suspend</tabstop>
+  <tabstop>notnetworkedsuspend</tabstop>
+  <tabstop>brightness</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

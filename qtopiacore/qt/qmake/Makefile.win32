@@ -1,0 +1,365 @@
+!IF "$(QMAKESPEC)" == "win32-msvc" || "$(QMAKESPEC)" == "win32-msvc.net" || "$(QMAKESPEC)" == "win32-msvc2005" || "$(QMAKESPEC)" == "win32-icc"
+#
+# specific stuff for NMake and ICC
+#
+!if "$(QMAKESPEC)" == "win32-icc"
+CXX	    = icl
+LINK	    = xilink
+CFLAGS      = /Zc:forScope
+!else
+CXX         = cl
+LINK	    = link
+!endif
+
+#
+# specific stuff for VS2005
+#
+!if "$(QMAKESPEC)" == "win32-msvc2005"
+CFLAGS      = /Zc:wchar_t-
+!endif
+
+CFLAGS	     = -c -Fo$@ \
+              -W3 -nologo -O2 \
+              -I. -Igenerators -Igenerators\unix -Igenerators\win32 -Igenerators\mac \
+              -I..\src\corelib\arch\generic -I..\include -I..\src\tools -I..\include\QtCore \
+              -I..\mkspecs\win32-msvc -I..\src\3rdparty\md5 \
+              -DQT_NO_TEXTCODEC -DQT_NO_UNICODETABLES -DQT_LITE_COMPONENT -DQT_NODLL -DQT_NO_STL \
+              -DQT_NO_COMPRESS -DUNICODE -DHAVE_QCONFIG_CPP -DQT_BUILD_QMAKE -DQT_NO_THREAD \
+              -DQT_NO_QOBJECT -DQT_NO_GEOM_VARIANT -DQT_NO_DATASTREAM \
+              $(CFLAGS)
+CXXFLAGS    = $(CFLAGS)
+LFLAGS	    =
+LIBS	    = ole32.lib advapi32.lib
+LINKQMAKE   = $(LINK) $(LFLAGS) -DEBUG -OUT:qmake.exe $(OBJS) $(QTOBJS) $(LIBS)
+ADDCLEAN    = vc60.pdb vc70.pdb qmake.pdb qmake.ilk
+!ELSE
+
+#
+# specific stuff for Borland make
+#
+!if !$d(BCB)
+BCB = $(MAKEDIR)\..
+!endif
+CXX	    = bcc32
+CFLAGS	    = -c -o$@ \
+	-tWR -w -w-hid -w-use -O1 \
+	-I. -Igenerators -Igenerators\unix -Igenerators\win32 -Igenerators\mac \
+	-I..\src\corelib\arch\generic -I..\include -I..\src\tools -I..\include\QtCore \
+	-I..\mkspecs\win32-borland -I..\src\3rdparty\md5 \
+	-DQT_NO_TEXTCODEC -DQT_NO_UNICODETABLES -DQT_LITE_COMPONENT -DQT_NODLL -DQT_NO_STL \
+	-DQT_NO_COMPRESS -DUNICODE -DHAVE_QCONFIG_CPP -DQT_BUILD_QMAKE -DQT_NO_THREAD \
+	-DQT_NO_QOBJECT -DQT_NO_GEOM_VARIANT
+CXXFLAGS    = $(CFLAGS)
+LFLAGS	    = -L$(BCB)\lib -c -x -Gn -ap -Tpe c0x32.obj
+LIBS	    = import32.lib cw32i.lib
+LINKQMAKE   = ilink32 $(LFLAGS) $(OBJS) $(QTOBJS), qmake.exe,,$(LIBS)
+ADDCLEAN    = qmake.tds
+!ENDIF
+
+#qmake code
+OBJS        = project.obj main.obj makefile.obj unixmake.obj unixmake2.obj mingw_make.obj \
+              option.obj winmakefile.obj projectgenerator.obj property.obj meta.obj md5.obj \
+              makefiledeps.obj metamakefile.obj xmloutput.obj pbuilder_pbx.obj
+
+!IFNDEF QMAKE_OPENSOURCE_EDITION
+OBJS        = $(OBJS) borland_bmake.obj msvc_nmake.obj msvc_dsp.obj msvc_vcproj.obj \
+              msvc_objectmodel.obj
+!ELSE
+CFLAGS      = $(CFLAGS) -DQMAKE_OPENSOURCE_EDITION
+!ENDIF
+
+#qt code
+QTOBJS= \
+	qbitarray.obj \
+	qbuffer.obj \
+	qfsfileengine.obj \
+	qbytearray.obj \
+        qvsnprintf.obj \
+	qbytearraymatcher.obj \
+	qchar.obj \
+	qdatetime.obj \
+	qdir.obj \
+	qfile.obj \
+	qtemporaryfile.obj \
+	qabstractfileengine.obj \
+	qfsfileengine_win.obj \
+	qfileinfo.obj \
+	qglobal.obj \
+	qhash.obj \
+	qiodevice.obj \
+	qlistdata.obj \
+	qlocale.obj \
+	qmap.obj \
+	qregexp.obj \
+	qstring.obj \
+	qstringlist.obj \
+	qstringmatcher.obj \
+	qtextstream.obj \
+	qdatastream.obj \
+	qunicodetables.obj \
+	quuid.obj \
+	qvector.obj \
+	qsettings.obj \
+	qlibraryinfo.obj \
+	qvariant.obj \
+        qurl.obj \
+	qsettings_win.obj \
+        qmetatype.obj
+
+first all: qmake.exe
+
+qmake.exe: $(OBJS) $(QTOBJS)
+	$(LINKQMAKE)
+	-copy qmake.exe ..\bin\qmake.exe
+
+clean::
+	-del qbitarray.obj
+	-del qbuffer.obj
+	-del qfsfileengine.obj
+	-del qbytearray.obj
+        -del qvsnprintf.obj
+	-del qbytearraymatcher.obj
+	-del qchar.obj
+	-del qdatetime.obj
+	-del qdir.obj
+	-del qfile.obj
+	-del qtemporaryfile.obj
+	-del qabstractfileengine.obj
+	-del qfsfileengine_win.obj
+	-del qfileinfo.obj
+	-del qglobal.obj
+	-del qhash.obj
+	-del qiodevice.obj
+	-del qlistdata.obj
+	-del qlocale.obj
+	-del qmap.obj
+	-del qregexp.obj
+	-del qstring.obj
+	-del qstringlist.obj
+	-del qstringmatcher.obj
+	-del qtextstream.obj
+	-del qdatastream.obj
+	-del qunicodetables.obj
+	-del quuid.obj
+	-del qvector.obj
+	-del qsettings.obj
+	-del qlibraryinfo.obj
+	-del qvariant.obj
+        -del qurl.obj
+	-del qsettings_win.obj
+        -del qmetatype.obj
+	-del project.obj
+	-del main.obj
+	-del makefile.obj
+	-del unixmake.obj
+	-del unixmake2.obj
+	-del mingw_make.obj
+	-del option.obj
+	-del winmakefile.obj
+	-del projectgenerator.obj
+	-del property.obj
+	-del meta.obj
+	-del md5.obj
+	-del makefiledeps.obj
+	-del metamakefile.obj
+	-del xmloutput.obj
+	-del borland_bmake.obj
+	-del msvc_nmake.obj
+	-del msvc_dsp.obj
+	-del msvc_vcproj.obj
+	-del msvc_objectmodel.obj
+	-del pbuilder_pbx.obj
+	-del vc60.pdb
+	-del vc70.pdb
+	-del qmake.pdb
+	-del qmake.ilk
+	-del qmake.tds
+
+distclean:: clean
+	-del qmake
+
+.c.obj:
+	$(CXX) $(CFLAGS) $<
+
+.cpp.obj:
+	$(CXX) $(CXXFLAGS) $<
+
+.cc.obj:
+	$(CXX) $(CXXFLAGS) $<
+
+.cxx.obj:
+	$(CXX) $(CXXFLAGS) $<
+
+qsettings_win.obj: ..\src\corelib\io\qsettings_win.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\io\qsettings_win.cpp
+
+qsettings.obj: ..\src\corelib\io\qsettings.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\io\qsettings.cpp
+
+qlibraryinfo.obj: ..\src\corelib\global\qlibraryinfo.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\global\qlibraryinfo.cpp
+
+qvariant.obj: ..\src\corelib\kernel\qvariant.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\kernel\qvariant.cpp
+
+qurl.obj: ..\src\corelib\io\qurl.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\io\qurl.cpp
+
+qtextstream.obj: ..\src\corelib\io\qtextstream.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\io\qtextstream.cpp
+
+qdatastream.obj: ..\src\corelib\io\qdatastream.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\io\qdatastream.cpp
+
+qiodevice.obj: ..\src\corelib\io\qiodevice.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\io\qiodevice.cpp
+
+qglobal.obj: ..\src\corelib\global\qglobal.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\global\qglobal.cpp
+
+qhash.obj: ..\src\corelib\tools\qhash.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\tools\qhash.cpp
+
+qbytearray.obj: ..\src\corelib\tools\qbytearray.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\tools\qbytearray.cpp
+
+qvsnprintf.obj: ..\src\corelib\tools\qvsnprintf.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\tools\qvsnprintf.cpp
+
+qbytearraymatcher.obj: ..\src\corelib\tools\qbytearraymatcher.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\tools\qbytearraymatcher.cpp
+
+qchar.obj: ..\src\corelib\tools\qchar.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\tools\qchar.cpp
+
+qstring.obj: ..\src\corelib\tools\qstring.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\tools\qstring.cpp
+
+qstringmatcher.obj: ..\src\corelib\tools\qstringmatcher.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\tools\qstringmatcher.cpp
+
+qlocale.obj: ..\src\corelib\tools\qlocale.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\tools\qlocale.cpp
+
+quuid.obj: ..\src\corelib\plugin\quuid.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\plugin\quuid.cpp
+
+qbuffer.obj: ..\src\corelib\io\qbuffer.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\io\qbuffer.cpp
+
+qlistdata.obj: ..\src\corelib\tools\qlistdata.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\tools\qlistdata.cpp
+
+qlinkedlist.obj: ..\src\corelib\tools\qlinkedlist.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\tools\qlinkedlist.cpp
+
+qfile.obj: ..\src\corelib\io\qfile.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\io\qfile.cpp
+
+qtemporaryfile.obj: ..\src\corelib\io\qtemporaryfile.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\io\qtemporaryfile.cpp
+
+qfsfileengine_win.obj: ..\src\corelib\io\qfsfileengine_win.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\io\qfsfileengine_win.cpp
+
+qfsfileengine.obj: ..\src\corelib\io\qfsfileengine.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\io\qfsfileengine.cpp
+
+qabstractfileengine.obj: ..\src\corelib\io\qabstractfileengine.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\io\qabstractfileengine.cpp
+
+qtextcodec.obj: ..\src\codecs\qtextcodec.cpp
+	$(CXX) $(CXXFLAGS) ..\src\codecs\qtextcodec.cpp
+
+qregexp.obj: ..\src\corelib\tools\qregexp.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\tools\qregexp.cpp
+
+qvector.obj: ..\src\corelib\tools\qvector.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\tools\qvector.cpp
+
+qbitarray.obj: ..\src\corelib\tools\qbitarray.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\tools\qbitarray.cpp
+
+qdir.obj: ..\src\corelib\io\qdir.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\io\qdir.cpp
+
+qmetatype.obj: ..\src\corelib\kernel\qmetatype.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\kernel\qmetatype.cpp
+
+qfileinfo.obj: ..\src\corelib\io\qfileinfo.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\io\qfileinfo.cpp
+
+qdatetime.obj: ..\src\corelib\tools\qdatetime.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\tools\qdatetime.cpp
+
+qstringlist.obj: ..\src\corelib\tools\qstringlist.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\tools\qstringlist.cpp
+
+qmap.obj: ..\src\corelib\tools\qmap.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\tools\qmap.cpp
+
+qunicodetables.obj: ..\src\corelib\tools\qunicodetables.cpp
+	$(CXX) $(CXXFLAGS) ..\src\corelib\tools\qunicodetables.cpp
+
+makefile.obj: generators\makefile.cpp
+	$(CXX) $(CXXFLAGS) generators\makefile.cpp
+
+unixmake.obj: generators\unix\unixmake.cpp
+	$(CXX) $(CXXFLAGS) generators\unix\unixmake.cpp
+
+unixmake2.obj: generators\unix\unixmake2.cpp
+	$(CXX) $(CXXFLAGS) generators\unix\unixmake2.cpp
+
+winmakefile.obj: generators/win32/winmakefile.cpp
+	$(CXX) $(CXXFLAGS) generators/win32/winmakefile.cpp
+
+borland_bmake.obj: generators/win32/borland_bmake.cpp
+	$(CXX) $(CXXFLAGS) generators/win32/borland_bmake.cpp
+
+mingw_make.obj: generators/win32/mingw_make.cpp
+	$(CXX) $(CXXFLAGS) generators/win32/mingw_make.cpp
+
+msvc_nmake.obj: generators/win32/msvc_nmake.cpp
+	$(CXX) $(CXXFLAGS) generators/win32/msvc_nmake.cpp
+
+msvc_dsp.obj: generators/win32/msvc_dsp.cpp
+	$(CXX) $(CXXFLAGS) generators/win32/msvc_dsp.cpp
+
+msvc_vcproj.obj: generators/win32/msvc_vcproj.cpp
+	$(CXX) $(CXXFLAGS) generators/win32/msvc_vcproj.cpp
+
+msvc_objectmodel.obj: generators/win32/msvc_objectmodel.cpp
+	$(CXX) $(CXXFLAGS) generators/win32/msvc_objectmodel.cpp
+
+md5.obj: ..\src\3rdparty\md5\md5.cpp
+	$(CXX) $(CXXFLAGS) ..\src\3rdparty\md5\md5.cpp
+
+project.obj: project.cpp project.h option.h
+	$(CXX) $(CXXFLAGS) project.cpp
+
+meta.obj: meta.cpp project.h option.h
+	$(CXX) $(CXXFLAGS) meta.cpp
+
+main.obj: main.cpp project.h
+	$(CXX) $(CXXFLAGS) main.cpp
+
+option.obj: option.cpp option.h
+	$(CXX) $(CXXFLAGS) option.cpp
+
+property.obj: property.cpp project.h option.h
+	$(CXX) $(CXXFLAGS) property.cpp
+
+projectgenerator.obj: generators/projectgenerator.cpp
+	$(CXX) $(CXXFLAGS) generators/projectgenerator.cpp
+
+pbuilder_pbx.obj: generators/mac/pbuilder_pbx.cpp
+	$(CXX) $(CXXFLAGS) generators/mac/pbuilder_pbx.cpp
+
+makefiledeps.obj: generators/makefiledeps.cpp
+	$(CXX) $(CXXFLAGS) generators/makefiledeps.cpp
+
+metamakefile.obj: generators/metamakefile.cpp
+	$(CXX) $(CXXFLAGS) generators/metamakefile.cpp
+
+xmloutput.obj: generators/xmloutput.cpp
+	$(CXX) $(CXXFLAGS) generators/xmloutput.cpp

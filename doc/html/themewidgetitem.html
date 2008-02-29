@@ -1,0 +1,61 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>ThemeWidgetItem Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">ThemeWidgetItem Class Reference</h1>
+<p>The ThemeWidgetItem class represents a widget in a <a href="themedview.html">ThemedView</a>. <a href="#details">More...</a></p>
+<pre>    #include &lt;ThemeWidgetItem&gt;</pre><p>Inherits <a href="themegraphicitem.html">ThemeGraphicItem</a>.</p>
+<p>Inherited by <a href="themelistitem.html">ThemeListItem</a>.</p>
+<ul>
+<li><a href="themewidgetitem-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="themewidgetitem.html#ThemeWidgetItem">ThemeWidgetItem</a></b> ( ThemeItem * <i>p</i>, ThemedView * <i>v</i>, const ThemeAttributes &amp; <i>atts</i> )</li>
+<li><div class="fn"/>virtual <b><a href="themewidgetitem.html#dtor.ThemeWidgetItem">~ThemeWidgetItem</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="themewidgetitem.html#setAutoDelete">setAutoDelete</a></b> ( bool <i>ad</i> )</li>
+<li><div class="fn"/>virtual void <b><a href="themewidgetitem.html#setWidget">setWidget</a></b> ( QWidget * <i>w</i> )</li>
+<li><div class="fn"/>QWidget * <b><a href="themewidgetitem.html#widget">widget</a></b> () const</li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>9 protected functions inherited from <a href="themegraphicitem.html#protected-functions">ThemeGraphicItem</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The ThemeWidgetItem class represents a widget in a <a href="themedview.html">ThemedView</a>.</p>
+<p>The ThemeWidgetItem class implements the <a href="themed-view-elements.html#themewidgetelement">widget element</a> from the theme XML.</p>
+<p>The item can be assigned a widget by overriding <a href="themedview.html#newWidget">ThemedView::newWidget</a>() for the parent <a href="themedview.html">ThemedView</a> for this item, or be calling <a href="themewidgetitem.html#setWidget">setWidget</a>() directly. <a href="themedview.html#newWidget">ThemedView::newWidget</a>() is called by this item once it has been completed constructed from the themed view XML.</p>
+<p>Normally you do not want to call this item's functions directly, but rather specify the relevant attributes and data for this item in the themed view XML, or overload ThemedView::newWidget to provide a widget that way.</p>
+<p>See also <a href="themed-view-elements.html#themewidgetelement">widget element</a>.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="ThemeWidgetItem"></a>ThemeWidgetItem::ThemeWidgetItem ( ThemeItem * <i>p</i>, <a href="themedview.html">ThemedView</a> * <i>v</i>, const ThemeAttributes &amp; <i>atts</i> )</h3>
+<p>Constructs a <a href="themewidgetitem.html">ThemeWidgetItem</a>. <i>p</i>, <i>v</i> and <i>atts</i> are passed to the base class constructor.</p>
+<h3 class="fn"><a name="dtor.ThemeWidgetItem"></a>ThemeWidgetItem::~ThemeWidgetItem ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Destroys this <a href="themewidgetitem.html">ThemeWidgetItem</a>. If a widget was set, and autoDelete() is true, the widget is deleted.</p>
+<h3 class="fn"><a name="setAutoDelete"></a>void ThemeWidgetItem::setAutoDelete ( bool <i>ad</i> )</h3>
+<p>Sets the auto-delete flag for this widget item. If <i>ad</i> is true (the default), subsequent calls to <a href="themewidgetitem.html#setWidget">setWidget</a>() will cause any existing widget to be deleted. If you don't want <a href="themewidgetitem.html">ThemeWidgetItem</a> to take memory ownership of the widgets you set on it, then call setAutoDelete(false) to disable this behaviour.</p>
+<h3 class="fn"><a name="setWidget"></a>void ThemeWidgetItem::setWidget ( <a href="qwidget.html">QWidget</a> * <i>w</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Sets the widget <i>w</i> on this item.</p>
+<p>See also <a href="themewidgetitem.html#widget">widget</a>().</p>
+<h3 class="fn"><a name="widget"></a><a href="qwidget.html">QWidget</a> * ThemeWidgetItem::widget () const</h3>
+<p>Returns the widget for this item.</p>
+<p>See also <a href="themewidgetitem.html#setWidget">setWidget</a>().</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

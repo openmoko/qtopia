@@ -1,23 +1,37 @@
-multiprocess:TEMPLATE	= app
-multiprocess:DESTDIR	= $(QPEDIR)/bin
-singleprocess:TEMPLATE	= lib
-singleprocess:DESTDIR   = $(QPEDIR)/lib
-quicklaunch:TEMPLATE    = lib
-quicklaunch:DESTDIR     = $(QPEDIR)/plugins/application
+qtopia_project(qtopia app)
+TARGET=mediaplayer
+CONFIG+=qtopia_main
 
-CONFIG		+= qtopia warn_on release
+HEADERS = mediaplayer.h \
+            playercontrol.h \
+            statewidget.h \
+            elidedlabel.h \
+            playerwidget.h \
+            mediabrowser.h \
+            visualization.h \
+            playlist.h
 
-HEADERS		= maindocumentwidgetstack.h controlwidgetbase.h imageutil.h documentlist.h loopcontrol.h playlistselection.h \
-		  framebuffer.h id3tag.h action.h fileinfo.h tabbedselector.h mediaplayerstate.h \
-		  videowidget.h audiowidget.h playlistwidget.h mediaplayer.h audiodevice.h
-SOURCES		= maindocumentwidgetstack.cpp controlwidgetbase.cpp imageutil.cpp documentlist.cpp \
-		  framebuffer.cpp loopcontrol.cpp playlistselection.cpp mediaplayerstate.cpp \
-		  id3tag.cpp fileinfo.cpp tabbedselector.cpp \
-		  videowidget.cpp audiowidget.cpp playlistwidget.cpp mediaplayer.cpp audiodevice.cpp
-TARGET		= mpegplayer
+SOURCES = main.cpp \
+            mediaplayer.cpp \
+            playercontrol.cpp \
+            statewidget.cpp \
+            elidedlabel.cpp \
+            playerwidget.cpp \
+            mediabrowser.cpp \
+            visualization.cpp \
+            playlist.cpp
 
-multiprocess:SOURCES += main.cpp
+desktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/mediaplayer.desktop
+desktop.path=/apps/Applications
+desktop.hint=desktop
 
-unix:LIBS       += -lpthread
+pics.files=$$QTOPIA_DEPOT_PATH/pics/mediaplayer/*
+pics.path=/pics/mediaplayer
+pics.hint=pics
 
-TRANSLATIONS = mpegplayer-en_GB.ts mpegplayer-de.ts mpegplayer-ja.ts mpegplayer-no.ts
+INSTALLS+=desktop pics
+
+pkg.desc=Qtopia media player.
+pkg.domain=mediasession,window,graphics,docapi,launcher,drm,cardreader
+
+depends(libraries/qtopiamedia)

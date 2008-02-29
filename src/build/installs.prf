@@ -1,0 +1,200 @@
+exists($$QPEDIR/src/build/trace_on):message(installs.prf)
+# Install helpers. Stuff that is i18n specific is done in i18n.prf
+
+# Find a location for the target
+!no_target:isEmpty(target.path) {
+    app:target.path=$$bindir
+    lib:target.path=$$libdir
+    plugin:target.path=$$plugdir/$$plugin_type
+}
+# Static libs shouldn't be installed!
+lib:staticlib:target.path=
+!isEmpty(target.path):INSTALLS+=target
+
+ICON_SIZE=$$QTOPIA_ICON_SIZE
+
+# Remove double slashes (they can confuse things)
+for(it,INSTALLS) {
+    path=$$eval($${it}.path)
+    !isEmpty(path) {
+        path=$$fixpath($$path)
+        eval($${it}.path=\$$path)
+    }
+}
+
+# Register the SXE domain of the application
+register=0
+qtopia:enable_sxe:contains(INSTALLS,target) {
+    app:register=1
+    quicklaunch:plugin:register=1
+}
+equals(register,1) {
+    isEmpty(pkg.domain) {
+        warning($$SRCDIR/$$self does not define pkg.domain (using 'none').)
+        pkg.domain=none
+    }
+    register_domain.commands=\
+        $$QPEDIR/bin/sxe_installer $(INSTALL_ROOT) $$fixpath($$target.path/$$TARGET)\
+            $$LITERAL_QUOTE$$pkg.domain$$LITERAL_QUOTE
+    register_domain.path=/etc/domain
+    register_domain.depends=install_target
+    INSTALLS+=register_domain
+}
+
+# Process the hints (see also i18n.prf for hint=nct)
+for(it,INSTALLS) {
+    hint=$$eval($${it}.hint)
+    contains(hint,pics) {
+        # Picture installer (resizes icons to the specified sizes and handles translated images)
+        INSTALLS-=$$it
+        files=$$eval($${it}.files)
+        path=$$eval($${it}.path)
+        eval($${it}.files=)
+        eval($${it}.path=)
+        command=$$COMMAND_HEADER\
+            $$fixpath($$QPEDIR/bin/installpic)\
+                $$LITERAL_QUOTE$$LANGUAGES$$LITERAL_QUOTE\
+                $$ICON_SIZE\
+                $$SRCDIR\
+                $$LITERAL_QUOTE$$fixpath($(INSTALL_ROOT)$$path)$$LITERAL_QUOTE\
+                $$fixpath($$files)
+        eval($${it}.commands=\$$command)
+        eval($${it}.CONFIG=no_path)
+        INSTALLS+=$$it
+    }
+    contains(hint,help) {
+        # Help files might be available in multiple languages
+        INSTALLS-=$$it
+        source=$$eval($${it}.source)
+        files=$$eval($${it}.files)
+        eval($${it}.source=)
+        eval($${it}.files=)
+        command=$$COMMAND_HEADER\
+            $$fixpath($$QPEDIR/bin/installhelp)\
+                $$LITERAL_QUOTE$$TRANSLATIONS$$LITERAL_QUOTE\
+                $$SRCDIR\
+                $$fixpath($$source)\
+                $(INSTALL_ROOT)/help\
+                $$LITERAL_QUOTE$$files$$LITERAL_QUOTE
+        eval($${it}.commands=\$$command)
+        eval($${it}.CONFIG=no_path)
+        INSTALLS+=$$it
+    }
+    syncqtopia {
+        contains(hint,headers)|contains(hint,non_qt_headers) {
+            contains(hint,non_qt_headers):qtheaders=
+            else:qtheaders=-qt
+            INSTALLS-=$$it
+            eval($${it}.CONFIG*=no_default_install)
+            commands=$$eval($${it}.commands)
+            !isEmpty(commands) {
+                # easy because we just run the commands
+                eval(syncqtopia_$${it}.commands=\$$commands)
+                QMAKE_EXTRA_TARGETS+=syncqtopia_$$it
+                syncqtopia.depends+=syncqtopia_$$it
+            } else {
+                # 'symlink' all the headers
+                eval(syncqtopia_$${it}.CONFIG=no_link no_dependencies no_build combine ignore_no_exist no_clean)
+                commands=$$COMMAND_HEADER\
+                    $$fixpath($$QPEDIR/bin/syncqtopia) $$qtheaders $$fixpath($$eval($${it}.path))\
+                        $$ORIG_TARGET ${QMAKE_FILE_IN}
+                eval(syncqtopia_$${it}.commands=\$$commands)
+                eval(syncqtopia_$${it}.input=$${it}.files)
+                eval(syncqtopia_$${it}.output=dummy_syncqtopia_$$it)
+                eval(syncqtopia_$${it}.name=syncqtopia_$$it)
+                QMAKE_EXTRA_COMPILERS+=syncqtopia_$$it
+                syncqtopia.depends+=compiler_syncqtopia_$${it}_make_all
+            }
+        }
+    }
+    contains(hint,sdk) {
+        eval($${it}.CONFIG*=no_default_install)
+        dep=install_$$it
+        # Special case for headers
+        syncqtopia {
+            contains(hint,headers)|contains(hint,non_qt_headers) {
+                dep=
+                contains(hint,non_qt_headers):qtheaders=
+                else:qtheaders=-qt
+                # This was already taken out above
+                #INSTALLS+=$$it
+                eval($${it}.CONFIG*=no_default_install)
+                commands=$$eval($${it}.commands)
+                !isEmpty(commands) {
+                    # easy because we just run the commands
+                    eval(sdk_syncqtopia_$${it}.commands=\$$commands)
+                    QMAKE_EXTRA_TARGETS+=sdk_syncqtopia_$$it
+                    sdk.depends+=sdk_syncqtopia_$$it
+                } else {
+                    # 'symlink' all the headers
+                    eval(sdk_syncqtopia_$${it}.CONFIG=no_link no_dependencies no_build combine ignore_no_exist no_clean)
+                    commands=$$COMMAND_HEADER\
+                        $$fixpath($$QPEDIR/bin/syncqtopia) -sdk $(INSTALL_ROOT) $$qtheaders $$fixpath($$eval($${it}.path))\
+                            $$ORIG_TARGET ${QMAKE_FILE_IN}
+                    eval(sdk_syncqtopia_$${it}.commands=\$$commands)
+                    eval(sdk_syncqtopia_$${it}.input=$${it}.files)
+                    eval(sdk_syncqtopia_$${it}.output=dummy_sdk_syncqtopia_$$it)
+                    eval(sdk_syncqtopia_$${it}.name=syncqtopia_$$it)
+                    QMAKE_EXTRA_COMPILERS+=sdk_syncqtopia_$$it
+                    sdk.depends+=compiler_sdk_syncqtopia_$${it}_make_all
+                }
+            }
+        }
+        !isEmpty(dep):eval(sdk.depends+=\$$dep)
+    }
+    contains(hint,desktop) {
+        # .desktop file installer (docapi uses a database instead of .desktop files)
+        INSTALLS-=$$it
+        files=$$eval($${it}.files)
+        path=$$eval($${it}.path)
+        command=$$COMMAND_HEADER\
+            $$fixpath($$QPEDIR/bin/content_installer) $(INSTALL_ROOT)\
+                $$QTOPIA_DEPOT_PATH $$QTOPIA_PREFIX $$fixpath($$files)
+        eval(docapi_$${it}.commands=\$$command)
+        eval(docapi_$${it}.CONFIG=no_path)
+        INSTALLS+=docapi_$$it
+    }
+    contains(hint,dawg) {
+        # .dawg generator
+        INSTALLS-=$$it
+        files=$$eval($${it}.files)
+        path=$$eval($${it}.path)
+        eval($${it}.files=)
+        eval($${it}.path=)
+        command=$$COMMAND_HEADER\
+            $$fixpath($$QPEDIR/bin/qdawggen) $$fixpath($(INSTALL_ROOT)$$path) $$fixpath($$files)
+        eval($${it}.commands=\$$command)
+        eval($${it}.CONFIG=no_path)
+        INSTALLS+=$$it
+    }
+    !isEmpty(QTOPIA_DISP_WIDTH):!isEmpty(QTOPIA_DISP_HEIGHT):contains(hint,background) {
+        # background image, scale to the size passed to configure
+        INSTALLS-=$$it
+        files=$$eval($${it}.files)
+        path=$$eval($${it}.path)
+        eval($${it}.files=)
+        eval($${it}.path=)
+        command=#$$COMMAND_HEADER
+        for(file,files) {
+            !equals(command,$$COMMAND_HEADER):command+=$$LINE_SEP_VERBOSE
+            command+=$$fixpath($$QPEDIR/bin/pngscale) -width $$QTOPIA_DISP_WIDTH -height $$QTOPIA_DISP_HEIGHT $$fixpath($$file) $$fixpath($(INSTALL_ROOT)$$path/$$tail($$file))
+        }
+        eval($${it}.commands=\$$command)
+        eval($${it}.CONFIG=no_path)
+        INSTALLS+=$$it
+    }
+    contains(hint,script) {
+        # script "preprocessor" (ie. set QPEDIR to a useful value)
+        INSTALLS-=$$it
+        files=$$eval($${it}.files)
+        path=$$eval($${it}.path)
+        eval($${it}.files=)
+        eval($${it}.path=)
+        command=$$COMMAND_HEADER\
+            $$fixpath($$QPEDIR/bin/script_preprocessor) $$fixpath($(INSTALL_ROOT)$$path) $$fixpath($$files)
+        eval($${it}.commands=\$$command)
+        eval($${it}.CONFIG=no_path)
+        INSTALLS+=$$it
+    }
+}
+

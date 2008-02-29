@@ -5,6 +5,6 @@ Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
 Type=Application
 Exec=security
-Icon=Security
-Name[]=Se­cu­ri­ty
+Icon=security/Security
+Name[]=Se\xad\x63u\xadri\xadty
 CanFastload=0

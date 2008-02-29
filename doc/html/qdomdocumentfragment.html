@@ -1,92 +1,57 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
---></style>
-</head><body bgcolor="#ffffff">
-
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-
-<h1 align=center>QDomDocumentFragment Class Reference<br><small>[ <a href="xml.html">XML module</a> ]</small></h1><br clear="all">
-<p>
-The QDomDocumentFragment class is a tree of QDomNodes which is usually not a complete <a href="qdomdocument.html">QDomDocument</a>.
-<a href="#details">More...</a>
-<p>
-<code>#include &lt;<a href="qdom-h.html">qdom.h</a>&gt;</code>
-<p>
-Inherits <a href="qdomnode.html">QDomNode</a>.
-<p><a href="qdomdocumentfragment-members.html">List of all member functions.</a>
-<h2>Public Members</h2>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: QDomDocumentFragment Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QDomDocumentFragment Class Reference<br /><sup><sup>[<a href="qtxml.html">QtXml</a> module]</sup></sup></h1>
+<p>The QDomDocumentFragment class is a tree of QDomNodes which is not usually a complete <a href="qdomdocument.html">QDomDocument</a>. <a href="#details">More...</a></p>
+<pre> #include &lt;QDomDocumentFragment&gt;</pre><p>Inherits <a href="qdomnode.html">QDomNode</a>.</p>
+<p><b>Note:</b> All the functions in this class are <a href="threads.html#reentrant">reentrant</a>.</p>
 <ul>
-<li><div class="fn"><a href="#1006f1"><b>QDomDocumentFragment</b></a> () </div>
-<li><div class="fn"><a href="#f3af61"><b>QDomDocumentFragment</b></a> ( const QDomDocumentFragment &amp; x ) </div>
-<li><div class="fn">QDomDocumentFragment&amp; <a href="#59d373"><b>operator=</b></a> ( const QDomDocumentFragment &amp; ) </div>
-<li><div class="fn"><a href="#0ad3aa"><b>~QDomDocumentFragment</b></a> () </div>
-<li><div class="fn">virtual QDomNode::NodeType <a href="#8edf5c"><b>nodeType</b></a> () const</div>
-<li><div class="fn">virtual bool <a href="#b52632"><b>isDocumentFragment</b></a> () const</div>
+<li><a href="qdomdocumentfragment-members.html">List of all members, including inherited members</a></li>
 </ul>
-<hr><h2><a name="details"></a>Detailed Description</h2>
-The QDomDocumentFragment class is a tree of QDomNodes which is usually not a complete <a href="qdomdocument.html">QDomDocument</a>.
-<p>
-If you want to do complex tree operations it is useful to have a lightweight
-class to store nodes and their relations. QDomDocumentFragment stores a
-subtree of a document which does not necessarily represent a well-formed XML
-document.
-<p>QDomDocumentFragment is also useful if you want to group several nodes in a
-list and insert them all together as children of some
-node. In these cases QDomDocumentFragment can be used as a temporary
-container for this list of children.
-<p>The most important feature of QDomDocumentFragment is, that it is treated in
-a special way by <a href="qdomnode.html#784bea">QDomNode::insertAfter</a>(), <a href="qdomnode.html#803362">QDomNode::insertBefore</a>() and
-<a href="qdomnode.html#813269">QDomNode::replaceChild</a>(): instead of inserting the fragment itself, all
-children of the fragment are inserted.
-
-<hr><h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="1006f1"></a>QDomDocumentFragment::QDomDocumentFragment ()</h3>
-<p>Constructs an empty DocumentFragment.
-<h3 class="fn"><a name="f3af61"></a>QDomDocumentFragment::QDomDocumentFragment ( const QDomDocumentFragment &amp; x )</h3>
-<p>Copy constructor.
-<p>The data of the copy is shared: modifying one will also change the other. If
-you want to make a real copy, use <a href="qdomnode.html#8f17f1">cloneNode</a>() instead.
-<h3 class="fn"><a name="0ad3aa"></a>QDomDocumentFragment::~QDomDocumentFragment ()</h3>
-<p>Destructor.
-<h3 class="fn">bool <a name="b52632"></a>QDomDocumentFragment::isDocumentFragment () const <code>[virtual]</code></h3>
-<p>This function reimplements <a href="qdomnode.html#8274e8">QDomNode::isDocumentFragment</a>().
-<p>See also  <a href="#8edf5c">nodeType</a>() and <a href="qdomnode.html#e8f59f">QDomNode::toDocumentFragment</a>().
-<p>Reimplemented from <a href="qdomnode.html#8274e8">QDomNode.</a>
-<h3 class="fn">QDomNode::NodeType <a name="8edf5c"></a>QDomDocumentFragment::nodeType() const <code>[virtual]</code></h3>
-<p>Returns <code>DocumentFragment.</code>
-<p>See also  <a href="#b52632">isDocumentFragment</a>() and <a href="qdomnode.html#e8f59f">QDomNode::toDocumentFragment</a>().
-<p>Reimplemented from <a href="qdomnode.html#46495e">QDomNode.</a>
-<h3 class="fn">QDomDocumentFragment&amp; <a name="59d373"></a>QDomDocumentFragment::operator= ( const QDomDocumentFragment &amp; x )</h3>
-<p>Assignment operator.
-<p>The data of the copy is shared: modifying one will also change the other. If
-you want to make a real copy, use <a href="qdomnode.html#8f17f1">cloneNode</a>() instead.
-<hr><p>
-Search the documentation, FAQ, qt-interest archive and more (uses
-<a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
-<form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.10"><nobr>
-<input size="50" name="search"><input type=submit value="Search">
-</nobr></form><hr><p>
-This file is part of the <a href="index.html">Qt toolkit</a>,
-copyright &copy; 1995-2005
-<a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qdomdocumentfragment.html#QDomDocumentFragment">QDomDocumentFragment</a></b> ()</li>
+<li><div class="fn"/><b><a href="qdomdocumentfragment.html#QDomDocumentFragment-2">QDomDocumentFragment</a></b> ( const QDomDocumentFragment &amp; <i>x</i> )</li>
+<li><div class="fn"/>QDomNode::NodeType <b><a href="qdomdocumentfragment.html#nodeType">nodeType</a></b> () const</li>
+<li><div class="fn"/>QDomDocumentFragment &amp; <b><a href="qdomdocumentfragment.html#operator-eq">operator=</a></b> ( const QDomDocumentFragment &amp; <i>x</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>65 public functions inherited from <a href="qdomnode.html#public-functions">QDomNode</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QDomDocumentFragment class is a tree of QDomNodes which is not usually a complete <a href="qdomdocument.html">QDomDocument</a>.</p>
+<p>If you want to do complex tree operations it is useful to have a lightweight class to store nodes and their relations. QDomDocumentFragment stores a subtree of a document which does not necessarily represent a well-formed XML document.</p>
+<p>QDomDocumentFragment is also useful if you want to group several nodes in a list and insert them all together as children of some node. In these cases QDomDocumentFragment can be used as a temporary container for this list of children.</p>
+<p>The most important feature of QDomDocumentFragment is that it is treated in a special way by <a href="qdomnode.html#insertAfter">QDomNode::insertAfter</a>(), <a href="qdomnode.html#insertBefore">QDomNode::insertBefore</a>(), <a href="qdomnode.html#replaceChild">QDomNode::replaceChild</a>() and <a href="qdomnode.html#appendChild">QDomNode::appendChild</a>(): instead of inserting the fragment itself, all the fragment's children are inserted.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QDomDocumentFragment"></a>QDomDocumentFragment::QDomDocumentFragment ()</h3>
+<p>Constructs an empty document fragment.</p>
+<h3 class="fn"><a name="QDomDocumentFragment-2"></a>QDomDocumentFragment::QDomDocumentFragment ( const QDomDocumentFragment &amp; <i>x</i> )</h3>
+<p>Constructs a copy of <i>x</i>.</p>
+<p>The data of the copy is shared (shallow copy): modifying one node will also change the other. If you want to make a deep copy, use <a href="qdomnode.html#cloneNode">cloneNode</a>().</p>
+<h3 class="fn"><a name="nodeType"></a><a href="qdomnode.html#NodeType-enum">QDomNode::NodeType</a> QDomDocumentFragment::nodeType () const</h3>
+<p>Returns <tt>DocumentFragment</tt>.</p>
+<p>See also <a href="qdomnode.html#isDocumentFragment">isDocumentFragment</a>() and <a href="qdomnode.html#toDocumentFragment">QDomNode::toDocumentFragment</a>().</p>
+<h3 class="fn"><a name="operator-eq"></a>QDomDocumentFragment &amp; QDomDocumentFragment::operator= ( const QDomDocumentFragment &amp; <i>x</i> )</h3>
+<p>Assigns <i>x</i> to this DOM document fragment.</p>
+<p>The data of the copy is shared (shallow copy): modifying one node will also change the other. If you want to make a deep copy, use <a href="qdomnode.html#cloneNode">cloneNode</a>().</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

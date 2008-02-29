@@ -4,7 +4,7 @@ Context=Network
 Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
 Exec=netsetup
-Icon=PPPConnect
+Icon=netsetup/PPPConnect
 Type=Application
-Name[]=In­ter­net
+Name[]=In\xadter\xadnet
 CanFastload=0

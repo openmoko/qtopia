@@ -1,31 +1,74 @@
-HEADERS+=addressbook.h
-SOURCES+=addressbook.cpp main.cpp
+qtopia_project(qtopia app)
+TARGET=addressbook
+CONFIG+=qtopia_main
 
-include (addressbook.pri)
+HEADERS+=\
+    abeditor.h\
+    imagesourcedialog.h\
+    ablabel.h\
+    contactsource.h\
+    addressbook.h
 
-CONFIG+=pimlib
+SOURCES+=\
+    abeditor.cpp\
+    imagesourcedialog.cpp\
+    ablabel.cpp\
+    addressbook.cpp\
+    contactsource.cpp\
+    main.cpp
 
-service.files=$${QTOPIA_DEPOT_PATH}/services/Contacts/addressbook
+phone {
+    !free_package|free_plus_binaries:depends(libraries/qtopiaphone)
+
+    SOURCES += emaildialogphone.cpp
+    HEADERS += emaildialogphone.h
+} else {
+    FORMS += emaildlg.ui
+    HEADERS += emaildlgimpl.h
+    SOURCES += emaildlgimpl.cpp
+}
+
+enable_cell {
+    !enable_singleexec {
+        SOURCES += ../../settings/ringprofile/ringtoneeditor.cpp
+        HEADERS += ../../settings/ringprofile/ringtoneeditor.h
+    }
+}
+
+TRANSLATABLES += emaildialogphone.cpp \
+                    emaildialogphone.h \
+                    emaildlg.ui \
+                    emaildlgimpl.h \
+                    emaildlgimpl.cpp \
+                    ../../settings/ringprofile/ringtoneeditor.cpp \
+                    ../../settings/ringprofile/ringtoneeditor.h 
+
+depends(libraries/qtopiapim)
+
+service.files=$$QTOPIA_DEPOT_PATH/services/Contacts/addressbook
 service.path=/services/Contacts
-receiveservice.files=$${QTOPIA_DEPOT_PATH}/services/Receive/text/x-vCard/addressbook
-receiveservice.path=/services/Receive/text/x-vCard/
-desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Applications/addressbook.desktop
+receiveservice.files=$$QTOPIA_DEPOT_PATH/services/Receive/text/x-vcard/addressbook
+receiveservice.path=/services/Receive/text/x-vcard/
+desktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/addressbook.desktop
 desktop.path=/apps/Applications
-help.files=$${QTOPIA_DEPOT_PATH}/help/html/addressbook*
-help.path=/help/html
-pics.files=$${QTOPIA_DEPOT_PATH}/pics/addressbook/*
+desktop.hint=desktop
+help.source=$$QTOPIA_DEPOT_PATH/help
+help.files=addressbook*
+help.hint=help
+pics.files=$$QTOPIA_DEPOT_PATH/pics/addressbook/*
 pics.path=/pics/addressbook
+pics.hint=pics
 im.files=named_addressbook-*.conf
 im.path=/etc/im/pkim
-INSTALLS+=service desktop receiveservice help im
-PICS_INSTALLS+=pics
-phoneservice.files=$${QTOPIA_DEPOT_PATH}/services/ContactsPhone/addressbook
+phoneservice.files=$$QTOPIA_DEPOT_PATH/services/ContactsPhone/addressbook
 phoneservice.path=/services/ContactsPhone
-setvcardservice.files=$${QTOPIA_DEPOT_PATH}/services/SetValue/v-card/addressbook
-setvcardservice.path=/services/SetValue/v-card/
-qdlservice.files=$${QTOPIA_DEPOT_PATH}/services/qdl/addressbook
-qdlservice.path=/services/qdl
-INSTALLS+=setvcardservice phoneservice qdlservice
+qdlservice.files=$$QTOPIA_DEPOT_PATH/services/QDL/addressbook
+qdlservice.path=/services/QDL
+qdsservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/Contacts
+qdsservice.path=/etc/qds
+qdsphoneservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/ContactsPhone
+qdsphoneservice.path=/etc/qds
+INSTALLS+=service receiveservice desktop help pics im phoneservice qdlservice qdsservice qdsphoneservice
 
-PACKAGE_DESCRIPTION=A simple addressbook for the Qtopia environment.
-PACKAGE_DEPENDS+=qpe-libqtopiapim1
+pkg.desc=Contacts for Qtopia.
+pkg.domain=pim,window,qdl,qds,beaming,phonecomm,pictures,msg,docapi,cardreader,camera,pictures,mediarecorder

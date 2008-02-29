@@ -1,47 +1,35 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
+
+#include <mediarecorderplugininterface.h>
 
 /*!
+  \internal
   \class MediaRecorderEncoder
   \brief The MediaRecorderEncoder class provides an abstract base class for
-  Qtopia MediaRecorder encoder plugins.
+  Qtopia MediaRecorder encoder plug-ins.
 
-  Writing an encoder plugin is achieved by subclassing this base class,
+  Writing an encoder plug-in is achieved by subclassing this base class,
   reimplementing the pure virtual functions and exporting the class with
-  the \c Q_EXPORT_PLUGIN macro. See the \link pluginintro.html Plugins
-  documentation\endlink for details.
+  the \c QTOPIA_EXPORT_PLUGIN macro. See the \l http://doc.trolltech.com/qtopia2.1/html/qtopia-plugins.html Qtopia Plugins documentation for details.
 
   The functions in this class are typically used in the following order
   when recording audio:
@@ -80,7 +68,7 @@
   \fn QString MediaRecorderEncoder::pluginFormatName( int format ) const
 
   Returns the name of one of a plugin's data format, e.g. "Wav Format".
-  The data format is selected using \a format as an index.  The name may be displayed 
+  The data format is selected using \a format as an index.  The name may be displayed
   to the user in a list of supported recording formats.
 */
 
@@ -88,7 +76,7 @@
   \fn QString MediaRecorderEncoder::pluginFormatTag( int format ) const
 
   Returns the tag name of a plugin's data format.  For example, "pcm".
-  The data format is selected using \a format as an index.  This value is used with \link MediaRecorderEncoder::begin \endlink .
+  The data format is selected using \a format as an index.  This value is used with \l MediaRecorderEncoder::begin .
 */
 
 /*!
@@ -103,7 +91,7 @@
   Returns the version of the plugin.  Normally 1.0.
 */
 
-//  \link MediaRecorderEncoder::pluginExtension() file extension \endlink .
+//  \l {MediaRecorderEncoder::pluginExtension() file extension} .
 /*!
   \fn QString MediaRecorderEncoder::pluginMimeType() const
 
@@ -116,16 +104,16 @@
 
   Begin recording on the specified output \a device, which must be
   capable of direct access (seeking) if
-  \link MediaRecorderEncoder::requiresDirectAccess() \endlink returns
-  TRUE. \a formatTag selects which format to use.
+  \l MediaRecorderEncoder::requiresDirectAccess() returns
+  true. \a formatTag selects which format to use.
 
-  Returns TRUE if recording has begun.  Returns FALSE if recording
+  Returns true if recording has begun.  Returns false if recording
   is already in progress or if \a device is not capable of seeking.
 
   This call will typically be followed by calls to set the
-  \link setAudioChannels() channels \endlink,
-  \link setAudioFrequency() frequency \endlink,
-  and \link addComment() file comments \endlink.
+  \l {setAudioChannels() channels} ,
+  \l {setAudioFrequency() frequency} ,
+  and \l {addComment() file comments} .
 
   \sa setAudioChannels(), setAudioFrequency(), addComment(),
   writeAudioSamples(), requiresDirectAccess()
@@ -139,15 +127,15 @@
   outputting the data, it will leave the device positioned after
   all bytes that were written.
 
-  Returns TRUE if recording was successfully terminated.
-  Returns FALSE if not currently recording, or there was an
+  Returns true if recording was successfully terminated.
+  Returns false if not currently recording, or there was an
   error writing to the device.
 */
 
 /*!
   \fn bool MediaRecorderEncoder::isActive() const
 
-  Returns TRUE if the recorder is currently active; FALSE otherwise.
+  Returns true if the recorder is currently active; false otherwise.
 */
 
 /*!
@@ -155,12 +143,12 @@
 
   Sets the number of audio channels in the recorded data to either 1 or 2.
 
-  Returns TRUE if the channel count was set successfully.  Returns FALSE
+  Returns true if the channel count was set successfully.  Returns false
   if not recording, the data header has already been written, or if
   \a channels is neither 1 nor 2.
 
   The data header is considered written upon the first call to
-  \link writeAudioSamples() write audio samples \endlink.
+  \l {writeAudioSamples() write audio samples} .
 
   \sa begin(), setAudioFrequency(), writeAudioSamples()
 */
@@ -170,12 +158,12 @@
 
   Sets the audio sample frequency in the recorded data.
 
-  Returns TRUE if the frequency was set successfuly.  Returns FALSE
+  Returns true if the frequency was set successfuly.  Returns false
   if not recording, the data header has already been written, or if
   \a frequency is less than or equal to zero.
 
   The data header is considered written upon the first call to
-  \link writeAudioSamples() write audio samples \endlink.
+  \l {writeAudioSamples() write audio samples} .
 
   \sa begin(), setAudioChannels(), writeAudioSamples()
 */
@@ -192,7 +180,7 @@
   \a samples buffer.  This will be a multiple of two for stereo data,
   with alternating channel samples.
 
-  Returns TRUE if the samples were successfully written.  Returns FALSE
+  Returns true if the samples were successfully written.  Returns false
   if not recording or there was an error writing to the output device.
 
   \sa begin(), setAudioChannels(), setAudioFrequency()
@@ -201,21 +189,20 @@
 /*!
   \fn bool MediaRecorderEncoder::addComment( const QString& tag, const QString& contents )
 
-  Adds a comment string \a contents tagged as \a tag to the recorded output.  The plugin may
+  Adds a comment string \a contents tagged as \a tag to the recorded output.  The plug-in may
   ignore tags that it doesn't understand.
 
-  Returns TRUE if the comment was successfully added (or ignored).
-  Returns FALSE if not recording or the data header has already been
+  Returns true if the comment was successfully added (or ignored).
+  Returns false if not recording or the data header has already been
   written.
 
   The data header is considered written upon the first call to
-  \link writeAudioSamples() write audio samples \endlink.  This is true
+  \l {writeAudioSamples() write audio samples} .  This is true
   even if plugin's data format places comments at the end of the stream,
-  rather than the front.  The plugin should cache the comments until
+  rather than the front.  The plug-in should cache the comments until
   it is ready to output them.
 
-  This should only be called if \link supportsComments() comments \endlink
-  are supported by the plugin.
+  This should only be called if \l {supportsComments() comments} are supported by the plugin.
 
   \sa begin(), writeAudioSamples(), supportsComments()
 */
@@ -231,19 +218,19 @@
 /*!
   \fn bool MediaRecorderEncoder::supportsAudio() const
 
-  Returns TRUE if this plugin supports audio; FALSE otherwise.
+  Returns true if this plug-in supports audio; false otherwise.
 */
 
 /*!
   \fn bool MediaRecorderEncoder::supportsVideo() const
 
-  Returns TRUE if this plugin supports video; FALSE otherwise.
+  Returns true if this plug-in supports video; false otherwise.
 */
 
 /*!
   \fn bool MediaRecorderEncoder::supportsComments() const
 
-  Returns TRUE if this plugin supports comments; FALSE otherwise.
+  Returns true if this plug-in supports comments; false otherwise.
 
   \sa addComment()
 */
@@ -251,19 +238,20 @@
 /*!
   \fn bool MediaRecorderEncoder::requiresDirectAccess() const
 
-  Returns TRUE if this plugin must be supplied a direct access (seekable)
+  Returns true if this plug-in must be supplied a direct access (seekable)
   output device.
 
   \sa begin()
 */
 
 /*!
-  \class MediaRecorderPluginInterface
-  \brief The MediaRecorderPluginInterface class provides a method of obtaining a multimedia encoder.
+  \internal
+  \class MediaRecorderCodecFactoryInterface
+  \brief The MediaRecorderCodecFactoryInterface class provides a method of obtaining a multimedia encoder.
 
   \mainclass
 
-  The abstract MediaRecorderPluginInterface class allows applications
+  The abstract  MediaRecorderCodecFactoryInterface class allows applications
   to obtain an encoder to record multimedia data to a file or other
   output device.
 
@@ -271,9 +259,16 @@
 */
 
 /*!
-  \fn MediaRecorderEncoder *MediaRecorderPluginInterface::encoder()
+  \fn MediaRecorderEncoder *MediaRecorderCodecFactoryInterface::encoder()
 
-  Creates and returns a new plugin encoder instance.  It is the
+  Creates and returns a new plug-in encoder instance.  It is the
   responsibility of the caller to delete the instance before unloading
-  the plugin interface library.
+  the plug-in interface library.
 */
+
+MediaRecorderCodecPlugin::MediaRecorderCodecPlugin( QObject* parent )
+    : QObject( parent )
+{ }
+
+MediaRecorderCodecPlugin::~MediaRecorderCodecPlugin()
+{ }

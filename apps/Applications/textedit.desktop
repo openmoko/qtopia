@@ -4,7 +4,7 @@ Context=Notes
 [Desktop Entry]
 Comment[]=A Text Editing Program
 Exec=textedit
-Icon=TextEditor
+Icon=textedit/TextEditor
 Type=Application
 MimeType=text/*
 Name[]=Notes

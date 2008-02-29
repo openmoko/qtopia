@@ -1,37 +1,23 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "memory.h"
 #include "load.h"
@@ -40,102 +26,149 @@
 #include "versioninfo.h"
 #include "sysinfo.h"
 #include "dataview.h"
+#include "securityinfo.h"
+#ifdef QTOPIA_CELL
+#include "siminfo.h"
+#include "modeminfo.h"
+#endif
 
-#include <qtopia/resource.h>
-#include <qtopia/qpeapplication.h>
+#include <qtopiaapplication.h>
+#include <qsoftmenubar.h>
 
 #include <qtabwidget.h>
 #include <qlayout.h>
-#include <qscrollview.h>
+#include <QScrollBar>
+#include <QAbstractSlider>
 #include <qpushbutton.h>
+#include <QKeyEvent>
 
-
-SystemInfo::SystemInfo( QWidget *parent, const char *name, WFlags f )
-    : QWidget( parent, name, f ), wizard(0)
+SystemInfo::SystemInfo( QWidget *parent, Qt::WFlags f )
+    : QWidget( parent, f )
+#ifdef QTOPIA4_TODO
+, wizard(0)
+#endif
 {
-    QScrollView *sv;
-    setIcon( Resource::loadPixmap( "SystemInfo" ) );
-    setCaption( tr("System Info") );
+    setWindowIcon( QPixmap( ":image/SystemInfo" ) );
+    setWindowTitle( tr("System Info") );
+
     QVBoxLayout *lay = new QVBoxLayout( this );
+    lay->setMargin( 1 );
     tab = new QTabWidget( this );
     lay->addWidget( tab );
 
-    sv = new QScrollView(this, "VersionSV");
-    sv->setHScrollBarMode(QScrollView::AlwaysOff);
-    sv->setResizePolicy(QScrollView::AutoOneFit);
-    sv->setFrameStyle(QFrame::NoFrame);
-    sv->addChild( new VersionInfo( tab ) );
-    tab->addTab( sv, tr("Version") );
-
-#if defined(_OS_LINUX_) || defined(Q_OS_LINUX)
-    sv = new QScrollView(this, "StorageSV");
-    QWidget *w = new QWidget(sv->viewport());
-    sv->setHScrollBarMode(QScrollView::AlwaysOff);
-    sv->setResizePolicy(QScrollView::AutoOneFit);
-    sv->setFrameStyle(QFrame::NoFrame);
-    sv->addChild(w);
-    
-    QVBoxLayout * vl = new QVBoxLayout(w);
-    vl->addWidget( new StorageInfoView(w) );
-    QPushButton * cleanup = new QPushButton(tr("Cleanup..."), w, "start cleanup");
-    cleanup->setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum));
-    connect(cleanup, SIGNAL(clicked()), this, SLOT(startCleanupWizard()));
-    vl->addWidget( cleanup ) ;
-    QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum,
-            QSizePolicy::Expanding);
-    vl->addItem(spacer);
-    
-    connect(qApp, SIGNAL(appMessage(const QCString&, const QByteArray&)),
-            this, SLOT(appMessage(const QCString&, const QByteArray&)));
-    
-    tab->addTab(sv, tr("Storage"));
-#endif
+    tab->addTab( wrapWithScrollArea(new VersionInfo( tab )), tr("Version") );
+    tab->addTab( new StorageInfoView(tab), tr("Storage"));
 
 #ifdef SYSINFO_GEEK_MODE
-    tab->addTab( new LoadInfo( tab ), tr("CPU") );
+    tab->addTab( wrapWithScrollArea(new LoadInfo(tab)), tr("CPU") );
     //tab->addTab( new Graphics( tab ), tr("Graphics") );
 #endif
 
-    tab->addTab( new MemoryInfo( tab ), tr("Memory") );
-    tab->addTab( new DataView( tab ), tr("Data") );
+    tab->addTab( wrapWithScrollArea(new MemoryInfo(tab)), tr("Memory") );
+    tab->addTab( wrapWithScrollArea(new DataView(tab)), tr("Data") );
+    tab->addTab( wrapWithScrollArea(new SecurityInfo(tab)), tr("Security") );
+#ifdef QTOPIA_CELL
+    tab->addTab( wrapWithScrollArea(new ModemInfo(tab)), tr("Modem") );
+    tab->addTab( wrapWithScrollArea(new SimInfo(tab)), tr("SIM") );
+#endif
     resize( 220, 180 );
 
 #ifdef QTOPIA_PHONE
-    contextMenu = new ContextMenu( this );
+    contextMenu = QSoftMenuBar::menuFor( this );
+    QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
 #endif
 }
 
-bool SystemInfo::event(QEvent *e) 
-{   
-    if (e->type() == QEvent::Accel ||  e->type() == QEvent::KeyPress) {
+
+bool SystemInfo::event(QEvent *e)
+{
+    if ( e->type() == QEvent::KeyPress) {
         QKeyEvent *ke = (QKeyEvent*)e;
-        if (ke->key() == Key_Up || ke->key() == Key_Down) {
-            QWidget *w = tab->currentPage();
-            if (w->inherits("QScrollView")) {
-                QScrollView *sView = (QScrollView*)(w);
-                if (ke->key() == Key_Down)
-                    sView->scrollBy(0, 10);
-                else
-                    sView->scrollBy(0, -10);
-                return TRUE;
+        if (ke->key() == Qt::Key_Up || ke->key() == Qt::Key_Down) {
+            QWidget* w = tab->currentWidget();
+            QAbstractScrollArea* area = NULL;
+            if (w->inherits("QAbstractScrollArea"))
+                area = qobject_cast<QAbstractScrollArea *>(w);
+            else
+                area = w->findChild<QAbstractScrollArea *>();
+            if ( !area )
+                return QWidget::event( e );
+            QScrollBar* vertBar = area->verticalScrollBar();
+            if ( !vertBar )
+                return QWidget::event( e );
+            if ( ke->key() == Qt::Key_Up )
+                vertBar->triggerAction( QAbstractSlider::SliderSingleStepSub );
+            else
+                vertBar->triggerAction( QAbstractSlider::SliderSingleStepAdd );
+        }
+    }
+#ifdef QTOPIA_PHONE
+    if (e->type() == QEvent::Show)
+        tab->currentWidget()->setEditFocus( true );
+#endif
+    if (e->type() == QEvent::ShortcutOverride /*|| e->type() == QEvent::KeyPress*/) {
+        // If the tab widget has focus, then Left/Right keys will be
+        // handled by the tab bar.  If we also handle them, we will
+        // get double-tab jumps on every keypress.
+        if ( !tab->hasFocus() ) {
+            QKeyEvent *ke = static_cast<QKeyEvent *>(e);
+            if (ke && ke->key() == Qt::Key_Left && tab->currentIndex() > 0) {
+                tab->setCurrentIndex((tab->currentIndex() + tab->count() - 1) % tab->count());
+                return true;
+            }
+            else if (ke && ke->key() == Qt::Key_Right && (tab->currentIndex()+1) < tab->count()) {
+                tab->setCurrentIndex((tab->currentIndex() + 1) % tab->count());
+                return true;
             }
         }
     }
     return QWidget::event(e);
 }
 
-void SystemInfo::appMessage(const QCString& msg, const QByteArray& data) {
-    (void)data;
-    if ( msg == "showCleanupWizard()" ) {
-        startCleanupWizard();
-    }
-}
-
-void SystemInfo::startCleanupWizard() 
+void SystemInfo::startCleanupWizard()
 {
-    QPEApplication::setKeepRunning();
-    if (!wizard) 
+#ifdef QTOPIA4_TODO
+    if (!wizard)
         wizard = new CleanupWizard(this, "CleanupWizard", WType_Modal);
     wizard->showMaximized();
-    
+#endif
+}
+
+QScrollArea *SystemInfo::wrapWithScrollArea(QWidget *widget)
+{
+    QScrollArea *sv = new QScrollArea();
+    sv->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    sv->setFrameStyle(QFrame::NoFrame);
+    sv->setWidgetResizable(true);
+    sv->setWidget( widget );
+    sv->setFocusPolicy( Qt::NoFocus );
+    return sv;
+}
+
+
+/*!
+    \service CleanupWizardService CleanupWizard
+    \brief Provides the Qtopia CleanupWizard service.
+
+    The \i CleanupWizard service enables applications to pop up the
+    cleanup wizard for deleting old documents.
+*/
+
+/*!
+    \internal
+*/
+CleanupWizardService::~CleanupWizardService()
+{
+}
+
+/*!
+    Start the cleanup wizard. The wizard allows the deletion of old documents,
+    the cleanup of the mailbox and purges old (and finished) events.
+
+    This slot corresponds to the QCop service message
+    \c{CleanupWizard::showCleanupWizard()}.
+*/
+void CleanupWizardService::showCleanupWizard()
+{
+    parent->startCleanupWizard();
 }

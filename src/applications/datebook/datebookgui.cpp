@@ -1,55 +1,37 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "datebookgui.h"
 
-#include <qtopia/resource.h>
-#ifdef Q_WS_QWS
-#include <qtopia/ir.h>
-#endif
+#include <QApplication>
+#include <QAction>
+#include <QToolBar>
+#include <QMenuBar>
+#include <QMenu>
+#include <QDesktopWidget>
 
-#ifndef QTOPIA_PHONE
-#include <qtopia/qpemenubar.h>
-#include <qtopia/qpetoolbar.h>
-#include <qapplication.h>
-#endif
+#include <qtopiasendvia.h>
 
-#include <qaction.h>
-
-DateBookGui::DateBookGui( QWidget *parent, const char *, WFlags f )
-    : QMainWindow( parent, "datebook", f ),
+DateBookGui::DateBookGui( QWidget *parent, Qt::WFlags f )
+    : QMainWindow( parent, f ),
     actionFind( 0 ),
     sub_bar( 0 ),
     details_bar( 0 )
@@ -64,164 +46,175 @@ void DateBookGui::init()
 {
     parentWidget = this;
 
-    setCaption( tr("Calendar") );
-    setIcon( Resource::loadPixmap( "DateBook" ) );
+    setWindowTitle(tr("Calendar"));
+    setWindowIcon(QPixmap(":image/DateBook"));
 
-    setToolBarsMovable( FALSE );
-    setBackgroundMode( PaletteButton );
+    //setToolBarsMovable( false );
+    setBackgroundRole(QPalette::Button);
 
     // Create the actions
 
-    actionNew = new QAction( tr( "New" ), Resource::loadIconSet( "new" ), QString::null, 0, parentWidget, 0 );
-    actionNew->setWhatsThis( tr("Create a new event") );
-    connect( actionNew, SIGNAL( activated() ), this, SLOT( fileNew() ) );
+    actionNew = new QAction(QIcon(":icon/new"), tr("New"), parentWidget);
+    actionNew->setWhatsThis(tr("Create a new event"));
+    connect(actionNew, SIGNAL(triggered()), this, SLOT(newAppointment()));
 
-    actionEdit = new QAction( tr( "Edit" ), Resource::loadIconSet( "edit" ), QString::null, 0, parentWidget, 0 );
-    actionEdit->setWhatsThis( tr("Edit the selected event") );
-    connect( actionEdit, SIGNAL( activated() ), this, SLOT( editCurrentEvent() ) );
+    actionEdit = new QAction(QIcon(":icon/edit"), tr("Edit"), parentWidget);
+    actionEdit->setWhatsThis(tr("Edit the selected event"));
+    connect(actionEdit, SIGNAL(triggered()), this, SLOT(editCurrentOccurrence()));
 
-    actionDelete = new QAction( tr( "Delete" ), Resource::loadIconSet( "trash" ), QString::null, 0, parentWidget, 0 );
-    actionDelete->setWhatsThis( tr("Delete the selected event") );
-    connect( actionDelete, SIGNAL( activated() ), this, SLOT( removeCurrentEvent() ) );
+    actionDelete = new QAction(QIcon(":icon/trash"), tr("Delete"), parentWidget);
+    actionDelete->setWhatsThis(tr("Delete the selected event"));
+    connect(actionDelete, SIGNAL(triggered()), this, SLOT(removeCurrentOccurrence()));
 
-#ifdef Q_WS_QWS
-    if (Ir::supported()) {
-	actionBeam = new QAction( tr( "Beam" ), Resource::loadIconSet( "beam" ), QString::null, 0, parentWidget, 0 );
-	actionBeam->setWhatsThis( tr("Beam the selected event") );
-	connect( actionBeam, SIGNAL( activated() ), this, SLOT( beamCurrentEvent() ) );
+    if (QtopiaSendVia::isDataSupported("text/x-vcalendar")) {
+        actionBeam = new QAction(QIcon(":icon/beam"), tr("Send"), parentWidget);
+        actionBeam->setWhatsThis(tr("Beam the selected event"));
+        connect(actionBeam, SIGNAL(triggered()), this, SLOT(beamCurrentAppointment()));
     }
-#endif
 
-    QActionGroup *g = new QActionGroup( parentWidget );
-    g->setExclusive( TRUE );
+    actionShowAll = new QAction(tr("Show All Events"), parentWidget);
+    actionShowAll->setWhatsThis(tr("Show the all day events that are currently hidden"));
+    connect(actionShowAll, SIGNAL(triggered()), this, SLOT(unfoldAllDay()));
 
-    actionToday = new QAction( tr( "Today" ), Resource::loadIconSet( "today" ), QString::null, 0, g, 0 );
-    actionToday->setWhatsThis( tr("Show today's events") );
-    connect( actionToday, SIGNAL( activated() ), this, SLOT( slotToday() ) );
+    actionHideSome = new QAction(tr("Compress Events"), parentWidget);
+    actionHideSome->setWhatsThis(tr("Show only a limited number of all day events"));
+    connect(actionHideSome, SIGNAL(triggered()), this, SLOT(foldAllDay()));
 
-    actionDay = new QAction( tr( "Day", "day, not date" ), Resource::loadIconSet( "day" ), QString::null, 0, g, 0 );
-    actionDay->setWhatsThis( tr("Show selected day's events") );
-    actionDay->setToggleAction( TRUE );
-    actionDay->setOn( TRUE );
-    connect( actionDay, SIGNAL( activated() ), this, SLOT( viewDay() ) );
+    QActionGroup *g = new QActionGroup(parentWidget);
+    g->setExclusive(true);
 
-#if !defined(QTOPIA_PHONE)
-    actionWeek = new QAction( tr( "Week" ), Resource::loadIconSet( "week" ), QString::null, 0, g, 0 );
-    actionWeek->setWhatsThis( tr("Show selected week's events") );
-    actionWeek->setToggleAction( TRUE );
-    connect( actionWeek, SIGNAL( activated() ), this, SLOT( viewWeek() ) );
-#endif
+    actionToday = new QAction(QIcon(":icon/today"), tr("Today"), g);
+    actionToday->setWhatsThis(tr("Show today's events"));
+    connect(actionToday, SIGNAL(triggered()), this, SLOT(selectToday()));
 
-    actionMonth = new QAction( tr( "Month" ), Resource::loadIconSet( "month" ), QString::null, 0, g, 0 );
-    actionMonth->setWhatsThis( tr("Show selected month's events") );
-    actionMonth->setToggleAction( TRUE );
-    connect( actionMonth, SIGNAL( activated() ), this, SLOT( viewMonth() ) );
-
-#if !defined(QTOPIA_PHONE)
-    actionFind = new QAction( tr( "Find" ), Resource::loadIconSet( "find" ), QString::null, 0, g, 0 );
-    connect( actionFind, SIGNAL(activated()), this, SLOT(slotFind()) );
-#endif
-
-#ifdef QTOPIA_PHONE
-    actionNextView = new QAction( tr( "Next View" ), Resource::loadIconSet( "month" ), QString::null, 0, g, 0 );
-    actionNextView->setAccel('*');
-    connect( actionNextView, SIGNAL( activated() ), this, SLOT( nextView() ) );
-#endif
-
-    actionSettings = new QAction( tr( "Settings..." ), Resource::loadIconSet("settings"), QString::null, 0, g );
-    connect( actionSettings, SIGNAL( activated() ), this, SLOT( showSettings() ) );
+    actionDay = new QAction(QIcon(":icon/day"), tr("Day", "day, not date"), g);
+    actionDay->setWhatsThis(tr("Show selected day's events"));
+    actionDay->setCheckable(true);
+    actionDay->setChecked(true);
+    connect(actionDay, SIGNAL(triggered()), this, SLOT(viewDay()));
 
 #ifndef QTOPIA_PHONE
-    actionBack = new QAction( tr("Back"), Resource::loadIconSet("contextback"), QString::null, 0, g );
-    connect( actionBack, SIGNAL(activated()), this, SLOT(hideEventDetails()) );
+    actionWeek = new QAction(QIcon(":icon/week"), tr("Week"), g);
+    actionWeek->setWhatsThis(tr("Show selected week's events"));
+    actionWeek->setCheckable(true);
+    connect(actionWeek, SIGNAL(triggered()), this, SLOT(viewWeek()));
+
+    actionFind = new QAction(QIcon(":icon/find"), tr("Find"), g);
+    connect(actionFind, SIGNAL(triggered()), this, SLOT(find()));
+
+    actionNextView = new QAction( QIcon(":icon/month"), tr("Next View"), g);
+    actionNextView->setShortcut(QString("*"));
+    connect(actionNextView, SIGNAL(triggered()), this, SLOT(nextView()));
+
+    actionBack = new QAction(QIcon(":icon/i18n/back"), tr("Back"), g);
+    connect(actionBack, SIGNAL(triggered()), this, SLOT(hideAppointmentDetails()));
 #endif
 
+    actionMonth = new QAction(QIcon(":icon/month"), tr("Month"), g);
+    actionMonth->setWhatsThis(tr("Show selected month's events"));
+    actionMonth->setCheckable(true);
+    connect(actionMonth, SIGNAL(triggered()), this, SLOT(viewMonth()));
+
+    actionAccounts = new QAction(QIcon(":icon/settings"), tr("Accounts"), parentWidget);
+    connect(actionAccounts, SIGNAL(triggered()), this, SLOT(showAccountSettings()));
+    // be default, dont' show this.  dependent on features of model loaded.
+    actionAccounts->setVisible(false);
+
+    actionSettings = new QAction(QIcon(":icon/settings"), tr("Settings..."), g);
+    connect(actionSettings, SIGNAL(triggered()), this, SLOT(showSettings()));
+
 #if 0
-    actionPurge = new QAction( tr( "Purge..." ), Resource::loadIconSet( "trash" ), QString::null, 0, g, 0 );
+    actionPurge = new QAction( QIcon( ":icon/trash" ), tr( "Purge..." ), g );
     actionPurge->setWhatsThis( tr("Remove old events") );
-    connect( actionPurge, SIGNAL( activated() ), this, SLOT( slotPurge() ) );
+    connect( actionPurge, SIGNAL(triggered()), this, SLOT( slotPurge() ) );
 #endif
 
     // Setup Menus
 #if !defined(QTOPIA_PHONE)
-    QPEToolBar *bar = new QPEToolBar( (QMainWindow *)parentWidget );
-    bar->setHorizontalStretchable( TRUE );
+    QToolBar *bar = new QToolBar(this); //(QMainWindow *)parentWidget );
+    bar->setMovable(false);
+    addToolBar(Qt::TopToolBarArea, bar);
 
-    QPEMenuBar *mb = new QPEMenuBar( bar );
-    mb->setMargin( 0 );
+    QMenuBar *mb = menuBar();
 
 #ifndef QTOPIA_NO_POINTER_INPUT
-    sub_bar = new QPEToolBar( (QMainWindow *)parentWidget );
-#endif
-#ifndef QTOPIA_PHONE
-    details_bar = new QPEToolBar( (QMainWindow *)parentWidget );
+    sub_bar = new QToolBar( this );
+    sub_bar->setMovable(false);
+    addToolBar(Qt::TopToolBarArea, sub_bar);
 #endif
 
-    QPopupMenu *eventMenu = new QPopupMenu( parentWidget );
-    QPopupMenu *view = new QPopupMenu( parentWidget );
+    details_bar = new QToolBar( this );
+    details_bar->setMovable(false);
+    addToolBar(Qt::TopToolBarArea, details_bar);
 
-    mb->insertItem( tr( "Event" ), eventMenu );
-    mb->insertItem( tr( "View" ), view );
+    QMenu *appointmentMenu = mb->addMenu( tr( "Event" ) );
+    QMenu *view = mb->addMenu( tr( "View" ) );
 
-    actionNew->addTo( eventMenu );
-    actionEdit->addTo( eventMenu );
-    actionDelete->addTo( eventMenu );
-    //actionPurge->addTo( eventMenu );
-#ifdef Q_WS_QWS
-    if (Ir::supported())
-	actionBeam->addTo( eventMenu );
-#endif
-    eventMenu->insertSeparator();
-    actionFind->addTo( eventMenu );
+    appointmentMenu->addAction( actionNew );
+    appointmentMenu->addAction( actionEdit );
+    appointmentMenu->addAction( actionDelete );
+    //appointmentMenu->addAction( actionPurge );
+
+    if (QtopiaSendVia::isDataSupported("text/x-vcalendar"))
+        appointmentMenu->addAction( actionBeam );
+
+    appointmentMenu->addSeparator();
+    appointmentMenu->addAction( actionFind );
 
     if ( sub_bar ) {
-	actionNew->addTo( sub_bar );
-	actionToday->addTo( sub_bar );
-	sub_bar->addSeparator();
-	bool thinScreen = QApplication::desktop()->width() < 200;
-	if ( !thinScreen ) {
-	    actionDay->addTo( sub_bar );
-	    actionWeek->addTo( sub_bar );
-	    actionMonth->addTo( sub_bar );
-	}
-	//actionFind->addTo( sub_bar );
+        sub_bar->addAction( actionNew );
+        sub_bar->addAction( actionToday );
+        sub_bar->addSeparator();
+        QDesktopWidget *desktop = QApplication::desktop();
+        bool thinScreen = desktop->availableGeometry(desktop->screenNumber(this)).width() < 200;
+        if ( !thinScreen ) {
+            sub_bar->addAction( actionDay );
+            sub_bar->addAction( actionWeek );
+            sub_bar->addAction( actionMonth );
+        }
+        //sub_bar->addAction( actionFind );
     }
 
     if ( details_bar ) {
-	actionEdit->addTo( details_bar );
-	actionDelete->addTo( details_bar );
-#ifdef Q_WS_QWS
-	if (Ir::supported())
-	    actionBeam->addTo( details_bar );
-#endif
-	details_bar->addSeparator();
-	actionBack->addTo( details_bar );
+        details_bar->addAction( actionEdit );
+        details_bar->addAction( actionDelete );
 
-	details_bar->hide();
+        if (QtopiaSendVia::isDataSupported("text/x-vcalendar"))
+            details_bar->addAction( actionBeam );
+
+        details_bar->addSeparator();
+        details_bar->addAction( actionBack );
+
+        details_bar->hide();
     }
 
-    actionToday->addTo( view );
-    view->insertSeparator();
-    actionDay->addTo( view );
-    actionWeek->addTo( view );
-    actionMonth->addTo( view );
-    view->insertSeparator();
-    actionSettings->addTo( view );
+    view->addAction( actionToday );
+    view->addSeparator();
+    view->addAction( actionDay );
+    view->addAction( actionWeek );
+    view->addAction( actionMonth );
+    view->addSeparator();
+    view->addAction( actionAccounts );
+    view->addAction( actionSettings );
 
 #else
-    contextMenu = new ContextMenu(parentWidget);
-    
-    actionNew->addTo( contextMenu );
-    actionEdit->addTo( contextMenu );
-    actionDelete->addTo( contextMenu );
-    //actionPurge->addTo( contextMenu );
-#ifdef Q_WS_QWS
-    if (Ir::supported())
-	actionBeam->addTo( contextMenu );
-#endif
-    actionToday->addTo( contextMenu );
-    actionMonth->addTo( contextMenu );
-    actionSettings->addTo( contextMenu );
+    contextMenu = QSoftMenuBar::menuFor(parentWidget);
+
+    contextMenu->addAction( actionNew );
+    contextMenu->addAction( actionEdit );
+    contextMenu->addAction( actionDelete );
+    contextMenu->addAction( actionAccounts );
+    contextMenu->addAction( actionShowAll );
+    contextMenu->addAction( actionHideSome );
+    //contextMenu->actionPurge( actionPurge );
+
+    if (QtopiaSendVia::isDataSupported("text/x-vcalendar"))
+        contextMenu->addAction( actionBeam );
+
+    contextMenu->addAction( actionToday );
+    contextMenu->addAction( actionMonth );
+    contextMenu->addAction( actionAccounts );
+    contextMenu->addAction( actionSettings );
 #endif
 }
 

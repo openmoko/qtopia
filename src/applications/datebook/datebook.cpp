@@ -1,1664 +1,835 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
-
-#define QTOPIA_INTERNAL_FD
-#define QTOPIA_INTERNAL_FILEOPERATIONS
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "datebook.h"
+
 #include "dayview.h"
-#include "datebooksettings.h"
-#include "datebookweek.h"
-#include "entrydialog.h"
 #include "monthview.h"
-#include "finddialog.h"
+#include "appointmentdetails.h"
+#if !defined(QTOPIA_PHONE) && defined(QTOPIA4_TODO)
+#   include "weekview.h"
+#endif
+
+#include "appointmentpicker.h"
+#include "datebooksettings.h"
 #include "exceptiondialog.h"
-#include "eventpicker.h"
+#include "entrydialog.h"
 #include "alarmdialog.h"
-#include "eventview.h"
-
-#ifdef QTOPIA_DESKTOP
-#include <common/action.h>
+#include "finddialog.h"
+#ifdef GOOGLE_CALENDAR_CONTEXT
+#include "accounteditor.h"
 #endif
 
-#include <qtopia/vscrollview.h>
-#include <qtopia/qpeapplication.h>
-#include <qtopia/global.h>
-#include <qtopia/config.h>
-#include <qtopia/qpedebug.h>
-#include <qtopia/pim/event.h>
-#include <qtopia/stringutil.h>
-#ifdef Q_WS_QWS
-#include <qtopia/ir.h>
-#endif
-#include <qtopia/qpemenubar.h>
-#include <qtopia/qpemessagebox.h>
-#include <qtopia/resource.h>
-#include <qtopia/sound.h>
-#include <qtopia/timestring.h>
-#include <qtopia/qpetoolbar.h>
-#include <qtopia/tzselect.h>
-#include <qtopia/xmlreader.h>
-#include <qtopia/applnk.h>
-#include <qtopia/pim/private/eventio_p.h>
-#include <qtopia/pim/private/eventxmlio_p.h>
-#ifdef Q_WS_QWS
-#include <qtopia/qcopenvelope_qws.h>
-#endif
-#ifdef QTOPIA_DATA_LINKING
-#include <qtopia/qdl.h>
-#endif
-#ifdef QTOPIA_PHONE
-#include <qtopia/contextbar.h>
-#endif
-#ifdef QTOPIA_DESKTOP
-#include <qtopia/categoryselect.h>
-#endif
-#include <qtopia/datetimeedit.h>
+#include <qtopiaapplication.h>
+#include <qtopianamespace.h>
+#include <qtopianamespace.h>
+#include <qtimestring.h>
+#include <qtimezonewidget.h>
+#include <qtopia/pim/qappointment.h>
+#include <qtopia/pim/qappointmentmodel.h>
 
-#include <qaction.h>
-#include <qtimer.h>
-#include <qdatetime.h>
-#include <qdialog.h>
-#include <qdir.h>
-#include <qfile.h>
-#include <qlabel.h>
-#include <qlayout.h>
-#include <qmessagebox.h>
-#include <qpopupmenu.h>
-#include <qpushbutton.h>
-#include <qtextcodec.h>
-#include <qtextstream.h>
-#include <qtl.h>
-#include <qwidgetstack.h>
-#include <qvbox.h>
-#include <qregexp.h>
-//#ifdef QWS
-////#include <qwindowsystem_qws.h>
-////#include <qcopchannel_qws.h>
-////#endif
-#include <qarray.h>
+#include <QDL>
+#include <QDLLink>
+#include <QDSActionRequest>
+#include <QDSData>
+#include <QDebug>
+
+#include <QSettings>
+#include <QAction>
+#include <QTimer>
+#include <QDateTime>
+#include <QDialog>
+#include <QDir>
+#include <QFile>
+#include <QLabel>
+#include <QLayout>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QTextCodec>
+#include <QTextStream>
+#include <QRegExp>
+#include <QStackedWidget>
+#include <QToolBar>
+#include <QCloseEvent>
 
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
-
-#ifndef Q_OS_WIN32
-#include <unistd.h>
-#endif
-
 #include <stdlib.h>
 
-#define DAY 1
-#define WEEK 2
-#define MONTH 3
-#define EVENT 4
+#ifdef QTOPIA_DESKTOP
+#   include <common/action.h>
+#   include <qtopia/categoryselect.h>
+#endif
 
+#include <qtopiasendvia.h>
+#include <qtopiaipcenvelope.h>
 
-#if !defined(QTOPIA_DESKTOP)
-DateBook::DateBook( QWidget *parent, const char *, WFlags f )
-    : DateBookGui( parent, "datebook", f ),
-      aPreset( FALSE ),
-      presetTime( -1 ),
-      startTime( 8 ), // an acceptable default
-      compressDay( TRUE ),
-      syncing(FALSE),
-      inSearch(FALSE),
-      exceptionMb(0)
+#include <qcontent.h>
+
+#ifdef QTOPIA_PHONE
+#   include <qtopia/qsoftmenubar.h>
+#endif
+
+#ifndef Q_OS_WIN32
+#   include <unistd.h>
+#endif
+
+static const unsigned int   DATEBOOK_UPDATE_ICON_TIMEOUT    =   500;
+
+DateBook::DateBook(QWidget *parent, Qt::WFlags f)
+#ifndef QTOPIA_DESKTOP
+: DateBookGui(parent, f),
+#else
+: DateBookGui(),
+#endif
+  editorView(0),
+  exceptionDialog(0),
+  aPreset(false),
+  presetTime(-1),
+  startTime(8), // an acceptable default
+  compressDay(true),
+  syncing(false),
+  inSearch(false),
+  closeAfterView(false),
+  updateIconsTimer(0),
+  prevOccurrences()
 {
     init();
-}
-#else
-DateBook::DateBook()
-    : DateBookGui(),
-      aPreset( FALSE ),
-      presetTime( -1 ),
-      startTime( 8 ), // an acceptable default
-      compressDay( TRUE ),
-      syncing(FALSE),
-      inSearch(FALSE),
-      exceptionMb(0)
-{
-}
-#endif
 
-void DateBook::init()
-{
-    int timingLoad, timingOther;
-#ifdef QTOPIA_DESKTOP
-    Q_UNUSED(timingOther)
-#endif
-
-    dayView = 0;
-    weekView = 0;
-    monthView = 0;
-    eventView = 0;
-
-#ifdef Q_WS_QWS
-    beamfile = Global::tempDir() + "obex";
-
-    QDir d;
-    d.mkdir(beamfile);
-    beamfile += "/event.vcs";
-#endif
-    
-
-    QTime t;
-    t.start();
-    db = new DateBookTable(this);
-    timingLoad = t.elapsed();
-    loadSettings();
-    DateBookGui::init();
-
-#if !defined(QTOPIA_DESKTOP)
-    views = new QWidgetStack( parentWidget );
-    setCentralWidget( views );
-
-    timingOther = t.elapsed();
-    viewToday();
-    TimeString::connectChange(this, SLOT(changeClock()) );
-    connect( qApp, SIGNAL(weekChanged(bool)),
-             this, SLOT(changeWeek(bool)) );
-
-    connect( qApp, SIGNAL( appMessage(const QCString&,const QByteArray&) ), 
-	    this, SLOT( appMessage(const QCString&,const QByteArray&) ) );
-
-    connect( qApp, SIGNAL( timeChanged() ), 
-	    this, SLOT( checkToday() ) );
-
-    connect( qApp, SIGNAL( timeChanged() ), 
-	    this, SLOT( updateAlarms() ) );
-
-    connect( qApp, SIGNAL( flush() ), 
-	    this, SLOT( flush() ) );
-
-    connect( qApp, SIGNAL( reload() ), 
-	    this, SLOT( reload() ) );
-
-    // start Timer
-    midnightTimer = new QTimer(this);
-    connect(midnightTimer, SIGNAL(timeout()), this, SLOT(checkToday()));
-    // 2 seconds after midnight
-    midnightTimer->start( (QTime::currentTime().secsTo(QTime(23,59,59)) + 3) * 1000 );
-#endif // QTOPIA_DESKTOP
-
-}
-
-void DateBook::checkToday()
-{
-    if ( lastToday != QDate::currentDate() ) {
-	if ( lastToday == currentDate() )
-	    slotToday();
-	else
-	    lastToday = QDate::currentDate();
-    } else {
-	refreshWidgets();
-    }
-
-    midnightTimer->start(
-	    (QTime::currentTime().secsTo(QTime(23,59,59)) + 3)
-	    * 1000 );
-}
-
-void DateBook::updateAlarms()
-{
-    /* 
-       time may have gone backwards... but giving the same alarms 
-       again won't hurt (server will ignore) so send them all again,
-   */
-    // no real way to tell if forward or backward, so need to do the lot.
-    db->updateAlarms();
-}
-
-void DateBook::refreshWidgets()
-{
-    // update active view!
-    if ( actionDay->isOn() )
-	dayView->redraw();
-#if !defined(QTOPIA_PHONE)
-    else if ( actionWeek->isOn() )
-	weekView->redraw();
-#endif
-    else if ( actionMonth->isOn() )
-	monthView->updateOccurrences();
+    if ( updateIconsTimer )
+        updateIconsTimer->start( DATEBOOK_UPDATE_ICON_TIMEOUT );
 }
 
 DateBook::~DateBook()
 {
 }
 
-void DateBook::showSettings()
+void DateBook::flush()
 {
-#if !defined(QTOPIA_DESKTOP)
-    bool whichclock;
-    Config config( "qpe" );
-    config.setGroup("Time");
-    whichclock = config.readBoolEntry("AMPM");
-    
-    DateBookSettings frmSettings(whichclock, parentWidget, "settings");
-    frmSettings.setStartTime( startTime );
-    frmSettings.setAlarmPreset( aPreset, presetTime );
-    frmSettings.setCompressDay( compressDay );
-
-    if ( QPEApplication::execDialog(&frmSettings) ) {
-	aPreset = frmSettings.alarmPreset();
-	presetTime = frmSettings.presetTime();
-	startTime = frmSettings.startTime();
-	compressDay = frmSettings.compressDay();
-	if ( dayView ) {
-	    dayView->setDayStarts( startTime );
-	    dayView->setCompressDay( compressDay );
-	}
-#if !defined(QTOPIA_PHONE)
-	if ( weekView )
-	    weekView->setDayStarts( startTime );
-#endif
-	saveSettings();
-
-	// make the change obvious
-	if ( views->visibleWidget() ) {
-	    if ( views->visibleWidget() == dayView )
-		dayView->redraw();
-#if !defined(QTOPIA_PHONE)
-	    else if ( views->visibleWidget() == weekView )
-		weekView->redraw();
-#endif
-	}
-    }
-#endif
+    //  TODO
+    syncing = true;
 }
 
-void DateBook::fileNew()
+void DateBook::reload()
 {
-    newEvent("");
+    //  TODO
+    syncing = false;
 }
 
-QString DateBook::checkEvent(const PimEvent &e)
+void DateBook::updateAlarms()
 {
-    /* check if overlaps with itself */
-    bool checkFailed = FALSE;
-
-    /* check the next 12 repeats. should catch most problems */
-    QDate current_date = e.end().date();
-    int duration = e.start().date().daysTo(e.end().date());
-    PimEvent previous = e;
-    for(int i = 0; i < 12; i++)
-    {
-	bool ok;
-	QDateTime next;
-	next = e.nextOccurrence(current_date.addDays(1), &ok);
-	next.setTime(e.start().time());
-	if (!ok)
-	    break;  // no more repeats
-	if(next < previous.end()) {
-	    checkFailed = TRUE;
-	    break;
-	}
-	current_date = next.date().addDays(duration);
-    }
-
-
-    if(checkFailed)
-	return tr("<qt>Event duration is potentially longer "
-		  "than interval between repeats.</qt>");
-
-    return QString::null;
+    /*
+    time may have gone backwards... but giving the same alarms
+    again won't hurt (server will ignore) so send them all again,
+    */
+    // no real way to tell if forward or backward, so need to do the lot.
+    // TODO model->updateAlarms();
 }
 
-QDate DateBook::currentDate()
+void DateBook::selectToday()
 {
-    if ( dayView && views->visibleWidget() == dayView ) {
-	return dayView->currentDate();
-#if !defined(QTOPIA_PHONE)
-    } else if ( weekView && views->visibleWidget() == weekView ) {
-        return weekView->currentDate();
+    lastToday = QDate::currentDate();
+    if (viewStack->currentWidget() == dayView) {
+        viewDay(lastToday);
+#if !defined(QTOPIA_PHONE) && defined(QTOPIA4_TODO)
+    } else if (viewStack->currentWidget() == weekView) {
+        weekView->selectDate( lastToday );
 #endif
-    } else if ( monthView && views->visibleWidget() == monthView ) {
-	return monthView->selectedDate();
-    } else {
-	return QDate(); // invalid;
+    } else if (viewStack->currentWidget() == monthView) {
+        monthView->setSelectedDate( lastToday );
     }
 }
 
 void DateBook::viewToday()
 {
     lastToday = QDate::currentDate();
-    viewDay( lastToday );
-}
-
-void DateBook::viewDay(const QDate& dt)
-{
-    initDay();
-    actionDay->setOn( TRUE );
-    dayView->selectDate( dt );
-    raiseWidget( dayView );
-    dayView->setFocus();
-    dayView->redraw();
-
-    updateIcons();
+    viewDay(lastToday);
 }
 
 void DateBook::viewDay()
 {
-    viewDay( currentDate() );
+    viewDay(currentDate());
+}
+
+void DateBook::viewDay(const QDate& d)
+{
+    initDayView();
+    actionDay->setChecked(true);
+    dayView->selectDate(d);
+    raiseView(dayView);
+
+    updateIcons();
 }
 
 void DateBook::viewWeek()
 {
-    viewWeek( currentDate() );
+    viewWeek(currentDate());
 }
 
-void DateBook::viewWeek( const QDate& dt )
+void DateBook::viewWeek(const QDate& d)
 {
+#if !defined(QTOPIA_PHONE) && defined(QTOPIA4_TODO)
     initWeek();
-    actionWeek->setOn( TRUE );
+    actionWeek->setChecked( true );
     weekView->selectDate( dt );
-    raiseWidget( weekView );
+    raiseView( weekView );
     weekView->redraw();
 
     updateIcons();
+#else
+    Q_UNUSED(d);
+#endif
 }
 
 void DateBook::viewMonth()
 {
-    viewMonth( currentDate() );
+    viewMonth(currentDate());
 }
 
-void DateBook::viewMonth( const QDate& dt)
+void DateBook::viewMonth(const QDate& d)
 {
-    initMonth();
-    actionMonth->setOn( TRUE );
-    monthView->setDate( dt );
-    raiseWidget( monthView );
-    monthView->updateOccurrences();
+    initMonthView();
+    actionMonth->setChecked(true);
+    raiseView(monthView);
+    monthView->setSelectedDate(d);
 
     updateIcons();
-}
-
-void DateBook::updateIcons()
-{
-    bool view = (eventView && views->visibleWidget() == eventView);
-
-#ifdef QTOPIA_DESKTOP
-    bool s = eventSelected();
-    actionDelete->setEnabled( s );
-    actionEdit->setEnabled( s );
-#else
-    if ( view ) {
-	if ( sub_bar )     sub_bar->hide();
-	if ( details_bar ) details_bar->show();
-    } else {
-	if ( details_bar ) details_bar->hide();
-	if ( sub_bar )     sub_bar->show();
-    }
-    actionNew->setEnabled( !view );
-    actionEdit->setEnabled( view  );
-    actionDelete->setEnabled( view );
-#ifdef Q_WS_QWS
-    if (Ir::supported())
-	actionBeam->setEnabled( view );
-#endif
-    actionToday->setEnabled( !view );
-    actionDay->setEnabled( !view );
-    actionMonth->setEnabled( !view );
-    actionSettings->setEnabled( !view );
-#ifndef QTOPIA_PHONE
-    actionBack->setEnabled( view );
-    actionWeek->setEnabled( !view );
-#endif
-#endif
-
-#ifdef QTOPIA_PHONE
-    if ( eventSelected() ) // dayView definitely exists
-	ContextBar::setLabel( dayView, Qt::Key_Select, ContextBar::View );
-    else if ( dayView ) // make sure it does in this case
-	ContextBar::setLabel( dayView, Qt::Key_Select, ContextBar::NoLabel );
-
-    if ( !view ) {
-	if ( views->visibleWidget() == monthView )
-	    actionMonth->setEnabled( FALSE );
-	else
-	    actionMonth->setEnabled( TRUE );
-    }
-#endif
-}
-
-void DateBook::initExceptionMb() {
-    exceptionMb = new ExceptionDialog( parentWidget, "exceptionDlg", TRUE );
-}
-
-// a bit to extreme.
-// should be possible to check each exception for if it still fits
-// on a valid date.
-bool affectsExceptions(const PimEvent &ne, const PimEvent &oe)
-{
-    if (oe.hasExceptions()) {
-	if (ne.start() != oe.start())
-	    return TRUE;
-	if (ne.frequency() != oe.frequency())
-	    return TRUE;
-	if (ne.repeatType() != oe.repeatType())
-	    return TRUE;
-	if ( ((PrEvent &)ne).p_weekMask() != ((PrEvent &)oe).p_weekMask())
-	    return TRUE;
-    }
-    return FALSE;
-}
-
-bool DateBook::checkSyncing()
-{
-    if (syncing) {
-	if ( QMessageBox::warning(parentWidget, tr("Calendar"),
-		    tr("<qt>Can not edit data, currently syncing</qt>"),
-		    QMessageBox::Ok, QMessageBox::Abort ) == QMessageBox::Abort )
-	{
-	    // Okay, if you say so (eg. Qtopia Desktop may have crashed)....
-	    syncing = FALSE;
-	} else
-	    return TRUE;
-    }
-    return FALSE;
-}
-
-void DateBook::editOccurrence( const Occurrence &ev )
-{
-    editOccurrence( ev, FALSE );
-}
-
-void DateBook::editOccurrence( const Occurrence &ev, bool preview )
-{
-#if !defined(QTOPIA_DESKTOP)
-    if ( checkSyncing() )
-	return;
-#endif
-
-    // if this event is an exception, or has exceptions we may need to do somethign different.
-    bool asException;
-    PimEvent e;
-
-    // stuff for "following" events
-    bool following = FALSE;
-    PimEvent orig;
-    QValueList<QDate> pastExceptions;
-    QValueList<QDate> futureExceptions;
-    QValueList<QUuid> pastChildren;
-    QValueList<QUuid> futureChildren;
-
-    if (ev.event().hasRepeat()) {
-	// ask if just this one or is series?
-	if (!exceptionMb)
-	    initExceptionMb();
-	exceptionMb->setCaption( tr("Edit Event") );
-	switch (exceptionMb->exec()) {
-	    default:
-		return;
-	    case ExceptionDialog::Current:
-		e = ev.event();
-		// modify e to be an exceptional event.
-		// with no uid (yet).
-		e.setSeriesUid(ev.event().uid());
-		e.setRepeatType(PimEvent::NoRepeat);
-		e.setStart(ev.start());
-		e.clearExceptions();
-		asException = TRUE;
-		break;
-	    case ExceptionDialog::All:
-		e = ev.event();
-		asException = FALSE;
-		break;
-	    case ExceptionDialog::Following:
-		// If we select Following but we're looking at the first instance,
-		// just do the same as All.
-		if ( ev.date() == e.start().date() ) {
-		    e = ev.event();
-		    asException = FALSE;
-		    break;
-		}
-
-		e = ev.event();
-		orig = ev.event();
-		// modify e to be a new series with no uid (yet).
-		e.setSeriesUid(QUuid());
-		e.setStart(ev.start());
-		asException = TRUE;
-		following = TRUE;
-
-		pastExceptions = ((PrEvent&)e).exceptions();
-		futureExceptions = ((PrEvent&)e).exceptions();
-		futureChildren = ((PrEvent&)e).childUids();
-		pastChildren = ((PrEvent&)e).childUids();
-		QValueList<QDate> processedDates;
-		// we can only remove everything
-		// put it back in while processing the lists
-		e.clearExceptions();
-
-		QValueListIterator<QUuid> uiter;
-		QValueListIterator<QDate> diter;
-		// disassociate all children that are in the "past"
-		for ( uiter = futureChildren.begin(); uiter != futureChildren.end(); ) {
-		    QUuid u = *uiter;
-		    PimEvent child = db->find( u );
-		    QDate dateOfChild = child.start().date();
-		    if ( dateOfChild < ev.date() ) {
-			uiter = futureChildren.remove( uiter );
-		    } else {
-			uiter++;
-			pastChildren.remove( u );
-			e.addException( dateOfChild, u );
-			processedDates.append( dateOfChild );
-		    }
-		}
-
-		// remove all exceptions from the "past"
-		for ( diter = futureExceptions.begin(); diter != futureExceptions.end(); ) {
-		    QDate d = *diter;
-		    if ( d < ev.date() ) {
-			diter = futureExceptions.remove( diter );
-		    } else {
-			diter++;
-			pastExceptions.remove( d );
-			// some of these would have been added by processing the children
-			if ( processedDates.contains( d ) == 0 )
-			    ((PrEvent&)e).addException( d );
-		    }
-		}
-
-		break;
-	}
-    } else {
-	e = ev.event();
-	asException = FALSE;
-    }
-
-    EntryDialog editDlg( onMonday, e, parentWidget->isVisible() ? parentWidget : 0, "edit-event", TRUE );
-    if ( preview )
-	editDlg.showSummary();
-    // workaround added for text input.
-    if (e.isException())
-#ifdef QTOPIA_PHONE
-	editDlg.setCaption( tr("Edit Exception") );
-#else
-	editDlg.setCaption( tr("Edit Event Exception") );
-#endif
-    else
-	editDlg.setCaption( tr("Edit Event") );
-
-    // connect the qApp stuff.
-    connect( qApp, SIGNAL(weekChanged(bool)),
-	     &editDlg, SLOT(setWeekStartsMonday(bool)) );
-
-#ifdef QTOPIA_DESKTOP
-    connect( editDlg.entryDetails()->comboCategory,
-	     SIGNAL( editCategoriesClicked(QWidget*) ),
-	     SLOT( editCategories(QWidget*) ) );
-    editDlg.resize(500, 300);
-#endif
-
-    //entry->timezone->setEnabled(FALSE);
-
-    while (QPEApplication::execDialog(&editDlg) ) {
-	PimEvent newEv = editDlg.event();
-	QString error = checkEvent(newEv);
-	if (!error.isNull()) {
-	    if (QMessageBox::warning(parentWidget, "Error",
-			error, "Fix it", "Continue", 0, 0, 1) == 0)
-		continue;
-	}
-	QUuid u;
-	if ( following ) {
-	    // We've got all the forward events and exceptions already
-	    // Now remove then from the "old" series. Of course, just
-	    // to be difficult, we can't do that so remove then all and
-	    // then add back the appropriate ones
-	    orig.clearExceptions();
-	    QValueList<QDate> processedDates;
-	    QValueListIterator<QUuid> uiter;
-	    QValueListIterator<QDate> diter;
-	    // Children first
-	    for ( uiter = pastChildren.begin(); uiter != pastChildren.end(); uiter++ ) {
-		QUuid u = *uiter;
-		PimEvent child = db->find( u );
-		QDate dateOfChild = child.start().date();
-		orig.addException( dateOfChild, u );
-		processedDates.append( dateOfChild );
-	    }
-	    // Now the extra exceptions
-	    for ( diter = pastExceptions.begin(); diter != pastExceptions.end(); diter++ ) {
-		QDate d = *diter;
-		if ( processedDates.contains( d ) == 0 )
-		    ((PrEvent&)orig).addException( d );
-	    }
-
-	    // Change the repeat end for the "old" series to be the current event's date
-	    orig.setRepeatTill( newEv.start().date().addDays( -1 ) );
-	    db->updateEvent( orig );
-	    u = db->addEvent( newEv );
-
-	    // Now change all the "future" children to belong to the correct series
-	    for ( uiter = futureChildren.begin(); uiter != futureChildren.end(); uiter++ ) {
-		QUuid uid = *uiter;
-		PimEvent child = db->find( uid );
-		((PrEvent&)child).setParentUid( u );
-		db->updateEvent( child );
-	    }
-	} else {
-	    if (asException) {
-		u = db->addException(ev.date(),ev.event(), newEv);
-	    } else {
-		if (affectsExceptions(newEv, e)) {
-		    if (QMessageBox::warning(parentWidget, tr("Calendar"),
-				tr( "<p>Changes to the start time or recurrence pattern"
-				    " of this event will cause all exceptions to this event"
-				    " to be lost.  Continue?"),
-				QMessageBox::Ok, QMessageBox::Cancel|QMessageBox::Default
-				) != QMessageBox::Ok)
-			return;
-		    /// need to clear exceptions
-		    db->removeExceptions(newEv);
-		    newEv.clearExceptions();
-		}
-		db->updateEvent(newEv);
-		u = newEv.uid();
-	    }
-	}
-	emit eventsChanged();
-	if ( views->visibleWidget() == dayView ) {
-	    bool ok;
-	    PimEvent e = db->find( u, &ok );
-	    if ( ok )
-		dayView->setCurrentEvent( e );
-	}
-	break;
-    }
-}
-
-void DateBook::removeOccurrence( const Occurrence &o )
-{
-#if !defined(QTOPIA_DESKTOP)
-    if ( checkSyncing() )
-	return;
-#endif
-
-    PimEvent e = o.event();
-
-    QString strName = e.description();
-    if (e.hasRepeat()) {
-	// ask if just this one or is series?
-	if (!exceptionMb)
-	    initExceptionMb();
-	exceptionMb->setCaption( tr("Delete Event") );
-	QValueListIterator<QUuid> uiter;
-	QValueListIterator<QDate> diter;
-	switch (exceptionMb->exec()) {
-	    default:
-		return;
-	    case ExceptionDialog::Current:
-		db->addException( o.start().date(), e );
-		break;
-	    case ExceptionDialog::All:
-		db->removeEvent( e );
-		break;
-	    case ExceptionDialog::Following:
-		// If we select Following but we're looking at the first instance,
-		// just do the same as All.
-		if ( o.date() == e.start().date() ) {
- 		    db->removeEvent( e );
-		    break;
-		}
-
-		PimEvent orig = o.event();
-		QValueList<QDate> pastExceptions = ((PrEvent&)e).exceptions();
-		QValueList<QDate> futureExceptions = ((PrEvent&)e).exceptions();
-		QValueList<QUuid> futureChildren = ((PrEvent&)e).childUids();
-		QValueList<QUuid> pastChildren = ((PrEvent&)e).childUids();
-		// we can only remove everything
-		// put it back in while processing the lists
-		e.clearExceptions();
-
-		// disassociate all children that are in the "past"
-		for ( uiter = futureChildren.begin(); uiter != futureChildren.end(); ) {
-		    QUuid u = *uiter;
-		    PimEvent child = db->find( u );
-		    QDate dateOfChild = child.start().date();
-		    if ( dateOfChild < o.date() ) {
-			uiter = futureChildren.remove( uiter );
-		    } else {
-			uiter++;
-			pastChildren.remove( u );
-		    }
-		}
-
-		// remove all exceptions from the "past"
-		for ( diter = futureExceptions.begin(); diter != futureExceptions.end(); ) {
-		    QDate d = *diter;
-		    if ( d < o.date() ) {
-			diter = futureExceptions.remove( diter );
-		    } else {
-			diter++;
-			pastExceptions.remove( d );
-		    }
- 		}
-
-		// We've got all the forward events and exceptions already
-		// Now remove them from the "old" series. Of course, just
-		// to be difficult, we can't do that so remove then all and
-		// then add back the appropriate ones
-		orig.clearExceptions();
-		QValueList<QDate> processedDates;
-		// Children first
-		for ( uiter = pastChildren.begin(); uiter != pastChildren.end(); uiter++ ) {
-		    QUuid u = *uiter;
-		    PimEvent child = db->find( u );
-		    QDate dateOfChild = child.start().date();
-		    orig.addException( dateOfChild, u );
-		    processedDates.append( dateOfChild );
-		}
-		// Now the extra exceptions
-		for ( diter = pastExceptions.begin(); diter != pastExceptions.end(); diter++ ) {
-		    QDate d = *diter;
-		    if ( processedDates.contains( d ) == 0 )
-			((PrEvent&)orig).addException( d );
-		}
-
-		// Change the repeat end for the "old" series to be the current event's date
-		orig.setRepeatTill( o.date().addDays( -1 ) );
-		db->updateEvent( orig );
-
-		// Now delete all the "future" children
-		for ( uiter = futureChildren.begin(); uiter != futureChildren.end(); uiter++ ) {
-		    QUuid uid = *uiter;
-		    PimEvent child = db->find( uid );
-		    db->removeEvent( child );
-		}
-
-		break;
-	}
-    } else  {
-	if ( !QPEMessageBox::confirmDelete( parentWidget, tr( "Calendar" ),strName ) )
-	    return;
-	db->removeEvent( e );
-    }
-
-    if ( views->visibleWidget() == dayView && dayView )
-        dayView->redraw();
-}
-
-void DateBook::addEvent( const PimEvent &e )
-{
-    QDate d = e.start().date();
-    initDay();
-    dayView->selectDate( d );
-}
-
-void DateBook::editCurrentEvent()
-{
-    bool inViewMode = views->visibleWidget() == eventView;
-    if ( inViewMode )
-	hideEventDetails();
-    if (eventSelected())
-	editOccurrence(currentOccurrence());
-    if ( inViewMode && eventSelected() )
-	showEventDetails();
-}
-
-void DateBook::removeCurrentEvent()
-{
-    if ( views->visibleWidget() == eventView )
-	hideEventDetails();
-    if (eventSelected())
-	removeOccurrence(currentOccurrence());
-}
-
-void DateBook::beamCurrentEvent()
-{
-#ifdef Q_WS_QWS
-    if ( views->visibleWidget() == eventView )
-	hideEventDetails();
-    if (eventSelected())
-	beamEvent(currentEvent());
-#endif
-}
-
-
-bool DateBook::eventSelected() const
-{
-    if (views->visibleWidget() && views->visibleWidget() == dayView) {
-	return dayView->hasSelection();
-    }
-    return FALSE;
-}
-
-PimEvent DateBook::currentEvent() const
-{
-    return dayView->currentEvent();
-}
-
-Occurrence DateBook::currentOccurrence() const
-{
-    return dayView->currentItem();
-}
-
-void DateBook::initDay()
-{
-    if ( !dayView ) {
-	dayView = new DayView( db, onMonday, views, "dayview" ); // No tr
-	dayView->setCompressDay( compressDay );
-	views->addWidget( dayView, DAY );
-	dayView->setDayStarts( startTime );
-	connect( this, SIGNAL( eventsChanged() ),
-		 dayView, SLOT( redraw() ) );
-	connect( dayView, SIGNAL( newEvent() ),
-		 this, SLOT( fileNew() ) );
-	connect( dayView, SIGNAL( removeOccurrence(const Occurrence&) ),
-		 this, SLOT( removeOccurrence(const Occurrence&) ) );
-	connect( dayView, SIGNAL( editOccurrence(const Occurrence&) ),
-		 this, SLOT( editOccurrence(const Occurrence&) ) );
-	connect( dayView, SIGNAL( beamEvent(const PimEvent&) ),
-		 this, SLOT( beamEvent(const PimEvent&) ) );
-	connect( dayView, SIGNAL(newEvent(const QString&)),
-		 this, SLOT(newEvent(const QString&)) );
-	connect( dayView, SIGNAL(selectionChanged()),
-		 this, SLOT(updateIcons()) );
-	connect( dayView, SIGNAL(showDetails()),
-		this, SLOT(showEventDetails()) );
-
-	// qApp connections
-	connect( qApp, SIGNAL(weekChanged(bool)),
-		dayView, SLOT(setStartOnMonday(bool)) );
-    }
-}
-
-void DateBook::initWeek()
-{
-    if ( !weekView ) {
-	weekView = new WeekView( db, onMonday, views, "weekview" ); // No tr
-	weekView->setDayStarts( startTime );
-	views->addWidget( weekView, WEEK );
-	connect( weekView, SIGNAL( dateActivated(const QDate&) ),
-             this, SLOT( viewDay(const QDate&) ) );
-	connect( this, SIGNAL( eventsChanged() ),
-		 weekView, SLOT( redraw() ) );
-
-	// qApp connections
-	connect( qApp, SIGNAL(weekChanged(bool)),
-		weekView, SLOT(setStartOnMonday(bool)) );
-    }
-}
-
-void DateBook::initMonth()
-{
-    if ( !monthView ) {
-	monthView = new MonthView( db, views, "monthview" ); // No tr
-#if !defined(QTOPIA_DESKTOP)
-	monthView->setMargin(0);
-#endif
-	views->addWidget( monthView, MONTH );
-	connect( monthView, SIGNAL( dateClicked(const QDate&) ),
-             this, SLOT( viewDay(const QDate&) ) );
-	connect( this, SIGNAL( eventsChanged() ),
-		 monthView, SLOT( updateOccurrences() ) );
-    }
-}
-
-void DateBook::initEvent()
-{
-    if ( ! eventView ) {
-	eventView = new EventView( views, "eventview" );
-	views->addWidget( eventView, EVENT );
-#ifdef QTOPIA_PHONE
-	eventView->setMargin(0);
-#endif
-
-	connect( eventView, SIGNAL(done()), this, SLOT(hideEventDetails()) );
-    }
-}
-
-void DateBook::loadSettings()
-{
-    {
-	Config config( "qpe" );
-	config.setGroup("Time");
-	onMonday = config.readBoolEntry( "MONDAY" );
-    }
-
-    {
-	Config config("DateBook");
-	config.setGroup("Main");
-	startTime = config.readNumEntry("startviewtime", 8);
-	aPreset = config.readBoolEntry("alarmpreset");
-	presetTime = config.readNumEntry("presettime");
-#ifdef QTOPIA_PHONE
-	compressDay = TRUE;
-#else
-	compressDay = config.readBoolEntry("compressday", TRUE);
-#endif
-    }
-}
-
-void DateBook::saveSettings()
-{
-    Config config( "qpe" );
-    Config configDB( "DateBook" );
-    configDB.setGroup( "Main" );
-    configDB.writeEntry("startviewtime",startTime);
-    configDB.writeEntry("alarmpreset",aPreset);
-    configDB.writeEntry("presettime",presetTime);
-    configDB.writeEntry("compressday", compressDay);
-}
-
-void DateBook::appMessage(const QCString& msg, const QByteArray& data)
-{
-    bool needShow = FALSE;
-    QDataStream stream( data, IO_ReadOnly );
-
-    if ( msg == "alarm(QDateTime,int)" ) {
-	QDateTime when; int warn;
-	stream >> when >> warn;
-
-	// may be more than one item.
-	QValueList<Occurrence> items = db->getNextAlarm(when, warn);
-	QValueListIterator<Occurrence> it;
-	bool skip_dialogs = FALSE;
-
-	for (it = items.begin(); it != items.end(); ++it) {
-	    Occurrence item = *it;
-	    // First Update the alarm for the event.
-	    db->updateAlarm(item.event());
-
-	    QDateTime current = QDateTime::currentDateTime();
-	    // if we are told to skip and still getting a flood of messages,
-	    // continue.
-	    if (lastcall.addSecs(1) >= current 
-		    && lastcall.addSecs(-1) <= current
-		    && skip_dialogs)
-		continue;
-
-
-	    // if alarm in past, (or nearly in the past) go off.
-	    if (current.addSecs(60) >= when) {
-		bool bSound = FALSE;
-		int stopTimer = 0;
-
-		if ( item.event().alarmSound() != PimEvent::Silent ) {
-		    bSound = TRUE;
-		    Sound::soundAlarm();
-		    stopTimer = startTimer( 5000 );
-		}
-
-		AlarmDialog dlg( parentWidget->isVisible() ? parentWidget : 0, 0, TRUE );
-		switch ( dlg.exec(item) ) {
-		    case AlarmDialog::Details:
-			needShow = TRUE;
-			break;
-		    default:
-                        //close();
-			needShow = FALSE;
-			break;
-		}
-		skip_dialogs = dlg.getSkipDialogs();
-
-		if ( bSound )
-		    killTimer( stopTimer );
-
-		lastcall = QDateTime::currentDateTime();
-
-		if ( needShow ) {
-		    viewDay( item.startInCurrentTZ().date() );
-		    dayView->setCurrentItem(item);
-		    showEventDetails();
-		}
-	    }
-	}
-    } else if ( msg == "newEvent()" ) {
-	if ( newEvent(QDateTime(),QDateTime(),QString::null,QString::null) )
-	    needShow = TRUE;
-    } else if ( msg == "receiveData(QString,QString)" ) {
-	QString f,t;
-	stream >> f >> t;
-	if ( t.lower() == "text/x-vcalendar" )
-	    if ( receiveFile(f) )
-		needShow = TRUE;
-	QFile::remove(f);
-    } else if ( msg == "newEvent(QDateTime,QDateTime,QString,QString)" ) {
-	QDateTime s,e;
-	QString d,n;
-	stream >> s >> e >> d >> n;
-	if ( newEvent(s,e,d,n) )
-	    needShow = TRUE;
-// PimLibrary stuff
-    } else if ( msg == "updateEvent(PimEvent)" && !syncing ) {
-	PimEvent e;
-	stream >> e;
-	db->updateEvent(e);
-	refreshWidgets();
-    } else if ( msg == "addEvent(PimEvent)" && !syncing ) {
-	PimEvent e;
-	stream >> e;
-	db->addEvent(e);
-	refreshWidgets();
-    } else if ( msg == "removeEvent(PimEvent)" && !syncing ) {
-	PimEvent e;
-	stream >> e;
-	db->removeEvent(e);
-	refreshWidgets();
-    } else if ( msg == "addException(PimEvent,QDate)" && !syncing ) {
-	PimEvent e, x;
-	QDate date;
-	stream >> e;
-	stream >> date;
-	db->addException(date, e);
-	refreshWidgets();
-    } else if ( msg == "addException(PimEvent,QDate,PimEvent)" && !syncing ) {
-	PimEvent e, x;
-	QDate date;
-	stream >> e;
-	stream >> date;
-	stream >> x;
-	db->addException(date, e, x);
-	refreshWidgets();
-    } else if ( msg == "removeException(PimEvent,QDate)" && !syncing ) {
-	PimEvent e;
-	QDate date;
-	stream >> e;
-	stream >> date;
-	e.removeException(date);
-	db->updateEvent(e);
-	refreshWidgets();
-    } else if ( msg == "removeException(PimEvent,PimEvent)" && !syncing ) {
-	PimEvent e, x;
-	stream >> e;
-	stream >> x;
-	if (x.seriesUid() == e.uid()) {
-	    db->removeEvent(x);
-	    refreshWidgets();
-	}
-    } else if ( msg == "removeAllExceptions(PimEvent)" && !syncing ) {
-	PimEvent e;
-	stream >> e;
-	db->removeExceptions(e);
-	e.clearExceptions();
-	db->updateEvent(e);
-	refreshWidgets();
-    } else if ( msg == "raiseToday()" ) {
-	bool visible=FALSE;
-	if ( data.size() ) {
-	    int i;
-	    stream >> i; // backdoor kludge
-	    visible = i;
-	}
-	if ( visible )
-	    nextView();
-	else
-	    viewToday();
-	needShow = TRUE;
-    } else if ( msg == "nextView()" ) {
-	nextView();
-	needShow = !!views->visibleWidget();
-    } else if ( msg == "showEvent(QUuid)" ) {
-	QUuid u;
-
-	stream >> u;
-
-	bool ok;
-	Occurrence o = db->find(u, QDate::currentDate(), &ok);
-
-	if (ok) {
-	    viewDay( o.startInCurrentTZ().date() );
-	    //dayView->selectDate( o.startInCurrentTZ().date() );
-	    dayView->setCurrentItem(o);
-	    showEventDetails();
-	    needShow = TRUE;
-	}
-    } else if ( msg == "showEvent(QUuid,QDate)" ) {
-	QUuid u;
-	QDate date;
-
-	stream >> u >> date;
-
-	bool ok;
-	Occurrence o = db->find(u, date, &ok);
-
-	if (ok) {
-	    viewDay( o.startInCurrentTZ().date() );
-	    //dayView->selectDate( o.startInCurrentTZ().date() );
-	    dayView->setCurrentItem(o);
-	    showEventDetails();
-	    needShow = TRUE;
-	}
-    }
-#ifdef QTOPIA_DATA_LINKING
-    else if ( msg == "QDLRequestLink(QString,QString)" ) {
-	QString clientID, hint;
-	stream >> clientID >> hint;
-	QDLHeartBeat hb( clientID );
-
-	EventPicker evtPick( this, parentWidget, "evtPick", TRUE );
-	evtPick.showMaximized();
-	if ( evtPick.exec() ) {
-	    if ( !evtPick.eventSelected() ) {
-		qDebug( "No Event Selected!" );
-	    } else {
-		QByteArray dataref;
-		QDataStream ds( dataref, IO_WriteOnly );
-		PimEvent event = evtPick.currentEvent();
-		ds << event.uid() << evtPick.currentDate();
-
-#ifndef QT_NO_COP
-		QCopEnvelope e( QDL::CLIENT_CHANNEL, "QDLProvideLink(QString,int,...)" );
-		e << clientID;
-
-		e << (int)1;
-
-		e << QDLLink( QCString( "datebook" ), dataref, event.description(),
-							    QCString( "datebook/DateBook" ) );
-#endif
-	    }
-	} else {
-#ifndef QT_NO_COP
-	    QCopEnvelope e( QDL::CLIENT_CHANNEL, "QDLProvideLink(QString,int,...)" );
-
-	    e << clientID;
-	    e << (int)0;
-#endif
-	}
-    }
-    else if ( msg == "QDLActivateLink(QByteArray)" ) {
-	QByteArray dataref;
-	stream >> dataref;
-	QDataStream ds( dataref, IO_ReadOnly );
-
-	QUuid u;
-	QDate date;
-	ds >> u >> date;
-
-	bool ok;
-	Occurrence o = db->find( u, date, &ok );
-	if ( ok ) {
-	    viewDay( o.startInCurrentTZ().date() );
-	    dayView->setCurrentItem( o );
-	    needShow = TRUE;
-	}
-    }
-#endif
-    else if ( msg == "cleanByDate(QDate)" ) {
-	QDate d;
-	stream >> d;
-	purgeEvents( d, FALSE );
-    }
-
-    if ( needShow ) {
-#if defined(Q_WS_QWS) || defined(_WS_QWS_)
-	//showMaximized();
-#else
-	//show();
-#endif
-	//raise();
-	QPEApplication::setKeepRunning();
-	//setActiveWindow();
-    }
 }
 
 void DateBook::nextView()
 {
-    QWidget* cur = views->visibleWidget();
-    if ( cur ) {
-	if ( cur == dayView )
-#if !defined(QTOPIA_PHONE)
-	    viewWeek();
-	else if ( cur == weekView )
+    QWidget* cur = viewStack->currentWidget();
+    if (cur) {
+        if (cur == dayView)
+#if !defined(QTOPIA_PHONE) && defined(QTOPIA4_TODO)
+            viewWeek();
+        else if (cur == weekView)
 #endif
-	    viewMonth();
-	else if ( cur == monthView )
-	    viewDay();
+            viewMonth();
+        else if (cur == monthView)
+            viewDay();
     }
 }
 
-void DateBook::reload()
+void DateBook::unfoldAllDay()
 {
-    // reload isn't as meaningful anymore.
-    //db->reload();} else
-    db->reload();
-    if ( actionDay->isOn() )
-	viewDay();
-#if !defined(QTOPIA_PHONE)
-    else if ( actionWeek->isOn() )
-	viewWeek();
-#endif
-    else if ( actionMonth->isOn() )
-	viewMonth();
-    syncing = FALSE;
+    if (dayView)
+        dayView->setAllDayFolded(false);
+
+    updateIcons();
 }
 
-void DateBook::flush()
+void DateBook::foldAllDay()
 {
-    db->flush();
-    syncing = TRUE;
-   // db->save();
-    // neither is saving.
+    if (dayView)
+        dayView->setAllDayFolded(true);
+
+    updateIcons();
 }
 
-void DateBook::timerEvent( QTimerEvent *e )
+void DateBook::checkToday()
 {
-    static int stop = 0;
-    if ( stop < 10 ) {
-	Sound::soundAlarm();
-	stop++;
-    } else {
-	stop = 0;
-	killTimer( e->timerId() );
+    if (lastToday != QDate::currentDate()) {
+        if (lastToday == currentDate())
+            selectToday();
+        else
+            lastToday = QDate::currentDate();
     }
+
+    midnightTimer->start((QTime::currentTime().secsTo(QTime(23, 59, 59)) + 3) * 1000);
+}
+
+void DateBook::showSettings()
+{
+#ifndef QTOPIA_DESKTOP
+    QSettings config("Trolltech", "qpe");
+    config.beginGroup("Time");
+    bool whichclock = config.value("AMPM").toBool();
+
+    DateBookSettings frmSettings(whichclock, parentWidget);
+    frmSettings.setStartTime(startTime);
+    frmSettings.setAlarmPreset(aPreset, presetTime);
+    frmSettings.setCompressDay(compressDay);
+
+    if (QtopiaApplication::execDialog(&frmSettings)) {
+        aPreset = frmSettings.alarmPreset();
+        presetTime = frmSettings.presetTime();
+        startTime = frmSettings.startTime();
+        compressDay = frmSettings.compressDay();
+
+        if (dayView)
+            dayView->setDaySpan( startTime, 17 );
+
+#if !defined(QTOPIA_PHONE) && defined(QTOPIA4_TODO)
+        if ( weekView )
+            weekView->setDayStarts( startTime );
+# endif
+
+        saveSettings();
+    }
+#endif  // !QTOPIA_DESKTOP
+}
+
+void DateBook::showAccountSettings()
+{
+    /* TODO possible not a dialog in that cancel might not make sense. */
+#ifdef GOOGLE_CALENDAR_CONTEXT
+    QDialog diag;
+    QVBoxLayout *vl = new QVBoxLayout;
+    AccountEditor *editor = new AccountEditor;
+    editor->setModel(model);
+    vl->addWidget(editor);
+    diag.setLayout(vl);
+    QtopiaApplication::execDialog(&diag);
+#endif
 }
 
 void DateBook::changeClock()
 {
-    // repaint the affected objects...
-    if (dayView) dayView->redraw();
-#if !defined(QTOPIA_PHONE)
-    if (weekView) weekView->redraw();
-#endif
 }
 
-void DateBook::changeWeek( bool m )
+void DateBook::changeWeek(bool m)
 {
     /* no need to redraw, each widget catches.  Do need to
-       store though for widgets we haven't made yet */
+    store though for widgets we haven't made yet */
     onMonday = m;
 }
 
-void DateBook::slotToday()
+void DateBook::appMessage(const QString& msg, const QByteArray& data)
 {
-    // we need to view today
-    lastToday = QDate::currentDate();
-    if ( views->visibleWidget() == dayView ) {
-	viewDay( lastToday );
-#if !defined(QTOPIA_PHONE)
-    } else if (views->visibleWidget() == weekView) {
-	weekView->selectDate( lastToday );
-#endif
-    } else if (views->visibleWidget() == monthView){
-	monthView->setDate( lastToday );
+    if (msg == "alarm(QDateTime,int)") {
+        /*@ \message
+            \arguments when warn
+          Register or respond to a preset alarm.
+          The appointment is at \i when and the alarm goes off \i warn minutes before.
+        */
+
+        QDataStream stream(data);
+        QDateTime when;
+        int warn;
+        stream >> when >> warn;
+
+        //  May be more than one item.
+        QDateTime alarmTime = when.addSecs(60 * warn);
+        QOccurrenceModel *om = new QOccurrenceModel(alarmTime, alarmTime, this);
+        om->completeFetch();
+
+        for (int i = 0; i < om->rowCount(); i++) {
+            QOccurrence o = om->occurrence(i);
+            QAppointment a = o.appointment();
+
+            if (a.hasAlarm() && o.alarmDelay() == warn) {
+                int stopTimer = 0;
+                bool sound = false;
+                QAppointment::AlarmFlags alarm = a.alarm();
+
+                if (alarm | QAppointment::Audible) {
+                    Qtopia::soundAlarm();
+                    stopTimer = startTimer(5000);
+                    sound = true;
+                }
+
+                AlarmDialog dlg(parentWidget->isVisible() ? parentWidget : 0);
+                dlg.setModal(true);
+                bool needShow = (dlg.exec(o) == AlarmDialog::Details);
+
+                if (sound)
+                    killTimer(stopTimer);
+
+                if (needShow) {
+                    initDayView();
+                    showAppointmentDetails(o);
+                }
+
+                //  Clear the alarm now that it has been sounded
+                a.clearAlarm();
+                model->updateAppointment(a);
+
+                if (dlg.getSkipDialogs())
+                    break;
+            }
+        }
+
+    /*@ \service Receive
+    This service is invoked when typed data is received from outside the device,
+    such as via IR beaming. The actual service is Receive/mimetype, such as
+    Receive/image or Receive/image/jpeg.
+    */
+    }
+    #if 0
+    else if ( msg == "receiveData(QString,QString)" ) {
+        /*@ \message
+            \arguments file mimetype
+          Handle incoming IR data.
+        */
+        QString f,t;
+        stream >> f >> t;
+        if (t.toLower() == "text/x-vcalendar")
+            receiveFile(f);
+        QFile::remove(f);
+    }
+    #endif
+}
+
+void DateBook::qdlActivateLink( const QDSActionRequest& request )
+{
+    // If we are currently viewing an appointment, chuck it on the
+    // previous appointments stack
+    if ( appointmentDetails &&
+         viewStack->currentWidget() == appointmentDetails ) {
+        prevOccurrences.push( appointmentDetails->occurrence() );
+    }
+
+    // Grab the link from the request and check that is one of ours
+    QDLLink link( request.requestData() );
+    if ( link.service() != "Calendar" ) {
+        QDSActionRequest( request ).respond( "Link doesn't belong to Calendar" );
+        return;
+    }
+
+    const QByteArray data = link.data();
+    QDataStream refStream( data );
+    QUniqueId u;
+    QDate date;
+    refStream >> u >> date;
+
+    QAppointment a = model->appointment( u );
+    if ( a.isValid() ) {
+        initDayView();
+        showAppointmentDetails( QOccurrence( date, a ) );
+        showMaximized();
+        QDSActionRequest( request ).respond();
+    } else {
+        QMessageBox::warning(
+            this,
+            tr("Calendar"),
+            "<qt>" + tr("The selected event no longer exists.") + "</qt");
+        QDSActionRequest( request ).respond( "Event doesn't exist" );
+    }
+
+}
+
+void DateBook::qdlRequestLinks( const QDSActionRequest& request )
+{
+    QDSActionRequest processingRequest( request );
+    AppointmentPicker evtPick( this, parentWidget );
+    evtPick.setModal( true );
+    evtPick.showMaximized();
+    if ( evtPick.exec() ) {
+        if ( !evtPick.appointmentSelected() ) {
+            processingRequest.respond( "No Event Selected" );
+        } else {
+            QList<QDSData> links;
+            QAppointment appointment = evtPick.currentAppointment();
+            links.push_back( appointmentQDLLink( appointment ) );
+
+            QByteArray array;
+            {
+                QDataStream ds( &array, QIODevice::WriteOnly );
+                ds << links;
+            }
+
+            processingRequest.respond(
+                QDSData( array, QDLLink::listMimeType() ) );
+        }
+    } else {
+        processingRequest.respond( "Event selection cancelled" );
     }
 }
 
-void DateBook::closeEvent( QCloseEvent *e )
+QDSData DateBook::appointmentQDLLink( QAppointment& appointment )
 {
-#ifdef QTOPIA_PHONE
-    if ( views->visibleWidget() == eventView ) {
-	e->ignore();
-	hideEventDetails();
-	return;
-    }
-#endif
+    if ( appointment == QAppointment() )
+        return QDSData();
 
-    slotToday();
-    if(syncing) {
-	/* no need to save, did that at flush */
-	e->accept();
-	return;
+    // Check if we need to create the QDLLink
+    QString keyString = appointment.customField( QDL::SOURCE_DATA_KEY );
+    if ( keyString.isEmpty() ||
+         !QDSData( QLocalUniqueId( keyString ) ).isValid() ) {
+        QByteArray dataRef;
+        QDataStream refStream( &dataRef, QIODevice::WriteOnly );
+        refStream << appointment.uid();
+
+        QDLLink link( "Calendar",
+                      dataRef,
+                      appointment.description(),
+                      QString( "pics/datebook/DateBook" ) );
+
+        QDSData linkData = link.toQDSData();
+        QLocalUniqueId key = linkData.store();
+        appointment.setCustomField( QDL::SOURCE_DATA_KEY, key.toString() );
+        model->updateAppointment( appointment );
+
+        return linkData;
     }
 
-    // save settings will generate it's own error messages, no
-    // need to do checking ourselves.
-    saveSettings();
-    //if ( db->save() )
-    e->accept();
-#if 0
-    else {
-	if ( QMessageBox::critical( parentWidget, tr( "Out of space" ),
-				    tr("<qt>Calendar was unable to save "
-				       "your changes. "
-				       "Free up some space and try again."
-				       "<br>Quit anyway?</qt>"),
-				    QMessageBox::Yes|QMessageBox::Escape,
-				    QMessageBox::No|QMessageBox::Default )
-	     != QMessageBox::No )
-	    e->accept();
-	else
-	    e->ignore();
-    }
-#endif
+    // Get the link from the QDSDataStore
+    return QDSData( QLocalUniqueId( keyString ) );
 }
 
-void DateBook::newEvent( const QString &description )
+void DateBook::removeAppointmentQDLLink( QAppointment& appointment )
+{
+    if ( appointment == QAppointment() )
+        return;
+
+    // Release any client QDLLinks
+    QString links = appointment.customField( QDL::CLIENT_DATA_KEY );
+    if ( !links.isEmpty() ) {
+        QDL::releaseLinks( links );
+    }
+
+    // Check if the Appointment is a QDLLink source, if so break it
+    QString key = appointment.customField( QDL::SOURCE_DATA_KEY );
+    if ( !key.isEmpty() ) {
+        // Break the link in the QDSDataStore
+        QDSData linkData = QDSData( QLocalUniqueId( key ) );
+        QDLLink link( linkData );
+        link.setBroken( true );
+        linkData.modify( link.toQDSData().data() );
+
+        // Now remove our reference to the link data
+        linkData.remove();
+
+        // Finally remove the stored key
+        appointment.removeCustomField( QDL::SOURCE_DATA_KEY );
+        model->updateAppointment( appointment );
+    }
+}
+
+void DateBook::newAppointment()
+{
+    newAppointment("");
+}
+
+bool DateBook::newAppointment(const QString &description)
 {
     QDateTime current = QDateTime::currentDateTime();
-    QDateTime start=current, end=current;
+    current.setDate(currentDate());
+    QDateTime start = current;
+    QDateTime end = current;
 
-    int mod = QTime(0,0,0).secsTo(current.time()) % 900;
-    if (mod != 0)  {
-	mod = 900 - mod;
-        current = current.addSecs( mod );
+    int mod = QTime(0, 0, 0).secsTo(current.time()) % 900;
+    if (mod != 0) {
+        mod = 900 - mod;
+        current = current.addSecs(mod);
     }
 
     start.setTime(current.time());
     start.setDate(current.date());
-    end = current.addSecs( 3600 );
+    end = current.addSecs(3600);
 
-    newEvent(start,end,description,QString::null);
+    return newAppointment(start, end, description, QString());
 }
 
-bool DateBook::newEvent(const QDateTime& dstart,const QDateTime& dend,const QString& description,const QString& notes)
+void DateBook::editCurrentOccurrence()
+{
+    bool inViewMode = (appointmentDetails && viewStack->currentWidget() == appointmentDetails);
+
+    if (inViewMode) {
+        QOccurrence o = editOccurrence(appointmentDetails->occurrence());
+        showAppointmentDetails(o);
+    } else {
+        editOccurrence(currentOccurrence());
+    }
+}
+
+QOccurrence DateBook::editOccurrence(const QOccurrence &o)
+{
+    return editOccurrence( o, false );
+}
+
+static bool onOccurrence(int flag)
+{
+    return flag == ExceptionDialog::NotEarlier || flag == ExceptionDialog::Earlier;
+}
+
+static bool postSplit(int flag)
+{
+    return (flag & ExceptionDialog::Later);
+}
+QOccurrence DateBook::editOccurrence(const QOccurrence &o, bool preview)
 {
 #ifndef QTOPIA_DESKTOP
-    if ( checkSyncing() )
-	return FALSE;
+    if (checkSyncing())
+        return QOccurrence();
 #endif
+    if ( editorView != 0 )
+        return QOccurrence();
 
-    QDateTime start=dstart, end=dend;
-    QDateTime current = QDateTime::currentDateTime();
-    bool snull = start.date().isNull();
-    bool enull = end.date().isNull();
+    QAppointment mainApp = o.appointment();
+    QAppointment editedApp = o.appointment();
 
-    if ( views->visibleWidget() ) {
-	if ( views->visibleWidget() == dayView ) {
-	    dayView->selectedDates( start, end );
-	} else if ( views->visibleWidget() == monthView ) {
-	    start.setDate( monthView->selectedDate() );
-	}
-#if !defined(QTOPIA_PHONE)
-	else if ( views->visibleWidget() == weekView ) {
-	    start.setDate( weekView->currentDate() );
-	}
+    int exceptionType = ExceptionDialog::All;
+    bool hasEarlier = o.start() != mainApp.start();
+    bool hasLater = o.nextOccurrence().isValid();
+
+    if (mainApp.hasRepeat() && (hasEarlier || hasLater)) {
+        exceptionType = askException(tr("Edit Event"));
+        QAppointment a = editedApp;
+        /* fix up exception types.
+           for starting occurrence
+                Earlier+Selected->Selected;
+                Later->NotSelected;
+                Later+Selected->All;
+                Earlier->Cancel;
+            for ending occrrence
+                Later+Selected->Selected;
+                Earlier->NotSelected;
+                Earlier+Selected->All
+                Later->Cancel;
+        */
+        if (!hasEarlier) {
+            if (exceptionType & ExceptionDialog::Later) {
+                exceptionType |= ExceptionDialog::Earlier;
+            } else {
+                exceptionType &= ExceptionDialog::NotEarlier;
+            }
+        } else if (!hasLater) {
+            if (exceptionType & ExceptionDialog::Earlier) {
+                exceptionType |= ExceptionDialog::Later;
+            } else {
+                exceptionType &= ExceptionDialog::NotLater;
+            }
+        }
+        switch (exceptionType) {
+            case ExceptionDialog::Selected:
+            case ExceptionDialog::RetainSelected:
+                // create exception.
+                a.clearExceptions();
+                a.setRepeatRule(QAppointment::NoRepeat);
+                a.setStart(o.start());
+                a.setUid(QUniqueId());
+                if (exceptionType == ExceptionDialog::Selected)
+                    editedApp = a;
+                else
+                    mainApp = a;
+                break;
+            case ExceptionDialog::Later:
+            case ExceptionDialog::Earlier:
+            case ExceptionDialog::NotLater:
+            case ExceptionDialog::NotEarlier:
+                // split appointment
+                a.setUid(QUniqueId());
+                a.clearExceptions();
+                if (onOccurrence(exceptionType))
+                    a.setStart(o.start());
+                else
+                    a.setStart(o.nextOccurrence().start());
+                if (postSplit(exceptionType))
+                    editedApp = a;
+                else
+                    mainApp = a;
+                break;
+            case ExceptionDialog::All:
+                break;
+            case ExceptionDialog::Cancel:
+                return QOccurrence();
+        }
+    }
+
+    editorView = new EntryDialog(onMonday, editedApp, this);
+    editorView->setModal(true);
+    if(preview)
+        editorView->showSummary();
+    editorView->setWindowTitle(tr("Edit Event", "window title" ));
+
+    while (QtopiaApplication::execDialog(editorView)) {
+        editedApp = editorView->appointment();
+
+        QString error = validateAppointment(editedApp);
+        if (!error.isNull()) {
+            if ( QMessageBox::warning(
+                    parentWidget->isVisible() ? parentWidget : 0,
+                    "Error",
+                    error,
+                    QMessageBox::Ok, QMessageBox::Cancel ) == QMessageBox::Cancel )
+            {
+                delete editorView;
+                editorView = 0;
+                return QOccurrence();
+            }
+        } else {
+            break;
+        }
+    }
+
+    delete editorView;
+    editorView = 0;
+
+    QOccurrence show;
+    switch (exceptionType) {
+        // exceptions
+        case ExceptionDialog::RetainSelected:
+            // for some reason will create the exception properly,
+            // except will also duplicate a non-repeating version
+            // of the event set at the start.
+            show = QOccurrence(o.start().date(), mainApp);
+            model->replaceOccurrence(editedApp, show);
+            model->updateAppointment(editedApp);
+        case ExceptionDialog::Selected:
+            show = QOccurrence(o.start().date(), editedApp);
+            model->replaceOccurrence(mainApp, show);
+            break;
+        // splits
+        case ExceptionDialog::Earlier:
+        case ExceptionDialog::NotLater:
+            model->updateAppointment(editedApp);
+            model->replaceRemaining(editedApp, mainApp);
+            show = QOccurrence(editedApp.start().date(), editedApp);
+        case ExceptionDialog::Later:
+        case ExceptionDialog::NotEarlier:
+            model->replaceRemaining(mainApp, editedApp);
+            show = QOccurrence(editedApp.start().date(), editedApp);
+            break;
+        case ExceptionDialog::All:
+            model->updateAppointment(editedApp);
+            show = QOccurrence(o.start().date(), editedApp);
+            break;
+        default:
+            return QOccurrence();
+    }
+
+#ifndef QTOPIA_DESKTOP
+    showAppointmentDetails(show);
 #endif
-    }
-    if ( start.date().isNull() )
-	start.setDate( current.date() );
-    if ( end.date().isNull() )
-	end.setDate( start.date() );
-    if ( (snull && end.time().isNull()) || !start.time().isValid() ) {
-	// We get to here from a key pressed in the Day View
-	// So we can assume some things.  We want the string
-	// passed in to be part of the description.
-	// move current to the next fifteen minutes
-	int mod = QTime(0,0,0).secsTo(current.time()) % 900;
-	if (mod != 0)  {
-	    mod = 900 - mod;
-            current = current.addSecs( mod );
-	}
-
-	// default start
-	start.setTime(current.time());
-    }
-    if ( (enull && end.time().isNull()) || !end.time().isValid() ) {
-	// default end
-	end = start.addSecs(3600);
-    }
-
-    PimEvent ev;
-    ev.setDescription( description );
-    // When the new gui comes in, change this...
-    ev.setLocation( "" );
-    ev.setStart( start );
-    ev.setEnd( end );
-    ev.setNotes( notes );
-    if ( aPreset )
-	ev.setAlarm( presetTime, PimEvent::Loud );
-
-    EntryDialog e( onMonday, ev, parentWidget->isVisible() ? parentWidget : 0, "new-event", TRUE );
-    e.setCaption( EntryDetails::tr("New Event") );
-
-#ifdef QTOPIA_DESKTOP
-    connect( e.entryDetails()->comboCategory,
-	     SIGNAL(editCategoriesClicked(QWidget*)),
-	     SLOT(editCategories(QWidget*)) );
-    connect( this, SIGNAL(categoriesChanged()),
-	     &e, SLOT(updateCategories()) );
-    e.resize( 500, 300 );
-#endif
-
-    while (QPEApplication::execDialog(&e)) {
-	ev = e.event();
-	//ev.assignUid(); // um, don't know if we can drop this or not
-	QString error = checkEvent( ev );
-	if ( !error.isNull() ) {
-	    if ( QMessageBox::warning( parentWidget, tr("Error!"),
-				       error, tr("Fix it"), tr("Continue"), 0, 0, 1 ) == 0 )
-		continue;
-	}
-	QUuid id = db->addEvent( ev );
-	emit eventsChanged();
-	if ( views->visibleWidget() == dayView ) {
-	    dayView->clearSelectedDates();
-	    bool ok;
-	    PimEvent e = db->find( id, &ok );
-	    if ( ok )
-		dayView->setCurrentEvent( e );
-	}
-	return TRUE;
-    }
-    if ( views->visibleWidget() == dayView )
-	dayView->clearSelectedDates();
-    return FALSE;
+    return show;
 }
 
-void DateBook::setDocument( const QString &filename )
+void DateBook::removeCurrentOccurrence()
 {
-    DocLnk doc(filename);
-    if ( doc.isValid() )
-	receiveFile(doc.file());
+    if (!occurrenceSelected())
+        return;
+    QOccurrence o = currentOccurrence();
+
+    if (viewStack->currentWidget() == appointmentDetails)
+        hideAppointmentDetails();
+
+    removeOccurrence(o);
+}
+
+void DateBook::removeOccurrence(const QOccurrence &o)
+{
+#if !defined(QTOPIA_DESKTOP)
+    if( checkSyncing() )
+        return;
+#endif
+
+    QAppointment a = o.appointment();
+    if (a.hasRepeat()) {
+        //  Ask if just this one or the entire series
+        int e = askException(tr("Delete Event"));
+        switch (e) {
+            case ExceptionDialog::Cancel:
+                return;
+
+            case ExceptionDialog::Selected:
+                // Should check if the only one of its kind.. e.g. is
+                // apointment next o, and o.n
+                if (a.firstOccurrence() == o &&
+                        !o.nextOccurrence().isValid()) {
+                    removeAppointmentQDLLink(a);
+                    model->removeAppointment(a);
+                } else {
+                    model->removeOccurrence(o);
+                }
+                break;
+
+            case ExceptionDialog::All:
+                removeAppointmentQDLLink(a);
+                model->removeAppointment(a);
+                break;
+
+            case ExceptionDialog::RetainSelected:
+                {
+                    QAppointment a = o.appointment();
+                    a.clearExceptions();
+                    a.setStart(o.start());
+                    a.setRepeatRule(QAppointment::NoRepeat);
+                    model->updateAppointment(a);
+                }
+                break;
+
+            case ExceptionDialog::Earlier:
+            case ExceptionDialog::NotLater:
+                // update start date
+                {
+                    QDateTime start = e == ExceptionDialog::Earlier ? o.start() : o.nextOccurrence().start();
+                    if (start.isNull()) {
+                        removeAppointmentQDLLink(a);
+                        model->removeAppointment(a);
+                    } else {
+                        a.setStart(start);
+                        if (!a.nextOccurrence(a.start().date().addDays(1)).isValid())
+                            a.setRepeatRule(QAppointment::NoRepeat);
+                        model->updateAppointment(a);
+                    }
+                }
+                break;
+
+            case ExceptionDialog::Later:
+            case ExceptionDialog::NotEarlier:
+                // update repeat till
+                {
+                    QDateTime start = e == ExceptionDialog::NotEarlier ? o.start() : o.nextOccurrence().start();
+                    if (start.date() == a.start().date()) {
+                        removeAppointmentQDLLink(a);
+                        model->removeAppointment(a);
+                    } else {
+                        a.setRepeatUntil(start.date().addDays(-1));
+                        if (!a.nextOccurrence(a.start().date().addDays(1)).isValid())
+                            a.setRepeatRule(QAppointment::NoRepeat);
+                        model->updateAppointment(a);
+                    }
+                    break;
+                }
+        }
+    }
     else
-	receiveFile(filename);
+    {
+        if (!Qtopia::confirmDelete(parentWidget->isVisible() ? parentWidget : 0, tr("Calendar"), a.description()))
+            return;
+        removeAppointmentQDLLink(a);
+        model->removeAppointment(a);
+    }
+
+    updateIconsTimer->start( DATEBOOK_UPDATE_ICON_TIMEOUT );
 }
 
-bool DateBook::receiveFile( const QString &filename )
+void DateBook::removeOccurrencesBefore()
 {
-    QValueList<PimEvent> tl = PimEvent::readVCalendar( filename );
-
-    QString msg = tr("<P>%1 new events.<p>Do you want to add them to your Calendar?").
-	arg(tl.count());
-
-    if ( QMessageBox::information(parentWidget, tr("New Events"),
-	    msg, QMessageBox::Ok, QMessageBox::Cancel)==QMessageBox::Ok ) {
-	QDateTime from,to;
-	for( QValueList<PimEvent>::Iterator it = tl.begin(); it != tl.end(); ++it ) {
-	    if ( from.isNull() || (*it).start() < from )
-		from = (*it).start();
-	    if ( to.isNull() || (*it).end() < to )
-		to = (*it).end();
-	    db->addEvent( *it );
-	}
-
-	// Change view to a sensible one...
+#ifdef QTOPIA4_TODO
+    QDialog dlg( parentWidget );
+    dlg.setModal( true );
 #ifdef QTOPIA_PHONE
-	if ( from.date() == to.date() )
-	    viewDay( from.date() );
-	else
-	    viewMonth( from.date() );
+    dlg.setWindowTitle( tr("Purge") );
 #else
-	if ( from.date() == to.date() ) {
-	    viewDay(from.date());
-	} else {
-	    initWeek();
-	    int fw,fy,tw,ty;
-	    weekView->calcWeek(from.date(), fw, fy);
-	    weekView->calcWeek(to.date(), tw, ty);
-	    if ( fw == tw && fy == ty ) {
-		viewWeek(from.date());
-	    } else if ( from.date().month() == to.date().month()
-		    && from.date().year() == to.date().year() ) {
-		viewMonth(from.date());
-	    } else {
-		viewDay(from.date());
-	    }
-	}
-#endif
-
-	emit eventsChanged();
-	return TRUE;
-    }
-    return FALSE;
-}
-
-void DateBook::beamEvent( const PimEvent &e )
-{
-#ifdef Q_WS_QWS
-    ::unlink( beamfile.local8Bit().data() ); // delete if exists
-
-    PimEvent::writeVCalendar( beamfile, e );
-    Ir *ir = new Ir( this );
-    connect( ir, SIGNAL( done(Ir*) ), this, SLOT( beamDone(Ir*) ) );
-    QString description = e.description();
-    ir->send( beamfile, description, "text/x-vCalendar" );
-#else
-    Q_UNUSED(e)
-#endif
-}
-
-void DateBook::beamDone( Ir *ir )
-{
-#ifdef Q_WS_QWS
-    delete ir;
-    ::unlink( beamfile.local8Bit().data() );
-#else
-    Q_UNUSED(ir)
-#endif
-}
-
-
-void DateBook::slotFind()
-{
-    // move it to the day view...
-    viewDay();
-    FindDialog frmFind( "Calendar", parentWidget ); // No tr
-    frmFind.setUseDate( true );
-    frmFind.setDate( currentDate() );
-    connect( &frmFind, SIGNAL(signalFindClicked(const QString&,const QDate&,bool,bool,int)),
-	     this, SLOT(slotDoFind(const QString&,const QDate&,bool,bool,int)) );
-    connect( this, SIGNAL(signalNotFound()),
-	     &frmFind, SLOT(slotNotFound()) );
-    connect( this, SIGNAL(signalWrapAround()),
-	     &frmFind, SLOT(slotWrapAround()) );
-    QPEApplication::execDialog(&frmFind);
-    inSearch = false;
-}
-
-bool catComp( QArray<int> cats, int category )
-{
-    bool returnMe;
-    int i,
-	count;
-
-    count = int(cats.count());
-    returnMe = false;
-    if ( (category == -1 && count == 0) || category == -2 )
-	returnMe = true;
-    else {
-	for ( i = 0; i < count; i++ ) {
-	    if ( category == cats[i] ) {
-		returnMe = true;
-		break;
-	    }
-	}
-    }
-    return returnMe;
-}
-
-void DateBook::slotDoFind( const QString& txt, const QDate &dt,
-			   bool caseSensitive, bool searchForward,
-			   int category )
-{
-    bool ok;
-    QRegExp r(txt);
-    r.setCaseSensitive(caseSensitive);
-
-    Occurrence o = db->find(r, category, dt,
-	    searchForward, &ok);
-
-    if ( ok ) {
-	dayView->selectDate( o.startInCurrentTZ().date() );
-	dayView->setCurrentItem(o);
-    }
-}
-
-void DateBook::showEventDetails()
-{
-#ifdef QTOPIA_DESKTOP
-    if (eventSelected())
-	editOccurrence(currentOccurrence(), TRUE);
-#else
-    initEvent();
-
-    if ( views->visibleWidget() != eventView ) {
-	eventView->previousView = views->visibleWidget();
-
-	raiseWidget( eventView );
-	eventView->setFocus();
-
-	updateIcons();
-	if (actionFind)
-	    actionFind->setEnabled( FALSE );
-    }
-
-    eventView->init( currentEvent() );
-#endif
-}
-
-void DateBook::hideEventDetails()
-{
-    raiseWidget( eventView->previousView );
-    eventView->previousView->setFocus();
-
-    updateIcons();
-    if (actionFind)
-	actionFind->setEnabled( TRUE );
-}
-
-void DateBook::raiseWidget( QWidget *widget )
-{
-    if ( !widget )
-	return;
-
-#ifndef QTOPIA_DESKTOP
-    parentWidget->setName( widget->name() );
-#endif
-    views->raiseWidget( widget );
-}
-
-void DateBook::slotPurge()
-{
-    QDialog dlg( parentWidget->isVisible() ? parentWidget : 0, "purge", TRUE );
-#ifdef QTOPIA_PHONE
-    dlg.setCaption( tr("Purge") );
-#else
-    dlg.setCaption( tr("Purge Events") );
+    dlg.setWindowTitle( tr("Purge Events") );
 #endif
 
     QVBoxLayout *vb = new QVBoxLayout( &dlg );
     QLabel *lbl = new QLabel( tr("<qt>Please select a date. Everything on and before this date will be removed.</qt>"), &dlg );
-    lbl->setAlignment( AlignCenter|AlignVCenter );
+    lbl->setAlignment( Qt::AlignCenter | Qt::AlignVCenter );
     vb->addWidget( lbl );
-    QPEDateEdit *dp = new QPEDateEdit( &dlg, 0, FALSE, TRUE );
+    DateEdit *dp = new DateEdit( &dlg, false, true );
     vb->addWidget( dp );
 #ifdef QTOPIA_DESKTOP
     QWidget *buttons = new QWidget( &dlg );
@@ -1674,82 +845,895 @@ void DateBook::slotPurge()
     dlg.resize( 100, 50 );
 #endif
 
-    if ( QPEApplication::execDialog( &dlg ) ) {
-	purgeEvents( dp->date() );
+    if ( QtopiaApplication::execDialog( &dlg ) ) {
+    purgeAppointments( dp->date() );
     }
+#endif
 }
 
-void DateBook::purgeEvents( const QDate &date, bool prompt )
+void DateBook::removeOccurrencesBefore(const QDate &, bool)
 {
+#ifdef QTOPIA4_TODO
     if (date.isNull())
         return;
 #ifndef QTOPIA_DESKTOP
-    QDialog *wait = new QDialog( parentWidget->isVisible() ? parentWidget : 0, 0, TRUE, WStyle_Customize | WStyle_NoBorder );
-    QVBox *vb = new QVBox( wait );
+    QDialog *wait = new QDialog( parentWidget, Qt::WStyle_Customize | Qt::WStyle_NoBorder );
+    wait->setModal( true );
+    QVBoxWidget *vb = new QVBoxWidget( wait );
     QLabel *l = new QLabel( tr("<b>Please Wait</b>"), vb );
-    l->setAlignment( AlignCenter|AlignVCenter );
+    l->setAlignment( Qt::AlignCenter | Qt::AlignVCenter );
     wait->show();
-    qApp->processEvents();
+    qApp->processAppointments();
 #endif
 
     QDateTime from( date );
-    {
-	const QList<PrEvent> &pevents = db->eventsIO().events();
-	QListIterator<PrEvent> it( pevents );
-	for ( PrEvent *e = it.current(); (e = it.current()); ++it ) {
-	    QDateTime s = e->startInCurrentTZ();
-	    if ( s < from )
-		from = s;
-	}
+{
+    const QList<PrAppointment*> &pappointments = model->appointmentsIO().appointments();
+    foreach ( PrAppointment *e, pappointments ) {
+        QDateTime s = e->startInCurrentTZ();
+        if ( s < from )
+            from = s;
     }
-    
-    QValueList<PimEvent> events = purge_getEvents( from, date );
+}
+
+    QList<QAppointment> appointments = purge_getAppointments( from, date );
 
 #ifndef QTOPIA_DESKTOP
     wait->close();
 #endif
 
     // nothing to do
-    if ( events.count() == 0 )
-	return;
+    if ( appointments.count() == 0 )
+        return;
 
     // give the user a chance to back out
-    if ( prompt && QMessageBox::warning( parentWidget, tr("WARNING"),
-		tr( "<qt>You are about to delete %1 events. "
-		    "Are you sure you want to do this?</qt>" ).arg( events.count() ),
-		tr("Delete"), tr("Abort"), 0, 1, 1 ) )
-	return;
+    if ( prompt && QMessageBox::warning( parentWidget->isVisible() ? parentWidget : 0, tr("WARNING"),
+         tr( "<qt>You are about to delete %1 events. "
+                 "Are you sure you want to do this?</qt>" ).arg( appointments.count() ),
+         tr("Delete"), tr("Abort"), 0, 1, 1 ) )
+        return;
 
 #ifndef QTOPIA_DESKTOP
     wait->show();
-    qApp->processEvents();
+    qApp->processAppointments();
 #endif
 
-    // delete everything (multiple passes because of interdependant events
+    // delete everything (multiple passes because of interdependant appointments
     do {
-	for ( QValueList<PimEvent>::Iterator it = events.begin(); it != events.end(); ++it ) {
-	    db->removeEvent( *it );
-	}
-	events = purge_getEvents( from, date );
-    } while ( events.count() > 0 );
+    for ( QList<QAppointment>::iterator it = appointments.begin(); it != appointments.end(); ++it ) {
+        model->removeAppointment( *it );
+    }
+    appointments = purge_getAppointments( from, date );
+    } while ( appointments.count() > 0 );
 
 #ifndef QTOPIA_DESKTOP
     delete wait;
 #endif
-
+#endif
 }
 
-QValueList<PimEvent> DateBook::purge_getEvents( const QDateTime &from, const QDate &date )
+void DateBook::beamCurrentAppointment()
 {
-    QValueList<Occurrence> occs = db->getOccurrences( from.date().addDays( -2 ), date );
-    QValueList<PimEvent> events;
-    for ( QValueList<Occurrence>::Iterator it = occs.begin(); it != occs.end(); ++it ) {
-	Occurrence o = *it;
-	PimEvent e = o.event();
-	if ( e.hasRepeat() && (e.repeatForever() || e.repeatTill() >= date) )
-	    continue;
-	if ( !events.contains( e ) )
-	    events.append( e );
+    if (viewStack->currentWidget() == appointmentDetails)
+        hideAppointmentDetails();
+    if (occurrenceSelected())
+        beamAppointment(currentAppointment());
+}
+
+void DateBook::beamAppointment(const QAppointment &e)
+{
+    ::unlink(beamfile.toLocal8Bit()); // delete if exists
+
+    QAppointment::writeVCalendar(beamfile, e);
+    QFile file(beamfile);
+    if (file.open(QIODevice::ReadOnly)) {
+        QByteArray data = file.readAll();
+        QtopiaSendVia::sendData(this, data, "text/x-vcalendar");
     }
-    return events;
+}
+
+void DateBook::setDocument(const QString &filename)
+{
+    QContent doc(filename);
+    if (doc.isValid())
+        receiveFile(doc.file());
+    else
+        receiveFile(filename);
+}
+
+void DateBook::showAppointmentDetails()
+{
+#ifdef QTOPIA_DESKTOP
+    if (occurrenceSelected())
+        editOccurrence(currentOccurrence(), true);
+#else
+    if (occurrenceSelected())
+        showAppointmentDetails(currentOccurrence());
+#endif
+}
+
+void DateBook::showAppointmentDetails(const QOccurrence &o)
+{
+    if( isHidden() ) // only close after view if hidden on first activation
+    {
+        closeAfterView = true;
+    }
+
+    initAppointmentDetails();
+    appointmentDetails->init(o);
+
+    if (viewStack->currentWidget() != appointmentDetails) {
+        appointmentDetails->previousDetails = viewStack->currentWidget();
+        raiseView(appointmentDetails);
+        updateIcons();
+    }
+
+    if ( dayView) {
+        dayView->setCurrentOccurrence(o);
+    }
+}
+
+void DateBook::hideAppointmentDetails()
+{
+    if ( prevOccurrences.count() > 0 ) {
+        showAppointmentDetails( prevOccurrences.top() );
+        prevOccurrences.pop();
+    } else {
+        raiseView(appointmentDetails->previousDetails);
+        appointmentDetails->previousDetails->setFocus();
+    }
+
+    updateIcons();
+}
+
+/*void DateBook::find()
+{
+    // move it to the day view...
+    viewDay();
+    FindDialog frmFind("Calendar", parentWidget->isVisible() ? parentWidget : 0); // No tr
+    frmFind.setUseDate(true);
+    frmFind.setDate(currentDate());
+    connect(&frmFind, SIGNAL(signalFindClicked(const QString&,const QDate&,bool,bool,int)),
+              this, SLOT(slotDoFind(const QString&,const QDate&,bool,bool,const QCategoryFilter&)));
+    connect(this, SIGNAL(signalNotFound()),
+             &frmFind, SLOT(slotNotFound()));
+    connect(this, SIGNAL(signalWrapAround()),
+             &frmFind, SLOT(slotWrapAround()));
+    QtopiaApplication::execDialog(&frmFind);
+    inSearch = false;
+}
+
+void DateBook::doFind(const QString&, const QDate &,
+            Qt::CaseSensitivity, bool, const QCategoryFilter &)
+{
+#ifdef QTOPIA4_TODO
+    bool ok;
+    QRegExp r(txt);
+    r.setCaseSensitivity(caseSensitive);
+
+    QOccurrence o = model->find(r, category, dt,
+                             searchForward, &ok);
+
+    if ( ok ) {
+        dayView->selectDate( o.startInCurrentTZ().date() );
+        dayView->setCurrentItem(o);
+    }
+#endif
+}*/
+
+void DateBook::updateIcons()
+{
+    bool showingDetails = (appointmentDetails && viewStack->currentWidget() == appointmentDetails);
+
+    bool itemSelected = showingDetails ? occurrenceSelected() : false;
+    bool itemEditable = itemSelected ? model->editable(currentOccurrence().uid()) : false;
+
+#ifdef QTOPIA_PHONE
+    actionEdit->setVisible(itemEditable);
+    actionDelete->setVisible(itemEditable);
+
+    actionNew->setVisible(!showingDetails);
+    actionToday->setVisible(!showingDetails);
+    actionDay->setVisible(!showingDetails && viewStack->currentWidget() != dayView);
+    actionMonth->setVisible(!showingDetails && viewStack->currentWidget() != monthView);
+    actionSettings->setVisible(!showingDetails);
+    actionAccounts->setVisible(!showingDetails);
+
+    if (QtopiaSendVia::isDataSupported("text/x-vcalendar"))
+        actionBeam->setVisible(itemSelected);
+
+    if (itemSelected)
+        QSoftMenuBar::setLabel(dayView, Qt::Key_Select, QSoftMenuBar::View);
+    else if (dayView)
+        QSoftMenuBar::setLabel(dayView, Qt::Key_Select, QSoftMenuBar::NoLabel);
+
+    if (dayView &&
+        viewStack->currentWidget() == dayView &&
+        dayView->allDayFoldingAvailable()) {
+        actionShowAll->setVisible(dayView->allDayFolded());
+        actionHideSome->setVisible(!dayView->allDayFolded());
+    } else {
+        actionShowAll->setVisible(false);
+        actionHideSome->setVisible(false);
+    }
+#else
+    //  TODO
+    /*if (showingDetails) {
+        if (sub_bar) sub_bar->hide();
+        if (details_bar) details_bar->show();
+    } else {
+        if (sub_bar) sub_bar->show();
+        if (details_bar) details_bar->hide();
+    }
+
+    actionBack->setEnabled(showingDetails);
+
+    if (actionFind)
+        actionFind->setEnabled(!view);*/
+#endif
+}
+
+void DateBook::timerEvent(QTimerEvent *e)
+{
+    static int stop = 0;
+    if (stop < 10) {
+        Qtopia::soundAlarm();
+        stop++;
+    } else {
+        stop = 0;
+        killTimer(e->timerId());
+    }
+}
+
+void DateBook::closeEvent(QCloseEvent *e)
+{
+#ifdef QTOPIA_PHONE
+    if ( ( viewStack->currentWidget() == appointmentDetails ) &&
+         !closeAfterView ) {
+        e->ignore();
+        hideAppointmentDetails();
+        return;
+    }
+    closeAfterView = false;
+    if ( viewStack->currentWidget() == monthView ) {
+        e->ignore();
+        viewDay();
+        return;
+    }
+#endif
+    selectToday();
+    if(syncing) {
+        /* no need to save, did that at flush */
+        e->accept();
+        return;
+    }
+    // save settings will generate it's own error messages, no
+    // need to do checking ourselves.
+    saveSettings();
+    //if ( model->save() )
+    e->accept();
+#if 0
+    else {
+        if ( QMessageBox::critical( parentWidget->isVisible() ? parentWidget : 0, tr( "Out of space" ),
+                                    tr("<qt>Calendar was unable to save "
+                                       "your changes. "
+                                       "Free up some space and try again."
+                                       "<br>Quit anyway?</qt>"),
+                                    QMessageBox::Yes|QMessageBox::Escape,
+                                    QMessageBox::No|QMessageBox::Default )
+             != QMessageBox::No )
+            e->accept();
+        else
+            e->ignore();
+}
+#endif
+}
+
+void DateBook::init()
+{
+    dayView = 0;
+    monthView = 0;
+    appointmentDetails = 0;
+#if !defined(QTOPIA_PHONE) && defined(QTOPIA4_TODO)
+    weekView = 0;
+#endif
+
+    beamfile = Qtopia::tempDir() + "obex";
+
+    QDir d;
+    d.mkdir(beamfile);
+    beamfile += "/appointment.vcs";
+
+    model = new QAppointmentModel(this);
+    loadSettings();
+    DateBookGui::init();
+#ifdef GOOGLE_CALENDAR_CONTEXT
+    actionAccounts->setVisible(AccountEditor::editableAccounts(model));
+#else
+    actionAccounts->setVisible(false);
+#endif
+
+#ifndef QTOPIA_DESKTOP
+    viewStack = new QStackedWidget(parentWidget);
+    setCentralWidget(viewStack);
+
+    viewToday();
+
+    connect(qApp, SIGNAL(clockChanged(bool)), this, SLOT(changeClock()));
+    connect(qApp, SIGNAL(dateFormatChanged()), this, SLOT(changeClock()));
+    connect(qApp, SIGNAL(weekChanged(bool)), this, SLOT(changeWeek(bool)));
+    connect(qApp, SIGNAL(timeChanged()), this, SLOT(checkToday()));
+    connect(qApp, SIGNAL(timeChanged()), this, SLOT(updateAlarms()));
+
+    connect(qApp, SIGNAL(flush()), this, SLOT(flush()));
+    connect(qApp, SIGNAL(reload()), this, SLOT(reload()));
+
+    connect(qApp, SIGNAL(appMessage(const QString&,const QByteArray&)),
+            this, SLOT(appMessage(const QString&,const QByteArray&)));
+
+    new CalendarService( this );
+
+    // Set timer to go off 2 sections to midnight
+    midnightTimer = new QTimer(this);
+    connect(midnightTimer, SIGNAL(timeout()), this, SLOT(checkToday()));
+    midnightTimer->start((QTime::currentTime().secsTo(QTime(23, 59, 59)) + 3) * 1000);
+#endif // !QTOPIA_DESKTOP
+
+    // Update icons timer, used to allow datebase to refresh before applying
+    // the update
+    updateIconsTimer = new QTimer( this );
+    updateIconsTimer->setSingleShot( true );
+    connect( updateIconsTimer,
+             SIGNAL( timeout() ),
+             this,
+             SLOT( updateIcons() ) );
+}
+
+void DateBook::initDayView()
+{
+    if (!dayView) {
+        dayView = new DayView;
+        viewStack->addWidget(dayView);
+        dayView->setDaySpan(startTime, 17);
+        connect(dayView, SIGNAL(newAppointment()), this, SLOT(newAppointment()));
+        connect(dayView, SIGNAL(removeOccurrence(const QOccurrence&)),
+                this, SLOT(removeOccurrence(const QOccurrence&)));
+        connect(dayView, SIGNAL(editOccurrence(const QOccurrence&)),
+                this, SLOT(editOccurrence(const QOccurrence&)));
+        connect(dayView, SIGNAL(beamAppointment(const QAppointment&)),
+                this, SLOT(beamAppointment(const QAppointment&)));
+        connect(dayView, SIGNAL(newAppointment(const QString&)),
+                this, SLOT(newAppointment(const QString&)));
+        connect(dayView, SIGNAL(dateChanged()), this, SLOT(updateIcons()));
+        connect(dayView, SIGNAL(showDetails()), this, SLOT(showAppointmentDetails()));
+        connect(dayView, SIGNAL(selectionChanged()), this, SLOT(updateIcons()));
+    }
+}
+
+void DateBook::initMonthView()
+{
+    if (!monthView) {
+        monthView = new MonthView;
+        monthView->setHorizontalHeaderFormat(QCalendarWidget::SingleLetterDayNames);
+        viewStack->addWidget(monthView);
+        connect(monthView, SIGNAL(activated(const QDate&)),
+                this, SLOT(viewDay(const QDate&)));
+    }
+}
+
+void DateBook::initAppointmentDetails()
+{
+    if (!appointmentDetails) {
+        appointmentDetails = new AppointmentDetails(viewStack);
+        viewStack->addWidget(appointmentDetails);
+        connect(appointmentDetails, SIGNAL(done()), this, SLOT(hideAppointmentDetails()));
+    }
+}
+
+#if !defined(QTOPIA_PHONE) && defined(QTOPIA4_TODO)
+void DateBook::initWeekView()
+{
+    if (!weekView) {
+        weekView = new WeekView( model, onMonday, viewStack );
+        weekView->setDayStarts( startTime );
+        viewStack->addWidget( weekView );
+        connect( weekView, SIGNAL( dateActivated(const QDate&) ),
+                this, SLOT( viewDay(const QDate&) ) );
+
+            // qApp connections
+        connect( qApp, SIGNAL(weekChanged(bool)),
+                weekView, SLOT(setStartOnMonday(bool)) );
+    }
+}
+#endif
+
+void DateBook::initExceptionDialog()
+{
+    if (!exceptionDialog) {
+        exceptionDialog = new ExceptionDialog(parentWidget);
+        exceptionDialog->setModal(true);
+    }
+}
+
+int DateBook::askException(const QString &action)
+{
+    initExceptionDialog();
+    exceptionDialog->setWindowTitle(action);
+    return exceptionDialog->exec();
+}
+
+void DateBook::loadSettings()
+{
+    {
+        QSettings config("Trolltech","qpe");
+        config.beginGroup("Time");
+        onMonday = config.value( "MONDAY" ).toBool();
+    }
+
+    {
+        QSettings config("Trolltech","DateBook");
+        config.beginGroup("Main");
+        startTime = config.value("startviewtime", 8).toInt();
+        aPreset = config.value("alarmpreset").toBool();
+        presetTime = config.value("presettime").toInt();
+#ifdef QTOPIA_PHONE
+        compressDay = true;
+#else
+        compressDay = config.value("compressday", true).toBool();
+#endif
+    }
+}
+
+void DateBook::saveSettings()
+{
+    QSettings config("Trolltech","qpe");
+    QSettings configDB("Trolltech","DateBook");
+    configDB.beginGroup("Main");
+    configDB.setValue("startviewtime",startTime);
+    configDB.setValue("alarmpreset",aPreset);
+    configDB.setValue("presettime",presetTime);
+    configDB.setValue("compressday", compressDay);
+}
+
+bool DateBook::receiveFile(const QString &filename)
+{
+    QList<QAppointment> tl = QAppointment::readVCalendar(filename);
+
+    QString msg = tr("<p>%1 new events.<p>Do you want to add them to your Calendar?",
+                     "%1 number").
+            arg(tl.count());
+
+    if ( QMessageBox::information(parentWidget->isVisible() ? parentWidget : 0, tr("New Events"),
+         msg, QMessageBox::Ok, QMessageBox::Cancel)==QMessageBox::Ok ) {
+             QDateTime from,to;
+             for( QList<QAppointment>::const_iterator it = tl.begin(); it != tl.end(); ++it ) {
+                 if ( from.isNull() || (*it).start() < from )
+                     from = (*it).start();
+                 if ( to.isNull() || (*it).end() < to )
+                     to = (*it).end();
+                 model->addAppointment( *it );
+             }
+
+        // Change view to a sensible one...
+#ifdef QTOPIA_PHONE
+        if ( from.date() == to.date() )
+            viewDay( from.date() );
+        else
+            viewMonth( from.date() );
+#else
+        if ( from.date() == to.date() ) {
+    viewDay(from.date());
+        } else {
+#ifdef QTOPIA4_TODO
+            initWeek();
+            int fw,fy,tw,ty;
+            weekView->calcWeek(from.date(), fw, fy);
+            weekView->calcWeek(to.date(), tw, ty);
+            if ( fw == tw && fy == ty ) {
+                viewWeek(from.date());
+            } else if ( from.date().month() == to.date().month()
+                        && from.date().year() == to.date().year() ) {
+                            viewMonth(from.date());
+                        } else {
+                            viewDay(from.date());
+                        }
+#endif
+        }
+#endif
+
+        return true;
+         }
+         return false;
+}
+
+bool DateBook::newAppointment(const QDateTime& dstart, const QDateTime& dend, const QString& description, const QString& notes)
+{
+#ifndef QTOPIA_DESKTOP
+    if (checkSyncing())
+        return false;
+#endif
+
+    if ( editorView != 0 )
+        return false;
+
+    //
+    //  Figure out a start and end times for the new appointment, if none given
+    //
+
+    QDateTime start = dstart;
+    QDateTime end = dend;
+    bool startNull = start.isNull();
+    bool endNull = end.isNull();
+
+    QDateTime current = QDateTime::currentDateTime();
+    current.setDate(currentDate());
+
+    if (viewStack->currentWidget()) {
+        if(viewStack->currentWidget() == monthView)
+            start.setDate(monthView->selectedDate());
+#if !defined(QTOPIA_PHONE) && defined(QTOPIA4_TODO)
+        else if(viewStack->currentWidget() == weekView)
+            start.setDate(weekView->selectedDate());
+#endif
+    }
+
+    if (start.date().isNull())
+        start.setDate(current.date());
+
+    if (end.date().isNull())
+        end.setDate(current.date());
+
+    if ((startNull && end.time().isNull()) || !start.time().isValid()) {
+        //  If no time is given, use the current time rounded up to the nearest 15 minutes
+        int mod = QTime(0, 0, 0).secsTo(current.time()) % 900;
+        if (mod != 0)
+        {
+            mod = 900 - mod;
+            current = current.addSecs(mod);
+        }
+    }
+
+    //  If no end time is given, default to one hour after start time
+    if ((endNull && end.time().isNull()) || !end.time().isValid())
+        end = start.addSecs(3600);
+
+    //
+    //  Prepare the appointment used by the dialog
+    //
+
+    QAppointment a;
+    a.setDescription(description);
+    a.setLocation("");
+    a.setStart(start);
+    a.setEnd(end);
+    a.setNotes(notes);
+    if (aPreset)
+        a.setAlarm(presetTime, QAppointment::Audible);
+
+    editorView = new EntryDialog(onMonday, a, parentWidget);
+    editorView->setObjectName("new-event");
+    editorView->setModal(true);
+    editorView->setWindowTitle(tr("New Event"));
+
+    while ( QtopiaApplication::execDialog( editorView ) ) {
+        a = editorView->appointment();
+
+        QString error = validateAppointment(a);
+        if(!error.isNull()) {
+            if (QMessageBox::warning(parentWidget->isVisible() ? parentWidget : 0, tr("Error!"),
+                error, tr("Fix it"), tr("Continue"), 0, 0, 1 ) == 0)
+                continue;
+        }
+
+        QUniqueId id = model->addAppointment(a);
+        a.setUid(id);
+
+        if (dayView) {
+            dayView->setCurrentAppointment(a);
+        }
+
+        updateIconsTimer->start( DATEBOOK_UPDATE_ICON_TIMEOUT );
+
+        delete editorView;
+        editorView = 0;
+
+        return true;
+    }
+
+    delete editorView;
+    editorView = 0;
+
+    return false;
+}
+
+void DateBook::addAppointment(const QAppointment &e)
+{
+    QDate d = e.start().date();
+    initDayView();
+    dayView->selectDate(d);
+}
+
+bool DateBook::occurrenceSelected() const
+{
+    if (viewStack->currentWidget() && viewStack->currentWidget() == dayView)
+        return dayView->currentIndex().isValid();
+    if (appointmentDetails && viewStack->currentWidget() == appointmentDetails)
+        return appointmentDetails->occurrence().isValid();
+    return false;
+}
+
+QAppointment DateBook::currentAppointment() const
+{
+    if (dayView && viewStack->currentWidget() == dayView)
+        return dayView->currentAppointment();
+    if (appointmentDetails && viewStack->currentWidget() == appointmentDetails)
+        return appointmentDetails->occurrence().appointment();
+
+    return QAppointment();
+}
+
+QOccurrence DateBook::currentOccurrence() const
+{
+    if (dayView && viewStack->currentWidget() == dayView)
+        return dayView->currentOccurrence();
+    if (appointmentDetails && viewStack->currentWidget() == appointmentDetails)
+        return appointmentDetails->occurrence();
+
+    return QOccurrence();
+}
+
+void DateBook::raiseView(QWidget *widget)
+{
+    if (!widget)
+        return;
+
+#ifndef QTOPIA_DESKTOP
+    if (parentWidget)
+        parentWidget->setObjectName(widget->objectName());
+#endif
+
+    viewStack->setCurrentIndex(viewStack->indexOf(widget));
+}
+
+QDate DateBook::currentDate()
+{
+    if (dayView && viewStack->currentWidget() == dayView)
+        return dayView->currentDate();
+#if !defined(QTOPIA_PHONE) && defined(QTOPIA4_TODO)
+    else if (weekView && viewStack->currentWidget() == weekView)
+        return weekView->currentDate();
+#endif
+    else if (monthView && viewStack->currentWidget() == monthView)
+        return monthView->selectedDate();
+    else
+        return QDate(); // invalid;
+}
+
+bool DateBook::checkSyncing()
+{
+    if (syncing) {
+        if (QMessageBox::warning(parentWidget->isVisible() ? parentWidget : 0, tr("Calendar"),
+            tr("<qt>Can not edit data, currently syncing</qt>"),
+            QMessageBox::Ok, QMessageBox::Abort ) == QMessageBox::Abort)
+        {
+            // Okay, if you say so (eg. Qtopia Desktop may have crashed)....
+            syncing = false;
+        } else
+            return true;
+    }
+    return false;
+}
+
+QString DateBook::validateAppointment(const QAppointment &e)
+{
+    // Check if overlaps with itself
+    bool checkFailed = false;
+
+    // check the next 12 repeats. should catch most problems
+    QDate current_date = e.end().date();
+    QOccurrence previous = e.nextOccurrence(current_date.addDays(1));
+    int count = 12;
+    while(count-- && previous.isValid()) {
+        QOccurrence next = previous.nextOccurrence();
+        if (!next.isValid())
+            break;
+
+        if(next.start() < previous.end()) {
+            checkFailed = true;
+            break;
+        }
+
+        previous = next;
+    }
+
+    if (checkFailed)
+        return tr("<qt>Event duration is potentially longer "
+                "than interval between repeats.</qt>");
+
+    return QString();
+}
+
+/*!
+    \service CalendarService Calendar
+    \brief Provides the Qtopia Calendar service.
+
+    The \i Calendar service enables applications to access features of
+    the Calendar application.
+*/
+
+/*!
+    \internal
+*/
+CalendarService::~CalendarService()
+{
+}
+
+/*!
+    Open a dialog so the user can create a new appointment. Default
+    values are used.
+
+    This slot corresponds to the QCop service message
+    \c{Calendar::newAppointment()}.
+*/
+void CalendarService::newAppointment()
+{
+    datebook->newAppointment("");
+}
+
+/*!
+    Open a dialog so the user can create a new appointment.  The new
+    appointment will use the specified \a start and \a end times,
+    \a description and \a notes.
+
+    This slot corresponds to the QCop service message
+    \c{Calendar::newAppointment(QDateTime,QDateTime,QString,QString)}.
+*/
+void CalendarService::newAppointment
+            ( const QDateTime& start, const QDateTime& end,
+              const QString& description, const QString& notes )
+{
+    datebook->newAppointment( start, end, description, notes );
+}
+
+/*!
+    Add the specified \a appointment to the calendar.  The request will
+    be ignored if the system is currently syncing.
+
+    This slot corresponds to the QCop service message
+    \c{Calendar::addAppointment(QAppointment)}.
+*/
+void CalendarService::addAppointment( const QAppointment& appointment )
+{
+    if ( !datebook->syncing ) {
+        datebook->model->addAppointment( appointment );
+    }
+}
+
+/*!
+    Update the specified \a appointment in the calendar.  The request will
+    be ignored if the system is currently syncing.
+
+    This slot corresponds to the QCop service message
+    \c{Calendar::updateAppointment(QAppointment)}.
+*/
+void CalendarService::updateAppointment( const QAppointment& appointment )
+{
+    if ( !datebook->syncing ) {
+        datebook->model->updateAppointment( appointment );
+    }
+}
+
+/*!
+    Remove the specified \a appointment from the calendar.  The request will
+    be ignored if the system is currently syncing.
+
+    This slot corresponds to the QCop service message
+    \c{Calendar::removeAppointment(QAppointment)}.
+*/
+void CalendarService::removeAppointment( const QAppointment& appointment )
+{
+    if ( !datebook->syncing ) {
+        QAppointment a = appointment;
+        datebook->removeAppointmentQDLLink( a );
+        datebook->model->removeAppointment( appointment );
+    }
+}
+
+/*!
+    Open the calendar user interface and show the appointments for today.
+
+    This slot corresponds to the QCop service message
+    \c{Calendar::raiseToday()}.
+*/
+void CalendarService::raiseToday()
+{
+    datebook->viewToday();
+    QtopiaApplication::instance()->showMainWidget();
+}
+
+/*!
+    Switch the calendar to the next view.
+
+    This slot corresponds to the QCop service message
+    \c{Calendar::nextView()}.
+*/
+void CalendarService::nextView()
+{
+    datebook->nextView();
+}
+
+/*!
+    Show the appointment indicated by \a uid in the calendar application.
+
+    This slot corresponds to the QCop service message
+    \c{Calendar::showAppointment(QUniqueId)}.
+*/
+void CalendarService::showAppointment( const QUniqueId& uid )
+{
+    QAppointment a = datebook->model->appointment(uid);
+    QOccurrence o = a.nextOccurrence(QDate::currentDate());
+
+    if (o.isValid()) {
+        datebook->showAppointmentDetails(o);
+    }
+}
+
+/*!
+    Show the occurrence of the appointment indicated by \a uid on \a date.
+
+    This slot corresponds to the QCop service message
+    \c{Calendar::showAppointment(QUniqueId,QDate)}.
+*/
+void CalendarService::showAppointment( const QUniqueId& uid, const QDate& date )
+{
+    QAppointment a = datebook->model->appointment(uid);
+    QOccurrence o = a.nextOccurrence(date);
+
+    if (o.isValid()) {
+        datebook->showAppointmentDetails(o);
+    }
+}
+
+/*!
+    Allow the system cleanup wizard to recover some space.
+    The \a date to clean from is a hint only. The calendar program
+    should only remove appointments and occurrences where doing so
+    will save space.
+
+    This slot corresponds to the QCop service message
+    \c{Calendar::cleanByDate(QDate)}.
+*/
+void CalendarService::cleanByDate( const QDate& date )
+{
+    datebook->removeOccurrencesBefore( date, false );
+}
+
+/*!
+    Activate the QDL link contained within \a request.
+
+    The slot corresponds to a QDS service with a request data type of
+    QDLLink::mimeType() and no response data.
+
+    The slot corresponds to the QCop service message
+    \c{Calendar::activateLink(QDSActionRequest)}.
+*/
+void CalendarService::activateLink( const QDSActionRequest& request )
+{
+    datebook->qdlActivateLink( request );
+}
+
+/*!
+    Request for one or more QDL links using the hint contained within
+    \a request.
+
+    The slot corresponds to a QDS service with a request data type of
+    "text/x-qstring" and response data type of QDLLink::listMimeType().
+
+    The slot corresponds to the QCop service message
+    \c{Calendar::requestLinks(QDSActionRequest)}.
+
+*/
+void CalendarService::requestLinks( const QDSActionRequest& request )
+{
+    datebook->qdlRequestLinks( request );
 }

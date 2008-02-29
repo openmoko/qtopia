@@ -1,0 +1,331 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QtopiaApplication Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QtopiaApplication Class Reference</h1>
+<p>The QtopiaApplication class implements the system services available to all Qtopia applications. <a href="#details">More...</a></p>
+<pre>    #include &lt;QtopiaApplication&gt;</pre><p>Inherits <a href="qapplication.html">QApplication</a>.</p>
+<p>Inherited by <a href="qtopiaserverapplication.html">QtopiaServerApplication</a>.</p>
+<ul>
+<li><a href="qtopiaapplication-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h3>Public Types</h3>
+<ul>
+<li><div class="fn"/>enum <b><a href="qtopiaapplication.html#InputMethodHint-enum">InputMethodHint</a></b> { Normal, AlwaysOff, AlwaysOn, Number, ..., Named }</li>
+<li><div class="fn"/>enum <b><a href="qtopiaapplication.html#PowerConstraint-enum">PowerConstraint</a></b> { Disable, DisableLightOff, DisableReturnToHomeScreen, DisableSuspend, Enable }</li>
+<li><div class="fn"/>enum <b><a href="qtopiaapplication.html#StylusMode-enum">StylusMode</a></b> { LeftOnly, RightOnHold }</li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qtopiaapplication.html#QtopiaApplication">QtopiaApplication</a></b> ( int &amp; <i>argc</i>, char ** <i>argv</i>, Type <i>t</i> = GuiClient )</li>
+<li><div class="fn"/><b><a href="qtopiaapplication.html#dtor.QtopiaApplication">~QtopiaApplication</a></b> ()</li>
+<li><div class="fn"/>int <b><a href="qtopiaapplication.html#exec">exec</a></b> ()</li>
+<li><div class="fn"/>QWidget * <b><a href="qtopiaapplication.html#mainWidget">mainWidget</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#registerRunningTask">registerRunningTask</a></b> ( const QString &amp; <i>name</i>, QObject * <i>taskObj</i> = 0 )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#setMainWidget">setMainWidget</a></b> ( QWidget * <i>wid</i>, bool <i>nomax</i> = false )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#showMainDocumentWidget">showMainDocumentWidget</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#showMainDocumentWidget-2">showMainDocumentWidget</a></b> ( QWidget * <i>mw</i>, bool <i>nomaximize</i> = false )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#showMainWidget">showMainWidget</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#showMainWidget-2">showMainWidget</a></b> ( QWidget * <i>mw</i>, bool <i>nomaximize</i> = false )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#unregisterRunningTask">unregisterRunningTask</a></b> ( const QString &amp; <i>name</i> )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#unregisterRunningTask-2">unregisterRunningTask</a></b> ( QObject * <i>taskObj</i> )</li>
+<li><div class="fn"/>bool <b><a href="qtopiaapplication.html#willKeepRunning">willKeepRunning</a></b> () const</li>
+</ul>
+<ul>
+<li><div class="fn"/>14 public functions inherited from <a href="qapplication.html#public-functions">QApplication</a></li>
+<li><div class="fn"/>8 public functions inherited from <a href="qcoreapplication.html#public-functions">QCoreApplication</a></li>
+<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+</ul>
+<a name="signals"></a>
+<h3>Signals</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#appMessage">appMessage</a></b> ( const QString &amp; <i>msg</i>, const QByteArray &amp; <i>data</i> )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#categoriesChanged">categoriesChanged</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#clockChanged">clockChanged</a></b> ( bool <i>ampm</i> )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#contentChanged">contentChanged</a></b> ( const QContentIdList &amp; <i>ids</i>, QContent::ChangeType <i>type</i> )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#dateFormatChanged">dateFormatChanged</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#resetContent">resetContent</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#timeChanged">timeChanged</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#volumeChanged">volumeChanged</a></b> ( bool <i>muted</i> )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#weekChanged">weekChanged</a></b> ( bool <i>startOnMonday</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>4 signals inherited from <a href="qapplication.html#signals">QApplication</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qcoreapplication.html#signals">QCoreApplication</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+</ul>
+<a name="static-public-members"></a>
+<h3>Static Public Members</h3>
+<ul>
+<li><div class="fn"/>int <b><a href="qtopiaapplication.html#execDialog">execDialog</a></b> ( QDialog * <i>dialog</i>, bool <i>nomax</i> = false )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#grabKeyboard">grabKeyboard</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#hideInputMethod">hideInputMethod</a></b> ()</li>
+<li><div class="fn"/>InputMethodHint <b><a href="qtopiaapplication.html#inputMethodHint">inputMethodHint</a></b> ( QWidget * <i>w</i> )</li>
+<li><div class="fn"/>QString <b><a href="qtopiaapplication.html#inputMethodHintParam">inputMethodHintParam</a></b> ( QWidget * <i>w</i> )</li>
+<li><div class="fn"/>QtopiaApplication * <b><a href="qtopiaapplication.html#instance">instance</a></b> ()</li>
+<li><div class="fn"/>bool <b><a href="qtopiaapplication.html#isMenuLike">isMenuLike</a></b> ( const QDialog * <i>diag</i> )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#loadTranslations">loadTranslations</a></b> ( const QString &amp; <i>qms</i> )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#loadTranslations-2">loadTranslations</a></b> ( const QStringList &amp; <i>qms</i> )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#setInputMethodHint">setInputMethodHint</a></b> ( QWidget * <i>w</i>, InputMethodHint <i>mode</i>, const QString &amp; <i>param</i> = QString() )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#setInputMethodHint-2">setInputMethodHint</a></b> ( QWidget * <i>w</i>, const QString &amp; <i>named</i> )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#setMenuLike">setMenuLike</a></b> ( QDialog * <i>diag</i>, bool <i>b</i> )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#setPowerConstraint">setPowerConstraint</a></b> ( PowerConstraint <i>constraint</i> )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#setStylusOperation">setStylusOperation</a></b> ( QWidget * <i>w</i>, StylusMode <i>mode</i> )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#showDialog">showDialog</a></b> ( QDialog * <i>dialog</i>, bool <i>nomax</i> = false )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#showInputMethod">showInputMethod</a></b> ()</li>
+<li><div class="fn"/>StylusMode <b><a href="qtopiaapplication.html#stylusOperation">stylusOperation</a></b> ( QWidget * <i>w</i> )</li>
+<li><div class="fn"/>void <b><a href="qtopiaapplication.html#ungrabKeyboard">ungrabKeyboard</a></b> ()</li>
+</ul>
+<ul>
+<li><div class="fn"/>90 static public members inherited from <a href="qapplication.html#static-public-members">QApplication</a></li>
+<li><div class="fn"/>37 static public members inherited from <a href="qcoreapplication.html#static-public-members">QCoreApplication</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>11 properties inherited from <a href="qapplication.html#properties">QApplication</a></li>
+<li><div class="fn"/>3 properties inherited from <a href="qcoreapplication.html#properties">QCoreApplication</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>3 public slots inherited from <a href="qapplication.html#public-slots">QApplication</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qcoreapplication.html#public-slots">QCoreApplication</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>2 public variables inherited from <a href="qapplication.html#public-variables">QApplication</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QtopiaApplication class implements the system services available to all Qtopia applications.</p>
+<p>By using QtopiaApplication instead of <a href="qapplication.html">QApplication</a>, a standard Qt application becomes a Qtopia application. It automatically follows style changes, quits and raises, and in the case of <a href="docwidget.html">document-oriented</a> applications, changes the currently displayed document in response to the environment.</p>
+<p>To create a <a href="docwidget.html">document-oriented</a> application use <a href="qtopiaapplication.html#showMainDocumentWidget">showMainDocumentWidget</a>(); to create a non-document-oriented application use <a href="qtopiaapplication.html#showMainWidget">showMainWidget</a>().</p>
+<p>A variety of signals are emitted when certain events occur, for example:</p>
+<ul>
+<li><a href="qtopiaapplication.html#timeChanged">timeChanged</a>()</li>
+<li><a href="qtopiaapplication.html#clockChanged">clockChanged</a>()</li>
+<li><a href="qtopiaapplication.html#weekChanged">weekChanged</a>(),</li>
+<li><a href="qtopiaapplication.html#dateFormatChanged">dateFormatChanged</a>()</li>
+<li><a href="qtopiaapplication.html#volumeChanged">volumeChanged</a>()</li>
+</ul>
+<p>The following signals are emitted:</p>
+<ul>
+<li><a href="qtopiaapplication.html#appMessage">appMessage</a>() - if the application receives a <a href="qcop.html">QCop</a> message on the QPE/Application/<i>appname</i> channel.</li>
+<li>flush() - when synching begins</li>
+<li>reload() - when syching ends.</li>
+</ul>
+<p>When synching begins or ends the application should save and reload any data files involved in synching. Most of these signals will intially be received and unfiltered through the <a href="qtopiaapplication.html#appMessage">appMessage</a>() signal.</p>
+<p>This class also provides a set of useful static functions as follows:</p>
+<ul>
+<li><a href="qtopiaapplication.html#grabKeyboard">grabKeyboard</a>() and <a href="qtopiaapplication.html#ungrabKeyboard">ungrabKeyboard</a>() - determine if the application takes control of the physical device buttons. For example, application launch keys.</li>
+<li><a href="qtopiaapplication.html#setStylusOperation">setStylusOperation</a>() - sets the mode of operation of the stylus</li>
+<li><a href="qtopiaapplication.html#stylusOperation">stylusOperation</a>() - retrieve the mode of operation of the stylus</li>
+<li>qpeDir() - returns the qpeDir path</li>
+<li>documentDir() - returns the documentDir path</li>
+<li><a href="qtopiaapplication.html#setStylusOperation">setStylusOperation</a>() - sets the mode of operation of the stylus</li>
+<li><a href="qtopiaapplication.html#stylusOperation">stylusOperation</a>() - retrieves the mode of operation of the stylus</li>
+<li><a href="qtopiaapplication.html#setInputMethodHint">setInputMethodHint</a>() - sets the input method hint</li>
+<li><a href="qtopiaapplication.html#inputMethodHint">inputMethodHint</a>() - retrieves the input method hint.</li>
+</ul>
+<hr />
+<h2>Member Type Documentation</h2>
+<h3 class="fn"><a name="InputMethodHint-enum"></a>enum QtopiaApplication::InputMethodHint</h3>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QtopiaApplication::Normal</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">the widget sometimes needs text input.</td></tr>
+<tr><td valign="top"><tt>QtopiaApplication::AlwaysOff</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">the widget never needs text input.</td></tr>
+<tr><td valign="top"><tt>QtopiaApplication::AlwaysOn</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">the widget always needs text input.</td></tr>
+<tr><td valign="top"><tt>QtopiaApplication::Number</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">the widget needs numeric input.</td></tr>
+<tr><td valign="top"><tt>QtopiaApplication::PhoneNumber</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">the widget needs phone-style numeric input.</td></tr>
+<tr><td valign="top"><tt>QtopiaApplication::Words</tt></td><td align="center" valign="top"><tt>5</tt></td><td valign="top">the widget needs word input.</td></tr>
+<tr><td valign="top"><tt>QtopiaApplication::Text</tt></td><td align="center" valign="top"><tt>6</tt></td><td valign="top">the widget needs non-word input.</td></tr>
+<tr><td valign="top"><tt>QtopiaApplication::Named</tt></td><td align="center" valign="top"><tt>7</tt></td><td valign="top">the widget needs special input, defined by param. Each input method may support a different range of special input types, but will default to Text if they do not know the type.</td></tr>
+</table></p>
+<p>By default, <a href="qlineedit.html">QLineEdit</a> and <a href="qtextedit.html">QTextEdit</a> have the Words hint unless they have a <a href="qintvalidator.html">QIntValidator</a>, in which case they have the Number hint. This is appropriate for most cases, including the input of names (new names being added to the user's dictionary). All other widgets default to Normal mode.</p>
+<p>See also <a href="qtopiaapplication.html#inputMethodHint">inputMethodHint</a>() and <a href="qtopiaapplication.html#setInputMethodHint">setInputMethodHint</a>().</p>
+<h3 class="fn"><a name="PowerConstraint-enum"></a>enum QtopiaApplication::PowerConstraint</h3>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QtopiaApplication::Disable</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">all power saving functions are disabled.</td></tr>
+<tr><td valign="top"><tt>QtopiaApplication::DisableLightOff</tt></td><td align="center" valign="top"><tt>50</tt></td><td valign="top">the screen's backlight will not be turned off (dimming remains active).</td></tr>
+<tr><td valign="top"><tt>QtopiaApplication::DisableReturnToHomeScreen</tt></td><td align="center" valign="top"><tt>100</tt></td><td valign="top">the device will not go back to the homescreen (phone edition only).</td></tr>
+<tr><td valign="top"><tt>QtopiaApplication::DisableSuspend</tt></td><td align="center" valign="top"><tt>900</tt></td><td valign="top">the device will not suspend</td></tr>
+<tr><td valign="top"><tt>QtopiaApplication::Enable</tt></td><td align="center" valign="top"><tt>1000</tt></td><td valign="top">all power saving functions are enabled.</td></tr>
+</table></p>
+<p>Less severe PowerConstraints always imply more severe constraints (e.g DisableLightOff implies DisableSuspend). The exact implications are determined by the integer value that each constraint is assigned to (enumeration value). A low valued constraint will always imply a high valued constraint.</p>
+<p>See also <a href="qtopiaapplication.html#setPowerConstraint">setPowerConstraint</a>().</p>
+<h3 class="fn"><a name="StylusMode-enum"></a>enum QtopiaApplication::StylusMode</h3>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QtopiaApplication::LeftOnly</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">the stylus only generates LeftButton events (the default).</td></tr>
+<tr><td valign="top"><tt>QtopiaApplication::RightOnHold</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">the stylus generates RightButton events if the user uses the press-and-hold gesture.</td></tr>
+</table></p>
+<p>See also <a href="qtopiaapplication.html#setStylusOperation">setStylusOperation</a>() and <a href="qtopiaapplication.html#stylusOperation">stylusOperation</a>().</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QtopiaApplication"></a>QtopiaApplication::QtopiaApplication ( int &amp; <i>argc</i>, char ** <i>argv</i>, <a href="qapplication.html#Type-enum">Type</a> <i>t</i> = GuiClient )</h3>
+<p>Constructs a <a href="qtopiaapplication.html">QtopiaApplication</a> just as you would construct a <a href="qapplication.html">QApplication</a>, passing <i>argc</i>, <i>argv</i>, and <i>t</i>.</p>
+<p>For applications, <i>t</i> should be the default, <a href="qapplication.html#Type-enum">GuiClient</a>. Only the Qtopia server passes <a href="qapplication.html#Type-enum">GuiServer</a>.</p>
+<h3 class="fn"><a name="dtor.QtopiaApplication"></a>QtopiaApplication::~QtopiaApplication ()</h3>
+<p>Destroys the <a href="qtopiaapplication.html">QtopiaApplication</a>.</p>
+<h3 class="fn"><a name="appMessage"></a>void QtopiaApplication::appMessage ( const <a href="qstring.html">QString</a> &amp; <i>msg</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted when a message is received on the application's QPE/Application/<i>appname</i> <a href="qcop.html">QCop</a> channel.</p>
+<p>The slot to which you connect this signal uses <i>msg</i> and <i>data</i> in the following way:</p>
+<pre>    void MyWidget::receive( const QString&amp; msg, const QByteArray&amp; data )
+    {
+        QDataStream stream( data, QIODevice::ReadOnly );
+        if ( msg == &quot;someMessage(int,int,int)&quot; ) {
+            int a,b,c;
+            stream &gt;&gt; a &gt;&gt; b &gt;&gt; c;
+            ...
+        } else if ( msg == &quot;otherMessage(QString)&quot; ) {
+            ...
+        }
+    }</pre>
+<p>Note: Messages received here may be processed by <a href="qtopiaapplication.html">QtopiaApplication</a> and emitted as signals, such as flush() and reload().</p>
+<h3 class="fn"><a name="categoriesChanged"></a>void QtopiaApplication::categoriesChanged ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted whenever a category is added, removed or edited.</p>
+<h3 class="fn"><a name="clockChanged"></a>void QtopiaApplication::clockChanged ( bool <i>ampm</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted when the clock style is changed. If <i>ampm</i> is true, the clock style is a 12-hour AM/PM clock, otherwise, it is a 24-hour clock.</p>
+<p><b>Warning:</b> When using the <a href="qtimestring.html">QTimeString</a> functions all strings obtained by <a href="qtimestring.html">QTimeString</a> should be updated to reflect the changes.</p>
+<p>See also <a href="qtopiaapplication.html#dateFormatChanged">dateFormatChanged</a>().</p>
+<h3 class="fn"><a name="contentChanged"></a>void QtopiaApplication::contentChanged ( const QContentIdList &amp; <i>ids</i>, <a href="qcontent.html#ChangeType-enum">QContent::ChangeType</a> <i>type</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted whenever one or more <a href="qcontent.html">QContent</a> is stored, removed or edited. <i>ids</i> contains the list of Id's of the content that is being modified. <i>type</i> contains the type of change.</p>
+<h3 class="fn"><a name="dateFormatChanged"></a>void QtopiaApplication::dateFormatChanged ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted whenever the date format is changed.</p>
+<p><b>Warning:</b> When using <a href="qtimestring.html">QTimeString</a> functions, all <a href="qtimestring.html">QTimeString</a> strings should be updated to reflect the changes.</p>
+<p>See also <a href="qtopiaapplication.html#clockChanged">clockChanged</a>().</p>
+<h3 class="fn"><a name="exec"></a>int QtopiaApplication::exec ()</h3>
+<p>Enters the main event loop and waits until <a href="qcoreapplication.html#exit">exit</a>() is called.</p>
+<p>See also <a href="qapplication.html#exec">QApplication::exec</a>().</p>
+<h3 class="fn"><a name="execDialog"></a>int QtopiaApplication::execDialog ( <a href="qdialog.html">QDialog</a> * <i>dialog</i>, bool <i>nomax</i> = false )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Shows and calls <a href="qtopiaapplication.html#exec">exec</a>() on <i>dialog</i>. An heuristic approach is taken to determine the size and maximization of the dialog.</p>
+<p><i>nomax</i> forces it to not be maximized.</p>
+<h3 class="fn"><a name="grabKeyboard"></a>void QtopiaApplication::grabKeyboard ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Grabs the physical keyboard keys, e.g. the application's launching keys. Instead of launching applications when these keys are pressed the signals emitted are sent to this application instead. Some games programs take over the launch keys in this way to make interaction easier.</p>
+<p>Under Qtopia Phone Edition this function does nothing. It is not possible to grab the keyboard under Qtopia Phone Edition.</p>
+<p>See also <a href="qtopiaapplication.html#ungrabKeyboard">ungrabKeyboard</a>().</p>
+<h3 class="fn"><a name="hideInputMethod"></a>void QtopiaApplication::hideInputMethod ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Explicitly hide the current input method.</p>
+<p>The current input method is still indicated in the taskbar, but no longer takes up screen space, and can no longer be interacted with.</p>
+<p>See also <a href="qtopiaapplication.html#showInputMethod">showInputMethod</a>().</p>
+<h3 class="fn"><a name="inputMethodHint"></a><a href="qtopiaapplication.html#InputMethodHint-enum">InputMethodHint</a> QtopiaApplication::inputMethodHint ( <a href="qwidget.html">QWidget</a> * <i>w</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the currently set hint to the system as to whether widget <i>w</i> has any use for text input methods.</p>
+<p>See also <a href="qtopiaapplication.html#setInputMethodHint">setInputMethodHint</a>() and <a href="qtopiaapplication.html#InputMethodHint-enum">InputMethodHint</a>.</p>
+<h3 class="fn"><a name="inputMethodHintParam"></a><a href="qstring.html">QString</a> QtopiaApplication::inputMethodHintParam ( <a href="qwidget.html">QWidget</a> * <i>w</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the currently set hint parameter for widget <i>w</i>.</p>
+<p>See also <a href="qtopiaapplication.html#setInputMethodHint">setInputMethodHint</a>() and <a href="qtopiaapplication.html#InputMethodHint-enum">InputMethodHint</a>.</p>
+<h3 class="fn"><a name="instance"></a>QtopiaApplication * QtopiaApplication::instance ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns a pointer to the application's <a href="qtopiaapplication.html">QtopiaApplication</a> instance.</p>
+<h3 class="fn"><a name="isMenuLike"></a>bool QtopiaApplication::isMenuLike ( const <a href="qdialog.html">QDialog</a> * <i>diag</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns true if the dialog <i>diag</i> is set to have MenuLike behaviour when executed, otherwise returns false.</p>
+<p>See also <a href="qtopiaapplication.html#setMenuLike">setMenuLike</a>().</p>
+<h3 class="fn"><a name="loadTranslations"></a>void QtopiaApplication::loadTranslations ( const <a href="qstring.html">QString</a> &amp; <i>qms</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Loads the translation file specified by <i>qms</i>. <i>qms</i> can be the name of a library or application.</p>
+<h3 class="fn"><a name="loadTranslations-2"></a>void QtopiaApplication::loadTranslations ( const <a href="qstringlist.html">QStringList</a> &amp; <i>qms</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>This is an overloaded member function, provided for convenience. It behaves essentially like the above function.</p>
+<p>It is the same as calling <tt>loadTranslations(QString)</tt> for each entry of <i>qms</i>.</p>
+<h3 class="fn"><a name="mainWidget"></a><a href="qwidget.html">QWidget</a> * QtopiaApplication::mainWidget () const</h3>
+<p>Get the main widget of this application.</p>
+<p>See also <a href="qtopiaapplication.html#setMainWidget">setMainWidget</a>().</p>
+<h3 class="fn"><a name="registerRunningTask"></a>void QtopiaApplication::registerRunningTask ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, <a href="qobject.html">QObject</a> * <i>taskObj</i> = 0 )</h3>
+<p>Register the task <i>name</i> as running. If <i>taskObj</i> is supplied, the task will be automatically unregistered when <i>taskObj</i> is destroyed. Tasks may always be manually unregistered by calling <a href="qtopiaapplication.html#unregisterRunningTask">unregisterRunningTask</a>(). For a broader discussion of tasks, please refer to the <a href="qtopiaapplication.html">QtopiaApplication</a> overview documentation.</p>
+<p>It is illegal to attempt to register two tasks with the same <i>name</i> simultaneously. Attempting to do so will cause the application to assert in debuging mode and misbehave in release mode.</p>
+<p>Certain task names are reserved for use by the system and should not be used directly by application programmers. The following table describes the list of reserved task names.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>name</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>UI</tt></td><td>An implied system task that is &quot;running&quot; whenever the application has visible UI. Visible UI is defined as toplevel widgets that are not hidden (as determined by <a href="qwidget.html#isHidden">QWidget::isHidden</a>()), although they may be obscured by other windows.</td></tr>
+<tr valign="top" class="even"><td><tt>QtopiaPreload</tt></td><td>A task used by the system to keep preloaded applications running indefinately.</td></tr>
+<tr valign="top" class="odd"><td><tt>Qtopia*</tt></td><td>All task names begining with &quot;Qtopia&quot; are reserved for future use.</td></tr>
+</table></p>
+<h3 class="fn"><a name="resetContent"></a>void QtopiaApplication::resetContent ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted whenever a new media database is attached, or the system needs to generallt reset the QContentSets to refresh their list of items.</p>
+<h3 class="fn"><a name="setInputMethodHint"></a>void QtopiaApplication::setInputMethodHint ( <a href="qwidget.html">QWidget</a> * <i>w</i>, <a href="qtopiaapplication.html#InputMethodHint-enum">InputMethodHint</a> <i>mode</i>, const <a href="qstring.html">QString</a> &amp; <i>param</i> = QString() )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Hints to the system that widget <i>w</i> has use for text input methods as specified by <i>mode</i>. If <i>mode</i> is <tt>Named</tt>, then <i>param</i> specifies the name.</p>
+<p>See also <a href="qtopiaapplication.html#inputMethodHint">inputMethodHint</a>() and <a href="qtopiaapplication.html#InputMethodHint-enum">InputMethodHint</a>.</p>
+<h3 class="fn"><a name="setInputMethodHint-2"></a>void QtopiaApplication::setInputMethodHint ( <a href="qwidget.html">QWidget</a> * <i>w</i>, const <a href="qstring.html">QString</a> &amp; <i>named</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Hints to the system that widget <i>w</i> has use for the text input method specified by <i>named</i>. Such methods are input-method-specific and are defined by the files in [qt_prefix]/etc/im/ for each input method.</p>
+<p>For example, the phone key input method includes support for the names input methods:</p>
+<ul>
+<li>email</li>
+<li>netmask</li>
+<li>url</li>
+</ul>
+<p>The effect in the phone key input method is to modify the binding of phone keys to characters (such as making &quot;<a href="mailto:@">@</a>&quot; easier to input), and to add additional <i>words</i> to the recognition word lists, such as: <i>www</i>.</p>
+<p>If the current input method doesn't understand the hint, it will be ignored.</p>
+<p>See also <a href="qtopiaapplication.html#inputMethodHint">inputMethodHint</a>() and <a href="qtopiaapplication.html#InputMethodHint-enum">InputMethodHint</a>.</p>
+<h3 class="fn"><a name="setMainWidget"></a>void QtopiaApplication::setMainWidget ( <a href="qwidget.html">QWidget</a> * <i>wid</i>, bool <i>nomax</i> = false )</h3>
+<p>Set the main widget for this application to <i>wid</i>. If <i>nomax</i> is true, then do not maximize it.</p>
+<p>See also <a href="qtopiaapplication.html#mainWidget">mainWidget</a>().</p>
+<h3 class="fn"><a name="setMenuLike"></a>void QtopiaApplication::setMenuLike ( <a href="qdialog.html">QDialog</a> * <i>diag</i>, bool <i>b</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p><i>b</i> equal to true sets the dialog <i>diag</i> to have MenuLike behaviour when executed, otherwise sets dialog to have default dialog behaviour.</p>
+<p>MenuLike dialogs typically have a single list of options, and should accept the dialog when the select key is pressed on the appropriate item, and when a mouse/stylus is used to click on an item. Key focus should be accepted by only one widget.</p>
+<p>By marking a dialog as MenuLike Qtopia will map the Back key to reject the dialog and will not map any key to accept the dialog - that must be user-defined.</p>
+<p>The default dialog behaviour is to include a cancel menu option in the context menu to reject the dialog and to map the Back key to accept the dialog.</p>
+<p>See also <a href="qtopiaapplication.html#isMenuLike">isMenuLike</a>().</p>
+<h3 class="fn"><a name="setPowerConstraint"></a>void QtopiaApplication::setPowerConstraint ( <a href="qtopiaapplication.html#PowerConstraint-enum">PowerConstraint</a> <i>constraint</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>This method temporarily overrides the current global power manager with the <a href="qtopiaapplication.html#PowerConstraint-enum">PowerConstraint</a> <i>constraint</i>, allowing applications to control power saving functions during their execution.</p>
+<p>See also <a href="qtopiaapplication.html#PowerConstraint-enum">PowerConstraint</a>.</p>
+<h3 class="fn"><a name="setStylusOperation"></a>void QtopiaApplication::setStylusOperation ( <a href="qwidget.html">QWidget</a> * <i>w</i>, <a href="qtopiaapplication.html#StylusMode-enum">StylusMode</a> <i>mode</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Causes widget <i>w</i> to receive mouse events according to the stylus <i>mode</i>.</p>
+<p>See also <a href="qtopiaapplication.html#stylusOperation">stylusOperation</a>() and <a href="qtopiaapplication.html#StylusMode-enum">StylusMode</a>.</p>
+<h3 class="fn"><a name="showDialog"></a>void QtopiaApplication::showDialog ( <a href="qdialog.html">QDialog</a> * <i>dialog</i>, bool <i>nomax</i> = false )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Shows <i>dialog</i>. An heuristic approach is taken to determine the size and maximization of the dialog.</p>
+<p><i>nomax</i> forces it to not be maximized.</p>
+<h3 class="fn"><a name="showInputMethod"></a>void QtopiaApplication::showInputMethod ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Explicitly show the current input method.</p>
+<p>Input methods are indicated in the taskbar by a small icon. If the input method is activated (shown) then it takes up some proportion of the bottom of the screen, to allow the user to interact (input characters) with it.</p>
+<p>See also <a href="qtopiaapplication.html#hideInputMethod">hideInputMethod</a>().</p>
+<h3 class="fn"><a name="showMainDocumentWidget"></a>void QtopiaApplication::showMainDocumentWidget ()</h3>
+<p>Show the main widget for this application and ask it to show the document specified on the command-line.</p>
+<h3 class="fn"><a name="showMainDocumentWidget-2"></a>void QtopiaApplication::showMainDocumentWidget ( <a href="qwidget.html">QWidget</a> * <i>mw</i>, bool <i>nomaximize</i> = false )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Sets widget <i>mw</i> as the <a href="qtopiaapplication.html#mainWidget">mainWidget</a>() and shows it. For small windows, consider passing true for <i>nomaximize</i> rather than the default false.</p>
+<p>This calls designates the application as a <a href="docwidget.html">document-oriented</a> application.</p>
+<p>The <i>mw</i> widget <i>must</i> have this slot: setDocument(const <a href="qstring.html">QString</a>&amp;).</p>
+<p>See also <a href="qtopiaapplication.html#showMainWidget">showMainWidget</a>().</p>
+<h3 class="fn"><a name="showMainWidget"></a>void QtopiaApplication::showMainWidget ()</h3>
+<p>Show the main widget for this application.</p>
+<h3 class="fn"><a name="showMainWidget-2"></a>void QtopiaApplication::showMainWidget ( <a href="qwidget.html">QWidget</a> * <i>mw</i>, bool <i>nomaximize</i> = false )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Sets widget <i>mw</i> as the <a href="qtopiaapplication.html#mainWidget">mainWidget</a>() and shows it. For small windows, consider passing true for <i>nomaximize</i> rather than the default false.</p>
+<p>See also <a href="qtopiaapplication.html#showMainDocumentWidget">showMainDocumentWidget</a>().</p>
+<h3 class="fn"><a name="stylusOperation"></a><a href="qtopiaapplication.html#StylusMode-enum">StylusMode</a> QtopiaApplication::stylusOperation ( <a href="qwidget.html">QWidget</a> * <i>w</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the current <a href="qtopiaapplication.html#StylusMode-enum">StylusMode</a> for widget <i>w</i>.</p>
+<p>See also <a href="qtopiaapplication.html#setStylusOperation">setStylusOperation</a>() and <a href="qtopiaapplication.html#StylusMode-enum">StylusMode</a>.</p>
+<h3 class="fn"><a name="timeChanged"></a>void QtopiaApplication::timeChanged ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted when the time changes outside the normal passage of time, that is, if the time is set backwards or forwards.</p>
+<p>If the application offers the TimeMonitor service, it will get the QCop message that causes this signal even if it is not running, thus allowing it to update any alarms or other time-related records.</p>
+<h3 class="fn"><a name="ungrabKeyboard"></a>void QtopiaApplication::ungrabKeyboard ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Reverses the effect of <a href="qtopiaapplication.html#grabKeyboard">grabKeyboard</a>(). This is called automatically on program exit.</p>
+<h3 class="fn"><a name="unregisterRunningTask"></a>void QtopiaApplication::unregisterRunningTask ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )</h3>
+<p>Unregister the task <i>name</i> previously registered with <a href="qtopiaapplication.html#registerRunningTask">registerRunningTask</a>(). Attempting to register a task that is not running has no effect.</p>
+<h3 class="fn"><a name="unregisterRunningTask-2"></a>void QtopiaApplication::unregisterRunningTask ( <a href="qobject.html">QObject</a> * <i>taskObj</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Unregister the task <i>taskObj</i> previously registered with <a href="qtopiaapplication.html#registerRunningTask">registerRunningTask</a>(). Attempting to register a task that is not running has no effect.</p>
+<h3 class="fn"><a name="volumeChanged"></a>void QtopiaApplication::volumeChanged ( bool <i>muted</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted whenever the mute state is changed. If <i>muted</i> is true, then sound output has been muted.</p>
+<h3 class="fn"><a name="weekChanged"></a>void QtopiaApplication::weekChanged ( bool <i>startOnMonday</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted if the week start day is changed. If <i>startOnMonday</i> is true then the first day of the week is Monday otherwise the first day of the week is Sunday.</p>
+<h3 class="fn"><a name="willKeepRunning"></a>bool QtopiaApplication::willKeepRunning () const</h3>
+<p>Determine if this application will keep running because there are widgets or tasks still being used.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

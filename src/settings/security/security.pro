@@ -1,17 +1,17 @@
-CONFIG		+= qtopiaapp
+qtopia_project(qtopia app)
+TARGET=security
+CONFIG+=qtopia_main no_quicklaunch
 
 HEADERS		= security.h
 SOURCES		= security.cpp main.cpp
 
-TRANSLATABLES = $${HEADERS} $${SOURCES} 
-
-QTOPIA_PHONE {
+enable_cell {
+    FORMS	= securityphone.ui
     HEADERS	+= phonesecurity.h
     SOURCES	+= phonesecurity.cpp
-    INTERFACES	= securityphone.ui
-}
-else {
-    INTERFACES	= securitybase.ui
+    depends(libraries/qtopiaphone)
+} else {
+    FORMS	= securitybase.ui
 }
 
 TRANSLATABLES +=  phonesecurity.h \
@@ -19,14 +19,16 @@ TRANSLATABLES +=  phonesecurity.h \
                     securityphone.ui \
                     securitybase.ui
 
-TARGET		= security
-
-pics.files=$${QTOPIA_DEPOT_PATH}/pics/security/*
+pics.files=$$QTOPIA_DEPOT_PATH/pics/security/*
 pics.path=/pics/security
-desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Settings/Security.desktop
+pics.hint=pics
+desktop.files=$$QTOPIA_DEPOT_PATH/apps/Settings/Security.desktop
 desktop.path=/apps/Settings
-help.files=$${QTOPIA_DEPOT_PATH}/help/html/security*
-help.path=/help/html
-INSTALLS+= desktop help
-PICS_INSTALLS+=pics
+desktop.hint=desktop
+help.source=$$QTOPIA_DEPOT_PATH/help
+help.files=security*
+help.hint=help
+INSTALLS+=pics desktop help
 
+pkg.description=Security settings application
+pkg.domain=window,phonecomm,security

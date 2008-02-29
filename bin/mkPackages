@@ -1,27 +1,61 @@
 #!/bin/sh
+#
+# Copyright (C) 2000-2006 TROLLTECH ASA.  All rights reserved.
+#
 
-# for each package in current directory, scan and create a Packages file
-# describing the ipkgs in the current directory
+# break on errors
+set -e
 
-for i in *.ipk
-do
-	packagename=${i%%_*}
-	#echo >&2 "$packagename..."
-	GOOD=y
-	for other in ${packagename}_*.ipk
-	do
-	    if [ $i != $other -a $other -nt $i ]
-	    then
-		GOOD=
-		break
-	    fi
-	done
-	if [ -n "$GOOD" ]
-	then
-	    tar xfOz $i ./control.tar.gz | tar xfOz - ./control
-	    echo
-	else
-	    echo >&2 "Deleting old file: $i ($other is newer)"
-	    rm $i
-	fi
-done >Packages
+pkg_dir=$1
+test -z $pkg_dir && pkg_dir=.
+
+if [ -z $pkg_dir ]; then
+  echo "Usage: `basename $0` <package_directory>"
+  exit 1
+fi
+
+if [ ! -d $pkg_dir ]; then
+  echo "Package directory $pkg_dir not found"
+  exit 1
+fi
+
+# See if there's packages in this directory to be installed in the 
+# package directory (as long as this isnt the package directory)
+if [ ! $pkg_dir = "." ]; then
+    set +e
+    qpk_list=`ls -1 *.qpk`;
+    set -e
+    for inst_pkg in $qpk_list; do
+      cp -vuf $inst_pkg $pkg_dir
+    done
+fi
+
+test -e $pkg_dir/packages.list && rm $pkg_dir/packages.list
+
+for pkg in `find $pkg_dir -maxdepth 1 -name '*.qpk' | sort`; do
+  filename=`basename $pkg`
+  pkgname=${filename%%_*}
+  echo "Adding to index: ${pkgname}" >&2
+  ## checking for multiple versions
+  oldflag=
+  for other in ${pkg_dir}/${pkgname}_*; do
+    if [ $pkg = $other -a !$pkg -nt $other ]; then
+      oldflag=y
+      break;
+    fi;
+  done
+  if [ -z "$oldflag" ]; then \
+    file_size=$(ls -l $pkg | awk '{print $5}')
+    md5sum=$(md5sum $pkg | awk '{print $1}')
+    # Take pains to make variable value sed-safe
+    sed_safe_pkg=`echo $filename | sed -e 's/\\//\\\\\\//g'`
+    tar -xzOf $pkg ./control | sed -e "s/^Filename:.*//g" | grep -v '^$' | sed -e "s/^Description:/Filename: $sed_safe_pkg\\
+Size: $file_size\\
+MD5Sum: $md5sum\\
+Description:/"
+    echo ""
+  else
+    echo >&2 "Skipped old file: $pkg ($other is newer)"
+    mv $pkg $pkg_dir/old/
+  fi
+done >> $pkg_dir/packages.list

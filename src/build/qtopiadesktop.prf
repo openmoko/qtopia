@@ -1,0 +1,22 @@
+exists($$QPEDIR/src/build/trace_on):message(qtopiadesktop.prf)
+# Qtopia Desktop-specific config
+
+# Qtopia Desktop doesn't do versions
+VERSION=
+
+# Qtopia Desktop has it's own includes
+INCLUDEPATH-=$$QPEDIR/include
+INCLUDEPATH+=$$QPEDIR/include/qtopiadesktop
+
+# The 'edition' define
+DEFINES+=QTOPIA_DESKTOP
+
+# Most libs need a prefix so they don't conflict with the device libs
+lib:!no_qd_prefix:TARGET=qd-$$TARGET
+
+# Let us detect when we're in a plugin
+plugin:DEFINES*=PLUGIN
+
+# All Qtopia Desktop plugins have the same type
+plugin_type=qtopiadesktop
+

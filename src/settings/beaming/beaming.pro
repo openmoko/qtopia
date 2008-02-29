@@ -1,21 +1,22 @@
-CONFIG		+= qtopiaapp
+qtopia_project(qtopia app)
+TARGET=beaming
+CONFIG+=qtopia_main no_quicklaunch
 
-HEADERS		= ../../plugins/applets/irreceiver/ircontroller.h beaming.h
-SOURCES		= ../../plugins/applets/irreceiver/ircontroller.cpp beaming.cpp main.cpp
-INTERFACES	=
+HEADERS		= ircontroller.h beaming.h
+SOURCES		= ircontroller.cpp beaming.cpp main.cpp
 
-TARGET		= beaming
+depends(libraries/qtopiacomm)
 
-TRANSLATABLES = $${HEADERS} $${SOURCES} $${INTERFACES}
-
-help.files=$${QTOPIA_DEPOT_PATH}/help/html/beaming*
-help.path=/help/html
-
-pics.files=$${QTOPIA_DEPOT_PATH}/pics/beaming/*
+help.source=$$QTOPIA_DEPOT_PATH/help
+help.files=beaming*
+help.hint=help
+pics.files=$$QTOPIA_DEPOT_PATH/pics/beaming/*
 pics.path=/pics/beaming
-desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Settings/Beaming.desktop
+pics.hint=pics
+desktop.files=$$QTOPIA_DEPOT_PATH/apps/Settings/Beaming.desktop
 desktop.path=/apps/Settings
-INSTALLS	+= desktop help
-PICS_INSTALLS+=pics
+desktop.hint=desktop
+INSTALLS+=help pics desktop
 
-PACKAGE_DESCRIPTION=Beaming settings dialog for the Qtopia environment.
+pkg.desc=Beaming settings dialog for Qtopia.
+pkg.domain=window,beaming

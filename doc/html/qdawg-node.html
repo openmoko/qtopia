@@ -1,111 +1,65 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>QDawgNode Class Reference</title>
-<style type="text/css"><!--
-h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }
-body { background: #ffffff; color: black; }
---></style>
+  <title>QDawgNode Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
-<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
-<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
-   <a href="index.html">Home</a>
- - <a href="qtopiaclasses.html">Classes</a>
- - <a href="qtopiahierarchy.html">Hierachy</a>
- - <a href="qtopiaannotated.html">Annotated</a>
- - <a href="qtopiafunctions.html">Functions</a>
- - <a href="qtindex.html">Qt Embedded</a>
-</td>
-<td align="right" valign="top">
-  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
-</td>
-</tr>
-</table><h1 align=center>QDawgNode Class Reference</h1>
-
-
-
-<a name="top"></a>
-<p> <!-- toc -->
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QDawgNode Class Reference<br /><small></small></h1>
+<a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
+<li><a href="#public-members">Public Members</a></li>
+<li><a href="#detailed-description">Detailed Description</a></li>
+<li><a href="#member-function-documentation">Member Function Documentation</a></li>
+<ul><li><a href="#qchar-qdawg-node-letter-const">QChar QDawg::Node::letter() const</a></li>
+<li><a href="#bool-qdawg-node-isword-const">bool QDawg::Node::isWord() const</a></li>
+<li><a href="#bool-qdawg-node-islast-const">bool QDawg::Node::isLast() const</a></li>
+<li><a href="#const-node-qdawg-node-next-const">const Node* QDawg::Node::next() const</a></li>
+<li><a href="#const-node-qdawg-node-jump-const">const Node* QDawg::Node::jump() const</a></li>
+</ul>
+</ul>
+<a name="introduction"></a>
+<h2>Introduction</h2>
+<p>The <a href="qdawg-node.html">QDawg::Node</a> class represents one node of a <a href="qdawg.html">QDawg</a>.</p>
+<p><tt>#include &lt;qdawg.h&gt;</tt></p>
+<a name="public-members"></a>
+<h2>Public Members</h2>
 <ul>
-<li><a href="#1"> Introduction
-</a>
-<li><a href="#2"> Public Members
-</a>
-<li><a href="#3"> Detailed Description
-</a>
-<li><a href="#4"> Member Function Documentation
-</a>
-<ul>
-<li><a href="#4-1"> QChar QDawg::Node::letter() const
-</a>
-<li><a href="#4-2"> bool QDawg::Node::isWord() const
-</a>
-<li><a href="#4-3"> bool QDawg::Node::isLast() const
-</a>
-<li><a href="#4-4"> const Node* QDawg::Node::next() const
-</a>
-<li><a href="#4-5"> const Node* QDawg::Node::jump() const
-</a>
+<li><a href="qchar.html">QChar</a> <a href="#letter">QDawg::Node::letter()</a> const</li>
+<li>bool <a href="#isword">QDawg::Node::isWord()</a> const</li>
+<li>bool <a href="#islast">QDawg::Node::isLast()</a> const</li>
+<li>const Node* <a href="#next">QDawg::Node::next()</a> const</li>
+<li>const Node* <a href="#jump">QDawg::Node::jump()</a> const</li>
 </ul>
-</ul>
-<!-- endtoc -->
-
-<p> <h2> Introduction
-</h2>
-<a name="1"></a><p> The QDawg::Node class represents one node of a <a href="qdawg.html">QDawg</a>.
-<p> <tt>#include &lt;qdawg.h&gt;</tt>
-<p> <h2> Public Members
-</h2>
-<a name="2"></a><p> <ul>
-<li> QChar <a href="#letter">QDawg::Node::letter()</a> const
-<li> bool <a href="#isword">QDawg::Node::isWord()</a> const
-<li> bool <a href="#islast">QDawg::Node::isLast()</a> const
-<li> const <a href="node.html">Node</a>* <a href="#next">QDawg::Node::next()</a> const
-<li> const Node* <a href="#jump">QDawg::Node::jump()</a> const
-</ul>
-<p> <hr>
-<p> <h2> Detailed Description
-</h2>
-<a name="3"></a><p> The QDawg::Node class represents one node of a <a href="qdawg.html">QDawg</a>.
-<p> See the <a href="qdawg.html">QDawg</a> documentation for further information.
-<p> <hr>
-<p> <h2> Member Function Documentation
-</h2>
-<a name="4"></a><p> <a name="letter"></a>
-<h3> QChar QDawg::Node::letter() const
-</h3>
-<a name="4-1"></a><p> Returns this Node's letter.
-<p> <a name="isword"></a>
-<h3> bool QDawg::Node::isWord() const
-</h3>
-<a name="4-2"></a><p> Returns TRUE if this Node is the end of a word; otherwise returns
-FALSE.
-<p> <a name="islast"></a>
-<h3> bool QDawg::Node::isLast() const
-</h3>
-<a name="4-3"></a><p> Returns TRUE if this Node is the last in the child list; otherwise
-returns FALSE.
-<p> <a name="next"></a>
-<h3> const Node* QDawg::Node::next() const
-</h3>
-<a name="4-4"></a><p> Returns the next child <a href="node.html">Node</a> in the child list.
-<p> <a name="jump"></a>
-<h3> const Node* QDawg::Node::jump() const
-</h3>
-<a name="4-5"></a><p> Returns the node connected to this Node.
-<p> 
-<!-- eof -->
-<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0">
-<tr>
-<td>Copyright &copy; 2001-2005 Trolltech
-<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qtopia version 2.1.1</div>
-</table></div></address></body>
+<a name="detailed-description"></a>
+<h2>Detailed Description</h2>
+<p>The <a href="qdawg-node.html">QDawg::Node</a> class represents one node of a <a href="qdawg.html">QDawg</a>.</p>
+<p>See the <a href="qdawg.html">QDawg</a> documentation for further information.</p>
+<a name="member-function-documentation"></a>
+<h2>Member Function Documentation</h2>
+<a name="letter"></a><a name="qchar-qdawg-node-letter-const"></a>
+<h3>QChar QDawg::Node::letter() const</h3>
+<p>Returns this Node's letter.</p>
+<a name="isword"></a><a name="bool-qdawg-node-isword-const"></a>
+<h3>bool QDawg::Node::isWord() const</h3>
+<p>Returns TRUE if this Node is the end of a word; otherwise returns FALSE.</p>
+<a name="islast"></a><a name="bool-qdawg-node-islast-const"></a>
+<h3>bool QDawg::Node::isLast() const</h3>
+<p>Returns TRUE if this Node is the last in the child list; otherwise returns FALSE.</p>
+<a name="next"></a><a name="const-node-qdawg-node-next-const"></a>
+<h3>const Node* QDawg::Node::next() const</h3>
+<p>Returns the next child Node in the child list.</p>
+<a name="jump"></a><a name="const-node-qdawg-node-jump-const"></a>
+<h3>const Node* QDawg::Node::jump() const</h3>
+<p>Returns the node connected to this Node.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
 </html>

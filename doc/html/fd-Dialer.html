@@ -1,0 +1,117 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>  Dialer </title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">  Dialer <br><small>Functional Description</small></h1>
+<p />
+<strong>Dialer</strong> is the interface used to create outgoing phone calls. It is integrated with the <a href="fd-Contacts.html" class="twikiLink">Contacts</a> and <a href="fd-CallHistory.html" class="twikiLink">Call History</a> applications to make it easy to dial contacts or previous calls. Separate user interfaces are provided for the keypad and touchscreen dialers with the user able to access <strong>Dialer</strong> by typing numbers on a keypad device or pushing a button on the homescreen on a touchscreen device. On a touchscreen device <strong>Dialer</strong> also provides access to the <a href="fd-CallHistory.html" class="twikiLink">Call History</a> application.
+<p />
+
+<p />
+<h2><a name="Features"></a> Features </h2>
+<p />
+<h3><a name="General_Phone_Call_Set_up"></a> General Phone Call Set-up </h3>
+<p />
+The user is shown the digits they have currently entered. Pressing the <em>Dial</em> button dials the entered number. Pressing the <em>Hang-up</em> button exits the application.
+<p />
+<h3><a name="Contact_and_Call_History_Look_up"></a> Contact and Call History Look-up </h3>
+<p />
+To assist with quick-dialing <strong>Dialer</strong> is able to look-up <strong>Contact</strong> and <a href="fd-CallHistory.html" class="twikiLink">Call History</a> records that match the digits the user has entered.
+<p />
+It is also possible to associate <strong>Contact</strong> matches with a <a href="fd-CallHistory.html" class="twikiLink">Call History</a> record.
+<p />
+A contact is deemed to match the user's numerical input if any of the following rules are true:
+<p />
+<p /> <ul>
+<li> The contact's first or last name is equal to the alphabetical mapping of the user's input.
+</li> <li> One of the contact's numbers starts with the user's input.
+</li></ul> 
+<p />
+<p />
+A <a href="fd-CallHistory.html" class="twikiLink">Call History</a> record is deemed to match the user's input if any of the following rules are true:
+<p />
+<p /> <ul>
+<li> The call records number starts with the user's input.
+</li></ul> 
+<p />
+Matches display as items in a list to be called the 'look-up list' with items containing the following:
+<p />
+<p /> <ul>
+<li> If the match is to a call record with no associated contact: <ul>
+<li> An image indicating the type of call record
+</li> <li> The phone number of the call
+</li> <li> The week day and time the call originated
+</li></ul> 
+</li></ul> 
+<p /> <ul>
+<li> If the match is to a contact that has no associated call record: <ul>
+<li> A photo of the contact
+</li> <li> The name of the contact
+</li> <li> The matching phone number
+</li> <li> The matching phone number type
+</li></ul> 
+</li></ul> 
+<p /> <ul>
+<li> If the match is to a contact that has an associated call record: <ul>
+<li> A photo of the contact
+</li> <li> The name of the contact
+</li> <li> The matching phone number type
+</li> <li> The week day and time the call originated
+</li></ul> 
+</li></ul> 
+<p />
+    If the contact was matched based on the name then the matching parts are indicated to the user.
+<p />
+<p />
+Selecting any item in the list begins a call to its phone number.
+<p />
+<h3><a name="Saving_to_Contacts"></a> Saving to Contacts </h3>
+<p />
+When the user enters a phone number that is not associated with any contacts or highlights a match in the look-up list that is not associated with a contact then the user is given the option to save the number to an existing or new contact.
+<p />
+<h3><a name="Other_Application_Integration"></a> Other Application Integration </h3>
+<p />
+The user is able to create a Message based on the number entered or a highlighted item in the look-up list.
+<p />
+The user is able to view a contact when an item in the look-up list is highlighted and has an associated contact.
+<p />
+<h3><a name="Keypad_Dialer_User_Interface"></a> Keypad Dialer User Interface </h3>
+<p />
+The Keypad <strong>Dialer</strong> user interface consists of a number of input fields and the look-up list. When the user inputs numbers the look-up list is updated to show <a href="fd-Contacts.html" class="twikiLink">Contacts</a> and <a href="fd-CallHistory.html" class="twikiLink">Call History</a> records matching the new input.
+<p />
+<h3><a name="Touchscreen_Dialer_User_Interfac"></a> Touchscreen Dialer User Interface </h3>
+<p />
+A touchscreen phone will typically not have its own keypad so a number pad is provided in the user interface. The number pad provides buttons for 0-9, * and #. The * button has a sub-menu where the user can select special input such as pauses.
+<p />
+The user can reasonably be expected to wish to use their fingers to input a phone number into the <strong>Dialer</strong>; this is taken into account, hence the number pad's button size.
+<p />
+Due to the size of the number pad the look-up list can not be displayed and automatically updated on the same screen as the keypad version. The Touchscreen <strong>Dialer</strong> provides a button to access the look-up list that pops-up over the <strong>Dialer</strong>.
+<p />
+<h2><a name="Dependencies"></a> Dependencies </h2>
+<p />
+<h3><a name="Contacts"></a> Contacts </h3>
+<p />
+<strong>Dialer</strong> is able to match user input with a contact's name or one of its numbers. <strong>Dialer</strong> provides the ability to create new contacts from user input. <strong>Dialer</strong> provides the ability to view the full details of matched contacts.
+<p />
+<h3><a name="Messages"></a> Messages </h3>
+<p />
+<strong>Dialer</strong> allows the creation of Messages based on user input, <a href="fd-CallHistory.html" class="twikiLink">Call History</a> record matches and/or <strong>Contact</strong> matches with a mobile phone number.
+<p />
+<h3><a name="Call_History"></a> Call History </h3>
+<p />
+<strong>Dialer</strong> is able to match user input with a <a href="fd-CallHistory.html" class="twikiLink">Call History</a> record.
+<p />
+<hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div>

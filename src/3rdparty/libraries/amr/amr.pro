@@ -1,5 +1,9 @@
-TEMPLATE	=   lib
-CONFIG		-=  qt
+qtopia_project(external lib)
+license(FREEWARE)
+TARGET=amr
+VERSION		=   1.0.0
+CONFIG -= warn_on
+
 HEADERS		=   a_refl.h agc.h autocorr.h az_lsp.h b_cn_cod.h basic_op.h bgnscd.h \
 		    bits2prm.h c1035pf.h c2_11pf.h c2_9pf.h c3_14pf.h c4_17pf.h \
 		    c8_31pf.h c_g_aver.h calc_cor.h calc_en.h cbsearch.h cl_ltp.h \
@@ -37,10 +41,11 @@ SOURCES		=   basicop2.c count.c oper_32b.c copy.c log2.c set_zero.c strfunc.c \
 		    dtx_dec.c a_refl.c b_cn_cod.c calc_cor.c hp_max.c vadname.c vad2.c \
 		    r_fft.c lflg_upd.c e_homing.c d_homing.c
 #		    coder.c decoder.c
-TARGET		=   amr
-DESTDIR		=   $$(QPEDIR)/lib
-VERSION		=   1.0.0
 DEFINES		+=  WMOPS=0 VAD1 MMS_IO
-PACKAGE_NAME	=   amr
-TRANSLATIONS=
 
+pkg.desc=AMR Library
+pkg.domain=libs
+
+idep(INCLUDEPATH+=$$PWD)
+idep(LIBS+=-l$$TARGET)
+dep(DEFINES+=MMS_IO)

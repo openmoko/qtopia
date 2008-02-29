@@ -1,181 +1,77 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Qtopia QCop Messages</title>
-<style type="text/css"><!--
-h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }
-body { background: #ffffff; color: black; }
---></style>
+  <title>QCop Messages</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
-<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
-<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
-   <a href="index.html">Home</a>
- - <a href="qtopiaclasses.html">Classes</a>
- - <a href="qtopiahierarchy.html">Hierachy</a>
- - <a href="qtopiaannotated.html">Annotated</a>
- - <a href="qtopiafunctions.html">Functions</a>
- - <a href="qtindex.html">Qt Embedded</a>
-</td>
-<td align="right" valign="top">
-  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
-</td>
-</tr>
-</table><h1 align=center>Qtopia QCop Messages</h1>
-
-
-<p> 
-<a name="top"></a>
-<!-- toc -->
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QCop Messages<br /><small></small></h1>
+<a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
+<li><a href="#the-application-channel">The Application Channel</a></li>
+<li><a href="#command-line-access-to-qcop">Command-line access to QCop</a></li>
+</ul>
+<a name="introduction"></a>
+<h2>Introduction</h2>
+<p>QCop messages allow applications to communicate with each other. These messages are sent using <a href="qtopiaipcenvelope.html">QtopiaIpcEnvelope</a>, and received by connecting to a <a href="qcopchannel.html">QCopChannel</a>.</p>
+<p>The <tt>channelname</tt> of channels within Qtopia all start with &quot;QPE/&quot;. The <tt>messagename</tt> is a function identifier followed by a list of types in parentheses. There is no whitespace in the message name.</p>
+<p>The variable names shown in this documentation are purely for information purposes. A message shown as <i>messageName(Type1 varname1, Type2 varname2, Type2 varname3)</i> would be used in program code as:</p>
+<pre>    QtopiaIpcEnvelope e(channelname, &quot;messageName(Type1,Type2,Type2)&quot;);
+    e &lt;&lt; parameter1 &lt;&lt; parameter2 &lt;&lt; parameter3;</pre>
+<p>The QCop message system uses the event-processing loop. If you create a QCop message it will not be sent until the next the event loop is entered.</p>
+<a name="the-application-channel"></a>
+<h2>The Application Channel</h2>
+<p>Each application listens on a channel called <b>QPE/Application/<i>appname</i></b> , where <b><i>appname</i></b> is the executable name (the application identifier). Standard messages on this channel are:</p>
+<p><b>QPE/Application/<i>appname</i></b></p>
 <ul>
-<li><a href="#1"> Introduction
-</a>
-<li><a href="#2"> The System-wide Channels and Messages.
-</a>
-<ul>
-<li><a href="#2-1"> QPE/System
-</a>
-<li><a href="#2-2"> QPE/TaskBar
-</a>
-<li><a href="#2-3"> QPE/Card
-</a>
-<li><a href="#2-4"> QPE/Network
-</a>
-<li><a href="#2-5"> Qt/Tray
-</a>
+<li>setDocument(<a href="qstring.html">QString</a>) -- Internal. Causes the setDocument(const <a href="qstring.html">QString</a>&amp;) slot of <a href="docwidget.html">the main document widget</a> be called.</li>
+<li>nextView() -- Applications connected to hardware buttons will receive this message if they are already visible.</li>
+<li>raise() -- Internal. Causes the the main document widget and the current modal widget to be raised.</li>
+<li>quit() -- Internal. Terminates the application.</li>
+<li>quitIfInvisible() -- Internal. Terminates the application if it is not shown.</li>
 </ul>
-<li><a href="#3"> The Application Channel
-</a>
-</ul>
-<!-- endtoc -->
-
-<p> <h2> Introduction
-</h2>
-<a name="1"></a><p> QCop messages allow applications to communicate with each other.
-These messages are sent using <a href="qcopenvelope.html">QCopEnvelope</a>, and received by connecting
-to a QCopChannel.
-<p> The <tt>channelname</tt> of channels within Qtopia all start with "QPE/".
-The <tt>messagename</tt> is a function identifier followed by a list of types
-in parentheses. There is no whitespace in the message name.
-<p> The variable names shown in this documentation are purely for
-information purposes. A message shown as <em>messageName(Type1 varname1, Type2 varname2, Type2 varname3)</em> would be used in program
-code as:
-<p> <pre>
-   <a href="qcopenvelope.html">QCopEnvelope</a> e(channelname, "messageName(Type1,Type2,Type2)");
-   e &lt;&lt; parameter1 &lt;&lt; parameter2 &lt;&lt; parameter3;
-</pre>
- 
-<p> Hint: The QCop message system uses the event-processing loop. So if you create a QCop message it will not be send until the next qApp::processEvents.
-<p> <h2> The System-wide Channels and Messages.
-</h2>
-<a name="2"></a><p> <h3> QPE/System
-</h3>
-<a name="2-1"></a><p> <ul>
-<li> busy() -- Causes a wait indicator to be shown to the user.
-<li> notBusy() -- Cancels the wait indicator.
-<li> linkChanged(QString) -- Sent whenever a link is changed. It is sent
-by <a href="filemanager.html#saveFile">FileManager::saveFile</a>() and others, and received by the Launcher.
-<li> applyStyle() -- Sent when user changes style. It is received by
-<a href="qpeapplication.html">QPEApplication</a> and the application will redraw accordingly.
-<li> quit() -- Shuts down all running applications.
-<li> shutdown() -- Shows the shutdown window.
-<li> restart() -- Restarts the Qtopia environment.
-<li> execute(QString) -- Executes or raises the given application.
-<li> execute(QString,QString) -- Executes or raises the given
-application, passing an argument. Note that you should consider
-using the <b>QPE/Application/<em>appname</em></b> channels described
-below.
-<li> setMouseProto(QString) -- Changes $QWS_MOUSE_PROTO dynamically.
-<li> setKeyboard(QString) -- Changes $QWS_KEYBOARD dynamically.
-<li> addAlarm(QDateTime,QCString,QCString,int) -- Internal. See
-<a href="alarmserver.html#addAlarm">AlarmServer::addAlarm</a>()
-<li> deleteAlarm(QDateTime,QCString,QCString,int) -- Internal. See
-<a href="alarmserver.html#deleteAlarm">AlarmServer::deleteAlarm</a>()
-<li> setDefaultRotation(int) -- Internal.
-<li> grabKeyboard(QString) -- Internal.
-<li> timeChange(QString) -- Internal.
-<li> clockChange(bool) -- Internal.
-<li> setScreenSaverInterval(int) -- Internal.
-<li> language(QString) -- Internal.
-<li> resetPowerTimeout(int) - Internal.
-</ul>
-<p> <h3> QPE/TaskBar
-</h3>
-<a name="2-2"></a><p> <ul>
-<li> message(QString) -- Internal. See <a href="global.html#statusMessage">Global::statusMessage</a>()
-<li> showInputMethod() -- Internal.
-<li> hideInputMethod() -- Internal.
-<li> reloadInputMethods() -- Internal.
-<li> reloadApplets() -- Internal.
-</ul>
-<p> <h3> QPE/Card
-</h3>
-<a name="2-3"></a><p> <ul>
-<li> mtabChanged() -- Sent when <tt>/etc/mtab</tt> may have changed.
-<li> stabChanged() -- Sent when <tt>/var/run/stab</tt>,
-<tt>/var/state/pcmcia/stab</tt>, or <tt>/var/lib/pcmcia/stab</tt> may have
-changed.
-</ul>
-<p> <h3> QPE/Network
-</h3>
-<a name="2-4"></a><p> <ul>
-<li> up() -- Sent when a network connection is running.
-<li> down() -- Sent when a running network connection is closed.
-<li> failed() -- Sent when a network connection failed to start.
-<li> available(QStringList) -- Sent whenever the available network connections
-may have changed, or in a response to an announceChoices() message.
-<li> announceChoices() -- Forces the network monitor to send a list of
-available connections.
-</ul>
-<p> <h3> Qt/Tray
-</h3>
-<a name="2-5"></a><p> This channel allows Qt applications (not just Qtopia applications) to
-show system-tray status in a cross-platform manner, but it is not
-currently supported. See <a href="taskbarappletinterface.html">TaskbarAppletInterface</a> for a more powerful
-alternative for system tray applications.
-<ul>
-<li> popup(int,QPoint) - Sent
-<li> doubleClicked(int,QPoint)
-<li> clicked(int,QPoint)
-<li> remove(int)
-<li> setIcon(int,QPixmap)
-<li> setToolTip(int,QString)
-</ul>
-<p> <h2> The Application Channel
-</h2>
-<a name="3"></a><p> Each application listens on a channel called
-<b>QPE/Application/<em>appname</em></b>, where <b><em>appname</em></b> is
-the executable name (the application identifier). Standard messages on
-this channel are:
-<p> <b>QPE/Application/<em>appname</em></b>
-<p> <ul>
-<li> setDocument(QString) -- Internal. Causes the setDocument(const
-QString&) slot of <a href="docwidget.html">the main document
-   widget</a> to be called.
-<li> nextView() -- Applications connected to hardware buttons will
-receive this message if they are already visible.
-<li> raise() -- Internal. Causes the the main document widget and the
-current modal widget to be raised.
-<li> quit() -- Internal. Terminates the application.
-<li> quitIfInvisible() -- Internal. Terminates the application if it is
-not shown.
-</ul>
-<p> The <b>QPE/Application/<em>appname</em></b> channel has a special
-property: when messages are sent to these channels via <a href="qcopenvelope.html">QCopEnvelope</a>,
-the message is delivered even if the application is not yet running
-(the application is run and the message is then sent).
-<p> 
-<!-- eof -->
-<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0">
-<tr>
-<td>Copyright &copy; 2001-2005 Trolltech
-<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qtopia version 2.1.1</div>
-</table></div></address></body>
+<p>The <b>QPE/Application/<i>appname</i></b> channel has a special property: when messages are sent to these channels via <a href="qtopiaipcenvelope.html">QtopiaIpcEnvelope</a>, the message is delivered even if the application is not yet running (the application is run and the message is then sent).</p>
+<a name="command-line-access-to-qcop"></a>
+<h2>Command-line access to QCop</h2>
+<p>The <tt>qcop</tt> command-line tool can be used to access the QCop system from shell scripts and for debugging purposes. Running <tt>qcop</tt> without any arguments will print a help message. The other commands are as follows:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>qcop send</tt> <i>channel</i> <i>message</i> [<i>parameters</i>]</td><td>Send <i>message</i> on <i>channel</i> with the specified <i>parameters</i>.</td></tr>
+<tr valign="top" class="even"><td><tt>qcop service send</tt> <i>name</i> <i>message</i> [<i>parameters</i>]</td><td>Send <i>message</i> to the application that implements the service <i>name</i> with the specified <i>parameters</i>.</td></tr>
+<tr valign="top" class="odd"><td><tt>qcop watch</tt> <i>channel</i> [<i>channel</i> ...]</td><td>Watch all messages on <i>channel</i> and print them to standard output. If <i>channel</i> has the form <tt>QPE/Application/foo</tt>, this will watch all messages to the application <tt>foo</tt>.</td></tr>
+<tr valign="top" class="even"><td><tt>qcop service watch</tt> <i>name</i> [<i>name</i> ...]</td><td>Same as above, but watches the application associated with the service <i>name</i> instead.</td></tr>
+<tr valign="top" class="odd"><td><tt>qcop wait</tt> <i>channel</i> <i>message</i></td><td>Waits for <i>message</i> to appear on <i>channel</i> and then prints the message arguments to standard output.</td></tr>
+<tr valign="top" class="even"><td><tt>qcop service wait</tt> <i>name</i> <i>message</i></td><td>Same as above, but waits on the application channel for the application associated with the service. This can be used to wait for someone to send a message to the service.</td></tr>
+<tr valign="top" class="odd"><td><tt>qcop query</tt> <i>channel</i></td><td>Query all messages that the application on <i>channel</i> can respond to. The application needs to handle the special message <tt>__query_qcop_messages(QString)</tt> for this to work correctly. The easiest method is to use the <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a> or <a href="qtopiaabstractservice.html">QtopiaAbstractService</a> classes to implement your service. These classes will automatically respond to the query message. The argument to the message is the name of the channel to respond on. The <tt>qcop query</tt> command has a default timeout of 1 second unless overridden by the <tt>timeout</tt> flag.</td></tr>
+<tr valign="top" class="even"><td><tt>qcop service query</tt> <i>name</i></td><td>Same as above, but for the service called <i>name</i>.</td></tr>
+<tr valign="top" class="odd"><td><tt>qcop list</tt></td><td>List all services and the QCop channels that they map to.</td></tr>
+</table></p>
+<p>The following flags can be specified before a command to modify its behavior:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Flag</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>hex</tt></td><td>Print the contents of <a href="qbytearray.html">QByteArray</a> parameters in hexadecimal (default).</td></tr>
+<tr valign="top" class="even"><td><tt>nohex</tt></td><td>Print the contents of <a href="qbytearray.html">QByteArray</a> parameters as Latin-1 strings.</td></tr>
+<tr valign="top" class="odd"><td><tt>timeout</tt> <i>msecs</i></td><td>Set the timeout for the command to <i>msecs</i> milliseconds.</td></tr>
+<tr valign="top" class="even"><td><tt>notimeout</tt></td><td>Disable the timeout for the command. This is the default for most commands, except <tt>qcop query</tt> which has a default timeout of 1 second.</td></tr>
+<tr valign="top" class="odd"><td><tt>enum</tt> <i>name</i></td><td>Recognise <i>name</i> as an enumerated type in message names.</td></tr>
+</table></p>
+<p>The following example will watch for all QCop messages on the <tt>QPE/System</tt> channel:</p>
+<pre>    qcop watch QPE/System</pre>
+<p>The channel name for <tt>qcop watch</tt> can include wildcards. For example, the following will watch all network-related channels:</p>
+<pre>    qcop watch 'QPE/Network*'</pre>
+<p>It is usually necessary to quote channel names when they include wildcards, especially when using <tt>qcop watch '*'</tt>.</p>
+<p>The following example sends a <tt>Time::editTime()</tt> message to the <tt>Time</tt> service:</p>
+<pre>    qcop service send Time 'editTime()'</pre>
+<p>Multiple commands can be separated by <tt>--</tt> on the command line. The following example sends the <tt>dial()</tt> message to the <tt>QPE/pppd</tt> channel and then waits for up to 30 seconds for a <tt>dialResult(bool)</tt> message on the same channel.</p>
+<pre>    qcop send QPE/pppd 'dial()' -- timeout 30000 wait QPE/pppd 'dialResult(bool)'</pre>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
 </html>

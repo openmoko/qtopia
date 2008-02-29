@@ -1,0 +1,8 @@
+<page base="themes/smart">
+    <image keypad="no" name="sub" src="hscrollbar-sub" rect="0,0,16x16" onclick="src=hscrollbar-sub-in;color=Button" color="Button" interactive="yes"/>
+    <image keypad="no" name="groove" src="hscrollbar-groove" rect="16,0,-16,15" tile="yes"/>
+    <image keypad="no" name="slider" src="hscrollbar-slider" rect="0,1,0x14" stretch="3,5" color="Highlight" onclick="src=hscrollbar-slider-in;color=Highlight" interactive="yes" orientation="horizontal"/>
+    <image keypad="no" name="add" src="hscrollbar-add" rect="-16,0,16x16" onclick="src=hscrollbar-add-in;color=Button" color="Button" interactive="yes"/>
+    <image touchscreen="no" color="Highlight" name="groove" src="hscrollbar-groove-thin" rect="0,0,0x8" tile="yes"/>
+    <image touchscreen="no" name="slider" src="hscrollbar-slider-thin" rect="0,1,0x6" stretch="3,5" orientation="horizontal"/>
+</page>

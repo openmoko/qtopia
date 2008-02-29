@@ -1,6 +1,7 @@
 [Desktop Entry]
-Name=Screen Light
-Comment=Adjusts the screen brightness.
-Name[ja]=画面の明るさ
-Comment[ja]=画面の明るさを調節します。
+Name[]=Screen Light
+Comment[]=Adjusts the screen brightness.
 X-QPE-Library=libbrightnessapplet.so
+[Translation]
+File=QtopiaPlugins
+Context=Applets

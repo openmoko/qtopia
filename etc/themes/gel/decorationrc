@@ -1,0 +1,13 @@
+[Decoration]
+Name = Gel
+Base = themes/gel
+
+[Maximized]
+TitleHeight = 10%
+TitleColor = None
+
+[Normal]
+TitleHeight = 10%
+OverlayPixmap = popupbar
+OverlayOffsets = "32,144"
+

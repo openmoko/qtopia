@@ -1,287 +1,285 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
---></style>
-</head><body bgcolor="#ffffff">
-
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-
-<h1 align=center>QRegion Class Reference</h1><br clear="all">
-<p>
-The QRegion class specifies a clip region for a painter.
-<a href="#details">More...</a>
-<p>
-<code>#include &lt;<a href="qregion-h.html">qregion.h</a>&gt;</code>
-<p><a href="qregion-members.html">List of all member functions.</a>
-<h2>Public Members</h2>
-<ul>
-<li><div class="fn">enum <a href="#RegionType"><b>RegionType</b></a> { Rectangle, Ellipse }</div>
-<li><div class="fn"><a href="#a80dd8"><b>QRegion</b></a> () </div>
-<li><div class="fn"><a href="#b666cf"><b>QRegion</b></a> ( int x, int y, int w, int h, RegionType = Rectangle ) </div>
-<li><div class="fn"><b>QRegion</b> ( const QRect &amp;, RegionType = Rectangle ) </div>
-<li><div class="fn"><a href="#304ab0"><b>QRegion</b></a> ( const QPointArray &amp;, bool winding=FALSE ) </div>
-<li><div class="fn"><a href="#b6e7a9"><b>QRegion</b></a> ( const QRegion &amp; ) </div>
-<li><div class="fn"><a href="#39c9d9"><b>QRegion</b></a> ( const QBitmap &amp; ) </div>
-<li><div class="fn"><a href="#b4b68b"><b>~QRegion</b></a> () </div>
-<li><div class="fn">QRegion&amp; <a href="#644768"><b>operator=</b></a> ( const QRegion &amp; ) </div>
-<li><div class="fn">bool <a href="#a2c0d0"><b>isNull</b></a> () const</div>
-<li><div class="fn">bool <a href="#507d42"><b>isEmpty</b></a> () const</div>
-<li><div class="fn">bool <a href="#ea58e9"><b>contains</b></a> ( const QPoint &amp; p ) const</div>
-<li><div class="fn">bool <a href="#afba2f"><b>contains</b></a> ( const QRect &amp; r ) const</div>
-<li><div class="fn">void <a href="#595875"><b>translate</b></a> ( int dx, int dy ) </div>
-<li><div class="fn">QRegion <a href="#2c10d0"><b>unite</b></a> ( const QRegion &amp; ) const</div>
-<li><div class="fn">QRegion <a href="#28e973"><b>intersect</b></a> ( const QRegion &amp; ) const</div>
-<li><div class="fn">QRegion <a href="#ae007f"><b>subtract</b></a> ( const QRegion &amp; ) const</div>
-<li><div class="fn">QRegion <a href="#d7aa83"><b>eor</b></a> ( const QRegion &amp; ) const</div>
-<li><div class="fn">QRect <a href="#7cb897"><b>boundingRect</b></a> () const</div>
-<li><div class="fn">QArray&lt;QRect&gt; <a href="#842bf7"><b>rects</b></a> () const</div>
-<li><div class="fn">void <a href="#9c7ecf"><b>setRects</b></a> ( const QRect *, int ) </div>
-<li><div class="fn">QRegion <a href="#4e4832"><b>operator|</b></a> ( const QRegion &amp; ) const</div>
-<li><div class="fn">QRegion <a href="#a61e7d"><b>operator+</b></a> ( const QRegion &amp; ) const</div>
-<li><div class="fn">QRegion <a href="#2ed087"><b>operator&amp;</b></a> ( const QRegion &amp; ) const</div>
-<li><div class="fn">QRegion <a href="#81786a"><b>operator-</b></a> ( const QRegion &amp; ) const</div>
-<li><div class="fn">QRegion <a href="#953473"><b>operator^</b></a> ( const QRegion &amp; ) const</div>
-<li><div class="fn">QRegion&amp; <a href="#0a5795"><b>operator|=</b></a> ( const QRegion &amp; ) </div>
-<li><div class="fn">QRegion&amp; <a href="#d77322"><b>operator+=</b></a> ( const QRegion &amp; ) </div>
-<li><div class="fn">QRegion&amp; <a href="#a6c103"><b>operator&amp;=</b></a> ( const QRegion &amp; ) </div>
-<li><div class="fn">QRegion&amp; <a href="#04eb26"><b>operator-=</b></a> ( const QRegion &amp; ) </div>
-<li><div class="fn">QRegion&amp; <a href="#3db11a"><b>operator^=</b></a> ( const QRegion &amp; ) </div>
-<li><div class="fn">bool <a href="#b6887c"><b>operator==</b></a> ( const QRegion &amp; ) const</div>
-<li><div class="fn">bool <a href="#7c842c"><b>operator!=</b></a> ( const QRegion &amp; r ) const</div>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: QRegion Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QRegion Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<p>The QRegion class specifies a clip region for a painter. <a href="#details">More...</a></p>
+<pre> #include &lt;QRegion&gt;</pre><ul>
+<li><a href="qregion-members.html">List of all members, including inherited members</a></li>
+<li><a href="qregion-obsolete.html">Obsolete members</a></li>
+<li><a href="qregion-qt3.html">Qt 3 support members</a></li>
 </ul>
-<h2>Related Functions</h2>
-(Note that these are not member functions.)
+<a name="public-types"></a>
+<h3>Public Types</h3>
 <ul>
-<li>QDataStream &amp; <a href="qregion.html#2179e4"><b>operator&gt;&gt;</b></a> (QDataStream &amp; s, QRegion &amp; r)
-<li>QDataStream &amp; <a href="qregion.html#9b85c2"><b>operator&lt;&lt;</b></a> (QDataStream &amp; s, const QRegion &amp; r)
+<li><div class="fn"/>enum <b><a href="qregion.html#RegionType-enum">RegionType</a></b> { Rectangle, Ellipse }</li>
 </ul>
-<hr><h2><a name="details"></a>Detailed Description</h2>
-The QRegion class specifies a clip region for a painter.
-<p>
-QRegion is used with <a href="qpainter.html#15cc78">QPainter::setClipRegion</a>() to limit the paint area to what
-needs to be painted. There is also a <a href="qwidget.html#7569b1">QWidget::repaint</a>() that takes a QRegion parameter.
-QRegion is the best tool for reducing flicker.
-<p>A region can be created from a rectangle, an ellipse, a polygon or a
-bitmap. Complex regions may be created by combining simple regions,
-using <a href="#2c10d0">unite</a>(), <a href="#28e973">intersect</a>(), <a href="#ae007f">subtract</a>() or <a href="#d7aa83">eor</a>() (exclusive or). Use
-<a href="#595875">translate</a>() to move a region.
-<p>You can test if a region <a href="#a2c0d0">isNull</a>(), <a href="#507d42">isEmpty</a>() or if it <a href="#afba2f">contains</a>() 
-a <a href="qpoint.html">QPoint</a> or <a href="qrect.html">QRect</a>. The bounding rectangle is given by <a href="#7cb897">boundingRect</a>().
-<p>The function <a href="#842bf7">rects</a>() gives a decomposition of the region into rectangles.
-<p>Example of using complex regions:
-<pre>    void MyWidget::paintEvent( <a href="qpaintevent.html">QPaintEvent</a> * )
-    {
-        <a href="qpainter.html">QPainter</a> p;                             // our painter
-        <a href="qregion.html">QRegion</a> r1( <a href="qrect.html">QRect</a>(100,100,200,80),      // r1 = elliptic region
-                    QRegion::Ellipse );
-        <a href="qregion.html">QRegion</a> r2( <a href="qrect.html">QRect</a>(100,120,90,30) );     // r2 = rectangular region
-        <a href="qregion.html">QRegion</a> r3 = r1.<a href="#28e973">intersect</a>( r2 );        // r3 = intersection
-        p.<a href="qpainter.html#02ed5d">begin</a>( this );                        // start painting widget
-        p.<a href="qpainter.html#15cc78">setClipRegion</a>( r3 );                  // set clip region
-        ...                                     // paint clipped graphics
-        p.<a href="qpainter.html#365784">end</a>();                                // painting done
-    }
-</pre>
-<p>QRegion is an <a href="shclass.html">implicitely shared</a> class.
-<p>Due to window system limitations, the width and height of a region
-is limited to 65535 on Unix/X11.
-<p>Some functions in QRegion are copyright (c) 1987  X Consortium.
-Please see src/3rdparty/kernel/qregion_qws.cpp for more information.
-<p>Some functions in QRegion for Qt/Embedded are copyright Digital
-Equipment Corporation:
-<p>Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.
-<p>All Rights Reserved
-<p>Permission to use, copy, modify, and distribute this software and its
-documentation for any purpose and without fee is hereby granted,
-provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in
-supporting documentation, and that the name of Digital not be used in
-advertising or publicity pertaining to distribution of the software
-without specific, written prior permission.
-<p>DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING
-ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL
-DIGITAL BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR
-ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
-WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
-ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
-SOFTWARE.
-<p>See also  <a href="qpainter.html#15cc78">QPainter::setClipRegion</a>() and <a href="qpainter.html#898839">QPainter::setClipRect</a>().
-
-<hr><h2>Member Type Documentation</h2>
-<h3 class="fn"><a name="RegionType">QRegion::RegionType</a></h3>
-Determines the shape of the region to be created.
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
 <ul>
-<li><code>Rectangle</code> - the region covers the entire rectangle
-<li><code>Ellipse</code> - the region is an ellipse inside the rectangle
+<li><div class="fn"/><b><a href="qregion.html#QRegion">QRegion</a></b> ()</li>
+<li><div class="fn"/><b><a href="qregion.html#QRegion-2">QRegion</a></b> ( int <i>x</i>, int <i>y</i>, int <i>w</i>, int <i>h</i>, RegionType <i>t</i> = Rectangle )</li>
+<li><div class="fn"/><b><a href="qregion.html#QRegion-3">QRegion</a></b> ( const QPolygon &amp; <i>a</i>, Qt::FillRule <i>fillRule</i> = Qt::OddEvenFill )</li>
+<li><div class="fn"/><b><a href="qregion.html#QRegion-5">QRegion</a></b> ( const QRegion &amp; <i>r</i> )</li>
+<li><div class="fn"/><b><a href="qregion.html#QRegion-6">QRegion</a></b> ( const QBitmap &amp; <i>bm</i> )</li>
+<li><div class="fn"/><b><a href="qregion.html#QRegion-7">QRegion</a></b> ( const QRect &amp; <i>r</i>, RegionType <i>t</i> = Rectangle )</li>
+<li><div class="fn"/><b><a href="qregion.html#dtor.QRegion">~QRegion</a></b> ()</li>
+<li><div class="fn"/>QRect <b><a href="qregion.html#boundingRect">boundingRect</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qregion.html#contains">contains</a></b> ( const QPoint &amp; <i>p</i> ) const</li>
+<li><div class="fn"/>bool <b><a href="qregion.html#contains-2">contains</a></b> ( const QRect &amp; <i>r</i> ) const</li>
+<li><div class="fn"/>Handle <b><a href="qregion.html#handle">handle</a></b> () const</li>
+<li><div class="fn"/>QRegion <b><a href="qregion.html#intersected">intersected</a></b> ( const QRegion &amp; <i>r</i> ) const</li>
+<li><div class="fn"/>bool <b><a href="qregion.html#intersects">intersects</a></b> ( const QRegion &amp; <i>region</i> ) const</li>
+<li><div class="fn"/>bool <b><a href="qregion.html#intersects-2">intersects</a></b> ( const QRect &amp; <i>rect</i> ) const</li>
+<li><div class="fn"/>bool <b><a href="qregion.html#isEmpty">isEmpty</a></b> () const</li>
+<li><div class="fn"/>QVector&lt;QRect&gt; <b><a href="qregion.html#rects">rects</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qregion.html#setRects">setRects</a></b> ( const QRect * <i>rects</i>, int <i>number</i> )</li>
+<li><div class="fn"/>QRegion <b><a href="qregion.html#subtracted">subtracted</a></b> ( const QRegion &amp; <i>r</i> ) const</li>
+<li><div class="fn"/>void <b><a href="qregion.html#translate">translate</a></b> ( int <i>dx</i>, int <i>dy</i> )</li>
+<li><div class="fn"/>void <b><a href="qregion.html#translate-2">translate</a></b> ( const QPoint &amp; <i>point</i> )</li>
+<li><div class="fn"/>QRegion <b><a href="qregion.html#translated">translated</a></b> ( int <i>dx</i>, int <i>dy</i> ) const</li>
+<li><div class="fn"/>QRegion <b><a href="qregion.html#translated-2">translated</a></b> ( const QPoint &amp; <i>p</i> ) const</li>
+<li><div class="fn"/>QRegion <b><a href="qregion.html#united">united</a></b> ( const QRegion &amp; <i>r</i> ) const</li>
+<li><div class="fn"/>QRegion <b><a href="qregion.html#xored">xored</a></b> ( const QRegion &amp; <i>r</i> ) const</li>
+<li><div class="fn"/><b><a href="qregion.html#operator-QVariant">operator QVariant</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qregion.html#operator-not-eq">operator!=</a></b> ( const QRegion &amp; <i>other</i> ) const</li>
+<li><div class="fn"/>const QRegion <b><a href="qregion.html#operator-and">operator&amp;</a></b> ( const QRegion &amp; <i>r</i> ) const</li>
+<li><div class="fn"/>QRegion &amp; <b><a href="qregion.html#operator-and-eq">operator&amp;=</a></b> ( const QRegion &amp; <i>r</i> )</li>
+<li><div class="fn"/>const QRegion <b><a href="qregion.html#operator-2b">operator+</a></b> ( const QRegion &amp; <i>r</i> ) const</li>
+<li><div class="fn"/>QRegion &amp; <b><a href="qregion.html#operator-2b-eq">operator+=</a></b> ( const QRegion &amp; <i>r</i> )</li>
+<li><div class="fn"/>const QRegion <b><a href="qregion.html#operator-">operator-</a></b> ( const QRegion &amp; <i>r</i> ) const</li>
+<li><div class="fn"/>QRegion &amp; <b><a href="qregion.html#operator--eq">operator-=</a></b> ( const QRegion &amp; <i>r</i> )</li>
+<li><div class="fn"/>QRegion &amp; <b><a href="qregion.html#operator-eq">operator=</a></b> ( const QRegion &amp; <i>r</i> )</li>
+<li><div class="fn"/>bool <b><a href="qregion.html#operator-eq-eq">operator==</a></b> ( const QRegion &amp; <i>r</i> ) const</li>
+<li><div class="fn"/>const QRegion <b><a href="qregion.html#operator-5e">operator^</a></b> ( const QRegion &amp; <i>r</i> ) const</li>
+<li><div class="fn"/>QRegion &amp; <b><a href="qregion.html#operator-5e-eq">operator^=</a></b> ( const QRegion &amp; <i>r</i> )</li>
+<li><div class="fn"/>const QRegion <b><a href="qregion.html#operator-7c">operator|</a></b> ( const QRegion &amp; <i>r</i> ) const</li>
+<li><div class="fn"/>QRegion &amp; <b><a href="qregion.html#operator-7c-eq">operator|=</a></b> ( const QRegion &amp; <i>r</i> )</li>
 </ul>
-<hr><h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="a80dd8"></a>QRegion::QRegion ()</h3>
-<p>Constructs a null region.
-<p>See also  <a href="#a2c0d0">isNull</a>().
-<h3 class="fn"><a name="39c9d9"></a>QRegion::QRegion ( const <a href="qbitmap.html">QBitmap</a> &amp; bm )</h3>
-<p>Constructs a region from the bitmap <em>bm.</em>
-<p>The resulting region consists of the pixels in <em>bm</em> that are <code>color1,</code> as if each pixel was a 1 by 1 rectangle.
-<p>This constructor may create complex regions that will slow
-down painting when used. Note that drawing masked pixmaps
-can be done much faster using <a href="qpixmap.html#68a75d">QPixmap::setMask</a>().
-<h3 class="fn"><a name="304ab0"></a>QRegion::QRegion ( const <a href="qpointarray.html">QPointArray</a> &amp; a, bool winding=FALSE )</h3>
-<p>Constructs a polygon region from the point array <em>a.</em>
-<p>If <em>winding</em> is TRUE, the polygon
-region is filled using the winding algorithm, otherwise the default
-even-odd fill algorithm is used.
-<p>This constructor may create complex regions that will slow
-down painting when used.
-<h3 class="fn"><a name="b6e7a9"></a>QRegion::QRegion ( const QRegion &amp; r )</h3>
-<p>Constructs a new region which is equal to <em>r.</em>
-<h3 class="fn"><a name="b666cf"></a>QRegion::QRegion ( int x, int y, int w, int h, <a href="qregion.html#RegionType">RegionType</a> t = Rectangle )</h3>
-<p>Constructs a rectangular or elliptic region.
-<p>If <em>t</em> is <code>Rectangle,</code> the region is the filled rectangle (<em>x, y, w, h).</em> If <em>t</em> is <code>Ellipse,</code> the region is the filled
-ellipse ellipse with center at (<em>x</em> + <em>w</em> / 2, <em>y</em> + <em>h</em> / 2) and 
-size (<em>w</em> ,<em>h</em> ).
-<h3 class="fn"><a name="b4b68b"></a>QRegion::~QRegion ()</h3>
-<p>Destructs the region.
-<h3 class="fn"><a href="qrect.html">QRect</a> <a name="7cb897"></a>QRegion::boundingRect () const</h3>
-<p>Returns the bounding rectangle of this region.
-An empty region gives a rectangle that is  <a href="qrect.html#3090bd">QRect::isNull</a>().
-<h3 class="fn">bool <a name="ea58e9"></a>QRegion::contains ( const <a href="qpoint.html">QPoint</a> &amp; p ) const</h3>
-<p>Returns TRUE if the region contains the point <em>p,</em> or FALSE if <em>p</em> is
-outside the region.
-<h3 class="fn">bool <a name="afba2f"></a>QRegion::contains ( const <a href="qrect.html">QRect</a> &amp; r ) const</h3>
-<p>Returns TRUE if the region overlaps the rectangle <em>r,</em> or FALSE if <em>r</em> is
-completely outside the region.
-<h3 class="fn">QRegion <a name="d7aa83"></a>QRegion::eor ( const QRegion &amp; r ) const</h3>
-<p>Returns a region which is the exclusive or (XOR) of this region and <em>r.</em>
-<p><img src=rxor.png>
-<p>The figure shows the exclusive or of two elliptical regions.
-<h3 class="fn">QRegion <a name="28e973"></a>QRegion::intersect ( const QRegion &amp; r ) const</h3>
-<p>Returns a region which is the intersection of this region and <em>r.</em>
-<p><img src=rintersect.png>
-<p>The figure shows the intersection of two elliptical regions.
-<h3 class="fn">bool <a name="507d42"></a>QRegion::isEmpty () const</h3>
-<p>Returns TRUE if the region is empty, or FALSE if it is non-empty.
-An empty region is a region that contains no points.
-<p>Example:
-<pre>    <a href="qregion.html">QRegion</a> r1( 10, 10, 20, 20 );
-    <a href="qregion.html">QRegion</a> r2( 40, 40, 20, 20 );
-    <a href="qregion.html">QRegion</a> r3;
-    r1.<a href="#a2c0d0">isNull</a>();                // FALSE
-    r1.<a href="#507d42">isEmpty</a>();               // FALSE
-    r3.<a href="#a2c0d0">isNull</a>();                // TRUE
-    r3.<a href="#507d42">isEmpty</a>();               // TRUE
-    r3 = r1.<a href="#28e973">intersect</a>( r2 );    // r3 = intersection of r1 and r2
-    r3.<a href="#a2c0d0">isNull</a>();                // FALSE
-    r3.<a href="#507d42">isEmpty</a>();               // TRUE
-    r3 = r1.<a href="#2c10d0">unite</a>( r2 );        // r3 = union of r1 and r2
-    r3.<a href="#a2c0d0">isNull</a>();                // FALSE
-    r3.<a href="#507d42">isEmpty</a>();               // FALSE
-</pre>
-<p>See also  <a href="#a2c0d0">isNull</a>().
-<h3 class="fn">bool <a name="a2c0d0"></a>QRegion::isNull () const</h3>
-<p>Returns TRUE if the region is a null region, otherwise FALSE.
-<p>A null region is a region that has not been initialized. A
-null region is always empty.
-<p>See also  <a href="#507d42">isEmpty</a>().
-<h3 class="fn">bool <a name="7c842c"></a>QRegion::operator!= ( const QRegion &amp; r ) const</h3>
-<p>Returns TRUE if the region is different from <em>r,</em> or FALSE if the regions
-are equal.
-<h3 class="fn">QRegion <a name="2ed087"></a>QRegion::operator&amp; ( const QRegion &amp; r ) const</h3>
-<p><code>r1&r2</code> is equivalent to <code>r1.<a href="#28e973">intersect</a>(r2)</code>
-<p>See also  <a href="#28e973">intersect</a>().
-<h3 class="fn">QRegion&amp; <a name="a6c103"></a>QRegion::operator&amp;= ( const QRegion &amp; r )</h3>
-<p><code>r1&=r2</code> is equivalent to <code>r1=r1.<a href="#28e973">intersect</a>(r2)</code>
-<p>See also  <a href="#28e973">intersect</a>().
-<h3 class="fn">QRegion <a name="a61e7d"></a>QRegion::operator+ ( const QRegion &amp; r ) const</h3>
-<p><code>r1+r2</code> is equivalent to <code>r1.<a href="#2c10d0">unite</a>(r2)</code>
-<p>See also  <a href="#2c10d0">unite</a>() and <a href="#4e4832">operator|</a>().
-<h3 class="fn">QRegion&amp; <a name="d77322"></a>QRegion::operator+= ( const QRegion &amp; r )</h3>
-<p><code>r1+=r2</code> is equivalent to <code>r1=r1.<a href="#2c10d0">unite</a>(r2)</code>
-<p>See also  <a href="#28e973">intersect</a>().
-<h3 class="fn">QRegion <a name="81786a"></a>QRegion::operator- ( const QRegion &amp; r ) const</h3>
-<p><code>r1-r2</code> is equivalent to <code>r1.<a href="#ae007f">subtract</a>(r2)</code>
-<p>See also  <a href="#ae007f">subtract</a>().
-<h3 class="fn">QRegion&amp; <a name="04eb26"></a>QRegion::operator-= ( const QRegion &amp; r )</h3>
-<p><code>r1-=r2</code> is equivalent to <code>r1=r1.<a href="#ae007f">subtract</a>(r2)</code>
-<p>See also  <a href="#ae007f">subtract</a>().
-<h3 class="fn">QRegion &amp; <a name="644768"></a>QRegion::operator= ( const QRegion &amp; r )</h3>
-<p>Assigns <em>r</em> to this region and returns a reference to the
-region.
-<h3 class="fn">bool <a name="b6887c"></a>QRegion::operator== ( const QRegion &amp; r ) const</h3>
-<p>Returns TRUE if the region is equal to <em>r,</em> or FALSE if the regions are
-different.
-<h3 class="fn">QRegion <a name="953473"></a>QRegion::operator^ ( const QRegion &amp; r ) const</h3>
-<p><code>r1^r2</code> is equivalent to <code>r1.<a href="#d7aa83">eor</a>(r2)</code>
-<p>See also  <a href="#d7aa83">eor</a>().
-<h3 class="fn">QRegion&amp; <a name="3db11a"></a>QRegion::operator^= ( const QRegion &amp; r )</h3>
-<p><code>r1^=r2</code> is equivalent to <code>r1=r1.<a href="#d7aa83">eor</a>(r2)</code>
-<p>See also  <a href="#d7aa83">eor</a>().
-<h3 class="fn">QRegion <a name="4e4832"></a>QRegion::operator| ( const QRegion &amp; r ) const</h3>
-<p><code>r1|r2</code> is equivalent to <code>r1.<a href="#2c10d0">unite</a>(r2)</code>
-<p>See also  <a href="#2c10d0">unite</a>() and <a href="#a61e7d">operator+</a>().
-<h3 class="fn">QRegion&amp; <a name="0a5795"></a>QRegion::operator|= ( const QRegion &amp; r )</h3>
-<p><code>r1|=r2</code> is equivalent to <code>r1=r1.<a href="#2c10d0">unite</a>(r2)</code>
-<p>See also  <a href="#2c10d0">unite</a>().
-<h3 class="fn"><a href="qarray.html">QArray</a>&lt;<a href="qrect.html">QRect</a>&gt; <a name="842bf7"></a>QRegion::rects () const</h3>
-<p>Returns an array of non-overlapping rectangles that make up the region.
-<p>The union of all the rectangles is equal to the original region.
-<h3 class="fn">void <a name="9c7ecf"></a>QRegion::setRects ( const <a href="qrect.html">QRect</a> * rects, int num )</h3>
-<p>Sets the region to be the given set of rectangles.  The rectangles
-<em>must</em> be optimal Y-X sorted bands as follows:
+<a name="related-non-members"></a>
+<h3>Related Non-Members</h3>
 <ul>
-<li> The rectangles must not intersect
-<li> All rectangles with a given top coordinate must have the same height.
-<li> No two rectangles may abut horizontally (they should be combined
-into a single wider rectangle in that case).
-<li> The rectangles must be sorted ascendingly by Y as the major sort key
-and X as the minor sort key.
+<li><div class="fn"/>QDataStream &amp; <b><a href="qregion.html#operator-lt-lt-94">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>s</i>, const QRegion &amp; <i>r</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qregion.html#operator-gt-gt-55">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>s</i>, QRegion &amp; <i>r</i> )</li>
 </ul>
-<h3 class="fn">QRegion <a name="ae007f"></a>QRegion::subtract ( const QRegion &amp; r ) const</h3>
-<p>Returns a region which is <em>r</em> subtracted from this region.
-<p><img src=rsubtract.png>
-<p>The figure shows the result when the ellipse on the right is subtracted
-from the ellipse on the left. (<code>left-right</code> ).
-<h3 class="fn">void <a name="595875"></a>QRegion::translate ( int dx, int dy )</h3>
-<p>Translates (moves) the region <em>dx</em> along the X axis and <em>dy</em> along the Y axis.
-<h3 class="fn">QRegion <a name="2c10d0"></a>QRegion::unite ( const QRegion &amp; r ) const</h3>
-<p>Returns a region which is the union of this region and <em>r.</em>
-<p><img src=runion.png>
-<p>The figure shows the union of two elliptical regions.
-<hr><h2>Related Functions</h2>
-<h3><a href="qdatastream.html">QDataStream</a> &amp; <a name="2179e4"></a>operator&gt;&gt; (<a href="qdatastream.html">QDataStream</a> &amp; s, QRegion &amp; r)</h3>
-<p>Reads a region from the stream <em>s</em> into <em>r</em> and returns a 
-reference to the stream.
-<p>See also  <a href="datastreamformat.html">Format of the QDataStream operators</a>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QRegion class specifies a clip region for a painter.</p>
+<p>QRegion is used with <a href="qpainter.html#setClipRegion">QPainter::setClipRegion</a>() to limit the paint area to what needs to be painted. There is also a <a href="qwidget.html#repaint">QWidget::repaint</a>() function that takes a QRegion parameter. QRegion is the best tool for reducing flicker.</p>
+<p>A region can be created from a rectangle, an ellipse, a polygon or a bitmap. Complex regions may be created by combining simple regions using <a href="qregion.html#united">united</a>(), <a href="qregion.html#intersected">intersected</a>(), <a href="qregion.html#subtracted">subtracted</a>(), or <a href="qregion.html#xored">xored</a>() (exclusive or). You can move a region using <a href="qregion.html#translate">translate</a>().</p>
+<p>You can test whether a region <a href="qregion.html#isEmpty">isEmpty</a>() or if it <a href="qregion.html#contains">contains</a>() a <a href="qpoint.html">QPoint</a> or <a href="qrect.html">QRect</a>. The bounding rectangle can be found with <a href="qregion.html#boundingRect">boundingRect</a>().</p>
+<p>The function <a href="qregion.html#rects">rects</a>() gives a decomposition of the region into rectangles.</p>
+<p>Example of using complex regions:</p>
+<pre> void MyWidget::paintEvent(QPaintEvent *)
+ {
+     QRegion r1(QRect(100, 100, 200, 80),    <span class="comment">// r1: elliptic region</span>
+                QRegion::Ellipse);
+     QRegion r2(QRect(100, 120, 90, 30));    <span class="comment">// r2: rectangular region</span>
+     QRegion r3 = r1.intersected(r2);        <span class="comment">// r3: intersection</span>
 
-<h3><a href="qdatastream.html">QDataStream</a> &amp; <a name="9b85c2"></a>operator&lt;&lt; (<a href="qdatastream.html">QDataStream</a> &amp; s, const QRegion &amp; r)</h3>
-<p>Writes the region <em>r</em> to the stream <em>s</em> and returns a reference to 
-the stream.
-<p>See also  <a href="datastreamformat.html">Format of the QDataStream operators</a>
+     QPainter painter(this);
+     painter.setClipRegion(r3);
+     ...                                     <span class="comment">// paint clipped graphics</span>
+ }</pre>
+<p>QRegion is an <a href="shared.html">implicitly shared class</a>.</p>
+<p><b>Warning:</b> Due to window system limitations, the whole coordinate space for a region is limited to the points between -32767 and 32767 on Windows 95/98/ME. You can circumvent this limitation by using a <a href="qpainterpath.html">QPainterPath</a>.</p>
+<a name="additional-license-information"></a>
+<h3>Additional License Information</h3>
+<p>For Qt/X11 and Qtopia Core, parts of this class rely on code obtained under the following license:</p>
+<div style="padding: 0.5em; background: #e0e0e0; color: black"><p>Copyright (c) 1987 X Consortium</p>
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+<p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
+<p>THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+<p>Except as contained in this notice, the name of the X Consortium shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization from the X Consortium.</p>
+</div>    <hr />
+    <div style="padding: 0.5em; background: #e0e0e0; color: black"><p>Copyright 1987 by Digital Equipment Corporation, Maynard, Massachusetts.</p>
+<p>All Rights Reserved</p>
+<p>Permission to use, copy, modify, and distribute this software and its documentation for any purpose and without fee is hereby granted, provided that the above copyright notice appear in all copies and that both that copyright notice and this permission notice appear in supporting documentation, and that the name of Digital not be used in advertising or publicity pertaining to distribution of the software without specific, written prior permission.</p>
+<p>DIGITAL DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO EVENT SHALL DIGITAL BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.</p>
+</div><p>See also <a href="qpainter.html#setClipRegion">QPainter::setClipRegion</a>(), <a href="qpainter.html#setClipRect">QPainter::setClipRect</a>(), and <a href="qpainterpath.html">QPainterPath</a>.</p>
+<hr />
+<h2>Member Type Documentation</h2>
+<h3 class="fn"><a name="RegionType-enum"></a>enum QRegion::RegionType</h3>
+<p>Specifies the shape of the region to be created.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QRegion::Rectangle</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">the region covers the entire rectangle.</td></tr>
+<tr><td valign="top"><tt>QRegion::Ellipse</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">the region is an ellipse inside the rectangle.</td></tr>
+</table></p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QRegion"></a>QRegion::QRegion ()</h3>
+<p>Constructs an empty region.</p>
+<p>See also <a href="qregion.html#isEmpty">isEmpty</a>().</p>
+<h3 class="fn"><a name="QRegion-2"></a>QRegion::QRegion ( int <i>x</i>, int <i>y</i>, int <i>w</i>, int <i>h</i>, <a href="qregion.html#RegionType-enum">RegionType</a> <i>t</i> = Rectangle )</h3>
+<p>Constructs a rectangular or elliptic region.</p>
+<p>If <i>t</i> is <tt>Rectangle</tt>, the region is the filled rectangle (<i>x</i>, <i>y</i>, <i>w</i>, <i>h</i>). If <i>t</i> is <tt>Ellipse</tt>, the region is the filled ellipse with center at (<i>x</i> + <i>w</i> / 2, <i>y</i> + <i>h</i> / 2) and size (<i>w</i> ,<i>h</i>).</p>
+<h3 class="fn"><a name="QRegion-3"></a>QRegion::QRegion ( const <a href="qpolygon.html">QPolygon</a> &amp; <i>a</i>, <a href="qt.html#FillRule-enum">Qt::FillRule</a> <i>fillRule</i> = Qt::OddEvenFill )</h3>
+<p>Constructs a polygon region from the point array <i>a</i> with the fill rule specified by <i>fillRule</i>.</p>
+<p>If <i>fillRule</i> is <a href="qt.html#FillRule-enum">Qt::WindingFill</a>, the polygon region is defined using the winding algorithm; if it is <a href="qt.html#FillRule-enum">Qt::OddEvenFill</a>, the odd-even fill algorithm is used.</p>
+<p><b>Warning:</b> This constructor can be used to create complex regions that will slow down painting when used.</p>
+<h3 class="fn"><a name="QRegion-5"></a>QRegion::QRegion ( const QRegion &amp; <i>r</i> )</h3>
+<p>Constructs a new region which is equal to region <i>r</i>.</p>
+<h3 class="fn"><a name="QRegion-6"></a>QRegion::QRegion ( const <a href="qbitmap.html">QBitmap</a> &amp; <i>bm</i> )</h3>
+<p>Constructs a region from the bitmap <i>bm</i>.</p>
+<p>The resulting region consists of the pixels in bitmap <i>bm</i> that are <a href="qt.html#GlobalColor-enum">Qt::color1</a>, as if each pixel was a 1 by 1 rectangle.</p>
+<p>This constructor may create complex regions that will slow down painting when used. Note that drawing masked pixmaps can be done much faster using <a href="qpixmap.html#setMask">QPixmap::setMask</a>().</p>
+<h3 class="fn"><a name="QRegion-7"></a>QRegion::QRegion ( const <a href="qrect.html">QRect</a> &amp; <i>r</i>, <a href="qregion.html#RegionType-enum">RegionType</a> <i>t</i> = Rectangle )</h3>
+<p>Create a region based on the rectange <i>r</i> with region type <i>t</i>.</p>
+<p>If the rectangle is invalid a null region will be created.</p>
+<p>See also <a href="qregion.html#RegionType-enum">QRegion::RegionType</a>.</p>
+<h3 class="fn"><a name="dtor.QRegion"></a>QRegion::~QRegion ()</h3>
+<p>Destroys the region.</p>
+<h3 class="fn"><a name="boundingRect"></a><a href="qrect.html">QRect</a> QRegion::boundingRect () const</h3>
+<p>Returns the bounding rectangle of this region. An empty region gives a rectangle that is <a href="qrect.html#isNull">QRect::isNull</a>().</p>
+<h3 class="fn"><a name="contains"></a>bool QRegion::contains ( const <a href="qpoint.html">QPoint</a> &amp; <i>p</i> ) const</h3>
+<p>Returns true if the region contains the point <i>p</i>; otherwise returns false.</p>
+<h3 class="fn"><a name="contains-2"></a>bool QRegion::contains ( const <a href="qrect.html">QRect</a> &amp; <i>r</i> ) const</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns true if the region overlaps the rectangle <i>r</i>; otherwise returns false.</p>
+<h3 class="fn"><a name="handle"></a>Handle QRegion::handle () const</h3>
+<p>Returns a platform-specific region handle. The <tt>Handle</tt> type is <tt>HRGN</tt> on Windows, <tt>Region</tt> on X11, and <tt>RgnHandle</tt> on Mac OS X. On <a href="qtopiacore.html">Qtopia Core</a> it is <tt>void *</tt>.</p>
+<p><b>Warning:</b> This function is not portable.</p>
+<h3 class="fn"><a name="intersected"></a>QRegion QRegion::intersected ( const QRegion &amp; <i>r</i> ) const</h3>
+<p>Returns a region which is the intersection of this region and <i>r</i>.</p>
+<p align="center"><img src="images/rintersect.png" alt="Region Intersection" /></p><p>The figure shows the intersection of two elliptical regions.</p>
+<p>This function was introduced in Qt 4.2.</p>
+<h3 class="fn"><a name="intersects"></a>bool QRegion::intersects ( const QRegion &amp; <i>region</i> ) const</h3>
+<p>Returns true if this region intersects with <i>region</i>, otherwise returns false.</p>
+<p>This function was introduced in Qt 4.2.</p>
+<h3 class="fn"><a name="intersects-2"></a>bool QRegion::intersects ( const <a href="qrect.html">QRect</a> &amp; <i>rect</i> ) const</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns true if this region intersects with <i>rect</i>, otherwise returns false.</p>
+<p>This function was introduced in Qt 4.2.</p>
+<h3 class="fn"><a name="isEmpty"></a>bool QRegion::isEmpty () const</h3>
+<p>Returns true if the region is empty; otherwise returns false. An empty region is a region that contains no points.</p>
+<p>Example:</p>
+<pre> QRegion r1(10, 10, 20, 20);
+ r1.isNull();                <span class="comment">// false</span>
+ r1.isEmpty();               <span class="comment">// false</span>
 
-<hr><p>
-Search the documentation, FAQ, qt-interest archive and more (uses
-<a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
-<form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.10"><nobr>
-<input size="50" name="search"><input type=submit value="Search">
-</nobr></form><hr><p>
-This file is part of the <a href="index.html">Qt toolkit</a>,
-copyright &copy; 1995-2005
-<a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+ QRegion r2(40, 40, 20, 20);
+ QRegion r3;
+ r3.isNull();                <span class="comment">// true</span>
+ r3.isEmpty();               <span class="comment">// true</span>
+
+ r3 = r1.intersected(r2);    <span class="comment">// r3: intersection of r1 and r2</span>
+ r3.isNull();                <span class="comment">// false</span>
+ r3.isEmpty();               <span class="comment">// true</span>
+
+ r3 = r1.united(r2);         <span class="comment">// r3: union of r1 and r2</span>
+ r3.isNull();                <span class="comment">// false</span>
+ r3.isEmpty();               <span class="comment">// false</span></pre>
+<h3 class="fn"><a name="rects"></a><a href="qvector.html">QVector</a>&lt;<a href="qrect.html">QRect</a>&gt; QRegion::rects () const</h3>
+<p>Returns an array of non-overlapping rectangles that make up the region.</p>
+<p>The union of all the rectangles is equal to the original region.</p>
+<p>See also <a href="qregion.html#setRects">setRects</a>().</p>
+<h3 class="fn"><a name="setRects"></a>void QRegion::setRects ( const <a href="qrect.html">QRect</a> * <i>rects</i>, int <i>number</i> )</h3>
+<p>Sets the region using the array of rectangles specified by <i>rects</i> and <i>number</i>. The rectangles <i>must</i> be optimally Y-X sorted and follow these restrictions:</p>
+<ul>
+<li>The rectangles must not intersect.</li>
+<li>All rectangles with a given top coordinate must have the same height.</li>
+<li>No two rectangles may abut horizontally (they should be combined into a single wider rectangle in that case).</li>
+<li>The rectangles must be sorted in ascending order, with Y as the major sort key and X as the minor sort key.</li>
+</ul>
+<p>See also <a href="qregion.html#rects">rects</a>().</p>
+<h3 class="fn"><a name="subtracted"></a>QRegion QRegion::subtracted ( const QRegion &amp; <i>r</i> ) const</h3>
+<p>Returns a region which is <i>r</i> subtracted from this region.</p>
+<p align="center"><img src="images/rsubtract.png" alt="Region Subtraction" /></p><p>The figure shows the result when the ellipse on the right is subtracted from the ellipse on the left (<tt>left - right</tt>).</p>
+<p>This function was introduced in Qt 4.2.</p>
+<p>See also <a href="qregion.html#intersected">intersected</a>(), <a href="qregion.html#united">united</a>(), and <a href="qregion.html#xored">xored</a>().</p>
+<h3 class="fn"><a name="translate"></a>void QRegion::translate ( int <i>dx</i>, int <i>dy</i> )</h3>
+<p>Translates (moves) the region <i>dx</i> along the X axis and <i>dy</i> along the Y axis.</p>
+<h3 class="fn"><a name="translate-2"></a>void QRegion::translate ( const <a href="qpoint.html">QPoint</a> &amp; <i>point</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Translates the region <i>point</i><i>.x()</i> along the x axis and <i>point</i><i>.y()</i> along the y axis, relative to the current position. Positive values move the region to the right and down.</p>
+<p>Translates to the given <i>point</i>.</p>
+<h3 class="fn"><a name="translated"></a>QRegion QRegion::translated ( int <i>dx</i>, int <i>dy</i> ) const</h3>
+<p>Returns a copy of the region that is translated <i>dx</i> along the x axis and <i>dy</i> along the y axis, relative to the current position. Positive values move the region to the right and down.</p>
+<p>This function was introduced in Qt 4.1.</p>
+<p>See also <a href="qregion.html#translate">translate</a>().</p>
+<h3 class="fn"><a name="translated-2"></a>QRegion QRegion::translated ( const <a href="qpoint.html">QPoint</a> &amp; <i>p</i> ) const</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns a copy of the regtion that is translated <i>p</i><i>.x()</i> along the x axis and <i>p</i><i>.y()</i> along the y axis, relative to the current position. Positive values move the rectangle to the right and down.</p>
+<p>This function was introduced in Qt 4.1.</p>
+<p>See also <a href="qregion.html#translate">translate</a>().</p>
+<h3 class="fn"><a name="united"></a>QRegion QRegion::united ( const QRegion &amp; <i>r</i> ) const</h3>
+<p>Returns a region which is the union of this region and <i>r</i>.</p>
+<p align="center"><img src="images/runion.png" alt="Region Union" /></p><p>The figure shows the union of two elliptical regions.</p>
+<p>This function was introduced in Qt 4.2.</p>
+<p>See also <a href="qregion.html#intersected">intersected</a>(), <a href="qregion.html#subtracted">subtracted</a>(), and <a href="qregion.html#xored">xored</a>().</p>
+<h3 class="fn"><a name="xored"></a>QRegion QRegion::xored ( const QRegion &amp; <i>r</i> ) const</h3>
+<p>Returns a region which is the exclusive or (XOR) of this region and <i>r</i>.</p>
+<p align="center"><img src="images/rxor.png" alt="Region XORed" /></p><p>The figure shows the exclusive or of two elliptical regions.</p>
+<p>This function was introduced in Qt 4.2.</p>
+<p>See also <a href="qregion.html#intersected">intersected</a>(), <a href="qregion.html#united">united</a>(), and <a href="qregion.html#subtracted">subtracted</a>().</p>
+<h3 class="fn"><a name="operator-QVariant"></a>QRegion::operator QVariant () const</h3>
+<p>Returns the region as a <a href="qvariant.html">QVariant</a></p>
+<h3 class="fn"><a name="operator-not-eq"></a>bool QRegion::operator!= ( const QRegion &amp; <i>other</i> ) const</h3>
+<p>Returns true if this region is different from the <i>other</i> region; otherwise returns false.</p>
+<h3 class="fn"><a name="operator-and"></a>const QRegion QRegion::operator&amp; ( const QRegion &amp; <i>r</i> ) const</h3>
+<p>Applies the <a href="qregion.html#intersected">intersected</a>() function to this region and <i>r</i>. <tt>r1&amp;r2</tt> is equivalent to <tt>r1.intersected(r2)</tt>.</p>
+<p>See also <a href="qregion.html#intersected">intersected</a>().</p>
+<h3 class="fn"><a name="operator-and-eq"></a>QRegion &amp; QRegion::operator&amp;= ( const QRegion &amp; <i>r</i> )</h3>
+<p>Applies the <a href="qregion.html#intersected">intersected</a>() function to this region and <i>r</i> and assigns the result to this region. <tt>r1&amp;=r2</tt> is equivalent to <tt>r1</tt> = r1.intersected(r2).</p>
+<p>See also <a href="qregion.html#intersected">intersected</a>().</p>
+<h3 class="fn"><a name="operator-2b"></a>const QRegion QRegion::operator+ ( const QRegion &amp; <i>r</i> ) const</h3>
+<p>Applies the <a href="qregion.html#united">united</a>() function to this region and <i>r</i>. <tt>r1+r2</tt> is equivalent to <tt>r1.united(r2)</tt>.</p>
+<p>See also <a href="qregion.html#united">united</a>() and <a href="qregion.html#operator-7c">operator|</a>().</p>
+<h3 class="fn"><a name="operator-2b-eq"></a>QRegion &amp; QRegion::operator+= ( const QRegion &amp; <i>r</i> )</h3>
+<p>Applies the <a href="qregion.html#united">united</a>() function to this region and <i>r</i> and assigns the result to this region. <tt>r1+=r2</tt> is equivalent to <tt>r1 = r1.united(r2)</tt>.</p>
+<p>See also <a href="qregion.html#intersected">intersected</a>().</p>
+<h3 class="fn"><a name="operator-"></a>const QRegion QRegion::operator- ( const QRegion &amp; <i>r</i> ) const</h3>
+<p>Applies the <a href="qregion.html#subtracted">subtracted</a>() function to this region and <i>r</i>. <tt>r1-r2</tt> is equivalent to <tt>r1.subtracted(r2)</tt>.</p>
+<p>See also <a href="qregion.html#subtracted">subtracted</a>().</p>
+<h3 class="fn"><a name="operator--eq"></a>QRegion &amp; QRegion::operator-= ( const QRegion &amp; <i>r</i> )</h3>
+<p>Applies the <a href="qregion.html#subtracted">subtracted</a>() function to this region and <i>r</i> and assigns the result to this region. <tt>r1-=r2</tt> is equivalent to <tt>r1 = r1.subtracted(r2)</tt>.</p>
+<p>See also <a href="qregion.html#subtracted">subtracted</a>().</p>
+<h3 class="fn"><a name="operator-eq"></a>QRegion &amp; QRegion::operator= ( const QRegion &amp; <i>r</i> )</h3>
+<p>Assigns <i>r</i> to this region and returns a reference to the region.</p>
+<h3 class="fn"><a name="operator-eq-eq"></a>bool QRegion::operator== ( const QRegion &amp; <i>r</i> ) const</h3>
+<p>Returns true if the region is equal to <i>r</i>; otherwise returns false.</p>
+<h3 class="fn"><a name="operator-5e"></a>const QRegion QRegion::operator^ ( const QRegion &amp; <i>r</i> ) const</h3>
+<p>Applies the <a href="qregion.html#xored">xored</a>() function to this region and <i>r</i>. <tt>r1^r2</tt> is equivalent to <tt>r1.xored(r2)</tt>.</p>
+<p>See also <a href="qregion.html#xored">xored</a>().</p>
+<h3 class="fn"><a name="operator-5e-eq"></a>QRegion &amp; QRegion::operator^= ( const QRegion &amp; <i>r</i> )</h3>
+<p>Applies the <a href="qregion.html#xored">xored</a>() function to this region and <i>r</i> and assigns the result to this region. <tt>r1^=r2</tt> is equivalent to <tt>r1 = r1.xored(r2)</tt>.</p>
+<p>See also <a href="qregion.html#xored">xored</a>().</p>
+<h3 class="fn"><a name="operator-7c"></a>const QRegion QRegion::operator| ( const QRegion &amp; <i>r</i> ) const</h3>
+<p>Applies the <a href="qregion.html#united">united</a>() function to this region and <i>r</i>. <tt>r1|r2</tt> is equivalent to <tt>r1.united(r2)</tt>.</p>
+<p>See also <a href="qregion.html#united">united</a>() and <a href="qregion.html#operator-2b">operator+</a>().</p>
+<h3 class="fn"><a name="operator-7c-eq"></a>QRegion &amp; QRegion::operator|= ( const QRegion &amp; <i>r</i> )</h3>
+<p>Applies the <a href="qregion.html#united">united</a>() function to this region and <i>r</i> and assigns the result to this region. <tt>r1|=r2</tt> is equivalent to <tt>r1 = r1.united(r2)</tt>.</p>
+<p>See also <a href="qregion.html#united">united</a>().</p>
+<hr />
+<h2>Related Non-Members</h2>
+<h3 class="fn"><a name="operator-lt-lt-94"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>s</i>, const QRegion &amp; <i>r</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Writes the region <i>r</i> to the stream <i>s</i> and returns a reference to the stream.</p>
+<p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
+<h3 class="fn"><a name="operator-gt-gt-55"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>s</i>, QRegion &amp; <i>r</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Reads a region from the stream <i>s</i> into <i>r</i> and returns a reference to the stream.</p>
+<p>See also <a href="datastreamformat.html">Format of the QDataStream operators</a>.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QRegion-4"></a>QRegion::QRegion ( const <a href="qpolygon.html">QPolygon</a> &amp; <i>pa</i>, bool <i>winding</i> )</h3>
+<p>Use the constructor tha takes a <a href="qt.html#FillRule-enum">Qt::FillRule</a> as the second argument instead.</p>
+<h3 class="fn"><a name="isNull"></a>bool QRegion::isNull () const</h3>
+<p>Use <a href="qregion.html#isEmpty">isEmpty</a>() instead.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

@@ -1,253 +1,180 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
---></style>
-</head><body bgcolor="#ffffff">
-
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-
-<h1 align=center>QPoint Class Reference</h1><br clear="all">
-<p>
-The QPoint class defines a point in the plane.
-<a href="#details">More...</a>
-<p>
-<code>#include &lt;<a href="qpoint-h.html">qpoint.h</a>&gt;</code>
-<p><a href="qpoint-members.html">List of all member functions.</a>
-<h2>Public Members</h2>
-<ul>
-<li><div class="fn"><a href="#38e511"><b>QPoint</b></a> () </div>
-<li><div class="fn"><a href="#b56557"><b>QPoint</b></a> ( int xpos, int ypos ) </div>
-<li><div class="fn">bool <a href="#b75100"><b>isNull</b></a> () const</div>
-<li><div class="fn">int <a href="#7e96b2"><b>x</b></a> () const</div>
-<li><div class="fn">int <a href="#e48824"><b>y</b></a> () const</div>
-<li><div class="fn">void <a href="#75b57f"><b>setX</b></a> ( int x ) </div>
-<li><div class="fn">void <a href="#c780b4"><b>setY</b></a> ( int y ) </div>
-<li><div class="fn">int <a href="#2fcb0e"><b>manhattanLength</b></a> () const</div>
-<li><div class="fn">QCOORD&amp; <a href="#bc236e"><b>rx</b></a> () </div>
-<li><div class="fn">QCOORD&amp; <a href="#17eba0"><b>ry</b></a> () </div>
-<li><div class="fn">QPoint&amp; <a href="#fbeb96"><b>operator+=</b></a> ( const QPoint &amp; p ) </div>
-<li><div class="fn">QPoint&amp; <a href="#c4f49f"><b>operator-=</b></a> ( const QPoint &amp; p ) </div>
-<li><div class="fn">QPoint&amp; <a href="#156b66"><b>operator*=</b></a> ( int c ) </div>
-<li><div class="fn">QPoint&amp; <a href="#d66de7"><b>operator*=</b></a> ( double c ) </div>
-<li><div class="fn">QPoint&amp; <a href="#6c68e1"><b>operator/=</b></a> ( int c ) </div>
-<li><div class="fn">QPoint&amp; <a href="#6ea8ca"><b>operator/=</b></a> ( double c ) </div>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: QPoint Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QPoint Class Reference<br /><sup><sup>[<a href="qtcore.html">QtCore</a> module]</sup></sup></h1>
+<p>The QPoint class defines a point in the plane using integer precision. <a href="#details">More...</a></p>
+<pre> #include &lt;QPoint&gt;</pre><ul>
+<li><a href="qpoint-members.html">List of all members, including inherited members</a></li>
 </ul>
-<h2>Related Functions</h2>
-(Note that these are not member functions.)
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
 <ul>
-<li>QPoint <a href="qpoint.html#1b3f41"><b>operator/</b></a> (const QPoint &amp; p, double c)
-<li>QPoint <a href="qpoint.html#25d7f1"><b>operator*</b></a> (double c, const QPoint &amp; p)
-<li>QPoint <a href="qpoint.html#2a667f"><b>operator/</b></a> (const QPoint &amp; p, int c)
-<li>QDataStream &amp; <a href="qpoint.html#32d460"><b>operator&lt;&lt;</b></a> (QDataStream &amp; s, const QPoint &amp; p)
-<li>QPoint <a href="qpoint.html#3f935a"><b>operator*</b></a> (int c, const QPoint &amp; p)
-<li>QDataStream &amp; <a href="qpoint.html#44a4cb"><b>operator&gt;&gt;</b></a> (QDataStream &amp; s, QPoint &amp; p)
-<li>QPoint <a href="qpoint.html#550c91"><b>operator*</b></a> (const QPoint &amp; p, double c)
-<li>QPoint <a href="qpoint.html#7b4ffd"><b>operator*</b></a> (const QPoint &amp; p, int c)
-<li>QPoint <a href="qpoint.html#8f8499"><b>operator+</b></a> (const QPoint &amp; p1, const QPoint &amp; p2)
-<li>bool <a href="qpoint.html#bf658e"><b>operator!=</b></a> (const QPoint &amp; p1, const QPoint &amp; p2)
-<li>QPoint <a href="qpoint.html#bf81ba"><b>operator-</b></a> (const QPoint &amp; p)
-<li>bool <a href="qpoint.html#c19b5c"><b>operator==</b></a> (const QPoint &amp; p1, const QPoint &amp; p2)
-<li>QPoint <a href="qpoint.html#cfa22c"><b>operator-</b></a> (const QPoint &amp; p1, const QPoint &amp; p2)
+<li><div class="fn"/><b><a href="qpoint.html#QPoint">QPoint</a></b> ()</li>
+<li><div class="fn"/><b><a href="qpoint.html#QPoint-2">QPoint</a></b> ( int <i>x</i>, int <i>y</i> )</li>
+<li><div class="fn"/>bool <b><a href="qpoint.html#isNull">isNull</a></b> () const</li>
+<li><div class="fn"/>int <b><a href="qpoint.html#manhattanLength">manhattanLength</a></b> () const</li>
+<li><div class="fn"/>int &amp; <b><a href="qpoint.html#rx">rx</a></b> ()</li>
+<li><div class="fn"/>int &amp; <b><a href="qpoint.html#ry">ry</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qpoint.html#setX">setX</a></b> ( int <i>x</i> )</li>
+<li><div class="fn"/>void <b><a href="qpoint.html#setY">setY</a></b> ( int <i>y</i> )</li>
+<li><div class="fn"/>int <b><a href="qpoint.html#x">x</a></b> () const</li>
+<li><div class="fn"/>int <b><a href="qpoint.html#y">y</a></b> () const</li>
+<li><div class="fn"/>QPoint &amp; <b><a href="qpoint.html#operator-2a-eq">operator*=</a></b> ( qreal <i>factor</i> )</li>
+<li><div class="fn"/>QPoint &amp; <b><a href="qpoint.html#operator-2b-eq">operator+=</a></b> ( const QPoint &amp; <i>point</i> )</li>
+<li><div class="fn"/>QPoint &amp; <b><a href="qpoint.html#operator--eq">operator-=</a></b> ( const QPoint &amp; <i>point</i> )</li>
+<li><div class="fn"/>QPoint &amp; <b><a href="qpoint.html#operator-2f-eq">operator/=</a></b> ( qreal <i>divisor</i> )</li>
 </ul>
-<hr><h2><a name="details"></a>Detailed Description</h2>
-The QPoint class defines a point in the plane.
-<p>
-A point is specified by an x coordinate and a y coordinate.
-<p>The coordinate type is <code>QCOORD</code> (a 32-bit integer).
-The minimum value of <code>QCOORD</code> is <code>QCOORD_MIN</code> (-2147483648) and the maximum
-value is  <code>QCOORD_MAX</code> (2147483647).
-<p>The coordinates are accessed by the functions <a href="#7e96b2">x</a>() and <a href="#e48824">y</a>(), they can
-be set by <a href="#75b57f">setX</a>() and <a href="#c780b4">setY</a>(), or by the reference functions <a href="#bc236e">rx</a>() and <a href="#17eba0">ry</a>().
-<p>Given a point <em>p,</em> the following statements are all equivalent:
-<pre>     p.setX( p.x() + 1 );
-     p += QPoint( 1, 0 );
-     p.rx()++;
-</pre>
-<p>A QPoint can also be used as a vector.  Addition and subtraction of
-QPoint are defined as for vectors (each component is added
-separately). You can divide or multiply a QPoint by an <code>int</code> or a
-<code>double.</code> The function <a href="#2fcb0e">manhattanLength</a>() gives an inexpensive
-approximation to the length of the QPoint interpreted as a vector.
-<p>Example:
-<pre>     //QPoint oldPos is defined somewhere else 
-     MyWidget::mouseMoveEvent( <a href="qmouseevent.html">QMouseEvent</a> *e )
-     {
-        <a href="qpoint.html">QPoint</a> vector = e-&gt;<a href="qmouseevent.html#ac6f25">pos</a>() - oldPos;
-        if ( vector.<a href="#2fcb0e">manhattanLength</a>() &gt; 3 )
-           ... //mouse has moved more than 3 pixels since oldPos
-     }
-</pre>
-<p>QPoints can be compared for equality or inequality, and they can be
-written to and read from a QStream.
-<p>See also  <a href="qsize.html">QSize</a> and <a href="qrect.html">QRect</a>.
-<p>Examples:
- <a href="drawlines-connect-cpp.html#QPoint">drawlines/connect.cpp</a>
- <a href="forever-forever-cpp.html#QPoint">forever/forever.cpp</a>
- <a href="qmag-qmag-cpp.html#QPoint">qmag/qmag.cpp</a>
- <a href="xform-xform-cpp.html#QPoint">xform/xform.cpp</a>
+<a name="related-non-members"></a>
+<h3>Related Non-Members</h3>
+<ul>
+<li><div class="fn"/>bool <b><a href="qpoint.html#operator-not-eq-13">operator!=</a></b> ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</li>
+<li><div class="fn"/>const QPoint <b><a href="qpoint.html#operator-2a">operator*</a></b> ( const QPoint &amp; <i>point</i>, qreal <i>factor</i> )</li>
+<li><div class="fn"/>const QPoint <b><a href="qpoint.html#operator-2a-16">operator*</a></b> ( qreal <i>factor</i>, const QPoint &amp; <i>point</i> )</li>
+<li><div class="fn"/>const QPoint <b><a href="qpoint.html#operator-2b-4">operator+</a></b> ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</li>
+<li><div class="fn"/>const QPoint <b><a href="qpoint.html#operator--2">operator-</a></b> ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</li>
+<li><div class="fn"/>const QPoint <b><a href="qpoint.html#operator--9">operator-</a></b> ( const QPoint &amp; <i>point</i> )</li>
+<li><div class="fn"/>const QPoint <b><a href="qpoint.html#operator-2f">operator/</a></b> ( const QPoint &amp; <i>point</i>, qreal <i>divisor</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qpoint.html#operator-lt-lt-48">operator&lt;&lt;</a></b> ( QDataStream &amp; <i>stream</i>, const QPoint &amp; <i>point</i> )</li>
+<li><div class="fn"/>bool <b><a href="qpoint.html#operator-eq-eq-22">operator==</a></b> ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</li>
+<li><div class="fn"/>QDataStream &amp; <b><a href="qpoint.html#operator-gt-gt-26">operator&gt;&gt;</a></b> ( QDataStream &amp; <i>stream</i>, QPoint &amp; <i>point</i> )</li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QPoint class defines a point in the plane using integer precision.</p>
+<p>A point is specified by a x coordinate and an y coordinate which can be accessed using the <a href="qpoint.html#x">x</a>() and <a href="qpoint.html#y">y</a>() functions. The <a href="qpoint.html#isNull">isNull</a>() function returns true if both x and y are set to 0. The coordinates can be set (or altered) using the <a href="qpoint.html#setX">setX</a>() and <a href="qpoint.html#setY">setY</a>() functions, or alternatively the <a href="qpoint.html#rx">rx</a>() and <a href="qpoint.html#ry">ry</a>() functions which return references to the coordinates (allowing direct manipulation).</p>
+<p>Given a point <i>p</i>, the following statements are all equivalent:</p>
+<pre> QPoint p;
 
-<hr><h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="38e511"></a>QPoint::QPoint ()</h3>
-<p>Constructs a point with coordinates (0,0) (<a href="#b75100">isNull</a>() returns TRUE).
-<h3 class="fn"><a name="b56557"></a>QPoint::QPoint ( int xpos, int ypos )</h3>
-<p>Constructs a point with the x value  <em>xpos</em> and y value <em>ypos.</em>
-<h3 class="fn">bool <a name="b75100"></a>QPoint::isNull () const</h3>
-<p>Returns TRUE if both the x value and the y value are 0.
-<h3 class="fn">int <a name="2fcb0e"></a>QPoint::manhattanLength () const</h3>
-<p>Returns the sum of the absolute values of <a href="#7e96b2">x</a>() and <a href="#e48824">y</a>(), traditionally
-known as the "Manhattan length" of the vector from the origin to the
-point. The tradition arises since such distances apply
-to travelers who can only travel on a rectangular grid, like the streets
-of Manhattan.
-<p>This is a useful approximation to the true length,
-sqrt(pow(x(),2)+pow(y(),2)).
-<h3 class="fn">QPoint &amp; <a name="d66de7"></a>QPoint::operator*= ( double c )</h3>
-<p>Multiplies both x and y with <em>c,</em> and return a reference to this point.
-<p>Example:
-<pre>    <a href="qpoint.html">QPoint</a> p( -1, 4 );
-    p *= 2.5;                   // p becomes (-3,10)
-</pre>
-<p>Note that the result is truncated.
-<h3 class="fn">QPoint &amp; <a name="156b66"></a>QPoint::operator*= ( int c )</h3>
-<p>Multiplies both x and y with <em>c,</em> and return a reference to this point.
-<p>Example:
-<pre>    <a href="qpoint.html">QPoint</a> p( -1, 4 );
-    p *= 2;                     // p becomes (-2,8)
-</pre>
-<h3 class="fn">QPoint &amp; <a name="fbeb96"></a>QPoint::operator+= ( const QPoint &amp; p )</h3>
-<p>Adds <em>p</em> to the point and returns a reference to this point.
-<p>Example:
-<pre>    <a href="qpoint.html">QPoint</a> p(  3, 7 );
-    <a href="qpoint.html">QPoint</a> q( -1, 4 );
-    p += q;                     // p becomes (2,11)
-</pre>
-<h3 class="fn">QPoint &amp; <a name="c4f49f"></a>QPoint::operator-= ( const QPoint &amp; p )</h3>
-<p>Subtracts <em>p</em> from the point and returns a reference to this point.
-<p>Example:
-<pre>    <a href="qpoint.html">QPoint</a> p(  3, 7 );
-    <a href="qpoint.html">QPoint</a> q( -1, 4 );
-    p -= q;                     // p becomes (4,3)
-</pre>
-<h3 class="fn">QPoint &amp; <a name="6ea8ca"></a>QPoint::operator/= ( double c )</h3>
-<p>Divides both x and y by <em>c,</em> and return a reference to this point.
-<p>Example:
-<pre>    <a href="qpoint.html">QPoint</a> p( -3, 10 );
-    p /= 2.5;                   // p becomes (-1,4)
-</pre>
-<p>Note that the result is truncated.
-<h3 class="fn">QPoint &amp; <a name="6c68e1"></a>QPoint::operator/= ( int c )</h3>
-<p>Divides both x and y by <em>c,</em> and return a reference to this point.
-<p>Example:
-<pre>    <a href="qpoint.html">QPoint</a> p( -2, 8 );
-    p /= 2;                     // p becomes (-1,4)
-</pre>
-<h3 class="fn">QCOORD &amp; <a name="bc236e"></a>QPoint::rx ()</h3>
-<p>Returns a reference to the x coordinate of the point.
-<p>Using a reference makes it possible to directly manipulate x.
-<p>Example:
-<pre>    <a href="qpoint.html">QPoint</a> p( 1, 2 );
-    p.<a href="#bc236e">rx</a>()--;                   // p becomes (0,2)
-</pre>
-<p>See also  <a href="#17eba0">ry</a>().
-<h3 class="fn">QCOORD &amp; <a name="17eba0"></a>QPoint::ry ()</h3>
-<p>Returns a reference to the y coordinate of the point.
-<p>Using a reference makes it possible to directly manipulate y.
-<p>Example:
-<pre>    <a href="qpoint.html">QPoint</a> p( 1, 2 );
-    p.<a href="#17eba0">ry</a>()++;                   // p becomes (1,3)
-</pre>
-<p>See also  <a href="#bc236e">rx</a>().
-<h3 class="fn">void <a name="75b57f"></a>QPoint::setX ( int x )</h3>
-<p>Sets the x coordinate of the point to <em>x.</em>
-<p>See also  <a href="#7e96b2">x</a>() and <a href="#c780b4">setY</a>().
-<h3 class="fn">void <a name="c780b4"></a>QPoint::setY ( int y )</h3>
-<p>Sets the y coordinate of the point to <em>y.</em>
-<p>See also  <a href="#e48824">y</a>() and <a href="#75b57f">setX</a>().
-<h3 class="fn">int <a name="7e96b2"></a>QPoint::x () const</h3>
-<p>Returns the x coordinate of the point.
-<p>See also  <a href="#75b57f">setX</a>() and <a href="#e48824">y</a>().
-<h3 class="fn">int <a name="e48824"></a>QPoint::y () const</h3>
-<p>Returns the y coordinate of the point.
-<p>See also  <a href="#c780b4">setY</a>() and <a href="#7e96b2">x</a>().
-<hr><h2>Related Functions</h2>
-<h3>QPoint <a name="1b3f41"></a>operator/ (const QPoint &amp; p, double c)</h3>
-<p>Returns the QPoint formed by dividing both components of <em>p</em>
-by <em>c.</em>
-<p>Note that the result is truncated.
+ p.setX(p.x() + 1);
+ p += QPoint(1, 0);
+ p.rx()++;</pre>
+<p>A QPoint object can also be used as a vector: Addition and subtraction are defined as for vectors (each component is added separately). A QPoint object can also be divided or multiplied by an <tt>int</tt> or a <tt>qreal</tt>.</p>
+<p>In addition, the QPoint class provides the <a href="qpoint.html#manhattanLength">manhattanLength</a>() function which gives an inexpensive approximation of the length of the QPoint object interpreted as a vector. Finally, QPoint objects can be streamed as well as compared.</p>
+<p>See also <a href="qpointf.html">QPointF</a> and <a href="qpolygon.html">QPolygon</a>.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QPoint"></a>QPoint::QPoint ()</h3>
+<p>Constructs a null point, i.e. with coordinates (0, 0)</p>
+<p>See also <a href="qpoint.html#isNull">isNull</a>().</p>
+<h3 class="fn"><a name="QPoint-2"></a>QPoint::QPoint ( int <i>x</i>, int <i>y</i> )</h3>
+<p>Constructs a point with the given coordinates (<i>x</i>, <i>y</i>).</p>
+<p>See also <a href="qpoint.html#setX">setX</a>() and <a href="qpoint.html#setY">setY</a>().</p>
+<h3 class="fn"><a name="isNull"></a>bool QPoint::isNull () const</h3>
+<p>Returns true if both the x and y coordinates are set to 0, otherwise returns false.</p>
+<h3 class="fn"><a name="manhattanLength"></a>int QPoint::manhattanLength () const</h3>
+<p>Returns the sum of the absolute values of <a href="qpoint.html#x">x</a>() and <a href="qpoint.html#y">y</a>(), traditionally known as the &quot;Manhattan length&quot; of the vector from the origin to the point. For example:</p>
+<pre> QPoint oldPosition;
 
-<h3>QPoint <a name="25d7f1"></a>operator* (double c, const QPoint &amp; p)</h3>
-<p>Returns the QPoint formed by multiplying both components of <em>p</em>
-by <em>c.</em>
-<p>Note that the result is truncated.
-
-<h3>QPoint <a name="2a667f"></a>operator/ (const QPoint &amp; p, int c)</h3>
-<p>Returns the QPoint formed by dividing both components of <em>p</em>
-by <em>c.</em>
-
-<h3><a href="qdatastream.html">QDataStream</a> &amp; <a name="32d460"></a>operator&lt;&lt; (<a href="qdatastream.html">QDataStream</a> &amp; s, const QPoint &amp; p)</h3>
-<p>Writes a QPoint to the stream and returns a reference to the stream.
-<p>See also  <a href="datastreamformat.html">Format of the QDataStream operators</a>
-
-<h3>QPoint <a name="3f935a"></a>operator* (int c, const QPoint &amp; p)</h3>
-<p>Returns the QPoint formed by multiplying both components of <em>p</em>
-by <em>c.</em>
-
-<h3><a href="qdatastream.html">QDataStream</a> &amp; <a name="44a4cb"></a>operator&gt;&gt; (<a href="qdatastream.html">QDataStream</a> &amp; s, QPoint &amp; p)</h3>
-<p>Reads a QPoint from the stream and returns a reference to the stream.
-<p>See also  <a href="datastreamformat.html">Format of the QDataStream operators</a>
-
-<h3>QPoint <a name="550c91"></a>operator* (const QPoint &amp; p, double c)</h3>
-<p>Returns the QPoint formed by multiplying both components of <em>p</em>
-by <em>c.</em>
-<p>Note that the result is truncated.
-
-<h3>QPoint <a name="7b4ffd"></a>operator* (const QPoint &amp; p, int c)</h3>
-<p>Returns the QPoint formed by multiplying both components of <em>p</em>
-by <em>c.</em>
-
-<h3>QPoint <a name="8f8499"></a>operator+ (const QPoint &amp; p1, const QPoint &amp; p2)</h3>
-<p>Returns the sum of <em>p1</em> and <em>p2;</em> each component is added separately.
-
-<h3>bool <a name="bf658e"></a>operator!= (const QPoint &amp; p1, const QPoint &amp; p2)</h3>
-<p>Returns TRUE if <em>p1</em> and <em>p2</em> are different, or FALSE if they are equal.
-
-<h3>QPoint <a name="bf81ba"></a>operator- (const QPoint &amp; p)</h3>
-<p>Returns the QPoint formed by changing the sign of both components of
-<em>p,</em> equivalent to <code>QPoint(0,0) - p</code>
-
-<h3>bool <a name="c19b5c"></a>operator== (const QPoint &amp; p1, const QPoint &amp; p2)</h3>
-<p>Returns TRUE if <em>p1</em> and <em>p2</em> are equal, or FALSE if they are different.
-
-<h3>QPoint <a name="cfa22c"></a>operator- (const QPoint &amp; p1, const QPoint &amp; p2)</h3>
-<p>Returns <em>p2</em> subtracted from <em>p1;</em> each component is
-subtracted separately.
-
-<hr><p>
-Search the documentation, FAQ, qt-interest archive and more (uses
-<a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
-<form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.10"><nobr>
-<input size="50" name="search"><input type=submit value="Search">
-</nobr></form><hr><p>
-This file is part of the <a href="index.html">Qt toolkit</a>,
-copyright &copy; 1995-2005
-<a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+ MyWidget::mouseMoveEvent(QMouseEvent *event)
+ {
+     QPoint point = event-&gt;pos() - oldPosition;
+     if (point.manhattanLength() &gt; 3)
+         <span class="comment">// the mouse has moved more than 3 pixels since the oldPosition</span>
+ }</pre>
+<p>This is a useful, and quick to calculate, approximation to the true length:</p>
+<pre> int trueManhattenLength = sqrt(pow(x(), 2) + pow(y(), 2));</pre>
+<p>The tradition of &quot;Manhattan length&quot; arises because such distances apply to travelers who can only travel on a rectangular grid, like the streets of Manhattan.</p>
+<h3 class="fn"><a name="rx"></a>int &amp; QPoint::rx ()</h3>
+<p>Returns a reference to the x coordinate of this point.</p>
+<p>Using a reference makes it possible to directly manipulate x. For example:</p>
+<pre> QPoint p(1, 2);
+ p.rx()--;   <span class="comment">// p becomes (0, 2)</span></pre>
+<p>See also <a href="qpoint.html#x">x</a>() and <a href="qpoint.html#setX">setX</a>().</p>
+<h3 class="fn"><a name="ry"></a>int &amp; QPoint::ry ()</h3>
+<p>Returns a reference to the y coordinate of this point.</p>
+<p>Using a reference makes it possible to directly manipulate y. For example:</p>
+<pre> QPoint p(1, 2);
+ p.ry()++;   <span class="comment">// p becomes (1, 3)</span></pre>
+<p>See also <a href="qpoint.html#y">y</a>() and <a href="qpoint.html#setY">setY</a>().</p>
+<h3 class="fn"><a name="setX"></a>void QPoint::setX ( int <i>x</i> )</h3>
+<p>Sets the x coordinate of this point to the given <i>x</i> coordinate.</p>
+<p>See also <a href="qpoint.html#x">x</a>() and <a href="qpoint.html#setY">setY</a>().</p>
+<h3 class="fn"><a name="setY"></a>void QPoint::setY ( int <i>y</i> )</h3>
+<p>Sets the y coordinate of this point to the given <i>y</i> coordinate.</p>
+<p>See also <a href="qpoint.html#y">y</a>() and <a href="qpoint.html#setX">setX</a>().</p>
+<h3 class="fn"><a name="x"></a>int QPoint::x () const</h3>
+<p>Returns the x coordinate of this point.</p>
+<p>See also <a href="qpoint.html#setX">setX</a>() and <a href="qpoint.html#rx">rx</a>().</p>
+<h3 class="fn"><a name="y"></a>int QPoint::y () const</h3>
+<p>Returns the y coordinate of this point.</p>
+<p>See also <a href="qpoint.html#setY">setY</a>() and <a href="qpoint.html#ry">ry</a>().</p>
+<h3 class="fn"><a name="operator-2a-eq"></a>QPoint &amp; QPoint::operator*= ( <a href="qtglobal.html#qreal-typedef">qreal</a> <i>factor</i> )</h3>
+<p>Multiplies this point's coordinates by the given <i>factor</i>, and returns a reference to this point. For example:</p>
+<pre> QPoint p(-1, 4);
+ p *= 2.5;    <span class="comment">// p becomes (-3, 10)</span></pre>
+<p>Note that the result is rounded to the nearest integer as points are held as integers. Use <a href="qpointf.html">QPointF</a> for floating point accuracy.</p>
+<p>See also <a href="qpoint.html#operator-2f-eq">operator/=</a>().</p>
+<h3 class="fn"><a name="operator-2b-eq"></a>QPoint &amp; QPoint::operator+= ( const QPoint &amp; <i>point</i> )</h3>
+<p>Adds the given <i>point</i> to this point and returns a reference to this point. For example:</p>
+<pre> QPoint p( 3, 7);
+ QPoint q(-1, 4);
+ p += q;    <span class="comment">// p becomes (2, 11)</span></pre>
+<p>See also <a href="qpoint.html#operator--eq">operator-=</a>().</p>
+<h3 class="fn"><a name="operator--eq"></a>QPoint &amp; QPoint::operator-= ( const QPoint &amp; <i>point</i> )</h3>
+<p>Subtracts the given <i>point</i> from this point and returns a reference to this point. For example:</p>
+<pre> QPoint p( 3, 7);
+ QPoint q(-1, 4);
+ p -= q;    <span class="comment">// p becomes (4, 3)</span></pre>
+<p>See also <a href="qpoint.html#operator-2b-eq">operator+=</a>().</p>
+<h3 class="fn"><a name="operator-2f-eq"></a>QPoint &amp; QPoint::operator/= ( <a href="qtglobal.html#qreal-typedef">qreal</a> <i>divisor</i> )</h3>
+<p>Divides both x and y by the given <i>divisor</i>, and returns a reference to this point. For example:</p>
+<pre> QPoint p(-3, 10);
+ p /= 2.5;           <span class="comment">// p becomes (-1, 4)</span></pre>
+<p>Note that the result is rounded to the nearest integer as points are held as integers. Use <a href="qpointf.html">QPointF</a> for floating point accuracy.</p>
+<p>See also <a href="qpoint.html#operator-2a-eq">operator*=</a>().</p>
+<hr />
+<h2>Related Non-Members</h2>
+<h3 class="fn"><a name="operator-not-eq-13"></a>bool operator!= ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns true if <i>p1</i> and <i>p2</i> are not equal; otherwise returns false.</p>
+<h3 class="fn"><a name="operator-2a"></a>const QPoint operator* ( const QPoint &amp; <i>point</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>factor</i> )</h3>
+<p>Returns a copy of the given <i>point</i> multiplied by the given <i>factor</i>.</p>
+<p>Note that the result is rounded to the nearest integer as points are held as integers. Use <a href="qpointf.html">QPointF</a> for floating point accuracy.</p>
+<p>See also <a href="qpoint.html#operator-2a-eq">QPoint::operator*=</a>().</p>
+<h3 class="fn"><a name="operator-2a-16"></a>const QPoint operator* ( <a href="qtglobal.html#qreal-typedef">qreal</a> <i>factor</i>, const QPoint &amp; <i>point</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns a copy of the given <i>point</i> multiplied by the given <i>factor</i>.</p>
+<h3 class="fn"><a name="operator-2b-4"></a>const QPoint operator+ ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns a <a href="qpoint.html">QPoint</a> object that is the sum of the given points, <i>p1</i> and <i>p2</i>; each component is added separately.</p>
+<p>See also <a href="qpoint.html#operator-2b-eq">QPoint::operator+=</a>().</p>
+<h3 class="fn"><a name="operator--2"></a>const QPoint operator- ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns a <a href="qpoint.html">QPoint</a> object that is formed by subtracting <i>p2</i> from <i>p1</i>; each component is subtracted separately.</p>
+<p>See also <a href="qpoint.html#operator--eq">QPoint::operator-=</a>().</p>
+<h3 class="fn"><a name="operator--9"></a>const QPoint operator- ( const QPoint &amp; <i>point</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns a <a href="qpoint.html">QPoint</a> object that is formed by changing the sign of both components of the given <i>point</i>.</p>
+<p>Equivalent to <tt>QPoint(0,0) - point</tt>.</p>
+<h3 class="fn"><a name="operator-2f"></a>const QPoint operator/ ( const QPoint &amp; <i>point</i>, <a href="qtglobal.html#qreal-typedef">qreal</a> <i>divisor</i> )</h3>
+<p>Returns the <a href="qpoint.html">QPoint</a> formed by dividing both components of the given <i>point</i> by the given <i>divisor</i>.</p>
+<p>Note that the result is rounded to the nearest integer as points are held as integers. Use <a href="qpointf.html">QPointF</a> for floating point accuracy.</p>
+<p>See also <a href="qpoint.html#operator-2f-eq">QPoint::operator/=</a>().</p>
+<h3 class="fn"><a name="operator-lt-lt-48"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&lt;&lt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, const QPoint &amp; <i>point</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Writes the given <i>point</i> to the given <i>stream</i> and returns a reference to the stream.</p>
+<p>See also <a href="datastreamformat.html">Format of the QDataStream Operators</a>.</p>
+<h3 class="fn"><a name="operator-eq-eq-22"></a>bool operator== ( const QPoint &amp; <i>p1</i>, const QPoint &amp; <i>p2</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Returns true if <i>p1</i> and <i>p2</i> are equal; otherwise returns false.</p>
+<h3 class="fn"><a name="operator-gt-gt-26"></a><a href="qdatastream.html">QDataStream</a> &amp; operator&gt;&gt; ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i>, QPoint &amp; <i>point</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Reads a point from the given <i>stream</i> into the given <i>point</i> and returns a reference to the stream.</p>
+<p>See also <a href="datastreamformat.html">Format of the QDataStream Operators</a>.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

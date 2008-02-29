@@ -1,19 +1,21 @@
-CONFIG		+= qtopiaapp
+qtopia_project(qtopia app)
+TARGET=qasteroids
+CONFIG+=qtopia_main no_quicklaunch
 
 HEADERS		= ledmeter.h sprites.h toplevel.h view.h
-SOURCES		= ledmeter.cpp toplevel.cpp view.cpp main.cpp
+SOURCES		= ledmeter.cpp sprites.cpp toplevel.cpp view.cpp main.cpp
 
-TARGET		= qasteroids
-
-TRANSLATABLES = $${HEADERS} $${SOURCES}
-
-help.files=$${QTOPIA_DEPOT_PATH}/help/html/qasteroids*
-help.path=/help/html
-desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Games/qasteroids.desktop
+help.source=$$QTOPIA_DEPOT_PATH/help
+help.files=qasteroids*
+help.hint=help
+desktop.files=$$QTOPIA_DEPOT_PATH/apps/Games/qasteroids.desktop
 desktop.path=/apps/Games
-pics.files=$${QTOPIA_DEPOT_PATH}/pics/qasteroids/*
+desktop.hint=desktop
+pics.files=$$QTOPIA_DEPOT_PATH/pics/qasteroids/*
 pics.path=/pics/qasteroids
-sounds.files=$${QTOPIA_DEPOT_PATH}/sounds/qasteroids/*
+pics.hint=pics
+sounds.files=$$QTOPIA_DEPOT_PATH/sounds/qasteroids/*
 sounds.path=/sounds/qasteroids
-INSTALLS+=desktop sounds help
-PICS_INSTALLS+=pics
+INSTALLS+=help desktop pics sounds
+pkg.domain=window,games,helix
+

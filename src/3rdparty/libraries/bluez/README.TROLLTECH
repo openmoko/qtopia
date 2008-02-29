@@ -1,0 +1,11 @@
+This library has trolltech made modifications.  The files affected are
+includes/sdp_lib.h
+src/sdp.c
+
+The modification introduces a new function
+int sdp_extract_uuid_from_string(uint128_t *dst, const char *str);
+
+This is used for converting 128 bit UUIDs to a 128 bit integer useable for creating uuid_t 
+objects.
+
+The autoconf-based buildsystem was removed and replaced with a simple qmake project file.

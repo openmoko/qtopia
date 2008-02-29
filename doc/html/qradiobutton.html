@@ -1,151 +1,88 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
---></style>
-</head><body bgcolor="#ffffff">
-
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-
-<h1 align=center>QRadioButton Class Reference</h1><br clear="all">
-<p>
-The QRadioButton widget provides a radio button with a text label.
-<a href="#details">More...</a>
-<p>
-<code>#include &lt;<a href="qradiobutton-h.html">qradiobutton.h</a>&gt;</code>
-<p>
-Inherits <a href="qbutton.html">QButton</a>.
-<p><a href="qradiobutton-members.html">List of all member functions.</a>
-<h2>Public Members</h2>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: QRadioButton Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QRadioButton Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<p>The QRadioButton widget provides a radio button with a text label. <a href="#details">More...</a></p>
+<pre> #include &lt;QRadioButton&gt;</pre><p>Inherits <a href="qabstractbutton.html">QAbstractButton</a>.</p>
 <ul>
-<li><div class="fn"><a href="#e2f23a"><b>QRadioButton</b></a> ( QWidget * parent, const char * name=0 ) </div>
-<li><div class="fn"><a href="#e35d9c"><b>QRadioButton</b></a> ( const QString &amp; text, QWidget * parent, const char * name=0 ) </div>
-<li><div class="fn">bool <a href="#da7700"><b>isChecked</b></a> () const</div>
-<li><div class="fn">virtual void <a href="#0e50fc"><b>setChecked</b></a> ( bool check ) </div>
+<li><a href="qradiobutton-members.html">List of all members, including inherited members</a></li>
+<li><a href="qradiobutton-qt3.html">Qt 3 support members</a></li>
 </ul>
-<h2>Important Inherited Members</h2>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
 <ul>
-<li><div class="fn">QString <a href="qbutton.html#6033fb"><b>text</b></a> () const</div>
-<li><div class="fn">virtual void <a href="qbutton.html#989f4f"><b>setText</b></a> ( const QString &amp; text ) </div>
-<li><div class="fn">QString <a href="qbutton.html#6033fb"><b>text</b></a> () const</div>
-<li><div class="fn">const QPixmap* <a href="qbutton.html#0e318f"><b>pixmap</b></a> () const</div>
-<li><div class="fn">virtual void <a href="qbutton.html#27e4fe"><b>setPixmap</b></a> ( const QPixmap &amp; pixmap ) </div>
-<li><div class="fn">int <a href="qbutton.html#eff9e3"><b>accel</b></a> () const</div>
-<li><div class="fn">virtual void <a href="qbutton.html#da0271"><b>setAccel</b></a> ( int key ) </div>
-<li><div class="fn">bool <a href="qbutton.html#1ad908"><b>isToggleButton</b></a> () const</div>
-<li><div class="fn">virtual void <a href="qbutton.html#f865ac"><b>setDown</b></a> ( bool enable ) </div>
-<li><div class="fn">bool <a href="qbutton.html#ea8b93"><b>isDown</b></a> () const</div>
-<li><div class="fn">bool <a href="qbutton.html#12ce08"><b>isOn</b></a> () const</div>
-<li><div class="fn">bool <a href="qbutton.html#359c59"><b>autoRepeat</b></a> () const</div>
-<li><div class="fn">bool <a href="qbutton.html#7ab492"><b>isExclusiveToggle</b></a> () const</div>
-<li><div class="fn">QButtonGroup* <a href="qbutton.html#a64d2c"><b>group</b></a> () const</div>
-<li><div class="fn">virtual void <a href="qbutton.html#221ffa"><b>setAutoRepeat</b></a> ( bool enable ) </div>
-<li><div class="fn">void <a href="qbutton.html#e6faa9"><b>toggle</b></a> () </div>
-<li><div class="fn">void <a href="qbutton.html#a27000"><b>pressed</b></a> () </div>
-<li><div class="fn">void <a href="qbutton.html#e6fa8e"><b>released</b></a> () </div>
-<li><div class="fn">void <a href="qbutton.html#da7248"><b>clicked</b></a> () </div>
-<li><div class="fn">void <a href="qbutton.html#4069b1"><b>toggled</b></a> ( bool on ) </div>
-<li><div class="fn">void <a href="qbutton.html#3369ee"><b>stateChanged</b></a> ( int state ) </div>
+<li><div class="fn"/><b><a href="qradiobutton.html#QRadioButton">QRadioButton</a></b> ( QWidget * <i>parent</i> = 0 )</li>
+<li><div class="fn"/><b><a href="qradiobutton.html#QRadioButton-2">QRadioButton</a></b> ( const QString &amp; <i>text</i>, QWidget * <i>parent</i> = 0 )</li>
 </ul>
-<h2>Properties</h2>
-<table border=1 cellpadding=3 cellspacing=0>
-<tr><th>Type<th>Name<th>READ<th>WRITE<th>Options
-<tr><td>bool<td>checked<td>isChecked<td>setChecked<td>&nbsp;
-</table>
-<hr><h2><a name="details"></a>Detailed Description</h2>
-The QRadioButton widget provides a radio button with a text label.
-<p>
-QRadioButton and <a href="qcheckbox.html">QCheckBox</a> are both option buttons. That is, they
-can be switched on (checked) or off (unchecked). The classes differ
-in how the choices for the user are restricted. Check-boxes define
-"many of many" choices, while radio buttons provide a "one of many"
-choice. In a group of radio buttons, only one button at a time can
-be checked. If the user selects another button, the previously
-selected button is switched off.
-<p>While it is technically possible to implement radio-behaviour with
-check boxes and vice versa, it's strongly recommended to stick with
-the well-known semantics. Otherwise your users would be pretty
-confused.
-<p>The easiest way to implement a "one of many" choice, is to simply
-stick the radio buttons into <a href="qbuttongroup.html">QButtonGroup</a>.
-<p>Whenver a button is switched on or off, it emits the signal
-<a href="qbutton.html#4069b1">toggled</a>(). Connect to this signal if you want to trigger an action
-each time the button changes state. Otherwise, use <a href="#da7700">isChecked</a>() to
-query whether or not a particular button is selected.
-<p><img src=qradiobt-m.png> <img src=qradiobt-w.png>
-<p>See also  <a href="qpushbutton.html">QPushButton</a>, <a href="qtoolbutton.html">QToolButton</a> and <a href="guibooks.html#fowler">GUI Design Handbook: Radio Button</a>
-<p>Examples:
- <a href="drawdemo-drawdemo-cpp.html#QRadioButton">drawdemo/drawdemo.cpp</a>
- <a href="xform-xform-cpp.html#QRadioButton">xform/xform.cpp</a>
-
-<hr><h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="e2f23a"></a>QRadioButton::QRadioButton ( <a href="qwidget.html">QWidget</a> * parent, const char * name=0 )</h3>
-<p>Constructs a radio button with no text.
-<p>The <em>parent</em> and <em>name</em> arguments are sent to the <a href="qwidget.html">QWidget</a> constructor.
-<h3 class="fn"><a name="e35d9c"></a>QRadioButton::QRadioButton ( const <a href="qstring.html">QString</a> &amp; text, <a href="qwidget.html">QWidget</a> * parent, const char * name=0 )</h3>
-<p>Constructs a radio button with a text.
-<p>The <em>parent</em> and <em>name</em> arguments are sent to the <a href="qwidget.html">QWidget</a> constructor.
-<h3 class="fn">void <a name="b82239"></a>QRadioButton::drawButton ( <a href="qpainter.html">QPainter</a> * paint ) <code>[virtual protected]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qbutton.html#13c577">QButton.</a>
-<h3 class="fn">void <a name="fcdc76"></a>QRadioButton::drawButtonLabel ( <a href="qpainter.html">QPainter</a> * p ) <code>[virtual protected]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qbutton.html#c175f1">QButton.</a>
-<h3 class="fn">void <a name="d1d657"></a>QRadioButton::focusInEvent ( <a href="qfocusevent.html">QFocusEvent</a> * e ) <code>[virtual protected]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qwidget.html#21a4b8">QWidget.</a>
-<h3 class="fn">bool <a name="9114b5"></a>QRadioButton::hitButton ( const <a href="qpoint.html">QPoint</a> &amp; pos ) const <code>[virtual protected]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qbutton.html#c0aff5">QButton.</a>
-<h3 class="fn">bool <a name="da7700"></a>QRadioButton::isChecked () const</h3>
-<p>Returns TRUE if the radio button is checked, or FALSE if it is not checked.
-<p>See also  <a href="#0e50fc">setChecked</a>().
-<h3 class="fn">void <a name="1feff9"></a>QRadioButton::resizeEvent ( <a href="qresizeevent.html">QResizeEvent</a> * e ) <code>[virtual protected]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qwidget.html#7d375f">QWidget.</a>
-<h3 class="fn">void <a name="0e50fc"></a>QRadioButton::setChecked ( bool check ) <code>[virtual]</code></h3>
-<p>Checks the radio button if <em>check</em> is TRUE, or unchecks it if <em>check</em>
-is FALSE.
-<p>Calling this function does not affect other radio buttons unless a radio
-button group has been defined using the <a href="qbuttongroup.html">QButtonGroup</a> widget.
-<p>See also  <a href="#da7700">isChecked</a>().
-<p>Examples:
- <a href="drawdemo-drawdemo-cpp.html#setChecked">drawdemo/drawdemo.cpp</a>
- <a href="xform-xform-cpp.html#setChecked">xform/xform.cpp</a>
-<h3 class="fn"><a href="qsize.html">QSize</a> <a name="69cd2a"></a>QRadioButton::sizeHint () const <code>[virtual]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qwidget.html#4511d1">QWidget.</a>
-<h3 class="fn"><a href="qsizepolicy.html">QSizePolicy</a> <a name="1183af"></a>QRadioButton::sizePolicy () const <code>[virtual]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qwidget.html#23726d">QWidget.</a>
-<h3 class="fn">void <a name="65ba96"></a>QRadioButton::updateMask () <code>[virtual protected]</code></h3>
-<p>Reimplemented for internal reasons; the API is not affected.
-<p>Reimplemented from <a href="qwidget.html#b8a07f">QWidget.</a>
-<hr><p>
-Search the documentation, FAQ, qt-interest archive and more (uses
-<a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
-<form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.10"><nobr>
-<input size="50" name="search"><input type=submit value="Search">
-</nobr></form><hr><p>
-This file is part of the <a href="index.html">Qt toolkit</a>,
-copyright &copy; 1995-2005
-<a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+<ul>
+<li><div class="fn"/>21 public functions inherited from <a href="qabstractbutton.html#public-functions">QAbstractButton</a></li>
+<li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>11 properties inherited from <a href="qabstractbutton.html#properties">QAbstractButton</a></li>
+<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>5 public slots inherited from <a href="qabstractbutton.html#public-slots">QAbstractButton</a></li>
+<li><div class="fn"/>19 public slots inherited from <a href="qwidget.html#public-slots">QWidget</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>4 signals inherited from <a href="qabstractbutton.html#signals">QAbstractButton</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qwidget.html#signals">QWidget</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qwidget.html#static-public-members">QWidget</a></li>
+<li><div class="fn"/>5 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>3 protected functions inherited from <a href="qabstractbutton.html#protected-functions">QAbstractButton</a></li>
+<li><div class="fn"/>38 protected functions inherited from <a href="qwidget.html#protected-functions">QWidget</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>1 protected function inherited from <a href="qpaintdevice.html#protected-functions">QPaintDevice</a></li>
+<li><div class="fn"/>1 protected slot inherited from <a href="qwidget.html#protected-slots">QWidget</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QRadioButton widget provides a radio button with a text label.</p>
+<p>A QRadioButton is an option button that can be switched on (checked) or off (unchecked). Radio buttons typically present the user with a &quot;one of many&quot; choice. In a group of radio buttons only one radio button at a time can be checked; if the user selects another button, the previously selected button is switched off.</p>
+<p>Radio buttons are <a href="qabstractbutton.html#autoExclusive-prop">autoExclusive</a> by default. If auto-exclusive is enabled, radio buttons that belong to the same parent widget behave as if they were part of the same exclusive button group. If you need multiple exclusive button groups for radio buttons that belong to the same parent widget, put them into a <a href="qbuttongroup.html">QButtonGroup</a>.</p>
+<p>Whenever a button is switched on or off it emits the <a href="qabstractbutton.html#toggled">toggled</a>() signal. Connect to this signal if you want to trigger an action each time the button changes state. Use <a href="qabstractbutton.html#checked-prop">isChecked</a>() to see if a particular button is selected.</p>
+<p>Just like <a href="qpushbutton.html">QPushButton</a>, a radio button displays text, and optionally a small icon. The icon is set with <a href="qabstractbutton.html#icon-prop">setIcon</a>(). The text can be set in the constructor or with <a href="qabstractbutton.html#text-prop">setText</a>(). A shortcut key can be specified by preceding the preferred character with an ampersand in the text. For example:</p>
+<pre> QRadioButton *button = new QRadioButton(&quot;Search from the &amp;cursor&quot;, this);</pre>
+<p>In this example the shortcut is <i>Alt+c</i>. See the <a href="qshortcut.html#mnemonic">QShortcut</a> documentation for details (to display an actual ampersand, use '&amp;&amp;').</p>
+<p>Important inherited members: <a href="qabstractbutton.html#text-prop">text</a>(), <a href="qabstractbutton.html#text-prop">setText</a>(), <a href="qabstractbutton.html#text-prop">text</a>(), <a href="qabstractbutton.html#down-prop">setDown</a>(), <a href="qabstractbutton.html#down-prop">isDown</a>(), <a href="qabstractbutton.html#autoRepeat-prop">autoRepeat</a>(), <a href="qabstractbutton.html#group">group</a>(), <a href="qabstractbutton.html#autoRepeat-prop">setAutoRepeat</a>(), <a href="qabstractbutton.html#toggle">toggle</a>(), <a href="qabstractbutton.html#pressed">pressed</a>(), <a href="qabstractbutton.html#released">released</a>(), <a href="qabstractbutton.html#clicked">clicked</a>(), and <a href="qabstractbutton.html#toggled">toggled</a>().</p>
+<p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" class="odd"><td><img src="images/plastique-radiobutton.png" alt="Screenshot of a Plastique radio button" /></td><td>A radio button shown in the <a href="gallery-plastique.html">Plastique widget style</a>.</td></tr>
+<tr valign="top" class="even"><td><img src="images/windows-radiobutton.png" alt="Screenshot of a Windows XP radio button" /></td><td>A radio button shown in the <a href="gallery-windowsxp.html">Windows XP widget style</a>.</td></tr>
+<tr valign="top" class="odd"><td><img src="images/macintosh-radiobutton.png" alt="Screenshot of a Macintosh radio button" /></td><td>A radio button shown in the <a href="gallery-macintosh.html">Macintosh widget style</a>.</td></tr>
+</table></p>
+<p>See also <a href="qpushbutton.html">QPushButton</a>, <a href="qtoolbutton.html">QToolButton</a>, <a href="qcheckbox.html">QCheckBox</a>, <a href="guibooks.html#fowler">GUI Design Handbook: Radio Button</a>, and Group Box Example.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QRadioButton"></a>QRadioButton::QRadioButton ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs a radio button with the given <i>parent</i>, but with no text or pixmap.</p>
+<p>The <i>parent</i> argument is passed on to the <a href="qabstractbutton.html">QAbstractButton</a> constructor.</p>
+<h3 class="fn"><a name="QRadioButton-2"></a>QRadioButton::QRadioButton ( const <a href="qstring.html">QString</a> &amp; <i>text</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs a radio button with the given <i>parent</i> and a <i>text</i> string.</p>
+<p>The <i>parent</i> argument is passed on to the <a href="qabstractbutton.html">QAbstractButton</a> constructor.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QRadioButton-3"></a>QRadioButton::QRadioButton ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i> )</h3>
+<p>Use one of the constructors that doesn't take the <i>name</i> argument and then use <a href="qobject.html#objectName-prop">setObjectName</a>() instead.</p>
+<h3 class="fn"><a name="QRadioButton-4"></a>QRadioButton::QRadioButton ( const <a href="qstring.html">QString</a> &amp; <i>text</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i> )</h3>
+<p>Use one of the constructors that doesn't take the <i>name</i> argument and then use <a href="qobject.html#objectName-prop">setObjectName</a>() instead.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

@@ -1,62 +1,43 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 #ifndef LAPSETTINGS_H
 #define LAPSETTINGS_H
 
+#include <QDialog>
 
-#include <qstrlist.h> 
-#include <qasciidict.h>
-#include <qdialog.h>
+#include <qpowerstatus.h>
 
-#include <qtopia/power.h>
-
-#include "lightsettingsbase.h"
-
+#include "ui_lightsettingsbase.h"
 #ifdef QTOPIA_PHONE
-#include "displaysettingsbase.h"
+#include "ui_displaysettingsbase.h"
 #endif
 
-
-class Config;
+class QSettings;
 
 class LightSettings : public QDialog
-{ 
+{
     Q_OBJECT
 
 public:
-    LightSettings( QWidget* parent = 0, const char* name = 0, WFlags fl = 0 );
+    LightSettings( QWidget* parent = 0, Qt::WFlags fl = 0 );
     ~LightSettings();
 
 protected:
@@ -66,52 +47,104 @@ protected:
 private slots:
     void applyBrightness();
     void applyMode();
-    void powerTypeClicked(int);
-    void sysMessage(const QCString&, const QByteArray&);
+    void powerTypeClicked(QAbstractButton *);
+#ifdef QTOPIA_PHONE
+    void backToHomeScreenClicked( int state );
+    void pushSettingStatus();
+    void receive( const QString& msg, const QByteArray& data );
+#endif
+    void sysMessage(const QString&, const QByteArray&);
+    void updateEditBoxes();
+    void updateLightOffMinValue( int dimValue );
+    void updateSuspendMinValue( int );
+
+#ifdef QTOPIA_PHONE
+private:
+    QString status();
+    void setStatus( QString details );
+    void pullSettingStatus();
+#endif
+    void saveConfig();
 
 private:
     struct PowerMode {
-	PowerMode()
-	{
-	    intervalDim = 20;
-	    intervalLightOff = 30;
-	    intervalSuspend = 60;
-	    initbright = 255;
+        PowerMode()
+        {
+            intervalDim = 20;
+            intervalLightOff = 30;
+            intervalSuspend = 60;
+            initbright = 255;
 
-	    dim = TRUE;
-	    lightoff = TRUE;
-	    suspend = TRUE;
-	    networkedsuspend = FALSE;
-	}
-	
-	bool dim;
-	bool lightoff;
-	bool suspend;
-	bool networkedsuspend;
-	int intervalDim;
-	int intervalLightOff;
-	int intervalSuspend;
-	int initbright;
+            dim = true;
+            lightoff = true;
+            suspend = true;
+            networkedsuspend = false;
+        }
+
+        bool dim;
+        bool lightoff;
+        bool suspend;
+        bool networkedsuspend;
+        int intervalDim;
+        int intervalLightOff;
+        int intervalSuspend;
+        int initbright;
+        bool canSuspend;
     };
 
-    void writeMode(Config &config, PowerMode *mode);
+    class LightSettingsContainer : public QFrame, private Ui::LightSettingsBase
+    {
+        public:
+            LightSettingsContainer( QWidget *parent = 0, Qt::WFlags f = 0 )
+                : QFrame( parent, f )
+                {
+                    setFrameShape( QFrame::NoFrame );
+                    setupUi( this );
+                    biginfo->setWordWrap(true);
+
+                }
+            QButtonGroup * powerSource;
+            friend class LightSettings;
+    };
+
+#ifdef QTOPIA_PHONE
+    class DisplaySettingsContainer : public QFrame, private Ui::DisplaySettingsBase
+    {
+        public:
+            DisplaySettingsContainer( QWidget *parent = 0, Qt::WFlags f = 0 )
+                : QFrame( parent, f )
+                {
+                    setFrameShape( QFrame::NoFrame );
+                    setupUi( this );
+                }
+            friend class LightSettings;
+    };
+
+
+#endif
+
+
+    void writeMode(QSettings &config, PowerMode *mode);
 
 private:
     int initbright;
 
-    PowerMode batteryMode, externalMode;
+    PowerMode batteryMode;
+    PowerMode externalMode;
     PowerMode *currentMode;
 
-    PowerStatus powerStatus;
+    QPowerStatus powerStatus;
 
-    bool horizontalized;
-    LightSettingsBase *b;
+    LightSettingsContainer *b;
 #ifdef QTOPIA_PHONE
-    DisplaySettingsBase *d;
+    QMenu* contextMenu;
+    DisplaySettingsContainer *d;
     bool showHomeScreen;
     int intervalShowHomeScreen;
     QString keyLock;
+    bool isFromActiveProfile; // when viewing the status from profile
 #endif
+bool isStatusView;
 };
 
 

@@ -1,0 +1,7 @@
+#!/bin/sh
+if [ "$TEAMBUILDER_SYSTEM" = 'iwmmxt:vfp' ]; then
+    exec /opt/toolchains/iwmmxt-vfp/arm-linux/bin/arm-linux-gcc "$@"
+else
+    export TEAMBUILDER_SYSTEM='iwmmxt:vfp'
+    exec /opt/teambuilder/bin/arm-linux-gcc "$@"
+fi

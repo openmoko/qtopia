@@ -1,14 +1,20 @@
-<qt title="Stopwatch">
-<h3>Stopwatch</h3>
+<html>
+<head><title>Stopwatch</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h2>Stopwatch</h2>
+<!--#else-->
+   <h3>Stopwatch</h3>
+<!--#endif-->
 <p>Top display shows total time.</p>
 <p>Number above Start/Stop shows current lap number.</p>
 <p>Split shows end time for this lap, Lap shows duration of this lap.</p>
-%%PHONE%%
+<!--#if expr="$PHONESTYLE"-->
 <p>Press * button to start/stop timer.</p>
 <p>Press # button to mark lap time, or to reset.</p>
-<p>When stopped, use <img src="up">/<img src="down"> to change lap number.</p>
-@@PHONE@@
-%%PDA%%
+<p>When stopped, use <img src=":icon/up">/<img src=":icon/down"> </img> to change lap number.</p>
+<!--#endif-->
+<!--#if expr="$PDASTYLE"-->
 <p><b>To start the stopwatch:</b></p>
 <ul>
 <li>Tap the <b>Start</b> button.</li>
@@ -40,6 +46,7 @@
 </ul>
 <p><b>Split</b> time is the total time elapsed until the end of the current lap.</p>
 <p><b>Lap</b> time is the time recorded for the current lap.</p>
-<p>The stopwatch can also be controlled by using a keypad (if available). The <img src="qpe/pda/OKButton.png" width="16" height="16" alt="OK"> button is used to start and stop the stopwatch, and the <b>Up</b> and <b>Down</b> buttons can be used to view the previous and next lap times.</p>
-@@PDA@@
-</qt>
+<p>The stopwatch can also be controlled by using a keypad (if available). The <img src=":image/qpe/pda/OKButton" width="16" height="16" alt="OK"> </img> button is used to start and stop the stopwatch, and the <b>Up</b> and <b>Down</b> buttons can be used to view the previous and next lap times.</p>
+<!--#endif-->
+</body>
+</html>

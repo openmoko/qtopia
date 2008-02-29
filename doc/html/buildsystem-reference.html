@@ -1,0 +1,384 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Build System Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Build System Reference<br /><small></small></h1>
+<p>This reference document aims to explain particular items found in the build system, however, it does not provide an overview of the complete functionality of the build system. It should be used in conjunction with the <a href="buildsystem-user-guide.html">(Build System User Guide}</a> outlining the bigger picture and the <a href="buildsystem-internals.html">Build System Internals</a> document for developer-oriented details.</p>
+<ul><li><a href="#functions">Functions</a></li>
+<ul><li><a href="#qtopia-project">qtopia_project()</a></li>
+<li><a href="#depends">depends()</a></li>
+<li><a href="#dep">dep()</a></li>
+<li><a href="#idep">idep()</a></li>
+<li><a href="#uses-export">uses_export()</a></li>
+<li><a href="#qt-inc">qt_inc()</a></li>
+<li><a href="#resolve-include">resolve_include()</a></li>
+<li><a href="#more-functions">More Functions</a></li>
+</ul>
+<li><a href="#config">CONFIG</a></li>
+<ul><li><a href="#config-values">CONFIG Values</a></li>
+</ul>
+<li><a href="#variables">Variables</a></li>
+<ul><li><a href="#prefix">PREFIX</a></li>
+<li><a href="#forms">FORMS</a></li>
+<li><a href="#headers">HEADERS</a></li>
+<li><a href="#sources">SOURCES</a></li>
+<li><a href="#installs">INSTALLS</a></li>
+<li><a href="#translatables">TRANSLATABLES</a></li>
+<li><a href="#target">TARGET</a></li>
+<li><a href="#trtarget">TRTARGET</a></li>
+<li><a href="#defines">DEFINES</a></li>
+<li><a href="#extra-ts-files">EXTRA_TS_FILES</a></li>
+<li><a href="#qtopia-license">QTOPIA_LICENSE</a></li>
+<li><a href="#packages">PACKAGES</a></li>
+<li><a href="#plugin-type">plugin_type</a></li>
+<li><a href="#vpath">VPATH</a></li>
+<li><a href="#projects">PROJECTS</a></li>
+<li><a href="#themes">THEMES</a></li>
+<li><a href="#subdirs">SUBDIRS</a></li>
+<li><a href="#includepath">INCLUDEPATH</a></li>
+</ul>
+<li><a href="#install-hints">Install Hints</a></li>
+<ul><li><a href="#pics">pics</a></li>
+<li><a href="#headers">headers</a></li>
+<li><a href="#help">help</a></li>
+<li><a href="#sdk">sdk</a></li>
+<li><a href="#devsdk">devsdk</a></li>
+<li><a href="#desktop">desktop</a></li>
+<li><a href="#dawg">dawg</a></li>
+<li><a href="#nct">nct</a></li>
+</ul>
+</ul>
+<a name="functions"></a>
+<h2>Functions</h2>
+<a name="qtopia-project"></a>
+<h3>qtopia_project()</h3>
+<pre>    
+    qtopia_project(keyword ... keyword)</pre>
+<p>All <tt>.pro</tt> files <b>must</b> contain this function and there are a number of keywords defined by the project root as well as some global keywords.</p>
+<p>All projects require one of the following:</p>
+<p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Keyword</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td>app</td><td>This is an application.</td></tr>
+<tr valign="top" class="even"><td>lib</td><td>This is a library.</td></tr>
+<tr valign="top" class="odd"><td>plugin</td><td>This is a plug-in.</td></tr>
+<tr valign="top" class="even"><td>subdirs</td><td>This project lists other projects to build.</td></tr>
+<tr valign="top" class="odd"><td>stub</td><td>This project does not build anything, however it can install packages and handle dependencies.</td></tr>
+</table></p>
+<p>The following keywords specify the Qt version to use:</p>
+<p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Keyword</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td>external</td><td>Non-Qt/Qtopia Core project.</td></tr>
+<tr valign="top" class="even"><td>embedded</td><td>Qtopia Core project.</td></tr>
+<tr valign="top" class="odd"><td>desktop</td><td>Qt project.</td></tr>
+</table></p>
+<p>The following table defines keywords that are useful for specific project types:</p>
+<p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Project Type</th><th>Keyword</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td>External</td><td>qtopia</td><td>This is a Qtopia project.</td></tr>
+<tr valign="top" class="even"><td></td><td>qtopiadesktop</td><td>This is a Qtopia Desktop project.</td></tr>
+<tr valign="top" class="odd"><td>Qtopia and Qtopia Desktop</td><td>core</td><td>Do not depend on the <i>usual</i> libraries that is, <tt>libqtopia/libqtopiadesktop</tt>.</td></tr>
+</table></p>
+<p>The <tt>etc/themes</tt> root has the following keywords:</p>
+<ul>
+<li>theme<ul>
+<li>This is a theme (alias for stub)</li>
+</ul>
+</li>
+</ul>
+<p>The <tt>src/plugins/designer</tt> root has the following keywords:</p>
+<ul>
+<li>designer<ul>
+<li>Use with <tt>plugin</tt> to make a designer plug-in.</li>
+</ul>
+</li>
+</ul>
+<a name="depends"></a><a name="depends"></a>
+<h3>depends()</h3>
+<pre>    
+    depends(libraries/qtopia)
+    depends(libraries/*,fake)</pre>
+<p><tt>depends()</tt> registers a dependency using the same format as <tt>projects.pri</tt>. Dependencies are searched for in the current project root directory first, then the Qtopia and Qtopia Desktop project roots followed by all other project roots. There is no support for depending on a particular project in a particular project root but such support may appear in the future.</p>
+<p><b>Note:</b> This function must only be called from <tt>.pro</tt> files or from an <tt>implicit_deps.pr[if]</tt> file.</p>
+<p>A second argument, <tt>fake</tt>, can be passed to create a fake dependency. Fake dependencies effect the order of building without changing the actual dependency tree. For example, <tt>src/build/extra/extra.pro</tt> depends on everything but is a fake dependency designed to be processed last.</p>
+<p>For further information refer to: <a href="buildsystem-user-guide.html#dependencies">Dependencies</a>.</p>
+<a name="dep"></a><a name="dep"></a>
+<h3>dep()</h3>
+<pre>    
+    dep(DEFINES+=CALLER=\$$TARGET)
+    dep(DEFINES+=CALLER=\$$TARGET,DEFINES)</pre>
+<p><tt>dep()</tt> registers a command to be run by dependent projects. For example, a library can use this to affect the link line of dependent projects. A second argument can be passed that causes the command to run (and the variable to be exported) so that same command can be used for both this project and dependent projects.</p>
+<p>There are some caveats to <tt>dep()</tt>:</p>
+<ul>
+<li>The <tt>.pro</tt> file is processed using the <tt>qmake</tt> function <tt>$$fromfile()</tt>.</li>
+<li>Only the <tt>DEP_CMDS</tt> variable is sent to the calling context.</li>
+<li>Processing stops at the <tt>.pro</tt> file with <tt>$$fromfile()</tt>, that is, no post-processing occurs.</li>
+<li><tt>$$varname</tt> can be used to have a variable evaluated in the calling context.</li>
+</ul>
+<a name="idep"></a><a name="idep"></a>
+<h3>idep()</h3>
+<pre>    
+    dep(LIBS+=-l$$TARGET)
+    dep(INCLUDEPATH+=../include,INCLUDEPATH)</pre>
+<p><tt>idep()</tt> is similar to <tt>dep()</tt> but works for indirect dependents also. This is useful for <tt>DEFINES</tt> and <tt>INCLUDEPATHS</tt> that headers rely on. All <tt>LIBS</tt> additions should generally be with <tt>idep()</tt> so that the final link can find indirectly-used libraries.</p>
+<a name="uses-export"></a>
+<h3>uses_export()</h3>
+<pre>    
+    uses_export($$TARGET)</pre>
+<p><tt>uses_export()</tt> assists the set up of <tt>_EXPORT</tt> macros. This is required for Qtopia Desktop on Windows but is also useful for symbol hiding in GCC 4.</p>
+<p><b>Note:</b> This does not set the <tt>_EXPORT</tt> macros but instead sets a <tt>_MAKEDLL</tt> or <tt>_DLL</tt> macro that the library symbol header can use to setup the <tt>_EXPORT</tt> macros. The header for all Qtopia libs is <tt>qtopiaglobal.h</tt>.</p>
+<a name="qt-inc"></a>
+<h3>qt_inc()</h3>
+<pre>    
+    qt_inc($$TARGET)</pre>
+<p>This function is used in libraries to enable Qt-style includes, for example: <tt>#include &lt;ClassName&gt;</tt>.</p>
+<p>For further information about setting up headers refer to the <a href="buildsystem-user-guide.html#setting-up-headers">Setting Up Headers</a> section in the User Guide.</p>
+<a name="resolve-include"></a>
+<h3>resolve_include()</h3>
+<pre>    
+    PREFIX=BLAH
+    BLAH_SOURCES=foo.cpp
+    BLAH_PRIVATE_SOURCES=bar.cpp
+    resolve_include()</pre>
+<p>The value in <tt>PREFIX</tt> is used to locate <tt>FORMS</tt>, <tt>HEADERS</tt> and <tt>SOURCES</tt>. It also collapses any <tt>PRIVATE_[FORMS|HEADERS|SOURCES]</tt> so that they are visible to <tt>qmake</tt>.</p>
+<a name="more-functions"></a>
+<h3>More Functions</h3>
+<p>More functions are defined in <tt>src/build/functions.prf</tt>. Most of these are utility functions used by the build system and a brief description generally precedes each function.</p>
+<a name="config"></a>
+<h2>CONFIG</h2>
+<p><tt>CONFIG</tt> is a variable just like other <tt>qmake</tt> variables however there are special behaviors for <tt>CONFIG</tt>.</p>
+<p>Testing for values in a variable is performed as follows:</p>
+<pre>    
+    VAR+=foo
+    contains(VAR,foo):message(foo)
+    !contains(VAR,bar):message(!bar)</pre>
+<p>While this works in <tt>CONFIG</tt>, the following shorthand also works:</p>
+<pre>    
+    CONFIG+=foo
+    foo:message(foo)
+    !bar:message(!bar)</pre>
+<p>There is also a <tt>CONFIG()</tt> function to help with mutually-exclusive values, that works as follows:</p>
+<pre>    
+    CONFIG+=debug
+    CONFIG+=release
+    debug:message(debug) # WRONG
+    CONFIG(debug,debug|release):message(debug) # CORRECT</pre>
+<p>Finally, after the <tt>.pro</tt> file is read, the values in <tt>CONFIG</tt> are used to locate <tt>.prf</tt> files:</p>
+<pre>    
+    CONFIG+=foo # will cause foo.prf to be loaded, if it exists</pre>
+<p>Since <tt>CONFIG</tt> is used for so many things there are some conventions to reduce the chance of a naming conflict:</p>
+<ul>
+<li>The building of optional components should be set/checked with <tt>build_*</tt> <tt>CONFIG</tt> values.</li>
+<li>The enabling of optional features should be set/checked with <tt>enable_*</tt> <tt>CONFIG</tt> values.</li>
+</ul>
+<a name="config-values"></a>
+<h3>CONFIG Values</h3>
+<p>The following table describes the available <tt>CONFIG</tt> values:</p>
+<p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Value</th><th>Usage</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td>no_install</td><td><tt>CONFIG+=no_install</tt></td><td><tt>no_install</tt> is set to ensure your target is not installed. This done automatically for <tt>stub</tt> and <tt>subdirs</tt> projects.</td></tr>
+<tr valign="top" class="even"><td>qtopia_main</td><td><tt>CONFIG+=qtopia_main</tt></td><td>Notifies the build system that the application uses the <tt>QTOPIA_ADD_APPLICATION</tt> and <tt>QTOPIA_MAIN</tt> macros. For further information refer to: <a href="buildsystem-user-guide.html#applications">Applications</a>.</td></tr>
+<tr valign="top" class="odd"><td>no_quicklaunch</td><td><tt>CONFIG+=no_quicklaunch</tt></td><td>Notifies the build system that the application should not be built for quicklaunching. This is only applicable if the <tt>qtopia_main</tt> <tt>CONFIG</tt> value is used. For further information refer to: <a href="buildsystem-user-guide.html#applications">Applications</a>.</td></tr>
+<tr valign="top" class="even"><td>no_singleexec</td><td><pre>    
+    CONFIG+=no_singleexec
+    idep(CONFIG+=no_singleexec,CONFIG)</pre>
+</td><td>Notifies the build system that the application should not be built into the <tt>singleexec</tt> binary. This is only applicable if the <tt>qtopia_main</tt> CONFIG value is used. Libraries should use <tt>idep()</tt> so that dependents are also excluded from the build. For further information refer to: <a href="buildsystem-user-guide.html#applications">Applications</a>.</td></tr>
+<tr valign="top" class="odd"><td>singleexec_main</td><td><tt>CONFIG+=singleexec_main</tt></td><td>Notifies the build system that the application should be built into the <tt>singleexec</tt> binary, even though it does not support <tt>quicklauncher</tt>. You must ensure the application can be called by the server. For further information refer to: <a href="buildsystem-user-guide.html#applications">Applications</a>.</td></tr>
+<tr valign="top" class="even"><td>no_dest</td><td><tt>CONFIG+=no_dest</tt></td><td>Some projects are built in particular locations by default. Setting <tt>no_dest</tt> prevents modification of <tt>DESTDIR</tt>, and ensures project output is located in the build directory.</td></tr>
+<tr valign="top" class="odd"><td>no_tr</td><td><tt>CONFIG+=no_tr</tt></td><td>Set <tt>no_tr</tt> if your project does not use the <tt>tr()</tt> macro. This prevents any handling of <tt>i18n</tt> files. For further information refer to: <a href="buildsystem-user-guide.html#internationalization">Internationalization</a>.</td></tr>
+<tr valign="top" class="even"><td>no_auto_translatables</td><td><tt>CONFIG+=no_auto_translatables</tt></td><td>Set to prevent the automatic adding of <tt>FORMS</tt>, <tt>HEADERS</tt> and <tt>SOURCES</tt> to <tt>TRANSLATABLES</tt>.</td></tr>
+<tr valign="top" class="odd"><td>no_target</td><td><tt>CONFIG+=no_target</tt></td><td>Do not set <tt>target.path</tt> automatically.</td></tr>
+<tr valign="top" class="even"><td>no_pkg</td><td><tt>CONFIG+=no_pkg</tt></td><td>Do not allow the default package to be created. Packages can still be created, but must be created explicitly. For further information refer to: <a href="buildsystem-user-guide.html#packages">Packages</a>.</td></tr>
+<tr valign="top" class="odd"><td>build_all_dirs</td><td><pre>    
+    # Limit to two subdirectories. 
+    # Leave SUBDIRS empty for all
+    # subdirectories.
+    SUBDIRS=foo bar
+    CONFIG+=build_all_dirs</pre>
+</td><td>Used by a <tt>subdirs</tt> project to specify that all available sub-directories be built rather than relying on the <tt>PROJECTS</tt> variable. This is superior to having recursive <tt>subdirs</tt> files because dependencies cannot be processed when that is done.</td></tr>
+</table></p>
+<a name="variables"></a>
+<h2>Variables</h2>
+<a name="prefix"></a>
+<h3>PREFIX</h3>
+<pre>    
+    PREFIX=FOO</pre>
+<p>This variable is used by the <tt>resolve_include()</tt> function to locate <tt>FORMS</tt>, <tt>HEADERS</tt> and <tt>SOURCES</tt>.</p>
+<a name="forms"></a>
+<h3>FORMS</h3>
+<pre>    
+    FORMS+=foo.ui</pre>
+<p>Add one or more <tt>.ui</tt> files to a project.</p>
+<a name="headers"></a>
+<h3>HEADERS</h3>
+<pre>    
+    HEADERS+=foo.h</pre>
+<p>Add one or more headers to a project. This is not strictly required but if not used, <tt>qmake</tt> will not create dependencies for the headers.</p>
+<a name="sources"></a>
+<h3>SOURCES</h3>
+<pre>    
+    SOURCES+=foo.pp</pre>
+<p>Add one or more source files to a project.</p>
+<a name="installs"></a>
+<h3>INSTALLS</h3>
+<pre>    
+    foo.files=my.png
+    foo.path=/pics
+    INSTALLS+=foo</pre>
+<p>Register an install object. Qtopia allows <a href="#install-hints">Install Hints</a> to be set to simplify installations.</p>
+<p><b>Note:</b> When referring to the <tt>Makefile</tt> target <tt>install_</tt> must be prepended.</p>
+<a name="translatables"></a>
+<h3>TRANSLATABLES</h3>
+<pre>    
+    COND_SOURCES=foo.cpp
+    TRANSLATABLES+=$$COND_SOURCES
+    cond:SOURCES+=$$COND_SOURCES</pre>
+<p><tt>TRANSLATABLES</tt> lists all of the translatable files for a project. For further information refer to: <a href="buildsystem-user-guide.html#internationalization">Internationalization</a>.</p>
+<a name="target"></a>
+<h3>TARGET</h3>
+<pre>    
+    TARGET=myapp</pre>
+<p><tt>TARGET</tt> sets the name of the project and is used to name the output file. If a <tt>TARGET</tt> is not specified, the name of the directory is used. The build system sets a macro with the name as a string (ie. <tt>-DQTOPIA_TARGET=&quot;foo&quot;</tt>). This can be used with the <tt>QTOPIA_MAIN</tt> macros (See <a href="buildsystem-user-guide.html#applications">Applications</a> for details) and anywhere the name of the application is required.</p>
+<a name="trtarget"></a>
+<h3>TRTARGET</h3>
+<pre>    
+    TRTARGET=myapp</pre>
+<p>This sets the name of the project for translations. It is required because the <tt>TARGET</tt> can change for libraries and plug-ins (including quicklaunched applications). This defaults to <tt>TARGET</tt> <b>before</b> any changes are made to it. The build system sets a macro with the name as a string (ie. <tt>-DQTOPIA_TRTARGET=&quot;foo&quot;</tt>). This can be used where the translation name of the application is requried.</p>
+<a name="defines"></a>
+<h3>DEFINES</h3>
+<pre>    
+    DEFINES+=FOO
+    DEFINES+=BAR=value</pre>
+<p>Add a define. The first case can be tested with <tt>#ifdef FOO</tt>. The second can also be used as a value. Since this is passed to the compiler on the command line you will need to quote any shell characters. For example, a string should be passed as <tt>DEFINES+=STR=\&quot;str\&quot;</tt>.</p>
+<a name="extra-ts-files"></a>
+<h3>EXTRA_TS_FILES</h3>
+<pre>    
+    EXTRA_TS_FILES+=QtopiaHandwriting</pre>
+<p>Translations are generally handled for each .pro file but there are many common resources in Qtopia that are processed in one go from the server's .pro file. However, applications are still responsible for installing their own <tt>.ts</tt> files. This variable simplifies the process since you only need to list the name of the <tt>.ts</tt> file. For third party projects, this is probably not very useful unless you are creating <tt>.ts</tt> files on your own.</p>
+<a name="qtopia-license"></a>
+<h3>QTOPIA_LICENSE</h3>
+<pre>    
+    QTOPIA_LICENSE=GPL</pre>
+<p>Set the license for the project. This is not particularly helpful, however it exists to ensure that particular license conditions are not violated. See <tt>src/build/license.prf</tt> for details.</p>
+<a name="packages"></a>
+<h3>PACKAGES</h3>
+<pre>    
+    foo.name=foo
+    foo.targets=install_foo
+    PACKAGES+=foo</pre>
+<p>Register an additional package from a <tt>.pro</tt> file. For further information refer to: <a href="buildsystem-user-guide.html#packages">Packages</a>.</p>
+<a name="plugin-type"></a>
+<h3>plugin_type</h3>
+<pre>    
+    plugin_type=application</pre>
+<p>Force the plug-in type. Normally the build system uses the parent directory's name but third party plug-ins may not be located appropriately for this to work. The value used here should match the plug-in type being built. See <tt>plugins/*</tt> for appropriate values.</p>
+<a name="vpath"></a>
+<h3>VPATH</h3>
+<pre>    
+    VPATH+=some/dir
+    SOURCES+=foo.pp</pre>
+<p>Register another directory for <tt>qmake</tt> to search for files. By default <tt>qmake</tt> will search relative to both the source and build trees. This is useful when including source from another directory.</p>
+<a name="projects"></a>
+<h3>PROJECTS</h3>
+<pre>    
+    PROJECTS+=libraries/qtopia</pre>
+<p>This variable should only be set in files that <tt>projects.pri</tt> loads. It lists the projects to be built for the current project root.</p>
+<p>For further information refer to: <a href="buildsystem-user-guide.html#deciding-what-to-build">Deciding what to build</a> for details.</p>
+<a name="themes"></a>
+<h3>THEMES</h3>
+<pre>    
+    THEMES+=qtopia</pre>
+<p>This variable should only be set in files that <tt>projects.pri</tt> loads. It lists the theme projects (located in <tt>etc/themes</tt>) to be built. For further information refer to: <a href="buildsystem-user-guide.html#deciding-what-to-build">Deciding what to build</a>.</p>
+<a name="subdirs"></a>
+<h3>SUBDIRS</h3>
+<pre>    
+    SUBDIRS+=foo</pre>
+<p>Subdirs projects will build projects that are in the SUBDIRS variable.</p>
+<a name="includepath"></a>
+<h3>INCLUDEPATH</h3>
+<pre>    
+    INCLUDEPATH+=/usr/include</pre>
+<p>Add a directory for includes. This will be searched by <tt>qmake</tt> for dependencies and made available to the compiler using <tt>-I/usr/include</tt>.</p>
+<a name="install-hints"></a>
+<h2>Install Hints</h2>
+<a name="pics"></a>
+<h3>pics</h3>
+<pre>    
+    foo.files=pics/*
+    foo.path=/pics/appname
+    foo.hint=pics
+    INSTALLS+=foo</pre>
+<p>Register an image install. This uses <tt>bin/installpic</tt> to install pictures so that icons (icons/&lt;size&gt;x&lt;size&gt;/*) are scaled appropriately and translated images (i18n/&lt;lang&gt;/*) are handled. If you cannot use <tt>pics/*</tt> then use <tt>pics/*.png pics/icons pics/i18n</tt> so that icons and translated images can be handled.</p>
+<a name="headers"></a>
+<h3>headers</h3>
+<pre>    
+    foo.files=$$HEADERS
+    foo.path=/include/qtopia/libname
+    foo.hint=headers
+    INSTALLS+=foo</pre>
+<p>Register a header install. For further information refer to: <a href="buildsystem-user-guide.html#setting-up-headers">Setting Up Headers</a> .</p>
+<a name="help"></a>
+<h3>help</h3>
+<pre>    
+    foo.source=/path/to/helproot
+    foo.files=foo.html
+    foo.hint=help
+    INSTALLS+=foo</pre>
+<p>Register a help install. This uses <tt>bin/installhelp</tt> so that translated help files (i18n/&lt;lang&gt;/*) are handled.</p>
+<a name="sdk"></a>
+<h3>sdk</h3>
+<pre>    
+    foo.hint=sdk</pre>
+<p>Register an SDK install. This install occurs when <tt>make sdk</tt> is run and can be combined with headers.</p>
+<a name="devsdk"></a>
+<h3>devsdk</h3>
+<pre>    
+    foo.hint=devsdk</pre>
+<p>Register a <tt>devsdk</tt> install. This install occurs <tt>make devsdk</tt> is run.</p>
+<a name="desktop"></a>
+<h3>desktop</h3>
+<pre>    
+    foo.files=example.desktop
+    foo.path=/apps/Applications
+    foo.hint=desktop
+    INSTALLS+=foo</pre>
+<p>Register a <tt>.desktop</tt> install. This uses <tt>content_installer</tt> to add the information from a <tt>.desktop</tt> file into the database.</p>
+<a name="dawg"></a>
+<h3>dawg</h3>
+<pre>    
+    foo.files=$$QTOPIA_DEPOT_PATH/etc/dict/internet
+    foo.path=/etc/dict
+    foo.hint=dawg
+    INSTALLS+=foo</pre>
+<p>Register a dawg install. This uses <tt>qdawggen</tt> to convert the input file into the <tt>.dawg</tt> format used by Qtopia.</p>
+<a name="nct"></a><a name="nct"></a>
+<h3>nct</h3>
+<pre>    
+    foo.files=example.desktop
+    foo.path=/apps/Applications
+    foo.trtarget=example-nct
+    foo.hint=nct desktop
+    INSTALLS+=foo
+    
+    foo.files=$$QTOPIA_DEPOT_PATH/etc/zoneinfo/zone.tab
+    foo.trtarget=timezone
+    # don't automatically install this
+    foo.CONFIG=no_path no_default_install
+    # We're really only interested in the translations for zone.tab
+    foo.hint=nct
+    INSTALLS+=zonetab</pre>
+<p>Register non-code translatable files. For further information refer to: <a href="buildsystem-user-guide.html#non-code-translatables">Non-code Translatables</a>.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

@@ -1,110 +1,123 @@
-/**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
 **
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 #ifndef LAUNCHERVIEW_H
 #define LAUNCHERVIEW_H
 
-#include <qtopia/storage.h>
-#include <qtopia/applnk.h>
+#include <QWidget>
+#include <QListView>
+#include <QContentSet>
+#include <QCategoryManager>
 
-#include <qvbox.h>
-
-class CategorySelect;
-class LauncherIconView;
-class QIconView;
-class QIconViewItem;
+class QContentSetMultiColumnProxyModel;
+class QAbstractMessageBox;
+class TypeDialog;
+class QCategoryDialog;
 class QLabel;
-class QWidgetStack;
-class MenuButton;
-class QComboBox;
+class QLauncherProxyModel;
 
-class LauncherView : public QVBox
+class LauncherViewListView : public QListView
 {
     Q_OBJECT
-
 public:
-    LauncherView( QWidget* parent = 0, const char* name = 0, WFlags fl = 0 );
-    ~LauncherView();
-
-    void hideIcons();
-
-    bool removeLink(const QString& linkfile);
-    void addItem(AppLnk* app, bool resort=TRUE);
-    void removeAllItems();
-    void setSortEnabled(bool);
-    void setUpdatesEnabled(bool);
-    void sort();
-
-    void setToolsEnabled(bool);
-    void updateTools();
-
-    void setBusy(bool);
-
-    enum ViewMode { Icon, List };
-    void setViewMode( ViewMode m );
-    ViewMode viewMode() const { return vmode; }
-
-    enum BackgroundType { Ruled, SolidColor, Image };
-    void setBackgroundType( BackgroundType t, const QString & );
-    BackgroundType backgroundType() const { return bgType; }
-
-    void setTextColor( const QColor & );
-    QColor textColor() const { return textCol; }
-
-    void setViewFont( const QFont & );
-    void clearViewFont();
-
-    void relayout(void);
+    LauncherViewListView( QWidget *parent );
 
 signals:
-    void clicked( const AppLnk * );
-    void rightPressed( AppLnk * );
+    void currentIndexChanged( const QModelIndex &current, const QModelIndex &previous );
 
 protected slots:
-    void selectionChanged();
-    void returnPressed( QIconViewItem *item );
-    void itemClicked( int, QIconViewItem * );
-    void itemPressed( int, QIconViewItem * );
-    void sortBy(int);
-    void showType(int);
-    void showCategory( int );
-    void resizeEvent(QResizeEvent *);
-    void flushBgCache();
+    virtual void currentChanged( const QModelIndex &current, const QModelIndex &previous );
 
 protected:
-    void paletteChange( const QPalette & );
+    virtual void focusOutEvent(QFocusEvent *);
+    virtual bool viewportEvent(QEvent *e);
+};
 
-    void fontChanged(const QFont &);
+class LauncherView : public QWidget
+{
+    Q_OBJECT
+    public:
+        LauncherView( QWidget* parent = 0, Qt::WFlags fl = 0 );
+        virtual ~LauncherView();
 
-private:
-    static bool bsy;
-    QWidget* tools;
-    LauncherIconView* icons;
-    QComboBox *typemb;
-    QStringList typelist;
-    CategorySelect *catmb;
-    ViewMode vmode;
-    BackgroundType bgType;
-    QString bgName;
-    QColor textCol;
+        void resetSelection();
+        void setBusy(bool);
+        void setBusy(const QModelIndex &, bool);
+        void setViewMode( QListView::ViewMode m );
+        QListView::ViewMode viewMode() const;
 
-    QImage loadBackgroundImage(QString &fname);
+        void removeAllItems();
+        void addItem(QContent* app, bool resort=true);
+        void removeItem(const QContent &);
+
+        void setColumns(int);
+        virtual void setFilter(const QContentFilter &filter);
+        const QContent currentItem() const;
+
+        enum SortingStyle { NoSorting, LanguageAwareSorting };
+
+        void setSorting(SortingStyle style);
+    protected:
+        friend class QLauncherProxyModel;
+        LauncherViewListView *icons;
+        QContentSet *contentSet;
+        QContentSetModel *model;
+        QContentFilter mainFilter;
+        QContentFilter categoryFilter;
+        QContentFilter typeFilter;
+        int nColumns;
+        int busyTimer;
+        QLauncherProxyModel *bpModel;
+
+        virtual void changeEvent(QEvent *e);
+        virtual void showEvent(QShowEvent *e);
+        virtual void calculateGridSize();
+        virtual void timerEvent( QTimerEvent * event );
+
+    signals:
+        void clicked( QContent );
+        void rightPressed( QContent );
+
+    protected slots:
+        void returnPressed(const QModelIndex &item);
+        void itemClicked(const QModelIndex & index);
+        void itemPressed(const QModelIndex &);
+        void resizeEvent(QResizeEvent *);
+    public slots:
+        void showType( const QContentFilter & );
+        void showCategory( const QContentFilter & );
+};
+
+class ApplicationLauncherView : public LauncherView
+{
+    Q_OBJECT
+    public:
+        ApplicationLauncherView(QWidget * = 0);
+        ApplicationLauncherView(const QString &, QWidget * = 0);
+    private slots:
+#ifdef QTOPIA_PHONE
+    void addSpeedDial();
+#endif
+    void launcherRightPressed(QContent);
+    private:
+        QMenu *rightMenu;
 };
 
 #endif // LAUNCHERVIEW_H

@@ -1,0 +1,46 @@
+#
+# Copyright (C) 2000-2006 TROLLTECH ASA.  All rights reserved.
+#
+# This file is part of the Qtopia Environment.
+#
+# Licensees holding a valid license agreement from Trolltech or any of its
+# authorized distributors may use this file in accordance with
+# the License Agreement provided with the Licensed Software.
+#
+# This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+# WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+#
+# See http://www.trolltech.com/pricing.html or email sales@trolltech.com for
+#   information about Trolltech's Commercial License Agreements.
+#
+# Contact info@trolltech.com if any conditions of this licensing are
+# not clear to you.
+#
+
+exec_profile_file("helix-client-core-basic.pfi")
+exec_profile_file("helix-client-core-advanced.pfi")
+exec_profile_file("helix-client-core-local.pfi")
+
+exec_profile_file("helix-client-core-net.pfi")
+# Remove HELIX_FEATURE_RDT for nodist
+project.RemoveDefines('HELIX_FEATURE_RDT')
+
+exec_profile_file("helix-client-core-net-advanced.pfi")
+# Remove HELIX_FEATURE_PNA for nodist
+project.RemoveDefines('HELIX_FEATURE_PNA')
+
+exec_profile_file("helix-client-core-audio.pfi")
+exec_profile_file("helix-client-core-audio-advanced.pfi")
+
+exec_profile_file("helix-client-core-video.pfi")
+# Compile without X11
+project.AddDefines('QWS', 'QT_CLEAN_NAMESPACE')
+project.AddDefines('HELIX_CONFIG_NO_XWINDOWS')
+project.AddDefines('HELIX_FEATURE_MINI_SITE')
+project.AddDefines('HELIX_FEATURE_LINUX_FB_SITE')
+
+exec_profile_file("helix-client-smil.pfi")
+exec_profile_file("helix-client-3gpp-advanced.pfi")
+exec_profile_file("helix-client-mp3.pfi")
+exec_profile_file("helix-client-mp4.pfi")
+exec_profile_file("helix-client-pcm.pfi")

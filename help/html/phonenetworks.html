@@ -1,7 +1,14 @@
-%%PHONE%%
-<qt title="Call Networks">
-<h3>Call Networks</h3>
-<p>Displays a list of available networks and shows which is currently used. To change network, de-select Automatic (highlight and select) then pick another network.</p>
+<!--#if expr="$TELEPHONY"-->
+<html>
+<head><title>Call Networks</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h2>Call Networks</h2>
+<!--#else -->
+   <h3>Call Networks</h3>
+<!--#endif-->
+<p>Shows the current status of modem and VoIP networks and allows to modify network preferences.</p>
 <p>See Also: <a href="netsetup.html">Internet Help</a></p>
-</qt>
-@@PHONE@@
+<!--#endif-->
+</body>
+</html>

@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- /usr/local/qtopia/qtopia-opensource-4.2.0/qtopiacore/qt/src/gui/widgets/qmainwindow.cpp -->
+<head>
+  <title>Qt 4.2: QMainWindow Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QMainWindow Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<p>The QMainWindow class provides a main application window. <a href="#details">More...</a></p>
+<pre> #include &lt;QMainWindow&gt;</pre><p>Inherits <a href="qwidget.html">QWidget</a>.</p>
+<ul>
+<li><a href="qmainwindow-members.html">List of all members, including inherited members</a></li>
+<li><a href="qmainwindow-qt3.html">Qt 3 support members</a></li>
+</ul>
+<a name="properties"></a>
+<h3>Properties</h3>
+<ul>
+<li><div class="fn"/><b><a href="qmainwindow.html#animated-prop">animated</a></b> : bool</li>
+<li><div class="fn"/><b><a href="qmainwindow.html#dockNestingEnabled-prop">dockNestingEnabled</a></b> : bool</li>
+<li><div class="fn"/><b><a href="qmainwindow.html#iconSize-prop">iconSize</a></b> : QSize</li>
+<li><div class="fn"/><b><a href="qmainwindow.html#toolButtonStyle-prop">toolButtonStyle</a></b> : Qt::ToolButtonStyle</li>
+</ul>
+<ul>
+<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qmainwindow.html#QMainWindow">QMainWindow</a></b> ( QWidget * <i>parent</i> = 0, Qt::WindowFlags <i>flags</i> = 0 )</li>
+<li><div class="fn"/><b><a href="qmainwindow.html#dtor.QMainWindow">~QMainWindow</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#addDockWidget">addDockWidget</a></b> ( Qt::DockWidgetArea <i>area</i>, QDockWidget * <i>dockwidget</i> )</li>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#addDockWidget-2">addDockWidget</a></b> ( Qt::DockWidgetArea <i>area</i>, QDockWidget * <i>dockwidget</i>, Qt::Orientation <i>orientation</i> )</li>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#addToolBar">addToolBar</a></b> ( Qt::ToolBarArea <i>area</i>, QToolBar * <i>toolbar</i> )</li>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#addToolBar-2">addToolBar</a></b> ( QToolBar * <i>toolbar</i> )</li>
+<li><div class="fn"/>QToolBar * <b><a href="qmainwindow.html#addToolBar-3">addToolBar</a></b> ( const QString &amp; <i>title</i> )</li>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#addToolBarBreak">addToolBarBreak</a></b> ( Qt::ToolBarArea <i>area</i> = Qt::TopToolBarArea )</li>
+<li><div class="fn"/>QWidget * <b><a href="qmainwindow.html#centralWidget">centralWidget</a></b> () const</li>
+<li><div class="fn"/>Qt::DockWidgetArea <b><a href="qmainwindow.html#corner">corner</a></b> ( Qt::Corner <i>corner</i> ) const</li>
+<li><div class="fn"/>virtual QMenu * <b><a href="qmainwindow.html#createPopupMenu">createPopupMenu</a></b> ()</li>
+<li><div class="fn"/>Qt::DockWidgetArea <b><a href="qmainwindow.html#dockWidgetArea">dockWidgetArea</a></b> ( QDockWidget * <i>dockwidget</i> ) const</li>
+<li><div class="fn"/>QSize <b><a href="qmainwindow.html#iconSize-prop">iconSize</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#insertToolBar">insertToolBar</a></b> ( QToolBar * <i>before</i>, QToolBar * <i>toolbar</i> )</li>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#insertToolBarBreak">insertToolBarBreak</a></b> ( QToolBar * <i>before</i> )</li>
+<li><div class="fn"/>bool <b><a href="qmainwindow.html#animated-prop">isAnimated</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qmainwindow.html#dockNestingEnabled-prop">isDockNestingEnabled</a></b> () const</li>
+<li><div class="fn"/>QMenuBar * <b><a href="qmainwindow.html#menuBar">menuBar</a></b> () const</li>
+<li><div class="fn"/>QWidget * <b><a href="qmainwindow.html#menuWidget">menuWidget</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#removeDockWidget">removeDockWidget</a></b> ( QDockWidget * <i>dockwidget</i> )</li>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#removeToolBar">removeToolBar</a></b> ( QToolBar * <i>toolbar</i> )</li>
+<li><div class="fn"/>bool <b><a href="qmainwindow.html#restoreState">restoreState</a></b> ( const QByteArray &amp; <i>state</i>, int <i>version</i> = 0 )</li>
+<li><div class="fn"/>QByteArray <b><a href="qmainwindow.html#saveState">saveState</a></b> ( int <i>version</i> = 0 ) const</li>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#setCentralWidget">setCentralWidget</a></b> ( QWidget * <i>widget</i> )</li>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#setCorner">setCorner</a></b> ( Qt::Corner <i>corner</i>, Qt::DockWidgetArea <i>area</i> )</li>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#iconSize-prop">setIconSize</a></b> ( const QSize &amp; <i>iconSize</i> )</li>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#setMenuBar">setMenuBar</a></b> ( QMenuBar * <i>menuBar</i> )</li>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#setMenuWidget">setMenuWidget</a></b> ( QWidget * <i>menuBar</i> )</li>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#setStatusBar">setStatusBar</a></b> ( QStatusBar * <i>statusbar</i> )</li>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#toolButtonStyle-prop">setToolButtonStyle</a></b> ( Qt::ToolButtonStyle <i>toolButtonStyle</i> )</li>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#splitDockWidget">splitDockWidget</a></b> ( QDockWidget * <i>first</i>, QDockWidget * <i>second</i>, Qt::Orientation <i>orientation</i> )</li>
+<li><div class="fn"/>QStatusBar * <b><a href="qmainwindow.html#statusBar">statusBar</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#tabifyDockWidget">tabifyDockWidget</a></b> ( QDockWidget * <i>first</i>, QDockWidget * <i>second</i> )</li>
+<li><div class="fn"/>Qt::ToolBarArea <b><a href="qmainwindow.html#toolBarArea">toolBarArea</a></b> ( QToolBar * <i>toolbar</i> ) const</li>
+<li><div class="fn"/>Qt::ToolButtonStyle <b><a href="qmainwindow.html#toolButtonStyle-prop">toolButtonStyle</a></b> () const</li>
+</ul>
+<ul>
+<li><div class="fn"/>195 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>14 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+</ul>
+<a name="public-slots"></a>
+<h3>Public Slots</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#animated-prop">setAnimated</a></b> ( bool <i>enabled</i> )</li>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#dockNestingEnabled-prop">setDockNestingEnabled</a></b> ( bool <i>enabled</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>19 public slots inherited from <a href="qwidget.html#public-slots">QWidget</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+</ul>
+<a name="signals"></a>
+<h3>Signals</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#iconSizeChanged">iconSizeChanged</a></b> ( const QSize &amp; <i>iconSize</i> )</li>
+<li><div class="fn"/>void <b><a href="qmainwindow.html#toolButtonStyleChanged">toolButtonStyleChanged</a></b> ( Qt::ToolButtonStyle <i>toolButtonStyle</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>1 signal inherited from <a href="qwidget.html#signals">QWidget</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>4 static public members inherited from <a href="qwidget.html#static-public-members">QWidget</a></li>
+<li><div class="fn"/>5 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>38 protected functions inherited from <a href="qwidget.html#protected-functions">QWidget</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>1 protected function inherited from <a href="qpaintdevice.html#protected-functions">QPaintDevice</a></li>
+<li><div class="fn"/>1 protected slot inherited from <a href="qwidget.html#protected-slots">QWidget</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QMainWindow class provides a main application window.</p>
+<p>QMainWindow provides a main application window, with a menu bar, tool bars, dock widgets and a status bar around a large central widget, such as a text edit, drawing canvas or <a href="qworkspace.html">QWorkspace</a> (for MDI applications).</p>
+<p>Note that QMainWindow comes with its own customized layout and that setting a layout on a QMainWindow, or creating a layout with a QMainWindow as a parent is considered an error. You should set your own layout on the <a href="qmainwindow.html#centralWidget">central widget</a> instead.</p>
+<p>Topics:</p>
+<ul><li><a href="#saving-and-restoring-state">Saving and restoring state</a></li>
+<li><a href="#behavior-of-dock-widgets">Behavior of Dock Widgets</a></li>
+<ul><li><a href="#dock-widget-separators">Dock Widget Separators</a></li>
+<li><a href="#dragging-dock-widgets">Dragging Dock Widgets</a></li>
+<ul><li><a href="#managing-dock-widgets-and-toolbars">Managing Dock Widgets and Toolbars</a></li>
+</ul>
+</ul>
+</ul>
+<a name="saving-and-restoring-state"></a>
+<h3>Saving and restoring state</h3>
+<p>The <a href="qmainwindow.html#saveState">saveState</a>() and <a href="qmainwindow.html#restoreState">restoreState</a>() functions provide a means to save and restore the layout of the QToolBars and QDockWidgets in the QMainWindow. These functions work by storing the <a href="qobject.html#objectName-prop">objectName</a> of each <a href="qtoolbar.html">QToolBar</a> and <a href="qdockwidget.html">QDockWidget</a> together with information about placement, size, etc.</p>
+<a name="behavior-of-dock-widgets"></a>
+<h3>Behavior of Dock Widgets</h3>
+<a name="dock-widget-separators"></a><a name="dock-widget-separators"></a>
+<h4>Dock Widget Separators</h4>
+<p>QMainWindow uses separators to separate QDockWidgets from each other and the <a href="qmainwindow.html#centralWidget">central widget</a>. These separators let the user control the size of QDockWidgets by dragging the boundary between them.</p>
+<p>A <a href="qdockwidget.html">QDockWidget</a> can be as large or as small as the user wishes, between the <a href="qwidget.html#minimumSizeHint-prop">minimumSizeHint</a>() (or <a href="qwidget.html#minimumSize-prop">minimumSize</a>()) and <a href="qwidget.html#maximumSize-prop">maximumSize</a>() of the <a href="qdockwidget.html">QDockWidget</a>. When a <a href="qdockwidget.html">QDockWidget</a> reaches its minimum size, space will be taken from other QDockWidgets in the direction of the user's drag, if possible. Once all QDockWidgets have reached their minimum sizes, further dragging does nothing. When a <a href="qdockwidget.html">QDockWidget</a> reaches its maximium size, space will be given to other QDockWidgets in the opposite direction of the user's drag, if possible. Once all QDockWidgets have reached their minimum size, futher dragging does nothing.</p>
+<a name="dragging-dock-widgets"></a><a name="dragging-dock-widgets"></a>
+<h4>Dragging Dock Widgets</h4>
+<p><a href="qdockwidget.html">QDockWidget</a> displays a title bar to let the user drag the dock widget to a new location. A <a href="qdockwidget.html">QDockWidget</a> can be moved to any location provided enough space is available. (QMainWindow won't resize itself to a larger size in an attempt to provide more space.)</p>
+<p>A <a href="qrubberband.html">QRubberBand</a> is shown while dragging the <a href="qdockwidget.html">QDockWidget</a>. This <a href="qrubberband.html">QRubberBand</a> provides an indication to the user about where the <a href="qdockwidget.html">QDockWidget</a> will be placed when the mouse button is released.</p>
+<a name="managing-dock-widgets-and-toolbars"></a>
+<h5>Managing Dock Widgets and Toolbars</h5>
+<p>By default, QMainWindow provides a context menu that can be used to toggle the visibility of the toolbars and dock widgets attached to a main window. This menu is usually accessed by right-clicking on a dock window or toolbar, but it can also be obtained programmatically by calling <a href="qmainwindow.html#createPopupMenu">createPopupMenu</a>().</p>
+<p align="center"><img src="images/mainwindow-contextmenu.png" alt="A typical main window context menu." /></p><p>This popup menu can be replaced or customized to suit the specific needs of an application: In a QMainWindow subclass, reimplement <a href="qmainwindow.html#createPopupMenu">createPopupMenu</a>() to either create a custom popup menu by constructing a new <a href="qmenu.html">QMenu</a> on demand, or to modify the <a href="qmenu.html">QMenu</a> object obtained by calling the default implementation.</p>
+<p>See also <a href="qmenubar.html">QMenuBar</a>, <a href="qtoolbar.html">QToolBar</a>, <a href="qstatusbar.html">QStatusBar</a>, <a href="qdockwidget.html">QDockWidget</a>, Application Example, Dock Widgets Example, MDI Example, and SDI Example.</p>
+<hr />
+<h2>Property Documentation</h2>
+<h3 class="fn"><a name="animated-prop"></a>animated : bool</h3>
+<p>This property holds whether manipulating dock widgets is animated.</p>
+<p>When a dock widget is dragged over the main window, other dock widgets in the window will adjust themselves to make space for the dragged widget. If this property is set to true, their movement will be animated. The default value is true.</p>
+<p>This property was introduced in Qt 4.2.</p>
+<p>Access functions:</p>
+<ul>
+<li><div class="fn"/><b>bool isAnimated () const</b></li>
+<li><div class="fn"/><b>void setAnimated ( bool <i>enabled</i> )</b></li>
+</ul>
+<h3 class="fn"><a name="dockNestingEnabled-prop"></a>dockNestingEnabled : bool</h3>
+<p>This property holds whether docks can be nested.</p>
+<p>If this property is set to false, dock areas can only contain a single row (horizontal or vertical) of dock widgets. If this property is set to true, the area occupied by a dock widget can be split in either direction to contain more dock widgets.</p>
+<p>Dock nesting is only necessary in applications that contain a lot of dock widgets. It gives the user greater freedom in organizing their main window. However, dock nesting leads to more complex (and less intuitive) behavior when a dock widget is dragged over the main window, since there are more ways in which a dropped dock widget may be placed in the dock area.</p>
+<p>This property was introduced in Qt 4.2.</p>
+<p>Access functions:</p>
+<ul>
+<li><div class="fn"/><b>bool isDockNestingEnabled () const</b></li>
+<li><div class="fn"/><b>void setDockNestingEnabled ( bool <i>enabled</i> )</b></li>
+</ul>
+<h3 class="fn"><a name="iconSize-prop"></a>iconSize : <a href="qsize.html">QSize</a></h3>
+<p>This property holds size of toolbar icons in this mainwindow.</p>
+<p>The default is the default tool bar icon size of the GUI style.</p>
+<p>Access functions:</p>
+<ul>
+<li><div class="fn"/><b>QSize iconSize () const</b></li>
+<li><div class="fn"/><b>void setIconSize ( const QSize &amp; <i>iconSize</i> )</b></li>
+</ul>
+<h3 class="fn"><a name="toolButtonStyle-prop"></a>toolButtonStyle : <a href="qt.html#ToolButtonStyle-enum">Qt::ToolButtonStyle</a></h3>
+<p>This property holds style of toolbar buttons in this mainwindow.</p>
+<p>The default is <a href="qt.html#ToolButtonStyle-enum">Qt::ToolButtonIconOnly</a>.</p>
+<p>Access functions:</p>
+<ul>
+<li><div class="fn"/><b>Qt::ToolButtonStyle toolButtonStyle () const</b></li>
+<li><div class="fn"/><b>void setToolButtonStyle ( Qt::ToolButtonStyle <i>toolButtonStyle</i> )</b></li>
+</ul>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QMainWindow"></a>QMainWindow::QMainWindow ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>flags</i> = 0 )</h3>
+<p>Constructs a <a href="qmainwindow.html">QMainWindow</a> with the given <i>parent</i> and the specified widget <i>flags</i>.</p>
+<h3 class="fn"><a name="dtor.QMainWindow"></a>QMainWindow::~QMainWindow ()</h3>
+<p>Destroys the main window.</p>
+<h3 class="fn"><a name="addDockWidget"></a>void QMainWindow::addDockWidget ( <a href="qt.html#DockWidgetArea-enum">Qt::DockWidgetArea</a> <i>area</i>, <a href="qdockwidget.html">QDockWidget</a> * <i>dockwidget</i> )</h3>
+<p>Adds the given <i>dockwidget</i> to the specified <i>area</i>.</p>
+<h3 class="fn"><a name="addDockWidget-2"></a>void QMainWindow::addDockWidget ( <a href="qt.html#DockWidgetArea-enum">Qt::DockWidgetArea</a> <i>area</i>, <a href="qdockwidget.html">QDockWidget</a> * <i>dockwidget</i>, <a href="qt.html#Orientation-enum">Qt::Orientation</a> <i>orientation</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Adds <i>dockwidget</i> into the given <i>area</i> in the direction specified by the <i>orientation</i>.</p>
+<h3 class="fn"><a name="addToolBar"></a>void QMainWindow::addToolBar ( <a href="qt.html#ToolBarArea-enum">Qt::ToolBarArea</a> <i>area</i>, <a href="qtoolbar.html">QToolBar</a> * <i>toolbar</i> )</h3>
+<p>Adds the <i>toolbar</i> into the specified <i>area</i> in this main window. The <i>toolbar</i> is placed at the end of the current tool bar block (i.e. line). If the main window already manages <i>toolbar</i> then it will only move the toolbar to <i>area</i>.</p>
+<p>See also <a href="qmainwindow.html#insertToolBar">insertToolBar</a>(), <a href="qmainwindow.html#addToolBarBreak">addToolBarBreak</a>(), and <a href="qmainwindow.html#insertToolBarBreak">insertToolBarBreak</a>().</p>
+<h3 class="fn"><a name="addToolBar-2"></a>void QMainWindow::addToolBar ( <a href="qtoolbar.html">QToolBar</a> * <i>toolbar</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Equivalent of calling addToolBar(<a href="qt.html#ToolBarArea-enum">Qt::TopToolBarArea</a>, <i>toolbar</i>)</p>
+<h3 class="fn"><a name="addToolBar-3"></a><a href="qtoolbar.html">QToolBar</a> * QMainWindow::addToolBar ( const <a href="qstring.html">QString</a> &amp; <i>title</i> )</h3>
+<p>This is an overloaded member function, provided for convenience.</p>
+<p>Creates a <a href="qtoolbar.html">QToolBar</a> object, setting its window title to <i>title</i>, and inserts it into the top toolbar area.</p>
+<p>See also <a href="qwidget.html#windowTitle-prop">setWindowTitle</a>().</p>
+<h3 class="fn"><a name="addToolBarBreak"></a>void QMainWindow::addToolBarBreak ( <a href="qt.html#ToolBarArea-enum">Qt::ToolBarArea</a> <i>area</i> = Qt::TopToolBarArea )</h3>
+<p>Adds a toolbar break to the given <i>area</i> after all the other objects that are present.</p>
+<h3 class="fn"><a name="centralWidget"></a><a href="qwidget.html">QWidget</a> * QMainWindow::centralWidget () const</h3>
+<p>Returns the central widget for the main window. This function returns zero if the central widget has not been set.</p>
+<p>See also <a href="qmainwindow.html#setCentralWidget">setCentralWidget</a>().</p>
+<h3 class="fn"><a name="corner"></a><a href="qt.html#DockWidgetArea-enum">Qt::DockWidgetArea</a> QMainWindow::corner ( <a href="qt.html#Corner-enum">Qt::Corner</a> <i>corner</i> ) const</h3>
+<p>Returns the dock widget area that occupies the specified <i>corner</i>.</p>
+<p>See also <a href="qmainwindow.html#setCorner">setCorner</a>().</p>
+<h3 class="fn"><a name="createPopupMenu"></a><a href="qmenu.html">QMenu</a> * QMainWindow::createPopupMenu ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Returns a popup menu containing checkable entries for the toolbars and dock widgets present in the main window.</p>
+<p>By default, this function is called by the main window when the user activates a context menu, typically by right-clicking on a toolbar or a dock widget.</p>
+<p>If you want to create a custom popup menu, reimplement this function and return a newly-created popup menu. Ownership of the popup menu is transferred to the caller.</p>
+<p>See also <a href="qmainwindow.html#addDockWidget">addDockWidget</a>(), <a href="qmainwindow.html#addToolBar">addToolBar</a>(), and <a href="qmainwindow.html#menuBar">menuBar</a>().</p>
+<h3 class="fn"><a name="dockWidgetArea"></a><a href="qt.html#DockWidgetArea-enum">Qt::DockWidgetArea</a> QMainWindow::dockWidgetArea ( <a href="qdockwidget.html">QDockWidget</a> * <i>dockwidget</i> ) const</h3>
+<p>Returns the <a href="qt.html#DockWidgetArea-enum">Qt::DockWidgetArea</a> for <i>dockwidget</i>. If <i>dockwidget</i> has not been added to the main window, this function returns <tt>Qt::NoDockWidgetArea</tt>.</p>
+<p>See also <a href="qmainwindow.html#addDockWidget">addDockWidget</a>(), <a href="qmainwindow.html#splitDockWidget">splitDockWidget</a>(), and <a href="qt.html#DockWidgetArea-enum">Qt::DockWidgetArea</a>.</p>
+<h3 class="fn"><a name="iconSizeChanged"></a>void QMainWindow::iconSizeChanged ( const <a href="qsize.html">QSize</a> &amp; <i>iconSize</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted when the size of the icons used in the window is changed. The new icon size is passed in <i>iconSize</i>.</p>
+<p>You can connect this signal to other components to help maintain a consistent appearance for your application.</p>
+<p>See also <a href="qmainwindow.html#iconSize-prop">setIconSize</a>().</p>
+<h3 class="fn"><a name="insertToolBar"></a>void QMainWindow::insertToolBar ( <a href="qtoolbar.html">QToolBar</a> * <i>before</i>, <a href="qtoolbar.html">QToolBar</a> * <i>toolbar</i> )</h3>
+<p>Inserts the <i>toolbar</i> into the area occupied by the <i>before</i> toolbar so that it appears before it. For example, in normal left-to-right layout operation, this means that <i>toolbar</i> will appear to the left of the toolbar specified by <i>before</i> in a horizontal toolbar area.</p>
+<p>See also <a href="qmainwindow.html#insertToolBarBreak">insertToolBarBreak</a>(), <a href="qmainwindow.html#addToolBar">addToolBar</a>(), and <a href="qmainwindow.html#addToolBarBreak">addToolBarBreak</a>().</p>
+<h3 class="fn"><a name="insertToolBarBreak"></a>void QMainWindow::insertToolBarBreak ( <a href="qtoolbar.html">QToolBar</a> * <i>before</i> )</h3>
+<p>Inserts a toolbar break before the toolbar specified by <i>before</i>.</p>
+<h3 class="fn"><a name="menuBar"></a><a href="qmenubar.html">QMenuBar</a> * QMainWindow::menuBar () const</h3>
+<p>Returns the menu bar for the main window. This function creates and returns an empty menu bar if the menu bar does not exist.</p>
+<p>See also <a href="qmainwindow.html#setMenuBar">setMenuBar</a>().</p>
+<h3 class="fn"><a name="menuWidget"></a><a href="qwidget.html">QWidget</a> * QMainWindow::menuWidget () const</h3>
+<p>Returns the menu bar for the main window. This function returns null if a menubar hasn't been constructed yet.</p>
+<p>This function was introduced in Qt 4.2.</p>
+<p>See also <a href="qmainwindow.html#setMenuWidget">setMenuWidget</a>().</p>
+<h3 class="fn"><a name="removeDockWidget"></a>void QMainWindow::removeDockWidget ( <a href="qdockwidget.html">QDockWidget</a> * <i>dockwidget</i> )</h3>
+<p>Removes the <i>dockwidget</i> from the main window layout and hides it. Note that the <i>dockwidget</i> is <i>not</i> deleted.</p>
+<h3 class="fn"><a name="removeToolBar"></a>void QMainWindow::removeToolBar ( <a href="qtoolbar.html">QToolBar</a> * <i>toolbar</i> )</h3>
+<p>Removes the <i>toolbar</i> from the main window layout and hides it. Note that the <i>toolbar</i> is <i>not</i> deleted.</p>
+<h3 class="fn"><a name="restoreState"></a>bool QMainWindow::restoreState ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>state</i>, int <i>version</i> = 0 )</h3>
+<p>Restores the <i>state</i> of this mainwindow's toolbars and dockwidgets. The <i>version</i> number is compared with that stored in <i>state</i>. If they do not match, the mainwindow's state is left unchanged, and this function returns <tt>false</tt>; otherwise, the state is restored, and this function returns <tt>true</tt>.</p>
+<p>See also <a href="qmainwindow.html#saveState">saveState</a>().</p>
+<h3 class="fn"><a name="saveState"></a><a href="qbytearray.html">QByteArray</a> QMainWindow::saveState ( int <i>version</i> = 0 ) const</h3>
+<p>Saves the current state of this mainwindow's toolbars and dockwidgets. The <i>version</i> number is stored as part of the data.</p>
+<p>The <a href="qobject.html#objectName-prop">objectName</a> property is used to identify each <a href="qtoolbar.html">QToolBar</a> and <a href="qdockwidget.html">QDockWidget</a>. You should make sure that this property is unique for each <a href="qtoolbar.html">QToolBar</a> and <a href="qdockwidget.html">QDockWidget</a> you add to the <a href="qmainwindow.html">QMainWindow</a></p>
+<p>To restore the saved state, pass the return value and <i>version</i> number to <a href="qmainwindow.html#restoreState">restoreState</a>().</p>
+<p>See also <a href="qmainwindow.html#restoreState">restoreState</a>().</p>
+<h3 class="fn"><a name="setCentralWidget"></a>void QMainWindow::setCentralWidget ( <a href="qwidget.html">QWidget</a> * <i>widget</i> )</h3>
+<p>Sets the given <i>widget</i> to be the main window's central widget.</p>
+<p>Note: <a href="qmainwindow.html">QMainWindow</a> takes ownership of the <i>widget</i> pointer and deletes it at the appropriate time.</p>
+<p>See also <a href="qmainwindow.html#centralWidget">centralWidget</a>().</p>
+<h3 class="fn"><a name="setCorner"></a>void QMainWindow::setCorner ( <a href="qt.html#Corner-enum">Qt::Corner</a> <i>corner</i>, <a href="qt.html#DockWidgetArea-enum">Qt::DockWidgetArea</a> <i>area</i> )</h3>
+<p>Sets the given dock widget <i>area</i> to occupy the specified <i>corner</i>.</p>
+<p>See also <a href="qmainwindow.html#corner">corner</a>().</p>
+<h3 class="fn"><a name="setMenuBar"></a>void QMainWindow::setMenuBar ( <a href="qmenubar.html">QMenuBar</a> * <i>menuBar</i> )</h3>
+<p>Sets the menu bar for the main window to <i>menuBar</i>.</p>
+<p>Note: <a href="qmainwindow.html">QMainWindow</a> takes ownership of the <i>menuBar</i> pointer and deletes it at the appropriate time.</p>
+<p>See also <a href="qmainwindow.html#menuBar">menuBar</a>().</p>
+<h3 class="fn"><a name="setMenuWidget"></a>void QMainWindow::setMenuWidget ( <a href="qwidget.html">QWidget</a> * <i>menuBar</i> )</h3>
+<p>Sets the menu bar for the main window to <i>menuBar</i>.</p>
+<p><a href="qmainwindow.html">QMainWindow</a> takes ownership of the <i>menuBar</i> pointer and deletes it at the appropriate time.</p>
+<p>This function was introduced in Qt 4.2.</p>
+<p>See also <a href="qmainwindow.html#menuWidget">menuWidget</a>().</p>
+<h3 class="fn"><a name="setStatusBar"></a>void QMainWindow::setStatusBar ( <a href="qstatusbar.html">QStatusBar</a> * <i>statusbar</i> )</h3>
+<p>Sets the status bar for the main window to <i>statusbar</i>.</p>
+<p>Setting the status bar to 0 will remove it from the main window. Note that <a href="qmainwindow.html">QMainWindow</a> takes ownership of the <i>statusbar</i> pointer and deletes it at the appropriate time.</p>
+<p>See also <a href="qmainwindow.html#statusBar">statusBar</a>().</p>
+<h3 class="fn"><a name="splitDockWidget"></a>void QMainWindow::splitDockWidget ( <a href="qdockwidget.html">QDockWidget</a> * <i>first</i>, <a href="qdockwidget.html">QDockWidget</a> * <i>second</i>, <a href="qt.html#Orientation-enum">Qt::Orientation</a> <i>orientation</i> )</h3>
+<p>Splits the space covered by the <i>first</i> dock widget into two parts, moves the <i>first</i> dock widget into the first part, and moves the <i>second</i> dock widget into the second part.</p>
+<p>The <i>orientation</i> specifies how the space is divided: A <a href="qt.html#Orientation-enum">Qt::Horizontal</a> split places the second dock widget to the right of the first; a <a href="qt.html#Orientation-enum">Qt::Vertical</a> split places the second dock widget below the first.</p>
+<p><i>Note</i>: if <i>first</i> is currently in a tabbed docked area, <i>second</i> will be added as a new tab, not as a neighbor of <i>first</i>. This is because a single tab can contain only one dock widget.</p>
+<p><i>Note</i>: The <a href="qt.html#LayoutDirection-enum">Qt::LayoutDirection</a> influences the order of the dock widgets in the two parts of the divided area. When right-to-left layout direction is enabled, the placing of the dock widgets will be reversed.</p>
+<p>See also <a href="qmainwindow.html#tabifyDockWidget">tabifyDockWidget</a>(), <a href="qmainwindow.html#addDockWidget">addDockWidget</a>(), and <a href="qmainwindow.html#removeDockWidget">removeDockWidget</a>().</p>
+<h3 class="fn"><a name="statusBar"></a><a href="qstatusbar.html">QStatusBar</a> * QMainWindow::statusBar () const</h3>
+<p>Returns the status bar for the main window. This function creates and returns an empty status bar if the status bar does not exist.</p>
+<p>See also <a href="qmainwindow.html#setStatusBar">setStatusBar</a>().</p>
+<h3 class="fn"><a name="tabifyDockWidget"></a>void QMainWindow::tabifyDockWidget ( <a href="qdockwidget.html">QDockWidget</a> * <i>first</i>, <a href="qdockwidget.html">QDockWidget</a> * <i>second</i> )</h3>
+<p>Moves <i>second</i> dock widget on top of <i>first</i> dock widget, creating a tabbed docked area in the main window.</p>
+<h3 class="fn"><a name="toolBarArea"></a><a href="qt.html#ToolBarArea-enum">Qt::ToolBarArea</a> QMainWindow::toolBarArea ( <a href="qtoolbar.html">QToolBar</a> * <i>toolbar</i> ) const</h3>
+<p>Returns the <a href="qt.html#ToolBarArea-enum">Qt::ToolBarArea</a> for <i>toolbar</i>. If <i>toolbar</i> has not been added to the main window, this function returns <tt>Qt::NoToolBarArea</tt>.</p>
+<p>See also <a href="qmainwindow.html#addToolBar">addToolBar</a>(), <a href="qmainwindow.html#addToolBarBreak">addToolBarBreak</a>(), and <a href="qt.html#ToolBarArea-enum">Qt::ToolBarArea</a>.</p>
+<h3 class="fn"><a name="toolButtonStyleChanged"></a>void QMainWindow::toolButtonStyleChanged ( <a href="qt.html#ToolButtonStyle-enum">Qt::ToolButtonStyle</a> <i>toolButtonStyle</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted when the style used for tool buttons in the window is changed. The new style is passed in <i>toolButtonStyle</i>.</p>
+<p>You can connect this signal to other components to help maintain a consistent appearance for your application.</p>
+<p>See also <a href="qmainwindow.html#toolButtonStyle-prop">setToolButtonStyle</a>().</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QMainWindow-2"></a>QMainWindow::QMainWindow ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, const char * <i>name</i>, <a href="qt.html#WindowType-enum">Qt::WindowFlags</a> <i>flags</i> = 0 )</h3>
+<p>Constructs a <a href="qmainwindow.html">QMainWindow</a> with the given <i>parent</i>, <i>name</i>, and with the specified widget <i>flags</i>.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

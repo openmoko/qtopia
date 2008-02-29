@@ -1,37 +1,55 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Qt Toolkit -  About Modules</title><style type="text/css"><!--
-a:visited { color: #672967; text-decoration: none }body { background: white; color: black; }
---></style></head><body bgcolor="#ffffff">
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: Qt's Modules</title>
+  <link rel="next" href="qtcore.html" />
+  <link rel="start" href="index.html" />
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><p>
+[Next: <a href="qtcore.html">QtCore Module</a>]
+</p>
+<h1 align="center">Qt's Modules<br /><small></small></h1>
+<p>Qt 4 consists of several modules, each of which lives in a separate library.</p>
+<p><table width="80%" align="center" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" class="odd"><td><a href="qtcore.html">QtCore</a></td><td>Core non-GUI classes used by other modules</td></tr>
+<tr valign="top" class="even"><td><a href="qtgui.html">QtGui</a></td><td>Graphical user interface components</td></tr>
+<tr valign="top" class="odd"><td><a href="qtnetwork.html">QtNetwork</a></td><td>Classes for network programming</td></tr>
+<tr valign="top" class="even"><td><a href="qtopengl.html">QtOpenGL</a></td><td>OpenGL support classes</td></tr>
+<tr valign="top" class="odd"><td><a href="qtsql.html">QtSql</a></td><td>Classes for database integration using SQL</td></tr>
+<tr valign="top" class="even"><td><a href="qtsvg.html">QtSvg</a></td><td>Classes for displaying the contents of SVG files</td></tr>
+<tr valign="top" class="odd"><td><a href="qtxml.html">QtXml</a></td><td>Classes for handling XML</td></tr>
+<tr valign="top" class="even"><td><a href="qtdesigner.html">QtDesigner</a></td><td>Classes for extending <i>Qt Designer</i></td></tr>
+<tr valign="top" class="odd"><td><a href="qtuitools.html">QtUiTools</a></td><td>Classes for handling <i>Qt Designer</i> forms in applications</td></tr>
+<tr valign="top" class="even"><td><a href="qtassistant.html">QtAssistant</a></td><td>Support for online help</td></tr>
+<tr valign="top" class="odd"><td><a href="qt3support.html">Qt3Support</a></td><td>Qt 3 compatibility classes</td></tr>
+<tr valign="top" class="even"><td><a href="qttest.html">QtTest</a></td><td>Tool classes for unit testing</td></tr>
+</table></p>
+<p>The following extension modules are available in the <a href="commercialeditions.html">Qt Commercial Editions</a> on Windows:</p>
+<p><table width="80%" align="center" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" class="odd"><td>QAxContainer</td><td>Extension for accessing ActiveX controls</td></tr>
+<tr valign="top" class="even"><td><a href="qaxserver.html">QAxServer</a></td><td>Extension for writing ActiveX servers</td></tr>
+</table></p>
+<p>The following extension module is available in all <a href="editions.html">Qt Editions</a> on Unix platforms:</p>
+<p><table width="80%" align="center" cellpadding="2" cellspacing="1" border="0">
+<tr valign="top" class="odd"><td><a href="qtdbus.html">QtDBus</a></td><td>Classes for Inter-Process Communication using the D-BUS</td></tr>
+</table></p>
+<p>If you use <a href="qmake-manual.html#qmake">qmake</a> to build your projects, the <a href="qtcore.html">QtCore</a> and <a href="qtgui.html">QtGui</a> modules are included by default. To link only against <a href="qtcore.html">QtCore</a>, add the following line to your <tt>.pro</tt> file:</p>
+<pre> QT -= gui</pre>
+<p>See also <a href="classes.html">Qt's Classes</a>.</p>
 <p>
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-<h1 align="center"> About Modules</h1><br clear="all">
-When you install Qt, certain modules are built into the library. For
-the Qt Enterprise Edition, Qt Evaluation Edition and Qt Free Edition
-this is all modules. For Qt Professional Edition, the base modules
-are available -
-the <i>tools</i>, <i>kernel</i>, <i>widgets</i>, <i>dialog</i>,
-<i>iconview</i>, and <i>workspace</i> modules.
-Trolltech does not currently offer modules for sale individually.
-<p>
-All modules may be used only under the terms of the licenses associated
-with each Edition.
-
-<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+[Next: <a href="qtcore.html">QtCore Module</a>]
+</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

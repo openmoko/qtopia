@@ -1,0 +1,89 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Tutorial: Implementing a Device Plug-in</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Tutorial: Implementing a Device Plug-in<br /><small></small></h1>
+<a name="top"></a><ul><li><a href="#keypad">Keypad</a></li>
+<ul><li><a href="#implementation-steps">Implementation Steps</a></li>
+</ul>
+<li><a href="#touchscreen-mouse">Touchscreen/Mouse</a></li>
+<ul><li><a href="#implementation-steps">Implementation Steps</a></li>
+</ul>
+</ul>
+<p>This document describes the process required to implement a plug-in for a new device. All directory references are relative to the example provided in the <tt>&lt;qtopia-root-dir&gt;/devices/example</tt> directory.</p>
+<p>Qtopia also provides <a href="buildsystem-user-guide.html#device-configuration-profiles">Device Configuration Profiles</a> to simplify the task of configuring Qtopia for a device and providing the plug-ins required.</p>
+<p>The following directories are of particular interest:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Directory</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>mkspecs</tt></td><td>contains the <tt>qmake</tt> configuration file used to build for the device</td></tr>
+<tr valign="top" class="even"><td><tt>src</tt></td><td>contains the source code for the plug-in drivers for keypad and touchscreen</td></tr>
+</table></p>
+<p>This tutorial assumes that debugging using <tt>qLog()</tt> is enabled. To activate debugging:</p>
+<ul>
+<li>edit <tt>image/Qtopia/etc/Trolltech/log.conf</tt> and enable <tt>Input</tt></li>
+<li>restart Qtopia to implement the change and <tt>qLog()</tt> messages will be displayed.</li>
+</ul>
+<p>This functionality is available in both debug and release builds.</p>
+<p>The steps taken to implement a new plug-in depend on whether you are implementing a keypad plug-in or a touchscreen/mouse plug-in. The following tutorial provides the steps for both.</p>
+<p>The initial steps for either type of plug-in are:</p>
+<ol type="1">
+<li>Copy the directory named <tt>example</tt> to <tt>&lt;device-name&gt;</tt>.</li>
+<li>Rename all sub-directories called <tt>example</tt> to <tt>&lt;device-name&gt;</tt>.</li>
+<li>Replace all occurrences of <tt>Example</tt> with <tt>&lt;device-name&gt;</tt>.</li>
+<li>Replace all occurrences of <tt>example</tt> with <tt>&lt;device-name&gt;</tt>.</li>
+<li>Replace all occurrences of <tt>EXAMPLE</tt> with <tt>&lt;DEVICE-NAME&gt;</tt>.</li>
+</ol>
+<a name="keypad"></a>
+<h2>Keypad</h2>
+<p>The functionality required to implement a keypad device plug-in is found in the source file: <tt>/src/&lt;device-name&gt;kbdhandler.cpp</tt>, which implements a class to handle keypad input inheriting <tt>QWSKeyboardhandler</tt>. Then the constructor/destructor <tt>readKbdData()</tt> functions are overloaded to match your device.</p>
+<a name="implementation-steps"></a>
+<h3>Implementation Steps</h3>
+<ol type="1">
+<li>Set environment variable: <tt>QWS_KEYBOARD=examplekbdhandler</tt></li>
+<li>Implement <tt>qLog()</tt> to output the data being read to standard output.</li>
+<li>Edit the keyboard plug-in code to suit your device as follows:<ul>
+<li>Identify the device node and update <tt>&lt;device-name&gt;kbdhandler.cpp</tt> to open the correct data node.</li>
+<li>Identify the data format(for example, 4-byte packets) and update <tt>&lt;device-name&gt;kbdhandler.cpp</tt> to read the correct number of bytes.</li>
+<li>Update the structure <tt>&lt;device-name&gt;Input</tt> in <tt>&lt;device-name&gt;kbdhandler.cpp</tt> with the correct data format for the device.</li>
+</ul>
+</li>
+<li>Build Qtopia using: <tt>./configure -device &lt;device-name&gt;</tt>.</li>
+<li>Run Qtopia.</li>
+<li>To determine the correct key mappings, use the keypad to input strokes and then identify the byte-values displayed by <tt>qLog()</tt>.</li>
+<li>In <tt>&lt;device-name&gt;kbdhandler.cpp</tt> update the switch statement in function <tt>readKbdData()</tt> with the correct key mappings.</li>
+</ol>
+<a name="touchscreen-mouse"></a>
+<h2>Touchscreen/Mouse</h2>
+<p>The functionality required to implement a touchscreen/mouse device plug-in is found in the source file: <tt>/src/&lt;device-name&gt;mousehandler.cpp</tt> which implements a class to handle mouse input inheriting <tt>QWSCalibratedMousehandler</tt>. The constructor/destructor <tt>readMouseData()</tt> and calibrate() functions are then overloaded to match your device.</p>
+<a name="implementation-steps"></a>
+<h3>Implementation Steps</h3>
+<ol type="1">
+<li>Set environment variable: <tt>QWS_MOUSE_PROTO=&lt;examplemousehandler&gt;</tt></li>
+<li>Implement <tt>qLog()</tt> to output the data being read to standard output.</li>
+<li>Edit the mouse plug-in code to suit your device as follows:<ul>
+<li>Identify the device node and update <tt>&lt;device-name&gt;mousehandler.cpp</tt> to open the correct data node.</li>
+<li>Identify the data format(for example, 4-byte packets) and update <tt>&lt;device-name&gt;mousehandler.cpp</tt> to read the correct number of bytes.</li>
+</ul>
+</li>
+<li>Build Qtopia using: <tt>./configure -device &lt;device-name&gt;</tt>.</li>
+<li>Run Qtopia.</li>
+<li>To determine the correct Y-coord, Y-coord and pressure (press or release) move the mouse, click the mouse buttons and then identify the values displayed by <tt>qLog()</tt>.</li>
+<li>Update the structure <tt>ts_packet</tt> in <tt>&lt;device-name&gt;mousehandler.cpp</tt> with the correct data format for the device.</li>
+<li>Update the <i>switch</i> statement in function <tt>readMouseData()</tt> in <tt>&lt;device-name&gt;mousehandler.cpp</tt> with the correct X-coord, Y-coord, and pressure value from the <tt>qLog()</tt> output.</li>
+</ol>
+<p><b>Note:</b> When creating a plug-in it is not necessary to rebuild all of Qtopia to enable it. Simply rebuild the plug-in and copy the files to the <tt>image/Qtopia</tt> directory and restart Qtopia.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

@@ -1,7 +1,14 @@
-%%PHONE%%
-<qt title="Set Call Forwarding">
-<h3>Set Call Forwarding</h3>
-<p>Turn on the types of calls you want to forward, then highlight the box at the bottom and press <img src="contextbar/select.png">.</p>
-<p>Now press <img src="contextbar/options.png"> and select Find contact, select the contact to receive the forwarded calls of that type.</p>
-</qt>
-@@PHONE@@
+<!--#if expr="$PHONESTYLE"-->
+<html>
+<head><title>Select Number</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h2>Select Number</h2>
+<!--#else -->
+   <h3>Select Number</h3>
+<!--#endif-->
+<p>You can use the previously used number or select a new number.</p>
+<p>Select your option using <img src=":icon/select"> </img> and press <img src=":icon/i18n/back">.</p>
+<!--#endif-->
+</body>
+</html>

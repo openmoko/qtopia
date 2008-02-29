@@ -1,57 +1,45 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "regionselector.h"
 
 #include "imageui.h"
 
-#include <qtopia/global.h>
-#include <qtopia/resource.h>
-#include <qtopia/contextbar.h>
+
+#include <qsoftmenubar.h>
+#include <qtopianamespace.h>
 
 #include <qaction.h>
 #include <qpainter.h>
 #include <qbrush.h>
 #include <qregion.h>
 
-RegionSelector::RegionSelector( ImageUI* iui, const char* name, WFlags f )
-    : QWidget( iui, name, f | Qt::WResizeNoErase | Qt::WRepaintNoErase ), 
-    image_ui( iui ), enabled( false )
+#include <QMouseEvent>
+#include <QKeyEvent>
+
+RegionSelector::RegionSelector( ImageUI* iui, Qt::WFlags f )
+    : QWidget( iui, f ), image_ui( iui ), enabled( false )
 {
 #ifdef QTOPIA_PHONE
-    if( Global::mousePreferred() ) {
+    if( Qtopia::mousePreferred() ) {
 #endif
         current_state = MARK;
 #ifdef QTOPIA_PHONE
@@ -63,34 +51,34 @@ RegionSelector::RegionSelector( ImageUI* iui, const char* name, WFlags f )
 
 QRect RegionSelector::region() const
 {
-    if( !_region.isNull() && 
+    if( !_region.isNull() &&
         _region.left() != _region.right() &&
         _region.top() != _region.bottom() &&
         !image_ui->region().intersect( _region ).isEmpty() )
-        return _region.normalize();
+        return _region.normalized();
     return QRect();
 }
 
 void RegionSelector::setEnabled( bool b )
 {
     enabled = b;
-    
+
 #ifdef QTOPIA_PHONE
     // If selection enabled, add labels to context bar
     // Otherwise, remove labels from context bar
     if( enabled ) {
-        if( Global::mousePreferred() ) {
+        if( Qtopia::mousePreferred() ) {
             // Disable context menu
-            ContextBar::setLabel( this, ContextMenu::key(), ContextBar::NoLabel );
+            QSoftMenuBar::setLabel( this, QSoftMenuBar::menuKey(), QSoftMenuBar::NoLabel );
         } else {
             setStateLabel();
-            ContextBar::setLabel( this, Qt::Key_Select, ContextBar::Select );
+            QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::Select );
         }
-        ContextBar::setLabel( this, Qt::Key_Back, ContextBar::Cancel );
+        QSoftMenuBar::setLabel( this, Qt::Key_Back, QSoftMenuBar::Cancel );
     } else {
-        ContextBar::clearLabel( this, ContextMenu::key() );
-        if( !Global::mousePreferred() ) ContextBar::clearLabel( this, Qt::Key_Select );
-        ContextBar::clearLabel( this, Qt::Key_Back );
+        QSoftMenuBar::clearLabel( this, QSoftMenuBar::menuKey() );
+        if( !Qtopia::mousePreferred() ) QSoftMenuBar::clearLabel( this, Qt::Key_Select );
+        QSoftMenuBar::clearLabel( this, Qt::Key_Back );
     }
 #endif
 }
@@ -102,7 +90,7 @@ void RegionSelector::reset()
 
     // Reset region
 #ifdef QTOPIA_PHONE
-    if( Global::mousePreferred() ) {
+    if( Qtopia::mousePreferred() ) {
 #endif
         region_start = QPoint();
         _region = QRect();
@@ -123,84 +111,11 @@ void RegionSelector::reset()
 void RegionSelector::paintEvent( QPaintEvent* )
 {
 #ifdef QTOPIA_PHONE
-static const char *top_left_xpm[] = {
-    "7 7 2 1",
-    "x c #ffffff",
-    ". c None",
-    "xxxxxxx",
-    "xxxxxx.",
-    "xxxxx..",
-    "xxxx...",
-    "xxx....",
-    "xx.....",
-    "x......"
-};
-
-static const char *top_right_xpm[] = {
-    "7 7 2 1",
-    "x c #ffffff",
-    ". c None",
-    "xxxxxxx",
-    ".xxxxxx",
-    "..xxxxx",
-    "...xxxx",
-    "....xxx",
-    ".....xx",
-    "......x"
-};
-
-static const char *bottom_left_xpm[] = {
-    "7 7 2 1",
-    "x c #ffffff",
-    ". c None",
-    "x......",
-    "xx.....",
-    "xxx....",
-    "xxxx...",
-    "xxxxx..",
-    "xxxxxx.",
-    "xxxxxxx"
-};
-
-static const char *bottom_right_xpm[] = {
-    "7 7 2 1",
-    "x c #ffffff",
-    ". c None",
-    "......x",
-    ".....xx",
-    "....xxx",
-    "...xxxx",
-    "..xxxxx",
-    ".xxxxxx",
-    "xxxxxxx"
-};
-
-static const char *crosshair_xpm[] = {
-    "15 15 2 1",
-    "x c #ffffff",
-    ". c None",
-    ".......x.......",
-    ".......x.......",
-    ".......x.......",
-    ".......x.......",
-    ".......x.......",
-    ".......x.......",
-    ".......x.......",
-    "xxxxxxxxxxxxxxx",
-    ".......x.......",
-    ".......x.......",
-    ".......x.......",
-    ".......x.......",
-    ".......x.......",
-    ".......x.......",
-    ".......x.......",
-};
-
-static const QPixmap top_left( top_left_xpm );
-static const QPixmap top_right( top_right_xpm );
-static const QPixmap bottom_left( bottom_left_xpm );
-static const QPixmap bottom_right( bottom_right_xpm );
-static const QPixmap crosshair( crosshair_xpm );
+static const QPixmap top_left( ":image/photoedit/top_left" );
+static const QPixmap top_right( ":image/photoedit/top_right" );
+static const QPixmap bottom_left( ":image/photoedit/bottom_left" );
+static const QPixmap bottom_right( ":image/photoedit/bottom_right" );
+static const QPixmap crosshair( ":image/photoedit/crosshair" );
 
 #define CROSSHAIR_CENTER 7
 #define CORNER_WIDTH 7
@@ -209,23 +124,22 @@ static const QPixmap crosshair( crosshair_xpm );
 #endif
 
 #define PAINTER_COLOR Qt::white
-#define SPACE_FILL_PATTERN QBrush::Dense6Pattern
+#define SPACE_FILL_PATTERN Qt::Dense6Pattern
+#define PEN_WIDTH 1
 
-    QPainter painter;
+    QPainter painter( this );
+    painter.setPen( PAINTER_COLOR );
 
     // If selection enabled, draw selected region onto widget
     // Otherwise, draw image ui onto widget
     if( enabled ) {
-        QPixmap buffer( image_ui->pixmap() );
-        painter.begin( &buffer );
-        painter.setPen( PAINTER_COLOR );
-        painter.setRasterOp( Qt::XorROP );
-        
+        // painter.setRasterOp( Qt::XorROP );
+
         // Draw box around current selection region
-        painter.drawRect( _region.normalize() );
-        
+        painter.drawRect( _region.normalized().adjusted( 0, 0, -PEN_WIDTH, -PEN_WIDTH ) );
+
 #ifdef QTOPIA_PHONE
-        if( !Global::mousePreferred() ) {
+        if( !Qtopia::mousePreferred() ) {
             QPoint center( _region.center() );
             switch( current_state ) {
             // If current state is move, draw crosshair in center of region
@@ -245,18 +159,14 @@ static const QPixmap crosshair( crosshair_xpm );
             }
         }
 #endif
-        painter.setClipRegion( image_ui->region().subtract( _region.normalize() ) );
-        painter.setClipping( true );
+        QRegion region = image_ui->region().subtract( _region.normalized() );
+        if( !region.isEmpty() ) {
+            painter.setClipRegion( region );
+            painter.setClipping( true );
 
-        // Gray out area surrounding current selection region
-        painter.fillRect( rect(), QBrush( PAINTER_COLOR, SPACE_FILL_PATTERN ) );
-        painter.end();
-        
-        painter.begin( this );
-        painter.drawPixmap( 0, 0, buffer );
-    } else {
-        painter.begin( this );
-        painter.drawPixmap( 0, 0, image_ui->pixmap() );
+            // Gray out area surrounding current selection region
+            painter.fillRect( rect(), QBrush( PAINTER_COLOR, SPACE_FILL_PATTERN ) );
+        }
     }
 }
 
@@ -265,8 +175,8 @@ void RegionSelector::keyPressEvent( QKeyEvent* e )
 {
 #define STEP 4
 
-    if( enabled && !Global::mousePreferred() ) {
-        if( e->key() == ContextMenu::key() ) {
+    if( enabled && !Qtopia::mousePreferred() ) {
+        if( e->key() == QSoftMenuBar::menuKey() ) {
             // Toggle current state
             switch( current_state ) {
             case MOVE:
@@ -283,26 +193,26 @@ void RegionSelector::keyPressEvent( QKeyEvent* e )
                 // Ignore
                 break;
             }
-        } else if( e->key() == Key_Select ) {
+        } else if( e->key() == Qt::Key_Select ) {
             emit selected();
         } else {
             switch( current_state ) {
             // Move region
             case MOVE:
                 switch( e->key() ) {
-                case Key_Left:
+                case Qt::Key_Left:
                     moveBy( -STEP, 0 );
                     update();
                     break;
-                case Key_Right:
+                case Qt::Key_Right:
                     moveBy( STEP, 0 );
                     update();
                     break;
-                case Key_Up:
+                case Qt::Key_Up:
                     moveBy( 0, -STEP );
                     update();
                     break;
-                case Key_Down:
+                case Qt::Key_Down:
                     moveBy( 0, STEP );
                     update();
                     break;
@@ -315,19 +225,19 @@ void RegionSelector::keyPressEvent( QKeyEvent* e )
             // Size region
             case SIZE:
                 switch( e->key() ) {
-                case Key_Left:
+                case Qt::Key_Left:
                     sizeBy( -STEP, 0 );
                     update();
                     break;
-                case Key_Right:
+                case Qt::Key_Right:
                     sizeBy( STEP, 0 );
                     update();
                     break;
-                case Key_Up:
+                case Qt::Key_Up:
                     sizeBy( 0, STEP );
                     update();
                     break;
-                case Key_Down:
+                case Qt::Key_Down:
                     sizeBy( 0, -STEP );
                     update();
                     break;
@@ -378,7 +288,7 @@ void RegionSelector::mouseReleaseEvent( QMouseEvent* e )
         case MARK:
             // If stylus released within the selected region, emit selected
             // Otherwise, emit canceled signal
-            if( _region.normalize().contains( e->pos() ) ) emit selected();
+            if( _region.normalized().contains( e->pos() ) ) emit selected();
             else emit canceled();
             break;
         // If region is moving, change to mark
@@ -404,13 +314,13 @@ void RegionSelector::mouseMoveEvent( QMouseEvent* e )
             {
             // Update region
             int x = e->pos().x(), y = e->pos().y();
-    
+
             // Contain region within widget
             if( x < rect().left() ) x = rect().left();
             if( x > rect().right() ) x = rect().right();
             if( y < rect().top() ) y = rect().top();
             if( y > rect().bottom() ) y = rect().bottom();
-    
+
             // Update region end with current stylus position
             _region = QRect( region_start, QPoint( x, y ) );
             }
@@ -429,10 +339,10 @@ void RegionSelector::setStateLabel()
 {
     switch( current_state ) {
     case MOVE:
-        ContextBar::setLabel( this, ContextMenu::key(), "photoedit/resize", QString::null );
+        QSoftMenuBar::setLabel( this, QSoftMenuBar::menuKey(), "photoedit/resize", QString() );
         break;
     case SIZE:
-        ContextBar::setLabel( this, ContextMenu::key(), "photoedit/move", QString::null );
+        QSoftMenuBar::setLabel( this, QSoftMenuBar::menuKey(), "photoedit/move", QString() );
         break;
     default:
         // Ignore
@@ -451,8 +361,8 @@ void RegionSelector::moveBy( int dx, int dy )
         dy = rect().top() - _region.top();
     if( _region.bottom() + dy > rect().bottom() )
         dy = rect().bottom() - _region.bottom();
-        
-    _region.moveBy( dx, dy );
+
+    _region.translate( dx, dy );
 }
 
 void RegionSelector::sizeBy( int dw, int dh )
@@ -464,7 +374,7 @@ void RegionSelector::sizeBy( int dw, int dh )
     _region.setRight( _region.right() + dw );
     _region.setTop( _region.top() - dh );
     _region.setBottom( _region.bottom() + dh );
-    
+
     // Limit to minimum
     if( _region.width() < MIN_WIDTH ) {
         _region.setLeft( _region.left() + dw );
@@ -474,7 +384,7 @@ void RegionSelector::sizeBy( int dw, int dh )
         _region.setTop( _region.top() + dh );
         _region.setBottom( _region.bottom() - dh );
     }
-     
+
     // Contain region within widget
     if( _region.left() < rect().left() )
         _region.setLeft( rect().left() );

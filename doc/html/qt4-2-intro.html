@@ -1,0 +1,123 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: What's New in Qt 4.2</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">What's New in Qt 4.2<br /><small></small></h1>
+<p>Qt 4.2 provides many improvements and enhancements over the previous releases in the Qt 4 series. This documents covers the most important features in this release, separated by category.</p>
+<p>Since we will continue to improve and fine-tune Qt as a result of feedback and suggestions from customers and the open source community, we have not included a detailed list of changes between Qt 4.1 and this release. A comprehensive list of changes between Qt 4.1 and Qt 4.2 will be included in the Qt 4.2 final release.</p>
+<p>A list of other Qt 4 features can be found on the <b><a href="qt4-intro.html">What's New in Qt 4</a></b> page.</p>
+<p><b>Highlights</b></p>
+<ul><li><a href="#graphics-view">Graphics View</a></li>
+<li><a href="#desktop-integration">Desktop Integration</a></li>
+<li><a href="#text-completion-framework">Text Completion Framework</a></li>
+<li><a href="#widget-style-sheets">Widget Style Sheets</a></li>
+<li><a href="#undo-framework">Undo Framework</a></li>
+<li><a href="#inter-process-communication-d-bus">Inter-Process Communication (D-BUS)</a></li>
+<li><a href="#new-widgets-and-gui-features">New Widgets and GUI Features</a></li>
+<li><a href="#extended-infrastructure">Extended Infrastructure</a></li>
+<li><a href="#qtopia-core">Qtopia Core</a></li>
+</ul>
+<a name="graphics-view"></a>
+<h2>Graphics View</h2>
+<p>Support for interactive graphics is provided by the <a href="graphicsview.html#graphics-view">Graphics View</a> framework. This framework is an enhanced replacement for the Canvas module, previously provided with Qt 3, with a refined set of features.</p>
+<p align="center"><img src="images/graphicsview-shapes.png" /></p><p>The framework enables <b>responsive handling of large numbers of canvas items</b> through the use of a space-partitioning scheme. Support for collision detection, coordinate transformations, and item groups make it easier than before to manage items for interactive displays.</p>
+<p align="center"><img src="images/elasticnodes-example.png" /></p><p>An <b>improved API</b> aims to make common uses easier while making advanced uses more accessible to developers.</p>
+<p align="center"><img src="images/graphicsview-map.png" /></p><p>Graphics View's <b>enhanced presentation system</b>, takes advantage of Qt 4's paint system to render items using anti-aliasing, and taking advantage of OpenGL to improve rendering performance. Support for printing is built into the framework, making it possible to produce high quality documents from interactive applications.</p>
+<p align="center"><img src="images/graphicsview-text.png" /></p><p>A selection of <b>predefined item types</b> is provided that contains, amongst others, a text item that supports inline editing.</p>
+<p>In addition, various graphics view examples have been written to demonstrate key features of the framework, including ports of Canvas module examples from Qt 3.</p>
+<a name="desktop-integration"></a>
+<h2>Desktop Integration</h2>
+<p>This release introduces a set of features that are designed to make it easier to write applications that are integrated into users' desktop environments.</p>
+  <table align="center">
+  <tr><td>
+  <p><img src="images/cleanlooks-tabwidget.png" /></p>
+  </td><td>
+  <p><img src="images/cleanlooks-treeview.png" /></p>
+  </td><td>
+  <p><img src="images/cleanlooks-combobox.png" /> <br /> <img src="images/cleanlooks-timeedit.png" /> <br /> <img src="images/cleanlooks-dateedit.png" /></p>
+  </td></tr>
+  </table>
+  <p><b>The <a href="qcleanlooksstyle.html">Cleanlooks</a> widget style</b>, designed to closely resemble the Clearlooks style for GTK+ applications, enables Qt applications to fit in with non-Qt applications on suitably-configured GNOME desktops. See the <a href="gallery-cleanlooks.html">Cleanlooks Style Widget Gallery</a> to see how Qt's widgets look in this style.</p>
+<p><a href="qdesktopservices.html">QDesktopServices</a> provides <b>cross-platform support for opening and launching URLs</b>, making it possible for applications to launch a web browser, mail composer, and other external resources by using the facilities of the user's desktop environment.</p>
+<p>To enable <b>closer integration with the GNOME deskop environment</b> and tools, Qt 4.2 now contains support for the Glib eventloop. This makes it possible for Qt applications to use plugins made using other Glib-based frameworks, and even enables Qt plugins to be created for use with non-Qt applications.</p>
+  <div align="center">
+  <p><img src="images/plastique-dialogbuttonbox.png" /> <img src="images/cleanlooks-dialogbuttonbox.png" /></p>
+  </div>
+  <p>The <a href="qdialogbuttonbox.html">QDialogButtonBox</a> class enables dialogs to be created that use the <b>appropriate button order for the user's chosen desktop environment</b>. This enables dialogs created for KDE and Windows to be reused for Mac OS X and GNOME.</p>
+  <table align="center">
+  <tr><td>
+  <p><img src="images/plastique-printdialog.png" /></p>
+  </td><td>
+  <p><img src="images/plastique-printdialog-properties.png" /></p>
+  </td></tr>
+  </table>
+  <p>On X11 platforms, <b>support for the <a href="http://www.cups.org/">Common Unix Printing System (CUPS)</a></b> has been greatly enhanced. Printer settings made available by CUPS can now be accessed via <a href="qprintdialog.html">QPrintDialog</a> for improved control over the printing process.</p>
+<p><b>System tray support</b> on all desktop platforms is provided by the new <a href="qsystemtrayicon.html">QSystemTrayIcon</a> class, which exposes a comprehensive set of features via an intuitive Qt-style API.</p>
+<a name="text-completion-framework"></a>
+<h2>Text Completion Framework</h2>
+<p align="center"><img src="images/completer-example.png" /></p><p>The new <a href="qcompleter.html">QCompleter</a> class provides a <b>framework for handling text completion in input widgets</b>. Completion facilities can be set up for use in <a href="qlineedit.html">QLineEdit</a>, <a href="qcombobox.html">QComboBox</a> and custom widgets. An example is included which shows how text completion can be used with a selection of different models and data sets.</p>
+<a name="widget-style-sheets"></a>
+<h2>Widget Style Sheets</h2>
+<p><b>Widgets can be styled using style sheets</b> that follow a syntax similar to that used by Cascading Style Sheets (CSS) for HTML. Many of the more common customizations to widget styles can be made using style sheets, making it largely unnecessary for developers to create entire custom widget styles with <a href="qstyle.html">QStyle</a> subclasses.</p>
+<p>The style sheet for any given widget can be accessed via its <a href="qwidget.html#styleSheet-prop">styleSheet</a> property. Style sheets are fully described in the <a href="stylesheet.html">Qt Style Sheets</a> document.</p>
+<a name="undo-framework"></a>
+<h2>Undo Framework</h2>
+<p><b>An <a href="qundo.html#undo-framework">Undo framework</a> based on the <a href="guibooks.html#design-patterns">Command pattern</a></b> has been introduced to help developers provide undo/redo features in applications. The provision of an undo framework in Qt means that developers can take advantage of a common, well-tested set of classes to improve usability and concentrate on higher-level functionality.</p>
+<p>The framework provides support for command compression to improve usability when many low-level or similar repetitive commands are used. Command macros can also be employed by developers to enable sequences of commands to be programatically applied via the framework in single steps. Additionally, the concept of a <i>clean state</i> is supported, enabling applications to clear the undo buffer when certain operations are performed, such as saving a file.</p>
+<a name="d-bus"></a><a name="inter-process-communication-d-bus"></a>
+<h2>Inter-Process Communication (D-BUS)</h2>
+<p>Qt 4.2 provides support for Inter-Process Communication (IPC) using the D-BUS protocol. This service-oriented protocol provides fast, low latency communication that can be used for same-machine communication between applications, yet also allows Remote Procedure Calling (RPC) mechanisms to be implemented.</p>
+<p>Using the <a href="qtdbus.html">QtDBus</a> module, an application can provide services to other applications by exporting objects, as well as use such exported services itself. The <a href="qtdbus.html">QtDBus</a> module also extends Qt's <a href="signalsandslots.html">Signals and Slots</a> mechanism, making it possible to connect to other applications.</p>
+<p>See the <a href="intro-to-dbus.html">Introduction to D-BUS</a> document for more information about using D-BUS with Qt.</p>
+<a name="new-widgets-and-gui-features"></a>
+<h2>New Widgets and GUI Features</h2>
+<p>Qt 4.2 also provides a number of new features for graphical user interface applications, expanding the range of available widgets while extending overall functionality.</p>
+  <table align="center">
+  <tr><td valign="top">
+  <p><img src="images/plastique-fontcombobox.png" /></p>
+  </td><td>
+  <p><img src="images/plastique-fontcombobox-open.png" /></p>
+  </td></tr>
+  </table>
+  <p>A <a href="qfontcombobox.html">specialized font combobox</a> is now available for use in text editing and related applications.</p>
+<p align="center"><img src="images/qcalendarwidget-maximum.png" /></p><p>Facilities for <b>displaying monthly calendars and date selection</b> are provided by <a href="qcalendarwidget.html">QCalendarWidget</a>, a class adapted from the <a href="http://www.trolltech.com/products/qt/addon/solutions/catalog/4/Widgets/qtcalendarwidget/">Calendar Widget</a> Qt Solution.</p>
+<p>The <b><a href="application.html">main window classes</a> have been updated to be more responsive to user activity</b>. In particular, when a user moves a floating dock window over a dock area by the user, any other dock windows in that area will automatically make room to allow it to be dropped there. These enhancements can be seen in the Dock Widgets example.</p>
+<p><b>Access to OpenGL framebuffer objects</b> is provided by the <a href="qglframebufferobject.html">QGLFramebufferObject</a> class; this enables textures to be painted with a series of calls to <a href="qpainter.html">QPainter</a> functions in the usual way for <a href="qpaintdevice.html">QPaintDevice</a> subclasses.</p>
+<p><b>Improved support for platform-native message boxes</b> is provided by QMessageBoxEx. This class uses <a href="qdialogbuttonbox.html">QDialogButtonBox</a> to positioned buttons using the appropriate conventions for the user's platform and desktop environment.</p>
+<a name="extended-infrastructure"></a>
+<h2>Extended Infrastructure</h2>
+<p>Many improvements have been made to the classes and tools that provide underlying functionality in Qt. Many of these changes involve introducing higher level functionality that aims to make application development easier while providing a more robust working environment for users.</p>
+<p>The <a href="qfilesystemwatcher.html">QFileSystemWatcher</a> class enables applications to <b>monitor files and directories for changes</b>. This feature is often used by applications and libraries that share access to files with other applications.</p>
+<p>The <a href="model-view.html">item view classes</a> have been optimized for performance and reliability, and new classes have been introduced:</p>
+<ul>
+<li><a href="qstandarditem.html">QStandardItem</a> and <a href="qstandarditemeditorcreator.html">QStandardItemEditorCreator</a> aim to make the <a href="qstandarditemmodel.html">QStandardItemModel</a> class easier to use.</li>
+<li><b><a href="qdatawidgetmapper.html">QDataWidgetMapper</a> enables mappings to be made between items in a model and selections of widgets</b> in a user interface, making it possible to design data-aware widgets and forms.</li>
+</ul>
+<p>The <b>HTML import and export facilities have been enhanced</b> in the <a href="richtext.html">rich text classes</a>, and now include support for CSS-like style sheets.</p>
+<p><b>A <a href="qtimeline.html">time line class</a> has been introduced for use in widgets that provide animations.</b> By using a mechanism that uses signals and slots to notify other application components about changes to a time line, this class can also be used for other timing purposes with non-GUI classes.</p>
+<p>The addition of a <b>Scalable Vector Graphics (SVG) icon engine</b> enables icons to be created from pictures in this vector graphics format. This reduces the number of fixed-size images that developers need to include with applications, and avoids the need to provide sufficiently high resolution images to cover all possible icon sizes.</p>
+<p>Support for <b>detection and reporting of network interfaces</b> is provided by the <a href="qnetworkinterface.html">QNetworkInterface</a> class.</p>
+<p>Qt's keyboard handling has been improved to support <b>physical key recognition</b>. This allows keyboard shortcuts to be created that specify the keys that users see on their keyboard instead of generic logical key assignments.</p>
+<p><a href="qkeysequence.html">QKeySequence</a> now provides <b>a range of standard shortcuts</b> that developers can use when creating actions. These describe commonly-used high-level actions, such as <b>Undo</b>, <b>Copy</b>, and <b>Paste</b>, and enable shortcuts to be specified in a true cross-platform way.</p>
+<p>Support for <a href="properties.html#dynamic-properties">dynamic properties</a> extends the standard Qt property system, enabling <b>new properties to be added to instances of <a href="qobject.html">QObject</a> subclasses at run-time</b>.</p>
+<a name="qtopia-core"></a>
+<h2>Qtopia Core</h2>
+<p>Many improvements in Qt are specific to Qtopia Core and are concerned with graphics support and rendering performance.</p>
+<p><b>Direct painting to the screen</b> can be enabled on by <a href="qtopiacore-performance.html#bypassing-the-backing-store">bypassing the backing store</a> on a per-application basis.</p>
+<p><b>Support for 18 and 24 bits-per-pixel color depths</b> has been added to the paint system. Color depths that assign 6 bits to each color (or alpha) channel are commonly used on mobile devices.</p>
+<p>Alongside many general improvements and optimizations, the <b>transformed screen driver has been optimized</b> to improve performance when rendering rotated content.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

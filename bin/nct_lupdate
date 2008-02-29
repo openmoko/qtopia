@@ -1,28 +1,43 @@
 #!/usr/bin/perl
-
 use strict;
+use warnings;
 
-# External perl modules
 use File::Basename;
+use lib ( dirname($0) );
+use Qtopia::Paths;
+use Qtopia::Vars;
+
+Qtopia::Paths::get_paths();
+
+# Windows depot builds use the perl scripts directly rather than the compiled code
+if ( $isWindows ) {
+    check_script($0, "$depotpath/bin", $ARGV[0]);
+}
+
 
 use constant DEBUG => 0;
 
-# Usage: nct_lupdate [ -depot path ] "lang1 lang2 ... langn" files
+# Usage: nct_lupdate [ -depot path ] DQTDIR "lang1 lang2 ... langn" files
 
 my $global = 0;
 my $depot;
+my $warn_on = 1;
+if ( $ARGV[0] eq "-nowarn" ) {
+    shift(@ARGV);
+    $warn_on = 0;
+}
 if ( $ARGV[0] eq "-depot" ) {
     shift(@ARGV);
     $global = 1;
     $depot = shift(@ARGV);
 }
+my $DQTDIR = shift(@ARGV);
 my @LANGS = split(/\s+/,shift(@ARGV));
 my %contextinfo;
 
 for my $file ( @ARGV ) {
     open CONFIG, "$file" or die "Cannot read $file\n";
     my @contents = <CONFIG>;
-
     DEBUG and print "FL $file\n";
     my $context;
     my $tsfile;
@@ -32,7 +47,7 @@ for my $file ( @ARGV ) {
     # There are various formats this script can read...
     if ( basename($file) eq "zone.tab" ) {
 	# Read a zone.tab file
-	$context = "TimeZone";
+	$context = "QTimeZone";
 	$tsfile = "timezone";
 	#cat zone.tab | awk '/^[^#]/{print $3}' | sed 's/\//\n/g' | sort -u | sed 's/_/ /g'
 	CONFIG: for ( @contents ) {
@@ -54,17 +69,23 @@ for my $file ( @ARGV ) {
 		    $group = $1;
 		} else {
 		    my ( $key, $value ) = ( /([^=]*?)\s*=\s*(.*)/ );
+                    next if !defined $key;
 		    DEBUG and print "KV $key = $value\n";
 		    if ( $key =~ /(.*)\[(.*)\]$/ ) {
+                        my $val1 = $1;
+                        my $val2 = $2;
+                        if ( $value =~ /^"(.*)"$/ ) {
+                            $value = $1;
+                        }
 			if ( $group eq "Translation") {
-			    if ($2 && $1 eq "Comment") {
-				$trcomments{"$2"} = $value;
+			    if ($val2 && $val1 eq "Comment") {
+				$trcomments{"$val2"} = $value;
 			    }
 			} else {
-			    if ( $2 ) {
-				warn "WARNING: Old-style translation for $1 in $file\n";
+			    if ( $val2 ) {
+				warn "WARNING: Old-style translation for $val1 in $file\n";
 			    }
-			    $v{"$group/$1"} = $value;
+			    $v{"$group/$val1"} = $value;
 			}
 		    }
 		    if ( $group eq "Translation" ) {
@@ -109,6 +130,8 @@ for my $file ( @ARGV ) {
         }
 	$info{$context} = \%list;
 	$contextinfo{$tsfile} = \%info;
+    } elsif ( $warn_on ) {
+	warn "Missing translation info for file $file\n";
     }
 
     close CONFIG;
@@ -126,7 +149,11 @@ for my $tsfile ( keys %contextinfo ) {
 	    my $list = $$info{$context};
 	    for my $value ( keys %$list ) {
 		DEBUG and print "Message $value\n";
-		print CPP "translate(\"$context\",\"$value\", \"$$list{$value}\", UTF8);\n"
+                #Desktop files have encoding format that is not quite UTF8 conform
+                #Add escape character (\xc2) for soft hyphens
+                my $replacement = $value;
+                $replacement =~ s/\\xad/\\xc2\\xad/g;
+		print CPP "translate(\"$context\",\"$replacement\", \"$$list{$value}\", UnicodeUTF8);\n"
 	    }
 	}
     close CPP;
@@ -135,15 +162,15 @@ for my $tsfile ( keys %contextinfo ) {
 	if ( $global ) {
 	    $filename = $depot."/i18n/".$lang;
             if ( ! -e $filename ) {
-                mkdir ($filename, 0755) || print "Failed to create $filename";
+                mkdir ($filename, 0755) || print "Failed to create $filename\n";
             }
 	    $filename = $filename."/".$tsfile.".ts";
 	} else {
 	    $filename = $tsfile."-".$lang.".ts";
 	}
-	my @command = ("lupdate", "$tmp", "-ts", $filename);
-	DEBUG and print join(" ", @command)."\n";
-	system(@command);
+	my $cmd = "$DQTDIR/bin/lupdate $tmp -ts $filename";
+	DEBUG and print "$cmd\n";
+	system($cmd);
     }
     unlink $tmp;
 }

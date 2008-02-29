@@ -1,0 +1,65 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title> OTA (Network) </title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center"> OTA (Network) <br><small>Functional Description</small></h1>
+<p />
+<p />
+OTA Network allows the network provider to send a set of network configuration to a mobile device with no user interaction required to create a working Internet connection. Qtopia processes the network configuration messages and writes the received settings to a file. Two distinct formats of OTA network configuration messages are supported:  <ol>
+<li> Nokia's Over the Air Settings Specification 7.0 
+</li> <li> WAP/OMA standards (wap-183-provcont-20010724-a.pdf and  OMA-WAP-ProvCont-v1_1-20050428-C.pdf).
+</li></ol> 
+<p />
+New Configuration options are automatically matched against existing configurations and if no existing configuration is available, new Internet/WAP accounts are created. The entire process does not require any interaction with the user, however for security reasons the user can refuse to accept configuration changes. Once the changes are applied, new options are integrated into the Qtopia network configuration and can be used by starting the appropriate accounts.
+<p />
+
+<p />
+<h2><a name="Features"></a> Features </h2>
+<p />
+Qtopia can process OTA network configuration messages and writes the received settings to a file. 
+<p />
+The <a href="fd-Internet.html" class="twikiLink">Internet</a> application is responsible the processing of received OTA messages. Depending on the message content it 
+may change Internet, WAP and MMS accounts. 
+<p />
+Qtopia supports two distinct formats of OTA network configuration messages: 
+<p /> <ul>
+<li> Nokia's Over the Air Settings Specification 7.0 
+</li> <li> WAP/OMA standards (wap-183-provcont-20010724-a.pdf and OMA-WAP-ProvCont-v1_1-20050428-C.pdf) 
+</li></ul> 
+<p />
+The following configuration options are used by Qtopia and its applications: 
+<p /> <ul>
+<li> ISP name ( the name of the Internet service provider ) 
+</li> <li> Bearer ( the supported bearer are GSM and GPRS dial-up ) 
+</li> <li> APN ( access point information - GPRS only ) 
+</li> <li> GSM dial-up number ( for GSM Dial-up only ) 
+</li> <li> Authentication name ( the dial-up login name ) 
+</li> <li> Authentication secret ( the dial-up password ) 
+</li> <li> Authentication type ( PAP/CHAP authentication ) 
+</li> <li> WAP gateway address 
+</li> <li> WAP gateway port 
+</li> <li> WAP username 
+</li> <li> WAP password 
+</li> <li> WAP service type (e.g. CL-WSP) 
+</li> <li> WAP home page 
+</li> <li> MMS server address 
+</li></ul> 
+<p />
+<p />
+<p />
+New options are automatically matched against existing configurations. If there is no existing configuration available, new Internet/!WAP accounts are created. The entire process does not require any interaction with the user. However for security reasons the user can refuse to accept configuration changes. Once the changes are applied new options are integrated into Qtopia's network configuration and can be used by starting the appropriate accounts. 
+<p />
+<hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div>

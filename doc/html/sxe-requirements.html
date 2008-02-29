@@ -1,0 +1,77 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>SXE - Requirements</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">SXE - Requirements<br /><small></small></h1>
+<ul><li><a href="#introduction">Introduction</a></li>
+<li><a href="#use-case">Use-case</a></li>
+<li><a href="#acceptance-scenario">Acceptance Scenario</a></li>
+<ul><li><a href="#counter-indications">Counter-indications</a></li>
+</ul>
+<li><a href="#discussion-of-benefits">Discussion of Benefits</a></li>
+</ul>
+<a name="introduction"></a>
+<h2>Introduction</h2>
+<p>The Qtopia SXE must satisfy the following requirements:</p>
+<ul>
+<li>provide for selection and OTA installation of a range of packages including native binaries and themes</li>
+<li>maintain security and integrity of the Qtopia system, including user-data and access to any network or other services</li>
+<li>cause minimal impact and maximum usability for the end-user, including performance considerations</li>
+<li>provide an acceptable level of assurance for telephony applications that the operation of the device especially with respect to the carrier network cannot be compromised by a user knowingly downloading and installing software.</li>
+</ul>
+<p>It is desirable to provide:</p>
+<ul>
+<li>improved performance, functionality, and security over other virtual machine or sand-boxing models.</li>
+<li>mechanisms to address a range of security risks such as denial of service, out-of-memory and UI spoofing.</li>
+</ul>
+<a name="use-case"></a>
+<h2>Use-case</h2>
+<p>To define and circumscribe the security problem that the SXE system is intended to solve the following Use-Case is presented:</p>
+<p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Use-Case</th></tr></thead>
+<tr valign="top" class="odd"><td>A device end-user:<ul>
+<li>browses for a package</li>
+<li>downloads the package</li>
+<li>installs it on the device.</li>
+</ul>
+<p>The package may, without the users knowledge, contain flawed or malicious software.</p>
+<p>After installation the user expects to run the program and obtain the package's promised functionality.</p>
+</td></tr>
+<tr valign="top" class="even"><td><i>For telephony enabled devices the network provider expects the telephony software and service will not be compromised by malicious software knowingly installed by the user.</i></td></tr>
+</table></p>
+<a name="acceptance-scenario"></a>
+<h2>Acceptance Scenario</h2>
+<p>The integrity of the user's data and the Qtopia system itself must remain intact following the installation and execution of new device programs.</p>
+<a name="counter-indications"></a>
+<h3>Counter-indications</h3>
+<p>If a package can be constructed for installation, such that a program installed from it is able to perform any of the following actions then the requirements (above) will not have been met:</p>
+<ul>
+<li>append a line to the <tt>/etc/passwd</tt> file</li>
+<li>change the permission bits of the <tt>libc</tt> library file</li>
+<li>launch <tt>/opt/Qtopia/bin/qcop</tt> with <tt>LD_PRELOAD</tt> set to <tt>/root/mylibs/libc.so.1.0.1</tt> such that, this library is loaded</li>
+<li>without having the Network profile to send an MMS have the server execute the telephony commands to send an MMS</li>
+<li>without having the <tt>AddressBook</tt> profile to process address book data successfully request the <tt>updateContact(QContact)</tt> service.</li>
+</ul>
+<a name="discussion-of-benefits"></a>
+<h2>Discussion of Benefits</h2>
+<ul>
+<li>Native applications will often have better performance, through code optimization and access to hardware.</li>
+<li>Native sand-boxing allows tailoring the security policy to the file-systems and application stack which provides stronger security.</li>
+<li>Previous implementations of MIDP (v1.0) was not strong on security, and even with version 2, security is focused on normal network protocols, with limited ability to protect the file system.</li>
+<li>There are licensing issues with the Java approach.</li>
+</ul>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

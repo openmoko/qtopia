@@ -1,4 +1,8 @@
-CONFIG		+= qtopiaapp
+qtopia_project(qtopia app)
+TARGET=sysinfo
+CONFIG+=qtopia_main
+
+#DEFINES         += SYSINFO_GEEK_MODE
 
 HEADERS		= memory.h \
 		  graph.h \
@@ -6,13 +10,14 @@ HEADERS		= memory.h \
 		  storage.h \
 		  versioninfo.h \
 		  sysinfo.h \
-                  dataview.h 
+                  dataview.h \
+                  securityinfo.h
 
-QTOPIA_PHONE{
-    HEADERS     += cleanupwizard.h
-} else {
-    HEADERS     += cleanupwizard_pda.h
-}
+#phone{
+#    HEADERS     += cleanupwizard.h
+#} else {
+#    HEADERS     += cleanupwizard_pda.h
+#}
 
 SOURCES		= memory.cpp \
 		  graph.cpp \
@@ -22,29 +27,31 @@ SOURCES		= memory.cpp \
 		  sysinfo.cpp \
 		  main.cpp \
                   dataview.cpp \
-                  cleanupwizard.cpp
+                  securityinfo.cpp
+#                  cleanupwizard.cpp
 
+enable_cell {
+    HEADERS += siminfo.h modeminfo.h
+    SOURCES += siminfo.cpp modeminfo.cpp
+    depends(libraries/qtopiaphone)
+}
 
-
-                  
-TARGET		= sysinfo
-
-TRANSLATABLES   = $$HEADERS \
-                    $$SOURCES \
+TRANSLATABLES   += \
                     cleanupwizard.h \
                     cleanupwizard_pda.h
 
-help.files=$${QTOPIA_DEPOT_PATH}/help/html/sysinfo*
-help.path=/help/html
-
-pics.files=$${QTOPIA_DEPOT_PATH}/pics/sysinfo/*
+help.source=$$QTOPIA_DEPOT_PATH/help
+help.files=sysinfo*
+help.hint=help
+pics.files=$$QTOPIA_DEPOT_PATH/pics/sysinfo/*
 pics.path=/pics/sysinfo
-desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Applications/sysinfo.desktop
+pics.hint=pics
+desktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/sysinfo.desktop
 desktop.path=/apps/Applications
-cleanupservice.files=$${QTOPIA_DEPOT_PATH}/services/CleanupWizard/sysinfo
+desktop.hint=desktop
+cleanupservice.files=$$QTOPIA_DEPOT_PATH/services/CleanupWizard/sysinfo
 cleanupservice.path=/services/CleanupWizard
+INSTALLS+=help pics desktop cleanupservice
 
-INSTALLS+=desktop help cleanupservice
-PICS_INSTALLS+=pics
-
-PACKAGE_DESCRIPTION=System information dialog for the Qtopia environment.
+pkg.desc=System information for Qtopia.
+pkg.domain=window,docapi,cardreader,phonecomm

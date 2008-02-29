@@ -1,66 +1,47 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #ifndef TEXTEDIT_H
 #define TEXTEDIT_H
 
-#define QTEXTEDIT_OPEN_API
-
-#include <qtopia/filemanager.h>
-#include <qtopia/fileselector.h>
-#include <qtopia/contextmenu.h>
+#include <qdocumentselector.h>
+#ifdef QTOPIA_PHONE
+#include <qsoftmenubar.h>
+#include <QToolButton>
+#endif
 
 #include <qmainwindow.h>
-#include <qmultilineedit.h>
-#include <qlist.h>
-#include <qmap.h>
-#include <qtoolbar.h>
-#include <qwidgetstack.h>
-#include <qtoolbutton.h>
-#include <qpopupmenu.h>
-#include <qlineedit.h>
-#include <qaction.h>
 
 class QpeEditor;
+class QLineEdit;
+class QAction;
+class QToolBar;
+class QStackedWidget;
 
 class TextEdit : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    TextEdit( QWidget *parent = 0, const char *name = 0, WFlags f = 0 );
+    TextEdit( QWidget *parent = 0, Qt::WFlags f = 0 );
     ~TextEdit();
 
 protected:
@@ -70,7 +51,7 @@ public slots:
     void setDocument(const QString&);
 
 private slots:
-    void message(const QCString& msg, const QByteArray& data);
+    void message(const QString& msg, const QByteArray& data);
 
     void fileNew();
     void fileRevert();
@@ -84,14 +65,13 @@ private slots:
 
     void search();
     void searchNext();
-    void findWrapped();
     void findNotFound();
-    void findFound();
+    void findWrapped();
 
     void accept();
 
-    void newFile( const DocLnk & );
-    void openFile( const DocLnk & );
+    void newFile();
+    void openFile( const QContent & );
     void showEditTools();
 
     void zoomIn();
@@ -100,20 +80,22 @@ private slots:
     void setFixedWidth(bool y);
 
     void clipboardChanged();
-    void linkChanged( const QString & );
+
+    void contentChanged(const QContentIdList& id,const QContent::ChangeType type);
+    void print();
 
 private:
     void colorChanged( const QColor &c );
     bool save();
     void clear();
-    void updateCaption( const QString &name=QString::null );
+    void updateCaption( const QString &name=QString() );
     void setFontSize(int sz, bool round_down_not_up);
     void setupFontSizes(void);
     void setReadOnly(bool);
 
 private:
-    QWidgetStack *editorStack;
-    FileSelector *fileSelector;
+    QStackedWidget *editorStack;
+    QDocumentSelector *fileSelector;
     QpeEditor* editor;
 #ifndef QTOPIA_PHONE
     QToolBar *menu, *editBar;
@@ -125,11 +107,13 @@ private:
     QAction *pasteAction;
     QAction *fixedAction;
     QAction *findAction;
-    DocLnk *doc;
+    QContent *doc;
+
 #ifdef QTOPIA_PHONE
     QString backup;
     bool qCopActivated, canceled, saved;
 #endif
+
     bool wasCreated;
     bool searchVisible;
     QAction *zin, *zout;
@@ -137,8 +121,7 @@ private:
     int variableFontSize;
     QString calculateName(QString);
 #ifdef QTOPIA_PHONE
-    ContextMenu *contextMenu;
-    ContextMenu *fileContextMenu;
+    QMenu *contextMenu;
 #endif
 };
 

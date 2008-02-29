@@ -1,0 +1,23 @@
+#!/bin/sh
+
+FVISIBILITY_SUPPORT=no
+XPLATFORM=`basename $1`
+XCONFIG=$1/qmake.conf
+VERBOSE=$2
+
+cat >>iwmmxt.c << EOF
+#include <mmintrin.h>
+EOF
+
+COMPILER=`grep QMAKE_CC "$XCONFIG" | sed "s,.*= *,,"`
+"$COMPILER" -c iwmmxt.c >/dev/null 2>&1 && IWMMXT_SUPPORT=yes
+rm -f iwmmxt.c iwmmxt.o
+
+# done
+if [ "$IWMMXT_SUPPORT" != "yes" ]; then
+    [ "$VERBOSE" = "yes" ] && echo "iwmmxt support disabled."
+    exit 1
+else
+    [ "$VERBOSE" = "yes" ] && echo "iwmmxt support enabled."
+    exit 0
+fi

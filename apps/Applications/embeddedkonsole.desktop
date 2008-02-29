@@ -5,6 +5,6 @@ Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
 Comment[]=A Terminal Window
 Exec=embeddedkonsole
-Icon=Terminal
+Icon=embeddedkonsole/Terminal
 Type=Application
-Name[]=Ter­mi­nal
+Name[]=Ter\xadmi\xadnal

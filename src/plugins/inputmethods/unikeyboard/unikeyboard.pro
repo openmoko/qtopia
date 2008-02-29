@@ -1,15 +1,13 @@
-CONFIG		+= qtopiaplugin
-
-TARGET		= qunikeyboard
+qtopia_project(qtopia plugin)
+TARGET=qunikeyboard
 
 HEADERS		= unikeyboard.h unikeyboardimpl.h
 SOURCES		= unikeyboard.cpp unikeyboardimpl.cpp
 
-desktop.files=$${QTOPIA_DEPOT_PATH}/plugins/inputmethods/qunikeyboard.desktop
+desktop.files=$$QTOPIA_DEPOT_PATH/plugins/inputmethods/qunikeyboard.desktop
 desktop.path=/plugins/inputmethods/
-
+desktop.hint=desktop
 INSTALLS+=desktop
 
-TRANSLATABLES   = $${HEADERS} $${SOURCES}
-PACKAGE_NAME	= qpe-unikeyboard
-
+pkg.name=qpe-unikeyboard
+pkg.domain=libs

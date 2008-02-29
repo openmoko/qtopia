@@ -1,0 +1,14 @@
+This patch includes the changes to Helix for it to support the alternative
+MIME types for WAVE files.
+
+--- helix/src/datatype/wav/fileformat/wvffplin.cpp 	Fri Mar 17 18:12:22 EST 2006
++++ helix/src/datatype/wav/fileformat/wvffplin.cpp 	Fri Mar 17 18:12:22 EST 2006
+@@ -154,7 +154,7 @@
+ const char* CWaveFileFormat::zm_pCopyright      = HXVER_COPYRIGHT;
+ const char* CWaveFileFormat::zm_pMoreInfoURL    = HXVER_MOREINFO;
+ 
+-const char* CWaveFileFormat::zm_pFileMimeTypes[]  = {"audio/x-pn-wav", NULL};
++const char* CWaveFileFormat::zm_pFileMimeTypes[]  = {"audio/wav", "audio/x-wav", "audio/wave", "audio/x-pn-wav", NULL};
+ const char* CWaveFileFormat::zm_pFileExtensions[] = {"wav", NULL};
+ const char* CWaveFileFormat::zm_pFileOpenNames[]  = {"WAVE Files (*.wav)", NULL};
+ const char* CWaveFileFormat::zm_pPacketFormats[]  = {"rdt", "rtp", NULL};

@@ -1,20 +1,14 @@
-requires(contains(QTOPIA_ARCH,sharp))
+qtopia_project(external app)
+license(LGPL)
+TARGET=atd
 
-TEMPLATE	= app
-CONFIG		= singleexec
-DESTDIR		= $$(QPEDIR)/bin
+SOURCES = atd.cpp greenphone.cpp
+HEADERS = greenphone.h
 
-SOURCES		= atd.cpp
-
-TARGET		= atd
-
-target.path=/bin
-at.files=$$(QPEDIR)/bin/at
+at.files=$$QTOPIA_DEPOT_PATH/src/3rdparty/tools/atd/at
 at.path=/bin
-INSTALLS+=target at
+at.hint=script
+INSTALLS+=at
 
-TRANSLATIONS=
-
-PACKAGE_NAME=atd
-PACKAGE_DESCRIPTION=atd daemon for Sharp
-
+pkg.desc=atd daemon for Sharp
+pkg.domain=comm

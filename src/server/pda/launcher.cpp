@@ -1,210 +1,195 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
-#include <qtopia/qpeglobal.h>
-#ifdef Q_WS_QWS
-#include <qtopia/qcopenvelope_qws.h>
-#endif
-#include <qtopia/resource.h>
-#include <qtopia/applnk.h>
-#include <qtopia/config.h>
-#include <qtopia/global.h>
-#include <qtopia/qpeapplication.h>
-#include <qtopia/mimetype.h>
-#include <qtopia/categories.h>
-#include <qtopia/services.h>
-#include <qtopia/custom.h>
-#include <qtopia/password.h>
+#include <qtopiaglobal.h>
+#include <qtopiaipcenvelope.h>
+#include <qcontent.h>
+
+#include <qtopiaapplication.h>
+#include <qmimetype.h>
+#include <qcategorymanager.h>
+#include <qtopiaservices.h>
+#include <qdocumentproperties.h>
+#include <custom.h>
+#include <qpassworddialog.h>
+#include <qtopialog.h>
 
 #include <qdir.h>
 #ifdef Q_WS_QWS
 #include <qwindowsystem_qws.h>
 #endif
-#include <qtimer.h>
-#include <qcombobox.h>
-#include <qvbox.h>
-#include <qlayout.h>
-#include <qstyle.h>
-#include <qpushbutton.h>
-#include <qtabbar.h>
-#include <qwidgetstack.h>
-#include <qlayout.h>
-#include <qregexp.h>
-#include <qmessagebox.h>
-#include <qframe.h>
-#include <qpainter.h>
-#include <qlabel.h>
-#include <qtextstream.h>
-#include <qpopupmenu.h>
+#include <QTimer>
+#include <QComboBox>
+#include <QStyle>
+#include <QPushButton>
+#include <QTabBar>
+#include <QLayout>
+#include <QRegExp>
+#include <QMessageBox>
+#include <QFrame>
+#include <QPainter>
+#include <QLabel>
+#include <QTextStream>
+#include <QSettings>
+
+#include <QStackedWidget>
+#include <QTabBar>
+#include <QMenu>
+#include <QDesktopWidget>
+#include <QDebug>
 
 #include "startmenu.h"
 #include "taskbar.h"
 
-#include "serverinterface.h"
+#include "windowmanagement.h"
 #include "launcherview.h"
 #include "launcher.h"
+#include "launchertab.h"
 #include "server.h"
-#include <qtopia/docproperties.h>
 #include <stdlib.h>
 #include <assert.h>
 
-#if defined(_OS_LINUX_) || defined(Q_OS_LINUX)
+#ifdef Q_OS_LINUX
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/vfs.h>
 #include <mntent.h>
 #endif
 
-#ifdef Q_WS_QWS
-#include <qkeyboard_qws.h>
-#endif
+#include "servertask.h"
+QTOPIA_TASK(PDAQtopiaUI, Launcher);
 
-
-//===========================================================================
-
+// define LauncherTabWidget
 LauncherTabWidget::LauncherTabWidget( Launcher* parent ) :
-    QVBox( parent )
+    QWidget( parent )
 {
-    docLoadingWidget = 0;
+    QVBoxLayout *vbl = new QVBoxLayout(this);
+    vbl->setMargin(0);
+    vbl->setSpacing(0);
     launcher = parent;
     categoryBar = new LauncherTabBar( this );
+    vbl->addWidget(categoryBar);
     QPalette pal = categoryBar->palette();
-    pal.setColor( QColorGroup::Light, pal.color(QPalette::Active,QColorGroup::Shadow) );
-    pal.setColor( QColorGroup::Background, pal.active().background().light(110) );
+    pal.setColor( QPalette::Light, pal.color(QPalette::Active,QPalette::Shadow) );
     categoryBar->setPalette( pal );
-    stack = new QWidgetStack(this);
-    connect( categoryBar, SIGNAL(selected(int)), this, SLOT(raiseTabWidget()) );
-    categoryBar->show();
-    stack->show();
+    stack = new QStackedWidget(this);
+    vbl->addWidget(stack);
+    connect( categoryBar, SIGNAL(currentChanged(int)), this, SLOT(raiseTabWidget()) );
 
-#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
-    QCopChannel *channel = new QCopChannel( "QPE/Launcher", this );
-    connect( channel, SIGNAL(received(const QCString&,const QByteArray&)),
-             this, SLOT(launcherMessage(const QCString&,const QByteArray&)) );
-    connect( qApp, SIGNAL(appMessage(const QCString&,const QByteArray&)),
-	     this, SLOT(appMessage(const QCString&,const QByteArray&)));
-#endif
-
-    docLoadingWidget = new LoadingWidget( stack );
-    Config cfg("Launcher");
-    cfg.setGroup( "Tab Documents" ); // No tr
-    setTabViewAppearance( docLoadingWidget, cfg );
-
-    stack->addWidget( docLoadingWidget, 0 );
+    QtopiaChannel *channel = new QtopiaChannel( "QPE/LauncherSettings", this );
+    connect( channel, SIGNAL(received(const QString&,const QByteArray&)),
+             this, SLOT(launcherMessage(const QString&,const QByteArray&)) );
+    connect( qApp, SIGNAL(appMessage(const QString&,const QByteArray&)),
+             this, SLOT(appMessage(const QString&,const QByteArray&)));
 }
-
 
 void LauncherTabWidget::initLayout()
 {
     layout()->activate();
     docView()->setFocus();
-    categoryBar->showTab("Documents");
+    showTab("Applications");
 }
 
-void LauncherTabWidget::appMessage(const QCString& message, const QByteArray&)
+void LauncherTabWidget::appMessage(const QString& message, const QByteArray&)
 {
-    if ( message == "nextView()" )
-	categoryBar->nextTab();
+    // TODO: This message is no longer sent on QPE/System, it is now a service
+    if ( message == "nextView()" ) {
+        int n = categoryBar->count();
+        int tab = categoryBar->currentIndex();
+        if ( tab >= 0 )
+            categoryBar->setCurrentIndex( (tab - 1 + n)%n );
+    }
 }
 
 void LauncherTabWidget::raiseTabWidget()
 {
-    if ( categoryBar->currentView() == docView()
-	 && docLoadingWidget->enabled() ) {
-	stack->raiseWidget( docLoadingWidget );
-	docLoadingWidget->updateGeometry();
-    } else {
-	stack->raiseWidget( categoryBar->currentView() );
-    }
+    LauncherView * view = categoryBar->currentView();
+    if(view)
+        stack->setCurrentWidget(view);
 }
 
 void LauncherTabWidget::tabProperties()
 {
-    LauncherView *view = categoryBar->currentView();
-    QPopupMenu *m = new QPopupMenu( this );
-    m->insertItem( tr("Icon View"), LauncherView::Icon );
-    m->insertItem( tr("List View"), LauncherView::List );
-    m->setItemChecked( (int)view->viewMode(), TRUE );
-    int rv = m->exec( QCursor::pos() );
-    if ( rv >= 0 && rv != view->viewMode() ) {
-	view->setViewMode( (LauncherView::ViewMode)rv );
-    }
+    LauncherView *view = static_cast<LauncherView *>(stack->currentWidget());
+    QMenu *m = new QMenu( this );
+    QAction *iconAction = m->addAction(tr("Icon View"));
+    if (view->viewMode() == LauncherView::Icon)
+        iconAction->setChecked(true);
+    QAction *listAction = m->addAction(tr("List View"));
+    if (view->viewMode() == LauncherView::List)
+        listAction->setChecked(true);
+    QAction *result = m->exec( QCursor::pos() );
+    if (result == iconAction)
+        view->setViewMode(LauncherView::Icon);
+    else
+        view->setViewMode(LauncherView::List);
 
     delete m;
 }
 
 void LauncherTabWidget::deleteView( const QString& id )
 {
-    LauncherTab *t = categoryBar->launcherTab(id);
-    if ( t ) {
-	stack->removeWidget( t->view );
-	delete t->view;
-	categoryBar->removeTab( t );
+    LauncherTab * t = categoryBar->lookup(id);
+    if(t) {
+        stack->removeWidget(t->view);
+        delete t->view;
+        categoryBar->removeTab(id);
     }
 }
 
-LauncherView* LauncherTabWidget::newView( const QString& id, const QPixmap& pm, const QString& label )
+LauncherView* LauncherTabWidget::newView( const QString& id, const QIcon &icon, const QString &label )
 {
-    LauncherView* view = new LauncherView( stack );
-    connect( view, SIGNAL(clicked(const AppLnk*)),
-	    this, SIGNAL(clicked(const AppLnk*)));
-    connect( view, SIGNAL(rightPressed(const AppLnk*)),
-	    this, SIGNAL(rightPressed(const AppLnk*)));
+    LauncherView* view = new ApplicationLauncherView( id, stack );
 
-    int n = categoryBar->count();
-    stack->addWidget( view, n );
+    stack->addWidget(view);
+    connect( view, SIGNAL(clicked(QContent)),
+            this, SIGNAL(clicked(QContent)));
+    connect( view, SIGNAL(rightPressed(QContent)),
+            this, SIGNAL(rightPressed(QContent)));
 
-    LauncherTab *tab = new LauncherTab( id, view, pm, label );
-    categoryBar->insertTab( tab, n-1 );
+    LauncherTab * tab;
+    if ( id == "Documents" ) {
+        // Documents tab should always be at the end
+        tab = categoryBar->addTab(id, label, icon, true);
+        docview = view;
+    } else {
+        tab = categoryBar->addTab(id, label, icon);
+    }
+    tab->view = view;
 
-    if ( id == "Documents" )
-	docview = view;
+    qLog(UI) << "inserting " << id.toAscii() << " into launcher tab";
 
-    qDebug("inserting %s at %d", id.latin1(), n-1 );
+    QSettings cfg("Trolltech","Launcher");
+    setTabAppearance( tab, id, cfg );
 
-    Config cfg("Launcher");
-    setTabAppearance( tab, cfg );
     return view;
 }
 
 LauncherView *LauncherTabWidget::view( const QString &id )
 {
-    LauncherTab *t = categoryBar->launcherTab(id);
-    if ( !t )
-	return 0;
-    return t->view;
+    LauncherTab * t = categoryBar->lookup(id);
+    if(t)
+        return t->view;
+    else
+        return 0; // Not found
 }
 
 LauncherView *LauncherTabWidget::docView()
@@ -212,158 +197,152 @@ LauncherView *LauncherTabWidget::docView()
     return docview;
 }
 
-void LauncherTabWidget::setLoadingWidgetEnabled( bool v )
+void LauncherTabWidget::layoutTabs()
 {
-    if ( docLoadingWidget && v != docLoadingWidget->enabled() ) {
-	docLoadingWidget->setEnabled( v );
-	raiseTabWidget();
-    }
-}
-
-void LauncherTabWidget::setLoadingProgress( int percent )
-{
-    docLoadingWidget->setProgress( (percent / 4) * 4 );
+    categoryBar->layoutTabs();
 }
 
 // ### this function could more to LauncherView
-void LauncherTabWidget::setTabViewAppearance( LauncherView *v, Config &cfg )
+void LauncherTabWidget::setTabViewAppearance( LauncherView *v, QSettings &cfg )
 {
     // View
-    QString view = cfg.readEntry( "View", "Icon" );
+    QString view = cfg.value( "View", "Icon" ).toString();
     if ( view == "List" ) // No tr
-	v->setViewMode( LauncherView::List );
-    QString bgType = cfg.readEntry( "BackgroundType" );
+        v->setViewMode( LauncherView::List );
+
+    QString bgType = cfg.value( "BackgroundType" ).toString();
+
     if ( bgType == "Image" ) { // No tr
-	QString pm = cfg.readEntry( "BackgroundImage" );
-	v->setBackgroundType( LauncherView::Image, pm );
+
+        QString pm = cfg.value( "BackgroundImage" ).toString();
+        v->setBackgroundType( LauncherView::Image, pm );
+
     } else if ( bgType == "SolidColor" ) {
-	QString c = cfg.readEntry( "BackgroundColor" );
-	v->setBackgroundType( LauncherView::SolidColor, c );
+        QString c = cfg.value( "BackgroundColor" ).toString();
+        v->setBackgroundType( LauncherView::SolidColor, c );
+
     } else {
-	v->setBackgroundType( LauncherView::Ruled, QString::null );
+        v->setBackgroundType( LauncherView::Ruled, QString() );
     }
-    QString textCol = cfg.readEntry( "TextColor" );
+
+    QString textCol = cfg.value( "TextColor" ).toString();
+
     if ( textCol.isEmpty() )
-	v->setTextColor( QColor() );
+        v->setTextColor( QColor() );
+
     else
-	v->setTextColor( QColor(textCol) );
-    bool customFont = cfg.readBoolEntry( "CustomFont", FALSE );
+        v->setTextColor( QColor(textCol) );
+    bool customFont = cfg.value( "CustomFont", false ).toBool();
+
     if ( customFont ) {
-	QStringList font = cfg.readListEntry( "Font", ',' );
-	if ( font.count() == 4 )
-	    v->setViewFont( QFont(font[0], font[1].toInt(), font[2].toInt(), font[3].toInt()!=0) );
+        QStringList font = cfg.value( "Font").toString().split( ',' );
+
+    if ( font.count() == 4 )
+            v->setViewFont( QFont(font[0], font[1].toInt(), font[2].toInt(), font[3].toInt()!=0) );
     } else {
-	v->clearViewFont();
+
+        v->clearViewFont();
     }
 }
 
-// ### Could move to LauncherTab
-void LauncherTabWidget::setTabAppearance( LauncherTab *tab, Config &cfg )
+void LauncherTabWidget::setTabAppearance( LauncherTab *tab,
+                                          const QString &type,
+                                          QSettings &cfg )
 {
-    cfg.setGroup( QString( "Tab %1" ).arg(tab->type) ); // No tr
+    cfg.beginGroup( QString( "Tab %1" ).arg(type) ); // No tr
 
     setTabViewAppearance( tab->view, cfg );
 
     // Tabs
-    QString tabCol = cfg.readEntry( "TabColor" );
+    QString tabCol = cfg.value( "TabColor" ).toString();
     if ( tabCol.isEmpty() )
-	tab->bgColor = QColor();
+        tab->bgColor = QColor();
     else
-	tab->bgColor = QColor(tabCol);
-    QString tabTextCol = cfg.readEntry( "TabTextColor" );
+        tab->bgColor = QColor(tabCol);
+    QString tabTextCol = cfg.value( "TabTextColor" ).toString();
     if ( tabTextCol.isEmpty() )
-	tab->fgColor = QColor();
+        tab->fgColor = QColor();
     else
-	tab->fgColor = QColor(tabTextCol);
+        tab->fgColor = QColor(tabTextCol);
+
+    cfg.endGroup();
 }
 
-void LauncherTabWidget::paletteChange( const QPalette &p )
+void LauncherTabWidget::showTab(const QString& id)
 {
-    QVBox::paletteChange( p );
-    QPalette pal = palette();
-    pal.setColor( QColorGroup::Light, pal.color(QPalette::Active,QColorGroup::Shadow) );
-    pal.setColor( QColorGroup::Background, pal.active().background().light(110) );
-    categoryBar->setPalette( pal );
-    categoryBar->update();
+    categoryBar->setCurrentTab(id);
 }
 
-void LauncherTabWidget::styleChange( QStyle & )
+void LauncherTabWidget::changeEvent(QEvent *e)
 {
-    QTimer::singleShot( 0, this, SLOT(setProgressStyle()) );
-}
+    if (e->type() == QEvent::PaletteChange) {
+        QPalette pal = palette();
+        pal.setColor( QPalette::Light, pal.color(QPalette::Active,QPalette::Shadow) );
+        categoryBar->setPalette( pal );
+    }
 
-void LauncherTabWidget::setProgressStyle()
-{
-    if (docLoadingWidget) 
-	docLoadingWidget->setProgressStyle();
+    QWidget::changeEvent(e);
 }
 
 void LauncherTabWidget::setBusy(bool on)
 {
     if ( on )
-	currentView()->setBusy(TRUE);
+        currentView()->setBusy(true);
     else {
-	for ( int i = 0; i < categoryBar->count(); i++ ) {
-	    LauncherView *view = ((LauncherTab *)categoryBar->tab(i))->view;
-	    view->setBusy( FALSE );
-	}
+        for(int ii = 0; ii < stack->count(); ii++)
+            static_cast<LauncherView *>(stack->widget(ii))->setBusy(false);
     }
 }
 
 LauncherView *LauncherTabWidget::currentView(void)
 {
-    return (LauncherView*)stack->visibleWidget();
+    return (LauncherView*)stack->currentWidget();
 }
 
-void LauncherTabWidget::launcherMessage( const QCString &msg, const QByteArray &data)
+void LauncherTabWidget::launcherMessage( const QString &msg, const QByteArray &data)
 {
-    QDataStream stream( data, IO_ReadOnly );
+    QDataStream stream( data );
     if ( msg == "setTabView(QString,int)" ) {
-	QString id;
-	stream >> id;
-	int mode;
-	stream >> mode;
-	if ( view(id) )
-	    view(id)->setViewMode( (LauncherView::ViewMode)mode );
+        QString id;
+        stream >> id;
+        int mode;
+        stream >> mode;
+        if ( view(id) )
+            view(id)->setViewMode( (LauncherView::ViewMode)mode );
     } else if ( msg == "setTabBackground(QString,int,QString)" ) {
-	QString id;
-	stream >> id;
-	int mode;
-	stream >> mode;
-	QString pixmapOrColor;
-	stream >> pixmapOrColor;
-	if ( view(id) )
-	    view(id)->setBackgroundType( (LauncherView::BackgroundType)mode, pixmapOrColor );
-	if ( id == "Documents" )
-	    docLoadingWidget->setBackgroundType( (LauncherView::BackgroundType)mode, pixmapOrColor );
+        QString id;
+        stream >> id;
+        int mode;
+        stream >> mode;
+        QString pixmapOrColor;
+        stream >> pixmapOrColor;
+        if ( view(id) )
+            view(id)->setBackgroundType( (LauncherView::BackgroundType)mode, pixmapOrColor );
     } else if ( msg == "setTextColor(QString,QString)" ) {
-	QString id;
-	stream >> id;
-	QString color;
-	stream >> color;
-	if ( view(id) )
-	    view(id)->setTextColor( QColor(color) );
-	if ( id == "Documents" )
-	    docLoadingWidget->setTextColor( QColor(color) );
+        QString id;
+        stream >> id;
+        QString color;
+        stream >> color;
+        if ( view(id) )
+            view(id)->setTextColor( QColor(color) );
     } else if ( msg == "setFont(QString,QString,int,int,int)" ) {
-	QString id;
-	stream >> id;
-	QString fam;
-	stream >> fam;
-	int size;
-	stream >> size;
-	int weight;
-	stream >> weight;
-	int italic;
-	stream >> italic;
-	if ( view(id) ) {
-	    if ( !fam.isEmpty() ) {
-		view(id)->setViewFont( QFont(fam, size, weight, italic!=0) );
-		qDebug( "setFont: %s, %d, %d, %d", fam.latin1(), size, weight, italic );
-	    } else {
-		view(id)->clearViewFont();
-	    }
-	}
+        QString id;
+        stream >> id;
+        QString fam;
+        stream >> fam;
+        int size;
+        stream >> size;
+        int weight;
+        stream >> weight;
+        int italic;
+        stream >> italic;
+        if ( view(id) ) {
+            if ( !fam.isEmpty() ) {
+                view(id)->setViewFont( QFont(fam, size, weight, italic!=0) );
+            } else {
+                view(id)->clearViewFont();
+            }
+        }
     }
 }
 
@@ -372,86 +351,120 @@ void LauncherTabWidget::launcherMessage( const QCString &msg, const QByteArray &
 //---------------------------------------------------------------------------
 
 Launcher::Launcher()
-    : QMainWindow( 0, "PDA User Interface", QWidget::WStyle_Customize | QWidget::WGroupLeader )
+: QWidget(0, Qt::FramelessWindowHint), categories(0)
 {
+    setAttribute(Qt::WA_GroupLeader);
     tabs = 0;
     tb = 0;
     delayedAppLnk = 0;
     tid_today = startTimer(3600*2*1000);
     last_today_show = QDate::currentDate();
-}
 
-void Launcher::timerEvent( QTimerEvent *e )
-{
-    if ( e->timerId() == tid_today ) {
-	QDate today = QDate::currentDate();
-	if ( today != last_today_show ) {
-	    last_today_show = today;
-	    Config cfg("today");
-	    cfg.setGroup("Start");
-#ifndef QPE_DEFAULT_TODAY_MODE
-#define QPE_DEFAULT_TODAY_MODE "Never"
-#endif
-	    if ( cfg.readEntry("Mode",QPE_DEFAULT_TODAY_MODE) == "Daily" ) {
-		QCopEnvelope env(Service::channel("today"),"raise()");
-	    }
-	}
-    }
-}
-
-void Launcher::createGUI()
-{
-    setCaption( tr("Launcher") );
+    setWindowTitle( tr("Launcher") );
 
     // we have a pretty good idea how big we'll be
     setGeometry( 0, 0, qApp->desktop()->width(), qApp->desktop()->height() );
 
     tb = new TaskBar;
+    QVBoxLayout *vb = new QVBoxLayout(this);
+    vb->setMargin(0);
+    vb->setSpacing(0);
     tabs = new LauncherTabWidget( this );
-    setCentralWidget( tabs );
+    vb->addWidget(tabs);
 
-    ServerInterface::dockWidget( tb, ServerInterface::Bottom );
+    WindowManagement::instance()->dockWindow( tb, WindowManagement::Bottom );
 
     qApp->installEventFilter( this );
 
     connect( qApp, SIGNAL(authenticate(bool)), this, SLOT(askForPin(bool)) );
 
     connect( tb, SIGNAL(tabSelected(const QString&)),
-	this, SLOT(showTab(const QString&)) );
+        this, SLOT(showTab(const QString&)) );
     connect( tabs, SIGNAL(selected(const QString&)),
-	this, SLOT(viewSelected(const QString&)) );
-    connect( tabs, SIGNAL(clicked(const AppLnk*)),
-	this, SLOT(select(const AppLnk*)));
-    connect( tabs, SIGNAL(rightPressed(const AppLnk*)),
-	this, SLOT(properties(const AppLnk*)));
+        this, SLOT(viewSelected(const QString&)) );
+    connect( tabs, SIGNAL(clicked(QContent)),
+        this, SLOT(select(QContent)));
+    connect( tabs, SIGNAL(rightPressed(QContent)),
+        this, SLOT(properties(QContent)));
 
-#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
-    QCopChannel* sysChannel = new QCopChannel( "QPE/System", this );
-    connect( sysChannel, SIGNAL(received(const QCString&,const QByteArray&)),
-             this, SLOT(systemMessage(const QCString&,const QByteArray&)) );
-#endif
+    QtopiaChannel* sysChannel = new QtopiaChannel( "QPE/System", this );
+    connect( sysChannel, SIGNAL(received(const QString&,const QByteArray&)),
+             this, SLOT(systemMessage(const QString&,const QByteArray&)) );
 
     // all documents
-    QImage img( Resource::loadImage( "DocsIcon" ) );
-    QPixmap pm;
-    pm = img.smoothScale( AppLnk::smallIconSize(), AppLnk::smallIconSize() );
+    QImage img( QImage( ":image/qpe/DocsIcon" ) );
+    int smallIconSize = qApp->style()->pixelMetric(QStyle::PM_SmallIconSize);
+    QPixmap pm = QPixmap::fromImage(img.scaled( smallIconSize, smallIconSize ));
     // It could add this itself if it handles docs
-    tabs->newView("Documents", pm, tr("Documents") )->setToolsEnabled( TRUE );
-    QTimer::singleShot( 0, tabs, SLOT( initLayout() ) );
+    // akennedy
+    tabs->newView("Documents", pm, tr("Documents") )->setToolsEnabled( true );
+    QTimer::singleShot( 0, tabs, SLOT(initLayout()) );
 
-    qApp->setMainWidget( this );
+    // Setup all types
+    categories = new QCategoryManager("Applications", this);
+    QObject::connect(categories, SIGNAL(categoriesChanged()),
+                     this, SLOT(categoriesChanged()));
+    categoriesChanged();
+
 }
 
-void Launcher::showGUI()
+void Launcher::categoriesChanged()
+{
+    QStringList cats = categories->categoryIds();
+    for(int ii = 0; ii < cats.count(); ++ii) {
+        const QString & cat = cats.at(ii);
+        if(!categories->isGlobal(cat) && !currentCategories.contains(cat)) {
+            addType(cat, categories->label(cat), categories->icon(cat));
+        }
+    }
+
+    // Inefficient but small set so should not be a problem
+    for(QStringList::Iterator iter = currentCategories.begin();
+            iter != currentCategories.end();) {
+        if(!cats.contains(*iter)) {
+            removeType(*iter);
+            iter = currentCategories.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
+}
+
+void Launcher::timerEvent( QTimerEvent *e )
+{
+    if ( e->timerId() == tid_today ) {
+        QDate today = QDate::currentDate();
+        if ( today != last_today_show ) {
+            last_today_show = today;
+            QSettings cfg("Trolltech","today");
+            cfg.beginGroup("Start");
+#ifndef QPE_DEFAULT_TODAY_MODE
+#define QPE_DEFAULT_TODAY_MODE "Never"
+#endif
+            if ( cfg.value("Mode",QPE_DEFAULT_TODAY_MODE).toString() == "Daily" ) {
+                QtopiaIpcEnvelope env(QtopiaService::channel("today"),"raise()");
+            }
+        }
+    }
+}
+
+void Launcher::showEvent(QShowEvent *e)
 {
     tb->show();
     QTimer::singleShot( 0, this, SLOT( makeVisible() ) );
+    QWidget::showEvent(e);
 }
 
 Launcher::~Launcher()
 {
-    if ( tb )
-	destroyGUI();
+    if ( tb ) {
+    delete tb;
+    tb = 0;
+    }
+    if ( tabs ) {
+    delete tabs;
+        tabs = 0;
+    }
 }
 
 void Launcher::makeVisible()
@@ -459,34 +472,26 @@ void Launcher::makeVisible()
     showMaximized();
 }
 
-void Launcher::destroyGUI()
-{
-    delete tb;
-    tb = 0;
-    delete tabs;
-    tabs =0;
-}
-
 bool Launcher::eventFilter( QObject*, QEvent *ev )
 {
 #ifdef QT_QWS_SL5XXX
     if ( ev->type() == QEvent::KeyPress ) {
-	QKeyEvent *ke = (QKeyEvent *)ev;
-	if ( ke->key() == Qt::Key_F11 ) { // menu key
-	    QWidget *active = qApp->activeWindow();
-	    if ( active && active->isPopup() )
-		active->close();
-	    else {
-		Global::terminateBuiltin("calibrate"); // No tr
-		tb->launchStartMenu();
-	    }
-	    return TRUE;
-	}
+        QKeyEvent *ke = (QKeyEvent *)ev;
+        if ( ke->key() == Qt::Key_F11 ) { // menu key
+            QWidget *active = qApp->activeWindow();
+            if ( active && active->isPopup() )
+                active->close();
+            else {
+                Global::terminateBuiltin("calibrate"); // No tr
+                tb->launchStartMenu();
+            }
+            return true;
+        }
     }
 #else
     Q_UNUSED(ev);
 #endif
-    return FALSE;
+    return false;
 }
 
 void Launcher::toggleSymbolInput()
@@ -506,263 +511,243 @@ void Launcher::toggleCapsLockState()
 
 void Launcher::askForPin(bool apo)
 {
-    Password::authenticate(apo);
-    ServerApplication::lockScreen(FALSE);
+    QPasswordDialog::authenticateUser(this, apo);
+    ServerApplication::lockScreen(false);
 }
 
 static bool isVisibleWindow(int wid)
 {
 #ifdef Q_WS_QWS
-    const QList<QWSWindow> &list = qwsServer->clientWindows();
-    QWSWindow* w;
-    for (QListIterator<QWSWindow> it(list); (w=it.current()); ++it) {
-	if ( w->winId() == wid )
-	    return !w->isFullyObscured();
+    const QList<QWSWindow*> &list = qwsServer->clientWindows();
+    foreach (QWSWindow* w, list) {
+        if ( w->winId() == wid )
+            return !w->isFullyObscured();
     }
 #endif
-    return FALSE;
+    return false;
 }
 
 void Launcher::viewSelected(const QString& s)
 {
-    setCaption( s + tr(" - Launcher") );
+    setWindowTitle( s + tr(" - Launcher") );
 }
 
 void Launcher::showTab(const QString& id)
 {
-    tabs->categoryBar->showTab(id);
+    tabs->showTab(id);
     raise();
 }
 
-void Launcher::select( const AppLnk *appLnk )
+void Launcher::select( const QContent *appLnk )
 {
     if ( appLnk->type() == "Folder" ) { // No tr
-	// Not supported: flat is simpler for the user
+        // Not supported: flat is simpler for the user
     } else {
-	if ( appLnk->exec().isNull() ) {
-	    if ( ! delayedAppLnk ) {
-		delayedAppLnk = new AppLnk(*appLnk);
-		QTimer::singleShot( 0, this, SLOT(delayedSelect()) );
-	    }
-	} else {
-	    tabs->setBusy(TRUE);
-	    emit executing( appLnk );
-	    appLnk->execute();
-	}
+      if ( appLnk->executableName().isNull() ) {
+            if ( ! delayedAppLnk ) {
+                delayedAppLnk = new QContent(*appLnk);
+                QTimer::singleShot( 0, this, SLOT(delayedSelect()) );
+            }
+        } else {
+            tabs->setBusy(true);
+            emit executing( appLnk );
+            appLnk->execute();
+        }
     }
 }
 
 void Launcher::delayedSelect()
 {
     if ( !delayedAppLnk )
-	return;
-    AppLnk *appLnk = delayedAppLnk;
+        return;
+    QContent *appLnk = delayedAppLnk;
     delayedAppLnk = 0;
 
     int i = QMessageBox::information(this,tr("No application"),
-	    tr("<qt>No application is defined for this document. "
-		"Type is %1.</qt>").arg(appLnk->type()),
-	    tr("OK"), tr("View as text"), 0, 0, 1);
+            tr("<qt>No application is defined for this document. "
+                "Type is %1.</qt>").arg(appLnk->type()),
+            tr("OK"), tr("View as text"), 0, 0, 1);
 
-    if ( ! QFileInfo(appLnk->file()).exists() )
-	qDebug( "file no longer exists!" );
-    else if ( i == 1 )
-	Global::execute(Service::app("Open/text/*"),appLnk->file());
+    if ( QFileInfo(appLnk->file()).exists() && i == 1 )
+        Qtopia::execute(QtopiaService::app("Open/text/*"),appLnk->file());
 
     delete appLnk;
 }
 
-void Launcher::properties( const AppLnk *appLnk )
+void Launcher::properties( const QContent *appLnk )
 {
     if ( appLnk->type() == "Folder" ) { // No tr
-	// Not supported: flat is simpler for the user
+        // Not supported: flat is simpler for the user
     } else {
-	if ( ! delayedAppLnk ) {
-	    delayedAppLnk = new AppLnk(*appLnk);
-	    QTimer::singleShot( 0, this, SLOT(delayedProperties()) );
-	}
+        if ( ! delayedAppLnk ) {
+            delayedAppLnk = new QContent(*appLnk);
+            QTimer::singleShot( 0, this, SLOT(delayedProperties()) );
+        }
     }
 }
 
 void Launcher::delayedProperties()
 {
     if ( !delayedAppLnk )
-	return;
-    AppLnk *appLnk = delayedAppLnk;
+        return;
+    QContent *appLnk = delayedAppLnk;
     delayedAppLnk = 0;
 
-    DocPropertiesDialog prop(appLnk,0,
-	    appLnk->isDocLnk() ? "document-properties" // No tr
-	    : "apps-properties"); // No tr
+    QDocumentPropertiesDialog prop(*appLnk);
     prop.showMaximized();
     prop.exec();
 
     delete appLnk;
 }
 
-void Launcher::storageChanged( const QList<FileSystem> &/*fs*/ )
+void Launcher::systemMessage( const QString &msg, const QByteArray &data)
 {
-    // ### update combo boxes if we had a combo box for the storage type
-}
-
-void Launcher::systemMessage( const QCString &msg, const QByteArray &data)
-{
-    QDataStream stream( data, IO_ReadOnly );
+    QDataStream stream( data );
     if ( msg == "busy()" ) {
-	tb->startWait();
+        tb->startWait();
     } else if ( msg == "notBusy(QString)" ) {
-	QString app;
-	stream >> app;
-	tabs->setBusy(FALSE);
-	tb->stopWait(app);
+        QString app;
+        stream >> app;
+        tabs->setBusy(false);
+        tb->stopWait(app);
     } else if (msg == "applyStyle()") {
-        tabs->categoryBar->layoutTabs();
+        tabs->layoutTabs();
     }
 }
 
 // These are the update functions from the server
-void Launcher::typeAdded( const QString& type, const QString& name,
-				    const QPixmap& pixmap, const QPixmap& )
+void Launcher::addType(const QString& type, const QString& name,
+                                     const QIcon &iconconst)
 {
-    tabs->newView( type, pixmap, name );
+    TypeView tv;
+
+    tv.view =   tabs->newView( type, iconconst, name );
     ids.append( type );
     tb->refreshStartMenu();
 
-    static bool first = TRUE;
+    tv.view->setObjectName(type);
+    map[QLatin1String("Folder/")+type] = tv;
+
+    static bool first = true;
     if ( first ) {
-	first = FALSE;
-        tabs->categoryBar->showTab(type);
+        first = false;
+        tabs->showTab(type);
     }
 
-    tabs->view( type )->setUpdatesEnabled( FALSE );
-    tabs->view( type )->setSortEnabled( FALSE );
+    tabs->view( type )->setUpdatesEnabled( true);
+    tabs->view( type )->setSortEnabled( false );
 }
 
-void Launcher::typeRemoved( const QString& type )
+void Launcher::removeType(const QString& type)
 {
     tabs->view( type )->removeAllItems();
     tabs->deleteView( type );
-    ids.remove( type );
+    ids.removeAll( type );
     tb->refreshStartMenu();
 }
 
-void Launcher::applicationAdded( const QString& type, const AppLnk& app )
+#ifdef QTOPIA4_TODO
+void Launcher::applicationAdded( const QString& type, const QContent& app )
 {
-    if ( app.type() == "Separator" )  // No tr
-	return;
+    if ( type == "Separator" )  // No tr
+        return;
 
-    LauncherView *view = tabs->view( type );
-    if ( view )
-	view->addItem( new AppLnk( app ), FALSE );
-    else
-	qWarning("addAppLnk: No view for type %s. Can't add app %s!",
-				  type.latin1(),app.name().latin1()  );
+    if (map.contains("Folder/"+type)) {
 
-    MimeType::registerApp( app );
+      LauncherView *view = map["Folder/"+type].view;
+      qLog(DocAPI) << "PdaLauncher::applicationAdded" << type << "," << app.name() << "(cid =" << app.id();
+      qLog(DocAPI) << "icon path =" << app.iconName();
+      view->addItem(new QContent(app));
+  }
 }
 
-void Launcher::applicationRemoved( const QString& type, const AppLnk& app )
+void Launcher::applicationRemoved(  QContentId id )
 {
-    LauncherView *view = tabs->view( type );
-    if ( view )
-	view->removeLink( app.linkFile() );
-    else
-	qWarning("removeAppLnk: No view for %s!", type.latin1() );
+
+   QMap<QString, TypeView>::Iterator it;
+   for (it = map.begin(); it != map.end(); ++it) {
+     (*it).view->removeLink(id);
+   }
 }
 
 void Launcher::allApplicationsRemoved()
 {
-    MimeType::clear();
-    for ( QStringList::ConstIterator it=ids.begin(); it!= ids.end(); ++it)
-	tabs->view( (*it) )->removeAllItems();
+   QMap<QString, TypeView>::Iterator it;
+   for (it = map.begin(); it != map.end(); ++it) {
+     (*it).view->removeAllItems();
+   }
 }
 
-void Launcher::documentAdded( const DocLnk& doc )
+void Launcher::documentAdded( QContentId doc )
 {
-    tabs->docView()->addItem( new DocLnk( doc ), FALSE );
+    if(doc == QContent::InvalidId)
+    {
+        qWarning() << "trying to add an invalid id to the document view";
+        return;
+    }
+  tabs->docView()->addItem( new QContent( doc ), false );
+ /* if (!actionProps->isEnabled())
+    actionProps->setEnabled(true);
+  if (!actionDelete->isEnabled())
+    actionDelete->setEnabled(true);
+  if (!actionBeam->isEnabled())
+    actionBeam->setEnabled(true);
+  separatorAction->setEnabled(true);
+ */
+  if (tabs->docView()->isVisible()) {
+    tabs->docView()->sort();
+ //   tabs->docViewNeedsSort = false;
+  } else {
+ //   tabs->docViewNeedsSort = true;
+  }
 }
 
-void Launcher::showLoadingDocs()
+void Launcher::documentRemoved( QContentId doc )
 {
-    tabs->docView()->hide();
-}
 
-void Launcher::showDocTab()
-{
-    if ( tabs->categoryBar->currentView() == tabs->docView() )
-	tabs->docView()->show();
-}
+  if ( tabs->docView()->removeLink( doc ) ) {
+  if ( tabs->docView()->isVisible()) {
+  tabs->docView()->sort();
+//      docViewNeedsSort = false;
+    } else {
+   //   docViewNeedsSort = true;
+    }
+  if (! tabs->docView()->count()) {
+//      actionProps->setEnabled(false);
+//      actionDelete->setEnabled(false);
+//      actionBeam->setEnabled(false);
+//      separatorAction->setEnabled(false);
+    }
+  }
 
-void Launcher::documentRemoved( const DocLnk& doc )
-{
-    QString file;
-    if ( doc.linkFileKnown() )
-	file = doc.linkFile();
-    else if ( doc.fileKnown() )
-	file = doc.file();
-    else
-	return;
-    tabs->docView()->removeLink( file );
-}
-
-void Launcher::documentChanged( const DocLnk& oldDoc, const DocLnk& newDoc )
-{
-    documentRemoved( oldDoc );
-    documentAdded( newDoc );
 }
 
 void Launcher::allDocumentsRemoved()
 {
-    tabs->docView()->removeAllItems();
+  /*
+  actionProps->setEnabled(false);
+  actionDelete->setEnabled(false);
+  actionBeam->setEnabled(false);
+  separatorAction->setEnabled(false);
+  */
+}
+
+void Launcher::documentChanged( QContentId id )
+{
+  documentRemoved(id);
+  documentAdded(id);
+
 }
 
 void Launcher::applicationStateChanged( const QString& name, ApplicationState state )
 {
     tb->setApplicationState( name, state );
 }
+#endif
 
-void Launcher::applicationScanningProgress( int percent )
+void Launcher::showDocTab()
 {
-    switch ( percent ) {
-        case 0: {
-	    for ( QStringList::ConstIterator it=ids.begin(); it!= ids.end(); ++it) {
-		tabs->view( (*it) )->setUpdatesEnabled( FALSE );
-		tabs->view( (*it) )->setSortEnabled( FALSE );
-	    }
-	    break;
-        }
-        case 100: {
-	    for ( QStringList::ConstIterator it=ids.begin(); it!= ids.end(); ++it) {
-		tabs->view( (*it) )->setSortEnabled( TRUE );
-		tabs->view( (*it) )->setUpdatesEnabled( TRUE );
-	    }
-	    break;
-        }
-        default:
-            break;
-    }
-}
-
-void Launcher::documentScanningProgress( int percent )
-{
-    switch ( percent ) {
-        case 0: {
-	    tabs->setLoadingProgress( 0 );
-	    tabs->setLoadingWidgetEnabled( TRUE );
-	    tabs->docView()->setUpdatesEnabled( FALSE );
-	    tabs->docView()->setSortEnabled( FALSE );
-	    break;
-        }
-        case 100: {
-	    tabs->docView()->updateTools();
-	    tabs->docView()->setSortEnabled( TRUE );
-	    tabs->docView()->setUpdatesEnabled( TRUE );
-	    tabs->setLoadingWidgetEnabled( FALSE );
-	    break;
-        }
-        default:
-	    tabs->setLoadingProgress( percent );
-            break;
-    }
+    if ( tabs->currentView() == tabs->docView() )
+        tabs->docView()->show();
 }
 

@@ -2,5 +2,5 @@
 File=QtopiaPlugins
 Context=Today
 [Desktop Entry]
-Name=Today
+Name[]=Today
 Comment[]=Plugins for the Today application.

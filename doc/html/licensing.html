@@ -1,216 +1,37 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/doc/licensing.doc:1 -->
-<html>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<style type="text/css"><!--
-h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }
-body { background: #ffffff; color: black; }
---></style>
+  <title>Qt 4.2: Licensing Information</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr bgcolor="black"><td>
-<a href="classes.html"><font color="white">Qt API</font></a>
-<font color="white">|</font>
-<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
-</td>
-<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
-<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table>
-<p> 
-<p> <h2> Qtopia - Licensing
-</h2>
-<a name="1"></a><p> Qtopia depends on <a href="qt.html">Qt</a>/Embedded. There are two types of third-party software in Qt/Embedded -
-<ol type=1>
-<li> Software compiled as part of the Qt library itself - <a href=licenses.html>Licenses</a>
-<li> Independent packages that may be added to enhance the capabilities of Qt - <a href=3rdparty.html>Licenses</a>
-</ol>
-<p> <hr>
-<p> Qtopia itself also includes software of the following types:
-<p> <ol type=1>
-<li> Trolltech original software licensed under
-a full commercial license to commercial customers
-(Commercial Licensed Software).
-<li> Trolltech original software licensed under the
-GNU General Public License, and additionally under
-a full commercial license to commercial customers
-(Dual Licensed Software).
-<li> Third-party software licensed under the GNU General Public License
-(GPL Licensed Software).
-<li> Third-party software licensed under the GNU Lesser General Public License
-(LGPL Licensed Software).
-<li> Third-party software licensed under liberal licenses
-(Very Free Software).
-</ol>
-<p> If modifications are made to Dual Licensed Software, this may effect
-your right to redistribute GPL Licensed Software that links with the
-Dual Licensed Software, unless the modifications are made available
-under the terms of the GPL.
-<p> If modifications are made to GPL Licensed Software, your right to redistribute
-that software is under the terms of the GPL.
-<p> If modifications are made to LGPL Licensed Software, your right to redistribute
-that software is under the terms of the LGPL.
-<p> Modifications to Very Free Software generally does not impose constraints
-upon redistribution.
-<p> A specific example case of Dual Licensed Software is the Media Player. The Media Player
-normally links with GPL Licensed Software such as the libmpeg3 plugin, and therefore
-if you make modifications
-to the Media Player, you must either make those modifications under the
-terms of the GPL, or you must not distribute the GPL Licensed Software that
-links with the Media Player, such as the libmpeg3 plugin.
-<p> This document is merely a guide. Full details of licensing is given in
-the license documents.
-<p> <h3> Non-Trolltech licensed software
-</h3>
-<a name="1-1"></a><p> Qtopia references some code that is not original code
-produced by Trolltech, but rather
-under specific licenses from the original authors.
-This page lists the licenses used for that code, names the authors,
-and links to the points where it is used.
-<p> Trolltech gratefully acknowledges these and others contribution to
-Qtopia.  We recommend that all users of Qtopia also acknowledge
-these contributions, and quote all these license statements in an appendix
-to the documentation.
-<p> <hr>
-GSM is a codec optimised for recording human speech, and is used by the MediaRecorder.
-<p> The GSM code was extracted from verison 12.17.3 of the Sox sound tools. The author 
-of Sox is Chris Bagwell &lt;cbagwell at users.sourceforge.net&gt;. Sox is distributed under the
-terms of the GNU General Public License. More information can be found at
-http://spies.com/Sox/<ul>
-<li><a href="gsm.html">GSM</a>
-</ul>
-<hr>
-Keypebble, the VNC client for Qtopia, is based on Keystone from 
-the KDE project. Keystone and Keypebble are distributed
-under the terms of the GNU General Public License. The VNC server
-code in Qt/Embedded is copyright Trolltech.
-<p> A primary copyright holder is Richard Moore &lt;rich@kde.org&gt;.
-<p> This software owes a lot to Markus Wuebben's kvncviewer,
-which some of the code is derived from. Thanks also go to ORL for
-making the RFB protocol and servers GPL.<ul>
-<li><a href="kvnc.html">KVNC</a>
-</ul>
-<hr>
-LibMAD is an integer-based MPEG audio decoder that supports all three
-MPEG Layers, and is used by the MediaPlayer.
-<p> The libmad library is distributed under the terms of the GNU General Public License,
-Version 2. The primary copyright holder is Robert Leslie &lt;rob@mars.org&gt;.
-More information about the Mad library can be found at http://www.mars.org/home/rob/proj/mpeg/<ul>
-<li><a href="libmadplugin.html">LibMadPlugin</a>
-</ul>
-<hr>
-Libflash renders Flash movies for the MediaPlayer.
-<p> The libflash library is distributed under the terms of the GNU General Public License.
-The primary copyright holders are
-Olivier Debon &lt;odebon@club-internet.fr&gt; and
-Fabrice Bellard &lt;fabrice.bellard@netgem.com&gt;.
-More information about the Flash library can be found at http://www.swift-tools.com/Flash<ul>
-<li><a href="libflashplugin.html">LibFlashPlugin</a>
-</ul>
-<hr>
-QJpUnicodeConv and the classes that use it (QEucJisCodec, QJisCodec,
-QSJisCodec) are the copyright of Serika Kurusugawa. These classes
-provide conversion between different Japanese encodings and Unicode,
-and are used by the Qtopia server.<ul>
-<li><a href="qjpunicodeconv.html">QJpUnicodeConv</a>
-</ul>
-<hr>
-QObex links with OpenOBEX, which is an open source implementation
-of the Object Exchange (OBEX) protocol. This protocol is essentially
-a typed file-exchange protocol. OpenOBEX is distributed under the terms
-of the GNU Lesser General Public License (LGPL). Primary
-copyright holders of OpenOBEX include Dag Brattli and
-Pontus Fuchs. QObex is used by Qtopia for infra-red communications.
-<p> The version of OpenOBEX included here includes some functions
-of GLIB, which is distributed under the terms of the GNU Library General Public
-License (LGPL). The primary copyright holders of GLIB are Peter Mattis,
-Spencer Kimball and Josh MacDonald. More information about OpenOBEX can
-be found at http://openobex.sourceforge.net/<ul>
-<li><a href="qobex.html">QObex</a>
-</ul>
-<hr>
-QRsync links with librsync, which provides fast incremental file
-transfer in the style of rsync. Qtopia and QtopiaDesktop use QRsync
-for PIM data synchronization.
-<p> Librsync is distributed under the terms of the
-GNU Lesser General Public License. The primary copyright holder and
-and author is Martin Pool &lt;mbp@samba.org&gt;. The primary copyright
-holder and author for rsync is Andrew Tridgell &lt;tridge@samba.org&gt;.
-More information about librsync can be found at http://librsync.sourceforge.net<ul>
-<li><a href="qrsync.html">QRsync</a>
-</ul>
-<hr>
-The CardMonitor applet is distributed under the terms of the GNU
-General Public License, Version 2.  The CardMonitor applet monitors
-PCMCIA and CF card insertion and removal.  The author and primary
-copyright holder of the CardMonitor applet is Devin Butterfield
-&lt;dbutter@wireless.net&gt;.<ul>
-<li><a href="cardmonitor.html">CardMonitor</a>
-</ul>
-<hr>
-The FreeType library provides a clean-room implementation of
-TrueType font rendering.
-<p> FreeType is distributed under one of two licenses, either the
-GNU General Public License, or the FreeType License. More information
-about FreeType can be found at http://freetype.sourceforge.net/<ul>
-<li><a href="freetype.html">FreeType</a>
-</ul>
-<hr>
-The Terminal allows command-line access to the system and
-is used for development and debugging activities.
-<p> The Terminal (embeddedkonsole) is based on the KDE Konsole
-application and is distributed under the terms of the GNU
-General Public License. A primary copyright holder of the
-code is Lars Doelle &lt;lars.doelle@on-line.de&gt;.<ul>
-<li><a href="konsole.html">Konsole</a>
-</ul>
-<hr>
-The atd program is based on Russ Nelson's lightweight At daemon.
-It is distributed under the terms of the GNU General Public License.
-The atd program is based on Russ Nelson's lightweight At daemon.
-The At daemon will run a program at a specified time.
-It is distributed under the terms of the GNU General Public License.<ul>
-<li><a href="atd.html">atd</a>
-</ul>
-<hr>
-The avformat and avcodec code was extracted from the FFMPEG project. FFMPEG
-is a large project that allows recording, conversion and streaming of audio
-and video data. avformat and avcodec are used by the MediaPlayer.The author
-and primary copyright holder is Fabrice Bellard &lt;fabrice.bellard at free.fr&gt;.
-The FFMPEG project is distributed under the GNU Lesser General Public License.
-More information can be found at http://ffmpeg.sourceforge.net<ul>
-<li><a href="ffmpeg.html">FFMpeg</a>
-</ul>
-<hr>
-This version of Pickboard is Dual Licensed Software. However, for you to be
-able to license the technology to others, you may require a T9(R) Text
-Input license from Tegic Communications Corporation. More information can
-be found at http://www.t9.com/.<ul>
-<li><a href="pickboard.html">Pickboard</a>
-</ul>
-
-<p> The original Norgwegian translation of Qtopia was contributed
-by Frank Paul Silye &lt;fpsilye@broadpark.no&gt; and licensed
-for redistribution.
-<p> <hr>
-<p> ALL MATERIALS, INFORMATION AND SOFTWARE INCLUDED IN OR AVAILABLE THROUGH OR 
-IN CONNECTION WITH THIS DOCUMENT (THE "CONTENT") ARE PROVIDED "AS IS".  THE 
-CONTENT IS PROVIDED WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR 
-IMPLIED, INCLUDING, BUT NOT LIMITED TO, IMPLIED WARRANTIES OF 
-MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. TO 
-THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, TROLLTECH ON BEHALF OF 
-ITSELF AND ITS LICENSORS AND SUPPLIERS, DOES NOT WARRANT THAT THE CONTENT 
-IS ACCURATE, RELIABLE OR CORRECT; THAT ANY DEFECTS OR ERRORS WILL BE 
-CORRECTED; OR THAT THE CONTENT IS FREE OF VIRUSES OR OTHER HARMFUL 
-COMPONENTS. YOUR USE OF THE CONTENT IS SOLELY AT YOUR RISK.
-<p> 
-<!-- eof -->
-<p><address><hr><div align=center>
-<table width=100% cellspacing=0 border=0><tr>
-<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.7.0</div>
-</table></div></address></body>
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Licensing Information<br /><small></small></h1>
+<p>These documents include information about Qt's licenses and the licenses of third party components used in Qt.</p>
+<p><table width="100%" class="annotated">
+<tr valign="top"><th><a href="3rdparty.html">Third-Party Licenses Used in Qt</a></th></tr>
+<tr valign="top"><th><a href="commercialeditions.html">Qt Commercial Editions</a></th></tr>
+<tr valign="top"><th><a href="credits.html">Thanks!</a></th></tr>
+<tr valign="top"><th><a href="designer-recursive-shadow-casting.html">Implementation of the Recursive Shadow Casting Algorithm in Qt Designer</a></th></tr>
+<tr valign="top"><th><a href="editions.html">Qt Editions</a></th></tr>
+<tr valign="top"><th><a href="gpl.html">GNU General Public License (GPL)</a></th></tr>
+<tr valign="top"><th><a href="licenses.html">Licenses for Code Used in Qt</a></th></tr>
+<tr valign="top"><th><a href="opensourceedition.html">Qt Open Source Edition</a></th></tr>
+<tr valign="top"><th><a href="pdf-licensing.html">Notes about PDF Licensing</a></th></tr>
+<tr valign="top"><th><a href="qpl.html">Q Public License (QPL)</a></th></tr>
+<tr valign="top"><th><a href="qt3to4-treewalker.html">Contributions to the Following qt3to4 Files: treewalker.h, treedump.cpp, treedump.h, treewalker.cpp</a></th></tr>
+<tr valign="top"><th><a href="trademarks.html">Trademarks</a></th></tr>
+</table></p>
+<p><table width="100%" class="annotated">
+</table></p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
 </html>

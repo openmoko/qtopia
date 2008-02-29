@@ -1,31 +1,34 @@
-<qt title="Picture View">
+<html>
+<head><title>Picture View</title></head>
+<body>
 <h3>Picture View</h3>
 <p>You can change how the image is viewed with these operations.</p>
-%%PHONE%%
-<p><b>To zoom in and out:</b> press <img src="contextbar/options.png"> and select <img src="view">. Use 
-%%TOUCH%%
+<!--#if expr="$PHONESTYLE"-->
+<p><b>To zoom in and out:</b> press <img src=":icon/options"> </img> and select <img src=":icon/view">. Use
+<!--#if expr="$TOUCH"-->
 the stylus or
-@@TOUCH@@
-<img src="help/dpad.png"> to control the slidebar. 
-%%KEYPAD%%
-Press <img src="contextbar/ok.png"> when you have finished OR <img src="contextbar/cancel.png"> to revert to the original size. 
-@@KEYPAD@@
-%%TOUCH%%
-Tap the image or press <img src="contextbar/back.png"> when you have finished. 
-@@TOUCH@@
-</p><p>If the image is too lage to fit on screen the <a href="photoedit-navigator.html">navigator</a> will appear.</p>
-<p><b>To use full screen:</b> press <img src="contextbar/options.png"> and select <img src="fullscreen">. 
-%%TOUCH%%
+<!--#endif-->
+<img src=":image/help/dpad"> </img> to control the slidebar.
+<!--#if expr="$KEYPAD"-->
+Press <img src=":icon/ok"> </img> when you have finished OR <img src=":icon/cancel"> </img> to revert to the original size.
+<!--#endif-->
+<!--#if expr="$TOUCH"-->
+Tap the image or press <img src=":icon/i18n/back"> </img> when you have finished.
+<!--#endif-->
+</p><p>If the image is too large to fit on screen the <a href="photoedit-navigator.html">navigator</a> will appear.</p>
+<p><b>To use full screen:</b> press <img src=":icon/options"> </img> and select <img src=":icon/fullscreen">.
+<!--#if expr="$TOUCH"-->
 Tap the image or press
-@@TOUCH@@
-%%KEYPAD%%
+<!--#endif-->
+<!--#if expr="$KEYPAD"-->
 Press
-@@KEYPAD@@ 
-<img src="contextbar/back.png"> to exit from full screen.</p>
-@@PHONE@@
+<!--#endif-->
+<img src=":icon/i18n/back"> </img> to exit from full screen.</p>
+<!--#endif-->
 
-%%PDA%%
-<p><img src="view"> <b>To zoom in and out:</b> tap the icon and use the stylus to control the slidebar. Tap the image when you have finished. If the image is too large to fit on screen the <a href="photoedit-navigator.html">navigator</a> will appear.</p>
-<p><img src="fullscreen"> <b>To use full screen:</b> tap the icon to change to a full screen view. Tap the image to exit from full screen.</p>
-@@PDA@@
-</qt>
+<!--#if expr="$PDASTYLE"-->
+<p><img src=":icon/view"> </img> <b>To zoom in and out:</b> tap the icon and use the stylus to control the slide bar. Tap the image when you have finished. If the image is too large to fit on screen the <a href="photoedit-navigator.html">navigator</a> will appear.</p>
+<p><img src=":icon/fullscreen"> </img> <b>To use full screen:</b> tap the icon to change to a full screen view. Tap the image to exit from full screen.</p>
+<!--#endif-->
+</body>
+</html>

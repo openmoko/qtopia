@@ -1,0 +1,202 @@
+/****************************************************************************
+**
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+**
+** This file is part of the Phone Edition of the Qtopia Toolkit.
+**
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
+
+#include <qnetworkdevice.h>
+#include <qtranslatablesettings.h>
+
+#include <QDebug>
+#include <QHash>
+#include <qvaluespace.h>
+
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+
+class QNetworkDevicePrivate: public QObject
+{
+    Q_OBJECT
+public:
+    QNetworkDevicePrivate( const QString& handle, QObject* parent = 0 )
+        : QObject( parent ), iface( handle ),
+        error( QtopiaNetworkInterface::NoError ),
+        state( QtopiaNetworkInterface::Unknown )
+    {
+        devHash = QString::number( qHash( iface ) );
+        devSpace = new QValueSpaceItem( "/Network/Interfaces/" + devHash, this );
+        devStateChanged();
+        updateTrigger = new QValueSpaceItem( "/Network/Interfaces/"+devHash +"/UpdateTrigger" );
+        connect( updateTrigger, SIGNAL(contentsChanged()), this, SLOT(devStateChanged()) );
+    }
+
+    ~QNetworkDevicePrivate()
+    {
+    }
+
+    QString errorString() const
+    {
+        return devSpace->value( "/ErrorString", QString() ).toString();
+    }
+
+    QString deviceName() const
+    {
+        return devSpace->value( "/NetDevice", QString() ).toString();
+    }
+
+public:
+    const QString iface;
+    QtopiaNetworkInterface::Error error;
+    QtopiaNetworkInterface::Status state;
+
+Q_SIGNALS:
+    void deviceStateChanged( QtopiaNetworkInterface::Status newState, bool error );
+
+private Q_SLOTS:
+    void devStateChanged( )
+    {
+        static bool firstTime = true;
+        QtopiaNetworkInterface::Status newState =
+            (QtopiaNetworkInterface::Status) (devSpace->value("/State", 0 ).toInt());
+
+        state = newState;
+        error = (QtopiaNetworkInterface::Error) ( devSpace->value("/Error", 0 ).toInt() );
+        if ( firstTime )
+            firstTime = false;
+        else {
+            emit deviceStateChanged( state, error );
+        }
+    }
+
+private:
+    QString devHash;
+    QValueSpaceItem* devSpace;
+    QValueSpaceItem* updateTrigger;
+};
+
+
+/*!
+  \class QNetworkDevice
+  \brief
+  The QNetworkDevice class provides information about the connectivity state of
+  a particular network device.
+*/
+
+
+
+/*!
+  Constructs a QNetworkDevice object for the network device which is defined by
+  \a handle. \a parent is the standard Qt parent object .
+  */
+QNetworkDevice::QNetworkDevice( const QString& handle, QObject* parent )
+    : QObject( parent )
+{
+    d = new QNetworkDevicePrivate( handle, this );
+    connect( d, SIGNAL( deviceStateChanged(QtopiaNetworkInterface::Status,bool)),
+            this, SIGNAL(stateChanged(QtopiaNetworkInterface::Status,bool)) );
+}
+
+/*!
+  Deconstructs the object
+  */
+QNetworkDevice::~QNetworkDevice()
+{
+}
+
+/*!
+  Returns the interface handle.
+  */
+QString QNetworkDevice::handle() const
+{
+    return d->iface;
+}
+
+/*!
+  This function returns the connectivity state of this device.
+*/
+QtopiaNetworkInterface::Status QNetworkDevice::state() const
+{
+    return d->state;
+}
+
+/*!
+  Returns the last error that occured. This is useful to find out what went wrong
+  when receiving a stateChanged() signal with the \c error argument set to \c true.
+
+  Note: There could be various reasons why a device may report \c QtopiaNetworkInterface::NotConnected.
+  A detailed description for such an error can be obtained by using errorString().
+  */
+QtopiaNetworkInterface::Error QNetworkDevice::error() const
+{
+    return d->error;
+}
+
+/*!
+  Returns a human-readable description of the last error that occurred.
+  This is useful for presenting an error message to the user.
+*/
+QString QNetworkDevice::errorString() const
+{
+    return d->errorString();
+}
+
+/*!
+  Returns the associated QNetworkInterface.
+  */
+QNetworkInterface QNetworkDevice::address() const
+{
+    return QNetworkInterface::interfaceFromName( d->deviceName() );
+}
+
+/*!
+  \fn void QNetworkDevice::stateChanged( QtopiaNetworkInterface::Status newState, bool error )
+
+  This signal is emitted when the state of this device changes. \a newState is the new state.
+  If \a error is true an error has occurred during the last transition.
+
+  \sa errorString()
+
+  \sa state()
+*/
+
+/*!
+  Returns the name of the associated *nix network interface, e.g. \c eth0 or \c ppp2. The name should not be used to identify
+  the network interface as it can change during the life time of the device. The returned name is empty if the interface
+  hasn't been initialized yet or is not available.
+
+  \sa state()
+*/
+QString QNetworkDevice::interfaceName() const
+{
+    return d->deviceName();
+}
+
+/*!
+  Returns the human-readable name of the device (e.g. Vodafone GPRS). The name can be set by the user when creating
+  and/or configuring the device.
+  */
+QString QNetworkDevice::name() const
+{
+    QTranslatableSettings cfg( d->iface, QSettings::IniFormat );
+    return cfg.value( "Info/Name" ).toString();
+}
+#include "qnetworkdevice.moc"

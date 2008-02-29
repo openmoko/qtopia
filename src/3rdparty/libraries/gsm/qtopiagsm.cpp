@@ -1,36 +1,32 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS and its licensors.
-** All rights reserved.
-**
-** This file is part of the Qtopia Environment.
-**
-** This file may be distributed and/or modified under the terms of the
-** GNU General Public License version 2 as published by the Free Software
-** Foundation and appearing in the file LICENSE.GPL included in the
-** packaging of this file.
-**
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
-** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-**
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
-** See below for additional copyright and license information
-**
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
-**
-**********************************************************************/
 /*!
- \class GSM qtopiagsm.h
- \brief The GSM class is a placeholder for licensing information.
+ \class GSMLegal
+ \brief The GSMLegal class is a placeholder for licensing information.
  \legalese
   GSM is a codec optimised for recording human speech, and is used by the MediaRecorder.
 
-  The GSM code was extracted from verison 12.17.3 of the Sox sound tools. The author 
-  of Sox is <a href="mailto:cbagwell@users.sourceforge.net">Chris Bagwell</a>. Sox is distributed under the
-  terms of the GNU General Public License. More information can be found at
-  <a href="http://spies.com/Sox/">http://spies.com/Sox/</a>
+Copyright 1992, 1993, 1994 by Jutta Degener and Carsten Bormann,
+Technische Universitaet Berlin
+
+Any use of this software is permitted provided that this notice is not
+removed and that neither the authors nor the Technische Universitaet Berlin
+are deemed to have made any representations as to the suitability of this
+software for any purpose nor are held responsible for any defects of
+this software.  THERE IS ABSOLUTELY NO WARRANTY FOR THIS SOFTWARE.
+
+As a matter of courtesy, the authors request to be informed about uses
+this software has found, about bugs in this software, and about any
+improvements that may be of general interest.
+
+Berlin, 28.11.1994
+Jutta Degener
+Carsten Bormann
+
+  \ingroup qtopia3rdparty
 */
 
-GSM::GSM()
+/*!
+    \internal
+*/
+GSMLegal::GSMLegal()
 {
 }

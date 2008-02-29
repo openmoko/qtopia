@@ -1,0 +1,2 @@
+dns refuse_mismatch /dev/null override
+dns refuse_no_reverse /dev/null override

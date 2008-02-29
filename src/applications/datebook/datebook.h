@@ -1,85 +1,75 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 #ifndef DATEBOOK_H
 #define DATEBOOK_H
 
-#include "datebookdb.h"
+#include <qtopia/pim/qappointmentmodel.h>
+#include <qtopia/pim/qappointment.h>
 
-#if !defined(QTOPIA_DESKTOP)
-#include "datebookgui.h"
-#else
-#include "datebookgui_qd.h"
+#include "exceptiondialog.h"
+#include "dayview.h"
+#include "monthview.h"
+#include "appointmentdetails.h"
+
+#if !QTOPIA_PHONE && QTOPIA4_TODO
+# include "weekview.h"
 #endif
 
+#if !defined(QTOPIA_DESKTOP)
+# include "datebookgui.h"
+#else
+# include "datebookgui_qd.h"
+#endif
+
+#include <QStackedWidget>
+#include <QAction>
+#include <QDateTime>
+#include <QMessageBox>
+#include <QtopiaAbstractService>
+#include <QDSData>
+#include <QStack>
+
 class QAction;
-class QWidgetStack;
+class QStackedWidget;
 class DayView;
 class WeekView;
 class MonthView;
-class PimEvent;
+class QAppointment;
 class QDateTime;
-class Ir;
 class QMessageBox;
 class ExceptionDialog;
-class EventView;
+class AppointmentDetails;
+class QDLClient;
+class QDSActionRequest;
+class EntryDialog;
 
 class DateBook : public DateBookGui
 {
-    friend class EventPicker;
-
+    friend class AppointmentPicker;
+    friend class CalendarService;
     Q_OBJECT
 
 public:
-#if !defined(QTOPIA_DESKTOP)
-    DateBook( QWidget *parent = 0, const char *name = 0, WFlags f = 0 );
-#else
-    DateBook();
-#endif
+    DateBook( QWidget *parent = 0, Qt::WFlags f = 0 );
     ~DateBook();
-
-
-signals:
-    void eventsChanged();
-    void signalNotFound();
-    void signalWrapAround();
-
-protected:
-    QDate currentDate();
-    void timerEvent( QTimerEvent *e );
-    void closeEvent( QCloseEvent *e );
-    void init();
 
 public slots:
     void flush();
@@ -87,77 +77,114 @@ public slots:
 
     // some setting or env changed, data hasn't but how its displayed may have.
     void updateAlarms();
-    void refreshWidgets();
 
-protected slots:
-    void fileNew();
-    void showSettings();
-    void slotToday();	// view today
-    void changeClock();
-    void changeWeek( bool newDay );
-    void appMessage(const QCString& msg, const QByteArray& data);
-    // handle key events in the day view...
-    void newEvent( const QString &str );
-    void slotFind();
-    void slotDoFind( const QString &, const QDate &, bool, bool, int );
-
-    void viewDay();
-    void viewDay(const QDate& dt);
+    void selectToday();     // Select today's date without changing view
+    void viewToday();       // View today's date in day view
+    void viewDay();         // View currently selected date in day view
+    void viewDay(const QDate& d);
     void viewWeek();
+    void viewWeek(const QDate& d);
     void viewMonth();
+    void viewMonth(const QDate& d);
     void nextView();
 
-    void editOccurrence( const Occurrence &e );
-    void editOccurrence( const Occurrence &e, bool preview );
-    void removeOccurrence( const Occurrence &e );
-
-    void editCurrentEvent();
-    void removeCurrentEvent();
-
-    void updateIcons();
-    void setDocument( const QString & );
-    void beamEvent( const PimEvent &e );
-
-    void beamCurrentEvent();
-    void beamDone( Ir *ir );
+    void unfoldAllDay();
+    void foldAllDay();
 
     void checkToday();
 
-    void showEventDetails();
-    void hideEventDetails();
+    void showSettings();
 
-    void slotPurge();
+    void changeClock();
+    void changeWeek(bool newDay);
+
+    void appMessage(const QString& msg, const QByteArray& data);
+
+    void newAppointment();
+    bool newAppointment(const QString &str);
+    bool newAppointment(const QDateTime &dstart, const QDateTime &dend, const QString &description, const QString &notes);
+
+    void addAppointment(const QAppointment &e);
+
+    void editCurrentOccurrence();
+    QOccurrence editOccurrence(const QOccurrence &o);
+    QOccurrence editOccurrence(const QOccurrence &o, bool preview);
+
+    void removeCurrentOccurrence();
+    void removeOccurrence(const QOccurrence &o);
+    void removeOccurrencesBefore();
+    void removeOccurrencesBefore(const QDate &date, bool prompt = true);
+
+    void beamCurrentAppointment();
+    void beamAppointment(const QAppointment &a);
+    void setDocument(const QString &filename);
+
+    void showAppointmentDetails();
+    void showAppointmentDetails(const QOccurrence &o);
+    void hideAppointmentDetails();
+
+    void showAccountSettings();
+
+    void qdlActivateLink( const QDSActionRequest& request );
+    void qdlRequestLinks( const QDSActionRequest& request );
+
+    /*void find();
+    void doFind(const QString &, const QDate &, Qt::CaseSensitivity, bool, const QCategoryFilter &);*/
+
+    void updateIcons();
+
+signals:
+    void searchNotFound();
+    void searchWrapAround();
 
 protected:
-    bool newEvent(const QDateTime& dstart,const QDateTime& dend,const QString& description,const QString& notes);
-    void viewToday();
-    void viewWeek(const QDate& dt);
-    void viewMonth(const QDate& dt);
-    void addEvent( const PimEvent &e );
-    void initDay();
-    void initWeek();
-    void initMonth();
-    void initEvent();
-    void initExceptionMb();
-    virtual void loadSettings();
+    void timerEvent(QTimerEvent *e);
+    void closeEvent(QCloseEvent *e);
+
+    void init();
+    void initDayView();
+    void initMonthView();
+    void initAppointmentDetails();
+#if !QTOPIA_PHONE && QTOPIA4_TODO
+    void initWeekView();
+#endif
+
+    void initExceptionDialog();
+    int askException(const QString &action);
+
+    void loadSettings();
     void saveSettings();
-    bool receiveFile( const QString &filename );
 
-    bool eventSelected() const;
-    PimEvent currentEvent() const;
-    Occurrence currentOccurrence() const;
+    bool receiveFile(const QString &filename);
 
-    void raiseWidget( QWidget *widget );
+    bool occurrenceSelected() const;
+    QAppointment currentAppointment() const;
+    QOccurrence currentOccurrence() const;
 
-    void purgeEvents( const QDate &date, bool prompt = TRUE );
-    QValueList<PimEvent> purge_getEvents( const QDateTime &from, const QDate &date );
+    void raiseView(QWidget *widget);
 
-    DateBookTable *db;
-    QWidgetStack *views;
+    QDate currentDate();
+    bool checkSyncing();
+    QString validateAppointment(const QAppointment &a);
+
+private:
+    QDSData appointmentQDLLink( QAppointment& appointment );
+    void removeAppointmentQDLLink( QAppointment& appointment );
+
+    QAppointmentModel *model;
+
     DayView *dayView;
-    WeekView *weekView;
     MonthView *monthView;
-    EventView *eventView;
+    AppointmentDetails *appointmentDetails;
+    QStackedWidget *viewStack;
+#if !QTOPIA_PHONE && QTOPIA4_TODO
+    WeekView *weekView;
+#endif
+    EntryDialog* editorView;
+
+    ExceptionDialog *exceptionDialog;
+
+    // Configuration values
     bool aPreset;    // have everything set to alarm?
     int presetTime;  // the standard time for the alarm
     int startTime;
@@ -165,20 +192,47 @@ protected:
     bool onMonday;
     bool compressDay;
 
-    bool checkSyncing();
     bool syncing;
     bool inSearch;
+    bool closeAfterView;
     QDate lastToday; // last date that was the selected as 'Today'
     QTimer *midnightTimer;
+    QTimer *updateIconsTimer;
 
-    QString checkEvent(const PimEvent &);
+    QStack<QOccurrence> prevOccurrences;
 
-    ExceptionDialog *exceptionMb;
-    QDateTime lastcall;
-#ifdef Q_WS_QWS
     QString beamfile;
-#endif
 };
 
+class CalendarService : public QtopiaAbstractService
+{
+    Q_OBJECT
+    friend class DateBook;
+private:
+    CalendarService( DateBook *parent )
+        : QtopiaAbstractService( "Calendar", parent )
+        { datebook = parent; publishAll(); }
+
+public:
+    ~CalendarService();
+
+public slots:
+    void newAppointment();
+    void newAppointment( const QDateTime& start, const QDateTime& end,
+                         const QString& description, const QString& notes );
+    void addAppointment( const QAppointment& appointment );
+    void updateAppointment( const QAppointment& appointment );
+    void removeAppointment( const QAppointment& appointment );
+    void raiseToday();
+    void nextView();
+    void showAppointment( const QUniqueId& uid );
+    void showAppointment( const QUniqueId& uid, const QDate& date );
+    void cleanByDate( const QDate& date );
+    void activateLink( const QDSActionRequest& request );
+    void requestLinks( const QDSActionRequest& request );
+
+private:
+    DateBook *datebook;
+};
 
 #endif

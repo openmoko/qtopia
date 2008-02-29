@@ -1,0 +1,33 @@
+#!/bin/sh
+
+if [ "$1" = "up" ] ; then
+  echo "Trying to get greenphone to mount /home/user/nfs as /mnt/nfs"
+
+cat >nfs.sh <<EOF
+#!/bin/sh
+mkdir -p /mnt/nfs
+mount -t nfs -o nolock,tcp 10.10.10.21:/home/user/nfs /mnt/nfs
+EOF
+
+  ftpput -u anonymous 10.10.10.20 / nfs.sh
+  rm -f nfs.sh
+  expect -c 'set timeout 300;log_user 0; spawn telnet 10.10.10.20; expect root@; send "chmod 555 /mnt/user_local/nfs.sh\r"; expect root@; send "/mnt/user_local/nfs.sh\r"; expect root@; send "rm -f /mnt/user_local/nfs.sh\r"; expect root@'
+  exit 
+fi
+if [ "$1" = "down" ] ; then
+  echo "Trying to get greenphone to umount /home/user/nfs"
+
+cat >nfs.sh <<EOF
+#!/bin/sh
+umount /mnt/nfs
+EOF
+
+  ftpput -u anonymous 10.10.10.20 / nfs.sh
+  rm -f nfs.sh
+  expect -c 'set timeout 300;log_user 0; spawn telnet 10.10.10.20; expect root@; send "chmod 555 /mnt/user_local/nfs.sh\r"; expect root@; send "/mnt/user_local/nfs.sh\r"; expect root@; send "rm -f /mnt/user_local/nfs.sh\r"; expect root@'
+  exit
+fi
+echo "FORMAT:green-nfs <up> or <down>"
+echo
+echo "  up   Tells greenphone to nfs mount /home/user/nfs as /mnt/nfs"
+echo "  down Tells greenphone to unmount /home/user/nfs"

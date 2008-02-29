@@ -1,0 +1,482 @@
+/****************************************************************************
+**
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+**
+** This file is part of the Phone Edition of the Qtopia Toolkit.
+**
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
+// Local includes
+#include "qds_p.h"
+#include "qdsactionrequest.h"
+#include "qdsactionrequest_p.h"
+#include "qdsserviceinfo.h"
+
+// Qt includes
+#include <QObject>
+#include <QTimer>
+
+// Qtopia includes
+#include <QtopiaIpcEnvelope>
+#include <QMimeType>
+#include <qtopialog.h>
+
+// ============================================================================
+//
+//  QDSActionRequestPrivate
+//
+// ============================================================================
+
+
+QDSActionRequestPrivate::QDSActionRequestPrivate()
+:   QObject(),
+    mServiceInfo(),
+    mRequestData(),
+    mResponseData(),
+    mAuxData(),
+    mChannel(),
+    mComplete(),
+    mErrorMessage(),
+    mHeartBeat()
+{
+}
+
+QDSActionRequestPrivate::QDSActionRequestPrivate(
+    const QDSActionRequestPrivate& other )
+:   QObject(),
+    mServiceInfo( other.mServiceInfo ),
+    mRequestData( other.mRequestData ),
+    mResponseData( other.mResponseData ),
+    mAuxData( other.mAuxData ),
+    mChannel( other.mChannel ),
+    mComplete( other.mComplete ),
+    mErrorMessage(),
+    mHeartBeat( other.mChannel )
+{
+}
+
+QDSActionRequestPrivate::QDSActionRequestPrivate(
+    const QDSServiceInfo& serviceInfo,
+    const QDSData& requestData,
+    const QByteArray& auxiliary,
+    const QString& channel )
+:   QObject(),
+    mServiceInfo( serviceInfo ),
+    mRequestData( requestData ),
+    mResponseData(),
+    mAuxData( auxiliary ),
+    mChannel( channel ),
+    mComplete( false ),
+    mErrorMessage(),
+    mHeartBeat( channel )
+{
+}
+
+QDSActionRequestPrivate::~QDSActionRequestPrivate()
+{
+}
+
+void QDSActionRequestPrivate::emitResponse()
+{
+    if ( mResponseData.isValid() ) {
+        QtopiaIpcEnvelope e( mChannel, "response(QDSData)" ); // No tr
+        e << mResponseData;
+    } else {
+        QtopiaIpcEnvelope e( mChannel, "response()" ); // No tr
+    }
+}
+
+void QDSActionRequestPrivate::emitError( const QString& error )
+{
+    QtopiaIpcEnvelope e( mChannel, "error(QString)" ); // No tr
+    e << error;
+}
+
+// ============================================================================
+//
+//  QDSHeartBeat
+//
+// ============================================================================
+
+QDSHeartBeat::QDSHeartBeat( QObject* parent )
+:   QObject( parent ),
+    mChannel(),
+    mTimer( 0 )
+{
+}
+
+QDSHeartBeat::QDSHeartBeat( const QString& channel, QObject* parent )
+:   QObject( parent ),
+    mChannel( channel ),
+    mTimer( 0 )
+{
+    mTimer = new QTimer( this );
+    connect( mTimer, SIGNAL( timeout() ), this, SLOT( beat() ) );
+    mTimer->start( QDS::SERVERING_HEARTBEAT_PERIOD );
+    beat();
+}
+
+QDSHeartBeat::QDSHeartBeat( const QDSHeartBeat& other )
+:   QObject(),
+    mChannel( other.mChannel ),
+    mTimer( 0 )
+{
+    mTimer = new QTimer( this );
+    connect( mTimer, SIGNAL( timeout() ), this, SLOT( beat() ) );
+    mTimer->start( QDS::SERVERING_HEARTBEAT_PERIOD );
+    beat();
+}
+
+const QDSHeartBeat& QDSHeartBeat::operator=( const QDSHeartBeat& other )
+{
+    mChannel = other.mChannel;
+
+    return *this;
+}
+
+void QDSHeartBeat::beat()
+{
+    QtopiaIpcEnvelope e( mChannel, "heartbeat()" ); // No tr
+}
+
+// ============================================================================
+//
+//  QDSActionRequest
+//
+// ============================================================================
+
+/*!
+    \class QDSActionRequest
+    \brief The QDSActionRequest class encapsulates a received action request.
+
+    A QDS service provider uses the QDSActionRequest class to capture the
+    context of received requests, and as an interface to respond to the request.
+
+    Applications seeking to utilise QDS services use the QDSAction class to
+    request a service, the QDSAction class will then create QDSActionRequest class
+    and send it to the QDS service for processing.
+
+    \sa QDSAction, QDSServiceInfo
+*/
+
+/*!
+    Default constructor which creates an empty request and attaches it to \a parent.
+*/
+QDSActionRequest::QDSActionRequest( QObject* parent )
+:   QObject( parent ),
+    d( 0 )
+{
+    d = new QDSActionRequestPrivate();
+}
+
+/*!
+    Copy constructor which creates a deep copy of \a other
+*/
+QDSActionRequest::QDSActionRequest( const QDSActionRequest& other )
+:   QObject(),
+    d( 0 )
+{
+    d = new QDSActionRequestPrivate( *(other.d) );
+}
+
+/*!
+    Creates an action request for a service with no request data. The service
+    responding to the request is provided in \a serviceInfo and the channel
+    for responding to the client is provided in \a channel. The request is
+    attached to \a parent.
+*/
+QDSActionRequest::QDSActionRequest( const QDSServiceInfo& serviceInfo,
+                                    const QString& channel,
+                                    QObject* parent )
+:   QObject( parent ),
+    d( 0 )
+{
+    d = new QDSActionRequestPrivate( serviceInfo, QDSData(), QByteArray(), channel );
+
+    if ( !d->mServiceInfo.supportsRequestDataType( QMimeType(QString()) ) )
+        respond( QString( tr( "request didn't contain data" ) ) );
+}
+
+/*!
+    Creates an action request for a service with request data. The service
+    responding to the request is provided in \a serviceInfo, the request data
+    to process in the request is provided in \a requestData and the channel
+    for responding to the client is provided in \a channel, \a auxiliary data
+    can also be attached to the request. The request is attached to \a parent.
+*/
+QDSActionRequest::QDSActionRequest( const QDSServiceInfo& serviceInfo,
+                                    const QDSData& requestData,
+                                    const QString& channel,
+                                    const QByteArray& auxiliary,
+                                    QObject* parent )
+:   QObject( parent ),
+    d( 0 )
+{
+    d = new QDSActionRequestPrivate( serviceInfo, requestData, auxiliary, channel );
+
+    if ( !d->mServiceInfo.supportsRequestDataType( requestData.type() ) )
+        respond( QString( tr( "request contained unexpected data" ) ) );
+}
+
+/*!
+    Destructor
+*/
+QDSActionRequest::~QDSActionRequest()
+{
+    delete d;
+    d = 0;
+}
+
+/*!
+    Assignment operator which deep copies \a other.
+*/
+const QDSActionRequest& QDSActionRequest::operator=( const QDSActionRequest& other )
+{
+    d->mServiceInfo = other.serviceInfo();
+    d->mRequestData = other.requestData();
+    d->mResponseData = other.responseData();
+    d->mAuxData = other.auxiliaryData();
+    d->mChannel = other.d->mChannel;
+    d->mComplete = other.isComplete();
+    d->mHeartBeat = QDSHeartBeat( other.d->mChannel );
+
+    return *this;
+}
+
+/*!
+    Returns the description of the service requested
+*/
+const QDSServiceInfo& QDSActionRequest::serviceInfo() const
+{
+    return d->mServiceInfo;
+}
+
+/*!
+    Returns the validity of the request
+*/
+bool QDSActionRequest::isValid() const
+{
+    if ( d->mServiceInfo.isValid() &&
+         !d->mChannel.isEmpty() &&
+         d->mErrorMessage.isEmpty() )
+        return true;
+
+    return false;
+}
+
+/*!
+    Determines if the request processing has been completed and a response
+    has been sent to the client.
+*/
+bool QDSActionRequest::isComplete() const
+{
+    return d->mComplete;
+}
+
+/*!
+    Returns the request data.
+*/
+const QDSData& QDSActionRequest::requestData() const
+{
+    return d->mRequestData;
+}
+
+/*!
+    Returns the response data.
+*/
+const QDSData& QDSActionRequest::responseData() const
+{
+    return d->mResponseData;
+}
+
+/*!
+    Returns the auxiliary data accompanying the request.
+*/
+const QByteArray& QDSActionRequest::auxiliaryData() const
+{
+    return d->mAuxData;
+}
+
+/*!
+    Returns the error message generated during the request.
+*/
+QString QDSActionRequest::errorMessage() const
+{
+    return d->mErrorMessage;
+}
+
+/*!
+    Sends a response back to the client to indicate that the request has
+    been processed correctly. This method is to be used for services which
+    don't have response data.
+
+    If true is returned the response was sent correctly. False is returned
+    if a response has already been sent or the service requires response data.
+*/
+bool QDSActionRequest::respond()
+{
+    if ( d->mComplete )
+        return false;
+
+    if ( !d->mServiceInfo.supportsResponseDataType() )
+        return false;
+
+    d->mComplete = true;
+    d->emitResponse();
+
+    return true;
+}
+
+/*!
+    Sends \a responseData back to the client to indicate that the request has
+    been processed correctly. This method is to be used for services which
+    have response data.
+
+    If true is returned the response was sent correctly. False is returned
+    if a response has already been sent or the service doesn't require
+    response data.
+*/
+bool QDSActionRequest::respond( const QDSData &responseData )
+{
+    if ( d->mComplete )
+        return false;
+
+    if ( !d->mServiceInfo.supportsResponseDataType( responseData.type() ) )
+        return false;
+
+    d->mResponseData = responseData;
+    d->mComplete = true;
+    d->emitResponse();
+
+    return true;
+}
+
+/*!
+    Sends the error message \a message back to the client to indicate that
+    an error has occured.
+
+    If true is returned the message was sent correctly. False is returned
+    if a response has already been sent.
+*/
+bool QDSActionRequest::respond( const QString& message )
+{
+    if ( d->mComplete )
+        return false;
+
+    d->mComplete = true;
+    d->mErrorMessage = message;
+    d->emitError( message );
+
+    return true;
+}
+
+/*!
+    \fn void QDSActionRequest::deserialize(Stream &value)
+
+    \internal
+
+    Deserializes the QDSActionRequest instance out to a template
+    type \c{Stream} \a stream.
+ */
+
+template <typename Stream> void QDSActionRequest::deserialize(Stream &stream)
+{
+    // Service info
+    QDSServiceInfo info;
+    stream >> info;
+    d->mServiceInfo = info;
+
+    // Request data
+    bool validRequestData = false;
+    stream >> validRequestData;
+    if ( validRequestData ) {
+        QDSData data;
+        stream >> data;
+        d->mRequestData = data;
+    } else {
+        d->mRequestData = QDSData();
+    }
+
+    // Response Data
+    bool validResponseData = false;
+    stream >> validResponseData;
+    if ( validResponseData ) {
+        QDSData data;
+        stream >> data;
+        d->mResponseData = data;
+    } else {
+        d->mResponseData = QDSData();
+    }
+
+    // Auxiliary data
+    QByteArray auxData;
+    stream >> auxData;
+    d->mAuxData = auxData;
+
+    // Now channel, complete and error message info
+    QString channel;
+    stream >> channel;
+    d->mChannel = channel;
+
+    bool complete = false;
+    stream >> complete;
+    d->mComplete = complete;
+
+    QString errorMsg;
+    stream >> errorMsg;
+    d->mErrorMessage = errorMsg;
+}
+
+/*!
+    \fn void QDSActionRequest::serialize(Stream &value) const
+
+    \internal
+
+    Serializes the QDSActionRequest instance out to a template
+    type \c{Stream} \a stream.
+ */
+
+template <typename Stream> void QDSActionRequest::serialize(Stream &stream) const
+{
+    // Service info
+    stream << serviceInfo();
+
+    // Request data
+    if ( requestData().isValid() ) {
+        stream << true;
+        stream << requestData();
+    } else {
+        stream << false;
+    }
+
+    // Response data
+    if ( responseData().isValid() ) {
+        stream << true;
+        stream << responseData();
+    } else {
+        stream << false;
+    }
+
+    // Auxiliary data
+    stream << auxiliaryData();
+
+    // Add channel, complete and error message info
+    stream << d->mChannel;
+    stream << isComplete();
+    stream << errorMessage();
+}
+
+// Macros
+Q_IMPLEMENT_USER_METATYPE(QDSActionRequest);

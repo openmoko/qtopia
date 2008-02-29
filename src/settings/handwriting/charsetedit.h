@@ -1,43 +1,32 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
+
+#ifndef CHARSETEDIT_H
+#define CHARSETEDIT_H
 
 #include <qlist.h>
 #include <qdialog.h>
 #include <qtopia/mstroke/profile.h>
 
-#include "charseteditbase.h"
+#include "ui_charseteditbase.h"
 
 class QTabWidget;
 class QListBox;
@@ -53,7 +42,7 @@ class QIMPenInputCharDlg : public QDialog
     Q_OBJECT
 public:
     QIMPenInputCharDlg( QWidget *parent = 0, const char *name = 0,
-	    bool modal = FALSE, bool fs = FALSE, int WFlags = 0 );
+            bool modal = false, bool fs = false, Qt::WFlags f = 0 );
 
     unsigned int unicode() const { return uni; }
 
@@ -68,22 +57,23 @@ private:
     UniSelect *u;
 };
 
-class CharSetEdit : public CharSetEditBase
+class CharSetEdit : public QFrame, private Ui::CharSetEditBase
 {
     Q_OBJECT
 public:
     CharSetEdit( QWidget *parent=0, const char *name=0 );
     CharSetEdit( QIMPenCharSet *c, QWidget *parent=0,
-		const char *name=0 );
+                const char *name=0 );
 
     void setCharSet( QIMPenCharSet *c );
 
     QIMPenCharSet *charSet() const;
 
     void checkStoreMatch();
+    void clearMatch();
 
     void setIsFS(bool b) {
-	mIsFS=b;
+        mIsFS=b;
     }
 protected:
     void fillCharList();
@@ -99,6 +89,7 @@ protected slots:
     void nextMatch();
 
     void selectCode( int );
+    void selectItemCode( QListWidgetItem *item, QListWidgetItem *previous = 0);
 
     void addChar();
     void removeChar();
@@ -106,20 +97,18 @@ protected slots:
     void addMatch();
     void removeMatch();
     void resetMatches();
-    void clearMatch();
 
     void newStroke( QIMPenStroke * );
 
 protected:
 
-    void appendMatch();
+    void appendMatch(QListWidgetItem *item = 0);
     void init();
     void updateLabel();
     void firstMatch();
     void lastMatch();
 
     // current code, not nearly detailed enough eh?
-    uint currentCode;
     QIMPenChar *currentChar;
     QIMPenChar *inputChar;
     QIMPenCharSet *currentSet;
@@ -136,7 +125,7 @@ class CharSetDlg : public QDialog
     Q_OBJECT
 public:
     CharSetDlg( QWidget *parent = 0, const char *name = 0,
-	    bool modal = FALSE, int WFlags = 0 );
+            bool modal = false, Qt::WFlags f = 0 );
     ~CharSetDlg();
 
     void setCharSet( QIMPenCharSet *c );
@@ -144,7 +133,7 @@ public:
     QIMPenCharSet *charSet() const;
 
     void setIsFS(bool b) {
-	edit->setIsFS(b);
+        edit->setIsFS(b);
     }
 protected:
     void accept();
@@ -154,3 +143,4 @@ private:
     CharSetEdit *edit;
 };
 
+#endif

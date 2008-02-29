@@ -1,0 +1,162 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QBluetoothDeviceSelector Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QBluetoothDeviceSelector Class Reference</h1>
+<p>The QBluetoothDeviceSelector class allows the user to perform a bluetooth device discovery and select a particular device. <a href="#details">More...</a></p>
+<pre>    #include &lt;QBluetoothDeviceSelector&gt;</pre><p>Inherits <a href="qdialog.html">QDialog</a>.</p>
+<ul>
+<li><a href="qbluetoothdeviceselector-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qbluetoothdeviceselector.html#QBluetoothDeviceSelector">QBluetoothDeviceSelector</a></b> ( bool <i>loadFavoritesOnShow</i>, QWidget * <i>parent</i> = 0, Qt::WFlags <i>flags</i> = 0 )</li>
+<li><div class="fn"/><b><a href="qbluetoothdeviceselector.html#QBluetoothDeviceSelector-2">QBluetoothDeviceSelector</a></b> ( QWidget * <i>parent</i> = 0, Qt::WFlags <i>flags</i> = 0 )</li>
+<li><div class="fn"/><b><a href="qbluetoothdeviceselector.html#dtor.QBluetoothDeviceSelector">~QBluetoothDeviceSelector</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qbluetoothdeviceselector.html#addDeviceAction">addDeviceAction</a></b> ( QAction * <i>action</i> )</li>
+<li><div class="fn"/>QList&lt;QBluetoothAddress&gt; <b><a href="qbluetoothdeviceselector.html#displayedDevices">displayedDevices</a></b> () const</li>
+<li><div class="fn"/>QBluetoothDeviceSelectorFilter <b><a href="qbluetoothdeviceselector.html#filter">filter</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qbluetoothdeviceselector.html#forcePairing">forcePairing</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qbluetoothdeviceselector.html#removeDeviceAction">removeDeviceAction</a></b> ( QAction * <i>action</i> )</li>
+<li><div class="fn"/>QBluetoothAddress <b><a href="qbluetoothdeviceselector.html#selectedDevice">selectedDevice</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qbluetoothdeviceselector.html#setFilter">setFilter</a></b> ( const QBluetoothDeviceSelectorFilter &amp; <i>filter</i> )</li>
+<li><div class="fn"/>void <b><a href="qbluetoothdeviceselector.html#setForcePairing">setForcePairing</a></b> ( bool <i>force</i> )</li>
+<li><div class="fn"/>void <b><a href="qbluetoothdeviceselector.html#setValidationProfiles">setValidationProfiles</a></b> ( QSet&lt;QBluetooth::SDPProfile&gt; <i>profiles</i> )</li>
+<li><div class="fn"/>bool <b><a href="qbluetoothdeviceselector.html#startDeviceDiscovery">startDeviceDiscovery</a></b> ( bool <i>clear</i> )</li>
+<li><div class="fn"/>QSet&lt;QBluetooth::SDPProfile&gt; <b><a href="qbluetoothdeviceselector.html#validationProfiles">validationProfiles</a></b> () const</li>
+</ul>
+<ul>
+<li><div class="fn"/>9 public functions inherited from <a href="qdialog.html#public-functions">QDialog</a></li>
+<li><div class="fn"/>258 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>22 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
+</ul>
+<a name="signals"></a>
+<h3>Signals</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qbluetoothdeviceselector.html#deviceActivated">deviceActivated</a></b> ( const QBluetoothAddress &amp; <i>addr</i> )</li>
+<li><div class="fn"/>void <b><a href="qbluetoothdeviceselector.html#deviceDiscoveryCompleted">deviceDiscoveryCompleted</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qbluetoothdeviceselector.html#deviceDiscoveryStarted">deviceDiscoveryStarted</a></b> ()</li>
+<li><div class="fn"/>void <b><a href="qbluetoothdeviceselector.html#deviceSelectionChanged">deviceSelectionChanged</a></b> ()</li>
+</ul>
+<ul>
+<li><div class="fn"/>3 signals inherited from <a href="qdialog.html#signals">QDialog</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qwidget.html#signals">QWidget</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+</ul>
+<a name="static-public-members"></a>
+<h3>Static Public Members</h3>
+<ul>
+<li><div class="fn"/>QBluetoothAddress <b><a href="qbluetoothdeviceselector.html#getRemoteDevice">getRemoteDevice</a></b> ( QSet&lt;QBluetooth::SDPProfile&gt; <i>profiles</i> = QSet&lt;QBluetooth::SDPProfile&gt; (), const QBluetoothDeviceSelectorFilter &amp; <i>filter</i> = QBluetoothDeviceSelectorFilter(), bool <i>loadFavoritesOnShow</i> = true, QWidget * <i>parent</i> = 0 )</li>
+</ul>
+<ul>
+<li><div class="fn"/>5 static public members inherited from <a href="qwidget.html#static-public-members">QWidget</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>13 static public members inherited from <a href="qpaintdevice.html#static-public-members">QPaintDevice</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>2 properties inherited from <a href="qdialog.html#properties">QDialog</a></li>
+<li><div class="fn"/>55 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>5 public slots inherited from <a href="qdialog.html#public-slots">QDialog</a></li>
+<li><div class="fn"/>20 public slots inherited from <a href="qwidget.html#public-slots">QWidget</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>39 protected functions inherited from <a href="qwidget.html#protected-functions">QWidget</a></li>
+<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>1 protected function inherited from <a href="qpaintdevice.html#protected-functions">QPaintDevice</a></li>
+<li><div class="fn"/>1 protected slot inherited from <a href="qwidget.html#protected-slots">QWidget</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 protected type inherited from <a href="qpaintdevice.html#protected-variables">QPaintDevice</a></li>
+<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QBluetoothDeviceSelector class allows the user to perform a bluetooth device discovery and select a particular device.</p>
+<p>The QBluetoothDeviceSelector class allows the user to perform a bluetooth device discovery and select a particular device.</p>
+<p>When a device selector is first displayed, it shows all favorite devices, and allows a device discovery to be activated in order to display remote devices found in the vicinity. If the system has no favorite devices, a device discovery will be started immediately.</p>
+<p>A device selector can be configured to only display certain devices, using the <a href="qbluetoothdeviceselector.html#setFilter">setFilter</a>() function. Also, if one or more validation profiles have been set using <a href="qbluetoothdeviceselector.html#setValidationProfiles">setValidationProfiles</a>(), the <a href="qbluetoothdeviceselector.html#deviceActivated">deviceActivated</a>() signal will only be emitted if the activated device has a service that matches the validation profile(s).</p>
+<p>Custom context menu actions can be added to a device selector through <a href="qbluetoothdeviceselector.html#addDeviceAction">addDeviceAction</a>(). (This is only available if keypad navigation is available.)</p>
+<p>The <a href="qbluetoothdeviceselector.html#getRemoteDevice">getRemoteDevice</a>() static method is the easiest way to run a device selector. It runs a modal device selection dialog, then returns the address of the device that was activated by the user.</p>
+<p>By default, a device selector dialog will close as soon as a valid device is activated by the end user. If you prefer to keep the dialog open when a device is activated, disconnect the appropriate signal, like this:</p>
+<pre>    QBluetoothDeviceSelector selector;
+    QObject::disconnect( &amp;selector, SIGNAL(deviceActivated(const QBluetoothAddress &amp;)),
+                         &amp;selector, SLOT(accept()) );</pre>
+<p>See also <a href="qbluetoothdeviceselectorfilter.html">QBluetoothDeviceSelectorFilter</a> and <a href="qbluetoothdeviceselector.html#deviceActivated">deviceActivated</a>().</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QBluetoothDeviceSelector"></a>QBluetoothDeviceSelector::QBluetoothDeviceSelector ( bool <i>loadFavoritesOnShow</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, <a href="qt.html#WFlags-typedef">Qt::WFlags</a> <i>flags</i> = 0 )</h3>
+<p>Constructs a <a href="qbluetoothdeviceselector.html">QBluetoothDeviceSelector</a> with the given parent widget <i>parent</i> and the window flags <i>flags</i>. If <i>loadFavoritesOnShow</i> is <tt>true</tt>, favorite devices (as determined by user settings) will be listed in the device selector when it is first displayed.</p>
+<h3 class="fn"><a name="QBluetoothDeviceSelector-2"></a>QBluetoothDeviceSelector::QBluetoothDeviceSelector ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0, <a href="qt.html#WFlags-typedef">Qt::WFlags</a> <i>flags</i> = 0 )</h3>
+<p>Constructs a <a href="qbluetoothdeviceselector.html">QBluetoothDeviceSelector</a> with the given parent widget <i>parent</i> and the window flags <i>flags</i>. Favorite devices will be listed in the device selector when it is first displayed.</p>
+<h3 class="fn"><a name="dtor.QBluetoothDeviceSelector"></a>QBluetoothDeviceSelector::~QBluetoothDeviceSelector ()</h3>
+<p>Destructs a <a href="qbluetoothdeviceselector.html">QBluetoothDeviceSelector</a> object.</p>
+<h3 class="fn"><a name="addDeviceAction"></a>void QBluetoothDeviceSelector::addDeviceAction ( <a href="qaction.html">QAction</a> * <i>action</i> )</h3>
+<p>Add a device action <i>action</i> to the top of the context menu of this selector. (This is only available if keypad navigation is available.)</p>
+<p>Device actions are enabled when a device is selected, and disabled when no devices are selected. They are hidden altogether during a device discovery.</p>
+<h3 class="fn"><a name="deviceActivated"></a>void QBluetoothDeviceSelector::deviceActivated ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted when a device is successfully activated. The <i>addr</i> value indicates the address of the activated device.</p>
+<p>If a device is activated by the user but its services do not match the current SDP profile filter, this signal will not be activated.</p>
+<p>See also <a href="qbluetoothdeviceselector.html#setValidationProfiles">setValidationProfiles</a>().</p>
+<h3 class="fn"><a name="deviceDiscoveryCompleted"></a>void QBluetoothDeviceSelector::deviceDiscoveryCompleted ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted whenever a device discovery has completed within the device selector. The discovery could have been started by the user or by a call to <a href="qbluetoothdeviceselector.html#startDeviceDiscovery">QBluetoothDeviceSelector::startDeviceDiscovery</a>().</p>
+<h3 class="fn"><a name="deviceDiscoveryStarted"></a>void QBluetoothDeviceSelector::deviceDiscoveryStarted ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted whenever a device discovery has started within the device selector. The discovery could have been started by the user or by a call to <a href="qbluetoothdeviceselector.html#startDeviceDiscovery">QBluetoothDeviceSelector::startDeviceDiscovery</a>().</p>
+<h3 class="fn"><a name="deviceSelectionChanged"></a>void QBluetoothDeviceSelector::deviceSelectionChanged ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted whenever the device selection has changed.</p>
+<h3 class="fn"><a name="displayedDevices"></a><a href="qlist.html">QList</a>&lt;<a href="qbluetoothaddress.html">QBluetoothAddress</a>&gt; QBluetoothDeviceSelector::displayedDevices () const</h3>
+<p>Returns a list of the devices that are currently displayed in the selector.</p>
+<h3 class="fn"><a name="filter"></a><a href="qbluetoothdeviceselectorfilter.html">QBluetoothDeviceSelectorFilter</a> QBluetoothDeviceSelector::filter () const</h3>
+<p>Returns the filter used by the device selector to filter displayed devices.</p>
+<p>See also <a href="qbluetoothdeviceselector.html#setFilter">setFilter</a>().</p>
+<h3 class="fn"><a name="forcePairing"></a>bool QBluetoothDeviceSelector::forcePairing () const</h3>
+<p>Returns whether devices must be paired in order to be successfully activated by the user. By default, this value is <tt>false</tt>.</p>
+<p>See also <a href="qbluetoothdeviceselector.html#setForcePairing">setForcePairing</a>() and <a href="qbluetoothdeviceselector.html#deviceActivated">deviceActivated</a>().</p>
+<h3 class="fn"><a name="getRemoteDevice"></a><a href="qbluetoothaddress.html">QBluetoothAddress</a> QBluetoothDeviceSelector::getRemoteDevice ( <a href="qset.html">QSet</a>&lt;<a href="qbluetooth.html#SDPProfile-enum">QBluetooth::SDPProfile</a>&gt; <i>profiles</i> = QSet&lt;QBluetooth::SDPProfile&gt; (), const <a href="qbluetoothdeviceselectorfilter.html">QBluetoothDeviceSelectorFilter</a> &amp; <i>filter</i> = QBluetoothDeviceSelectorFilter(), bool <i>loadFavoritesOnShow</i> = true, <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0 )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>A convenience method for allowing an end user to select a bluetooth device.</p>
+<p>This opens a device selector with the validation profiles <i>profiles</i>, the device filter <i>filter</i>, and the parent <i>parent</i>. If <i>loadFavoritesOnShow</i> is <tt>true</tt>, the &quot;Favorite devices&quot; (as determined by user settings) will be shown in the device selector when it is first displayed. (Note that the displayed favorites are also subject to the given filter and validation profiles.)</p>
+<p>Returns the address of the remote device that was activated, or a an invalid address (&quot;00:00:00:00:00:00&quot;) if the dialog was cancelled.</p>
+<p>See also <a href="qbluetoothdeviceselector.html#setValidationProfiles">setValidationProfiles</a>() and <a href="qbluetoothdeviceselectorfilter.html">QBluetoothDeviceSelectorFilter</a>.</p>
+<h3 class="fn"><a name="removeDeviceAction"></a>void QBluetoothDeviceSelector::removeDeviceAction ( <a href="qaction.html">QAction</a> * <i>action</i> )</h3>
+<p>Remove a device action <i>action</i> from the context menu of this selector.</p>
+<h3 class="fn"><a name="selectedDevice"></a><a href="qbluetoothaddress.html">QBluetoothAddress</a> QBluetoothDeviceSelector::selectedDevice () const</h3>
+<p>Returns the address of the currently selected device.</p>
+<p>Note that the SDP profile filter (set through setValidationFilters()) and the enforcment of device pairing (set through <a href="qbluetoothdeviceselector.html#setForcePairing">setForcePairing</a>()) are only applied when a device is activated, and not when they are merely selected. Therefore, if these conditions have been set, the device that is returned by this method may not have the desired attributes.</p>
+<p>See also <a href="qbluetoothdeviceselector.html#deviceSelectionChanged">deviceSelectionChanged</a>() and <a href="qbluetoothdeviceselector.html#deviceActivated">deviceActivated</a>().</p>
+<h3 class="fn"><a name="setFilter"></a>void QBluetoothDeviceSelector::setFilter ( const <a href="qbluetoothdeviceselectorfilter.html">QBluetoothDeviceSelectorFilter</a> &amp; <i>filter</i> )</h3>
+<p>Sets the device selector to filter displayed devices using the filter <i>filter</i>.</p>
+<p>See also <a href="qbluetoothdeviceselector.html#filter">filter</a>().</p>
+<h3 class="fn"><a name="setForcePairing"></a>void QBluetoothDeviceSelector::setForcePairing ( bool <i>force</i> )</h3>
+<p>Sets whether devices must be paired in order to be successfully activated by the user.</p>
+<p>If <i>force</i> is true, and the user activates a device that is not paired, this selector will start the pairing process. If the pairing process fails, the <a href="qbluetoothdeviceselector.html#deviceActivated">deviceActivated</a>() signal will not be emitted.</p>
+<p>See also <a href="qbluetoothdeviceselector.html#forcePairing">forcePairing</a>() and <a href="qbluetoothdeviceselector.html#deviceActivated">deviceActivated</a>().</p>
+<h3 class="fn"><a name="setValidationProfiles"></a>void QBluetoothDeviceSelector::setValidationProfiles ( <a href="qset.html">QSet</a>&lt;<a href="qbluetooth.html#SDPProfile-enum">QBluetooth::SDPProfile</a>&gt; <i>profiles</i> )</h3>
+<p>Set the accepted SDP profiles to <i>profiles</i>.</p>
+<p>When this is set, a device can only be activated if it has at least one service that matches one of the given profiles.</p>
+<p>See also <a href="qbluetoothdeviceselector.html#validationProfiles">validationProfiles</a>() and <a href="qbluetoothdeviceselector.html#deviceActivated">deviceActivated</a>().</p>
+<h3 class="fn"><a name="startDeviceDiscovery"></a>bool QBluetoothDeviceSelector::startDeviceDiscovery ( bool <i>clear</i> )</h3>
+<p>Triggers a new device discovery process within the device selector. If <i>clear</i> is <tt>true</tt>, any devices that are currently displayed in the device selector will be cleared from the screen before the discovery is initiated.</p>
+<p>Returns whether a device discovery was successfully started. The discovery will not start if a discovery or pairing process is currently in progress.</p>
+<p>This method should be carefully used by the programmer, to ensure that there is no disruption to user interaction with the device selector. It would be confusing for the user if a new discovery is started at the moment that the user is prepared to select or activate a particular device. However, this method could be useful if, for example, the user has interrupted the device discovery process (perhaps by starting a different operation on the local device) and the programmer wants to give the illusion of &quot;continuing&quot; a discovery process if this other process is cancelled, by calling <tt>startDeviceDiscovery(false)</tt>.</p>
+<p>See also <a href="qbluetoothdeviceselector.html#deviceDiscoveryStarted">deviceDiscoveryStarted</a>() and <a href="qbluetoothdeviceselector.html#deviceDiscoveryCompleted">deviceDiscoveryCompleted</a>().</p>
+<h3 class="fn"><a name="validationProfiles"></a><a href="qset.html">QSet</a>&lt;<a href="qbluetooth.html#SDPProfile-enum">QBluetooth::SDPProfile</a>&gt; QBluetoothDeviceSelector::validationProfiles () const</h3>
+<p>Returns the current SDP profile filters.</p>
+<p>See also <a href="qbluetoothdeviceselector.html#setValidationProfiles">setValidationProfiles</a>().</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

@@ -1,0 +1,7 @@
+[Translation]
+File=QtopiaServices
+Context=Email
+[Service]
+Actions = "postMessage(QString,QString)"
+Icon = email
+Name[]=SystemMessages

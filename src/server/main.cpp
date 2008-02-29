@@ -1,70 +1,48 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
-#ifndef QTOPIA_INTERNAL_FILEOPERATIONS
-#define QTOPIA_INTERNAL_FILEOPERATIONS
-#endif
-
-#define QTOPIA_NO_MAIN
-
-#include "server.h"
-#include "serverapp.h"
 #include "pda/taskbar.h"
 #include "stabmon.h"
-#include "pda/launcher.h"
+#include "qabstractserverinterface.h"
 
-#ifndef QTOPIA_PHONE
-#include "firstuse.h"
+#ifdef QTOPIA_PDA
+#include "pda/launcher.h"
+#include "pda/firstuse.h"
 #endif
 
-#include <qtopia/qpeapplication.h>
-#include <qtopia/resource.h>
-#include <qtopia/network.h>
-#include <qtopia/config.h>
-#include <qtopia/timezone.h>
-#include <qtopia/custom.h>
-#include <qtopia/global.h>
+#include <qtopiaapplication.h>
+#include <qtimezone.h>
+#include <custom.h>
 
 #include <qfile.h>
 #include <qdir.h>
-#ifdef QWS
+#include <qimagereader.h>
+#include <qscreen_qws.h>
+#include <qsettings.h>
+#ifdef Q_WS_QWS
 #include <qwindowsystem_qws.h>
-#include <qtopia/qcopenvelope_qws.h>
 #endif
-#include <qtopia/alarmserver.h>
-#include <qtopia/global.h>
+#include <qtopiaipcenvelope.h>
+#include <qtopianamespace.h>
+#include <qtopialog.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -73,97 +51,36 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/resource.h>
-#define QTOPIA_USE_SPLASHPROCESS
 #else
 #include <process.h>
 #endif
 
-#ifdef QTOPIA_USE_SPLASHPROCESS
-#include <qpainter.h>
-#include <qasyncimageio.h>
-#endif
+#include <QPainter>
+#include <QThread>
+#include <QBasicTimer>
 
-#ifdef QTOPIA_USE_SPLASHPROCESS
-#include <sys/wait.h>
+#include <QImageIOHandler>
+
+#include <perftest.h>
+
+QSXE_APP_KEY
+
+#include "qtopiaserverapplication.h"
+
+#include <QDesktopWidget>
+#include <QLibraryInfo>
+
 #include <sys/types.h>
-#include <sys/time.h>
-#include <signal.h>
-#endif
-
-#ifdef QT_QWS_LOGIN
-#include "../login/qdmdialogimpl.h"
-#endif
-
-#ifdef Q_WS_QWS
-#include <qkeyboard_qws.h>
-#ifdef SINGLE_EXEC
-#include <qsoundqss_qws.h>
-#endif
-#endif
-
-#ifdef QT_QWS_CASSIOPEIA
-static void ignoreMessage( QtMsgType, const char * )
-{
-}
-#include <sys/mount.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <fcntl.h>
-#include <qdatetime.h>
-
-void initCassiopeia()
-{
-    // MIPSEL-specific init - make sure /proc exists for shm
-/*
-    if ( mount("/dev/ram0", "/", "ext2", MS_REMOUNT | MS_MGC_VAL, 0 ) ) {
-	perror("Remounting - / read/write");
-    }
-*/
-    if ( mount("none", "/tmp", "ramfs", 0, 0 ) ) {
-	perror("mounting ramfs /tmp");
-    } else {
-	fprintf( stderr, "mounted /tmp\n" ); // No tr
-    }
-    if ( mount("none", "/home", "ramfs", 0, 0 ) ) {
-	perror("mounting ramfs /home");
-    } else {
-	fprintf( stderr, "mounted /home\n" ); // No tr
-    }
-    if ( mount("none","/proc","proc",0,0) ) {
-	perror("Mounting - /proc");
-    } else {
-	fprintf( stderr, "mounted /proc\n" ); // No tr
-    }
-    if ( mount("none","/mnt","shm",0,0) ) {
-	perror("Mounting - shm");
-    }
-    setenv( "QTDIR", "/", 1 );
-    setenv( "QPEDIR", "/", 1 );
-    setenv( "HOME", "/home", 1 );
-    mkdir( "/home/Documents", 0755 );
-
-    // set a reasonable starting date
-    QDateTime dt( QDate( 2001, 3, 15 ) );
-    QDateTime now = QDateTime::currentDateTime();
-    int change = now.secsTo( dt );
-
-    time_t t = ::time(0);
-    t += change;
-    stime(&t);
-
-    qInstallMsgHandler(ignoreMessage);
-}
-#endif
+#include <unistd.h>
 
 #ifdef QPE_OWNAPM
 #include <sys/ioctl.h>
-#include <sys/types.h>
 #include <fcntl.h>
-#include <unistd.h>
 #include <errno.h>
 #include <linux/ioctl.h>
-#include <qtopia/global.h>
+
+// Not currently supported, available for demonstration purposes.
+//#define QTOPIA_ANIMATED_SPLASH
 
 static void disableAPM()
 {
@@ -199,198 +116,92 @@ static void initAPM()
 }
 #endif
 
-#ifdef QT_DEMO_SINGLE_FLOPPY
-#include <sys/mount.h>
-
-void initFloppy()
-{
-    mount("none","/proc","proc",0,0);
-    setenv( "QTDIR", "/", 0 );
-    setenv( "HOME", "/root", 0 );
-    setenv( "QWS_SIZE", "240x320", 0 );
-}
-#endif
-
-static void cleanup()
-{
-    QDir dir( Global::tempDir(), "qcop-msg-*" );
-
-    QStringList stale = dir.entryList();
-    QStringList::Iterator it;
-    for ( it = stale.begin(); it != stale.end(); ++it ) {
-	dir.remove( *it );
-    }
-}
-
 static void refreshTimeZoneConfig()
 {
    // We need to help WorldTime in setting up its configuration for
    //   the current translation
     // BEGIN no tr
     const char *defaultTz[] = {
-	"America/New_York",
-	"America/Los_Angeles",
-	"Europe/Oslo",
-	"Asia/Tokyo",
-	"Asia/Hong_Kong",
-	"Australia/Brisbane",
-	0
+        "America/New_York",
+        "America/Los_Angeles",
+        "Europe/Oslo",
+        "Asia/Tokyo",
+        "Asia/Hong_Kong",
+        "Australia/Brisbane",
+        0
     };
     // END no tr
 
-    TimeZone curZone;
+    QTimeZone curZone;
     QString zoneID;
     int zoneIndex;
-    Config cfg = Config( "WorldTime" );
-    cfg.setGroup( "TimeZones" );
-    if (!cfg.hasKey( "Zone0" )){
-	// We have no existing timezones - use the defaults that are untranslated strings
-	QString currTz = TimeZone::current().id();
-	QStringList zoneDefaults;
-	zoneDefaults.append( currTz );
-	for ( int i = 0; defaultTz[i] && zoneDefaults.count() < 6; i++ ) {
-	    if ( defaultTz[i] != currTz )
-		zoneDefaults.append( defaultTz[i] );
-	}
-	zoneIndex = 0;
-	for (QStringList::Iterator it = zoneDefaults.begin(); it != zoneDefaults.end() ; ++it){
-	    cfg.writeEntry( "Zone" + QString::number( zoneIndex ) , *it);
-	    zoneIndex++;
-	}
+    QSettings cfg( "WorldTime" );
+    cfg.beginGroup( "TimeZones" );
+    if (!cfg.contains( "Zone0" )){
+        // We have no existing timezones - use the defaults that are untranslated strings
+        QString currTz = QTimeZone::current().id();
+        QStringList zoneDefaults;
+        zoneDefaults.append( currTz );
+        for ( int i = 0; defaultTz[i] && zoneDefaults.count() < 6; i++ ) {
+            if ( defaultTz[i] != currTz )
+                zoneDefaults.append( defaultTz[i] );
+        }
+        zoneIndex = 0;
+        for (QStringList::Iterator it = zoneDefaults.begin(); it != zoneDefaults.end() ; ++it){
+            cfg.setValue( "Zone" + QString::number( zoneIndex ) , *it);
+            zoneIndex++;
+        }
     }
     // We have an existing list of timezones - refresh the
-    //  translations of TimeZone name
+    //  translations of QTimeZone name
     zoneIndex = 0;
-    while (cfg.hasKey( "Zone"+ QString::number( zoneIndex ))){
-	zoneID = cfg.readEntry( "Zone" + QString::number( zoneIndex ));
-	curZone = TimeZone( zoneID );
-	if ( !curZone.isValid() ){
-	    qDebug( "initEnvironment() Invalid TimeZone %s", zoneID.latin1() );
-	    break;
-	}
-	cfg.writeEntry( "ZoneName" + QString::number( zoneIndex ), curZone.city() );
-	zoneIndex++;
-    }
-
-}
-
-void initEnvironment(int argc, char ** argv)
-{
-#ifdef Q_OS_WIN32
-    // Config file requires HOME dir which uses QDir which needs the winver
-    qt_init_winver();
-#endif
-    Config config("locale");
-    config.setGroup( "Location" );
-    QString tz = config.readEntry( "Timezone", getenv("TZ") ).stripWhiteSpace();
-
-    setenv( "TZ", tz, 1 );
-
-    config.setGroup( "Language" );
-    QString lang = config.readEntry( "Language", getenv("LANG") ).stripWhiteSpace();
-    if( lang.isNull() || lang.isEmpty())
-	lang = "en_US";
-
-    setenv( "LANG", lang+".utf8", 1 );
-
-    QString displayID; //get id passed via qpe -display
-    
-    for (int i = 1; i<argc; i++) {
-        QCString arg = argv[i];
-        if (arg == "-display") {
-            if (++i < argc) {
-                QCString id = argv[i];
-
-                QRegExp regExp( ":[0-9]+" );  
-                int length;
-                int match = regExp.match( id , 0, &length );
-                if ( match >= 0 ) {
-                    displayID = QString(id).mid( match+1, length-1 );
-                    break;
-                }
-            }
+    while (cfg.contains( "Zone"+ QString::number( zoneIndex ))){
+        zoneID = cfg.value( "Zone" + QString::number( zoneIndex )).toString();
+        curZone = QTimeZone( zoneID.toLatin1() );
+        if ( !curZone.isValid() ){
+            qWarning( "initEnvironment() Invalid QTimeZone %s", (const char *)zoneID.toLatin1() );
+            break;
         }
-    }
-    
-    QString qws_display_env(getenv("QWS_DISPLAY"));
-    if (!displayID.isEmpty() ) {
-        if (!qws_display_env.isNull() && !qws_display_env.isEmpty()) {
-            QRegExp regExp( ":[0-9]+" );  
-            int length;
-            int match = regExp.match( qws_display_env, 0, &length );
-            if (match >= 0)
-                qws_display_env = qws_display_env.left(match+1)
-                        + displayID;
-        } else{ 
-            qws_display_env = ":" + displayID ;
-        }
+        zoneIndex++;
     }
 
-    if (qws_display_env.isNull() || qws_display_env.isEmpty()) {
-        config = Config("qpe");
-        config.setGroup( "Rotation" );
-        qws_display_env = config.readEntry( "Screen" ).stripWhiteSpace();
-    }
-    
-    if (!qws_display_env.isNull() && !qws_display_env.isEmpty()) {
-	setenv( "QWS_DISPLAY", qws_display_env, 1 );
-	config.writeEntry( "Screen", qws_display_env);
-    }
-
-    QString keyOffset = config.readEntry( "Cursor", getenv("QWS_CURSOR_ROTATION") );
-
-    if (keyOffset.isNull())
-	keyOffset = "0";
-
-    setenv( "QWS_CURSOR_ROTATION", keyOffset, 1 );
-    config.writeEntry( "Cursor", keyOffset);
-
-    config.write();
-}
-
-static void initBacklight()
-{
-#ifndef QT_NO_COP
-    QCopEnvelope e("QPE/System", "setBacklight(int)" );
-    e << -3; // Forced on
-#endif
 }
 
 static void initKeyboard()
 {
+    QSettings config("Trolltech","qpe");
 
-    Config config("qpe");
+    config.beginGroup( "Keyboard" );
 
-    config.setGroup( "Keyboard" );
-
-    int ard = config.readNumEntry( "RepeatDelay" );
-    int arp = config.readNumEntry( "RepeatPeriod" );
+/* FIXME
+    int ard = config.value( "RepeatDelay" ).toInt();
+    int arp = config.value( "RepeatPeriod" ).toInt();
     if ( ard > 0 && arp > 0 )
-	qwsSetKeyboardAutoRepeat( ard, arp );
+        qwsSetKeyboardAutoRepeat( ard, arp );
+*/
 
-    QString layout = config.readEntry( "Layout", "us101" );
-    Server::setKeyboardLayout( layout );
+    QString layout = config.value( "Layout", "us101" ).toString();
 }
 
-#ifndef QTOPIA_PHONE
+#ifdef QTOPIA_PDA
 static bool firstUse()
 {
-    bool needFirstUse = FALSE;
-#if defined(QPE_NEED_CALIBRATION)
+    bool needFirstUse = false;
+#if 0 //  defined(QPE_NEED_CALIBRATION)
     if ( !QFile::exists( "/etc/pointercal" ) )
-	needFirstUse = TRUE;
+        needFirstUse = true;
 #endif
 
     {
-	Config config( "qpe" );
-	config.setGroup( "Startup" );
-	needFirstUse |= config.readBoolEntry( "FirstUse", TRUE );
+        QSettings config("Trolltech","qpe");
+        config.beginGroup( "Startup" );
+        needFirstUse |= config.value( "FirstUse", true ).toBool();
     }
 
     if ( !needFirstUse )
-	return FALSE;
+        return false;
 
-    ServerApplication::login(TRUE);
+    ServerApplication::login(true);
 
     FirstUse *fu = new FirstUse();
     fu->exec();
@@ -400,407 +211,301 @@ static bool firstUse()
 }
 #endif
 
-#ifdef QTOPIA_USE_SPLASHPROCESS
-class DirectMovie : public QImageConsumer {
+#if defined(QTOPIA_ANIMATED_SPLASH)
+class DirectMovie : public QObject, public QImageReader {
 public:
-    DirectMovie(QWidget* w) : loop(0), period(0)
-    {
-	size = w->size();
-	painter = new QPainter(w);
-    }
-
-    virtual ~DirectMovie()
-    {
-	delete painter;
-    }
-
-    static int killed;
-    static void splashsig(int)
-    {
-	killed = 1;
-    }
+    DirectMovie() {}
 
     void play(const QString& filename)
     {
-	signal(SIGTERM,splashsig); // I don't want to die... yet.
+        setFileName(filename);
 
-	const int buf_len=2048;
-	uchar buffer[buf_len];
-	loop = -1;
-	woffset.rx() = -1;
+        if ( !canRead() )
+            return;
 
-	QFile f(filename);
-	if ( f.open(IO_ReadOnly) ) {
-	    decoder = new QImageDecoder(this);
-
-	    gettimeofday(&last,0);
-
-	    for (;;) {
-		int length = f.readBlock((char*)buffer, buf_len);
-		if ( length <= 0 ) {
-		    if ( killed || loop < 0 || loop && --loop == 0 )
-			break;
-		    signal(SIGTERM,SIG_DFL); // Kill me now, I'm looping anyway.
-		    length = 0;
-		    f.reset();
-		    delete decoder;
-		    decoder = new QImageDecoder(this);
-		}
-		uchar* b = buffer;
-		int r = -1;
-		while (length > 0) {
-		    r = decoder->decode(b, length);
-		    if ( r <= 0 ) break;
-		    b += r;
-		    length -= r;
-		}
-	    }
-	}
+        gettimeofday(&last,0);
+        timer.start(0,this);
     }
 
-    void changed(const QRect& r)
+    void timerEvent(QTimerEvent*)
     {
-	charea |= r;
-	//draw(r.topLeft(),r);
+        QImage img = read();
+        int delay = 0;
+
+        if ( img.isNull() ) {
+            setFileName(fileName()); // XXX restart
+        } else {
+            QRegion r(0,0,qt_screen->width(),qt_screen->height());
+            qt_screen->blit(img,QPoint(0,0),r);
+            qt_screen->exposeRegion(r,1);
+            if ( imageCount() == 1 )
+                return;
+            struct timeval now;
+            gettimeofday(&now,0);
+            int period = nextImageDelay();
+            delay = period -
+                ((now.tv_sec-last.tv_sec)*1000+(now.tv_usec-last.tv_usec)/1000);
+            last.tv_sec += period/1000;
+            last.tv_usec += (period%1000)*1000;
+            if ( delay < 0 )
+                delay = 0;
+        }
+
+        timer.start(delay,this);
     }
-
-    void end() { }
-
-    void preFrameDone()
-    {
-	if ( woffset.x() == -1 )
-	    setSize(decoder->image().width(),decoder->image().height());
-    }
-
-    void frameDone(const QPoint& offset, const QRect& r)
-    {
-	preFrameDone();
-	draw(offset,r);
-	frameDone();
-    }
-
-    void frameDone()
-    {
-	preFrameDone();
-	if ( toobig ) {
-	    // Too big; just scale this first frame and exit
-	    painter->drawImage(0,0,decoder->image().smoothScale(size.width(),size.height()));
-	    exit(0);
-	}
-	if ( !charea.isEmpty() )
-	    draw(charea.topLeft(),charea);
-	struct timeval now;
-	gettimeofday(&now,0);
-	int delay = period*1000 -
-	    ((now.tv_sec-last.tv_sec)*1000000+(now.tv_usec-last.tv_usec));
-	last.tv_sec += period/1000;
-	last.tv_usec += (period%1000)*1000;
-	if ( delay > 0 )
-	    usleep(delay);
-    }
-
-    void setLooping(int l) { loop = l; }
-    void setFramePeriod(int p) { period = p; }
-    void setSize(int w, int h)
-    {
-	needfill = size != QSize(w,h);
-	toobig = size.width() < w || size.height() < h;
-	woffset = (QPoint(size.width(),size.height())-QPoint(w,h))/2;
-    }
-
-    void draw(const QPoint& offset, const QRect& r)
-    {
-	if ( toobig )
-	    return;
-
-	if ( needfill ) {
-	    painter->fillRect(0,0,size.width(),size.height(),
-		QColor(decoder->image().pixel(0,0)));
-	    needfill = FALSE;
-	}
-	painter->drawImage(woffset+offset,decoder->image(),r);
-    }
-
 
 private:
-    QRect charea;
-    QImageDecoder *decoder;
-    QSize size;
-    QPoint woffset;
-    int loop,period;
-    bool needfill,toobig;
-    QPainter *painter;
     struct timeval last;
+    QBasicTimer timer;
 };
 
-int DirectMovie::killed=0;
-#endif
 
-#if defined(QTOPIA_PHONE)
+class DirectMovieThread : public QThread {
+public:
+    DirectMovieThread(QObject *parent) : QThread(parent)
+    {
+    }
+
+    void play(const QString& file)
+    {
+        filename = file;
+        start();
+    }
+
+    void run()
+    {
+        movie = new DirectMovie;
+        movie->play(filename);
+        exec();
+        delete movie;
+    }
+
+private:
+    QString filename;
+    DirectMovie *movie;
+};
+
+
 class SplashScreen : public QLabel {
-    QWidget* rep;
-    QImage img;
 public:
     SplashScreen() :
-	QLabel(0,0),
-	rep(0)
+        QLabel(0),
+        rep(0),
+        thread(0)
     {
     }
 
     ~SplashScreen()
     {
-#ifdef QTOPIA_USE_SPLASHPROCESS
-	kill(childpid,SIGTERM);
-	waitpid(childpid,0,0);
-#endif
+        if ( thread ) {
+            thread->terminate();
+            thread->wait();
+            delete thread;
+        }
     }
 
-    void splash(const QString& imagefile)
+    void splash(const QString& animfile)
     {
-#ifdef QTOPIA_USE_SPLASHPROCESS
-	setBackgroundMode(NoBackground);
-#else
-	img = QImage(imagefile);
-	QSize ss = qApp->desktop()->rect().size();
-	if ( img.size() != ss ) {
-	    qWarning("%s != screen size",imagefile.latin1());
-	    img = img.smoothScale(ss.width(),ss.height());
-	}
-#endif
-	startTimer(3000); // minimum splash time
-	showFullScreen();
-	qApp->processEvents();
-#ifdef QTOPIA_USE_SPLASHPROCESS
-	if ( !(childpid = fork()) ) {
-	    DirectMovie(this).play(imagefile);
-	    exit(0);
-	}
-#endif
-    }
+        setAttribute(Qt::WA_NoBackground);
+        timer.start(2000,this); // minimum splash time
 
-    void paintEvent(QPaintEvent*)
-    {
-	QPainter p(this);
-	p.drawImage(0,0,img);
+        // Conceptually, we want to paint "on this widget", but instead
+        // we paint on the screen, since that can be done in a thread.
+        //showFullScreen();
+
+        thread = new DirectMovieThread(this);
+        thread->play(animfile);
     }
 
     void setReplacement(QWidget *s)
     {
-	rep = s;
+        rep = s;
     }
 
     void timerEvent(QTimerEvent*)
     {
-	killTimers();
-	if ( rep ) {
-	    rep->show();
-	    hide();
-	    rep->lower();
-	    delete this;
-	} else {
-	    startTimer(200); // keep waiting
-	}
+        if ( rep ) {
+            rep->show();
+            hide();
+            rep->lower();
+            delete this;
+        } else {
+            timer.start(200,this); // keep waiting
+        }
     }
 private:
-#ifdef QTOPIA_USE_SPLASHPROCESS
-    int childpid;
-#endif
+    QWidget* rep;
+    QImage img;
+    DirectMovieThread *thread;
+    QBasicTimer timer;
 };
 #endif
 
+void Qtopia_initAlarmServer(); // from qalarmserver.cpp
+
+//
+// IMPORTANT NOTE: This function implements part of the Qtopia startup
+// processing.  The sequence of steps performed during Qtopia startup is
+// documented in the file <depot-directory>/doc/src/qtopia-startup.qdoc.
+// If you make changes or additions to the startup sequence, you must ensure
+// that that document is also updated.
+//
 int initApplication( int argc, char ** argv )
 {
-#ifdef QT_QWS_CASSIOPEIA
-    initCassiopeia();
-#endif
+    if(!QtopiaServerApplication::startup(argc, argv))
+        qFatal("Unable to initialize task subsystem.  Please check '%s' exists and its content is valid.", QtopiaServerApplication::taskConfigFile().toLatin1().constData());
 
 #ifdef QPE_OWNAPM
     initAPM();
 #endif
 
-#ifdef QT_DEMO_SINGLE_FLOPPY
-    initFloppy();
-#endif
-
-    initEnvironment(argc, argv);
-
-    //Don't flicker at startup:
-#ifdef QWS
-    QWSServer::setDesktopBackground( QImage() );
-#endif
-    ServerApplication a( argc, argv, QApplication::GuiServer );
-
-    cleanup();
-
     refreshTimeZoneConfig();
-
-    initBacklight();
+    qLog(Performance) << "QtopiaServer : " << "Refresh time zone information : "
+                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
 
     initKeyboard();
+    qLog(Performance) << "QtopiaServer : " << "Keyboard initialisation : "
+                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
 
-#if defined(QTOPIA_PHONE)
+#if defined(QTOPIA_ANIMATED_SPLASH)
     SplashScreen *splash = new SplashScreen;
-    splash->splash(Resource::findPixmap("splash"));
-#else
+    splash->splash(QString(":image/splash"));
+    qLog(Performance) << "QtopiaServer : " << "Splash screen creation : "
+                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+#endif
+
+#if 0 // FIXME first use is broken. just disable it for now
     // Don't use first use under Windows
-# if defined(Q_OS_UNIX) 
+# if defined(Q_OS_UNIX)
     if ( firstUse() ) {
-	a.restart();
-	return 0;
+        a.restart();
+        return 0;
     }
 # endif
 #endif
 
-#if defined(QT_QWS_LOGIN)
-    for( int i=0; i<a.argc(); i++ )
-      if( strcmp( a.argv()[i], "-login" ) == 0 ) { // No tr
-	QDMDialogImpl::login( );
-	return 0;
-      }
-#endif
+    // Load and show UI
+    QAbstractServerInterface *interface =
+        qtopiaWidget<QAbstractServerInterface>(0, Qt::FramelessWindowHint);
 
-    Server *s = new Server();
-    s->connect(&a, SIGNAL(recoverMemory(ServerApplication::MemState)),
-		SLOT(recoverMemory(ServerApplication::MemState)));
-
-    ServerApplication::login(TRUE);
-
-#ifndef QPE_SYSTEM_SYSFILEMONITOR
-    // Device *should* send QCop message when a change happens.
-    (void)new SysFileMonitor(s);
-#endif
-
-#ifdef QWS
-    Network::createServer(s);
-#endif
-
-#if defined(QTOPIA_PHONE)
-    splash->setReplacement(s);
+#if defined(QTOPIA_ANIMATED_SPLASH)
+    splash->setReplacement(interface);
 #else
-    s->show();
+    if(interface)
+        interface->show();
 #endif
+    qLog(Performance) << "QtopiaServer : " << "Display the server : "
+                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
 
-    AlarmServer::initialize();
+    Qtopia_initAlarmServer();
+    qLog(Performance) << "QtopiaServer : " << "AlarmServer startup : "
+                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
 
-    int rv =  a.exec();
+    qLog(Performance) << "QtopiaServer : " << "Entering event loop : "
+                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
 
-    qDebug("exiting...");
-    delete s;
+//    int rv =  a.exec();
+    //Can't do this either, exec is static int rv =  qApp->exec();
+    int rv = static_cast<QtopiaApplication *>(qApp)->exec();
 
+    qLog(QtopiaServer) << "exiting...";
+    qLog(Performance) << "QtopiaServer : " << "Event loop exited : "
+                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+
+    delete interface;
+
+    qLog(Performance) << "QtopiaServer : " << "Leaving initApplication : "
+                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
     return rv;
 }
 
 #ifndef Q_OS_WIN32
 
+static void check_prefix()
+{
+    // Construct a string with the path to the binary that we'll expect to see at runtime
+    QString prefix_bin = QDir(QString("%1/bin/%2").arg(QLibraryInfo::location(QLibraryInfo::PrefixPath)).arg(QTOPIA_TARGET)).absolutePath();
+    QString prefix_check = QDir(prefix_bin).canonicalPath(); // handle symlinks
+    // Get the path to the currently running binary
+    QString proc_check = QDir(QString("/proc/%1/exe").arg(getpid())).canonicalPath();
+    if ( proc_check.isEmpty() )
+        proc_check = QString("CANNOT READ /proc/%1/exe").arg(getpid());
+    if ( prefix_check != proc_check ) {
+        // Figure out what the prefix should be based on the location of the currently running binary
+        QString proc_prefix = QDir(QString("%1/../..").arg(proc_check)).canonicalPath();
+        qWarning() << "**********************************************************" << endl
+                   << "* ERROR: Expecting this binary to be located in" << endl
+                   << "*  " << prefix_bin.toLocal8Bit().constData() << endl
+                   << "* but it is being run from" << endl
+                   << "*  " << proc_check.toLocal8Bit().constData() << endl
+                   << "*" << endl
+                   << "* This generally indicates that you have specified the wrong" << endl
+                   << "* value for -prefix when configuring Qtopia. Based on the" << endl
+                   << "* location of this binary, you should be using a prefix of" << endl
+                   << "*  " << proc_prefix.toLocal8Bit().constData() << endl
+                   << "**********************************************************" << endl;
+    }
+}
+
 #ifdef SINGLE_EXEC
-#include "../tools/qcop/qcopimpl.h"
-#include "singleexec_quicklaunch.h"
-#include "singleexec_server_apps.cpp"
-#include <qtopia/resource.h>
+#include "../tools/quicklauncher/quicklaunch.h"
+int main_quicklaunch( int argc, char **argv );
 
 int main( int argc, char ** argv )
 {
-    QString executableName(argv[0]); 
-    executableName = executableName.right(executableName.length() 
-	    - executableName.findRev('/') - 1); 
+    check_prefix();
+    QString executableName(argv[0]);
+    executableName = executableName.right(executableName.length() - executableName.lastIndexOf('/') - 1);
 
     if ( executableName != "qpe" ) {
-	if ( executableName == "quicklauncher" ) {
-	    app = new QPEApplication( argc, argv ); 
-#ifdef _OS_LINUX_
-	    // Setup to change proc title
-	    int i;
-	    char **envp = environ;
-	    /* Move the environment so we can reuse the memory.
-	     * (Code borrowed from sendmail.) */
-	    for (i = 0; envp[i] != NULL; i++)
-		continue;
-	    environ = (char **) malloc(sizeof(char *) * (i + 1));
-	    if (environ == NULL)
-		return -1;
-	    for (i = 0; envp[i] != NULL; i++)
-		if ((environ[i] = strdup(envp[i])) == NULL)
-		    return -1;
-	    environ[i] = NULL;
-
-	    argv0 = argv;
-	    if (i > 0)
-		argv_lth = envp[i-1] + strlen(envp[i-1]) - argv0[0];
-	    else
-		argv_lth = argv0[argc-1] + strlen(argv0[argc-1]) - argv0[0];
-#endif
-	    unsetenv( "LD_BIND_NOW" );
-	    (void)new QuickLauncher();
-	    qDebug( "QuickLauncher running" );
-	    // Pre-load default fonts
-	    QFontMetrics fm( QApplication::font() );
-	    fm.ascent(); // causes font load.
-	    QFont f( QApplication::font() );
-	    f.setWeight( QFont::Bold );
-	    QFontMetrics fmb( f );
-	    fmb.ascent(); // causes font load.
-
-	    // Create a widget to force initialization of title bar images, etc.
-	    QObject::disconnect(app, SIGNAL(lastWindowClosed()), app, SLOT(hideOrQuit()));
-	    QWidget *w = new QWidget(0,0,Qt::WDestructiveClose|Qt::WStyle_ContextHelp|Qt::WStyle_Tool);
-	    w->setGeometry( -100, -100, 10, 10 );
-	    w->show();
-	    QTimer::singleShot( 0, w, SLOT(close()) );
-
-	    // Each of the following force internal structures/internal
-	    // initialization to be performed.  This may mean allocating
-	    // memory that is not needed by all applications.
-	    TimeZone::current().isValid(); // populate timezone cache
-	    TimeString::currentDateFormat(); // create internal structures
-	    TimeString::currentAMPM();
-	    Resource::loadIconSet("new"); // do internal init
-	    app->enter_loop();
-	} else if ( executableName == "qcop" ) {
-	    return doqcopimpl(argc,argv);
-	} else if ( executableName == "qss" ) {
-	    QApplication a(argc,argv);
-	    (void)new QWSSoundServer(0);
-	    setpriority(PRIO_PROCESS, 0, -15);
-	    return a.exec();
-	} else {
-	    QuickLauncher::exec(argc,argv);
-	}
-	int rv = app->exec();
-	delete mainWindow;
-	delete app;
-	return rv;
+        qLog(Performance) << executableName.toLatin1().constData() << " : " << "Starting single-exec main : "
+            << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
+        QPEMainMap *qpeMainMap();
+        if ( qpeMainMap()->contains(executableName) ) {
+            // This is a non-quicklaunch app
+            return (*qpeMainMap())[executableName](argc, argv);
+        } else {
+            // Someone directly invoked a quicklaunch app
+            // Pass control to quicklaunch's main function so that it can deal with it
+            return main_quicklaunch(argc, argv);
+        }
     }
 
 #else // SINGLE_EXEC
 int main( int argc, char ** argv )
 {
+    check_prefix();
 #endif // SINGLE_EXEC
+    qLog(Performance) << "QtopiaServer : " << "Starting qpe main : "
+                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
 
     signal( SIGCHLD, SIG_IGN );
+
+    const QByteArray restartFile = "/tmp/restart-qtopia";
+    ::system( "touch " + restartFile );
 
     int retVal = initApplication( argc, argv );
 
 #ifdef Q_WS_QWS
     // Have we been asked to restart?
-    if ( ServerApplication::doRestart ) {
-	for ( int fd = 3; fd < 100; fd++ )
-	    close( fd );
-# if defined(QT_DEMO_SINGLE_FLOPPY)
-	execl( "/sbin/init", "qpe", 0 );
-# elif defined(QT_QWS_CASSIOPEIA)
-	execl( "/bin/sh", "sh", 0 );
-# else
-	execl( (QPEApplication::qpeDir()+"bin/qpe").latin1(), "qpe", 0 );
-# endif
+    if(!(QtopiaServerApplication::shutdownType() == QtopiaServerApplication::RestartDesktop)) {
+        //we assume that the calling script is running
+        //in a loop which will restart qpe automatically
+        //if /tmp/restart-qtopia exists. The script may or
+        //may not delete the file
+        if ( QFile::exists( restartFile ) )
+            QFile::remove( restartFile );
     }
 #endif
 
     // Kill them. Kill them all.
     setpgid( getpid(), getppid() );
     killpg( getpid(), SIGTERM );
-    Global::sleep( 1 );
+    Qtopia::sleep( 1 );
     killpg( getpid(), SIGKILL );
 
+    qLog(Performance) << "QtopiaServer : " << "Exiting qpe main : "
+                      << qPrintable( QTime::currentTime().toString( "h:mm:ss.zzz" ) );
     return retVal;
 }
 #else // WIN32
@@ -810,8 +515,8 @@ int main( int argc, char ** argv )
     int retVal = initApplication( argc, argv );
 
     if ( DesktopApplication::doRestart ) {
-	qDebug("Trying to restart");
-	execl( (QPEApplication::qpeDir()+"bin\\qpe").latin1(), "qpe", 0 );
+        qLog(QtopiaServer) << "Trying to restart";
+        execl( (Qtopia::qtopiaDir()+"bin\\qpe").toLatin1(), "qpe", 0 );
     }
 
     return retVal;

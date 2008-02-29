@@ -1,0 +1,86 @@
+#!/bin/sh
+# get the paths
+if [ -f "$(dirname $0)/getpaths.sh" ]; then . "$(dirname $0)/getpaths.sh"; else echo "Could not find getpaths.sh"; exit 1; fi
+
+# This script is no longer capable of running Qtopia 1.x or 2.x. Please use the runqvfb scripts in those packages.
+
+if [ -z "$QPEHOME" ]; then
+    export QPEHOME=$QPEDIR/home
+fi
+
+# Grab QWS_DISPLAY from qpe.conf if it's unset. This lets rotation stuff work.
+if [ -z "$QWS_DISPLAY" -a -f $QPEHOME/Settings/Trolltech/qpe.conf ]; then
+   QWS_DISPLAY="$(awk -F= '/Screen=QVFb/{print $2}' $QPEHOME/Settings/Trolltech/qpe.conf)"
+fi
+# Force the use of QVFb:0 is QWS_DISPLAY is unset (match the 'algorithm' in runqvfb).
+# This 'breaks' the rotation settings because Qtopia normally uses a QWS_DISPLAY from a settings
+# file if it's unset. If you need to test rotation settings, disable these lines.
+display=${QWS_DISPLAY:=QVFb:0}
+
+skins="$QVFB_SKIN Trolltech-Keypad Trolltech-Touchscreen"
+
+RUNDIR=$QT_DEPOT_PATH/tools/qvfb
+qvfb=$DQTDIR/bin/qvfb
+cd $RUNDIR
+
+args=
+verbose=0
+while (( $# > 0 )); do
+    case $1 in
+        -\?)
+            exit 2
+            ;;
+        -v)
+            verbose=1
+            ;;
+        -qwsdisplay)
+            shift
+            display=$1
+            ;;
+        *)
+        if [ -f $1.skin -o -d $1.skin ]; then
+            skins="$1 Trolltech-$1 $skins"
+        elif [ -d $QTOPIA_DEPOT_PATH/devices/*/$1.skin ]; then
+            RUNDIR=$(echo $QTOPIA_DEPOT_PATH/devices/*/$1.skin)
+            RUNDIR=${RUNDIR%/*.skin}
+            skins="$1 Trolltech-$1 $skins"
+        else
+            args="$args $1"
+        fi
+    esac
+    shift
+done
+
+cd $RUNDIR
+if [ "$verbose" = 1 ]; then
+    echo "Running from $RUNDIR"
+fi
+
+# Grab only the stuff after the last :
+display=${display##*:}
+if [ -e /tmp/.qtvfb_keyboard-$display ]; then
+    echo "QVfb $display is already running!"
+    echo "Please close it and remove /tmp/.qtvfb_*-$display"
+    exit 1;
+fi
+if [ -e /tmp/qtembedded-$LOGNAME/QtEmbedded-$display ]; then
+    echo "QVfb $display is already running!"
+    echo "Please close it and remove /tmp/qtembedded-$LOGNAME"
+    exit 1;
+fi
+
+
+for skin in $skins; do
+    if [ -f $skin.skin -o -d $skin.skin ]; then
+        args="$args -skin ${skin}.skin"
+        break
+    fi
+done
+
+if [ "$verbose" = 1 ]; then
+    echo $qvfb -qwsdisplay :$display $args
+    $qvfb -qwsdisplay :$display $args "$@"
+else
+    $qvfb -qwsdisplay :$display $args "$@" >/dev/null 2>&1 &
+fi
+

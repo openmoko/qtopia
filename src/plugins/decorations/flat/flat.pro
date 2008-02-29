@@ -1,8 +1,6 @@
-CONFIG		+= qtopiaplugin
-
-TARGET		= flat
+qtopia_project(qtopia plugin)
+TARGET=flat
 
 HEADERS		= flat.h
 SOURCES		= flat.cpp
 
-TRANSLATABLES = $${HEADERS} $${SOURCES}

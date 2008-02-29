@@ -1,0 +1,43 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>  Virtual Target Environment </title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">  Virtual Target Environment <br><small>Functional Description</small></h1>
+<p />
+
+<p />
+The Virtual Target Environment allows the Qtopia developer or integrator to simulate running Qtopia on a Linux device. It uses User Mode Linux (UML) to provide a development environment for Qtopia closely resembling target hardware. In particular, Safe Execution  features may be enabled in the virtual system, leaving the host system as a regular development workstation.
+<p />
+The Virtual Target Environment  allows  testing to occur on a development machine with the entire device running as a single process.  This, in turn, allows  testing of Qtopia in different file system configurations or with different kernels while still being able to run and test the software without additional hardware.  QVFb is  used to simulate the display and input devices. Benefits include being able to use QVFb  to simulate the display and input devices; reset the state of the virtual target environment; perform entire device state diffs and limit device storage or RAM availability.
+<p />
+<p />
+<strong>Note:</strong> this is not supported in Qtopia 4.1
+<p />
+
+<p />
+<h2><a name="Features"></a> Features </h2>
+<p />
+The Virtual Target Environment includes the Linux kernel with LIDS patches (see <a href="fd-SafeExecution.html" class="twikiLink">SafeExecution</a>), a Qtopia/SXE/LIDS file-system and policies.  
+<p />
+By routing the simulated devices framebuffer device and keyboard device via special kernel drivers it can display to a simulated device display provided by the Qtopia Virtual Frame Buffer (QVFB).
+<p />
+This enables SXE with full LIDS support to be enabled for development testing on the desktop, without compiling LIDS into the host computers kernel.
+<p />
+<h3><a name="Availability"></a> Availability </h3>
+<p />
+At present the Virtual Target Environment is used internally but may be made available by request.
+<p />
+<hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div>

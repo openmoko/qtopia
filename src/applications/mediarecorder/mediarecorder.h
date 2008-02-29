@@ -1,37 +1,23 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #ifndef MEDIARECORDER_H
 #define MEDIARECORDER_H
@@ -39,28 +25,36 @@
 #include <qmainwindow.h>
 #include <qlist.h>
 #include <qmap.h>
-#include <qvbox.h>
-#include <qwidgetstack.h>
+#include <qstackedwidget.h>
 #include <qpushbutton.h>
 #include <qlabel.h>
 #include <qtimer.h>
+#include <qsound.h>
+#include <qtopiaabstractservice.h>
+
+#include "ui_mediarecorderbase.h"
 
 class QToolBar;
 class QAction;
 class MediaRecorderPluginList;
+#ifdef QTOPIA4_TODO
 class MediaPlayerPluginList;
-class AudioInput;
+#endif
+#ifdef QTOPIA4_TODO
 class AudioDevice;
+#endif
 class SampleBuffer;
-class MediaRecorderBase;
 class ConfigureRecorder;
 class Waveform;
 class MediaRecorderEncoder;
+#ifdef QTOPIA4_TODO
 class MediaPlayerDecoder;
-class QCopChannel;
-class FileSelector;
-class DocLnk;
-
+#endif
+class QtopiaChannel;
+class QDocumentSelector;
+class QContent;
+class QAudioInput;
+class QDSActionRequest;
 
 // Define this to record to memory before saving to disk.
 //#define RECORD_THEN_SAVE
@@ -68,10 +62,10 @@ class DocLnk;
 
 struct QualitySetting
 {
-    int		frequency;
-    int		channels;
-    QString	mimeType;
-    QString	formatTag;
+    int         frequency;
+    int         channels;
+    QString     mimeType;
+    QString     formatTag;
 };
 
 
@@ -87,7 +81,7 @@ class MediaRecorder : public QMainWindow
     Q_OBJECT
 
 public:
-    MediaRecorder( QWidget *parent = 0, const char *name = 0, WFlags f = 0 );
+    MediaRecorder( QWidget *parent = 0, Qt::WFlags f = 0 );
     ~MediaRecorder();
 
 private:
@@ -117,26 +111,34 @@ private slots:
     void audioOutputDone();
     void audioDeviceReady();
     void audioDeviceError();
-    void traySocket( const QCString&, const QByteArray& );
-    void fileSelected( const DocLnk& );
-    void newSelected( const DocLnk& );
-    void appMessage( const QCString&, const QByteArray& );
+    void traySocket( const QString&, const QByteArray& );
+    void documentSelected(const QContent&);
+    void newSelected();
 
 protected:
     void closeEvent( QCloseEvent *e );
     void keyPressEvent( QKeyEvent *e );
 
+public slots:
+    void toggleRecording();
+    void recordAudio( const QDSActionRequest& request );
+
 private:
-    FileSelector *selector;
-    MediaRecorderBase *contents;
+    QDocumentSelector *selector;
+    QWidget *contentsWidget;
+    Ui::MediaRecorderBase *contents;
     ConfigureRecorder *config;
     QToolBar *menu;
     QAction *configureAction;
-    QWidgetStack *stack;
+    QStackedWidget *stack;
     MediaRecorderPluginList *recorderPlugins;
+#ifdef QTOPIA4_TODO
     MediaPlayerPluginList *playerPlugins;
-    AudioInput *audioInput;
+#endif
+    QAudioInput *m_audioInput;
+#ifdef QTOPIA4_TODO
     AudioDevice *audioOutput;
+#endif
     bool audioDeviceIsReady;
     bool startWhenAudioDeviceReady;
 #ifdef RECORD_THEN_SAVE
@@ -145,7 +147,10 @@ private:
     short *sampleBuffer;
     QIODevice *io;
     MediaRecorderEncoder *encoder;
+#ifdef QTOPIA4_TODO
     MediaPlayerDecoder *decoder;
+#endif
+    QSound *m_sound;
     QualitySetting qualities[MaxQualities];
     long recordTime;
     long maxRecordTime;
@@ -153,15 +158,13 @@ private:
     bool recording;
     bool playing;
     QString lastSaved;
-    QString lastSavedLink;
     QTimer *lightTimer;
     bool recordLightState;
-    QCopChannel *trayChannel;
-    int recordingsCategory;
-    bool requestMode;
+    QtopiaChannel *trayChannel;
+    QString recordingsCategory;
+    QDSActionRequest* mRecordAudioRequest;
     QualitySetting recordQuality;
-    QCString responseChannel;
-    QString responseId;
+    bool smallScreen;
 
     void setContextKey( bool record );
     void setReplayEnabled( bool flag );
@@ -176,6 +179,37 @@ private:
     void stopPlayingNoSwitch();
     void stopEverythingNoSwitch();
 
+    QWidget* getContentsWidget();
+
+    int     m_position;
+};
+
+class VoiceRecordingService : public QtopiaAbstractService
+{
+    Q_OBJECT
+
+    friend class MediaRecorder;
+
+public:
+
+    ~VoiceRecordingService();
+
+public slots:
+
+    void toggleRecording();
+    void recordAudio( const QDSActionRequest& request );
+
+private:
+
+    VoiceRecordingService(MediaRecorder *parent):
+            QtopiaAbstractService("VoiceRecording", parent)
+        {
+        this->parent = parent;
+
+        publishAll();
+    }
+
+    MediaRecorder *parent;
 };
 
 #endif

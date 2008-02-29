@@ -1,0 +1,10 @@
+[Translation]
+File=QtopiaSettings
+Context=DB Services
+Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
+[Desktop Entry]
+Type=Application
+Exec=dbservices
+Icon=dbservices/DbServices
+Name[]=DB Serv\xadices
+CanFastload=0

@@ -1,0 +1,6 @@
+# Get Qt's version of this file
+load(default_pre)
+
+# Tell people we're building Qtopia
+QT_CONFIG+=qtopia
+

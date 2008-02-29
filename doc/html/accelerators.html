@@ -1,117 +1,90 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"><html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Standard Accelerators</title>
-<table width="100%">
-<tr><td><a href="index.html">
-<img width="100" height="100" src="qtlogo.png"
-alt="Home" border="0"><img width="100"
-height="100" src="face.png" alt="Home" border="0">
-</a><td valign="top"><div align="right"><img src="dochead.png" width="472" height="27"><br>
-<a href="classes.html"><b>Classes</b></a>
-- <a href="annotated.html">Annotated</a>
-- <a href="hierarchy.html">Tree</a>
-- <a href="functions.html">Functions</a>
-- <a href="index.html">Home</a>
-- <a href="topicals.html"><b>Structure</b>
-  <font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qte</font>
-</a>
-</div>
-</table>
-<p>
-<h1 align="center">Standard Accelerator Keys</h1>
-<p>
-Applications invariably need to define accelerator keys for actions,
-and Qt provides functions to help with that, most importantly <a href="qaccel.html#a4d095">QAccel::shortcutKey()</a>.
-<p>
-Here is Microsoft's recommendations for accelerator key choice, with
-comments about the Open Group's recommendations where they exist and
-differ.  For most commands, the Open Group either has no advice or
-agrees with Microsoft.
-<p>
-The boldfaced letter plus Alt is Microsoft's recommended choice, and
-we recommend supporting it.  For an Apply button, for example, we
-recommend <a href="qbutton.html#989f4f">setText(</a> <a href="qobject.html#2418a9">tr(</a> "&Apply" ) );
-<p>
-If you have conflicting commands (e.g. About and Apply buttons in the
-same dialog), you're on your own.
-<p>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: Standard Accelerator Keys</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Standard Accelerator Keys<br /><small></small></h1>
+<p>Applications invariably need to define accelerator keys for actions. Qt fully supports accelerators, for example with <a href="q3accel.html#shortcutKey">Q3Accel::shortcutKey</a>().</p>
+<p>Here are Microsoft's recommendations for accelerator keys, with comments about the Open Group's recommendations where they exist and differ. For most commands, the Open Group either has no advice or agrees with Microsoft.</p>
+<p>The emboldened letter plus Alt is Microsoft's recommended choice, and we recommend supporting it. For an Apply button, for example, we recommend QAbstractButton::setText(<a href="qobject.html#tr">tr</a>(&quot;&amp;Apply&quot;));</p>
+<p>If you have conflicting commands (e.g. About and Apply buttons in the same dialog), you must decide for yourself.</p>
 <ul>
-<li><b><u>A</u></b>bout
-<li>Always on <b><u>T</u></b>op
-<li><b><u>A</u></b>pply
-<li><b><u>B</u></b>ack
-<li><b><u>B</u></b>rowse
-<li><b><u>C</u></b>lose (CDE: Alt-F4.  Alt-F4 is "close window" in Windows.)
-<li><b><u>C</u></b>opy (CDE: Ctrl-C, Ctrl-Insert)
-<li><b><u>C</u></b>opy Here
-<li>Create <b><u>S</u></b>hortcut
-<li>Create <b><u>S</u></b>hortcut Here
-<li>Cu<b><u>t</u></b>
-<li><b><u>D</u></b>elete
-<li><b><u>E</u></b>dit
-<li><b><u>E</u></b>xit
-<li><b><u>E</u></b>xplore
-<li><b><u>F</u></b>ile
-<li><b><u>F</u></b>ind
-<li><b><u>H</u></b>elp
-<li>Help <b><u>T</u></b>opics
-<li><b><u>H</u></b>ide
-<li><b><u>I</u></b>nsert
-<li>Insert <b><u>O</u></b>bject
-<li><b><u>L</u></b>ink Here
-<li>Ma<b><u>x</u></b>imize
-<li>Mi<b><u>n</u></b>imize
-<li><b><u>M</u></b>ove
-<li><b><u>M</u></b>ove Here
-<li><b><u>N</u></b>ew
-<li><b><u>N</u></b>ext
-<li><b><u>N</u></b>o
-<li><b><u>O</u></b>pen
-<li>Open <b><u>W</u></b>ith
-<li>Page Set<b><u>u</u></b>p
-<li><b><u>P</u></b>aste
-<li>Paste <b><u>L</u></b>ink
-<li>Paste <b><u>S</u></b>hortcut
-<li>Paste <b><u>S</u></b>pecial
-<li><b><u>P</u></b>ause
-<li><b><u>P</u></b>lay
-<li><b><u>P</u></b>rint
-<li><b><u>P</u></b>rint Here
-<li>P<b><u>r</u></b>operties
-<li><b><u>Q</u></b>uick View
-<li><b><u>R</u></b>edo (CDE: Ctrl-Y, Shift-Alt-Backspace)
-<li><b><u>R</u></b>epeat
-<li><b><u>R</u></b>estore
-<li><b><u>R</u></b>esume
-<li><b><u>R</u></b>etry
-<li><b><u>R</u></b>un
-<li><b><u>S</u></b>ave
-<li>Save <b><u>A</u></b>s
-<li>Select <b><u>A</u></b>ll
-<li>Se<b><u>n</u></b>d To
-<li><b><u>S</u></b>how
-<li><b><u>S</u></b>ize
-<li>S<b><u>p</u></b>lit
-<li><b><u>S</u></b>top
-<li><b><u>U</u></b>ndo (CDE: Ctrl-Z or Alt-Backspace)
-<li><b><u>V</u></b>iew
-<li><b><u>W</u></b>hat's This?
-<li><b><u>W</u></b>indow
-<li><b><u>Y</u></b>es
+<li><b><u>A</u></b>bout</li>
+<li>Always on <b><u>T</u></b>op</li>
+<li><b><u>A</u></b>pply</li>
+<li><b><u>B</u></b>ack</li>
+<li><b><u>B</u></b>rowse</li>
+<li><b><u>C</u></b>lose (CDE: Alt+F4; Alt+F4 is &quot;close window&quot; in Windows)</li>
+<li><b><u>C</u></b>opy (CDE: Ctrl+C, Ctrl+Insert)</li>
+<li><b><u>C</u></b>opy Here</li>
+<li>Create <b><u>S</u></b>hortcut</li>
+<li>Create <b><u>S</u></b>hortcut Here</li>
+<li>Cu<b><u>t</u></b></li>
+<li><b><u>D</u></b>elete</li>
+<li><b><u>E</u></b>dit</li>
+<li><b><u>E</u></b>xit (CDE: E<b><u>x</u></b>it)</li>
+<li><b><u>E</u></b>xplore</li>
+<li><b><u>F</u></b>ile</li>
+<li><b><u>F</u></b>ind</li>
+<li><b><u>H</u></b>elp</li>
+<li>Help <b><u>T</u></b>opics</li>
+<li><b><u>H</u></b>ide</li>
+<li><b><u>I</u></b>nsert</li>
+<li>Insert <b><u>O</u></b>bject</li>
+<li><b><u>L</u></b>ink Here</li>
+<li>Ma<b><u>x</u></b>imize</li>
+<li>Mi<b><u>n</u></b>imize</li>
+<li><b><u>M</u></b>ove</li>
+<li><b><u>M</u></b>ove Here</li>
+<li><b><u>N</u></b>ew</li>
+<li><b><u>N</u></b>ext</li>
+<li><b><u>N</u></b>o</li>
+<li><b><u>O</u></b>pen</li>
+<li>Open <b><u>W</u></b>ith</li>
+<li>Page Set<b><u>u</u></b>p</li>
+<li><b><u>P</u></b>aste</li>
+<li>Paste <b><u>L</u></b>ink</li>
+<li>Paste <b><u>S</u></b>hortcut</li>
+<li>Paste <b><u>S</u></b>pecial</li>
+<li><b><u>P</u></b>ause</li>
+<li><b><u>P</u></b>lay</li>
+<li><b><u>P</u></b>rint</li>
+<li><b><u>P</u></b>rint Here</li>
+<li>P<b><u>r</u></b>operties</li>
+<li><b><u>Q</u></b>uick View</li>
+<li><b><u>R</u></b>edo (CDE: Ctrl+Y, Shift+Alt+Backspace)</li>
+<li><b><u>R</u></b>epeat</li>
+<li><b><u>R</u></b>estore</li>
+<li><b><u>R</u></b>esume</li>
+<li><b><u>R</u></b>etry</li>
+<li><b><u>R</u></b>un</li>
+<li><b><u>S</u></b>ave</li>
+<li>Save <b><u>A</u></b>s</li>
+<li>Select <b><u>A</u></b>ll</li>
+<li>Se<b><u>n</u></b>d To</li>
+<li><b><u>S</u></b>how</li>
+<li><b><u>S</u></b>ize</li>
+<li>S<b><u>p</u></b>lit</li>
+<li><b><u>S</u></b>top</li>
+<li><b><u>U</u></b>ndo (CDE: Ctrl+Z or Alt+Backspace)</li>
+<li><b><u>V</u></b>iew</li>
+<li><b><u>W</u></b>hat's This?</li>
+<li><b><u>W</u></b>indow</li>
+<li><b><u>Y</u></b>es</li>
 </ul>
-<p>
-There are also a lot of other keys and actions (that use other
-modifier keys).  See the Microsoft and Open Group documentation for
-details.
-<p>
-The <a
-href="http://www.amazon.com/exec/obidos/ASIN/0735605661/trolltech/t">
-Microsoft book</a> has ISBN 0735605661.  The corresponding Open Group
-book is <em>very</em> hard to find, rather expensive and we cannot recommend
-it. However, if you really want it, OGPubs@opengroup.org may be able
-to help. Ask then for ISBN 1859121047. (This ISBN is correct, but is
-not listed in any database we have seen.)
-
-<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0"><tr>
-<td>Copyright © 2005 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.10</div>
-</table></div></address></body></html>
+<p>There are also a lot of other keys and actions (that use other modifier keys than Alt). See the Microsoft and The Open Group documentation for details.</p>
+<p>The <a href="http://www.amazon.com/exec/obidos/ASIN/0735605661/trolltech/t">Microsoft book</a> has ISBN 0735605661. The corresponding Open Group book is very hard to find, rather expensive and we cannot recommend it. However, if you really want it, <a href="mailto:ogpubs@opengroup">ogpubs@opengroup</a>.org might be able to help. Ask them for ISBN 1859121047.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

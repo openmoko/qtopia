@@ -1,7 +1,13 @@
-<qt title="Setting the Date">
-<h3>Setting the Date</h3>
+<html>
+<head><title>Setting the Date</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h2>Setting the Date</h2>
+<!--#else-->
+   <h3>Setting the Date</h3>
+<!--#endif-->
 <p><b>To set the date:</b></p>
-%%PDA%%
+<!--#if expr="$PDASTYLE"-->
 <ul>
 <li>Tap the <b>Date</b> drop-down list to select the current date from the pop-up calendar.</li>
 </ul>
@@ -9,26 +15,29 @@
 <ul>
 <li>Tap the <b>Weeks start on</b> drop-down list, then either Sunday or Monday.</li>
 </ul>
+<a name="format">
 <p><b>To select your preferred date format:</b></p>
+</a>
 <ul>
 <li>Tap the <b>Date format</b> drop-down list.</li>
 </ul>
-<p>To confirm the new date and time tap <img src="qpe/pda/OKButton.png" alt="OK"> otherwise tap <img src="qpe/pda/CloseButton.png" alt="X"> to cancel the changes.</p>
-@@PDA@@
-%%PHONE%%
+<p>To confirm the new date and time tap <img src=":image/qpe/pda/OKButton" alt="OK"> </img> otherwise tap <img src=":image/qpe/pda/CloseButton" alt="X"> </img> to cancel the changes.</p>
+<!--#endif-->
+<!--#if expr="$PHONESTYLE"-->
 <ul>
-<li>Launch <b>Settings</b> by using <img src="help/dpad"> to focus on <img src="settings"> and pressing <img src="contextbar/select.png"> to select.</li>
-<li>Use <img src="help/dpad"> to scroll down the list and <img src="contextbar/select.png"> to select <b>Date/Time</b>.</li>
+<li>Launch <b>Settings</b> by using <img src=":image/help/dpad"> </img> to focus on <img src=":icon/settings"> </img> and pressing <img src=":icon/select"> </img> to select.</li>
+<li>Use <img src=":image/help/dpad"> </img> to scroll down the list and <img src=":icon/select"> </img> to select <b>Date/Time</b>.</li>
 <li>Use the <b>down</b> arrow to reach the fields.</li>
-<li>Press <img src="contextbar/select.png"> and choose the time zone (T.Z.).</li>
-<li>To select the date press <img src="contextbar/select.png"> to launch the calendar.</li>
-<li>Use <img src="help/dpad"> arrow to highlight the correct date then press <img src="contextbar/select.png">.</li>
-<li>To set the day of the week calendar begins on, highlight and select the <b>Week starts</b> field. Choose the day and press <img src="contextbar/select.png"> to select it.</li>
+<li>Press <img src=":icon/select"> </img> and choose the time zone (T.Z.).</li>
+<li>To select the date press <img src=":icon/select"> </img> to launch the calendar.</li>
+<li>Use <img src=":image/help/dpad"> </img> arrow to highlight the correct date then press <img src=":icon/select">.</li>
+<li>To set the day of the week calendar begins on, highlight and select the <b>Week starts</b> field. Choose the day and press <img src=":icon/select"> </img> to select it.</li>
 <li>Change the date format to suit by selecting from the <b>Date format</b> field menu.</li>
-<li>Press <img src="contextbar/back.png"> to save and exit.</li>
+<li>Press <img src=":icon/i18n/back"> </img> to save and exit.</li>
 </ul>
-@@PHONE@@
+<!--#endif-->
 <p>See Also: <a href="systemtime-settime.html">Setting the Time</a></p>
-</qt>
 
 
+</body>
+</html>

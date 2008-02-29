@@ -1,0 +1,9 @@
+[Desktop Entry]
+Categories = SystemRingtones
+File = alarm.wav
+Name[] = Short
+Type = audio/x-wav
+Role = Data
+[Translation]
+File=QtopiaRingTones
+Context=Alarm

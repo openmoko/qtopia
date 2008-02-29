@@ -1,58 +1,15 @@
 #!/usr/bin/perl
-############################################################################
-#
-# Synchronizes Qtopia header files - internal Trolltech tool.
-#   - Creates symlinks on Unix.
-#   - Copies files on Windows.
-#
-# Copyright (C) 1997-2002 by Trolltech AS.  All rights reserved.
-#
-############################################################################
-
 use strict;
-package main;
+use warnings;
 
-use English;
-use File::stat;
+use Cwd;
 use File::Basename;
-use File::Copy;
-use File::Glob;
+use lib ( dirname($0) );
+use Qtopia::Paths;
+use Qtopia::Vars;
+use Qtopia::File;
 
-if ( !$ENV{"QPEDIR"} ) {
-    die "syncqtopia: QPEDIR not defined";
-}
-my $fast = 0;
-my $force_relative = 0;
-my $shadow = 1;
-my $showonly = 0;
-my $showonlypriv = 0;
-my $opt_verbose = 0;
-
-my $outpath = $ENV{"QPEDIR"};
-my $QTDIR = $ENV{"QTDIR"};
- 
-my $includedir = $outpath."/include/qtopia";
-
-my $isWindows = ( $^O eq "MSWin32" || $^O eq "cygwin" );
-
-# Find the depot path
-my $depotpath = undef;
-open IN, "$outpath/src/config.pri" or die "Cannot open $outpath/src/config.pri\n";
-while ( defined($_ = <IN>) ) {
-    if ( /QTOPIA_DEPOT_PATH=(.*)/ ) {
-	$depotpath = $1;
-	last;
-    }
-}
-close IN;
-if ( !defined($depotpath) ) {
-    die "Can't find the depot path in $outpath/src/config.pri\n";
-}
-
-# Load some subs
-open IN, "$depotpath/bin/common.pm" or die "Cannot open $depotpath/bin/common.pm\n";
-eval join("", <IN>) or die "Error while evaluating common.pm: $!\n$@\n";
-close IN;
+Qtopia::Paths::get_paths();
 
 # Windows depot builds use the perl scripts directly rather than the compiled code
 if ( $isWindows ) {
@@ -60,157 +17,159 @@ if ( $isWindows ) {
 }
 
 
-if ( -d "/System/Library/Frameworks" ) {
-    $force_relative = 1;
-}
+use constant DEBUG => 0;
+use constant OUTPUT => 1;
 
-while ( $#ARGV >= 0 ) {
-    if ( $ARGV[0] eq "-fast" ) {
-	$fast = 1;
-    } elsif ( $ARGV[0] eq "-inc" ) {
-	shift;
-	$includedir = $ARGV[0];
-	if ( $includedir !~ /^\// ) {
-	    $includedir = `pwd`;
-	    chomp $includedir;
-	    $includedir .= "/". $includedir;
-	}
-    } elsif ( $ARGV[0] eq "-show" ) {
-	$showonly = 1;
-    } elsif ( $ARGV[0] eq "-showpriv" ) {
-	$showonlypriv = 1;
-    } elsif ( $ARGV[0] eq "-windows" ) {
-	$isWindows = 1;
-    } elsif ( $ARGV[0] eq "-relative" ) {
-	$force_relative = 1;
-	$shadow = 0;
-    } elsif ( $ARGV[0] eq "-verbose" ) {
-	print "verbose\n";
-	$opt_verbose = 1;
-	debugMsg("test");
-    }
-    shift;
-}
-    
-undef $INPUT_RECORD_SEPARATOR;
-
-debugMsg( "making " . $outpath . "/include" );
-mkdir($outpath . "/include", 0777);
-mkdir($outpath . "/include/qtopia", 0777);
-mkdir($outpath . "/src", 0777);
-mkdir($outpath . "/src/qtopiadesktop", 0777);
-mkdir($outpath . "/src/qtopiadesktop/include", 0777);
-chdir($outpath);
-# a map of where headers can be found to where headers are to be put
-my %includeDirs = ( "libraries/qtopia" => "/include/qtopia", "libraries/qtopia1" => "/include/qtopia", "libraries/qtopia2" => "/include/qtopia",
-		"libraries/qtopiapim" => "/include/qtopia/pim", 
-		"libraries/qtopiadb" => "/include/qtopia/db", "libraries/qtopiacalc" => "/include/qtopia/calc", 
-		"libraries/qtopiamail" => "/include/qtopia/mail", "libraries/qtopiasql" => "/include/qtopia/sql",
-		"libraries/qtopiaphone" => "/include/qtopia/phone",
-		"libraries/qtopiawap" => "/include/qtopia/wap",
-		"libraries/qtopiasmil" => "/include/qtopia/smil",
-		"libraries/handwriting" => "/include/qtopia/mstroke",
-		"qtopiadesktop/common" => "/src/qtopiadesktop/include/common",
-		"qtopiadesktop/libraries/qdbase" => "/src/qtopiadesktop/include");
-
-#make these extra links 
-my @files;
-my @pfiles;
-my $destDir;
-my $f;
-my $key;
-my $file;
-my $cmdLine;
-
-for $key (keys %includeDirs){
-    $destDir = $includeDirs{$key};
-    @files = find_files( "$depotpath/src/". $key, "^[-a-z0-9]*(?:_[^p].*)?\\.h\$", 0);
-    @pfiles = find_files( "$depotpath/src/". $key, "[-z0-9]*[__][p]\\.h\$" , 0 );
-        
-    if ( $showonly ) {
-	foreach ( @files ) {
-	    print "$_\n";
-	}
-    }else{
-	debugMsg( "mkdir " . $outpath . $destDir );
-	mkdir($outpath . $destDir, 0777);
-	foreach $file (@files){
-	    $f = basename($file, ""); 
-	    symlink_file($file, $outpath . $destDir."/".$f);
-	}
-    }
-    
-    if ( $showonlypriv ) {
-	foreach ( @pfiles ) {
-	    print "$_\n";
-	}
-    }else{
-	debugMsg( "mkdir " . $outpath . $destDir . "/private" );
-        mkdir($outpath . $destDir . "/private" , 0777);
-	foreach $file (@pfiles){
-	    $f = basename($file, "");
-	    symlink_file($file, $outpath . $destDir . "/private/" . $f);
-	}
-    }
-}
-@files = find_files("$depotpath/src/libraries/qtopia/backend", ".*\\.h", 0);
-if ( $showonly ) {
-    foreach (@files){
-	print "$_\n";
-    }
-}else{
-    foreach $file (@files){
-	$f = basename($file, "");
-	symlink_file($file, $outpath . "/include/qtopia/private/" . $f);
+my $sdk = 0;
+my $orig_QPEDIR = $QPEDIR;
+if ( scalar(@ARGV) >= 2 ) {
+    if ( $ARGV[0] eq "-sdk" ) {
+        shift @ARGV;
+        $QPEDIR = fixpath(shift @ARGV);
+        $sdk = 1;
     }
 }
 
-symlink_file($outpath . "/include/qtopia/qwizard.h", $outpath . "/include/qwizard.h");
-
-if ($isWindows){        
-    # include/qpe is not being made anymore, is the next line still needed?
-    if ( -d $outpath."/include/qpe" ) {
-	system("rmdir /Q /S $outpath\\include\\qpe\\");
+my $qtheaders = 0;
+if ( scalar(@ARGV) >= 2 ) {
+    if ( $ARGV[0] eq "-qt" ) {
+        shift @ARGV;
+        $qtheaders = 1;
     }
-    print `"xcopy /Q /E /Y /S $outpath\\include\\qtopia\\*.* $outpath\\include\\qpe\\"`;
-}else{
-    symlink_file($outpath. "/include/qtopia", $outpath. "/include/qpe");
+}
+
+if ( scalar(@ARGV) < 2 ) {
+    usage();
+}
+
+my $destdir = shift or usage();
+my $target = shift or usage();
+
+my $targetname = $target;
+
+if ( basename($destdir) eq "private" ) {
+    $target .= "/private";
+}
+
+if ( $qtheaders ) {
+    $destdir =~ s/^(\/include\/)/$1classic\//;
+}
+$destdir = fixpath("$QPEDIR/$destdir");
+# FIXME this should be changed to include once we switch
+my $targetdir = fixpath("$QPEDIR/include/$target");
+if ( $destdir =~ /qtopiadesktop/ ) {
+    $targetdir = fixpath("$QPEDIR/include/qtopiadesktop/$target");
+}
+
+my @package_files;
+
+OUTPUT and print "syncqtopia ";
+for my $source ( @ARGV ) {
+    DEBUG and print "source $source\n";
+    if ( !$isWindows && index($source,"/") != 0 ) {
+        $source = getcwd()."/$source";
+    } elsif ( $isWindows && index($source,":") != 1 ) {
+        $source = fixpath(getcwd()."/$source");
+    }
+    my $filename = basename($source);
+    OUTPUT and print "$filename ";
+    if ( $sdk ) {
+        DEBUG and print "resolveHeader\n";
+        $source = resolveHeader($source);
+        DEBUG and print "resolved header!!!!!!!!!\n";
+    }
+
+    # This is for "classic" includes
+    my $dest = fixpath("$destdir/$filename");
+    DEBUG and print "do_symlink enter 1\n";
+    do_symlink($source, $dest, $sdk);
+    DEBUG and print "do_symlink exit 1\n";
+
+    if ( $qtheaders ) {
+        DEBUG and print "qtheaders\n";
+        # Qt-style includes
+        if ( basename($destdir) eq "private" ) {
+            my $filename = basename($source);
+            my $dest = fixpath("$targetdir/$filename");
+            DEBUG and print "do_symlink($source, $dest, $sdk)\n";
+            do_symlink($source, $dest, $sdk);
+            DEBUG and print "do_symlink exit 2\n";
+        } else {
+            my $found = 0;
+            open IN, $source or die "Can't open ".fixpath($source)."\n";
+            while ( defined($_ = <IN>) ) {
+                if ( /^\s*class\s+.*_EXPORT\s+([^\s:]+)/ ||
+                     ( /^\s*class\s+([^\s:]+)/ && index($_, ";") == -1 ) ) {
+                    $found = 1;
+                    my $filename = $1;
+                    my $dest = fixpath("$targetdir/$filename");
+                    # Do a "relative" link
+                    DEBUG and print "do_symlink enter 3\n";
+                    do_symlink(basename($source), $dest, 0);
+                    DEBUG and print "do_symlink exit 3\n";
+                }
+            }
+            close IN;
+            my $filename = basename($source);
+            my $dest = fixpath("$targetdir/$filename");
+            if ( $found ) {
+                DEBUG and print "symlink_file $source $dest $sdk\n";
+                symlink_file($source, $dest, $sdk);
+            } else {
+                DEBUG and print "do_symlink $source $dest $sdk\n";
+                do_symlink($source, $dest, $sdk);
+                DEBUG and print "do_symlink exit 4\n";
+            }
+            push(@package_files, $filename);
+        }
+    }
+}
+OUTPUT and print "\n";
+
+if ( $qtheaders ) {
+    open OUT, ">$targetdir/$targetname" or die "Can't write $targetdir/$targetname\n";
+    for ( @package_files ) {
+        print OUT "#include \"$_\"\n";
+    }
+    close OUT;
+    # FIXME this is a temporary file left for compatibility reasons
+    open OUT, ">$targetdir/$targetname.h" or die "Can't write $targetdir/$targetname.h\n";
+    for ( @package_files ) {
+        print OUT "#include \"$_\"\n";
+    }
+    close OUT;
 }
 
 exit 0;
 
 
-###################################################################
+sub usage
+{
+    print "Usage:  ".script_name($0)." dest target source [source] ... [source]\n";
+    exit 2;
+}
 
-# Helper functions
+sub do_symlink
+{
+    my ( $source, $dest, $copy ) = @_;
 
-# Finds files
-#
-# Examples:
-#   find_files("/usr","\.cpp$",1)   - finds .cpp files in /usr and below
-#   find_files("/tmp","^#",0)	    - finds #* files in /tmp
-sub find_files {
-    my($dir,$match,$descend) = @_;
-    my($file,$p,@files);
-    local(*D);
-    $dir =~ s=\\=/=g;
-    ($dir eq "") && ($dir = ".");
-    if ( opendir(D,$dir) ) {
-	if ( $dir eq "." ) {
-	    $dir = "";
-	} else {
-	    ($dir =~ /\/$/) || ($dir .= "/");
-	}
-	foreach $file ( readdir(D) ) {
-	    next if ( $file  =~ /^\.\.?$/ );
-	    $p = $dir . $file;
-	    ($file =~ /$match/) && (push @files, $p);
-	    if ( $descend && -d $p && ! -l $p ) {
-		push @files, &find_files($p,$match,$descend);
-	    }
-	}
-	closedir(D);
+    my $reported_source = $source;
+    my $reported_dest = $dest;
+    for ( $reported_source, $reported_dest ) {
+        s/^\Q$QPEDIR\E[\/\\]//;
+        s/^\Q$depotpath\E[\/\\]//;
+        s/^src[\/\\]//;
+        s/^include[\/\\]//;
     }
-    return @files;
+    DEBUG and print "Creating header for $reported_source ($reported_dest)\n";
+    if ( DEBUG ) {
+        $reported_source = basename($reported_source);
+        $reported_dest = basename(dirname($dest))."/".basename($reported_dest);
+        if ( $reported_dest =~ /\_p\.h$/ ) {
+            $reported_dest = basename(dirname(dirname($dest)))."/".$reported_dest;
+        }
+        print "    \"$reported_source\" => \"$reported_dest\",\n";
+    }
+    symlink_file($source, $dest, $copy);
 }
 

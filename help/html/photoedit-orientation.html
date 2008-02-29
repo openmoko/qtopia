@@ -1,11 +1,14 @@
-<qt title="Picture Rotate">
+<html>
+<head><title>Picture Rotate</title></head>
+<body>
 <h3>Picture Rotate</h3>
 <p>You can rotate the image with this operation.</p>
-%%PHONE%%
-<p><b>To rotate:</b> Press <img src="contextbar/options.png"> and select <img src="rotate">.</p>
-@@PHONE@@
-%%PDA%%
-<p><img src="rotate"> <b>To rotate:</b> tap the icon.</p>
-@@PDA@@
+<!--#if expr="$PHONESTYLE"-->
+<p><b>To rotate:</b> Press <img src=":icon/options"> </img> and select <img src=":icon/rotate">.</p>
+<!--#endif-->
+<!--#if expr="$PDASTYLE"-->
+<p><img src=":icon/rotate"> </img> <b>To rotate:</b> tap the icon.</p>
+<!--#endif-->
 <p>You can continue to rotate until you have achieved the desired orientation.</p>
-</qt>
+</body>
+</html>

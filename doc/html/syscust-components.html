@@ -1,0 +1,101 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Customizing Components</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Customizing Components<br /><small></small></h1>
+<a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
+<li><a href="#removing-components">Removing Components</a></li>
+<li><a href="#developer-only-components">Developer-Only Components</a></li>
+<li><a href="#unsupported-components">Unsupported Components</a></li>
+<li><a href="#camera-camcorder">Camera / Camcorder</a></li>
+<li><a href="#music">Music</a></li>
+<li><a href="#video">Video</a></li>
+<li><a href="#pictures">Pictures</a></li>
+<li><a href="#voice-notes">Voice Notes</a></li>
+<li><a href="#video-calls">Video Calls</a></li>
+</ul>
+<a name="introduction"></a>
+<h2>Introduction</h2>
+<p>Qtopia is a modular system, allowing each component to be replaced. This page describes key issues with replacing existing components and with integrating some common components that do not exist in Qtopia.</p>
+<a name="removing-components"></a><a name="removing-components"></a>
+<h2>Removing Components</h2>
+<p>Choosing not to build a component, for example, <tt>Todo</tt>, can easily be done by editing <tt>$QPEDIR/src/custom.pri</tt> and re-configuring Qtopia.</p>
+<p>For example add the following to <tt>custom.pri</tt>:</p>
+<pre>    APP_PROJECTS-=applications/todo</pre>
+<p>For further information refer to: <tt>$QPEDIR/src/custom.pri</tt> and <a href="buildsystem-user-guide.html">Build System User Guide</a>.</p>
+<a name="developer-only-components"></a><a name="developer-only-components"></a>
+<h2>Developer-Only Components</h2>
+<p>The following are applications/features supplied with Qtopia that are not intended to be shipped with production devices:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Application/Feature</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td>Rotation Setting</td><td>Provided to test and demonstrate Qtopia's ability to display in different orientations. It may be helpful during development if the device uses the transformation display driver.</td></tr>
+<tr valign="top" class="even"><td>Shutdown Setting</td><td>Provided as a development tool and is not necessary on a production device. It can be removed by deleting <tt>apps/Settings/quit.desktop</tt>. On most devices it is expected that there is a physical power button, therefore the user is not expected to manually run or shutdown Qtopia.</td></tr>
+<tr valign="top" class="odd"><td><tt>Screensize</tt> Applet</td><td>Allows changing the maximum window size for testing different screen sizes during development. This is a development tool only and is not intended for end-users.</td></tr>
+</table></p>
+<a name="unsupported-components"></a>
+<h2>Unsupported Components</h2>
+<p>The following applications are unsupported 3rd party applications/ports intended purely to demonstrate the flexibility of Qtopia:</p>
+<ul>
+<li>VNC Viewer</li>
+</ul>
+<a name="camera-camcorder"></a>
+<h2>Camera / Camcorder</h2>
+<p>Qtopia ships with a basic Camera application. Substitute applications should supply the following services:</p>
+<ul>
+<li>provide the <tt>GetValue/image</tt> service</li>
+<li>place images or videos taken with the camera into the predefined <tt>Document View</tt> category <tt>Camera</tt>. This allows the user to easily sort items from the camera (possibly taking them out of the <tt>Camera</tt> category in the process). Think of the <tt>Camera</tt> category as the <i>film</i> in the camera</li>
+<li>respond to the <tt>QtopiaApplication::linkChanged(const QString&amp; link)</tt> signal when <tt>link</tt> is a relevant camera item (for example, updating lists).</li>
+</ul>
+<p>The Qtopia Camera application uses the <tt>Video4Linux</tt> API, facilitating interoperability. Substitute applications should consider also using this API.</p>
+<p>The Qtopia Camera application uses the <tt>QDirectPainter</tt> class in simple cases. Substitute applications should always use this class in cases appropriate for the target device.</p>
+<p>Playback in a <tt>Camcorder</tt> function should follow the <a href="#video">Guidelines for Video Applications</a>.</p>
+<a name="music"></a><a name="music"></a>
+<h2>Music</h2>
+<p>Qtopia ships with the <tt>Music</tt> application for playing MP3 and other audio files. Substitute applications should supply the following services:</p>
+<ul>
+<li><a href="docwidget.html">Main Document Widget</a> slot response to the <tt>QtopiaApplication::linkChanged(const QString&amp; link)</tt> signal when <tt>link</tt> is a relevant media file (for example, updating lists).</li>
+</ul>
+<p>Audio uses the QSS sound server's pipe functionality which allows multiple applications to produce audio simultaneously. An alternative is to use in-kernel audio mixing.</p>
+<a name="video"></a><a name="video"></a>
+<h2>Video</h2>
+<p>Qtopia ships with the <tt>Video</tt> application for playing MPEG and other video files. Substitute applications should supply the following services:</p>
+<ul>
+<li><a href="docwidget.html">Main Document Widget</a> slot respond to the <tt>QtopiaApplication::linkChanged(const QString&amp; link)</tt> signal when <tt>link</tt> is a relevant media file (for example, updating lists).</li>
+</ul>
+<p>The Qtopia <tt>Video</tt> application uses the <tt>QDirectPainter</tt> class to optimize painting. Substitute applications should use this class, to ensure interoperability with other applications.</p>
+<p>Audio in the <tt>Video</tt> function should follow the <a href="#music">Guidelines for Music applications</a>.</p>
+<a name="pictures"></a>
+<h2>Pictures</h2>
+<p>Qtopia ships with the <tt>Pictures</tt> application. Substitute applications should supply the following services:</p>
+<ul>
+<li><a href="docwidget.html">Main Document Widget</a> slot</li>
+<li>provide the <tt>GetValue/image</tt> service</li>
+<li>respond to the <tt>QtopiaApplication::linkChanged(const QString&amp; link)</tt> signal when <tt>link</tt> is a relevant image (for example, updating lists)</li>
+<li>respond to the QCop message <tt>showCategory(int catid)</tt> by showing images in the given category ID.</li>
+</ul>
+<a name="voice-notes"></a>
+<h2>Voice Notes</h2>
+<p>Qtopia ships with the Voice Notes application. Substitute applications should supply the following services:</p>
+<ul>
+<li>provide the <tt>GetValue/audio</tt> service</li>
+<li>respond to the <tt>QtopiaApplication::linkChanged(const QString&amp; link)</tt> signal when <tt>link</tt> is a relevant audio item (for example, updating lists).</li>
+</ul>
+<a name="video-calls"></a>
+<h2>Video Calls</h2>
+<p>Qtopia does not ship with <tt>Video Call</tt> functionality.</p>
+<p>Depending on the underlying technology, integrating video call functionality involves integration changes in <tt>Contacts</tt> (<tt>src/applications/addressbook/</tt>) and the <tt>Phone Launcher</tt> (<tt>src/server/phone/</tt>).</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

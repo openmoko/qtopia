@@ -4,6 +4,6 @@ Context=World Time
 [Desktop Entry]
 Comment[]=A World Clock and Time Zone Editor
 Exec=worldtime
-Icon=CityTime
+Icon=worldtime/CityTime
 Type=Application
 Name[]=World Time

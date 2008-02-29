@@ -1,8 +1,6 @@
-CONFIG		+= qtopiaplugin
-
-TARGET		= polished
+qtopia_project(qtopia plugin)
+TARGET=polished
 
 HEADERS		= polished.h
 SOURCES		= polished.cpp
 
-TRANSLATABLES = $${HEADERS} $${SOURCES}

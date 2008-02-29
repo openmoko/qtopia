@@ -1,0 +1,119 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Distribution Packaging</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Distribution Packaging<br /><small></small></h1>
+<a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
+<li><a href="#package-formats">Package Formats</a></li>
+<ul><li><a href="#make-packages">make packages</a></li>
+<li><a href="#the-control-file">The Control File</a></li>
+<li><a href="#supported-fields">Supported Fields</a></li>
+<li><a href="#replacing-the-control-suffix">Replacing the <b>.control</b> suffix</a></li>
+</ul>
+</ul>
+<a name="introduction"></a>
+<h2>Introduction</h2>
+<p>This document describes Qtopia device package distribution.</p>
+<a name="package-formats"></a>
+<h2>Package Formats</h2>
+<p>Packages for Qtopia devices should be distributed in IPKG (Itsy Package Management System) format.</p>
+<p>This format is supported by <i>make packages</i> which is part of the Qtopia SDK. This uses the install rules from your .pro file to create a .ipk file. Pre/post install/uninstall scripts must have the same name as your package or they will not be used.</p>
+<p>An older program that might be useful is <tt>mkipks</tt>. This program takes a control file and produces either an IPKG file or an RPM file. Sample control files are included in the Qtopia software developer's kit (SDK). However, this script looks for files relative to $QPEDIR so you will need to ensure that you have write privelages to $QPEDIR and that your files are put there.</p>
+<a name="make-packages"></a>
+<h3>make packages</h3>
+<p>You should setup install rules (see the example application for how to do this). You should also define the following variables:</p>
+<ul>
+<li>PACKAGE_NAME - The name of the package</li>
+<li>PACKAGE_DESCRIPTION - A one line description of the package</li>
+<li>PACKAGE_VERSION - The version of the package (use x.y.z-rel so that a new package can be built without changing the version number)</li>
+<li>PACKAGE_MAINTAINER - The entity responsible for maintaining this package (eg. Joe Bloggs &lt;<a href="mailto:joe@blogs">joe@blogs</a>.com&gt;)</li>
+<li>PACKAGE_LICENSE - The license this package is released under (eg. GPL, Commercial)</li>
+<li>PACKAGE_DEPENDS - A list of packages that this package depends on (eg. qpe-taskbar)</li>
+</ul>
+<p>If you are going to use pre/post install/uninstall scripts you will probably want to do something like this:</p>
+<p>In the .pro file:</p>
+<pre>    postinst.commands=$$COMMAND_HEADER\
+        export QPEDIR=$(INSTALL_ROOT);\
+        export PATH=\$$QPEDIR/bin:\$$PATH;\
+        $$PWD/$${PACKAGE_NAME}.postinst
+    postinst.CONFIG=no_path
+    INSTALLS+=postinst</pre>
+<p>In the .postinst file:</p>
+<pre>    if [ -x $QPEDIR/bin/qtopia-addmimetype ]; then
+        $QPEDIR/bin/qtopia-addmimetype application/x-rom rom
+    fi</pre>
+<p>This means that &quot;make install&quot; will work. It also means that make packages won't fail. INSTALL_ROOT is set to a temporary location when building the package so scripts/binaries won't exist.</p>
+<a name="the-control-file"></a>
+<h3>The Control File</h3>
+<p>The control file has the following form:</p>
+<pre>    Files: bin/foo apps/Applications/foo.desktop etc/foo.dat
+    Priority: optional
+    Section: qpe/applications
+    Maintainer: Your Name &lt;you@yourdomain.com&gt;
+    Version: 1.2.3-1
+    Depends: qpe-base
+    Description: Very brief description.
+     A much longer
+     multi-line
+     description.</pre>
+<a name="supported-fields"></a>
+<h3>Supported Fields</h3>
+<p>The following fields are supported:</p>
+<ul>
+<li><tt>Files</tt> - List of files relative to $QPEDIR, wildcards are permitted. see <a href="files.html">Qtopia File System standards </a> for more information.</li>
+<li><tt>Priority</tt> - The priority (normally &quot;optional&quot;).</li>
+<li><tt>Section</tt> - The classification of the package. The classifications recognized by Qtopia are:<ul>
+<li>qpe/applications</li>
+<li>qpe/games</li>
+<li>qpe/settings</li>
+<li>qpe/system</li>
+<li>kernel</li>
+<li>base</li>
+<li>libs</li>
+<li>qpe/taskbar</li>
+<li>qpe/styles</li>
+<li>qpe/inputmethods</li>
+<li>qpe/decorations</li>
+<li>qpe/plugins</li>
+</ul>
+</li>
+<li><tt>Maintainer</tt> - The contact person for the package.</li>
+<li><tt>Version</tt> - The version number should be suffixed by -n, the package number which allows the package builder to re-build in cases of error.</li>
+<li><tt>Depends</tt> - comma-separated list of packages which this package requires.</li>
+<li><tt>Description</tt> - one line description, then multiple lines, with a leading space, to the end of the control file.</li>
+</ul>
+<p>Other IPKG fields are passed through unchanged to the the control file within the resulting .ipk file. See the documentation of the ipkg program for more information.</p>
+<a name="replacing-the-control-suffix"></a>
+<h3>Replacing the <b>.control</b> suffix</h3>
+<p>For IPKG format, you may also have files with the same name as the control file, but with the <b>.control</b> suffix replaced by one of the following:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Suffix</th><th>Notes</th></tr></thead>
+<tr valign="top" class="odd"><td>.preinst</td><td>This script will execute before files are moved into place at installation.</td></tr>
+<tr valign="top" class="even"><td>.postinst</td><td>This script will execute after files are moved into place at installation. Common uses of this script are:<ul>
+<li><tt>qtopia-addmimetype type/subtype extension</tt> -- add a MIME type for your application.</li>
+<li><tt>/opt/Qtopia/bin/qcop QPE/TaskBar &quot;reloadInputMethods()&quot;</tt> -- reload input methods if your software is an input method plug-in.</li>
+<li><tt>/opt/Qtopia/bin/qcop QPE/TaskBar &quot;reloadApplets()&quot;</tt> -- reload applets if your software is a taskbar applet.</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td>.prerm</td><td>This script will execute before files are removed at de-installation.</td></tr>
+<tr valign="top" class="even"><td>.postrm</td><td>This script will execute after files are removed at de-installation. Common uses of this script are:<ul>
+<li><tt>/opt/Qtopia/bin/qcop QPE/TaskBar &quot;reloadInputMethods()&quot;</tt> -- reload input methods if your software was an input method plug-in.</li>
+<li><tt>/opt/Qtopia/bin/qcop QPE/TaskBar &quot;reloadApplets()&quot;</tt> -- reload applets if your software was a taskbar applet.</li>
+</ul>
+</td></tr>
+</table></p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

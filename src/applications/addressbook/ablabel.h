@@ -1,48 +1,34 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 #ifndef ABLABEL_H
 #define ABLABEL_H
 
-#include <qtopia/pim/contact.h>
-#include <qtopia/services.h>
-#include <qtextbrowser.h>
-
-#ifdef QTOPIA_DATA_LINKING
-class QDLClient;
+#include <qtopia/pim/qcontact.h>
+#include <qtopiaservices.h>
+#ifdef QTOPIA_VOIP
+#include <qpresence.h>
 #endif
-class AbLabel : public QTextBrowser
+#include <QDLBrowserClient>
+
+class AbLabel : public QDLBrowserClient
 {
     Q_OBJECT
 
@@ -50,38 +36,54 @@ public:
     AbLabel( QWidget *parent, const char *name = 0 );
     ~AbLabel();
 
-    virtual void setSource( const QString& name );
+    //virtual void setSource( const QString& name );
 
-    bool AbLabel::decodeHref(const QString& href, ServiceRequest* req, QString* pm) const;
-    PimContact entry() const;
+    bool decodeHref(const QString& href, QtopiaServiceRequest* req, QString* pm) const;
+    QString encodeHref() const;
+    QContact entry() const;
 
 public slots:
-    void init( const PimContact &entry );
-    void sync();
+    void init( const QContact &entry );
+    void linkClicked(const QString& link);
+    void linkSelected(const QString& link);
 
 signals:
     void okPressed();
     void previous();
     void next();
     void externalLinkActivated();
+    void backClicked();
 
 protected:
-    void keyPressEvent( QKeyEvent * );
-    QString contactToRichText( const PimContact & contact, bool dialer );
-    QString businessRichText( const PimContact &contact, bool dialer );
-    QString personalRichText( const PimContact &contact, bool dialer );
-    QString busPhoneRichText( const PimContact &contact, bool dialer );
-    QString homePhoneRichText( const PimContact &contact, bool dialer );
-    QString emailRichText( const PimContact &contact );
-    
-private:
-#ifdef QTOPIA_DATA_LINKING
-    QDLClient *mNotesQC;
+    void keyPressEvent( QKeyEvent *e );
+
+    void setSource(const QUrl & name);
+
+    QString contactToRichText( const QContact & contact, bool dialer );
+    QString businessRichText( const QContact &contact, bool dialer );
+    QString personalRichText( const QContact &contact, bool dialer );
+    QString busPhoneRichText( const QContact &contact, bool dialer );
+    QString homePhoneRichText( const QContact &contact, bool dialer );
+    QString emailRichText( const QContact &contact );
+#ifdef QTOPIA_VOIP
+    QString voipIdRichText( const QContact &contact );
 #endif
-    ServiceRequest anchorService(const QString& name) const;
-    PimContact ent;
-    bool dirty;
-    bool mOnlyActivateDialLinks;
+
+private slots:
+#ifdef QTOPIA_VOIP
+    void monitoredPresence( const QString& uri, QPresence::Status status );
+#endif
+private:
+    QtopiaServiceRequest anchorService(const QString& name) const;
+    QContact ent;
+
+    QString mLink;
+
+#ifdef QTOPIA_VOIP
+    QPresence *presence;
+    QPresence::Status monitoredVoipIdStatus;
+    QString monitoredVoipId;
+#endif
 };
 
 #endif // ABLABEL_H

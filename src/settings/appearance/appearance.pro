@@ -1,36 +1,38 @@
-CONFIG		+= qtopiaapp
+qtopia_project(qtopia app)
+TARGET=appearance
+CONFIG+=qtopia_main no_quicklaunch
 
-HEADERS		= appearance.h themeparser.h fontmap.h
-SOURCES		= appearance.cpp themeparser.cpp main.cpp fontmap.cpp
-QTOPIA_PHONE {
-    INTERFACES	= appearancesettingsbasephone.ui
+phone {
+    FORMS	= appearancesettingsbasephone.ui
 } else {
-    INTERFACES	= appearancesettingsbase.ui
+    FORMS	= appearancesettingsbase.ui
 }
-
-TRANSLATABLES = $${HEADERS} $${SOURCES} appearancesettingsbase.ui \
+TRANSLATABLES += appearancesettingsbase.ui \
                     appearancesettingsbasephone.ui
+
+HEADERS		= appearance.h themeparser.h
+SOURCES		= appearance.cpp themeparser.cpp main.cpp
+
     
-
-
-!QTOPIA_PHONE {
+!phone {
     HEADERS += samplewindow.h
     SOURCES += samplewindow.cpp
 }
-
 TRANSLATABLES +=samplewindow.h \
                 samplewindow.cpp 
 
-defaults.files=$${QTOPIA_DEPOT_PATH}/etc/default/FontMap.conf
-defaults.path=/etc/default
-desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Settings/Appearance.desktop
+desktop.files=$$QTOPIA_DEPOT_PATH/apps/Settings/Appearance.desktop
 desktop.path=/apps/Settings
-help.files=$${QTOPIA_DEPOT_PATH}/help/html/appearance*
-help.path=/help/html
-pics.files=$${QTOPIA_DEPOT_PATH}/pics/appearance/*
+desktop.hint=desktop
+help.source=$$QTOPIA_DEPOT_PATH/help
+help.files=appearance*
+help.hint=help
+pics.files=$$QTOPIA_DEPOT_PATH/pics/appearance/*
 pics.path=/pics/appearance
-INSTALLS	+= desktop help defaults
-PICS_INSTALLS+=pics
+pics.hint=pics
+captureService.files=$$QTOPIA_DEPOT_PATH/services/Settings/appearance
+captureService.path=/services/Settings
+INSTALLS+=desktop help pics captureService
 
-TARGET		= appearance
-
+pkg.desc=Appearance settings for Qtopia.
+pkg.domain=window,docapi,profiles,cardreader,drm

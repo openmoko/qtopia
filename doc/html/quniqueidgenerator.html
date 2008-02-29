@@ -1,0 +1,76 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QUniqueIdGenerator Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QUniqueIdGenerator Class Reference</h1>
+<p>The QUniqueIdGenerator class provides a generator of unique identifiers. <a href="#details">More...</a></p>
+<pre>    #include &lt;QUniqueIdGenerator&gt;</pre><ul>
+<li><a href="quniqueidgenerator-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="quniqueidgenerator.html#QUniqueIdGenerator">QUniqueIdGenerator</a></b> ( const QUuid &amp; <i>context</i> )</li>
+<li><div class="fn"/><b><a href="quniqueidgenerator.html#QUniqueIdGenerator-2">QUniqueIdGenerator</a></b> ( const QUuid &amp; <i>device</i>, const QUuid &amp; <i>context</i> )</li>
+<li><div class="fn"/><b><a href="quniqueidgenerator.html#QUniqueIdGenerator-3">QUniqueIdGenerator</a></b> ( const QUniqueIdGenerator &amp; <i>other</i> )</li>
+<li><div class="fn"/><b><a href="quniqueidgenerator.html#dtor.QUniqueIdGenerator">~QUniqueIdGenerator</a></b> ()</li>
+<li><div class="fn"/>QUniqueId <b><a href="quniqueidgenerator.html#constructUniqueId">constructUniqueId</a></b> ( uint <i>index</i> )</li>
+<li><div class="fn"/>QUniqueId <b><a href="quniqueidgenerator.html#createUniqueId">createUniqueId</a></b> ()</li>
+<li><div class="fn"/>bool <b><a href="quniqueidgenerator.html#isValid">isValid</a></b> () const</li>
+</ul>
+<a name="static-public-members"></a>
+<h3>Static Public Members</h3>
+<ul>
+<li><div class="fn"/>QUniqueId <b><a href="quniqueidgenerator.html#temporaryID">temporaryID</a></b> ( uint <i>index</i> )</li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QUniqueIdGenerator class provides a generator of unique identifiers.</p>
+<p>The QUniqueIdGenerator class provides a generator of unique identifiers. These identifiers are unique within any Qtopia device but can be stored with only 64 bits locally. When transferring or storing in data that may be transfered to another device the ids are expanded to 288 bits. This is achieved by keeping a record of contexts seen.</p>
+<p>Ids are generated with a <a href="quuid.html">QUuid</a> Device identifier, a <a href="quuid.html">QUuid</a> Context identifer and an index. The context identifer should be generated with a program such as <i>quuid</i> and represent the data store or context within which the id is generated. For example, XML, SQL , and SIM card storage for QContacts each have their own Context Identifier.</p>
+<p>Usually usage will be:</p>
+<pre>    QUniqueIdGenerator g(myContext());
+    id = g.createId();</pre>
+<p>However, if creating an id from a source that has its own 32 bit (non 0) identifiers, the identifiers can be constructed thus avoiding storing the QUniqueIdentifiers on the store.</p>
+<pre>    QUniqueIdGenerator g(myContext());
+    id = g.constructId(index);</pre>
+<p>If the identifier is for removable media or a foriegn device, a device id should also be obtained for the generator.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QUniqueIdGenerator"></a>QUniqueIdGenerator::QUniqueIdGenerator ( const <a href="quuid.html">QUuid</a> &amp; <i>context</i> )</h3>
+<p>Create a <a href="quniqueidgenerator.html">QUniqueIdGenerator</a> with the scope <i>context</i>.</p>
+<h3 class="fn"><a name="QUniqueIdGenerator-2"></a>QUniqueIdGenerator::QUniqueIdGenerator ( const <a href="quuid.html">QUuid</a> &amp; <i>device</i>, const <a href="quuid.html">QUuid</a> &amp; <i>context</i> )</h3>
+<p>Create a <a href="quniqueidgenerator.html">QUniqueIdGenerator</a> with the scope <i>context</i> as if from <i>device</i>. Should only be used for importing foriegn data (e.g. from SIM card).</p>
+<h3 class="fn"><a name="QUniqueIdGenerator-3"></a>QUniqueIdGenerator::QUniqueIdGenerator ( const QUniqueIdGenerator &amp; <i>other</i> )</h3>
+<p>Create a deep copy QtopiaIdGen from <i>other</i>.</p>
+<h3 class="fn"><a name="dtor.QUniqueIdGenerator"></a>QUniqueIdGenerator::~QUniqueIdGenerator ()</h3>
+<p>Destroy <a href="quniqueidgenerator.html">QUniqueIdGenerator</a>.</p>
+<h3 class="fn"><a name="constructUniqueId"></a><a href="quniqueid.html">QUniqueId</a> QUniqueIdGenerator::constructUniqueId ( uint <i>index</i> )</h3>
+<p>Constructs a identifier based of <i>index</i> for the context of the generator. Does not ensure the constructed id is not in conflict with past or future <a href="quniqueid.html">QUniqueId</a> objects.</p>
+<p>See also <a href="quniqueidgenerator.html#createUniqueId">createUniqueId</a>().</p>
+<h3 class="fn"><a name="createUniqueId"></a><a href="quniqueid.html">QUniqueId</a> QUniqueIdGenerator::createUniqueId ()</h3>
+<p>Generate and return a new identifier. The identifier will be unique from other ids generated with this function.</p>
+<p>See also <a href="quniqueidgenerator.html#constructUniqueId">constructUniqueId</a>().</p>
+<h3 class="fn"><a name="isValid"></a>bool QUniqueIdGenerator::isValid () const</h3>
+<p>Returns true if the generator is valid and can be used to create or construct unique id's. Otherwise returns false.</p>
+<p>This function should only be needed during debugging as only a generator constructed using null <a href="quuid.html">QUuid</a>'s will be invalid.</p>
+<h3 class="fn"><a name="temporaryID"></a><a href="quniqueid.html">QUniqueId</a> QUniqueIdGenerator::temporaryID ( uint <i>index</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Creates a temporary identify based of <i>index</i>.</p>
+<p>Temporary identifiers are scoped so as not to conflict with other identifiers, but are not suitable for syncing.</p>
+<p>The main use of a temporaryID is to use other, non-<a href="quniqueid.html">QUniqueId</a> objects within the set of QtopiaIDs.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

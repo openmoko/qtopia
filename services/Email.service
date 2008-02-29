@@ -1,9 +1,13 @@
 [Service]
-Actions = writeMail();writeMail(QString,QString)
-Icon = EMail
-Name = Email
-Name[ja] = 電子メール
+Actions = "emailVCard(QDSActionRequest);viewMail();writeMail()"
+Icon = email
+Name[] = Email
+[Translation]
+Context = Email
+File = QtopiaServices
+[viewMail()]
+Icon = email
+Name[] = "View Email"
 [writeMail()]
-Icon = EMail
-Name = Compose Email
-Name[ja] = 電子メールの作成
+Icon = email
+Name[] = "Compose Email"

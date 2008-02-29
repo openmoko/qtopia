@@ -2,6 +2,6 @@
 File=QtopiaServices
 Context=Time
 [Service]
-Actions = editTime()
+Actions = "editTime()"
 Icon = systemtime/DateTime
 Name[]=Edit Time

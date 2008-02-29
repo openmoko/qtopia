@@ -1,0 +1,16 @@
+<page name="contextbar" base="themes/crisp" rect="0,0,0x8.18%">
+  <rect name="reserved" rect="0,0,0x100%" color="None" brush="Midlight"/>
+  <layout>
+    <image expanding="yes" name="button0" rect="0,0,0x0" align="vcenter" interactive="yes"/>
+    <group expanding="yes">
+      <image name="button1" rect="0,0,0x0" align="vcenter" interactive="yes"/>
+    </group>
+    <image expanding="yes" name="button2" rect="0,0,0x0" align="vcenter" interactive="yes"/>
+  </layout>
+<layout>
+  <text expanding="yes" name="button0" rect="1%,2,0x89%" size="6" bold="yes" align="vcenter,left" color="Text" interactive="yes"/>
+  <text expanding="yes" name="button1" rect="1%,2,0x89%" size="6" bold="yes" align="vcenter,hcenter" color="Text" interactive="yes"/>
+  <text expanding="yes" name="button2" rect="1%,2,0x89%" size="6" bold="yes" align="vcenter,right" color="Text" interactive="yes"/>
+</layout>
+<line rect="0,0,0x1" color="#72715a"/>
+</page>

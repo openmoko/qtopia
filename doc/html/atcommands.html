@@ -1,0 +1,133 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>AT Commands</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">AT Commands<br /><small></small></h1>
+<a name="top"></a><a name="introduction"></a>
+<h2>Introduction</h2>
+<p>The following lists the AT control commands that a device is expected to support, however, a device may support more commands than listed.</p>
+<p>For example, some phones support both <tt>AT+CGMI</tt> and <tt>AT+GMI</tt> to retrieve the manufacturer name, while only <tt>AT+CGMI</tt> is required.</p>
+<p>In the future, additional commands from the GSM specifications 07.05 and 07.07 may be required, so it is recommended that all device manufacturers fully comply with GSM specifications.</p>
+<p>The categories of control commands are:</p>
+<ul>
+<li>General Commands (GSM 07.07, Section 5)</li>
+<li>Call Control Commands (GSM 07.07, Section 6)</li>
+<li>Network Services Related Commands (GSM 07.07, Section 7)</li>
+<li>Mobile Equipment Control and Status Commands (GSM 07.07, Section 8)</li>
+<li>SMS Commands (GSM 07.05)</li>
+<li>Multiplexing Commands (GSM 07.10)</li>
+<li>Other Commands</li>
+<li>Phone-Specific Commands</li>
+</ul>
+<a name="general-commands-gsm-07-07-section-5"></a>
+<h3>General Commands (GSM 07.07, section 5)</h3>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+CGMI</tt></td><td>Identify manufacturer</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CGMM</tt></td><td>Identify model</td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CGMR</tt></td><td>Identify revision</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CGSN</tt></td><td>Identify serial number (of device, not SIM card)</td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CSCS</tt></td><td>Select character set</td></tr>
+</table></p>
+<a name="call-control-commands-gsm-07-07-section-6"></a>
+<h3>Call Control Commands (GSM 07.07, section 6)</h3>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>ATDnnn;</tt></td><td>Dial &quot;nnn&quot; in voice mode.</td></tr>
+<tr valign="top" class="even"><td><tt>ATH</tt></td><td>Hangup the current call.</td></tr>
+<tr valign="top" class="odd"><td><tt>ATA</tt></td><td>Answer an incoming call.</td></tr>
+</table></p>
+<p><b>Note:</b> When the <tt>ATD</tt> command is used with a trailing '<b>;</b>', it must return immediately to command mode after command processing. Some phones have been known to wait until the receiving party answers the call, or busy is detected, before returning to command mode. Such phones are not compliant with the GSM specification and will not be supported.</p>
+<p>The GSM specification permits <tt>ATD</tt> to be used in a special mode for dialing directly from phone books. This mode is not required as Qtopia implements its own algorithm for converting phone book entries to numbers.</p>
+<p>It is important that <tt>ATD</tt> recognise numbers starting with <tt>+</tt> as international, and all other numbers as being local.</p>
+<a name="network-services-related-commands-gsm-07-07-section-7"></a>
+<h3>Network Services Related Commands (GSM 07.07, section 7)</h3>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+CNUM</tt></td><td>Subscriber number</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CREG</tt></td><td>Network registration</td></tr>
+<tr valign="top" class="odd"><td><tt>AT+COPS</tt></td><td>Operator selection</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CLCK</tt></td><td>Facility lock</td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CPWD</tt></td><td>Change password</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CLIP</tt></td><td>Enable caller line identification</td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CLIR</tt></td><td>Caller ID restriction</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CCUG</tt></td><td>Closed user group</td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CCFC</tt></td><td>Call forwarding number and conditions</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CCWA</tt></td><td>Call waiting</td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CHLD</tt></td><td>Call hold and multiparty</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CTFR</tt></td><td>Call transfer</td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CAOC</tt></td><td>Advice of charge</td></tr>
+</table></p>
+<a name="mobile-equipment-control-and-status-commands-gsm-07-07-section-8"></a>
+<h3>Mobile Equipment Control and Status Commands (GSM 07.07, section 8)</h3>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+CPAS</tt></td><td>Phone activity status</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CFUN</tt></td><td>Set phone functionality</td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CPIN</tt></td><td>Enter PIN</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CBC</tt></td><td>Battery charge</td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CSQ</tt></td><td>Signal quality</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CPBS</tt></td><td>Select phone book memory storage</td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CPBR</tt></td><td>Read phone book entries</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CPBW</tt></td><td>Write phone book entries</td></tr>
+</table></p>
+<p>The phone book commands are intended for accessing phone books stored on SIM cards, typically the SM phone book. However, Qtopia Phone software provides its own mechanisms for managing phone books stored within the phone memory.</p>
+<a name="sms-commands-gsm-07-05"></a>
+<h3>SMS Commands (GSM 07.05)</h3>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+CPMS</tt></td><td>Preferred message storage</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CMGF</tt></td><td>Message format (we use format 0: PDU)</td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CSCA</tt></td><td>Service centre address</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CNMI</tt></td><td>Enable new message indications</td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CSCB</tt></td><td>Select cell broadcast message types</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CMGL</tt></td><td>List messages</td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CMGR</tt></td><td>Read message</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CMGS</tt></td><td>Send message</td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CMGD</tt></td><td>Delete message</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CMMS</tt></td><td>More messages to send</td></tr>
+<tr valign="top" class="odd"><td><tt>+CMTI</tt></td><td>Notification of SMS message delivery.</td></tr>
+<tr valign="top" class="even"><td><tt>+CBMI</tt></td><td>Notification of a cell broadcast message.</td></tr>
+<tr valign="top" class="odd"><td><tt>+CDSI</tt></td><td>Notification of an SMS status report message.</td></tr>
+<tr valign="top" class="even"><td><tt>+CBM</tt></td><td>Notification of a directly delivered cell broadcast message.</td></tr>
+</table></p>
+<p>It is assumed that incoming SMS messages are stored in a temporary storage area on the device and that Qtopia will retrieve the messages using the <tt>AT+CMGL</tt> and <tt>AT+CMGR</tt> commands.</p>
+<a name="multiplexing-commands-gsm-07-10"></a>
+<h3>Multiplexing Commands (GSM 07.10)</h3>
+<p>Qtopia Phone expects to use GSM 07.10 multiplexing to establish multiple communications paths with the modem. The modem needs to support the AT+CMUX command plus the basic packet mode in GSM 07.10. If the modem supports some other form of multiplexing, then it is necessary to modify <tt>muxdevice.cpp</tt> in the source code. Multiplexing support is required for GPRS.</p>
+<a name="other-commands"></a>
+<h3>Other Commands</h3>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+VTS</tt></td><td>DTMF and tone generation (GSM 07.07, Appendix C)</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CVIB</tt></td><td>Select vibrate mode</td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CPUC</tt></td><td>Price per unit</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CIMI</tt></td><td>SIM identity</td></tr>
+<tr valign="top" class="odd"><td><tt>AT+CHSC</tt></td><td>Get phone status (only needed if AT+CPAS is not available)</td></tr>
+<tr valign="top" class="even"><td><tt>AT+CLCC</tt></td><td>List active calls</td></tr>
+</table></p>
+<a name="phone-specific-commands"></a>
+<h3>Phone-specific Commands</h3>
+<p>The GSM specification lacks some functionality required to provide a complete feature set. The most important of these is <i>Call Monitoring</i>, that is, when an outgoing dial request is made, a method of detecting call acceptance or rejection by the other party is required.</p>
+<p>Ericsson phones have an <tt>AT*ECAM</tt> command that is used to turn on supplementary call monitoring events. That is, each time the call status changes, the phone emits an <tt>*ECAV</tt> message with the details. It is recommended that device manufacturers provide these or similar commands.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT*ECAM</tt></td><td>Turn on call monitoring</td></tr>
+<tr valign="top" class="even"><td><tt>AT*ESIL</tt></td><td>Select silent mode</td></tr>
+<tr valign="top" class="odd"><td><tt>*ECAV</tt></td><td>Unsolicited response for <tt>AT*ECAM</tt></td></tr>
+</table></p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>VoIP Overview</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">VoIP Overview<br /><small></small></h1>
+<a name="top"></a><p>This document provides an introduction to the Qtopia VoIP infrastructure.</p>
+<a name="qtopia-voip-architecture"></a>
+<h2>Qtopia VoIP Architecture</h2>
+<p>VoIP is a Qtopia application integrated with the Qtopia server. The key features are:</p>
+<ul>
+<li>supports Session Initiated Protocol (SIP)</li>
+<li>VoIP is provided as a compiler option</li>
+<li>provides an interface to abstract the VoIP SIP stack from the VoIP application</li>
+<li>provides basic call management functionality - VoIP call initiation/origination and termination</li>
+<li>implements a statusQuery API to allow other applications to query information and status</li>
+<li>integrated with Qtopia QuickDialer</li>
+</ul>
+<p>An overview of the VoIP Framework Architecture is provided in the following diagram:</p>
+<p align="center"><img src="images/voipIntegration.png" /></p><a name="handler-interface"></a>
+<h2>Handler Interface</h2>
+<p>The handler interface communicates with vendor SIP stacks via the vendor wrapper software. For integration information refer to <a href="voip-integration.html"> VoIP Integration</a>.</p>
+<a name="qtopia-voip-applications"></a>
+<h2>Qtopia VoIP Applications</h2>
+<p>Qtopia VoIP is integrated with the following applications:</p>
+<ul>
+<li>Call History</li>
+<li>Settings</li>
+<li>Quick Dial</li>
+<li>Contacts</li>
+</ul>
+<a name="call-history"></a>
+<h3>Call History</h3>
+<p>Call History is a Qtopia module providing the history of all calls received, missed and dialled. VoIP call details are displayed and calls can be initiated from the Call History screen.</p>
+<a name="settings"></a>
+<h3>Settings</h3>
+<p>Qtopia provides a basic settings application for VoIP. However, integration of a settings application and design of the settings GUI is largely the responsibility of the vendor. The following describes commonly supported functionality:</p>
+<ol type="1">
+<li>User profile management - save/edit/view user profile</li>
+<li>Preferences management - manage the SIP, audio call preferences</li>
+<li>Initiating registration of the SIP client to presence server</li>
+</ol>
+<p>The screen displays comprising the settings application are described in the following table:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Display Name</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td>Identity</td><td>Allows the user to set<ul>
+<li>user and host parts of a SIP URL</li>
+<li>full name</li>
+<li>SIP server password</li>
+<li>auto-register option.</li>
+</ul>
+</td></tr>
+<tr valign="top" class="even"><td>Proxy</td><td>Allows the user to set<ul>
+<li>host and port parts of a SIP proxy</li>
+<li>user name for the SIP proxy</li>
+</ul>
+</td></tr>
+<tr valign="top" class="odd"><td>Advanced</td><td>Allows the user to set:<ul>
+<li>expire time of registration</li>
+<li>expire time of presence subscription</li>
+<li>preferred audio codec</li>
+</ul>
+</td></tr>
+</table></p>
+<a name="quick-dial"></a>
+<h3>Quick Dial</h3>
+<p>Quick Dial component is a Qtopia module that provides a dialing facility from the Home screen and is integrated with the Qtopia phone edition. VoIP identifiers are taken as input Call History matches are presented and the VoIP call is initiated.</p>
+<a name="contacts"></a>
+<h3>Contacts</h3>
+<p>The Contacts application stores, edits, and displays the VoIP identifier and status of a contact. It interacts with the VoIP framework for:</p>
+<ol type="1">
+<li>VoIP Contact additions/deletions/edits</li>
+<li>Getting updates on VoIP status of contacts (available/unavailable)</li>
+</ol>
+<p>The Contact application receives updates from VoIP server regarding VoIP user status (online/offline) and is responsible for keeping it up-to-date in its database.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

@@ -1,0 +1,66 @@
+#!/bin/sh
+
+SUCCESS=no
+QMKSPEC=$1
+XPLATFORM=`basename "$1"`
+VERBOSE=$2
+SRCDIR=$3
+OUTDIR=$4
+TEST=$5
+EXE=`basename "$5"`
+DESCRIPTION=$6
+shift 6
+LIBPATH=""
+INCLUDEPATH=""
+CXXFLAGS=""
+while [ "$#" -gt 0 ]; do
+    PARAM=$1
+    case $PARAM in
+    -framework)
+        LIBPATH="$LIBPATH -framework \"$2\""
+        shift
+        ;;
+    -F*)
+        LIBPATH="$LIBPATH $PARAM"
+        CXXFLAGS="$CXXFLAGS $PARAM"
+        ;;
+    -L*|-l*)
+	LIBPATH="$LIBPATH $PARAM"
+	;;
+    -I*)
+        INC=`echo $PARAM | sed -e 's/^-I//'`
+        INCLUDEPATH="$INCLUDEPATH $INC"
+        ;;
+    -f*)
+        CXXFLAGS="$CXXFLAGS $PARAM"
+        ;;
+    *)  ;;
+    esac
+    shift
+done
+
+# debuggery
+[ "$VERBOSE" = "yes" ] && echo "$DESCRIPTION auto-detection... ($*)"
+
+test -d "$OUTDIR/$TEST" || mkdir -p "$OUTDIR/$TEST"
+
+cd "$OUTDIR/$TEST"
+
+"$OUTDIR/bin/qmake" -nocache -spec "$QMKSPEC" "LIBS*=$LIBPATH" "INCLUDEPATH*=$INCLUDEPATH" "QMAKE_CXXFLAGS*=$CXXFLAGS" "$SRCDIR/$TEST/$EXE.pro" -o "$OUTDIR/$TEST/Makefile" >/dev/null 2>&1
+
+if [ "$VERBOSE" = "yes" ]; then
+    make
+else
+    make >/dev/null 2>&1
+fi
+
+[ -x "$EXE" ] && SUCCESS=yes
+
+# done
+if [ "$SUCCESS" != "yes" ]; then
+    [ "$VERBOSE" = "yes" ] && echo "$DESCRIPTION disabled."
+    exit 1
+else
+    [ "$VERBOSE" = "yes" ] && echo "$DESCRIPTION enabled."
+    exit 0
+fi

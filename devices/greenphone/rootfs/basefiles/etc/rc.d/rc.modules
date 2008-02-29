@@ -1,0 +1,10 @@
+#!/bin/sh
+insmod /lib/modules/omega_rtcalarm.o >/dev/null 2>&1
+insmod /lib/modules/omega_bcm2121.o >/dev/null 2>&1
+insmod /lib/modules/usbdcore.o >/dev/null 2>&1
+insmod /lib/modules/omega_bt.o >/dev/null 2>&1
+
+# NFS Support
+insmod /lib/modules/sunrpc.o >/dev/null 2>&1
+insmod /lib/modules/lockd.o >/dev/null 2>&1
+insmod /lib/modules/nfs.o >/dev/null 2>&1

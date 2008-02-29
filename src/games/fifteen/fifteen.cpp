@@ -1,196 +1,342 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "fifteen.h"
 
-#include <qtopia/resource.h>
-#include <qtopia/config.h>
-#include <qtopia/contextmenu.h>
+#include <QSettings>
+#include <qsoftmenubar.h>
+#include <qtopiaapplication.h>
+#include <qimagedocumentselector.h>
 
-#include <qvbox.h>
-#include <qaction.h>
-#include <qlayout.h>
-#include <qpainter.h>
-#include <qpopupmenu.h>
-#include <qmessagebox.h>
-#include <qtopia/qpetoolbar.h>
-#include <qtopia/qpemenubar.h>
-#include <qstringlist.h>
-#include <qapplication.h>
-#include <qtoolbutton.h>
+#include <QBoxLayout>
+#include <QAction>
+#include <QPainter>
+#include <QMenu>
+#include <QToolBar>
+#include <QMessageBox>
+#include <QStringList>
+#include <QApplication>
+#include <QToolButton>
+#include <QKeyEvent>
+#include <QMouseEvent>
+#include <QHeaderView>
 
 #include <stdlib.h>
 #include <time.h>
 
-FifteenMainWindow::FifteenMainWindow(QWidget *parent, const char* name, WFlags fl)
-  : QMainWindow( parent, name, fl )
+static bool bShowNumber = false;
+static bool bGameWon = false;
+
+FifteenMainWindow::FifteenMainWindow(QWidget *parent, Qt::WFlags fl)
+  : QMainWindow( parent, fl )
 {
     // random seed
     srand(time(0));
 
-    setCaption(tr("Fifteen Pieces"));
-    setToolBarsMovable( FALSE );
-    QVBox *vbox = new QVBox( this );
-    PiecesTable *table = new PiecesTable( vbox );
-    table->setFocus();
+    setWindowTitle(tr("Fifteen Pieces"));
+    QWidget *vbox = new QWidget(this);
+    QVBoxLayout *vlayout = new QVBoxLayout(vbox);
+    vlayout->setMargin(0);
+    PiecesView *view = new PiecesView( vbox );
+    PiecesTable *table = new PiecesTable( this );
+    view->setModel(table);
+    view->setItemDelegate(new PiecesDelegate( this ));
+    view->setShowGrid(false);
+    vlayout->addWidget(view);
+    view->setFocus();
     setCentralWidget(vbox);
 
-    QIconSet   newicon( Resource::loadPixmap("Fifteen"));
+    QAction *actionShuffle = new QAction( QIcon( ":image/Fifteen" ), tr("Shuffle"), this );
+    connect( actionShuffle, SIGNAL(triggered()), table, SLOT(randomize()) );
 
+    QAction *actionReset = new QAction( tr("Reset Pieces"), this );
+    connect( actionReset, SIGNAL(triggered()), table, SLOT(reset()) );
+
+    actionLoadImg = new QAction( tr( "Load Image"), this );
+    connect( actionLoadImg, SIGNAL(triggered()), table, SLOT(loadImage()) );
+
+    actionDeleteImg = new QAction( tr( "Delete Image"), this );
+    connect( actionDeleteImg, SIGNAL(triggered()), table, SLOT(deleteImage()) );
+
+    actionShowNum = new QAction( tr( "Show Numbers" ), this );
+    actionShowNum->setCheckable( true );
+    if ( bShowNumber )
+        actionShowNum->setChecked( true );
+    connect( actionShowNum, SIGNAL(triggered()), this, SLOT(showNumber()) );
+    connect( actionShowNum, SIGNAL(triggered()), table, SLOT(showNumber()) );
+    connect( table, SIGNAL(gameWon()), this, SLOT(showNumber()) );
+
+    connect( table, SIGNAL(updateMenu(bool)), this, SLOT(updateMenu(bool)) );
+    updateMenu( table->useImage() );
 #ifdef QTOPIA_PHONE
-    ContextMenu* menu = new ContextMenu(this);
-    menu->insertItem(newicon, tr("Shuffle"), table, SLOT(slotRandomize()));
+    QMenu* menu = QSoftMenuBar::menuFor(this);
+    menu->addAction( actionShuffle );
+    menu->addAction( actionReset );
+    menu->addAction( actionLoadImg );
+    menu->addAction( actionDeleteImg );
+    menu->addAction( actionShowNum );
 #else
-    QPEToolBar *toolbar = new QPEToolBar(this);
-    toolbar->setHorizontalStretchable( FALSE );
-
-    (void)new QToolButton(newicon, tr("Shuffle"), 0,
-	  table, SLOT(slotRandomize()), toolbar, "New Game");
-
-    /* This is pointless and confusing.
-    a = new QAction( tr( "Solve" ), Resource::loadIconSet( "repeat" ),
-		     QString::null, 0, this, 0 );
-    connect( a, SIGNAL( activated() ), table, SLOT( slotReset() ) );
-    a->addTo( game );
-    a->addTo( toolbar );
-    */
+    QToolBar *toolbar = new QToolBar(this);
+    toolbar->setMovable(false);
+    addToolBar(toolbar);
+    toolbar->addAction( actionShuffle );
+    toolbar->addAction( actionReset );
+    toolbar->addAction( actionLoadImg );
+    toolbar->addAction( actionDeleteImg );
+    toolbar->addAction( actionShowNum );
 #endif
 }
 
-PiecesTable::PiecesTable(QWidget* parent, const char* name )
-  : QTableView(parent, name), _menu(0), _randomized(false)
+void FifteenMainWindow::showNumber()
 {
-  // setup table view
-  setFrameStyle(NoFrame);
-  setBackgroundMode(NoBackground);
-  setMouseTracking(true);
+    actionShowNum->setChecked( bGameWon ? false : !bShowNumber );
+    bShowNumber = bGameWon ? false : actionShowNum->isChecked();
+}
 
-  setNumRows(4);
-  setNumCols(4);
+void FifteenMainWindow::updateMenu( bool useImage )
+{
+    actionLoadImg->setEnabled( !useImage );
+    actionLoadImg->setVisible( !useImage );
+    actionDeleteImg->setEnabled( useImage );
+    actionDeleteImg->setVisible( useImage );
+    actionShowNum->setEnabled( useImage );
+    actionShowNum->setVisible( useImage );
+    actionShowNum->setChecked( bShowNumber );
+    actionShowNum->setVisible( useImage );
+}
 
-  // init arrays
-  initMap();
-  readConfig();
-  initColors();
+PiecesTable::PiecesTable(QObject* parent)
+    : QAbstractTableModel(parent), _randomized(false)
+{
+    // init arrays
+    initMap();
+    readConfig();
+    if ( !_randomized )
+        randomize();
+    initColors();
+}
 
-  // set font
-  QFont f = font();
-  f.setPixelSize(18);
-  f.setBold( TRUE );
-  setFont(f);
+QVariant PiecesTable::data(const QModelIndex &index, int role) const
+{
+    int number =  _map[index.row()*columnCount() + index.column()];
+    switch(role) {
+        default:
+        case Qt::DisplayRole:
+            return number + 1;
+        case Qt::BackgroundColorRole:
+            return _colors[number];
+        case Qt::FontRole:
+            if (qApp) {
+                QFont f = qApp->font();
+                f.setPixelSize(18);
+                f.setBold( true );
+                return f;
+            }
+            break;
+        case Qt::UserRole:
+            if ( _images.count() == 0 ) return 0;
+            return _images.at( number );
+        case Qt::UserRole + 1:
+            return !_imgName.isEmpty();
+    }
+    return QVariant();
+    // set font
 }
 
 PiecesTable::~PiecesTable()
 {
-  writeConfig();
+    writeConfig();
 }
 
 void PiecesTable::writeConfig()
 {
-  Config cfg("Fifteen");
-  cfg.setGroup("Game");
-  QStringList map;
-  for (int i = 0; i < 16; i++)
+    QSettings cfg("Trolltech","Fifteen");
+    cfg.beginGroup("Game");
+    QStringList map;
+    for (int i = 0; i < 16; i++)
     map.append( QString::number( _map[i] ) );
-  cfg.writeEntry("Map", map, '-');
-  cfg.writeEntry("Randomized", _randomized );
+    cfg.setValue("Map", map.join(QString('-')));
+    cfg.setValue("Randomized", _randomized );
+    cfg.setValue("ImageName", _imgName);
+    cfg.setValue("ShowNumber", bShowNumber);
 }
 
 void PiecesTable::readConfig()
 {
-  Config cfg("Fifteen");
-  cfg.setGroup("Game");
-  QStringList map = cfg.readListEntry("Map", '-');
-  _randomized = cfg.readBoolEntry( "Randomized", FALSE );
-  int i = 0;
-  for ( QStringList::Iterator it = map.begin(); it != map.end(); ++it ) {
-    _map[i] = (*it).toInt();
-    i++;
-    if ( i > 15 ) break;
-  }
+    QSettings cfg("Trolltech","Fifteen");
+    cfg.beginGroup("Game");
+    QStringList map = cfg.value("Map").toString().split( '-');
+    _randomized = cfg.value( "Randomized", false ).toBool();
+    _imgName = cfg.value( "ImageName", QString() ).toString();
+    bShowNumber = cfg.value( "ShowNumber", false ).toBool();
+    int i = 0;
+    for ( QStringList::Iterator it = map.begin(); it != map.end(); ++it ) {
+        _map[i] = (*it).toInt();
+        i++;
+        if ( i > 15 ) break;
+    }
+
+    if ( !_imgName.isEmpty() ) {
+        sliceImage();
+        emit updateMenu( true );
+    }
 }
 
-void PiecesTable::paintCell(QPainter *p, int row, int col)
+void PiecesTable::loadImage()
 {
-  int w = cellWidth();
-  int h = cellHeight();
-  int x2 = w - 1;
-  int y2 = h - 1;
-
-  int number = _map[col + row * numCols()] + 1;
-
-  // draw cell background
-  if(number == 16)
-    p->setBrush(colorGroup().background());
-  else
-    p->setBrush(_colors[number-1]);
-  p->setPen(NoPen);
-  p->drawRect(0, 0, w, h);
-
-  if (number == 16) return;
-
-  // draw borders
-  if (height() > 40) {
-    p->setBrush(_colors[number-1].light(130));
-    p->drawPolygon(light_border);
-
-    p->setBrush(_colors[number-1].dark(130));
-    p->drawPolygon(dark_border);
-  }
-
-  // draw number
-  p->setPen(black);
-  p->drawText(0, 0, x2, y2, AlignHCenter | AlignVCenter, QString::number(number));
+    QImageDocumentSelectorDialog sel;
+    if (QtopiaApplication::execDialog(&sel)) {
+        QContent doc = sel.selectedDocument();
+        if(doc.fileKnown())
+            _imgName = doc.file();
+    }
+    if ( _imgName.isEmpty() )
+        return;
+    sliceImage();
+    emit updateMenu( true );
+    bGameWon = bGameWon ? false : bGameWon;
 }
 
-void PiecesTable::resizeEvent(QResizeEvent *e)
+void PiecesTable::sliceImage()
 {
-  QTableView::resizeEvent(e);
+    _images.clear();
+    QImage img(_imgName);
+    int w = img.width() / 4;
+    int h = img.height() / 4;
+    bool rtl = QtopiaApplication::layoutDirection() == Qt::RightToLeft;
+    for ( int row = 0; row < rowCount() ; row++ ) {
+        if ( rtl ) {
+            for ( int col = columnCount() - 1 ; col >= 0 ; col-- )
+                _images.append( img.copy(col * w, row * h, w, h) );
+        } else {
+            for ( int col = 0 ; col < columnCount() ; col++ )
+                _images.append( img.copy(col * w, row * h, w, h) );
+        }
+    }
+}
 
-  setCellWidth(contentsRect().width()/ numRows());
-  setCellHeight(contentsRect().height() / numCols());
+void PiecesTable::deleteImage()
+{
+    _imgName = "";
+    _images.clear();
+    bShowNumber = false;
+    emit updateMenu( false );
+    emit dataChanged(createIndex(0,0), createIndex(3,3));
+}
 
-  //
-  // Calculate 3d-effect borders
-  //
-  int	cell_w = cellWidth();
-  int	cell_h = cellHeight();
-  int	x_offset = cell_w - int(cell_w * 0.9);	// 10% should be enough
-  int	y_offset = cell_h - int(cell_h * 0.9);
+void PiecesTable::showNumber()
+{
+    emit dataChanged(createIndex(0,0), createIndex(3,3));
+}
 
-  light_border.setPoints(6,
+QSize PiecesDelegate::cellSize(10,10);
+QPolygon PiecesDelegate::light_border;
+QPolygon PiecesDelegate::dark_border;
+
+void PiecesDelegate::paint(QPainter *p, const QStyleOptionViewItem &o, const QModelIndex &i) const
+{
+    int w = o.rect.width();
+    int h = o.rect.height();
+    int x2 = w - 1;
+    int y2 = h - 1;
+
+    int number = i.model()->data(i, Qt::DisplayRole).toInt();
+    QVariant variant = i.model()->data(i, Qt::BackgroundColorRole);
+    QColor color = variant.value<QColor>();
+    QVariant font = i.model()->data(i, Qt::FontRole);
+    if (!font.isNull())
+        p->setFont(font.value<QFont>());
+
+    // draw cell background
+    if(number == 16)
+        p->setBrush( QColor( Qt::white ) );
+    else
+        p->setBrush(color);
+
+    p->setPen(Qt::NoPen);
+    p->drawRect(o.rect);
+
+    if (!bGameWon && number == 16) return;
+
+    // get image from model
+    // scale and draw the image
+    variant = i.model()->data(i, Qt::UserRole + 1);
+    bool useImage = variant.toBool();
+    if (useImage) {
+        variant = i.model()->data(i, Qt::UserRole);
+        QImage img = variant.value<QImage>();
+        QImage img2=img.scaled(w, h);
+        p->drawImage( QPoint( o.rect.x(), o.rect.y() ), img2 );
+        if( bShowNumber ) {
+            p->setPen(Qt::black);
+            p->drawText(o.rect.x() + 1, o.rect.y() + 1, x2, y2, Qt::AlignLeft | Qt::AlignTop, QString::number(number));
+            p->setPen(Qt::white);
+            p->drawText(o.rect.x(), o.rect.y(), x2, y2, Qt::AlignLeft | Qt::AlignTop, QString::number(number));
+        }
+        return;
+    } else if (number == 16 )
+        return;
+    // draw borders
+    if (h >= 40) {
+        QPolygon l = light_border;
+        l.translate(o.rect.topLeft());
+        p->setBrush(color.light(130));
+        p->drawPolygon(l);
+
+        QPolygon d = dark_border;
+        d.translate(o.rect.topLeft());
+        p->setBrush(color.dark(130));
+        p->drawPolygon(d);
+    }
+
+    // draw number
+    p->setPen(Qt::black);
+    p->drawText(o.rect.x(), o.rect.y(), x2, y2, Qt::AlignHCenter | Qt::AlignVCenter, QString::number(number));
+}
+
+PiecesView::PiecesView(QWidget *parent) : QTableView(parent), _menu(0)
+{
+    setFrameStyle(NoFrame);
+    verticalHeader()->hide();
+    horizontalHeader()->hide();
+    rtl = layoutDirection() == Qt::RightToLeft;
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+}
+
+void PiecesView::resizeEvent(QResizeEvent *e)
+{
+    Q_UNUSED(e);
+
+    int cell_w = qMax(10, contentsRect().width() / model()->columnCount());
+    int cell_h = qMax(10, contentsRect().height() / model()->rowCount());
+    PiecesDelegate::cellSize = QSize(cell_w, cell_h);
+
+    //
+    // Calculate 3d-effect borders
+    //
+    int x_offset = cell_w - int(cell_w * 0.9);  // 10% should be enough
+    int y_offset = cell_h - int(cell_h * 0.9);
+
+    PiecesDelegate::light_border.setPoints(6,
     0, 0,
     cell_w, 0,
     cell_w - x_offset, y_offset,
@@ -198,169 +344,231 @@ void PiecesTable::resizeEvent(QResizeEvent *e)
     x_offset, cell_h - y_offset,
     0, cell_h);
 
-  dark_border.setPoints(6,
+    PiecesDelegate::dark_border.setPoints(6,
     cell_w, 0,
     cell_w, cell_h,
     0, cell_h,
     x_offset, cell_h - y_offset,
     cell_w - x_offset, cell_h - y_offset,
     cell_w - x_offset, y_offset);
+
+    int i;
+    for (i = 0; i < model()->rowCount(); ++i)
+        verticalHeader()->resizeSection(i, cell_h);
+    for (i = 0; i < model()->columnCount(); ++i)
+        horizontalHeader()->resizeSection(i, cell_w);
 }
 
 void PiecesTable::initColors()
 {
-  _colors.resize(numRows() * numCols());
-  for (int r = 0; r < numRows(); r++)
-    for (int c = 0; c < numCols(); c++)
-      _colors[c + r *numCols()] = QColor(255 - 70 * c,255 - 70 * r, 150);
+    _colors.clear();
+    for (int r = 0; r < rowCount(); r++)
+        for (int c = 0; c < columnCount(); c++)
+            _colors.append(QColor(255 - 70 * c,255 - 70 * r, 150));
 }
 
 void PiecesTable::initMap()
 {
-  _map.resize(16);
-  for ( int i = 0; i < 16; i++)
-    _map[i] = i;
+    _map.clear();
+    for ( int i = 0; i < 16; i++)
+        _map.append(i);
 
-  _randomized = false;
+    _randomized = false;
 }
 
-void PiecesTable::randomizeMap()
+void PiecesTable::randomize()
 {
-  initMap();
-  _randomized = true;
-  // find the free position
-  int pos = _map.find(15);
+    initMap();
+    _randomized = true;
+    bGameWon = false;
+    // find the free position
+    int pos = _map.indexOf(15);
 
-  int move = 0;
-  while ( move < 333 ) {
+    int move = 0;
+    while ( move < 333 ) {
 
-    int frow = pos / numCols();
-    int fcol = pos - frow * numCols();
+        int frow = pos / columnCount();
+        int fcol = pos - frow * columnCount();
 
-    // find click position
-    int row = rand()%4;
-    int col = rand()%4;
+        // find click position
+        int row = rand()%4;
+        int col = rand()%4;
 
-    // sanity check
-    if ( row < 0 || row >= numRows() ) continue;
-    if ( col < 0 || col >= numCols() ) continue;
-    if ( row != frow && col != fcol ) continue;
+        // sanity check
+        if ( row < 0 || row >= rowCount() ) continue;
+        if ( col < 0 || col >= columnCount() ) continue;
+        if ( row != frow && col != fcol ) continue;
 
-    move++;
+        move++;
 
-    // rows match -> shift pieces
-    if(row == frow) {
+        // rows match -> shift pieces
+        if(row == frow) {
 
-      if (col < fcol) {
-	for(int c = fcol; c > col; c--) {
-	  _map[c + row * numCols()] = _map[ c-1 + row *numCols()];
-	}
-      }
-      else if (col > fcol) {
-	for(int c = fcol; c < col; c++) {
-	  _map[c + row * numCols()] = _map[ c+1 + row *numCols()];
-	}
-      }
-    }
-    // cols match -> shift pieces
-    else if (col == fcol) {
+            if (col < fcol) {
+                for(int c = fcol; c > col; c--)
+                    _map[c + row * columnCount()] = _map[ c-1 + row *columnCount()];
+            } else if (col > fcol) {
+                for(int c = fcol; c < col; c++)
+                    _map[c + row * columnCount()] = _map[ c+1 + row *columnCount()];
+            }
+        }
+        // cols match -> shift pieces
+        else if (col == fcol) {
 
-      if (row < frow) {
-	for(int r = frow; r > row; r--) {
-	  _map[col + r * numCols()] = _map[ col + (r-1) *numCols()];
-	}
-      }
-      else if (row > frow) {
-	for(int r = frow; r < row; r++) {
-	  _map[col + r * numCols()] = _map[ col + (r+1) *numCols()];
-	}
-      }
-    }
+            if (row < frow) {
+                for(int r = frow; r > row; r--)
+                    _map[col + r * columnCount()] = _map[ col + (r-1) *columnCount()];
+            } else if (row > frow) {
+                for(int r = frow; r < row; r++)
+                    _map[col + r * columnCount()] = _map[ col + (r+1) *columnCount()];
+            }
+        }
     // move free cell to click position
-    _map[pos=(col + row * numCols())] = 15;
-  }
-  repaint();
+    _map[pos=(col + row * columnCount())] = 15;
+    }
+    emit dataChanged(createIndex(0,0), createIndex(3,3));
 }
 
 void PiecesTable::checkwin()
 {
-  if(!_randomized) return;
+    if(!_randomized) return;
 
-  int i;
-  for (i = 0; i < 16; i++)
-    if(i != _map[i])
-      break;
+    int i;
+    for (i = 0; i < 16; i++)
+        if(i != _map[i])
+            break;
 
-  if (i == 16) {
-    QMessageBox::information(this, tr("Fifteen Pieces"),
-			     tr("Congratulations!<br>You win the game!"));
-    _randomized = FALSE;
-  }
+    if (i == 16) {
 
-}
-
-void PiecesTable::slotRandomize()
-{
-  randomizeMap();
-}
-
-void PiecesTable::slotReset()
-{
-  initMap();
-  repaint();
-}
-
-void PiecesTable::keyPressEvent(QKeyEvent* e)
-{
-    int fpos = _map.find(15);
-    int y = fpos / numCols();
-    int x = fpos % numCols();
-
-    switch ( e->key() ) {
-	case Key_Right: x--; x--;
-	case Key_Left: x++; y++;
-	case Key_Down: y--; y--;
-	case Key_Up: y++;
-	push(x,y);
-	e->accept();
-    default:
-	QTableView::keyPressEvent(e);
-	return;
+        _randomized = false;
+        emit gameWon();
     }
 }
 
-void PiecesTable::mousePressEvent(QMouseEvent* e)
+void PiecesView::setModel(QAbstractItemModel *m)
 {
-  QTableView::mousePressEvent(e);
+    QTableView::setModel(m);
+    PiecesTable *pt = qobject_cast<PiecesTable *>(model());
+    if (pt)
+        connect(pt, SIGNAL(gameWon()), this, SLOT(announceWin()));
+}
 
-  if (e->button() == RightButton) {
+void PiecesView::announceWin()
+{
+    bGameWon = true;
+    QMessageBox::information(this, tr("Fifteen Pieces"),
+            tr("Congratulations!<br>You win the game!"));
+}
+
+void PiecesTable::reset()
+{
+    initMap();
+    emit dataChanged(createIndex(0,0), createIndex(3,3));
+}
+
+QPoint PiecesTable::findPoint(int val)
+{
+    int i = _map.indexOf(val);
+    if (i != -1) {
+        int col = i % columnCount();
+        int row = ( i - col ) / columnCount();
+        return QPoint(col, row);
+    }
+    return QPoint(0,0);
+}
+
+void PiecesTable::pushLeft()
+{
+    QPoint fpos = findPoint(15);
+    push(fpos + QPoint(1,0));
+}
+
+void PiecesTable::pushRight()
+{
+    QPoint fpos = findPoint(15);
+    push(fpos + QPoint(-1,0));
+}
+
+void PiecesTable::pushUp()
+{
+    QPoint fpos = findPoint(15);
+    push(fpos + QPoint(0,1));
+}
+
+void PiecesTable::pushDown()
+{
+    QPoint fpos = findPoint(15);
+    push(fpos + QPoint(0,-1));
+}
+
+void PiecesView::keyPressEvent(QKeyEvent* e)
+{
+    PiecesTable *pt = qobject_cast<PiecesTable *>(model());
+    if (!pt) {
+        QTableView::keyPressEvent(e);
+        return;
+    }
+    switch ( e->key() ) {
+        case Qt::Key_Up: pt->pushUp(); e->accept(); break;
+        case Qt::Key_Down: pt->pushDown(); e->accept(); break;
+        case Qt::Key_Left:
+            if ( rtl ) {
+                pt->pushRight();
+                e->accept();
+                break;
+            } else {
+                pt->pushLeft();
+                e->accept();
+                break;
+            }
+        case Qt::Key_Right:
+            if ( rtl ) {
+                pt->pushLeft();
+                e->accept();
+                break;
+            } else {
+                pt->pushRight();
+                e->accept();
+                break;
+            }
+
+        default:
+            QTableView::keyPressEvent(e);
+        return;
+    }
+}
+
+void PiecesView::mousePressEvent(QMouseEvent* e)
+{
+    PiecesTable *pt = qobject_cast<PiecesTable *>(model());
+    if (!pt) {
+        QTableView::mousePressEvent(e);
+        return;
+    }
+
+    if (e->button() == Qt::RightButton) {
 
     // setup RMB pupup menu
     if(!_menu) {
-      _menu = new QPopupMenu(this);
-      _menu->insertItem(tr("R&andomize Pieces"), mRandomize);
-      _menu->insertItem(tr("&Reset Pieces"), mReset);
-      _menu->adjustSize();
+        _menu = new QMenu(this);
+        QAction *randomizeAction = new QAction( tr("R&andomize Pieces"), this );
+        connect(randomizeAction, SIGNAL(triggered()), pt, SLOT(randomize()));
+        QAction *resetAction = new QAction( tr("&Reset Pieces"), this );
+        connect(resetAction, SIGNAL(triggered()), pt, SLOT(reset()));
+        _menu->addAction(randomizeAction);
+        _menu->addAction(resetAction);
+        _menu->adjustSize();
     }
 
     // execute RMB popup and check result
-    switch(_menu->exec(mapToGlobal(e->pos()))) {
-    case mRandomize:
-      randomizeMap();
-      break;
-    case mReset:
-      initMap();
-      repaint();
-      break;
-    default:
-      break;
+    QAction *res = _menu->exec(mapToGlobal(e->pos()));
+    if (res == randomizeAction)
+        pt->randomize();
+    else if (res == resetAction)
+        pt->reset();
+    } else {
+        pt->push( indexAt( QPoint( e->x(), e->y() ) ) );
     }
-  } else {
-    // find click position
-    int row = findRow(e->y());
-    int col = findCol(e->x());
-    push(col,row);
-  }
 }
 
 void PiecesTable::push(int col, int row)
@@ -368,15 +576,15 @@ void PiecesTable::push(int col, int row)
     // GAME LOGIC
 
     // find the free position
-    int pos = _map.find(15);
+    int pos = _map.indexOf(15);
     if(pos < 0) return;
 
-    int frow = pos / numCols();
-    int fcol = pos - frow * numCols();
+    int frow = pos / columnCount();
+    int fcol = pos - frow * columnCount();
 
     // sanity check
-    if (row < 0 || row >= numRows()) return;
-    if (col < 0 || col >= numCols()) return;
+    if (row < 0 || row >= rowCount()) return;
+    if (col < 0 || col >= columnCount()) return;
     if ( row != frow && col != fcol ) return;
 
     // valid move?
@@ -385,38 +593,29 @@ void PiecesTable::push(int col, int row)
     // rows match -> shift pieces
     if(row == frow) {
 
-      if (col < fcol) {
-	for(int c = fcol; c > col; c--) {
-	  _map[c + row * numCols()] = _map[ c-1 + row *numCols()];
-	  updateCell(row, c, false);
-	}
-      }
-      else if (col > fcol) {
-	for(int c = fcol; c < col; c++) {
-	  _map[c + row * numCols()] = _map[ c+1 + row *numCols()];
-	  updateCell(row, c, false);
-	}
-      }
+        if (col < fcol) {
+            for(int c = fcol; c > col; c--)
+                _map[c + row * columnCount()] = _map[ c-1 + row *columnCount()];
+        } else if (col > fcol) {
+            for(int c = fcol; c < col; c++)
+                _map[c + row * columnCount()] = _map[ c+1 + row *columnCount()];
+        }
+        emit dataChanged(createIndex(row, fcol), createIndex(row, col));
     }
     // cols match -> shift pieces
     else if (col == fcol) {
 
-      if (row < frow) {
-	for(int r = frow; r > row; r--) {
-	  _map[col + r * numCols()] = _map[ col + (r-1) *numCols()];
-	  updateCell(r, col, false);
-	}
-      }
-      else if (row > frow) {
-	for(int r = frow; r < row; r++) {
-	  _map[col + r * numCols()] = _map[ col + (r+1) *numCols()];
-	  updateCell(r, col, false);
-	}
-      }
+        if (row < frow) {
+            for(int r = frow; r > row; r--)
+                _map[col + r * columnCount()] = _map[ col + (r-1) *columnCount()];
+        } else if (row > frow) {
+            for(int r = frow; r < row; r++)
+                _map[col + r * columnCount()] = _map[ col + (r+1) *columnCount()];
+        }
+        emit dataChanged(createIndex(frow, col), createIndex(row, col));
     }
     // move free cell to click position
-    _map[col + row * numCols()] = 15;
-    updateCell(row, col, false);
+    _map[col + row * columnCount()] = 15;
 
     // check if the player wins with this move
     checkwin();

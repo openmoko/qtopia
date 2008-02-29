@@ -1,4 +1,10 @@
-CONFIG    += qtopiaapp
+qtopia_project(qtopia app)
+TARGET=photoedit
+# This can't be turned on while photoedit checks qApp->arguments in the photoeditUi constructor!
+#CONFIG+=qtopia_main
+# Have replaced it for now -- this hasn't solved the problem, and I've been having probs with
+# qotpia/photoedit getting mixed up, since, at runtime.
+CONFIG+=qtopia_main
 
 HEADERS    = photoeditui.h \
                 selector/selectorui.h \
@@ -28,25 +34,20 @@ SOURCES    = main.cpp \
                 slideshow/slideshowdialog.cpp \
                 slideshow/slideshow.cpp
 
-TRANSLATABLES   = $$HEADERS \
-                    $$SOURCES \
-                    $$INTERFACES
-
-TARGET     = photoedit
-
-help.files=$${QTOPIA_DEPOT_PATH}/help/html/photoedit*
-help.path=/help/html
-
-desktop.files=$${QTOPIA_DEPOT_PATH}/apps/Applications/photoedit.desktop
+help.source=$$QTOPIA_DEPOT_PATH/help
+help.files=photoedit*
+help.hint=help
+desktop.files=$$QTOPIA_DEPOT_PATH/apps/Applications/photoedit.desktop
 desktop.path=/apps/Applications
-pics.files=$${QTOPIA_DEPOT_PATH}/pics/photoedit/*
+desktop.hint=desktop
+pics.files=$$QTOPIA_DEPOT_PATH/pics/photoedit/*
 pics.path=/pics/photoedit
-service.files=$${QTOPIA_DEPOT_PATH}/services/PhotoEdit/photoedit
+pics.hint=pics
+service.files=$$QTOPIA_DEPOT_PATH/services/PhotoEdit/photoedit
 service.path=/services/PhotoEdit
-qdsservice.files=$${QTOPIA_DEPOT_PATH}/services/GetValue/image/photoedit
-qdsservice.path=/services/GetValue/image
-INSTALLS+=desktop service qdsservice help
-PICS_INSTALLS+=pics
+qdsservice.files=$$QTOPIA_DEPOT_PATH/etc/qds/PhotoEdit
+qdsservice.path=/etc/qds
+INSTALLS+=help desktop pics service qdsservice
 
-PACKAGE_NAME=qpe-photoedit
-PACKAGE_DESCRIPTION=An image manager for the Qtopia Environment.
+pkg.desc=An image manager for Qtopia.
+pkg.domain=window,qds,beaming,cardreader,drm,docapi{image/*},pictures,print

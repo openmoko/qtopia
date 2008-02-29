@@ -1,0 +1,275 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>SXE - System Integration</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">SXE - System Integration<br /><small></small></h1>
+<ul><li><a href="#introduction">Introduction</a></li>
+<ul><li><a href="#the-role-of-lids-mac-in-sxe">The role of LIDS MAC in SXE</a></li>
+</ul>
+<li><a href="#lids-mac-kernel">LIDS MAC kernel</a></li>
+<li><a href="#file-system-creation">File System Creation</a></li>
+<li><a href="#boot-process">Boot Process</a></li>
+<li><a href="#policy-file-creation">Policy File Creation</a></li>
+<li><a href="#qtopia-sxe-and-lids-mac-integration-points">Qtopia SXE and LIDS MAC integration points</a></li>
+<ul><li><a href="#qtopia-sxe-domain-scripts">Qtopia SXE domain scripts</a></li>
+</ul>
+<li><a href="#qtopia-4-1-release-pending-functionality">Qtopia 4.1 Release Pending Functionality</a></li>
+</ul>
+<a name="introduction"></a>
+<h2>Introduction</h2>
+<p>From Qtopia 4.1 the <a href="sxe.html">Safe Execution Environment - (SXE)</a> is built into Qtopia to provide a level of confidence to allow the download and execution of native 3rd-party binaries, such as games and utilities.</p>
+<p>At the application level, SXE acts like a firewall to prevent programs making unauthorized access to sensitive system services. Requests received for the Qtopia phone server are first checked to see if the originating program has the correct security domain awarded to allow the sending of such messages.</p>
+<p>Downloaded programs must however, also be controlled at the file-system level, to prevent them accessing sensitive system files, such as the <tt>sxe.policy</tt> file. Altering the policy file could result in the program awarding the security domain to itself.</p>
+<p>These file-system level controls are achieved for SXE by a Mandatory Access Control (MAC) system.</p>
+<p>This document is to assist engineers with system integration to enable the MAC system for a device.</p>
+<p>The MAC system for SXE is provided by the LIDS (Linux Instruction Detection) project: <a href="http://lids.org">http://lids.org</a>. LIDS is discussed in the <a href="#lidsmac">LIDS MAC kernel</a> section below.</p>
+<p>There are three stages to enabling the LIDS MAC system:</p>
+<ol type="1">
+<li>building the LIDS kernel</li>
+<li>building the LIDS file system</li>
+<li>configuring the policy scripts.</li>
+</ol>
+<p>These stages for enabling LIDS MAC for a Qtopia SXE device are described below.</p>
+<a name="lidsmac"></a><a name="the-role-of-lids-mac-in-sxe"></a>
+<h3>The role of LIDS MAC in SXE</h3>
+<p>MAC policy can prevent a program from accessing the network or the modem device directly. This means that programs must route their requests via the application policy framework mentioned in the previous section.</p>
+<p>While the SXE system will run without MAC, it requires MAC to provide a guarantee of security as the modem, policy files, and other sensitive system resources are not otherwise protected.</p>
+<p>To reiterate, the SXE application level system continues to operate if the LIDS MAC system is not in place. However a malicious or flawed - &quot;Malware&quot; - program could simply alter SXE system files or directly operate on the devices hardware. The LIDS MAC system must be enabled in order for SXE to provide its level of guarantee of the security of the device.</p>
+<p>For this reason, if the LIDS system is detected in the underlying device then the Qtopia System Information application will show that SXE is enabled - otherwise it will show in red that SXE is disabled.</p>
+<p>The MAC system also provides System Hardening by the MAC bounding set. The bounding set comprises global MAC rules which apply to all programs, unless specifically excepted. System hardening makes it much more difficult for a flawed or malicious downloaded program to compromise the device.</p>
+<a name="lids-mac-kernel"></a>
+<h2>LIDS MAC kernel</h2>
+<p>The Linux kernel selected for use with the device must be patched to enable the LIDS Mandatory Access Control (MAC) system.</p>
+<p>LIDS kernel patches are available for both 2.4 and 2.6 series kernels. However there are two key differences between the LIDS system for the two versions:</p>
+<ol type="1">
+<li>If the kernel is a 2.6 series, the LIDS system can be compiled as a module and inserted after the kernel has booted. This is because 2.6 patch sets use the Linux Security Module (LSM) framework. The 2.4 series LIDS system must be compiled in to the kernel, and run from boot.</li>
+<li>For 2.4 series LIDS systems, the LIDS_SANDBOX Access Control List rule is available as part of the LIDS Trusted Domain Enforcement system. This rule makes it simpler to sandbox untrusted programs. The 2.6 series LIDS system must instead detail all rules required to effectively sandbox the untrusted program, making the list of rules required longer. Efforts are underway to port the LIDS_SANDBOX feature to the 2.6 series.</li>
+</ol>
+<p>The Linux kernel patches required to enable LIDS are available at: <a href="http://lids.org">http://lids.org</a>.</p>
+<p>A full discussion of how to patch and install the LIDS enabled kernel is beyond the scope of this document. Refer to <a href="http://wiki.lids.org/index.php/Main_Page">the LIDS Wiki</a> for more details.</p>
+<p>Some <a href="http://www.selinux.gr.jp/LIDS-JP/LIDS_en/index.html">resources for embedded LIDS</a> have been prepared by a Japanese user-group.</p>
+<p>The steps to compiling lids into the kernel are:</p>
+<ul>
+<li>Determine the kernel version - here the example of 2.6.13 is used</li>
+<li>The following assumes kernel sources are in <tt>$PWD/linux</tt>:<pre>    export SXE_ROOT=$PWD
+    export LIDS=lids-2.2.1-2.6.13
+    export LIDS_DL=http:<span class="comment">//www.lids.org/download/v2.6/2.6.13</span>
+    export LIDS_DIR=$PWD/$LIDS</pre>
+</li>
+<li>Download and install the LIDS patches for that version:<pre>    wget $LIDS_DL/$LIDS.tar.gz
+    tar zvxf $LIDS.tar.gz
+    cd linux
+    patch -p0 &lt; ../$LIDS/$LIDS.patch</pre>
+</li>
+<li>manually apply some patch hunks if required</li>
+<li>configure the kernel as normal</li>
+<li>ensure LIDS is enabled in the <tt>.config</tt> - set LIDS be a module if desired</li>
+<li>build Linux as normal<pre>     make linux ARCH=&lt;some arch&gt;
+     make modules ARCH=&lt;some arch&gt;</pre>
+</li>
+</ul>
+<a name="file-system-creation"></a>
+<h2>File System Creation</h2>
+<p>The LIDS enabled kernel requires the user-space utilities <tt>/sbin/lidsconf</tt> and <tt>/sbin/lidsadm</tt>. These binaries must be installed in <b>/sbin</b> or LIDS will be disabled, as this path is hard-coded in the kernel.</p>
+<p>The other components required for LIDS are the default lids configuration files, installed in <tt>/etc/lids</tt>.</p>
+<p>The steps are:</p>
+<ol type="1">
+<li>Prepare your file system as normal - assume it is mounted at <tt>$SXE_ROOT/target</tt></li>
+<li>Determine your cross-compile arguments if needed<pre>     export LIDS_CROSS=&quot;--target=arm-linux --host=arm-linux --build=i586-linux-gnu&quot;</pre>
+</li>
+<li>Building the LIDS MAC userspace tools<pre>     cd $LIDS_DIR/lidstools*
+     ./configure $LIDS_CROSS KERNEL_DIR=../../$LINUX LDFLAGS=-static
+     make</pre>
+</li>
+<li>install the tools, configuration files and other items in the file-system<p><b>Note:</b> here the example configuration files from the LIDS distribution are used</p>
+<pre>     cp -u src/lidsadm src/lidsconf target_mnt/sbin
+     export LIST=`ls -1 example/*.cap example/*.conf example/*.ini example/*.pw`
+     for P in $LIST; do cp $P $SXE_ROOT/target/etc/lids; done
+
+     cd $SXE_ROOT/linux
+     make modules_install INSTALL_MOD_PATH=target_mnt ARCH=um</pre>
+</li>
+</ol>
+<a name="boot"></a><a name="boot-process"></a>
+<h2>Boot Process</h2>
+<p>When a LIDS system boots, runs and shuts down, the system goes through the following stages:</p>
+<ol type="1">
+<li>BOOT - special privileges available, for example, <tt>mount</tt>, <tt>fsck</tt></li>
+<li>POSTBOOT</li>
+<li>SHUTDOWN - special privileges available, for example, <tt>kill</tt>, <tt>unmount</tt></li>
+</ol>
+<p>The system initialization scripts must be set up to run the command <tt>lidsadm -I</tt> at the completion of the BOOT phase. This should occur after the system initialization scripts have run to set up any mount points, networking, daemons etc... After this command, special privileges required for booting the device will be dropped, the kernel is <i>sealed</i> and the device is operating in secure mode.</p>
+<p>The system shutdown scripts should likewise be setup to <tt>lidsadm -S -- +SHUTDOWN</tt> at the beginning of the device shutdown or reboot sequence.</p>
+<p>Initialization scripts must also be setup to provide the once-off LIDS initialization required, for example, via a script such as:</p>
+<pre>    if [ ! -f /etc/lids_initialized ]; then
+        echo &quot;*** First run, initialising lids.&quot;
+        /etc/lids/lids.conf.sh
+        lidsconf -U;
+        lidsconf -C;
+        lidsconf -P;
+        touch /etc/lids_initialized;
+    fi</pre>
+<p>Here the file <tt>/etc/lids/lids.conf.sh</tt> is a shell script which calls the LIDS policy file scripts mentioned in the next section, which will create the LIDS runtime rules for the device.</p>
+<a name="policy"></a><a name="policy-file-creation"></a>
+<h2>Policy File Creation</h2>
+<p>The resources which are required to be protected on the file-system should be listed in detail before commencing creating LIDS policies. The table below can be used as a basis for constructing this list.</p>
+<p>More general rules can be placed at the top of the table, with exceptions to the rules further down.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Item</th><th>Typical file system path</th><th>General rule</th><th>Requiring special access</th></tr></thead>
+<tr valign="top" class="odd"><td>system configuration</td><td><tt>/etc</tt></td><td>Programs can read but not write</td><td>network programs must write to /etc/network/pcmcia files</td></tr>
+<tr valign="top" class="even"><td>MAC system configuration</td><td><tt>/etc/lids</tt></td><td>Programs cannot read</td><td>lids programs must write to /etc/lids files</td></tr>
+<tr valign="top" class="odd"><td>Qtopia binaries</td><td><tt>/opt/Qtopia/bin</tt></td><td>No program ever launches binaries</td><td>qpe - launches all qtopia binaries, netsetup - launches the <tt>bin/lan-network</tt> or <tt>bin/ppp-network</tt> scripts, various other exceptions</td></tr>
+<tr valign="top" class="even"><td>Qtopia libraries</td><td><tt>/opt/Qtopia/lib:/opt/Qtopia/plugins</tt></td><td>Programs can read but not write</td><td>packagemanager may need to install upgrades to these libraries</td></tr>
+<tr valign="top" class="odd"><td>system libraries</td><td><tt>/lib:/usr/lib</tt></td><td>Programs can read but not write</td><td>packagemanager may need to install upgrades to these libraries</td></tr>
+<tr valign="top" class="even"><td>System binaries</td><td><tt>/bin:/sbin:/usr/bin:/usr/sbin</tt></td><td>No program ever launches binaries</td><td>various exceptions - qtopia-pppd-internal calls /sbin/chat for example</td></tr>
+<tr valign="top" class="odd"><td>Qtopia etc</td><td><tt>/opt/Qtopia/etc</tt></td><td>Programs can read but not write</td><td>Some configuration files are not readable, see next item</td></tr>
+<tr valign="top" class="even"><td>SXE control files</td><td><tt>/opt/Qtopia/etc/keyfile</tt></td><td>No program can read</td><td><tt>qpe</tt> - reads <tt>keyfile</tt> to authenticate requests</td></tr>
+<tr valign="top" class="odd"><td>DRM system directory</td><td><tt>/opt/Qtopia/Applications/Qtopia/DRM</tt></td><td>No program can read/write</td><td>Programs with the drm security domain can read/write</td></tr>
+</table></p>
+<p>Once the list has been filled out, LIDS rules can be constructed in the form of bash shell scripts.</p>
+<pre>    lidsconf -A -o /etc -j READONLY
+    lidsconf -A -s /opt/Qtopia/bin/qpe -o /etc/network -j WRITE
+
+    lidsconf -A -o /etc/lids -j DENY
+    lidsconf -A -s /sbin/lidsconf -o /etc/lids -j READONLY
+    lidsconf -A -s /sbin/lidsconf -o /etc/lids/lids.cap -j READONLY
+    lidsconf -A -s /sbin/lidsconf -o /etc/lids/lids.conf -j READONLY
+
+    lidsconf -A -o /opt/Qtopia/bin -j DENY
+    lidsconf -A -s /opt/Qtopia/bin/qpe -o /opt/Qtopia/bin -j READONLY
+    lidsconf -A -o /opt/Qtopia/bin -j DENY
+    lidsconf -A -s /opt/Qtopia/bin/netsetup -o /opt/Qtopia/bin -j READONLY
+
+    lidsconf -A -o /opt/Qtopia/etc -j READONLY
+    lidsconf -A -o /opt/Qtopia/etc/keyfile -j DENY
+    lidsconf -A -s /opt/Qtopia/bin/qpe -o /opt/Qtopia/etc/keyfile WRITE</pre>
+<a name="qtopia-sxe-and-lids-mac-integration-points"></a>
+<h2>Qtopia SXE and LIDS MAC integration points</h2>
+<p>The LIDS MAC installation for the device is heavily dependent on the configuration of the filesystem.</p>
+<p>In addition there are differences between the 2.6 and 2.4 series kernel implementations. Efforts are underway to reduce these differences, but at present integration by way of scripts is required in order to provide an interface for Qtopia.</p>
+<p>This means that much of the interface between Qtopia SXE and the LIDS MAC system must be done by SXE calling into scripts which are provided by the system integration engineers for the device.</p>
+<p>Qtopia uses this system for other integration points where device specifics prevent Qtopia code from making direct access - examples are the <tt>pppd</tt> and network scripts which are called by the <tt>netsetup</tt> program, and the card monitor facility provided during integration which tells Qtopia when a new storage media card has been inserted.</p>
+<p>The SXE system provides a number of script templates to assist in the integration effort. The scripts and descriptions of their function are listed here:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Script Name/Template</th><th>Call Signature</th><th>Description</th></tr></thead>
+<tr valign="top" class="odd"><td><ul>
+<li><tt>sxe_sandbox</tt></li>
+<li><tt>sxe_sandbox.template</tt></li>
+</ul>
+</td><td><ul>
+<li><tt>sxe_sandbox &lt;/path/to/installed/binary&gt;</tt></li>
+</ul>
+</td><td>Create LIDS MAC sandbox rules so that when the binary is launched it will be sandboxed to run in the directory <tt>/path/to/installed</tt>.<p>All system capabilities are denied, unless specifically allowed.</p>
+<p><b>Note</b>: this script is run by the SXE <tt>packagemanager</tt> at install time, and causes policy to be written into the <tt>/etc/lids/*.conf</tt> control files.</p>
+</td></tr>
+<tr valign="top" class="even"><td><ul>
+<li><tt>sxe_unsandbox</tt></li>
+<li><tt>sxe_unsandbox.template</tt></li>
+</ul>
+</td><td><ul>
+<li><tt>sxe_unsandbox &lt;/path/to/installed/binary&gt;</tt></li>
+</ul>
+</td><td>Remove LIDS MAC sandbox rules on binary <tt>uninstall</tt>.<p>This may require a <tt>lidsconf -Z</tt> to zero out the rules and reconstruct them from the scripts.</p>
+</td></tr>
+<tr valign="top" class="odd"><td><ul>
+<li><tt>lids</tt></li>
+<li><tt>lids.template</tt></li>
+</ul>
+</td><td><ul>
+<li><tt>lids start|stop</tt></li>
+</ul>
+</td><td>Start the LIDS system at boot- time, sealing the kernel, OR at shutdown time enter SHUTDOWN mode and terminate processes.<p>This script will call other scripts mentioned below.</p>
+<p>See the previous section on the <a href="#boot">boot</a> process.</p>
+</td></tr>
+<tr valign="top" class="even"><td><ul>
+<li><tt>sxe_boot</tt></li>
+<li><tt>sxe_boot.template</tt></li>
+</ul>
+</td><td><ul>
+<li><tt>sxe_boot</tt></li>
+</ul>
+</td><td>Carry out LIDS one-off initialization as described above, then seal the kernel with the <tt>lidsadm -I</tt> LIDS command.<p>This script may also contain other LIDS related initialization.</p>
+<p>This is called by <tt>lids start</tt> prior to the <tt>sxe_bounding.sh</tt> script.</p>
+</td></tr>
+<tr valign="top" class="odd"><td><ul>
+<li><tt>sxe_bounding</tt></li>
+<li><tt>sxe_bounding.template</tt></li>
+</ul>
+</td><td><ul>
+<li><tt>sxe_bounding</tt></li>
+</ul>
+</td><td>Enable the LIDS bounding set rules for SXE.<p>These are the rules which operate at POSTBOOT level to control the normal runtime operation of the Qtopia device.</p>
+<p>The broad system wide rules such as denying write access to /etc and /usr/lib belong in this file.</p>
+<p>This is called by <tt>sxe_boot.sh</tt> if the lids policy files are not yet initialized.</p>
+<p>Refer to the <a href="#policy">policy</a> section above.</p>
+</td></tr>
+<tr valign="top" class="even"><td><ul>
+<li><tt>sxe_qtopia</tt></li>
+<li><tt>sxe_qtopia.template</tt></li>
+</ul>
+</td><td><ul>
+<li><tt>sxe_qtopia</tt></li>
+</ul>
+</td><td>Enable the Qtopia specific exceptions to the bounding set rules for SXE.<p>These are the rules which operate at POSTBOOT level to control the normal runtime operation of the Qtopia device.</p>
+<p>The exceptions to the bounding set which are required by privileged Qtopia programs <b>but which are not covered by particular domains</b> are listed in this file. For LIDS exceptions which apply to all programs in a domain see the next entry in this table.</p>
+<p>This is called by <tt>sxe_boot.sh</tt> if the lids policy files are not yet initialized.</p>
+<p>Refer to the <a href="#policy">policy</a> section above.</p>
+</td></tr>
+<tr valign="top" class="odd"><td><ul>
+<li><tt>sxe_qtopia_&lt;domain-name&gt;</tt></li>
+<li><tt>sxe_qtopia_drm.template</tt></li>
+<li><tt>sxe_qtopia_comm.template</tt></li>
+<li><tt>sxe_qtopia_bluetooth.template</tt></li>
+</ul>
+</td><td><ul>
+<li><tt>run-parts</tt> sxe_qtopia</li>
+</ul>
+</td><td>Enable the SXE domain specific exceptions to the bounding set rules for SXE.<p>These are the rules which operate at POSTBOOT level to control the normal runtime operation of the Qtopia device.</p>
+<p>The exceptions to the bounding set which are required by privileged Qtopia domains are listed in this file. See the next section for a description of the generated scripts in the /opt/Qtopia/etc/sxe_qtopia directory.</p>
+</td></tr>
+<tr valign="top" class="even"><td><ul>
+<li><tt>sxe_shutdown</tt></li>
+<li><tt>sxe_shutdown.template</tt></li>
+</ul>
+</td><td><ul>
+<li><tt>sxe_shutdown</tt></li>
+</ul>
+</td><td>Enable the LIDS SHUTDOWN process.<p>This process awards extra privileges to enable the killing of processes and unmounting of devices.</p>
+<p>This is called by <tt>lids_conf.sh stop</tt> after <tt>qpe</tt> has shut itself down.</p>
+<p>Refer to the <a href="#boot">boot</a> process description above.</p>
+</td></tr>
+</table></p>
+<a name="qtopia-sxe-domain-scripts"></a>
+<h3>Qtopia SXE domain scripts</h3>
+<p>Where special access is required for applications based on the security domains awarded, an sxe domain script is created.</p>
+<p>When the packagemanager installs a program with security domains, for each domain the directory <tt>/opt/Qtopia/etc/sxe_domains</tt> is scanned for a script with the name <tt>sxe_qtopia_&lt;domain-name&gt;</tt> where the &lt;domain-name&gt; is the actual name of the domain.</p>
+<p>For example <tt>sxe_qtopia_drm.sh</tt> provides access for applications with the <tt>drm</tt> domain to the drm system directory:</p>
+<pre>    lidsconf -A POSTBOOT -s ${BIN} -o /opt/Qtopia/Applications/Qtopia/DRM -j WRITE</pre>
+<p>Lines in the file are token substituted with ${BIN} being replaced by the installed location of the binary, then the contents of the file are concatenated to the end of the /opt/Qtopia/etc/sxe_qtopia/sxe_qtopia_&lt;binary-name&gt;.sh script.</p>
+<p>This script is then run to create the LIDS policy for that program.</p>
+<p>Note that with the <tt>drm</tt> domain, and with most domains which require LIDS privileges, only Qtopia system programs delivered as part of a system upgrade or system update would be awarded such a domain. Downloaded 3rd party applications should rarely if ever require such policies.</p>
+<p>The same mechanism is used by the <tt>sxe_installer</tt> program to install lids scripts at <tt>make install</tt> time. The sxe domains are listed in the .pro files for each Qtopia program under the pkg.domains variable.</p>
+<p>For each of these domains, the sxe_installer processes the scripts described above, just as the packagemanager would during normal operation, and adds to the scripts listed in the <tt>/opt/Qtopia/etc/sxe_qtopia</tt> directory.</p>
+<p>When the Qtopia SXE device boots up, during the initialization process the sxe_boot.sh script is run. See the previous section for more details of how this script is called.</p>
+<p>One of the actions of this script is to call the <tt>run-parts</tt> command (provided by BusyBox on devices) on the <tt>/opt/Qtopia/etc/sxe_qtopia</tt> directory if the sxe system requires initialization.</p>
+<a name="qtopia-4-1-release-pending-functionality"></a>
+<h2>Qtopia 4.1 Release Pending Functionality</h2>
+<p><b>Items not completed for the 4.1 Release</b> include the *.template script files mentioned in the previous section.</p>
+<p>These will be provided in the upcoming maintenance release.</p>
+<p>Also the Qtopia SXE functionality in the <tt>packagemanager</tt> which would call into these scripts has not been completed as it relies on these scripts.</p>
+<p>The <tt>sxe_qtopia</tt> scripts covered in the previous section, and the make install and packagemanager functionality which implements it has also not yet been completed.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

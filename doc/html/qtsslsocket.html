@@ -1,0 +1,266 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QtSslSocket Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QtSslSocket Class Reference</h1>
+<p>The QtSslSocket class provides a TCP socket with SSL encryption support. <a href="#details">More...</a></p>
+<pre>    #include &lt;QtSslSocket&gt;</pre><p>Inherits <a href="qtcpsocket.html">QTcpSocket</a>.</p>
+<ul>
+<li><a href="qtsslsocket-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h3>Public Types</h3>
+<ul>
+<li><div class="fn"/>enum <b><a href="qtsslsocket.html#Mode-enum">Mode</a></b> { Client, Server }</li>
+<li><div class="fn"/>enum <b><a href="qtsslsocket.html#VerifyResult-enum">VerifyResult</a></b> { VerifyOk, SelfSigned, Expired, NotYetValid, UnableToVerify }</li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qtsslsocket.html#QtSslSocket">QtSslSocket</a></b> ( Mode <i>mode</i> = Client, QObject * <i>parent</i> = 0 )</li>
+<li><div class="fn"/><b><a href="qtsslsocket.html#dtor.QtSslSocket">~QtSslSocket</a></b> ()</li>
+<li><div class="fn"/>QString <b><a href="qtsslsocket.html#ciphers">ciphers</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qtsslsocket.html#connectToHost">connectToHost</a></b> ( const QString &amp; <i>hostName</i>, quint16 <i>port</i>, OpenMode <i>openMode</i> = QIODevice::ReadWrite )</li>
+<li><div class="fn"/>void <b><a href="qtsslsocket.html#disconnectFromHost">disconnectFromHost</a></b> ()</li>
+<li><div class="fn"/>QString <b><a href="qtsslsocket.html#localCertificate">localCertificate</a></b> () const</li>
+<li><div class="fn"/>QString <b><a href="qtsslsocket.html#pathToCACertDir">pathToCACertDir</a></b> () const</li>
+<li><div class="fn"/>QString <b><a href="qtsslsocket.html#pathToCACertFile">pathToCACertFile</a></b> () const</li>
+<li><div class="fn"/>QString <b><a href="qtsslsocket.html#pathToCertificate">pathToCertificate</a></b> () const</li>
+<li><div class="fn"/>QString <b><a href="qtsslsocket.html#pathToPrivateKey">pathToPrivateKey</a></b> () const</li>
+<li><div class="fn"/>QString <b><a href="qtsslsocket.html#peerCertificate">peerCertificate</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qtsslsocket.html#setCiphers">setCiphers</a></b> ( const QString &amp; <i>ciphers</i> )</li>
+<li><div class="fn"/>void <b><a href="qtsslsocket.html#setPathToCACertDir">setPathToCACertDir</a></b> ( const QString &amp; <i>path</i> )</li>
+<li><div class="fn"/>void <b><a href="qtsslsocket.html#setPathToCACertFile">setPathToCACertFile</a></b> ( const QString &amp; <i>path</i> )</li>
+<li><div class="fn"/>void <b><a href="qtsslsocket.html#setPathToCertificate">setPathToCertificate</a></b> ( const QString &amp; <i>path</i> )</li>
+<li><div class="fn"/>void <b><a href="qtsslsocket.html#setPathToPrivateKey">setPathToPrivateKey</a></b> ( const QString &amp; <i>path</i> )</li>
+<li><div class="fn"/>void <b><a href="qtsslsocket.html#setSocket">setSocket</a></b> ( QTcpSocket * <i>socket</i> )</li>
+<li><div class="fn"/>QTcpSocket * <b><a href="qtsslsocket.html#socket">socket</a></b> () const</li>
+</ul>
+<ul>
+<li><div class="fn"/>29 public functions inherited from <a href="qabstractsocket.html#public-functions">QAbstractSocket</a></li>
+<li><div class="fn"/>54 public functions inherited from <a href="qiodevice.html#public-functions">QIODevice</a></li>
+<li><div class="fn"/>37 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+</ul>
+<a name="public-slots"></a>
+<h3>Public Slots</h3>
+<ul>
+<li><div class="fn"/>bool <b><a href="qtsslsocket.html#sslAccept">sslAccept</a></b> ()</li>
+<li><div class="fn"/>bool <b><a href="qtsslsocket.html#sslConnect">sslConnect</a></b> ()</li>
+</ul>
+<ul>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+</ul>
+<a name="signals"></a>
+<h3>Signals</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qtsslsocket.html#connectionVerificationDone">connectionVerificationDone</a></b> ( QtSslSocket::VerifyResult <i>result</i>, bool <i>hostNameMatched</i>, const QString &amp; <i>description</i> )</li>
+</ul>
+<ul>
+<li><div class="fn"/>7 signals inherited from <a href="qabstractsocket.html#signals">QAbstractSocket</a></li>
+<li><div class="fn"/>3 signals inherited from <a href="qiodevice.html#signals">QIODevice</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+</ul>
+<a name="protected-slots"></a>
+<h3>Protected Slots</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qtsslsocket.html#connectToHostImplementation">connectToHostImplementation</a></b> ( const QString &amp; <i>hostName</i>, quint16 <i>port</i>, OpenMode <i>openMode</i> )</li>
+<li><div class="fn"/>void <b><a href="qtsslsocket.html#disconnectFromHostImplementation">disconnectFromHostImplementation</a></b> ()</li>
+</ul>
+<ul>
+<li><div class="fn"/>2 protected slots inherited from <a href="qabstractsocket.html#protected-slots">QAbstractSocket</a></li>
+</ul>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qabstractsocket.html#protected-functions">QAbstractSocket</a></li>
+<li><div class="fn"/>5 protected functions inherited from <a href="qiodevice.html#protected-functions">QIODevice</a></li>
+<li><div class="fn"/>8 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 static protected member inherited from <a href="qobject.html#static-protected-members">QObject</a></li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QtSslSocket class provides a TCP socket with SSL encryption support.</p>
+<p>It provides some extra functionality which is needed for working with SSL, but otherwise there is no difference from <a href="qtcpsocket.html">QTcpSocket</a>. Example:</p>
+<pre>    void MyClient::connectToHost(const QString &amp;host, int port)
+    {
+        <span class="comment">// Create a new SSL socket</span>
+        socket = new QtSslSocket();
+
+        <span class="comment">// Set the path to the CA certificates</span>
+        socket-&gt;setPathToCACertDir(&quot;/etc/ssl/certs/&quot;);
+
+        <span class="comment">// Connect the socket's signals to slots in our client</span>
+        <span class="comment">// implementation.</span>
+        connect(socket, SIGNAL(connected()),
+                this, SLOT(connectedToHost()));
+        connect(socket, SIGNAL(readyRead()),
+                this, SLOT(readData()));
+        connect(socket, SIGNAL(disconnected()),
+                this, SLOT(connectionClosed()));
+        connect(socket, SIGNAL(error(QAbstractSocket::SocketError)),
+                this, SLOT(inspectError(QAbstractSocket::SocketError)));
+        connect(socket, SIGNAL(connectionVerificationDone(QtSslSocket::VerifyResult, bool, const QString &amp;)),
+                this, SLOT(checkCertError(QtSslSocket::VerifyResult, bool, const QString &amp;)));
+
+        <span class="comment">// Initiate a connection.</span>
+        socket-&gt;connectToHost(host, port);
+    }</pre>
+<p>Use <a href="qtsslsocket.html#connectToHost">connectToHost</a>() when connecting to an SSL server. QtSslSocket will eventually emit the <a href="qabstractsocket.html#connected">connected</a>() signal if the connection was established, or the <a href="qabstractsocket.html#error">error</a>() signal if the connection failed.</p>
+<p>In the case of accepting incoming connections, one common approach is to create a subclass of <a href="qtcpserver.html">QTcpServer</a> and reimplement <a href="qtcpserver.html#incomingConnection">QTcpServer::incomingConnection</a>(). In this function, create a QtSslSocket object and call <a href="qabstractsocket.html#setSocketDescriptor">setSocketDescriptor</a>() passing the provided socketDescriptor. Connect QtSslSocket's signals to slots in the server class. The path to a file containing a PEM encoded certificate is set with <a href="qtsslsocket.html#setPathToCertificate">setPathToCertificate</a>(). The path to the private key file is set with <a href="qtsslsocket.html#setPathToPrivateKey">setPathToPrivateKey</a>(). Finally, call <a href="qtsslsocket.html#sslAccept">sslAccept</a>() to establish the secure connection. When QtSslSocket emits <a href="qtsslsocket.html#connectionVerificationDone">connectionVerificationDone</a>(), the SSL encrypted link is established. Example:</p>
+<pre>    void MyServer::incomingConnection(int socketDescriptor)
+    {
+        <span class="comment">// Create a new socket and pass it a new QSocket</span>
+        socket = new QtSslSocket(QtSslSocket::Server, this);
+        socket-&gt;setSocketDescriptor(socketDescriptor);
+
+        <span class="comment">// Set up the certificate and private key.</span>
+        socket-&gt;setPathToCertificate(&quot;/etc/ssl/servercert.pem&quot;);
+        socket-&gt;setPathToPrivateKey(&quot;/etc/ssl/serverkey.pem&quot;);
+
+        <span class="comment">// Connect the socket's signals to slots in our server</span>
+        <span class="comment">// implementation</span>
+        connect(socket, SIGNAL(disconnected()),
+                this, SLOT(connectionClosed()));
+        connect(socket, SIGNAL(readyRead()),
+                this, SLOT(readData()));
+        connect(socket, SIGNAL(error(QAbstractSocket::SocketError)),
+                this, SLOT(error(QAbstractSocket::SocketError)));
+
+        <span class="comment">// Initiate SSL handshake. Eventually, QtSslSocket will emit</span>
+        <span class="comment">// connectionVerificationDone.</span>
+        socket-&gt;sslAccept();
+    }</pre>
+<p>In order to convert an existing socket into an SSL-encrypted socket (i.e., using the &quot;STARTTLS&quot; command or something similar), you can create a new QtSslSocket and then pass your existing socket to <a href="qtsslsocket.html#setSocket">setSocket</a>(). The original socket is assumed to be in <a href="qabstractsocket.html#SocketState-enum">ConnectedState</a>.</p>
+<p>Most often clients, but sometimes also servers need a set of CA (Certificate Authority) certificates to verify the identity of their peer. Use <a href="qtsslsocket.html#setPathToCACertFile">setPathToCACertFile</a>() and <a href="qtsslsocket.html#setPathToCACertDir">setPathToCACertDir</a>() to point QtSslSocket to these certificates. CA certificates are usually bundled as part of any Unix distribution or Mac OS X as part of the <a href="openssl.html">OpenSSL</a> package. On Windows, you can either use the bundle provided with <a href="openssl.html">OpenSSL</a>, or export CA certificates from your web browser.</p>
+<p>In rare occasions, it also is useful to restrict the encryption ciphers available to the client or server with <a href="qtsslsocket.html#setCiphers">setCiphers</a>(). This is mostly useful when debugging faulty connections.</p>
+<p>As mentioned, QtSslSocket emits <a href="qabstractsocket.html#connected">connected</a>() when the connection has been established and <a href="qtsslsocket.html#connectionVerificationDone">connectionVerificationDone</a>() when the SSL handshake has been completed. Make sure to connect to <a href="qabstractsocket.html#error">error</a>() and <a href="qtsslsocket.html#connectionVerificationDone">connectionVerificationDone</a>() to catch errors. The <a href="qiodevice.html#readyRead">readyRead</a>() signal is emitted when there is new incoming data. Call <a href="qiodevice.html#read">read</a>() to read the new data into a buffer. When <a href="qabstractsocket.html#disconnected">disconnected</a>() is emitted, the other peer has closed the connection.</p>
+<p>If the ceritificate check fails, it is often useful to display details about the failing certificate to the user. <a href="qtsslsocket.html#peerCertificate">peerCertificate</a>() returns information about this certificate. To get the local certificate, call <a href="qtsslsocket.html#localCertificate">localCertificate</a>().</p>
+<p>When building an application that uses QtSslSocket, you must link your application against the SSL library. Include the bundled .pri file, or add the following line to your .pro file, modified with the path to your installation of <a href="openssl.html">OpenSSL</a>:</p>
+<pre>    unix:LIBS += -L/usr/lib -lssl -lcrypto
+    win32:INCLUDEPATH += /openssl/include
+    win32:LIBS += -L/openssl/lib ssleay32.lib libeay32.lib</pre>
+<p>The pri file must be edited to set the paths of the SSL files.</p>
+<p><i>Note: QtSslSocket requires <a href="openssl.html">OpenSSL</a>. The <a href="openssl.html">OpenSSL</a> toolkit is licensed under an Apache-style licence, which basically means that you are free to get and use it for commercial and non-commercial purposes subject to certain license conditions. The official web site is:</i> <a href="http://www.openssl.org/">http://www.openssl.org/</a> <i>. Windows binaries are available from:</i> <a href="http://www.openssl.org/related/binaries.html">http://www.openssl.org/related/binaries.html</a> <i>.</i></p>
+<p><i>Note: Since Qt 4.1, you can pass a QtSslSocket to <a href="qhttp.html">QHttp</a> by calling <a href="qhttp.html#setSocket">QHttp::setSocket</a>() to achieve an SSL encrypted HTTP transport. (SSL over HTTP uses port 443.)</i></p>
+<p>See also <a href="qtcpsocket.html">QTcpSocket</a> and <a href="qtcpserver.html">QTcpServer</a>.</p>
+<hr />
+<h2>Member Type Documentation</h2>
+<h3 class="fn"><a name="Mode-enum"></a>enum QtSslSocket::Mode</h3>
+<p>Describes whether <a href="qtsslsocket.html">QtSslSocket</a> is used on the client side or the server side. Pass a suitable value to <a href="qtsslsocket.html">QtSslSocket</a>'s constructor to ensure that the SSL handshake is performed correctly.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QtSslSocket::Client</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top"><a href="qtsslsocket.html">QtSslSocket</a> is used for a client side socket (i.e., you call <a href="qtsslsocket.html#connectToHost">connectToHost</a>() to connect to a remote SSL server.</td></tr>
+<tr><td valign="top"><tt>QtSslSocket::Server</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top"><a href="qtsslsocket.html">QtSslSocket</a> is used to handle a server side connection (i.e., someone connected to your server).</td></tr>
+</table></p>
+<h3 class="fn"><a name="VerifyResult-enum"></a>enum QtSslSocket::VerifyResult</h3>
+<p>Describes the result of the SSL handshake.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QtSslSocket::VerifyOk</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The certificate has been successfully verified, and the peer authenticity has been established. The connection is secure, and ready to use.</td></tr>
+<tr><td valign="top"><tt>QtSslSocket::SelfSigned</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The peer certificate is self-signed (i.e., does not use a certificate authority for verification). This means that the identity of the peer has not been established. Self-signed peer certificates provide no security beyond transport encryption, and should only be used on closed networks or for debugging.</td></tr>
+<tr><td valign="top"><tt>QtSslSocket::Expired</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The peer certificate has expired. This means that the associated certificate authority no longer guarantees the identity of the peer. An expired certificate provides no security beyond transport encryption, and the administrators of the remote server should be notified as soon as possible.</td></tr>
+<tr><td valign="top"><tt>QtSslSocket::NotYetValid</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The peer certificate is not valid yet (i.e., the &quot;opposite&quot; of Expired). It provides no security beyond transport encryption, and the administrators of the remote server should be notified as soon as possible.</td></tr>
+<tr><td valign="top"><tt>QtSslSocket::UnableToVerify</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">This value signifies an error that was not covered by the other (non-VerifyOK) VerifyResult values. A common cause for the UnableToVerify value is that there is a technical fault on either side of the connection that prevents the handshake from completing, such as the server running out of diskspace, or the client running out of memory.</td></tr>
+</table></p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QtSslSocket"></a>QtSslSocket::QtSslSocket ( <a href="qtsslsocket.html#Mode-enum">Mode</a> <i>mode</i> = Client, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs a <a href="qtsslsocket.html">QtSslSocket</a> running with mode <i>mode</i>. <i>parent</i> is passed to <a href="qtcpsocket.html">QTcpSocket</a>'s constructor.</p>
+<h3 class="fn"><a name="dtor.QtSslSocket"></a>QtSslSocket::~QtSslSocket ()</h3>
+<p>Destroys the <a href="qtsslsocket.html">QtSslSocket</a> object.</p>
+<h3 class="fn"><a name="ciphers"></a><a href="qstring.html">QString</a> QtSslSocket::ciphers () const</h3>
+<p>Returns the list of ciphers <a href="qtsslsocket.html">QtSslSocket</a> will advertise to the remote peer during the SSL handshake.</p>
+<p>See also <a href="qtsslsocket.html#setCiphers">setCiphers</a>().</p>
+<h3 class="fn"><a name="connectToHost"></a>void QtSslSocket::connectToHost ( const <a href="qstring.html">QString</a> &amp; <i>hostName</i>, quint16 <i>port</i>, <a href="qiodevice.html#OpenMode-typedef">OpenMode</a> <i>openMode</i> = QIODevice::ReadWrite )</h3>
+<p>Initiates a connection to <i>hostName</i> on port <i>port</i>, using the open mode <i>openMode</i>. <a href="qtsslsocket.html">QtSslSocket</a> will emit <a href="qabstractsocket.html#connected">connected</a>() when the connection has been established, and <a href="qtsslsocket.html#connectionVerificationDone">connectionVerificationDone</a>() when the SSL handshake has completed and the socket is ready to use.</p>
+<p>Note: The implementation of this function invokes the slot <a href="qtsslsocket.html#connectToHostImplementation">connectToHostImplementation</a>(). To alter its behavior, you should reimplement <a href="qtsslsocket.html#connectToHostImplementation">connectToHostImplementation</a>() instead.</p>
+<h3 class="fn"><a name="connectToHostImplementation"></a>void QtSslSocket::connectToHostImplementation ( const <a href="qstring.html">QString</a> &amp; <i>hostName</i>, quint16 <i>port</i>, <a href="qiodevice.html#OpenMode-typedef">OpenMode</a> <i>openMode</i> )&nbsp;&nbsp;<tt> [protected slot]</tt></h3>
+<p>Initiates a connection to the host <i>hostName</i> on port <i>port</i>, using the open mode <i>openMode</i>. After <a href="qtsslsocket.html">QtSslSocket</a> emits <a href="qabstractsocket.html#connected">connected</a>(), the SSL handshake will start automatically, and eventually <a href="qtsslsocket.html">QtSslSocket</a> will emit <a href="qtsslsocket.html#connectionVerificationDone">connectionVerificationDone</a>() to signal that the handshake has completed. <i>It is essential that the connection is not used before the handshake has completed.</i></p>
+<p>Note: This function contains the implementation of <a href="qtsslsocket.html#connectToHost">connectToHost</a>(). It is implemented as a slot to achieve polymorphic behavior (as <a href="qabstractsocket.html#connectToHost">QTcpSocket::connectToHost</a>() is not virtual). Reimplement this function to alter the behavior of <a href="qtsslsocket.html#connectToHost">connectToHost</a>() polymorphically.</p>
+<p>See also <a href="qtsslsocket.html#disconnectFromHostImplementation">disconnectFromHostImplementation</a>().</p>
+<h3 class="fn"><a name="connectionVerificationDone"></a>void QtSslSocket::connectionVerificationDone ( <a href="qtsslsocket.html#VerifyResult-enum">QtSslSocket::VerifyResult</a> <i>result</i>, bool <i>hostNameMatched</i>, const <a href="qstring.html">QString</a> &amp; <i>description</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<p>This signal is emitted by <a href="qtsslsocket.html">QtSslSocket</a> to notify that the SSL handshake has completed, and the connecion is ready for use. The result of the handshake is available through <i>result</i>, and in addition, <i>hostNameMatched</i> will be set to true if the hostname of the peer certificate matches the hostname passed to <a href="qtsslsocket.html#connectToHost">connectToHost</a>(), or false if it doesn't. (For server-side connections, hostNameMatched is always true.) For displaying to the user, <i>description</i> contains a human readable description of the result of the certificate verification.</p>
+<h3 class="fn"><a name="disconnectFromHost"></a>void QtSslSocket::disconnectFromHost ()</h3>
+<p>Initiates a disconnect from the remote host.</p>
+<p>Note: The implementation of this function invokes the <a href="qtsslsocket.html#disconnectFromHostImplementation">disconnectFromHostImplementation</a>() slot.</p>
+<h3 class="fn"><a name="disconnectFromHostImplementation"></a>void QtSslSocket::disconnectFromHostImplementation ()&nbsp;&nbsp;<tt> [protected slot]</tt></h3>
+<p>This function contains the implementation of <a href="qtsslsocket.html#disconnectFromHost">disconnectFromHost</a>(). It is implemented as a slot to achieve polymorphic behavior (as <a href="qabstractsocket.html#disconnectFromHost">QTcpSocket::disconnectFromHost</a>() is not virtual). Reimplement this function to alter the behavior of <a href="qtsslsocket.html#disconnectFromHost">disconnectFromHost</a>() polymorphically.</p>
+<p>See also <a href="qtsslsocket.html#connectToHostImplementation">connectToHostImplementation</a>().</p>
+<h3 class="fn"><a name="localCertificate"></a><a href="qstring.html">QString</a> QtSslSocket::localCertificate () const</h3>
+<p>Returns the local SSL certificate as a list of keys and values, separated by '/'. Call this function after the connection has been established and <a href="qtsslsocket.html#connectionVerificationDone">connectionVerificationDone</a>() has been emitted to show the user the details of the certificate. This function is usually only called in the case where the SSL verification failed. If you call this function on an unconnected socket, or before <a href="qtsslsocket.html">QtSslSocket</a> emits <a href="qtsslsocket.html#connectionVerificationDone">connectionVerificationDone</a>(), or without providing <a href="qtsslsocket.html">QtSslSocket</a> with a local certificate (see <a href="qtsslsocket.html#setPathToCertificate">setPathToCertificate</a>()), it will return an empty string.</p>
+<p>See also <a href="qtsslsocket.html#peerCertificate">peerCertificate</a>().</p>
+<h3 class="fn"><a name="pathToCACertDir"></a><a href="qstring.html">QString</a> QtSslSocket::pathToCACertDir () const</h3>
+<p>Returns the path to a locale directory containing files with CA certificates.</p>
+<p>See also <a href="qtsslsocket.html#setPathToCACertDir">setPathToCACertDir</a>().</p>
+<h3 class="fn"><a name="pathToCACertFile"></a><a href="qstring.html">QString</a> QtSslSocket::pathToCACertFile () const</h3>
+<p>Returns the path to a local file containing a bundle of CA certificates.</p>
+<p>See also <a href="qtsslsocket.html#setPathToCACertFile">setPathToCACertFile</a>().</p>
+<h3 class="fn"><a name="pathToCertificate"></a><a href="qstring.html">QString</a> QtSslSocket::pathToCertificate () const</h3>
+<p>Returns the path to the client's certificate.</p>
+<p>See also <a href="qtsslsocket.html#setPathToCertificate">setPathToCertificate</a>().</p>
+<h3 class="fn"><a name="pathToPrivateKey"></a><a href="qstring.html">QString</a> QtSslSocket::pathToPrivateKey () const</h3>
+<p>Returns the path to the client's private key.</p>
+<p>See also <a href="qtsslsocket.html#setPathToPrivateKey">setPathToPrivateKey</a>().</p>
+<h3 class="fn"><a name="peerCertificate"></a><a href="qstring.html">QString</a> QtSslSocket::peerCertificate () const</h3>
+<p>Returns the peer SSL certificate as a list of keys and values, separated by '/'. Call this function after the connection has been established and <a href="qtsslsocket.html#connectionVerificationDone">connectionVerificationDone</a>() has been emitted to show the user the details of the peer certificate. This function is usually only called in the case where the SSL verification failed. If you call this function on an unconnected socket, or before <a href="qtsslsocket.html">QtSslSocket</a> emits <a href="qtsslsocket.html#connectionVerificationDone">connectionVerificationDone</a>(), it will return an empty string.</p>
+<p>See also <a href="qtsslsocket.html#localCertificate">localCertificate</a>().</p>
+<h3 class="fn"><a name="setCiphers"></a>void QtSslSocket::setCiphers ( const <a href="qstring.html">QString</a> &amp; <i>ciphers</i> )</h3>
+<p>Sets the list of ciphers <a href="qtsslsocket.html">QtSslSocket</a> will advertise to the remote peer during the SSL handshake. This effectively limits the ciphers <a href="qtsslsocket.html">QtSslSocket</a> can use, and is therefore mostly useful for debugging the SSL handshake. <i>ciphers</i> contains a list of ciphers listed by name, separated by a ':', and listed in descending order from the most secure to the least secure cipher.</p>
+<p>The default behavior for <a href="qtsslsocket.html">QtSslSocket</a> is to advertise all available ciphers to the remote peer, thereby maximizing the chance that a secure connection can be established.</p>
+<p>See also <a href="qtsslsocket.html#ciphers">ciphers</a>().</p>
+<h3 class="fn"><a name="setPathToCACertDir"></a>void QtSslSocket::setPathToCACertDir ( const <a href="qstring.html">QString</a> &amp; <i>path</i> )</h3>
+<p>Sets the path to a local directory containing files with CA certificates to <i>path</i>. This directory is generated by <a href="openssl.html">OpenSSL</a> using the program &quot;c_rehash&quot;, and is often installed by default as part of installing <a href="openssl.html">OpenSSL</a>. It's common to use a CA directory containing several CA files instead of using only a single CA file, as you can then add more CA files without interfering with ones provided by the operating system, your web browser or by <a href="openssl.html">OpenSSL</a>.</p>
+<p>See also <a href="qtsslsocket.html#pathToCACertDir">pathToCACertDir</a>() and <a href="qtsslsocket.html#setPathToCACertFile">setPathToCACertFile</a>().</p>
+<h3 class="fn"><a name="setPathToCACertFile"></a>void QtSslSocket::setPathToCACertFile ( const <a href="qstring.html">QString</a> &amp; <i>path</i> )</h3>
+<p>Sets the path to a local file containing a bundle of CA certificates to <i>path</i>. You can either use the bundle that comes with <a href="openssl.html">OpenSSL</a>, or use a bundle exported by your web browser. This CA bundle is necessary for verifying the authenticity of the remote peer. Without such a bundle, <a href="qtsslsocket.html">QtSslSocket</a> can never verify the peer's identity, but it will still encrypt the transferred data.</p>
+<p>See also <a href="qtsslsocket.html#pathToCACertFile">pathToCACertFile</a>().</p>
+<h3 class="fn"><a name="setPathToCertificate"></a>void QtSslSocket::setPathToCertificate ( const <a href="qstring.html">QString</a> &amp; <i>path</i> )</h3>
+<p>Sets the path to a local file containing the client's certificate to <i>path</i>. This is useful for server side connections, or for clients that connect to servers that need to verify the peer identity (client verification is not yet supported by <a href="qtsslsocket.html">QtSslSocket</a>).</p>
+<p>See also <a href="qtsslsocket.html#pathToCertificate">pathToCertificate</a>().</p>
+<h3 class="fn"><a name="setPathToPrivateKey"></a>void QtSslSocket::setPathToPrivateKey ( const <a href="qstring.html">QString</a> &amp; <i>path</i> )</h3>
+<p>Sets the path the a local file containing the client's private key to <i>path</i>. This is useful for server side connections, or for clients that connect to servers that need to verify the peer identity (client verification is not yet supported by <a href="qtsslsocket.html">QtSslSocket</a>).</p>
+<p>See also <a href="qtsslsocket.html#pathToPrivateKey">pathToPrivateKey</a>().</p>
+<h3 class="fn"><a name="setSocket"></a>void QtSslSocket::setSocket ( <a href="qtcpsocket.html">QTcpSocket</a> * <i>socket</i> )</h3>
+<p>Sets or replaces <a href="qtsslsocket.html">QtSslSocket</a>'s internal socket with <i>socket</i>. <i>socket</i> must be in <a href="qabstractsocket.html#SocketState-enum">ConnectedState</a>; otherwise this function does nothing. After calling setSocket(), you can call <a href="qtsslsocket.html#sslConnect">sslConnect</a>() to initiate a client-side handshake, or <a href="qtsslsocket.html#sslAccept">sslAccept</a>() to initiate a server-side handshake.</p>
+<p><a href="qtsslsocket.html">QtSslSocket</a> disconnects all <i>socket</i>'s existing signal connections as part of the handover, but does not take ownership of the object.</p>
+<p>This functionality is useful if you need to enable SSL on an existing, unencrypted socket. For example, certain network protocols like IMAP4, POP3 and SMTP allow you to use a plain text connection initially, and then convert to an encrypted connection later by issuing a certain command (e.g., &quot;STARTTLS&quot;). Example:</p>
+<pre>    void NetworkProtocol::readyReadSlot()
+    {
+        <span class="comment">// Convert to an SSL connection.</span>
+        if (socket-&gt;canReadLine() &amp;&amp; socket-&gt;readLine() == &quot;STARTTLS\r\n&quot;) {
+            QtSslSocket *sslSocket = new QtSslSocket(QtSslSocket::Client, this);
+            sslSocket-&gt;setSocket(socket);
+            socket = sslSocket;
+            connectSignals(socket);
+        }
+    }</pre>
+<p>See also <a href="qtsslsocket.html#socket">socket</a>().</p>
+<h3 class="fn"><a name="socket"></a><a href="qtcpsocket.html">QTcpSocket</a> * QtSslSocket::socket () const</h3>
+<p>Returns a pointer to the socket holding the actualy SSL connection. This is different from <a href="qtsslsocket.html">QtSslSocket</a>, which only acts like a wrapper. Call this function if you need to access the actual connected socket.</p>
+<p>See also <a href="qtsslsocket.html#setSocket">setSocket</a>().</p>
+<h3 class="fn"><a name="sslAccept"></a>bool QtSslSocket::sslAccept ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Initiates the SSL handshake for server-side sockets (Server). This function is useful for when <a href="qtsslsocket.html">QtSslSocket</a> is initialized using <a href="qabstractsocket.html#setSocketDescriptor">setSocketDescriptor</a>(). After calling sslAccept(), <a href="qtsslsocket.html">QtSslSocket</a> will eventually emit <a href="qtsslsocket.html#connectionVerificationDone">connectionVerificationDone</a>().</p>
+<p>See also <a href="qtsslsocket.html#sslConnect">sslConnect</a>().</p>
+<h3 class="fn"><a name="sslConnect"></a>bool QtSslSocket::sslConnect ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<p>Initiates the SSL handshake for client-side sockets (Client). This function is useful for when <a href="qtsslsocket.html">QtSslSocket</a> is initialized using <a href="qabstractsocket.html#setSocketDescriptor">setSocketDescriptor</a>(). After calling sslConnect(), <a href="qtsslsocket.html">QtSslSocket</a> will eventually emit <a href="qtsslsocket.html#connectionVerificationDone">connectionVerificationDone</a>().</p>
+<p>If you connect to a peer by calling <a href="qtsslsocket.html#connectToHost">connectToHost</a>(), you do not need to call this function as <a href="qtsslsocket.html">QtSslSocket</a> will do so for you.</p>
+<p>See also <a href="qtsslsocket.html#sslAccept">sslAccept</a>().</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

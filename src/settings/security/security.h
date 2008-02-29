@@ -1,72 +1,52 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 #ifndef SECURITY_H
 #define SECURITY_H
 
-#ifdef QTOPIA_PHONE
-#include "securityphone.h"
-#include <qtopia/phone/phone.h>
+#ifdef QTOPIA_CELL
+#include "ui_securityphone.h"
 #else
-#include "securitybase.h"
+#include "ui_securitybase.h"
 #endif
 
-#include <qdatetime.h>
+#include <QDialog>
+#include <QDateTime>
 
-class QPEDialogListener;
 class WaitScreen;
 class PhoneSecurity;
 
-class Security : public SecurityBase
-{ 
+class Security
+    : public QDialog, public Ui::SecurityBase
+{
     Q_OBJECT
 
 public:
-    Security( QWidget* parent = 0, const char* name = 0, WFlags fl = 0 );
+    Security( QWidget* parent = 0, Qt::WFlags fl = 0 );
     ~Security();
 
-    void show();
+    void setVisible(bool vis);
 
 protected:
-
-#ifdef QTOPIA_PHONE
-    bool close(bool);
-#else
     void accept();
     void done(int);
-#endif
-
     void applySecurity();
 
 private slots:
@@ -87,18 +67,16 @@ private:
 
     static bool parseNet(const QString& sn,int& auth_peer,int& auth_peer_bits);
     void selectNet(int auth_peer,int auth_peer_bits);
-    
-    QString enterPassCode(const QString&, bool encrypt = TRUE);
+
+    QString enterPassCode(const QString&, bool encrypt = true, bool last = true);
     QString passcode;
     bool valid;
     QTime timeout;
 
-#ifdef QTOPIA_PHONE
+#ifdef QTOPIA_CELL
     WaitScreen *mStatus;
     PhoneSecurity *phonesec;
-		    // confirm pin number.
-#else
-    QPEDialogListener *dl;
+                    // confirm pin number.
 #endif
 };
 

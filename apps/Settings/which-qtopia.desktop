@@ -1,0 +1,9 @@
+[Translation]
+File=QtopiaSettings
+Context=Which Qtopia?
+[Desktop Entry]
+Type=Application
+Exec=which-qtopia
+Icon=which-qtopia/whichqtopia
+Name[]=Which Qtopia?
+CanFastload=0

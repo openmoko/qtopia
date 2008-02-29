@@ -1,0 +1,83 @@
+exists($$QPEDIR/src/build/trace_on):message(packages.prf)
+# Package creation
+#
+# struct package {
+#     name       # eg. $name.ipk
+#     desc       # one line summary
+#     domain     # SXE security domains
+#     deps       # packages that this ipk depends on
+#     multi      # additional projects that should be included in this package
+#     version    # package version
+#     license    # package license
+#     maintainer # package maintainer
+#     targets    # targets to run (ie. install stuff)
+# }
+
+# FIXME document how to set the default license and maintainer
+isEmpty(DEFAULT_LICENSE) {
+    free_package:DEFAULT_LICENSE=GPL
+    else:DEFAULT_LICENSE=Unspecified
+}
+isEmpty(DEFAULT_MAINTAINER) {
+    depotProject:qtopia_depot:DEFAULT_MAINTAINER=Trolltech (www.trolltech.com)
+    else:DEFAULT_MAINTAINER=Unspecified
+}
+isEmpty(DEFAULT_VERSION) {
+    !isEmpty(VERSION):DEFAULT_VERSION=$$VERSION
+    else:DEFAULT_VERSION=1.0.0-1
+}
+
+# pkg is the "default" package
+!no_pkg {
+    PACKAGES+=pkg
+    # Some defaults for the "default" package
+    isEmpty(pkg.deps):pkg.deps=$$QTOPIA_DEPENDS
+    for(i,INSTALLS) {
+        pkg.targets+=install_$$i
+    }
+    pkg.targets-=install_register_domain
+}
+
+for(_p,PACKAGES) {
+    # Load everything into a local structure
+    PARTS=name desc domain deps multi version trust license maintainer targets
+    for(part,PARTS) {
+        eval(p.$${part}=\$$eval(\$${_p}.$${part}))
+    }
+
+    # Default values
+    isEmpty(p.name):p.name=qpe-$$ORIG_TARGET
+    isEmpty(p.desc):p.desc=No description written for this package
+    isEmpty(p.domain):p.domain=none
+    isEmpty(p.version):p.version=$$DEFAULT_VERSION
+    isEmpty(p.trust):p.trust=Untrusted
+    isEmpty(p.license):p.license=$$DEFAULT_LICENSE
+    isEmpty(p.maintainer):p.maintainer=$$DEFAULT_MAINTAINER
+
+    WORKING_PATH=$$OUT_PWD/.package_$$p.name
+    commands=$$COMMAND_HEADER\
+        $$QPEDIR/bin/mkpkg\
+            $$LITERAL_QUOTE$$MAKE$$LITERAL_QUOTE\
+            $$LITERAL_QUOTE$(FORMAT)$$LITERAL_QUOTE\
+            $$LITERAL_QUOTE$$WORKING_PATH$$LITERAL_QUOTE\
+            $$LITERAL_QUOTE$$arch$$LITERAL_QUOTE\
+            $$LITERAL_QUOTE$$PROJECT_ROOT$$LITERAL_QUOTE\
+            $$LITERAL_QUOTE$$LANGUAGES$$LITERAL_QUOTE\
+            $$LITERAL_QUOTE$$PKG_PATH$$LITERAL_QUOTE\
+            $$LITERAL_QUOTE$$SRCDIR$$LITERAL_QUOTE\
+            $$LITERAL_QUOTE$$OUT_PWD$$LITERAL_QUOTE\
+            $$LITERAL_QUOTE$$p.name$$LITERAL_QUOTE\
+            $$LITERAL_QUOTE$$p.desc$$LITERAL_QUOTE\
+            $$LITERAL_QUOTE$$p.domain$$LITERAL_QUOTE\
+            $$LITERAL_QUOTE$$p.deps$$LITERAL_QUOTE\
+            $$LITERAL_QUOTE$$p.multi$$LITERAL_QUOTE\
+            $$LITERAL_QUOTE$$p.version$$LITERAL_QUOTE\
+            $$LITERAL_QUOTE$$p.trust$$LITERAL_QUOTE\
+            $$LITERAL_QUOTE$$p.license$$LITERAL_QUOTE\
+            $$LITERAL_QUOTE$$p.maintainer$$LITERAL_QUOTE\
+            $$LITERAL_QUOTE$$p.targets$$LITERAL_QUOTE
+    eval(package_$${p.name}.commands=\$$commands)
+    QMAKE_EXTRA_TARGETS+=package_$$p.name
+    packages.depends+=package_$$p.name
+}
+

@@ -1,12 +1,19 @@
-<qt title="Alarm Clock">
-<h3>Alarm Clock</h3>
-%%PHONE%%
-<p>Press <img src="contextbar/options.png"> to switch to clock or alarm mode.</p>
-@@PHONE@@
+<html>
+<head><title>Alarm Clock</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h2>Alarm Clock</h2>
+<!--#else -->
+   <h3>Alarm Clock</h3>
+<!--#endif-->
+<!--#if expr="$PHONESTYLE"-->
+<p>Press <img src=":icon/options"> </img> to switch to clock or alarm mode.</p>
+<!--#endif-->
 <p><b>To set the alarm:</b></p>
 <ul>
 <li>Check the <b>Enabled</b> box to enable the daily alarm.</li>
 <li>Set the time the alarm is to be activated.</li>
 <li>Select the days of the week on which the alarm is to be activated.</li>
 </ul>
-</qt>
+</body>
+</html>

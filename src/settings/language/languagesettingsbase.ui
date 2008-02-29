@@ -1,57 +1,53 @@
-<!DOCTYPE UI><UI>
-<class>LanguageSettingsBase</class>
-<widget>
-    <class>QDialog</class>
-    <property stdset="1">
-        <name>name</name>
-        <cstring>LanguageSettingsBase</cstring>
-    </property>
-    <property stdset="1">
-        <name>geometry</name>
-        <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>276</width>
-            <height>269</height>
-        </rect>
-    </property>
-    <property stdset="1">
-        <name>caption</name>
-        <string>Language</string>
-    </property>
-    <property>
-        <name>layoutMargin</name>
-    </property>
-    <property>
-        <name>layoutSpacing</name>
-    </property>
-    <vbox>
-        <property stdset="1">
-            <name>margin</name>
-            <number>2</number>
-        </property>
-        <property stdset="1">
-            <name>spacing</name>
-            <number>2</number>
-        </property>
-        <widget>
-            <class>QLabel</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>TextLabel1</cstring>
-            </property>
-            <property stdset="1">
-                <name>text</name>
-                <string>Select language</string>
-            </property>
-        </widget>
-        <widget>
-            <class>QListBox</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>languages</cstring>
-            </property>
-        </widget>
-    </vbox>
-</widget>
-</UI>
+<ui version="4.0" >
+ <author></author>
+ <comment></comment>
+ <exportmacro></exportmacro>
+ <class>LanguageSettingsBase</class>
+ <widget class="QDialog" name="LanguageSettingsBase" >
+  <property name="objectName" >
+   <string notr="true" >LanguageSettingsBase</string>
+  </property>
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Language</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <property name="objectName" >
+    <string notr="true" />
+   </property>
+   <property name="margin" >
+    <number>2</number>
+   </property>
+   <property name="spacing" >
+    <number>2</number>
+   </property>
+   <item>
+    <widget class="QLabel" name="TextLabel1" >
+     <property name="objectName" >
+      <string notr="true" >TextLabel1</string>
+     </property>
+     <property name="geometry" >
+      <rect>
+       <x>2</x>
+       <y>2</y>
+       <width>396</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text" >
+      <string>Select language</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <pixmapfunction></pixmapfunction>
+ <connections/>
+</ui>

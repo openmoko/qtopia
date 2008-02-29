@@ -1,0 +1,32 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>SXE - Display Security</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">SXE - Display Security<br /><small></small></h1>
+<p>If a package does not specify either the <b>graphics</b> Profile, it will be denied file level access to the /dev/fb0 framebuffer device.</p>
+<p>Qtopia applications use a region of shared memory and QWSCommands to access the windowing system. If a packages requests the X11 profile it is allowed access to both windowing system commands and the shared memory region, but does not get access to /dev/fb0</p>
+<p>Modifications to the QWS display system are required to ensure that applications apart from the server cannot overwrite the task bar section at the bottom of the display on the PDA; or the status bar section at the top of the display on the phone.</p>
+<p>Note that the shared memory region can only be protected by Unix user and group permissions, not by the MAC kernel. Because of this if untrusted programs are running as root it is not possible to protect the QWS display. Historically there have been some Qtopia devices on which all processes have all run as root.</p>
+<p>With that proviso, by doing some modifications to the QWS display system, applications could be prevented from drawing to the entire screen.</p>
+<p>If an application will use the full screen of the device so that the clock, battery indicator and task bar for example are not visible, then those features are not available to the user. It also may be possible to spoof the display of other applications. It is not feasible to stop a program with the <i>graphics</i> profile doing this.</p>
+<p>A program which is being launched to use the whole screen possibly with OpenGL ES acceleration will be preceded with a Qtopia generated launch screen advertising the Safe Execution Environment, and declaring the name of the launched program.</p>
+<p>If an application takes over the whole screen, it can be killed by holding down the &quot;hangup&quot; button, or equivalent. See the Process Monitor section.</p>
+<a name="interaction-with-qtopia-desktop"></a>
+<h2>Interaction with Qtopia Desktop</h2>
+<p>Packages may be browsed for via Qtopia Desktop, and then the package can be transferred to the device for installation. The installer must run on the device. Initially this may require a two step process, in later versions functionality will be added to allow Qtopia Desktop to initiate the devices package installer remotely.</p>
+<p>Packages could also be downloaded by Qtopia Desktop and then transferred to the device via a CF Card. Again the devices installed would need to be launched as a separate action.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

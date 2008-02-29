@@ -1,140 +1,194 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
-#ifndef HELPWINDOW_H
-#define HELPWINDOW_H
+#ifndef HELPBROWSER_H
+#define HELPBROWSER_H
 
-#include <qtopia/contextmenu.h>
+#include "bookmark.h"
 
-#include <qmainwindow.h>
-#include <qtextbrowser.h>
-#include <qvaluestack.h>
-#include <qpopupmenu.h>
-#include <qaction.h>
-#include <qtimer.h>
-#include <qlabel.h>
+#ifdef QTOPIA_PHONE
+# include <qtopia/qsoftmenubar.h>
+#endif
+#include <qtopiaabstractservice.h>
+
+#include <QMainWindow>
+#include <QTextBrowser>
+#include <QStack>
+#include <QUrl>
+#include "navigationbar_p.h"
+
+class QAction;
+class QLabel;
+class BookmarksUI;
+//class Bookmark;
+
+// PagePlaceInfo retains information about a URL page prior to leaving it. This information
+// includes its filename and the vertical scrollbar location. Although this struct is not
+// part of the public API, a complete declaration is required here, since it is used as the
+// content of generic lists.
+struct PagePlaceInfo
+{
+    PagePlaceInfo() {} // Required for generic lists
+    PagePlaceInfo(const QString &_name,const QString &_title,int _vPlace) : name(_name), title(_title), vPlace(_vPlace) {}
+
+    // The filename of the URL.
+    QString name;
+    // The document title.
+    QString title;
+    // The location of the vertical scrollbar when the page was last seen.
+    int vPlace;
+};
 
 class MagicTextBrowser : public QTextBrowser {
     Q_OBJECT
 public:
     MagicTextBrowser( QWidget* parent );
-    
+
     // Clear page source and history
     void clear();
-    
+
     // Return page source
     QString source() { return current; }
-    
+
+    // Returns the current documents title.
+    QString title() { return documentTitle(); }
+
     // Set page source
-    void setSource( const QString& );
-    
+    void setSource( const QUrl& );
+
+    // Checks the history, and emits the signals hasBack(bool) and hasForward(bool) appropriately.
+    // This is useful to call when initialising widgets that rely on these signals.
+    void emitStatus();
+
+    virtual QVariant loadResource (int type, const QUrl &name);
+
 signals:
     // Back status changed
     void hasBack( bool );
-    
+
     // Forward status changed
     void hasForward( bool );
-    
+
+    // When the current document changes, the pointer in the history queue changes, and this signal
+    // is emitted, supplying the titles of the changed documents on either side of the current document.
+    // If either document is not available, an empty string is supplied. This signal should be emitted
+    // at the same time as either hasBack(bool) and hasForward(bool).
+    void historyChanged(const QString &previous,const QString &next);
+
 public slots:
     // Go to previous page in history
     void backward();
-    
+
     // Go to next page in history
     void forward();
-    
+
 private:
     // Display source and set as current
     void setCurrent( const QString& file );
 
     // Replace qtopia tags with help page links
     bool magic( const QString&, const QString&, const QString& );
-    
-    // Generate help page links 
+
+    // Generate help page links
     QString generate( const QString& );
-    
+
+    // Determines the current state of the history, and emits a historyChanged() signal.
+    void emitHistoryChanged();
+
     QString current;
-    QValueStack< QString > backStack, forwardStack;
+    QStack< PagePlaceInfo > backStack, forwardStack;
 };
 
 class HelpBrowser : public QMainWindow
 {
     Q_OBJECT
 public:
-    HelpBrowser( QWidget* parent = 0, const char *name = 0, WFlags f = 0 );
-    
+    HelpBrowser( QWidget* parent=0, Qt::WFlags f=0 );
+
+    virtual ~HelpBrowser();
+
 #ifdef QTOPIA_PHONE
     bool eventFilter( QObject*, QEvent* );
 #endif
 
 public slots:
     void setDocument( const QString &doc );
-    
+
+    void bookmarkSelected(Bookmark);
+
 private slots:
-    void appMessage( const QCString& msg, const QByteArray& data );
-    
     void goHome();
-    
+
+    void bookmarks();
+
+    void addBookmark();
+
     void textChanged();
-    
-    // Only Qtopia Phone
-    void setBackDisabled();
-    
-    // Only Qtopia Phone
-    void setBack( bool );
+
+    void forward();
+
+    void backward();
 
 protected:
     void closeEvent( QCloseEvent* );
-    
+
 private:
     void init();
-    
-#ifdef QTOPIA_PHONE
-    void close();
-#endif
-    
+
+    BookmarksUI *getBookmarksUI();
+
     MagicTextBrowser *browser;
     QAction *backAction, *forwardAction;
 #ifdef DEBUG
     QLabel *location;
 #endif
+    NavigationBar *navigationBar;
+
+
+    // The UI for displaying and selecting bookmarks. Created lazily. This data member
+    // should never be referenced directly, but should be fetched via getBookmarksUI().
+    BookmarksUI *bookmarksUI;
 
 #ifdef QTOPIA_PHONE
-    ContextMenu *contextMenu;
-    QTimer *closeTimer;
-    bool pressed, closeOk;
+    QMenu *contextMenu;
 #endif
 };
 
-#endif
+class HelpService : public QtopiaAbstractService
+{
+    Q_OBJECT
+    friend class HelpBrowser;
+private:
+    HelpService( HelpBrowser *parent )
+        : QtopiaAbstractService( "Help", parent )
+        { this->parent = parent; publishAll(); }
+
+public:
+    ~HelpService();
+
+public slots:
+    void setDocument( const QString& doc );
+
+private:
+    HelpBrowser *parent;
+};
+
+#endif // HELPBROWSER_H

@@ -1,0 +1,5 @@
+[Translation]
+File=QtopiaServices
+Context=Service:Name
+[Service]
+Actions="activate(QContentId);activate(QContentId;QDrmRights::Permission,QString);reactivate(QContentId,QDrmRights::Permission);handleXmlRightsObject(QDSActionRequest);handleWbxmlRightsObject(QDSActionRequest);handleRoapTrigger(QDSActionRequest);handleRoapPdu(QDSActionRequest);convertMessage(QDSActionRequest);handleProtectedRightsObject(QDSActionRequest);handleWbXmlRightsObject(QDSActionRequest);handleProtectedRightsObject(QString);dcfReceived(QString);enableSilentRoap(bool);enableTransactionTracking(bool)"

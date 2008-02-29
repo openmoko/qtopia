@@ -1,0 +1,38 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>SXE - Package Trusts</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">SXE - Package Trusts<br /><small></small></h1>
+<a name="introduction"></a>
+<h2>Introduction</h2>
+<p>Some binaries, such as text-codecs and style plug-ins, are loaded by the server and generally implemented as dynamic libraries. When the server passes control to the library by making an API call, the libraries code has complete access to the server's process space, and runs with its privileges.</p>
+<p>Unlike distributed objects connected into a system via for example an ORB or a system like DCOM, the construct of a divide over the plug-in API is simply a programming convention - the malicious or flawed plug-in can index into the in-memory image of the server and read or alter its data.</p>
+<p>For this reason only packages determined as trusted by the PKI framework of the SXE are given status that allows them to be loaded by the server. It is not possible to sandbox an application that is running the same process as the server.</p>
+<p>It is the job of the PKI framework to allow establishing trust in a package for this purpose. The Qtopia development office maintains a Certificate Authority (CA) certificate able to sign other certificates. These other certificates can then be issued to clients and 2nd-parties needing to create trusted packages. The Qtopia development office also signs its own packages.</p>
+<p>Other frameworks for 3rd-party applications provide a package trust feature which forms a principal plank of the security promised by the framework. This is a sub-optimal approach because:</p>
+<ul>
+<li>it assumes most of the 3rd-party applications are signed</li>
+<li>the large scale PKI framework requires features such as Certificate Revocation Lists (CRL) to be effective</li>
+<li>the certificate invites the end-user to trust the application, on the basis its author is trusted by the certificate issuer</li>
+<li>to actually trust a 3rd-party author either a firm business relationship must exist, or extensive auditing of the 3rd-party must take place. This is not possible with a large PKI framework.</li>
+<li>if the 3rd-party application does contain flawed or malicious code the PKI framework simply allows the end-user to know with certainty whose software it was that compromised their device.</li>
+</ul>
+<p>Therefore, for the SXE the PKI are small and few certificates are issued ensuring that CRL will not be required.</p>
+<p>The PKI framework is intended for software releases which form a part of Qtopia and released by us; and for close industry partners who might use it to release updates to the device software stack.</p>
+<p>It is not intended for a general end-to-end authentication framework for developers of games and other 3rd-party applications.</p>
+<p><b>Note:</b> Downloaded 3rd-party applications are generally untrusted.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

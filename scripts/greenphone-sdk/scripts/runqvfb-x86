@@ -1,0 +1,76 @@
+#!/bin/sh
+
+display=${QWS_DISPLAY:=:0}
+# Grab only the stuff after the last :
+display=${display##*:}
+
+if [ -e /tmp/.qtvfb_keyboard-$display ]; then
+    echo "QVfb $display is already running!"
+    echo "Please close it and remove /tmp/.qtvfb_*-$display"
+    exit 1;
+fi
+if [ -e /tmp/qtembedded-$LOGNAME/QtEmbedded-$display ]; then
+    echo "QVfb $display is already running!"
+    echo "Please close it and remove /tmp/qtembedded-$LOGNAME"
+    exit 1;
+fi
+
+if [ -z "$QPEDIR" -a -d $PWD/qtopiacore/host/tools/qvfb ];then
+    QPEDIR=$PWD
+fi
+
+if [ -d $QPEDIR/qtopiacore/host/tools/qvfb ]; then
+    cd $QPEDIR/qtopiacore/host/tools/qvfb
+elif [ -d $DQTDIR/tools/qvfb ]; then
+    cd $DQTDIR/tools/qvfb
+else
+    if which qvfb >/dev/null 2>&1; then
+	cd $(dirname $(which qvfb))
+    else
+	echo "Cannot find QVfb!"
+	exit 1
+    fi
+fi
+verbose=0
+while getopts "v" opt; do
+    case $opt in
+        v)
+            verbose=1
+            ;;
+    esac
+done
+#srcdir=$(dirname $(awk '/^# Project:/{print $3}' Makefile) 2>/dev/null)
+#if [ -z "$srcdir" ]; then
+    qvfb=./qvfb
+#else
+#    qvfb=$(/bin/pwd)/qvfb
+#    if [ "$verbose" = 1 ]; then
+#        echo "Running from $srcdir"
+#    fi
+#    cd $srcdir
+#fi
+shift $(expr $OPTIND - 1)
+args=
+skins="$QVFB_SKIN Trolltech-Keypad Trolltech-Touchscreen"
+if [ -f $1.skin -o -d $1.skin ]; then
+    skins="$1 Trolltech-$1 $skins"
+    shift
+fi
+for skin in $skins
+do
+    if [ -f $skin.skin -o -d $skin.skin ]; then
+        args="-skin ${skin}.skin"
+        break
+    fi
+done
+#if [ ! -x "$qvfb" ]; then
+    qvfb=$QPEDIR/qtopiacore/host/bin/qvfb
+#fi
+export LD_LIBRARY_PATH=$QPEDIR/qtopicore/host/lib
+if [ "$verbose" = 1 ]; then
+    echo $qvfb -qwsdisplay :$display $args
+    $qvfb -qwsdisplay :$display $args "$@"
+else
+    $qvfb -qwsdisplay :$display $args "$@" >/dev/null 2>&1 &
+fi
+

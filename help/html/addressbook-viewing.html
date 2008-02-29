@@ -1,25 +1,32 @@
-<qt title="Viewing Contacts">
-<h3>Viewing Contacts</h3>
+<html>
+<head><title>Viewing Contacts</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h2>Viewing Contacts</h2>
+<!--#else -->
+   <h3>Viewing Contacts</h3>
+<!--#endif -->
 <p>
-%%PDA%% %%TOUCH%%
-Select the contact you want to view by 
-@@PDA@@ @@TOUCH@@
-%%TOUCH%%
-pressing on 
-@@TOUCH@@
-%%PDA%%
-tapping 
-@@PDA@@
-%%PDA%% %%TOUCH%%
-it in the list. 
-@@PDA@@ @@TOUCH@@
-%%KEYPAD%%
-Highlight the contact you want to view in the list and press <img src="contextbar/view.png">. 
-@@KEYPAD@@
+<!--#if expr="$PDASTYLE || $TOUCH"-->
+Select the contact you want to view by
+<!--#endif-->
+<!--#if expr="$TOUCH"-->
+pressing on
+<!--#endif-->
+<!--#if expr="$PDASTYLE"-->
+tapping
+<!--#endif-->
+<!--#if expr="$PDASTYLE || $TOUCH"-->
+it in the list.
+<!--#endif-->
+<!--#if expr="$KEYPAD"-->
+Highlight the contact you want to view in the list and press <img src=":icon/view">.
+<!--#endif-->
 This displays the detailed record.</p>
-<p>Use the menu 
-%%PDA%%
-or the toolbar 
-@@PDA@@
+<p>Use the menu
+<!--#if expr="$PDASTYLE"-->
+or the toolbar
+<!--#endif-->
 to edit or delete the contact, or access other options.</p>
-</qt>
+</body>
+</html>

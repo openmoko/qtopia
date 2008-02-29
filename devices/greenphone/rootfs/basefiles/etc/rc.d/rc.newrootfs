@@ -1,0 +1,52 @@
+#!/bin/sh
+
+if [ -e /.newrootflashed ]; then
+  QTOPIA_IMAGE_PATH=/
+
+  if [ ! -f /mnt/user/fs.ver ] || grep -v '^troll' /mnt/user/fs.ver; then
+    echo "TROLL: Recreating /mnt/user"
+    umount /mnt/user
+    /sbin/mkfs.ext2 /dev/tffsc
+    mount /mnt/user
+    echo "troll v1.0" > /mnt/user/fs.ver
+
+    echo "TROLL: Recreating /mnt/user_local"
+    umount /mnt/user_local
+    /sbin/mkdosfs -F 32 /dev/tffsd
+    mount /mnt/user_local
+  fi
+
+  if [ -r $QTOPIA_IMAGE_PATH/user_default.tgz ]; then
+    echo "TROLL: Extracting user_default.tgz"
+    tar -xzf $QTOPIA_IMAGE_PATH/user_default.tgz -C /mnt/user
+  fi
+  if [ -r $QTOPIA_IMAGE_PATH/user_tools.tgz ]; then
+    echo "TROLL: Extracting user_tools.tgz"
+    rm -rf /mnt/user/tools
+    tar -xzf $QTOPIA_IMAGE_PATH/user_tools.tgz -C /mnt/user
+  fi
+  if [ -r $QTOPIA_IMAGE_PATH/home_default.tgz ] && [ ! -d /mnt/user/home ]; then
+    echo "TROLL: Extracting home_default.tgz"
+    tar -xzf $QTOPIA_IMAGE_PATH/home_default.tgz -C /mnt/user
+  fi
+
+  echo "TROLL: Recreating writeable Qtopia filesystem"
+  umount /mnt/disk2
+  /sbin/mkfs.ext2 /dev/tffsb
+  mount /mnt/disk2
+  echo "troll v1.0" > /mnt/disk2/fs.ver
+
+  tar -xzf $QTOPIA_IMAGE_PATH/qtopia_default.tgz -C /mnt/disk2
+
+  mount -o remount,rw,async,noatime /
+  rm -f /.newrootflashed
+  mount -o remount,ro /
+
+  sync
+
+  umount /mnt/disk2
+  umount /mnt/user
+  umount /mnt/user_local
+  reboot
+fi
+

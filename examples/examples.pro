@@ -1,7 +1,9 @@
-# To build the examples, run configure -build $QPEDIR/examples
-TEMPLATE	= subdirs
-CONFIG		+= ordered
+qtopia_project(subdirs)
 
-SUBDIRS		= application
-!QTOPIA_PHONE:SUBDIRS+=inputmethod
+SUBDIRS+=\
+    application
+
+!phone:SUBDIRS+=\
+    inputmethod/composing\
+    inputmethod/popup
 

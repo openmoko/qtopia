@@ -1,36 +1,43 @@
-<qt title="Documents Help">
-<h3>Documents Help</h3>
-<p>Documents such as video and audio clips,
-notes, pictures and voice notes
+<html>
+<head><title>Documents Help</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h1>Documents </h1>
+<!--#else -->
+   <h3>Documents Help</h3>
+<!--#endif -->
+<p>Documents such as Video and Audio clips,
+Notes, Pictures and Voice Notes
 can be created and/or viewed with various applications installed on your
 <i>Qtopia</i> device.</p>
-%%PHONE%%
+<!--#if expr="$PHONESTYLE"-->
 <p><b>To view your documents:</b></p>
 <ul>
-<li>Use <img src="help/dpad"> to focus on press <img src="qpe/DocsIcon_16.png"> and press <img src="contextbar/select.png"> to launch <b>Documents</b>.</li>
+<li>Use <img src=":image/help/dpad"> </img> to focus on <img src=":icon/qpe/DocsIcon"> </img> and press <img src=":icon/select"> </img> to launch <b>Documents</b>.</li>
 </ul>
 <p><b>To open a document with the application used to create it:</b></p>
 <ul>
-<li>Use <img src="help/dpad"> to and <img src="contextbar/select.png"> to select the document.</li>
+<li>Use <img src=":image/help/dpad"> </img> to and <img src=":icon/select"> </img> to select the document.</li>
 </ul>
-@@PHONE@@
-%%PDA%%
+<!--#endif-->
+<!--#if expr="$PDASTYLE"-->
 <p><b>To view your documents:</b></p>
 <ul>
-<li>Tap the <img src="qpe/DocsIcon.png" width="16" height="16"> tab at the top of the screen.</li>
+<li>Tap the <img src=":icon/qpe/DocsIcon" width="16" height="16"> </img> tab at the top of the screen.</li>
 </ul>
 <p><b>To open a document with the application used to create it:</b></p>
 <ul>
 <li>Tap the document to open.</li>
 </ul>
-@@PDA@@
+<!--#endif-->
 <h3>Other Functions</h3>
 <ul>
 <li><a href="qpe-document-properties.html">Changing Properties</a></li>
 <li><a href="documents-type.html">Show Documents by Type</a></li>
 <li><a href="documents-category.html">Show Documents by Category</a></li>
-%%PDA%%
+<!--#if expr="$PDASTYLE"-->
 <li><a href="backuprestore.html">Back-ups</a></li>
-@@PDA@@
+<!--#endif-->
 </ul>
-</qt>
+</body>
+</html>

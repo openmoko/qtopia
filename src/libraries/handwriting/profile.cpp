@@ -1,54 +1,43 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
-#define QTOPIA_INTERNAL_LOADTRANSLATIONS
 #include "combining.h"
 #include "profile.h"
 
-#include <qfileinfo.h>
-#include <qtopia/qpeapplication.h>
-#include <qtopia/config.h>
-#include <qtopia/global.h>
+#include <QFileInfo>
+#include <QDebug>
+#include <qtopiaapplication.h>
+#include <qtranslatablesettings.h>
 
 
 QIMPenProfile::QIMPenProfile( const QString &fn )
     : filename( fn )
 {
-    sets.setAutoDelete( true );
-
+    // sets.setAutoDelete( true );
     load();
+}
+
+QIMPenProfile::~QIMPenProfile()
+{
+    while ( sets.count() ) delete sets.takeLast();
 }
 
 void QIMPenProfile::load()
@@ -56,82 +45,84 @@ void QIMPenProfile::load()
 #ifndef QT_NO_TRANSLATION
     static int translation_installed = 0;
     if (!translation_installed) {
-        QPEApplication::loadTranslations("libqmstroke");
+        QtopiaApplication::loadTranslations("libqmstroke");
         translation_installed++;
     }
 #endif
-    
-    Config config( filename, Config::File );
-    config.setGroup( "Handwriting" );
 
-    pname = config.readEntry( "Name" );
-    pdesc = config.readEntry( "Description" );
+    QTranslatableSettings config(filename, QSettings::IniFormat);
+    config.beginGroup( "Handwriting" );
 
-    tstyle = config.readBoolEntry( "CanSelectStyle", false );
-    istyle = config.readBoolEntry( "CanIgnoreStroke", false );
+    pname = config.value( "Name" ).toString();
+    pdesc = config.value( "Description" ).toString();
 
-    wordMatch = config.readBoolEntry( "MatchWords", true );
+    tstyle = config.value( "CanSelectStyle", false ).toBool();
+    istyle = config.value( "CanIgnoreStroke", false ).toBool();
 
-    config.setGroup( "Settings" );
+    wordMatch = config.value( "MatchWords", true ).toBool();
+
+    config.endGroup();
+
+    config.beginGroup( "Settings" );
 
     pstyle = BothCases;
-    QString s = config.readEntry( "Style", "BothCases" );
+    QString s = config.value( "Style", "BothCases" ).toString();
     if ( s == "ToggleCases" )
-	pstyle = ToggleCases;
+        pstyle = ToggleCases;
 
-    msTimeout = config.readNumEntry( "MultiTimeout", 500 );
-    isTimeout = config.readNumEntry( "IgnoreTimeout", 200 );
+    msTimeout = config.value( "MultiTimeout", 500 ).toInt();
+    isTimeout = config.value( "IgnoreTimeout", 200 ).toInt();
 
     // Read user configuration
-    Config usrConfig( userConfig() );
-    usrConfig.setGroup( "Settings" );
-    msTimeout = usrConfig.readNumEntry( "MultiTimeout", msTimeout );
+    QSettings usrConfig("Trolltech",userConfig());
+    usrConfig.beginGroup( "Settings" );
+    msTimeout = usrConfig.value( "MultiTimeout", msTimeout ).toInt();
 
-    if ( tstyle && usrConfig.hasKey( "Style" ) ) {
-	pstyle = BothCases;
-	QString s = usrConfig.readEntry( "Style", "BothCases" );
-	if ( s == "ToggleCases" )
-	    pstyle = ToggleCases;
+    if ( tstyle && usrConfig.contains( "Style" ) ) {
+        pstyle = BothCases;
+        QString s = usrConfig.value( "Style", "BothCases" ).toString();
+        if ( s == "ToggleCases" )
+            pstyle = ToggleCases;
     }
-    if ( istyle && usrConfig.hasKey( "IgnoreTimeout" ) ) {
-	isTimeout = usrConfig.readNumEntry( "IgnoreTimeout", isTimeout );
+    if ( istyle && usrConfig.contains( "IgnoreTimeout" ) ) {
+        isTimeout = usrConfig.value( "IgnoreTimeout", isTimeout ).toInt();
     }
 }
 
 void QIMPenProfile::save() const
 {
-    Config usrConfig( userConfig() );
-    usrConfig.setGroup("Settings");
-    usrConfig.writeEntry("MultiTimeout", msTimeout);
+    QSettings usrConfig("Trolltech",userConfig());
+    usrConfig.beginGroup("Settings");
+    usrConfig.setValue("MultiTimeout", msTimeout);
 
     if (tstyle)
-	usrConfig.writeEntry("Style", pstyle == BothCases ? "BothCases" : "ToggleCases" );
+        usrConfig.setValue("Style", pstyle == BothCases ? "BothCases" : "ToggleCases" );
     if (istyle)
-	usrConfig.writeEntry("IgnoreTimeout", isTimeout);
+        usrConfig.setValue("IgnoreTimeout", isTimeout);
 
     // each set knows if its modified.
     if (!sets.isEmpty())
-	saveData();
+        saveData();
 }
 
 void QIMPenProfile::setStyle( Style s )
 {
     if ( tstyle && s != pstyle ) {
-	pstyle = s;
+        pstyle = s;
     }
 }
 
 void QIMPenProfile::setMultiStrokeTimeout( int t )
 {
     if ( t != msTimeout ) {
-	msTimeout = t;
+        msTimeout = t;
     }
 }
 
 void QIMPenProfile::setIgnoreStrokeTimeout( int t )
 {
     if ( t != isTimeout ) {
-	isTimeout = t;
+        isTimeout = t;
     }
 }
 
@@ -146,139 +137,131 @@ QString QIMPenProfile::userConfig() const
     return "handwriting-" + identifier();
 }
 
-static const char* untranslatedProfileNames[] = {
-    QT_TRANSLATE_NOOP( "QIMPenProfile", "Upper case" ),
-    QT_TRANSLATE_NOOP( "QIMPenProfile", "Lower case" ),
-    QT_TRANSLATE_NOOP( "QIMPenProfile", "Numeric" ),
-    QT_TRANSLATE_NOOP( "QIMPenProfile", "Punctuation" ),
-    QT_TRANSLATE_NOOP( "QIMPenProfile", "Symbol" ),
-    QT_TRANSLATE_NOOP( "QIMPenProfile", "Shortcut" )
-};
-
 void QIMPenProfile::loadData()
 {
-    Config config( filename, Config::File );
-    config.setGroup( "CharSets" );
+    QSettings config(filename, QSettings::IniFormat);
+    config.beginGroup( "CharSets" );
 
     // accents
     QIMPenCombining *combining = 0;
-    QString s = config.readEntry( "Combining" );
+    QString s = config.value( "Combining" ).toString();
     if ( !s.isEmpty() ) {
-	combining = new QIMPenCombining( s );
-	if ( combining->isEmpty() ) {
-	    delete combining;
-	    combining = 0;
-	}
+        combining = new QIMPenCombining( s );
+        if ( combining->isEmpty() ) {
+            delete combining;
+            combining = 0;
+        }
     }
-    // uppercase latin1
+    // uppercase toLatin1
     QIMPenCharSet *cs = 0;
     ProfileSet *ps = 0;
-    s = config.readEntry( "Uppercase" );
+    s = config.value( "Uppercase" ).toString();
     if ( !s.isEmpty() ) {
-	cs = new QIMPenCharSet( s );
-	if ( !cs->isEmpty() ) {
-	    if ( combining )
-		combining->addCombined( cs );
-	    ps = new ProfileSet(cs);
-	    ps->id = "Uppercase"; // no tr
-	    sets.append( ps );
-	} else {
-	    delete cs;
-	}
+        cs = new QIMPenCharSet( s );
+        if ( !cs->isEmpty() ) {
+            if ( combining )
+                combining->addCombined( cs );
+            ps = new ProfileSet(cs);
+            ps->id = "Uppercase"; // no tr
+            sets.append( ps );
+        } else {
+            delete cs;
+        }
     }
-    // lowercase latin1
-    s = config.readEntry( "Lowercase" );
+    // lowercase toLatin1
+    s = config.value( "Lowercase" ).toString();
     if ( !s.isEmpty() ) {
-	cs = new QIMPenCharSet( s );
-	if ( !cs->isEmpty() ) {
-	    if ( combining )
-		combining->addCombined( cs );
-	    ps = new ProfileSet(cs);
-	    ps->id = "Lowercase"; // no tr
-	    sets.append( ps );
-	} else {
-	    delete cs;
-	}
+        cs = new QIMPenCharSet( s );
+        if ( !cs->isEmpty() ) {
+            if ( combining )
+                combining->addCombined( cs );
+            ps = new ProfileSet(cs);
+            ps->id = "Lowercase"; // no tr
+            sets.append( ps );
+        } else {
+            delete cs;
+        }
     }
     // numeric (may comtain punctuation and symbols)
-    s = config.readEntry( "Numeric" );
+    s = config.value( "Numeric" ).toString();
     if ( !s.isEmpty() ) {
-	cs = new QIMPenCharSet( s );
-	if ( !cs->isEmpty() ) {
-	    ps = new ProfileSet(cs);
-	    ps->id = "Numeric"; // no tr
-	    sets.append( ps );
-	} else {
-	    delete cs;
-	}
+        cs = new QIMPenCharSet( s );
+        if ( !cs->isEmpty() ) {
+            ps = new ProfileSet(cs);
+            ps->id = "Numeric"; // no tr
+            sets.append( ps );
+        } else {
+            delete cs;
+        }
     }
     // punctuation
-    s = config.readEntry( "Punctuation" );
+    s = config.value( "Punctuation" ).toString();
     if ( !s.isEmpty() ) {
-	cs = new QIMPenCharSet( s );
-	if ( !cs->isEmpty() ) {
-	    ps = new ProfileSet(cs);
-	    ps->id = "Punctuation"; // no tr
-	    sets.append( ps );
-	} else {
-	    delete cs;
-	}
+        cs = new QIMPenCharSet( s );
+        if ( !cs->isEmpty() ) {
+            ps = new ProfileSet(cs);
+            ps->id = "Punctuation"; // no tr
+            sets.append( ps );
+        } else {
+            delete cs;
+        }
     }
     // symbol
-    s = config.readEntry( "Symbol" );
+    s = config.value( "Symbol" ).toString();
     if ( !s.isEmpty() ) {
-	cs = new QIMPenCharSet( s );
-	if ( !cs->isEmpty() ) {
-	    ps = new ProfileSet(cs);
-	    ps->id = "Symbol"; // no tr
-	    sets.append( ps );
-	} else {
-	    delete cs;
-	}
+        cs = new QIMPenCharSet( s );
+        if ( !cs->isEmpty() ) {
+            ps = new ProfileSet(cs);
+            ps->id = "Symbol"; // no tr
+            sets.append( ps );
+        } else {
+            delete cs;
+        }
     }
     // shortcut
-    s = config.readEntry( "Shortcut" );
+    s = config.value( "Shortcut" ).toString();
     if ( !s.isEmpty() ) {
-	cs = new QIMPenCharSet( s );
-	if ( !cs->isEmpty() ) {
-	    ps = new ProfileSet(cs);
-	    ps->id = "Shortcut"; // no tr
-	    sets.append( ps );
-	} else {
-	    delete cs;
-	}
+        cs = new QIMPenCharSet( s );
+        if ( !cs->isEmpty() ) {
+            ps = new ProfileSet(cs);
+            ps->id = "Shortcut"; // no tr
+            sets.append( ps );
+        } else {
+            delete cs;
+        }
     }
     // now read sets that are specified in list variable.
 
-    config.setGroup( "Handwriting" );
-    QStringList customSets = config.readListEntry("customSets", ',');
+    config.endGroup();
+    config.beginGroup( "Handwriting" );
+    QStringList customSets = config.value("customSets").toStringList();
     QStringList::Iterator it;
     for ( it = customSets.begin(); it != customSets.end(); ++it ) {
-	QString id(*it);
-	config.setGroup(id);
-	//qDebug("loading custom set %s (%s : %s)", id.latin1(), config.readEntry("Title").latin1(), config.readEntry("Data").latin1());
-	cs = new QIMPenCharSet( config.readEntry("Data") );
-	if ( !cs->isEmpty() ) {
-	    if ( combining &&
-		(cs->type() & (QIMPenCharSet::Lower | QIMPenCharSet::Upper)) != 0)
-		combining->addCombined( cs );
-	    ps = new ProfileSet(cs);
-	    ps->id = id;
-	    sets.append( ps );
-	} else {
-	    delete cs;
-	}
+        QString id(*it);
+        config.endGroup();
+        config.beginGroup(id);
+        cs = new QIMPenCharSet( config.value("Data").toString() );
+        if ( !cs->isEmpty() ) {
+            if ( combining &&
+                (cs->type() & (QIMPenCharSet::Lower | QIMPenCharSet::Upper)) != 0)
+                combining->addCombined( cs );
+            ps = new ProfileSet(cs);
+            ps->id = id;
+            sets.append( ps );
+        } else {
+            delete cs;
+        }
     }
 
     if ( combining )
-	delete combining;
+        delete combining;
 }
 
 void QIMPenProfile::saveData() const
 {
-    ProfileSetListIterator it( sets );
-    for ( ; it.current(); ++it )
-	it.current()->set->save();
+    ProfileSetListConstIterator it = sets.begin();
+    for ( ; it != sets.end(); ++it )
+        (*it)->set->save();
 }
 
 /*!
@@ -287,11 +270,11 @@ void QIMPenProfile::saveData() const
 QIMPenCharSet *QIMPenProfile::charSet( const QString &id )
 {
     if ( sets.isEmpty() )
-	loadData();
-    ProfileSetListIterator it( sets );
-    for ( ; it.current(); ++it ) {
-	if (it.current()->id == id)
-	    return it.current()->set;
+        loadData();
+    ProfileSetListIterator it = sets.begin();
+    for ( ; it != sets.end(); ++it ) {
+        if ( (*it)->id == id)
+            return (*it)->set;
     }
     return 0;
 }
@@ -302,11 +285,11 @@ QIMPenCharSet *QIMPenProfile::charSet( const QString &id )
 QIMPenCharSet *QIMPenProfile::find( QIMPenCharSet::Type t )
 {
     if ( sets.isEmpty() )
-	loadData();
-    ProfileSetListIterator it( sets );
-    for ( ; it.current(); ++it ) {
-	if (it.current()->set->type() == t)
-	    return it.current()->set;
+        loadData();
+    ProfileSetListIterator it = sets.begin();
+    for ( ; it != sets.end(); ++it ) {
+        if ( (*it)->set->type() == t)
+            return (*it)->set;
     }
     return 0;
 }
@@ -317,17 +300,17 @@ QIMPenCharSet *QIMPenProfile::find( QIMPenCharSet::Type t )
 QString QIMPenProfile::title( const QString &id )
 {
     if ( sets.isEmpty() )
-	loadData();
-    Config config( filename, Config::File );
+        loadData();
+    QTranslatableSettings config(filename, QSettings::IniFormat);
 
     // Try from config file
-    config.setGroup( id );
-    if (config.hasKey("Title"))
-	return config.readEntry("Title", id);
+    config.beginGroup( id );
+    if (config.contains("Title"))
+        return config.value("Title", id).toString();
     // Try from Profile Translations
-    config.setGroup( "CharSets" );
-    if (config.hasKey(id) && qApp)
-	return qApp->translate("QIMPenProfile", id);
+    { config.endGroup(); config.beginGroup( "CharSets" ); };
+    if (config.contains(id) && qApp)
+        return qApp->translate("QIMPenProfile", id.toAscii());
     return id;
 }
 
@@ -337,14 +320,14 @@ QString QIMPenProfile::title( const QString &id )
 QString QIMPenProfile::description( const QString &id )
 {
     if ( sets.isEmpty() )
-	loadData();
-    Config config( filename, Config::File );
+        loadData();
+    QTranslatableSettings config(filename, QSettings::IniFormat);
 
     // Try from config file
-    config.setGroup( id );
-    if (config.hasKey("Description"))
-	return config.readEntry("Description", id);
-    return QString::null;
+    config.beginGroup( id );
+    if (config.contains("Description"))
+        return config.value("Description", id).toString();
+    return QString();
 }
 
 /*!
@@ -353,11 +336,11 @@ QString QIMPenProfile::description( const QString &id )
 QStringList QIMPenProfile::charSets()
 {
     if ( sets.isEmpty() )
-	loadData();
+        loadData();
     QStringList result;
-    ProfileSetListIterator it( sets );
-    for ( ; it.current(); ++it ) {
-	result.append(it.current()->id);
+    ProfileSetListIterator it = sets.begin();
+    for ( ; it != sets.end(); ++it ) {
+        result.append( (*it)->id);
     }
     return result;
 }

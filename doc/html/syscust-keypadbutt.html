@@ -1,0 +1,168 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Keypad Button Behavior</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Keypad Button Behavior<br /><small></small></h1>
+<a name="top"></a><ul><li><a href="#keypad-button-behavior">Keypad Button Behavior</a></li>
+<ul><li><a href="#user-definable-button-mappings">User Definable Button Mappings</a></li>
+<li><a href="#phone-launcher-menu">Phone Launcher Menu</a></li>
+<li><a href="#phone-buttons">Phone Buttons</a></li>
+<li><a href="#phone-softkey-definition">Phone SoftKey Definition</a></li>
+</ul>
+</ul>
+<a name="keypad-button-behavior"></a>
+<h2>Keypad Button Behavior</h2>
+<p>The configuration of hardware buttons for a device is defined by the <tt>etc/defaultbuttons-&lt;platform-spec&gt;.conf</tt> files.</p>
+<p>The file is divided into sections.</p>
+<p>See the existing files, especially the generic file, for guidance.</p>
+<a name="user-definable-button-mappings"></a>
+<h3>User Definable Button Mappings</h3>
+<p>Button Mappings are what maps the hard buttons on a device to application shortcuts in Qtopia. For example a calendar button that brings up todays schedule, or a button to beam your business card.</p>
+<p>The description of the buttons should be included in <tt>defaultbuttons.conf</tt> on the device, or <tt>defaultbuttons-&lt;platform&gt;.conf</tt> if in the build tree.</p>
+<p>An example of what this may look like:</p>
+<pre>    [Button]
+    Count=2
+    [Button0]
+    Name=Calendar Button
+    Key=F9
+    PressedActionService=Calendar
+    PressedActionMessage=raiseToday()
+    HeldActionService=Calendar
+    HeldActionMessage=raise()
+    [Button1]
+    Name=Contacts Button
+    Key=F10
+    PressedActionService=Contacts
+    PressedActionMessage=raise()
+    HeldActionService=Contacts
+    HeldActionMessage=beamBusinessCard()
+    [Button2]
+    Name=Multitasking Button
+    Key=Home
+    PressedActionMappable=0
+    PressedActionService=TaskManager
+    PressedActionMessage=multitask()
+    HeldActionMappable=0
+    HeldActionService=TaskManager
+    HeldActionMessage=showRunningTasks()</pre>
+<p>This example describes a device with three hardware buttons. One that opens the calendar application, one that opens the contacts application or beams the owners business card, and a third that is used for multitasking.</p>
+<pre>    [Button]
+    Count=3</pre>
+<p>This indicates that also in <tt>defaultbuttons.conf</tt> there are two groups, named <tt>Button0</tt> and <tt>Button1</tt>. Each group describes the button and its actions. For example starting from the line <tt>[Button0]</tt> to another group definition or the end of the file defines the first button mapping.</p>
+<pre>    Name[]=Calendar Button
+    ...
+    [Translation]
+    File=QtopiaDefaults
+    Context=Buttons</pre>
+<p>This describes the name of the button. Qtopia provides a Buttons application where the user can change the button mapping for shortcut buttons on their device. The Name of a button is how the button is described to them. The translation for the button's name can be found in <tt>$QPEDIR/i18n/&lt;your-lang&gt;/QtopiaDefaults.ts</tt>.</p>
+<p>Images can be provided for the buttons by placing them in <tt>pics/Button/</tt>. The name of the image should be the number of the button as described in <tt>defaultbuttons.conf</tt>. For this example, the image for the calendar button would be <tt>Button/0.png</tt>.</p>
+<pre>    Key=F9</pre>
+<p>This describes the Qt keycode the button maps to. These are the codes listed in <tt>qnamespace.h</tt> found in the Qt include directory.</p>
+<p>If your driver does not already map to the right keycode a custom driver may be required. Driver's can be added by deriving from the <a href="qwsmousehandler.html">QWSMouseHandler</a> and <a href="qmousedriverplugin.html">QMouseDriverPlugin</a> classes, or the <a href="qwskeyboardhandler.html">QWSKeyboardHandler</a> and <a href="qkbddriverplugin.html">QKbdDriverPlugin</a> classes, and using Qt's plugin mechanism. See the <a href="plugins-howto.html">How to Create Qt Plugins</a> documentation and the Plug &amp; Paint example for details.</p>
+<pre>    PressedActionService=Calendar
+    PressedActionMessage=raiseToday()
+    HeldActionService=Calendar
+    HeldActionMessage=raise()</pre>
+<p>These describe what occurs when a button is pressed or held. The Service is a Qtopia Service, described in <a href="services.html">Qtopia Application Services </a>. In this case the name of the services is calendar, and the action is raise(), or raiseToday(). Both the service and actions are already provided for the Qtopia calendar application. Only actions that take no parameters can be used.</p>
+<p>The &quot;Multitasking Button&quot; in the example uses:</p>
+<pre>    HeldActionMappable=0</pre>
+<p>To disable the user from changing the button's functionality. This could be important for certain usability or branding considerations.</p>
+<a name="phone-launcher-menu"></a>
+<h3>Phone Launcher Menu</h3>
+<p>The launcher menu on a phone is often a 3 by 4 grid, corresponding to the positioning of the keys 1 to 9, *, 0, and #.</p>
+<p>The format of the launcher menu section of the file is as follows:</p>
+<pre>    [Menu]
+    Rows=&lt;rows of icons&gt;
+    Columns=&lt;columns of icons&gt;
+    Map=&lt;one character for each icon, left to right, top to bottom&gt;
+    Default=&lt;character of initially focussed icon&gt;
+    &lt;character&gt;=&lt;desktop file or directory&gt;
+    ... for each character in Map.</pre>
+<p>An example of what this may look like in a real example is:</p>
+<pre>    [Menu]
+    Rows=3
+    Columns=3
+    Map=123456789
+    Default=5
+    1=
+    2=Applications/datebook.desktop
+    3=Games
+    4=
+    5=Applications/addressbook.desktop
+    6=Settings
+    7=
+    8=Applications
+    9=Documents</pre>
+<a name="phone-buttons"></a>
+<h3>Phone Buttons</h3>
+<p>The dialing and other buttons of a phone are configured by the <i>SystemButtons</i>, <i>TextButtons</i>, <i>PhoneTextButtons</i>, and <i>LocaleTextButtons</i> sections of the <tt>defaultbuttons.conf</tt> file.</p>
+<p>The format of the SystemButtons section of the file is as follows:</p>
+<pre>    [SystemButtons]
+    Count=n
+    Key0=Name of Qt key code, e.g. Menu, Select, Context1
+    ... for each system button on the device 0 to n</pre>
+<p>An example of what this may look like in a real example is:</p>
+<pre>    [SystemButtons]
+    Count=5
+    Key0=Menu
+    Key1=Select
+    Key2=Back
+    Key3=Call
+    Key4=Hangup</pre>
+<p>The <tt>TextButtons</tt> section defines all text and actions associated with each button. For example, the &quot;2&quot; key is associated with &quot;2&quot;, as well as the letters &quot;a&quot;, &quot;b&quot;, &quot;c&quot;, and all variants of those letters.</p>
+<p>The <tt>LocaleTextButtons</tt> section is like the <tt>TextButtons</tt> section, except it only defines the text associated with the current language. The texts in these sections are translated in the standard way for Config files.</p>
+<p>The <tt>PhoneTextButtons</tt> section defines all phone number text and actions associated with each button. For example, the &quot;*&quot; key might choose between any of the characters &quot;*&quot;, &quot;+&quot;, and &quot;p&quot; (for pause).</p>
+<p>The format of the <tt>TextButtons</tt>, <tt>PhoneTextButtons</tt>, and <tt>LocaleTextButtons</tt> sections of the file are similar, as follows:</p>
+<pre>    [TextButtons]
+    Buttons=0123456789*#
+    Tap0= ...
+    Hold0= ...
+    ...</pre>
+<p>For each button listed in <tt>Buttons</tt>, define:</p>
+<ul>
+<li>Tap<tt>X</tt> - the action to do when key <tt>X</tt> is pressed and released. This is either:<ul>
+<li><tt>'</tt> <i>text</i> - insert character from <i>text</i>.</li>
+<li><tt>&quot;</tt> <i>text</i> - insert character from <i>text</i>, while showing all options.</li>
+<li>space - insert a space.</li>
+<li>symbol - popup symbol selector.</li>
+<li>modify - choose between alternatives.</li>
+<li>mode - change mode or language.</li>
+<li>shift - toggle upper/lowercase.</li>
+</ul>
+</li>
+<li>Hold<tt>X</tt> - the action to do when key <tt>X</tt> is held down. This is the same as for Tap, except <tt>&quot;</tt> <i>text</i> is not supported.</li>
+</ul>
+<p>Character insertions where the first character is punctuation are treated specially. The details of the special treatment are internal.</p>
+<p>Timing behavior for phone buttons are handled by the ButtonTimings section of the file.</p>
+<pre>    [ButtonTimings]
+    ButtonHeldTimeout=1500
+    AutoAcceptTimeout=1200</pre>
+<p>The ButtonHeldTimeout is the number of milliseconds a button needs to be held for the held behavior described above to take affect. The AutoAcceptTimeout is the number of milliseconds after a key is tapped before the composed text is confirmed. This only applies to some text input modes.</p>
+<p>The help file &quot;help/html/help-input.html&quot; should be modified to explain the usage of phone keys.</p>
+<a name="phone-softkey-definition"></a>
+<h3>Phone SoftKey Definition</h3>
+<p>The format of the soft-key definition section of the file is as follows:</p>
+<pre>    [SoftKeys]
+    Count=n
+    Key0=Name of Qt key code, e.g. Menu, Select, Context1</pre>
+<p>An example of what this may look like in a real example is:</p>
+<pre>    [SoftKeys]
+    Count=3
+    Key0=Context1
+    Key1=Select
+    Key2=Back</pre>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

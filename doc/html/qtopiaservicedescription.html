@@ -1,0 +1,65 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>QtopiaServiceDescription Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QtopiaServiceDescription Class Reference</h1>
+<p>The QtopiaServiceDescription class describes a service request in user terms. <a href="#details">More...</a></p>
+<pre>    #include &lt;QtopiaServiceDescription&gt;</pre><ul>
+<li><a href="qtopiaservicedescription-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qtopiaservicedescription.html#QtopiaServiceDescription">QtopiaServiceDescription</a></b> ()</li>
+<li><div class="fn"/><b><a href="qtopiaservicedescription.html#QtopiaServiceDescription-2">QtopiaServiceDescription</a></b> ( QtopiaServiceRequest <i>r</i>, QString <i>l</i>, QString <i>ic</i> )</li>
+<li><div class="fn"/>QString <b><a href="qtopiaservicedescription.html#iconName">iconName</a></b> () const</li>
+<li><div class="fn"/>QString <b><a href="qtopiaservicedescription.html#label">label</a></b> () const</li>
+<li><div class="fn"/>QtopiaServiceRequest <b><a href="qtopiaservicedescription.html#request">request</a></b> () const</li>
+<li><div class="fn"/>void <b><a href="qtopiaservicedescription.html#setIconName">setIconName</a></b> ( const QString &amp; <i>i</i> )</li>
+<li><div class="fn"/>void <b><a href="qtopiaservicedescription.html#setLabel">setLabel</a></b> ( const QString &amp; <i>l</i> )</li>
+<li><div class="fn"/>void <b><a href="qtopiaservicedescription.html#setRequest">setRequest</a></b> ( const QtopiaServiceRequest &amp; <i>r</i> )</li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QtopiaServiceDescription class describes a service request in user terms.</p>
+<p>This data includes what action to undertake when activated, and a display name and icon.</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QtopiaServiceDescription"></a>QtopiaServiceDescription::QtopiaServiceDescription ()</h3>
+<p>Constructs an empty <a href="qtopiaservicedescription.html">QtopiaServiceDescription</a> .</p>
+<h3 class="fn"><a name="QtopiaServiceDescription-2"></a>QtopiaServiceDescription::QtopiaServiceDescription ( <a href="qtopiaservicerequest.html">QtopiaServiceRequest</a> <i>r</i>, <a href="qstring.html">QString</a> <i>l</i>, <a href="qstring.html">QString</a> <i>ic</i> )</h3>
+<p>Constructs a <a href="qtopiaservicedescription.html">QtopiaServiceDescription</a>, which describes an action called <i>l</i>, with the display icon found in the file specified by <i>ic</i>, which initiates <a href="qtopiaservicerequest.html">QtopiaServiceRequest</a> <i>r</i> when activated.</p>
+<h3 class="fn"><a name="iconName"></a><a href="qstring.html">QString</a> QtopiaServiceDescription::iconName () const</h3>
+<p>Returns the icon name describing the request.</p>
+<p>See also <a href="qtopiaservicedescription.html#setIconName">setIconName</a>().</p>
+<h3 class="fn"><a name="label"></a><a href="qstring.html">QString</a> QtopiaServiceDescription::label () const</h3>
+<p>Returns the display label describing the request.</p>
+<p>See also <a href="qtopiaservicedescription.html#setLabel">setLabel</a>().</p>
+<h3 class="fn"><a name="request"></a><a href="qtopiaservicerequest.html">QtopiaServiceRequest</a> QtopiaServiceDescription::request () const</h3>
+<p>Returns the <a href="qtopiaservicerequest.html">QtopiaServiceRequest</a> described.</p>
+<p>See also <a href="qtopiaservicedescription.html#setRequest">setRequest</a>().</p>
+<h3 class="fn"><a name="setIconName"></a>void QtopiaServiceDescription::setIconName ( const <a href="qstring.html">QString</a> &amp; <i>i</i> )</h3>
+<p>Sets the display icon to <i>i</i>.</p>
+<p>See also <a href="qtopiaservicedescription.html#iconName">iconName</a>().</p>
+<h3 class="fn"><a name="setLabel"></a>void QtopiaServiceDescription::setLabel ( const <a href="qstring.html">QString</a> &amp; <i>l</i> )</h3>
+<p>Sets the display label to <i>l</i>.</p>
+<p>See also <a href="qtopiaservicedescription.html#label">label</a>().</p>
+<h3 class="fn"><a name="setRequest"></a>void QtopiaServiceDescription::setRequest ( const <a href="qtopiaservicerequest.html">QtopiaServiceRequest</a> &amp; <i>r</i> )</h3>
+<p>Sets the request to <i>r</i>.</p>
+<p>See also <a href="qtopiaservicedescription.html#request">request</a>().</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

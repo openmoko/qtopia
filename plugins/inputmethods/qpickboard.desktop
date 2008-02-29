@@ -1,6 +1,7 @@
+[Translation]
+File=QtopiaPlugins
+Context=Input Methods
 [Desktop Entry]
-Name=Pickboard
-Comment=Dictionary based input method.
-Name[ja]=ピックボード
-Comment[ja]=辞書ベース入力メソッド
+Name[]=Pickboard
+Comment[]=Dictionary based input method.
 X-QPE-Library=libqpickboard.so

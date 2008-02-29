@@ -1,28 +1,31 @@
-<qt title="Picture Properties">
+<html>
+<head><title>Picture Properties</title></head>
+<body>
 <h3>Picture Properties</h3>
-<p>The following properties are available for images.</p>
+<p>The following properties are available for images:</p>
 
 <p><b>Name:</b> title to show with picture.</p>
 
 <p>
-%%PDA%%
+<!--#if expr="$PDASTYLE"-->
 <b>Location:</b>
-@@PDA@@
-%%PHONE%%
+<!--#endif-->
+<!--#if expr="$PHONESTYLE"-->
 <b>Loc:</b>
-@@PHONE@@ 
+<!--#endif-->
 storage location of file.</p>
 
 <p>
-%%PDA%%
+<!--#if expr="$PDASTYLE"-->
 <b>Category:</b>
-@@PDA@@
-%%PHONE%%
+<!--#endif-->
+<!--#if expr="$PHONESTYLE"-->
 <b>Cat:</b>
-@@PHONE@@ 
+<!--#endif-->
 used to group like pictures.</p>
 
 <p><b>Type:</b> indicates file format (read-only).</p>
 
 <p>See Also: <a href="qpe-categories.html">Category Help</a></p>
-</qt>
+</body>
+</html>

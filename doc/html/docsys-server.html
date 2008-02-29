@@ -1,0 +1,82 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Document System: Document Server</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Document System: Document Server<br /><small></small></h1>
+<ul><li><a href="#performance">Performance</a></li>
+<ul><li><a href="#performance">Performance</a></li>
+<li><a href="#database-schema-implementation">Database Schema Implementation</a></li>
+<ul><li><a href="#data-update-process">Data Update Process</a></li>
+<li><a href="#synchronization">Synchronization</a></li>
+<li><a href="#metadata-import-and-export">Metadata Import and Export</a></li>
+</ul>
+</ul>
+</ul>
+<a name="performance"></a>
+<p>The <tt>Document Server</tt> maintains the document meta-information database and provides synchronized <tt>Content</tt> list models. It handles requests for document services such as <i>delete</i>, <i>rename</i> and <i>open</i>. The following sections describe the functionality of the Document Server together with key criteria for optimum implementation.</p>
+<a name="performance"></a>
+<h3>Performance</h3>
+<p>Performance is a key criterion, especially where large numbers of files are processed. When inserting a large capacity removable media and scanning file systems to extract <tt>Content</tt> metadata the document server does not schedule blocking reads in the GUI thread. This means that scanning is done incrementally thus, reducing the impact on GUI response.</p>
+<a name="database-schema-implementation"></a>
+<h3>Database Schema Implementation</h3>
+<p>Metadata records are stored in an embedded SQL database. The database backing store is in the main storage on the device, not on removable media. A server process monitors changes in storage and updates the SQL database as required.</p>
+<p>The database schema is as follows:</p>
+<p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th colspan="3">ContentTable</th></tr>
+<tr valign="top" class="qt-style"><th>Field</th><th>Type</th><th>Details/Index</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>id</tt></td><td><tt>int</tt></td><td>autoincrement unique key</td></tr>
+<tr valign="top" class="even"><td><tt>uiName</tt></td><td><tt>varchar 100</tt></td><td>indexed</td></tr>
+<tr valign="top" class="odd"><td><tt>mimeType</tt></td><td><tt>varchar 50</tt></td><td>indexed</td></tr>
+<tr valign="top" class="even"><td><tt>size</tt></td><td><tt>int</tt></td><td></td></tr>
+<tr valign="top" class="odd"><td><tt>drmStatus</tt></td><td><tt>enum</tt> one of: <tt>plain</tt> <tt>controlled</tt> <tt>unrenderable</tt></td><td></td></tr>
+<tr valign="top" class="even"><td>docStatus</td><td>enum one of: <tt>doc</tt> <tt>dat</tt></td><td>indexed</td></tr>
+<tr valign="top" class="odd"><td><tt>icon</tt></td><td><tt>blob</tt> (binary large object)</td><td></td></tr>
+<tr valign="top" class="even"><td><tt>thumbnail</tt></td><td><tt>blob</tt></td><td></td></tr>
+<tr valign="top" class="odd"><td><tt>owner</tt></td><td><tt>int</tt></td><td>index (foreign key)</td></tr>
+</table></p>
+<p><table width="100%" align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th colspan="3">CategoryMapTable</th></tr>
+<tr valign="top" class="qt-style"><th>Field</th><th>Type</th><th>Details/Index</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>contentId</tt></td><td><tt>int</tt></td><td><i>foreign key</i> <tt>ContentTable</tt></td></tr>
+<tr valign="top" class="even"><td><tt>category</tt></td><td><tt>int</tt></td><td><i>foreign key</i> <tt>Categories</tt></td></tr>
+</table></p>
+<p><b>Note:</b></p>
+<ul>
+<li>Exactly one row in <tt>ContentTable</tt> maps to zero to N rows in <tt>CategoryMapTable</tt>.</li>
+<li>Exactly one row in <tt>CategoryTable</tt> (see Catgory sub-system) maps to zero to N rows in <tt>CategoryMapTable</tt>.</li>
+</ul>
+<a name="data-update-process"></a>
+<h4>Data Update Process</h4>
+<p>A process running inside the Qtopia server is responsible for keeping the database view synchronized with the files and content on the device. This is the Data Update Process (DUP).</p>
+<p>When new content arrives on the device either by download, Bluetooth transfer or insertion of media records, it will be added or refreshed in the database. When content is no longer on the device due to removal of media, or deletion of files, these are deleted from the database.</p>
+<p>When new media is inserted the DUP also checks it for metadata in import-format. The DUP ensures that any metadata is correct and up-to-date with respect to the actual content on the media, and automatically imports it.</p>
+<p>After that point calls to the <tt>ContentLnk</tt> API to change the files will result in updates to the import-format metadata. The DUP is not required to perform those updates.</p>
+<a name="synchronization"></a>
+<h4>Synchronization</h4>
+<p>If QtopiaDesktop is used to mirror the device as is the case when PIM contacts and other data are synchronized, the metadata, especially categorization information, can be transferred via a database synchronization. This is done by replaying the journal files from the point at which the last synchronization took place. Journal files are normally recorded automatically by the database system.</p>
+<a name="metaimportexport"></a><a name="metadata-import-and-export"></a>
+<h4>Metadata Import and Export</h4>
+<p>When data is transferred other than by a synchronization, for example:</p>
+<ul>
+<li>a number of media files are uploaded</li>
+<li><tt>qtopiadesktop</tt> is used to place files on to the device</li>
+<li>data is copied or moved by Bluetooth or removable media</li>
+</ul>
+<p>the metadata must be translated into an import format on one side of the transfer and translated back on the other side.</p>
+<p>In the case of category data additional information, such as a device specifier has to be added to disambiguate the categories from top-level name collisions if there is more than one Qtopia device.</p>
+<p>The Qtopia metadata import format (<tt>QDIF</tt>) files are XML and are essentially serialized from the database and have a device identifier embedded in them.</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

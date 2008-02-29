@@ -1,0 +1,265 @@
+/****************************************************************************
+**
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
+**
+** This file is part of the Phone Edition of the Qtopia Toolkit.
+**
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
+
+#include <qtopiaabstractservice.h>
+#include <qmetaobject.h>
+#include <qtopialog.h>
+#include <QByteArray>
+
+#if defined(QTOPIA_DBUS_IPC)
+#include <qdbusconnection.h>
+#include <qdbusabstractadaptor.h>
+#include <qdbuserror.h>
+#include <qdbusconnectioninterface.h>
+#include "dbusipccommon_p.h"
+#else
+#include <qtopiaipcadaptor.h>
+#include <qtopiaservices.h>
+#endif
+
+/*!
+    \class QtopiaAbstractService
+    \brief The QtopiaAbstractService class provides an interface to messages on a QCop service
+    which simplifies remote slot invocations
+
+    The QtopiaAbstractService class provides an interface for publishing services
+    for remote invocation.
+
+    The use of this class will be demonstrated using the Qtopia \c{Time}
+    service.  This has a single message called \c{editTime()} which asks
+    the service to pop up a dialog allowing the user to edit the current time.
+
+    \code
+    class TimeService : public QtopiaAbstractService
+    {
+        Q_OBJECT
+    public:
+        TimeService( QObject *parent = 0 );
+
+    public slots:
+        void editTime();
+    };
+
+    TimeService::TimeService( QObject *parent )
+        : QtopiaAbstractService( "Time", parent )
+    {
+        publishAll();
+    }
+    \endcode
+
+    The call to publishAll() causes all public slots within \c{TimeService}
+    to be automatically registered as Service messages.  This can be
+    useful if the service has many message types.
+
+    The client can send a request to the service by use of the
+    QtopiaServiceRequest class, as in previous versions of Qtopia:
+
+    \code
+    QtopiaServiceRequest req( "Time", "editTime()" );
+    req.send();
+    \endcode
+
+    \sa QtopiaService, QtopiaIpcAdaptor, QtopiaIpcEnvelope, QtopiaServiceRequest
+*/
+
+#if defined(QTOPIA_DBUS_IPC)
+class QtopiaDBusAdaptor : public QDBusAbstractAdaptor
+{
+    Q_OBJECT
+    Q_CLASSINFO("D-Bus Interface", "com.trolltech.qtopia")
+
+public:
+    QtopiaDBusAdaptor(QObject *parent);
+    ~QtopiaDBusAdaptor();
+};
+
+QtopiaDBusAdaptor::QtopiaDBusAdaptor(QObject *parent) : QDBusAbstractAdaptor(parent)
+{
+
+}
+
+QtopiaDBusAdaptor::~QtopiaDBusAdaptor()
+{
+
+}
+#endif
+
+#if !defined(QTOPIA_DBUS_IPC)
+class ServiceQtopiaIpcAdaptorProxy : public QtopiaIpcAdaptor
+{
+    Q_OBJECT
+
+public:
+    ServiceQtopiaIpcAdaptorProxy(const QString &channel, QObject *parent=0);
+
+    QString memberToMessage( const QByteArray& member );
+    QStringList sendChannels( const QString& channel );
+    QString receiveChannel( const QString& channel );
+
+    QString m_channel;
+};
+
+ServiceQtopiaIpcAdaptorProxy::ServiceQtopiaIpcAdaptorProxy(const QString &channel, QObject *parent) :
+        QtopiaIpcAdaptor(channel, parent), m_channel(channel)
+{
+
+}
+
+/*!
+    \reimp
+ */
+QString ServiceQtopiaIpcAdaptorProxy::memberToMessage( const QByteArray& member )
+{
+    return m_channel + "::" + QtopiaIpcAdaptor::memberToMessage( member );
+}
+
+/*!
+    Convert \a channel into a list of new names to use for sending messages.
+    This override interprets \a channel as a service name and looks
+    up the actual QCop channels associated with the service.
+ */
+QStringList ServiceQtopiaIpcAdaptorProxy::sendChannels( const QString& channel )
+{
+    return QtopiaService::channels( channel );
+}
+
+/*!
+    Convert \a channel into a new name to use for receiving messages.
+    This override returns an empty string, which indicates that
+    messages should be received on the application's main message channel.
+ */
+QString ServiceQtopiaIpcAdaptorProxy::receiveChannel( const QString& )
+{
+    return QString();
+}
+#endif
+
+class QtopiaAbstractService_Private
+{
+public:
+    QtopiaAbstractService_Private(const QString &service);
+
+#if !defined(QTOPIA_DBUS_IPC)
+    QtopiaIpcAdaptor *m_copobject;
+#endif
+
+    QString m_service;
+    bool m_publishAllCalled;
+};
+
+QtopiaAbstractService_Private::QtopiaAbstractService_Private(const QString &service) :
+#if !defined(QTOPIA_DBUS_IPC)
+        m_copobject(NULL),
+#endif
+        m_service(service),
+        m_publishAllCalled(false)
+{
+#if !defined(QTOPIA_DBUS_IPC)
+    m_copobject = new ServiceQtopiaIpcAdaptorProxy(service);
+#endif
+}
+
+/*!
+    Construct a remote service object for \a service and attach it to \a parent.
+*/
+QtopiaAbstractService::QtopiaAbstractService( const QString& service, QObject *parent )
+    : QObject( parent )
+{
+    m_data = new QtopiaAbstractService_Private(service);
+}
+
+/*!
+    Destroy this QCop service handling object.
+*/
+QtopiaAbstractService::~QtopiaAbstractService()
+{
+#if defined(QTOPIA_DBUS_IPC)
+    QDBusConnection dbc = QDBus::sessionBus();
+    if (!dbc.isConnected()) {
+        qWarning() << "Unable to connect do D-BUS:" << dbc.lastError();
+        return;
+    }
+
+    qLog(Services) << "Unregistering service" << m_data->m_service;
+
+    QString path = dbusPathBase;
+    path.append(m_data->m_service);
+    dbc.unregisterObject(path);
+
+    QDBusConnectionInterface *iface = dbc.interface();
+    QString service = dbusInterface;
+    service.append(".");
+    service.append(m_data->m_service);
+
+    iface->unregisterService(service);
+#endif
+
+    if (m_data)
+        delete m_data;
+}
+
+/*!
+    Publish all slots on this object within subclasses of QtopiaAbstractService.
+    This is typically called from a subclass constructor.
+*/
+void QtopiaAbstractService::publishAll()
+{
+#if defined(QTOPIA_DBUS_IPC)
+    QDBusConnection dbc = QDBus::sessionBus();
+    if (!dbc.isConnected()) {
+        qWarning() << "Unable to connect do D-BUS:" << dbc.lastError();
+        return;
+    }
+
+    qLog(Services) << "Registering service" << m_data->m_service;
+
+    QDBusConnectionInterface *iface = dbc.interface();
+    QString service = dbusInterface;
+    service.append(".");
+    service.append(m_data->m_service);
+    if (iface->registerService(service) == QDBusConnectionInterface::ServiceNotRegistered) {
+        qWarning() << "WARNING: could not request name" << service;
+        return;
+    }
+
+    new QtopiaDBusAdaptor(this);
+    QString path = dbusPathBase;
+    path.append(m_data->m_service);
+    dbc.registerObject(path, this, QDBusConnection::ExportNonScriptableSlots);
+#else
+    const QMetaObject *meta = metaObject();
+    if ( !m_data->m_publishAllCalled ) {
+        int count = meta->methodCount();
+        int index = QtopiaAbstractService::staticMetaObject.methodCount();
+        for ( ; index < count; ++index ) {
+            QMetaMethod method = meta->method( index );
+            if ( method.methodType() == QMetaMethod::Slot &&
+                 method.access() == QMetaMethod::Public) {
+                QByteArray name = method.signature();
+                QtopiaIpcAdaptor::connect(m_data->m_copobject, "2" + name, this, "1" + name);
+            }
+        }
+        m_data->m_publishAllCalled = true;
+    }
+#endif
+}
+
+#include "qtopiaabstractservice.moc"

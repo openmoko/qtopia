@@ -1,37 +1,23 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #ifndef PHOTOEDITUI_H
 #define PHOTOEDITUI_H
@@ -48,115 +34,139 @@
 #include "slideshow/slideshowui.h"
 #include "slideshow/slideshow.h"
 
-#include <qtopia/imageselector.h>
-#include <qtopia/contextmenu.h>
-#include <qtopia/applnk.h>
+#include <qimagedocumentselector.h>
+#include <qsoftmenubar.h>
+#include <qdrmcontent.h>
+#include <qtopiaabstractservice.h>
 
-#include <qvbox.h>
 #include <qstring.h>
-#include <qwidgetstack.h>
 #include <qslider.h>
-#include <qpopupmenu.h>
 
-class PhotoEditUI : public QVBox {
+#include <QStackedWidget>
+#include <QMenu>
+
+class QDSActionRequest;
+class QResizeEvent;
+
+
+class PhotoEditUI : public QWidget {
     Q_OBJECT
+    friend class PhotoEditService;
 public:
-    PhotoEditUI( QWidget* parent, const char* name, WFlags f );
-    
+    PhotoEditUI( QWidget* parent, Qt::WFlags f );
+    ~PhotoEditUI();
+
     // Process window deactivate events
     bool eventFilter( QObject*, QEvent* );
-    
+
 public slots:
     // Open image for editing
     void setDocument( const QString& lnk );
-    
+
 private slots:
     // Respond to service request
-    void appMessage( const QCString&, const QByteArray& );
-    
+    void appMessage( const QString&, const QByteArray& );
+
     // Open given image for editing
     void processSetDocument();
-    
+
     // Change category and show selector
     void processShowCategory();
-    
+
     // Open given image for editing
     void processGetImage();
-    
+
     // Toggle actions dependant of images in image selector
     void toggleActions();
 
     // Raise selector to top of widget stack
     void enterSelector();
-    
+
     // Raise slide show to top of widget stack and start
     void enterSlideShow();
-    
+
     // Raise editor to top of widget stack and load current image
     void enterEditor();
-    
+
     // Show zoom control
     void enterZoom();
-    
+
     // Show brightness control
     void enterBrightness();
-    
+
     // Enable region selector and hide naviagtor
     void enterCrop();
-    
+
     // Show editor view in full screen
     void enterFullScreen();
-    
+
     // Change to single view in image selector
     void setViewSingle();
-    
+
+    // Change to multi view in image selector
+    void setViewThumbnail();
+
     // Only Qtopia PDA
     // Launch selector popup menu
-    void launchPopupMenu( const DocLnk&, const QPoint& );
-    
+    void launchPopupMenu( const QContent&, const QPoint& );
+
     // Launch slide show dialog
     void launchSlideShowDialog();
-    
+
     // Launch properties dialog
     void launchPropertiesDialog();
-    
+
     // Move to previous UI state
     // Enable application to be closed if no previous state exists
     void exitCurrentUIState();
-    
+
     // Move to previous editor state
     void exitCurrentEditorState();
-    
+
     // Set zoom factor in image processor
     void setZoom( int );
-    
+
     // Set brightness factor in image processor
     void setBrightness( int );
-    
+
     // Open currently highlighted image in image selector for editing
     void editCurrentSelection();
-    
+
     // Only Qtopia Phone
     // Ignore changes to image and exit from editor
     void cancelEdit();
-    
+
     // Perform crop on current image using region from region selector
     void cropImage();
-    
+
     // Send current image over IR link
     void beamImage();
-    
+
+    // Print current image
+    void printImage();
+
     // Delete current image
     void deleteImage();
-    
+
     // Show selector if image currently being edited is deleted
-    void linkChanged( const QString& );
-    
+    void contentChanged( const QContentIdList &id, const QContent::ChangeType type );
+
+    // Rights to the open image have expired so close.
+    void rightsExpired( const QDrmContent &content );
+
+    // Edit an image contained within the QDS request
+    void editImage( const QDSActionRequest& request );
+
 protected:
     // Move to previous state, close application if no previous state exists
     void closeEvent( QCloseEvent* );
 
+    void resizeEvent(QResizeEvent *event);
+
 private:
+
+    void init(bool listMode);
+
 #ifndef QTOPIA_PHONE
     // Interrupt and conclude current state
     void interruptCurrentState();
@@ -167,52 +177,76 @@ private:
 
     // Prompt user to save changes to image if image was modified
     void saveChanges();
-    
+
     // Send modified image back in qcop message
     void sendValueSupplied();
-    
+
     enum { SELECTOR, SLIDE_SHOW, EDITOR } ui_state;
-    
+
     enum { VIEW, FULL_SCREEN, ZOOM, BRIGHTNESS, CROP } editor_state;
-        
+
     bool only_editor, service_requested;
-    
+
 #ifdef QTOPIA_PHONE
     bool was_fullscreen, edit_canceled, close_ok, editor_state_changed;
 #endif
-    
-    DocLnk service_lnk;
-    int service_category;
-    QCString service_channel;
+
+    QContent service_lnk;
+    QCategoryFilter service_category;
+    QString service_channel;
     QString service_id;
     int service_width, service_height;
     QImage service_image;
-        
-    DocLnk current_image;
+
+    QContent current_image;
+    QDrmContent selector_image;
 
 #ifdef QTOPIA_PHONE
-    ContextMenu *selector_menu;
-    int separator_id;
+    QMenu *selector_menu;
+    QAction *separator_action, *properties_action, *beam_action, *print_action;
+    QAction *delete_action, *edit_action, *slide_show_action;
 #else
     SelectorUI *selector_ui;
-    QPopupMenu *selector_menu;
+    QMenu *selector_menu;
 #endif
-    ImageSelector *image_selector;
-    
+    QImageDocumentSelector *image_selector;
+
     EditorUI *editor_ui;
     RegionSelector *region_selector;
     Navigator *navigator;
     Slider *brightness_slider, *zoom_slider;
-    
+
     ImageUI *image_ui;
     ImageProcessor *image_processor;
     ImageIO *image_io;
-    
+
     SlideShowDialog *slide_show_dialog;
     SlideShowUI *slide_show_ui;
     SlideShow *slide_show;
-    
-    QWidgetStack *widget_stack;
+
+    QStackedWidget *widget_stack;
+
+    QDSActionRequest* currEditImageRequest;
+};
+
+class PhotoEditService : public QtopiaAbstractService
+{
+    Q_OBJECT
+    friend class PhotoEditUI;
+private:
+    PhotoEditService( PhotoEditUI *parent )
+        : QtopiaAbstractService( "PhotoEdit", parent ),
+        mParent( parent ) { publishAll(); }
+
+public:
+    ~PhotoEditService();
+
+public slots:
+    void showCategory( const QString& category );
+    void editImage( const QDSActionRequest& request );
+
+private:
+    PhotoEditUI* mParent;
 };
 
 #endif

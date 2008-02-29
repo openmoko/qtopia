@@ -4,7 +4,7 @@ Context=Today
 Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation
 [Desktop Entry]
 Exec=today
-Icon=TodayApp
+Icon=today/TodayApp
 Type=Application
-Name[]=To­day
+Name[]=To\xad\x64\x61y
 CanFastload=0

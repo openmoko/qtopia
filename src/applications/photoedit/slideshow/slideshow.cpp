@@ -1,59 +1,95 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "slideshow.h"
 
-SlideShow::SlideShow( QObject* parent, const char* name )
-    : QObject( parent, name )
+#include <qtopiaapplication.h>
+
+
+SlideShow::SlideShow( QObject* parent )
+    : QObject( parent )
+    , collection_model( &collection )
+    , collection_i( -1 )
+    , drm_content( QDrmRights::Display, QDrmContent::NoLicenseOptions )
 {
     // When timeout advance to next image in collection
     connect( &timer, SIGNAL( timeout() ), this, SLOT( advance() ) );
+    connect( this, SIGNAL(stopped()), &drm_content, SLOT(renderStopped()) );
 }
 
-void SlideShow::setFirstImage( const DocLnk& image )
+SlideShow::~SlideShow()
+{
+#ifdef Q_WS_QWS
+    // Ensure backlight dimmer is re-enabled.
+    QtopiaApplication::setPowerConstraint(QtopiaApplication::Enable);
+#endif
+}
+
+void SlideShow::setFirstImage( const QContent& image )
 {
     // Find image in collection and update iterator with this image
-    QValueList<DocLnk>::ConstIterator it;
-    for( it = collection.begin(); 
-        it != collection.end() && (*it).file() != image.file(); ++it );
-    if( it != collection.end() ) emit changed( *( collection_iterator = it ) ); 
+
+    for( collection_i = 0; collection_i < collection_model.rowCount(); collection_i++ )
+    {
+        if( collection_model.content( collection_i ).id() == image.id() )
+        {
+            if( (image.permissions() & QDrmRights::Automated) && drm_content.requestLicense( image ) )
+            {
+                drm_content.renderStarted();
+
+                emit changed(image);
+            }
+            else
+                QTimer::singleShot( 0, this, SLOT(advance()) );
+
+            return;
+        }
+    }
+}
+
+void SlideShow::start()
+{
+    if ( collection.count() == 0 ) {
+        // No slides to play.
+        return;
+    }
+
+    // Disable power save while playing so that the device
+    // doesn't suspend before the slides finish.
+#ifdef Q_WS_QWS
+    QtopiaApplication::setPowerConstraint(QtopiaApplication::Disable);
+#endif
+
+    timer.start( pause*FACTOR );
 }
 
 void SlideShow::stop()
 {
     timer.stop();
+
+    // Re-enable power save (that was disabled in start()).
+#ifdef Q_WS_QWS
+    QtopiaApplication::setPowerConstraint(QtopiaApplication::Enable);
+#endif
+
     emit stopped();
 }
 
@@ -61,15 +97,39 @@ void SlideShow::advance()
 {
     // If at end of collection and not looping through, stop slideshow
     // Otherwise, advance to next image in collection
-    ++collection_iterator;
-    if( collection_iterator == collection.end() && !loop_through ) {
-        timer.stop();
-        emit stopped();
-    } else {
-        if( collection.count() > 1 ) {
-            if( collection_iterator == collection.end() )
-                collection_iterator = collection.begin();
-            emit changed( *collection_iterator );
+    collection_i++;
+    if (collection_i == collection.count() && !loop_through)
+    {
+        //timer.stop();
+        //emit stopped();
+        stop();
+    }
+    else
+    {
+        if (collection.count() > 1)
+        {
+            //if(collection_i == collection.count())
+            //    collection_i = 0;
+            if(collection_i == collection.count()) {
+                // Wrap around - and put the power saving back on, just in case it wraps
+                // around forever.
+                collection_i = 0;
+#ifdef Q_WS_QWS
+                QtopiaApplication::setPowerConstraint(QtopiaApplication::Enable);
+#endif
+            }
+
+            QContent image = collection_model.content( collection_i );
+
+            if( (image.permissions() & QDrmRights::Automated) && drm_content.requestLicense( image ) )
+            {
+                drm_content.renderStarted();
+
+                emit changed(image);
+            }
+            else
+                QTimer::singleShot( 0, this, SLOT(advance()) );
+
         }
     }
 }

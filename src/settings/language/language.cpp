@@ -1,198 +1,140 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "languagesettings.h"
+#include "langmodel.h"
 
-#include <qtopia/global.h>
-#include <qtopia/fontmanager.h>
-#include <qtopia/config.h>
-#include <qtopia/applnk.h>
-#include <qtopia/qpedialog.h>
-#include <qtopia/qpeapplication.h>
-#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
-#include <qtopia/qcopenvelope_qws.h>
-#endif
+#include <qtopianamespace.h>
+
+#include <qtopiaapplication.h>
+#include <qtopialog.h>
+#include <qtopiaipcenvelope.h>
 #ifdef QTOPIA_PHONE
-#include <qtopia/contextbar.h>
-#include <qtopia/contextmenu.h>
+#include <qsoftmenubar.h>
 #endif
-#include <qtopia/resource.h>
 
-#include <qlabel.h>
-#include <qaction.h>
-#include <qcheckbox.h>
-#include <qradiobutton.h>
-#include <qtabwidget.h>
-#include <qslider.h>
-#include <qfile.h>
-#include <qtextstream.h>
-#include <qdatastream.h>
-#include <qmessagebox.h>
-#include <qcombobox.h>
-#include <qspinbox.h>
-#include <qlistbox.h>
-#include <qdir.h>
-#if QT_VERSION >= 0x030000
-#include <qstylefactory.h>
-#endif
-#include <qaccel.h>
+#include <QLabel>
+#include <QFile>
+#include <QMessageBox>
+#include <QListView>
+#include <QAbstractListModel>
+#include <QDir>
+#include <QDebug>
+#include <QMenu>
+#include <QSettings>
 
-//#if defined(QT_QWS_IPAQ) || defined(QT_QWS_SL5XXX)
-//#include <unistd.h>
-//#include <linux/fb.h>
-//#include <sys/types.h>
-//#include <sys/stat.h>
-//#include <fcntl.h>
-//#include <sys/ioctl.h>
-//#endif
-#include <stdlib.h>
+using namespace Ui;
 
-class FontedItem : public QListBoxPixmap {
-public:
-    FontedItem(const QPixmap& pxm, const QString& langName,const QFont& font) :
-	QListBoxPixmap(pxm, langName),
-	fnt(font), showPixmap(FALSE)
-    {
-    }
-
-    int height( const QListBox * ) const
-    {
-	return QMAX(QFontMetrics(fnt).lineSpacing(), pixmap()->height());
-    }
-
-    int width( const QListBox * ) const
-    {
-	return QMAX(QFontMetrics(fnt).width(text()), pixmap()->width());
-    }
-
-    void setSelected(bool active)
-    {
-        showPixmap = active;
-    }
-
-    bool selected() { return showPixmap; }
-    
-protected:
-    void paint(QPainter* painter)
-    {
-	painter->setFont(fnt);
-        if (showPixmap)
-            painter->drawPixmap( 3, 0, *pixmap() );
-        if ( !text().isEmpty() ) {
-	    QFontMetrics fm = painter->fontMetrics();
-            if (showPixmap) {
-                int yPos;			// vertical text position
-                if ( pixmap()->height() < fm.height() )
-                    yPos = fm.ascent() + fm.leading()/2;
-                else
-                    yPos = pixmap()->height()/2 - fm.height()/2 + fm.ascent();
-                painter->drawText( pixmap()->width() + 5, yPos, text() );
-            } else {
-                painter->drawText( 3, fm.ascent() + fm.leading()/2, text() );
-            }
-        }
-    }
-
-private:
-    QFont fnt;
-    bool showPixmap;
-};
-
-
-//remove dependency on pkim
+//copied from PkimMatcher in order to remove dependency on pkim
 QStringList LanguageSettings::langs;
 
 QStringList LanguageSettings::dictLanguages()
 {
     if ( langs.isEmpty() ) {
-	QDir dir(QPEApplication::qpeDir() + "etc/dict", "words-*.dawg");
-	for (int i=0; i<(int)dir.count(); i++) {
-	    QString f = dir[i];
-	    langs.append(f.mid(6,f.length()-11)); // words-*.dawg
-	}
+        QString basename = Qtopia::qtopiaDir() + "/etc/dict/";
+        QDir dir(basename);
+        QStringList dftLangs = dir.entryList(QDir::Dirs);
+        for (QStringList::ConstIterator it = dftLangs.begin(); it != dftLangs.end(); ++it){
+            QString lang = *it;
+            if (QFile::exists(basename+lang+"/words.dawg")) {
+                langs.append(lang);
+            }
+        }
     }
+
     return langs;
 }
 
 #include "langname.h"
 
-LanguageSettings::LanguageSettings( QWidget* parent,  const char* name, WFlags fl )
-    : LanguageSettingsBase( parent, name, TRUE, fl ), confirmChange(TRUE)
+LanguageSettings::LanguageSettings( QWidget* parent, Qt::WFlags fl )
+    : QDialog( parent, fl ), confirmChange(true)
 {
-#ifdef QWS
-    if ( FontManager::hasUnicodeFont() )
-       languages->setFont(FontManager::unicodeFont(FontManager::Proportional));
-#endif
-
-    QPixmap pix = Resource::loadPixmap("selectedDict");
-    QStringList qpepaths = Global::qtopiaPaths();
-    for (QStringList::Iterator qit=qpepaths.begin(); qit != qpepaths.end(); ++qit ) {
-	QString tfn = *qit+"i18n/";
-	QDir langDir = tfn;
-	QStringList list = langDir.entryList("*", QDir::Dirs );
-	QStringList::Iterator it;
-	for( it = list.begin(); it != list.end(); ++it ) {
-	    QString id = (*it);
-	    if ( !langAvail.contains(id) ) {
-		QFileInfo desktopFile( tfn + "/" + id + "/.directory" );
-		if( desktopFile.exists() ) {
-		    langAvail.append(id);
-		    QFont font = languages->font();
-		    QString langName = languageName(id, &font);
-		    languages->insertItem( new FontedItem(pix, langName,font) );
-		}
-	    }
-	}
-    }
-
-    dl = new QPEDialogListener(this);
+    setupUi(this);
+    setModal( true );
 
     reset();
-    connect(languages,SIGNAL(highlighted(int)), this, SLOT(applyLanguage()));
-#ifdef QTOPIA_PHONE
-    connect(languages,SIGNAL(selected(int)), this, SLOT(accept()));
-    a_input = new QAction( tr("Use for input"), QString::null, 0, this );
-    connect( a_input, SIGNAL( activated() ), this, SLOT( inputToggled() ) );
-    a_input->setToggleAction(TRUE);
 
-    ContextMenu *menu = new ContextMenu(this);
-    a_input->addTo(menu);
+    QList<FontedItem> itemList;
+    QStringList qpepaths = Qtopia::installPaths();
+    foreach(QString tfn, qpepaths) {
+        tfn +="i18n/";
+        QDir langDir = tfn;
+        QStringList list = langDir.entryList(QStringList("*") );
+        QStringList::Iterator it;
+        for( it = list.begin(); it != list.end(); ++it ) {
+            QString id = (*it);
+            if ( !langAvail.contains(id) ) {
+                QFileInfo desktopFile( tfn + "/" + id + "/.directory" );
+                if( desktopFile.exists() ) {
+                    langAvail.append(id);
+                    QFont font("dejavu");
+                    font.setPointSize( 8 );
+                    //we need to start with dejavu or all names would be written
+                    //in unifont if this application is using unifont
+                    bool rightToLeft = false;
+                    QString langName = languageName(id, &font, &rightToLeft);
+                    qLog(I18n) << "Found language:" << langName
+                        << id << "Font:" << font.family() << "Font size:"<< font.pointSize()<< "RTL:" << rightToLeft;
+                    FontedItem item (langName, font,
+                        dictLanguages().contains(id) && inputLanguages.contains(id) );
+                    item.direction = rightToLeft ? Qt::RightToLeft : Qt::LeftToRight;
+                    itemList.append(item);
+                }
+            }
+        }
+    }
+
+    model = new LanguageModel(this, itemList);
+
+    listView = new QListView(this);
+    listView->setModel(model);
+    listView->setSelectionMode(QAbstractItemView::SingleSelection);
+    listView->setAlternatingRowColors( true );
+    //LanguageDelegate * delegate = new LanguageDelegate( listView );
+    //listView->setItemDelegate( delegate );
+
+    //set current language
+    int currentLanguage = langAvail.indexOf(chosenLanguage);
+    if (currentLanguage >= 0)
+        listView->setCurrentIndex(model->index(currentLanguage));
+
+    vboxLayout->addWidget(listView);
+
+    QItemSelectionModel *selectionModel = listView->selectionModel();
+    connect(selectionModel,SIGNAL(currentChanged(const QModelIndex &, const QModelIndex&)),
+            this, SLOT(applyLanguage(const QModelIndex&)));
+#ifdef QTOPIA_PHONE
+    connect(listView,SIGNAL(activated(const QModelIndex&)), this, SLOT(newLanguageSelected()));
+    a_input = new QAction( tr("Use for input"), this );
+    connect( a_input, SIGNAL( triggered(bool) ), this, SLOT( inputToggled() ) );
+    a_input->setCheckable(true);
+    updateActions(listView->currentIndex());
+
+    QMenu *menu = QSoftMenuBar::menuFor(this);
+    menu->addAction(a_input);
 #else
-    connect(languages,SIGNAL(selected(int)), this, SLOT(inputToggled()));
+    connect(listView, SIGNAL(doubleClicked(const QModelIndex&)),
+            this, SLOT(inputToggled(const QModelIndex&)));
 #endif
-    updateActions();
 }
 
 LanguageSettings::~LanguageSettings()
@@ -204,101 +146,162 @@ void LanguageSettings::setConfirm(bool c)
     confirmChange = c;
 }
 
-void LanguageSettings::inputToggled()
+void LanguageSettings::inputToggled(const QModelIndex &index)
 {
-    int index = languages->currentItem();
-    QString lang = langAvail.at( index );
-    inputLanguages.remove(lang);
-#ifdef QTOPIA_PHONE
-    if ( a_input->isOn() )
-	inputLanguages.prepend(lang);
-#else
-    FontedItem* item = (FontedItem*) languages->item(index);
-    if (!item->selected()) {
-	inputLanguages.prepend(lang);
-        item->setSelected(FALSE);
-    } else 
-        item->setSelected(TRUE);
-#endif
-    updateActions();
+    QString lang = langAvail.at( index.row() );
+    inputLanguages.removeAll(lang);
+    bool selected = model->data(index,Qt::UserRole).toBool();
+    if (!selected && dictLanguages().contains(lang)) {
+        inputLanguages.prepend(lang);
+        model->setData(index, QVariant(true), Qt::UserRole);
+    } else {
+        model->setData(index, QVariant(false), Qt::UserRole);
+    }
+
+    updateActions(index);
 }
 
-void LanguageSettings::updateActions()
+void LanguageSettings::updateActions(const QModelIndex& index)
 {
-    int numEntries = languages->numRows();
-    QString lang;
-    for(int index = 0; index < numEntries; index++) {
-        FontedItem* item = (FontedItem* ) languages->item(index);
-        lang = langAvail.at(index);
-        item->setSelected(dictLanguages().contains(lang) && 
-                inputLanguages.contains(lang));
-    }
-    languages->triggerUpdate(FALSE);
-#ifdef QTOPIA_PHONE 
-    lang = langAvail.at( languages->currentItem() );
-    a_input->setOn(inputLanguages.contains(lang));
+#ifdef QTOPIA_PHONE
+    if (!index.isValid())
+        return;
+    QString lang = langAvail.at( listView->currentIndex().row() );
+    bool dictLang = dictLanguages().contains(lang);
+
+    a_input->setEnabled(dictLang);
+    a_input->setVisible(dictLang);
+    a_input->setChecked(inputLanguages.contains(lang));
+#else
+    Q_UNUSED(index);
 #endif
 }
+
+#ifdef QTOPIA_PHONE
+void LanguageSettings::inputToggled()
+{
+    inputToggled(listView->currentIndex());
+}
+#endif
 
 void LanguageSettings::forceChosen()
 {
     // For simplicity, make primary reading language also primary writing language.
     QString l = chosenLanguage;
     while (1) {
-	if ( dictLanguages().contains(l) )
-	    break;
-	int e = l.findRev(QRegExp("[._]"));
-	if ( e >= 0 ) {
-	    l = l.left(e);
-	} else {
-	    // Give up.
-	    l = chosenLanguage;
-	    break;
-	}
+        if ( dictLanguages().contains(l) )
+            break;
+        int e = l.indexOf(QRegExp("[._]"));
+        if ( e >= 0 ) {
+            l = l.left(e);
+        } else {
+            // Give up.
+            l = chosenLanguage;
+            break;
+        }
     }
-    inputLanguages.remove(l);
+    inputLanguages.removeAll(l);
     inputLanguages.prepend(l);
 }
 
-void LanguageSettings::accept()
+void LanguageSettings::newLanguageSelected()
 {
-    chosenLanguage = langAvail.at( languages->currentItem() );
-    Config config("locale");
-    config.setGroup( "Language" );
-    QString lang = config.readEntry( "Language" );
+    chosenLanguage = langAvail.at( listView->currentIndex().row() );
+    QSettings config("Trolltech","locale");
+    config.beginGroup( "Language" );
+    QString lang = config.value( "Language" ).toString();
+
+    if (lang == chosenLanguage) {
+        accept();
+        return;
+    }
+
 
     if( lang != chosenLanguage && confirmChange
-	&& QMessageBox::warning( this, tr("Language Change"),
+        && QMessageBox::warning( this, tr("Language Change"),
                                   tr("<qt>This will cause "
                                   "Qtopia to restart, closing all applications."
                                   "<p>Change Language?</qt>"),
                                   QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes ) {
-            
-            // user should be able to leave the app by pressing BACK
-            // user doesn't want to change lang anymore => reset chosenLanguage
-            chosenLanguage = lang;
-	    return; // Cancel accept.
-    }
+        return;
+   }
 
-    config.writeEntry( "Language", chosenLanguage );
+    // because reading language is primary writing language (see forceChosen())
+    // we have to remove previous language from inputLanguages if it does not
+    // have a dictionary.
+    if (!dictLanguages().contains(lang))
+        inputLanguages.removeAll(lang);
+
+    config.setValue( "Language", chosenLanguage );
     forceChosen();
-    config.writeEntry( "InputLanguages", inputLanguages, ' ' );
-    config.write();
+    config.setValue("InputLanguages", inputLanguages.join(QString(' ' )));
+    config.sync();
 
-#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
-    if( lang != chosenLanguage ) {
-	QCopEnvelope e("QPE/System","language(QString)");
-	e << chosenLanguage;
+    qLog(I18n) << "New language:" << chosenLanguage;
+    qLog(I18n) << "Using following dictionaries:" << inputLanguages;
+
+    //we have to set the new default font for the new language
+
+    QSettings qpeconfig("Trolltech","qpe");
+    QSettings fmcfg( QSettings::SystemScope, "Trolltech", "FontMap" );
+    fmcfg.beginGroup("Map");
+    QString bf=fmcfg.value("Font1[]").toString();
+
+    QTranslator t(0);
+    QString tfn = Qtopia::qtopiaDir() +"/i18n/";
+    if (t.load(tfn+chosenLanguage+"/QtopiaDefaults.qm")) {
+        //we assume the user wants normal font size
+        QStringList fs = t.translate("FontMap",bf.toAscii().constData(),0).split(',');
+        if ( fs.count() == 3 ) {
+            qLog(I18n) << "New Font:" << fs[1] << "Font size:" << fs[2];
+            qpeconfig.setValue("Appearance/FontFamily", fs[1]);
+            qpeconfig.setValue("Appearance/FontSize", fs[2]);
+        }
+    } else{ //drop back to default font
+        // simply read what is in etc/default/Fontmap.conf
+        //if we cannot find FontMap.conf use hardcoded value
+        QStringList fs = bf.split(',');
+        if ( fs.count() == 3 ) {
+            qLog(I18n) << "New Font:" << fs[1] << "Font size:" << fs[2];
+            qpeconfig.setValue("Appearance/FontFamily", fs[1]);
+            qpeconfig.setValue("Appearance/FontSize", fs[2]);
+        } else {
+            qLog(I18n) << "Could not determine font, dropping back to dejavu";
+            qpeconfig.setValue("Appearance/FontFamily", "dejavau");
+            qpeconfig.setValue("Appearance/FontSize", "7");
+        }
     }
-#endif
+    //remove the current date format and let the new language determine
+    //what the format should be
+    qpeconfig.remove("Date/DateFormat");
+
+    qpeconfig.sync();
+
+
+    if( lang != chosenLanguage ) {
+        QtopiaIpcEnvelope e("QPE/System","language(QString)");
+        e << chosenLanguage;
+    }
+
+    accept();
+}
+
+void LanguageSettings::accept()
+{
+    QSettings config("Trolltech","locale");
+    config.beginGroup( "Language" );
+    config.setValue("InputLanguages", inputLanguages.join(QString(' ' )));
+    config.sync();
 
     QDialog::accept();
 }
 
-void LanguageSettings::applyLanguage()
+void LanguageSettings::applyLanguage(const QModelIndex& idx)
 {
-    chosenLanguage = langAvail.at( languages->currentItem() );
-    updateActions();
+    if (!idx.isValid())
+        return;
+    chosenLanguage = langAvail.at(idx.row());
+    updateActions(idx);
 }
 
 
@@ -310,17 +313,22 @@ void LanguageSettings::reject()
 
 void LanguageSettings::reset()
 {
-    Config config("locale");
-    config.setGroup( "Language" );
+    QSettings config("Trolltech","locale");
+    config.beginGroup( "Language" );
     QString l = getenv("LANG");
-    l = config.readEntry( "Language", l );
-    if(l.isEmpty()) l = "en_US"; // No tr
-    chosenLanguage = l;
-    inputLanguages = config.readListEntry( "InputLanguages", ' ' );
-    forceChosen();
+    l = config.value( "Language", l ).toString();
+    if(l.isEmpty())
+        l = "en_US"; // No tr
+    else
+    {
+        int index = l.indexOf(QChar('.'));
+        if (index > 0)
+            l = l.left(index);
+    }
 
-    int n = langAvail.find( l );
-    languages->setCurrentItem( n );
+    chosenLanguage = l;
+    inputLanguages = config.value( "InputLanguages").toString().split( ' ' );
+    forceChosen();
 }
 
 

@@ -1,0 +1,13 @@
+<page name="contextbar" base="themes/portal" rect="0,0,0x7.27%" stretch="80,96" transparent="yes">
+  <image rect="0,0,0x0" src="contextbg" stretch="80,96" scale="vertical" orientation="horizontal"/>
+  <rect name="reserved" rect="0,0,0x0" color="None" brush="None"/>
+  <image rect="23.75%,26%,51.5%x72%" src="context_overlay" stretch="16,68" scale="vertical" color="Highlight">
+    <text name="profile" rect="0,0,0x0" size="6" bold="yes" color="HighlightedText" align="hcenter,vcenter" active="expr:!@/UI/Profile/Default">
+      expr:@/UI/Profile/Name
+    </text>
+  </image>
+  <image name="button0" rect="0,0,22.72%x0" interactive="yes"/>
+  <image name="button1" rect="-22.72%,0,22.72%x0" interactive="yes"/>
+  <text name="button0" rect="1.15%,12.5%,22.72%x75%" size="6" bold="yes" align="hcenter" interactive="yes"/>
+  <text name="button1" rect="-23.86%,12.5%,22.72%x75%" size="6" bold="yes" align="hcenter" interactive="yes"/>
+</page>

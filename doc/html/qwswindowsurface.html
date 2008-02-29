@@ -1,0 +1,192 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qt 4.2: QWSWindowSurface Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QWSWindowSurface Class Reference<br /><sup><sup>[<a href="qtgui.html">QtGui</a> module]</sup></sup></h1>
+<p>The QWSWindowSurface class provides the drawing area for top-level windows in Qtopia Core. <a href="#details">More...</a></p>
+<pre> #include &lt;QWSWindowSurface&gt;</pre><p><b>This class is under development and is subject to change.</b></p>
+<p>This class was introduced in Qt 4.2.</p>
+<ul>
+<li><a href="qwswindowsurface-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h3>Public Types</h3>
+<ul>
+<li><div class="fn"/>enum <b><a href="qwswindowsurface.html#SurfaceFlag-enum">SurfaceFlag</a></b> { Reserved, Buffered, Opaque }</li>
+<li><div class="fn"/>flags <b><a href="qwswindowsurface.html#SurfaceFlag-enum">SurfaceFlags</a></b></li>
+</ul>
+<a name="public-functions"></a>
+<h3>Public Functions</h3>
+<ul>
+<li><div class="fn"/><b><a href="qwswindowsurface.html#QWSWindowSurface">QWSWindowSurface</a></b> ()</li>
+<li><div class="fn"/><b><a href="qwswindowsurface.html#QWSWindowSurface-2">QWSWindowSurface</a></b> ( QWidget * <i>window</i> )</li>
+<li><div class="fn"/><b><a href="qwswindowsurface.html#dtor.QWSWindowSurface">~QWSWindowSurface</a></b> ()</li>
+<li><div class="fn"/>virtual bool <b><a href="qwswindowsurface.html#attach">attach</a></b> ( const QByteArray &amp; <i>data</i> ) = 0</li>
+<li><div class="fn"/>virtual void <b><a href="qwswindowsurface.html#beginPaint">beginPaint</a></b> ( const QRegion &amp; <i>region</i> )</li>
+<li><div class="fn"/>const QRegion <b><a href="qwswindowsurface.html#clipRegion">clipRegion</a></b> () const</li>
+<li><div class="fn"/>virtual const QByteArray <b><a href="qwswindowsurface.html#data">data</a></b> () const = 0</li>
+<li><div class="fn"/>virtual void <b><a href="qwswindowsurface.html#detach">detach</a></b> () = 0</li>
+<li><div class="fn"/>const QRegion <b><a href="qwswindowsurface.html#dirtyRegion">dirtyRegion</a></b> () const</li>
+<li><div class="fn"/>virtual void <b><a href="qwswindowsurface.html#endPaint">endPaint</a></b> ( const QRegion &amp; <i>region</i> )</li>
+<li><div class="fn"/>virtual void <b><a href="qwswindowsurface.html#flush">flush</a></b> ( QWidget * <i>widget</i>, const QRegion &amp; <i>region</i>, const QPoint &amp; <i>offset</i> )</li>
+<li><div class="fn"/>virtual QRect <b><a href="qwswindowsurface.html#geometry">geometry</a></b> () const = 0</li>
+<li><div class="fn"/>virtual const QImage <b><a href="qwswindowsurface.html#image">image</a></b> () const = 0</li>
+<li><div class="fn"/>bool <b><a href="qwswindowsurface.html#isBuffered">isBuffered</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qwswindowsurface.html#isOpaque">isOpaque</a></b> () const</li>
+<li><div class="fn"/>bool <b><a href="qwswindowsurface.html#isReserved">isReserved</a></b> () const</li>
+<li><div class="fn"/>virtual bool <b><a href="qwswindowsurface.html#isValidFor">isValidFor</a></b> ( const QWidget * <i>window</i> ) const = 0</li>
+<li><div class="fn"/>virtual const QString <b><a href="qwswindowsurface.html#key">key</a></b> () const = 0</li>
+<li><div class="fn"/>virtual QPaintDevice * <b><a href="qwswindowsurface.html#paintDevice">paintDevice</a></b> () = 0</li>
+<li><div class="fn"/>virtual QPoint <b><a href="qwswindowsurface.html#painterOffset">painterOffset</a></b> () const</li>
+<li><div class="fn"/>virtual void <b><a href="qwswindowsurface.html#release">release</a></b> ()</li>
+<li><div class="fn"/>virtual void <b><a href="qwswindowsurface.html#scroll">scroll</a></b> ( const QRegion &amp; <i>region</i>, int <i>dx</i>, int <i>dy</i> ) = 0</li>
+<li><div class="fn"/>void <b><a href="qwswindowsurface.html#setClipRegion">setClipRegion</a></b> ( const QRegion &amp; <i>clip</i> )</li>
+<li><div class="fn"/>void <b><a href="qwswindowsurface.html#setDirty">setDirty</a></b> ( const QRegion &amp; <i>region</i> ) const</li>
+<li><div class="fn"/>virtual void <b><a href="qwswindowsurface.html#setGeometry">setGeometry</a></b> ( const QRect &amp; <i>rectangle</i> )</li>
+<li><div class="fn"/>SurfaceFlags <b><a href="qwswindowsurface.html#surfaceFlags">surfaceFlags</a></b> () const</li>
+<li><div class="fn"/>QWidget * <b><a href="qwswindowsurface.html#window">window</a></b> () const</li>
+</ul>
+<a name="protected-functions"></a>
+<h3>Protected Functions</h3>
+<ul>
+<li><div class="fn"/>void <b><a href="qwswindowsurface.html#setSurfaceFlags">setSurfaceFlags</a></b> ( SurfaceFlags <i>flags</i> )</li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The QWSWindowSurface class provides the drawing area for top-level windows in Qtopia Core.</p>
+<p>Note that this class is only available in Qtopia Core.</p>
+<p>In <a href="qtopiacore.html">Qtopia Core</a>, the default behavior is for each client to render its widgets into memory while the server is responsible for putting the contents of the memory onto the screen. QWSWindowSurface is used by the window system to implement the associated memory allocation.</p>
+<p>When a screen update is required, the server runs through all the top-level windows that intersect with the region that is about to be updated, and ensures that the associated clients have updated their memory buffer. Then the server uses the screen driver to copy the content of the memory to the screen. To locate the relevant parts of memory, the driver is provided with the list of top-level windows that intersect with the given region. Associated with each of the top-level windows there is a window surface representing the drawing area of the window.</p>
+<p>When deriving from the QWSWindowSurface class, e.g., when adding an <a href="qtopiacore-accel.html">accelerated graphics driver</a>, there are several pure virtual functions that must be implemented. In addition, QWSWindowSurface provides several virtual functions that can be reimplemented to customize the drawing process.</p>
+<ul><li><a href="#pure-virtual-functions">Pure Virtual Functions</a></li>
+<li><a href="#virtual-functions">Virtual Functions</a></li>
+<li><a href="#other-members">Other Members</a></li>
+</ul>
+<a name="pure-virtual-functions"></a>
+<h3>Pure Virtual Functions</h3>
+<p>There are in fact two window surface instances for each top-level window; one used by the application when drawing a window, and another used by the server application to perform window compositioning. Implement the <a href="qwswindowsurface.html#attach">attach</a>() to create the server-side representation of the surface. The <a href="qwswindowsurface.html#data">data</a>() function must be implemented to provide the required data. In addition, the related <a href="qwswindowsurface.html#detach">detach</a>() function must be implemented to enable the window system to detach the server-side instance from the client.</p>
+<p>Implement the <a href="qwswindowsurface.html#key">key</a>() function to uniquely identify the surface class, and the <a href="qwswindowsurface.html#isValidFor">isValidFor</a>() function to determine is a surface corresponds to a given widget.</p>
+<p>The <a href="qwswindowsurface.html#geometry">geometry</a>() function must be implemented to let the window system determine the area required by the window surface (QWSWindowSurface also provides a corresponding virtual <a href="qwswindowsurface.html#setGeometry">setGeometry</a>() function that is called whenever the area necessary for the top-level window to be drawn, changes). The <a href="qwswindowsurface.html#image">image</a>() function is called by the window system during window compositioning, and must be implemented to return an image of the top-level window.</p>
+<p>Finally, the <a href="qwswindowsurface.html#paintDevice">paintDevice</a>() function must be implemented to return the appropriate paint device, and the <a href="qwswindowsurface.html#scroll">scroll</a>() function must be implemented to scroll the given region of the surface the given number of pixels.</p>
+<a name="virtual-functions"></a>
+<h3>Virtual Functions</h3>
+<p>When painting onto the surface, the window system will always call the <a href="qwswindowsurface.html#beginPaint">beginPaint</a>() function before any painting operations are performed. Likewise the <a href="qwswindowsurface.html#endPaint">endPaint</a>() function is automatically called when the painting is done. Reimplement the <a href="qwswindowsurface.html#painterOffset">painterOffset</a>() function to alter the offset that is applied when drawing.</p>
+<p>The window system uses the <a href="qwswindowsurface.html#flush">flush</a>() function to put a given region of the widget onto the screen, and the <a href="qwswindowsurface.html#release">release</a>() function to deallocate the screen region corresponding to this window surface.</p>
+<a name="other-members"></a>
+<h3>Other Members</h3>
+<p>QWSWindowSurface provides the <a href="qwswindowsurface.html#window">window</a>() function returning a pointer to the top-level window the surface is representing. The currently visible region of the associated widget can be retrieved and set using the <a href="qwswindowsurface.html#clipRegion">clipRegion</a>() and <a href="qwswindowsurface.html#setClipRegion">setClipRegion</a>() functions, respectively.</p>
+<p>When the window system performs the window compositioning, it uses the <a href="qwswindowsurface.html#SurfaceFlag-enum">SurfaceFlag</a> enum describing the surface content. The currently set surface flags can be retrieved and altered using the <a href="qwswindowsurface.html#surfaceFlags">surfaceFlags</a>() and <a href="qwswindowsurface.html#setSurfaceFlags">setSurfaceFlags</a>() functions. In addition, QWSWindowSurface provides the <a href="qwswindowsurface.html#isBuffered">isBuffered</a>(), <a href="qwswindowsurface.html#isOpaque">isOpaque</a>() and <a href="qwswindowsurface.html#isReserved">isReserved</a>() convenience functions. Use the <a href="qwswindowsurface.html#dirtyRegion">dirtyRegion</a>() function to retrieve the part of the widget that must be repainted, and the <a href="qwswindowsurface.html#setDirty">setDirty</a>() function to ensure that a region is repainted.</p>
+<p>See also <a href="qtopiacore-architecture.html#drawing-on-screen">Qtopia Core Architecture</a>.</p>
+<hr />
+<h2>Member Type Documentation</h2>
+<h3 class="flags"><a name="SurfaceFlag-enum"></a>enum QWSWindowSurface::SurfaceFlag<br />flags QWSWindowSurface::SurfaceFlags</h3>
+<p>This enum is used to describe the window surface's contents. It is used by the screen driver to handle region allocation and composition.</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>QWSWindowSurface::Reserved</tt></td><td align="center" valign="top"><tt>0x1</tt></td><td valign="top">The surface contains a reserved area. Once allocated, a reserved area can not not be changed by the window system, i.e., no other widgets can be drawn on top of this.</td></tr>
+<tr><td valign="top"><tt>QWSWindowSurface::Buffered</tt></td><td align="center" valign="top"><tt>0x2</tt></td><td valign="top">The surface is in a memory area which is not part of a framebuffer. (A top-level window with <a href="qwidget.html#windowOpacity-prop">QWidget::windowOpacity</a>() other than 1.0 must use a buffered surface in order to making blending with the background work.)</td></tr>
+<tr><td valign="top"><tt>QWSWindowSurface::Opaque</tt></td><td align="center" valign="top"><tt>0x4</tt></td><td valign="top">The surface contains only opaque pixels.</td></tr>
+</table></p>
+<p>The SurfaceFlags type is a typedef for <a href="qflags.html">QFlags</a>&lt;SurfaceFlag&gt;. It stores an OR combination of SurfaceFlag values.</p>
+<p>See also <a href="qwswindowsurface.html#surfaceFlags">surfaceFlags</a>() and <a href="qwswindowsurface.html#setSurfaceFlags">setSurfaceFlags</a>().</p>
+<hr />
+<h2>Member Function Documentation</h2>
+<h3 class="fn"><a name="QWSWindowSurface"></a>QWSWindowSurface::QWSWindowSurface ()</h3>
+<p>Constructs an empty surface.</p>
+<h3 class="fn"><a name="QWSWindowSurface-2"></a>QWSWindowSurface::QWSWindowSurface ( <a href="qwidget.html">QWidget</a> * <i>window</i> )</h3>
+<p>Constructs an empty surface for the given top-level <i>window</i>.</p>
+<h3 class="fn"><a name="dtor.QWSWindowSurface"></a>QWSWindowSurface::~QWSWindowSurface ()</h3>
+<p>Destroys this surface.</p>
+<h3 class="fn"><a name="attach"></a>bool QWSWindowSurface::attach ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>Implement this function to attach a server-side surface instance to the corresponding client side instance using the given <i>data</i>. Return true if successful; otherwise return false.</p>
+<p>See also <a href="qwswindowsurface.html#detach">detach</a>() and <a href="qwswindowsurface.html#data">data</a>().</p>
+<h3 class="fn"><a name="beginPaint"></a>void QWSWindowSurface::beginPaint ( const <a href="qregion.html">QRegion</a> &amp; <i>region</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>This function is called before painting onto the surface begins, with the <i>region</i> in which the painting will occur.</p>
+<p>See also <a href="qwswindowsurface.html#endPaint">endPaint</a>() and <a href="qwswindowsurface.html#paintDevice">paintDevice</a>().</p>
+<h3 class="fn"><a name="clipRegion"></a>const <a href="qregion.html">QRegion</a> QWSWindowSurface::clipRegion () const</h3>
+<p>Returns the region currently visible on the screen.</p>
+<p>See also <a href="qwswindowsurface.html#setClipRegion">setClipRegion</a>().</p>
+<h3 class="fn"><a name="data"></a>const <a href="qbytearray.html">QByteArray</a> QWSWindowSurface::data () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>Implement this function to return the data required for creating a server-side representation of the surface.</p>
+<p>See also <a href="qwswindowsurface.html#attach">attach</a>().</p>
+<h3 class="fn"><a name="detach"></a>void QWSWindowSurface::detach ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>Implement this function to detach a server-side instance from the client.</p>
+<p>See also <a href="qwswindowsurface.html#attach">attach</a>() and <a href="qwswindowsurface.html#release">release</a>().</p>
+<h3 class="fn"><a name="dirtyRegion"></a>const <a href="qregion.html">QRegion</a> QWSWindowSurface::dirtyRegion () const</h3>
+<p>Returns the region that must be repainted.</p>
+<p>See also <a href="qwswindowsurface.html#setDirty">setDirty</a>().</p>
+<h3 class="fn"><a name="endPaint"></a>void QWSWindowSurface::endPaint ( const <a href="qregion.html">QRegion</a> &amp; <i>region</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>This function is called after painting onto the surface has ended, with the <i>region</i> in which the painting was performed.</p>
+<p>See also <a href="qwswindowsurface.html#beginPaint">beginPaint</a>() and <a href="qwswindowsurface.html#paintDevice">paintDevice</a>().</p>
+<h3 class="fn"><a name="flush"></a>void QWSWindowSurface::flush ( <a href="qwidget.html">QWidget</a> * <i>widget</i>, const <a href="qregion.html">QRegion</a> &amp; <i>region</i>, const <a href="qpoint.html">QPoint</a> &amp; <i>offset</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Flushes the given <i>region</i> from the specified <i>widget</i> onto the screen.</p>
+<p>Note that the <i>offset</i> parameter is currently unused.</p>
+<p>See also <a href="qwswindowsurface.html#painterOffset">painterOffset</a>().</p>
+<h3 class="fn"><a name="geometry"></a><a href="qrect.html">QRect</a> QWSWindowSurface::geometry () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>Implement this function to return the currently allocated area.</p>
+<p>See also <a href="qwswindowsurface.html#setGeometry">setGeometry</a>(), <a href="qwswindowsurface.html#scroll">scroll</a>(), and <a href="qwswindowsurface.html#image">image</a>().</p>
+<h3 class="fn"><a name="image"></a>const <a href="qimage.html">QImage</a> QWSWindowSurface::image () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>Implement this function to return an image of the top-level window.</p>
+<p>See also <a href="qwswindowsurface.html#geometry">geometry</a>().</p>
+<h3 class="fn"><a name="isBuffered"></a>bool QWSWindowSurface::isBuffered () const</h3>
+<p>Returns true if the <a href="qwswindowsurface.html#SurfaceFlag-enum">QWSWindowSurface::Buffered</a> is set; otherwise returns false.</p>
+<p>See also <a href="qwswindowsurface.html#surfaceFlags">surfaceFlags</a>().</p>
+<h3 class="fn"><a name="isOpaque"></a>bool QWSWindowSurface::isOpaque () const</h3>
+<p>Returns true if the <a href="qwswindowsurface.html#SurfaceFlag-enum">QWSWindowSurface::Opaque</a> is set; otherwise returns false.</p>
+<p>See also <a href="qwswindowsurface.html#surfaceFlags">surfaceFlags</a>().</p>
+<h3 class="fn"><a name="isReserved"></a>bool QWSWindowSurface::isReserved () const</h3>
+<p>Returns true if the <a href="qwswindowsurface.html#SurfaceFlag-enum">QWSWindowSurface::Reserved</a> is set; otherwise returns false.</p>
+<p>See also <a href="qwswindowsurface.html#surfaceFlags">surfaceFlags</a>().</p>
+<h3 class="fn"><a name="isValidFor"></a>bool QWSWindowSurface::isValidFor ( const <a href="qwidget.html">QWidget</a> * <i>window</i> ) const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>Implement this function to return true if the surface is a valid surface for the given top-level <i>window</i>; otherwise return false.</p>
+<p>See also <a href="qwswindowsurface.html#window">window</a>() and <a href="qwswindowsurface.html#key">key</a>().</p>
+<h3 class="fn"><a name="key"></a>const <a href="qstring.html">QString</a> QWSWindowSurface::key () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>Implement this function to return a string that uniquely identifies the class of this surface.</p>
+<p>See also <a href="qwswindowsurface.html#window">window</a>() and <a href="qwswindowsurface.html#isValidFor">isValidFor</a>().</p>
+<h3 class="fn"><a name="paintDevice"></a><a href="qpaintdevice.html">QPaintDevice</a> * QWSWindowSurface::paintDevice ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>Implement this function to return the appropriate paint device.</p>
+<p>See also <a href="qwswindowsurface.html#painterOffset">painterOffset</a>().</p>
+<h3 class="fn"><a name="painterOffset"></a><a href="qpoint.html">QPoint</a> QWSWindowSurface::painterOffset () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Returns the offset to be used when painting.</p>
+<p>See also <a href="qwswindowsurface.html#paintDevice">paintDevice</a>().</p>
+<h3 class="fn"><a name="release"></a>void QWSWindowSurface::release ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Releases the current allocated screen region associated with this window surface.</p>
+<p>See also <a href="qwswindowsurface.html#detach">detach</a>().</p>
+<h3 class="fn"><a name="scroll"></a>void QWSWindowSurface::scroll ( const <a href="qregion.html">QRegion</a> &amp; <i>region</i>, int <i>dx</i>, int <i>dy</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<p>Scrolls the given <i>region</i> <i>dx</i> pixels to the right and <i>dy</i> downward; both <i>dx</i> and <i>dy</i> may be negative.</p>
+<p>See also <a href="qwswindowsurface.html#geometry">geometry</a>().</p>
+<h3 class="fn"><a name="setClipRegion"></a>void QWSWindowSurface::setClipRegion ( const <a href="qregion.html">QRegion</a> &amp; <i>clip</i> )</h3>
+<p>Sets the region currently visible on the screen to be the given <i>clip</i> region.</p>
+<p>See also <a href="qwswindowsurface.html#clipRegion">clipRegion</a>().</p>
+<h3 class="fn"><a name="setDirty"></a>void QWSWindowSurface::setDirty ( const <a href="qregion.html">QRegion</a> &amp; <i>region</i> ) const</h3>
+<p>Marks the given <i>region</i> as dirty, i.e., altered.</p>
+<p>See also <a href="qwswindowsurface.html#dirtyRegion">dirtyRegion</a>().</p>
+<h3 class="fn"><a name="setGeometry"></a>void QWSWindowSurface::setGeometry ( const <a href="qrect.html">QRect</a> &amp; <i>rectangle</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Sets the currently allocated area to be the given <i>rectangle</i>.</p>
+<p>This function is called whenever area covered by the top-level window changes.</p>
+<p>See also <a href="qwswindowsurface.html#geometry">geometry</a>().</p>
+<h3 class="fn"><a name="setSurfaceFlags"></a>void QWSWindowSurface::setSurfaceFlags ( <a href="qwswindowsurface.html#SurfaceFlag-enum">SurfaceFlags</a> <i>flags</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<p>Sets the surface flags describing the contents of this surface, to be the given <i>flags</i>.</p>
+<p>See also <a href="qwswindowsurface.html#surfaceFlags">surfaceFlags</a>().</p>
+<h3 class="fn"><a name="surfaceFlags"></a><a href="qwswindowsurface.html#SurfaceFlag-enum">SurfaceFlags</a> QWSWindowSurface::surfaceFlags () const</h3>
+<p>Returns the surface flags describing the contents of this surface.</p>
+<p>See also <a href="qwswindowsurface.html#setSurfaceFlags">setSurfaceFlags</a>(), <a href="qwswindowsurface.html#isBuffered">isBuffered</a>(), <a href="qwswindowsurface.html#isOpaque">isOpaque</a>(), and <a href="qwswindowsurface.html#isReserved">isReserved</a>().</p>
+<h3 class="fn"><a name="window"></a><a href="qwidget.html">QWidget</a> * QWSWindowSurface::window () const</h3>
+<p>Returns a pointer to the top-level window associated with this surface.</p>
+<p>See also <a href="qwswindowsurface.html#isValidFor">isValidFor</a>() and <a href="qwswindowsurface.html#key">key</a>().</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qt 4.2.2</div></td>
+</tr></table></div></address></body>
+</html>

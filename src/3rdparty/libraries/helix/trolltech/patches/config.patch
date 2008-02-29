@@ -1,0 +1,16 @@
+This patch includes the changes to Helix for it to honor the "config.h"
+mechanism of configuration.
+
+--- helix/src/video/vidutil/colormap.c 	Fri Mar 17 18:12:22 EST 2006
++++ helix/src/video/vidutil/colormap.c 	Fri Mar 17 18:12:22 EST 2006
+@@ -47,6 +47,10 @@
+  * 
+  * ***** END LICENSE BLOCK ***** */
+ 
++#ifdef CONFIG_H_FILE
++#include CONFIG_H_FILE
++#endif
++
+ #include "hxtypes.h"
+ #include "hlxclib/windows.h"
+ 

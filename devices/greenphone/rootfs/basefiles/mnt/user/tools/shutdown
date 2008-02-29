@@ -1,0 +1,58 @@
+#!/bin/sh
+
+QTOPIA_TOOLS=/mnt/user/tools
+
+if [ $# -eq 0 ]; then
+    gifanim $QTOPIA_TOOLS/splash-shutdown-exit.gif &
+else
+    while [ $# -gt 0 ]; do
+        case $1 in
+            --reason-low-power)
+                gifanim $QTOPIA_TOOLS/splash-shutdown-low-power.gif &
+                ;;
+            --reason-*)
+                gifanim $QTOPIA_TOOLS/splash-shutdown-unknown.gif &
+                ;;
+            --exit)
+                gifanim $QTOPIA_TOOLS/splash-shutdown-exit.gif &
+                exit 0
+                ;;
+            -r)
+                gifanim $QTOPIA_TOOLS/splash-shutdown-exit.gif &
+                killall qpe.sh
+                killall qpe
+                killall sipagent
+                killall qss
+                killall quicklauncher
+                killall mediaplayer
+                sleep 1
+                reboot
+                ;;
+            -h)
+                gifanim $QTOPIA_TOOLS/splash-shutdown-exit.gif &
+                killall qpe.sh
+                killall qpe
+                killall sipagent
+                killall qss
+                killall quicklauncher
+                killall mediaplayer
+                sleep 1
+                poweroff
+                ;;
+            *)
+                gifanim $QTOPIA_TOOLS/splash-shutdown-exit.gif &
+                ;;
+        esac
+        shift
+    done
+fi
+
+killall qpe.sh
+killall qpe
+killall sipagent
+killall qss
+killall quicklauncher
+killall mediaplayer
+sleep 1
+poweroff
+

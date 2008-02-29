@@ -1,37 +1,16 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
-** See http://www.trolltech.com/gpl/ for GPL licensing information.
+** $TROLLTECH_DUAL_LICENSE$
 **
-** Contact info@trolltech.com if any conditions of this licensing are
-** not clear to you.
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
-**********************************************************************/
+****************************************************************************/
+
 /*
  * KAsteroids - Copyright (c) Martin R. Jones 1997
  *
@@ -40,883 +19,1284 @@
 
 #include "view.h"
 
-#include <qtopia/resource.h>
-
 #include <qapplication.h>
-#include <qkeycode.h>
-#include <qaccel.h>
+#include <QVBoxLayout>
+#include <QtDebug>
 
 #include <stdlib.h>
 #include <math.h>
 
-#define IMG_BACKGROUND "qasteroids/bg"
+#define IMG_BACKGROUND ":image/qasteroids/bg"
 
-#define REFRESH_DELAY           33
-#define SHIP_SPEED              0.3
-#ifndef QTOPIA_PHONE
-# define MISSILE_SPEED           10.0
-#else
-# define MISSILE_SPEED           6.0
-#endif
-#define SHIP_STEPS              64
-#define ROTATE_RATE             2
+#define REFRESH_DELAY          33
+#define MISSILE_SPEED          10.0
+#define SHIP_STEPS             64
+#define ROTATION_RATE           2
 #define SHIELD_ON_COST          1
-#define SHIELD_HIT_COST         30
+#define SHIELD_HIT_COST        30
 #define BRAKE_ON_COST           4
 
-#define MAX_ROCK_SPEED          2.5
-#define MAX_POWERUP_SPEED       1.5
-#define MAX_SHIP_SPEED		8
-#define MAX_BRAKES              5
-#define MAX_SHIELDS             5
-#define MAX_FIREPOWER		5
+#define ROCK_SPEED_MULTIPLIER   2.5
+#define MAX_SHIP_SPEED          8
+#define MAX_BRAKING_FORCE       5
+#define MAX_SHIELD_STRENGTH     5
+#define MAX_FIREPOWER           5
 
-#define TEXT_SPEED              4
+#define TEXT_SPEED              2
 
 #define PI_X_2                  6.283185307
 #ifndef M_PI
-#define M_PI 3.141592654
+#define M_PI                    3.141592654
 #endif
 
-struct
+#define ROCK_IMAGE_COUNT   32
+#define SHIP_IMAGE_COUNT   32
+#define FRAG_IMAGE_COUNT   16
+#define SHIELD_IMAGE_COUNT  6
+
+static struct
 {
     int id;
     const char *path;
     int frames;
-}
-kas_animations [] =
+} kas_animations[] =
 {
-//    { ID_ROCK_LARGE,       "rock1/rock1\%1.png",       32 },
-    { ID_ROCK_MEDIUM,      "rock2/rock2\%1.png",       32 },
-    { ID_ROCK_SMALL,       "rock3/rock3\%1.png",       32 },
-    { ID_SHIP,             "ship/ship\%1.png",         32 },
-    { ID_MISSILE,          "missile/missile.png",      0 },
-    { ID_BIT,              "bits/bits\%1.png",         16 },
-    { ID_EXHAUST,          "exhaust/exhaust.png",      0 },
-    { ID_ENERGY_POWERUP,   "powerups/energy.png",      0 },
-//    { ID_TELEPORT_POWERUP, "powerups/teleport%1.png", 12 },
-    { ID_BRAKE_POWERUP,    "powerups/brake.png",       0 },
-    { ID_SHIELD_POWERUP,   "powerups/shield.png",      0 },
-    { ID_SHOOT_POWERUP,    "powerups/shoot.png",       0 },
-    { ID_SHIELD,           "shield/shield\%1.png",      6 },
-    { 0,                   0,                          0 }
+//  { ID_ROCK_LARGE,       "rock1/rock1\%1.png",    ROCK_IMAGE_COUNT },
+    { ID_ROCK_MEDIUM,      "rock2/rock2\%1.png",    ROCK_IMAGE_COUNT },
+    { ID_ROCK_SMALL,       "rock3/rock3\%1.png",    ROCK_IMAGE_COUNT },
+    { ID_SHIP,             "ship/ship\%1.png",      SHIP_IMAGE_COUNT },
+    { ID_MISSILE,          "missile/missile.png",   0 },
+    { ID_FRAGMENT,         "bits/bits\%1.png",      FRAG_IMAGE_COUNT },
+    { ID_EXHAUST,          "exhaust/exhaust.png",   0 },
+    { ID_ENERGY_POWERUP,   "powerups/energy.png",   0 },
+    { ID_TELEPORT_POWERUP, "powerups/teleport.png", 0 },
+    { ID_BRAKE_POWERUP,    "powerups/brake.png",    0 },
+    { ID_SHIELD_POWERUP,   "powerups/shield.png",   0 },
+    { ID_SHOOT_POWERUP,    "powerups/shoot.png",    0 },
+    { ID_SHIELD,           "shield/shield\%1.png",  SHIELD_IMAGE_COUNT },
+    { 0,                   0,                       0 }
 };
 
+/* mws
+  Apparently, the teleport sprite used to be animated.
+  This was the line in the table above for the teleport
+  icon:
+
+  { ID_TELEPORT_POWERUP, "powerups/teleport%1.png",  12 },
+
+  But there is a teleport.png file there, not a sequence
+  of them, so it must be a single png, ie frames = 0.
+ */
+
+/*!
+  \externalpage http://doc.trolltech.com/4.2/graphicsview.html
+  \title Qt Graphics View Framework
+ */
+
+/*!
+  \class MyGraphicsView
+  \internal
+
+  \brief The MyGraphicsView class is a subclass of QGraphicsView,
+         which was created for the sole purpose of allowing us to
+         implement our own resizeEvent() function.
+
+  We need to re-implement that function to get the widget's new
+  geometry once it has been resized to fit the space available. We
+  do this by calling the base class resizeEvent(), which processes
+  the resize event generated when the widget was resized to fit
+  the available space.
+
+  After processing that event, we get the width() and height() of
+  the resized widget from the base class and use them to construct
+  a rectangle at (0,0), which we use to set the scene geometry of
+  our QGraphicsScene.
+ */
 
 
-KAsteroidsView::KAsteroidsView( QWidget *parent, const char *name )
-    : QWidget( parent, name ),
-      field(200, 200),
-      view(&field,this)
+/*!
+  \internal
+
+  We need to re-implement this virtual function here to get the
+  widget's new geometry once it has been resized to fit the space
+  available. We do this by calling the base class resizeEvent(),
+  which processes the resize event generated when the widget was
+  resized to fit the available space.
+
+  After processing that event, we get the width() and height() of
+  the resized widget from the base class and use them to construct
+  a rectangle at (0,0), which we use to set the scene geometry of
+  our QGraphicsScene.
+ */
+void MyGraphicsView::resizeEvent(QResizeEvent* event)
 {
-    view.setVScrollBarMode( QScrollView::AlwaysOff );
-    view.setHScrollBarMode( QScrollView::AlwaysOff );
-    rocks.setAutoDelete( TRUE );
-    missiles.setAutoDelete( TRUE );
-    bits.setAutoDelete( TRUE );
-    powerups.setAutoDelete( TRUE );
-    exhaust.setAutoDelete( TRUE );
+    QGraphicsView::resizeEvent(event);
+    scene()->setSceneRect(0,0,width(),height());
+}
 
-    QPixmap pm( Resource::loadPixmap(IMG_BACKGROUND) );
-    field.setBackgroundPixmap( pm );
+/*!
+  \class KAsteroidsView
+  \brief The KAsteroidsView class contains the asteroids game's
+         use of the \l {Qt Graphics View Framework} API.
+  \internal
 
-    textSprite = new QCanvasText( &field );
-    QFont font( "helvetica", 12 );
-    textSprite->setFont( font );
+  The class creates a \l {QGraphicsScene} {scene} and a
+  \l {MyGraphicsView} {view} for the scene.
+ */
 
-    shield = 0;
-    shieldOn = FALSE;
+/*!
+  \internal
+ */
+KAsteroidsView::KAsteroidsView(QWidget* parent)
+    : QWidget(parent)
+{
+    scene_ = new QGraphicsScene();
+    view_ = new MyGraphicsView(scene_,this);
+    view_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    view_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    scene_->setBackgroundBrush(QPixmap(IMG_BACKGROUND));
+
+    QVBoxLayout* layout = new QVBoxLayout(this);
+    layout->addWidget(view_);
+    layout->setSpacing(0);
+    layout->setMargin(0);
+
+    textSprite_ = new QGraphicsTextItem(0,scene_);
+
+    shield_ = 0;
+    shieldIsUp_ = false;
     refreshRate = REFRESH_DELAY;
 
     readSprites();
 
-    shieldTimer = new QTimer( this );
-    connect( shieldTimer, SIGNAL(timeout()), this, SLOT(hideShield()) );
-    mTimerId = -1;
+    shieldTimer_ = new QTimer(this);
+    connect(shieldTimer_, SIGNAL(timeout()), this, SLOT(dropShield()));
+    masterTimerId_ = -1;
 
-    shipPower = MAX_POWER_LEVEL;
-    vitalsChanged = FALSE;
-    can_destroy_powerups = FALSE;
+    shipPowerLevel_ = MAX_SHIP_POWER_LEVEL;
+    vitalsChanged_ = false;
 
-    mPaused = TRUE;
-    gameover = TRUE;
+    paused_ = true;
+    gameOver_ = true;
+    started_ = false;
 }
 
-// - - -
+/*!
+  \internal
 
+  The destructor resets the game. It does not delete the scene
+  or the view. The view has this KAsteroidsView as its parent,
+  so we assume it will be deleted in the normal Qt hierarchical
+  destruction on exit. The scene has no parent, but we assume
+  it is deleted during the same process.
+ */
 KAsteroidsView::~KAsteroidsView()
 {
+    reset();
 }
 
-// - - -
+/*!
+  \internal
 
+  This function is called on exit, but, more importantly, it
+  is called when a new game starts. It deletes any existing
+  rocks, missiles, ship fragments, and powerups and resets
+  several global variables. It also hides the ship and the
+  shield.
+ */
 void KAsteroidsView::reset()
 {
-    rocks.clear();
-    missiles.clear();
-    bits.clear();
-    powerups.clear();
-    exhaust.clear();
+    qDeleteAll(rocks_);
+    rocks_.clear();
+    qDeleteAll(missiles_);
+    missiles_.clear();
+    qDeleteAll(ship_fragments_);
+    ship_fragments_.clear();
+    qDeleteAll(powerups_);
+    powerups_.clear();
+    KPowerup::clearCounts();
+    qDeleteAll(exhaust_);
+    exhaust_.clear();
 
-    shotsFired = 0;
-    shotsHit = 0;
+    clearShotsFired();
+    clearRocksHit();
 
-    rockSpeed = 1.0;
-    powerupSpeed = 1.0;
-    mFrameNum = 0;
-    mPaused = FALSE;
+    rockSpeed_ = 1.0;
+    timerEventCount_ = 0;
+    paused_ = false;
 
-    ship->hide();
-    shield->hide();
+    ship_->hide();
+    shield_->hide();
 /*
-    if ( mTimerId >= 0 ) {
-	killTimer( mTimerId );
-	mTimerId = -1;
+    if (masterTimerId_ >= 0) {
+        killTimer(masterTimerId_);
+        masterTimerId_ = -1;
     }
 */
 }
 
-// - --
+/*!
+  \internal
 
+  Stop the ship's rotation to left or right, and reset the
+  rotation rate variables to their initial values.
+ */
+void KAsteroidsView::stopShipRotation()
+{
+    rotateShipLeft_ = false;
+    rotateShipRight_ = false;
+    rotationRate_ = ROTATION_RATE;
+    rotatingSlowly_ = 0;
+}
+
+/*!
+  \internal
+
+  If the braking force is not yet at its maximum, increment it.
+ */
+void KAsteroidsView::incrementBrakeForce()
+{
+    if (brakeForce() < MAX_BRAKING_FORCE)
+        brakeForce_++;
+}
+
+/*!
+  \internal
+
+  Start a new game. Calls reset() and emits updateVitals();
+ */
 void KAsteroidsView::newGame()
 {
-    gameover = FALSE;
-    if ( shieldOn )
-    {
-      shield->hide();
-      shieldOn = FALSE;
-    }
+    gameOver_ = false;
     reset();
-    if ( mTimerId < 0 )
-	mTimerId = startTimer( REFRESH_DELAY );
+    if (masterTimerId_ < 0)
+        masterTimerId_ = startTimer(REFRESH_DELAY);
     emit updateVitals();
 }
 
-// - - -
+/*!
+  \internal
 
+  Set a flag indicating the game has ended.
+ */
 void KAsteroidsView::endGame()
 {
-    gameover = TRUE;
+    gameOver_ = true;
 }
 
-void KAsteroidsView::pause( bool p )
+/*!
+  \internal
+
+  Put the game in its paused state if \a p is true,
+  and take it out of its paused state if \a p is false.
+
+  This is a bit misleading, because the actual pause is
+  maintained by a QMessageBox waiting for the user to
+  press the "OK" button it puts up. As soon as "OK" is
+  pressed, this function is called again with \a p set
+  to false.
+ */
+void KAsteroidsView::pause(bool p)
 {
-    if ( !mPaused && p ) {
-	if ( mTimerId >= 0 ) {
-	    killTimer( mTimerId );
-	    mTimerId = -1;
-	}
-    } else if ( mPaused && !p )
-	mTimerId = startTimer( REFRESH_DELAY );
-    mPaused = p;
+    if (!paused_ && p) {
+        if (masterTimerId_ >= 0) {
+            killTimer(masterTimerId_);
+            masterTimerId_ = -1;
+        }
+    }
+    else if (paused_ && !p)
+        masterTimerId_ = startTimer(REFRESH_DELAY);
+    paused_ = p;
 }
 
-// - - -
+/*!
+  \internal
 
+  Create a new ship and show it. The ship is created in the
+  center of the screen with its shield up to prevent it from
+  being destroyed immediately if there is also a rock there.
+ */
 void KAsteroidsView::newShip()
 {
-    ship->move( field.width()/2, field.height()/2, 0 );
-    shield->move( field.width()/2, field.height()/2, 0 );
-    ship->setVelocity( 0.0, 0.0 );
-    shipDx = 0;
-    shipDy = 0;
-    shipAngle = 0;
-    rotateL = FALSE;
-    rotateR = FALSE;
-    thrustShip = FALSE;
-    shootShip = FALSE;
-    brakeShip = FALSE;
-    teleportShip = FALSE;
-    shieldOn = TRUE;
-    shootDelay = 0;
-    shipPower = MAX_POWER_LEVEL;
-    rotateRate = ROTATE_RATE;
-    rotateSlow = 0;
+    ship_->setPos(scene_->width()/2, scene_->height()/2);
+    ship_->resetImage();
+    shield_->setPos(scene_->width()/2, scene_->height()/2);
+    shield_->resetImage();
+    ship_->setVelocity(0.0, 0.0);
+    shipDx_ = 0;
+    shipDy_ = 0;
+    shipAngleIndex_ = 0;
+    stopEngine();
+    stopShipRotation();
+    stopShooting();
+    releaseBrakes();
+    teleportShip_ = false;
+    shieldIsUp_ = true;
+    shipPowerLevel_ = MAX_SHIP_POWER_LEVEL;
 
-    mBrakeCount = 0;
-    mTeleportCount = 0;
-    mShootCount = 0;
+    brakeForce_ = 0;
+    teleportCount_ = 0;
+    firePower_ = 0;
 
-    ship->show();
-    shield->show();
-    mShieldCount = 1;   // just in case the ship appears on a rock.
-    shieldTimer->start( 1000, TRUE );
+    ship_->show();
+    shield_->show();
+    shieldStrength_ = 1;   // just in case the ship appears on a rock.
+    raiseShield();
 }
 
-void KAsteroidsView::setShield( bool s )
+/*!
+  \internal
+
+  If the ship's shield strength is greater than 0,
+  raise the shield.
+ */
+void KAsteroidsView::raiseShield()
 {
-    if ( shieldTimer->isActive() && !s ) {
-	shieldTimer->stop();
-	hideShield();
-    } else {
-	shieldOn = s && mShieldCount;
+    shieldIsUp_ = (shieldStrength_ > 0);
+    if (shieldIsUp_) {
+        shieldTimer_->setSingleShot(true);
+        shieldTimer_->start(1000);
+        --shieldStrength_;
+        reducePower(SHIELD_ON_COST);
     }
 }
 
-void KAsteroidsView::brake( bool b )
-{
-    if ( mBrakeCount )
-    {
-	if ( brakeShip && !b )
-	{
-	    rotateL = FALSE;
-	    rotateR = FALSE;
-	    thrustShip = FALSE;
-	    rotateRate = ROTATE_RATE;
-	}
+/*!
+  \internal
 
-	brakeShip = b;
+  Drop the shield. The shield's hide() function is called,
+  and the "shield is up" flag is turned off.
+ */
+void KAsteroidsView::dropShield()
+{
+    shield_->hide();
+    shieldIsUp_ = false;
+}
+
+/*!
+  \internal
+
+  If the ship has any braking force available, start applying
+  the brakes to slow down the ship.
+ */
+void KAsteroidsView::startBraking()
+{
+    if (brakeForce())
+        applyBrakes();
+}
+
+/*!
+  \internal
+
+  If the ship has any braking force available, release the
+  brakes, ie stop applying the breaks. Also, if the ship is
+  braking, stop the ship movement, and stop its rotation. I
+  don't know if this is actually correct, but this is how it
+  was programmed when I ported it to Qtopia 4.2.
+ */
+void KAsteroidsView::stopBraking()
+{
+    if (brakeForce()) {
+        if (shipIsBraking()) {
+            stopEngine();
+            stopShipRotation();
+        }
+        releaseBrakes();
     }
 }
 
-// - - -
+/*!
+  \internal
 
+  Read the sprite files and generate pixmaps for use in the
+  animations required for the game.
+ */
 void KAsteroidsView::readSprites()
 {
-    QString sprites_prefix = Resource::findPixmap( IMG_BACKGROUND );
-    int sep = sprites_prefix.findRev( "/" );
+    QString sprites_prefix = IMG_BACKGROUND;
+    int sep = sprites_prefix.lastIndexOf("/");
 
-    sprites_prefix.truncate( sep );
+    sprites_prefix.truncate(sep);
 
     int i = 0;
-    while ( kas_animations[i].id )
-    {
-	animation.insert( kas_animations[i].id,
-	    new QCanvasPixmapArray( sprites_prefix + "/" + kas_animations[i].path,
-				    kas_animations[i].frames ) );
-	i++;
+    QString fn;
+    QString base = sprites_prefix + "/";
+    QList<QPixmap> pixmap_list;
+    while (kas_animations[i].id) {
+        pixmap_list.clear();
+        if (kas_animations[i].frames) {
+            for (int j=0; j<kas_animations[i].frames; ++j) {
+                QString s(kas_animations[i].path);
+                fn = base + s.arg(j,4,10,QLatin1Char('0'));
+                QPixmap pixmap(fn);
+                pixmap_list.insert(j,pixmap);
+            }
+        }
+        else {
+            fn = base + QString(kas_animations[i].path);
+            QPixmap pixmap(fn);
+            pixmap_list.insert(0,pixmap);
+        }
+        animation_.insert(kas_animations[i].id,pixmap_list);
+/*
+  The stuff below was replaced by the stuff above. I don't know if it's right.
+  mws 13/10/2006 ...and it's Friday the 13th today.
+        animation_.insert(kas_animations[i].id,
+            new QCanvasPixmapArray(sprites_prefix+"/"+kas_animations[i].path,
+                                   kas_animations[i].frames));
+*/
+        i++;
     }
 
-    ship = new QCanvasSprite( animation[ID_SHIP], &field );
-    ship->hide();
+    ship_ = new MyAnimation(&animation_[ID_SHIP],scene_);
+    ship_->hide();
 
-    shield = new KShield( animation[ID_SHIELD], &field );
-    shield->hide();
+    shield_ = new KShield(&animation_[ID_SHIELD],scene_);
+    shield_->hide();
 }
 
-// - - -
+/*!
+  \internal
 
-void KAsteroidsView::addRocks( int num )
+  Adds \a count new rocks to the scene.
+ */
+void KAsteroidsView::addRocks(int count)
 {
-    for ( int i = 0; i < num; i++ )
-    {
-	KRock *rock = new KRock( animation[ID_ROCK_MEDIUM], &field,
-			     ID_ROCK_MEDIUM, randInt(2), randInt(2) ? -1 : 1 );
-	double dx = (2.0 - randDouble()*4.0) * rockSpeed;
-	double dy = (2.0 - randDouble()*4.0) * rockSpeed;
-	rock->setVelocity( dx, dy );
-	rock->setFrame( randInt( rock->frameCount() ) );
-	if ( dx > 0 )
-	{
-	    if ( dy > 0 )
-		rock->move( 5, 5, 0 );
-	    else
-		rock->move( 5, field.height() - 25, 0 );
-	}
-	else
-	{
-	    if ( dy > 0 )
-		rock->move( field.width() - 25, 5, 0 );
-	    else
-		rock->move( field.width() - 25, field.height() - 25, 0 );
-	}
-	rock->show( );
-	rocks.append( rock );
+    for (int i=0; i<count; i++) {
+        KRock *rock = new KRock(&animation_[ID_ROCK_MEDIUM],
+                                scene_,
+                                ID_ROCK_MEDIUM,
+                                randInt(2),
+                                randInt(2) ? -1 : 1);
+        double dx = (2.0 - randDouble()*4.0) * rockSpeed_;
+        double dy = (2.0 - randDouble()*4.0) * rockSpeed_;
+        rock->setVelocity(dx,dy);
+        rock->setImage(randInt(ROCK_IMAGE_COUNT));
+        if (dx > 0) {
+            if (dy > 0)
+                rock->setPos(5,5);
+            else
+                rock->setPos(5,scene_->height() - 25);
+        }
+        else {
+            if (dy > 0)
+                rock->setPos(scene_->width() - 25,5);
+            else
+                rock->setPos(scene_->width() - 25,scene_->height() - 25);
+
+        }
+        rock->show();
+        rocks_.append(rock);
     }
 }
 
-// - - -
+/*!
+  \internal
 
-void KAsteroidsView::showText( const QString &text, const QColor &color, bool scroll )
+  Displays a \a text message in a certain \a color, which
+  then scrolls off the screen if \a scroll is true. In the
+  QTopia phone version, \a scroll is ignored.
+ */
+void KAsteroidsView::showText(const QString& text, bool scroll)
 {
-    textSprite->setTextFlags( AlignLeft | AlignVCenter);
-    textSprite->setText( text );
-    textSprite->setColor( color );
+    textSprite_->setPlainText(text);
+    textSprite_->setDefaultTextColor(Qt::yellow);
 
-    if ( scroll ) {
-	textSprite->move( (field.width()-textSprite->boundingRect().width()) / 2,
-			    -textSprite->boundingRect().height() );
-	textDy = TEXT_SPEED;
-    } else {
-	textSprite->move( (field.width()-textSprite->boundingRect().width()) / 2,
-			  (field.height()-textSprite->boundingRect().height()) / 2 );
-	textDy = 0;
+    qreal x = (scene_->width()-textSprite_->boundingRect().width())/2;
+    qreal y = 0.0;
+
+#ifdef QTOPIA_PHONE
+    scroll = false;
+#endif
+    if (scroll) {
+        y = -textSprite_->boundingRect().height();
+        textDy_ = TEXT_SPEED;
     }
-    textSprite->show();
+    else {
+        y = (scene_->height()-textSprite_->boundingRect().height())/2;
+        textDy_ = 0;
+    }
+    textSprite_->setPos(x,y);
+    textSprite_->show();
 }
 
-// - - -
+/*!
+  \internal
 
+  Starts the text scrolling up so that it scrolls off the
+  screen.
+ */
 void KAsteroidsView::hideText()
 {
-    textDy = -TEXT_SPEED;
+    textDy_ = -TEXT_SPEED;
 }
 
-// - - -
+/*!
+  \internal
 
-void KAsteroidsView::resizeEvent(QResizeEvent* event)
+  Returns true if the text message has scrolled completely
+  off the top of the screen.
+ */
+bool KAsteroidsView::textAboveScreen() const
 {
-    QWidget::resizeEvent(event);
-    field.resize(width()-4, height()-4);
-    view.resize(width(),height());
+    if (textDy_ >= 0)
+        return false;
+    QRectF br = textSprite_->boundingRect();
+    if (br.y() > -br.height())
+        return false;
+    return true;
 }
 
-// - - -
+/*!
+  \internal
 
-void KAsteroidsView::timerEvent( QTimerEvent * )
+  Construct a bunch of messages for communicating instructions
+  to the user.
+ */
+void KAsteroidsView::constructMessages(const QString& t)
 {
-    field.advance();
+    startGameMessage_ =
+        tr("Press %1\nto start game","").arg(t);
+    shipKilledMessage_ =
+        tr("Ship Destroyed\nPress %1", "").arg(t);
+    gameOverMessage_ =
+        tr("GAME OVER\nPress %1\nfor new game.","").arg(t);
+}
 
-    QCanvasSprite *rock;
+/*!
+  \internal
 
-    // move rocks forward
-    for ( rock = rocks.first(); rock; rock = rocks.next() ) {
-	((KRock *)rock)->nextFrame();
-	wrapSprite( rock );
+  Display a message telling the user how to start the game
+  so he doesn't sit there feeling stupid.
+ */
+void KAsteroidsView::reportStartGame()
+{
+    showText(startGameMessage_,Qt::yellow);
+}
+
+/*!
+  \internal
+
+  Display a message indicating the ship has been destroyed,
+  as if it wasn't obvious from all the bits and pieces flying
+  around.
+ */
+void KAsteroidsView::reportShipKilled()
+{
+    showText(shipKilledMessage_,Qt::yellow);
+}
+
+/*!
+  \internal
+
+  Display a message indicating the game is over.
+ */
+void KAsteroidsView::reportGameOver()
+{
+    showText(gameOverMessage_,false);
+}
+
+/*!
+  \internal
+
+  This is where most of the game processing happens. It is
+  called for each timer event. All the objects on the screen
+  are aged and moved, and the important collisions are detected
+  and interpreted.
+
+  First the scene's advance() function is called to advance the
+  animation of each of the game's objects.
+ */
+void
+KAsteroidsView::timerEvent(QTimerEvent* )
+{
+    if (!started_) {
+        reportStartGame();
+        started_ = true;
     }
+    scene_->advance();
 
-    wrapSprite( ship );
-
-    // check for missile collision with rocks.
     processMissiles();
+    processFragments();
 
-    // these are generated when a ship explodes
-    for ( KBit *bit = bits.first(); bit; bit = bits.next() )
-    {
-	if ( bit->expired() )
-	{
-	    bits.removeRef( bit );
-	}
-	else
-	{
-	    bit->growOlder();
-	    bit->setFrame( ( bit->frame()+1 ) % bit->frameCount() );
-	}
-    }
+    while (!exhaust_.isEmpty())
+        delete exhaust_.takeFirst();
 
-    for ( KExhaust *e = exhaust.first(); e; e = exhaust.next() )
-	exhaust.removeRef( e );
-
-    // move / rotate ship.
-    // check for collision with a rock.
     processShip();
-
-    // move powerups and check for collision with player and missiles
     processPowerups();
 
-    if ( textSprite->visible() )
-    {
-	if ( textDy < 0 &&
-	     textSprite->boundingRect().y() <= -textSprite->boundingRect().height() ) {
-	    textSprite->hide();
-	} else {
-	    textSprite->moveBy( 0, textDy );
-	}
-	if ( textSprite->boundingRect().y() > (field.height()-textSprite->boundingRect().height())/2 )
-	    textDy = 0;
+    if (textSprite_->isVisible()) {
+        if (textAboveScreen()) {
+            textSprite_->hide();
+        }
+        else {
+            textSprite_->moveBy(0,textDy_);
+        }
+        QRectF br = textSprite_->boundingRect();
+        if (br.y() > (scene_->height() - br.height())/2)
+            textDy_ = 0;
     }
 
-    if ( vitalsChanged && !(mFrameNum % 10) ) {
-	emit updateVitals();
-	vitalsChanged = FALSE;
+    if (vitalsChanged_ && !(timerEventCount_ % 10)) {
+        emit updateVitals();
+        vitalsChanged_ = false;
     }
 
-    mFrameNum++;
+    timerEventCount_++;
 }
 
-void KAsteroidsView::wrapSprite( QCanvasItem *s )
+/*!
+  If there aren't too many powerups of the specifield \a type,
+  create a powerup of that \a type and return a pointer to it.
+  Otherwise return null.
+ */
+KPowerup*
+KAsteroidsView::createPowerup(int type)
 {
-    int x = int(s->x() + s->boundingRect().width() / 2);
-    int y = int(s->y() + s->boundingRect().height() / 2);
-
-    if ( x > field.width() )
-	s->move( s->x() - field.width(), s->y() );
-    else if ( x < 0 )
-	s->move( field.width() + s->x(), s->y() );
-
-    if ( y > field.height() )
-	s->move( s->x(), s->y() - field.height() );
-    else if ( y < 0 )
-	s->move( s->x(), field.height() + s->y() );
+    if (KPowerup::quotaFilled(type))
+        return 0;
+    return new KPowerup(&animation_[type],scene_,type);
 }
 
-// - - -
+/*!
+  \internal
 
-void KAsteroidsView::rockHit( QCanvasItem *hit )
+  Destroy \a rock because it was either hit by a missile
+  fired by the ship, or it was hit by the ship itself while
+  the ship's shield was up.
+
+  If \a rock is a large rock, it is broken into medium
+  size rock fragments. If \a rock is a medium size rock, it
+  is broken into small rock fragments. If \a rock is small
+  already, it is simply removed from the screen.
+
+  An appropriate rockHit signal is emitted so the game score
+  can be updated.
+
+  Additionally, a powerup might be created as a consequence
+  of destroying the rock.
+ */
+void KAsteroidsView::destroyRock(MyAnimation* oldRock)
 {
-    KPowerup *nPup = 0;
-#ifdef QTOPIA_PHONE
-    const int range = 60;
-#else
-    const int range = 30;
-#endif
-    int rnd = static_cast<int>(randDouble()*range) % range;
-    switch( rnd )
-    {
-      case 4:
-      case 5:
-	nPup = new KPowerup( animation[ID_ENERGY_POWERUP], &field,
-			     ID_ENERGY_POWERUP );
-	break;
-      case 10:
-//        nPup = new KPowerup( animation[ID_TELEPORT_POWERUP], &field,
-//                             ID_TELEPORT_POWERUP );
-	break;
-      case 15:
-	nPup = new KPowerup( animation[ID_BRAKE_POWERUP], &field,
-				  ID_BRAKE_POWERUP );
-	break;
-      case 20:
-	nPup = new KPowerup( animation[ID_SHIELD_POWERUP], &field,
-				  ID_SHIELD_POWERUP );
-	break;
-      case 24:
-      case 25:
-	nPup = new KPowerup( animation[ID_SHOOT_POWERUP], &field,
-				  ID_SHOOT_POWERUP );
-	break;
-    }
-    if ( nPup )
-    {
-	double r = 0.5 - randDouble();
-	nPup->move( hit->x(), hit->y(), 0 );
-	nPup->setVelocity( hit->xVelocity() + r, hit->yVelocity() + r );
-	nPup->show( );
-	powerups.append( nPup );
+    rocks_.removeAll(oldRock); // destroyed at exit.
+    if (oldRock->type() == ID_ROCK_SMALL) {
+        KPowerup* new_pup = 0;
+        switch (randInt(30)) {
+          case 2:
+              new_pup = createPowerup(ID_ENERGY_POWERUP);
+              break;
+          case 10:
+              new_pup = createPowerup(ID_TELEPORT_POWERUP);
+              break;
+          case 15:
+              new_pup = createPowerup(ID_BRAKE_POWERUP);
+              break;
+          case 20:
+              new_pup = createPowerup(ID_SHIELD_POWERUP);
+              break;
+          case 24:
+              new_pup = createPowerup(ID_SHOOT_POWERUP);
+              break;
+        }
+
+        if (new_pup) {
+            double r = (0.5 - randDouble()) * 4.0;
+            new_pup->setPos(oldRock->x(),oldRock->y());
+            new_pup->setVelocity(oldRock->velocityX()+r,oldRock->velocityY()+r);
+            new_pup->show();
+            powerups_.append(new_pup);
+        }
     }
 
-    if ( hit->rtti() == ID_ROCK_LARGE || hit->rtti() == ID_ROCK_MEDIUM )
-    {
-	// break into smaller rocks
-	double addx[4] = { 1.0, 1.0, -1.0, -1.0 };
-	double addy[4] = { -1.0, 1.0, -1.0, 1.0 };
-
-	double dx = hit->xVelocity();
-	double dy = hit->yVelocity();
-
-	double maxRockSpeed = MAX_ROCK_SPEED * rockSpeed;
-	if ( dx > maxRockSpeed )
-	    dx = maxRockSpeed;
-	else if ( dx < -maxRockSpeed )
-	    dx = -maxRockSpeed;
-	if ( dy > maxRockSpeed )
-	    dy = maxRockSpeed;
-	else if ( dy < -maxRockSpeed )
-	    dy = -maxRockSpeed;
-
-	QCanvasSprite *nrock;
-
-	for ( int i = 0; i < 4; i++ )
-	{
-	    double r = rockSpeed/2 - randDouble()*rockSpeed;
-	    if ( hit->rtti() == ID_ROCK_LARGE )
-	    {
-		nrock = new KRock( animation[ID_ROCK_MEDIUM], &field,
-			       ID_ROCK_MEDIUM, randInt(2), randInt(2) ? -1 : 1 );
-		emit rockHit( 0 );
-	    }
-	    else
-	    {
-		nrock = new KRock( animation[ID_ROCK_SMALL], &field,
-			       ID_ROCK_SMALL, randInt(2), randInt(2) ? -1 : 1 );
-		emit rockHit( 1 );
-	    }
-
-	    int rockOffs = nrock->boundingRect().width()/4;
-	    nrock->move( hit->x()+addx[i]*rockOffs, hit->y()+addy[i]*rockOffs, 0 );
-	    nrock->setVelocity( dx+addx[i]*rockSpeed+r, dy+addy[i]*rockSpeed+r );
-	    nrock->setFrame( randInt( nrock->frameCount() ) );
-	    nrock->show( );
-	    rocks.append( nrock );
-	}
+    /*
+      Break large rocks into medium rocks and medium rocks
+      into small rocks.
+     */
+    int newRockType = 0;
+    if (oldRock->type() == ID_ROCK_LARGE) {
+        newRockType = ID_ROCK_MEDIUM;
+        emit rockHit(0);
     }
-    else if ( hit->rtti() == ID_ROCK_SMALL )
-	emit rockHit( 2 );
-    rocks.removeRef( (QCanvasSprite *)hit );
-    if ( rocks.count() == 0 )
-	emit rocksRemoved();
+    else if (oldRock->type() == ID_ROCK_MEDIUM) {
+        newRockType = ID_ROCK_SMALL;
+        emit rockHit(1);
+    }
+    else if (oldRock->type() == ID_ROCK_SMALL) {
+        emit rockHit(2);
+    }
+    if (newRockType) {
+        double x_multiplier[4] = { 1.0, 1.0, -1.0, -1.0 };
+        double y_multiplier[4] = { -1.0, 1.0, -1.0, 1.0 };
+
+        double dx = oldRock->velocityX();
+        double dy = oldRock->velocityY();
+
+        double maxRockSpeed = ROCK_SPEED_MULTIPLIER * rockSpeed_;
+        if (dx > maxRockSpeed)
+            dx = maxRockSpeed;
+        else if (dx < -maxRockSpeed)
+            dx = -maxRockSpeed;
+        if (dy > maxRockSpeed)
+            dy = maxRockSpeed;
+        else if (dy < -maxRockSpeed)
+            dy = -maxRockSpeed;
+
+        MyAnimation* newRock;
+
+        /*
+          When the old rock explodes, we create four new, smaller
+          rocks in its place. If the old rock is a large one, create
+          four medium size rocks. If the old rock is a medium one,
+          create four small ones. If the old rock is already small,
+          we don't create anything. We don't even get into this loop
+          if the old rock is small.
+         */
+        for (int i = 0; i < 4; i++) {
+            double r = rockSpeed_/2 - (randDouble() * rockSpeed_);
+            if (oldRock->type() == ID_ROCK_LARGE) {
+                newRock = new KRock(&animation_[ID_ROCK_MEDIUM],
+                                    scene_,
+                                    ID_ROCK_MEDIUM,
+                                    randInt(2),
+                                    randInt(2) ? -1 : 1);
+            }
+            else {
+                newRock = new KRock(&animation_[ID_ROCK_SMALL],
+                                    scene_,
+                                    ID_ROCK_SMALL,
+                                    randInt(2),
+                                    randInt(2) ? -1 : 1);
+            }
+
+            /*
+              Each new rock is given an initial position which
+              is offset from the old rock's last position by the
+              width of one quadrant of the old rock's bounding box.
+              Each of the new rocks is positioned in a different
+              quadrant of the old rock's bounding box.
+             */
+            qreal quadrant = newRock->boundingRect().width()/4;
+            newRock->setPos(oldRock->x() + (x_multiplier[i] * quadrant),
+                            oldRock->y() + (y_multiplier[i] * quadrant));
+            newRock->setVelocity(dx + (x_multiplier[i] * rockSpeed_) + r,
+                                 dy + (y_multiplier[i] * rockSpeed_) + r);
+            newRock->setImage(randInt(ROCK_IMAGE_COUNT));
+            newRock->show();
+            rocks_.append(newRock);
+        }
+    }
+    delete oldRock;
+    if (rocks_.count() == 0)
+        emit rocksRemoved();
 }
 
-void KAsteroidsView::reducePower( int val )
+/*!
+  \internal
+
+  Reduce the ship's power level by \a reduction.
+ */
+void KAsteroidsView::reducePower(int reduction)
 {
-    shipPower -= val;
-    if ( shipPower <= 0 )
-    {
-	shipPower = 0;
-	thrustShip = FALSE;
-	if ( shieldOn )
-	{
-	    shieldOn = FALSE;
-	    shield->hide();
-	}
+    shipPowerLevel_ -= reduction;
+    if (shipPowerLevel_ <= 0) {
+        shipPowerLevel_ = 0;
+        stopEngine();
+        dropShield();
+        shieldStrength_ = 0;
     }
-    vitalsChanged = TRUE;
+    vitalsChanged_ = true;
 }
 
-void KAsteroidsView::addExhaust( double x, double y, double dx,
-				 double dy, int count )
+/*!
+  \internal
+
+  I don't think the exhaust is working at the moment.
+  I will look into it later.
+ */
+void
+KAsteroidsView::addExhaust(double x,
+                           double y,
+                           double dx,
+                           double dy,
+                           int count)
 {
-    for ( int i = 0; i < count; i++ )
-    {
-	KExhaust *e = new KExhaust( animation[ID_EXHAUST], &field );
-	e->move( x + 2 - randDouble()*4, y + 2 - randDouble()*4 );
-	e->setVelocity( dx, dy );
-	e->show( );
-	exhaust.append( e );
+    for (int i = 0; i < count; i++) {
+        KExhaust* e = new KExhaust(&animation_[ID_EXHAUST], scene_);
+        e->setPos(x + 2 - randDouble()*4, y + 2 - randDouble()*4);
+        e->setVelocity(dx, dy);
+        e->show();
+        exhaust_.append(e);
     }
 }
 
-void KAsteroidsView::processMissiles()
+/*!
+  \internal
+
+  Process all the ship fragments that were created when the
+  ship exploded due to a collision with a rock.
+ */
+void
+KAsteroidsView::processFragments()
 {
-    KMissile *missile;
+    if (ship_fragments_.isEmpty())
+        return;
+    for (int i=0; i<ship_fragments_.size(); ++i) {
+        KFragment* fragment = ship_fragments_.at(i);
+        if (fragment->isExpired()) {
+            ship_fragments_.removeAll(fragment);
+            delete fragment;
+        }
+        else {
+            fragment->incrementAge();
+            fragment->advanceImage();
+        }
+    }
+}
+
+/*!
+  \internal
+
+  Process all fired missiles that haven't petered out yet.
+  Each fired missile's age is increment. It's age is then
+  tested. If the missile is too old, ie if it has reached
+  its maximum range, remove it from the screen and from
+  the list and delete it.
+
+  For each fired missile that had not passed its maximum
+  range, check to see if it has hit a rock. If it has hit
+  a rock, call destroyRock() to break up the rock and randomly
+  add a powerup symbol to the screen.
+
+  When a rock is hit, it explodes into smaller rocks, and
+  the original rock is removed from the screen and from
+  the list and is deleted.
+ */
+void
+KAsteroidsView::processMissiles()
+{
+    KMissile* missile;
+    QList<KMissile*>::iterator mi = missiles_.begin();
 
     // if a missile has hit a rock, remove missile and break rock into smaller
     // rocks or remove completely.
-    QPtrListIterator<KMissile> it(missiles);
 
-    for ( ; it.current(); ++it )
-    {
-	missile = it.current();
-	missile->growOlder();
+    while (mi != missiles_.end()) {
+        missile = (*mi);
+        missile->incrementAge();
 
-	if ( missile->expired() )
-	{
-	    missiles.removeRef( missile );
-	    continue;
-	}
+        if (missile->isExpired()) {
+            mi = missiles_.erase(mi);
+            delete missile;
+            continue;
+        }
 
-	wrapSprite( missile );
+        //wrapSprite(missile);
 
-	QCanvasItemList hits = missile->collisions( TRUE );
-	QCanvasItemList::Iterator hit;
-	for ( hit = hits.begin(); hit != hits.end(); ++hit )
-	{
-	    if ( (*hit)->rtti() >= ID_ROCK_LARGE &&
-		 (*hit)->rtti() <= ID_ROCK_SMALL )
-	    {
-		shotsHit++;
-		rockHit( *hit );
-		missiles.removeRef( missile );
-		break;
-	    }
-	}
+        QList<QGraphicsItem*> hits = missile->collidingItems();
+        QList<QGraphicsItem*>::iterator hi;
+        for (hi=hits.begin(); hi!=hits.end(); ++hi) {
+            if (((*hi)->type() >= ID_ROCK_LARGE) &&
+                ((*hi)->type() <= ID_ROCK_SMALL)) {
+                incrementRocksHit();
+                destroyRock((MyAnimation*)(*hi));
+                missiles_.erase(mi);
+                delete missile;
+                return;
+            }
+        }
+        ++mi;
     }
 }
 
-// - - -
+/*
+  \internal
 
-void KAsteroidsView::processShip()
+  This is where the ship is updated. This function is called
+  once for each timer period.
+ */
+void
+KAsteroidsView::processShip()
 {
-    if ( ship->visible() )
-    {
-	if ( shieldOn )
-	{
-	    shield->show();
-	    reducePower( SHIELD_ON_COST );
-	    static int sf = 0;
-	    sf++;
+    if (!ship_->isVisible())
+        return;
 
-	    if ( sf % 2 )
-		shield->setFrame( (shield->frame()+1) % shield->frameCount() );
-	    shield->move( ship->x() - 5, ship->y() - 5 );
+    if (rotatingSlowly_)
+        rotatingSlowly_--;
 
-	    QCanvasItemList hits = shield->collisions( TRUE );
-	    QCanvasItemList::Iterator it;
-	    for ( it = hits.begin(); it != hits.end(); ++it )
-	    {
-		if ( (*it)->rtti() >= ID_ROCK_LARGE &&
-		     (*it)->rtti() <= ID_ROCK_SMALL )
-		{
-		    int factor;
-		    switch ( (*it)->rtti() )
-		    {
-			case ID_ROCK_LARGE:
-			    factor = 3;
-			    break;
+    if (rotateShipLeft_) {
+        shipAngleIndex_ -= rotatingSlowly_ ? 1 : rotationRate_;
+        if (shipAngleIndex_ < 0)
+            shipAngleIndex_ += SHIP_STEPS;
+    }
 
-			case ID_ROCK_MEDIUM:
-			    factor = 2;
-			    break;
+    if (rotateShipRight_) {
+        shipAngleIndex_ += rotatingSlowly_ ? 1 : rotationRate_;
+        if (shipAngleIndex_ >= SHIP_STEPS)
+            shipAngleIndex_ -= SHIP_STEPS;
+    }
 
-			default:
-			    factor = 1;
-		    }
+    double angle = shipAngleIndex_ * PI_X_2 / SHIP_STEPS;
+    double cosangle = cos(angle);
+    double sinangle = sin(angle);
 
-		    if ( factor > mShieldCount )
-		    {
-			// shield not strong enough
-			shieldOn = FALSE;
-			break;
-		    }
-		    rockHit( *it );
-		    // the more shields we have the less costly
-		    reducePower( factor * (SHIELD_HIT_COST - mShieldCount*2) );
-		}
-	    }
-	}
+    if (shipIsBraking()) {
+        vitalsChanged_ = true;
+        stopEngine();
+        stopShipRotation();
+        if (fabs(shipDx_) < 2.5 && fabs(shipDy_) < 2.5) {
+            shipDx_ = 0.0;
+            shipDy_ = 0.0;
+            ship_->setVelocity(shipDx_,shipDy_);
+            releaseBrakes();
+        }
+        else {
+            double motionAngle = atan2(-shipDy_, -shipDx_);
+            if (angle > M_PI)
+                angle -= PI_X_2;
+            double angleDiff = angle - motionAngle;
+            if (angleDiff > M_PI)
+                angleDiff = PI_X_2 - angleDiff;
+            else if (angleDiff < -M_PI)
+                angleDiff = PI_X_2 + angleDiff;
+            double fdiff = fabs(angleDiff);
+            if (fdiff > 0.08) {
+                if (angleDiff > 0)
+                    rotateShipLeft_ = true;
+                else if (angleDiff < 0)
+                    rotateShipRight_ = true;
+                if (fdiff > 0.6)
+                    rotationRate_ = brakeForce() + 1;
+                else if (fdiff > 0.4)
+                    rotationRate_ = 2;
+                else
+                    rotationRate_ = 1;
 
-	if ( !shieldOn )
-	{
-	    shield->hide();
-	    QCanvasItemList hits = ship->collisions( TRUE );
-	    QCanvasItemList::Iterator it;
-	    for ( it = hits.begin(); it != hits.end(); ++it )
-	    {
-		if ( (*it)->rtti() >= ID_ROCK_LARGE &&
-		     (*it)->rtti() <= ID_ROCK_SMALL )
-		{
-		    KBit *bit;
-		    for ( int i = 0; i < 8; i++ )
-		    {
-		      bit = new KBit( animation[ID_BIT], &field );
-		      bit->move( ship->x() + 5 - randDouble() * 10,
-				 ship->y() + 5 - randDouble() * 10,
-				 randInt(bit->frameCount()) );
-		      bit->setVelocity( 1-randDouble()*2,
-					1-randDouble()*2 );
-		      bit->setDeath( 60 + randInt(60) );
-		      bit->show( );
-		      bits.append( bit );
-		    }
-		    ship->hide();
-		    shield->hide();
-		    emit shipKilled();
-		    break;
-		}
-	    }
-	}
+                if (rotationRate_ > 5)
+                    rotationRate_ = 5;
+            }
+            else if (fabs(shipDx_) > 1 || fabs(shipDy_) > 1) {
+                engineIsOn_ = true;
+                // we'll make braking a bit faster
+                shipDx_ += cosangle/6 * (brakeForce() - 1);
+                shipDy_ += sinangle/6 * (brakeForce() - 1);
+                reducePower(BRAKE_ON_COST);
+                addExhaust(ship_->x() + 10 - cosangle*11,
+                           ship_->y() + 10 - sinangle*11,
+                           shipDx_-cosangle, shipDy_-sinangle,
+                           brakeForce()+1);
+            }
+        }
+    }
 
+    if (engineIsOn()) {
+        // The ship has a terminal velocity, but trying to go faster
+        // still uses fuel (can go faster diagonally - don't care).
+        double thrustx = cosangle/8;
+        double thrusty = sinangle/8;
+        if (fabs(shipDx_ + thrustx) < MAX_SHIP_SPEED)
+            shipDx_ += thrustx;
+        if (fabs(shipDy_ + thrusty) < MAX_SHIP_SPEED)
+            shipDy_ += thrusty;
+        ship_->setVelocity(shipDx_,shipDy_);
+        reducePower(1);
+        vitalsChanged_ = true;
+        addExhaust(ship_->x() + 10 - cosangle*10,
+                   ship_->y() + 10 - sinangle*10,
+                   shipDx_-cosangle, shipDy_-sinangle, 3);
+    }
 
-	if ( rotateSlow )
-	    rotateSlow--;
+    ship_->setImage(shipAngleIndex_ >> 1);
 
-	if ( rotateL )
-	{
-	    shipAngle -= rotateSlow ? 1 : rotateRate;
-	    if ( shipAngle < 0 )
-		shipAngle += SHIP_STEPS;
-	}
-
-	if ( rotateR )
-	{
-	    shipAngle += rotateSlow ? 1 : rotateRate;
-	    if ( shipAngle >= SHIP_STEPS )
-		shipAngle -= SHIP_STEPS;
-	}
-
-	double angle = shipAngle * PI_X_2 / SHIP_STEPS;
-	double cosangle = cos( angle );
-	double sinangle = sin( angle );
-
-	if ( brakeShip )
-	{
-	    thrustShip = FALSE;
-	    rotateL = FALSE;
-	    rotateR = FALSE;
-	    rotateRate = ROTATE_RATE;
-	    if ( fabs(shipDx) < 2.5 && fabs(shipDy) < 2.5 )
-	    {
-		shipDx = 0.0;
-		shipDy = 0.0;
-		ship->setVelocity( shipDx, shipDy );
-		brakeShip = FALSE;
-	    }
-	    else
-	    {
-		double motionAngle = atan2( -shipDy, -shipDx );
-		if ( angle > M_PI )
-		    angle -= PI_X_2;
-		double angleDiff = angle - motionAngle;
-		if ( angleDiff > M_PI )
-		    angleDiff = PI_X_2 - angleDiff;
-		else if ( angleDiff < -M_PI )
-		    angleDiff = PI_X_2 + angleDiff;
-		double fdiff = fabs( angleDiff );
-		if ( fdiff > 0.08 )
-		{
-		    if ( angleDiff > 0 )
-			rotateL = TRUE;
-		    else if ( angleDiff < 0 )
-			rotateR = TRUE;
-		    if ( fdiff > 0.6 )
-			rotateRate = mBrakeCount + 1;
-		    else if ( fdiff > 0.4 )
-			rotateRate = 2;
-		    else
-			rotateRate = 1;
-
-		    if ( rotateRate > 5 )
-			rotateRate = 5;
-		}
-		else if ( fabs(shipDx) > 1 || fabs(shipDy) > 1 )
-		{
-		    thrustShip = TRUE;
-		    // we'll make braking a bit faster
-		    shipDx += cosangle/6 * (mBrakeCount - 1);
-		    shipDy += sinangle/6 * (mBrakeCount - 1);
-		    reducePower( BRAKE_ON_COST );
-		    addExhaust( ship->x() + 10 - cosangle*11,
-				ship->y() + 10 - sinangle*11,
-				shipDx-cosangle, shipDy-sinangle,
-				mBrakeCount+1 );
-		}
-	    }
-	}
-
-	if ( thrustShip )
-	{
-	    // The ship has a terminal velocity, but trying to go faster
-	    // still uses fuel (can go faster diagonally - don't care).
-	    double thrustx = cosangle/8;
-	    double thrusty = sinangle/8;
-	    if ( fabs(shipDx + thrustx) < MAX_SHIP_SPEED )
-		shipDx += thrustx;
-	    if ( fabs(shipDy + thrusty) < MAX_SHIP_SPEED )
-		shipDy += thrusty;
-	    ship->setVelocity( shipDx, shipDy );
-	    reducePower( 1 );
-	    addExhaust( ship->x() + 10 - cosangle*10,
-			ship->y() + 10 - sinangle*10,
-			shipDx-cosangle, shipDy-sinangle, 3 );
-	}
-
-	ship->setFrame( shipAngle >> 1 );
-
-	if ( shootShip )
-	{
+    if (shipIsShooting()) {
 #ifndef QTOPIA_PHONE
-	    int maxMissiles = mShootCount + 2;
+        int maxMissiles = firePower_ + 2;
 #else
-	    int maxMissiles = mShootCount + 1;
+        int maxMissiles = firePower_ + 1;
 #endif
-	    if ( !shootDelay && (int)missiles.count() < maxMissiles )
-	    {
-	      KMissile *missile = new KMissile( animation[ID_MISSILE], &field );
+        if (shipCanShoot() && ((int)missiles_.count() < maxMissiles)) {
+            KMissile* missile = new KMissile(&animation_[ID_MISSILE],scene_);
 #ifdef QTOPIA_PHONE
-	      missile->setExpiry(12);
+            missile->setMaximumAge(12);
 #endif
-	      missile->move( 11+ship->x()+cosangle*11,
-			     11+ship->y()+sinangle*11, 0 );
-	      missile->setVelocity( shipDx + cosangle*MISSILE_SPEED,
-				    shipDy + sinangle*MISSILE_SPEED );
-	      missile->show( );
-	      missiles.append( missile );
-	      emit missileFired();
-	      shotsFired++;
-	      reducePower( 1 );
+            missile->setPos(11 + ship_->x() + cosangle * 11,
+                            11 + ship_->y() + sinangle * 11);
+            missile->setVelocity(shipDx_ + cosangle * MISSILE_SPEED,
+                                 shipDy_ + sinangle * MISSILE_SPEED);
+            missile->show();
+            missiles_.append(missile);
+            emit missileFired();
+            incrementShotsFired();
+            reducePower(1);
+            vitalsChanged_ = true;
 
-	      shootDelay = 5;
-	    }
+            // delay firing next missile.
+            delayShooting(5);
+        }
 
-	    if ( shootDelay )
-	      shootDelay--;
-	}
+        decrementNextShotDelay();
+    }
 
-	if ( teleportShip )
-	{
-	    int ra = rand() % 10;
-	    if( ra == 0 )
-	    ra += rand() % 20;
-	    int xra = ra * 60 + ( (rand() % 20) * (rand() % 20) );
-	    int yra = ra * 50 - ( (rand() % 20) * (rand() % 20) );
-	    ship->move( xra, yra );
-	}
+    if (teleportShip_) {
+        int ra = rand() % 10;
+        if(ra == 0)
+            ra += rand() % 20;
+        int xra = ra * 60 + ((rand() % 20) * (rand() % 20));
+        int yra = ra * 50 - ((rand() % 20) * (rand() % 20));
+        ship_->setPos(xra, yra);
+        teleportShip_ = false;
+        if (teleportCount_ > 0) {
+            --teleportCount_;
+            vitalsChanged_ = true;
+        }
+    }
 
-	vitalsChanged = TRUE;
+    if (shieldIsUp_) {
+        shield_->show();
+        static int sf = 0;
+        sf++;
+
+        if (sf % 2)
+            shield_->advanceImage();
+        shield_->setPos(ship_->x() - 5, ship_->y() - 5);
+
+        QList<QGraphicsItem*> hits = shield_->collidingItems();
+        QList<QGraphicsItem*>::Iterator it;
+
+        for (it=hits.begin(); it!=hits.end(); ++it) {
+            int factor = 0;
+            bool shieldHitRock = false;
+            switch ((*it)->type()) {
+            case ID_ROCK_LARGE:
+                factor = 3;
+                shieldHitRock = true;
+                if (shieldStrength_ < 3)
+                    shieldIsUp_ = false;
+                break;
+
+            case ID_ROCK_MEDIUM:
+                factor = 2;
+                shieldHitRock = true;
+                if (shieldStrength_ < 2)
+                    shieldIsUp_ = false;
+                break;
+
+            case ID_ROCK_SMALL:
+                factor = 1;
+                shieldHitRock = true;
+                if (shieldStrength_ < 1)
+                    shieldIsUp_ = false;
+                break;
+
+            case ID_ENERGY_POWERUP:
+                ((KPowerup*)(*it))->expire();
+                break;
+            case ID_TELEPORT_POWERUP:
+                ((KPowerup*)(*it))->expire();
+                break;
+            case ID_BRAKE_POWERUP:
+                ((KPowerup*)(*it))->expire();
+                break;
+            case ID_SHIELD_POWERUP:
+                ((KPowerup*)(*it))->expire();
+                break;
+            case ID_SHOOT_POWERUP:
+                ((KPowerup*)(*it))->expire();
+                break;
+            default:
+                factor = 0;
+            }
+            if (shieldHitRock) {
+                destroyRock((MyAnimation*)(*it));
+                // the more shields we have the less costly
+                reducePower(factor * (SHIELD_HIT_COST-shieldStrength_*2));
+                vitalsChanged_ = true;
+            }
+            if (!shieldIsUp_) {
+                // shield failed
+                break;
+            }
+        }
+    }
+
+    if (!shieldIsUp_) {
+        shield_->hide();
+        QList<QGraphicsItem*> hits = ship_->collidingItems();
+        QList<QGraphicsItem*>::Iterator it;
+        for (it = hits.begin(); it != hits.end(); ++it) {
+            KPowerup* pup = 0;
+            switch ((*it)->type()) {
+                case ID_ROCK_LARGE:
+                case ID_ROCK_MEDIUM:
+                case ID_ROCK_SMALL:
+                {
+                    KFragment* f;
+                    for (int i = 0; i < 4; i++) {
+                        f = new KFragment(&animation_[ID_FRAGMENT],scene_);
+                        f->setPos(ship_->x() + 5 - randDouble() * 10,
+                                  ship_->y() + 5 - randDouble() * 10);
+                        f->setImage(randInt(FRAG_IMAGE_COUNT));
+                        f->setVelocity(1-randDouble()*2,1-randDouble()*2);
+                        f->setMaximumAge(60 + randInt(60));
+                        f->show();
+                        ship_fragments_.append(f);
+                    }
+                    ship_->hide();
+                    shield_->hide();
+                    emit shipKilled();
+                    vitalsChanged_ = true;
+                    return;
+                }
+                case ID_ENERGY_POWERUP:
+                    shipPowerLevel_ += 15;
+                    if (shipPowerLevel_ > MAX_SHIP_POWER_LEVEL)
+                        shipPowerLevel_ = MAX_SHIP_POWER_LEVEL;
+                    ((KPowerup*)(*it))->expire();
+                    vitalsChanged_ = true;
+                    break;
+                case ID_TELEPORT_POWERUP:
+                    pup = (KPowerup*)(*it);
+                    teleportCount_++;
+                    pup->expire();
+                    vitalsChanged_ = true;
+                    break;
+                case ID_BRAKE_POWERUP:
+                    pup = (KPowerup*)(*it);
+                    incrementBrakeForce();
+                    pup->expire();
+                    vitalsChanged_ = true;
+                    break;
+                case ID_SHIELD_POWERUP:
+                    pup = (KPowerup*)(*it);
+                    if (shieldStrength_ < MAX_SHIELD_STRENGTH)
+                        shieldStrength_++;
+                    pup->expire();
+                    vitalsChanged_ = true;
+                    break;
+                case ID_SHOOT_POWERUP:
+                    pup = (KPowerup*)(*it);
+                    if (firePower_ < MAX_FIREPOWER)
+                        firePower_++;
+                    pup->expire();
+                    vitalsChanged_ = true;
+                    break;
+            }
+        }
     }
 }
 
-// - - -
+/*!
+  \internal
 
+  The ship often hits special symbols representing packets
+  of increased capabilities. These hits are processed here.
+  They include increased ship power, increased fire power,
+  increased shield strength, and increased braking force
+  to slow the ship. There is also a symbol representing
+  the ability to teleport the ship to a safe location, but
+  this kind of hit has been disabled in the Qtopia version.
+  I don't know why. Maybe the orignal author couldn't get
+  it to work?
+
+  If the ship hits a powerup, remove the powerup from the
+  screen and award the value to the player.
+
+  If the shield is up and the power up hits the shield,
+  sorry, the player doesn't get the powerup value.
+
+  If a missile hits a powerup and the option allowing
+  missiles to destroy powerups has been enabled, destroy
+  the powerup.
+ */
 void KAsteroidsView::processPowerups()
 {
-    if ( !powerups.isEmpty() )
-    {
-	// if player gets the powerup remove it from the screen, if option
-	// "Can destroy powerups" is enabled and a missile hits the powerup
-	// destroy it
+    if (powerups_.isEmpty())
+        return;
 
-	KPowerup *pup;
-	QPtrListIterator<KPowerup> it( powerups );
+    KPowerup* pup = 0;
+    QList<KPowerup*>::iterator pi = powerups_.begin();
 
-	for( ; it.current(); ++it )
-	{
-	    pup = it.current();
-	    pup->growOlder();
+    while (pi != powerups_.end()) {
+        pup = (*pi);
+        pup->incrementAge();
 
-	    if( pup->expired() )
-	    {
-		powerups.removeRef( pup );
-		continue;
-	    }
+        if(pup->isExpired()) {
+            pi = powerups_.erase(pi);
+            delete pup;
+            continue;
+        }
 
-	    wrapSprite( pup );
-
-	    QCanvasItemList hits = pup->collisions( TRUE );
-	    QCanvasItemList::Iterator it;
-	    for ( it = hits.begin(); it != hits.end(); ++it )
-	    {
-		if ( (*it) == ship )
-		{
-		    switch( pup->rtti() )
-		    {
-		      case ID_ENERGY_POWERUP:
-			shipPower += 150;
-			if ( shipPower > MAX_POWER_LEVEL )
-			    shipPower = MAX_POWER_LEVEL;
-			break;
-		      case ID_TELEPORT_POWERUP:
-			mTeleportCount++;
-			break;
-		      case ID_BRAKE_POWERUP:
-			if ( mBrakeCount < MAX_BRAKES )
-			    mBrakeCount++;
-			break;
-		      case ID_SHIELD_POWERUP:
-			if ( mShieldCount < MAX_SHIELDS )
-			    mShieldCount++;
-			break;
-		      case ID_SHOOT_POWERUP:
-			if ( mShootCount < MAX_FIREPOWER )
-			    mShootCount++;
-			break;
-		    }
-
-		    powerups.removeRef( pup );
-		    vitalsChanged = TRUE;
-		}
-		else if ( (*it) == shield )
-		{
-		    powerups.removeRef( pup );
-		}
-		else if ( (*it)->rtti() == ID_MISSILE )
-		{
-		    if ( can_destroy_powerups )
-		    {
-		      powerups.removeRef( pup );
-		    }
-		}
-	    }
-	}
-    }         // -- if( powerups.isEmpty() )
+        //wrapSprite(pup);
+        ++pi;
+    }
 }
 
-// - - -
+/*!
+  \internal
 
-void KAsteroidsView::hideShield()
-{
-    shield->hide();
-    mShieldCount = 0;
-    shieldOn = FALSE;
-}
-
+  Generate and return a random double.
+ */
 double KAsteroidsView::randDouble()
 {
     int v = rand();
     return (double)v / (double)RAND_MAX;
 }
 
-int KAsteroidsView::randInt( int range )
+/*!
+  \internal
+
+  Generate and return a random integer in the specified
+  \a range.
+ */
+int KAsteroidsView::randInt(int range)
 {
     return rand() % range;
+}
+
+/*!
+  \internal
+
+  Turn on engine. While the engine is on, velocity increases.
+ */
+void KAsteroidsView::startEngine()
+{
+    engineIsOn_ = (shipPowerLevel_ > 0);
+}
+
+/*!
+  \internal
+
+  Turn off engine. The ship doesn't stop when you turn off
+  the engine. You just coast.
+ */
+void KAsteroidsView::stopEngine()
+{
+    engineIsOn_ = false;
+}
+
+/*!
+  \internal
+
+  Returns 1 if both the shield strength and power level are
+  greater than 0. Otherwise returns 0.
+ */
+int KAsteroidsView::checksum() const
+{
+    if (shieldStrength() > 0) {
+        if (shipPowerLevel() > 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+/*!
+  If any teleports are available, enable teleporting
+  for the next timer interrup when the ship is processed.
+ */
+void
+KAsteroidsView::teleport()
+{
+    if (teleportCount_)
+        teleportShip_ = true;
 }

@@ -1,113 +1,127 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 #ifndef APPEARANCESETTINGS_H
 #define APPEARANCESETTINGS_H
 
 
-#include "fontmap.h"
 #ifdef QTOPIA_PHONE
-#include "appearancesettingsbasephone.h"
+#include "ui_appearancesettingsbasephone.h"
 #else
-#include "appearancesettingsbase.h"
+#include "ui_appearancesettingsbase.h"
 #endif
-#include <qstrlist.h> 
-#include <qasciidict.h>
+#include <QDialog>
+#include <QStringList>
+#include <QSoftMenuBar>
 
-struct WindowDecorationInterface;
-struct StyleInterface;
-class PluginLoader;
+class QWindowDecorationInterface;
+class QPluginManager;
 class SampleWindow;
+class QListWidgetItem;
+class QHBoxLayout;
+class QWaitWidget;
 
-class AppearanceSettings : public AppearanceSettingsBase
-{ 
+class AppearanceSettings : public QDialog, Ui::AppearanceSettingsBase
+{
     Q_OBJECT
 
 public:
-    AppearanceSettings( QWidget* parent = 0, const char* name = 0, WFlags fl = 0 );
+    AppearanceSettings( QWidget* parent = 0, Qt::WFlags fl = 0 );
     ~AppearanceSettings();
 
 protected:
     void accept();
+    void reject();
     void done(int r);
     void resizeEvent( QResizeEvent * );
+    void showEvent( QShowEvent * );
+#ifdef QTOPIA_PHONE
     bool eventFilter(QObject *o, QEvent *e);
+#endif
     QPalette readColorScheme(int id);
 
 protected slots:
-    void colorSelected( int );
-    void styleSelected( int );
-    void themeSelected( int );
-    void decorationSelected( int );
-    void fontSelected( const QString &name );
+    void applyStyle();
+    void colorSelected( QListWidgetItem * );
+    void styleSelected( QListWidgetItem * );
+    void decorationSelected( QListWidgetItem * );
+    QFont fontSelected( const QString &name );
     void fontSizeSelected( const QString &sz );
     void fixSampleGeometry();
-    void accelerator(int);
     void selectImage();
     void selectWallpaper();
     void updateBackground();
     void clearBackground();
+#ifdef QTOPIA_PHONE
+    void pushSettingStatus();
+    void receive( const QString& msg, const QByteArray& data );
+    void tabChanged( int curIndex );
+    void updateContextLabels();
+#endif
 
 private:
+    void populateColorList();
+#ifndef QTOPIA_PHONE
     void populateStyleList();
+    void populateDecorationList();
+#endif
+    void populateFontList(const QString& cur, int cursz);
+    void populate(const QString&, int);
 #ifdef QTOPIA_PHONE
     void selectBackground(bool src_wallpaper);
-    void populateThemeList();
+    void populateThemeList( QString current );
+    void populateLabelTypeList(const QSoftMenuBar::LabelType type);
+    QString status();
+    void setStatus( const QString details );
+    void pullSettingStatus();
 #endif
-    void populateColorList();
-    void populateDecorationList();
-    void populateFontList(const QString&, int);
     void setStyle( QWidget *w, QStyle *s );
-
-signals:
-    void applyTheme(QString themeName);
+    bool isWide();
+    bool displayMode();
 
 private:
-    WindowDecorationInterface *wdiface;
-    PluginLoader *wdLoader;
+    QWindowDecorationInterface *wdiface;
+    QPluginManager *wdLoader;
     bool wdIsPlugin;
-    StyleInterface *styleiface;
-    PluginLoader *styleLoader;
     SampleWindow *sample;
     int prefFontSize;
     int maxFontSize;
     QStringList colorListIDs;
+    QHBoxLayout *hBoxLayout;
+    bool isClosing, rtl;
+    QListWidgetItem *defaultColor;
+    QString initColor;
 #ifdef QTOPIA_PHONE
-    FontMap fontMap;
+    QMenu *contextMenu;
     QString bgImgName;
-    QTimer *bgTimer;
+    int bgDisplayMode;
+    QString initStatus;
+    QAction *actionShowText;
+    QString activeDetails;
+    bool isThemeLoaded, isShowPreview, isStatusView, isFromActiveProfile;
+    QListWidgetItem *defaultTheme;
+    QWaitWidget *waitWidget;
 #endif
+    int currColor;
+    int currTheme;
+    bool bgChanged;
 };
 
 

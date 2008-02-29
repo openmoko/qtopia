@@ -1,110 +1,90 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include "appearance.h"
 #ifndef QTOPIA_PHONE
 # include "samplewindow.h"
 #endif
 #include "themeparser.h"
-#include <qtopia/global.h>
-#include <qtopia/fontdatabase.h>
-#include <qtopia/config.h>
-#include <qtopia/applnk.h>
-#include <qtopia/qpeapplication.h>
-#include <qtopia/pluginloader.h>
-#include <qtopia/styleinterface.h>
-#include <qtopia/resource.h>
-#include <qtopia/image.h>
-#include <qtopia/imageselector.h>
-#include <qtopia/windowdecorationinterface.h>
-#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
-#include <qtopia/qcopenvelope_qws.h>
-#endif
+#include <QSettings>
+#include <qcontent.h>
+#include <qtopiaapplication.h>
+#include <qtopianamespace.h>
+#include <qpluginmanager.h>
+#include <qthumbnail.h>
+#include <qimagedocumentselector.h>
+#include <qwindowdecorationinterface.h>
+#include <qtopialog.h>
+#include <qtopiaipcenvelope.h>
+#include <qtopiaservices.h>
 #ifdef QTOPIA_PHONE
 # include <qtopia/private/phonedecoration_p.h>
-# include <qtopia/contextbar.h>
-# include <qtopia/phonestyle.h>
+# include <qtopia/private/qtopiaresource_p.h>
+# include <qtopia/qphonestyle.h>
 #else
-# include <qtopia/qpestyle.h>
+# include <qtopia/qtopiastyle.h>
 #endif
+#include <Qt>
+#include <QLabel>
+#include <QCheckBox>
+#include <QRadioButton>
+#include <QButtonGroup>
+#include <QTabWidget>
+#include <QSlider>
+#include <QFile>
+#include <QAction>
+#include <QTextStream>
+#include <QDataStream>
+#include <QMessageBox>
+#include <QComboBox>
+#include <QListWidget>
+#include <QDir>
+#include <QGroupBox>
+#include <QWindowsStyle>
+#include <QLayout>
+#include <QMenuBar>
+#include <QPushButton>
+#include <QCheckBox>
+#include <QWhatsThis>
+#include <QPixmapCache>
+#include <QPixmap>
+#include <QStyleFactory>
+#include <QDesktopWidget>
+#include <QTimer>
+#include <QPainter>
+#include <QFontDatabase>
+#include <QMenu>
+#include <QKeyEvent>
+#include <qtranslatablesettings.h>
+#include <qtopiaipcenvelope.h>
+#include <qdrmcontent.h>
+#include <qwaitwidget.h>
 
-#include <qlabel.h>
-#include <qcheckbox.h>
-#include <qradiobutton.h>
-#include <qtabwidget.h>
-#include <qslider.h>
-#include <qfile.h>
-#include <qtextstream.h>
-#include <qdatastream.h>
-#include <qmessagebox.h>
-#include <qcombobox.h>
-#include <qlistbox.h>
-#include <qdir.h>
-#include <qgroupbox.h>
-#include <qwindowsstyle.h>
-#include <qobjectlist.h>
-#include <qlayout.h>
-#include <qvbox.h>
-#include <qmenubar.h>
-#include <qpushbutton.h>
-#include <qcheckbox.h>
-#include <qwhatsthis.h>
-#include <qpixmapcache.h>
-#if QT_VERSION >= 0x030000
-#include <qstylefactory.h>
-#endif
-#include <qaccel.h>
-#include <qpixmap.h>
-
-//#if defined(QT_QWS_IPAQ) || defined(QT_QWS_SL5XXX)
-//#include <unistd.h>
-//#include <linux/fb.h>
-//#include <sys/types.h>
-//#include <sys/stat.h>
-//#include <fcntl.h>
-//#include <sys/ioctl.h>
-//#endif
-#include <stdlib.h>
-
-#define SAMPLE_HEIGHT	115
+#define SAMPLE_HEIGHT   115
 
 
-class PluginItem : public QListBoxText
+class PluginItem : public QListWidgetItem
 {
 public:
-    PluginItem( QListBox *lb, const QString &t ) : QListBoxText( lb, t ) {}
+    PluginItem( const QString &t, QListWidget *lb ) : QListWidgetItem(t, lb) {}
     void setFilename( const QString fn ) { file = fn; }
     const QString &filename() const { return file; }
     void setThemeFilename( const QString fn ) { themeFile = fn; }
@@ -118,65 +98,33 @@ private:
     QString decorationFile;
 };
 
-class FontItem : public QListBoxText
+class DefaultWindowDecoration : public QWindowDecorationInterface
 {
 public:
-    FontItem(QListBox *lb, const QString &t, const QFont &f)
-	: QListBoxText( lb, t ), fnt(f) {}
-
-    int height(const QListBox *) const { return 20; }
-
-protected:
-    void paint(QPainter *p) {
-	p->setFont(fnt);
-	QListBoxText::paint(p);
-    }
-
-private:
-    QFont fnt;
-};
-
-//===========================================================================
-
-class DefaultWindowDecoration : public WindowDecorationInterface
-{
-public:
-    DefaultWindowDecoration() : ref(0) {}
+    DefaultWindowDecoration() {}
     QString name() const {
-	return qApp->translate("WindowDecoration", "Default", 
-		"List box text for default window decoration");
+        return qApp->translate("WindowDecoration", "Default",
+        "List box text for default window decoration");
     }
     QPixmap icon() const {
-	return QPixmap();
+        return QPixmap();
     }
-    QRESULT queryInterface( const QUuid &uuid, QUnknownInterface **iface ) {
-	*iface = 0;
-	if ( uuid == IID_QUnknown )
-	    *iface = this;
-	else if ( uuid == IID_WindowDecoration )
-	    *iface = this;
-
-	if ( *iface )
-	    (*iface)->addRef();
-	return QS_OK;
-    }
-    Q_REFCOUNT
-
-private:
-	ulong ref;
 };
 
 //===========================================================================
 
-AppearanceSettings::AppearanceSettings( QWidget* parent,  const char* name, WFlags fl )
-    : AppearanceSettingsBase( parent, name, TRUE, fl|Qt::WStyle_ContextHelp )
+AppearanceSettings::AppearanceSettings( QWidget* parent, Qt::WFlags fl )
+    : QDialog(parent, fl), isClosing( false ), defaultColor( 0 )
+#ifdef QTOPIA_PHONE
+, isThemeLoaded( true ), isShowPreview( false )
+, isStatusView( false ), defaultTheme( 0 )
+#endif
+, currColor(-1), currTheme(-1), bgChanged(false)
 {
+    setupUi(this);
     wdiface = 0;
-    styleiface = 0;
-    wdLoader = new PluginLoader( "decorations" );
-    styleLoader = new PluginLoader( "styles" );
-    wdIsPlugin = FALSE;
-
+    wdLoader = new QPluginManager( "decorations" );
+    wdIsPlugin = false;
 #ifdef DEBUG
     maxFontSize = 24;
 #else
@@ -184,751 +132,811 @@ AppearanceSettings::AppearanceSettings( QWidget* parent,  const char* name, WFla
 #endif
 
 #ifdef QTOPIA_PHONE
-    tabWidget->removePage(tab_3);
-    tabWidget->removePage(tab_4);
-    tabWidget->setFocusPolicy(NoFocus);
-    AppearanceSettingsBaseLayout->setMargin(0);
+    contextMenu = QSoftMenuBar::menuFor( this );
+    QAction *actionCapture = new QAction( QIcon( ":icon/Note" ), tr( "Add to profile" ), this );
+    connect( actionCapture, SIGNAL(triggered()), this, SLOT(pushSettingStatus()) );
+    contextMenu->addAction( actionCapture );
 
-    tabWidget->changeTab(tab, Resource::loadIconSet("theme"), QString::null);
-    tabWidget->changeTab(tab_2, Resource::loadIconSet("color"), QString::null);
-    tabWidget->changeTab(tab_5, Resource::loadIconSet("font"), QString::null);
-    tabWidget->changeTab(tab_6, Resource::loadIconSet("background"), QString::null);
+    tabWidget->setFocusPolicy(Qt::NoFocus);
+    vboxLayout->setMargin(0);
 
-    tabLayout->setMargin(0);
-    tabLayout_2->setMargin(0);
-    tabLayout_5->setMargin(0);
+    tabWidget->setTabIcon(0, QIcon(":icon/theme"));
+    tabWidget->setTabText(0, QString());
+    tabWidget->setTabIcon(1, QIcon(":icon/color"));
+    tabWidget->setTabText(1, QString());
+    tabWidget->setTabIcon(2, QIcon(":icon/info"));
+    tabWidget->setTabText(2, QString());
+    tabWidget->setTabIcon(3, QIcon(":icon/background"));
+    tabWidget->setTabText(3, QString());
 
-#ifdef QTOPIA_PHONE
+    connect( tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)) );
+
     themeList->setFrameStyle(QFrame::NoFrame);
-#endif
     colorList->setFrameStyle(QFrame::NoFrame);
-    fontList->setFrameStyle(QFrame::NoFrame);
+    smbLabelTypeList->setFrameStyle(QFrame::NoFrame);
 
-    QAccel *accel = new QAccel(this);
-    connect(accel, SIGNAL(activated(int)), this, SLOT(accelerator(int)));
-    accel->insertItem(Key_Left, Key_Left);
-    accel->insertItem(Key_Right, Key_Right);
+    QSoftMenuBar::setLabel(themeList, Qt::Key_Select, QSoftMenuBar::View);
+    QSoftMenuBar::setLabel(colorList, Qt::Key_Select, QSoftMenuBar::View);
+    QSoftMenuBar::setLabel(smbLabelTypeList, Qt::Key_Select, QSoftMenuBar::View);
+
+    waitWidget = new QWaitWidget( this );
 #else
+    // in landscape mode, change layout to QHBoxLayout
+    if ( isWide() ) {
+        delete vboxLayout;
+        hBoxLayout = new QHBoxLayout( this );
+        hBoxLayout->addWidget( tabWidget );
+    }
+
     sample = new SampleWindow( this );
-    AppearanceSettingsBaseLayout->addWidget( sample );
+    vboxLayout->addWidget( sample );
     populateStyleList();
     populateDecorationList();
 #endif
-
-#ifdef QTOPIA_PHONE
-    populateThemeList();
-#endif
     populateColorList();
 
-    Config config("qpe");
-    config.setGroup( "Appearance" );
-    QString s = config.readEntry( "Scheme", "Qtopia" );
-    connect( colorList, SIGNAL(highlighted(int)),
-	this, SLOT(colorSelected(int)) );
-    colorList->setCurrentItem( colorListIDs.findIndex(s) );
-
+    QSettings config("Trolltech","qpe");
+    config.beginGroup( "Appearance" );
+    QString s = config.value( "Scheme", "Qtopia" ).toString();
+    connect( colorList, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
+            this, SLOT(colorSelected(QListWidgetItem*)) );
+    colorList->setCurrentItem( colorList->item(colorListIDs.indexOf(s)) );
+    currColor = colorList->currentRow();
 #ifdef QTOPIA_PHONE
-    QString t = config.readEntry( "Theme");
-    int themeMatchIndex = -1;
-    for ( unsigned i = 0; i < themeList->count(); i++ ) {
-	PluginItem *item = (PluginItem*)themeList->item(i);
-	if (item->themeFilename() == t && themeMatchIndex == -1)
-	    themeMatchIndex = i;
-    }
-    if (themeMatchIndex != -1){
-	themeList->setSelected( themeMatchIndex, TRUE );
-	themeSelected(themeMatchIndex);
-    }
-    connect( themeList, SIGNAL(highlighted(int)),
-	this, SLOT(themeSelected(int)) );
+    QString t = config.value( "Theme").toString();
+    populateThemeList( t );
 #else
-    s = config.readEntry( "Style", "Qtopia" );
-    unsigned i;
+    s = config.value( "Style", "Qtopia" ).toString();
+    int i;
     if ( s == "QPE" ) s = "Qtopia";
     for ( i = 0; i < styleList->count(); i++ ) {
-	PluginItem *item = (PluginItem*)styleList->item(i);
-	if ( item->filename() == s || item->text() == s ) {
-	    styleList->setCurrentItem( i );
-	    break;
-	}
+        PluginItem *item = (PluginItem*)styleList->item(i);
+        if ( item->filename() == s || item->text() == s ) {
+            styleList->setCurrentItem( item );
+            break;
+        }
     }
-    connect( styleList, SIGNAL(highlighted(int)),
-	    this, SLOT(styleSelected(int)) );
+    connect( styleList, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
+            this, SLOT(styleSelected(QListWidgetItem*)) );
 
-    s = config.readEntry( "Decoration" );
+    s = config.value( "Decoration" ).toString();
     for ( i = 0; i < decorationList->count(); i++ ) {
-	PluginItem *item = (PluginItem*)decorationList->item(i);
-	if ( item->filename() == s || item->text() == s ) {
-	    decorationList->setCurrentItem( i );
-	    break;
-	}
+        PluginItem *item = (PluginItem*)decorationList->item(i);
+        if ( item->filename() == s || item->text() == s ) {
+            decorationList->setCurrentItem( item );
+            break;
+        }
     }
-    connect( decorationList, SIGNAL(highlighted(int)),
-	this, SLOT(decorationSelected(int)) );
+    connect( decorationList, SIGNAL( currentItemChanged( QListWidgetItem *, QListWidgetItem * ) ),
+            this, SLOT( decorationSelected(QListWidgetItem * ) ) );
     decorationSelected( decorationList->currentItem() );
 #endif
-
-    s = config.readEntry( "FontFamily", "Helvetica" );
-    prefFontSize = config.readNumEntry( "FontSize", font().pointSize() );
-    populateFontList(s,prefFontSize);
-    connect( fontList, SIGNAL(highlighted(const QString&)),
-	this, SLOT(fontSelected(const QString&)) );
 #ifndef QTOPIA_PHONE
+    s = config.value( "FontFamily", "Helvetica" ).toString();
+    prefFontSize = config.value( "FontSize", font().pointSize() ).toInt();
+    populateFontList(s,prefFontSize);
+    connect( fontList, SIGNAL(currentTextChanged(const QString&)),
+            this, SLOT(fontSelected(const QString&)) );
     connect( fontSize, SIGNAL(activated(const QString&)),
-	this, SLOT(fontSizeSelected(const QString&)) );
-
+            this, SLOT(fontSizeSelected(const QString&)) );
 #else
-    fontSizeLabel->hide();
-    fontSize->hide();
-
-    ContextBar::setLabel(themeList, Key_Select, ContextBar::NoLabel);
-    ContextBar::setLabel(colorList, Key_Select, ContextBar::NoLabel);
-    ContextBar::setLabel(styleList, Key_Select, ContextBar::NoLabel);
-    ContextBar::setLabel(fontList, Key_Select, ContextBar::NoLabel);
-
-    previewLabel->installEventFilter(this);
-    bgTimer = new QTimer(this);
-    connect(bgTimer, SIGNAL(timeout()), this, SLOT(updateBackground()));
+    previewLabel->setAlignment( Qt::AlignCenter );
+    previewLabel->setWordWrap( true );
 #endif
 
 
 #ifdef QTOPIA_PHONE
-    bgImgName = config.readEntry("BackgroundImage");
+    bgImgName = config.value("BackgroundImage").toString();
+    // bg display mode 1 = standard
+    // mode 2 = maximized
+    // mode 3 = tiled
+    bgDisplayMode = config.value("BackgroundMode", 0).toInt();
     if ( !bgImgName.isEmpty() && bgImgName[0]!='/' )
-	bgImgName = Resource::findPixmap("wallpaper/"+bgImgName);
+        bgImgName = QString(":image/wallpaper/"+bgImgName);
     connect(myPictures, SIGNAL(clicked()), this, SLOT(selectImage()));
     connect(wallpaper, SIGNAL(clicked()), this, SLOT(selectWallpaper()));
     connect(clearButton, SIGNAL(clicked()), this, SLOT(clearBackground()));
+
+    connect( qApp, SIGNAL(appMessage(const QString&,const QByteArray&)),
+        this, SLOT(receive(const QString&,const QByteArray&)) );
+
+    config.endGroup();
+    config.beginGroup( "ContextMenu" );
+    populateLabelTypeList( (QSoftMenuBar::LabelType)config.value( "LabelType", QSoftMenuBar::IconLabel ).toInt() );
+
+    initStatus = status();
+
 #endif
+
+#ifdef QTOPIA_PHONE
+    themeList->installEventFilter( this );
+    colorList->installEventFilter( this );
+    smbLabelTypeList->installEventFilter( this );
+    myPictures->installEventFilter( this );
+    wallpaper->installEventFilter( this );
+    clearButton->installEventFilter( this );
+
+    themeList->setEditFocus( true );
+#endif
+    rtl = layoutDirection() == Qt::RightToLeft;
 }
 
 AppearanceSettings::~AppearanceSettings()
 {
-    delete styleLoader;
     delete wdLoader;
 }
 
 void AppearanceSettings::accept()
 {
-    Config config("qpe");
-    config.setGroup( "Appearance" );
-    QString s;
-
+    isClosing = true;
 #ifdef QTOPIA_PHONE
-    PluginItem *item = (PluginItem *)themeList->item( themeList->currentItem() );
-    if ( item ) {
-	if (!item->themeFilename().isEmpty() && (item->themeFilename() != item->text()) ){
-	    config.writeEntry( "Style", item->filename() );
-	    config.writeEntry("Theme", item->themeFilename());
-	    config.writeEntry("DecorationTheme", item->decorationFilename());
-	    qDebug("Write config theme select %s %s", item->filename().latin1(), item->text().latin1());
-	}else{
-	    s = item->themeFilename().isEmpty() ? item->text() : item->themeFilename();
-	    qDebug("Write simple config theme select %s %s", item->filename().latin1(), item->text().latin1());
-	    config.writeEntry( "Style", s );
-	    config.writeEntry( "Theme", "");
-	    config.writeEntry( "DecorationTheme", "");
-	}
-    }
-#else
-    PluginItem *item = (PluginItem *)styleList->item( styleList->currentItem() );
-    if ( item ) {
-	s = item->filename().isEmpty() ? item->text() : item->filename();
-	config.writeEntry( "Style", s );
+    if ( isStatusView ) { // status view from profiles
+        if ( initStatus != status() ) { // if changed
+            int result = QMessageBox::warning( this, tr("Appearance"),
+                            tr("<qt>Would you like to save changes to Profile?</qt>"),
+                            QMessageBox::Yes, QMessageBox::No);
+            if ( result == QMessageBox::No ) { // do not save
+                if ( isFromActiveProfile ) // activate initial status
+                    setStatus( initStatus );
+            } else { // save changes to the selected profile
+                pushSettingStatus();
+            }
+        }
+
+        if ( !isFromActiveProfile )
+            setStatus( activeDetails );
+    } else { // normal appearance setting operation
+        if ( initStatus != status() ) { // if changed
+            int result = QMessageBox::warning( this, tr("Appearance"),
+                            tr("<qt>Would you like to apply new appearance?</qt>"),
+                            QMessageBox::Yes, QMessageBox::No);
+            if ( result == QMessageBox::No ) { // apply initial appearance
+                setStatus( initStatus );
+            } else { // if active profile contatins this property udpate details
+                QSettings cfg( "Trolltech", "PhoneProfile" );
+                cfg.beginGroup( "Profiles" );
+                QString activeProfile = cfg.value( "Selected", 1 ).toString();
+                cfg.endGroup();
+                cfg.beginGroup( "Profile " + activeProfile );
+                QString settings = cfg.value( "SettingList" ).toString();
+                if ( settings.contains( "appearance" ) )
+                    pushSettingStatus();
+            }
+        }
     }
 #endif
-
-    item = (PluginItem *)decorationList->item( decorationList->currentItem() );
-    if ( item ) {
-	s = item->filename().isEmpty() ? item->text() : item->filename();
-	config.writeEntry( "Decoration", s );
-    }
-
-    s = colorListIDs[colorList->currentItem()];
-    config.writeEntry( "Scheme", s );
-
-    Config scheme( QPEApplication::qpeDir() + "etc/colors/" + s + ".scheme",
-        Config::File );
-    if (scheme.isValid()){
-	scheme.setGroup("Colors");
-	QString color = scheme.readEntry( "Background", "#EEEEEE" );
-	config.writeEntry( "Background", color );
-	color = scheme.readEntry( "Foreground", "#000000" );
-	config.writeEntry( "Foreground", color );
-	color = scheme.readEntry( "Button", "#F0F0F0" );
-	config.writeEntry( "Button", color );
-	color = scheme.readEntry( "Highlight", "#8BAF31" );
-	config.writeEntry( "Highlight", color );
-	color = scheme.readEntry( "HighlightedText", "#FFFFFF" );
-	config.writeEntry( "HighlightedText", color );
-	color = scheme.readEntry( "Text", "#000000" );
-	config.writeEntry( "Text", color );
-	color = scheme.readEntry( "ButtonText", "#000000" );
-	config.writeEntry( "ButtonText", color );
-	color = scheme.readEntry( "Base", "#FFFFFF" );
-	config.writeEntry( "Base", color );
-	color = scheme.readEntry( "AlternateBase", "#CBEF71" );
-	config.writeEntry( "AlternateBase", color );
-	color = scheme.readEntry( "Text_disabled", "" );
-	config.writeEntry("Text_disabled", color);
-	color = scheme.readEntry( "Foreground_disabled", "" );
-	config.writeEntry("Foreground_disabled", color);
-	color = scheme.readEntry( "Shadow", "" );
-	config.writeEntry("Shadow", color);
-    } else {
-	QString themeConfigName(QPEApplication::qpeDir() + "etc/themes/" + s+ ".conf");
-	Config themeConfig(themeConfigName, Config::File);
-	if (themeConfig.isValid()){
-	    themeConfig.setGroup( "Theme" ); 
-	    if (themeConfig.hasKey( "Name" ) && themeConfig.hasKey( "Style" ) && themeConfig.hasKey( "WidgetsConfig")) {
-		QString themeXMLFile = themeConfig.readEntry( "WidgetsConfig");
-		WidgetThemeParser parser;
-		if (parser.parse(QPEApplication::qpeDir() + "etc/themes/" + themeXMLFile)){
-		    QPalette pal = parser.palette();
-		    config.writeEntry("Button", pal.color(QPalette::Normal, QColorGroup::Button).name());
-		    config.writeEntry("Background", pal.color(QPalette::Normal, QColorGroup::Background).name());
-		    config.writeEntry("Foreground", pal.color(QPalette::Normal, QColorGroup::Foreground).name());
-		    config.writeEntry("Highlight", pal.color(QPalette::Normal, QColorGroup::Highlight).name());
-		    config.writeEntry("HighlightedText", pal.color(QPalette::Normal, QColorGroup::HighlightedText).name());
-		    config.writeEntry("Text", pal.color(QPalette::Normal, QColorGroup::Text).name());
-		    config.writeEntry("ButtonText", pal.color(QPalette::Normal, QColorGroup::ButtonText).name());
-		    config.writeEntry("Base", pal.color(QPalette::Normal, QColorGroup::Base).name());
-		    config.writeEntry("Text_disabled", "");
-		    config.writeEntry("Foreground_disabled", "");
-		    config.writeEntry("Shadow", "");
-		}	
-	    }else{
-		qWarning("Theme config %s is invalid", themeConfigName.local8Bit().data());
-	    }
-	}else{
-	    qWarning("Unable to read config file %s", themeConfigName.local8Bit().data());
-	}
-    }
-
-#ifndef QTOPIA_PHONE
-    QFont font(fontList->currentText(), fontSize->currentText().toInt());
-    config.writeEntry( "FontFamily", fontList->currentText() );
-    config.writeEntry( "FontSize", fontSize->currentText().toInt() );
-#else
-    FontMap::Font f = fontMap.current();
-    QFont font(f.family,f.size);
-    fontMap.write(config);
-
-    config.writeEntry("BackgroundImage", bgImgName);
-#endif
-
-#ifndef QPE_FONT_HEIGHT_TO_ICONSIZE
-#define QPE_FONT_HEIGHT_TO_ICONSIZE(x) (x+1)
-#endif
-    QFontMetrics fm(font);
-    config.writeEntry( "IconSize", QPE_FONT_HEIGHT_TO_ICONSIZE(fm.height()) );
-
-    config.write(); // need to flush the config info first
-    Global::applyStyle();
+    applyStyle();
+    if ( waitWidget->isVisible() )
+        waitWidget->hide();
     QDialog::accept();
 }
 
+void AppearanceSettings::reject()
+{
+    isClosing = true;
+#ifdef QTOPIA_PHONE
+    if ( initStatus != status() ) {
+        setStatus( initStatus );
+        applyStyle();
+        if ( waitWidget->isVisible() )
+            waitWidget->hide();
+    }
+#endif
+    QDialog::reject();
+}
+
 void AppearanceSettings::done(int r)
-{ 
+{
     QDialog::done(r);
     close();
 }
 
-bool AppearanceSettings::eventFilter(QObject *
-#ifdef QTOPIA_PHONE
-o, QEvent *e
-#else
-,QEvent *
-#endif
-)
+void AppearanceSettings::applyStyle()
 {
 #ifdef QTOPIA_PHONE
-    if (o == previewLabel && e->type() == QEvent::Show) {
-	bgTimer->start(0, TRUE);
-    }
+    if ( !isThemeLoaded || !isShowPreview )
+        return;
+
+    isThemeLoaded = false;
 #endif
 
-    return FALSE;
+    bool updateTheme = currColor != colorList->currentRow()
+                        || currTheme != themeList->currentRow();
+
+    QSettings config("Trolltech","qpe");
+    config.beginGroup( "Appearance" );
+
+    if (updateTheme) {
+        waitWidget->show();
+        QString s;
+
+#ifdef QTOPIA_PHONE
+        PluginItem *item = (PluginItem *)themeList->currentItem();
+        if ( item ) {
+            if (!item->themeFilename().isEmpty() && (item->themeFilename() != item->text()) ){
+                config.setValue( "Style", item->filename() );
+                config.setValue("Theme", item->themeFilename());
+                config.setValue("DecorationTheme", item->decorationFilename());
+                qLog(UI) << "Write config theme select" << item->filename().toLatin1().data() <<
+                    item->text().toLatin1().data();
+            } else {
+                s = item->themeFilename().isEmpty() ? item->text() : item->themeFilename();
+                qLog(UI) << "Write simple config theme select" << item->filename().toLatin1().data() <<
+                    item->text().toLatin1().data();
+                config.setValue( "Style", s );
+                config.setValue( "Theme", "");
+                config.setValue( "DecorationTheme", "");
+            }
+        }
+#else
+
+        PluginItem *item = (PluginItem *)styleList->currentItem();
+        if ( item ) {
+            s = item->filename().isEmpty() ? item->text() : item->filename();
+            config.setValue( "Style", s );
+        }
+        item = (PluginItem *)decorationList->currentItem();
+        if ( item ) {
+            s = item->filename().isEmpty() ? item->text() : item->filename();
+            config.setValue( "Decoration", s );
+        }
+#endif
+
+        s = colorListIDs[colorList->row(colorList->currentItem())];
+        config.setValue( "Scheme", s );
+
+        QSettings scheme(Qtopia::qtopiaDir() + "etc/colors/" + s + ".scheme", QSettings::IniFormat);
+        if (scheme.status()==QSettings::NoError){
+            scheme.beginGroup("Colors");
+            QString color = scheme.value( "Background", "#EEEEEE" ).toString();
+            config.setValue( "Background", color );
+            color = scheme.value( "Foreground", "#000000" ).toString();
+            config.setValue( "Foreground", color );
+            color = scheme.value( "Button", "#F0F0F0" ).toString();
+            config.setValue( "Button", color );
+            color = scheme.value( "Highlight", "#8BAF31" ).toString();
+            config.setValue( "Highlight", color );
+
+            if ( waitWidget ) {
+                QColor col( color );
+                waitWidget->setColor( col );
+            }
+
+            color = scheme.value( "HighlightedText", "#FFFFFF" ).toString();
+            config.setValue( "HighlightedText", color );
+            color = scheme.value( "Text", "#000000" ).toString();
+            config.setValue( "Text", color );
+            color = scheme.value( "ButtonText", "#000000" ).toString();
+            config.setValue( "ButtonText", color );
+            color = scheme.value( "Base", "#FFFFFF" ).toString();
+            config.setValue( "Base", color );
+            color = scheme.value( "AlternateBase", "#CBEF71" ).toString();
+            config.setValue( "AlternateBase", color );
+            color = scheme.value( "Text_disabled", "" ).toString();
+            config.setValue("Text_disabled", color);
+            color = scheme.value( "Foreground_disabled", "" ).toString();
+            config.setValue("Foreground_disabled", color);
+            color = scheme.value( "Shadow", "" ).toString();
+            config.setValue("Shadow", color);
+        }
+    }
+
+#ifndef QTOPIA_PHONE
+    QFont font(fontList->currentItem()->text(), fontSize->currentText().toInt());
+    config.setValue( "FontFamily", fontList->currentItem()->text() );
+    config.setValue( "FontSize", fontSize->currentText().toDouble() );
+#else
+    config.setValue("BackgroundImage", bgImgName);
+    config.setValue("BackgroundMode", bgDisplayMode );
+#endif
+
+#ifdef QTOPIA_PHONE
+    config.endGroup();
+    config.beginGroup( "ContextMenu" );
+    config.setValue( "LabelType", smbLabelTypeList->currentRow() );
+#endif
+
+    config.sync(); // need to flush the config info first
+    if (updateTheme)
+        QtopiaChannel::send("QPE/System", "applyStyle()");
+#ifdef QTOPIA_PHONE
+    QtopiaChannel::send("QPE/System", "updateContextLabels()");
+    if (updateTheme) {
+        if ( isClosing )
+            QtopiaChannel::send("QPE/System", "applyStyleSplash()");
+        else
+            QtopiaChannel::send("QPE/System", "applyStyleNoSplash()");
+    } else if (bgChanged) {
+        QtopiaChannel::send("QPE/System", "applyBackgroundImage()");
+    }
+#endif
 }
+
+#ifdef QTOPIA_PHONE
+bool AppearanceSettings::eventFilter(QObject *o, QEvent *e)
+{
+    if ( e->type() == QEvent::KeyPress ) {
+        QKeyEvent *ke = (QKeyEvent*) e;
+        int key = ke->key();
+        if ( o == themeList || o == colorList || o == smbLabelTypeList
+        || o == myPictures || o == wallpaper || o == clearButton ) {
+            int currentIndex = tabWidget->currentIndex();
+            int count = tabWidget->count();
+            switch ( key ) {
+                case Qt::Key_Hangup:
+                    accept();
+                    break;
+                case Qt::Key_Back:
+                    // normal exit after theme is loaded
+                    if ( isThemeLoaded ) {
+                        isClosing = true;
+                        e->ignore();
+                    }
+                    // item selection changed but don't want to apply
+                    else if ( initStatus != status() && isThemeLoaded ) {
+                        setStatus( initStatus );
+                        isClosing = true;
+                        e->ignore();
+                    }
+                    // item selection changed and the theme is currently applying
+                    else if ( initStatus != status() && !isThemeLoaded ) {
+                        return true;
+                    }
+                    break;
+                case Qt::Key_Left:
+                    if ( rtl && currentIndex < count - 1 )
+                        ++currentIndex;
+                    else if ( !rtl && currentIndex > 0 )
+                        --currentIndex;
+                    tabWidget->setCurrentIndex( currentIndex );
+                    return true;
+                    break;
+                case Qt::Key_Right:
+                    if ( rtl && currentIndex > 0 )
+                        --currentIndex;
+                    else if ( !rtl && currentIndex < count - 1 )
+                        ++currentIndex;
+                    tabWidget->setCurrentIndex( currentIndex );
+                    return true;
+                    break;
+                case Qt::Key_Select:
+                    if ( o == themeList || o == colorList )
+                        applyStyle();
+                    else if ( o == smbLabelTypeList )
+                        updateContextLabels();
+                    break;
+                default: break;
+            }
+        }
+        if ( o == clearButton && key == Qt::Key_Down ) {
+            myPictures->setFocus();
+            return true;
+        } else if ( o == myPictures && key == Qt::Key_Up ) {
+            clearButton->setFocus();
+            return true;
+        }
+#ifdef QTOPIA_PHONE
+        if ( ( o == themeList || o == colorList || o == smbLabelTypeList )
+        && ( key == Qt::Key_Down || key == Qt::Key_Up ) )
+            qobject_cast<QWidget*>(o)->setEditFocus( true );
+#endif
+    }
+    return false;
+}
+#endif
 
 void AppearanceSettings::resizeEvent( QResizeEvent *e )
 {
 #ifndef QTOPIA_PHONE
-    int dheight = QApplication::desktop()->height();
-    int dwidth = QApplication::desktop()->width();
-    static bool wide = FALSE;
-    bool isWide = ( dheight < 300 && dheight < dwidth );
-    if ( isWide != wide ) {
-	wide = isWide;
-	delete layout();
-	QBoxLayout *l;
-	if ( wide )
-	    l = new QHBoxLayout( this );
-	else
-	    l = new QVBoxLayout( this );
-	l->setMargin( 4 );
-	l->setSpacing( 6 );
-	l->addWidget( tabWidget );
-	delete sample;
-	sample = new SampleWindow( this );
-	l->addWidget( sample );
-	sample->show();
+    static bool wide = false;
+    bool w = isWide();
+    if ( w != wide ) {
+        wide = w;
+        delete layout();
+        QBoxLayout *l;
+        if ( wide )
+            l = new QHBoxLayout( this );
+        else
+            l = new QVBoxLayout( this );
+        l->setMargin( 4 );
+        l->setSpacing( 6 );
+        l->addWidget( tabWidget );
+        delete sample;
+        sample = new SampleWindow( this );
+
+        if ( wdiface )
+            sample->setDecoration( wdiface );
+        else
+            sample->setDecoration( new DefaultWindowDecoration );
+
+        l->addWidget( sample );
+        sample->show();
     }
 #endif
-    AppearanceSettingsBase::resizeEvent( e );
+    QDialog::resizeEvent( e );
 }
 
-void AppearanceSettings::colorSelected( int id )
+void AppearanceSettings::showEvent( QShowEvent *e )
+{
+    QFont fnt(font());
+
+    // update font and background of currentItems
+    fnt.setBold( true );
+
+#ifdef QTOPIA_PHONE
+    themeList->currentItem()->setFont( fnt );
+    smbLabelTypeList->currentItem()->setFont( fnt );
+    isShowPreview = true;
+#else
+    styleList->currentItem()->setFont( fnt );
+    decorationList->currentItem()->setFont( fnt );
+    fontList->currentItem()->setFont( fnt );
+#endif
+    colorList->currentItem()->setFont( fnt );
+
+    QDialog::showEvent( e );
+}
+
+void AppearanceSettings::colorSelected( QListWidgetItem *colorItem )
 {
 #ifndef QTOPIA_PHONE
+    int id = colorList->row(colorItem);
     QPalette pal = readColorScheme(id);
     sample->setPalette( pal );
 #else
-    Q_UNUSED(id);
+    Q_UNUSED( colorItem );
 #endif
 }
 
 
 #define setPaletteEntry(pal, cfg, role, defaultVal) \
-    setPalEntry(pal, cfg, #role, QColorGroup::role, defaultVal)
-static void setPalEntry( QPalette &pal, const Config &config, const QString &entry,
-				QColorGroup::ColorRole role, const QString &defaultVal )
+    setPalEntry(pal, cfg, #role, QPalette::role, defaultVal)
+static void setPalEntry( QPalette &pal, const QSettings &config, const QString &entry,
+            QPalette::ColorRole role, const QString &defaultVal )
 {
-    QString value = config.readEntry( entry, defaultVal );
+    QString value = config.value( entry, defaultVal ).toString();
     if ( value[0] == '#' )
-	pal.setColor( role, QColor(value) );
+        pal.setColor( role, QColor(value) );
     else
-	pal.setBrush( role, QBrush(QColor(defaultVal), Resource::loadPixmap(value)) );
+        pal.setBrush( role, QBrush(QColor(defaultVal), QPixmap(":image/"+value)) );
 }
 
 
 QPalette AppearanceSettings::readColorScheme(int id)
 {
-    Config config( QPEApplication::qpeDir() + "etc/colors/" + colorListIDs[id] + ".scheme",
-        Config::File );
-    config.setGroup( "Colors" );
+    QSettings config(Qtopia::qtopiaDir() + "etc/colors/" + colorListIDs[id] + ".scheme", QSettings::IniFormat);
+    config.beginGroup( "Colors" );
 
     QPalette tempPal;
     setPaletteEntry( tempPal, config, Button, "#F0F0F0" );
     setPaletteEntry( tempPal, config, Background, "#EEEEEE" );
-    QPalette pal( tempPal.normal().button(), tempPal.normal().background() );
+    QPalette pal( tempPal.color(QPalette::Button), tempPal.color(QPalette::Background) );
     setPaletteEntry( pal, config, Button, "#F0F0F0" );
     setPaletteEntry( pal, config, Background, "#EEEEEE" );
     setPaletteEntry( pal, config, Base, "#FFFFFF" );
     setPaletteEntry( pal, config, Highlight, "#8BAF31" );
     setPaletteEntry( pal, config, Foreground, "#000000" );
-    QString color = config.readEntry( "HighlightedText", "#FFFFFF" );
-    pal.setColor( QColorGroup::HighlightedText, QColor(color) );
-    color = config.readEntry( "Text", "#000000" );
-    pal.setColor( QColorGroup::Text, QColor(color) );
-    color = config.readEntry( "ButtonText", "#000000" );
-    pal.setColor( QPalette::Active, QColorGroup::ButtonText, QColor(color) );
+    QString color = config.value( "HighlightedText", "#FFFFFF" ).toString();
+    pal.setColor( QPalette::HighlightedText, QColor(color) );
+    color = config.value( "Text", "#000000" ).toString();
+    pal.setColor( QPalette::Text, QColor(color) );
+    color = config.value( "ButtonText", "#000000" ).toString();
+    pal.setColor( QPalette::Active, QPalette::ButtonText, QColor(color) );
 
-    pal.setColor( QPalette::Disabled, QColorGroup::Text,
-		  pal.color(QPalette::Active, QColorGroup::Background).dark() );
+    pal.setColor( QPalette::Disabled, QPalette::Text, pal.color(QPalette::Active, QPalette::Background).dark() );
 
     return pal;
 }
 
-void AppearanceSettings::styleSelected( int idx )
+void AppearanceSettings::styleSelected( QListWidgetItem *styleItem )
 {
 #ifndef QTOPIA_PHONE
     QString style("Qtopia");
-    PluginItem *item = (PluginItem *)styleList->item( idx );
+    PluginItem *item = (PluginItem *)styleItem;
     if ( item )
-	style = item->filename().isEmpty() ? item->text() : item->filename();
+        style = item->filename().isEmpty() ? item->text() : item->filename();
 
-    StyleInterface *oldIface = styleiface;
+    // XXX delete old style
     QStyle *newStyle = 0;
-    styleiface = 0;
     if ( style == "Windows" ) { // No tr
-	newStyle = new QWindowsStyle;
+        newStyle = new QWindowsStyle;
     } else if ( style == "QPE" || style == "Qtopia" ) {
-	newStyle = new QPEStyle;
+#ifdef QTOPIA4_TODO
+        newStyle = new QPEStyle;
+#endif
     } else {
-	StyleInterface *iface = 0;
-	if ( styleLoader->queryInterface( style, IID_Style, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
-	    newStyle = iface->style();
-	    styleiface = iface;
-	}
+        newStyle = QStyleFactory::create(style);
     }
 
+#ifdef QTOPIA4_TODO
     if (!newStyle)
-	newStyle = new QPEStyle;
+        newStyle = new QPEStyle;
+#else
+    if (!newStyle)
+        newStyle = new QWindowsStyle;
+#endif
 
-    sample->setUpdatesEnabled( FALSE );
+    sample->setUpdatesEnabled( false );
     QPixmapCache::clear();
     setStyle( sample, newStyle );
     QTimer::singleShot( 0, this, SLOT(fixSampleGeometry()) );
 
-    if ( oldIface )
-	styleLoader->releaseInterface( oldIface );
 #else
-    Q_UNUSED(idx);
+    Q_UNUSED(styleItem);
 #endif
 }
 
-void AppearanceSettings::themeSelected( int idx )
-{
-#ifdef QTOPIA_PHONE
-    QString theme("Qtopia");
-    PluginItem *item = (PluginItem *)themeList->item( idx );
-    if ( item )
-	theme = item->themeFilename().isEmpty() ? item->text() : item->themeFilename();
-
-    QString readStyleName, configFileName;
-    // Check if a themed style was selected.
-    QString themeDataPath( QPEApplication::qpeDir() + "etc/themes/" );
-    QDir dir;
-    bool validTheme, skipTheme;
-
-    qDebug( "Find the themed definition" );
-    if ( item && !item->text().isEmpty() && dir.exists( themeDataPath ) ){
-	dir.setPath( themeDataPath );
-	dir.setNameFilter( "*.conf" ); // No tr
-	for (int index = 0; index < (int)dir.count(); index++){
-	    QString configFileName(themeDataPath + dir[index]);
-	    Config themeConfig(configFileName, Config::File );
-	    validTheme = TRUE;
-	    skipTheme = FALSE;
-	    qDebug( "Reading config %s", configFileName.local8Bit().data() );
-	    themeConfig.setGroup( "Theme" ); // no Tr
-	    if ( themeConfig.isValid() ){
-		if ( themeConfig.hasKey( "Name" ) && themeConfig.hasKey( "Style" ) ){	// No tr 
-		    readStyleName = themeConfig.readEntry( "Name" );
-		    if ( readStyleName == item->text() ){ 
-			qDebug( "Adopting theme %s", item->text().local8Bit().data());
-			theme = item->themeFilename();
-			break;
-		    }else{
-			skipTheme = TRUE;
-			qDebug( "Skipping themed style %s when looking for %s", 
-				readStyleName.local8Bit().data(), item->text().local8Bit().data() );
-		    }
-		}else{
-		    validTheme = FALSE;
-		}
-	    }
-
-	    if (!validTheme && !skipTheme)
-		qDebug("Ignoring invalid theme file %s", configFileName.local8Bit().data()); 
-	}
-    }
-#else
-    Q_UNUSED(idx);
-#endif
-}
-
-void AppearanceSettings::decorationSelected( int idx )
+void AppearanceSettings::decorationSelected( QListWidgetItem *decItem )
 {
 #ifndef QTOPIA_PHONE
-    if ( wdIsPlugin ) {
-	wdLoader->releaseInterface( wdiface );
-    } else {
-	delete wdiface;
-    }
     wdiface = 0;
-    wdIsPlugin = FALSE;
+    wdIsPlugin = false;
 
     QString dec("Qtopia");
-    PluginItem *item = (PluginItem *)decorationList->item( idx );
+    PluginItem *item = (PluginItem *)decItem;
     if ( item )
-	dec = item->filename().isEmpty() ? item->text() : item->filename();
+        dec = item->filename().isEmpty() ? item->text() : item->filename();
 
     if ( dec != "Qtopia" ) {
-	if ( wdLoader->queryInterface( dec, IID_WindowDecoration, (QUnknownInterface**)&wdiface ) == QS_OK && wdiface )
-	    wdIsPlugin = TRUE;
+        QObject *instance = wdLoader->instance(dec);
+        QWindowDecorationFactoryInterface *iface = 0;
+        iface = qobject_cast<QWindowDecorationFactoryInterface*>(instance);
+        if (iface) {
+            wdiface = iface->decoration(iface->keys()[0]);
+            wdIsPlugin = true;
+        }
     }
 
     if ( !wdiface )
-	wdiface = new DefaultWindowDecoration;
+        wdiface = new DefaultWindowDecoration;
     sample->setDecoration( wdiface );
     sample->repaint();
 #else
-    Q_UNUSED(idx);
+    Q_UNUSED(decItem);
 #endif
 }
 
-void AppearanceSettings::fontSelected( const QString &name )
+QFont AppearanceSettings::fontSelected( const QString &name )
 {
-
     QString selFontFamily = name;
+    QFont font;
 
 #ifndef QTOPIA_PHONE
     int selFontSize = prefFontSize;
 
-    sample->setUpdatesEnabled( FALSE );
+    sample->setUpdatesEnabled( false );
     fontSize->clear();
 
     int diff = 1000;
-    FontDatabase fd;
-    QValueList<int> pointSizes = fd.pointSizes( name.lower() );
-    QValueList<int>::Iterator it;
+    QFontDatabase fd;
+    QList<int> pointSizes = fd.pointSizes( name.toLower() );
+    QList<int>::Iterator it;
     for ( it = pointSizes.begin(); it != pointSizes.end(); ++it ) {
-	if ( *it <= maxFontSize ) {
-	    fontSize->insertItem( QString::number( *it ) );
-	    if ( QABS(*it-prefFontSize) < diff ) {
-		diff = QABS(*it - prefFontSize);
-		fontSize->setCurrentItem( fontSize->count()-1 );
-	    }
-	}
+        if ( *it <= maxFontSize ) {
+            fontSize->addItem( QString::number( *it ) );
+            if ( qAbs(*it-prefFontSize) < diff ) {
+                diff = qAbs(*it - prefFontSize);
+                fontSize->setCurrentIndex( fontSize->count()-1 );
+            }
+        }
     }
 
     selFontSize = fontSize->currentText().toInt();
-
-    qDebug( "Setfont: %s %d", selFontFamily.latin1(), selFontSize );
-
     QFont f( selFontFamily, selFontSize );
+    font = f;
 
-    sample->setFont( f );
+    sample->setFont( font );
     QTimer::singleShot( 0, this, SLOT(fixSampleGeometry()) );
-#else
-    fontMap.select(name);
 #endif
+    return font;
 }
 
 void AppearanceSettings::fontSizeSelected( const QString &sz )
 {
     prefFontSize = sz.toInt();
 #ifndef QTOPIA_PHONE
-    sample->setUpdatesEnabled( FALSE );
-    sample->setFont( QFont(fontList->currentText(),prefFontSize) );
+    sample->setUpdatesEnabled( false );
+    sample->setFont( QFont(fontList->currentItem()->text(),prefFontSize) );
     QTimer::singleShot( 0, this, SLOT(fixSampleGeometry()) );
 #endif
 }
 
+#ifndef QTOPIA_PHONE
 void AppearanceSettings::setStyle( QWidget *w, QStyle *s )
 {
-    if (&w->style() != s)
-	w->setStyle( s );
-    QObjectList *childObjects=(QObjectList*)w->children();
-    if ( childObjects ) {
-	QObject * o;
-	for(o=childObjects->first();o!=0;o=childObjects->next()) {
-	    if( o->isWidgetType() ) {
-		setStyle((QWidget *)o,s);
-	    }
-	}
+    if (w->style() != s)
+        w->setStyle( s );
+    QObjectList childObjects = w->children();
+    QObjectList::ConstIterator it;
+    for (it = childObjects.begin(); it != childObjects.end(); ++it) {
+        if( (*it)->isWidgetType() ) {
+            setStyle((QWidget *)(*it),s);
+        }
     }
 }
 
 void AppearanceSettings::populateStyleList()
 {
-    (void)new PluginItem( styleList, "Qtopia");
-#if QT_VERSION >= 0x030000
-//    styleList->insertStringList(QStyleFactory::styles());
-#else
-# ifndef QTOPIA_PHONE
-    (void)new PluginItem( styleList, "Windows"); // No tr
-# endif
-    QStringList list = styleLoader->list();
+    (void)new PluginItem( "Qtopia", styleList );
+    QStringList list = QStyleFactory::keys();
     QStringList::Iterator it;
     for ( it = list.begin(); it != list.end(); ++it ) {
-	StyleInterface *iface = 0;
-	if (  styleLoader->queryInterface( *it, IID_Style, (QUnknownInterface**)&iface ) == QS_OK ) {
-	    PluginItem *item = new PluginItem( styleList, iface->name() );
-	    item->setFilename( *it );
-	    styleLoader->releaseInterface( iface );
-	}
+        //PluginItem *item = new PluginItem( *it, styleList );
     }
-#endif
 }
+#endif
 
 #ifdef QTOPIA_PHONE
-void AppearanceSettings::populateThemeList()
+void AppearanceSettings::populateThemeList( QString current )
 {
     // Look for themed styles
-    QString themeDataPath( QPEApplication::qpeDir() + "etc/themes/" );
+    QString themeDataPath( Qtopia::qtopiaDir() + "etc/themes/" );
     QString configFileName, themeName, decorationName;
     QDir dir;
     if (dir.exists(themeDataPath)){
-	bool valid;
-	dir.setPath( themeDataPath );
-	dir.setNameFilter( "*.conf" ); // No tr
-	for (int index = 0; index < (int)dir.count(); index++){
-	    valid = TRUE;
-	    configFileName = themeDataPath + dir[index];
-	    Config themeConfig( configFileName, Config::File );
-	    // Ensure that we only provide valid theme choices.
-	    if (themeConfig.isValid()){
-		themeConfig.setGroup( "Theme" ); // No tr
-		QString styleName = themeConfig.readEntry("Style", "Qtopia");
-		QStringList list;
-		list << "TitleConfig" << "HomeConfig" << "DecorationsConfig" << "ContextConfig" << "WidgetsConfig";
-		for (QStringList::ConstIterator it = list.begin(); it != list.end(); it++){
-		    if (themeConfig.hasKey(*it)){
-			QFileInfo info(QPEApplication::qpeDir() + "etc/themes/" + themeConfig.readEntry(*it));
-			if (!info.isFile()){
-			    qWarning("Config entry %s in %s points to non-existant file  %s", 
-					(*it).local8Bit().data(), configFileName.local8Bit().data(), info.filePath().local8Bit().data()); 
-			    valid = FALSE; 
-			    break; 
-			}
-		    }
-		}
-		if (valid && themeConfig.hasKey( "Name" )) {
-		    themeName = themeConfig.readEntry( "Name" );
-		    decorationName = themeConfig.readEntry("DecorationConfig");
-		    PluginItem *item = new PluginItem( themeList, themeName );
-		    item->setFilename( styleName );
-		    item->setThemeFilename( dir[index] );
-		    item->setDecorationFilename( decorationName );
-		}else{
-		    valid = FALSE;
-		}
-	    }else{
-		valid = FALSE;
-	    }
-	    if (!valid)
-		qWarning("Ignoring invalid theme conf file %s", configFileName.local8Bit().data()); 
-	}
+        bool valid;
+        dir.setPath( themeDataPath );
+        dir.setNameFilters( QStringList( "*.conf" )); // No tr
+        for (int index = 0; index < (int)dir.count(); index++) {
+            valid = true;
+            configFileName = themeDataPath + dir[index];
+            QTranslatableSettings themeConfig(configFileName, QSettings::IniFormat);
+            // Ensure that we only provide valid theme choices.
+            if (themeConfig.status()==QSettings::NoError){
+                themeConfig.beginGroup( "Theme" ); // No tr
+                QString styleName = themeConfig.value("Style", "Qtopia").toString();
+                QStringList list;
+                list << "TitleConfig" << "HomeConfig" << "ContextConfig" << "DialerConfig" << "CallScreenConfig" << "DecorationConfig";
+                for (QStringList::const_iterator it = list.constBegin(); it != list.constEnd(); it++){
+                    if (themeConfig.contains(*it)){
+                        QFileInfo info(Qtopia::qtopiaDir() + "etc/themes/" + themeConfig.value(*it).toString());
+                        if (!info.isFile()){
+                            qLog(UI) << "QSettings entry" << (*it).toLocal8Bit().data()
+                                    << "in" << configFileName.toLocal8Bit().data()
+                                    << "points to non-existant file" << info.filePath().toLocal8Bit().data();
+                            valid = false;
+                            break;
+                        }
+                    }
+                }
+                if (valid && themeConfig.contains("Name")) {
+                    themeName = themeConfig.value( "Name" ).toString();
+                    decorationName = themeConfig.value("DecorationConfig").toString();
+                    PluginItem *item = new PluginItem( themeName, themeList );
+
+                    if ( themeName == tr( "Qtopia" ) )
+                        defaultTheme = item;
+
+                    item->setFilename( styleName );
+                    item->setThemeFilename( dir[index] );
+                    item->setDecorationFilename( decorationName );
+                    if ( configFileName.contains( current ) ) {
+                        themeList->setCurrentItem( item );
+                        currTheme = themeList->currentRow();
+                    }
+                } else {
+                    valid = false;
+                }
+            } else {
+                valid = false;
+            }
+
+            if (!valid)
+                qLog(UI) << "Ignoring invalid theme conf file" << configFileName.toLocal8Bit().data();
+        }
 
     } else {
-	qWarning("Theme style configuration path not found %s", themeDataPath.local8Bit().data()); // No tr
+        qLog(UI) << "Theme style configuration path not found" << themeDataPath.toLocal8Bit().data(); // No tr
     }
 }
 #endif
 
 void AppearanceSettings::populateColorList()
 {
-    int lineHeight = fontMetrics().lineSpacing();
-    QDir dir( QPEApplication::qpeDir() + "etc/colors" );
-    QStringList list = dir.entryList( "*.scheme" ); // No tr
+    QDir dir( Qtopia::qtopiaDir() + "etc/colors" );
+    QStringList list = dir.entryList( QStringList("*.scheme") ); // No tr
     QStringList::Iterator it;
     colorListIDs.clear();
     for ( it = list.begin(); it != list.end(); ++it ) {
-	Config scheme( QPEApplication::qpeDir() + "etc/colors/" + *it, Config::File );
-        QString name = (*it).left( (*it).find( ".scheme" ) );
-	colorListIDs.append(name);
-	scheme.setGroup("Global");
-	QPalette pal = readColorScheme(colorListIDs.count()-1);
-	QPixmap pm(32, lineHeight);
-	QPainter ppm(&pm);
-	ppm.setPen(black);
-	ppm.setBrush(QBrush::NoBrush);
-	ppm.drawRect(0, 0, 32, lineHeight);
-	ppm.fillRect(1, 1, 10, lineHeight-2, pal.active().background());
-	ppm.fillRect(11, 1, 10, lineHeight-2, pal.active().base());
-	ppm.fillRect(21, 1, 10, lineHeight-2, pal.active().highlight());
-	ppm.end();
-        colorList->insertItem( pm, scheme.readEntry("Name",name+"-DEF") );
-    }
-    
-    dir = QDir( QPEApplication::qpeDir() + "etc/themes" );
-    list = dir.entryList( "*.conf" ); // No tr
-    for ( it = list.begin(); it != list.end(); ++it ) {
-	Config themeConfig( QPEApplication::qpeDir() + "etc/themes/" + *it, Config::File );
-	if ( themeConfig.isValid() ){
-	    themeConfig.setGroup("Theme");
-	    if ( themeConfig.hasKey( "Name" ) && themeConfig.hasKey( "Style" )	// No tr 
-		    && themeConfig.hasKey( "WidgetsConfig" ) ) {			// No tr
-		QString name = (*it).left( (*it).find( ".conf" ) );
-		colorListIDs.append(name);
-		colorList->insertItem( themeConfig.readEntry("Name",name+"-DEF") );
-	    }
-	}
+        QTranslatableSettings scheme(Qtopia::qtopiaDir() + "etc/colors/" + *it, QSettings::IniFormat);
+        QString name = (*it).left( (*it).indexOf( ".scheme" ) );
+        colorListIDs.append(name);
+        scheme.beginGroup("Global");
+        QListWidgetItem *item = new QListWidgetItem(scheme.value("Name",name+"-DEF").toString(), colorList);
+
+        if ( name == tr( "Qtopia" ) )
+            defaultColor = item;
     }
 }
 
+#ifndef QTOPIA_PHONE
 void AppearanceSettings::populateDecorationList()
 {
-    (void)new PluginItem( decorationList, "Qtopia" );
+    (void)new PluginItem( "Qtopia", decorationList );
     QStringList list = wdLoader->list();
     QStringList::Iterator it;
     for ( it = list.begin(); it != list.end(); ++it ) {
-	WindowDecorationInterface *iface = 0;
-	if ( wdLoader->queryInterface( *it, IID_WindowDecoration, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
-	    PluginItem *item = new PluginItem( decorationList, iface->name() );
-	    item->setFilename( *it );
-	    wdLoader->releaseInterface( iface );
-	}
+        QWindowDecorationFactoryInterface *iface = 0;
+        QObject *instance = wdLoader->instance(*it);
+        iface = qobject_cast<QWindowDecorationFactoryInterface*>(instance);
+        if (iface) {
+            PluginItem *item = new PluginItem( iface->decoration(iface->keys()[0])->name(), decorationList );
+            item->setFilename(*it);
+        }
+        if (instance)
+            delete instance;
     }
 }
 
 void AppearanceSettings::populateFontList(const QString& cur, int cursz)
 {
-#ifndef QTOPIA_PHONE
-    FontDatabase fd;
+    QFontDatabase fd;
     QStringList f = fd.families();
-    for ( QStringList::ConstIterator it=f.begin(); it!=f.end(); ++it ) {
-	QString n = *it;
-	n[0] = n[0].upper();
-	fontList->insertItem(n);
-	if ( (*it).lower() == cur.lower() )
-	    fontList->setCurrentItem(fontList->count()-1);
+    for ( QStringList::const_iterator it=f.constBegin(); it!=f.constEnd(); ++it ) {
+        QString n = *it;
+        n[0] = n[0].toUpper();
+        fontList->addItem(n);
+        if ( (*it).toLower() == cur.toLower() )
+            fontList->setCurrentItem(fontList->item(fontList->count()-1));
     }
-    fontSize->insertItem( QString::number( cursz ) );
-    fontSelected( fontList->currentText() );
-#else
-    for (int i=0; i<fontMap.count(); ++i) {
-	(void)new FontItem(fontList, fontMap[i].name, QFont(fontMap[i].family, fontMap[i].size));
-	if ( fontMap[i].family.lower()==cur.lower() && fontMap[i].size == cursz )
-	    fontList->setCurrentItem(fontList->count()-1);
-    }
-    if (fontList->currentText().isNull())
-	fontList->setCurrentItem(1);
-    fontSelected( fontList->currentText() );
-#endif
+    if ( !fontList->currentItem() )
+        fontList->setCurrentRow(0);
+    fontSize->addItem( QString::number( cursz ) );
+    fontSelected( fontList->currentItem()->text() );
 }
+#endif
+
+#ifdef QTOPIA_PHONE
+void AppearanceSettings::populateLabelTypeList(const QSoftMenuBar::LabelType type)
+{
+    smbLabelTypeList->addItem( new QListWidgetItem( tr( "Icon Label" ) ) );
+    smbLabelTypeList->addItem( new QListWidgetItem( tr( "Text Label" ) ) );
+    smbLabelTypeList->setCurrentItem( smbLabelTypeList->item( (int)type ) );
+}
+#endif
 
 void AppearanceSettings::fixSampleGeometry()
 {
 #ifndef QTOPIA_PHONE
-    qDebug( "update sample");
     sample->fixGeometry();
-    sample->setUpdatesEnabled( TRUE );
-    sample->repaint( FALSE );  // repaint decoration
-#endif
-}
-
-void AppearanceSettings::accelerator(int 
-#ifdef QTOPIA_PHONE        
-        key
-#endif
-        )
-{
-#ifdef QTOPIA_PHONE
-    if (key == Key_Left) {
-	int idx = tabWidget->currentPageIndex()-1;
-	if (idx < 0)
-	    idx = 5;
-	if (idx == 3) // the removed decoration page
-	    idx--;
-	if (idx == 2) // the removed style page
-	    idx--;
-	tabWidget->setCurrentPage(idx);
-    } else if (key == Key_Right) {
-	int idx = tabWidget->currentPageIndex()+1;
-	if (idx > 5)
-	    idx = 0;
-	if (idx == 2) // the removed style page
-	    idx++;
-	if (idx == 3) // the removed decoration page
-	    idx++;
-	tabWidget->setCurrentPage(idx);
-    }
+    sample->setUpdatesEnabled( true );
+    sample->repaint();  // repaint decoration
 #endif
 }
 
 #ifdef QTOPIA_PHONE
 void AppearanceSettings::selectBackground(bool wallpapers)
 {
-    QStringList locations;
-    if( wallpapers ) {
-        QStringList qtopia_paths = Global::qtopiaPaths();
+    QContentFilter locations;
+    if( wallpapers) {
+        QStringList qtopia_paths = Qtopia::installPaths();
         QStringList::Iterator it;
-        for ( it = qtopia_paths.begin(); it != qtopia_paths.end(); it++ )
-            locations.append( (*it) + "pics/wallpaper" );
+        for ( it = qtopia_paths.begin(); it != qtopia_paths.end(); it++ ) {
+            locations |= QContentFilter( QContentFilter::Directory, (*it) + QLatin1String("pics/wallpaper") );
+            QContentSet::scan( (*it) + "pics/wallpaper" );
+        }
     }
-    
-    ImageSelectorDialog sel( locations, this );
-    if (QPEApplication::execDialog(&sel)) {
-	if (!sel.selectedFilename().isNull()) {
-	    previewLabel->setText("");
-	    bgImgName = sel.selectedFilename();
-	    previewLabel->setText(tr("Loading..."));
-	    updateBackground();
-	}
+    else
+        locations = QContentFilter( QContent::Document );
+
+    QDrmContent drm( QDrmRights::Display );
+
+    QImageDocumentSelectorDialog sel( this );
+    sel.setFilter( locations );
+    sel.setMandatoryPermissions( QDrmRights::Automated );
+    if (QtopiaApplication::execDialog(&sel)) {
+        QContent doc = sel.selectedDocument();
+
+        if(doc.fileKnown() && displayMode() ) { // display mode must be selected
+            qLog(Resource) << "Selected Document:" << doc.file();
+            bgChanged = true;
+            previewLabel->setText("");
+            bgImgName = doc.file();
+            previewLabel->setText(tr("Loading..."));
+            updateBackground();
+            if ( isThemeLoaded && isShowPreview )
+                QtopiaChannel::send("QPE/System", "applyBackgroundImage()");
+        }
     }
 }
 #endif
@@ -936,40 +944,202 @@ void AppearanceSettings::selectBackground(bool wallpapers)
 void AppearanceSettings::selectImage(void)
 {
 #ifdef QTOPIA_PHONE
-    selectBackground(FALSE);
+    selectBackground(false);
 #endif
 }
 
 void AppearanceSettings::selectWallpaper(void)
 {
 #ifdef QTOPIA_PHONE
-    selectBackground(TRUE);
+    selectBackground(true);
 #endif
 }
 
 void AppearanceSettings::clearBackground()
 {
 #ifdef QTOPIA_PHONE
-    bgImgName = QString::null;
+    bgImgName = QString();
+    bgDisplayMode = 0;
+    bgChanged = true;
     updateBackground();
+    applyStyle();
 #endif
 }
 
 void AppearanceSettings::updateBackground()
 {
 #ifdef QTOPIA_PHONE
-    //QPixmap *currPm = previewLabel->pixmap();
     if (bgImgName.isEmpty()) {
-	previewLabel->setText(tr("No image"));
+        previewLabel->setText(tr("No image"));
     } else if (previewLabel->isVisible()) {
-	QImage bgImg = Image::loadScaled(bgImgName, previewLabel->width(), previewLabel->height());
-	if (!bgImg.isNull()) {
-	    QPixmap pm;
-	    pm.convertFromImage(bgImg);
-	    previewLabel->setPixmap(pm);
-	} else {
-	    previewLabel->setText(tr("Cannot load image"));
-	}
+        QDrmContent imgContent( QDrmRights::Display, QDrmContent::NoLicenseOptions );
+        if( imgContent.requestLicense( QContent( bgImgName ) ) )
+        {
+            QThumbnail thumbnail( bgImgName );
+            int margin = previewLabel->margin();
+            QSize sz = previewLabel->contentsRect().size()
+                        - QSize(margin,margin)
+                        - QSize(1,1); // prevents weird Qt bug.
+            QPixmap bgImg = thumbnail.pixmap(sz);
+            if (!bgImg.isNull()) {
+                previewLabel->setPixmap(bgImg);
+                return;
+            }
+        }
+        previewLabel->setText(tr("Cannot load image"));
     }
 #endif
 }
+
+bool AppearanceSettings::displayMode()
+{
+    QDialog dlg( this );
+    dlg.setWindowTitle( tr( "Display Mode" ) );
+    QVBoxLayout layout( &dlg );
+    QRadioButton centerButton( tr( "Standard" ), &dlg );
+    QRadioButton scaleButton( tr( "Maximize" ), &dlg );
+    QRadioButton tileButton( tr( "Tile" ), &dlg );
+    QButtonGroup group( &dlg );
+    group.addButton( &centerButton, 0 );
+    group.addButton( &scaleButton, 1 );
+    group.addButton( &tileButton, 2 );
+    centerButton.setChecked( true );
+    layout.setMargin( 2 );
+    layout.setSpacing( 2 );
+    layout.addWidget( &centerButton );
+    layout.addWidget( &scaleButton );
+    layout.addWidget( &tileButton );
+    layout.addStretch( 0 );
+
+    if ( QtopiaApplication::execDialog( &dlg ) ) {
+        bgDisplayMode = group.checkedId();
+        return true;
+    }
+    return false;
+}
+
+bool AppearanceSettings::isWide()
+{
+    QDesktopWidget *desktop = QApplication::desktop();
+    QSize dSize = desktop->availableGeometry(desktop->primaryScreen()).size();
+    return (dSize.height() < 300 && dSize.height() < dSize.width());
+}
+
+#ifdef QTOPIA_PHONE
+void AppearanceSettings::pushSettingStatus()
+{
+    QtopiaServiceRequest e( "SettingsManager", "pushSettingStatus(QString,QString,QString)" );
+    e << QString( "appearance" ) << QString( windowTitle() ) << status();
+    e.send();
+    initStatus = status();
+}
+
+void AppearanceSettings::pullSettingStatus()
+{
+    QtopiaServiceRequest e( "SettingsManager", "pullSettingStatus(QString,QString,QString)" );
+    e << QString( "appearance" ) << QString( windowTitle() ) << status();
+    e.send();
+}
+
+QString AppearanceSettings::status()
+{
+    QString status;
+    status += QString::number( themeList->currentRow() ) + ",";
+    status += QString::number( colorList->currentRow() ) + ",";
+    status += bgImgName + ",";
+    status += QString::number( bgDisplayMode ) + ",";
+    status += QString::number( smbLabelTypeList->currentRow() ) + ",";
+    return status;
+}
+
+void AppearanceSettings::setStatus( const QString details )
+{
+#ifdef QTOPIA_PHONE
+    isShowPreview = false;
+#endif
+    QStringList s = details.split( ',' );
+    themeList->setCurrentRow( s.at( 0 ).toInt() );
+    colorList->setCurrentRow( s.at( 1 ).toInt() );
+    bgImgName = s.at( 2 );
+    bgDisplayMode = s.at( 3 ).toInt();
+    smbLabelTypeList->setCurrentRow( s.at( 4 ).toInt() );
+    if ( !bgImgName.isEmpty() )
+        updateBackground();
+#ifdef QTOPIA_PHONE
+    isShowPreview = true;
+#endif
+}
+
+void AppearanceSettings::receive( const QString& msg, const QByteArray& data )
+{
+    QDataStream ds( data );
+    if ( msg == "Settings::setStatus(bool,QString)" ) {
+        // must show widget to keep running
+        QtopiaApplication::instance()->showMainWidget();
+        isStatusView = true;
+#ifdef QTOPIA_PHONE
+        QSoftMenuBar::removeMenuFrom( this, contextMenu );
+        delete contextMenu;
+#endif
+        QString details;
+        ds >> isFromActiveProfile;
+        ds >> details;
+        activeDetails = initStatus;
+        initStatus = details;
+        setStatus( details );
+        applyStyle();
+    } else if ( msg == "Settings::activateSettings(QString)" ) {
+        isClosing = true;
+        QString details;
+        ds >> details;
+        setStatus( details );
+        applyStyle();
+        QTimer::singleShot( 500, waitWidget, SLOT(hide()) );
+    } else if ( msg == "Settings::pullSettingStatus()" ) {
+        pullSettingStatus();
+    } else if ( msg == "Settings::activateDefault()" ) {
+        colorList->setCurrentItem( defaultColor );
+#ifdef QTOPIA_PHONE
+        isShowPreview = false;
+        themeList->setCurrentItem( defaultTheme );
+        bgImgName = "";
+        smbLabelTypeList->setCurrentRow( (int)QSoftMenuBar::IconLabel );
+        isShowPreview = true;
+#endif
+        isClosing = true;
+        applyStyle();
+        QTimer::singleShot( 500, waitWidget, SLOT(hide()) );
+    } else if ( msg == "Settings::themeLoaded()" ) {
+        isThemeLoaded = true;
+        QTimer::singleShot( 500, waitWidget, SLOT(hide()) );
+    }
+}
+
+void AppearanceSettings::tabChanged( int curIndex )
+{
+    if ( curIndex == 0 )
+        themeList->setEditFocus( true );
+    else if ( curIndex == 1 )
+        colorList->setEditFocus( true );
+    else if ( curIndex == 2 )
+        smbLabelTypeList->setEditFocus( true );
+    else if ( curIndex == 3 )
+        updateBackground();
+}
+
+void AppearanceSettings::updateContextLabels()
+{
+#ifdef QTOPIA_PHONE
+    if ( isThemeLoaded &&  isShowPreview ) {
+        QSettings config("Trolltech","qpe");
+        config.beginGroup( "ContextMenu" );
+        config.setValue( "LabelType", smbLabelTypeList->currentRow() );
+
+        QtopiaChannel::send("QPE/System", "updateContextLabels()");
+    }
+#endif
+}
+
+#endif
+
+

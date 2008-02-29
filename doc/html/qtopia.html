@@ -1,0 +1,48 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Qtopia Class Reference</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Qtopia Class Reference</h1>
+<p>The Qtopia namespace contains miscellaneous functionality. <a href="#details">More...</a></p>
+<pre>    #include &lt;Qtopia&gt;</pre><ul>
+<li><a href="qtopia-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h3>Public Types</h3>
+<ul>
+<li><div class="fn"/>enum <b><a href="qtopia.html#Lockflags-enum">Lockflags</a></b> { LockShare, LockWrite, LockBlock }</li>
+</ul>
+<a name="details"></a>
+<hr />
+<h2>Detailed Description</h2>
+<p>The Qtopia namespace contains miscellaneous functionality.</p>
+<a name="word-list-related"></a>
+<h3>Word list related</h3>
+<p>A list of words relevant to the current locale is maintained by the system. The list is held in a <a href="qdawg.html">DAWG</a> (implemented by the <a href="qdawg.html">QDawg</a> class). This list is used, for example, by the pickboard input method.</p>
+<p>The global <a href="qdawg.html">QDawg</a> is returned by fixedDawg(); this cannot be updated. An updatable copy of the global <a href="qdawg.html">QDawg</a> is returned by addedDawg(). Applications may have their own word lists stored in <a href="qdawg.html">QDawg</a>s which are returned by <a href="buildsystem-reference.html#dawg">dawg</a>(). Use addWords() to add words to the updateable copy of the global <a href="qdawg.html">QDawg</a> or to named application <a href="qdawg.html">QDawg</a>s.</p>
+<hr />
+<h2>Member Type Documentation</h2>
+<h3 class="fn"><a name="Lockflags-enum"></a>enum Qtopia::Lockflags</h3>
+<p>This enum controls what type of locking is performed on a file.</p>
+<p>Current defined values are:</p>
+<p><table border="1" cellpadding="2" cellspacing="1" width="100%">
+<tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
+<tr><td valign="top"><tt>Qtopia::LockShare</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">Allow lock to be shared. Reserved for future use</td></tr>
+<tr><td valign="top"><tt>Qtopia::LockWrite</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">Create at a write lock.</td></tr>
+<tr><td valign="top"><tt>Qtopia::LockBlock</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">Block the process when lock is encountered. Under WIN32 this blocking is limited to ten(10) failed attempts to access locked file. Reserved for future use.</td></tr>
+</table></p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
+</html>

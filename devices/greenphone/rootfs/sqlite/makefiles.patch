@@ -1,0 +1,47 @@
+--- sqlite-3.3.8/main.mk	2006-10-09 03:58:28.000000000 +1000
++++ sqlite-3.3.8-greenphone/main.mk	2006-11-09 14:37:53.000000000 +1000
+@@ -60,7 +60,7 @@
+          expr.o func.o hash.o insert.o loadext.o \
+          main.o opcodes.o os.o os_os2.o os_unix.o os_win.o \
+          pager.o parse.o pragma.o prepare.o printf.o random.o \
+-         select.o table.o tclsqlite.o tokenize.o trigger.o \
++         select.o table.o tokenize.o trigger.o \
+          update.o util.o vacuum.o \
+          vdbe.o vdbeapi.o vdbeaux.o vdbefifo.o vdbemem.o \
+          where.o utf.o legacy.o vtab.o
+@@ -103,7 +103,6 @@
+   $(TOP)/src/sqlite.h.in \
+   $(TOP)/src/sqliteInt.h \
+   $(TOP)/src/table.c \
+-  $(TOP)/src/tclsqlite.c \
+   $(TOP)/src/tokenize.c \
+   $(TOP)/src/trigger.c \
+   $(TOP)/src/utf.c \
+@@ -159,7 +158,6 @@
+   $(TOP)/src/test_md5.c \
+   $(TOP)/src/test_schema.c \
+   $(TOP)/src/test_server.c \
+-  $(TOP)/src/test_tclvar.c \
+   $(TOP)/src/utf.c \
+   $(TOP)/src/util.c \
+   $(TOP)/src/vdbe.c \
+--- sqlite-3.3.8/Makefile.linux-gcc	2006-09-09 04:22:06.000000000 +1000
++++ sqlite-3.3.8-greenphone/Makefile.linux-gcc	2006-11-09 14:36:56.000000000 +1000
+@@ -19,7 +19,7 @@
+ #### C Compiler and options for use in building executables that
+ #    will run on the platform that is doing the build.
+ #
+-BCC = gcc -g -O2
++BCC=gcc -O2
+ #BCC = /opt/ancic/bin/c89 -0
+ 
+ #### If the target operating system supports the "usleep()" system
+@@ -70,7 +70,7 @@
+ #    will run on the target platform.  This is usually the same
+ #    as BCC, unless you are cross-compiling.
+ #
+-TCC = gcc -O6
++TCC=arm-linux-gcc -O2
+ #TCC = gcc -g -O0 -Wall
+ #TCC = gcc -g -O0 -Wall -fprofile-arcs -ftest-coverage
+ #TCC = /opt/mingw/bin/i386-mingw32-gcc -O6

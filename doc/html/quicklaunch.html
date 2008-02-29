@@ -1,256 +1,128 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<title>Writing Applications that Startup Quickly</title>
-<style type="text/css"><!--
-h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
-a:link { color: #004faf; text-decoration: none }
-a:visited { color: #672967; text-decoration: none }
-body { background: #ffffff; color: black; }
---></style>
+  <title>Writing Applications that Startup Quickly</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
-<td align="left" valign="top"><a href="index.html"><img height="27" width="472" src="dochead.png" border="0"></a><br>
-<font face="Arial,Helvetica,Geneva,Swiss,SunSans-Regular" align="center" size=32>Qtopia</font>
-   <a href="index.html">Home</a>
- - <a href="qtopiaclasses.html">Classes</a>
- - <a href="qtopiahierarchy.html">Hierachy</a>
- - <a href="qtopiaannotated.html">Annotated</a>
- - <a href="qtopiafunctions.html">Functions</a>
- - <a href="qtindex.html">Qt Embedded</a>
-</td>
-<td align="right" valign="top">
-  <img height="100" width="100" src="qpelogo.png" align="top" border="0">
-</td>
-</tr>
-</table><h1 align=center>Writing Applications that Startup Quickly</h1>
-
-
-
-<a name="top"></a>
-<!-- toc -->
-<ul>
-<li><a href="#1"> Introduction
-</a>
-<li><a href="#2"> Delaying code execution.
-</a>
-<li><a href="#3"> Using Quicklaunch
-</a>
-<ul>
-<li><a href="#3-1"> Design
-</a>
-<ul>
-<li><a href="#3-1-1"> Stub Application
-</a>
-<li><a href="#3-1-2"> Quick Launcher
-</a>
-<li><a href="#3-1-3"> Making Applications Quick Launchable
-</a>
+<td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
+<td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Writing Applications that Startup Quickly<br /><small></small></h1>
+<a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
+<li><a href="#delaying-code-execution">Delaying code execution.</a></li>
+<li><a href="#using-quicklauncher">Using Quicklauncher</a></li>
+<ul><li><a href="#design">Design</a></li>
+<ul><li><a href="#stub-application">Stub Application</a></li>
+<li><a href="#quicklauncher">Quicklauncher</a></li>
+<li><a href="#making-applications-quicklauncher-enabled">Making Applications quicklauncher Enabled</a></li>
 </ul>
-<li><a href="#3-2"> Initial Results
-</a>
+<li><a href="#initial-results">Initial Results</a></li>
 </ul>
 </ul>
-<!-- endtoc -->
-
-<p> <h2> Introduction
-</h2>
-<a name="1"></a><p> Application startup time is critical on consumer devices.  This document describes techniques for making Qtopia applications startup as quickly as possible.
-<p> <h2> Delaying code execution.
-</h2>
-<a name="2"></a><p> Making an application startup quickly is closely related to
-how much code is executed during the startup process.
-Some of the common operations that can affect startup time are:
+<a name="introduction"></a>
+<h2>Introduction</h2>
+<p>Application startup time is critical on consumer devices. This document describes techniques for making Qtopia applications startup as quickly as possible.</p>
+<a name="delaying-code-execution"></a>
+<h2>Delaying code execution.</h2>
+<p>Making an application startup quickly is closely related to how much code is executed during the startup process. Some of the common operations that can affect startup time are:</p>
 <ul>
-<li> Loading/parsing configuration files.
-<li> Creating user interface components (dialogs, etc.)
-<li> Reading data files.
+<li>loading/parsing configuration files</li>
+<li>creating user interface components (dialogs, etc.)</li>
+<li>reading data files.</li>
 </ul>
-<p> The simplest way to improve startup time is to defer some of these operations
-until after the UI is visible.  If possible, perform the operation on demand,
-for example, do not create a dialog until it is actually needed:
-<p> <pre>
-MainWidget::MainWidget( QWidget *parent, const char *name, WFlags f )
-    : QMainWindow( parent, name, f ), settingsDialog(0)
-{
-}
+<p>The simplest way to improve startup time is to defer some of these operations until after the user interface is visible. If possible, perform the operation on demand, for example, do not create a dialog until it is actually needed:</p>
+<pre>    MainWidget::MainWidget( QWidget *parent, Qt::WFlags f )
+        : QMainWindow( parent, f ), settingsDialog(0)
+    {
+    }
 
-void MainWidget::showSettings()
-{
-    // If settingsDialog has not yet been created, create it now.
-    if ( !settingsDialog )
-        settingsDialog = new SettingsDialog( this );
-    settingsDialog-&amp;gt;exec();
-}
-</pre>
- 
-<p> If the operation is required immediately after the application is visible,
-a single shot timer may be used to start the processing after the main
-widget is visible:
-<p> <pre>
-MainWidget::MainWidget( QWidget *parent, const char *name, WFlags f )
-    : QMainWindow( parent, name, f ), settingsDialog(0)
-{
-    // After the event queue has been processed and the mainwindow is
-    // visible, load the data.
-    QTimer::singleShot(0, this, SLOT(loadData()));
-}
+    void MainWidget::showSettings()
+    {
+        <span class="comment">// If settingsDialog has not yet been created, create it now.</span>
+        if ( !settingsDialog )
+            settingsDialog = new SettingsDialog( this );
+        settingsDialog-&gt;exec();
+    }</pre>
+<p>If the operation is required immediately after the application is visible, a single shot timer may be used to start the processing after the main widget is visible:</p>
+<pre>    MainWidget::MainWidget( QWidget *parent, Qt::WFlags f )
+        : QMainWindow( parent, f ), settingsDialog(0)
+    {
+        <span class="comment">// After the event queue has been processed and the mainwindow is</span>
+        <span class="comment">// visible, load the data.</span>
+        QTimer::singleShot(0, this, SLOT(loadData()));
+    }
 
-void MainWidget::loadData()
-{
-    // Open data file and populate data view.
-}
-</pre>
- 
-<p> <h2> Using Quicklaunch
-</h2>
-<a name="3"></a><p> Old Qtopia versions suffered from slow startup times primarily for the following reasons:
-<ol>
-<li>Loading and linking dynamic libraries
-<li>Constructing QPE/Application
-<li>Constructing widgets
-<li>Loading data files
-</ol>
-<p> The Quick Launcher funcionality aims to eliminate 1, 2, and some of 3.
-<p> <h3> Design
-</h3>
-<a name="3-1"></a><p> <h4> Stub Application
-</h4>
-<a name="3-1-1"></a><p> To eliminate loading/linking and <a href="qpeapplication.html">QPEApplication</a> construction, a stub
-application will be run in advance of an application being requested.
-When the stub application is started, it will:
+    void MainWidget::loadData()
+    {
+        <span class="comment">// Open data file and populate data view.</span>
+    }</pre>
+<a name="using-quicklauncher"></a>
+<h2>Using Quicklauncher</h2>
+<p>Old Qtopia versions suffered from slow startup times primarily for the following reasons:</p>
 <ul>
-<li> Link to the most common libraries
-<li> Construct QPEApplication
-<li> Pre-load the default font and initialize other data where possible.
-<li> Execute the event loop and wait for a request to run an application.
+<li>loading and linking dynamic libraries</li>
+<li>constructing <tt>QtopiaApplication</tt></li>
+<li>constructing widgets</li>
+<li>loading data files.</li>
 </ul>
-<p> When the stub application is requested to run an application, it will:
+<p>The <tt>quicklauncher</tt> functionality aims to eliminate 1, 2, and some of 3.</p>
+<a name="design"></a>
+<h3>Design</h3>
+<a name="stub-application"></a>
+<h4>Stub Application</h4>
+<p>To eliminate loading/linking and <tt>QtopiaApplication</tt> construction, a stub application will be run in advance of an application being requested. When the stub application is started, it will:</p>
 <ul>
-<li> Load the quick-launchable application's library and run the entry point
-function.
-<li> Change identity to that of the requested application - i.e. it will
-be subscribed to the QPE/Application/<i>exename</i> QCop channel.
-<li> Unsubscribe from the quick launcher QCop channel.
-<li> Return to the event loop.
+<li>link to the most common libraries</li>
+<li>construct <tt>QtopiaApplication</tt></li>
+<li>pre-load the default font and initialize other data where possible</li>
+<li>execute the event loop and wait for a request to run an application.</li>
 </ul>
-<p> At this point, the stub application should behave exactly as if it were
-started via the normal process.
-<p> <h4> Quick Launcher
-</h4>
-<a name="3-1-2"></a><p> The Quick Launcher will become part of the AppLauncher class in the server process (qpe). The AppLauncher is already responsible for launching Qtopia applications, and monitoring their status.
-<p> The AppLauncher will attempt to always have one Stub Application running in readiness for a request to run an application.
-<p> When a request to run an application is made:
+<p>When the stub application is requested to run an application, it will:</p>
 <ul>
-<li> If the application is not quick launchable, it will be started normally.
-<li> If a Stub Application is not already running, it will be started normally.
-<li> Otherwise, the stub application is sent a message via QCop to start the application.
-<li> After a short delay (2 seconds) a new Stub Application will be started to handle the next request.
+<li>load the quick-launchable application's library and run the entry point function</li>
+<li>change identity to that of the requested application, that is, it will be subscribed to the QPE/Application/<i>exename</i> QCop channel</li>
+<li>unsubscribe from the <tt>quicklauncher</tt> QCop channel</li>
+<li>return to the event loop.</li>
 </ul>
-<p> Since the stub applications are child processes of the server process,
-AppLauncher will continue to function normally, i.e. it can catch SIGCHILD
-signals and handle application exit as it does currently.
-<p> If the server is running as root, it will set the priority of the Stub
-Application low while it is being started to ensure that it does not
-take processor cycles needed by foreground processes.  It will be given
-normal priority when a request to load a new application is received.
-<p> <h4> Making Applications Quick Launchable
-</h4>
-<a name="3-1-3"></a><p> An application is made quick launchable by implementing the Quick Launcher
-entry and exit functions:
+<p>At this point, the stub application should behave exactly as if it were started via the normal process.</p>
+<a name="quicklauncher"></a>
+<h4>Quicklauncher</h4>
+<p>The <tt>quicklauncher</tt> will become part of the <tt>AppLauncher</tt> class in the server process (<tt>qpe</tt>). The <tt>AppLauncher</tt> is already responsible for launching Qtopia applications, and monitoring their status.</p>
+<p>The <tt>AppLauncher</tt> will attempt to always have one Stub Application running in readiness for a request to run an application.</p>
+<p>When a request to run an application is made:</p>
 <ul>
-<li> void qtopiaInit( int argc, char *argv[] )
-<li> void qtopiaDestroy()
+<li>if the application is not quick-launchable, it will be started normally</li>
+<li>if a Stub Application is not already running, it will be started normally</li>
+<li>otherwise, the stub application is sent a message via QCop to start the application</li>
+<li>after a short delay (2 seconds) a new Stub Application will be started to handle the next request.</li>
 </ul>
-<p> Usually the qtopiaInit() function will simply construct the application's main
-widget and show it as the current documentation suggests.  The qtopiaDestroy()
-function frees any memory allocated by qtopiaInit().
-<p> For Example, the Qtopia documentation suggests this implementation for main():
-<pre>
-int main( int argc, char **argv )
-{
-    <a href="qpeapplication.html">QPEApplication</a> a( argc, argv );
-
-    Main m;
-    a.<a href="qpeapplication.html#showMainWidget">showMainWidget</a>(&amp;m);
-
-    return a.exec();
-}
-</pre>
- 
-<p> A quick launch enabled applciation would look like:
-<pre>
-static Main *m = 0;
-
-void qtopiaInit( int argc, char *argv[] )
-{
-    m = new Main();
-    qApp-&amp;gt;showMainWidget(m);
-}
-
-void qtopiaDestroy()
-{
-    delete m;
-}
-
-QTOPIA_MAIN
-</pre>
- 
-<p> The QTOPIA_MAIN macro is implemented as:
-<p> <pre>
-int main( int argc, char **argv )
-{
-    <a href="qpeapplication.html">QPEApplication</a> a( argc, argv );
-    qtopiaInit( argc, argv );
-    int rv = a.exec();
-    qtopiaDestroy();
-    return rv;
-}
-</pre>
- 
-<p> <h3> Initial Results
-</h3>
-<a name="3-2"></a><p> The initial results of the design described above are:
-<p> <center><table cellpadding="4" cellspacing="2" border="0">
-<tr bgcolor="#a2c511"> <th valign="top">Application
-<th valign="top">Qtopia 1.6.0 (sec)
-<th valign="top">+ QuickLauncher (sec)
-<tr bgcolor="#f0f0f0"> <td valign="top">Calendar
-<td valign="top">1.9
-<td valign="top">0.8
-<tr bgcolor="#d0d0d0"> <td valign="top">Contacts
-<td valign="top">2.2
-<td valign="top">1.1
-<tr bgcolor="#f0f0f0"> <td valign="top">Email
-<td valign="top">2.4
-<td valign="top">1.2
-<tr bgcolor="#d0d0d0"> <td valign="top">Image Viewer
-<td valign="top">1.4
-<td valign="top">0.9
-<tr bgcolor="#f0f0f0"> <td valign="top">Media Player
-<td valign="top">2.3
-<td valign="top">0.4/1.3*
-<tr bgcolor="#d0d0d0"> <td valign="top">Tasks
-<td valign="top">2.0
-<td valign="top">1.1
-<tr bgcolor="#f0f0f0"> <td valign="top">Today
-<td valign="top">1.8
-<td valign="top">0.8
-<tr bgcolor="#d0d0d0"> <td valign="top">Clock
-<td valign="top">1.6
-<td valign="top">0.6
-</table></center>
-<p> * The Media Player delays its main GUI construction, so the initial window displays in 0.4 seconds and the full GUI is displayed in 1.3 seconds
-<p> 
-<!-- eof -->
-<p><address><hr><div align="center">
-<table width="100%" cellspacing="0" border="0">
-<tr>
-<td>Copyright &copy; 2001-2005 Trolltech
-<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qtopia version 2.1.1</div>
-</table></div></address></body>
+<p>Since the stub applications are child processes of the server process, <tt>AppLauncher</tt> will continue to function normally, that is, it can catch <tt>SIGCHILD</tt> signals and handle application exit as it does currently.</p>
+<p>If the server is running as root, it will set the priority of the Stub Application low while it is being started to ensure that it does not take processor cycles needed by foreground processes. It will be given normal priority when a request to load a new application is received.</p>
+<a name="making-applications-quicklauncher-enabled"></a>
+<h4>Making Applications quicklauncher Enabled</h4>
+<p>To make an application <tt>quicklauncher</tt>-enabled use the macros described in: <a href="syscust-mainwidget.html">Optimization Using main()</a>.</p>
+<a name="initial-results"></a>
+<h3>Initial Results</h3>
+<p>The initial results of the design described above are:</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Application</th><th>Qtopia 1.6.0 (sec)</th><th>+ quicklauncher (sec)</th></tr></thead>
+<tr valign="top" class="odd"><td>Calendar</td><td>1.9</td><td>0.8</td></tr>
+<tr valign="top" class="even"><td>Contacts</td><td>2.2</td><td>1.1</td></tr>
+<tr valign="top" class="odd"><td>Email</td><td>2.4</td><td>1.2</td></tr>
+<tr valign="top" class="even"><td>Image Viewer</td><td>1.4</td><td>0.9</td></tr>
+<tr valign="top" class="odd"><td>Media Player</td><td>2.3</td><td>0.4/1.3*</td></tr>
+<tr valign="top" class="even"><td>Tasks</td><td>2.0</td><td>1.1</td></tr>
+<tr valign="top" class="odd"><td>Today</td><td>1.8</td><td>0.8</td></tr>
+<tr valign="top" class="even"><td>Clock</td><td>1.6</td><td>0.6</td></tr>
+</table></p>
+<p>* The Media Player delays its main GUI construction, so the initial window displays in 0.4 seconds and the full GUI is displayed in 1.3 seconds</p>
+<p /><address><hr /><div align="center">
+<table width="100%" cellspacing="0" border="0"><tr class="address">
+<td width="30%">Copyright &copy; 2006 <a href="trolltech.html">Trolltech</a></td>
+<td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
+<td width="30%" align="right"><div align="right">Qtopia 4.2.0</div></td>
+</tr></table></div></address></body>
 </html>

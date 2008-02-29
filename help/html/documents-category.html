@@ -1,18 +1,24 @@
-<qt title="Showing Documents by Category">
-<h3>Showing Documents by Category</h3>
+<html>
+<head><title>Showing Documents by Category</title></head>
+<body>
+<!--#if expr="$USERGUIDE"-->
+   <h2>Showing Documents by Category</h2>
+<!--#else -->
+   <h3>Showing Documents by Category</h3>
+<!--#endif -->
 <p>Documents can be
 <a href="qpe-categories.html">categorized</a>
 to make finding them easier.</p>
 <p>Use the <b>Categories</b> drop-down list in the bottom right corner of the screen to view documents.</p>
 <p><b>Documents assigned to a category:</b></P>
-%%PHONE%%
+<!--#if expr="$PHONESTYLE"-->
 <ul>
-<li>Press <img src="contextbar/options.png"> and select <b>View Category</b> from the menu.</li>
-<li>Use <img src="help/dpad"> to highlight the category and press <img src="contextbar/select.png"> to limit the list of documents to only those with that category.</li>
-<li>Press <img src="contextbar/back.png"> to exit.</li>
+<li>Press <img src=":icon/options"> </img> and select <b>View Category</b> from the menu.</li>
+<li>Use <img src=":image/help/dpad"> </img> to highlight the category and press <img src=":icon/select"> </img> to limit the list of documents to only those with that category.</li>
+<li>Press <img src=":icon/i18n/back"> </img> to exit.</li>
 </ul>
-@@PHONE@@
-%%PDA%%
+<!--#endif-->
+<!--#if expr="$PDASTYLE"-->
 <ul>
 <li>Tap the name of the category of documents to view</li>
 </ul>
@@ -24,5 +30,6 @@ to make finding them easier.</p>
 <ul>
 <li>Tap <b>All</b> to display a list of all documents.</li>
 </ul>
-@@PDA@@
-</qt>
+<!--#endif-->
+</body>
+</html>

@@ -1,101 +1,50 @@
-# This file performs marshalling of the various other .pri files
-# It also sets up LIBRARY_PROJECTS properly (core libs go first)
+# Setup the PROJECTS variables
 
-!contains( processed_pri, projects.pri ) {
-    processed_pri += projects.pri
+# Global stuff
+PROJECTS*=\
+    tools/pngscale
 
-    include($${QTOPIA_DEPOT_PATH}/src/general.pri)
-    include($${QTOPIA_DEPOT_PATH}/src/commercial.pri)
-    include($${QTOPIA_DEPOT_PATH}/src/custom.pri)
-    include($$(QPEDIR)/src/local.pri)
+# Qt files
+DQT_PROJECTS=\
+    tools/qt/moc\
+    tools/qt/uic\
+    tools/qt/uic3\
+    tools/qt/rcc\
+    libraries/qt/corelib\
+    libraries/qt/gui\
+    libraries/qt/network\
+    libraries/qt/opengl\
+    libraries/qt/sql\
+    libraries/qt/xml\
+    libraries/qt/qt3support\
+    plugins/qt\
+    tools/qt/lupdate\
+    tools/qt/lrelease\
+    tools/qt/assistant\
+    tools/qt/assistant/lib\
+    tools/qt/designer/src/uitools\
+    tools/qt/designer/src/lib\
+    tools/qt/designer/src/components\
+    tools/qt/designer/src/designer\
+    tools/qt/designer/src/plugins\
+    tools/qt/linguist
+!win:DQT_PROJECTS+=tools/qt/qvfb
+!equals(DQT_MINOR_VERSION,1):DQT_PROJECTS+=libraries/qt/svg
+qtopia_depot:DQT_PROJECTS*=tools/qt/qdoc3
+win32:DQT_PROJECTS*=\
+    libraries/qt/winmain\
+    libraries/qt/activeqt\
+    tools/qt/dumpcpp
+PROJECTS*=$$DQT_PROJECTS
+# When building Qtopia and skipping Qt, build QVFb anyway
+build_qtopia:!build_dqt:DQT_PROJECTS-=tools/qt/qvfb
 
-    LIBRARY_PROJECTS=$$CORE_LIBRARY_PROJECTS $$LIBRARY_PROJECTS
-
-    # dependencies
-    # required for dependencies
-    !contains(LIBRARY_PROJECTS,libraries/handwriting) {
-	PLUGIN_PROJECTS-=plugins/inputmethods/handwriting\
-		plugins/inputmethods/fshandwriting
-	APP_PROJECTS -= settings/handwriting
-    }
-
-    !contains(LIBRARY_PROJECTS,libraries/qtopiapim) {
-	LIBRARY_PROJECTS -= libraries/qtopiapim1
-	APP_PROJECTS -= applications/addressbook\
-		applications/datebook\
-		applications/todo\
-		applications/qtmail
-    }
-
-    !contains(LIBRARY_PROJECTS,libraries/mediaplayer) {
-	PLUGIN_PROJECTS-=3rdparty/plugins/codecs/libmad \
-		3rdparty/plugins/codecs/libffmpeg \
-		3rdparty/plugins/codecs/libamr
-
-	QTOPIA_PHONE:LIBRARY_PROJECTS-=libraries/qtopiasmil
-
-	LIBRARY_PROJECTS -= 3rdparty/libraries/libavcodec \
-		3rdparty/libraries/libavformat \
-		3rdparty/libraries/amr
-
-	APP_PROJECTS -= applications/videos \
-		applications/music \
-		applications/mediarecorder
-
-	PLUGIN_PROJECTS-=plugins/codecs/wavplugin \
-		plugins/codecs/wavrecord
-    }
-
-    !contains(APP_PROJECTS,applications/videos):!contains(APP_PROJECTS,applications/music) {
-	THEME_PROJECTS-=mediaplayer/techno
-    }
-
-    !contains(LIBRARY_PROJECTS,libraries/qtopiacalc) {
-	APP_PROJECTS-=applications/calculator
-
-	PLUGIN_PROJECTS-=plugins/calculator/fraction\
-	    plugins/calculator/conversion\
-	    plugins/calculator/simple\
-	    plugins/calculator/advanced
-    }
-    !contains(LIBRARY_PROJECTS,libraries/qtopiamail) {
-	APP_PROJECTS-=applications/qtmail
-	PLUGIN_PROJECTS-=plugins/today/email
-# TODO also should check if no qtmail app, what libraries to drop.
-    }
-    !contains(APP_PROJECTS,applications/datebook) {
-	PLUGIN_PROJECTS-=plugins/today/datebook
-    }
-    !contains(APP_PROJECTS,applications/todo) {
-	PLUGIN_PROJECTS-=plugins/today/todo
-    }
-    !contains(APP_PROJECTS,applications/today) {
-	PLUGIN_PROJECTS-=plugins/today/email\
-	    plugins/today/datebook\
-	    plugins/today/todo
-    }
-    # exclusive use dependencies
-    # wavrecord/play gsm only needed if medierecorder built
-    !contains(APP_PROJECTS,applications/mediarecorder) {
-	PLUGIN_PROJECTS-=plugins/codecs/wavplugin plugins/codecs/wavrecord
-	LIBRARY_PROJECTS-=3rdparty/libraries/gsm
-    }
-
-    # only used with ffmpeg/amr
-    !contains(PLUGIN_PROJECTS,3rdparty/plugins/codecs/libffmpeg) {
-	!contains(PLUGIN_PROJECTS,3rdparty/plugins/codecs/libamr):LIBRARY_PROJECTS-=3rdparty/libraries/amr
-	LIBRARY_PROJECTS-=3rdparty/libraries/libavcodec\
-	    3rdparty/libraries/libavformat
-    }
-
-    # Features stuff
-
-    !contains(LIBRARY_PROJECTS,libraries/qtopiasmil) {
-        FEATURES+=QTOPIA_NO_MMS
-    }
-
-    # qpe_features.h lets things rebuild that would normally require a make clean first
-    system($${QTOPIA_DEPOT_PATH}/bin/setupfeatures $$(QPEDIR) $$FEATURES)
-
+build_qtopia {
+    include(general.pri)
+    !free_package|free_plus_binaries:include(commercial.pri)
+    # Load a device-specific file (if it exists)
+    !isEmpty(DEVICE_CONFIG_PATH):exists($$DEVICE_CONFIG_PATH/projects.pri):include($$DEVICE_CONFIG_PATH/projects.pri)
+    include(custom.pri)
+    include($$QPEDIR/src/local.pri)
 }
 

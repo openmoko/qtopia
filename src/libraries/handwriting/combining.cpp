@@ -1,44 +1,33 @@
-/**********************************************************************
-** Copyright (C) 2000-2005 Trolltech AS.  All rights reserved.
+/****************************************************************************
 **
-** This file is part of the Qtopia Environment.
-** 
-** This program is free software; you can redistribute it and/or modify it
-** under the terms of the GNU General Public License as published by the
-** Free Software Foundation; either version 2 of the License, or (at your
-** option) any later version.
-** 
-** A copy of the GNU GPL license version 2 is included in this package as 
-** LICENSE.GPL.
+** Copyright (C) 2000-2006 TROLLTECH ASA. All rights reserved.
 **
-** This program is distributed in the hope that it will be useful, but
-** WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
-** See the GNU General Public License for more details.
+** This file is part of the Phone Edition of the Qtopia Toolkit.
 **
-** In addition, as a special exception Trolltech gives permission to link
-** the code of this program with Qtopia applications copyrighted, developed
-** and distributed by Trolltech under the terms of the Qtopia Personal Use
-** License Agreement. You must comply with the GNU General Public License
-** in all respects for all of the code used other than the applications
-** licensed under the Qtopia Personal Use License Agreement. If you modify
-** this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so. If you do not wish to do so, delete
-** this exception statement from your version.
-** 
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
 ** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
-**********************************************************************/
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+****************************************************************************/
 
 #include <qfile.h>
-#include <qtl.h>
+// #include <qtl.h>
 #include <math.h>
 #include <limits.h>
 #include <qdatastream.h>
 #include "combining.h"
+
+//debug
+#include <stdio.h>
 
 // set of chararaters that can be combined against
 static unsigned int combiningSymbols[] = { '\\', '/', '^', '~', '\"', 'o' };
@@ -50,7 +39,7 @@ static unsigned int combiningSymbols[] = { '\\', '/', '^', '~', '\"', 'o' };
 
 // definately should be made extensible....
 // make configurable out of etc file?:
-static unsigned int combiningChars[][7] = {
+static const ushort combiningChars[][7] = {
     //     \       /       ^       ~       "
     { 'A', 0x00C0, 0x00C1, 0x00C2, 0x00C3, 0x00C4, 0x00C5 },
     { 'O', 0x00D2, 0x00D3, 0x00D4, 0x00D5, 0x00D6, 0x0000 },
@@ -88,40 +77,39 @@ QIMPenCombining::QIMPenCombining( const QString &fn )
 */
 void QIMPenCombining::addCombined( QIMPenCharSet *cs )
 {
-    unsigned int count = cs->count();
-    // input set characters
-    QIMPenCharIterator it( cs->characters() );
-    for ( ; it.current() && count; ++it, --count ) {
-	QIMPenChar *pc = it.current();
-	if ( pc->testFlag( QIMPenChar::Deleted ) )
-	    continue;
-	int charIdx = findCombining( pc->character() );
-	if ( charIdx < 0 )
-	    continue;
-	for ( int i = 0; i < 6; i++ ) {
-	    if ( combiningChars[charIdx][i+1] ) {
-		// this craracters
-		QIMPenCharIterator cit( characters() );
-		for ( ; cit.current(); ++cit ) {
-		    QIMPenChar *accentPc = cit.current();
-		    if ( accentPc->character() == combiningSymbols[i] ) {
-			QIMPenChar *combined = combine( pc, accentPc );
-			combined->setCharacter( combiningChars[charIdx][i+1] );
-			cs->addChar( combined );
-		    }
-		}
-	    }
-	}
+    QIMPenCharList toAdd;
+    foreach( QIMPenChar *pc, cs->characters()) {
+        if ( pc->testFlag( QIMPenChar::Deleted ) )
+            continue;
+        int charIdx = findCombining( pc->repCharacter() );
+        if ( charIdx < 0 )
+            continue;
+        for ( int i = 0; i < 6; i++ ) {
+            if ( combiningChars[charIdx][i+1] ) {
+                // this craracters
+                foreach(QIMPenChar *accentPc, characters()) {
+                    if ( accentPc->repCharacter() == combiningSymbols[i] ) {
+                        QIMPenChar *combined = combine( pc, accentPc );
+                        combined->setRepCharacter( combiningChars[charIdx][i+1] );
+                        toAdd.append( combined );
+                        // cs->addChar( combined );
+                    }
+                }
+            }
+        }
+    }
+    foreach(QIMPenChar *pc, toAdd) {
+        cs->addChar( pc );
     }
 }
 
-int QIMPenCombining::findCombining( unsigned int ch ) const
+int QIMPenCombining::findCombining( QChar ch ) const
 {
     int i = 0;
     while ( combiningChars[i][0] ) {
-	if ( combiningChars[i][0] == ch )
-	    return i;
-	i++;
+        if ( combiningChars[i][0] == ch )
+            return i;
+        i++;
     }
 
     return -1;
@@ -133,30 +121,30 @@ QIMPenChar *QIMPenCombining::combine( QIMPenChar *base, QIMPenChar *accent )
     QRect arect = accent->boundingRect();
     int offset;
     if ( accent->testFlag( QIMPenChar::CombineRight ) )
-	offset = brect.left() - arect.left() + brect.width() + 2;
+        offset = brect.left() - arect.left() + brect.width() + 2;
     else
-	offset = brect.left() - arect.left() + (brect.width() - arect.width())/2;
+        offset = brect.left() - arect.left() + (brect.width() - arect.width())/2;
     QIMPenChar *combined = 0;
-    if ( base->character() == 'i' ) {
-	// Hack to remove the dot from i's when combining.
-	if ( base->penStrokes().count() > 1 ) {
-	    combined = new QIMPenChar;
-	    QIMPenStrokeIterator it( base->penStrokes() );
-	    for ( unsigned int i = 0; i < base->penStrokes().count()-1; ++it, i++ ) {
-		QIMPenStroke st( *(it.current()) );
-		combined->addStroke( &st );
-	    }
-	    combined->setFlag( QIMPenChar::System );
-	}
+    if ( base->repCharacter() == QChar('i') ) {
+        // Hack to remove the dot from i's when combining.
+        if ( base->penStrokes().count() > 1 ) {
+            combined = new QIMPenChar;
+            QIMPenStrokeConstIterator it = base->penStrokes().begin();
+            for ( int i = 0; i < base->penStrokes().count()-1; ++it, i++ ) {
+                QIMPenStroke st( **it );
+                combined->addStroke( &st );
+            }
+            combined->setFlag( QIMPenChar::System );
+        }
     }
     if ( !combined )
-	combined = new QIMPenChar( *base );
-    QIMPenStrokeIterator it( accent->penStrokes() );
-    for ( ; it.current(); ++it ) {
-	QIMPenStroke *st = new QIMPenStroke( *(it.current()) );
-	st->setStartingPoint( st->startingPoint() + QPoint(offset, 0 ));
-	combined->addStroke( st );
-	delete st;
+        combined = new QIMPenChar( *base );
+    QIMPenStrokeConstIterator it = accent->penStrokes().begin();
+    for ( ; it != accent->penStrokes().end(); ++it ) {
+        QIMPenStroke *st = new QIMPenStroke( **it );
+        st->setStartingPoint( st->startingPoint() + QPoint(offset, 0 ));
+        combined->addStroke( st );
+        delete st;
     }
 
     return combined;
@@ -165,11 +153,11 @@ QIMPenChar *QIMPenCombining::combine( QIMPenChar *base, QIMPenChar *accent )
 QIMPenChar *QIMPenCombining::penChar( int type )
 {
     // lookup
-    QIMPenCharIterator it( characters() );
-    for ( ; it.current(); ++it ) {
-	QIMPenChar *pc = it.current();
-	if ( pc->character() == combiningSymbols[type] )
-	    return pc;
+    QIMPenCharIterator it = characters().begin();
+    for ( ; it != characters().end(); ++it ) {
+        QIMPenChar *pc = *it;
+        if ( pc->repCharacter().unicode() == combiningSymbols[type] )
+            return pc;
     }
 
     return 0;

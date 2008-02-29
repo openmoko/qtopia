@@ -1,6 +1,7 @@
 [Desktop Entry]
-Name=Calendar
-Comment=Displays today's events.
-Name[ja]=カレンダー
-Comment[ja]=今日の行事を表示します。
+Name[]=Calendar
+Comment[]=Displays today's events.
 X-QPE-Library=libdatebookplugin.so
+[Translation]
+File=QtopiaPlugins
+Context=Today

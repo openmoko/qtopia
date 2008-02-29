@@ -1,2 +1,5 @@
+[Translation]
+File=QtopiaServices
+Context=Service:Name
 [Service]
-Actions = openURL(QString);retrieveURL(QString);getURL(QString,QString)
+Actions="openURL(QString);retrieveURL(QString);getURL(QString,QString)"
