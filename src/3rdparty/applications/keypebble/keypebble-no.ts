@@ -3,204 +3,210 @@
     <name>KRFBConnection</name>
     <message>
         <source>Connected</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Tilkoblet</translation>
     </message>
     <message>
         <source>Connection Refused</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Tilkobling nektet</translation>
     </message>
     <message>
         <source>Host not found</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Tjener ikke funnet</translation>
     </message>
     <message>
         <source>Read Error: QSocket reported an error reading
 data, the remote host has probably dropped the
 connection.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Lese feil: QSocket rapporterte en feil ved
+lesning av data, tjeneren lukket trolig
+forbindelsen.</translation>
     </message>
     <message>
         <source>QSocket reported an invalid error code</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">QSocket rapporterte en ugyldig feilkode</translation>
     </message>
 </context>
 <context>
     <name>KRFBDecoder</name>
     <message>
         <source>Waiting for desktop name...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Venter på skrivebordsnavn...</translation>
     </message>
     <message>
         <source>Connected to %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Tilkoblet %1</translation>
     </message>
     <message>
         <source>Protocol Error: Message Id %1 was found when expecting an update message.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Protokoll feil: Melding ID %1 ble funnet mens en ventet på en oppdateringsmelding.</translation>
     </message>
     <message>
         <source>Protocol Error: An unknown encoding was used by the server %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Protokoll feil: En ukjent koding har blitt brukt på vertsmaskin %1</translation>
     </message>
     <message>
         <source>Waiting for server initialization...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Venter på initiering av vertsmaskin...</translation>
     </message>
 </context>
 <context>
     <name>KRFBLogin</name>
     <message>
         <source>Waiting for server version...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Venter på vertsmaskin versjon...</translation>
     </message>
     <message>
         <source>Error: Invalid server version, %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Feil: Ugyldig vertsmaskin versjon, %1</translation>
     </message>
     <message>
         <source>Logged in</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Logget inn</translation>
     </message>
     <message>
         <source>Error: This server requires a password, but none has been specified.
 </source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Feil: Denne vertsmaskinen krever passord, men ingen har blitt spesifisert.
+</translation>
     </message>
     <message>
         <source>Login Failed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Påloggingen feilet</translation>
     </message>
     <message>
         <source>Too many failures</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">For mange mislykkede forsøk</translation>
     </message>
     <message>
         <source>Unsupported server version, %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Ikke støttet vertsmaskin versjon, %1</translation>
     </message>
     <message>
         <source>Login failed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Pålogging feilet</translation>
     </message>
     <message>
         <source>Login failed:
 Invalid password.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Pålogging feilet:
+Ugyldig passord.</translation>
     </message>
     <message>
         <source>Login failed: Too many invalid
 login attempts to this account.
 Try again later.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Pålogging feilet. For mange mislykkede
+påloggingsforsøk.
+Prøv igjen senere.</translation>
     </message>
 </context>
 <context>
     <name>KVNC</name>
     <message>
         <source>VNC Viewer</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">VNC klient</translation>
     </message>
     <message>
         <source>Full Screen</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Fullskjerm</translation>
     </message>
     <message>
         <source>Zoom</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Zoom</translation>
     </message>
     <message>
         <source>Settings...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Innstillinger...</translation>
     </message>
     <message>
         <source>Connect...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Koble til...</translation>
     </message>
     <message>
         <source>Connected to remote host</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Tilkoblet ekstern vertsmaskin</translation>
     </message>
     <message>
         <source>Disconnect</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Koble fra</translation>
     </message>
     <message>
         <source>Logged in to remote host</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Pålogget ekstern vertsmaskin</translation>
     </message>
     <message>
         <source>Connection closed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Forbindelse lukket</translation>
     </message>
 </context>
 <context>
     <name>KVNCConnectDlg</name>
     <message>
         <source>Connect to VNC server</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Koble til VNC tjener</translation>
     </message>
     <message>
         <source>Host Name:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Tjener navn:</translation>
     </message>
     <message>
         <source>Display Number:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Vis nummer:</translation>
     </message>
     <message>
         <source>Password:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Passord:</translation>
     </message>
 </context>
 <context>
     <name>VncOptionsBase</name>
     <message>
         <source>VNC Viewer Options</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">VNC klient valg</translation>
     </message>
     <message>
         <source>Connection</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Forbindelse</translation>
     </message>
     <message>
         <source>Check for screen updates every:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Sjekk skjermoppdatering hvert:</translation>
     </message>
     <message>
         <source>Milliseconds</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Millisekunder</translation>
     </message>
     <message>
         <source>Request 8-bit session</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Etterspør 8-bit sesjon</translation>
     </message>
     <message>
         <source>Raise on bell</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Aktiver på bjelle</translation>
     </message>
     <message>
         <source>Request shared session</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Etterspør delt sesjon</translation>
     </message>
     <message>
         <source>Data Encoding</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Data koding</translation>
     </message>
     <message>
         <source>Hextile encoding</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Hextile koding</translation>
     </message>
     <message>
         <source>CoRRE encoding</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">CoRRE koding</translation>
     </message>
     <message>
         <source>RRE encoding</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">RRE koding</translation>
     </message>
     <message>
         <source>Copy rectangle encoding</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Kopier rektangel koding</translation>
     </message>
 </context>
 </TS>

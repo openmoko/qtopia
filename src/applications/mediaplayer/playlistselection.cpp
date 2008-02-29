@@ -274,6 +274,12 @@ void PlayListSelection::addLink( const DocLnk &lnk )
     if ( !filtersMatch( lnk ) )
 	return;
     newItem( lnk );
+    // Set selected and current to first in list while adding links
+    QListViewItem *first = firstChild();
+    if ( first ) {
+	setCurrentItem( first );
+	setSelected( first, TRUE );
+    }
 }
 
 

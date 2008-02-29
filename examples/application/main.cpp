@@ -1,12 +1,6 @@
 #include "example.h"
 #include <qpe/qpeapplication.h>
 
-int main( int argc, char ** argv )
-{
-    QPEApplication a( argc, argv );
+QTOPIA_ADD_APPLICATION("example", Example)
+QTOPIA_MAIN
 
-    Example mw;
-    a.showMainWidget( &mw );
-
-    return a.exec();
-}

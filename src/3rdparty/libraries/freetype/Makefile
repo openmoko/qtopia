@@ -3,7 +3,7 @@
 # Build options from 
 #############################################################################
 
-default: all # package
+default: all  # package
 
 CONTROL = 3rdparty/libraries/freetype/freetype.control
 
@@ -116,9 +116,9 @@ OBJECTS_DIR = .obj/linux-generic-g++/
 ####### Compiler, tools and options
 
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
-CXXFLAGS=	$(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
+CXXFLAGS=	$(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB) -DQTOPIA_APP_INTERFACE
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB) -DQTOPIA_APP_INTERFACE
 INCPATH =	-I$(MOC_DIR) -I$(QTDIR)/src/3rdparty/freetype/src -I$(QTDIR)/src/3rdparty/freetype/include -I$(QTDIR)/src/3rdparty/freetype/builds/unix
 LFLAGS	=	$(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS)  $(SYSCONF_LIBS_QTAPP)
@@ -413,7 +413,7 @@ lrelease:
 
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
-	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done
+	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic  $(QPEDIR)/src/$$ctrl ; done
 
 package: ipkg
 	cd $(QPEDIR)/ipkg; 	../bin/mkPackages

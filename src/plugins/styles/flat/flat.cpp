@@ -169,7 +169,7 @@ void FlatStyle::unPolish( QWidget *w )
 
 int FlatStyle::defaultFrameWidth() const
 {
-    return 2;
+    return 1;
 }
 
 void FlatStyle::drawItem( QPainter *p, int x, int y, int w, int h,

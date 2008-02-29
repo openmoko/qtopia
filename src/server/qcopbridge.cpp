@@ -163,15 +163,12 @@ QCopBridgePI::QCopBridgePI( int socket, QObject *parent, const char* name )
 #ifndef INSECURE
     if ( !SyncAuthentication::isAuthorized(peeraddress) ) {
 	state = Forbidden;
-	startTimer( 0 );
+	close();
     } else
 #endif
     {
 	state = Connected;
-	sendSync = FALSE;
 	connect( this, SIGNAL( readyRead() ), SLOT( read() ) );
-	connect( this, SIGNAL( connectionClosed() ), SLOT( connectionClosed() ) );
-
 	QString intro="220 Qtopia ";
 	intro += QPE_VERSION; intro += ";";
 	intro += "challenge="; intro += SyncAuthentication::serverId(); intro += ";"; // No tr
@@ -179,18 +176,19 @@ QCopBridgePI::QCopBridgePI( int socket, QObject *parent, const char* name )
 	intro += "displayname="; intro += SyncAuthentication::ownerName(); intro += ";";
 	send( intro );
 	state = Wait_USER;
-
-	// idle timer to close connections when not used anymore
-	timer = new QTimer(this);
-	connect( timer, SIGNAL(timeout()), this, SLOT(connectionClosed()) );
-	timer->start( 300000, TRUE );
     }
+    sendSync = FALSE;
+    connect( this, SIGNAL( connectionClosed() ), SLOT( myConnectionClosed() ) );
+
+    // idle timer to close connections when not used anymore
+    timer = new QTimer(this);
+    connect( timer, SIGNAL(timeout()), this, SLOT(myConnectionClosed()) );
+    timer->start( 300000, TRUE );
 }
 
 
 QCopBridgePI::~QCopBridgePI()
 {
-
 }
 
 bool QCopBridgePI::verifyAuthorised()
@@ -202,7 +200,7 @@ bool QCopBridgePI::verifyAuthorised()
     return TRUE;
 }
 
-void QCopBridgePI::connectionClosed()
+void QCopBridgePI::myConnectionClosed()
 {
     emit connectionClosed( this );
 }
@@ -215,6 +213,8 @@ void QCopBridgePI::sendDesktopMessage( const QString &msg )
 
 void QCopBridgePI::sendDesktopMessage( const QCString &msg, const QByteArray& data )
 {
+    if ( !isOpen() ) // eg. Forbidden
+	return;
     const char hdr[]="CALLB QPE/Desktop ";
     writeBlock(hdr,sizeof(hdr)-1);
     writeBlock(msg,msg.length());
@@ -227,6 +227,8 @@ void QCopBridgePI::sendDesktopMessage( const QCString &msg, const QByteArray& da
 
 void QCopBridgePI::send( const QString& msg )
 {
+    if ( !isOpen() ) // eg. Forbidden
+	return;
     QTextStream os( this );
     os << msg << endl;
     //qDebug( "sending qcop message: %s", msg.latin1() );

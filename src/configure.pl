@@ -712,7 +712,7 @@ sub parseOptions {
 	$opt_product = "qtopia";
     }
 
-    if ($opt_qconfig){
+    if ($opt_qconfig && ($opt_product ne "qtopiadesktop")){
 	$qconfig = '\\\\\"qconfig-' . $opt_qconfig.'.h\\\\\"';
     }
 
@@ -738,6 +738,7 @@ sub parseOptions {
 
     if ($opt_qt3 || $opt_product eq "qtopiadesktop") {
 	$qtVersion = 3;
+	$opt_qt3=1;
     }
 
     validateOptions();
@@ -766,11 +767,9 @@ sub initializeQMakeSettings {
     }
 
     if ($opt_product eq "qtopiadesktop") {
-	if ( $qconfig eq "" ) {
-    	    $qconfig = '\\\\\"qconfig.h\\\\\"';
-	}
 	$QMAKE_DEFINES .= " QTOPIA_DESKTOP";
 	$QMAKE_CONFIG .= " qdesktop thread qt3";
+	
     }elsif ($opt_product eq "sdk"){
 	if ( $qconfig eq "" ){
 	    $qconfig = '\\\\\"qconfig-qpe.h\\\\\"';
@@ -844,9 +843,6 @@ sub initializeTMakeSettings {
     my $TMAKE_CONFIG = "qt$qtVersion qtopia multiprocess dynamic";
 
     if ($opt_product eq "qtopiadesktop") {
-	if ( $qconfig eq "" ) {
-	    $qconfig = '\\\\\"qconfig.h\\\\\"';
-	}
 	$TMAKE_DEFINES .= " QTOPIA_DESKTOP";
 	$TMAKE_CONFIG .= " qdesktop thread qt3";
     } else {
@@ -900,6 +896,9 @@ sub initializeMakeMake {
     } else {
 	die "Don't know how to use $option make make\n";
     }
+    if ($qconfig){
+	$qtmake_cmd_args = "\"DEFINES+=QCONFIG=$qconfig\"" . $qtmake_cmd_args; 
+    }
 }
 
 
@@ -926,9 +925,9 @@ sub generateMakefile {
 	    my $dspFileName = $item;
 	    $dspFileName =~ s/\.pro//;
 	    $dspFileName = "$dspFileName" . ".dsp";
-	    runCmd( "$qtmake_cmd $dspArgs $qtmake_cmd_args \"DEFINES+=QCONFIG=$qconfig\" -o \"$dspFileName\" \"$item\"" );
+	    runCmd( "$qtmake_cmd $dspArgs $qtmake_cmd_args -o \"$dspFileName\" \"$item\"" );
 	}
-	runCmd( "$qtmake_cmd $qtmake_cmd_args  \"DEFINES += QCONFIG=$qconfig\" -o \"$MAKEFILE\" \"$item\"" );
+	runCmd( "$qtmake_cmd $qtmake_cmd_args -o \"$MAKEFILE\" \"$item\"" );
 	chdir $pwd;
     } else {
 	debugMsg("Missing .pro file: $item");

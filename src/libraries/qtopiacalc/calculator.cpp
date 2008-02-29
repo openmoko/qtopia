@@ -42,6 +42,8 @@ QTOPIA_EXPORT Engine *systemEngine;
 Calculator::Calculator( QWidget * p, const char *n,WFlags fl) : QWidget (p, n, fl),
 	pluginWidgetStack(NULL)
 {
+    QPEApplication::setInputMethodHint(this, QPEApplication::AlwaysOff);
+    setCaption(tr("Calculator"));
     pluginList = new QValueList<CalculatorPlugin>();
     modeBox = 0;
     systemEngine = new Engine();

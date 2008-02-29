@@ -38,10 +38,20 @@
 #include <qfileinfo.h>
 #include <qhbox.h>
 #include <qiconview.h>
+#include <qwidgetstack.h>
 #include <qpainter.h>
 #include <qregexp.h>
 #include <qtoolbutton.h>
 #include <qimage.h>
+#include <qlabel.h>
+#include <qobjectlist.h>
+
+
+// These define how the busy icon is animated and highlighted
+#define BRIGHTEN_BUSY_ICON
+//#define ALPHA_FADE_BUSY_ICON
+//#define USE_ANIMATED_BUSY_ICON_OVERLAY
+#define BOUNCE_BUSY_ICON
 
 
 class BgPixmap
@@ -67,6 +77,30 @@ static void cleanup_cache()
     bgCache = 0;
 }
 
+
+class LauncherItem : public QIconViewItem
+{
+public:
+    LauncherItem( QIconView *parent, AppLnk* applnk, bool bigIcon=TRUE );
+    ~LauncherItem();
+
+    AppLnk *appLnk() const { return app; }
+    AppLnk *takeAppLnk() { AppLnk* r=app; app=0; return r; }
+
+    void animateIcon();
+    void resetIcon();
+
+    virtual int compare ( QIconViewItem * i ) const;
+    void paintItem( QPainter *p, const QColorGroup &cg );
+protected:
+    bool isBigIcon;
+    int iteration;
+    AppLnk* app;
+private:
+    void paintAnimatedIcon( QPainter *p );
+};
+
+
 class LauncherIconView : public QIconView {
 public:
     LauncherIconView( QWidget* parent, const char* name=0 ) :
@@ -74,6 +108,7 @@ public:
 	tf(""),
 	cf(0),
 	bsy(0),
+	busyTimer(0),
 	bigIcns(TRUE),
 	bgColor(white)
     {
@@ -95,9 +130,16 @@ public:
 #endif
     }
 
-    QPixmap* busyPixmap() const { return (QPixmap*)&bpm; }
     QIconViewItem* busyItem() const { return bsy; }
-    void setBigIcons( bool bi ) { bigIcns = bi; }
+#ifdef USE_ANIMATED_BUSY_ICON_OVERLAY
+    QPixmap busyPixmap() const { return busyPix; }
+#endif
+    void setBigIcons( bool bi ) {
+	bigIcns = bi;
+#ifdef USE_ANIMATED_BUSY_ICON_OVERLAY
+	busyPix.resize(0,0);
+#endif
+    }
 
     void updateCategoriesAndMimeTypes();
 
@@ -108,36 +150,31 @@ public:
 
     void setBusy(bool on)
     {
-	QIconViewItem *c = on ? currentItem() : 0;
-	if ( bsy != c ) {
-	    if ( c ) {
-		QPixmap *src = c->pixmap();
-		QImage img = src->convertToImage();
-		QRgb* rgb;
-		int count;
-		if ( img.depth() == 32 ) {
-		    rgb = (QRgb*)img.bits();
-		    count = img.bytesPerLine()/sizeof(QRgb)*img.height();
-		} else {
-		    rgb = img.colorTable();
-		    count = img.numColors();
-		}
-		int rc, gc, bc;
-		colorGroup().highlight().rgb( &rc, &gc, &bc );
-		for ( int r = 0; r < count; r++, rgb++ ) {
-		    int ri = (rc+qRed(*rgb))/2;
-		    int gi = (gc+qGreen(*rgb))/2;
-		    int bi = (bc+qBlue(*rgb))/2;
-		    int ai = qAlpha(*rgb);
-		    *rgb = qRgba(ri,gi,bi,ai);
-		}
+#ifdef USE_ANIMATED_BUSY_ICON_OVERLAY
+	if ( busyPix.isNull() ) {
+	    int size = ( bigIcns ) ? AppLnk::bigIconSize() : AppLnk::smallIconSize();
+	    busyPix.convertFromImage( Resource::loadImage( "busy" ).smoothScale( size * 16, size ) );
+	}
+#endif
 
-		bpm.convertFromImage( img );
+	if ( on ) {
+	    busyTimer = startTimer( 100 );
+	} else {
+	    if ( busyTimer ) {
+	        killTimer( busyTimer );
+		busyTimer = 0;
 	    }
-	    QIconViewItem* o = bsy;
+	}
+
+	LauncherItem *c = on ? (LauncherItem*)currentItem() : 0;
+
+	if ( bsy != c ) {
+	    LauncherItem *oldBusy = bsy;
 	    bsy = c;
-	    if ( o ) o->repaint();
-	    if ( c ) c->repaint();
+	    if ( oldBusy )
+		oldBusy->resetIcon();
+	    if ( bsy )
+		bsy->animateIcon();
 	}
     }
 
@@ -147,11 +184,11 @@ public:
 	ike = TRUE;
 	if ( e->key() == Key_F33 /* OK button */ || e->key() == Key_Space ) {
 	    if ( (e->state() & ShiftButton) )
-		emit mouseButtonPressed(ShiftButton, currentItem(), QPoint() ); 
+		emit mouseButtonPressed(ShiftButton, currentItem(), QPoint() );
 	    else
 		returnPressed(currentItem());
 	}
-	
+
 	QIconView::keyPressEvent(e);
 	ike = FALSE;
     }
@@ -183,6 +220,9 @@ public:
 	    k = maj.left(12) == "application/" ? maj : maj.left(sl);
 	    mimes.replace(k,(void*)1);
 	}
+    }
+
+    void setBackgroundOrigin( QWidget::BackgroundOrigin ) {
     }
 
     void setBackgroundPixmap( const QPixmap &pm ) {
@@ -256,9 +296,17 @@ public:
 	return 0;
     }
 
-    QString getAllDocLinkInfo() const;
-
 protected:
+
+    void timerEvent( QTimerEvent *te )
+    {
+	if ( te->timerId() == busyTimer ) {
+	    if ( bsy )
+		bsy->animateIcon();
+	} else {
+	    QIconView::timerEvent( te );
+	}
+    }
 
     void styleChange( QStyle &old )
     {
@@ -301,12 +349,15 @@ private:
     SortMethod sortmeth;
     QRegExp tf;
     int cf;
-    QIconViewItem* bsy;
+    LauncherItem* bsy;
+    int busyTimer;
     bool ike;
     bool bigIcns;
     QPixmap bgPixmap;
-    QPixmap bpm;
     QColor bgColor;
+#ifdef USE_ANIMATED_BUSY_ICON_OVERLAY
+    QPixmap busyPix;
+#endif
 };
 
 
@@ -317,55 +368,21 @@ void LauncherView::setBusy(bool on)
     icons->setBusy(on);
 }
 
-class LauncherItem : public QIconViewItem
-{
-public:
-    LauncherItem( QIconView *parent, AppLnk* applnk, bool bigIcon=TRUE );
-    ~LauncherItem()
-    {
-	LauncherIconView* liv = (LauncherIconView*)iconView();
-	if ( liv->busyItem() == this )
-	    liv->setBusy(FALSE);
-	delete app;
-    }
-
-    AppLnk* appLnk() const { return app; }
-    AppLnk* takeAppLnk() { AppLnk* r=app; app=0; return r; }
-
-    virtual int compare ( QIconViewItem * i ) const;
-
-    void paintItem( QPainter *p, const QColorGroup &cg )
-    {
-	LauncherIconView* liv = (LauncherIconView*)iconView();
-	QBrush oldBrush( liv->itemTextBackground() );
-	QColorGroup mycg( cg );
-	if ( liv->currentItem() == this ) {
-	    liv->setItemTextBackground( cg.brush( QColorGroup::Highlight ) );
-	    mycg.setColor( QColorGroup::Text, cg.color( QColorGroup::HighlightedText ) );
-	}
-	QIconViewItem::paintItem(p,mycg);
-	if ( liv->currentItem() == this )
-	    liv->setItemTextBackground( oldBrush );
-    }
-
-    virtual QPixmap* pixmap () const
-    {
-	const LauncherIconView* liv = (LauncherIconView*)iconView();
-	if ( (const LauncherItem *)liv->busyItem() == this )
-	    return liv->busyPixmap();
-	return QIconViewItem::pixmap();
-    }
-
-protected:
-    AppLnk* app;
-};
-
-
 LauncherItem::LauncherItem( QIconView *parent, AppLnk *applnk, bool bigIcon )
     : QIconViewItem( parent, applnk->name(),
            bigIcon ? applnk->bigPixmap() :applnk->pixmap() ),
+	isBigIcon( bigIcon ),
+	iteration(0),
 	app(applnk) // Takes ownership
 {
+}
+
+LauncherItem::~LauncherItem()
+{
+    LauncherIconView* liv = (LauncherIconView*)iconView();
+    if ( liv->busyItem() == this )
+	liv->setBusy(FALSE);
+    delete app;
 }
 
 int LauncherItem::compare ( QIconViewItem * i ) const
@@ -373,6 +390,106 @@ int LauncherItem::compare ( QIconViewItem * i ) const
     LauncherIconView* view = (LauncherIconView*)iconView();
     return view->compare(app,((LauncherItem *)i)->appLnk());
 }
+
+void LauncherItem::paintItem( QPainter *p, const QColorGroup &cg )
+{
+    LauncherIconView* liv = (LauncherIconView*)iconView();
+    QBrush oldBrush( liv->itemTextBackground() );
+    QColorGroup mycg( cg );
+    if ( liv->currentItem() == this ) {
+	liv->setItemTextBackground( cg.brush( QColorGroup::Highlight ) );
+	mycg.setColor( QColorGroup::Text, cg.color( QColorGroup::HighlightedText ) );
+    }
+
+    QIconViewItem::paintItem(p,mycg);
+
+    // Paint animation overlay
+    if ( liv->busyItem() == this ) 
+	paintAnimatedIcon(p);
+
+    if ( liv->currentItem() == this )
+	liv->setItemTextBackground( oldBrush );
+}
+
+void LauncherItem::paintAnimatedIcon( QPainter *p )
+{
+    LauncherIconView* liv = (LauncherIconView*)iconView();
+    int pic = iteration % 16;
+    int w = pixmap()->width(), h = pixmap()->height();
+    QPixmap dblBuf( w, h + 4 );
+    QPainter p2( &dblBuf );
+    int x1, y1;
+    if ( liv->itemTextPos() == QIconView::Bottom ) {
+	x1 = x() + (width() - w) / 2 - liv->contentsX();
+	y1 = y() - liv->contentsY();
+    } else {
+	x1 = x() - liv->contentsX();
+	y1 = y() + (height() - h) / 2 - liv->contentsY();
+    }
+    y1 -= 2;
+    p2.translate(-x1,-y1);
+    liv->drawBackground( &p2, QRect(x1,y1,w,h+4) );
+    int bounceY = 2;
+#ifdef BOUNCE_BUSY_ICON
+    bounceY = 4 - ((iteration+2)%8);
+    bounceY = bounceY < 0 ? -bounceY : bounceY;
+#endif
+    p2.drawPixmap( x1, y1 + bounceY, *pixmap() );
+#ifdef USE_ANIMATED_BUSY_ICON_OVERLAY
+    p2.drawPixmap( x1, y1 + bounceY, liv->busyPixmap(), w * pic, 0, w, h );
+#endif
+    p->drawPixmap( x1, y1, dblBuf );
+}
+
+void LauncherItem::animateIcon()
+{
+    LauncherIconView* liv = (LauncherIconView*)iconView();
+
+    if ( liv->busyItem() != this || !app )
+	return;
+
+    // Highlight the icon
+    if ( iteration == 0 ) {
+	QPixmap src = isBigIcon ? app->bigPixmap() : app->pixmap();
+	QImage img = src.convertToImage();
+	QRgb *rgb;
+	int count;
+	if ( img.depth() == 32 ) {
+	    rgb = (QRgb*)img.bits();
+	    count = img.bytesPerLine()/sizeof(QRgb)*img.height();
+	} else {
+	    rgb = img.colorTable();
+	    count = img.numColors();
+	}
+	for ( int r = 0; r < count; r++, rgb++ ) {
+#if defined(BRIGHTEN_BUSY_ICON)
+	    QColor c(*rgb);
+	    int h, s, v;
+	    c.hsv(&h,&s,&v);
+	    c.setHsv(h,QMAX(s-24,0),QMIN(v+48,255));
+	    *rgb = qRgba(c.red(),c.green(),c.blue(),qAlpha(*rgb));
+#elif defined(ALPHA_FADE_BUSY_ICON)
+	    *rgb = qRgba(qRed(*rgb),qGreen(*rgb),qBlue(*rgb),qAlpha(*rgb)/2);
+#endif
+	}
+	src.convertFromImage( img );
+	setPixmap( src );
+    }
+
+    iteration++;
+
+    // Paint animation overlay
+    QPainter p( liv->viewport() );
+    paintAnimatedIcon( &p );
+}
+
+void LauncherItem::resetIcon()
+{
+    iteration = 0;
+    setPixmap( isBigIcon ? app->bigPixmap() : app->pixmap() );
+}
+
+//===========================================================================
 
 QStringList LauncherIconView::mimeTypes() const
 {
@@ -419,6 +536,7 @@ void LauncherIconView::updateCategoriesAndMimeTypes()
 
 void LauncherIconView::hideOrShowItems(bool resort)
 {
+    viewport()->setUpdatesEnabled( FALSE );
     hidden.setAutoDelete(FALSE);
     QList<AppLnk> links=hidden;
     hidden.clear();
@@ -428,7 +546,6 @@ void LauncherIconView::hideOrShowItems(bool resort)
 	links.append(item->takeAppLnk());
 	item = (LauncherItem*)item->nextItem();
     }
-    viewport()->setUpdatesEnabled( FALSE );
     clear();
     QListIterator<AppLnk> it(links);
     AppLnk* l;
@@ -436,9 +553,9 @@ void LauncherIconView::hideOrShowItems(bool resort)
 	addItem(l,FALSE);
 	++it;
     }
-    viewport()->setUpdatesEnabled( TRUE );
     if ( resort && !autoArrange() )
 	sort();
+    viewport()->setUpdatesEnabled( TRUE );
 }
 
 bool LauncherIconView::removeLink(const QString& linkfile)
@@ -470,57 +587,6 @@ bool LauncherIconView::removeLink(const QString& linkfile)
 	}
     }
     return did;
-}
-
-static QString docLinkInfo(const Categories& cats, DocLnk* doc)
-{
-    QString contents;
-
-    QFileInfo fi( doc->file() );
-    if ( !fi.exists() )
-	return contents;
-
-    if ( doc->linkFileKnown() ) {
-	QString lfn = doc->linkFile();
-	QFile f( lfn );
-	if ( f.open( IO_ReadOnly ) ) {
-	    QTextStream ts( &f );
-	    ts.setEncoding( QTextStream::UnicodeUTF8 );
-	    contents += ts.read();
-	    f.close();
-	    goto calcsize;
-	}
-    }
-
-    contents += "[Desktop Entry]\n"; // No tr
-    contents += "Categories = " // No tr
-	+ cats.labels("Document View", doc->categories()).join(";") + "\n"; // No tr
-    contents += "File = "+doc->file()+"\n"; // No tr
-    contents += "Name = "+doc->name()+"\n"; // No tr
-    contents += "Type = "+doc->type()+"\n"; // No tr
-
-calcsize:
-    contents += QString("Size = %1\n").arg( fi.size() ); // No tr
-    return contents;
-}
-
-QString LauncherIconView::getAllDocLinkInfo() const
-{
-    QString contents;
-    LauncherItem* item = (LauncherItem*)firstItem();
-    Categories cats;
-    while (item) {
-	DocLnk* doc = (DocLnk*)item->appLnk();
-	contents += docLinkInfo(cats,doc);
-	item = (LauncherItem*)item->nextItem();
-    }
-    QListIterator<AppLnk> it(hidden);
-    DocLnk* doc;
-    while ((doc=(DocLnk*)it.current())) {
-	contents += docLinkInfo(cats,doc);
-	++it;
-    }
-    return contents;
 }
 
 //===========================================================================
@@ -563,6 +629,11 @@ LauncherView::~LauncherView()
 	(*bgCache)[bgName]->ref--;
 }
 
+void LauncherView::hideIcons()
+{
+    icons->hide();
+}
+
 void LauncherView::setToolsEnabled(bool y)
 {
     if ( !y != !tools ) {
@@ -578,6 +649,9 @@ void LauncherView::setToolsEnabled(bool y)
 	    // Category filter
 	    updateTools();
 	    tools->show();
+
+	    // Always show vscrollbar
+	    icons->setVScrollBarMode( QScrollView::AlwaysOn );
 	} else {
 	    delete tools;
 	    tools = 0;
@@ -592,6 +666,7 @@ void LauncherView::updateTools()
     if ( catmb ) disconnect( catmb, SIGNAL(signalSelected(int)),
 	        this, SLOT(showCategory(int)) );
 
+    // ### I want to remove this
     icons->updateCategoriesAndMimeTypes();
 
     QString prev;
@@ -641,7 +716,7 @@ void LauncherView::updateTools()
     // if type has changed we need to redisplay
     if ( typemb->currentText() != prev )
 	showType( typemb->currentItem() );
-    
+
     connect(typemb, SIGNAL(activated(int)), this, SLOT(showType(int)));
     connect(catmb, SIGNAL(signalSelected(int)), this, SLOT(showCategory(int)));
 }
@@ -724,7 +799,7 @@ QImage LauncherView::loadBackgroundImage(QString &bgName)
 	    int t2 = imgio.image().height() * ds.width();
 	    int dsth = ds.height();
 	    int dstw = ds.width();
-	    
+
 	    if (t1 > t2) {
 		dsth = t2 / imgio.image().width();
 	    } else {
@@ -747,13 +822,16 @@ void LauncherView::setBackgroundType( BackgroundType t, const QString &val )
 	bgCache = new QMap<QString,BgPixmap*>;
 	qAddPostRoutine( cleanup_cache );
     }
+
     if ( bgCache->contains( bgName ) )
 	(*bgCache)[bgName]->ref--;
+    bgName = "";
+
+    QPixmap bg;
 
     switch ( t ) {
 	case Ruled: {
 	    bgName = QString("Ruled_%1").arg(colorGroup().background().name()); // No tr
-	    QPixmap bg;
 	    if ( bgCache->contains( bgName ) ) {
 		(*bgCache)[bgName]->ref++;
 		bg = (*bgCache)[bgName]->pm;
@@ -770,24 +848,12 @@ void LauncherView::setBackgroundType( BackgroundType t, const QString &val )
 		painter.end();
 		bgCache->insert( bgName, new BgPixmap(bg) );
 	    }
-	    icons->setBackgroundPixmap( bg );
 	    break;
 	}
-
-	case SolidColor:
-	    icons->setBackgroundPixmap( QPixmap() );
-	    if ( val.isEmpty() ) {
-		icons->setBackgroundColor( colorGroup().base() );
-	    } else {
-		icons->setBackgroundColor( val );
-	    }
-	    bgName = "";
-	    break;
 
 	case Image:
 	    if (!val.isEmpty()) {
 		bgName = val;
-		QPixmap bg;
 		if ( bgCache->contains( bgName ) ) {
 		    (*bgCache)[bgName]->ref++;
 		    bg = (*bgCache)[bgName]->pm;
@@ -807,10 +873,33 @@ void LauncherView::setBackgroundType( BackgroundType t, const QString &val )
 		    bg.convertFromImage(img);
 		    bgCache->insert( bgName, new BgPixmap(bg) );
 		}
-		icons->setBackgroundPixmap( bg );
 	    }
 	    break;
+
+	case SolidColor:
+	default:
+	    break;
     }
+
+    const QObjectList *list = queryList( "QWidget", 0, FALSE );
+    QObject *obj;
+    for ( QObjectListIt it( *list ); (obj=it.current()); ++it ) {
+	if ( obj->isWidgetType() ) {
+	    QWidget *w = (QWidget*)obj;
+	    w->setBackgroundPixmap( bg );
+	    if ( bgName.isEmpty() ) {
+		// Solid Color
+		if ( val.isEmpty() ) 
+		    w->setBackgroundColor( colorGroup().base() );
+		else 
+		    w->setBackgroundColor( val );
+	    } else {
+		// Ruled or Image pixmap
+		w->setBackgroundOrigin( ParentOrigin );
+	    }
+	}
+    }
+    delete list;
 
     bgType = t;
     icons->viewport()->update();
@@ -844,17 +933,6 @@ void LauncherView::resizeEvent(QResizeEvent *e)
     QVBox::resizeEvent( e );
     if ( e->size().width() != e->oldSize().width() )
 	sort();
-}
-
-void LauncherView::populate( AppLnkSet *folder, const QString& typefilter )
-{
-    icons->clear();
-    internalPopulate( folder, typefilter );
-}
-
-QString LauncherView::getAllDocLinkInfo() const
-{
-    return icons->getAllDocLinkInfo();
 }
 
 void LauncherView::selectionChanged()
@@ -897,30 +975,30 @@ void LauncherView::itemPressed( int btn, QIconViewItem *item )
 	    emit rightPressed( appLnk );
 	else if ( btn == ShiftButton )
 	    emit rightPressed( appLnk );
-/*
-	else if ( btn == LeftButton )
-	    emit clicked( appLnk );
-*/
 	item->setSelected(FALSE);
     }
 }
 
-void LauncherView::internalPopulate( AppLnkSet *folder, const QString& typefilter )
+void LauncherView::removeAllItems()
 {
-    QListIterator<AppLnk> it( folder->children() );
-    icons->setTypeFilter(typefilter,FALSE);
-
-    while ( it.current() ) {
-	icons->addItem(*it,FALSE);
-	++it;
-    }
-
-    icons->sort();
+    icons->clear();
 }
 
 bool LauncherView::removeLink(const QString& linkfile)
 {
     return icons->removeLink(linkfile);
+}
+
+void LauncherView::setSortEnabled( bool v )
+{
+    icons->setSorting( v );
+    if ( v )
+	sort();
+}
+
+void LauncherView::setUpdatesEnabled( bool u )
+{
+    icons->setUpdatesEnabled( u );
 }
 
 void LauncherView::sort()
@@ -931,11 +1009,6 @@ void LauncherView::sort()
 void LauncherView::addItem(AppLnk* app, bool resort)
 {
     icons->addItem(app,resort);
-}
-
-void LauncherView::setFileSystems(const QList<FileSystem> &)
-{
-    // ### does nothing now...
 }
 
 void LauncherView::paletteChange( const QPalette &p )

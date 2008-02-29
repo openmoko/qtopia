@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2003 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 **
@@ -19,15 +19,8 @@
 **********************************************************************/
 
 #include "mediarecorder.h"
-
 #include <qtopia/qpeapplication.h>
 
-int main( int argc, char **argv )
-{
-    QPEApplication a( argc, argv );
-    
-    MediaRecorder mr;
-    a.showMainDocumentWidget(&mr);
+QTOPIA_ADD_APPLICATION("mediarecorder",MediaRecorder)
+QTOPIA_MAIN
 
-    a.exec();
-}

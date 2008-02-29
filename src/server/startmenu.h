@@ -42,6 +42,8 @@ public:
     StartMenu( QWidget * );
     ~StartMenu();
 
+    void refreshMenu();
+
 public:
     StartPopupMenu *launchMenu;
 
@@ -50,9 +52,7 @@ signals:
 
 public slots:
     void launch( );
-    void loadOptions( );
     void createMenu( );
-    void reloadApps( );
 
 protected slots:
     void itemSelected( int id );

@@ -86,7 +86,7 @@ public:
     bool setLocation( const QString& docPath ); // libqtopia
 
     bool isDocLnk() const; // libqtopia
-    
+
 #ifdef QTOPIA_INTERNAL_PRELOADACCESS
 // MOC_SKIP_BEGIN
     bool isPreloaded() const;
@@ -113,6 +113,7 @@ protected:
     static int lastId;
     AppLnkPrivate *d;
     friend class AppLnkSet;
+    friend class AppLnkPrivate;
 #ifdef Q_WS_QWS
     virtual void invoke(const QStringList& args) const;
 #endif

@@ -107,7 +107,7 @@ PasswordDialog::PasswordDialog( QWidget* parent,  const char* name, WFlags fl )
 {
     QRect desk = qApp->desktop()->geometry();
 
-    if ( desk.width() < 220 ) {
+    if ( desk.width() < 220  || desk.height() < 320) {
 	QFont f( font() );
 	f.setPointSize( 18 );
 	setFont( f );
@@ -177,8 +177,10 @@ void PasswordDialog::keyPressEvent( QKeyEvent *e )
 
 void PasswordDialog::input( QString c )
 {
-    text += c;
-    display->setText( text );
+    if (text.length() < 8) {
+	text += c;
+	display->setText( text );
+    }
 }
 
 /*!

@@ -50,11 +50,11 @@ Inherits <a href="qobject.html">QObject</a>.
 <li><div class="fn">void <a href="#194113"><b>enablePainting</b></a> ( bool ) </div>
 <li><div class="fn">void <b>sendPropertyNotifyEvent</b> ( int property, int state ) (internal)</div>
 <li><div class="fn">QWSPropertyManager* <b>manager</b> () </div>
-<li><div class="fn">enum <b>WindowEvent</b> { Create=0x01, Destroy=0x02, Hide=0x04, Show=0x08, Raise=0x10, Lower=0x20, Geometry=0x40, Active=0x80 }</div>
+<li><div class="fn">enum <a href="#WindowEvent"><b>WindowEvent</b></a> { Create=0x01, Destroy=0x02, Hide=0x04, Show=0x08, Raise=0x10, Lower=0x20, Geometry=0x40, Active=0x80 }</div>
 </ul>
 <h2>Signals</h2>
 <ul>
-<li><div class="fn">void <b>windowEvent</b> ( QWSWindow * w, QWSServer::WindowEvent e ) </div>
+<li><div class="fn">void <a href="#aa0e84"><b>windowEvent</b></a> ( QWSWindow * w, QWSServer::WindowEvent e ) </div>
 <li><div class="fn">void <a href="#064f8e"><b>newChannel</b></a> ( const QString &amp; channel ) </div>
 <li><div class="fn">void <a href="#433fce"><b>removedChannel</b></a> ( const QString &amp; channel ) </div>
 <li><div class="fn">void <b>markedText</b> ( const QString &amp; ) </div>
@@ -89,10 +89,10 @@ Inherits <a href="qobject.html">QObject</a>.
 <li><div class="fn">QList&lt;QWSInternalWindowInfo&gt;* <b>windowList</b> () (internal)</div>
 <li><div class="fn">void <b>startup</b> ( int flags ) (internal)</div>
 <li><div class="fn">void <b>closedown</b> () (internal)</div>
-<li><div class="fn">void <b>beginDisplayReconfigure</b> () </div>
-<li><div class="fn">void <b>endDisplayReconfigure</b> () </div>
-<li><div class="fn">void <b>setCursorVisible</b> ( bool ) </div>
-<li><div class="fn">bool <b>isCursorVisible</b> () </div>
+<li><div class="fn">void <b>beginDisplayReconfigure</b> () (internal)</div>
+<li><div class="fn">void <b>endDisplayReconfigure</b> () (internal)</div>
+<li><div class="fn">void <a href="#8e84d2"><b>setCursorVisible</b></a> ( bool ) </div>
+<li><div class="fn">bool <a href="#65e92e"><b>isCursorVisible</b></a> () </div>
 </ul>
 <hr><h2><a name="details"></a>Detailed Description</h2>
 Server-specific functionality in Qt/Embedded
@@ -105,6 +105,19 @@ You should never construct this class yourself.
 <p>A pointer to the QWSServer instance can be obtained via the global
 qwsServer variable.
 
+<hr><h2>Member Type Documentation</h2>
+<h3 class="fn"><a name="WindowEvent">QWSServer::WindowEvent</a></h3>
+This enum type defines the Qt/Embedded window system events: <ul>
+<li> <code>Create</code> - a new window has been created.
+<li> <code>Destroy</code> - a window has been destroyed.
+<li> <code>Hide</code> - a window has been hidden.
+<li> <code>Show</code> - a window has been shown.
+<li> <code>Raise</code> - a window has been raised.
+<li> <code>Lower</code> - a window has been lowered.
+<li> <code>Geometry</code> - the size and/or position of a window has changed.
+<li> <code>Active</code> - a window has become the active window (has keyboard
+focus).
+</ul>
 <hr><h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="c34aad"></a>QWSServer::QWSServer ( int flags = 0, <a href="qobject.html">QObject</a> * parent=0, const char * name=0 )</h3>
 <p>Construct a QWSServer class.
@@ -122,6 +135,9 @@ use.  The windows are sorted in stacking order from top-most to lowest.
 <p>Closes pointer device(s).
 <h3 class="fn">void <a name="194113"></a>QWSServer::enablePainting ( bool e )</h3>
 <p>Disables all painting on the display.
+<h3 class="fn">bool <a name="65e92e"></a>QWSServer::isCursorVisible () <code>[static]</code></h3>
+<p>Returns TRUE is the cursor is visible, or FALSE if it is hidden.
+<p>See also  <a href="#8e84d2">setCursorVisible</a>().
 <h3 class="fn">QWSKeyboardHandler* <a name="52b0b9"></a>QWSServer::keyboardHandler () <code>[static]</code></h3>
 <p>Returns the primary keyboard handler.
 <h3 class="fn">QWSMouseHandler * <a name="65a378"></a>QWSServer::mouseHandler () <code>[static]</code></h3>
@@ -147,6 +163,9 @@ deactivates the screensaver.
 "virtual keyboards".
 <h3 class="fn">void <a name="a5f1a0"></a>QWSServer::sendMouseEvent ( const <a href="qpoint.html">QPoint</a> &amp; pos, int state ) <code>[static]</code></h3>
 <p>Send a mouse event.
+<h3 class="fn">void <a name="8e84d2"></a>QWSServer::setCursorVisible ( bool visible ) <code>[static]</code></h3>
+<p>Shows the cursor if <em>visible</em> is TRUE, otherwise hides the cursor.
+<p>See also  <a href="#65e92e">isCursorVisible</a>().
 <h3 class="fn">void <a name="840f3b"></a>QWSServer::setDefaultKeyboard ( const char * k ) <code>[static]</code></h3>
 <p>Set the keyboard driver to use if $QWS_KEYBOARD is not defined. The default
 is platform-dependant.
@@ -184,7 +203,14 @@ The array must be 0-terminated.
 <h3 class="fn"><a href="qwswindow.html">QWSWindow</a> * <a name="a5ed99"></a>QWSServer::windowAt ( const <a href="qpoint.html">QPoint</a> &amp; pos )</h3>
 <p>Returns the window containing the point <code>pos</code> or 0 if there is no window
 under the point.
+<h3 class="fn">void <a name="aa0e84"></a>QWSServer::windowEvent ( <a href="qwswindow.html">QWSWindow</a> * window, <a href="qwsserver.html#WindowEvent">QWSServer::WindowEvent</a> event ) <code>[signal]</code></h3>
+<p>This signal is emitted when a window system event <em>event</em> has been
+processed for <em>window.</em>
+<h3 class="fn">void <a name="da495c"></a>QWSServer::beginDisplayReconfigure () <code>[static]</code></h3>
+<p>For internal use only.
 <h3 class="fn">void <a name="18d94b"></a>QWSServer::closedown () <code>[static]</code></h3>
+<p>For internal use only.
+<h3 class="fn">void <a name="872b28"></a>QWSServer::endDisplayReconfigure () <code>[static]</code></h3>
 <p>For internal use only.
 <h3 class="fn">void <a name="175465"></a>QWSServer::processEventQueue () <code>[static]</code></h3>
 <p>For internal use only.
@@ -202,7 +228,7 @@ under the point.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.6"><nobr>
+<input type=hidden name="version" value="2.3.7"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -210,5 +236,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.6</div>
+<td align="right"><div align="right">Qt version 2.3.7</div>
 </table></div></address></body></html>

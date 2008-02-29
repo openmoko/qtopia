@@ -4,7 +4,7 @@
     <message>
         <source>Fresh</source>
         <comment>Name of the style Fresh</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Frisk</translation>
     </message>
 </context>
 </TS>

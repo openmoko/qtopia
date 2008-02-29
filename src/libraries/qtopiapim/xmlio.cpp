@@ -421,8 +421,11 @@ QString PimXmlIO::recordToXml(const PimRecord *p)
 
 	QMap<int,QCString>::ConstIterator keyId = keyToIdentifier.find( key );
 	if ( !value.isEmpty() && keyId != keyToIdentifier.end() ) {
-	    out += *keyId;
-	    out += "=\"" + Qtopia::escapeString(value) + "\" ";
+	    QString k = *keyId;
+	    if ( !k.isEmpty() ) { // else custom
+		out += k;
+		out += "=\"" + Qtopia::escapeString(value) + "\" ";
+	    }
 	}
     }
 

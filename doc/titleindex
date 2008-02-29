@@ -165,6 +165,8 @@ Qtopia Overview | overview.html
 Resource Class | resource.html
 Resource Member List | resource-members.html
 Server plugins | serverplugins.html
+ServerInterface Class | serverinterface.html
+ServerInterface Member List | serverinterface-members.html
 Service Class | service.html
 Service Member List | service-members.html
 ServiceRequest Class | servicerequest.html
@@ -256,7 +258,7 @@ xmlreader.h Include File | xmlreader-h.html
  | distrib.html
  | docwidget.html
  | files.html
- | i18n.html
+ | i18n-qtopia.html
  | inputmethods.html
  | licensing.html
  | mainfunc.html
@@ -270,6 +272,7 @@ xmlreader.h Include File | xmlreader-h.html
  | release-1.6beta3.html
  | release-1.6beta4.html
  | release-1.6beta5.html
+ | release-1.7.0.html
  | release-index.html
  | services.html
  | servicesapi.html

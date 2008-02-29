@@ -266,8 +266,11 @@ QString EventXmlIO::recordToXml(const PimRecord *p)
 
 	const QString &value = fit.data();
 	if ( !value.isEmpty() ) {
-	    out += keyToIdentifier[key];
-	    out += "=\"" + Qtopia::escapeString(value) + "\" ";
+	    QString k = keyToIdentifier[key];
+	    if ( !k.isEmpty() ) { // else custom
+		out += k;
+		out += "=\"" + Qtopia::escapeString(value) + "\" ";
+	    }
 	}
     }
 

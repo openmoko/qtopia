@@ -84,6 +84,10 @@ public:
 
     int exec();
 
+#ifdef QTOPIA_INTERNAL_INITAPP
+    void initApp( int argc, char **argv );
+#endif
+
 signals:
     void clientMoused();
     void timeChanged();
@@ -138,3 +142,88 @@ QTOPIA_EXPORT void unsetenv(const char *name);
 #endif
 #endif
 
+// Application main/plugin macro magic
+
+#include <qmap.h>
+#include <qtopia/applicationinterface.h>
+#include <qmetaobject.h>
+
+typedef QWidget* (*qpeAppCreateFunc)(QWidget*,const char *,Qt::WFlags);
+typedef QMap<QString,qpeAppCreateFunc> QPEAppMap;
+
+#define QTOPIA_ADD_APPLICATION(NAME,IMPLEMENTATION) \
+    static QWidget *create_ ## IMPLEMENTATION( QWidget *p, const char *n, Qt::WFlags f ) { \
+	return new IMPLEMENTATION(p,n,f); } \
+    QPEAppMap *qpeAppMap(); \
+    static QPEAppMap::Iterator dummy_ ## IMPLEMENTATION = qpeAppMap()->insert(NAME,create_ ## IMPLEMENTATION);
+
+#ifdef QTOPIA_APP_INTERFACE
+
+# define QTOPIA_MAIN \
+    struct ApplicationImpl : public ApplicationInterface { \
+	ApplicationImpl() : ref(0) {} \
+	QRESULT queryInterface( const QUuid &uuid, QUnknownInterface **iface ) { \
+	    *iface = 0; \
+	    if ( uuid == IID_QUnknown ) *iface = this; \
+	    else if ( uuid == IID_QtopiaApplication ) *iface = this; \
+	    else return QS_FALSE; \
+	    (*iface)->addRef(); \
+	    return QS_OK; \
+	} \
+	virtual QWidget *createMainWindow( const QString &appName, QWidget *parent, const char *name, Qt::WFlags f ) { \
+	    if ( qpeAppMap()->contains(appName) ) \
+		return (*qpeAppMap())[appName](parent, name, f); \
+	    return 0; \
+	} \
+	virtual QStringList applications() const { \
+	    QStringList list; \
+	    for ( QPEAppMap::Iterator it=qpeAppMap()->begin(); it!=qpeAppMap()->end(); ++it ) \
+		list += it.key(); \
+	    return list; \
+	} \
+	Q_REFCOUNT \
+	private: \
+	    ulong ref; \
+    }; \
+    QPEAppMap *qpeAppMap() { \
+	static QPEAppMap *am = 0; \
+	if ( !am ) am = new QPEAppMap(); \
+	return am; \
+    } \
+    Q_EXPORT_INTERFACE() { Q_CREATE_INSTANCE( ApplicationImpl ) }
+
+#else
+
+# define QTOPIA_MAIN \
+    QPEAppMap *qpeAppMap(); \
+    int main( int argc, char ** argv ) { \
+	QPEApplication a( argc, argv ); \
+	QWidget *mw = 0; \
+\
+    QString executableName(argv[0]); \
+    executableName = executableName.right(executableName.length() \
+	    - executableName.findRev('/') - 1); \
+\
+	if ( qpeAppMap()->contains(executableName) ) \
+	    mw = (*qpeAppMap())[executableName](0,0,0); \
+	else if ( qpeAppMap()->count() ) \
+	    mw = qpeAppMap()->begin().data()(0,0,0); \
+	if ( mw ) { \
+	    if ( mw->metaObject()->slotNames().contains("setDocument(const QString&)") ) \
+		a.showMainDocumentWidget( mw ); \
+	    else \
+		a.showMainWidget( mw ); \
+	    int rv = a.exec(); \
+	    delete mw; \
+	    return rv; \
+	} else { \
+	    return -1; \
+	} \
+    } \
+    QPEAppMap *qpeAppMap() { \
+	static QPEAppMap *am = 0; \
+	if ( !am ) am = new QPEAppMap(); \
+	return am; \
+    } \
+
+#endif

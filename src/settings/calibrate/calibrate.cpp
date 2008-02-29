@@ -38,6 +38,23 @@
 Calibrate::Calibrate(QWidget* parent, const char * name, WFlags wf) :
     QDialog( parent, name, TRUE, wf | WStyle_Customize | WStyle_StaysOnTop )
 {
+    init();
+
+    timer = new QTimer( this );
+    connect( timer, SIGNAL(timeout()), this, SLOT(timeout()) );
+
+    setFocusPolicy( StrongFocus );
+    setFocus();
+}
+
+Calibrate::~Calibrate()
+{
+    store();
+}
+
+void
+Calibrate::init(void)
+{
     showCross = TRUE;
     pressed = FALSE;
     anygood = FALSE;
@@ -57,22 +74,12 @@ Calibrate::Calibrate(QWidget* parent, const char * name, WFlags wf) :
     cd.screenPoints[QWSPointerCalibrationData::Center] = QPoint( qt_screen->deviceWidth()/2, qt_screen->deviceHeight()/2 );
     goodcd = cd;
     reset();
-
-    timer = new QTimer( this );
-    connect( timer, SIGNAL(timeout()), this, SLOT(timeout()) );
-
-    setFocusPolicy( StrongFocus );
-    setFocus();
-}
-
-Calibrate::~Calibrate()
-{
-    store();
 }
 
 void Calibrate::show()
 {
     if ( !isVisible() && QWSServer::mouseHandler() ) {
+	init();
 	anygood = QFile::exists("/etc/pointercal");
 	QWSServer::mouseHandler()->getCalibration(&goodcd);
 	QWSServer::mouseHandler()->clearCalibration();

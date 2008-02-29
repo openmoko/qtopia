@@ -1,4 +1,4 @@
-Files: lib/libqtopia.so.$VERSION_MAJ.$VERSION_MIN.$VERSION_PAT lib/libqtopia.so.$VERSION_MAJ.$VERSION_MIN lib/libqtopia.so.$VERSION_MAJ
+Files: lib/libqtopia.so lib/libqtopia.so.1 lib/libqtopia.so.1.6 lib/libqtopia.so.1.6.2
 Priority: required
 Section: qpe/system
 Maintainer: Trolltech (www.trolltech.com)

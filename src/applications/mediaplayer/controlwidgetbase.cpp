@@ -631,7 +631,7 @@ void ControlWidgetBase::mouseReleaseEvent( QMouseEvent *event )
 
 void ControlWidgetBase::closeEvent( QCloseEvent* )
 {
-    mediaPlayerState->setList();
+    mediaPlayerState->closeView();
 }
 
 

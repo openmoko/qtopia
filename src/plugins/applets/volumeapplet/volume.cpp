@@ -88,10 +88,9 @@ VolumeApplet::VolumeApplet( QWidget *parent, const char *name )
     img = img.smoothScale(AppLnk::smallIconSize(), AppLnk::smallIconSize() - 4);
     volumePixmap.convertFromImage(img);
 
-    muted = FALSE; // ### read from pref
-    volumePercent = 50; // ### read from pref
+    readSystemVolume();
+
     connect( qApp, SIGNAL( volumeChanged(bool) ), this, SLOT( volumeChanged(bool) ) );
-    writeSystemVolume();
 }
 
 VolumeApplet::~VolumeApplet()

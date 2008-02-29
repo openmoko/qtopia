@@ -21,15 +21,16 @@
 #define LAUNCHERVIEW_H
 
 #include <qtopia/storage.h>
+#include <qtopia/applnk.h>
 
 #include <qvbox.h>
 
-class AppLnk;
-class AppLnkSet;
 class CategorySelect;
 class LauncherIconView;
 class QIconView;
 class QIconViewItem;
+class QLabel;
+class QWidgetStack;
 class MenuButton;
 class QComboBox;
 
@@ -41,17 +42,20 @@ public:
     LauncherView( QWidget* parent = 0, const char* name = 0, WFlags fl = 0 );
     ~LauncherView();
 
+    void hideIcons();
+
     bool removeLink(const QString& linkfile);
     void addItem(AppLnk* app, bool resort=TRUE);
+    void removeAllItems();
+    void setSortEnabled(bool);
+    void setUpdatesEnabled(bool);
     void sort();
 
-    void setFileSystems(const QList<FileSystem> &);
     void setToolsEnabled(bool);
     void updateTools();
 
     void setBusy(bool);
 
-    QString getAllDocLinkInfo() const;
     enum ViewMode { Icon, List };
     void setViewMode( ViewMode m );
     ViewMode viewMode() const { return vmode; }
@@ -67,9 +71,6 @@ public:
     void clearViewFont();
 
     void relayout(void);
-
-public slots:
-    void populate( AppLnkSet *folder, const QString& categoryfilter );
 
 signals:
     void clicked( const AppLnk * );
@@ -87,7 +88,6 @@ protected slots:
     void flushBgCache();
 
 protected:
-    void internalPopulate( AppLnkSet *, const QString& categoryfilter );
     void paletteChange( const QPalette & );
 
     void fontChanged(const QFont &);

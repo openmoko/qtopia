@@ -19,16 +19,8 @@
 **********************************************************************/
 
 #include "clock.h"
-
 #include <qtopia/qpeapplication.h>
 
-int main( int argc, char ** argv )
-{
-    QPEApplication a( argc, argv );
+QTOPIA_ADD_APPLICATION("clock",Clock)
+QTOPIA_MAIN
 
-    Clock mw;
-    mw.setCaption( Clock::tr("Clock") );
-    a.showMainWidget( &mw );
-
-    return a.exec();
-}

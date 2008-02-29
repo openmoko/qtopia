@@ -84,7 +84,7 @@ protected slots:
     void read();
     void send( const QString& msg );
     void process( const QString& command );
-    void connectionClosed();
+    void myConnectionClosed();
 
 private:
     State state;

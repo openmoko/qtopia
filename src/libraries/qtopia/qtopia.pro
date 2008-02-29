@@ -49,7 +49,8 @@ HEADERS	=   calendar.h \
 	    backend/vobject_p.h \
 	    styleinterface.h \
 	    windowdecorationinterface.h \
-	    qdawg.h 
+	    qdawg.h \
+	    applicationinterface.h
 
 SOURCES	=   calendar.cpp \
 	    global.cpp \

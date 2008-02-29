@@ -221,10 +221,7 @@ public:
 
     void setInfo(const QString& c)
     {
-	if ( parseInfo(c) && c != link.comment() ) {
-	    link.setComment(c);
-	    link.writeLink();
-	}
+	parseInfo(c);
     }
 
     bool parseInfo()
@@ -1136,6 +1133,7 @@ QStringList PackageWizard::findPackages( const QRegExp& r )
 bool PackageWizard::installIpkg( const QString &ipk, const QString &location, QString& out )
 {
     //qDebug( "installing %s to '%s'", ipk.ascii(), location.ascii() );
+    out = QString("installing %1 to %2").arg(ipk).arg(location);
     QStringList cmd;
     QStringList orig_packages;
     if ( !location.isEmpty() ) {
@@ -1283,6 +1281,9 @@ bool PackageWizard::commitWithIpkg()
 	    for (QStringList::ConstIterator it=to_do.begin(); it!=to_do.end(); ++it) {
 		QString out;
 		if ( !installIpkg( *it, loc, out ) ) {
+		    errlog += getenv("PATH");
+		    errlog += "\n";
+		    errlog += "install ipkg returned false for " + loc + "\n";
 		    ok = FALSE;
 		    errlog += out;
 		} else {
@@ -1401,7 +1402,6 @@ bool PackageWizard::runIpkg(const QStringList& args, QString& out)
 	cmd += "-force-defaults";
     cmd += args;
     qApp->processEvents();
-    //qDebug( "RUNNING %s", cmd.join( "##" ).latin1() );
     Process ipkg_status(cmd);
     bool r = ipkg_status.exec("",out);
     //qDebug( "RESULT %s", out.latin1() );

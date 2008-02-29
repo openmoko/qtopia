@@ -3,7 +3,7 @@
 # Build options from 
 #############################################################################
 
-default: all # package
+default: all  # package
 
 CONTROL = settings/pluginmgr/qpe-pluginmanager.control
 
@@ -116,9 +116,9 @@ OBJECTS_DIR = .obj/linux-generic-g++/
 ####### Compiler, tools and options
 
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
-CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
+CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) -DQTOPIA_APP_INTERFACE
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) -DQTOPIA_APP_INTERFACE
 INCPATH =	-I$(MOC_DIR) -I$(QPEDIR)/include
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
@@ -224,6 +224,7 @@ $(OBJECTS_DIR)/pluginmanager.o: pluginmanager.cpp \
 		$(QPEDIR)/include/qtopia/quuid.h \
 		$(QPEDIR)/include/qtopia/qtopiawinexport.h \
 		$(QPEDIR)/include/qtopia/timestring.h \
+		$(QPEDIR)/include/qtopia/applicationinterface.h \
 		$(QPEDIR)/include/qtopia/pluginloader.h \
 		$(QPEDIR)/include/qtopia/global.h \
 		$(QPEDIR)/include/qtopia/config.h \
@@ -240,7 +241,8 @@ $(OBJECTS_DIR)/main.o: main.cpp \
 		$(QPEDIR)/include/qtopia/qcom.h \
 		$(QPEDIR)/include/qtopia/quuid.h \
 		$(QPEDIR)/include/qtopia/qtopiawinexport.h \
-		$(QPEDIR)/include/qtopia/timestring.h
+		$(QPEDIR)/include/qtopia/timestring.h \
+		$(QPEDIR)/include/qtopia/applicationinterface.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
 pluginmanagerbase.h: pluginmanagerbase.ui
@@ -309,7 +311,7 @@ lrelease:
 
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
-	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done
+	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic  $(QPEDIR)/src/$$ctrl ; done
 
 package: ipkg
 	cd $(QPEDIR)/ipkg; 	../bin/mkPackages

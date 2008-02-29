@@ -18,23 +18,24 @@
 **
 **********************************************************************/
 
-#ifndef __TASKBAR_H__
-#define __TASKBAR_H__
+#ifndef TASKBAR_H
+#define TASKBAR_H
 
 #include <qhbox.h>
+#include "serverinterface.h"
+#include "startmenu.h"
 
 class QLabel;
 class QTimer;
 class InputMethods;
 class Wait;
 class SysTray;
-//class MRUList;
 class RunningAppBar;
 class QWidgetStack;
 class QTimer;
 class QLabel;
-class StartMenu;
 class LockKeyState;
+class AppLnkSet;
 
 class TaskBar : public QHBox {
     Q_OBJECT
@@ -42,20 +43,18 @@ public:
     TaskBar();
     ~TaskBar();
 
-    static QWidget *calibrate( bool );
-
-    bool recoverMemory();
-
-    StartMenu *startMenu() const { return sm; }
+    void launchStartMenu() { if (sm) sm->launch(); }
+    void refreshStartMenu() { if (sm) sm->refreshMenu(); }
+    void setApplicationState( const QString &name, ServerInterface::ApplicationState state );
 
 signals:
-    void forceSuspend();
     void tabSelected(const QString&);
 
 public slots:
     void startWait();
     void stopWait(const QString&);
     void stopWait();
+
     void clearStatusBar();
     void toggleNumLockState();
     void toggleCapsLockState();
@@ -71,12 +70,10 @@ private slots:
     void receive( const QCString &msg, const QByteArray &data );
 
 private:
-    
     QTimer *waitTimer;
     Wait *waitIcon;
     InputMethods *inputMethods;
     SysTray *sysTray;
-/*     MRUList *mru; */
     RunningAppBar* runningAppBar;
     QWidgetStack *stack;
     QTimer *clearer;
@@ -86,4 +83,4 @@ private:
 };
 
 
-#endif // __TASKBAR_H__
+#endif // TASKBAR_H

@@ -130,7 +130,7 @@ QCopEnvelope::~QCopEnvelope()
 	    QByteArray b;
 	    QDataStream stream(b, IO_WriteOnly);
 	    stream << QString(ch.mid(pref));
-	    QCopChannel::send("QPE/System", "processQCop(QString)", b);
+	    QCopChannel::send("QPE/Server", "processQCop(QString)", b);
 	    delete device();
 	    return;
 	} else {

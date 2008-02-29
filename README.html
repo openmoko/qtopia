@@ -1,25 +1,42 @@
-<html>
-<title>Qtopia Free Developer Kit</title>
+<html> <title>Qtopia Free Developer Kit</title>
 <body>
-<h1><img src=pics/logo32.png align=center> Qtopia Free Developer Kit</h1>
+<h1><img src=pics/logo32.png align=center> Qtopia Free Developer
+Kit</h1>
 
 <hr>
 <p>
-This is a development version for Qtopia. See the
-<a href=LICENSE>LICENSE</a> file for
-information on LICENSE of this software.  
+This is a development version for Qtopia. See the <a
+href=LICENSE>LICENSE</a> file for information on LICENSE of this
+software.
+<p>
+You can only develop GPL licensed applications using the Qtopia Free
+edition. If you wish to develop a commercial application, please go to
+<a href=http://www.trolltech.com/download/qtopia/index.html>Qtopia
+Download Page</a> to purchase the commercial SDK.
+
+<h2> Getting Started
+
+<p> You can either download and install the Qtopia RPM or the Qtopia
+source.
+
+Using the RPM will save you compile time and will allow you to start
+developing sooner. To download the RPM, go to <a
+href=http://www.trolltech.com/download/qtopia/index.html>Qtopia
+Download Page</a> to download the rpm for your platform.
+
+If you are using the RPM, goto <a href=#running>Running Qtopia</a>.
+
+<h2> Compile Qtopia from source
 
 <p>
 You will need the software listed below to be able to compile and use
 Qtopia.
 
 <ul>
-  <li> Qtopia 1.6.x (this package)
-  <li> Qt/Embedded 2.3.x (upon which Qtopia is built)
+  <li> Qtopia 1.7.x (this package) 
+  <li> Qt/Embedded 2.3.x (upon which Qtopia is built) 
   <li> Qt 2.3.2 for X11 (for emulated desktop development)
 </ul>
-
-<h2>How to compile</h2>
 
 <p>
 Below is a description of how to get everything built quickly without
@@ -30,8 +47,8 @@ packages above.
  <li><i> Unpack Qtopia...</i>
 <pre>
 
-   tar xfz qtopia-free-1.6.x.tar.gz
-   cd qtopia-1.6.x
+   tar xfz qtopia-free-1.7.x.tar.gz 
+   cd qtopia-1.7.x 
    export QPEDIR=$PWD
    cd ..
 
@@ -39,64 +56,72 @@ packages above.
  <li><i> Install Qt/Embedded...</i>
 <pre>
 
-   tar xfz qt-embedded-2.3.x.tar.gz
-   cd qt-2.3.x
+   tar xfz qt-embedded-2.3.x.tar.gz 
+   cd qt-2.3.x 
    export QTDIR=$PWD
-   export QTEDIR=$QTDIR
-   export PATH=$QTDIR/bin:$PATH
-   export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
-   cp $QPEDIR/src/qt/qconfig-qpe.h src/tools/
-   ./configure -qconfig qpe -qvfb -depths 4,8,16,32
-   make sub-src
+   export QTEDIR=$QTDIR 
+   export PATH=$QTDIR/bin:$PATH 
+   export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH 
+   cp $QPEDIR/src/qt/qconfig-qpe.h src/tools/ 
+   ./configure -qconfig qpe -qvfb -depths 4,8,16,32 
+   make sub-src 
    cd ..
 
 </pre>
 
-You may also want to use the configure options<tt> -system-jpeg </tt>and<tt> -gif</tt> for jpeg and gif support.<br><br>
+You may also want to use the configure options<tt> -system-jpeg
+</tt>and<tt> -gif</tt> for jpeg and gif support.<br><br>
 
- <li><i> Install Qt/X11 2.3.2...</i>
-Note that you must use 2.3.x, not 3.x, as this step is done to provide
-Qt 2 tools.
+ <li><i> Install Qt/X11 2.3.2...</i> Note that you must use 2.3.x, not
+ 3.x, as this step is done to provide Qt 2 tools.
 <pre>
 
-   tar xfz qt-x11-2.3.2-free.tar.gz
-   cd qt-2.3.2
+   tar xfz qt-x11-2.3.2.tar.gz 
+   cd qt-2.3.2 
    export QTDIR=$PWD
-   export PATH=$QTDIR/bin:$PATH
-   export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
-   ./configure
-   make
-   make -C tools/qvfb
-   mv tools/qvfb/qvfb bin
-   cp bin/uic $QTEDIR/bin
+   export PATH=$QTDIR/bin:$PATH 
+   export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH 
+   ./configure 
+   make 
+   make -C tools/qvfb 
+   mv tools/qvfb/qvfb bin 
+   cp bin/uic $QTEDIR/bin 
    cd ..
 
 </pre>
 
-You may also pass other configure options such as <tt>-no-opengl</tt> or <tt>-no-xft</tt> as suitable to your environment.  Use <tt>./configure -help</tt> for more information.
-You may also want to build Qt Designer (in <tt>tools/designer/</tt>).
-<br><br>
+You may also pass other configure options such as <tt>-no-opengl</tt>
+or <tt>-no-xft</tt> as suitable to your environment.  Use
+<tt>./configure -help</tt> for more information.  You may also want to
+build Qt Designer (in <tt>tools/designer/</tt>).  <br><br>
 
  <li><i> Build Qtopia...</i>
 <pre>
 
-   cd qtopia-1.6.x
-   export QTDIR=$QTEDIR
-   export QPEDIR=$PWD
-   export PATH=$QPEDIR/bin:$PATH
-   cd src
-   ./configure
-   make
+   cd qtopia-1.7.x 
+   export QTDIR=$QTEDIR 
+   export QPEDIR=$PWD 
+   export PATH=$QPEDIR/bin:$PATH 
+   cd src 
+   ./configure 
+   make 
    cd ../..
 
 </pre>
 </ol>
 
+<h2><a name="running"> Running Qtopia</a></h1> 
+<p> 
+<ol> 
+<li> <i>Ensure your environment has the following variables set. </i>
 
+<pre>
+   export QPEDIR=/opt/Qtopia
+   export QTDIR=/opt/Qtopia
+   export PATH=$QTDIR/bin:$PATH
+   export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+</pre>
 
-<h2>How to run</h2>
-
-<ol>
  <li><i>Run the Qt Virtual Framebuffer (an X11 application)...</i>
 <pre>
 
@@ -104,34 +129,48 @@ You may also want to build Qt Designer (in <tt>tools/designer/</tt>).
 
 </pre>
 
- <li><i>Run Qtopia (a Qt/Embedded application, will show in QVFb)...</i>
+ <li><i>Run Qtopia (a Qt/Embedded application, will show in
+ QVFb)...</i>
 <pre>
 
-   export QTDIR=$QTEDIR
+   export QTDIR=$QTEDIR 
    qpe &amp;
 
 </pre>
 
 </ol>
 
+<h2> Documentation
 
+<p> Qtopia documentation also includes the Qt 2.3.x documentation. You
+can always get the most up to date documentation by going online and
+visiting the <a href="http://doc.trolltech.com/">Trolltech
+Documentation Site</a>
 
-<h2>How to use</h2>
+<p> If you are using the SDK then the documentation has been already
+installed on your system:
 
+<ul> 
+  <li> <a href="doc/index.html">Qtopia documentation index</a>.
+<ul><li> <a
+href="doc/html/overview.html">Qtopia Platform introduction</a>.
+<li> <a
+href="doc/html/start.html">Getting Started page</a> 
+</ul>
+<li> <a href="doc/html/index.html">Qt documentation index</a> and the <a
+href="http://www.trolltech.com/products/qt/whitepaper.html">Qt
+Whitepaper</a>
+</ul>
 <p>
-With the above procedure, the Qtopia environment will be running the Qt
-Virtual Framebuffer.
 
-<hr>
+<h2> Support
+<p> The free edition comes with no official Trolltech support. Trolltech maintains support mailing lists where the open-source community can ask and answer questions. The Trolltech team also tries to assist these mailing lists by answering new questions.
+<p> Please go to <a href=http://lists.trolltech.com/>Trolltech Mailing List index</a> to join our mailing lists or to browse the archives. There is a specific mailing list for <a href=http://lists.trolltech.com/qtopia-interest/> Qtopia related issues</a>.
 
-<table width=100%>
-<tr>
-<td>
-<big>Welcome to Qtopia!</big>
-<td align=center>
-<a href="mailto:info@trolltech.com">info@trolltech.com</a> <br>
-the Qtopia team
-<td align=right>
-&copy; 2001-2002 Trolltech AS
-</tr>
-</table>
+<!-- eof --> <p><address><hr><div align=center> 
+<table width=100% cellspacing=0 border=0><tr> 
+<td>Copyright &copy; 2001-2003 Trolltech
+<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a> 
+<td align=right><div align=right>Qtopia version 1.7.0</div>
+</table></div></address></body>
+</html>

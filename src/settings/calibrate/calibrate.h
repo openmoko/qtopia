@@ -48,6 +48,7 @@ private:
     void mousePressEvent( QMouseEvent * );
     void mouseMoveEvent( QMouseEvent * );
     void mouseReleaseEvent( QMouseEvent * );
+    void init(void);
 
 private slots:
     void timeout();

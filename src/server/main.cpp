@@ -21,7 +21,8 @@
 #ifndef QTOPIA_INTERNAL_FILEOPERATIONS
 #define QTOPIA_INTERNAL_FILEOPERATIONS
 #endif
-#include "desktop.h"
+#include "server.h"
+#include "serverapp.h"
 #include "taskbar.h"
 #include "stabmon.h"
 #include "launcher.h"
@@ -127,7 +128,7 @@ void initCassiopeia()
 #include <linux/ioctl.h>
 #include <qtopia/global.h>
 
-static void disableAPM() 
+static void disableAPM()
 {
 
     int fd, cur_val, ret;
@@ -180,7 +181,6 @@ static void cleanup()
     QStringList stale = dir.entryList();
     QStringList::Iterator it;
     for ( it = stale.begin(); it != stale.end(); ++it ) {
-	qDebug( "Removing: %s", (*it).latin1() );
 	dir.remove( *it );
     }
 }
@@ -219,10 +219,10 @@ static void refreshTimeZoneConfig()
 	for (QStringList::Iterator it = zoneDefaults.begin(); it != zoneDefaults.end() ; ++it){
 	    cfg.writeEntry( "Zone" + QString::number( zoneIndex ) , *it);
 	    zoneIndex++;
-	} 
+	}
     }
-    // We have an existing list of timezones refresh the 
-    //  translations of TimeZone name 
+    // We have an existing list of timezones refresh the
+    //  translations of TimeZone name
     zoneIndex = 0;
     while (cfg.hasKey( "Zone"+ QString::number( zoneIndex ))){
 	zoneID = cfg.readEntry( "Zone" + QString::number( zoneIndex ));
@@ -240,14 +240,14 @@ static void refreshTimeZoneConfig()
 void initEnvironment()
 {
 #ifdef Q_OS_WIN32
-    // Config file requires HOME dir which uses QDir which needs the winver 
+    // Config file requires HOME dir which uses QDir which needs the winver
     qt_init_winver();
 #endif
     Config config("locale");
     config.setGroup( "Location" );
     QString tz = config.readEntry( "Timezone", getenv("TZ") ).stripWhiteSpace();
 
-    // if not timezone set, pick New York 
+    // if not timezone set, pick New York
     if (tz.isNull() || tz.isEmpty())
 	tz = "America/New_York";
 
@@ -293,19 +293,19 @@ static void initBacklight()
 static void initKeyboard()
 {
     Config config("qpe");
-  
+
     config.setGroup( "Keyboard" );
-  
+
     int ard = config.readNumEntry( "RepeatDelay" );
     int arp = config.readNumEntry( "RepeatPeriod" );
     if ( ard > 0 && arp > 0 )
 	qwsSetKeyboardAutoRepeat( ard, arp );
 
     QString layout = config.readEntry( "Layout", "us101" );
-    Launcher::setKeyboardLayout( layout );
+    Server::setKeyboardLayout( layout );
 }
 
-static void firstUse()
+static bool firstUse()
 {
     bool needFirstUse = FALSE;
 #if defined(QPE_NEED_CALIBRATION)
@@ -319,14 +319,14 @@ static void firstUse()
 	needFirstUse |= config.readBoolEntry( "FirstUse", TRUE );
     }
 
-    if ( needFirstUse ) {
-	FirstUse *fu = new FirstUse();
-	fu->exec();
-	bool rs = fu->restartNeeded();
-	delete fu;
-	if ( rs )
-	    Global::restart();
-    }
+    if ( !needFirstUse )
+	return FALSE;
+
+    FirstUse *fu = new FirstUse();
+    fu->exec();
+    bool rs = fu->restartNeeded();
+    delete fu;
+    return rs;
 }
 
 int initApplication( int argc, char ** argv )
@@ -351,7 +351,7 @@ int initApplication( int argc, char ** argv )
 #ifdef QWS
     QWSServer::setDesktopBackground( QImage() );
 #endif
-    DesktopApplication a( argc, argv, QApplication::GuiServer );
+    ServerApplication a( argc, argv, QApplication::GuiServer );
 
     refreshTimeZoneConfig();
 
@@ -361,7 +361,10 @@ int initApplication( int argc, char ** argv )
 
     // Don't use first use under Windows
 #ifdef Q_OS_UNIX
-    firstUse();
+    if ( firstUse() ) {
+	a.restart();
+	return 0;
+    }
 #endif
 
     AlarmServer::initialize();
@@ -373,30 +376,20 @@ int initApplication( int argc, char ** argv )
 	return 0;
       }
 #endif
-    
-    Desktop *d = new Desktop();
-    a.setMainWidget(d->appLauncher());
 
-    QObject::connect( &a, SIGNAL(launch()),   d, SLOT(raiseLauncher()) );
-    QObject::connect( &a, SIGNAL(power()),   d, SLOT(togglePower()) );
-    QObject::connect( &a, SIGNAL(backlight()),   d, SLOT(toggleLight()) );
-    QObject::connect( &a, SIGNAL(symbol()),   d, SLOT(toggleSymbolInput()) );
-    QObject::connect( &a, SIGNAL(numLockStateToggle()),   d, SLOT(toggleNumLockState()) );
-    QObject::connect( &a, SIGNAL(capsLockStateToggle()),   d, SLOT(toggleCapsLockState()) );
-    QObject::connect( &a, SIGNAL(prepareForRestart()),   d, SLOT(terminateServers()) );
-    QObject::connect( &a, SIGNAL(timeChanged()),   d, SLOT(pokeTimeMonitors()) );
-    QObject::connect( &a, SIGNAL(appMessage(const QCString&, const QByteArray&)), d, SLOT(appMessage(const QCString&, const QByteArray&)));
+    Server *s = new Server();
 
-    (void)new SysFileMonitor(d);
+    (void)new SysFileMonitor(s);
 #ifdef QWS
-    Network::createServer(d);
+    Network::createServer(s);
 #endif
 
-    d->show();
+    s->show();
 
     int rv =  a.exec();
 
-    delete d;
+    qDebug("exiting...");
+    delete s;
 
     return rv;
 }
@@ -412,7 +405,7 @@ int main( int argc, char ** argv )
 
 #ifdef Q_WS_QWS
     // Have we been asked to restart?
-    if ( DesktopApplication::doRestart ) {
+    if ( ServerApplication::doRestart ) {
 	for ( int fd = 3; fd < 100; fd++ )
 	    close( fd );
 # if defined(QT_DEMO_SINGLE_FLOPPY)

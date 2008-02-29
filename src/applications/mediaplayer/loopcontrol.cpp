@@ -328,7 +328,7 @@ void LoopControl::startAudio()
 
 	    currentSample = audioSampleCounter + 1;
 	    long samplesRead = 0;
-	    bool readOkay = mediaPlayerState->decoder()->audioReadSamples( (short*)audioBuffer, channels, 1024, samplesRead, astream );
+	    bool readOkay = mediaPlayerState->decoder()->audioReadSamples( (short*)audioBuffer, channels, 4096, samplesRead, astream );
 	    long sampleWeShouldBeAt = long( playtime.elapsed() ) * freq / 1000;
 	    long sampleWaitTime = currentSample - sampleWeShouldBeAt;
 

@@ -26,7 +26,7 @@ class QCString;
 class QPushButton;
 class QTranslator;
 class AppLauncher;
-class AppLnkSet;
+class DocumentList;
 
 class FirstUse : public QDialog
 {
@@ -71,7 +71,7 @@ private:
     QTranslator *transLib;
 
     bool needCalibrate;
-    AppLnkSet *appLnkSet;
+    DocumentList *docList;
     AppLauncher *appLauncher;
     QWidget *taskBar;
 

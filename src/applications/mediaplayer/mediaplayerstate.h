@@ -64,6 +64,7 @@ public:
     bool hasLength()		 { return (curLength > 1); }
     View view()			 { return curView; }
     QString skin()		 { return curSkin; }
+    void closeView()		 { emit viewClosed(); }
 
     MediaPlayerDecoder* decoder( const QString& file = QString::null );
     MediaPlayerDecoder* streamingDecoder( const QString& url, const QString& mimetype );
@@ -130,6 +131,7 @@ signals:
     void positionUpdated( long ); // When the media file progresses
     void lengthChanged( long );
     void viewChanged( View );
+    void viewClosed();
     void skinChanged( const QString& );
 
     void prev();

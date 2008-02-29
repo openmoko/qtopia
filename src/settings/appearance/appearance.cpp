@@ -403,14 +403,19 @@ void AppearanceSettings::accept()
 {
     Config config("qpe");
     config.setGroup( "Appearance" );
+    QString s;
 
     PluginItem *item = (PluginItem *)styleList->item( styleList->currentItem() );
-    QString s = item->filename().isEmpty() ? item->text() : item->filename();
-    config.writeEntry( "Style", s );
+    if ( item ) {
+	s = item->filename().isEmpty() ? item->text() : item->filename();
+	config.writeEntry( "Style", s );
+    }
 
     item = (PluginItem *)decorationList->item( decorationList->currentItem() );
-    s = item->filename().isEmpty() ? item->text() : item->filename();
-    config.writeEntry( "Decoration", s );
+    if ( item ) {
+	s = item->filename().isEmpty() ? item->text() : item->filename();
+	config.writeEntry( "Decoration", s );
+    }
 
     s = colorListIDs[colorList->currentItem()];
     config.writeEntry( "Scheme", s );

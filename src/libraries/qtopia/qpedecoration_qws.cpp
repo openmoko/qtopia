@@ -487,6 +487,20 @@ static WindowDecorationInterface *wdiface = 0;
 static PluginLoaderIntern *wdLoader = 0;
 
 //===========================================================================
+bool QPEDecoration::helpExists() const
+{
+    if ( helpFile.isNull() ) {
+	QStringList helpPath = Global::helpPath();
+	QString hf = QString(qApp->argv()[0]) + ".html";
+	bool he = FALSE;
+	for (QStringList::ConstIterator it=helpPath.begin(); it!=helpPath.end() && !he; ++it)
+	    he = QFile::exists( *it + "/" + hf );
+	((QPEDecoration*)this)->helpFile = hf;
+	((QPEDecoration*)this)->helpexists = he;
+	return he;
+    }
+    return helpexists;
+}
 
 QPEDecoration::QPEDecoration()
     : QWSDefaultDecoration()
@@ -499,11 +513,7 @@ QPEDecoration::QPEDecoration()
     }
     wdiface = new DefaultWindowDecoration;
 
-    helpFile = QString(qApp->argv()[0]) + ".html";
-    QStringList helpPath = Global::helpPath();
-    helpExists = FALSE;
-    for (QStringList::ConstIterator it=helpPath.begin(); it!=helpPath.end() && !helpExists; ++it)
-	helpExists = QFile::exists( *it + "/" + helpFile );
+    helpexists = FALSE; // We don't know (flagged by helpFile being null)
     qpeManager = new QPEManager( this );
     imageOk = Resource::loadImage( "OKButton" );
     imageClose = Resource::loadImage( "CloseButton" );
@@ -534,11 +544,7 @@ QPEDecoration::QPEDecoration( const QString &plugin )
 	}
     }
 
-    helpFile = QString(qApp->argv()[0]) + ".html";
-    QStringList helpPath = Global::helpPath();
-    helpExists = FALSE;
-    for (QStringList::ConstIterator it=helpPath.begin(); it!=helpPath.end() && !helpExists; ++it)
-	helpExists = QFile::exists( *it + "/" + helpFile );
+    helpexists = FALSE; // We don't know (flagged by helpFile being null)
     qpeManager = new QPEManager( this );
 }
 
@@ -640,7 +646,7 @@ QRegion QPEDecoration::region(const QWidget *widget, const QRect &rect, QWSDecor
 	    }
 	    break;
 	case Help:
-	    if ( helpExists || widget->testWFlags(Qt::WStyle_ContextHelp) ) {
+	    if ( helpExists() || widget->testWFlags(Qt::WStyle_ContextHelp) ) {
 		QRect r(rect.left(), rect.top() - titleHeight,
 			  helpWidth, titleHeight);
 		region = r;
@@ -789,7 +795,7 @@ void QPEDecoration::paintButton(QPainter *painter, const QWidget *w,
 	case Minimize:
 	    if ( ((DecorHackWidget *)w)->needsOk() )
 		b = WindowDecorationInterface::OK;
-	    else if ( helpExists )
+	    else if ( helpExists() )
 		b = WindowDecorationInterface::Help;
 	    else
 		return;
@@ -887,7 +893,7 @@ void QPEDecoration::minimize( QWidget *widget )
 
 void QPEDecoration::help( QWidget *w )
 {
-    if ( helpExists ) {
+    if ( helpExists() ) {
 	QString hf = helpFile;
 	QString localHelpFile = QString(qApp->argv()[0]) + "-" + w->name() + ".html";
 	QStringList helpPath = Global::helpPath();

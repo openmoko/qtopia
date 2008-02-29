@@ -24,7 +24,7 @@
 #include <qmap.h>
 
 #include "mimetype.h"
-#include <qtopia/qtopiawinexport.h> 
+#include <qtopia/qtopiawinexport.h>
 #include "applnk.h"
 #include "resource.h"
 #include "qpeapplication.h"
@@ -36,6 +36,7 @@
 #include <qstringlist.h>
 #include <qtextstream.h>
 #include <qmap.h>
+#include <qpixmapcache.h>
 
 
 static void cleanupMime()
@@ -76,6 +77,7 @@ public:
     }
 
 private:
+//#define QTOPIA_NO_CACHE_PIXMAPS
     void loadPixmaps()
     {
 	if ( apps.count() ) {
@@ -97,9 +99,20 @@ private:
 		regicon = lnk->pixmap();
 		bigicon = lnk->bigPixmap();
 	    } else {
-		QImage unscaledIcon = Resource::loadImage( icon );
-		regicon.convertFromImage( unscaledIcon.smoothScale( AppLnk::smallIconSize(), AppLnk::smallIconSize() ) );
-		bigicon.convertFromImage( unscaledIcon.smoothScale( AppLnk::bigIconSize(), AppLnk::bigIconSize() ) );
+
+#ifndef QTOPIA_NO_CACHE_PIXMAPS
+		if ( !QPixmapCache::find( icon, regicon ) ||
+		     !QPixmapCache::find( icon + "_big", bigicon ) ) {
+#endif
+		    QImage unscaledIcon = Resource::loadImage( icon );
+		    regicon.convertFromImage( unscaledIcon.smoothScale( AppLnk::smallIconSize(), AppLnk::smallIconSize() ) );
+		    bigicon.convertFromImage( unscaledIcon.smoothScale( AppLnk::bigIconSize(), AppLnk::bigIconSize() ) );
+
+#ifndef QTOPIA_NO_CACHE_PIXMAPS
+		    QPixmapCache::insert( icon, regicon );
+		    QPixmapCache::insert( icon + "_big", bigicon );
+		}
+#endif
 	    }
 	}
     }
@@ -176,7 +189,7 @@ QString MimeType::id() const
 }
 
 /*!
-    Returns a description of the MIME Type. This is usually based 
+    Returns a description of the MIME Type. This is usually based
     on the application() associated with the type.
 */
 QString MimeType::description() const
@@ -268,6 +281,7 @@ void MimeType::registerApp( const AppLnk& lnk )
 	AppLnk* l = new AppLnk(lnk);
 	if ( !cur ) {
 	    cur = new MimeTypeData( *it );
+	    //qDebug("MimeType::registerApp for %s", (*it).latin1() );
 	    data().insert( *it, cur );
 	    cur->apps.append(l);
 	} else if ( cur->apps.count() ) {
@@ -289,6 +303,16 @@ void MimeType::registerApp( const AppLnk& lnk )
 	}
     }
 }
+
+#ifdef QTOPIA_INTERNAL_MIMEEXT
+/*!
+    \internal
+*/
+bool MimeType::hasAppRegistered( const QString &mimetype )
+{
+    return data(mimetype);
+}
+#endif // QTOPIA_INTERNAL_MIMEEXT
 
 /*!
     \internal

@@ -24,6 +24,7 @@
 #include <qtopia/pim/event.h>
 
 #include <qdatetime.h>
+#include <qlabel.h>
 #include <qtable.h>
 #include <qvbox.h>
 #include <qlist.h>
@@ -178,9 +179,16 @@ private:
     void fontChange( const QFont &);
     void getEvents();
     void relayoutPage( bool fromResize = false );
+#ifdef QTOPIA_NO_POINTER_INPUT
+    QString headerText(const QDate &d) const;
+#endif
     DayViewContents *view;
     DayViewContents *allView;
+#ifdef QTOPIA_NO_POINTER_INPUT
+    QLabel *header;
+#else 
     DayViewHeader *header;
+#endif
     int viewWithFocus;
 };
 

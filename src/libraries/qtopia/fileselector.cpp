@@ -242,6 +242,12 @@ public:
 	// everything else is a subobject
     }
 
+    void initReread( QListView *view, int timeout ) {
+	view->clear();
+	new QListViewItem( view, FileSelector::tr("Finding Documents...") );
+	rereadTimer->start( timeout, TRUE );
+    }
+
     TypeCombo *typeCombo;
     CategorySelect *catSelect;
     QValueList<QRegExp> mimeFilters;
@@ -263,7 +269,7 @@ public:
   is usually the first widget seen in a \link docwidget.html
   document-oriented application\endlink. The developer will most often
   create this widget in combination with a <a
-  href="../qt/qwidgetstack.html"> QWidgetStack</a> and the appropriate
+  href="qwidgetstack.html"> QWidgetStack</a> and the appropriate
   editor and/or viewer widget for their application. This widget
   should be shown first and the user can the select which document
   they wish to operate on. Please refer to the implementation of
@@ -322,6 +328,7 @@ FileSelector::FileSelector( const QString &f, QWidget *parent, const char *name,
     d = new FileSelectorPrivate();
     d->showNew = newVisible;
     d->catId = -2; // All files
+    d->files = 0;
 
     d->toolbar = new QHBox( this );
     d->toolbar->setBackgroundMode( PaletteButton );   // same colour as toolbars
@@ -331,7 +338,7 @@ FileSelector::FileSelector( const QString &f, QWidget *parent, const char *name,
     d->rereadTimer = new QTimer( this );
     connect( d->rereadTimer, SIGNAL(timeout()), this, SLOT(slotReread()) );
 
-    d->needReread = FALSE;
+    d->needReread = TRUE;
 
     QWidget *spacer = new QWidget( d->toolbar );
     spacer->setBackgroundMode( PaletteButton );
@@ -382,7 +389,6 @@ FileSelector::FileSelector( const QString &f, QWidget *parent, const char *name,
 
     connect( qApp, SIGNAL(linkChanged(const QString&)), this, SLOT(linkChanged(const QString&)) );
 
-    reread();
     updateWhatsThis();
 }
 
@@ -401,7 +407,9 @@ FileSelector::~FileSelector()
 */
 int FileSelector::fileCount()
 {
-    return d->files->children().count();;
+    if ( !d->files )
+	reread();
+    return d->files->children().count();
 }
 
 /*!
@@ -438,7 +446,7 @@ void FileSelector::filePressed( int button, QListViewItem *i, const QPoint &, in
 	if ( pop.exec(QCursor::pos()) == 1 && 
 	     QPEMessageBox::confirmDelete( this, tr("Delete"), l.name() ) ) {
 	    l.removeFiles();
-	    reread();
+	    // We get a linkChanged so rereading happens again
 	}
     }
 }
@@ -476,16 +484,16 @@ void FileSelector::catSelected( int c )
 
 void FileSelector::cardChanged()
 {
-    if ( isVisible() )
-	d->rereadTimer->start( 200, TRUE );
+    if ( isVisible() ) 
+	d->initReread( view, 200 );
     else
 	d->needReread = TRUE;
 }
 
 void FileSelector::linkChanged( const QString & )
 {
-    if ( isVisible() )
-	d->rereadTimer->start( 200, TRUE );
+    if ( isVisible() ) 
+	d->initReread( view, 200 );
     else
 	d->needReread = TRUE;
 }
@@ -574,7 +582,7 @@ void FileSelector::slotReread()
 void FileSelector::showEvent( QShowEvent *e )
 {
     if ( d->needReread )
-	d->rereadTimer->start( 200, TRUE );
+	d->initReread( view, 0 );
     QVBox::showEvent( e );
 }
 
@@ -593,15 +601,28 @@ static inline bool linkFileKnown(const AppLnk* l)
 
 static int compareDocLnk(const void* va, const void* vb)
 {
-    const DocLnk* b = *(const DocLnk**)va;
-    const DocLnk* a = *(const DocLnk**)vb;
-    int d = a->name().lower().compare(b->name().lower());
-    if ( !d ) {
-	QFileInfo fa(linkFileKnown(a) ? a->linkFile() : a->file());
-	QFileInfo fb(linkFileKnown(b) ? b->linkFile() : b->file());
-	d = fa.lastModified().secsTo(fb.lastModified());
+    const DocLnk* docB = *(const DocLnk**)va;
+    const DocLnk* docA = *(const DocLnk**)vb;
+    const QChar *a = docA->name().unicode();
+    const QChar *b = docB->name().unicode();
+    int alen = docA->name().length();
+    int blen = docB->name().length();
+    int l = alen < blen ? alen : blen;
+    while ( l-- && a->lower() == b->lower() )
+	a++,b++;
+    if ( l!=-1 ) {
+	QChar al = a->lower();
+	QChar bl = b->lower();
+	return al.unicode() - bl.unicode();
+    } else {
+	if ( alen == blen ) {
+	    QFileInfo fa(linkFileKnown(docA) ? docA->linkFile() : docA->file());
+	    QFileInfo fb(linkFileKnown(docB) ? docB->linkFile() : docB->file());
+	    return fa.lastModified().secsTo(fb.lastModified());
+	} else {
+	    return alen - blen; 
+	}
     }
-    return d;
 }
 
 void FileSelector::updateView()
@@ -638,7 +659,7 @@ void FileSelector::updateView()
 		(d->catId == -2 || doc[i]->categories().contains(d->catId) ||
 		 (d->catId == -1 && doc[i]->categories().isEmpty())) ) {
 	    item = new FileSelectorItem( view, *doc[i] );
-	    if ( item->file().file() == oldFile )
+	    if ( oldFile && item->fl.file() == oldFile )
 		view->setCurrentItem( item );
 	}
     }
@@ -647,7 +668,7 @@ void FileSelector::updateView()
 
     if ( d->showNew )
 	d->newDocItem = new NewDocItem( view, DocLnk() );
-    else
+    else 
 	d->newDocItem = 0;
 
     if ( !view->selectedItem() || view->childCount() == 1 ) {

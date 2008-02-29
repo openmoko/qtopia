@@ -3,9 +3,9 @@
 ####### Compiler, tools and options
 
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
-CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
+CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) -DQTOPIA_APP_INTERFACE
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) -DQTOPIA_APP_INTERFACE
 INCPATH =	-I$(MOC_DIR) -I$(QPEDIR)/src/settings/calibrate -I$(QPEDIR)/src/3rdparty/libraries/rsync
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -ljpeg -Wl,-Bstatic -Wl,-whole-archive  -Wl,-no-whole-archive -Wl,-Bdynamic -lcrypt -luuid -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
@@ -23,7 +23,11 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 
 ####### Files
 
-HEADERS =	desktop.h \
+HEADERS =	server.h \
+		serverinterface.h \
+		launchertab.h \
+		documentlist.h \
+		suspendmonitor.h \
 		appicons.h \
 		taskbar.h \
 		runningappbar.h \
@@ -60,8 +64,13 @@ HEADERS =	desktop.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/whole.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.h \
-		syncdialog.h
-SOURCES =	desktop.cpp \
+		syncdialog.h \
+		serverapp.h
+SOURCES =	server.cpp \
+		serverinterface.cpp \
+		launchertab.cpp \
+		documentlist.cpp \
+		suspendmonitor.cpp \
 		appicons.cpp \
 		taskbar.cpp \
 		runningappbar.cpp \
@@ -107,8 +116,13 @@ SOURCES =	desktop.cpp \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/version.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/whole.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.cpp \
-		syncdialog.cpp
-OBJECTS =	$(OBJECTS_DIR)/desktop.o \
+		syncdialog.cpp \
+		serverapp.cpp
+OBJECTS =	$(OBJECTS_DIR)/server.o \
+		$(OBJECTS_DIR)/serverinterface.o \
+		$(OBJECTS_DIR)/launchertab.o \
+		$(OBJECTS_DIR)/documentlist.o \
+		$(OBJECTS_DIR)/suspendmonitor.o \
 		$(OBJECTS_DIR)/appicons.o \
 		$(OBJECTS_DIR)/taskbar.o \
 		$(OBJECTS_DIR)/runningappbar.o \
@@ -155,11 +169,15 @@ OBJECTS =	$(OBJECTS_DIR)/desktop.o \
 		$(OBJECTS_DIR)/whole.o \
 		$(OBJECTS_DIR)/qrsync.o \
 		$(OBJECTS_DIR)/syncdialog.o \
+		$(OBJECTS_DIR)/serverapp.o \
 		$(OBJECTS_DIR)/shutdown.o
 INTERFACES =    shutdown.ui
 UICDECLS =      shutdown.h
 UICIMPLS =      shutdown.cpp
-SRCMOC	=	$(MOC_DIR)/moc_desktop.cpp \
+SRCMOC	=	$(MOC_DIR)/moc_server.cpp \
+		$(MOC_DIR)/moc_launchertab.cpp \
+		$(MOC_DIR)/moc_documentlist.cpp \
+		$(MOC_DIR)/moc_suspendmonitor.cpp \
 		$(MOC_DIR)/moc_appicons.cpp \
 		$(MOC_DIR)/moc_taskbar.cpp \
 		$(MOC_DIR)/moc_runningappbar.cpp \
@@ -177,11 +195,17 @@ SRCMOC	=	$(MOC_DIR)/moc_desktop.cpp \
 		$(MOC_DIR)/moc_irserver.cpp \
 		$(MOC_DIR)/moc_firstuse.cpp \
 		$(MOC_DIR)/moc_syncdialog.cpp \
+		$(MOC_DIR)/moc_serverapp.cpp \
 		$(MOC_DIR)/moc_shutdown.cpp \
-		$(MOC_DIR)/desktop.moc \
+		$(MOC_DIR)/serverinterface.moc \
+		$(MOC_DIR)/documentlist.moc \
 		$(MOC_DIR)/appicons.moc \
-		$(MOC_DIR)/taskbar.moc
-OBJMOC	=	$(OBJECTS_DIR)/moc_desktop.o \
+		$(MOC_DIR)/taskbar.moc \
+		$(MOC_DIR)/serverapp.moc
+OBJMOC	=	$(OBJECTS_DIR)/moc_server.o \
+		$(OBJECTS_DIR)/moc_launchertab.o \
+		$(OBJECTS_DIR)/moc_documentlist.o \
+		$(OBJECTS_DIR)/moc_suspendmonitor.o \
 		$(OBJECTS_DIR)/moc_appicons.o \
 		$(OBJECTS_DIR)/moc_taskbar.o \
 		$(OBJECTS_DIR)/moc_runningappbar.o \
@@ -199,6 +223,7 @@ OBJMOC	=	$(OBJECTS_DIR)/moc_desktop.o \
 		$(OBJECTS_DIR)/moc_irserver.o \
 		$(OBJECTS_DIR)/moc_firstuse.o \
 		$(OBJECTS_DIR)/moc_syncdialog.o \
+		$(OBJECTS_DIR)/moc_serverapp.o \
 		$(OBJECTS_DIR)/moc_shutdown.o
 
 
@@ -265,40 +290,26 @@ REQUIRES=
 
 ####### Compile
 
-$(OBJECTS_DIR)/desktop.o: desktop.cpp \
-		$(MOC_DIR)/desktop.moc \
-		desktop.h \
+$(OBJECTS_DIR)/server.o: server.cpp \
+		server.h \
+		serverapp.h \
 		shutdownimpl.h \
 		shutdown.h \
 		launcher.h \
 		launcherview.h \
-		qcopbridge.h \
+		launchertab.h \
+		serverinterface.h \
 		startmenu.h \
-		taskbar.h \
 		transferserver.h \
+		qcopbridge.h \
 		irserver.h \
-		packageslave.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/desktop.o desktop.cpp
-
-$(OBJECTS_DIR)/appicons.o: appicons.cpp \
-		$(MOC_DIR)/appicons.moc \
-		appicons.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/appicons.o appicons.cpp
-
-$(OBJECTS_DIR)/taskbar.o: taskbar.cpp \
-		$(MOC_DIR)/taskbar.moc \
-		startmenu.h \
-		inputmethods.h \
-		mrulist.h \
-		runningappbar.h \
-		systray.h \
+		packageslave.h \
 		$(QPEDIR)/src/settings/calibrate/calibrate.h \
-		wait.h \
-		appicons.h \
-		taskbar.h \
-		desktop.h \
-		shutdownimpl.h \
-		shutdown.h \
+		$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.h \
+		syncdialog.h \
+		applauncher.h \
+		suspendmonitor.h \
+		documentlist.h \
 		apps.h \
 		../applications/addressbook/addressbook.h \
 		../applications/datebook/datebook.h \
@@ -317,15 +328,55 @@ $(OBJECTS_DIR)/taskbar.o: taskbar.cpp \
 		../games/solitaire/canvascardwindow.h \
 		../settings/systemtime/settime.h \
 		../settings/appearance/appearance.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/server.o server.cpp
+
+$(OBJECTS_DIR)/serverinterface.o: serverinterface.cpp \
+		$(MOC_DIR)/serverinterface.moc \
+		serverinterface.h \
+		server.h \
+		documentlist.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/serverinterface.o serverinterface.cpp
+
+$(OBJECTS_DIR)/launchertab.o: launchertab.cpp \
+		launchertab.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/launchertab.o launchertab.cpp
+
+$(OBJECTS_DIR)/documentlist.o: documentlist.cpp \
+		$(MOC_DIR)/documentlist.moc \
+		documentlist.h \
+		serverinterface.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/documentlist.o documentlist.cpp
+
+$(OBJECTS_DIR)/suspendmonitor.o: suspendmonitor.cpp \
+		suspendmonitor.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/suspendmonitor.o suspendmonitor.cpp
+
+$(OBJECTS_DIR)/appicons.o: appicons.cpp \
+		$(MOC_DIR)/appicons.moc \
+		appicons.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/appicons.o appicons.cpp
+
+$(OBJECTS_DIR)/taskbar.o: taskbar.cpp \
+		$(MOC_DIR)/taskbar.moc \
+		startmenu.h \
+		inputmethods.h \
+		runningappbar.h \
+		systray.h \
+		wait.h \
+		appicons.h \
+		taskbar.h \
+		serverinterface.h \
+		server.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/taskbar.o taskbar.cpp
 
 $(OBJECTS_DIR)/runningappbar.o: runningappbar.cpp \
 		runningappbar.h \
-		applauncher.h
+		serverinterface.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/runningappbar.o runningappbar.cpp
 
 $(OBJECTS_DIR)/applauncher.o: applauncher.cpp \
-		applauncher.h
+		applauncher.h \
+		documentlist.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/applauncher.o applauncher.cpp
 
 $(OBJECTS_DIR)/stabmon.o: stabmon.cpp \
@@ -340,7 +391,6 @@ $(OBJECTS_DIR)/inputmethods.o: inputmethods.cpp \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/inputmethods.o inputmethods.cpp
 
 $(OBJECTS_DIR)/systray.o: systray.cpp \
-		quicklauncher.h \
 		systray.h \
 		../plugins/applets/clockapplet/clockappletimpl.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/systray.o systray.cpp
@@ -355,14 +405,13 @@ $(OBJECTS_DIR)/shutdownimpl.o: shutdownimpl.cpp \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/shutdownimpl.o shutdownimpl.cpp
 
 $(OBJECTS_DIR)/launcher.o: launcher.cpp \
+		startmenu.h \
+		taskbar.h \
+		serverinterface.h \
 		launcherview.h \
 		launcher.h \
-		syncdialog.h \
-		desktop.h \
-		shutdownimpl.h \
-		shutdown.h \
-		mrulist.h \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.h
+		launchertab.h \
+		server.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/launcher.o launcher.cpp
 
 $(OBJECTS_DIR)/launcherview.o: launcherview.cpp \
@@ -392,19 +441,21 @@ $(OBJECTS_DIR)/qcopbridge.o: qcopbridge.cpp \
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qcopbridge.o qcopbridge.cpp
 
 $(OBJECTS_DIR)/startmenu.o: startmenu.cpp \
-		startmenu.h \
-		sidething.h \
-		mrulist.h
+		startmenu.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/startmenu.o startmenu.cpp
 
 $(OBJECTS_DIR)/main.o: main.cpp \
-		desktop.h \
+		server.h \
+		serverapp.h \
 		shutdownimpl.h \
 		shutdown.h \
 		taskbar.h \
+		serverinterface.h \
+		startmenu.h \
 		stabmon.h \
 		launcher.h \
 		launcherview.h \
+		launchertab.h \
 		firstuse.h \
 		$(QPEDIR)/src/settings/calibrate/../calibrate/calibrate.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
@@ -413,10 +464,11 @@ $(OBJECTS_DIR)/firstuse.o: firstuse.cpp \
 		firstuse.h \
 		inputmethods.h \
 		applauncher.h \
-		desktop.h \
+		serverapp.h \
 		shutdownimpl.h \
 		shutdown.h \
-		../settings/calibrate/calibrate.h
+		../settings/calibrate/calibrate.h \
+		documentlist.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/firstuse.o firstuse.cpp
 
 $(OBJECTS_DIR)/base64.o: $(QPEDIR)/src/3rdparty/libraries/rsync/base64.c \
@@ -669,6 +721,13 @@ $(OBJECTS_DIR)/syncdialog.o: syncdialog.cpp \
 		syncdialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/syncdialog.o syncdialog.cpp
 
+$(OBJECTS_DIR)/serverapp.o: serverapp.cpp \
+		$(MOC_DIR)/serverapp.moc \
+		serverapp.h \
+		shutdownimpl.h \
+		shutdown.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/serverapp.o serverapp.cpp
+
 shutdown.h: shutdown.ui
 	$(UIC) shutdown.ui -o $(INTERFACE_DECL_PATH)/shutdown.h
 
@@ -680,18 +739,30 @@ $(OBJECTS_DIR)/shutdown.o: shutdown.cpp \
 		shutdown.ui
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/shutdown.o shutdown.cpp
 
-$(OBJECTS_DIR)/moc_desktop.o: $(MOC_DIR)/moc_desktop.cpp \
-		desktop.h \
-		shutdownimpl.h \
-		shutdown.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_desktop.o $(MOC_DIR)/moc_desktop.cpp
+$(OBJECTS_DIR)/moc_server.o: $(MOC_DIR)/moc_server.cpp \
+		server.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_server.o $(MOC_DIR)/moc_server.cpp
+
+$(OBJECTS_DIR)/moc_launchertab.o: $(MOC_DIR)/moc_launchertab.cpp \
+		launchertab.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_launchertab.o $(MOC_DIR)/moc_launchertab.cpp
+
+$(OBJECTS_DIR)/moc_documentlist.o: $(MOC_DIR)/moc_documentlist.cpp \
+		documentlist.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_documentlist.o $(MOC_DIR)/moc_documentlist.cpp
+
+$(OBJECTS_DIR)/moc_suspendmonitor.o: $(MOC_DIR)/moc_suspendmonitor.cpp \
+		suspendmonitor.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_suspendmonitor.o $(MOC_DIR)/moc_suspendmonitor.cpp
 
 $(OBJECTS_DIR)/moc_appicons.o: $(MOC_DIR)/moc_appicons.cpp \
 		appicons.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_appicons.o $(MOC_DIR)/moc_appicons.cpp
 
 $(OBJECTS_DIR)/moc_taskbar.o: $(MOC_DIR)/moc_taskbar.cpp \
-		taskbar.h
+		taskbar.h \
+		serverinterface.h \
+		startmenu.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_taskbar.o $(MOC_DIR)/moc_taskbar.cpp
 
 $(OBJECTS_DIR)/moc_runningappbar.o: $(MOC_DIR)/moc_runningappbar.cpp \
@@ -717,7 +788,9 @@ $(OBJECTS_DIR)/moc_shutdownimpl.o: $(MOC_DIR)/moc_shutdownimpl.cpp \
 
 $(OBJECTS_DIR)/moc_launcher.o: $(MOC_DIR)/moc_launcher.cpp \
 		launcher.h \
-		launcherview.h
+		launcherview.h \
+		launchertab.h \
+		serverinterface.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_launcher.o $(MOC_DIR)/moc_launcher.cpp
 
 $(OBJECTS_DIR)/moc_launcherview.o: $(MOC_DIR)/moc_launcherview.cpp \
@@ -756,12 +829,27 @@ $(OBJECTS_DIR)/moc_syncdialog.o: $(MOC_DIR)/moc_syncdialog.cpp \
 		syncdialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_syncdialog.o $(MOC_DIR)/moc_syncdialog.cpp
 
+$(OBJECTS_DIR)/moc_serverapp.o: $(MOC_DIR)/moc_serverapp.cpp \
+		serverapp.h \
+		shutdownimpl.h \
+		shutdown.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_serverapp.o $(MOC_DIR)/moc_serverapp.cpp
+
 $(OBJECTS_DIR)/moc_shutdown.o: $(MOC_DIR)/moc_shutdown.cpp \
 		shutdown.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_shutdown.o $(MOC_DIR)/moc_shutdown.cpp
 
-$(MOC_DIR)/moc_desktop.cpp: desktop.h
-	$(MOC) desktop.h -o $(MOC_DIR)/moc_desktop.cpp
+$(MOC_DIR)/moc_server.cpp: server.h
+	$(MOC) server.h -o $(MOC_DIR)/moc_server.cpp
+
+$(MOC_DIR)/moc_launchertab.cpp: launchertab.h
+	$(MOC) launchertab.h -o $(MOC_DIR)/moc_launchertab.cpp
+
+$(MOC_DIR)/moc_documentlist.cpp: documentlist.h
+	$(MOC) documentlist.h -o $(MOC_DIR)/moc_documentlist.cpp
+
+$(MOC_DIR)/moc_suspendmonitor.cpp: suspendmonitor.h
+	$(MOC) suspendmonitor.h -o $(MOC_DIR)/moc_suspendmonitor.cpp
 
 $(MOC_DIR)/moc_appicons.cpp: appicons.h
 	$(MOC) appicons.h -o $(MOC_DIR)/moc_appicons.cpp
@@ -814,14 +902,23 @@ $(MOC_DIR)/moc_firstuse.cpp: firstuse.h
 $(MOC_DIR)/moc_syncdialog.cpp: syncdialog.h
 	$(MOC) syncdialog.h -o $(MOC_DIR)/moc_syncdialog.cpp
 
-$(MOC_DIR)/desktop.moc: desktop.cpp
-	$(MOC) desktop.cpp -o $(MOC_DIR)/desktop.moc
+$(MOC_DIR)/moc_serverapp.cpp: serverapp.h
+	$(MOC) serverapp.h -o $(MOC_DIR)/moc_serverapp.cpp
+
+$(MOC_DIR)/serverinterface.moc: serverinterface.cpp
+	$(MOC) serverinterface.cpp -o $(MOC_DIR)/serverinterface.moc
+
+$(MOC_DIR)/documentlist.moc: documentlist.cpp
+	$(MOC) documentlist.cpp -o $(MOC_DIR)/documentlist.moc
 
 $(MOC_DIR)/appicons.moc: appicons.cpp
 	$(MOC) appicons.cpp -o $(MOC_DIR)/appicons.moc
 
 $(MOC_DIR)/taskbar.moc: taskbar.cpp
 	$(MOC) taskbar.cpp -o $(MOC_DIR)/taskbar.moc
+
+$(MOC_DIR)/serverapp.moc: serverapp.cpp
+	$(MOC) serverapp.cpp -o $(MOC_DIR)/serverapp.moc
 
 $(MOC_DIR)/moc_shutdown.cpp: shutdown.h
 	$(MOC) shutdown.h -o $(MOC_DIR)/moc_shutdown.cpp

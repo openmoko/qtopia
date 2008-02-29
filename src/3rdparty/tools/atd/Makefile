@@ -3,7 +3,7 @@
 # Build options from 
 #############################################################################
 
-default: all # package
+default: all  # package
 
 CONTROL = 3rdparty/tools/atd/atd.control
 
@@ -116,9 +116,9 @@ OBJECTS_DIR = .obj/linux-generic-g++/
 ####### Compiler, tools and options
 
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
-CXXFLAGS=	$(SYSCONF_CXXFLAGS)
+CXXFLAGS=	$(SYSCONF_CXXFLAGS) -DQTOPIA_APP_INTERFACE
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
+CFLAGS	=	$(SYSCONF_CFLAGS) -DQTOPIA_APP_INTERFACE
 INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
@@ -137,7 +137,7 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 ####### Files
 
 HEADERS =	
-SOURCES =	atd.c
+SOURCES =	atd.cpp
 OBJECTS =	$(OBJECTS_DIR)/atd.o
 INTERFACES =    
 UICDECLS =      
@@ -209,8 +209,9 @@ REQUIRES=
 
 ####### Compile
 
-$(OBJECTS_DIR)/atd.o: atd.c
-	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/atd.o atd.c
+$(OBJECTS_DIR)/atd.o: atd.cpp \
+		atd.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/atd.o atd.cpp
 
 
 
@@ -225,7 +226,7 @@ lrelease:
 
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
-	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done
+	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic  $(QPEDIR)/src/$$ctrl ; done
 
 package: ipkg
 	cd $(QPEDIR)/ipkg; 	../bin/mkPackages

@@ -35,7 +35,6 @@ class QCString;
 class QProcess;
 class QMessageBox;
 class TempScreenSaverMonitor;
-class AppLauncher;
 
 class RunningAppBar : public QFrame
 {
@@ -45,84 +44,29 @@ public:
     RunningAppBar(QWidget* parent);
     ~RunningAppBar();
 
+    QSize sizeHint() const;
+
+protected:
     void addTask(const AppLnk& appLnk);
     void removeTask(const AppLnk& appLnk);
     void paintEvent(QPaintEvent* event);
     void mousePressEvent(QMouseEvent*);
     void mouseReleaseEvent(QMouseEvent*);
-    QSize sizeHint() const;
-    void reloadApps();
 
-signals:
-    void forceSuspend();
+public slots:
+    void applicationLaunched(const QString &);
+    void applicationTerminated(const QString &);
 
 private slots:
     void received(const QCString& msg, const QByteArray& data);
-    void applicationLaunched(int, const QString &);
-    void applicationTerminated(int, const QString &);
-    void applicationConnected(const QString &);
 
 private:
-    AppLnkSet* m_AppLnkSet;
-    QList<AppLnk> m_AppList;
-    int m_SelectedAppIndex;
+    const AppLnkSet *appLnkSet;
+    QList<AppLnk> appList;
+    int selectedAppIndex;
     int spacing;
-    TempScreenSaverMonitor *tsmMonitor;
-    AppLauncher *appLauncher;    
 };
 
-/**
- * Internal class that checks back in on the process when timerExpired is called
- * to make sure the process is on top.  If it's not it displays a dialog
- * box asking permission to kill it.
- */
-class AppMonitor : public QObject {
-  Q_OBJECT
-
- public:
-  static const int RAISE_TIMEOUT_MS;
-
-  AppMonitor(const AppLnk& app, RunningAppBar& owner);
-  ~AppMonitor();
-  
-  private slots:
-    void timerExpired();
-    void received(const QCString& msg, const QByteArray& data);
-    void psProcFinished();
-
- private:
-  RunningAppBar& m_Owner;
-  AppLnk m_App;
-  QTimer m_Timer;
-  QProcess* m_PsProc;
-  QMessageBox* m_AppKillerBox;
-};
-
-class TempScreenSaverMonitor : public QObject
-{
-    Q_OBJECT
-public:
-    TempScreenSaverMonitor(QObject *parent = 0, const char *name = 0);
-
-    void setTempMode(int,int);
-    void applicationTerminated(int);
-
-signals:
-    void forceSuspend();
-
-protected:
-    void timerEvent(QTimerEvent *);
-
-private:
-    bool removeOld(int);
-    void updateAll();
-    int timerValue();
-
-private:
-    QValueList<int> sStatus[3];
-    int currentMode;
-    int timerId;
-};
 
 #endif
 

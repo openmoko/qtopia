@@ -31,7 +31,7 @@ Describes the disks mounted on the file system. | StorageInfo
 Displays a list of available storage locations. | LocationCombo
 Dummy class. | FreeType
 Dummy class. GSM is a codec optimised for recording human speech, and is used by the MediaRecorder. | GSM
-Dummy class. The atd program is based on Russ Nelson's lightweight At daemon. The At daemon will run a program at a specified time. It is distributed under the terms of the GNU General Public License. | atd
+Dummy class. The atd program is based on Russ Nelson's lightweight At daemon. It is distributed under the terms of the GNU General Public License. The atd program is based on Russ Nelson's lightweight At daemon. The At daemon will run a program at a specified time. It is distributed under the terms of the GNU General Public License. | atd
 Dummy class. The avformat and avcodec code was extracted from the FFMPEG project. FFMPEG is a large project that allows recording, conversion and streaming of audio and video data. avformat and avcodec are used by the MediaPlayer.The author and primary copyright holder is Fabrice Bellard &lt;fabrice.bellard at free.fr&gt;. The FFMPEG project is distributed under the GNU Lesser General Public License. More information can be found at http://ffmpeg.sourceforge.net. | FFMpeg
 Encapsulates and sends QCop messages over QCopChannels. | QCopEnvelope
 Extended interface for Qtopia input methods. | ExtInputMethodInterface
@@ -48,6 +48,7 @@ Implements the default Qtopia widget style. | QPEStyle
 Implements various system services that are available to all Qtopia applications. | QPEApplication
 Information about available fonts. | FontDatabase
 Input method based on a virtual keyboard combined with word-completion. | Pickboard
+Interface for Qtopia custom launchers. | ServerInterface
 Interface for Qtopia input methods. | InputMethodInterface
 Interface for Qtopia taskbar applet plugins. | TaskbarAppletInterface
 Interface for Qtopia widget styles. | StyleInterface

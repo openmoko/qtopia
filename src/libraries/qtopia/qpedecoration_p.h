@@ -66,12 +66,14 @@ protected:
 private:
     void windowData( const QWidget *w, WindowDecorationInterface::WindowData &wd ) const;
 
+    bool helpExists() const;
+
 protected:
     QImage imageOk;
     QImage imageClose;
     QImage imageHelp;
     QString helpFile;
-    bool helpExists;
+    bool helpexists;
     QPEManager *qpeManager;
 };
 

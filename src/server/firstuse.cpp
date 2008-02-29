@@ -28,11 +28,12 @@
 #include "firstuse.h"
 #include "inputmethods.h"
 #include "applauncher.h"
-#include "desktop.h"
+#include "serverapp.h"
 #include <qtopia/custom.h>
 #if defined(QPE_NEED_CALIBRATION)
 #include "../settings/calibrate/calibrate.h"
 #endif
+#include "documentlist.h"
 
 #include <qtopia/resource.h>
 #include <qtopia/qcopenvelope_qws.h>
@@ -93,7 +94,7 @@ FirstUse::FirstUse(QWidget* parent, const char * name, WFlags wf) :
     transApp(0), transLib(0), needCalibrate(FALSE), currApp(-1),
     waitForExit(-1), waitingForLaunch(FALSE), needRestart(FALSE)
 {
-    DesktopApplication::allowRestart = FALSE;
+    ServerApplication::allowRestart = FALSE;
     // we force our height beyound the maximum (which we set anyway)
     QRect desk = qApp->desktop()->geometry();
     setGeometry( 0, 0, desk.width(), desk.height() );
@@ -101,12 +102,13 @@ FirstUse::FirstUse(QWidget* parent, const char * name, WFlags wf) :
     connect(qwsServer, SIGNAL(newChannel(const QString&)),
 	this, SLOT(newQcopChannel(const QString&)));
 
-    appLnkSet = new AppLnkSet( MimeType::appsFolderName() );
-    appLauncher = new AppLauncher( appLnkSet, this );
+    // Create a DocumentList so appLauncher has appLnkSet to search
+    docList = new DocumentList( 0, FALSE );
+    appLauncher = new AppLauncher( this );
     connect( appLauncher, SIGNAL(terminated(int, const QString&)),
 	    this, SLOT(terminated(int, const QString&)) );
 
-    // more hackery 
+    // more hackery
     // I will be run as either the main server or as part of the main server
     QWSServer::setScreenSaverIntervals(0);
     loadPixmaps();
@@ -142,7 +144,7 @@ FirstUse::FirstUse(QWidget* parent, const char * name, WFlags wf) :
     next->setFocusPolicy(NoFocus);
     connect(next, SIGNAL(clicked()), this, SLOT(nextDialog()) );
 
-    // need to set the geom to lower corner 
+    // need to set the geom to lower corner
     QSize sz = inputMethods->sizeHint();
     int buttonWidth = (width() - sz.width()) / 2;
     int x = 0;
@@ -190,9 +192,9 @@ FirstUse::FirstUse(QWidget* parent, const char * name, WFlags wf) :
 FirstUse::~FirstUse()
 {
     delete appLauncher;
-    delete appLnkSet;
+    delete docList;
     delete taskBar;
-    DesktopApplication::allowRestart = TRUE;
+    ServerApplication::allowRestart = TRUE;
 }
 
 void FirstUse::calcMaxWindowRect()
@@ -204,7 +206,7 @@ void FirstUse::calcMaxWindowRect()
     if ( ir.isValid() ) {
 	wr.setCoords( 0, 0, displayWidth-1, ir.top()-1 );
     } else {
-	wr.setCoords( 0, 0, displayWidth-1, 
+	wr.setCoords( 0, 0, displayWidth-1,
 		qApp->desktop()->height() - controlHeight-1);
     }
 
@@ -219,47 +221,49 @@ void FirstUse::calcMaxWindowRect()
 }
 
 /* cancel current dialog, and bring up next */
-void FirstUse::nextDialog() 
+void FirstUse::nextDialog()
 {
     int prevApp = currApp;
     do {
 	currApp++;
 	qDebug( "currApp = %d", currApp );
 	if ( settingsTable[currApp].app == 0 ) {
-	    qDebug( "Done!" );
-	    Config config( "qpe" );
-	    config.setGroup( "Startup" );
-	    config.writeEntry( "FirstUse", FALSE );
-	    if ( prevApp >= 0 ) {
+	    if ( prevApp >= 0 && appLauncher->isRunning(settingsTable[prevApp].app) ) {
+		// The last application is still running.
+		// Tell it to stop, and when its done we'll come back 
+		// to nextDialog and exit.
+		qDebug( "Waiting for %s to exit", settingsTable[prevApp].app );
 		QCopEnvelope e(QCString("QPE/Application/") + settingsTable[prevApp].app,
 			settingsTable[prevApp].stop );
+		currApp = prevApp;
+	    } else {
+		qDebug( "Done!" );
+		Config config( "qpe" );
+		config.setGroup( "Startup" );
+		config.writeEntry( "FirstUse", FALSE );
+		QPixmap pix = Resource::loadPixmap("bigwait");
+		QLabel *lblWait = new QLabel(0, "wait hack!", // No tr
+			QWidget::WStyle_Customize | QWidget::WDestructiveClose |
+			QWidget::WStyle_NoBorder | QWidget::WStyle_Tool |
+			QWidget::WStyle_StaysOnTop);
+		lblWait->setPixmap( pix );
+		lblWait->setAlignment( QWidget::AlignCenter );
+		lblWait->setGeometry( qApp->desktop()->geometry() );
+		lblWait->show();
+		qApp->processEvents();
+		QTimer::singleShot( 1000, lblWait, SLOT(close()) );
+		repaint();
+		close();
+		ServerApplication::allowRestart = TRUE;
 	    }
-	    QPixmap pix = Resource::loadPixmap("bigwait");
-	    QLabel *lblWait = new QLabel(0, "wait hack!", // No tr
-		    QWidget::WStyle_Customize | QWidget::WDestructiveClose |
-		    QWidget::WStyle_NoBorder | QWidget::WStyle_Tool |
-		    QWidget::WStyle_StaysOnTop);
-	    lblWait->setPixmap( pix );
-	    lblWait->setAlignment( QWidget::AlignCenter );
-	    lblWait->setGeometry( qApp->desktop()->geometry() );
-	    lblWait->show();
-	    qApp->processEvents();
-	    QTimer::singleShot( 1000, lblWait, SLOT(close()) );
-	    repaint();
-	    close();
-	    DesktopApplication::allowRestart = TRUE;
 	    return;
 	}
     } while ( !settingsTable[currApp].enabled );
 
-    if ( prevApp >= 0 ) {
+    if ( prevApp >= 0 && appLauncher->isRunning(settingsTable[prevApp].app) ) {
 	qDebug( "Shutdown: %s", settingsTable[prevApp].app );
 	QCopEnvelope e(QCString("QPE/Application/") + settingsTable[prevApp].app,
 			settingsTable[prevApp].stop );
-/*
-	if (settingsTable[prevApp].app == QString("systemtime"))
-	    QCopEnvelope ce("QPE/Application/citytime", "close()");
-*/
 	waitForExit = prevApp;
     } else {
 	qDebug( "Startup: %s", settingsTable[currApp].app );
@@ -272,7 +276,7 @@ void FirstUse::nextDialog()
 }
 
 /* accept current dialog and bring up previous */
-void FirstUse::previousDialog() 
+void FirstUse::previousDialog()
 {
     int prevApp = currApp;
     do {
@@ -310,7 +314,7 @@ void FirstUse::message(const QCString &msg, const QByteArray &data)
 	stream >> t;
 	if ( t.isNull() )
 	    unsetenv("TZ");
-	else 
+	else
 	    setenv( "TZ", t.latin1(), 1 );
     }
 }
@@ -335,6 +339,7 @@ void FirstUse::terminated( int, const QString &app )
 	waitingForLaunch = TRUE;
 	updateButtons();
 	repaint();
+	waitForExit = -1;
     } else if ( settingsTable[currApp].app == app ) {
 	nextDialog();
     } else {
@@ -354,7 +359,7 @@ void FirstUse::newQcopChannel(const QString& channelName)
 	    waitingForLaunch = FALSE;
 	    updateButtons();
 	    repaint();
-	} else {
+	} else if (appName != "quicklauncher") {
 	    back->setEnabled(FALSE);
 	    next->setEnabled(FALSE);
 	}
@@ -384,9 +389,9 @@ void FirstUse::reloadLanguages()
         qApp->translators->setAutoDelete(TRUE);
         delete (qApp->translators);
         qApp->translators = 0;
-    }  
+    }
 #endif
- 
+
     // load translation tables
     transApp = new QTranslator(qApp);
     QString tfn = QPEApplication::qpeDir() + "i18n/"+l+"/qpe.qm";
@@ -444,7 +449,7 @@ void FirstUse::paintEvent( QPaintEvent * )
     }
 }
 
-void FirstUse::loadPixmaps() 
+void FirstUse::loadPixmaps()
 {
     /* create background, tr so can change image with language.
        images will likely contain text. */
@@ -462,7 +467,7 @@ void FirstUse::drawText(QPainter &p, const QString &text)
     rt.setWidth(width() - 20);
 
     int h = (height() * 3) / 10; // start at 30%
-    if (rt.height() < height() / 2) 
+    if (rt.height() < height() / 2)
 	h += ((height() / 2) - rt.height()) / 2;
     rt.draw(&p, 10, h, QRegion(0,0, width()-20, height()), palette());
 }

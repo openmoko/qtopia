@@ -511,7 +511,7 @@
                 </property>
                 <attribute>
                     <name>title</name>
-                    <string>Alarms</string>
+                    <string>Alarm</string>
                 </attribute>
                 <vbox>
                     <property stdset="1">

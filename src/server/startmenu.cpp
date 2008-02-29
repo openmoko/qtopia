@@ -21,8 +21,6 @@
 #define INCLUDE_MENUITEM_DEF
 
 #include "startmenu.h"
-#include "sidething.h"
-#include "mrulist.h"
 
 #include <qtopia/qpeapplication.h>
 #include <qtopia/config.h>
@@ -33,26 +31,36 @@
 
 #include <qdict.h>
 #include <qdir.h>
+#include <qpainter.h>
 
 #include <stdlib.h>
 
 
-// #define USE_CONFIG_FILE
+void StartPopupMenu::keyPressEvent( QKeyEvent *e )
+{
+    if ( e->key() == Key_F33 || e->key() == Key_Space ) {
+	// "OK" button, little hacky
+	QKeyEvent ke(QEvent::KeyPress, Key_Enter, 13, 0);
+	QPopupMenu::keyPressEvent( &ke );
+    } else {
+	QPopupMenu::keyPressEvent( e );
+    }
+}
 
+//---------------------------------------------------------------------------
 
 StartMenu::StartMenu(QWidget *parent) : QLabel( parent )
 {
-    loadOptions();
+    startButtonPixmap = "go"; // No tr
 
     int sz = AppLnk::smallIconSize()+3;
     QPixmap pm;
     pm.convertFromImage(Resource::loadImage(startButtonPixmap).smoothScale(sz,sz));
     setPixmap(pm);
     setFocusPolicy( NoFocus );
-    //setFlat( startButtonIsFlat );
 
     launchMenu = 0;
-    reloadApps();
+    refreshMenu();
 }
 
 
@@ -66,41 +74,14 @@ StartMenu::~StartMenu()
 {
 }
 
-
-void StartMenu::loadOptions()
-{
-#ifdef USE_CONFIG_FILE
-    // Read configuration file
-    Config config("StartMenu");
-    config.setGroup( "StartMenu" );
-    QString tmpBoolString1 = config.readEntry( "UseWidePopupMenu", "FALSE" );
-    useWidePopupMenu  = ( tmpBoolString1 == "TRUE" ) ? TRUE : FALSE;
-    QString tmpBoolString2 = config.readEntry( "StartButtonIsFlat", "TRUE" );
-    startButtonIsFlat = ( tmpBoolString2 == "TRUE" ) ? TRUE : FALSE;
-    QString tmpBoolString3 = config.readEntry( "UseMRUList", "TRUE" );
-    popupMenuSidePixmap = config.readEntry( "PopupMenuSidePixmap", "sidebar" );
-    startButtonPixmap = config.readEntry( "StartButtonPixmap", "go" );
-#else
-    // Basically just #include the .qpe_menu.conf file settings
-    useWidePopupMenu = FALSE;
-    popupMenuSidePixmap = "sidebar";
-    startButtonIsFlat = TRUE;
-    startButtonPixmap = "go"; // No tr
-#endif
-}
-
-
 void StartMenu::createMenu()
 {
     delete launchMenu;
-//    if ( useWidePopupMenu )
-//	launchMenu = new PopupWithLaunchSideThing( this, &popupMenuSidePixmap );
- //   else
-        launchMenu = new StartPopupMenu( this );
+    launchMenu = new StartPopupMenu( this );
     loadMenu( launchMenu );
 }
 
-void StartMenu::reloadApps()
+void StartMenu::refreshMenu()
 {
     Config cfg("Taskbar");
     cfg.setGroup("Menu");
@@ -212,13 +193,3 @@ void StartMenu::launch()
         launchMenu->popup( QPoint( 1, y ) );
 }
 
-void StartPopupMenu::keyPressEvent( QKeyEvent *e )
-{
-    if ( e->key() == Key_F33 || e->key() == Key_Space ) {
-	// "OK" button, little hacky
-	QKeyEvent ke(QEvent::KeyPress, Key_Enter, 13, 0);
-	QPopupMenu::keyPressEvent( &ke );
-    } else {
-	QPopupMenu::keyPressEvent( e );
-    }
-}

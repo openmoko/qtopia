@@ -249,7 +249,6 @@ void WordGame::readConfig()
 void WordGame::openGameSelector(const QStringList& /* initnames */)
 {
     toolbar->hide();
-    gameover = FALSE;
 
     delete board;
     board = 0;
@@ -273,6 +272,7 @@ void WordGame::openGameSelector(const QStringList& /* initnames */)
 
 void WordGame::startGame()
 {
+    gameover = FALSE;
     rules = newgame->ruleslist[newgame->rules->currentItem()];
     if ( loadRules(rules) ) {
 	QStringList names;
@@ -1065,6 +1065,7 @@ retry:
 		break;
 	    case 1:
 		break;
+	    case -1:	// falthrough
 	    case 2:
 		unshowTurn();
 		canvas()->update();

@@ -73,6 +73,7 @@ protected slots:
     virtual void resizeEvent(QResizeEvent *);
 
     void appMessage(const QCString &, const QByteArray &);
+    void sysMessage(const QCString &, const QByteArray &);
     
     void taskSelected(const QString &id);
     void optionButtonClicked();

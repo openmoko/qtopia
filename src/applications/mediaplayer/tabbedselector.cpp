@@ -74,7 +74,7 @@ public:
 
 class TabbedSelectorPrivate {
 public:
-    DocumentList *list;
+    AppDocumentList *list;
     TabItemData audioTab; 
     TabItemData videoTab; 
     TabItemData plistTab; 
@@ -90,7 +90,7 @@ TabbedSelector::TabbedSelector( QWidget *parent, const char *name )
     d->videoTab.create( this );
     d->plistTab.create( this, FALSE );
 
-    d->list = new DocumentList( "video/*;audio/*", this, "list" ); // No tr
+    d->list = new AppDocumentList( "video/*;audio/*", this, "list" ); // No tr
 
     connect( d->list, SIGNAL( added( const DocLnk & ) ), this, SLOT( addLink( const DocLnk & ) ) );
     connect( d->list, SIGNAL( allRemoved() ), this, SLOT( removeAll() ) );

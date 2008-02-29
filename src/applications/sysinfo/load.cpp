@@ -168,6 +168,7 @@ void Load::timeout()
     FILE *fp;
     fp = fopen( "/proc/stat", "r" );
     fscanf( fp, "cpu %d %d %d %d", &user, &usernice, &sys, &idle );
+    user += usernice;
     fclose( fp );
     struct timeval now;
     gettimeofday( &now, 0 );

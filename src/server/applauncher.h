@@ -29,18 +29,18 @@
 #include <qlist.h>
 #endif
 
-class AppLnkSet;
+class QMessageBox;
 
 class AppLauncher : public QObject
 {
     Q_OBJECT
 public:
-    AppLauncher(const AppLnkSet *, QObject *parent = 0, const char *name = 0);
+    AppLauncher(QObject *parent = 0, const char *name = 0);
     ~AppLauncher();
 
-    void setAppLnkSet(const AppLnkSet*);
-
     bool isRunning(const QString &app);
+
+    static const int RAISE_TIMEOUT_MS;
 
 signals:
     void launched(int pid, const QString &app);
@@ -51,22 +51,31 @@ protected slots:
     void sigStopped(int sigPid, int sigStatus);
     void received(const QCString& msg, const QByteArray& data);
     void newQcopChannel(const QString& channel);
+    void removedQcopChannel(const QString& channel);
+    void createQuickLauncher();
     void processExited();
 
 protected:
     bool event(QEvent *);
+    void timerEvent( QTimerEvent * );
 
 private:
     static void signalHandler(int sig);
     bool executeBuiltin(const QString &c, const QString &document);
-    void execute(const QString &c, const QString &document, bool noRaise = FALSE);
+    bool execute(const QString &c, const QString &document, bool noRaise = FALSE);
+    void kill( int pid );
+    int pidForName( const QString & );
     
 private:    
     QMap<int,QString> runningApps;
+    QMap<QString,int> waitingHeartbeat;
 #ifdef Q_OS_WIN32
     QList<QProcess> runningAppsProc; 
 #endif
-    const AppLnkSet *appLnkSet;
+    int qlPid;
+    bool qlReady;
+    QMessageBox *appKillerBox;
+    QString appKillerName;
 };
 
 #endif

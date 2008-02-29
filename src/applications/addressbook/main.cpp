@@ -19,27 +19,8 @@
 **********************************************************************/
 
 #include "addressbook.h"
-
 #include <qtopia/qpeapplication.h>
-#ifdef QWS
-#include <qtopia/qcopenvelope_qws.h>
-#endif
-#include <qstring.h>
 
-int main( int argc, char ** argv )
-{
-    QPEApplication a( argc, argv );
+QTOPIA_ADD_APPLICATION("addressbook",AddressbookWindow)
+QTOPIA_MAIN
 
-    AddressbookWindow mw;
-    QObject::connect( &a, SIGNAL( appMessage(const QCString &, const QByteArray &) ), 
-	    &mw, SLOT( appMessage(const QCString &, const QByteArray &) ) );
-    QObject::connect( &a, SIGNAL( reload() ), 
-	    &mw, SLOT( reload() ) );
-    QObject::connect( &a, SIGNAL( flush() ), 
-	    &mw, SLOT( flush() ) );
-
-    mw.setCaption( AddressbookWindow::tr("Contacts") );
-    a.showMainDocumentWidget(&mw);
-
-    return a.exec();
-}

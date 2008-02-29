@@ -36,6 +36,7 @@ class QPopupMenu;
 class QWidgetStack;
 class FileSelector;
 class DocLnk;
+class StorageInfo;
 class QTimer;
 class QAction;
 
@@ -117,7 +118,7 @@ private:
     void updateStatus();
     void openFile( const QString &name, const QString &file );
     int  imageIndex(void);
-    void setControls(bool force = FALSE, bool valid = TRUE);
+    void setControls();
 
 signals:
     void keypress(int keycode);
@@ -144,8 +145,7 @@ private slots:
     void handleKeypress(int keycode);
     void docsChanged(void);
     void properties(void);
-    void linkChanged(const QString&);
-    void cardMessage(const QCString &msg, const QByteArray &);
+    void updateDocs();
 
 private:
     QImage  image;	    // the loaded image
@@ -165,6 +165,7 @@ private:
     QMenuBar *menubar;
     QToolBar *toolBar;
     DocLnk  *doc;	    // for accessing properties
+    StorageInfo *storage;
     
     QWidgetStack *stack;
     ImagePane *imagePanel;

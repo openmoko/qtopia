@@ -39,6 +39,7 @@
 #include <qdict.h>
 #include <qdir.h>
 #include <qregexp.h>
+#include <qpixmapcache.h>
 
 #ifdef Q_WS_QWS
 #include <qgfx_qws.h>
@@ -210,6 +211,52 @@ public:
 	    }
 	    mCat[i] = id;
 	}
+    }
+
+    static void setPixmaps( AppLnk *lnk, bool load_small = TRUE)
+    {
+	if ( !lnk )
+	    return;
+
+	QPixmap *pm    = load_small ? &lnk->mPixmap : &lnk->mBigPixmap;
+	QString	suffix = load_small ? "_small" : "_big";
+	int	size   = load_small ? smallSize : bigSize;
+
+	if ( lnk->mIconFile.isEmpty() ) {
+	    // Documents may have no icon.
+	    if (QPixmapCache::find(lnk->type() + suffix, *pm)) 
+		return;
+
+	    // Use the icon associated with the mime-type.
+	    MimeType mt( lnk->type() );
+	    *pm = (load_small) ? mt.pixmap() : mt.bigPixmap();
+
+	    if ( !pm->isNull() ) {
+		QPixmapCache::insert(lnk->type() + suffix, *pm);
+		return;
+	    }
+	} else {
+	    // Applications have icons associated with them.
+	    if ( QPixmapCache::find(lnk->mIconFile + suffix, *pm) ) 
+		return;
+
+	    // Load up the application's icon.
+	    QImage unscaledIcon = Resource::loadImage( lnk->mIconFile );
+	    if ( !unscaledIcon.isNull() ) {
+		pm->convertFromImage( unscaledIcon.smoothScale( size, size ) );
+		QPixmapCache::insert(lnk->mIconFile + suffix, *pm);
+		return;
+	    }
+	}
+
+	// Fall through when we didn't find an icon
+	QString name = "UnknownDocument" + suffix;
+	if (QPixmapCache::find(name, *pm))
+	    return;
+
+	// Create unknown document icons as required
+	pm->convertFromImage(Resource::loadImage("UnknownDocument").smoothScale(size,size));
+	QPixmapCache::insert(name, *pm);
     }
 };
 ReloadingCategories* AppLnkPrivate::sCat=0;
@@ -502,26 +549,7 @@ const QPixmap& AppLnk::pixmap() const
 {
     if ( mPixmap.isNull() ) {
 	AppLnk* that = (AppLnk*)this;
-	if ( mIconFile.isEmpty() ) {
-	    MimeType mt(type());
-	    that->mPixmap = mt.pixmap();
-	    if ( that->mPixmap.isNull() )
-		that->mPixmap.convertFromImage(
-		    Resource::loadImage("UnknownDocument")
-			.smoothScale( smallSize, smallSize ) );
-	    return that->mPixmap;
-	}
-	QImage unscaledIcon = Resource::loadImage( that->mIconFile );
-	if ( unscaledIcon.isNull() ) {
-	    qDebug( "Cannot find icon: %s", that->mIconFile.latin1() );
-	    that->mPixmap.convertFromImage(
-		    Resource::loadImage("UnknownDocument")
-			.smoothScale( smallSize, smallSize ) );
-	} else {
-	    that->mPixmap.convertFromImage( unscaledIcon.smoothScale( smallSize, smallSize ) );
-	    that->mBigPixmap.convertFromImage( unscaledIcon.smoothScale( bigSize, bigSize ) );
-	}
-	return that->mPixmap;
+	AppLnkPrivate::setPixmaps( that, TRUE );
     }
     return mPixmap;
 }
@@ -535,26 +563,7 @@ const QPixmap& AppLnk::bigPixmap() const
 {
     if ( mBigPixmap.isNull() ) {
 	AppLnk* that = (AppLnk*)this;
-	if ( mIconFile.isEmpty() ) {
-	    MimeType mt(type());
-	    that->mBigPixmap = mt.bigPixmap();
-	    if ( that->mBigPixmap.isNull() )
-		that->mBigPixmap.convertFromImage(
-		    Resource::loadImage("UnknownDocument")
-			.smoothScale( bigSize, bigSize ) );
-	    return that->mBigPixmap;
-	}
-	QImage unscaledIcon = Resource::loadImage( that->mIconFile );
-	if ( unscaledIcon.isNull() ) {
-	    qDebug( "Cannot find icon: %s", that->mIconFile.latin1() );
-	    that->mBigPixmap.convertFromImage(
-		    Resource::loadImage("UnknownDocument")
-			.smoothScale( bigSize, bigSize ) );
-	} else {
-	    that->mPixmap.convertFromImage( unscaledIcon.smoothScale( smallSize, smallSize ) );
-	    that->mBigPixmap.convertFromImage( unscaledIcon.smoothScale( bigSize, bigSize ) );
-	}
-	return that->mBigPixmap;
+	AppLnkPrivate::setPixmaps( that, FALSE );
     }
     return mBigPixmap;
 }
@@ -832,9 +841,8 @@ void AppLnk::setType( const QString& type )
 void AppLnk::setIcon( const QString& iconname )
 {
     mIconFile = iconname;
-    QImage unscaledIcon = Resource::loadImage( mIconFile );
-    mPixmap.convertFromImage( unscaledIcon.smoothScale( smallSize, smallSize ) );
-    mBigPixmap.convertFromImage( unscaledIcon.smoothScale( bigSize, bigSize ) );
+    AppLnkPrivate::setPixmaps( this, TRUE );
+    AppLnkPrivate::setPixmaps( this, FALSE );
 }
 
 /*!

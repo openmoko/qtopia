@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1.6/tmp10050/qtopia/doc/mainwidget.doc:1 -->
+<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/doc/mainwidget.doc:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -23,23 +23,30 @@ body { background: #ffffff; color: black; }
 <p> 
 <p> <h2> Qtopia - The main() function
 </h2>
-<a name="1"></a><p> The <tt>main()</tt> function of all applications should be modelled on
-this example:
+<a name="1"></a><p> Starting with Qtopia 1.7, it is no longer recommended that the main()
+function be written explicitly by the programmer.  Instead two macros
+are provided to declare the application entry point:
 <p> <pre>
-int main( int argc, char **argv )
-{
-    <a href="qpeapplication.html">QPEApplication</a> a( argc, argv );
-    
-    Main m;
-    a.<a href="qpeapplication.html#showMainWidget">showMainWidget</a>(&amp;m);
-
-    return a.exec();
-}
+QTOPIA_ADD_APPLICATION(NAME,IMPLEMENTATION)
+QTOPIA_MAIN
 </pre>
  
-<p> If the application is <a href="docwidget.html">document-oriented</a>,
-the call to <a href="qpeapplication.html#showMainWidget">QPEApplication::showMainWidget</a>() should be replaced by
-a call to <a href="qpeapplication.html#showMainDocumentWidget">QPEApplication::showMainDocumentWidget</a>().
+<p> QTOPIA_ADD_APPLICATION() generates code to instantiate the main window,
+where NAME is the application executable name and IMPLEMENTATION is the
+application window class.
+<p> QTOPIA_MAIN is either the main() implementation or the interface code
+necessary to make the application a  quicklauncher plugin (if
+QTOPIA_APP_INTERFACE is defined - see below).
+<p> The main.cpp of all applications should be modeled on
+this example:
+<p> <pre>
+#include "mymainwindow.h"
+#include &lt;qtopia/qpeapplication.h&gt;
+
+QTOPIA_ADD_APPLICATION("myapp", MyMainWindow)
+QTOPIA_MAIN
+</pre>
+ 
 <p> The application window should be implemented in a self-contained way:
 it should not perform application-level operations such as testing
 parameters, calling exit(), or calling quit(); all of these are
@@ -51,11 +58,37 @@ your application window in a way that it could be used easily from
 other applications. If you take this approach it will also mean that
 most of your program can be trivially reused on <a href="qt.html">Qt</a>/X11, Qt/Windows,
 Qt/Mac, and any other ports of the Qt API.
+<p> <h3> Enabling Quicklaunching
+</h3>
+<a name="1-1"></a><p> Starting with Qtopia 1.7, applications can be built as plugins that
+can be loaded by the  quicklaucher.
+The quicklauncher is a stub application that is
+pre-loaded and can load an application plugin and change personality to
+the plugin application.  The benefit of loading Qtopia applications in this
+way is that much of the functionality that the application needs is pre-loaded
+and pre-initialised, so the application loading time is significantly
+reduced.  Quicklauncher-enabled applications can be run on older Qtopia
+platforms by first installing the quicklauncher package.
+<p> In order to build an application as a quicklauncher application plugin,
+main.cpp must be implemented as above.  Then modify the
+tmake project file to build the application as a library and compile
+with the plugin interface code enabled by defining QTOPIA_APP_INTERFACE),
+for example:
+<p> <pre>
+TEMPLATE = lib
+CONFIG  += qtopia
+DEFINES += QTOPIA_APP_INTERFACE
+HEADERS  = mymainwindow.h
+SOURCES  = mymainwindow.cpp main.cpp
+TARGET   = myapp
+</pre>
+ 
+<p> Application plugins must be installed in QPEDIR/plugins/application/.
 <p> 
 <!-- eof -->
 <p><address><hr><div align=center>
 <table width=100% cellspacing=0 border=0><tr>
 <td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.6.2</div>
+<td align=right><div align=right>Qtopia version 1.7.0</div>
 </table></div></address></body>
 </html>

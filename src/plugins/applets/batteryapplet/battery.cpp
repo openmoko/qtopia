@@ -62,17 +62,8 @@ void BatteryMeter::mousePressEvent( QMouseEvent *)
 	delete (QWidget *) batteryView;
 	// batteryView becomes 0 because it's a QGuardedPtr
     } else {
-	if ( qApp->desktop()->height() >= 300 ) {
-	    // Plenty of room
-	    if ( !batteryView ) {
-		batteryView = new BatteryStatus( ps, TRUE, 0, WStyle_StaysOnTop | WType_Popup | WDestructiveClose );
-		batteryView->setFrameStyle( QFrame::PopupPanel | QFrame::Raised );
-	    }
-	} else {
-	    if ( !batteryView )
-		batteryView = new BatteryStatus( ps, FALSE, 0, WDestructiveClose );
-	    batteryView->showMaximized();
-	}
+	batteryView = new BatteryStatus( ps, TRUE, 0, WStyle_StaysOnTop | WType_Popup | WDestructiveClose );
+	batteryView->setFrameStyle( QFrame::PopupPanel | QFrame::Raised );
 	bvsz = QSize();
 	updateBatteryViewGeometry();
 	batteryView->raise();
@@ -86,11 +77,9 @@ bool BatteryMeter::updateBatteryViewGeometry()
     if ( sz != bvsz ) {
 	bvsz = sz;
 	QRect r(batteryView->pos(),batteryView->sizeHint());
-	if ( qApp->desktop()->height() >= 300 ) {
-	    QPoint curPos = mapToGlobal( rect().topLeft() );
-	    int lp = qApp->desktop()->width() - batteryView->sizeHint().width();
-	    r.moveTopLeft( QPoint(lp, curPos.y()-batteryView->sizeHint().height()-1) );
-	}
+	QPoint curPos = mapToGlobal( rect().topLeft() );
+	int lp = qApp->desktop()->width() - batteryView->sizeHint().width();
+	r.moveTopLeft( QPoint(lp, curPos.y()-batteryView->sizeHint().height()-1) );
 	batteryView->setGeometry(r);
 	return TRUE;
     }

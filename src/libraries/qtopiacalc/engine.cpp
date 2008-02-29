@@ -805,6 +805,9 @@ void Engine::setError(Error e){
 		    "Not a number");
 	    break;
 	case eNegInf: // For the translations sake
+	    s = qApp->translate("Engine",
+		    "Negative infinity");
+	    break;
 	case eInf:
 	    s = qApp->translate("Engine",
 		    "Infinity");

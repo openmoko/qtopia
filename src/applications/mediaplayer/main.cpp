@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2003 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 **
@@ -20,15 +20,6 @@
 #include <qtopia/qpeapplication.h>
 #include "maindocumentwidgetstack.h"
 
-
-int main(int argc, char **argv)
-{
-    QPEApplication a(argc,argv);
-
-    MainDocumentWidgetStack tlw( 0, "Widget Stack" );
-    a.showMainDocumentWidget(&tlw);
-
-    return a.exec();
-}
-
+QTOPIA_ADD_APPLICATION("mpegplayer",MainDocumentWidgetStack)
+QTOPIA_MAIN
 

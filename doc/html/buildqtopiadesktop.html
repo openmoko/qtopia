@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1.6/tmp10050/qtopia/doc/buildqtopiadesktop.doc:1 -->
+<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/doc/buildqtopiadesktop.doc:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -73,11 +73,11 @@ in step one, if not compile them with:<br>
 <li> Download and install tmake 1.11
 (ftp://ftp.trolltech.com/freebies/tmake/tmake-1.11.zip)
 (example commands assumes it is installed to c:\tmake-1.11)
-<li> Install Qtopia source to c:\qtopia&#92;1.6 (substitute below if different)
+<li> Install Qtopia source to c:\qtopia&#92;1.7 (substitute below if different)
 <li> From command prompt, Compile Qtopia Desktop and all of its plugins:<br>
 <pre>
                 set QTDIR=c:\qt\3.1.2
-                set QPEDIR=c:\qtopia\1.6
+                set QPEDIR=c:\qtopia\1.7
                 set TMAKEDIR=c:\tmake-1.11
                 set TMAKEPATH=%TMAKEDIR%\lib\win32-msvc
                 set PATH=%QPEDIR%\bin;%QTDIR%\bin;%TMAKEDIR%\bin;%PATH%
@@ -87,7 +87,7 @@ in step one, if not compile them with:<br>
 </pre>
  
 <li> Using the regedit program ensure that the qtopiadir registry entry in the path \HKEY_LOCAL_MACHINE\SOFTWARE\Trolltech\palmcenter 
-points to c:\qtopia&#92;1.6\src\qtopiadesktop&#92;
+points to c:\qtopia&#92;1.7\src\qtopiadesktop&#92;
 </ol>
 <p> <h2> Linux
 </h2>
@@ -96,6 +96,7 @@ points to c:\qtopia&#92;1.6\src\qtopiadesktop&#92;
 Download and extract Qt 3.1.x for X11.
 <li>    Compile qt:<br>
 <pre>
+                tar xfz qt-x11-commercial-3.1.x.tar.gz
                 cd qt-x11-commercial-3.1.x
                 export QTDIR=$PWD
                 export PATH=$QTDIR/bin:$PATH
@@ -106,7 +107,7 @@ Download and extract Qt 3.1.x for X11.
 </pre>
  
 <br>
-<li> Extract Qtopia source package for example to ~/qtopia-source-1.6.2
+<li> Extract Qtopia source package for example to ~/qtopia-source-1.7.0
 (substitute below if different)
 <li> Install tmake..<br>
 <pre>
@@ -118,12 +119,15 @@ Download and extract Qt 3.1.x for X11.
  
 <li> Compile Qtopia Desktop as follows:<br>
 <pre>
-                export QTDIR=~/qt-x11-commercial-3.1.x
-                export QPEDIR=~/qtopia-source-1.6.2
+                tar xfz qtopia-source-1.7.0.tar.gz
+                cd qtopia-source-1.7.0
+                export QPEDIR=$PWD
                 export PATH=$QPEDIR/bin:$QTDIR/bin:$PATH
                 cd $QPEDIR/src
                 ./configure -qtopiadesktop
                 make
+                cd $QPEDIR/bin
+                ln -s ../src/qtopiadesktop/bin/qtopiadesktop qtopiadesktop
 </pre>
  
 <br>
@@ -132,6 +136,6 @@ Download and extract Qt 3.1.x for X11.
 <p><address><hr><div align=center>
 <table width=100% cellspacing=0 border=0><tr>
 <td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.6.2</div>
+<td align=right><div align=right>Qtopia version 1.7.0</div>
 </table></div></address></body>
 </html>

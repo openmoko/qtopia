@@ -42,6 +42,8 @@
 #include <qwhatsthis.h>
 #include <qtimer.h>
 
+#include <qcopchannel_qws.h>
+
 Browser::Browser(QWidget *parent, const char *name)
 	: QTextBrowser(parent, name)
 {
@@ -62,7 +64,14 @@ Today::Today(QWidget *parent, const char *name, WFlags fl)
     daytimer = new QTimer();
     connect(daytimer, SIGNAL(timeout()), this, SLOT(dayChange()));
 
+    QCopChannel *c = new QCopChannel("QPE/System", this);
+    connect(c, SIGNAL(received(const QCString &, const QByteArray&)),
+	this, SLOT(sysMessage(const QCString &, const QByteArray&)));
+
     init();
+
+    connect( qApp, SIGNAL(appMessage(const QCString &, const QByteArray &)),
+        this, SLOT(appMessage(const QCString &, const QByteArray &)) );
 }
 
 Today::~Today()
@@ -130,6 +139,17 @@ void Today::appMessage(const QCString &msg, const QByteArray &)
     /*	Reload plugin should contain plugin that has changed.  We can
 	only update all plugins for now though.	*/
     if ( msg == "reloadPlugin(QString)" ) {
+	update();
+    }
+}
+
+//
+// Respond to system messages.
+//
+void
+Today::sysMessage(const QCString &msg, const QByteArray &)
+{
+    if (msg == "timeChange(QString)") {
 	update();
     }
 }

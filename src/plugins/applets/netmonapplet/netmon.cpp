@@ -282,7 +282,13 @@ void NetMonitorApplet::chooseNet()
     ensureMonitor();
     QSize sh = netmon->sizeHint();
     netmon->resize(sh);
-    netmon->move(mapToGlobal(QPoint((width()-sh.width())/2,-sh.height())));
+
+    QPoint  curPoint = mapToGlobal(QPoint((width()-sh.width())/2,-sh.height()));
+    if (curPoint.x() + sh.width() > qApp->desktop()->width()) {
+	curPoint.setX(qApp->desktop()->width() - sh.width());
+    }
+
+    netmon->move(curPoint);
     netmon->show();
 }
 

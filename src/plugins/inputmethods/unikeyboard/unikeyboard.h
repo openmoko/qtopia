@@ -34,6 +34,7 @@ public slots:
     void scrollTo( int unicode );
 
 protected:
+    void resizeEvent(QResizeEvent *);
     void contentsMousePressEvent(QMouseEvent*);
     void contentsMouseReleaseEvent(QMouseEvent*);
     void drawContents( QPainter *, int cx, int cy, int cw, int ch ) ;

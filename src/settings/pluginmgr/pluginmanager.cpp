@@ -139,7 +139,7 @@ void PluginManager::init()
     QStringList tlist = tdir.entryList( QDir::Dirs );
     QStringList::Iterator it;
     for ( it = tlist.begin(); it != tlist.end(); ++it ) {
-	if ( (*it)[0] == '.' )
+	if ( (*it)[0] == '.' || *it == "application" )
 	    continue;
 	QString pluginPath = path + *it + '/';
 	QStringList required;

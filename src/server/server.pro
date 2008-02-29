@@ -5,7 +5,11 @@ win32:DEFINES   += QTOPIA_DLL
 
 DESTDIR		= $(QPEDIR)/bin
 
-HEADERS		+= desktop.h \
+HEADERS		+= server.h \
+		  serverinterface.h \
+		  launchertab.h \
+		  documentlist.h \
+		  suspendmonitor.h \
 		  appicons.h \
 		  taskbar.h \
                   runningappbar.h \
@@ -42,10 +46,14 @@ HEADERS		+= desktop.h \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/whole.h \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.h \
-		  syncdialog.h
-#		  quicklauncher.h \
+		  syncdialog.h \
+		  serverapp.h
 
-SOURCES		+= desktop.cpp \
+SOURCES		+= server.cpp \
+		  serverinterface.cpp \
+		  launchertab.cpp \
+		  documentlist.cpp \
+		  suspendmonitor.cpp \
 		  appicons.cpp \
 		  taskbar.cpp \
                   runningappbar.cpp \
@@ -91,7 +99,8 @@ SOURCES		+= desktop.cpp \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/version.c \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/whole.c \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.cpp \
-		  syncdialog.cpp
+		  syncdialog.cpp \
+		  serverapp.cpp
 
 INTERFACES	+= shutdown.ui
 

@@ -21,15 +21,6 @@
 #include "datebook.h"
 #include <qtopia/qpeapplication.h>
 
+QTOPIA_ADD_APPLICATION("datebook",DateBook)
+QTOPIA_MAIN
 
-int main( int argc, char **argv )
-{
-    QPEApplication a( argc, argv );
-
-    DateBook mw;
-    
-    mw.setCaption( DateBook::tr("Calendar") );
-    a.showMainWidget(&mw);
-
-    return a.exec();
-}

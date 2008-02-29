@@ -59,9 +59,14 @@
 #include <qsignal.h>
 #include <qclipboard.h>
 #include <qtimer.h>
+#include <qpixmapcache.h>
 
 #ifdef Q_WS_QWS
 #include <qwsdisplay_qws.h>
+#endif
+
+#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
+#define QTOPIA_INTERNAL_INITAPP
 #endif
 
 #include "qpeapplication.h"
@@ -348,6 +353,7 @@ public:
 	QList<AppLnk> appsList = apps.children();
 	for ( QListIterator<AppLnk> it(appsList); it.current(); ++it ) {
 	    if ( (*it)->exec() == appName ) {
+		mw->setIcon( (*it)->pixmap() );
 		mw->setCaption( (*it)->name() );
 		return TRUE;
 	    }
@@ -515,6 +521,7 @@ static int& hack(int& i)
     return i;
 }
 
+#ifdef Q_WS_QWS
 static bool forced_off = FALSE;
 static int curbl=-1;
 
@@ -529,7 +536,6 @@ static int backlight()
     return curbl;
 }
 
-#ifdef Q_WS_QWS
 void qpe_setBrightness(int bright);
 
 static void setBacklight(int bright)
@@ -563,27 +569,20 @@ static bool dim_on = FALSE;
 static bool lightoff_on = FALSE;
 static bool networkedsuspend_on = FALSE;
 static bool poweredsuspend_on = FALSE;
+
+#ifdef Q_WS_QWS
 static int disable_suspend = 100;
 
 static bool powerOnlineStopsSuspend()
 {
-#ifdef Q_WS_QWS
     return !poweredsuspend_on && PowerStatusManager::readStatus().acStatus() == PowerStatus::Online;
-#else
-    return FALSE;
-#endif
 }
 
 static bool networkOnlineStopsSuspend()
 {
-#ifdef Q_WS_QWS
     return !networkedsuspend_on && Network::networkOnline();
-#else
-    return FALSE;
-#endif
 }
 
-#ifdef Q_WS_QWS
 class QPEScreenSaver : public QWSScreenSaver
 {
 
@@ -665,10 +664,12 @@ static void setScreenSaverIntervals(int i1, int i2, int i3)
 #endif
 }
 
+#ifndef QTOPIA_DESKTOP
 static void setScreenSaverInterval(int interval)
 {
     setScreenSaverIntervals(-1,-1,interval);
 }
+#endif
 
 
 /*!
@@ -882,7 +883,11 @@ void QPEApplication::processQCopFile()
 */
 QPEApplication::QPEApplication( int& argc, char **argv, Type t )
     : QApplication( hack(argc), argv, t )
+#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
+, pidChannel(0)
+#endif
 {
+    QPixmapCache::setCacheLimit(256);  // sensible default for smaller devices.
     d = new QPEApplicationData;
 #ifdef Q_WS_QWS
     PluginLoaderIntern::init();
@@ -914,12 +919,14 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
     QMimeSourceFactory::setDefaultFactory(new ResourceMimeFactory);
 
     connect(this, SIGNAL(lastWindowClosed()), this, SLOT(hideOrQuit()));
+
 #if defined(Q_WS_QWS) && !defined(QT_NO_COP)
 
     sysChannel = new QCopChannel( "QPE/System", this );
     connect( sysChannel, SIGNAL(received(const QCString &, const QByteArray &)),
 	     this, SLOT(systemMessage( const QCString &, const QByteArray &)) );
-
+    
+#if 0
 #ifdef Q_OS_UNIX
     QCString channel = QCString(argv[0]);
 #else
@@ -956,6 +963,9 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
 
     /* overide stored arguments */
     setArgs(argc, argv);
+#else
+    initApp( argc, argv );
+#endif // #if 0
 
 #endif
 #if defined(Q_WS_QWS)
@@ -1018,6 +1028,57 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
     QToolTip::setEnabled( FALSE );
 #endif
 }
+
+
+#ifdef QTOPIA_INTERNAL_INITAPP
+void QPEApplication::initApp( int argc, char **argv )
+{
+    delete pidChannel;
+    d->keep_running = TRUE;
+    d->preloaded = FALSE;
+    d->forceshow = FALSE;
+
+#ifdef Q_OS_UNIX
+    QCString channel = QCString(argv[0]);
+#else
+    QCString channel;
+    if (QApplication::winVersion() != Qt::WV_98)
+	channel += QString(argv[0]); // append command name
+    else
+	channel += QString(argv[0]).lower(); // append command name
+#endif
+    channel.replace(QRegExp(".*/"),"");
+    d->appName = channel;
+
+    qt_fbdpy->setIdentity( channel ); // In Qt/E 2.3.6
+
+    channel = "QPE/Application/" + channel;
+    pidChannel = new QCopChannel( channel, this);
+    connect( pidChannel, SIGNAL(received(const QCString &, const QByteArray &)),
+	    this, SLOT(pidMessage(const QCString &, const QByteArray &)));
+
+    processQCopFile();
+    d->keep_running = d->qcopq.isEmpty();
+
+    for (int a=0; a<argc; a++) {
+	if ( qstrcmp(argv[a],"-preload")==0 ) {
+	    argv[a] = argv[a+1];
+	    a++;
+	    d->preloaded = TRUE;
+	    argc-=1;
+	} else if ( qstrcmp(argv[a],"-preload-show")==0 ) {
+	    argv[a] = argv[a+1];
+	    a++;
+	    d->preloaded = TRUE;
+	    d->forceshow = TRUE;
+	    argc-=1;
+	}
+    }
+
+    /* overide stored arguments */
+    setArgs(argc, argv);
+}
+#endif
 
 static QPtrDict<void>* inputMethodDict=0;
 static void createInputMethodDict()
@@ -1096,15 +1157,6 @@ void QPEApplication::mapToDefaultAction( QWSKeyEvent *ke, int key )
 */
 bool QPEApplication::qwsEventFilter( QWSEvent *e )
 {
-    if ( !d->notbusysent && e->type == QWSEvent::Focus ) {
-	if ( qApp->type() != QApplication::GuiServer ) {
-#ifndef QT_NO_COP
-	    QCopEnvelope e("QPE/System", "notBusy(QString)" );
-	    e << d->appName;
-#endif
-	}
-	d->notbusysent=TRUE;
-    }
     if ( type() == GuiServer ) {
 	switch ( e->type ) {
 	    case QWSEvent::Mouse:
@@ -1169,8 +1221,17 @@ bool QPEApplication::qwsEventFilter( QWSEvent *e )
 	if ( ((QWSKeyEvent *)e)->simpleData.keycode == Qt::Key_F4 )
 	    return TRUE;
 #endif
-    }
-    if ( e->type == QWSEvent::Focus ) {
+    } else if ( e->type == QWSEvent::Focus ) {
+	if ( !d->notbusysent ) {
+	    if ( qApp->type() != QApplication::GuiServer ) {
+#ifndef QT_NO_COP
+		QCopEnvelope e("QPE/System", "notBusy(QString)" );
+		e << d->appName;
+#endif
+	    }
+	    d->notbusysent=TRUE;
+	}
+
 	QWSFocusEvent *fe = (QWSFocusEvent*)e;
 	QWidget* nfw = QWidget::find(e->window());
 	if ( !fe->simpleData.get_focus ) {
@@ -1202,6 +1263,7 @@ bool QPEApplication::qwsEventFilter( QWSEvent *e )
 		Global::showInputMethod();
 	}
     }
+
     return QApplication::qwsEventFilter( e );
 }
 #endif
@@ -1258,6 +1320,7 @@ QString QPEApplication::qpeDir()
 
 #ifdef __GNUG__
 #warning "Should be able to change given a 'developing' parameter"
+// qtopiadesktop has a 'debug' parameter, but we can't/shouldn't get it here.
 #endif
 
     QSettings settings;
@@ -1568,6 +1631,14 @@ void QPEApplication::systemMessage( const QCString &msg, const QByteArray &data)
 	    const int scan = Key_C;
 	    qwsServer->processKeyEvent( unicode, scan, ControlButton, TRUE, FALSE );
 	    qwsServer->processKeyEvent( unicode, scan, ControlButton, FALSE, FALSE );
+	}
+    } else if ( msg == "newChannel(QString)") {
+	QString myChannel = "QPE/Application/" + d->appName;
+	QString channel;
+	stream >> channel;
+	if (channel == myChannel) {
+	    processQCopFile();
+	    d->sendQCopQ();
 	}
     }
 #endif
@@ -1915,11 +1986,9 @@ void QPEApplication::setStylusOperation( QWidget* w, StylusMode mode )
     createDict();
     if ( mode == LeftOnly ) {
 	stylusDict->remove(w);
-	w->removeEventFilter(qApp);
     } else {
 	stylusDict->insert(w,(void*)mode);
 	connect(w,SIGNAL(destroyed()),qApp,SLOT(removeSenderFromStylusDict()));
-	w->installEventFilter(qApp);
     }
 }
 
@@ -1929,6 +1998,9 @@ void QPEApplication::setStylusOperation( QWidget* w, StylusMode mode )
 */
 bool QPEApplication::eventFilter( QObject *o, QEvent *e )
 {
+    if ( !o->isWidgetType() )
+	return FALSE;
+
     if ( stylusDict && e->type() >= QEvent::MouseButtonPress && e->type() <= QEvent::MouseMove ) {
 	QMouseEvent* me = (QMouseEvent*)e;
 	StylusMode mode = (StylusMode)(int)stylusDict->find(o);
@@ -1937,7 +2009,8 @@ bool QPEApplication::eventFilter( QObject *o, QEvent *e )
 	    switch ( me->type() ) {
 	      case QEvent::MouseButtonPress:
 		if ( me->button() == LeftButton ) {
-		    d->presstimer = startTimer(500); // #### pref.
+		    if ( !d->presstimer )
+			d->presstimer = startTimer(500); // #### pref.
 		    d->presswidget = (QWidget*)o;
 		    d->presspos = me->pos();
 		    d->rightpressed = FALSE;
@@ -2073,7 +2146,8 @@ int QPEApplication::exec()
     d->execCalled = TRUE;
 #ifndef QT_NO_COP
     d->sendQCopQ();
-    processEvents(); // we may have received QCop messages in the meantime.
+    if ( !d->keep_running )
+	processEvents(); // we may have received QCop messages in the meantime.
 #endif
     if ( d->keep_running)
 	//|| d->qpe_main_widget && d->qpe_main_widget->isVisible() )
@@ -2133,8 +2207,9 @@ void QPEApplication::hideOrQuit()
 	e << d->appName;
 #endif
 	d->qpe_main_widget->hide();
-    } else
+    } else {
 	quit();
+    }
 }
 
 #ifdef Q_WS_QWS

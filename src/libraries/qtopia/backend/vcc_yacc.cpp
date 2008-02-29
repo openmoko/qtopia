@@ -833,7 +833,7 @@ static void finiLex() {
 /* This parses and converts the base64 format for binary encoding into
  * a decoded buffer (allocated with new).  See RFC 1521.
  */
-static char * lexGetDataFromBase64()
+static int lexGetDataFromBase64()
     {
     unsigned long bytesLen = 0, bytesMax = 0;
     int quadIx = 0, pad = 0;
@@ -846,6 +846,7 @@ static char * lexGetDataFromBase64()
     DBG_(("db: lexGetDataFromBase64\n"));
     while (1) {
 	c = lexGetc();
+	lexSkipWhite();
 	if (c == '\n') {
 	    ++mime_lineNum;
 	    if (lexLookahead() == '\n') {
@@ -868,8 +869,6 @@ static char * lexGetDataFromBase64()
 	    else if (c == '=') {
 		b = 0;
 		pad++;
-	    } else if ((c == ' ') || (c == '\t')) {
-		continue;
 	    } else { /* error condition */
 		if (bytes) free(bytes);
 		else if (oldBytes) free(oldBytes);
@@ -878,14 +877,17 @@ static char * lexGetDataFromBase64()
 		if (c != EOF)  {
 		    c = lexGetc();
 		    while (c != EOF) {
-			if (c == '\n' && lexLookahead() == '\n') {
-			    ++mime_lineNum;
-			    break;
+			if (c == '\n') {
+			    lexSkipWhite();
+			    if(lexLookahead() == '\n') {
+				++mime_lineNum;
+				break;
+				}
 			    }
 			c = lexGetc();
 			}
 		    }
-		return NULL;
+		return c != EOF;
 		}
 	    trip = (trip << 6) | b;
 	    if (++quadIx == 4) {
@@ -931,7 +933,7 @@ static char * lexGetDataFromBase64()
 	setValueWithSize(curProp,oldBytes,(unsigned int)bytesLen);
 	free(oldBytes);
 	}
-    return 0;
+    return bytesLen;
     }
 
 static int match_begin_end_name(int end) {
@@ -962,7 +964,7 @@ static char* lexGetQuotedPrintable()
     c = lexLookahead();
     lexClearToken();
 
-    while (c != EOF && c != ';') {
+    while (c != EOF && (c != ';' || !fieldedProp)) {
 	if (c == '\n') {
 	    // break, leave '\n' on remaining chars.
 	    break;
@@ -1052,9 +1054,8 @@ static int yylex() {
 	    lexPushLookaheadc(c);
 	    if (lexWithinMode(L_BASE64)) {
 		/* get each char and convert to bin on the fly... */
-		p = lexGetDataFromBase64();
-		yylval.str = p;
-		return STRING;
+		yylval.str = NULL;
+		return lexGetDataFromBase64() ? STRING : 0;
 		}
 	    else if (lexWithinMode(L_QUOTED_PRINTABLE)) {
 		p = lexGetQuotedPrintable();
@@ -1236,7 +1237,7 @@ void mime_error_(char *s)
 	}
     }
 
-#line 1240 "y.tab.c"
+#line 1241 "y.tab.c"
 #define YYABORT goto yyabort
 #define YYREJECT goto yyabort
 #define YYACCEPT goto yyaccept
@@ -1536,7 +1537,7 @@ case 45:
 	popVObject();
 	}
 break;
-#line 1540 "y.tab.c"
+#line 1541 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

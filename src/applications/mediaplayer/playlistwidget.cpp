@@ -112,6 +112,7 @@ PlayListWidget::PlayListWidget( QWidget* parent, const char* name, WFlags fl )
     d->audioFiles = d->ts->audioFiles();
     d->videoFiles = d->ts->videoFiles();
     d->selectedFiles = d->ts->selectedFiles();
+    d->audioFiles->setFocus(); 
 
     d->tbPlay   = new Action( this, tr( "Play" ),       "mediaplayer/play",    mediaPlayerState, SLOT(setPlaying(bool)), TRUE );
     d->tbPlay->addTo( bar );
@@ -184,6 +185,7 @@ PlayListWidget::PlayListWidget( QWidget* parent, const char* name, WFlags fl )
     connect( mediaPlayerState, SIGNAL( scaledToggled( bool ) ),     d->tbScale,   SLOT( setOn2( bool ) ) );
 
     connect( mediaPlayerState, SIGNAL( viewChanged(View) ),	    this,	  SLOT( setView(View) ) );
+    connect( mediaPlayerState, SIGNAL( viewClosed() ),		    this,	  SLOT( viewClosed() ) );
 
     setCentralWidget( d->ts );
 
@@ -462,7 +464,6 @@ bool PlayListWidget::prev()
     if ( d->setDocumentActive ) {
         d->setDocumentActive = FALSE;
 	d->ts->resumeLoading();
-	return FALSE;
     }
 
     switch ( d->ts->tab() ) {
@@ -482,7 +483,6 @@ bool PlayListWidget::next()
     if ( d->setDocumentActive ) {
         d->setDocumentActive = FALSE;
 	d->ts->resumeLoading();
-	return FALSE;
     }
 
     switch ( d->ts->tab() ) {
@@ -502,7 +502,6 @@ bool PlayListWidget::first()
     if ( d->setDocumentActive ) {
         d->setDocumentActive = FALSE;
 	d->ts->resumeLoading();
-	return FALSE;
     }
 
     switch ( d->ts->tab() ) {
@@ -522,7 +521,6 @@ bool PlayListWidget::last()
     if ( d->setDocumentActive ) {
         d->setDocumentActive = FALSE;
 	d->ts->resumeLoading();
-	return FALSE;
     }
 
     switch ( d->ts->tab() ) {
@@ -552,6 +550,15 @@ void PlayListWidget::loadList()
 //  pseudo code
 //  filename = FileSelector->openFile( "*.playlist" );
     readPlayList( filename + ".playlist" );
+}
+
+
+void PlayListWidget::viewClosed()
+{
+    if ( d->setDocumentActive )
+	qApp->exit();
+    else
+	mediaPlayerState->setList();
 }
 
 

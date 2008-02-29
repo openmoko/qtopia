@@ -705,12 +705,12 @@ static int div_round (int dividend, int divisor)
     return -((-dividend + (divisor>>1)) / divisor);
 }
 
-
+/*
 #include <linux/config.h>
 #ifdef CONFIG_ARM
 #include "yuv2rgb_arm.c"
 #endif
-
+*/
 
 yuv2rgb_factory_t* yuv2rgb_factory_init (int mode, int swapped, int gamma)
 {

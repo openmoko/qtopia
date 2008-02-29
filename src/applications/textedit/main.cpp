@@ -19,17 +19,7 @@
 **********************************************************************/
 
 #include "textedit.h"
-
 #include <qtopia/qpeapplication.h>
 
-int main( int argc, char **argv )
-{
-    QPEApplication a( argc, argv );
-    
-    TextEdit e;
-    a.showMainDocumentWidget(&e);
-    if ( argc == 3 && argv[1] == QCString("-f") )
-	e.setDocument(argv[2]);
-
-   return a.exec();
-}
+QTOPIA_ADD_APPLICATION("textedit",TextEdit)
+QTOPIA_MAIN

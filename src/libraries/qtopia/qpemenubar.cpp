@@ -120,7 +120,8 @@ void QPEMenuToolFocusManager::moveFocus( bool next )
 	}
 	QWidget *w = (*it);
 	if ( w && w->isEnabled() && w->isVisible() &&
-	     w->topLevelWidget() == qApp->activeWindow() ) {
+	     w->topLevelWidget() == qApp->activeWindow() &&
+	     !w->isA("QToolBarSeparator") ) {
 	    setFocus( w, next );
 	    return;
 	}
@@ -220,31 +221,6 @@ bool QPEMenuToolFocusManager::eventFilter( QObject *object, QEvent *event )
 	    setActive( !isActive() );
 	    return TRUE;
 	}
-    } else if ( event->type() == QEvent::KeyRelease ) {
-	QKeyEvent *ke = (QKeyEvent *)event;
-	if ( isActive() ) {
-	    if ( object->inherits( "QButton" ) ) {
-		// Deactivate when a button is selected
-		if ( ke->key() == Key_Space )
-		    QTimer::singleShot( 0, this, SLOT(deactivate()) );
-	    }
-	}
-    } else if ( event->type() == QEvent::FocusIn ) {
-	if ( isActive() ) {
-	    // A non-menu/tool widget has been selected - we're deactivated
-	    QWidget *w = (QWidget *)object;
-	    if ( !w->isPopup() && !list.contains( GuardedWidget( w ) ) ) {
-		inFocus = 0;
-	    }
-	}
-    } else if ( event->type() == QEvent::Hide ) {
-	if ( isActive() ) {
-	    // Deaticvate if a menu/tool has been hidden
-	    QWidget *w = (QWidget *)object;
-	    if ( !w->isPopup() && !list.contains( GuardedWidget( w ) ) ) {
-		setActive( FALSE );
-	    }
-	}
     } else if ( event->type() == QEvent::ChildInserted ) {
 	QChildEvent *ce = (QChildEvent *)event;
 	if ( ce->child()->isWidgetType() ) {
@@ -263,6 +239,27 @@ bool QPEMenuToolFocusManager::eventFilter( QObject *object, QEvent *event )
 		ce->child()->removeEventFilter( this );
 	    } else if ( object->inherits( "QToolBar" ) ) {
 		removeWidget( (QWidget *)ce->child() );
+	    }
+	}
+    } else if ( isActive() ) {
+	if ( event->type() == QEvent::KeyRelease ) {
+	    QKeyEvent *ke = (QKeyEvent *)event;
+	    if ( object->inherits( "QButton" ) ) {
+		// Deactivate when a button is selected
+		if ( ke->key() == Key_Space )
+		    QTimer::singleShot( 0, this, SLOT(deactivate()) );
+	    }
+	} else if ( event->type() == QEvent::FocusIn ) {
+	    // A non-menu/tool widget has been selected - we're deactivated
+	    QWidget *w = (QWidget *)object;
+	    if ( !w->isPopup() && !list.contains( GuardedWidget( w ) ) ) {
+		inFocus = 0;
+	    }
+	} else if ( event->type() == QEvent::Hide ) {
+	    // Deaticvate if a menu/tool has been hidden
+	    QWidget *w = (QWidget *)object;
+	    if ( !w->isPopup() && !list.contains( GuardedWidget( w ) ) ) {
+		setActive( FALSE );
 	    }
 	}
     }

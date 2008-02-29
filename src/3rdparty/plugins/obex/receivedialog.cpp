@@ -42,7 +42,7 @@ ReceiveDialog::ReceiveDialog( QIrServer* irserver, QWidget *parent, const char *
 {
     setCaption( tr("Infrared receive") );
 
-    w = new ReceiveDialogBase(this);
+    w = new ReceiveDialogBase(this, "irReceive");
     setCentralWidget(w);
     
     server = irserver;

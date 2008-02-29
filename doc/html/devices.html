@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1.6/tmp10050/qtopia/doc/devices.doc:1 -->
+<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/doc/devices.doc:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -193,11 +193,62 @@ for 'dimming' and turning off the light.
 <li> The system's <tt>at</tt> daemon is used to write the RTC clock
 (because on some systems only one process can manipulate the RTC).
 </ul>
+<p> <h3> Custom Qtopia Launcher User Interface
+</h3>
+<a name="1-7"></a><p> In some cases it is desireable to have a cusomized launcher interface
+that better suits the intended application of the target device.  Qtopia
+supports custom laucher user interfaces via the ServerInterface.  This
+interface provides all of the infrastructure necessary to implement a
+launcher, while maintaining compatiblity with the Qtopia application and
+document models.
+<p> The launcher user interface is part of the Qtopia server
+($QPEDIR/src/server) which provides services such as syncing
+and filesystem management.
+<p> <h4> Launcher
+</h4>
+<a name="1-7-1"></a><p> The first step when writing a user interface is to implement a class
+derived from ServerInterface.  This interface provides the functionality
+necessary to show the available applications and documents available
+on a Qtopia device.
+<p> The createGUI() and destroyGUI() functions must be implemented to create
+and show the laucnher and any other user interface components.
+<p> Most of the functions provided by the ServerInterface are to manage adding
+and removing applications and documents as necessary.  The ServerInterface
+documentation describes each one in detail.
+<p> The default Qtopia launcher is implemented by the Launcher class.
+<p> <h4> Other User Interface Components
+</h4>
+<a name="1-7-2"></a><p> In addition to the launcher itself, it is ususally necessary to provide
+some system components, such as input methods and status display.
+<p> There are several classes in the
+default Qtopia user interface that may be reused in a custom interface.
+Most user interfaces will make use of some of these classes to ensure a
+useable system:
+<p> <ul>
+<li> InputMethods - loads and displays input methods.
+<li> RunningAppBar - displays running application icons.
+<li> SysTray - loads and displays applets.
+<li> StartMenu - provides menus for launcher tabs and accessory plugins.
+</ul>
+<p> An interface providing these components will support most of the default
+Qtopia launcher functionality.
+<p> The Qtopia libraries aslo assume that QPE/Taskbar QCOP channel is available
+and supports the following functions:
+<p> <ul>
+<li> message(<a href="qstring.html">QString</a>) - display a status message.
+<li> hideInputMethod() - hide any visible input method.
+<li> showInputMethod() - show the currently selected input method.
+<li> showInputMethod(QString) - show the specified input method.
+<li> reloadInputMethods() - release and reload the input method plugins.
+<li> reloadApplets() - release and reload the applets.
+</ul>
+<p> The default Qtopia launcher uses the TaskBar class to encapsulate the
+above functionality.
 <p> 
 <!-- eof -->
 <p><address><hr><div align=center>
 <table width=100% cellspacing=0 border=0><tr>
 <td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.6.2</div>
+<td align=right><div align=right>Qtopia version 1.7.0</div>
 </table></div></address></body>
 </html>

@@ -42,6 +42,7 @@ public:
     DocLnk file() const { return fl; }
 
 private:
+    friend class FileSelector;
     DocLnk fl;
 };
 

@@ -869,8 +869,15 @@ DayView::DayView( DateBookTable *newDb, bool startOnMonday,
 #endif
 
     QVBoxLayout *layout = new QVBoxLayout(this);
+#ifdef QTOPIA_NO_POINTER_INPUT
+    header = new QLabel(this, "day header");
+    header->setBackgroundMode(PaletteButton);
+    header->setAlignment(AlignHCenter);
+    header->setText(headerText(cDate));
+#else
     header = new DayViewHeader( startOnMonday, this, "day header" ); // No tr
     header->setDate( cDate.year(), cDate.month(), cDate.day() );
+#endif
     layout->addWidget(header);
     allView = new DayViewContents( DayViewContents::AllDay,
 	    this, "all day view" ); // No tr
@@ -883,8 +890,10 @@ DayView::DayView( DateBookTable *newDb, bool startOnMonday,
     view->setFrameStyle( QFrame::NoFrame );
     allView->setFrameStyle( QFrame::NoFrame );
     layout->addWidget(view);
+#ifndef QTOPIA_NO_POINTER_INPUT
     connect( header, SIGNAL( dateChanged( const QDate & ) ),
              this, SLOT( selectDate( const QDate &) ) );
+#endif
     connect( view, SIGNAL( sigColWidthChanged() ),
              this, SLOT( slotColWidthChanged() ) );
 
@@ -911,6 +920,14 @@ DayView::DayView( DateBookTable *newDb, bool startOnMonday,
     setFocusPolicy(StrongFocus);
     setFocus();
 }
+
+#ifdef QTOPIA_NO_POINTER_INPUT
+QString DayView::headerText(const QDate &d) const
+{
+    return tr("%1 - %2", "Date as day of week, followed by date in local format")
+	.arg(TimeString::localDayOfWeek(d, TimeString::Long)).arg(TimeString::localYMD(d));
+}
+#endif
 
 void DayView::selectedDates( QDateTime &start, QDateTime &end )
 {
@@ -942,7 +959,11 @@ void DayView::selectDate( const QDate &d)
 	return;
     PeriodView::selectDate(d);
 
+#ifdef QTOPIA_NO_POINTER_INPUT
+    header->setText(headerText(d));
+#else
     header->setDate( d.year(), d.month(), d.day() );
+#endif
     view->selectDate(d);
 
     relayoutPage();
@@ -1084,7 +1105,9 @@ void DayView::setDayStarts( int startHere )
 
 void DayView::setStartOnMonday( bool bStartOnMonday )
 {
+#ifndef QTOPIA_NO_POINTER_INPUT
     header->setStartOfWeek( bStartOnMonday );
+#endif
     //    redraw();
 }
 

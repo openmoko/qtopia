@@ -98,6 +98,7 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, const char *name,
       contacts( ContactIO::ReadWrite ),
       abEditor(0),
       mView(0),
+      searchBar(0),
       bAbEditFirstTime(TRUE),
       syncing(FALSE),
       showingPersonal(FALSE)
@@ -227,25 +228,6 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, const char *name,
     viewmenu->insertSeparator();
     viewmenu->insertItem( tr("Configure headers"), this, SLOT(configure()) );
 
-    // Search bar
-    searchBar = new QPEToolBar(this);
-    addToolBar( searchBar, "", QMainWindow::Top, TRUE );
-
-    searchBar->setHorizontalStretchable( TRUE );
-
-    searchEdit = new QLineEdit( searchBar, "searchEdit" );
-    searchBar->setStretchableWidget( searchEdit );
-    connect( searchEdit, SIGNAL(textChanged(const QString &)),
-	    this, SLOT(search()) );
-    connect( searchEdit, SIGNAL(returnPressed()), this, SLOT(search()) );
-
-    a = new QAction( tr( "Find Next" ), Resource::loadIconSet( "next" ), QString::null, 0, this, 0 );
-    connect( a, SIGNAL(activated()), this, SLOT(search()) );
-    a->setWhatsThis( tr("Find the next occurrence of the search text.") );
-    a->addTo( searchBar );
-
-    searchBar->hide();
-
     // Create Views
 
     listView = new QVBox( this );
@@ -313,6 +295,11 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, const char *name,
 
     // This call is to ensure that all records contains only valid categories 
     catChanged();
+
+    connect( qApp, SIGNAL(appMessage(const QCString &, const QByteArray &)), 
+	    this, SLOT(appMessage(const QCString &, const QByteArray &)) );
+    connect( qApp, SIGNAL(reload()), this, SLOT(reload()) );
+    connect( qApp, SIGNAL(flush()), this, SLOT(flush()) );
 }
 
 void AddressbookWindow::setDocument( const QString &filename )
@@ -428,6 +415,7 @@ void AddressbookWindow::resizeEvent( QResizeEvent *e )
 AddressbookWindow::~AddressbookWindow()
 {
     writeConfig();
+    delete abEditor;
 }
 
 void
@@ -994,6 +982,25 @@ AbLabel *AddressbookWindow::abView()
 
 void AddressbookWindow::slotFind(bool s)
 {
+    if ( !searchBar ) {
+	// Search bar
+	searchBar = new QPEToolBar(this);
+	addToolBar( searchBar, "", QMainWindow::Top, TRUE );
+
+	searchBar->setHorizontalStretchable( TRUE );
+
+	searchEdit = new QLineEdit( searchBar, "searchEdit" );
+	searchBar->setStretchableWidget( searchEdit );
+	connect( searchEdit, SIGNAL(textChanged(const QString &)),
+		this, SLOT(search()) );
+	connect( searchEdit, SIGNAL(returnPressed()), this, SLOT(search()) );
+
+	QAction *a = new QAction( tr( "Find Next" ), Resource::loadIconSet( "next" ), QString::null, 0, this, 0 );
+	connect( a, SIGNAL(activated()), this, SLOT(search()) );
+	a->setWhatsThis( tr("Find the next occurrence of the search text.") );
+	a->addTo( searchBar );
+    }
+
     if ( s ) {
 	if ( centralWidget() == abView() )
 	    slotListView();

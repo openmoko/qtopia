@@ -100,7 +100,8 @@ void Security::show()
 	if ( pc != passcode ) {
 	    QMessageBox::critical(this, tr("Passcode incorrect"), 
 		    tr("The passcode entered is incorrect.\nAccess denied"));
-	    reject();
+//	    reject();
+	    qApp->quit();
 	    return;
 	}
 	timeout.start();

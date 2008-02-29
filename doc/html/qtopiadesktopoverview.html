@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/period/dev/qtopia/1.6/tmp10050/qtopia/doc/qtopiadesktop.doc:1 -->
+<!-- /home/period/dev/qtopia/1/tmp31069/qtopia/doc/qtopiadesktop.doc:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -63,8 +63,11 @@ machine
 extend the above functionality for their application's data. In fact,
 most existing functionality provided by Qtopia Desktop is provided by
 Trolltech using this architecture. Every icon seen on the left hand
-column of Qtopia Desktop is in fact using the same architecture and
+column of Qtopia Desktop is using the same architecture and
 APIs that is exposed to any developer.
+<p> For historical reasons, you may see the name Palmtop Center
+in function names or the code. This was an earlier name for
+Qtopia Desktop.
 <p> <h2> Architecture and Plugins
 </h2>
 <a name="2"></a><p> Qtopia Desktop has modular and flexible design allowing end-users to easily
@@ -76,38 +79,33 @@ defined by Qtopia Desktop.
 <ul>
 <li> write their own visual plugin for entering information or
 transfering documents -  PluginInterface
-<li> synchronize their data and files - DataSetInterface and MergeInterface
+<li> synchronize their data and files - SyncAppInterface and MergeInterface
 <li> import external data to Qtopia - ImportInterface
-<li> export Qtopia's data - ExportInterface
+<li> export Qtopia's data - ExportInterface <i>not yet supported</i>
 </ul>
 <p> Qtopia Desktop provides each plugin with access to the CenterInterface.
 The CenterInterface class allows each plugin to use the functionality
 provided by Qtopia Desktop.
-<p> When Qtopia Desktop starts up it automatically scans for plugins and
-registers any plugins that support the interfaces. Qtopia Desktop will
-look in the subdirectory under the installed directory called lib. Plugin installations should place their shared object libraries in the qtopiadesktop/lib
+<p> When Qtopia Desktop starts up it scans for plugins and registers any
+plugins that support the interfaces. Qtopia Desktop will look in the
+subdirectory under the installed directory called lib. Plugin
+installations should place their shared object libraries in the
+<installed directory>/lib
 <p> <h2> Synchronization Architecture and Algorithms
 </h2>
 <a name="3"></a><p> Qtopia Desktop contains the algorithms for synchronization for any
 plugin.
-<p> Qtopia Desktop handles synchronizing multiple plugins working on the same data
-set. A data set is the data associated with an application domain,
-such as Address Book, To do List, and <a href="calendar.html">Calendar</a>. So there can be
-multiple plugins that synchronize Address Book data such as Qtopia's
-Address Book and foobar's Address Book application.
+<p> Qtopia Desktop handles synchronizing multiple plugins working on the
+same application data.  So there can be multiple plugins that
+synchronize Contacts data such as Qtopia's Contacts and My
+Desktop PIM Application's address book.
 <p> The sync algorithm remembers the last state of each plugin when it was
 last synced. It then uses that information to determine what changes
-have occured in each plugin. Those changes are then merged together
-with all other plugins of the same data set type such as address book
-on the desktop and with the embedded device. A master document is
-created by applying those changes. A diff is then made between the new
-master document and each plugin to determine the changes for that
-plugin. Each plugin must then apply the changes sent to it through the
-interface. The new master document is also sent to the embedded
-device. After synchronization, all plugins and the embedded device
-should have the same document. Qtopia Desktop remembers that state as
-the base information needed for the next synchronization.
-<p> The diffs are performed on field level, so a conflict is created if
+have occured in each plugin. A master document is created by 
+merging those changes. Each plugin is then given a list of changes
+that it should apply so that its contents will be same as the
+master document.
+<p> The diffs are performed at a field level, so a conflict is created if
 the user modifies the same field of the same record in multiple
 plugins or interfaces. The algorithm used for conflict resolution of
 two records depends on what the user has selected in the
@@ -120,29 +118,31 @@ by Qtopia Desktop - MergeInterface::data()
 <li> each plugin to apply the changes made during merging to itself -
 MergeInterface::applyChanges()
 </ul>
+<p> Currently, the only architecture supported is synchronizing 
+that data that needs to be merged together. Future versions will
+support plugins that simply wish to transfer a set of files and possibly
+do manual operations on those files.
 <p> <h3> Data Conversion during Synchronization
 </h3>
 <a name="3-1"></a><p> Qtopia Desktop requires each plugin to convert it's data between the
 plugin's internal representation of its data and a generic way to
 define any data. Qtopia Desktop uses MergeML::Record as a generic
 storage class for anyone's data.  MergeML::Record stores its data in
-an int-QString QMap, where the int refers to the type of field in the
-map.
-<p> For the core pims (Address Book, Todo List and <a href="calendar.html">Calendar</a>), the integer
-values used in the QMap<int, <a href="qstring.html">QString</a>> have been defined in
-recordfields.h. There are individual record classes for these data
-sets, which are Contact, Task and Event, respectively. These PIM
-classes abstract for the developer away from the QMap to more readable
-methods (such as Contact::setLastName) and allow for the class to
-perform manipulations on these sets and accessors (i.e. a QString may be
-used to store an integer value, so this class returns the integer
-value not the QString).
+an QMap&lt;int, <a href="qstring.html">QString</a>&gt;, where the key refers to the type of field in the map.
+<p> For the core pims (Contacts, Todo List and <a href="calendar.html">Calendar</a>), the integer
+values used in the QMap&lt;int, QString&gt; have been defined in their PIM
+library classes. There are individual record classes for these data
+sets, which are Contact, Task and Event, respectively. These classes
+provide convenience methods which convert to and from a
+QMap&lt;int,QString&gt; . Each class has a toMap() 
+method and a constructor that takes the QMap&lt;int,QString&gt; in their 
+constructor.
 <p> There are static templated methods provided in mergeml.h that help the
 developer convert between a lists of QMap&lt;int,QString&gt; and a list of
 these PIM classes. They are MergeML::convertToML() and
 MergeML::convertFromML(). These templated methods will be helpfull for the
-developer when implementing DataSetInterface::data() and
-DataSetInterface::applyChanges().
+developer when implementing SyncAppInterface::load() and
+SyncAppInterface::save().
 <p> <h2> Implementing a Plugin
 </h2>
 <a name="4"></a><p> Each plugin implementation needs to define some pure virtual methods defined
@@ -184,8 +184,8 @@ Q_EXPORT_INTERFACE()
         *iface = (QComponentInformationInterface*)(PluginInterface *) this;
     else if ( uuid == IID_PalmtopCenterPlugin )
         *iface = (PluginInterface*)this;
-    else if ( uuid == IID_DataSetInterface )
-        *iface = (DataSetInterface*)this;
+    else if ( uuid == IID_SyncAppInterface )
+        *iface = (SyncAppInterface*)this;
     else if ( uuid == IID_MergeInterface )
         *iface = (MergeInterface*)this;
     else
@@ -201,7 +201,7 @@ which interfaces your plugin is implementing. Each plugin should
 only have one implementation of queryInterface. Each plugin can
 implement more than one interface as shown above. (And multiple
 interfaces can be implemented by the same class as shown
-above). Every interface other than DataSetInterface implements both
+above). Every interface other than SyncAppInterface implements both
 QUnknownInterface and QComponentInformationInterface and should
 return as such as shown above.
 
@@ -209,6 +209,6 @@ return as such as shown above.
 <p><address><hr><div align=center>
 <table width=100% cellspacing=0 border=0><tr>
 <td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.6.2</div>
+<td align=right><div align=right>Qtopia version 1.7.0</div>
 </table></div></address></body>
 </html>

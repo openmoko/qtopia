@@ -110,7 +110,7 @@ Drag-and-drop object for transferring images. | QImageDrag
 Drag-and-drop object for transferring plain and Unicode text. | QTextDrag
 Dummy class. | FreeType
 Dummy class. GSM is a codec optimised for recording human speech, and is used by the MediaRecorder. | GSM
-Dummy class. The atd program is based on Russ Nelson's lightweight At daemon. The At daemon will run a program at a specified time. It is distributed under the terms of the GNU General Public License. | atd
+Dummy class. The atd program is based on Russ Nelson's lightweight At daemon. It is distributed under the terms of the GNU General Public License. The atd program is based on Russ Nelson's lightweight At daemon. The At daemon will run a program at a specified time. It is distributed under the terms of the GNU General Public License. | atd
 Dummy class. The avformat and avcodec code was extracted from the FFMPEG project. FFMPEG is a large project that allows recording, conversion and streaming of audio and video data. avformat and avcodec are used by the MediaPlayer.The author and primary copyright holder is Fabrice Bellard &lt;fabrice.bellard at free.fr&gt;. The FFMPEG project is distributed under the GNU Lesser General Public License. More information can be found at http://ffmpeg.sourceforge.net. | FFMpeg
 Encapsulates I/O asynchronicity. | QAsyncIO
 Encapsulates MIME-based information transfer. | QDragObject

@@ -47,10 +47,7 @@ SnakeGame::SnakeGame(QWidget* parent, const char* name, WFlags f) :
 
     QPEToolBar* toolbar = new QPEToolBar( this);
     toolbar->setHorizontalStretchable( TRUE );
-
-    QPixmap newicon = Resource::loadPixmap("Snake");
-    setIcon(newicon);
-    (void)new QToolButton(newicon, tr("New Game"), 0,
+    (void)new QToolButton(Resource::loadIconSet("Snake"), tr("New Game"), 0,
                             this, SLOT(newGame()), toolbar, "New Game");
 
     scorelabel = new QLabel(toolbar);

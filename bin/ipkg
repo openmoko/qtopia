@@ -61,9 +61,10 @@ ipkg_src_byname() {
 
 ipkg_dests() {
 	local destre=`echo $1 | ipkg_protect_slashes`
+	local destor=`echo "$IPKG_OFFLINE_ROOT" | ipkg_protect_slashes`
 	sed -ne "/^dest[[:space:]]\+$destre/{
 s/^dest[[:space:]]\+[^[:space:]]\+[[:space:]]\+//
-s/^/$IPKG_OFFLINE_ROOT/
+s/^/$destor/
 p
 }" < $IPKG_CONF
 }
@@ -128,7 +129,11 @@ Valid destinations are directories or one of the dest names from $IPKG_CONF:" >&
 	IPKG_DIR_PREFIX=usr/lib/ipkg
 	IPKG_LISTS_DIR=$IPKG_OFFLINE_ROOT/$IPKG_DIR_PREFIX/lists
 	IPKG_PENDING_DIR=$IPKG_OFFLINE_ROOT/$IPKG_DIR_PREFIX/pending
-	IPKG_TMP=$IPKG_ROOT/tmp/ipkg
+	if [ -n "$IPKG_OFFLINE_ROOT" ]; then
+	    IPKG_TMP=/tmp/ipkg
+	else
+	    IPKG_TMP=$IPKG_ROOT/tmp/ipkg
+	fi
 
 	# Destination specific ipkg meta-data directory
 	IPKG_STATE_DIR=$IPKG_ROOT/$IPKG_DIR_PREFIX
@@ -784,7 +789,8 @@ diff -u $dest/$conffile $IPKG_TMP/$pkg/data/$conffile"
 	if [ -n "$new_conffiles" ]; then
 		new_conffiles='Conffiles: '`echo $new_conffiles | ipkg_protect_slashes`
 	fi
-	local sed_safe_root=`echo $dest | sed -e "s/^${IPKG_OFFLINE_ROOT}//" | ipkg_protect_slashes`
+	local destor=`echo "$IPKG_OFFLINE_ROOT" | ipkg_protect_slashes`
+	local sed_safe_root=`echo $dest | sed -e "s/^${destor}//" | ipkg_protect_slashes`
 	sed -e "s/\(Package:.*\)/\1\\
 Status: install ok installed\\
 Root: ${sed_safe_root}\\

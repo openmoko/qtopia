@@ -57,6 +57,9 @@ public:
     // These shouldn't be needed
     static void clear();
     static void registerApp( const AppLnk& );
+#ifdef QTOPIA_INTERNAL_MIMEEXT
+    static bool hasAppRegistered( const QString &mimetype );
+#endif // QTOPIA_INTERNAL_MIMEEXT
 
 private:
     static void updateApplications(AppLnkSet* folder);

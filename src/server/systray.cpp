@@ -28,7 +28,6 @@
 #include <qmessagebox.h>
 #include <qtranslator.h>
 
-#include "quicklauncher.h"
 #include "systray.h"
 
 #include <stdlib.h>

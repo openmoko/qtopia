@@ -29,7 +29,7 @@
 #include <qwindowsystem_qws.h>
 #endif
 
-static const int nw = 8;
+static int nw = 8;
 
 typedef struct BlockMap {
     ushort start;
@@ -126,8 +126,8 @@ static const BlockMap blockMap[] =
 {0xFE30, 0xFE4F, QT_TRANSLATE_NOOP("UniKeyboard", "CJK Compatibility Forms")},
 {0xFE50, 0xFE6F, QT_TRANSLATE_NOOP("UniKeyboard", "Small Form Variants")},
 {0xFE70, 0xFEFE, QT_TRANSLATE_NOOP("UniKeyboard", "Arabic Presentation Forms-B")},
-{0xFF00, 0xFEFF, QT_TRANSLATE_NOOP("UniKeyboard", "Halfwidth and Fullwidth Forms")},
-{0xFFF0, 0xFFEF, QT_TRANSLATE_NOOP("UniKeyboard", "Specials")},
+{0xFF00, 0xFFEF, QT_TRANSLATE_NOOP("UniKeyboard", "Halfwidth and Fullwidth Forms")},
+{0xFFF0, 0xFFFD, QT_TRANSLATE_NOOP("UniKeyboard", "Specials")},
 {0xFFFF, 0xFFFF, 	0} };
 
 
@@ -143,13 +143,21 @@ UniScrollview::UniScrollview(QWidget* parent, const char* name, int f) :
 #endif
     QFontMetrics fm( font() );
     cellsize = fm.lineSpacing() + 2;
-    resizeContents( cellsize*nw, cellsize*65536/nw );
     verticalScrollBar()->setLineStep(cellsize);
     
     viewport()->setBackgroundMode( QWidget::PaletteBase );
 }
 
 
+void UniScrollview::resizeEvent(QResizeEvent *e)
+{
+    nw = ( e->size().width() - xoff ) / cellsize;
+    nw -= nw % 8;
+    nw = QMAX(nw, 8);
+    resizeContents( cellsize*nw, cellsize*65536/nw );
+    
+    QScrollView::resizeEvent(e);
+}
 
 void UniScrollview::contentsMousePressEvent(QMouseEvent* e)
 {
@@ -275,12 +283,14 @@ void UniKeyboard::svMove( int /*x*/, int y )
     }
     if ( i != currentBlock ) {
 	currentBlock = i;
-	for (int ind=0; ind<cb->count(); ind++) {
+	int closest = 0;
+	for (int ind=0; ind <= cb->count() && blockMap[cbmap[ind]].start < blockMap[i].stop; ind++) {
+	    closest = ind;
 	    if ( cbmap[ind] == i ) {
-		cb->setCurrentItem( ind );
 		break;
 	    }
 	}
+	cb->setCurrentItem( closest );
     }
 }
 

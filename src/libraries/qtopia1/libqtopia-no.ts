@@ -3,165 +3,165 @@
     <name>DatePickerHeader</name>
     <message>
         <source>Show January in the selected year</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Vis januar måned i det valgte året</translation>
     </message>
     <message>
         <source>Show the previous month</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Vis forrige måned</translation>
     </message>
     <message>
         <source>Show the next month</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Vis neste måned</translation>
     </message>
     <message>
         <source>Show December in the selected year</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Vis desember måned i det valgte året</translation>
     </message>
 </context>
 <context>
     <name>DocPropertiesDialog</name>
     <message>
         <source>Properties</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Rettigheter</translation>
     </message>
 </context>
 <context>
     <name>DocPropertiesWidget</name>
     <message>
         <source>Name:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Navn:</translation>
     </message>
     <message>
         <source>Location:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Sted:</translation>
     </message>
     <message>
         <source>Categories:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Kategorier:</translation>
     </message>
     <message>
         <source>Document View</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Dokument visning</translation>
     </message>
     <message>
         <source>Type:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Type:</translation>
     </message>
     <message>
         <source>Comment:</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Kommentar:</translation>
     </message>
     <message>
         <source>Fast load (consumes memory)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Rask innlasting (bruker minne)</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Slett</translation>
     </message>
     <message>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Kopier</translation>
     </message>
     <message>
         <source>Beam</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Beam</translation>
     </message>
     <message>
         <source>Copy of </source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Kopi av</translation>
     </message>
     <message>
         <source>Duplicate</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Dupliser</translation>
     </message>
     <message>
         <source>File copy failed.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Kopiering av fil feilet.</translation>
     </message>
     <message>
         <source>Details</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Detaljer</translation>
     </message>
     <message>
         <source>Moving Document failed.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Flytting av dokument feilet.</translation>
     </message>
     <message>
         <source>&quot;%1&quot;</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&quot;%1&quot;</translation>
     </message>
     <message>
         <source>File deletion failed.</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Sletting av fil feilet.</translation>
     </message>
 </context>
 <context>
     <name>FieldMap</name>
     <message>
         <source>Header Fields</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Meldingshode feltene</translation>
     </message>
     <message>
         <source>Displayed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Vist</translation>
     </message>
     <message>
         <source>-&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">-&gt;</translation>
     </message>
     <message>
         <source>Display the selected column</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Vis valgte kolonne</translation>
     </message>
     <message>
         <source>Available</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Tilgjengelig</translation>
     </message>
     <message>
         <source>A list of the columns currently being displayed</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">En liste over de kolonnene som vises</translation>
     </message>
     <message>
         <source>A list of the columns available for display</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">En liste over kolonner som er tilgjengelig for visning</translation>
     </message>
     <message>
         <source>&lt;-</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&lt;-</translation>
     </message>
     <message>
         <source>Remove the selected column from display</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Fjern den valgte kolonnen fra visningen</translation>
     </message>
     <message>
         <source>Move up</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Flytt opp</translation>
     </message>
     <message>
         <source>Move down</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Flytt ned</translation>
     </message>
 </context>
 <context>
     <name>LocalTimeFormat</name>
     <message>
         <source>%1am</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1am</translation>
     </message>
     <message>
         <source>%1pm</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1pm</translation>
     </message>
     <message>
         <source>0%1</source>
         <comment>0..9 hour of day</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">0%1</translation>
     </message>
     <message>
         <source>%1</source>
         <comment>10..24 hour of day</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1</translation>
     </message>
 </context>
 <context>
@@ -175,23 +175,23 @@
     <name>QWizard</name>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Avbryt</translation>
     </message>
     <message>
         <source>&lt; Back</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">&lt; Tilbake</translation>
     </message>
     <message>
         <source>Next &gt;</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Neste &gt;</translation>
     </message>
     <message>
         <source>Finish</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Avslutt</translation>
     </message>
     <message>
         <source>Help</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Hjelp</translation>
     </message>
 </context>
 <context>
@@ -199,7 +199,7 @@
     <message>
         <source>%1 %2</source>
         <comment>1=Monday 2=12:45</comment>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">%1 %2</translation>
     </message>
 </context>
 </TS>

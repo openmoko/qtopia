@@ -133,7 +133,11 @@ DateBook::DateBook( QWidget *parent, const char *, WFlags f )
     QPEMenuBar *mb = new QPEMenuBar( bar );
     mb->setMargin( 0 );
 
+#ifdef QTOPIA_NO_POINTER_INPUT
+    QPEToolBar *sub_bar=0;
+#else
     QPEToolBar *sub_bar = new QPEToolBar(this);
+#endif;
 
     QPopupMenu *eventMenu = new QPopupMenu( this );
     QPopupMenu *view = new QPopupMenu( this );
@@ -148,7 +152,7 @@ DateBook::DateBook( QWidget *parent, const char *, WFlags f )
                               QString::null, 0, this, 0 );
     a->setWhatsThis( tr("Create a new event") );
     connect( a, SIGNAL( activated() ), this, SLOT( fileNew() ) );
-    a->addTo( sub_bar );
+    if (sub_bar) a->addTo( sub_bar );
     a->addTo( eventMenu );
 
     editAction = new QAction( tr( "Edit Event" ),
@@ -187,16 +191,16 @@ DateBook::DateBook( QWidget *parent, const char *, WFlags f )
     a = new QAction( tr( "Today" ), Resource::loadIconSet( "today" ), QString::null, 0, g, 0 );
     connect( a, SIGNAL( activated() ), this, SLOT( slotToday() ) );
     a->setWhatsThis( tr("Show today's events") );
-    a->addTo( sub_bar );
+    if (sub_bar) a->addTo( sub_bar );
     a->addTo( view );
 
     view->insertSeparator();
-    sub_bar->addSeparator();
+    if (sub_bar) sub_bar->addSeparator();
 
     a = new QAction( tr( "Day", "day, not date" ), Resource::loadIconSet( "day" ), QString::null, 0, g, 0 );
     a->setWhatsThis( tr("Show selected day's events") );
     if (!thinScreen)
-	a->addTo( sub_bar );
+	if (sub_bar) a->addTo( sub_bar );
     a->addTo( view );
     a->setToggleAction( TRUE );
     a->setOn( TRUE );
@@ -206,7 +210,7 @@ DateBook::DateBook( QWidget *parent, const char *, WFlags f )
     connect( a, SIGNAL( activated() ), this, SLOT( viewWeek() ) );
     a->setWhatsThis( tr("Show selected week's events") );
     if (!thinScreen)
-	a->addTo( sub_bar );
+	if (sub_bar) a->addTo( sub_bar );
     a->addTo( view );
     a->setToggleAction( TRUE );
     weekAction = a;

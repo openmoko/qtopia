@@ -27,6 +27,7 @@
 
 #include <qtopia/qpeapplication.h>
 #include <qtopia/resource.h>
+#include <qtopia/storage.h>
 #include <qtopia/fileselector.h>
 #include <qtopia/applnk.h>
 #include <qtopia/qpemenubar.h>
@@ -148,7 +149,7 @@ void ImageWidget::mouseReleaseEvent(QMouseEvent *)
 */
 
 ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
-    : QMainWindow( parent, name, wFlags ),
+    : QMainWindow( parent, name, wFlags | Qt::WResizeNoErase ),
       filename( 0 ), 
       doc(NULL),
       bFromDocView( FALSE )
@@ -184,7 +185,6 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
     connect( fileSelector, SIGNAL( fileSelected( const DocLnk &) ), this, SLOT( openFile( const DocLnk & ) ) );
     connect(fileSelector, SIGNAL(categoryChanged()), this, SLOT(docsChanged()));
     connect(fileSelector, SIGNAL(typeChanged()), this, SLOT(docsChanged()));
-    imageList = fileSelector->fileList();
 
     edit = new QPopupMenu( menubar );
     QPopupMenu *view = new QPopupMenu( menubar );
@@ -229,21 +229,19 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
     connect( slideAction, SIGNAL( toggled(bool) ), this, SLOT( slideShow(bool) ) );
     slideAction->addTo( view);
     slideAction->addTo( toolBar );
-    slideAction->setEnabled(imageList.count() != 0);
+    slideAction->setEnabled( FALSE );
 
     prevImageAction = new QAction(tr("Previous"), Resource::loadIconSet("back"),
 	QString::null, 0, this, 0);
     connect(prevImageAction, SIGNAL(activated()), this, SLOT(prevImage()));
     prevImageAction->addTo(toolBar);
     prevImageAction->addTo(view);
-    prevImageAction->setEnabled(imageList.count() != 0);
 
     nextImageAction = new QAction(tr("Next"), Resource::loadIconSet("forward"),
 	QString::null, 0, this, 0);
     connect(nextImageAction, SIGNAL(activated()), this, SLOT(nextImage()));
     nextImageAction->addTo(toolBar);
     nextImageAction->addTo(view);
-    nextImageAction->setEnabled(imageList.count() != 0);
 
     view->insertSeparator();
     view->insertItem(tr("Settings..."), this, SLOT(settings()), 0);
@@ -267,15 +265,18 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
     fastLoad = config.readBoolEntry("FastLoad", TRUE);
     smallScale = config.readBoolEntry("SmallScale", FALSE);
 
-    setControls(TRUE, !imageList.isEmpty());
+    storage = new StorageInfo( this );
+    connect(storage, SIGNAL(disksChanged()), this, SLOT(updateDocs()));
+    connect(qApp, SIGNAL(linkChanged(const QString&)), this, SLOT(updateDocs()));
 
-    connect(qApp, SIGNAL(linkChanged(const QString&)), this, SLOT(linkChanged(const QString&)));
-
-    QCopChannel *cardCh = new QCopChannel( "QPE/Card", this );
-    connect( cardCh, SIGNAL(received(const QCString &, const QByteArray &)),
-	    this, SLOT(cardMessage( const QCString &, const QByteArray &)) );
+    setControls();
+    updateDocs();
 }
 
+void ImageViewer::updateDocs()
+{
+    QTimer::singleShot(1000, this, SLOT(docsChanged()));
+}
 
 ImageViewer::~ImageViewer()
 {
@@ -303,34 +304,14 @@ ImageViewer::properties(void)
     if (doc) {
 	// pause slideshow if on
 	bool on = slideTimer->isActive();
-	int idx = imageIndex();
 	if (on)
 	    slideTimer->stop();
 
 	DocPropertiesDialog *dp = new DocPropertiesDialog(doc, this);
 	QPEApplication::execDialog( dp );
 	delete dp;
-
-	QString newname = doc->name();
-	filename = doc->file();
-	fileSelector->reread();
-	imageList = fileSelector->fileList();
-
-	setControls(TRUE, !imageList.isEmpty());
-
-	if (imageIndex() == -1)
-	{
-	    if (imageList.count() > 0) {
-		if (idx >= int(imageList.count()))
-		    idx = imageList.count() - 1;
-		if (idx != -1)
-		    openFile(imageList[idx]);
-	    } else {
-		on = FALSE;
-		slideShow(FALSE);
-		open();
-	    }
-	}
+	// if link is changed in the properties dialog,
+	// we get a linkChanged message to handle
 
 	if (on)
 	    slideTimer->start(slideDelay * 1000, FALSE);
@@ -339,9 +320,14 @@ ImageViewer::properties(void)
 
 void ImageViewer::docsChanged(void)
 {
-    imageList.clear();
-    imageList = fileSelector->fileList();
-    setControls(TRUE, !imageList.isEmpty());
+    // Avoid causing the fileSelector to scan until needed. It's okay if
+    // we have already caused it to scan in which case imageList is not
+    // empty, or we need it to scan because we are viewing the file selector.
+    if ( fileSelector->isVisible() || !imageList.isEmpty() ) {
+	imageList.clear();
+	imageList = fileSelector->fileList();
+	setControls();
+    }
 }
 
 void ImageViewer::settings()
@@ -437,6 +423,7 @@ void ImageViewer::open()
     fileSelector->setFocus();
     openAction->setEnabled( FALSE );
     updateCaption();
+    updateDocs();
 }
 
 void ImageViewer::closeFileSelector()
@@ -535,21 +522,21 @@ void ImageViewer::loadFilename( const QString &file ) {
     }
 }
 
-void ImageViewer::setControls(bool force, bool valid)
+void ImageViewer::setControls()
 {
-    bool valid_picture = force ? valid : !image.isNull();
+    bool validPicture = !image.isNull() && stack->visibleWidget() == imagePanel;
+    propAction->setEnabled(validPicture);
+    rotateAction->setEnabled(validPicture);
+    flipAction->setEnabled(validPicture);
+    fullscreenAction->setEnabled(validPicture);
 
-    propAction->setEnabled(valid_picture);
-    rotateAction->setEnabled(valid_picture);
-    flipAction->setEnabled(valid_picture);
-    fullscreenAction->setEnabled(valid_picture);
+    bool multipleImages = imageList.count() > 1;
+    slideAction->setEnabled(multipleImages);
+    prevImageAction->setEnabled(validPicture && multipleImages);
+    nextImageAction->setEnabled(validPicture && multipleImages);
 
-    slideAction->setEnabled(valid_picture);
-    prevImageAction->setEnabled(valid_picture);
-    nextImageAction->setEnabled(valid_picture);
-
-    edit->setItemEnabled(hflip_id, valid_picture);
-    edit->setItemEnabled(vflip_id, valid_picture);
+    edit->setItemEnabled(hflip_id, validPicture);
+    edit->setItemEnabled(vflip_id, validPicture);
 }
 
 bool ImageViewer::loadSelected()
@@ -930,16 +917,5 @@ ImageViewer::handleKeypress(int keycode)
 	}
 	break;
     }
-}
-
-void ImageViewer::linkChanged(const QString &)
-{
-    QTimer::singleShot(1000, this, SLOT(docsChanged()));
-}
-
-void ImageViewer::cardMessage(const QCString &msg, const QByteArray &)
-{
-    if (msg == "mtabChanged()")
-	QTimer::singleShot(1000, this, SLOT(docsChanged()));
 }
 

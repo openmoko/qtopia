@@ -698,7 +698,7 @@ public:
 	    services->hide();
 	    services_label->hide();
 	}
-	if ( !device[device.length()-1].isDigit() )
+	if ( !device[(int)device.length()-1].isDigit() )
 	    device += "0";
 	tid = startTimer(1000);
 	updateDisplay();

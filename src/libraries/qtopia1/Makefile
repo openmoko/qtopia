@@ -3,7 +3,7 @@
 # Build options from 
 #############################################################################
 
-default: all # package
+default: all  # package
 
 CONTROL = libraries/qtopia1/qpe-libqtopia.control
 
@@ -116,9 +116,9 @@ OBJECTS_DIR = .obj/linux-generic-g++/
 ####### Compiler, tools and options
 
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
-CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
+CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB) -DQTOPIA_APP_INTERFACE
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB) -DQTOPIA_APP_INTERFACE
 INCPATH =	-I$(MOC_DIR) -I$(QPEDIR)/src/server
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -luuid -lqpe $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
@@ -395,7 +395,8 @@ $(OBJECTS_DIR)/pluginloaderlib.o: pluginloaderlib.cpp \
 
 $(OBJECTS_DIR)/qprocess_unix.o: qprocess_unix.cpp \
 		$(MOC_DIR)/qprocess_unix.moc \
-		qprocess.h
+		qprocess.h \
+		qcleanuphandler_p.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qprocess_unix.o qprocess_unix.cpp
 
 $(OBJECTS_DIR)/quuid1.o: quuid1.cpp
@@ -518,7 +519,7 @@ lrelease:
 
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
-	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done
+	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic  $(QPEDIR)/src/$$ctrl ; done
 
 package: ipkg
 	cd $(QPEDIR)/ipkg; 	../bin/mkPackages

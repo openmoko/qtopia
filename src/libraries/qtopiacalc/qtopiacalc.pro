@@ -23,5 +23,5 @@ static:LIBS	+= -lqpe
 TARGET		= qtopiacalc
 DESTDIR		= $(QPEDIR)/lib$(PROJMAK)
 win32:DLLDESTDIR = $(QPEDIR)/bin
-VERSION		= 1.6.2
+VERSION		= 1.7.0
 

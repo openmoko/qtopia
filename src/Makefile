@@ -107,7 +107,7 @@ SUPPORTEDAPPS=\
 	settings/worldtime \
 	settings/launcher \
 	settings/language \
-	tools/quickexec \
+	tools/quicklauncher \
 	tools/qcop \
 	tools/symlinker
 

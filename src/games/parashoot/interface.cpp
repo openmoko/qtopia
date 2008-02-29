@@ -48,9 +48,7 @@ ParaShoot::ParaShoot(QWidget* parent, const char* name, WFlags f) :
     toolbar->setHorizontalStretchable( TRUE );
 
     setCaption( tr("ParaShoot") );
-    QPixmap newicon = Resource::loadPixmap("ParaShoot");
-    setIcon(newicon);
-    new QToolButton(newicon, tr("New Game"), 0,
+    new QToolButton( Resource::loadIconSet("ParaShoot"), tr("New Game"), 0,
                            this, SLOT(newGame()), toolbar, "New Game");
 
     levelscore = new QLabel(toolbar);

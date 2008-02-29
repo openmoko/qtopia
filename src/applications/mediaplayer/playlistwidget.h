@@ -51,6 +51,7 @@ public slots:
     void setActiveWindow(); // need to handle this to show the right view
     //void setPlaylist( bool ); // Show/Hide the playlist
     void setView( View );
+    void viewClosed();
     void saveList();  // Save the playlist
     void loadList();  // Load a playlist
     bool first();

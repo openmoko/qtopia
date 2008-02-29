@@ -20,15 +20,13 @@
 
 #include "startmenu.h"
 #include "inputmethods.h"
-#include "mrulist.h"
 #include "runningappbar.h"
 #include "systray.h"
-#include "calibrate.h"
 #include "wait.h"
 #include "appicons.h"
 
 #include "taskbar.h"
-#include "desktop.h"
+#include "server.h"
 
 #include <qtopia/qpeapplication.h>
 #ifdef QWS
@@ -51,46 +49,6 @@
 #include <qgfx_qws.h>
 #endif
 
-
-#define FACTORY(T) \
-    static QWidget *new##T( bool maximized ) { \
-	QWidget *w = new T( 0, 0, QWidget::WDestructiveClose | QWidget::WGroupLeader ); \
-	if ( maximized ) { \
-	    if ( qApp->desktop()->width() <= 350 ) { \
-		w->showMaximized(); \
-	    } else { \
-		w->resize( QSize( 300, 300 ) ); \
-	    } \
-	} \
-	w->show(); \
-	return w; \
-    }
-
-
-#ifdef SINGLE_APP
-#define APP(a,b,c,d) FACTORY(b)
-#include "apps.h"
-#undef APP
-#endif // SINGLE_APP
-
-static Global::Command builtins[] = {
-
-#ifdef SINGLE_APP
-#define APP(a,b,c,d) { a, new##b, c, d },
-#include "apps.h"
-#undef APP
-#endif
-
-#if defined(QPE_NEED_CALIBRATION)
-        { "calibrate",          TaskBar::calibrate,	1, 0 }, // No tr
-#endif
-#if !defined(QT_QWS_CASSIOPEIA)
-	{ "shutdown",           Global::shutdown,		1, 0 }, // No tr
-//	{ "run",                run,			1, 0 }, // No tr
-#endif
-
-	{ 0,            TaskBar::calibrate,	0, 0 },
-};
 
 static bool initNumLock()
 {
@@ -215,8 +173,6 @@ TaskBar::~TaskBar()
 
 TaskBar::TaskBar() : QHBox(0, 0, WStyle_Customize | WStyle_Tool | WStyle_StaysOnTop | WGroupLeader)
 {
-    Global::setBuiltinCommands(builtins);
-
     sm = new StartMenu( this );
     connect( sm, SIGNAL(tabSelected(const QString&)), this,
 	    SIGNAL(tabSelected(const QString&)) );
@@ -224,16 +180,12 @@ TaskBar::TaskBar() : QHBox(0, 0, WStyle_Customize | WStyle_Tool | WStyle_StaysOn
     inputMethods = new InputMethods( this );
     connect( inputMethods, SIGNAL(inputToggled(bool)),
 	     this, SLOT(calcMaxWindowRect()) );
-    //new QuickLauncher( this );
     
     stack = new QWidgetStack( this );
     stack->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Minimum ) );
     label = new QLabel(stack);
 
-//     mru = new MRUList( stack );
-//     stack->raiseWidget( mru );
     runningAppBar = new RunningAppBar(stack);
-    connect(runningAppBar, SIGNAL(forceSuspend()), this, SIGNAL(forceSuspend()) );
     stack->raiseWidget(runningAppBar);
 
     waitIcon = new Wait( this );
@@ -262,6 +214,10 @@ TaskBar::TaskBar() : QHBox(0, 0, WStyle_Customize | WStyle_Tool | WStyle_StaysOn
     connect( waitTimer, SIGNAL( timeout() ), this, SLOT( stopWait() ) );
     clearer = new QTimer( this );
     QObject::connect(clearer, SIGNAL(timeout()), SLOT(clearStatusBar()));
+
+    connect( qApp, SIGNAL(symbol()), this, SLOT(toggleSymbolInput()) );
+    connect( qApp, SIGNAL(numLockStateToggle()), this, SLOT(toggleNumLockState()) );
+    connect( qApp, SIGNAL(capsLockStateToggle()), this, SLOT(toggleCapsLockState()) );
 }
 
 void TaskBar::setStatusMessage( const QString &text )
@@ -361,34 +317,19 @@ void TaskBar::receive( const QCString &msg, const QByteArray &data )
 	inputMethods->showInputMethod(name);
     } else if ( msg == "reloadInputMethods()" ) {
 	inputMethods->loadInputMethods();
-    } else if ( msg == "reloadApps()" ) {
-	runningAppBar->reloadApps();
-	sm->reloadApps();
     } else if ( msg == "reloadApplets()" ) {
 	sysTray->clearApplets();
 	sm->createMenu();
 	sysTray->addApplets();
-    } else if ( msg == "soundAlarm()" ) {
-	Desktop::soundAlarm();
     }
-#ifdef CUSTOM_LEDS    
-    else if ( msg == "setLed(int,bool)" ) {
-	int led, status;
-	stream >> led >> status;
-	CUSTOM_LEDS( led, status );
-    }
-#endif    
 }
 
-QWidget *TaskBar::calibrate(bool)
+void TaskBar::setApplicationState( const QString &name, ServerInterface::ApplicationState state )
 {
-#ifdef Q_WS_QWS
-    Calibrate *c = new Calibrate;
-    c->show();
-    return c;
-#else
-    return 0;
-#endif
+    if ( state == ServerInterface::Launching )
+	runningAppBar->applicationLaunched( name );
+    else if ( state == ServerInterface::Terminated )
+	runningAppBar->applicationTerminated( name );
 }
 
 void TaskBar::toggleNumLockState()
@@ -409,12 +350,6 @@ void TaskBar::toggleSymbolInput()
     } else {
 	inputMethods->showInputMethod( unicodeInput );
     }
-}
-
-bool TaskBar::recoverMemory()
-{
-//     return mru->quitOldApps();
-  return true;
 }
 
 #include "taskbar.moc"

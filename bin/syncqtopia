@@ -10,6 +10,19 @@
 #
 ############################################################################
 
+sub mkdir_recursive
+{
+    my ($dir, $mode) = @_;
+    my @dirList = split(/\//, $dir);
+    my $currentDir = "";
+    foreach $dirSegments (@dirList){
+	$currentDir .= $dirSegments . "/";
+	if (! -d $currentDir){
+	    mkdir ($currentDir, $mode);
+	}
+    } 
+}
+
 use strict;
 use File::Basename;
 
@@ -52,9 +65,11 @@ while ( $#ARGV >= 0 ) {
 
 undef $/;
 
-mkdir($basedir . "/include", 0777);
-mkdir($basedir . "/include/qtopia", 0777);
-mkdir($basedir . "/include/qpe", 0777);
+if (! check_unix()){
+    $fast = 1;
+}
+mkdir_recursive($basedir . "/include/qtopia/private", 0777);
+mkdir_recursive($basedir . "/include/qpe/private", 0777);
 chdir($basedir);
 # a map of where headers can be found to where headers are to be put
 my %includeDirs = ( "qtopia" => "qtopia", "qtopia1" => "qtopia", "qtopiapim" => "qtopia/pim", 
@@ -77,8 +92,8 @@ if (! $showonly){
         symlink_files($basedir. "/src/libraries/qtopia/custom-linux-generic-g++.cpp", $basedir. "/src/libraries/qtopia/custom.cpp");
         symlink_files($basedir. "/src/libraries/qtopia/custom-linux-generic-g++.h", $basedir. "/src/libraries/qtopia/custom..h");
     }else{
-	sync_files($basedir . "/src/libraries/qtopia/custom-win32-msvc.cpp", $basedir . "/src/libraries/qtopia/custom.cpp");
-	sync_files($basedir . "/src/libraries/qtopia/custom-win32-msvc.h", $basedir . "/src/libraries/qtopia/custom.h");
+	sync_files($basedir . "/src/libraries/qtopia/custom-win32-msvc.cpp", $basedir . "/src/libraries/qtopia/custom.cpp", $fast);
+	sync_files($basedir . "/src/libraries/qtopia/custom-win32-msvc.h", $basedir . "/src/libraries/qtopia/custom.h", $fast);
     }
 }
 
@@ -93,7 +108,7 @@ for $key (keys %includeDirs){
 	}
     }else{
 
-	mkdir($basedir . "/include/" .  $destDir, 0777);
+	mkdir_recursive($basedir . "/include/" .  $destDir, 0777);
 	if ($isUnix){
 	    foreach $file (@files){
 		$f = basename($file, ""); 
@@ -112,7 +127,7 @@ for $key (keys %includeDirs){
 	    print "$_\n";
 	}
     }else{
-        mkdir($basedir . "/include/" .  $destDir . "/private" , 0777);
+        mkdir_recursive($basedir . "/include/" .  $destDir . "/private" , 0777);
         if ($isUnix){
 	    foreach $file (@pfiles){
 	        $f = basename($file, "");

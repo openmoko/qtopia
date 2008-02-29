@@ -184,6 +184,19 @@
 "Config::writeEntry" config.html#writeEntry
 "Config::writeEntryCrypt" config.html#writeEntryCrypt
 "Config::~Config" config.html#~Config
+"Database::Database" database.html#Database
+"Database::defaultView" database.html#defaultView
+"Database::insert" database.html#insert
+"Database::name" database.html#name
+"Database::remove" database.html#remove
+"Database::~Database" database.html#~Database
+"DatabaseDefaultView::DatabaseDefaultView" databasedefaultview.html#DatabaseDefaultView
+"DatabaseView::DatabaseView" databaseview.html#DatabaseView
+"DatabaseView::count" databaseview.html#count
+"DatabaseView::countAll" databaseview.html#countAll
+"DatabaseView::find" databaseview.html#find
+"DatabaseView::insert" databaseview.html#insert
+"DatabaseView::remove" databaseview.html#remove
 "DateBookAccess" datebookaccess.html
 "DateBookAccess::DateBookAccess" datebookaccess.html#DateBookAccess
 "DateBookAccess::addEvent" datebookaccess.html#addEvent
@@ -5357,10 +5370,12 @@
 "QWSMouseHandler::~QWSMouseHandler" qwsmousehandler.html#~QWSMouseHandler
 "QWSServer" qwsserver.html
 "QWSServer::QWSServer" qwsserver.html#QWSServer
+"QWSServer::WindowEvent" qwsserver.html#WindowEvent
 "QWSServer::clientWindows" qwsserver.html#clientWindows
 "QWSServer::closeKeyboard" qwsserver.html#closeKeyboard
 "QWSServer::closeMouse" qwsserver.html#closeMouse
 "QWSServer::enablePainting" qwsserver.html#enablePainting
+"QWSServer::isCursorVisible" qwsserver.html#isCursorVisible
 "QWSServer::keyboardHandler" qwsserver.html#keyboardHandler
 "QWSServer::mouseHandler" qwsserver.html#mouseHandler
 "QWSServer::newChannel" qwsserver.html#newChannel
@@ -5372,6 +5387,7 @@
 "QWSServer::screenSaverActive" qwsserver.html#screenSaverActive
 "QWSServer::sendKeyEvent" qwsserver.html#sendKeyEvent
 "QWSServer::sendMouseEvent" qwsserver.html#sendMouseEvent
+"QWSServer::setCursorVisible" qwsserver.html#setCursorVisible
 "QWSServer::setDefaultKeyboard" qwsserver.html#setDefaultKeyboard
 "QWSServer::setDefaultMouse" qwsserver.html#setDefaultMouse
 "QWSServer::setDesktopBackground" qwsserver.html#setDesktopBackground
@@ -5383,6 +5399,7 @@
 "QWSServer::setScreenSaverIntervals" qwsserver.html#setScreenSaverIntervals
 "QWSServer::setWindowRegion" qwsserver.html#setWindowRegion
 "QWSServer::windowAt" qwsserver.html#windowAt
+"QWSServer::windowEvent" qwsserver.html#windowEvent
 "QWSServer::~QWSServer" qwsserver.html#~QWSServer
 "QWSWindow" qwswindow.html
 "QWSWindow::allocation" qwswindow.html#allocation
@@ -6049,7 +6066,7 @@
 "" distrib.html
 "" docwidget.html
 "" files.html
-"" i18n.html
+"" i18n-qtopia.html
 "" inputmethods.html
 "" licensing.html
 "" mainfunc.html
@@ -6063,6 +6080,7 @@
 "" release-1.6beta3.html
 "" release-1.6beta4.html
 "" release-1.6beta5.html
+"" release-1.7.0.html
 "" release-index.html
 "" services.html
 "" servicesapi.html

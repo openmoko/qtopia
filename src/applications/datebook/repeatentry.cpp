@@ -128,6 +128,8 @@ WeekGroup::WeekGroup(int oM, QWidget *parent)
 	oM++;
 	if (oM > 7)
 	    oM = 1;
+
+	b1->setFocusPolicy(QWidget::StrongFocus);
     }
 
    /*

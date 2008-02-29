@@ -19,15 +19,8 @@
 **********************************************************************/
 
 #include "mainwindow.h"
-
 #include <qtopia/qpeapplication.h>
 
-int main( int argc, char **argv )
-{
-    QPEApplication a( argc, argv );
+QTOPIA_ADD_APPLICATION("todolist",TodoWindow)
+QTOPIA_MAIN
 
-    TodoWindow mw;
-    
-    a.showMainWidget(&mw);
-    return a.exec();
-}

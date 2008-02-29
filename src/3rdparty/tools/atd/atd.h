@@ -1,6 +1,5 @@
-
 class atd
 {
 public:
     atd();
-}
+};

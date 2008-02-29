@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2003 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 **
@@ -20,19 +20,7 @@
 **********************************************************************/
 
 #include "today.h"
-
 #include <qtopia/qpeapplication.h>
 
-int main(int argc, char* argv[])
-{
-    QPEApplication a( argc, argv );
-    Today mw(0, 0);
-
-    QObject::connect( &a, SIGNAL( appMessage(const QCString &, const QByteArray &) ),
-        &mw, SLOT( appMessage(const QCString &, const QByteArray &) ) );
-
-    a.showMainDocumentWidget(&mw);
-
-    return a.exec();
-}
-
+QTOPIA_ADD_APPLICATION("today",Today)
+QTOPIA_MAIN

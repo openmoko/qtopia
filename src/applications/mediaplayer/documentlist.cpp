@@ -39,10 +39,10 @@
 static const int MAX_SEARCH_DEPTH = 10;
 
 
-class DocumentListPrivate {
+class AppDocumentListPrivate {
 public:
-    DocumentListPrivate();
-    ~DocumentListPrivate();
+    AppDocumentListPrivate();
+    ~AppDocumentListPrivate();
 
     void initialize( const QString &mimefilter );
     QString mimeFilter;
@@ -73,12 +73,12 @@ public:
 };
 
 
-DocumentListPrivate::DocumentListPrivate() 
+AppDocumentListPrivate::AppDocumentListPrivate() 
 {
 }
 
 
-void DocumentListPrivate::initialize( const QString &mimefilter ) 
+void AppDocumentListPrivate::initialize( const QString &mimefilter ) 
 {
     mimeFilter = mimefilter;
 
@@ -110,13 +110,13 @@ void DocumentListPrivate::initialize( const QString &mimefilter )
 }
 
 
-DocumentListPrivate::~DocumentListPrivate()
+AppDocumentListPrivate::~AppDocumentListPrivate()
 {
     delete dit;
 }
 
 
-QFileInfo *DocumentListPrivate::nextFile( )
+QFileInfo *AppDocumentListPrivate::nextFile( )
 {
     while ( TRUE ) {
 	while ( searchDepth < 0 ) {
@@ -159,7 +159,7 @@ QFileInfo *DocumentListPrivate::nextFile( )
 			QDir dir( fi->filePath() );
 //qDebug("now going in to path: %s", bn.latin1() );
 			if ( !dir.exists( ".Qtopia-ignore" ) ) {
-			    if ( searchDepth < MAX_SEARCH_DEPTH ) {
+			    if ( searchDepth < MAX_SEARCH_DEPTH - 1 ) {
 				searchDepth++;
 				listDirs[searchDepth] = new QDir( dir );
 				lists[searchDepth] = listDirs[searchDepth]->entryInfoList();
@@ -178,7 +178,7 @@ QFileInfo *DocumentListPrivate::nextFile( )
 }
 
 
-bool DocumentListPrivate::store( DocLnk* dl )
+bool AppDocumentListPrivate::store( DocLnk* dl )
 {
     bool mtch = FALSE;
     if ( mimeFilters.count() == 0 ) {
@@ -202,7 +202,7 @@ bool DocumentListPrivate::store( DocLnk* dl )
 }
 
 
-const DocLnk *DocumentListPrivate::iterate()
+const DocLnk *AppDocumentListPrivate::iterate()
 {
     if ( state == Find ) {
 	//qDebug("state Find");
@@ -226,6 +226,7 @@ const DocLnk *DocumentListPrivate::iterate()
 	const QList<DocLnk> &list = dls.children();
 	for ( QListIterator<DocLnk> it( list ); it.current(); ++it ) {
 	    reference.remove( (*it)->file() );
+	    // ### check if this needs a delete
 	}
 	dit = new QDictIterator<void>(reference);
 	state = MakeUnknownFiles;
@@ -257,10 +258,10 @@ const DocLnk *DocumentListPrivate::iterate()
 
 
 
-DocumentList::DocumentList( const QString &mimefilter, QObject *parent, const char *name )
+AppDocumentList::AppDocumentList( const QString &mimefilter, QObject *parent, const char *name )
  : QObject( parent, name )
 {
-    d = new DocumentListPrivate();
+    d = new AppDocumentListPrivate();
 
     d->storage = new StorageInfo( this );
 
@@ -276,34 +277,34 @@ DocumentList::DocumentList( const QString &mimefilter, QObject *parent, const ch
 }
 
 
-void DocumentList::add( const DocLnk& doc ) 
+void AppDocumentList::add( const DocLnk& doc ) 
 {
     if ( QFile::exists( doc.file() ) )
 	emit added( doc );
 }
 
 
-void DocumentList::start() 
+void AppDocumentList::start() 
 {
     resume();
 }
 
 
-void DocumentList::pause() 
+void AppDocumentList::pause() 
 {
     killTimer( d->tid );
     d->tid = 0;
 }
 
 
-void DocumentList::resume() 
+void AppDocumentList::resume() 
 {
     if ( d->tid == 0 )
 	d->tid = startTimer( 1 );
 }
 
 
-void DocumentList::resend()
+void AppDocumentList::resend()
 {
     // Re-emits all the added items to the list (firstly letting everyone know to
     // clear what they have as it is being sent again)
@@ -313,7 +314,7 @@ void DocumentList::resend()
 }
 
 
-void DocumentList::resendWorker()
+void AppDocumentList::resendWorker()
 {
     const QList<DocLnk> &list = d->dls.children();
     for ( QListIterator<DocLnk> it( list ); it.current(); ++it ) 
@@ -322,7 +323,7 @@ void DocumentList::resendWorker()
 }
 
 
-void DocumentList::rescan()
+void AppDocumentList::rescan()
 {
     pause();
     emit allRemoved();
@@ -331,14 +332,14 @@ void DocumentList::rescan()
 }
 
 
-DocumentList::~DocumentList( )
+AppDocumentList::~AppDocumentList( )
 {
     delete d->systemChannel;
     delete d;
 }
 
 
-void DocumentList::systemMessage( const QCString &msg, const QByteArray &data )
+void AppDocumentList::systemMessage( const QCString &msg, const QByteArray &data )
 {
     if ( msg == "linkChanged(QString)" ) {
 	QDataStream stream( data, IO_ReadOnly );
@@ -347,8 +348,12 @@ void DocumentList::systemMessage( const QCString &msg, const QByteArray &data )
 	qDebug( "linkchanged( %s )", arg.latin1() );
 	pause();
 	const QList<DocLnk> &list = d->dls.children();
-	for ( QListIterator<DocLnk> it( list ); it.current(); ++it ) {
-	    if ( (*it)->linkFile() == arg ) {
+	QListIterator<DocLnk> it( list );
+	while ( it.current() ) {
+	    DocLnk *doc = it.current();
+	    ++it;
+	    if ( ( doc->linkFileKnown() && doc->linkFile() == arg )
+		|| ( doc->fileKnown() && doc->file() == arg ) ) {
 		qDebug( "found old link" );
 		DocLnk* dl = new DocLnk( arg );
 		// add new one if it exists and matches the mimetype
@@ -356,14 +361,15 @@ void DocumentList::systemMessage( const QCString &msg, const QByteArray &data )
 		    // Existing link has been changed, send old link ref and a ref
 		    // to the new link
 		    qDebug( "change case" );
-		    emit changed( *(*it), *dl );
+		    emit changed( *doc, *dl );
 		} else {
 		    // Link has been removed or doesn't match the mimetypes any more
 		    // so we aren't interested in it, so take it away from the list
 		    qDebug( "removal case" );
-		    emit removed( *(*it) );
+		    emit removed( *doc );
 		}
-		d->dls.remove( (*it) ); // remove old link from docLnkSet
+		d->dls.remove( doc ); // remove old link from docLnkSet
+		delete doc;
 		resume();
 		return;
 	    }
@@ -380,7 +386,7 @@ void DocumentList::systemMessage( const QCString &msg, const QByteArray &data )
 }
 
 
-void DocumentList::storageChanged()
+void AppDocumentList::storageChanged()
 {
     // ### Optimization opportunity
     // Could be a bit more intelligent and somehow work out which
@@ -390,7 +396,7 @@ void DocumentList::storageChanged()
 }
 
 
-void DocumentList::timerEvent( QTimerEvent *te )
+void AppDocumentList::timerEvent( QTimerEvent *te )
 {
     if ( te->timerId() == d->tid ) {
 	// Do 10 at a time

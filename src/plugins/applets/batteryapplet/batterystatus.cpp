@@ -24,6 +24,7 @@
 #include <qpainter.h>
 #include <qpushbutton.h> 
 #include <qdrawutil.h> 
+#include <qtopia/qpeapplication.h>
 
 static const int marg=10;
 
@@ -43,7 +44,8 @@ QSize BatteryStatus::sizeHint() const
     QString text = statusText();
     QFontMetrics fm = fontMetrics();
     QRect r=fm.boundingRect( marg, 0, width()-marg*2, height(), AlignVCenter, text );
-    return QSize(QMAX(200,2*marg+r.width()),2*marg+60+r.height());
+    return QSize(QMAX(QMIN(200, qApp->desktop()->width()),
+	2*marg+r.width()),2*marg+60+r.height());
 }
 
 void BatteryStatus::updatePercent( int pc, bool doRepaint )

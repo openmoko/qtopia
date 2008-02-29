@@ -975,7 +975,7 @@ xmlreader.h Include File | xmlreader-h.html
  | distrib.html
  | docwidget.html
  | files.html
- | i18n.html
+ | i18n-qtopia.html
  | inputmethods.html
  | licensing.html
  | mainfunc.html
@@ -989,6 +989,7 @@ xmlreader.h Include File | xmlreader-h.html
  | release-1.6beta3.html
  | release-1.6beta4.html
  | release-1.6beta5.html
+ | release-1.7.0.html
  | release-index.html
  | services.html
  | servicesapi.html

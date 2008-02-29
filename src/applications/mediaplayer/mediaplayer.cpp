@@ -30,6 +30,7 @@
 #include "mediaplayer.h"
 #include "playlistwidget.h"
 #include "audiowidget.h"
+#include "videowidget.h"
 #include "loopcontrol.h"
 #include "audiodevice.h"
 
@@ -89,6 +90,7 @@ void MediaPlayer::error( const QString& error, const QString& errorMsg )
 {
     QMessageBox::critical( 0, error, errorMsg );
     mediaPlayerState->setPlaying( FALSE );
+    mediaPlayerState->closeView();
 }
 
 
@@ -387,6 +389,12 @@ void MediaPlayer::timerEvent( QTimerEvent *te )
 
 bool MediaPlayer::eventFilter( QObject *o, QEvent *e )
 {
+    if ( e->type() == QEvent::WindowActivate ) {
+	if ( o == mainDocumentWindow && mediaPlayerState && mediaPlayerState->view() == VideoView ) {
+	    mediaPlayerState->videoUI()->makeVisible();
+	    return TRUE;
+	}
+    }
     if ( e->type() == QEvent::KeyPress )
 	if ( keyPressEvent( (QKeyEvent *)e ) )
 	    return TRUE;

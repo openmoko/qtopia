@@ -36,7 +36,9 @@ const int CITIES = 6;    // the number of cities...
 #ifndef Q_DEFINED_QLABEL
 #define Q_DEFINED_QLABEL
 #endif
+#ifdef Q_OS_WIN32
 #include <common/qpcwinexports.h>
+#endif
 #define WORLDTIME_EXPORT QPC_EXPORT
 #else
 #define WORLDTIME_EXPORT

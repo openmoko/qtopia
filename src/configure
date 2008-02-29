@@ -21,6 +21,7 @@ SINGLE="CONFIG+=multiprocess"
 SINGLESINGLE="CONFIG+=singleprocess DEFINES+=SINGLE_APP"
 STATIC="CONFIG+=dynamic"
 STATICSTATIC="CONFIG+=static DEFINES+=QTOPIA_FAKE_COMPONENT"
+QUICKLAUNCH="CONFIG+=quicklaunch DEFINES+=QTOPIA_APP_INTERFACE"
 
 touch .test.qtopia.
 if [ '!' -f ${QPEDIR}/src/.test.qtopia. ];
@@ -174,6 +175,9 @@ while [ -n "$1" ]; do
     -single)
 	SINGLE="$SINGLESINGLE"
 	;;
+    -noquicklaunch)
+	QUICKLAUNCH=
+	;;
     *)
 	HELP=yes;;
    esac
@@ -215,6 +219,8 @@ if [ "$HELP" = "yes" ]; then
 	    -platform target ... The platform you are building on ($PLATFORM)
 
 	    -qtopiadesktop ..... Configure for Qtopia Desktop, not device Qtopia.
+
+	    -noquicklaunch ..... Disable the quicklauncher functionality.
 EOF
    exit 0
 fi
@@ -407,6 +413,23 @@ for a in $TOMAKE server; do
 			fi
 		    fi
 		fi
+		if [ -n "$QUICKLAUNCH" ]
+		then
+		    LINK_TO_QUICKLAUNCH=
+		    PACKAGE_QUICKLAUNCH=
+		    # Not a very good way to detect ql enbaled apps.
+		    doql=`grep '^quicklaunch\:' $a/$f.pro`
+		    if [ -n "$doql" ]
+		    then
+			LINK_TO_QUICKLAUNCH="ln_quicklaunch"
+			PACKAGE_QUICKLAUNCH="-quicklaunch"
+			targ=`grep '^TARGET' $a/$f.pro | cut -d'=' -f2 | sed -e 's/ //g'`
+			if [ -z $targ ];
+			then
+			    targ=$f
+			fi
+		    fi
+		fi
 	    fi
 
 	    (   cd $a;
@@ -417,7 +440,7 @@ for a in $TOMAKE server; do
 		fi
 		MOC_DIR=.moc
 		OBJECTS_DIR=.obj
-		tmake $MAGICPATH $STATIC $SINGLE $VCONFIG $QCONFIGARG $ECONFIG LIBS+="$EXTRALIBS" \
+		tmake $MAGICPATH $STATIC $SINGLE $QUICKLAUNCH $VCONFIG $QCONFIGARG $ECONFIG LIBS+="$EXTRALIBS" \
 		OBJECTS_DIR="\$(OBJECTS_DIR)" MOC_DIR="\$(MOC_DIR)" INCLUDEPATH+="\$(MOC_DIR)" \
 		    -t $H/qt/tmake/propagate.t $f.pro |
 		    sed -e "s|$QTDIR|\$(QTDIR)|g" -e "s|$QPEDIR|\$(QPEDIR)|g" >Makefile.in;
@@ -466,11 +489,20 @@ for a in $TOMAKE server; do
 # Build options from $1
 #############################################################################
 
-default: $DEFAULTTARGET # $MKPKG_Y
+default: $DEFAULTTARGET $LINK_TO_QUICKLAUNCH # $MKPKG_Y
 
 CONTROL = $CONTROL
 
 EOF
+
+	if [ -n "$LINK_TO_QUICKLAUNCH" ]
+	then
+	    cat >> $N <<EOF
+ln_quicklaunch:
+	-cd \$(QPEDIR)/bin ; ln -sf quicklauncher $targ
+
+EOF
+	fi
 
 	SED=
 	PLATFORM_CFLAGS=
@@ -660,7 +692,15 @@ EOF
 	TR=
 	if [ -f $a/$f.pro ]
 	then
-	    template=`grep '^TEMPLATE' $a/$f.pro | sed 's/^TEMPLATE.*=//' | sed 's/ //g'`
+	    template=
+	    if [ -n "$QUICKLAUNCH" ]
+	    then
+		template=`grep '^quicklaunch\:TEMPLATE' $a/$f.pro | sed 's/^quicklaunch\:TEMPLATE.*=//' | sed 's/ //g'`
+	    fi
+	    if [ -z "$template" ]
+	    then
+		template=`grep '^TEMPLATE' $a/$f.pro | sed 's/^TEMPLATE.*=//' | sed 's/ //g'`
+	    fi
 
 	    IPKGDEP="\$(DESTDIR)\$(TARGET)"
 	    if [ "$template" = "lib" ]
@@ -736,7 +776,7 @@ EOF
 	cat >> $N <<EOF
 
 ipkg: $IPKGDEP # among other things...
-	CTL="\$(CONTROL)"; for ctrl in \$\$CTL; do cd \$(QPEDIR)/ipkg; ../bin/mkipks -platform $DEVICE_ARCH \$(QPEDIR)/src/\$\$ctrl ; done
+	CTL="\$(CONTROL)"; for ctrl in \$\$CTL; do cd \$(QPEDIR)/ipkg; ../bin/mkipks -platform $DEVICE_ARCH $PACKAGE_QUICKLAUNCH \$(QPEDIR)/src/\$\$ctrl ; done
 
 package: ipkg
 	cd \$(QPEDIR)/ipkg; \

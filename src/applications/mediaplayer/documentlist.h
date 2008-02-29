@@ -17,8 +17,8 @@
 ** not clear to you.
 **
 **********************************************************************/
-#ifndef DOCUMENT_LIST_H 
-#define DOCUMENT_LIST_H 
+#ifndef APP_DOCUMENT_LIST_H 
+#define APP_DOCUMENT_LIST_H 
 
 
 #include <qtopia/applnk.h>
@@ -30,14 +30,14 @@
 #include <qlist.h>
 
 
-class DocumentListPrivate;
+class AppDocumentListPrivate;
 
 
-class DocumentList : public QObject {
+class AppDocumentList : public QObject {
     Q_OBJECT
 public:
-    DocumentList( const QString &mimefilter, QObject *parent, const char *name = 0 );
-    ~DocumentList();
+    AppDocumentList( const QString &mimefilter, QObject *parent, const char *name = 0 );
+    ~AppDocumentList();
 
     void start();
     void pause();
@@ -61,7 +61,7 @@ protected:
 
 private:
     void add( const DocLnk& doc );
-    DocumentListPrivate *d;
+    AppDocumentListPrivate *d;
 };
 
 

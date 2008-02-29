@@ -1,3 +1,4 @@
+#include <qapplication.h>
 #include <qfile.h>
 #include <qfileinfo.h>
 #include <qdir.h>
@@ -140,9 +141,10 @@ static void updateSymlinks()
 
 
 
-
 int main( int argc, char *argv[] )
 {
+    QApplication a( argc, argv, QApplication::Tty );
+
     QString command = argc > 1 ? argv[1] : "update"; // No tr
     
     if ( command == "update" ) // No tr

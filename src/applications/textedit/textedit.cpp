@@ -44,6 +44,7 @@
 #include <qwidgetstack.h>
 #include <qclipboard.h>
 #include <qwhatsthis.h>
+#include <qtimer.h>
 
 #include <stdlib.h> //getenv
 
@@ -63,6 +64,9 @@ public:
         }
 
     void find( const QString &txt, bool caseSensitive );
+
+protected:
+    virtual void mousePressEvent(QMouseEvent *);
 
 signals:
     void findNotFound();
@@ -114,6 +118,22 @@ void QpeEditor::find ( const QString &txt, bool caseSensitive )
     lastTxt = txt;
 }
 
+//
+// Ensure that the we are looking at the end of the line when the
+// line length exceeds the viewable area, and the user taps on the
+// space underneath the line.
+//
+void
+QpeEditor::mousePressEvent(QMouseEvent *e)
+{
+    int line;
+    int col;
+
+    QMultiLineEdit::mousePressEvent(e);
+
+    getCursorPosition(&line, &col);
+    setCursorPosition(line, col);
+}
 
 #else
 
@@ -199,7 +219,7 @@ TextEdit::TextEdit( QWidget *parent, const char *name, WFlags f )
     pasteAction->setWhatsThis( tr("Paste the text in the clipboard at the cursor position.") );
     pasteAction->addTo( editBar );
     pasteAction->addTo( edit );
-    clipboardChanged();
+    QTimer::singleShot(0, this, SLOT(clipboardChanged()));
 
     a = new QAction( tr( "Find" ), Resource::loadIconSet( "find" ), QString::null, 0, this, 0 );
     a->setToggleAction( TRUE );
@@ -232,7 +252,6 @@ TextEdit::TextEdit( QWidget *parent, const char *name, WFlags f )
     connect( editor, SIGNAL(findFound()), this, SLOT(findFound()) );
     connect( editor, SIGNAL(copyAvailable(bool)), cutAction, SLOT(setEnabled(bool)) );
     connect( editor, SIGNAL(copyAvailable(bool)), copyAction, SLOT(setEnabled(bool)) );
-
 
     setupFontSizes();
 
@@ -278,24 +297,9 @@ TextEdit::TextEdit( QWidget *parent, const char *name, WFlags f )
     fixedAction->setToggleAction(TRUE);
     fixedAction->addTo( font );
 
-    searchBar = new QPEToolBar(this);
-    addToolBar( searchBar,  tr("Search"), QMainWindow::Top, TRUE );
-
-    searchBar->setHorizontalStretchable( TRUE );
-
-    searchEdit = new QLineEdit( searchBar, "searchEdit" );
-    searchBar->setStretchableWidget( searchEdit );
-    connect( searchEdit, SIGNAL( textChanged( const QString & ) ),
-			 this, SLOT( search() ) );
-    connect( searchEdit, SIGNAL(returnPressed()), this, SLOT(search()) );
-
-    a = new QAction( tr( "Find Next" ), Resource::loadIconSet( "next" ), QString::null, 0, this, 0 );
-    connect( a, SIGNAL(activated()), this, SLOT(search()) );
-    a->setWhatsThis( tr("Find the next occurrence of the search text.") );
-    a->addTo( searchBar );
-
-    searchBar->hide();
-				
+    // create search bar on demand
+    searchBar = 0;
+    searchEdit = 0;
     searchVisible = FALSE;
 
     fileSelector = new FileSelector( "text/*", editorStack, "fileselector" ,
@@ -317,6 +321,9 @@ TextEdit::TextEdit( QWidget *parent, const char *name, WFlags f )
 
     fixedAction->setOn(fixedwidth);
     setFixedWidth(fixedAction->isOn());
+
+    if ( qApp->argc() == 3 && qApp->argv()[1] == QCString("-f") )
+	setDocument(qApp->argv()[2]);
 }
 
 TextEdit::~TextEdit()
@@ -496,9 +503,9 @@ void TextEdit::fileOpen()
     }
     menu->hide();
     editBar->hide();
-    searchBar->hide();
+    if (searchBar)
+	searchBar->hide();
     editorStack->raiseWidget( fileSelector );
-    fileSelector->reread();
     updateCaption();
 }
 
@@ -532,6 +539,23 @@ void TextEdit::editPaste()
 
 void TextEdit::editFind(bool s)
 {
+    if ( !searchBar ) {
+	searchBar = new QPEToolBar(this);
+	addToolBar( searchBar,  tr("Search"), QMainWindow::Top, TRUE );
+
+	searchBar->setHorizontalStretchable( TRUE );
+
+	searchEdit = new QLineEdit( searchBar, "searchEdit" );
+	searchBar->setStretchableWidget( searchEdit );
+	connect( searchEdit, SIGNAL( textChanged( const QString & ) ),
+		this, SLOT( search() ) );
+	connect( searchEdit, SIGNAL(returnPressed()), this, SLOT(search()) );
+
+	QAction *a = new QAction( tr( "Find Next" ), Resource::loadIconSet( "next" ), QString::null, 0, this, 0 );
+	connect( a, SIGNAL(activated()), this, SLOT(search()) );
+	a->setWhatsThis( tr("Find the next occurrence of the search text.") );
+	a->addTo( searchBar );
+    }
     if ( s ) {
 	searchBar->show();
 	searchVisible = TRUE;
@@ -628,7 +652,7 @@ void TextEdit::showEditTools()
     fileSelector->hide();
     menu->show();
     editBar->show();
-    if ( searchVisible )
+    if ( searchBar && searchVisible )
 	searchBar->show();
     updateCaption();
 }
@@ -683,6 +707,16 @@ void TextEdit::fileName()
 	newFile(DocLnk());
     if (doc->name().isEmpty())
 	doc->setName(calculateName(editor->text()));
+
+    //
+    // Document properties operations depend on the file being
+    // up-to-date.  Force a write before changing properties.
+    //
+    FileManager fm;
+    if ( !fm.saveFile( *doc, editor->text() ) ) {
+	return;
+    }
+
     DocPropertiesDialog *lp = new DocPropertiesDialog(doc, this);
     QPEApplication::execDialog( lp );
     delete lp;

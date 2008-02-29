@@ -1,5 +1,5 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000-2003 Trolltech AS.  All rights reserved.
 **
 ** This file is part of the Qtopia Environment.
 **
@@ -19,15 +19,8 @@
 **********************************************************************/
 
 #include "showimg.h"
-
 #include <qtopia/qpeapplication.h>
 
-int main( int argc, char **argv )
-{
-    QPEApplication a( argc, argv );
-    
-    ImageViewer w(0, "new window", Qt::WResizeNoErase );
-    a.showMainDocumentWidget(&w);
+QTOPIA_ADD_APPLICATION("showimg",ImageViewer)
+QTOPIA_MAIN
 
-    return a.exec();
-}

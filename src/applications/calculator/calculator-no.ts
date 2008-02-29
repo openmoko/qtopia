@@ -3,7 +3,7 @@
     <name>Calculator</name>
     <message>
         <source>Calculator</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Kalkulator</translation>
     </message>
 </context>
 </TS>

@@ -3,7 +3,7 @@ CONFIG		= warn_on release
 DESTDIR		= $(QPEDIR)/bin
 
 HEADERS		= 
-SOURCES		= atd.c
+SOURCES		= atd.cpp
 INTERFACES	= 
 
 TARGET		= atd

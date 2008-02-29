@@ -19,16 +19,7 @@
 **********************************************************************/
 #include <qtopia/qpeapplication.h>
 #include <calculator.h>
-#include <engine.h>
 
-int main (int argc, char **argv)
-{
-  QPEApplication a (argc, argv);
+QTOPIA_ADD_APPLICATION("calculator",Calculator)
+QTOPIA_MAIN
 
-  Calculator mw;
-  QPEApplication::setInputMethodHint (&mw, QPEApplication::AlwaysOff);
-  mw.setCaption(Calculator::tr("Calculator"));
-  a.showMainWidget (&mw);
-
-  return a.exec ();
-}

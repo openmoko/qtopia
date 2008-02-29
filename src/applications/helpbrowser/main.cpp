@@ -19,15 +19,8 @@
 **********************************************************************/
 
 #include "helpbrowser.h"
-
 #include <qtopia/qpeapplication.h>
 
-int main( int argc, char ** argv )
-{
-    QPEApplication a( argc, argv );
+QTOPIA_ADD_APPLICATION("helpbrowser",HelpBrowser)
+QTOPIA_MAIN
 
-    HelpBrowser mw;
-    a.showMainDocumentWidget( &mw );
-
-    return a.exec();
-}

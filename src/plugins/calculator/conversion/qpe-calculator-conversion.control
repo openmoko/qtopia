@@ -1,4 +1,4 @@
-Files: plugins/calculator/libconversion.so* etc/unit_conversion.dat
+Files: plugins/calculator/libconversion.so* etc/calculator
 Priority: optional
 Section: qpe/inputmethods
 Maintainer: Trolltech (www.trolltech.com)
