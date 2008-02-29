@@ -1,6 +1,6 @@
 [Global]
 Name = Blues
-Name[ja] = ???
+Name[ja] = 青
 [Colors]
 Background = #C2DFFF
 Button = #C9DFFF

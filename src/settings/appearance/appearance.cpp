@@ -54,7 +54,7 @@
 #include <qcheckbox.h>
 #include <qwhatsthis.h>
 #include <qpixmapcache.h>
-#if QT_VERSION >= 300
+#if QT_VERSION >= 0x030000
 #include <qstylefactory.h>
 #endif
 
@@ -588,7 +588,7 @@ void AppearanceSettings::setStyle( QWidget *w, QStyle *s )
 void AppearanceSettings::populateStyleList()
 {
     (void)new PluginItem( styleList, "Qtopia");
-#if QT_VERSION >= 300
+#if QT_VERSION >= 0x030000
 //    styleList->insertStringList(QStyleFactory::styles());
 #else
     (void)new PluginItem( styleList, "Windows"); // No tr

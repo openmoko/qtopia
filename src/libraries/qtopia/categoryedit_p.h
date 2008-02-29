@@ -61,6 +61,7 @@ protected slots:
 
 private slots:
     void reloadCategories();
+    void enableButtons();
 
 private:
     bool updateInline();

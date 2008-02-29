@@ -1,4 +1,6 @@
 [Desktop Entry]
 Name=Clipboard
 Comment=Easy access to Cut, Copy and Paste.
+Name[ja]=クリップボード
+Comment[ja]=切り取り、コピー、貼り付けなどの機能への容易なアクセス。
 X-QPE-Library=libclipboardapplet.so

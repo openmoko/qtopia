@@ -48,8 +48,10 @@ protected slots:
     void moveUp();
     void moveDown();
 
+    void enableButtons();
 private:
     void init();
+    bool containsSelection(QListBox *b);
 
 private:
     QPushButton* addButton;

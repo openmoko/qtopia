@@ -271,7 +271,8 @@ bool SyncAuthentication::checkPassword( const QString& password )
 
 
 ServerPI::ServerPI( int socket, QObject *parent, const char* name )
-    : QSocket( parent, name ) , dtp( 0 ), serversocket( 0 ), waitsocket( 0 )
+    : QSocket( parent, name ) , dtp( 0 ), serversocket( 0 ), waitsocket( 0 ),
+      storFileSize(-1)
 {
     state = Connected;
 
@@ -447,6 +448,9 @@ void ServerPI::process( const QString& message )
 
     // ACCESS CONTROL COMMANDS
 
+    // Only an ALLO sent immediately before STOR is valid.
+    if ( cmd != "STOR" )
+	storFileSize = -1;
 
     // account (ACCT)
     if ( cmd == "ACCT" ) {
@@ -569,6 +573,7 @@ void ServerPI::process( const QString& message )
 
     // allocate (ALLO)
     else if ( cmd == "ALLO" ) {
+	storFileSize = args.toInt();
 	send( "200 Command okay" ); // No tr
     }
 
@@ -788,7 +793,7 @@ void ServerPI::retrieveFile( const QString& file )
       if ( backupRestoreGzip( file, targets ) )
 	dtp->retrieveGzipFile( file, peeraddress, peerport );
       else
-	dtp->retrieveFile( file, peeraddress, peerport );
+	dtp->retrieveFile( file, peeraddress, peerport, storFileSize );
     }
 }
 
@@ -816,6 +821,7 @@ void ServerPI::dtpCompleted()
     }
     waitsocket = 0;
     dtp->close();
+    storFileSize = -1;
 }
 
 void ServerPI::dtpFailed()
@@ -823,6 +829,7 @@ void ServerPI::dtpFailed()
     dtp->close();
     waitsocket = 0;
     send( "451 Requested action aborted: local error in processing" ); // No tr
+    storFileSize = -1;
 }
 
 void ServerPI::dtpError( int )
@@ -830,6 +837,7 @@ void ServerPI::dtpError( int )
     dtp->close();
     waitsocket = 0;
     send( "451 Requested action aborted: local error in processing" ); // No tr
+    storFileSize = -1;
 }
 
 bool ServerPI::sendList( const QString& arg )
@@ -1000,7 +1008,7 @@ void ServerPI::newConnection( int socket )
       if ( backupRestoreGzip( waitfile ) )
 	dtp->retrieveGzipFile( waitfile );
       else
-	dtp->retrieveFile( waitfile );
+	dtp->retrieveFile( waitfile, storFileSize );
       dtp->setSocket( socket );
     }
     else if ( wait[SendByteArray] ) {
@@ -1064,7 +1072,16 @@ ServerDTP::ServerDTP( QObject *parent, const char* name)
 ServerDTP::~ServerDTP()
 {
     buf.close();
-    file.close();
+    if ( RetrieveFile == mode && file.isOpen() ) {
+	// We're being shutdown before the client closed.
+	file.close();
+	if ( recvFileSize >= 0 && (int)file.size() != recvFileSize ) {
+	    qDebug( "STOR incomplete" );
+	    file.remove();
+	}
+    } else {
+	file.close();
+    }
     createTargzProc->kill();
 }
 
@@ -1188,7 +1205,13 @@ void ServerDTP::connectionClosed()
     // retrieve file mode
     else if ( RetrieveFile == mode ) {
 	file.close();
-	emit completed();
+	if ( recvFileSize >= 0 && (int)file.size() != recvFileSize ) {
+	    qDebug( "STOR incomplete" );
+	    file.remove();
+	    emit failed();
+	} else {
+	    emit completed();
+	}
     }
 
     else if ( RetrieveGzipFile == mode ) {
@@ -1318,15 +1341,17 @@ void ServerDTP::sendGzipFile( const QString &fn,
 	     SIGNAL( readyReadStdout() ), SLOT( writeTargzBlock() ) );
 }
 
-void ServerDTP::retrieveFile( const QString fn, const QHostAddress& host, Q_UINT16 port )
+void ServerDTP::retrieveFile( const QString fn, const QHostAddress& host, Q_UINT16 port, int fileSize )
 {
+    recvFileSize = fileSize;
     file.setName( fn );
     mode = RetrieveFile;
     connectToHost( host.toString(), port );
 }
 
-void ServerDTP::retrieveFile( const QString fn )
+void ServerDTP::retrieveFile( const QString fn, int fileSize )
 {
+    recvFileSize = fileSize;
     file.setName( fn );
     mode = RetrieveFile;
 }

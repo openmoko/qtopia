@@ -30,7 +30,7 @@ connection.</source>
     <name>KRFBDecoder</name>
     <message>
         <source>Waiting for server initialisation...</source>
-        <translation type="obsolete">サーバーの初期化を待機中...</translation>
+        <translation>サーバーの初期化を待機中...</translation>
     </message>
     <message>
         <source>Waiting for desktop name...</source>
@@ -50,7 +50,7 @@ connection.</source>
     </message>
     <message>
         <source>Waiting for server initialization...</source>
-        <translation type="unfinished"></translation>
+        <translation>サーバーの初期化を待機中...</translation>
     </message>
 </context>
 <context>

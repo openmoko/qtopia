@@ -11,7 +11,7 @@
     </message>
     <message>
         <source>Busy, dropping request %1</source>
-        <translation type="unfinished"></translation>
+        <translation>使用中、リクエスト%1を中断しています</translation>
     </message>
 </context>
 <context>
@@ -49,11 +49,11 @@
     </message>
     <message>
         <source>Infrared receive</source>
-        <translation type="unfinished">赤外線受信</translation>
+        <translation>赤外線受信</translation>
     </message>
     <message>
         <source>Failed</source>
-        <translation type="unfinished"></translation>
+        <translation>失敗しました</translation>
     </message>
     <message>
         <source>You received an event for:
@@ -104,7 +104,7 @@
     </message>
     <message>
         <source>Discard</source>
-        <translation type="unfinished"></translation>
+        <translation>捨てる</translation>
     </message>
 </context>
 <context>
@@ -133,42 +133,42 @@
     <name>SendWidgetBase</name>
     <message>
         <source>Send</source>
-        <translation type="unfinished">送信</translation>
+        <translation>送信</translation>
     </message>
     <message>
         <source>Description</source>
-        <translation type="unfinished"></translation>
+        <translation>詳細</translation>
     </message>
     <message>
         <source>File</source>
-        <translation type="unfinished"></translation>
+        <translation>ファイル</translation>
     </message>
     <message>
         <source>Status:</source>
-        <translation type="unfinished"></translation>
+        <translation>状態:</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished">取り消し</translation>
+        <translation>取り消し</translation>
     </message>
     <message>
         <source>Sending item</source>
-        <translation type="unfinished"></translation>
+        <translation>アイテムの送信中</translation>
     </message>
 </context>
 <context>
     <name>SendWindow</name>
     <message>
         <source>Infrared send</source>
-        <translation type="unfinished">赤外線送信</translation>
+        <translation>赤外線送信</translation>
     </message>
     <message>
         <source>Beamed %1</source>
-        <translation type="unfinished"></translation>
+        <translation>%1をビームしました</translation>
     </message>
     <message>
         <source>Failed</source>
-        <translation type="unfinished"></translation>
+        <translation>失敗しました</translation>
     </message>
 </context>
 </TS>

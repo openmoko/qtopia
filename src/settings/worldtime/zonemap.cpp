@@ -420,6 +420,10 @@ static void dayNight(QImage *pImage)
 
 static inline void darken( QImage *pImage, int start, int stop, int row )
 {
+    // Always clip stop parameter to ensure our preconditions
+    if ( stop >= pImage->width() )
+	stop =  pImage->width() - 1;
+
     // Assume that the image is 32bpp as we should have converted previously to that...
     QRgb *p = (QRgb *)pImage->scanLine( row );
     for ( int j = start; j <= stop; j++ ) {

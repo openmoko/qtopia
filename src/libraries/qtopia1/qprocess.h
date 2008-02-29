@@ -21,6 +21,8 @@
 #ifndef QPROCESS_H
 #define QPROCESS_H
 
+#include <qtopia/qpeglobal.h>
+
 #ifndef QT_H
 #include "qobject.h"
 #include "qstringlist.h"
@@ -32,7 +34,7 @@
 class QProcessPrivate;
 
 
-class QProcess : public QObject
+class QTOPIA_EXPORT QProcess : public QObject
 {
     Q_OBJECT
 public:

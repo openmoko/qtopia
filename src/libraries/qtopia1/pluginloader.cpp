@@ -20,6 +20,7 @@
 
 #include "pluginloader.h"
 #include "pluginloaderlib_p.h"
+#include <signal.h>
 #include <qtopia/qpeapplication.h>
 #include <qtopia/config.h>
 #include <qtopia/global.h>
@@ -98,7 +99,7 @@ static bool unlockFile( QFile &f )
 
 static bool lockFile( QFile &f )
 {
-    return if.isOpen();
+    return f.isOpen();
 }
 
 static bool unlockFile( QFile &f )
@@ -147,6 +148,8 @@ public:
 
 /*!
   Creates a PluginLoader for plugins of type \a type.
+
+  The plugins must be installed in the $QPEDIR/plugins/<i>type<i> directory.
 */
 
 PluginLoader::PluginLoader( const QString &type )
@@ -375,7 +378,7 @@ bool PluginLoader::isEnabled( const QString &name ) const
 }
 
 /*!
-  Returns TRUE if Qtopia is currently in \em {Safe Mode}.  In Safe Mode
+  Returns TRUE if Qtopia is currently in <i>Safe Mode</i>.  In Safe Mode
   list() will return an empty list and no plugins should be loaded.  This
   is to allow misbehaving plugins to be disbled.
 */
@@ -405,6 +408,9 @@ QString PluginLoader::stripSystem( const QString &libFile ) const
 }
 
 //===========================================================================
+// Only compile this once under Win32 and single process
+#if !(defined(Q_OS_WIN32) && defined(PLUGINLOADER_INTERN)) && \
+    !(defined(SINGLE_APP) && defined(PLUGINLOADER_INTERN))
 
 PluginLibraryManager::PluginLibraryManager()
 {
@@ -423,7 +429,7 @@ QLibrary *PluginLibraryManager::refLibrary( const QString &file )
 {
     QLibrary *lib = libs.find( file );
     if ( !lib ) {
-#if (QT_VERSION < 300)
+#if (QT_VERSION < 0x030000)
 	lib = new QLibrary( file, QLibrary::Immediately );
 #else
 	lib = new QLibrary( file );
@@ -450,7 +456,7 @@ void PluginLibraryManager::derefLibrary( QLibrary *lib )
 	delete lib;
     }
 }
-
+#endif
 //===========================================================================
 
 #undef PluginLoader

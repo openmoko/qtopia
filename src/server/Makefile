@@ -423,7 +423,6 @@ $(OBJECTS_DIR)/taskbar.o: taskbar.cpp \
 		../applications/mediaplayer/maindocumentwidgetstack.h \
 		../applications/textedit/textedit.h \
 		../games/fifteen/fifteen.h \
-		../games/go/gowidget.h \
 		../games/mindbreaker/mindbreaker.h \
 		../games/minesweep/minesweep.h \
 		../games/qasteroids/toplevel.h \
@@ -953,7 +952,7 @@ ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done
 
 package: ipkg
-	cd $(QPEDIR)/ipkg; 	../scripts/mkPackages
+	cd $(QPEDIR)/ipkg; 	../bin/mkPackages
 
 Makefile: server.pro
 	cd $(QPEDIR)/src; 	./configure  -platform generic -make server

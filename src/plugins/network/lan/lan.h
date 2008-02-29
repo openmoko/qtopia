@@ -48,6 +48,9 @@ private:
     bool writeConfig();
     virtual void accept();
 
+    static bool writeBuiltinNetworkOpts( Config &config, QString scheme );
+    static bool writePcmciaNetworkOpts( Config &config, QString scheme );
+
 private:
     Config& config;
     QButtonGroup *ipGroup;

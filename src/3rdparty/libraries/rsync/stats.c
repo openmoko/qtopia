@@ -25,8 +25,8 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
 #if !defined (_OS_WIN32_)
+#include <unistd.h>
 #include <sys/file.h>
 #else
 #define snprintf _snprintf

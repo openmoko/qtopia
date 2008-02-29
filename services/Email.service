@@ -1,13 +1,9 @@
 [Service]
-Actions = writeMail();writeMail(QMap(QString,QString));writeMail(QString,QString)
+Actions = writeMail();writeMail(QString,QString)
 Icon = EMail
 Name = Email
-Name[ja] = ???
+Name[ja] = 電子メール
 [writeMail()]
 Icon = EMail
 Name = Compose Email
-Name[ja] = ???
-[writeMail(QString,QString)]
-Icon = EMail
-Name = Compose Email
-Name[ja] = ???
+Name[ja] = 電子メールの作成

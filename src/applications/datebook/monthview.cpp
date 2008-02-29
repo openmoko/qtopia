@@ -169,8 +169,8 @@ void MonthView::getEventsForMonth(int y, int m)
     paintCache.clear();
 
     // Get enough days that it won't matter if the start of week changes.
-    QDate from = Calendar::dateAtCoord(y, m, 0, 0, FALSE);
-    QDate to = Calendar::dateAtCoord(y, m, 5, 6, TRUE);
+    QDate from = Calendar::dateAtCoord(y, m, 0, 0, FALSE).addDays(-6);
+    QDate to = Calendar::dateAtCoord(y, m, 5, 6, TRUE).addDays(6);
 
     daysEvents = mDb->getOccurrences(from, to);
 
@@ -205,8 +205,8 @@ void MonthView::getEventsForMonth(int y, int m)
 		repeatAllDay = TRUE;
 	    }
 	} else {
-	    startPos =  ev.startInCurrentTZ().time().hour();
-	    endPos = ev.endInCurrentTZ().time().hour();
+	    startPos =  (*it).startInCurrentTZ().time().hour();
+	    endPos = (*it).endInCurrentTZ().time().hour();
 	}
 
 	if (f < from) {

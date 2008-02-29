@@ -35,8 +35,6 @@ CORECOMPONENTS=\
 
 COREAPPS=server
 
-$(COREAPPS): $(CORELIBS)
-
 $(CORECOMPONENTS): $(CORELIBS)
 
 #Supported
@@ -124,8 +122,7 @@ $(SUPPORTEDCOMPONENTS): $(SUPPORTEDLIBS) $(CORELIBS)
 UNSUPPORTEDAPPS=\
 	applications/filebrowser \
 	3rdparty/applications/embeddedkonsole \
-	3rdparty/applications/keypebble \
-	games/go
+	3rdparty/applications/keypebble
 
 $(UNSUPPORTEDAPPS): $(CORELIBS) $(SUPPORTEDLIBS)
 
@@ -212,6 +209,8 @@ APPS=$(COREAPPS) \
 $(LIBS) $(COMPONENTS) $(APPS):
 	$(MAKE) -C $@
 
+$(COREAPPS): $(SUPPORTEDAPPS) $(SUPPORTEDCOMPONENTS)
+
 #Targets.
 dynamic: $(COREAPPS) \
 	$(CORECOMPONENTS) \
@@ -278,6 +277,6 @@ packages:
 	mkdir -p $(QPEDIR)/ipkg
 	for dir in $(APPS) $(LIBS) $(COMPONENTS); do $(MAKE) -C $$dir ipkg || exit 1; done
 	for ctrl in $(EXTRAPACKAGES); do cd $(QPEDIR)/ipkg; ../bin/mkipks $$ctrl; done
-	cd $(QPEDIR)/ipkg; ../scripts/mkPackages
+	cd $(QPEDIR)/ipkg; ../bin/mkPackages
 
 .PHONY: default dynamic desktop libraries components $(LIBS) $(APPS) $(COMPONENTS) showcomponents showlinksource clean

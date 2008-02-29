@@ -114,6 +114,9 @@ void StartMenu::reloadApps()
 	int i;
 	for (i=0; i<(int)launchMenu->count(); i++) {
 	    QMenuItem* item = launchMenu->findItem(launchMenu->idAt(i));
+	    if ( item && item->id() >= 0 && item->id() < ntabs ) {
+		break;
+	    }
 	    if ( item && item->isSeparator() ) {
 		i++;
 		break;

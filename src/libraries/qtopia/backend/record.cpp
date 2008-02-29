@@ -94,7 +94,7 @@ QUuid Record::generateUuid()
     }
     return QUuid( guid );
 #else
-#if QT_VERSION < 300
+#if QT_VERSION < 0x030000
     uuid_t uuid;
     uuid_generate( uuid );
 

@@ -50,7 +50,7 @@ readZoneTab($base=shift);
 
 print "<!DOCTYPE TS><TS>
 <context>
-    <name>Timezone</name>
+    <name>TimeZone</name>
 ";
 %map = ();
 for $t ( "area", "city", "comment" ) {

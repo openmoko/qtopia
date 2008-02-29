@@ -74,6 +74,7 @@ VERSION_PAT=$(sed -n -e 's/.*QPE_VERSION "[0-9]*\.[0-9]*\.\([0-9]*\).*".*/\1/p' 
 TOMAKE=
 EXTRALIBS=
 lupdateargs=
+INSTALL=
 
 if grep -q 'VERSION_STR.*"3' $QTDIR/include/qglobal.h
 then
@@ -117,6 +118,10 @@ while [ -n "$1" ]; do
 	A="$A $1"
 	QMAKE_LFLAGS="QMAKE_LFLAGS=-Wl,-rpath,$1"
 	QT3=yes
+	;;
+    -install)
+	#pass through to qdesktop.  does rpath.
+	INSTALL=" -install"
 	;;
    -noobsolete)
 	lupdateargs="$lupdateargs -noobsolete"
@@ -667,7 +672,7 @@ ipkg: $IPKGDEP # among other things...
 
 package: ipkg
 	cd \$(QPEDIR)/ipkg; \
-	../scripts/mkPackages
+	../bin/mkPackages
 
 EOF
 
@@ -690,7 +695,7 @@ done
 if [ -n "$QDESKTOP" ]
 then
     rm -f ../lib/libfreetype.so.6*  # It may get in the way if it exists
-    ( cd qtopiadesktop; ./configure -quiet; )
+    ( cd qtopiadesktop; ./configure -quiet $INSTALL; )
 fi
 
 MAKE=make

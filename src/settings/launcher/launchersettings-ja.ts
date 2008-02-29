@@ -97,11 +97,11 @@
     </message>
     <message>
         <source>Launcher</source>
-        <translation type="unfinished"></translation>
+        <translation>ランチャー</translation>
     </message>
     <message>
         <source>TextLabel2</source>
-        <translation type="unfinished">テキストラベル2</translation>
+        <translation>テキストラベル2</translation>
     </message>
 </context>
 <context>

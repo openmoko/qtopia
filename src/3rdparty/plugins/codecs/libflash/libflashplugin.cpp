@@ -24,6 +24,7 @@
   \brief The LibFlashPlugin class is a wrapper for the libflash library.
 
   \legalese
+  Libflash renders Flash movies for the MediaPlayer.
 
   The libflash library is distributed under the terms of the GNU General Public License.
   The primary copyright holders are

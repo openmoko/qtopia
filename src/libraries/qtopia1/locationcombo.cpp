@@ -117,7 +117,8 @@ void LocationCombo::setLocation( const AppLnk * lnk )
     if ( lnk ) {
 	QFileInfo fi( lnk->file() );
 	d->fileSize = fi.size();
-	d->originalPath = storage->fileSystemOf( lnk->file() )->path();
+	const FileSystem *fs =  storage->fileSystemOf( lnk->file() );
+	d->originalPath = fs ? fs->path() : QString::null;
     } else {
 	d->fileSize = 0;
 	d->originalPath = QString::null;

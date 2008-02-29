@@ -36,7 +36,7 @@ Inherits <a href="qobject.html">QObject</a>.
 <li><div class="fn"><a href="#890981"><b>~QWSServer</b></a> () </div>
 <li><div class="fn">enum <b>ServerFlags</b> { DisableKeyboard = 0x01, DisableMouse = 0x02 }</div>
 <li><div class="fn">enum <b>GUIMode</b> { NoGui = FALSE, NormalGUI = TRUE, Server }</div>
-<li><div class="fn">enum <b>IMState</b> { Reserved, IMCompose, IMEnd }</div>
+<li><div class="fn">enum <b>IMState</b> { Reserved, IMCompose, IMEnd, IMInternal = 42, IMMarkedText }</div>
 <li><div class="fn">enum <b>IMMouse</b> { MousePress, MouseRelease, MouseMove }</div>
 <li><div class="fn">void <b>sendIMEvent</b> ( IMState state, const QString &amp; txt, int cpos, int selLen ) </div>
 <li><div class="fn">class KeyboardFilter { public: virtual bool <b>filter</b> ( int unicode, int keycode, int modifiers, bool isPress, bool autoRepeat ) </div>
@@ -50,13 +50,14 @@ Inherits <a href="qobject.html">QObject</a>.
 <li><div class="fn">void <a href="#194113"><b>enablePainting</b></a> ( bool ) </div>
 <li><div class="fn">void <b>sendPropertyNotifyEvent</b> ( int property, int state ) (internal)</div>
 <li><div class="fn">QWSPropertyManager* <b>manager</b> () </div>
-<li><div class="fn">enum <b>WindowEvent</b> { Create=0x01, Destroy=0x02, Hide=0x04, Show=0x08, Raise=0x10, Lower=0x20, Geometry=0x40 }</div>
+<li><div class="fn">enum <b>WindowEvent</b> { Create=0x01, Destroy=0x02, Hide=0x04, Show=0x08, Raise=0x10, Lower=0x20, Geometry=0x40, Active=0x80 }</div>
 </ul>
 <h2>Signals</h2>
 <ul>
 <li><div class="fn">void <b>windowEvent</b> ( QWSWindow * w, QWSServer::WindowEvent e ) </div>
 <li><div class="fn">void <a href="#064f8e"><b>newChannel</b></a> ( const QString &amp; channel ) </div>
 <li><div class="fn">void <a href="#433fce"><b>removedChannel</b></a> ( const QString &amp; channel ) </div>
+<li><div class="fn">void <b>markedText</b> ( const QString &amp; ) </div>
 </ul>
 <h2>Static Public Members</h2>
 <ul>
@@ -68,6 +69,7 @@ Inherits <a href="qobject.html">QObject</a>.
 <li><div class="fn">void <b>setCurrentInputMethod</b> ( QWSInputMethod * im ) </div>
 <li><div class="fn">void <b>resetInputMethod</b> () </div>
 <li><div class="fn">void <b>setMicroFocus</b> ( int x, int y ) </div>
+<li><div class="fn">void <b>requestMarkedText</b> () </div>
 <li><div class="fn">void <a href="#e0f937"><b>setDefaultMouse</b></a> ( const char * ) </div>
 <li><div class="fn">void <a href="#840f3b"><b>setDefaultKeyboard</b></a> ( const char * ) </div>
 <li><div class="fn">void <a href="#482fbe"><b>setMaxWindowRect</b></a> ( const QRect &amp; ) </div>
@@ -198,7 +200,7 @@ under the point.
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.4"><nobr>
+<input type=hidden name="version" value="2.3.5"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -206,5 +208,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.4</div>
+<td align="right"><div align="right">Qt version 2.3.5</div>
 </table></div></address></body></html>

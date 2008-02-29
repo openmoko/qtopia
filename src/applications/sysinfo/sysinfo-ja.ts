@@ -76,7 +76,7 @@
     </message>
     <message>
         <source>RAM disk</source>
-        <translation type="unfinished"></translation>
+        <translation>RAMディスク</translation>
     </message>
 </context>
 <context>

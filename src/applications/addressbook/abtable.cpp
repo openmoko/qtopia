@@ -100,8 +100,12 @@ AbTable::AbTable(ContactXmlIO *c, QWidget *parent, const char *name, const char 
 
     mAscending = FALSE;
     mSortColumn = -1;
+
+#ifdef QTOPIA_DESKTOP
     readSettings();
-    constructorDone = TRUE;
+#else
+    QTimer::singleShot(0, this, SLOT(readSettings()) );
+#endif
 }
 
 
@@ -142,6 +146,9 @@ void AbTable::setSelection(int fromRow, int toRow)
 void AbTable::paintCell( QPainter *p, int row, int col,
 	const QRect &cr, bool )
 {
+    if ( !constructorDone )
+	return;
+
 #if defined(Q_WS_WIN)
     const QColorGroup &cg = ( style().styleHint( QStyle::SH_ItemView_ChangeHighlightOnFocus ) ? palette().inactive() : colorGroup() );
 #else
@@ -187,6 +194,10 @@ void AbTable::paintCell( QPainter *p, int row, int col,
 	}
 	break;
     case PimContact::Notes:
+	text = c.field( key ).simplifyWhiteSpace();
+	break;
+    case PimContact::BusinessStreet:
+    case PimContact::HomeStreet:
 	text = c.field( key ).simplifyWhiteSpace();
 	break;
     default:
@@ -403,8 +414,6 @@ void AbTable::contentsMouseReleaseEvent( QMouseEvent *e )
     QTable::contentsMouseReleaseEvent( e );
 }
 
-static bool needColumnResize = TRUE;
-
 void AbTable::resizeEvent( QResizeEvent *e )
 {
     QTable::resizeEvent( e );
@@ -412,17 +421,14 @@ void AbTable::resizeEvent( QResizeEvent *e )
     // we receive a resize event from qtable in the middle of the constrution, since
     // QTable::columnwidth does qApp->processEvents.  Ignore this event as it causes
     // all sorts of init problems for us
-    if ( !constructorDone )
-	return;
 }
 
 void AbTable::showEvent( QShowEvent *e)
 {
     QTable::showEvent(e);
-    if ( needColumnResize ) {
-	needColumnResize = FALSE;
-	fitHeadersToWidth();
-    }
+#ifdef QTOPIA_DESKTOP
+    fitHeadersToWidth();
+#endif
 }
 
 void AbTable::fitHeadersToWidth()
@@ -567,7 +573,7 @@ QString AbTable::findContactContact( const PimContact &entry )
 	for (int i = 0; idList[i] >= 0; i++) {
 	    QString v = getField( entry, idList[i] );
 	    if ( !v.isEmpty() ) {
-		value = v;
+		value = v.simplifyWhiteSpace();
 		break;
 	    }
 	}
@@ -796,7 +802,6 @@ void AbTable::setFields(QValueList<int> f)
 
     setFields(f, sizes);
 
-    needColumnResize = TRUE;
     if ( isVisible() )
 	fitHeadersToWidth();
 }
@@ -923,6 +928,9 @@ void AbTable::readSettings()
 	reload(); 
 	horizontalHeader()->setSortIndicator(mSortColumn,!mAscending);
     }
+    constructorDone = TRUE;
+    fitHeadersToWidth();
+    refresh();
 }
 
 void AbTable::saveSettings()

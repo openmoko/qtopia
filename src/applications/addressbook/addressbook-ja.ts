@@ -97,27 +97,27 @@
     </message>
     <message>
         <source>Edit Contact Details</source>
-        <translation type="unfinished"></translation>
+        <translation>連絡先内容を編集</translation>
     </message>
     <message>
         <source>Describes the spoken name phonetically.</source>
-        <translation type="unfinished"></translation>
+        <translation>口語名を発音通りに表記してください。</translation>
     </message>
     <message>
         <source>e.g. Husband or Wife.</source>
-        <translation type="unfinished"></translation>
+        <translation>例. 夫または妻</translation>
     </message>
     <message>
         <source>Preferred format for the contact name.</source>
-        <translation type="unfinished"></translation>
+        <translation>連絡先の名前として使用する形式</translation>
     </message>
     <message>
         <source>Occupation or job description.</source>
-        <translation type="unfinished"></translation>
+        <translation>業務または職務内容</translation>
     </message>
     <message>
         <source>Discard changes?</source>
-        <translation type="unfinished"></translation>
+        <translation>変更を破棄しますか?</translation>
     </message>
 </context>
 <context>
@@ -159,31 +159,31 @@
     </message>
     <message>
         <source>Male</source>
-        <translation type="unfinished">男性</translation>
+        <translation>男性</translation>
     </message>
     <message>
         <source>Female</source>
-        <translation type="unfinished">女性</translation>
+        <translation>女性</translation>
     </message>
     <message>
         <source>H: </source>
         <comment>Short title for Home phone</comment>
-        <translation type="unfinished"></translation>
+        <translation>自:</translation>
     </message>
     <message>
         <source>B: </source>
         <comment>Short title for Business phone</comment>
-        <translation type="unfinished"></translation>
+        <translation>勤:</translation>
     </message>
     <message>
         <source>HM: </source>
         <comment>Short title for Home mobile</comment>
-        <translation type="unfinished"></translation>
+        <translation>携帯(個人):</translation>
     </message>
     <message>
         <source>BM: </source>
         <comment>Short title for Business mobile</comment>
-        <translation type="unfinished"></translation>
+        <translation>携帯(ビジネス):</translation>
     </message>
 </context>
 <context>
@@ -346,7 +346,7 @@ VCards already in your addressbook</source>
     </message>
     <message>
         <source>Unfiled</source>
-        <translation>ファイルになし</translation>
+        <translation>未整理</translation>
     </message>
     <message>
         <source>All</source>
@@ -408,19 +408,19 @@ VCards already in your addressbook</source>
     </message>
     <message>
         <source>View list of Contacts.</source>
-        <translation type="unfinished"></translation>
+        <translation>連絡先一覧を表示します。</translation>
     </message>
     <message>
         <source>Fit to width</source>
-        <translation type="unfinished"></translation>
+        <translation>幅にあわせる</translation>
     </message>
     <message>
         <source>Contact List</source>
-        <translation type="unfinished"></translation>
+        <translation>連絡先一覧</translation>
     </message>
     <message>
         <source>View Contact details.</source>
-        <translation type="unfinished"></translation>
+        <translation>連絡先内容を表示します。</translation>
     </message>
 </context>
 <context>
@@ -448,11 +448,11 @@ VCards already in your addressbook</source>
     </message>
     <message>
         <source>OK</source>
-        <translation type="unfinished">OK</translation>
+        <translation>OK</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished">取消し</translation>
+        <translation>取り消し</translation>
     </message>
 </context>
 </TS>

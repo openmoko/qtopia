@@ -5,4 +5,4 @@ Maintainer: Trolltech (www.trolltech.com)
 Architecture: $CPU_ARCH
 Arch: $DEVICE_ARCH
 Version: $QPE_VERSION-13
-Description: Qtopia librarys extestion.
+Description: Qtopia library extension 1.

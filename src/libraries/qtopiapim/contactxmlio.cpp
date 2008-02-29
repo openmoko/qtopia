@@ -202,12 +202,14 @@ bool ContactXmlIO::internalUpdateRecord(PimRecord *r)
 	    if ( select(*current) ) {
 		m_Filtered.remove(current);
 	    }
+	    
+	    if ( current != cnt ) {
+		*current = *cnt;
+		delete cnt;
+	    }
 
-	    m_Contacts.remove();
-	    m_Contacts.append(cnt);
-
-	    if (select(*cnt)) {
-		m_Filtered.append(cnt);
+	    if (select(*current)) {
+		m_Filtered.append(current);
 	    }
 	    return TRUE;
 	}

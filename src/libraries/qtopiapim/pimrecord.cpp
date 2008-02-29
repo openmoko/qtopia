@@ -39,6 +39,10 @@ extern "C" {
 }
 #endif
 
+static QMap<QString, int> *cidToKeyMapPtr = 0;
+static QMap<int, QString> *keyToCidMapPtr = 0;
+static int nextCidKey = CustomFieldsStart;
+
 /*!
   \class PimRecord
   \module qpepim
@@ -242,6 +246,12 @@ QString PimRecord::customField(const QString &key) const
  */
 void PimRecord::setCustomField(const QString &key, const QString &value)
 {
+    if (!cidToKeyMapPtr->contains(key)) {
+	// need a new int for this key.A
+	cidToKeyMapPtr->insert(key, nextCidKey);
+	keyToCidMapPtr->insert(nextCidKey, key);
+	nextCidKey++;
+    }
     if (customMap.contains(key))
 	customMap.replace(key, value);
     else
@@ -270,8 +280,11 @@ void PimRecord::setField(int key,const QString &s)
 	QUuid id;
 	id.data1 = s.toInt();
 	p_setUid( id );
-    } else
+    } else if ( keyToCidMapPtr->contains(key) ) {
+	setCustomField((*keyToCidMapPtr)[key], s);
+    } else {
 	qWarning("PimRecord::setField() Did not get passed a valid key %d", key);
+    }
 }
 
 /*!
@@ -284,6 +297,8 @@ QString PimRecord::field(int key) const
     } else if ( key == UID_ID ) {
 	return mUid.isNull() ? QString::null :
 	    QString::number( PimXmlIO::uuidToInt( mUid ) );
+    } else if ( keyToCidMapPtr->contains(key) ) {
+	return customField((*keyToCidMapPtr)[key]);
     }
 
     qWarning("PimRecord::field() Did not get passed a valid key %d", key);
@@ -315,6 +330,11 @@ QMap<int,QString> PimRecord::fields() const
     if ( !str.isEmpty() )		//TODO: check whether we need to use QString::null instead
 	m.insert(Categories, str );
 
+    // now need to do the keys for custom fields.
+    QMap<int,QString>::Iterator it;
+    for( it = keyToCidMapPtr->begin(); it != keyToCidMapPtr->end(); ++it )
+	m.insert(it.key(), customField(it.data()));
+
     return m;
 }
 
@@ -332,6 +352,10 @@ static const QtopiaPimMapEntry recentries[] = {
 void PimRecord::initMaps(const char* trclass, const QtopiaPimMapEntry *entries, QMap<int,int> &uniquenessMap, QMap<QCString,int> &identifierToKeyMap,
 			QMap<int,QCString> &keyToIdentifierMap, QMap<int,QString> &trFieldsMap)
 {
+    // init private custom->key maps.
+    cidToKeyMapPtr = new QMap<QString, int>;
+    keyToCidMapPtr = new QMap<int, QString>;
+
     static int translation_installed = 0;
     if ( !translation_installed ) {
 	++translation_installed;

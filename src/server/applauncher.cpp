@@ -20,9 +20,11 @@
 
 #define QTOPIA_INTERNAL_PRELOADACCESS
 #define QTOPIA_PROGRAM_MONITOR
+#include <qtopia/qpeglobal.h>
 
 #ifndef Q_OS_WIN32
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <errno.h>
 #else
@@ -33,7 +35,6 @@
 
 #include <signal.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <stdlib.h>
 
 #include <qtimer.h>
@@ -74,7 +75,11 @@ AppLauncher::AppLauncher(const AppLnkSet *as, QObject *parent, const char *name)
     connect( channel, SIGNAL(received(const QCString&, const QByteArray&)),
 	     this, SLOT(received(const QCString&, const QByteArray&)) );
     
+#ifndef Q_OS_WIN32
     signal(SIGCHLD, signalHandler);
+#else
+    runningAppsProc.setAutoDelete( TRUE );
+#endif
 
     appLauncherPtr = this;
 }
@@ -82,7 +87,9 @@ AppLauncher::AppLauncher(const AppLnkSet *as, QObject *parent, const char *name)
 AppLauncher::~AppLauncher()
 {
     appLauncherPtr = 0;
+#ifndef Q_OS_WIN32
     signal(SIGCHLD, SIG_DFL);
+#endif
 }
 
 void AppLauncher::setAppLnkSet(const AppLnkSet* as)
@@ -130,6 +137,7 @@ void AppLauncher::received(const QCString& msg, const QByteArray& data)
 
 void AppLauncher::signalHandler(int)
 {
+#ifndef Q_OS_WIN32
     int status;
     pid_t pid = waitpid(-1, &status, WNOHANG);
 /*    if (pid == 0 || &status == 0 ) {
@@ -137,6 +145,9 @@ void AppLauncher::signalHandler(int)
     }
 */
     QApplication::postEvent(appLauncherPtr, new AppStoppedEvent(pid, status) );
+#else
+    qDebug("Unhandled signal see by AppLauncher::signalHandler(int)");
+#endif
 }
 
 bool AppLauncher::event(QEvent *e)
@@ -150,6 +161,7 @@ bool AppLauncher::event(QEvent *e)
     return QObject::event(e);
 }
 
+#ifndef Q_OS_WIN32 
 void AppLauncher::sigStopped(int sigPid, int sigStatus)
 {
     int exitStatus = 0;
@@ -244,6 +256,12 @@ void AppLauncher::sigStopped(int sigPid, int sigStatus)
     
     emit terminated(sigPid, appName);
 }
+#else
+void AppLauncher::sigStopped(int sigPid, int sigStatus)
+{
+    qDebug("Unhandled signal : AppLauncher::sigStopped(int sigPid, int sigStatus)");
+}
+#endif // Q_OS_WIN32
 
 bool AppLauncher::isRunning(const QString &app)
 {
@@ -363,12 +381,64 @@ void AppLauncher::execute(const QString &c, const QString &docParam)
 	emit launched(pid, QString(args[0]));
     }
 #else
-    qDebug("Doing spawn %s: args %s", args[0], args[1]);
-    spawnvp(_P_NOWAIT,args[0], args);
+    QProcess *proc = new QProcess(this);
+    if (proc){
+	proc->addArgument(args[0]);
+	proc->addArgument(args[1]);
+	connect(proc, SIGNAL(processExited()), this, SLOT(processExited()));
+	if (!proc->start()){
+	    qDebug("Unable to start application %s", args[0]);
+	}else{
+	    PROCESS_INFORMATION *procInfo = (PROCESS_INFORMATION *)proc->processIdentifier();
+	    if (procInfo){
+		DWORD pid = procInfo->dwProcessId;
+		runningApps[pid] = QString(args[0]);		
+		runningAppsProc.append(proc);
+		emit launched(pid, QString(args[0]));
+	    }else{
+		qDebug("Unable to read process inforation #1 for %s", args[0]);
+	    }
+	}
+    }else{
+	qDebug("Unable to create process for application %s", args[0]);
+    }
 #endif
 #endif //QT_NO_QWS_MULTIPROCESS
 
     delete [] args;
 }
 
+// Used only by Win32
+void AppLauncher::processExited()
+{
+#ifdef Q_OS_WIN32
+    qDebug("AppLauncher::processExited()");
+    bool found = FALSE;
+    QProcess *proc = (QProcess *) sender();
+    if (!proc){
+	qDebug("Interanl error NULL proc");
+	return;
+    }
 
+    QString appName = proc->arguments()[0];
+    qDebug("Removing application %s", appName.latin1());
+    runningAppsProc.remove(proc);	
+
+    // Search for the app to find its PID
+    QMap<int, QString>::Iterator it;
+    for (it = runningApps.begin(); it!= runningApps.end(); ++it){
+	if (it.data() == appName){
+	    found = TRUE;
+	    break;
+	}
+    }
+
+    if (found){
+	emit terminated(it.key(), it.data());
+	runningApps.remove(it.key());
+    }else{
+	qDebug("Internal error application %s not listed as running", appName.latin1());
+    }
+    
+#endif
+}

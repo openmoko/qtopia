@@ -11,8 +11,7 @@
     </message>
     <message>
         <source>Horizontal flip</source>
-        <translation>水平反転
-</translation>
+        <translation>水平反転</translation>
     </message>
     <message>
         <source>Vertical flip</source>
@@ -88,11 +87,11 @@
     </message>
     <message>
         <source>Image</source>
-        <translation type="unfinished"></translation>
+        <translation>イメージ</translation>
     </message>
     <message>
         <source>View</source>
-        <translation type="unfinished"></translation>
+        <translation>表示</translation>
     </message>
 </context>
 <context>
@@ -135,27 +134,27 @@
     </message>
     <message>
         <source>Options</source>
-        <translation type="unfinished"></translation>
+        <translation>オプション</translation>
     </message>
     <message>
         <source>Slideshow</source>
-        <translation type="unfinished"></translation>
+        <translation>スライドショー</translation>
     </message>
     <message>
         <source>Rotation on loading</source>
-        <translation type="unfinished"></translation>
+        <translation>ロード中にローテーション</translation>
     </message>
     <message>
         <source>Clockwise</source>
-        <translation type="unfinished"></translation>
+        <translation>右回り</translation>
     </message>
     <message>
         <source>Counter clockwise</source>
-        <translation type="unfinished"></translation>
+        <translation>左回り</translation>
     </message>
     <message>
         <source>Scale up small pictures</source>
-        <translation type="unfinished"></translation>
+        <translation>小さい画像を拡大する</translation>
     </message>
 </context>
 </TS>

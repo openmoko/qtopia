@@ -167,16 +167,16 @@ Quit anyway?</source>
     <message>
         <source>Single</source>
         <comment>1 event, not all</comment>
-        <translation type="unfinished">単一 [various kind of way to say, please provide sample]</translation>
+        <translation>一行事</translation>
     </message>
     <message>
         <source>Show selected month&apos;s events</source>
-        <translation type="unfinished"></translation>
+        <translation>選択した月の行事を表示</translation>
     </message>
     <message>
         <source>Day</source>
         <comment>day, not date</comment>
-        <translation type="unfinished"></translation>
+        <translation>曜日</translation>
     </message>
 </context>
 <context>
@@ -340,7 +340,7 @@ Quit anyway?</source>
     </message>
     <message>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
 </context>
 <context>
@@ -351,12 +351,12 @@ Quit anyway?</source>
     </message>
     <message>
         <source>Office</source>
-        <translation type="unfinished">オフィス</translation>
+        <translation>オフィス</translation>
     </message>
     <message>
         <source>Home</source>
         <comment>ie. not work</comment>
-        <translation type="unfinished">ホーム [Translated as Home, such as home directory of your computer.]</translation>
+        <translation>自宅</translation>
     </message>
 </context>
 <context>
@@ -510,15 +510,15 @@ Quit anyway?</source>
     </message>
     <message>
         <source>Time zone:</source>
-        <translation type="unfinished">タイムゾーン:</translation>
+        <translation>タイムゾーン:</translation>
     </message>
     <message>
         <source>Start</source>
-        <translation type="unfinished">開始</translation>
+        <translation>開始</translation>
     </message>
     <message>
         <source>End</source>
-        <translation type="unfinished">終了</translation>
+        <translation>終了</translation>
     </message>
 </context>
 <context>
@@ -726,12 +726,12 @@ Quit anyway?</source>
     <message>
         <source>Repeat every month on the %1 %2 of the month.</source>
         <comment>eg. %1 %2 = 2nd Friday</comment>
-        <translation type="unfinished">毎月、第%1%2に繰り返す [%1 must be number only, eg. %1=1 or 2,3,...31]</translation>
+        <translation>毎月、第%1%2に繰り返します。</translation>
     </message>
     <message>
         <source>Repeat every %1 months on the %2 %3 of the month.</source>
         <comment>eg. %1 = 4, %2 %3 = 2nd Friday</comment>
-        <translation type="unfinished">%1か月毎、第%2%3に繰り返す [%1 must be number only, eg. %1=1 or 2,3...31]</translation>
+        <translation>%1か月毎、第%2%3に繰り返します。</translation>
     </message>
     <message>
         <source>Repeat every month on the last %1 of the month.</source>
@@ -741,7 +741,7 @@ Quit anyway?</source>
     <message>
         <source>Repeat every month on %1 last %2 of the month.</source>
         <comment>eg. %1 = 2nd, %2 = Friday</comment>
-        <translation type="unfinished">毎月、月の最後から%1週目の%2に繰り返す [%1 must be number only, eg. %1=1 or 2,3...31]</translation>
+        <translation>毎月、月の最後から%1週目の%2に繰り返します。</translation>
     </message>
     <message>
         <source>Repeat every %2 months on the last %1 of the month.</source>
@@ -751,7 +751,7 @@ Quit anyway?</source>
     <message>
         <source>Repeat every %3 months on %1 last %2 of the month.</source>
         <comment>eg. %1 = 2nd, %2 = Friday, %3 = 4</comment>
-        <translation type="unfinished">%3か月毎、月の最後から%1週目の%2に繰り返す [%1 must be number only, eg. %1=1 or 2,3,...31]</translation>
+        <translation>%3か月毎、月の最後から%1週目の%2に繰り返します。</translation>
     </message>
     <message>
         <source>Cancel</source>
@@ -763,7 +763,7 @@ Quit anyway?</source>
     </message>
     <message>
         <source>Repeating Event</source>
-        <translation type="unfinished"></translation>
+        <translation>繰り返し行事</translation>
     </message>
     <message>
         <source>ORDINAL</source>
@@ -773,74 +773,74 @@ Quit anyway?</source>
     <message>
         <source>Day</source>
         <comment>Day, not date</comment>
-        <translation type="unfinished">日 [Translated as date but not day.]</translation>
+        <translation>曜日</translation>
     </message>
     <message>
         <source>Every %1 day(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>%1日毎</translation>
     </message>
     <message>
         <source>Every %1 week(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>%1週間毎</translation>
     </message>
     <message>
         <source>Every %1 month(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>%1か月毎</translation>
     </message>
     <message>
         <source>Every %1 year(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>%1年毎</translation>
     </message>
     <message>
         <source>the last %1.</source>
         <comment>eg. %1 = Friday</comment>
-        <translation type="unfinished"></translation>
+        <translation>最終%1</translation>
     </message>
     <message>
         <source>the %1 last %2.</source>
         <comment>eg. %1 last %2 = 2nd last Friday</comment>
-        <translation type="unfinished"></translation>
+        <translation>最後から%1週目の%2</translation>
     </message>
     <message>
         <source>day %1 of the month.</source>
         <comment>eg. %1 = 3</comment>
-        <translation type="unfinished"></translation>
+        <translation>その月の%1日</translation>
     </message>
     <message>
         <source>the %1 %2.</source>
         <comment>eg. %1 %2 = 2nd Friday</comment>
-        <translation type="unfinished"></translation>
+        <translation>第%1%2</translation>
     </message>
     <message>
         <source>Repeat every month on day %1 of the month.</source>
         <comment>eg. %1 = 3</comment>
-        <translation type="unfinished"></translation>
+        <translation>毎月、その月の%1日に繰り返します。</translation>
     </message>
     <message>
         <source>first</source>
         <comment>eg. first Friday of month</comment>
-        <translation type="unfinished"></translation>
+        <translation>第一</translation>
     </message>
     <message>
         <source>second</source>
-        <translation type="unfinished"></translation>
+        <translation>第二</translation>
     </message>
     <message>
         <source>third</source>
-        <translation type="unfinished"></translation>
+        <translation>第三</translation>
     </message>
     <message>
         <source>fourth</source>
-        <translation type="unfinished"></translation>
+        <translation>第四</translation>
     </message>
     <message>
         <source>fifth</source>
-        <translation type="unfinished"></translation>
+        <translation>第五</translation>
     </message>
     <message>
         <source>Repeat every %1 months on day %2 of the month.</source>
         <comment>eg. %1 = 4, %2 = 3rd</comment>
-        <translation type="unfinished"></translation>
+        <translation>%1か月毎、その月の%2日に繰り返します。</translation>
     </message>
 </context>
 <context>
@@ -901,7 +901,7 @@ Quit anyway?</source>
     </message>
     <message>
         <source>%1am</source>
-        <translation type="unfinished"></translation>
+        <translation>%1am</translation>
     </message>
 </context>
 <context>
@@ -909,18 +909,18 @@ Quit anyway?</source>
     <message>
         <source>%1-%2</source>
         <comment>2 dates</comment>
-        <translation type="unfinished"></translation>
+        <translation>%1日〜%2日</translation>
     </message>
 </context>
 <context>
     <name>WorldTimeDialog</name>
     <message>
         <source>OK</source>
-        <translation type="unfinished">OK</translation>
+        <translation>OK</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished">取り消し</translation>
+        <translation>取り消し</translation>
     </message>
 </context>
 </TS>

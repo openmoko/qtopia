@@ -135,7 +135,6 @@ InputMethods::InputMethods( QWidget *parent ) :
     imButton->setFocusPolicy(NoFocus);
     if (parent->sizeHint().height() > 0)
 	imButton->setFixedHeight( parent->sizeHint().height() );
-    imButton->setMaximumWidth( 32 );
     hbox->addWidget(imButton);
 
     imChoice = new QToolButton( this );

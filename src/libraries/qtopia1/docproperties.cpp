@@ -241,7 +241,9 @@ void DocPropertiesWidget::applyChanges()
 	    } else {
 		apps.remove(exe);
 #ifndef QT_NO_COP
-		QCopEnvelope e("QPE/Application/"+exe.local8Bit(),
+		QCopEnvelope("QPE/Application/"+exe.local8Bit(),
+			       "disablePreload()");
+		QCopEnvelope("QPE/Application/"+exe.local8Bit(),
 			       "quitIfInvisible()");
 #endif
 	    }

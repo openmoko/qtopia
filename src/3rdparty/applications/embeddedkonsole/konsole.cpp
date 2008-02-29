@@ -19,17 +19,6 @@
 //  some enhancements added by L.J. Potter <ljp@llornkcor.com>
 //
 
-/*! \class Konsole
-  \brief The Konsole class implements the Konsole application.
-
-  \legalese
-
-  EmbeddedKonsole is a port of the KDE program Konsole. The primary copyright holder
-  is Lars Doelle <lars.doelle@on-line.de>.  It is distributed under the terms of the 
-  GNU General Public License.
-*/
-
-
 #include <qtopia/resource.h>
 
 #include <qdir.h>
@@ -171,10 +160,14 @@ static const char *commonCmds[] =
     NULL
 };
 
-/*
-  \class Konsole konsole.h
-  \brief The Konsole class is the top-level widget.
+/*!
+  \class Konsole
+  \brief The Konsole class is the top-level widget for the
+  Terminal application.
+
   \legalese
+  The Terminal allows command-line access to the system and
+  is used for development and debugging activities.
 
   The Terminal (embeddedkonsole) is based on the KDE Konsole
   application and is distributed under the terms of the GNU

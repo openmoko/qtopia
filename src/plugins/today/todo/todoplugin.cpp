@@ -36,12 +36,44 @@ public:
     QString description;
     int	    priority;
     QDate   dueDate;
-    bool    hasDueDate;
+    bool    dueSoon;
     QUuid   uuid;
 
-    bool operator<(shortTask &t)  { return priority < t.priority; }
-    bool operator>(shortTask &t)  { return priority > t.priority; }
-    bool operator<=(shortTask &t) { return priority <= t.priority; }
+    int operator<(const shortTask &t) const
+    { return cmp(t) < 0; }
+    int operator>(const shortTask &t) const
+    { return cmp(t) > 0; }
+    int operator<=(const shortTask &t) const
+    { return cmp(t) <= 0; }
+
+    int cmp(const shortTask &t) const
+    {
+	int r = 0;
+	if ( dueSoon ) {
+	    if ( t.dueSoon )
+		r = t.dueDate.daysTo(dueDate);
+	    else
+		r = +1;
+	} else if ( t.dueSoon )
+	    r = -1;
+
+	if ( !r ) {
+	    r = priority - t.priority;
+	    if ( !r ) {
+		r = t.dueDate.daysTo(dueDate);
+		if ( !r )
+		    r = description.compare(t.description);
+		if ( !r ) {
+		    if ( uuid < t.uuid )
+			r = -1;
+		    else if ( uuid > t.uuid )
+			r = +1;
+		}
+	    }
+	}
+
+	return r;
+    }
 };
 
 
@@ -51,8 +83,6 @@ public:
     TodoPluginPrivate()
     {
 	days = 0;
-	limit = 0;
-	
 	todoAccess = new TodoAccess();
 	readConfig();
     }
@@ -70,16 +100,22 @@ public:
 	days = config.readNumEntry("days", 1);
 
 	if ( config.readBoolEntry("limit", TRUE) ) {
-	    limit = config.readNumEntry("limitcount", 3);	//+1 since 0 is not an option
+	    limit = config.readNumEntry("limitcount", 3);
+	} else {
+	    limit = 0;
 	}
     }
 
-    // max is currently unused.
-    void getTaskList(uint /* max */)
+    void getTaskList()
     {
 	tasks.clear();
 	
 	TodoIterator it(*todoAccess);
+
+	QDate before = QDate::currentDate();
+	before = before.addDays( days );
+	QDate later(9999,1,1);
+
 	for ( ; it.current(); ++it) {
 	    PimTask task( *it.current() );
 	    if ( !task.isCompleted() ) {
@@ -87,48 +123,22 @@ public:
 
 		stask.description = task.description();
 		stask.priority = task.priority();
-		stask.dueDate = task.dueDate();
-		stask.hasDueDate = FALSE;
+		stask.dueDate = task.hasDueDate()
+		    ? task.dueDate() : later;
 		stask.uuid = task.uid();
-
-		switch(selection) {
-		case 0:
-		    tasks.append(stask);
-		    break;
-
-		case 1:
-		    if ( task.hasDueDate() ) {
-			QDate before = QDate::currentDate();
-			before = before.addDays( days );
-
-			//
-			// Assign priority 1 if we have a due date that
-			// satisfies our selection criteria.  This moves
-			// it to the top of the list.
-			//
-			if ( task.dueDate() < before ) {
-			    stask.hasDueDate = TRUE;
-			    stask.priority = 1;
-			    tasks.append( stask );
-			}
+		stask.dueSoon = FALSE;
+		if ( selection==1 ) {
+		    if ( task.hasDueDate() && task.dueDate() < before ) {
+			stask.dueSoon = TRUE;
+			tasks.append( stask );
 		    }
-		    break;
-
-		default:
+		} else {
 		    tasks.append( stask );
-		    break;
 		}
 	    }
-//	    if ( tasks.count() >= max )	//need count function in qtopiapim lib
-//		break;
 	}
 
 	qHeapSort(tasks);
-	
-	if ( !limit )
-	    limit = tasks.count();
-	else if ( limit > tasks.count() )
-	    limit = tasks.count();
     }
 
     TodoAccess *todoAccess;
@@ -166,7 +176,7 @@ QString TodoPlugin::html(uint charWidth, uint /* lineHeight */) const
 {
     QString status;
 
-    d->getTaskList( d->limit );
+    d->getTaskList();
 
     // We try to be logical with the substrings, to allow
     // translation. If we have failed we will need to verbosify.
@@ -195,14 +205,13 @@ QString TodoPlugin::html(uint charWidth, uint /* lineHeight */) const
     str = "<table> <tr> <td> <a href=\"raise:todolist\"><img src=\"TodoList\" alt=\"Todo\"></a> </td>";
     str += "<td> <b> " + status + " </b> </td> </tr> </table> ";
 
-    
     if ( d->tasks.count() ) {
 	str += " <table> <tr> ";
-	for (uint i = 0; i < d->limit; i++ ) {
+	for (uint i = 0; (!d->limit || i < d->limit) && i < d->tasks.count(); i++ ) {
 	    shortTask t = d->tasks[i];
 
 	    QString when;
-	    if ( t.hasDueDate ) {
+	    if ( t.dueSoon ) {
 		when = TimeString::localYMD( t.dueDate ); 
 	    } else {
 		when = tr("Priority %1").arg(t.priority);
@@ -220,7 +229,7 @@ QString TodoPlugin::html(uint charWidth, uint /* lineHeight */) const
 	    }
 	    
 	    str += "<td> <a href=\"qcop:" + name() + QString(":%1\">").arg(i) + desc + "</a> </td>";
-	    if ( t.hasDueDate ) {
+	    if ( t.dueSoon ) {
 		str += "<td> " + when + " </td>";
 	    } else {
 		str += "<td> " + when +" </td>";

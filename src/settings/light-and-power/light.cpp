@@ -45,7 +45,7 @@
 #include <qlistbox.h>
 #include <qdir.h>
 #include <qbuttongroup.h>
-#if QT_VERSION >= 300
+#if QT_VERSION >= 0x030000
 #include <qstylefactory.h>
 #endif
 

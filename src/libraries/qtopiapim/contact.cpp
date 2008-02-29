@@ -290,11 +290,11 @@ void PimContact::insert( int key, const QString &v )
 */
 void PimContact::setField(int key,const QString &s)
 {
-    if (key < CommonFieldsEnd)
+    if (key < CommonFieldsEnd || key >= CustomFieldsStart) {
 	PimRecord::setField(key,s);
-    else if (key > ContactFieldsEnd)
-	qDebug("custom field");
-    else {
+    } else if (key > ContactFieldsEnd) {
+	qDebug("unkown field");
+    } else {
 	QString fixedStr = s;
 
 	//
@@ -316,13 +316,14 @@ void PimContact::setField(int key,const QString &s)
 */
 QString PimContact::field(int key) const
 {
-    if (key < CommonFieldsEnd)
+    if (key < CommonFieldsEnd || key >= CustomFieldsStart) {
 	return PimRecord::field(key);
-    else if (key > ContactFieldsEnd) {
-	qDebug("custom field");
+    } else if (key > ContactFieldsEnd) {
+	qDebug("unkown field");
 	return QString::null;
-    } else
+    } else {
 	return mMap[key];
+    }
 }
 
 QMap<int, QString> PimContact::fields() const

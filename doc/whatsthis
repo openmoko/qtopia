@@ -29,9 +29,10 @@ Defines the interface for text codec plugins. | TextCodecInterface
 Describes a single mount point. | FileSystem
 Describes the disks mounted on the file system. | StorageInfo
 Displays a list of available storage locations. | LocationCombo
-Dummy class. The atd program is based on Russ Nelson's lightweight At daemon. It is distributed under the terms of the GNU General Public License. | atd
-Dummy class. The avformat and avcodec code was extracted from the FFMPEG project. The author and primary copyright holder is Fabrice Bellard &lt;fabrice.bellard at free.fr&gt;. The FFMPEG project is distributed under the GNU Lesser General Public License. | FFMpeg
-Dummy class. The gsm code was extracted from verison 12.17.3 of the Sox sound tools. The author of Sox is Chris Bagwell &lt;cbagwell at users.sourceforge.net&gt;. Sox is distributed under the terms of the GNU General Public License. | GSM
+Dummy class. | FreeType
+Dummy class. GSM is a codec optimised for recording human speech, and is used by the MediaRecorder. | GSM
+Dummy class. The atd program is based on Russ Nelson's lightweight At daemon. The At daemon will run a program at a specified time. It is distributed under the terms of the GNU General Public License. | atd
+Dummy class. The avformat and avcodec code was extracted from the FFMPEG project. FFMPEG is a large project that allows recording, conversion and streaming of audio and video data. avformat and avcodec are used by the MediaPlayer.The author and primary copyright holder is Fabrice Bellard &lt;fabrice.bellard at free.fr&gt;. The FFMPEG project is distributed under the GNU Lesser General Public License. More information can be found at http://ffmpeg.sourceforge.net. | FFMpeg
 Encapsulates and sends QCop messages over QCopChannels. | QCopEnvelope
 Extended interface for Qtopia input methods. | ExtInputMethodInterface
 Extension to the MediaPlayerDecoder class for Qtopia MediaPlayer decoder plugins. | MediaPlayerDecoder_1_6
@@ -43,10 +44,10 @@ Holds the data of an address book entry. | PimContact
 Implementation of a Directed Acyclic Word Graph. | QDawg
 Implementation support for QJisCodec, QSjisCodec, and QEucJpCodec. | QJpUnicodeConv
 Implements basic support for sending objects over an infrared communication link. | Ir
-Implements the Konsole application. | Konsole
 Implements the default Qtopia widget style. | QPEStyle
 Implements various system services that are available to all Qtopia applications. | QPEApplication
 Information about available fonts. | FontDatabase
+Input method based on a virtual keyboard combined with word-completion. | Pickboard
 Interface for Qtopia input methods. | InputMethodInterface
 Interface for Qtopia taskbar applet plugins. | TaskbarAppletInterface
 Interface for Qtopia widget styles. | StyleInterface
@@ -75,6 +76,7 @@ Set of DocLnk objects. | DocLnkSet
 Simplifies plugin loading and allows plugins to be enabled/disabled. | PluginLoader
 Single element in an XML structure defined by XmlHandler. | Node
 The base class for PIM data recorded in the Qtopia database. | PimRecord
+The top-level widget for the Terminal application. | Konsole
 Used to access MediaPlayerDecoder objects. | MediaPlayerPluginInterface
 Used to start external programs and to communicate with them. | QProcess
 VNC client. | KVNC

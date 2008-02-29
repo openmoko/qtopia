@@ -41,6 +41,7 @@
 #include <qpainter.h>
 #include <qapplication.h>
 #include <qtimer.h>
+#include <qcopchannel_qws.h>
 #include <qtopia/docproperties.h>
 
 //===========================================================================
@@ -181,8 +182,8 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
     fileSelector = new FileSelector("image/*", stack, "fs", FALSE, FALSE);
     connect( fileSelector, SIGNAL( closeMe() ), this, SLOT( closeFileSelector() ) );
     connect( fileSelector, SIGNAL( fileSelected( const DocLnk &) ), this, SLOT( openFile( const DocLnk & ) ) );
-    connect(fileSelector, SIGNAL(categoryChanged()), this, SLOT(categoryChanged()));
-    connect(fileSelector, SIGNAL(typeChanged()), this, SLOT(typeChanged()));
+    connect(fileSelector, SIGNAL(categoryChanged()), this, SLOT(docsChanged()));
+    connect(fileSelector, SIGNAL(typeChanged()), this, SLOT(docsChanged()));
     imageList = fileSelector->fileList();
 
     edit = new QPopupMenu( menubar );
@@ -267,7 +268,14 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
     smallScale = config.readBoolEntry("SmallScale", FALSE);
 
     setControls(TRUE, !imageList.isEmpty());
+
+    connect(qApp, SIGNAL(linkChanged(const QString&)), this, SLOT(linkChanged(const QString&)));
+
+    QCopChannel *cardCh = new QCopChannel( "QPE/Card", this );
+    connect( cardCh, SIGNAL(received(const QCString &, const QByteArray &)),
+	    this, SLOT(cardMessage( const QCString &, const QByteArray &)) );
 }
+
 
 ImageViewer::~ImageViewer()
 {
@@ -329,14 +337,7 @@ ImageViewer::properties(void)
     }
 }
 
-void ImageViewer::categoryChanged(void)
-{
-    imageList.clear();
-    imageList = fileSelector->fileList();
-    setControls(TRUE, !imageList.isEmpty());
-}
-
-void ImageViewer::typeChanged(void)
+void ImageViewer::docsChanged(void)
 {
     imageList.clear();
     imageList = fileSelector->fileList();
@@ -542,6 +543,10 @@ void ImageViewer::setControls(bool force, bool valid)
     rotateAction->setEnabled(valid_picture);
     flipAction->setEnabled(valid_picture);
     fullscreenAction->setEnabled(valid_picture);
+
+    slideAction->setEnabled(valid_picture);
+    prevImageAction->setEnabled(valid_picture);
+    nextImageAction->setEnabled(valid_picture);
 
     edit->setItemEnabled(hflip_id, valid_picture);
     edit->setItemEnabled(vflip_id, valid_picture);
@@ -922,3 +927,15 @@ ImageViewer::handleKeypress(int keycode)
 	break;
     }
 }
+
+void ImageViewer::linkChanged(const QString &)
+{
+    QTimer::singleShot(1000, this, SLOT(docsChanged()));
+}
+
+void ImageViewer::cardMessage(const QCString &msg, const QByteArray &)
+{
+    if (msg == "mtabChanged()")
+	QTimer::singleShot(1000, this, SLOT(docsChanged()));
+}
+

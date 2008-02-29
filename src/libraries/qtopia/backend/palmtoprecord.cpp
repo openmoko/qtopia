@@ -23,7 +23,7 @@
 
 #if defined(Q_TEMPLATEDLL)
 // MOC_SKIP_BEGIN
-#if QT_VERSION >= 300
+#if QT_VERSION >= 0x030000
 Q_TEMPLATE_EXTERN template class Q_EXPORT QValueList<int>;
 #endif
 // MOC_SKIP_END

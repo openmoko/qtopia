@@ -60,6 +60,13 @@ void StorageInfoView::setVBGeom()
     vb->setGeometry(4,0,width()-8,height());
 }
 
+QSize StorageInfoView::sizeHint() const
+{
+    QSize s = vb ? vb->sizeHint() : QSize();
+    return QSize( s.width()+8, s.height() );
+}
+
+
 void StorageInfoView::updateMounts()
 {
     const QList<FileSystem>& sifs(sinfo->fileSystems());
@@ -83,6 +90,7 @@ void StorageInfoView::updateMounts()
     if ( n < 3 ) // add a filler
 	(new QWidget(vb))->setSizePolicy(QSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding));
     setVBGeom();
+    updateGeometry();
     vb->show();
 }
 

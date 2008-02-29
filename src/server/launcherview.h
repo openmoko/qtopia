@@ -84,6 +84,7 @@ protected slots:
     void showType(int);
     void showCategory( int );
     void resizeEvent(QResizeEvent *);
+    void flushBgCache();
 
 protected:
     void internalPopulate( AppLnkSet *, const QString& categoryfilter );

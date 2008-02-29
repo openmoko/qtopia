@@ -33,9 +33,21 @@
 
 static QString fontDir()
 {
+#ifndef Q_OS_WIN32
     QString qtdir = getenv("QTDIR");
     if ( qtdir.isEmpty() ) qtdir = "/usr/local/qt-embedded";
     return qtdir+"/lib/fonts/";
+#else
+    QString fontDir, qtDir;
+    if ( getenv("QTDIR") )
+	qtDir = QString(getenv("QTDIR")).stripWhiteSpace();
+    if ( qtDir.isNull() || qtDir.isEmpty() )
+	fontDir = QPEApplication::qpeDir();
+    else
+	fontDir = qtDir + QDir::separator();
+    fontDir.append("lib/fonts/");
+    return fontDir;
+#endif
 }
 
 #ifdef QT_NO_FONTDATABASE

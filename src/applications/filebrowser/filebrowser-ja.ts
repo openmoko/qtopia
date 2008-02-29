@@ -203,7 +203,7 @@
     <message>
         <source>Open in %1</source>
         <comment>eg. text editor</comment>
-        <translation type="unfinished"></translation>
+        <translation>%1で開く</translation>
     </message>
 </context>
 </TS>

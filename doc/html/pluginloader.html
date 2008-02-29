@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/src/libraries/qtopia1/pluginloader.cpp:115 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12684/qtopia/src/libraries/qtopia1/pluginloader.cpp:116 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -17,7 +17,7 @@ body { background: #ffffff; color: black; }
 <tr bgcolor="black"><td>
 <a href="classes.html"><font color="white">Qt API</font></a>
 <font color="white">|</font>
-<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
 </td>
 <td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
 <td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>PluginLoader Class Reference</h1>
@@ -64,12 +64,13 @@ iterate over the list of plugins and load each one:
   </pre>
  
 <p> 
-<p>See also <a href="../classes.html">Qtopia Classes</a>.
+<p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
 
 <hr><h2>Member Function Documentation</h2>
 <h3 class=fn><a name="PluginLoader"></a>PluginLoader::PluginLoader ( const&nbsp;<a href="qstring.html">QString</a>&nbsp;&amp;&nbsp;type )
 </h3>
 Creates a PluginLoader for plugins of type <em>type</em>.
+<p> The plugins must be installed in the $QPEDIR/plugins/<i>type<i> directory.
 
 <h3 class=fn><a name="~PluginLoader"></a>PluginLoader::~PluginLoader ()
 </h3>
@@ -86,7 +87,7 @@ Returns the list of plugins that have been disabled.
 
 <h3 class=fn>bool <a name="inSafeMode"></a>PluginLoader::inSafeMode ()<tt> [static]</tt>
 </h3>
-Returns TRUE if Qtopia is currently in \em {Safe Mode}.  In Safe Mode
+Returns TRUE if Qtopia is currently in <i>Safe Mode</i>.  In Safe Mode
 <a href="#list">list</a>() will return an empty list and no plugins should be loaded.  This
 is to allow misbehaving plugins to be disbled.
 
@@ -121,6 +122,6 @@ copyright &copy; 1995-2002
 <a href="http://www.trolltech.com/">Trolltech</a>, all rights reserved.<p><address><hr><div align=center>
 <table width=100% cellspacing=0 border=0><tr>
 <td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.6.0</div>
+<td align=right><div align=right>Qtopia version 1.6.1</div>
 </table></div></address></body>
 </html>

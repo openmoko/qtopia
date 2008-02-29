@@ -21,7 +21,7 @@
     <name>FileSelector</name>
     <message>
         <source>Document View</source>
-        <translation type="unfinished">ドキュメント表示</translation>
+        <translation>ドキュメント表示</translation>
     </message>
 </context>
 <context>
@@ -55,27 +55,27 @@
     <name>ID3TagEditWidget</name>
     <message>
         <source>Title</source>
-        <translation type="unfinished">タイトル</translation>
+        <translation>タイトル</translation>
     </message>
     <message>
         <source>Artist</source>
-        <translation type="unfinished">アーティスト</translation>
+        <translation>アーティスト</translation>
     </message>
     <message>
         <source>Album</source>
-        <translation type="unfinished">アルバム</translation>
+        <translation>アルバム</translation>
     </message>
     <message>
         <source>Comment</source>
-        <translation type="unfinished">コメント</translation>
+        <translation>コメント</translation>
     </message>
     <message>
         <source>Year</source>
-        <translation type="unfinished">年</translation>
+        <translation>年</translation>
     </message>
     <message>
         <source>Track</source>
-        <translation type="unfinished">トラック</translation>
+        <translation>トラック</translation>
     </message>
 </context>
 <context>
@@ -300,15 +300,15 @@ the next time you start it.</source>
     <name>TabbedSelector</name>
     <message>
         <source>Audio</source>
-        <translation type="unfinished"></translation>
+        <translation>オーディオ</translation>
     </message>
     <message>
         <source>Video</source>
-        <translation type="unfinished"></translation>
+        <translation>ビデオ</translation>
     </message>
     <message>
         <source>Playlist</source>
-        <translation type="unfinished">プレイリスト</translation>
+        <translation>プレイリスト</translation>
     </message>
 </context>
 <context>

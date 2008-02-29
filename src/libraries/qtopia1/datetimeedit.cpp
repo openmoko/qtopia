@@ -281,8 +281,15 @@ void QPETimeEdit::stepUp()
     int tmp = value();
     tmp = tmp - (tmp % 15);
     tmp += 15;
-    if (tmp > maxValue())
-	tmp = maxValue();
+    if (tmp > maxValue()) {
+	if (parent() && qstrcmp(parent()->className(), "QPEDateTimeEdit") == 0) {
+	    QPEDateTimeEdit *dte = (QPEDateTimeEdit *)parent();
+	    dte->blockSignals(TRUE);
+	    dte->setDate(dte->date().addDays(1));
+	    dte->blockSignals(FALSE);
+	}
+	tmp = 0;
+    }
     setValue(tmp);
 }
 
@@ -296,8 +303,15 @@ void QPETimeEdit::stepDown()
 	tmp = tmp - (tmp % 15);
     else
 	tmp -=15;
-    if (tmp < minValue())
-	tmp = minValue();
+    if (tmp < minValue()) {
+	if (parent() && qstrcmp(parent()->className(), "QPEDateTimeEdit") == 0) {
+	    QPEDateTimeEdit *dte = (QPEDateTimeEdit *)parent();
+	    dte->blockSignals(TRUE);
+	    dte->setDate(dte->date().addDays(-1));
+	    dte->blockSignals(FALSE);
+	}
+	tmp = 23*60+45;
+    }
     setValue(tmp);
 }
 

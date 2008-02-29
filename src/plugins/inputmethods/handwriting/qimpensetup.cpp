@@ -564,6 +564,7 @@ void QIMPenEdit::selectChar( int i )
     if ( !it.current() )
 	setCurrentChar( 0 );
     inputChar->clear();
+    enableButtons();
     lastCh = i;
 }
 

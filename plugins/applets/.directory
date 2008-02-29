@@ -1,4 +1,6 @@
 [Desktop Entry]
 Name=Applets
 Comment=Applets provide status information and easy access to settings via the Taskbar.
+Name[ja]=アプレット
+Comment[ja]=アプレットでは状態に関する情報を提供し、またタスクバーから簡単に設定にアクセスできます。
 Apply=QPE/TaskBar reloadApplets()

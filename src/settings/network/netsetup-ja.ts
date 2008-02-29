@@ -26,7 +26,7 @@
     </message>
     <message>
         <source>&lt;p&gt;Only one %1 can be added. Remove the current one, or change its Properties</source>
-        <translation>&lt;p&gt;%1がひとつだけ追加できます。現在のものを削除するか、プロパティを変更してください</translation>
+        <translation>&lt;p&gt;%1がひとつ追加できます。現在のものを削除するか、プロパティを変更してください</translation>
     </message>
     <message>
         <source>Network</source>
@@ -34,11 +34,11 @@
     </message>
     <message>
         <source>&lt;p&gt;There are no running network services.</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;稼動しているネットワークサービスはありません。</translation>
     </message>
     <message>
         <source>&lt;p&gt;This is the state of your running network services.</source>
-        <translation type="unfinished">&lt;p&gt;実行中のネットワークサービスの状態です。</translation>
+        <translation>&lt;p&gt;稼動中のネットワークサービスの状態です。</translation>
     </message>
 </context>
 <context>
@@ -53,7 +53,7 @@
     </message>
     <message>
         <source>&lt;p&gt;This is the state of your running network services.</source>
-        <translation type="unfinished">&lt;p&gt;実行中のネットワークサービスの状態です。</translation>
+        <translation>&lt;p&gt;稼動中のネットワークサービスの状態です。</translation>
     </message>
     <message>
         <source>Services</source>

@@ -34,11 +34,11 @@
     </message>
     <message>
         <source>To change this location, click here, then choose a new location from the map.</source>
-        <translation>この場所を変更するには、ここをクリックし、マップから新しい場所を選びます。</translation>
+        <translation>この場所を変更するには、ここをクリックしてマップから新しい場所を選びます。</translation>
     </message>
     <message>
         <source>&lt;CITY 6 TIME&gt;</source>
-        <translation>&lt;都市 6 時刻&gt;</translation>
+        <translation>&lt;都市 6 時間&gt;</translation>
     </message>
     <message>
         <source>&lt;location 5&gt;</source>
@@ -54,15 +54,15 @@
     </message>
     <message>
         <source>&lt;CITY 5 TIME&gt;</source>
-        <translation>&lt;都市 5 時刻&gt;</translation>
+        <translation>&lt;都市 5 時間&gt;</translation>
     </message>
     <message>
         <source>&lt;CITY 2 TIME&gt;</source>
-        <translation>&lt;都市 2 時刻&gt;</translation>
+        <translation>&lt;都市 2 時間&gt;</translation>
     </message>
     <message>
         <source>&lt;CITY 1 TIME&gt;</source>
-        <translation>&lt;都市 1 時刻&gt;</translation>
+        <translation>&lt;都市 1 時間&gt;</translation>
     </message>
     <message>
         <source>&lt;location 3&gt;</source>
@@ -74,11 +74,11 @@
     </message>
     <message>
         <source>&lt;CITY 3 TIME&gt;</source>
-        <translation>&lt;都市 3 時刻&gt;</translation>
+        <translation>&lt;都市 3 時間&gt;</translation>
     </message>
     <message>
         <source>&lt;CITY 4 TIME&gt;</source>
-        <translation>&lt;都市 4 時刻&gt;</translation>
+        <translation>&lt;都市 4 時間&gt;</translation>
     </message>
 </context>
 <context>

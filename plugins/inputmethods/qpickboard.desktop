@@ -1,4 +1,6 @@
 [Desktop Entry]
 Name=Pickboard
 Comment=Dictionary based input method.
+Name[ja]=ピックボード
+Comment[ja]=辞書ベース入力メソッド
 X-QPE-Library=libqpickboard.so

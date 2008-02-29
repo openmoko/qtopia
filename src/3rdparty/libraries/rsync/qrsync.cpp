@@ -11,10 +11,15 @@ extern "C" {
   \brief The QRsync class provides an interface to librsync.
 
   \legalese
-  QRsync links with librsync, which is distributed under the terms of the
-  GNU Lesser General Public License. The primary copyright holders and
-  and authors are Martin Pool \<mbp@samba.org\> and Andrew Tridgell 
-  \<tridge@samba.org\>.
+  QRsync links with librsync, which provides fast incremental file
+  transfer in the style of rsync. Qtopia and QtopiaDesktop use QRsync
+  for PIM data synchronization.
+  
+  Librsync is distributed under the terms of the
+  GNU Lesser General Public License. The primary copyright holder and
+  and author is Martin Pool \<mbp@samba.org\>. The primary copyright
+  holder and author for rsync is Andrew Tridgell \<tridge@samba.org\>.
+  More information about librsync can be found at http://librsync.sourceforge.net
 */
 
 

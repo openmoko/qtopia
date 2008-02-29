@@ -41,11 +41,11 @@ Access denied</source>
     </message>
     <message>
         <source>Mismatch: Retry new code</source>
-        <translation>ミスマッチ; 新しいコードをやり直してください</translation>
+        <translation>不一致: 新しいコードを再入力してください</translation>
     </message>
     <message>
         <source>Invalid: Retry new code</source>
-        <translation type="unfinished"></translation>
+        <translation>無効: 新しいコードを再入力してください</translation>
     </message>
 </context>
 <context>
@@ -108,7 +108,7 @@ Access denied</source>
     </message>
     <message>
         <source>Security</source>
-        <translation type="unfinished"></translation>
+        <translation>セキュリティ</translation>
     </message>
 </context>
 </TS>

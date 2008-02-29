@@ -404,11 +404,11 @@ DayViewContents::DayViewContents( Type t,
     setHScrollBarMode(AlwaysOff);
 
     if (typ == AllDay) {
-	setMargins(0, 3, 0, 0);
+	setMargins(0, 0, 0, 0);
 	setBackgroundMode(PaletteDark);
-	itemList = new AllDayLayout(contentsWidth() - 1, contentsHeight());
+	itemList = new AllDayLayout(contentsWidth(), contentsHeight());
     } else {
-	itemList = new DayViewLayout(contentsWidth() - time_width - 1, contentsHeight());
+	itemList = new DayViewLayout(contentsWidth() - time_width, contentsHeight());
     }
 
     viewport()->setBackgroundColor( white );
@@ -1040,11 +1040,9 @@ void DayView::getEvents()
     if (allDayCount) {
 	int fixed_height;
 	if (allDayCount > 4)
-	    fixed_height = 2 * day_height + (day_height / 2 ) + qApp->style().defaultFrameWidth() * 2;
+	    fixed_height = 2 * day_height + (day_height / 2 );
 	else
-	    fixed_height = day_height * (++allDayCount / 2 ) + qApp->style().defaultFrameWidth() * 2;
-
-	fixed_height++;
+	    fixed_height = day_height * (++allDayCount / 2 );
 
 	allView->setMaximumHeight(fixed_height);
 	allView->setMinimumHeight(fixed_height);

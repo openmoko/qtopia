@@ -171,11 +171,11 @@
     </message>
     <message>
         <source>Last Name Pronunciation</source>
-        <translation type="unfinished"></translation>
+        <translation>姓のふりがな</translation>
     </message>
     <message>
         <source>Company Pronunciation</source>
-        <translation type="unfinished"></translation>
+        <translation>社名のふりがな</translation>
     </message>
 </context>
 <context>
@@ -346,144 +346,144 @@
     <name>QtopiaPim</name>
     <message>
         <source>Due: </source>
-        <translation type="unfinished"></translation>
+        <translation>期限:</translation>
     </message>
     <message>
         <source>Started: </source>
-        <translation type="unfinished"></translation>
+        <translation>開始日:</translation>
     </message>
     <message>
         <source>Completed: </source>
-        <translation type="unfinished"></translation>
+        <translation>完了日:</translation>
     </message>
     <message>
         <source>Not yet started</source>
-        <translation type="unfinished"></translation>
+        <translation>未開始</translation>
     </message>
     <message>
         <source>In progress</source>
-        <translation type="unfinished"></translation>
+        <translation>進行中</translation>
     </message>
     <message>
         <source>Waiting</source>
-        <translation type="unfinished"></translation>
+        <translation>待機中</translation>
     </message>
     <message>
         <source>Deferred</source>
-        <translation type="unfinished"></translation>
+        <translation>延期</translation>
     </message>
     <message>
         <source>Completed</source>
-        <translation type="unfinished">完了</translation>
+        <translation>完了</translation>
     </message>
     <message>
         <source>Status: </source>
-        <translation type="unfinished"></translation>
+        <translation>状態:</translation>
     </message>
     <message>
         <source>Priority: </source>
-        <translation type="unfinished"></translation>
+        <translation>優先度:</translation>
     </message>
     <message>
         <source> percent</source>
         <comment>Word or symbol after numbers for percentage</comment>
-        <translation type="unfinished"></translation>
+        <translation>%</translation>
     </message>
     <message>
         <source>Notes: </source>
-        <translation type="unfinished"></translation>
+        <translation>メモ:</translation>
     </message>
     <message>
         <source>Work Address: </source>
-        <translation type="unfinished"></translation>
+        <translation>勤務先所在地:</translation>
     </message>
     <message>
         <source>Home Address: </source>
-        <translation type="unfinished"></translation>
+        <translation>自宅住所:</translation>
     </message>
     <message>
         <source>Email Addresses: </source>
-        <translation type="unfinished">電子メールアドレス:</translation>
+        <translation>電子メールアドレス:</translation>
     </message>
     <message>
         <source>Home Phone: </source>
-        <translation type="unfinished">自宅電話番号:</translation>
+        <translation>自宅電話番号:</translation>
     </message>
     <message>
         <source>Home Fax: </source>
-        <translation type="unfinished">自宅ファクス番号:</translation>
+        <translation>自宅ファクス番号:</translation>
     </message>
     <message>
         <source>Home Mobile: </source>
-        <translation type="unfinished">個人用携帯番号:</translation>
+        <translation>個人用携帯番号:</translation>
     </message>
     <message>
         <source>Home Web Page: </source>
-        <translation type="unfinished">個人用ウェブページ:</translation>
+        <translation>個人ウェブページ:</translation>
     </message>
     <message>
         <source>Business Web Page: </source>
-        <translation type="unfinished">ビジネスウェブページ:</translation>
+        <translation>ビジネスウェブページ:</translation>
     </message>
     <message>
         <source>Office: </source>
-        <translation type="unfinished">オフィス:</translation>
+        <translation>オフィス:</translation>
     </message>
     <message>
         <source>Business Phone: </source>
-        <translation type="unfinished">勤務先電話番号:</translation>
+        <translation>勤務先電話番号:</translation>
     </message>
     <message>
         <source>Business Fax: </source>
-        <translation type="unfinished">勤務先ファックス番号:</translation>
+        <translation>勤務先ファックス番号:</translation>
     </message>
     <message>
         <source>Business Mobile: </source>
-        <translation type="unfinished">ビジネス用携帯番号:</translation>
+        <translation>ビジネス携帯番号:</translation>
     </message>
     <message>
         <source>Business Pager: </source>
-        <translation type="unfinished">ビジネス用ポケットベル:</translation>
+        <translation>ビジネスポケベル:</translation>
     </message>
     <message>
         <source>Profession: </source>
-        <translation type="unfinished">職業:</translation>
+        <translation>職業:</translation>
     </message>
     <message>
         <source>Assistant: </source>
-        <translation type="unfinished">アシスタント:</translation>
+        <translation>アシスタント:</translation>
     </message>
     <message>
         <source>Manager: </source>
-        <translation type="unfinished">マネージャ:</translation>
+        <translation>マネージャ:</translation>
     </message>
     <message>
         <source>Male</source>
-        <translation type="unfinished">男性</translation>
+        <translation>男性</translation>
     </message>
     <message>
         <source>Female</source>
-        <translation type="unfinished">女性</translation>
+        <translation>女性</translation>
     </message>
     <message>
         <source>Gender: </source>
-        <translation type="unfinished">性別:</translation>
+        <translation>性別:</translation>
     </message>
     <message>
         <source>Spouse: </source>
-        <translation type="unfinished">配偶者:</translation>
+        <translation>配偶者:</translation>
     </message>
     <message>
         <source>Birthday: </source>
-        <translation type="unfinished">誕生日:</translation>
+        <translation>誕生日:</translation>
     </message>
     <message>
         <source>Anniversary: </source>
-        <translation type="unfinished">記念日:</translation>
+        <translation>記念日:</translation>
     </message>
     <message>
         <source>Nickname: </source>
-        <translation type="unfinished">ニックネーム:</translation>
+        <translation>ニックネーム:</translation>
     </message>
 </context>
 </TS>

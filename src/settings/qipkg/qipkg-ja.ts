@@ -19,7 +19,7 @@
     </message>
     <message>
         <source>Select</source>
-        <translation type="unfinished"></translation>
+        <translation>選択</translation>
     </message>
 </context>
 <context>
@@ -116,143 +116,143 @@
     <message>
         <source>Installing on %1</source>
         <comment>eg. SD card</comment>
-        <translation type="unfinished"></translation>
+        <translation>%1にインストール中</translation>
     </message>
     <message>
         <source>Installing from network to %1</source>
         <comment>eg. SD card</comment>
-        <translation type="unfinished"></translation>
+        <translation>ネットワークから%1へインストール中</translation>
     </message>
     <message>
         <source>%1 more packages</source>
-        <translation type="unfinished"></translation>
+        <translation>%1パッケージ</translation>
     </message>
     <message>
         <source>Install</source>
-        <translation type="unfinished">インストール</translation>
+        <translation>インストール</translation>
     </message>
     <message>
         <source>Uninstall:</source>
-        <translation type="unfinished"></translation>
+        <translation>アンインストール:</translation>
     </message>
     <message>
         <source>Remove</source>
-        <translation type="unfinished">削除</translation>
+        <translation>削除</translation>
     </message>
     <message>
         <source>Package Feed</source>
-        <translation type="unfinished">パッケージフィード</translation>
+        <translation>パッケージフィード</translation>
     </message>
     <message>
         <source>Close</source>
-        <translation type="unfinished"></translation>
+        <translation>閉じる</translation>
     </message>
     <message>
         <source>No details.</source>
-        <translation type="unfinished"></translation>
+        <translation>詳細がありません。</translation>
     </message>
     <message>
         <source>Package: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>パッケージ: %1</translation>
     </message>
     <message>
         <source>Error</source>
-        <translation type="unfinished"></translation>
+        <translation>エラー</translation>
     </message>
 </context>
 <context>
     <name>PackageWizardBase</name>
     <message>
         <source>Software Packages</source>
-        <translation type="unfinished"></translation>
+        <translation>ソフトウェアパッケージ</translation>
     </message>
     <message>
         <source>What do you want to do?</source>
-        <translation type="unfinished"></translation>
+        <translation>何をしますか?</translation>
     </message>
     <message>
         <source>Install from Documents</source>
-        <translation type="unfinished"></translation>
+        <translation>ドキュメントからインストール</translation>
     </message>
     <message>
         <source>Install from Network</source>
-        <translation type="unfinished"></translation>
+        <translation>ネットワークからインストール</translation>
     </message>
     <message>
         <source>Uninstall software packages</source>
-        <translation type="unfinished"></translation>
+        <translation>ソフトウェアパッケージのアンインストール</translation>
     </message>
     <message>
         <source>Share software packages</source>
-        <translation type="unfinished"></translation>
+        <translation>共有ソフトウェアパッケージ</translation>
     </message>
     <message>
         <source>Choose servers...</source>
-        <translation type="unfinished"></translation>
+        <translation>サーバーの選択...</translation>
     </message>
     <message>
         <source>Remove</source>
-        <translation type="unfinished">削除</translation>
+        <translation>削除</translation>
     </message>
     <message>
         <source>Name:</source>
-        <translation type="unfinished">名前：</translation>
+        <translation>名前:</translation>
     </message>
     <message>
         <source>URL:</source>
-        <translation type="unfinished">URL：</translation>
+        <translation>URL:</translation>
     </message>
     <message>
         <source>Name</source>
-        <translation type="unfinished">名前</translation>
+        <translation>名前</translation>
     </message>
     <message>
         <source>URL</source>
-        <translation type="unfinished">URL</translation>
+        <translation>URL</translation>
     </message>
     <message>
         <source>New</source>
-        <translation type="unfinished">新規</translation>
+        <translation>新規</translation>
     </message>
     <message>
         <source>Choose packages...</source>
-        <translation type="unfinished"></translation>
+        <translation>パッケージの選択...</translation>
     </message>
     <message>
         <source>Description</source>
-        <translation type="unfinished">詳細</translation>
+        <translation>詳細</translation>
     </message>
     <message>
         <source>Size</source>
-        <translation type="unfinished">サイズ</translation>
+        <translation>サイズ</translation>
     </message>
     <message>
         <source>Share Packages</source>
-        <translation type="unfinished"></translation>
+        <translation>共有パッケージ</translation>
     </message>
     <message>
         <source>Beam via IR</source>
-        <translation type="unfinished"></translation>
+        <translation>赤外線によるビーム</translation>
     </message>
     <message>
         <source>Send via Email</source>
-        <translation type="unfinished"></translation>
+        <translation>電子メールによる送信</translation>
     </message>
     <message>
         <source>Store as Document</source>
-        <translation type="unfinished"></translation>
+        <translation>ドキュメントとして格納</translation>
     </message>
     <message>
         <source>Choose destination...</source>
-        <translation type="unfinished"></translation>
+        <translation>転送先の選択...</translation>
     </message>
     <message>
         <source>Confirm operation...</source>
-        <translation type="unfinished"></translation>
+        <translation>オペレーションの確定...</translation>
     </message>
     <message>
         <source>[confirm]</source>
-        <translation type="unfinished"></translation>
+        <translation>[確定]</translation>
     </message>
     <message>
         <source>Package</source>
@@ -260,7 +260,7 @@
     </message>
     <message>
         <source>Show Details...</source>
-        <translation type="unfinished"></translation>
+        <translation>詳細表示...</translation>
     </message>
 </context>
 <context>

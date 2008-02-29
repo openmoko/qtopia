@@ -23,8 +23,32 @@
 #include <qfile.h>
 #include <stdlib.h>
 #include <qgfx_qws.h>
+#ifdef Q_OS_WIN32
+#include <qtopia/qpeapplication.h>
+#include <qdir.h>
+#endif
 
 
+
+/*! internal
+    Determine where unicode fonts are installed
+*/
+static QString unicodeFontDirPath()
+{
+#ifndef Q_OS_WIN32
+    QString fontDir = getenv("QTDIR") + QString("/lib/fonts/");
+#else
+    QString fontDir, qtDir;
+    if ( getenv("QTDIR") )
+	qtDir = QString(getenv("QTDIR")).stripWhiteSpace();
+    if ( qtDir.isNull() || qtDir.isEmpty() )
+	fontDir = QPEApplication::qpeDir();
+    else
+	fontDir = qtDir + QDir::separator();
+    fontDir.append("lib/font/");
+#endif
+    return fontDir;
+}
 
 /*
     QFontInfo doesn't work in QWS at the moment,
@@ -38,8 +62,7 @@
 
 bool FontManager::hasUnicodeFont()
 {
-    QString fontDir = getenv("QTDIR") + QString("/lib/fonts/");
-
+    QString fontDir = unicodeFontDirPath();
     QString suffix;
     if ( qt_screen->isTransformed() ) {
 	suffix += "_t";
@@ -58,7 +81,7 @@ QFont FontManager::unicodeFont( Spacing sp )
 {
     QString key;
     QString fontName;
-    QString fontDir = getenv("QTDIR") + QString("/lib/fonts/");
+    QString fontDir = unicodeFontDirPath();
 
     int size;
     if ( sp == Proportional ) {

@@ -1,4 +1,6 @@
 [Desktop Entry]
 Name=Calendar
 Comment=Displays today's events.
+Name[ja]=カレンダー
+Comment[ja]=今日の行事を表示します。
 X-QPE-Library=libdatebookplugin.so

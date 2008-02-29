@@ -26,16 +26,18 @@
   \brief The QObex class provides an interface to OpenOBEX.
 
   \legalese
-
-  QObex links with OpenOBEX, which is distributes under the terms
+  QObex links with OpenOBEX, which is an open source implementation
+  of the Object Exchange (OBEX) protocol. This protocol is essentially
+  a typed file-exchange protocol. OpenOBEX is distributed under the terms
   of the GNU Lesser General Public License (LGPL). Primary
   copyright holders of OpenOBEX include Dag Brattli and
-  Pontus Fuchs.
+  Pontus Fuchs. QObex is used by Qtopia for infra-red communications.
 
   The version of OpenOBEX included here includes some functions
   of GLIB, which is distributed under the terms of the GNU Library General Public
   License (LGPL). The primary copyright holders of GLIB are Peter Mattis,
-  Spencer Kimball and Josh MacDonald.
+  Spencer Kimball and Josh MacDonald. More information about OpenOBEX can
+  be found at http://openobex.sourceforge.net/
 */
 
 QObex::QObex()

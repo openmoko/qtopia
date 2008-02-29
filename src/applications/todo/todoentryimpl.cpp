@@ -132,8 +132,8 @@ void NewTaskDialog::init()
     s->buttonCancel->hide();
     s->buttonOk->hide();
 #else
-    setTabOrder(s->comboCategory, s->buttonCancel);
-    setTabOrder(s->buttonCancel, s->buttonOk);
+    setTabOrder(s->comboCategory, s->buttonOk);
+    setTabOrder(s->buttonOk, s->buttonCancel);
     s->buttonOk->setDefault(TRUE);
 
     connect( s->buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );

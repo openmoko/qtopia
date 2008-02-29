@@ -1440,7 +1440,7 @@ void DocLnkSet::findChildren(const QString &dr, const QValueList<QRegExp> &mimeF
   \a file for other files.
 */
 DocLnk::DocLnk( const QString &file ) :
-    AppLnk(file)
+    AppLnk( file.right(8) == ".desktop" ? file : QString::null )
 {
     init(file);
 }

@@ -27,6 +27,7 @@
 #include <qtopia/qcopenvelope_qws.h>
 #include <qtopia/resource.h>
 #include <qtopia/global.h>
+#include <qtopia/qpeapplication.h>
 
 #include <qdir.h>
 #include <qmessagebox.h>
@@ -37,6 +38,20 @@
 #define BEAM_TRAY_ID ((int) 0x43535345)
 
 //#define QTOPIA_IR_DEBUG
+
+static void notifyBeamBegin()
+{
+    QCopEnvelope("Qt/Tray", "setIcon(int,QPixmap)")
+	<< BEAM_TRAY_ID << Resource::loadPixmap("beam");
+    QPEApplication::setTempScreenSaverMode(QPEApplication::DisableSuspend);
+}
+
+static void notifyBeamDone()
+{
+    QCopEnvelope("Qt/Tray", "remove(int)")
+	<< BEAM_TRAY_ID;
+    QPEApplication::setTempScreenSaverMode(QPEApplication::Enable);
+}
 
 QIr::QIr( QObject *parent, const char *name )
     : QObject( parent, name ),
@@ -125,10 +140,7 @@ void QIr::obexMessage( const QCString &msg , const QByteArray &data )
 	    sendWindow->initBeam();
 	    obexServer->beam( filename, mimetype );
 	    sendWindow->beamingFirst();
-	    {
-		QCopEnvelope("Qt/Tray", "setIcon(int,QPixmap)")
-		    << BEAM_TRAY_ID << Resource::loadPixmap("beam");
-	    }
+	    notifyBeamBegin();
 	} 
     }
 }
@@ -163,7 +175,8 @@ void QIr::traySocket( const QCString &msg, const QByteArray &data)
 		}
 		break;
 	   default:
-		qDebug("should not be visible");
+		notifyBeamDone();
+		break;
 	}
     }
 }
@@ -173,10 +186,7 @@ void QIr::receiveInit()
     if ( !receiveWindow )
       receiveWindow = new ReceiveDialog(obexServer, 0, "irReceive");
 
-    {
-	QCopEnvelope("Qt/Tray", "setIcon(int,QPixmap)")
-	    << BEAM_TRAY_ID << Resource::loadPixmap("beam");
-    }
+    notifyBeamBegin();
 }
 
 void QIr::received( const QString&, const QString &)
@@ -188,9 +198,7 @@ void QIr::received( const QString&, const QString &)
 	Global::statusMessage( "" );
     }
 
-    QCopEnvelope("Qt/Tray", "remove(int)")
-	<< BEAM_TRAY_ID;
-    
+    notifyBeamDone();
     ips->beamingDone(TRUE);
 }
 
@@ -208,9 +216,7 @@ void QIr::receiveError()
     else
 	receiveWindow->showMaximized();
 
-    QCopEnvelope("Qt/Tray", "remove(int)")
-	<< BEAM_TRAY_ID;
-    
+    notifyBeamDone();
     ips->beamingDone(TRUE);
 }
 
@@ -222,10 +228,8 @@ void QIr::beamDone()
 	QTimer::singleShot(0, this, SLOT(beamNext()) );
     } else {
 	sendWindow->finished();
-	QCopEnvelope("Qt/Tray", "remove(int)")
-	    << BEAM_TRAY_ID;
-    
 	ips->beamingDone();
+	notifyBeamDone();
     }
 }
 
@@ -247,10 +251,7 @@ void QIr::beamError()
     }
     
     sendWindow->failed();
-    
-    QCopEnvelope("Qt/Tray", "remove(int)")
-	<< BEAM_TRAY_ID;
-    
+    notifyBeamDone();
     ips->beamingDone();
 }
 

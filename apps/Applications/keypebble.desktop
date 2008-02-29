@@ -4,5 +4,5 @@ Exec=keypebble
 Icon=vnc
 Type=Application
 Name=VNC Viewer
-Name[ja]=???
+Name[ja]=VNCビューワ
 CanFastload=0

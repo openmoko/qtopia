@@ -1,4 +1,3 @@
-//depot/qtopia/1/src/libraries/qtopia/applnk.h#3 - edit change 78786 (text)
 /**********************************************************************
 ** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
 **

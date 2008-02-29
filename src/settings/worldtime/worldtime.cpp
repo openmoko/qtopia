@@ -140,40 +140,36 @@ void WorldTime::cancelChanges()
 void WorldTime::writeTimezoneChanges(void)
 {
     qDebug("Writing changes");
-    Config *cfg = new Config("WorldTime");
-    if (!cfg){
-	qDebug("Unable to Write WorldTime configuration");
-	return;
-    }
+    Config cfg("WorldTime");
 
     QListIterator<QPushButton> itCity( listCities );
-    cfg->setGroup("TimeZones");
+    cfg.setGroup("TimeZones");
 
     int i;
     bool realTzWritten = FALSE;
     for ( i = 0, itCity.toFirst();  itCity.current(); i++, ++itCity ) {
 	if ( !strCityTz[i].isNull() ) {
-	    cfg->writeEntry("Zone"+QString::number(i), strCityTz[i]);
-	    cfg->writeEntry("ZoneName"+QString::number(i), itCity.current()->text());
+	    cfg.writeEntry("Zone"+QString::number(i), strCityTz[i]);
+	    cfg.writeEntry("ZoneName"+QString::number(i), itCity.current()->text());
 	    if ( strCityTz[i] == strRealTz )
 		realTzWritten = TRUE;
 	}
     }
     if ( realTzWritten ) {
-	cfg->removeEntry("Zone"+QString::number(listCities.count()));
-	cfg->removeEntry("ZoneName"+QString::number(listCities.count()));
+	cfg.removeEntry("Zone"+QString::number(listCities.count()));
+	cfg.removeEntry("ZoneName"+QString::number(listCities.count()));
     } else {
-	cfg->writeEntry("Zone"+QString::number(listCities.count()),
+	cfg.writeEntry("Zone"+QString::number(listCities.count()),
 	    strRealTz);
 	if ( nameRealTz.isEmpty() ) {
 	    int i =  strRealTz.find( '/' );
 	    nameRealTz = strRealTz.mid( i+1 );
 	}
-	cfg->writeEntry("ZoneName"+QString::number(listCities.count()),
+	cfg.writeEntry("ZoneName"+QString::number(listCities.count()),
 	    nameRealTz);
     }
 
-    delete cfg; // ensure that config file is written immediately
+    cfg.write(); // ensure that config file is written immediately
 #ifndef QTOPIA_DESKTOP
 #ifndef QT_NO_COP
     QCopEnvelope ( "QPE/System", "timeZoneListChange()" );
@@ -234,14 +230,19 @@ void WorldTime::slotNewTz( const QCString & zoneID)
     // determine what to do based on what putton is pressed...
     QListIterator<QPushButton> itCity(listCities);
     TimeZone curZone;
-    int i;
+    int i = 0;
+    for ( ;itCity.current(); ++itCity) {
+	if ( strCityTz[i++] == zoneID.data() && !itCity.current()->isOn() )
+	    return;
+    }
+    
     // go through the list and make adjustments based on which button is on
     for ( i = 0, itCity.toFirst(); itCity.current(); i++, ++itCity ) {
         QPushButton *cmdTmp = itCity.current();
         if ( cmdTmp->isOn() ) {
-            strCityTz[i] = zoneID.data();
-	    curZone = TimeZone( zoneID.data() );
-            cmdTmp->setText( curZone.city().data());
+            strCityTz[i] = zoneID;
+	    curZone = TimeZone( zoneID );
+            cmdTmp->setText( curZone.city() );
             cmdTmp->toggle();
             // we can actually break, since there is only one button
             // that is ever pressed!
@@ -249,9 +250,12 @@ void WorldTime::slotNewTz( const QCString & zoneID)
             break;
         }
     }
-    if (changed) {
+
+#ifndef QTOPIA_DESKTOP
+    if (changed)
 	writeTimezoneChanges();
-    }
+#endif
+
     showTime();
 }
 

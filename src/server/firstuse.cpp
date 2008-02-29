@@ -62,7 +62,9 @@
 
 #include <stdlib.h>
 #include <sys/types.h>
+#if defined(Q_OS_LINUX) || defined(_OS_LINUX_)
 #include <unistd.h>
+#endif
 
 
 struct {
@@ -76,8 +78,10 @@ settingsTable [] =
 {
     { FALSE, "language", "raise()", "accept()", // No tr
 	QT_TR_NOOP("Language") },
+#ifndef Q_OS_WIN32
     { FALSE, "systemtime", "raise()", "accept()", // No tr
 	QT_TR_NOOP("Time and Date") },
+#endif
     { FALSE, "addressbook", "editPersonalAndClose()", "accept()", // No tr
 	QT_TR_NOOP("Personal Information") },
     { FALSE, 0, 0, 0, 0 }
@@ -85,7 +89,7 @@ settingsTable [] =
 
 
 FirstUse::FirstUse(QWidget* parent, const char * name, WFlags wf) :
-    QDialog( parent, name, TRUE, wf | WStyle_Tool | WStyle_Customize), 
+    QDialog( parent, name, TRUE, wf),
     transApp(0), transLib(0), needCalibrate(FALSE), currApp(-1),
     waitForExit(-1), waitingForLaunch(FALSE), needRestart(FALSE)
 {
@@ -204,7 +208,7 @@ void FirstUse::calcMaxWindowRect()
 		qApp->desktop()->height() - controlHeight-1);
     }
 
-#if QT_VERSION < 300
+#if QT_VERSION < 0x030000
     QWSServer::setMaxWindowRect( qt_screen->mapToDevice(wr,
 		QSize(qt_screen->width(),qt_screen->height()))
 			       );
@@ -483,6 +487,13 @@ void FirstUse::updateButtons()
     else
 	next->setText(tr("Next >>"));
     next->setEnabled( !waitingForLaunch );
+}
+
+void FirstUse::keyPressEvent( QKeyEvent *e )
+{
+    // Allow cancelling at first dialog, in case display is broken.
+    if ( e->key() == Key_Escape && currApp < 0 )
+	QDialog::keyPressEvent(e);
 }
 
 void FirstUse::mouseReleaseEvent( QMouseEvent * )

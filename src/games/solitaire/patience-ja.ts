@@ -3,19 +3,20 @@
     <name>CanvasCardGame</name>
     <message>
         <source>Game Complete</source>
-        <translation type="unfinished"></translation>
+        <translation>ゲーム終了</translation>
     </message>
     <message>
         <source>Congratulations!
 You won the game!</source>
-        <translation type="unfinished"></translation>
+        <translation>おめでとうございます!
+あなたの勝ちです!</translation>
     </message>
 </context>
 <context>
     <name>CanvasCardWindow</name>
     <message>
         <source>Patience</source>
-        <translation>ペイシェンス</translation>
+        <translation>ソリティア</translation>
     </message>
     <message>
         <source>Freecell</source>
@@ -71,15 +72,15 @@ You won the game!</source>
     </message>
     <message>
         <source>&amp;Patience</source>
-        <translation type="unfinished"></translation>
+        <translation>(&amp;P)ソリティア</translation>
     </message>
     <message>
         <source>&amp;Freecell</source>
-        <translation type="unfinished"></translation>
+        <translation>(&amp;F)フリーセル</translation>
     </message>
     <message>
         <source>&amp;Play</source>
-        <translation type="unfinished"></translation>
+        <translation>(&amp;P)プレイ</translation>
     </message>
 </context>
 </TS>

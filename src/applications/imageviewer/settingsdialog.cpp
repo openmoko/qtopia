@@ -35,8 +35,8 @@ SettingsDialog::SettingsDialog( QWidget *parent, const char *name, bool modal, W
     connect( delaySlider, SIGNAL(valueChanged(int)), this, SLOT(delayChanged(int)) );
 
     rotateComboBox->clear();
-    rotateComboBox->insertItem("Clockwise", ROTATION_CLOCKWISE);
-    rotateComboBox->insertItem("Counter-clockwise",
+    rotateComboBox->insertItem(SettingsDialogBase::tr("Clockwise"), ROTATION_CLOCKWISE);
+    rotateComboBox->insertItem(SettingsDialogBase::tr("Counter clockwise"),
 	ROTATION_COUNTERCLOCKWISE);
 }
 

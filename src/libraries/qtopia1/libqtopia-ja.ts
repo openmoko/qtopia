@@ -175,21 +175,21 @@
     </message>
     <message>
         <source>%1am</source>
-        <translation type="unfinished"></translation>
+        <translation>%1am</translation>
     </message>
     <message>
         <source>%1pm</source>
-        <translation type="unfinished"></translation>
+        <translation>%1pm</translation>
     </message>
     <message>
         <source>0%1</source>
         <comment>0..9 hour of day</comment>
-        <translation type="unfinished"></translation>
+        <translation>0%1</translation>
     </message>
     <message>
         <source>%1</source>
         <comment>10..24 hour of day</comment>
-        <translation type="unfinished"></translation>
+        <translation>%1</translation>
     </message>
 </context>
 <context>
@@ -453,7 +453,7 @@
     <name>QPEDateEdit</name>
     <message>
         <source>None</source>
-        <translation type="unfinished">なし</translation>
+        <translation>なし</translation>
     </message>
 </context>
 <context>
@@ -484,7 +484,7 @@
     <message>
         <source>%1 %2</source>
         <comment>1=Monday 2=12:45</comment>
-        <translation type="unfinished"></translation>
+        <translation>%1 %2</translation>
     </message>
 </context>
 </TS>

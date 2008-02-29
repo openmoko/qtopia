@@ -25,6 +25,7 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 
 HEADERS =	calendar.h \
 		global.h \
+		qpeglobal.h \
 		resource.h \
 		xmlreader.h \
 		mimetype.h \

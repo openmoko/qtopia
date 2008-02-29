@@ -36,9 +36,9 @@
 
 #include <config_rsync.h>
 
-#include <unistd.h>
 #include <stdio.h>
 #if !defined (_OS_WIN32_)
+#include <unistd.h>
 #include <sys/file.h>
 #else
 #define vsnprintf _vsnprintf

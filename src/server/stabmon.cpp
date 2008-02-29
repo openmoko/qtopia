@@ -29,7 +29,9 @@
 #include <qcstring.h>
 
 #include <sys/stat.h>
+#if defined(Q_OS_LINUX) || defined(_OS_LINUX_)
 #include <unistd.h>
+#endif
 #include <stdlib.h>
 
 SysFileMonitor::SysFileMonitor(QObject* parent) :

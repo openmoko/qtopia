@@ -10,351 +10,351 @@
     <name>UniKeyboard</name>
     <message>
         <source>Basic Latin</source>
-        <translation type="unfinished"></translation>
+        <translation>基本ラテン文字</translation>
     </message>
     <message>
         <source>Latin-1 Supplement</source>
-        <translation type="unfinished"></translation>
+        <translation>ラテン文字 1</translation>
     </message>
     <message>
         <source>Latin Extended-A</source>
-        <translation type="unfinished"></translation>
+        <translation>拡張ラテン文字 A</translation>
     </message>
     <message>
         <source>Latin Extended-B</source>
-        <translation type="unfinished"></translation>
+        <translation>拡張ラテン文字 B</translation>
     </message>
     <message>
         <source>IPA Extensions</source>
-        <translation type="unfinished"></translation>
+        <translation>IPA 拡張</translation>
     </message>
     <message>
         <source>Spacing Modifier Letters</source>
-        <translation type="unfinished"></translation>
+        <translation>スペース調整文字</translation>
     </message>
     <message>
         <source>Combining Diacritical Marks</source>
-        <translation type="unfinished"></translation>
+        <translation>ダイアクリティカルマーク</translation>
     </message>
     <message>
         <source>Greek</source>
-        <translation type="unfinished"></translation>
+        <translation>ギリシャ文字</translation>
     </message>
     <message>
         <source>Cyrillic</source>
-        <translation type="unfinished"></translation>
+        <translation>キリル文字</translation>
     </message>
     <message>
         <source>Armenian</source>
-        <translation type="unfinished"></translation>
+        <translation>アルメニア文字</translation>
     </message>
     <message>
         <source>Hebrew</source>
-        <translation type="unfinished"></translation>
+        <translation>ヘブライ文字</translation>
     </message>
     <message>
         <source>Arabic</source>
-        <translation type="unfinished"></translation>
+        <translation>アラビア文字</translation>
     </message>
     <message>
         <source>Syriac  </source>
-        <translation type="unfinished"></translation>
+        <translation>シリア文字</translation>
     </message>
     <message>
         <source>Thaana</source>
-        <translation type="unfinished"></translation>
+        <translation>ターナ文字</translation>
     </message>
     <message>
         <source>Devanagari</source>
-        <translation type="unfinished"></translation>
+        <translation>デバナーガリー文字</translation>
     </message>
     <message>
         <source>Bengali</source>
-        <translation type="unfinished"></translation>
+        <translation>ベンガル文字</translation>
     </message>
     <message>
         <source>Gurmukhi</source>
-        <translation type="unfinished"></translation>
+        <translation>グルムキー文字</translation>
     </message>
     <message>
         <source>Gujarati</source>
-        <translation type="unfinished"></translation>
+        <translation>グジャラート文字</translation>
     </message>
     <message>
         <source>Oriya</source>
-        <translation type="unfinished"></translation>
+        <translation>オーリヤ文字</translation>
     </message>
     <message>
         <source>Tamil</source>
-        <translation type="unfinished"></translation>
+        <translation>タミル文字</translation>
     </message>
     <message>
         <source>Telugu</source>
-        <translation type="unfinished"></translation>
+        <translation>テルグ文字</translation>
     </message>
     <message>
         <source>Kannada</source>
-        <translation type="unfinished"></translation>
+        <translation>カンナダ文字</translation>
     </message>
     <message>
         <source>Malayalam</source>
-        <translation type="unfinished"></translation>
+        <translation>マラーヤラム文字</translation>
     </message>
     <message>
         <source>Sinhala</source>
-        <translation type="unfinished"></translation>
+        <translation>シンハラ文字</translation>
     </message>
     <message>
         <source>Thai</source>
-        <translation type="unfinished"></translation>
+        <translation>タイ文字</translation>
     </message>
     <message>
         <source>Lao</source>
-        <translation type="unfinished"></translation>
+        <translation>ラオス文字</translation>
     </message>
     <message>
         <source>Tibetan</source>
-        <translation type="unfinished"></translation>
+        <translation>チベット文字</translation>
     </message>
     <message>
         <source>Myanmar </source>
-        <translation type="unfinished"></translation>
+        <translation>ミャンマー文字</translation>
     </message>
     <message>
         <source>Georgian</source>
-        <translation type="unfinished"></translation>
+        <translation>グルジア文字</translation>
     </message>
     <message>
         <source>Hangul Jamo</source>
-        <translation type="unfinished"></translation>
+        <translation>ハングル字母</translation>
     </message>
     <message>
         <source>Ethiopic</source>
-        <translation type="unfinished"></translation>
+        <translation>エチオピア文字</translation>
     </message>
     <message>
         <source>Cherokee</source>
-        <translation type="unfinished"></translation>
+        <translation>チェロキー文字</translation>
     </message>
     <message>
         <source>Unified Canadian Aboriginal Syllabics</source>
-        <translation type="unfinished"></translation>
+        <translation>Unified Canadian Aboriginal Syllabics</translation>
     </message>
     <message>
         <source>Ogham</source>
-        <translation type="unfinished"></translation>
+        <translation>オガム文字</translation>
     </message>
     <message>
         <source>Runic</source>
-        <translation type="unfinished"></translation>
+        <translation>ルーニック文字</translation>
     </message>
     <message>
         <source>Khmer</source>
-        <translation type="unfinished"></translation>
+        <translation>クメール文字</translation>
     </message>
     <message>
         <source>Mongolian</source>
-        <translation type="unfinished"></translation>
+        <translation>モンゴル文字</translation>
     </message>
     <message>
         <source>Latin Extended Additional</source>
-        <translation type="unfinished"></translation>
+        <translation>拡張ラテン文字 Additional</translation>
     </message>
     <message>
         <source>Greek Extended</source>
-        <translation type="unfinished"></translation>
+        <translation>拡張ギリシャ文字</translation>
     </message>
     <message>
         <source>General Punctuation</source>
-        <translation type="unfinished"></translation>
+        <translation>一般句読点</translation>
     </message>
     <message>
         <source>Superscripts and Subscripts</source>
-        <translation type="unfinished"></translation>
+        <translation>上付き文字と下付き文字</translation>
     </message>
     <message>
         <source>Currency Symbols</source>
-        <translation type="unfinished"></translation>
+        <translation>通貨記号</translation>
     </message>
     <message>
         <source>Combining Marks for Symbols</source>
-        <translation type="unfinished"></translation>
+        <translation>Combining Marks for Symbols</translation>
     </message>
     <message>
         <source>Letterlike Symbols</source>
-        <translation type="unfinished"></translation>
+        <translation>文字樣記号</translation>
     </message>
     <message>
         <source>Number Forms</source>
-        <translation type="unfinished"></translation>
+        <translation>ローマ数字</translation>
     </message>
     <message>
         <source>Arrows</source>
-        <translation type="unfinished"></translation>
+        <translation>矢印</translation>
     </message>
     <message>
         <source>Mathematical Operators</source>
-        <translation type="unfinished"></translation>
+        <translation>数学記号</translation>
     </message>
     <message>
         <source>Miscellaneous Technical</source>
-        <translation type="unfinished"></translation>
+        <translation>学術記号</translation>
     </message>
     <message>
         <source>Control Pictures</source>
-        <translation type="unfinished"></translation>
+        <translation>Control Pictures</translation>
     </message>
     <message>
         <source>Optical Character Recognition</source>
-        <translation type="unfinished"></translation>
+        <translation>光学的手法による文字認識</translation>
     </message>
     <message>
         <source>Enclosed Alphanumerics</source>
-        <translation type="unfinished"></translation>
+        <translation>囲み英数字</translation>
     </message>
     <message>
         <source>Box Drawing</source>
-        <translation type="unfinished"></translation>
+        <translation>ボックス描写</translation>
     </message>
     <message>
         <source>Block Elements</source>
-        <translation type="unfinished"></translation>
+        <translation>ブロック要素</translation>
     </message>
     <message>
         <source>Geometric Shapes</source>
-        <translation type="unfinished"></translation>
+        <translation>幾何学模様</translation>
     </message>
     <message>
         <source>Miscellaneous Symbols</source>
-        <translation type="unfinished"></translation>
+        <translation>その他の記号</translation>
     </message>
     <message>
         <source>Dingbats</source>
-        <translation type="unfinished"></translation>
+        <translation>記号</translation>
     </message>
     <message>
         <source>Braille Patterns</source>
-        <translation type="unfinished"></translation>
+        <translation>ブライユパターン</translation>
     </message>
     <message>
         <source>CJK Radicals Supplement</source>
-        <translation type="unfinished"></translation>
+        <translation>CJK Radicals Supplement</translation>
     </message>
     <message>
         <source>Kangxi Radicals</source>
-        <translation type="unfinished"></translation>
+        <translation>Kangxi Radicals</translation>
     </message>
     <message>
         <source>Ideographic Description Characters</source>
-        <translation type="unfinished"></translation>
+        <translation>Ideographic Description Characters</translation>
     </message>
     <message>
         <source>CJK Symbols and Punctuation</source>
-        <translation type="unfinished"></translation>
+        <translation>CJK記号と句読点</translation>
     </message>
     <message>
         <source>Hiragana</source>
-        <translation type="unfinished"></translation>
+        <translation>ひらがな</translation>
     </message>
     <message>
         <source>Katakana</source>
-        <translation type="unfinished"></translation>
+        <translation>カタカナ</translation>
     </message>
     <message>
         <source>Bopomofo</source>
-        <translation type="unfinished"></translation>
+        <translation>Bopomofo文字</translation>
     </message>
     <message>
         <source>Hangul Compatibility Jamo</source>
-        <translation type="unfinished"></translation>
+        <translation>ハングル互換字母</translation>
     </message>
     <message>
         <source>Kanbun</source>
-        <translation type="unfinished"></translation>
+        <translation>漢文</translation>
     </message>
     <message>
         <source>Bopomofo Extended</source>
-        <translation type="unfinished"></translation>
+        <translation>拡張Bopomofo文字</translation>
     </message>
     <message>
         <source>Enclosed CJK Letters and Months</source>
-        <translation type="unfinished"></translation>
+        <translation>Enclosed CJK Letters and Months</translation>
     </message>
     <message>
         <source>CJK Compatibility</source>
-        <translation type="unfinished"></translation>
+        <translation>CJK互換文字</translation>
     </message>
     <message>
         <source>CJK Unified Ideographs Extension A</source>
-        <translation type="unfinished"></translation>
+        <translation>CJK Unified Ideographs Extension A</translation>
     </message>
     <message>
         <source>CJK Unified Ideographs</source>
-        <translation type="unfinished"></translation>
+        <translation>CJK Unified Ideographs</translation>
     </message>
     <message>
         <source>Yi Syllables</source>
-        <translation type="unfinished"></translation>
+        <translation>Yi Syllables</translation>
     </message>
     <message>
         <source>Yi Radicals</source>
-        <translation type="unfinished"></translation>
+        <translation>Yi Radicals</translation>
     </message>
     <message>
         <source>Hangul Syllables</source>
-        <translation type="unfinished"></translation>
+        <translation>Hangul Syllables</translation>
     </message>
     <message>
         <source>High Surrogates</source>
-        <translation type="unfinished"></translation>
+        <translation>High Surrogates</translation>
     </message>
     <message>
         <source>High Private Use Surrogates</source>
-        <translation type="unfinished"></translation>
+        <translation>High Private Use Surrogates</translation>
     </message>
     <message>
         <source>Low Surrogates</source>
-        <translation type="unfinished"></translation>
+        <translation>Low Surrogates</translation>
     </message>
     <message>
         <source>Private Use</source>
-        <translation type="unfinished"></translation>
+        <translation>Private Use</translation>
     </message>
     <message>
         <source>CJK Compatibility Ideographs</source>
-        <translation type="unfinished"></translation>
+        <translation>CJK Compatibility Ideographs</translation>
     </message>
     <message>
         <source>Alphabetic Presentation Forms</source>
-        <translation type="unfinished"></translation>
+        <translation>Alphabetic Presentation Forms</translation>
     </message>
     <message>
         <source>Arabic Presentation Forms-A</source>
-        <translation type="unfinished"></translation>
+        <translation>Arabic Presentation Forms-A</translation>
     </message>
     <message>
         <source>Combining Half Marks</source>
-        <translation type="unfinished"></translation>
+        <translation>Combining Half Marks</translation>
     </message>
     <message>
         <source>CJK Compatibility Forms</source>
-        <translation type="unfinished"></translation>
+        <translation>CJK Compatibility Forms</translation>
     </message>
     <message>
         <source>Small Form Variants</source>
-        <translation type="unfinished"></translation>
+        <translation>Small Form Variants</translation>
     </message>
     <message>
         <source>Arabic Presentation Forms-B</source>
-        <translation type="unfinished"></translation>
+        <translation>Arabic Presentation Forms-B</translation>
     </message>
     <message>
         <source>Halfwidth and Fullwidth Forms</source>
-        <translation type="unfinished"></translation>
+        <translation>半角形・全角形</translation>
     </message>
     <message>
         <source>Specials</source>
-        <translation type="unfinished"></translation>
+        <translation>特殊</translation>
     </message>
 </context>
 </TS>

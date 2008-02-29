@@ -308,7 +308,12 @@ DateBook::~DateBook()
 
 void DateBook::showSettings()
 {
-    DateBookSettings frmSettings( this );
+    bool whichclock;
+    Config config( "qpe" );
+    config.setGroup("Time");
+    whichclock = config.readBoolEntry("AMPM");
+    
+    DateBookSettings frmSettings(whichclock, this);
     frmSettings.setStartTime( startTime );
     frmSettings.setAlarmPreset( aPreset, presetTime );
 
@@ -351,6 +356,7 @@ QString DateBook::checkEvent(const PimEvent &e)
 	bool ok;
 	QDateTime next;
 	next = e.nextOccurrence(current_date.addDays(1), &ok);
+	next.setTime(e.start().time());
 	if (!ok)
 	    break;  // no more repeats
 	if(next < previous.end()) {
@@ -501,7 +507,7 @@ void DateBook::editOccurrence( const Occurrence &ev )
     // if this event is an exception, or has exceptions we may need to do somethign different.
     bool asException;
     PimEvent e;
-    if (ev.event().isException() || ev.event().hasRepeat()) {
+    if (ev.event().hasRepeat()) {
 	// ask if just this one or is series?
 	if (!exceptionMb)
 	    initExceptionMb();
@@ -510,27 +516,18 @@ void DateBook::editOccurrence( const Occurrence &ev )
 	    default:
 		return;
 	    case QMessageBox::Yes:
-		if (ev.event().isException()) {
-		    e = db->find(ev.event().seriesUid());
-		} else {
-		    e = ev.event();
-		}
+		e = ev.event();
 		asException = FALSE;
 		break;
 	    case QMessageBox::No:
-		if (ev.event().isException()) {
-		    e = ev.event();
-		    asException = FALSE;
-		} else {
-		    e = ev.event();
-		    // modify e to be an exceptional event.
-		    // with no uid (yet).
-		    e.setSeriesUid(ev.event().uid());
-		    e.setRepeatType(PimEvent::NoRepeat);
-		    e.setStart(ev.start());
-		    e.clearExceptions();
-		    asException = TRUE;
-		}
+		e = ev.event();
+		// modify e to be an exceptional event.
+		// with no uid (yet).
+		e.setSeriesUid(ev.event().uid());
+		e.setRepeatType(PimEvent::NoRepeat);
+		e.setStart(ev.start());
+		e.clearExceptions();
+		asException = TRUE;
 		break;
 	}
     } else {
@@ -905,6 +902,25 @@ void DateBook::appMessage(const QCString& msg, const QByteArray& data)
 	ds >> s >> e >> d >> n;
 	if ( newEvent(s,e,d,n) )
 	    needShow = TRUE;
+// PimLibrary stuff
+    } else if ( msg == "updateEvent(PimEvent)" && !syncing ) {
+	QDataStream ds(data,IO_ReadOnly);
+	PimEvent e;
+	ds >> e;
+	db->updateEvent(e);
+	refreshWidgets();
+    } else if ( msg == "addEvent(PimEvent)" && !syncing ) {
+	QDataStream ds(data,IO_ReadOnly);
+	PimEvent e;
+	ds >> e;
+	db->addEvent(e);
+	refreshWidgets();
+    } else if ( msg == "removeEvent(PimEvent)" && !syncing ) {
+	QDataStream ds(data,IO_ReadOnly);
+	PimEvent e;
+	ds >> e;
+	db->removeEvent(e);
+	refreshWidgets();
     } else if ( msg == "raiseToday()" ) {
 	bool visible=FALSE;
 	if ( data.size() ) {
@@ -1126,7 +1142,7 @@ bool DateBook::newEvent(const QDateTime& dstart,const QDateTime& dend,const QStr
     }
     if ( (enull && end.time().isNull()) || !end.time().isValid() ) {
 	// default end
-	end.setTime(start.time().addSecs(3600));
+	end = start.addSecs(3600);
     }
 
 
@@ -1197,7 +1213,7 @@ bool DateBook::receiveFile( const QString &filename )
     QString msg = tr("<P>%1 new events.<p>Do you want to add them to your Calendar?").
 	arg(tl.count());
 
-    if ( QMessageBox::information(this, tr("New Events"),
+    if ( QMessageBox::information(isVisible() ? this : 0, tr("New Events"),
 	    msg, QMessageBox::Ok, QMessageBox::Cancel)==QMessageBox::Ok ) {
 	QDateTime from,to;
 	for( QValueList<PimEvent>::Iterator it = tl.begin(); it != tl.end(); ++it ) {

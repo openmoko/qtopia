@@ -67,6 +67,7 @@
 #include <stdio.h>
 #include <errno.h>
 
+extern bool mkdirRecursive( QString path );
 
 // added in qtopia 1.6, so don't export this
 QString qtopia_tempName( const QString &fname )
@@ -346,7 +347,7 @@ void Global::createDocDir()
 #ifndef Q_WS_WIN32
 	    mkdir( QPEApplication::documentDir().latin1(), 0755 );
 #else
-	    d.mkdir(QPEApplication::documentDir().latin1());
+	    mkdirRecursive(QPEApplication::documentDir());
 #endif
 	}else{
 	    docDirCreated = TRUE;

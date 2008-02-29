@@ -56,10 +56,11 @@ extern "C" {
   \brief The LibMadPlugin class is a wrapper for the libmad library.
 
   \legalese
+  LibMAD is an integer-based MPEG audio decoder that supports all three
+  MPEG Layers, and is used by the MediaPlayer.
 
   The libmad library is distributed under the terms of the GNU General Public License,
-  Version 2.
-  The primary copyright holder is Robert Leslie &lt;rob@mars.org&gt;.
+  Version 2. The primary copyright holder is Robert Leslie &lt;rob@mars.org&gt;.
   More information about the Mad library can be found at http://www.mars.org/home/rob/proj/mpeg/
 */
 

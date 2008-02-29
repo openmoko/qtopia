@@ -46,7 +46,9 @@
 #include <qfont.h>
 #include <qtooltip.h>
 
+#if defined(Q_OS_LINUX) || defined(_OS_LINUX_)
 #include <unistd.h>
+#endif
 #include <stdlib.h>
 #include <sys/stat.h>
 

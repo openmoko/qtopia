@@ -123,23 +123,23 @@ different name.</source>
     </message>
     <message>
         <source>Passphrase:</source>
-        <translation type="unfinished"></translation>
+        <translation>パスフレーズ:</translation>
     </message>
     <message>
         <source>None</source>
-        <translation type="unfinished"></translation>
+        <translation>なし</translation>
     </message>
     <message>
         <source>40 bit</source>
-        <translation type="unfinished"></translation>
+        <translation>40ビット</translation>
     </message>
     <message>
         <source>128 bit</source>
-        <translation type="unfinished"></translation>
+        <translation>128ビット</translation>
     </message>
     <message>
         <source>WEP:</source>
-        <translation type="unfinished"></translation>
+        <translation>WEP:</translation>
     </message>
 </context>
 <context>

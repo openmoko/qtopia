@@ -32,13 +32,13 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>228</width>
+            <width>224</width>
             <height>290</height>
         </rect>
     </property>
     <property stdset="1">
         <name>caption</name>
-        <string>Preferences</string>
+        <string>Settings</string>
     </property>
     <property>
         <name>layoutMargin</name>

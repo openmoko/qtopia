@@ -19,6 +19,9 @@
 **********************************************************************/
 
 #define QTOPIA_INTERNAL_FILEOPERATIONS
+#define QTOPIA_INTERNAL_LANGLIST
+#include "config.h"
+#include "global.h"
 #include <qdir.h>
 #include <qfile.h>
 #include <qfileinfo.h>
@@ -37,9 +40,6 @@
 #include <qfileinfo.h>
 #endif
 
-#define QTOPIA_INTERNAL_LANGLIST
-#include "config.h"
-#include "global.h"
 
 #include <qapplication.h> //for translate
 

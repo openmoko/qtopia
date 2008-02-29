@@ -590,8 +590,8 @@ void Engine::pushInstruction(InstructionDescription *i) {
 		}
 	    }
 	}
+	previousInstructionsPrecedence = i->precedence;
     }
-    previousInstructionsPrecedence = i->precedence;
     delete i;
 }
 #endif

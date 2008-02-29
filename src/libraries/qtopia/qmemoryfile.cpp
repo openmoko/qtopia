@@ -85,11 +85,10 @@
 /*
   Construct a memory mapped to an actual file or named memory block.
   If \a fileName is not preceeded by an \\ then it is treated as a real
-  file name.  Otherwise the characters after the \\ are used as the
-  name for the memory block required.
-
-  A value for \a size should always be provided, though if the size is not provided it will
-  be determined if possible.
+     file name.
+  Otherwise the characters after the \\ are used as the name for the memory block required.
+    nb: You will need to escape the \'s so it you need to use \\\\ within a literal string 
+  A value for \a size should always be provided, though if the size is not provided it will be determined if possible.
 
  If a file is being mapped to be written to, then the \a flags of subsequent QMemoryFiles
  mapped to the same file should include QMemoryFile::Write.
@@ -109,7 +108,7 @@
  Example for creating named memory block:
  \code
 
- QMemoryFile block1("\\block1", QMemoryFile::Create | QMemoryFile::Write, 20);
+ QMemoryFile block1("\\\\block1", QMemoryFile::Create | QMemoryFile::Write, 20);
  char *dataBlock = block.data();
  for (int i = 0; i < 19; i++){
    dataBlock[i] = i +'a';

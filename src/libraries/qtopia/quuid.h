@@ -18,6 +18,8 @@
 **
 **********************************************************************/
 
+#include <qtopia/qpeglobal.h>
+
 #if !(QT_VERSION-0 < 0x030000)
 #include <quuid.h>
 #else
@@ -28,8 +30,6 @@
 #ifndef QT_H
 #include <qstring.h>
 #endif // QT_H
-
-#include <qtopia/qpeglobal.h>
 
 #include <memory.h>
 

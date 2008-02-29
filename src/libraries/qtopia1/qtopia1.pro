@@ -1,8 +1,5 @@
-singleprocess:singleprocess=true
 TEMPLATE	= lib
-CONFIG		+= qtopia warn_on release
-win32:DEFINES += QTOPIA_MAKEDLL QTOPIA_PLUGIN_MAKEDLL
-win32:CONFIG += dll 
+CONFIG		+= qtopia
 
 # IF YOU MAKE CHANGE HERE TO THE SOURCES
 # OR HEADERS, PLEASE UPDATE THE QTOPIA.PRO
@@ -63,10 +60,9 @@ unix:LIBS   += -luuid
 win32:LIBS += rpcrt4.lib
 
 TARGET		= qtopia
-qdesktop:TARGET		= qd-qtopia
+qdesktop:TARGET = qd-qtopia
 DESTDIR		= $(QPEDIR)/lib$(PROJMAK)
-win32:DLLDESTDIR = $(QPEDIR)/bin
-VERSION		= 1.6.0
+VERSION		= 1.6.1
 
 TRANSLATIONS = libqtopia-en_GB.ts libqtopia-de.ts libqtopia-ja.ts libqtopia-no.ts
 

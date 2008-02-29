@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/doc/buildqtopiadesktop.doc:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12684/qtopia/doc/buildqtopiadesktop.doc:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -17,7 +17,7 @@ body { background: #ffffff; color: black; }
 <tr bgcolor="black"><td>
 <a href="classes.html"><font color="white">Qt API</font></a>
 <font color="white">|</font>
-<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
 </td>
 <td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
 <td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>Instructions for Building Qtopia Desktop</h1>
@@ -27,7 +27,7 @@ body { background: #ffffff; color: black; }
 <p> <h2> Windows
 </h2>
 <a name="1"></a><p> <ol type=1> 
-<li> <a href="qt.html">Qt</a> 3.1.2 is required to build Qtopia Desktop 1.6.0.
+<li> <a href="qt.html">Qt</a> 3.1.2 is required to build Qtopia Desktop 1.6.1.
 Download and install Qt 3.1.2 for windows with default settings,
 (ie install to c:\qt&#92;3.1.2, substitute below if different)
 <li>	    From a command prompt,
@@ -73,7 +73,6 @@ in step one, if not compile them with:<br>
 <li> Download and install tmake 1.11
 (ftp://ftp.trolltech.com/freebies/tmake/tmake-1.11.zip)
 (example commands assumes it is installed to c:\tmake-1.11)
-<li> Download and install a version of perl for Windows.
 <li> Install Qtopia source to c:\qtopia&#92;1.6 (substitute below if different)
 <li> From command prompt, Compile Qtopia Desktop and all of its plugins:<br>
 <pre>
@@ -81,13 +80,14 @@ in step one, if not compile them with:<br>
                 set QPEDIR=c:\qtopia\1.6
                 set TMAKEDIR=c:\tmake-1.11
                 set TMAKEPATH=%TMAKEDIR%\lib\win32-msvc
-                set PATH=%QTDIR%\bin;%QPEDIR%\bin;%TMAKEDIR%\bin;%PATH%
-                cd %QPEDIR%
-                cd src
-                perl configure.pl -product qtopiadesktop
+                set PATH=%QPEDIR%\bin;%QTDIR%\bin;%TMAKEDIR%\bin;%PATH%
+                cd %QPEDIR%\src
+                configure -product qtopiadesktop
                 nmake -f Makefile
 </pre>
  
+<li> Using the regedit program ensure that the qtopiadir registry entry in the path \HKEY_LOCAL_MACHINE\SOFTWARE\Trolltech\palmcenter 
+points to c:\qtopia&#92;1.6\src\qtopiadesktop&#92;
 </ol>
 <p> <h2> Linux
 </h2>
@@ -100,27 +100,36 @@ in step one, if not compile them with:<br>
                 cd $QTDIR
                 ./configure -thread
                 make
+                cd ..
 </pre>
  
 <br>
 <li> Extract Qtopia source package for example to ~/qtopia/1.6
 (substitute below if different)
+<li> Install tmake..<br>
+<pre>
+                tar xfz tmake-1.11.tar.gz
+                export TMAKEDIR=$PWD/tmake-1.11
+                export TMAKEPATH=$TMAKEDIR/lib/linux-g++
+                export PATH=$PATH:$TMAKEDIR/bin
+</pre>
+ 
 <li> Compile Qtopia Desktop as follows:<br>
 <pre>
                 export QTDIR=~/qt/3.1.2
                 export QPEDIR=~/qtopia/1.6
-                export PATH=$QTDIR/bin:$QPEDIR/bin:$PATH
-                cd $QPEDIR
-                cd src
+                export PATH=$QPEDIR/bin:$QTDIR/bin:$PATH
+                cd $QPEDIR/src
                 ./configure -qtopiadesktop
                 make
 </pre>
  
 <br>
+
 <!-- eof -->
 <p><address><hr><div align=center>
 <table width=100% cellspacing=0 border=0><tr>
 <td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.6.0</div>
+<td align=right><div align=right>Qtopia version 1.6.1</div>
 </table></div></address></body>
 </html>

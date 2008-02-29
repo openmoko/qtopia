@@ -31,6 +31,8 @@
 #ifndef Q_OS_WIN32
 #include <unistd.h>
 #include <sys/file.h>
+#else
+#include <stdlib.h>
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -103,7 +105,11 @@ QCopEnvelope::~QCopEnvelope()
     QByteArray data = ((QBuffer*)device())->buffer();
     const int pref=16;
     if ( qstrncmp(ch.data(),"QPE/Application/",pref)==0 ) {
+#if defined(_OS_LINUX_) || defined(Q_OS_LINUX)
 	QString qcopfn("/tmp/qcop-msg-");
+#else
+	QString qcopfn(QString(getenv("TEMP")) + "/qcop-msg-");
+#endif
 	qcopfn += ch.mid(pref);
 	QFile qcopfile(qcopfn);
 

@@ -67,6 +67,7 @@ private:
     int dy;
     bool showCross;
     bool pressed;
+    bool anygood;
 };
 
 #endif // _WS_QWS_

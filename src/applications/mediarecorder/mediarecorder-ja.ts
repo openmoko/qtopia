@@ -145,32 +145,36 @@
     </message>
     <message>
         <source>No playback plugin found</source>
-        <translation type="unfinished"></translation>
+        <translation>プレイバックプラグインが検出できません</translation>
     </message>
     <message>
         <source>Voice Recorder was unable to
 locate a suitable plugin to
 play the selected format.</source>
-        <translation type="unfinished"></translation>
+        <translation>ボイスレコーダーは選択した形式を
+再生する適切なプラグインを
+検出できませんでした。</translation>
     </message>
     <message>
         <source>Play</source>
-        <translation type="unfinished"></translation>
+        <translation>再生</translation>
     </message>
     <message>
         <source>No plugin found</source>
-        <translation type="unfinished"></translation>
+        <translation>プラグインが検出できません</translation>
     </message>
     <message>
         <source>Voice Recorder was unable to
 locate a suitable plugin to
 record in the selected format.</source>
-        <translation type="unfinished"></translation>
+        <translation>ボイスレコーダーは選択した形式で
+録音する適切なプラグインを
+検出できませんでした。</translation>
     </message>
     <message>
         <source>Recorded Sound %1</source>
         <comment>date</comment>
-        <translation type="unfinished"></translation>
+        <translation>%1に録音したサウンド</translation>
     </message>
 </context>
 <context>
@@ -209,11 +213,11 @@ record in the selected format.</source>
     </message>
     <message>
         <source>Play</source>
-        <translation type="unfinished"></translation>
+        <translation>再生</translation>
     </message>
     <message>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>削除</translation>
     </message>
 </context>
 </TS>

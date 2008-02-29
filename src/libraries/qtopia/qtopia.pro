@@ -6,6 +6,7 @@ DEFINES += QTOPIA_WIN32PROCESS_SUPPORT
 
 HEADERS	=   calendar.h \
 	    global.h \
+		qpeglobal.h \
 	    resource.h \
 	    xmlreader.h \
 	    mimetype.h \
@@ -93,6 +94,8 @@ SOURCES	=   calendar.cpp \
 	    backend/vobject.cpp \
 	    mediarecorderplugininterface.cpp \
 	    qdawg.cpp
+
+QTOPIA1DIR = ../qtopia1
 	
 # Qt 3 compatibility
 qt2:CONFIG+=notqt2unix notqt2win 
@@ -152,8 +155,6 @@ TRANSLATIONS = libqpe-en_GB.ts libqpe-de.ts libqpe-ja.ts libqpe-no.ts
 
 
 
-QTOPIA1DIR = ../qtopia1
-
 # don't touch if you don't know what you are doing
 # compile in qtopia1 libraries under Windows
 CONFIG += win32emb
@@ -168,7 +169,11 @@ win32emb:HEADERS +=	$$QTOPIA1DIR/services.h \
 		    	$$QTOPIA1DIR/devicebutton.h \
 			$$QTOPIA1DIR/qwizard.h	\
     			$$QTOPIA1DIR/docproperties.h \
-			$$QTOPIA1DIR/pluginloader.h
+			$$QTOPIA1DIR/pluginloader.h \
+		    	$$QTOPIA1DIR/pluginloaderlib_p.h \
+			$$QTOPIA1DIR/locationcombo.h \
+			$$QTOPIA1DIR/qprocess.h
+
 		    
 
 win32emb:SOURCES +=  	$$QTOPIA1DIR/services.cpp \
@@ -177,7 +182,11 @@ win32emb:SOURCES +=  	$$QTOPIA1DIR/services.cpp \
 			$$QTOPIA1DIR/qwizard.cpp \
     			$$QTOPIA1DIR/docproperties.cpp \
 			$$QTOPIA1DIR/pluginloader.cpp \
-			$$QTOPIA1DIR/pluginloaderlib.cpp
+			$$QTOPIA1DIR/pluginloaderlib.cpp \
+			$$QTOPIA1DIR/locationcombo.cpp \ 
+			$$QTOPIA1DIR/qprocess.cpp \ 	
+			$$QTOPIA1DIR/qprocess_win.cpp \
+			$$QTOPIA1DIR/quuid1.cpp
 
 win32:HEADERS	+=  $$QTOPIA1DIR/accessory.h \
 	    	    $$QTOPIA1DIR/datepicker.h \

@@ -268,7 +268,7 @@ ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done
 
 package: ipkg
-	cd $(QPEDIR)/ipkg; 	../scripts/mkPackages
+	cd $(QPEDIR)/ipkg; 	../bin/mkPackages
 
 Makefile: netmonapplet.pro
 	cd $(QPEDIR)/src; 	./configure  -platform generic -make plugins/applets/netmonapplet

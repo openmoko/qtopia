@@ -17,7 +17,7 @@ Please change the due date first.</source>
     </message>
     <message>
         <source>Discard changes?</source>
-        <translation type="unfinished"></translation>
+        <translation>変更を破棄しますか?</translation>
     </message>
 </context>
 <context>
@@ -119,14 +119,14 @@ Please change the due date first.</source>
     <name>TodoSettings</name>
     <message>
         <source>Configure columns to display</source>
-        <translation type="unfinished"></translation>
+        <translation>コラムを設定して表示する</translation>
     </message>
 </context>
 <context>
     <name>TodoTable</name>
     <message>
         <source>Unfiled</source>
-        <translation>ファイルになし</translation>
+        <translation>未整理</translation>
     </message>
     <message>
         <source>All</source>
@@ -289,35 +289,35 @@ Please change the due date first.</source>
     </message>
     <message>
         <source>Task List</source>
-        <translation type="unfinished"></translation>
+        <translation>タスク一覧</translation>
     </message>
     <message>
         <source>View the list of Tasks.</source>
-        <translation type="unfinished"></translation>
+        <translation>タスクの一覧を表示します。</translation>
     </message>
     <message>
         <source>Search</source>
-        <translation type="unfinished"></translation>
+        <translation>検索</translation>
     </message>
     <message>
         <source>Fit to width</source>
-        <translation type="unfinished"></translation>
+        <translation>横幅に合わせる</translation>
     </message>
     <message>
         <source>the %1 selected tasks</source>
-        <translation type="unfinished"></translation>
+        <translation>選択された%1のタスク</translation>
     </message>
     <message>
         <source>View the current task&apos;s details.</source>
-        <translation type="unfinished"></translation>
+        <translation>現在のタスクの詳細を表示します。</translation>
     </message>
     <message>
         <source>&lt;qt&gt;Are you sure you want to delete the %1 selected tasks?&lt;/qt&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;qt&gt;本当に、選択した%1のタスクを削除してよろしいですか?&lt;/qt&gt;</translation>
     </message>
     <message>
         <source>&lt;qt&gt;Are you sure you want to delete:&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;?&lt;/qt&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;qt&gt;本当に削除してよろしいですか:&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;?&lt;/qt&gt;</translation>
     </message>
 </context>
 </TS>

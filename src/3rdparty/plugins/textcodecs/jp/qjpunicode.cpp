@@ -126,9 +126,10 @@
   \sa QEucJisCodec QJisCodec QSJisCodec
 
   \legalese
-  This class and the classes that use it (QEucJisCodec, QJisCodec,
-  QSJisCodec) are the copyright of Serika Kurusugawa.
-
+  QJpUnicodeConv and the classes that use it (QEucJisCodec, QJisCodec,
+  QSJisCodec) are the copyright of Serika Kurusugawa. These classes
+  provide conversion between different Japanese encodings and Unicode,
+  and are used by the Qtopia server.
 */
 
 #include "qcstring.h"

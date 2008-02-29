@@ -37,7 +37,8 @@ class StorageInfoView : public QWidget
     Q_OBJECT
 public:
     StorageInfoView( QWidget *parent=0, const char *name=0 );
-
+    QSize sizeHint() const;
+    
 protected:
     void timerEvent(QTimerEvent*);
     void resizeEvent(QResizeEvent*);

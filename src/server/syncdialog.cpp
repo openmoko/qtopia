@@ -49,7 +49,7 @@ SyncDialog::SyncDialog( QWidget *parent, const QString &w )
     dot = Resource::loadImage( "syncdot" );
     setBackgroundColor( white );
 
-    QPushButton *pb = new QPushButton( tr("Cancel"), this, "CancelSync" );
+    QPushButton *pb = new QPushButton( tr("Abort"), this, "CancelSync" );
     QSize bs = pb->sizeHint();
     bs.rwidth() += 10;
     bs.rheight() += 5;
@@ -144,9 +144,9 @@ QPointArray SyncDialog::scalePath( const QPointArray &pa, int xn, int xd, int yn
     QPointArray sa( pa.size() );
 
     for ( unsigned i = 0; i < pa.count(); i++ ) {
-	int x = xn * pa[i].x() / xd;
-	int y = yn * pa[i].y() / yd;
-	sa[i] = QPoint( x, y );
+	int x = xn * pa[int(i)].x() / xd;
+	int y = yn * pa[int(i)].y() / yd;
+	sa[int(i)] = QPoint( x, y );
     }
 
     return sa;
@@ -162,10 +162,10 @@ QPointArray SyncDialog::generatePath( const QPointArray &pa, int dist )
     fa.resize( count+1 );
     fa[count++] = pa[0];
     for ( unsigned i = 0; i < pa.count()-1; i++ ) {
-	int x1 = pa[i].x();
-	int y1 = pa[i].y();
-	int x2 = pa[i+1].x();
-	int y2 = pa[i+1].y();
+	int x1 = pa[int(i)].x();
+	int y1 = pa[int(i)].y();
+	int x2 = pa[int(i+1)].x();
+	int y2 = pa[int(i+1)].y();
 	int dx = x2 - x1;
 	int dy = y2 - y1;
 	int pts = (QMAX(QABS(dx),QABS(dy)) + dist/2 )/dist;
@@ -173,10 +173,10 @@ QPointArray SyncDialog::generatePath( const QPointArray &pa, int dist )
 	    int x = j * dx / pts;
 	    int y = j * dy / pts;
 	    fa.resize( count+1 );
-	    fa[count++] = pa[i] + QPoint( x, y );
+	    fa[count++] = pa[int(i)] + QPoint( x, y );
 	}
 	fa.resize( count+1 );
-	fa[count++] = pa[i+1];
+	fa[count++] = pa[int(i+1)];
     }
 
     return fa;

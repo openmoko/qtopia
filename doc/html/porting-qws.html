@@ -34,9 +34,18 @@ using #ifdef directives:
 <tr><td>Qt/Windows</td><td>Q_WS_WIN</td></tr>
 <tr><td>Qt/Embedded</td><td>Q_WS_QWS</td></tr>
 </table>
+<p>
+Qt/Embedded also requires the following flags to be defined when compiling
+applications:
+<pre>
+-DQWS -fno-exceptions -fno-rtti
+</pre>
+<p>
+Exceptions and RTTI are disabled in Qt/Embedded because they incur a large
+overhead in both size and speed.
 
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.4</div>
+<td align="right"><div align="right">Qt version 2.3.5</div>
 </table></div></address></body></html>

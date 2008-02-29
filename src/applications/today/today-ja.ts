@@ -11,24 +11,24 @@
     </message>
     <message>
         <source>Edit Today View</source>
-        <translation type="unfinished">今日のビューを編集</translation>
+        <translation>今日のビューを編集</translation>
     </message>
     <message>
         <source>No plugins found</source>
-        <translation type="unfinished"></translation>
+        <translation>プラグインが検出できません</translation>
     </message>
     <message>
         <source>No plugins selected for display.</source>
-        <translation type="unfinished"></translation>
+        <translation>表示用のプラグインが選択されていません。</translation>
     </message>
     <message>
         <source>Click &lt;a href=&quot;TodayPluginEdit&quot;&gt;here&lt;/a&gt; to configure display.</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;a href=&quot;TodayPluginEdit&quot;&gt;ここ&lt;/a&gt;をクリックして表示の設定をします。</translation>
     </message>
     <message>
         <source>%1 settings</source>
         <comment>eg. Calendar settings</comment>
-        <translation type="unfinished"></translation>
+        <translation>%1設定</translation>
     </message>
 </context>
 <context>

@@ -53,16 +53,19 @@ public:
     static QCString zonePath();
     static QCString zoneFile();
 
-    static QDateTime setUtcTime( uint t )
+    static QDateTime setUtcTime( long t )
 {
     QDateTime r;
-#if QT_VERSION >= 0x030100
-    r.setTime_t( t, Qt::UTC );
-#else
-    tm *tM = gmtime( &(time_t)t );
-    r.setDate( QDate( tM->tm_year + 1900, tM->tm_mon + 1, tM->tm_mday ) );
-    r.setTime( QTime( tM->tm_hour, tM->tm_min, tM->tm_sec ) );
-#endif
+    time_t tmpTime = t;
+    tm *tM = gmtime( &tmpTime );
+    if (tM){
+	r.setDate( QDate( tM->tm_year + 1900, tM->tm_mon + 1, tM->tm_mday ) );
+	r.setTime( QTime( tM->tm_hour, tM->tm_min, tM->tm_sec ) );
+    }else{
+	r.setDate(QDate(1970, 1, 1));
+	r.setTime(QTime(0,0,0));
+    }
+
     return r;
 }
 
@@ -103,11 +106,11 @@ QCString TimeZonePrivate::zonePath()
 #ifdef Q_OS_UNIX
 	sZonePath = "/usr/share/zoneinfo/";
 #else
-	sZonePath = QPEApplication::qpeDir() + "\\etc\\zoneinfo\\";
+	sZonePath = QPEApplication::qpeDir() + "etc\\zoneinfo\\";
 	QDir zoneDir(sZonePath);
 	if ( !zoneDir.exists() ) {
 	    // probably developing for Qtopia Deskop; try in it's etc directory
-	    sZonePath = QPEApplication::qpeDir() + "\\..\\..\\etc\\zoneinfo\\";
+	    sZonePath = QPEApplication::qpeDir() + "..\\..\\etc\\zoneinfo\\";
 	    zoneDir = sZonePath;
 	    sZonePath = zoneDir.absPath() + "\\";
 	}
@@ -373,6 +376,9 @@ TimeZoneData::TimeZoneData( const QCString & loc ) : mId( loc ), mDstRule( FALSE
 	ds >> secs;
 
 	transInfo.time = TimeZonePrivate::setUtcTime( secs );
+	if (transInfo.time.isNull()){
+	    qWarning("Invalid transistion time for %s", id().data());
+	}
 	transInfo.timeTypeIndex = 0;
 	transitionTimes[i] = transInfo;
     }
@@ -963,14 +969,25 @@ QDateTime TimeZone::convert( const QDateTime &dt, const TimeZone &dtTz ) const
     return fromUtc( utc );
 }
 
+QCString lastZoneRead;
+QCString lastLocRead;
+
 /*!
   Returns the current system time zone.
 */
 TimeZone TimeZone::current()
 {
-    Config lconfig("locale");
-    lconfig.setGroup( "Location" );
-    QCString currentLoc = lconfig.readEntry( "Timezone" ).latin1();
+    QCString cZone = getenv("TZ");
+    QString currentLoc;
+    if (lastLocRead.isEmpty() || lastZoneRead != cZone) {
+	Config lconfig("locale");
+	lconfig.setGroup( "Location" );
+	currentLoc = lconfig.readEntry( "Timezone" ).latin1();
+	lastZoneRead = cZone;
+	lastLocRead = currentLoc;
+    } else {
+	currentLoc = lastLocRead;
+    }
 
     if ( !currentLoc.isEmpty() )
 	return TimeZone( currentLoc );
@@ -998,6 +1015,8 @@ TimeZone TimeZone::current()
     }
 
     if ( !currentLoc.isEmpty() ) {
+	Config lconfig("locale");
+	lconfig.setGroup( "Location" );
 	lconfig.writeEntry( "Timezone", currentLoc.data() );
 	return TimeZone (currentLoc);
     }

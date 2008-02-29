@@ -56,11 +56,12 @@ bool ComposeIM::filter(int unicode, int keycode, int modifiers,
 	    } else if ( keycode == Qt::Key_Backspace ) {
 		if ( composed.length() > 0 )
 		    composed = composed.left( composed.length() - 1 );
-		sendIMEvent( QWSServer::IMCompose, composed, composed.length(), 0 );	} else if ( unicode > 0 && unicode < 0xffff) {
-		    composed += QChar( unicode );
-		    compose( composed );
-		    sendIMEvent( QWSServer::IMCompose, composed, composed.length(), 0 );
-		}
+		sendIMEvent( QWSServer::IMCompose, composed, composed.length(), 0 );
+	    } else if ( unicode > 0 && unicode < 0xffff) {
+		composed += QChar( unicode );
+		compose( composed );
+		sendIMEvent( QWSServer::IMCompose, composed, composed.length(), 0 );
+	    }
 	}
 	return TRUE; //block event
     }  

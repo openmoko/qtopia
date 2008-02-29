@@ -214,11 +214,13 @@ bool TodoXmlIO::internalUpdateRecord(PimRecord *r)
 		m_Filtered.remove(current);
 	    }
 
-	    m_Tasks.remove();
-	    m_Tasks.append(todo);
+	    if ( current != todo ) {
+		*current = *todo;
+		delete todo;
+	    }
 
-	    if (select(*todo)) {
-		m_Filtered.append(todo);
+	    if (select(*current)) {
+		m_Filtered.append(current);
 	    }
 	    return TRUE;
 	}

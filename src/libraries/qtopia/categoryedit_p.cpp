@@ -77,6 +77,8 @@ CategoryEdit::CategoryEdit( QWidget *parent, const char *name )
 {
     d = 0;
     lvView->setMinimumHeight( 1 );
+    connect(lvView, SIGNAL(currentChanged(QListViewItem*)),
+	this, SLOT(enableButtons()));
 
 #ifndef QTOPIA_DESKTOP
     connect( qApp, SIGNAL( categoriesChanged() ), SLOT( reloadCategories() ) );
@@ -91,6 +93,8 @@ CategoryEdit::CategoryEdit( const QArray<int> &recCats,
     d = 0;
     lvView->setMinimumHeight( 1 );
     setCategories( recCats, appName, visibleName );
+    connect(lvView, SIGNAL(currentChanged(QListViewItem*)),
+	this, SLOT(enableButtons()));
 
 #ifndef QTOPIA_DESKTOP
     connect( qApp, SIGNAL( categoriesChanged() ), SLOT( reloadCategories() ) );
@@ -152,6 +156,7 @@ void CategoryEdit::setCategories( const QArray<int> &recCats,
     else {
 	lvView->setSelected( lvView->firstChild(), true );
     }
+    enableButtons();
 }
 
 #ifdef QTOPIA_DESKTOP
@@ -201,6 +206,7 @@ void CategoryEdit::setCategories( const QArray<int> &recCats,
     else {
 	lvView->setSelected( lvView->firstChild(), true );
     }
+    enableButtons();
 }
 
 void CategoryEdit::refresh()
@@ -272,6 +278,7 @@ void CategoryEdit::slotAdd()
     txtCat->selectAll();
     txtCat->setFocus();
     d->nameChanged = TRUE;
+    enableButtons();
 }
 
 void CategoryEdit::slotRemove()
@@ -289,7 +296,8 @@ void CategoryEdit::slotRemove()
 				      "Any items in this category "
 				      "will become unfiled. "
 				      "Are you sure you want to do this?") + "</qt>",
-				  QMessageBox::Yes, QMessageBox::No ) ) {
+				  QMessageBox::Yes,
+				  QMessageBox::No | QMessageBox::Default ) ) {
 		case QMessageBox::Yes : break;
 		default: return;
 	    }
@@ -322,6 +330,7 @@ void CategoryEdit::slotRemove()
 	txtCat->setEnabled( FALSE );
 	d->settingItem = FALSE;
     }
+    enableButtons();
 }
 
 void CategoryEdit::slotSetGlobal( bool isChecked )
@@ -523,5 +532,10 @@ int CategoryEdit::tryRename(const QString &newName, bool global)
 	return (int) Failed;
     } else
 	return (int) Ok;
+}
+
+void CategoryEdit::enableButtons()
+{
+    cmdDel->setEnabled(lvView->selectedItem() != 0);
 }
 

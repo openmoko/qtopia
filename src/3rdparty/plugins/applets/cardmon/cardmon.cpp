@@ -23,7 +23,9 @@
 #include <qpopupmenu.h>
 
 #include <stdio.h>
+#if defined(Q_OS_LINUX) || defined(_OS_LINUX_)
 #include <unistd.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
@@ -32,6 +34,7 @@
   \brief The CardMonitor class provides a widget to monitor CF cards.
 
   \legalese
+  The CardMonitor applet monitors PCMCIA and CF card insertion and removal.
   The author and primary copyright holder of the CardMonitor applet is Devin Butterfield \<dbutter@wireless.net\>.
 */
 

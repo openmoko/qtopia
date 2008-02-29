@@ -80,8 +80,8 @@ public:
     void sendByteArray( const QByteArray& array );
     void sendByteArray( const QByteArray& array, const QHostAddress& host, Q_UINT16 port );
 
-    void retrieveFile( const QString fn );
-    void retrieveFile( const QString fn, const QHostAddress& host, Q_UINT16 port );
+    void retrieveFile( const QString fn, int fileSize );
+    void retrieveFile( const QString fn, const QHostAddress& host, Q_UINT16 port, int fileSize );
     void retrieveGzipFile( const QString &fn );
     void retrieveGzipFile( const QString &fn, const QHostAddress& host, Q_UINT16 port );
     void retrieveByteArray();
@@ -114,6 +114,7 @@ private:
     QBuffer buf;
     QProcess *createTargzProc;
     QProcess *retrieveTargzProc;
+    int recvFileSize;
 };
 
 class ServerSocket : public QServerSocket
@@ -186,4 +187,5 @@ private:
     QString renameFrom;
     QString lastCommand;
     int waitsocket;
+    int storFileSize;
 };

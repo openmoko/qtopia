@@ -35,15 +35,15 @@ int SortedLayoutItems::compareItems(Item i1, Item i2)
     LayoutItem *d1 = (LayoutItem *)i1;
     LayoutItem *d2 = (LayoutItem *)i2;
 
-    if (d1->event().startInCurrentTZ() < d2->event().startInCurrentTZ())
+    if (d1->occurrence().startInCurrentTZ() < d2->occurrence().startInCurrentTZ())
 	return -1;
-    if (d2->event().startInCurrentTZ() < d1->event().startInCurrentTZ())
+    if (d2->occurrence().startInCurrentTZ() < d1->occurrence().startInCurrentTZ())
 	return 1;
     return 0;
 
-    if (d1->event().endInCurrentTZ() < d2->event().endInCurrentTZ())
+    if (d1->occurrence().endInCurrentTZ() < d2->occurrence().endInCurrentTZ())
 	return -1;
-    if (d2->event().endInCurrentTZ() < d1->event().endInCurrentTZ())
+    if (d2->occurrence().endInCurrentTZ() < d1->occurrence().endInCurrentTZ())
 	return 1;
     return 0;
 }
@@ -200,16 +200,16 @@ void LayoutManager::initializeGeometry(LayoutItem *item)
     if (referenceDate > item->occurrence().startInCurrentTZ().date())
 	y = 0;
     else 
-	y = timeToHeight(item->event().startInCurrentTZ().time());
+	y = timeToHeight(item->occurrence().startInCurrentTZ().time());
 
     if (referenceDate < 
 	    item->occurrence().startInCurrentTZ().date().addDays( 
-		item->event().startInCurrentTZ().date().daysTo(item->event().endInCurrentTZ().date())
+		item->occurrence().startInCurrentTZ().date().daysTo(item->occurrence().endInCurrentTZ().date())
 		)
 	    )
 	yend = timeToHeight(QTime(23,59,59));
     else
-	yend = timeToHeight(item->event().endInCurrentTZ().time());
+	yend = timeToHeight(item->occurrence().endInCurrentTZ().time());
 
     int h = yend - y;
     if (h < min_height)

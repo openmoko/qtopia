@@ -1,6 +1,6 @@
 [Global]
 Name = Yellow
-Name[ja] = ???
+Name[ja] = 黄
 [Colors]
 Background = #EFEFAA
 Button = #D1D194

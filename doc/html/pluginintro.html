@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12327/qtopia/doc/pluginintro.doc:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12684/qtopia/doc/pluginintro.doc:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -16,7 +16,7 @@ body { background: #ffffff; color: black; }
 <tr bgcolor="black"><td>
 <a href="classes.html"><font color="white">Qt API</font></a>
 <font color="white">|</font>
-<a href="../classes.html"> <font color="white">Qtopia API</font></a>
+<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
 </td>
 <td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
 <td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table>
@@ -174,11 +174,32 @@ Q_EXPORT_INTERFACE()
 }
 </pre>
  
+<p> <h3> Loading Plugins
+</h3>
+<a name="1-5"></a><p> The recommended method for loading plugins is to use the <a href="pluginloader.html">PluginLoader</a> class.
+The PluginLoader class provides simplified enumeration and loading of
+plugins and provides safety in cases where the system has been booted in
+Safe Mode.
+<p> <pre>
+PluginLoader loader( "Widgets" );
+QStringList list = pluginLoader.list();
+QStringList::Iterator it;
+QValueList&lt;WidgetPluginInterface*&gt; widgetsList;
+for ( it = list.begin(); it != list.end(); ++it ) {
+    WidgetPluginInterface *iface = 0;
+    if ( pluginLoader.queryInterface( *it, IID_WidgetPlugin, (QUnknownInterface**)&amp;iface ) == QS_OK &amp;&amp; iface ) {
+        widgetsList.append( iface );
+    }
+}
+</pre>
+ 
+<p> The PluginLoader class expects the plugins to be installed in the
+$QPEDIR/plugins/<i>type</i> directory.
 <p> 
 <!-- eof -->
 <p><address><hr><div align=center>
 <table width=100% cellspacing=0 border=0><tr>
 <td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.6.0</div>
+<td align=right><div align=right>Qtopia version 1.6.1</div>
 </table></div></address></body>
 </html>

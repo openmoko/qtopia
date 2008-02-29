@@ -3,5 +3,5 @@ Type=Application
 Exec=pluginmanager
 Icon=PluginManager
 Name=Plugin Manager
-Name[ja]=???
+Name[ja]=プラグインマネージャ
 CanFastload=0

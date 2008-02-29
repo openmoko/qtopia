@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# for each package in current directory, scan and create a Packages file
+# describing the ipkgs in the current directory
+
+for i in *.ipk
+do
+	packagename=${i%%_*}
+	#echo >&2 "$packagename..."
+	GOOD=y
+	for other in ${packagename}_*.ipk
+	do
+	    if [ $i != $other -a $other -nt $i ]
+	    then
+		GOOD=
+		break
+	    fi
+	done
+	if [ -n "$GOOD" ]
+	then
+	    tar xfOz $i ./control.tar.gz | tar xfOz - ./control
+	    echo
+	else
+	    echo >&2 "Deleting old file: $i ($other is newer)"
+	    rm $i
+	fi
+done >Packages

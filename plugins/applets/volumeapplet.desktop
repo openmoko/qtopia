@@ -1,4 +1,6 @@
 [Desktop Entry]
 Name=Volume
 Comment=Sets the sound volume.
+Name[ja]=音量
+Comment[ja]=音量を設定します。
 X-QPE-Library=libvolumeapplet.so

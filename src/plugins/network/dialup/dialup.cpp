@@ -442,7 +442,7 @@ bool DialupImpl::start( Config& cfg, const QString& password )
 	    return FALSE;
 	}
 	cfg.setGroup("Info");
-	cmd = "/usr/sbin/pppd " + d + " debug call " + cfg.readEntry("Id"); // No tr
+	cmd = "/usr/sbin/pppd updetach " + d + " debug call " + cfg.readEntry("Id"); // No tr
     } else {
 	cmd += " " + dev(cfg);
     }

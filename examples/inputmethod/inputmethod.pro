@@ -1,5 +1,5 @@
 TEMPLATE     = lib
-CONFIG      += qt warn_on release
+CONFIG      += qtopia warn_on release
 HEADERS      = composeim.h \
                composeimpl.h
 SOURCES      = composeimpl.cpp \

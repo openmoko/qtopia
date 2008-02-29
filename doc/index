@@ -307,6 +307,7 @@
 "FontDatabase::loadRenderers" fontdatabase.html#loadRenderers
 "FontFactoryInterface" fontfactoryinterface.html
 "FontFactoryInterface::fontFactory" fontfactoryinterface.html#fontFactory
+"FreeType" freetype.html
 "GSM" gsm.html
 "Global" global.html
 "Global::addWords" global.html#addWords
@@ -498,6 +499,7 @@
 "Node::~Node" node.html#~Node
 "Password::authenticate" password.html#authenticate
 "Password::getPassword" password.html#getPassword
+"Pickboard" pickboard.html
 "PimContact" pimcontact.html
 "PimContact::GenderType" pimcontact.html#GenderType
 "PimContact::PimContact" pimcontact.html#PimContact
@@ -903,9 +905,9 @@
 "QWSDatabase::setIndexing" qwsdatabase.html#setIndexing
 "QWSDatabase::writeRecord" qwsdatabase.html#writeRecord
 "Qtopia" index.html
-"Qtopia - All Functions" functions.html
-"Qtopia - Header Files" headers.html
-"Qtopia - Library Classes" classes.html
+"Qtopia - All Functions" qtopiafunctions.html
+"Qtopia - Header Files" qtopiaheaders.html
+"Qtopia - Library Classes" qtopiaclasses.html
 "Qtopia Desktop and Syncing Framework" qtopiadesktopoverview.html
 "Qtopia Overview" overview.html
 "Resource" resource.html
@@ -1036,12 +1038,13 @@
 "" licensing.html
 "" mainfunc.html
 "" pluginintro.html
-"" porting.html
 "" qcop.html
-"" release-1.6.0.html
+"" qtopiaporting.html
+"" release-1.6.1.html
 "" release-1.6beta2.html
 "" release-1.6beta3.html
 "" release-1.6beta4.html
 "" release-1.6beta5.html
 "" services.html
+"" servicesapi.html
 "" start.html

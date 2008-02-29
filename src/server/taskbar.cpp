@@ -334,7 +334,7 @@ void TaskBar::calcMaxWindowRect()
 	wr.setCoords( 0, 0, displayWidth-1, y()-1 );
     }
 
-#if QT_VERSION < 300
+#if QT_VERSION < 0x030000
     QWSServer::setMaxWindowRect( qt_screen->mapToDevice(wr,
 	QSize(qt_screen->width(),qt_screen->height()))
 	);

@@ -1,4 +1,6 @@
 [Desktop Entry]
-Name=Diap-up Monitor
+Name=Dial-up Monitor
 Comment=Monitor for dial-up internet connections.
+Name[ja]=ダイアルアップモニター
+Comment[ja]=ダイアルアップのインターネット接続を監視します。
 X-QPE-Library=libnetmonapplet.so

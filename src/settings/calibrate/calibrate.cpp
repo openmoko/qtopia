@@ -27,6 +27,7 @@
 #if defined(Q_WS_QWS) || defined(_WS_QWS_)
 
 #include <qpainter.h>
+#include <qfile.h>
 #include <qtimer.h>
 #include <qmessagebox.h>
 #include <qwindowsystem_qws.h>
@@ -39,6 +40,7 @@ Calibrate::Calibrate(QWidget* parent, const char * name, WFlags wf) :
 {
     showCross = TRUE;
     pressed = FALSE;
+    anygood = FALSE;
     const int offset = 30;
     QRect desk = qApp->desktop()->geometry();
     setGeometry( 0, 0, desk.width(), desk.height() );
@@ -70,21 +72,20 @@ Calibrate::~Calibrate()
 
 void Calibrate::show()
 {
-    if ( !isVisible() ) {
+    if ( !isVisible() && QWSServer::mouseHandler() ) {
+	anygood = QFile::exists("/etc/pointercal");
 	QWSServer::mouseHandler()->getCalibration(&goodcd);
 	QWSServer::mouseHandler()->clearCalibration();
     }
     QDialog::show();
     setActiveWindow();
-    if ( !checkTouch() )
-	QTimer::singleShot(0, this, SLOT(reject()) );
-    else
-	QTimer::singleShot(0, this, SLOT(doGrab()) );
+    QTimer::singleShot(0, this, SLOT(doGrab()) );
 }
 
 void Calibrate::store()
 {
-    QWSServer::mouseHandler()->calibrate( &goodcd );
+    if ( QWSServer::mouseHandler() && anygood )
+	QWSServer::mouseHandler()->calibrate( &goodcd );
     reset();
 }
 
@@ -142,9 +143,12 @@ bool Calibrate::checkTouch()
 	    touch = TRUE;
     }
     if ( !touch ) {
-	qDebug( "show dlg" );
+	bool grab = QWidget::mouseGrabber() == this;
+	releaseMouse();
 	QMessageBox::warning( this, tr("Calibrate"), 
 	    tr("<qt>Calibration may only be performed on the touch screen.") );
+	if ( grab )
+	    grabMouse();
     }
 
     return touch;
@@ -264,6 +268,7 @@ void Calibrate::mouseReleaseEvent( QMouseEvent * )
     } else {
 	if ( sanityCheck() ) {
 	    reset();
+	    anygood = TRUE;
 	    goodcd = cd;
 	    hide();
 	    emit accept();
@@ -309,10 +314,14 @@ void Calibrate::timeout()
 
 void Calibrate::doGrab()
 {
-    if ( !QWidget::mouseGrabber() )
-	grabMouse();
-    else
+    if ( !QWidget::mouseGrabber() ) {
+	if ( !checkTouch() )
+	    reject();
+	else
+	    grabMouse();
+    } else {
 	QTimer::singleShot( 50, this, SLOT(doGrab()) );
+    }
 }
 
 #endif // _WS_QWS_

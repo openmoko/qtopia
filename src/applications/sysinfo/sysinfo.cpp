@@ -54,7 +54,14 @@ SystemInfo::SystemInfo( QWidget *parent, const char *name, WFlags f )
 
     tab->addTab( new LoadInfo( tab ), tr("CPU") );
 //    tab->addTab( new Graphics( tab ), tr("Graphics") );
-    tab->addTab( new VersionInfo( tab ), tr("Version") );
+
+    sv = new QScrollView(this);
+    sv->setHScrollBarMode(QScrollView::AlwaysOff);
+    sv->setResizePolicy(QScrollView::AutoOneFit);
+    sv->setFrameStyle(QFrame::NoFrame);
+    sv->addChild( new VersionInfo( tab ) );
+    
+    tab->addTab( sv, tr("Version") );
 
     resize( 220, 180 );
 }

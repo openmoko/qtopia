@@ -55,7 +55,8 @@ The size of mapped file can not be changed.
 If <em>fileName</em> is not preceeded by an \\ then it is treated as a real
 file name.
 Otherwise the characters after the \\ are used as the name for the memory block required.
-<p>A value for <em>size</em> should always be provided, though if the size is not provided it will be determined if possible.
+nb: You will need to escape the \'s so it you need to use \\\\ within a literal string 
+A value for <em>size</em> should always be provided, though if the size is not provided it will be determined if possible.
 <p>If a file is being mapped to be written to, then the <em>flags</em> of subsequent QMemoryFiles mapped to the same file should include QMemoryFile::Write.
 <p>Example:
 <pre> // Open a maping to file text.dat
@@ -68,7 +69,7 @@ Otherwise the characters after the \\ are used as the name for the memory block 
  <a href="qapplication.html#72e78c">qDebug</a>("Sum =%d", sum);
 </pre>
 <p>Example for creating named memory block:
-<pre> <a href="qmemoryfile.html">QMemoryFile</a> block1("\block1", QMemoryFile::Create | QMemoryFile::Write, 20);
+<pre> <a href="qmemoryfile.html">QMemoryFile</a> block1("\\\\block1", QMemoryFile::Create | QMemoryFile::Write, 20);
  char *dataBlock = block.data();
  for (int i = 0; i &lt; 19; i++){
    dataBlock[i] = i +'a';
@@ -88,7 +89,7 @@ Otherwise the characters after the \\ are used as the name for the memory block 
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.4"><nobr>
+<input type=hidden name="version" value="2.3.5"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -96,5 +97,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.4</div>
+<td align="right"><div align="right">Qt version 2.3.5</div>
 </table></div></address></body></html>

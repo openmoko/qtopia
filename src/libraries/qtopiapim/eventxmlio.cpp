@@ -149,7 +149,7 @@ void EventXmlIO::pimMessage(const QCString &message, const QByteArray &data)
 	ds >> pid;
 	ds >> event;
 	if (pid != getpid()) {
-	    internalUpdateRecord(new PimEvent(event));
+	    internalUpdateRecord( &event );
 	    emit eventsUpdated();
 	}
     } else if (message == "reloadEvents()") {
@@ -203,12 +203,12 @@ bool EventXmlIO::internalUpdateRecord(PimRecord *rec)
     for (m_PrEvents.first(); m_PrEvents.current(); m_PrEvents.next()) {
 	PrEvent *current = m_PrEvents.current();
 	if (current->uid() == ev->uid()) {
-	    m_PrEvents.remove();
-	    m_PrEvents.append(ev);
+	    if ( current != ev ) {
+		*current = *ev;
+	    }
 	    return TRUE;
 	}
     }
-    delete rec;
     return FALSE;
 }
 
@@ -394,6 +394,7 @@ void EventXmlIO::addException(const QDate &d, const PimEvent &p)
 	}
 #endif
     }
+    delete parent;
 }
 
 QUuid EventXmlIO::addException(const QDate &d, const PimEvent &p, const PimEvent& event)
@@ -434,6 +435,7 @@ QUuid EventXmlIO::addException(const QDate &d, const PimEvent &p, const PimEvent
 	}
 #endif
     }
+    delete parent;
     return u;
 }
 
@@ -496,8 +498,8 @@ void EventXmlIO::updateEvent(const PimEvent &event)
 	return;
     }
 
-    PrEvent *ev = new PrEvent((const PrEvent &)event);
-
+    PrEvent *ev = new PrEvent((const PrEvent&)event);
+    
     for (m_PrEvents.first(); m_PrEvents.current(); m_PrEvents.next()) {
 	if (m_PrEvents.current()->uid() == ev->uid()) {
 	    if (m_PrEvents.current()->hasAlarm())
@@ -519,6 +521,7 @@ void EventXmlIO::updateEvent(const PimEvent &event)
 #endif
 	}
     }
+    delete ev;
 }
 
 void EventXmlIO::ensureDataCurrent(bool forceReload)

@@ -25,7 +25,9 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#if !defined (_OS_WIN32_)
 #include <unistd.h>
+#endif
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/file.h>

@@ -25,6 +25,7 @@
 #define PLUGINLOADER_INTERN
 
 #include "pluginloader_p.h"
+#include <signal.h>
 
 #include "../qtopia1/pluginloader.cpp"
 
@@ -37,8 +38,13 @@ static void cleanupPluginLibraryManager()
 
 static void handleCrash( int s )
 {
-    if ( s != SIGSEGV && s != SIGBUS )
+#ifndef Q_OS_WIN32
+     if ( s != SIGSEGV && s != SIGBUS )
+ 	return;
+#else
+    if ( s != SIGSEGV )
 	return;
+#endif
 
     if ( qApp->type() == QApplication::GuiServer ) {
 	Config cfg( "PluginLoader" );

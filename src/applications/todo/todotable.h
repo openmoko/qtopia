@@ -134,9 +134,9 @@ private slots:
     void priorityChanged(int);
 
     void headerClicked(int);
+    void readSettings();
 
 private:
-    void readSettings();
     void saveSettings();
 
     void setSelection(int fromRow, int toRow);

@@ -1,4 +1,6 @@
 [Desktop Entry]
 Name=Unicode
 Comment=Unicode character selector.
+Name[ja]=ユニコード
+Comment[ja]=ユニコード文字セレクタ
 X-QPE-Library=libqunikeyboard.so

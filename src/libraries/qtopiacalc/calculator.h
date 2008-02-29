@@ -30,7 +30,7 @@
 #include "engine.h"
 
 #ifndef QT_NO_COMPONENT
-#if QT_VERSION >= 300
+#if QT_VERSION >= 0x030000
 #include <private/qcomlibrary_p.h>
 #define QLibrary QComLibrary
 #else

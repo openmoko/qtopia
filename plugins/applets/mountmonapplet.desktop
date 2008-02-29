@@ -1,4 +1,6 @@
 [Desktop Entry]
 Name=SD Card Monitor
 Comment=Monitors the SD card slot.
+Name[ja]=SDカードモニター
+Comment[ja]=SDカードスロットを監視します。
 X-QPE-Library=libmountmonapplet.so

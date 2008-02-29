@@ -137,6 +137,9 @@ void FileAsCombo::userChanged( const QString &newText )
     //    newText.latin1(), curIndex, *found );
 
     if ( found == indexLookup.end() ) {
+	lineEdit()->blockSignals(TRUE);
+	lineEdit()->setText(newText);
+	lineEdit()->blockSignals(FALSE);
 	userOverride = TRUE;
 	curIndex = -1;
 	lastNumGroupChoices = -1;

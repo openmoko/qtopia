@@ -1,4 +1,6 @@
 [Desktop Entry]
 Name= Font Factories
 Comment=Font factories provide support for different font formats.
+Name[ja]=フォントファクトリー
+Comment[ja]=フォントファクトリーは異なるフォント形式のサポートを提供します。
 Apply=QPE/System restart()

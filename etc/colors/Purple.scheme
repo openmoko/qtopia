@@ -1,6 +1,6 @@
 [Global]
 Name = Purple
-Name[ja] = ???
+Name[ja] = 紫
 [Colors]
 Background = #F0D3FF
 Button = #E4B8FF

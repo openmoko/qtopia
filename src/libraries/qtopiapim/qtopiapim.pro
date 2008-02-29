@@ -50,7 +50,7 @@ qdesktop:TARGET	    = qd-qpepim
 DESTDIR		    = $(QPEDIR)/lib$(PROJMAK)
 win32:DLLDESTDIR = $(QPEDIR)/bin
 # This is set by configure$(QPEDIR).
-VERSION         = 1.6.0
+VERSION         = 1.6.1
 
 win32:DEFINES += QTOPIAPIM_MAKEDLL QTOPIA_DLL
 

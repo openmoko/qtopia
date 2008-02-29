@@ -66,12 +66,13 @@
     </message>
     <message>
         <source>Select Day</source>
-        <translation type="unfinished"></translation>
+        <translation>曜日を選択</translation>
     </message>
     <message>
         <source>Daily alarm requires at least
 one day to be selected.</source>
-        <translation type="unfinished"></translation>
+        <translation>デイリーアラームをセットするには、
+1つ以上の曜日を選択してください。</translation>
     </message>
 </context>
 <context>

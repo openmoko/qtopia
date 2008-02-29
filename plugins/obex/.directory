@@ -1,4 +1,6 @@
 [Desktop Entry]
 Name=IR communications
 Comment=Provides support for Infrared communications.
+Name[ja]=IR(赤外線)通信
+Comment[ja]=赤外線通信に関するサポートを提供します。
 Apply=QPE/System restart()

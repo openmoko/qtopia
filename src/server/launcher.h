@@ -106,6 +106,8 @@ public:
 
     void syncConnectionClosed();
 
+    static void setKeyboardLayout( const QString &kb );
+    
 public slots:
     void viewSelected(const QString&);
     void showTab(const QString&);

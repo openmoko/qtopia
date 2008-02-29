@@ -342,6 +342,32 @@ bool Lan::writeConfig()
 
 bool Lan::writeNetworkOpts( Config &config, QString scheme )
 {
+    // PCMCIA card will have "CardType = network" entry
+    config.setGroup("Properties");
+    QString cardType = config.readEntry("CardType");
+
+    if (cardType == "network")
+	return writePcmciaNetworkOpts(config, scheme);
+    else
+	return writeBuiltinNetworkOpts(config, scheme);
+}
+
+bool Lan::writeBuiltinNetworkOpts( Config &config, QString scheme )
+{
+    // Since no standard exists for configuring networks, this
+    // function must be implemented by the system integrator.
+    //
+    // The procedure is:
+    //  1. write the network configuration file to a tmp file.
+    //  2. stop the network.
+    //  3. move the tmp file to the network config file.
+    //  4. start the network.
+
+    return FALSE;
+}
+
+bool Lan::writePcmciaNetworkOpts( Config &config, QString scheme )
+{
     QString prev = "/etc/pcmcia/network.opts";
     QFile prevFile(prev);
     if ( !prevFile.open( IO_ReadOnly ) )
@@ -390,10 +416,15 @@ bool Lan::writeNetworkOpts( Config &config, QString scheme )
 		    }
 		    if ( !k.isNull() ) {
 			QString v = config.readEntry(k);
-			if ( dhcp && eq > 0 && k.left(4) != "DHCP" )
-			    v = "";
-			if ( s == "=" )
-			    v = Global::shellQuote(v);
+			if ( eq > 0 ) {
+			    if ( dhcp && k.left(4) != "DHCP" )
+				v = "";
+			    else
+				v = Global::shellQuote(v);
+			} else {
+			    if ( v.isEmpty() )
+				v = "{ return; }";
+			}
 			line = "    " + k + s + v;
 		    }
 		}

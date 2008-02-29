@@ -98,6 +98,7 @@ my @win32Excludes = qw (
 	./src/settings/systemtime/systemtime.pro
 	./src/settings/qipkg/qipkg.pro
 	./src/tools/quickexec/quickexec.pro
+	./src/tools/symlinker/symlinker.pro
 	./src/single/single.pro
 );
 
@@ -752,7 +753,12 @@ sub initializeQMakeSettings {
     if ($opt_product eq "qtopiadesktop") {
 	$QMAKE_DEFINES .= " QTOPIA_DESKTOP";
 	$QMAKE_CONFIG .= " qdesktop thread qt3";
-    }
+    }elsif ($opt_product eq "sdk"){
+	$QMAKE_DEFINES .= " QWS";
+	$QMAKE_CONFIG .= " qt2";
+    }else{
+		die "Unknown product type \"$opt_product\"";
+	}
 
     if ($opt_host eq "win32") {
 	if ($opt_console) {
@@ -779,7 +785,7 @@ sub initializeTMakeSettings {
 
     if ($TMAKEDIR) {
 	if ($opt_host eq "win32") {
-	    if ($opt_sdk) {
+	    if ($opt_product eq "sdk") {
 		$TMAKEPATH = $TMAKEDIR . "\/lib\/qws\/win32-msvc";
 	    } else {
 		$TMAKEPATH = $TMAKEDIR . "\/lib\/win32-msvc";
@@ -789,7 +795,7 @@ sub initializeTMakeSettings {
 	}
     }
 
-    if ($opt_host eq "win32" && $opt_sdk && $TMAKEPATH !~ /qws\/win32-msvc/) {
+    if ($opt_host eq "win32" && $opt_product eq "sdk" && $TMAKEPATH !~ /qws\/win32-msvc/) {
 	die "Expecting TMAKEPATH to contain qws/win32-msvc but it doesn't. It is currently set to $TMAKEPATH.\n";
     }
 
@@ -820,7 +826,8 @@ sub initializeTMakeSettings {
 	$TMAKE_DEFINES .= " QTOPIA_DESKTOP";
 	$TMAKE_CONFIG .= " qdesktop thread qt3";
     } else {
-	$TMAKE_CONFIG .= " embedded";
+	$TMAKE_DEFINES .= " QWS";
+	$TMAKE_CONFIG .= " qt2 embedded";
     }
 
     if ($opt_host eq "win32") {
@@ -1091,7 +1098,7 @@ sub generateComponentLists {
 	$makePackagesCmd = "\tmkdir -p \$(QPEDIR)/ipkg\n".
 	    "\t$makeForEach\n".
 	    "\tfor ctrl in \$(EXTRAPACKAGES); do cd \$(QPEDIR)/ipkg; ../bin/mkipks \$\$ctrl; done\n".
-	    "\tcd \$(QPEDIR)/ipkg; ../scripts/mkPackages\n";
+	    "\tcd \$(QPEDIR)/ipkg; ../bin/mkPackages\n";
         $makeForEach = "\tfor dir in \$(LIBS) \$(COMPONENTS) \$(APPS); do cd \$(QPEDIR)$DIR_SEPARATOR\$\$dir; \$(MAKE) \$@ || exit 1; done";
     }
 

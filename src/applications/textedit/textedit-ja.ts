@@ -154,11 +154,11 @@ Continue anyway?</source>
     </message>
     <message>
         <source>Search</source>
-        <translation type="unfinished"></translation>
+        <translation>検索</translation>
     </message>
     <message>
         <source>Empty Text</source>
-        <translation type="unfinished"></translation>
+        <translation>空白テキスト</translation>
     </message>
 </context>
 </TS>

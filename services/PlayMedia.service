@@ -1,9 +1,9 @@
 [Service]
 Actions = openURL(QString,QString)
-Icon = MediaPlayer 
+Icon = MediaPlayer
 Name = Play Media
-Name[ja] = ???
+Name[ja] = メディアの再生
 [openURL(QString,QString)]
-Icon = MediaPlayer 
+Icon = MediaPlayer
 Name = Open Media File
-Name[ja] = ???
+Name[ja] = メディアファイルを開く

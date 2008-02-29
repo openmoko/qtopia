@@ -3,157 +3,162 @@
     <name>@default</name>
     <message>
         <source>Language</source>
-        <translation type="unfinished"></translation>
+        <translation>言語</translation>
     </message>
     <message>
         <source>Time and Date</source>
-        <translation type="unfinished"></translation>
+        <translation>時刻と日付</translation>
     </message>
     <message>
         <source>Personal Information</source>
-        <translation type="unfinished"></translation>
+        <translation>個人情報</translation>
     </message>
     <message>
         <source>Security</source>
-        <translation type="unfinished"></translation>
+        <translation>セキュリティ</translation>
     </message>
 </context>
 <context>
     <name>AppLauncher</name>
     <message>
         <source>&lt;qt&gt;&lt;p&gt;Fast loading has been disabled for this application.  Tap and hold the application icon to reenable it.&lt;/qt&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;qt&gt;&lt;p&gt;このアプリケーションは高速ロードが無効になっています。アプリケーションアイコンをしばらくタップしたままにして有効に設定し直します。&lt;/qt&gt;</translation>
     </message>
     <message>
         <source>Application terminated</source>
-        <translation type="unfinished"></translation>
+        <translation>アプリケーションは終了しました</translation>
     </message>
     <message>
         <source>Application not found</source>
-        <translation type="unfinished"></translation>
+        <translation>アプリケーションが見つかりません</translation>
     </message>
     <message>
         <source>&lt;qt&gt;Could not locate application &lt;b&gt;%1&lt;/b&gt;&lt;/qt&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;qt&gt;&lt;b&gt;%1&lt;/b&gt;のアプリケーションを検出できませんでした&lt;/qt&gt;</translation>
     </message>
     <message>
         <source>Error</source>
-        <translation type="unfinished"></translation>
+        <translation>エラー</translation>
     </message>
     <message>
         <source>Could not find the application %1</source>
-        <translation type="unfinished"></translation>
+        <translation>%1のアプリケーションが見つかりませんでした</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation type="unfinished"></translation>
+        <translation>OK</translation>
     </message>
     <message>
         <source>&lt;qt&gt;&lt;b&gt;%1&lt;/b&gt; was terminated due to signal code %2&lt;/qt&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;qt&gt;シグナルコード%2のため&lt;b&gt;%1&lt;/b&gt;は終了しました&lt;/qt&gt;</translation>
     </message>
 </context>
 <context>
     <name>AppMonitor</name>
     <message>
         <source>Application Problem</source>
-        <translation type="unfinished"></translation>
+        <translation>アプリケーションに関する問題</translation>
     </message>
     <message>
         <source>&lt;p&gt;%1 is not responding.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;%1が応答していません。&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;Would you like to force the application to exit?&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;アプリケーションを強制的に終了しますか?&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
     <name>CategoryTabWidget</name>
     <message>
         <source>Documents</source>
-        <translation type="unfinished"></translation>
+        <translation>ドキュメント</translation>
     </message>
     <message>
         <source>Icon View</source>
-        <translation type="unfinished"></translation>
+        <translation>アイコン表示</translation>
     </message>
     <message>
         <source>List View</source>
-        <translation type="unfinished"></translation>
+        <translation>一覧表示</translation>
     </message>
 </context>
 <context>
     <name>Desktop</name>
     <message>
         <source>Memory Status</source>
-        <translation type="unfinished"></translation>
+        <translation>メモリーの状態</translation>
     </message>
     <message>
         <source>Memory Low
 Please save data.</source>
-        <translation type="unfinished"></translation>
+        <translation>メモリ残量が低
+データを保存してください。</translation>
     </message>
     <message>
         <source>Critical Memory Shortage
 Please end this application
 immediately.</source>
-        <translation type="unfinished"></translation>
+        <translation>メモリ残量がありません
+直ちにこのアプリケーションを
+終了してください。</translation>
     </message>
 </context>
 <context>
     <name>DesktopApplication</name>
     <message>
         <source>Battery is running very low.</source>
-        <translation type="unfinished"></translation>
+        <translation>バッテリーの残量が少なくなっています。</translation>
     </message>
     <message>
         <source>Battery level is critical!
 Keep power off until power restored!</source>
-        <translation type="unfinished"></translation>
+        <translation>バッテリー残量がありません!
+電力が回復するまで電源を切っておいてください!</translation>
     </message>
     <message>
         <source>The Back-up battery is very low.
 Please charge the back-up battery.</source>
-        <translation type="unfinished"></translation>
+        <translation>バックアップのバッテリー残量が少なくなっています。
+バックアップのバッテリーを充電してください。</translation>
     </message>
     <message>
         <source>Safe Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>セーフモード</translation>
     </message>
     <message>
         <source>&lt;P&gt;A system startup error occurred, and the system is now in Safe Mode. Plugins are not loaded in Safe Mode. You can use the Plugin Manager to disable plugins that cause system error.</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;P&gt;システムスタートアップのエラーが発生したため、システムは現在セーフモードです。セーフモードではプラグインはロードされません。プラグインマネージャを使用してシステムエラーの要因となるブラグインを無効にすることができます。</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation type="unfinished"></translation>
+        <translation>OK</translation>
     </message>
     <message>
         <source>Plugin Manager...</source>
-        <translation type="unfinished"></translation>
+        <translation>プラグインマネージャ...</translation>
     </message>
 </context>
 <context>
     <name>DesktopPowerAlerter</name>
     <message>
         <source>Battery Status</source>
-        <translation type="unfinished"></translation>
+        <translation>バッテリーの状態</translation>
     </message>
     <message>
         <source>Low Battery</source>
-        <translation type="unfinished"></translation>
+        <translation>バッテリー残量が低</translation>
     </message>
 </context>
 <context>
     <name>FirstUse</name>
     <message>
         <source>&lt;&lt; Back</source>
-        <translation type="unfinished">&lt;&lt;�L�A</translation>
+        <translation>&lt;&lt; 戻る</translation>
     </message>
     <message>
         <source>Next &gt;&gt;</source>
-        <translation type="unfinished">次�A&gt;&gt;</translation>
+        <translation>進む &gt;&gt;</translation>
     </message>
     <message>
         <source>Tap anywhere on the screen to continue.</source>
@@ -161,172 +166,173 @@ Please charge the back-up battery.</source>
     </message>
     <message>
         <source>Please wait, loading %1 settings.</source>
-        <translation type="unfinished"></translation>
+        <translation>%1の設定をロード中、お待ちください。</translation>
     </message>
     <message>
         <source>Please wait...</source>
-        <translation type="unfinished">�A~J�E�A�A~O�A| �A~U�A~D...</translation>
+        <translation>お待ちください...</translation>
     </message>
     <message>
         <source>FirstUseBackground</source>
-        <translation type="unfinished"></translation>
+        <translation>初めて使う背景</translation>
     </message>
     <message>
         <source>Finish</source>
-        <translation type="unfinished">�B�F</translation>
+        <translation>完了</translation>
     </message>
 </context>
 <context>
     <name>InputMethods</name>
     <message>
         <source>Unicode</source>
-        <translation type="unfinished"></translation>
+        <translation>ユニコード</translation>
     </message>
 </context>
 <context>
     <name>Launcher</name>
     <message>
         <source>Launcher</source>
-        <translation type="unfinished"></translation>
+        <translation>ランチャー</translation>
     </message>
     <message>
         <source> - Launcher</source>
-        <translation type="unfinished"></translation>
+        <translation>- ランチャー</translation>
     </message>
     <message>
         <source>No application</source>
-        <translation type="unfinished"></translation>
+        <translation>アプリケーションがありません</translation>
     </message>
     <message>
         <source>&lt;p&gt;No application is defined for this document.&lt;p&gt;Type is %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;このドキュメント用にアプリケーションが決められていません。&lt;p&gt;タイプは%1です。</translation>
     </message>
     <message>
         <source>OK</source>
-        <translation type="unfinished"></translation>
+        <translation>OK</translation>
     </message>
     <message>
         <source>View as text</source>
-        <translation type="unfinished"></translation>
+        <translation>テキストとして表示</translation>
     </message>
     <message>
         <source>Finding documents...</source>
-        <translation type="unfinished"></translation>
+        <translation>ドキュメントの検索中...</translation>
     </message>
 </context>
 <context>
     <name>LauncherView</name>
     <message>
         <source>All types</source>
-        <translation type="unfinished"></translation>
+        <translation>すべてのタイプ</translation>
     </message>
     <message>
         <source>Document View</source>
-        <translation type="unfinished"></translation>
+        <translation>ドキュメント表示</translation>
     </message>
 </context>
 <context>
     <name>SafeMode</name>
     <message>
         <source>Safe Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>セーフモード</translation>
     </message>
     <message>
         <source>Plugin Manager...</source>
-        <translation type="unfinished"></translation>
+        <translation>プラグインマネージャ...</translation>
     </message>
     <message>
         <source>Restart Qtopia</source>
-        <translation type="unfinished"></translation>
+        <translation>Qtopiaを再スタート</translation>
     </message>
     <message>
         <source>Help...</source>
-        <translation type="unfinished"></translation>
+        <translation>ヘルプ...</translation>
     </message>
 </context>
 <context>
     <name>Shutdown</name>
     <message>
         <source>Shut down...</source>
-        <translation type="unfinished">シャットダウン...</translation>
+        <translation>シャットダウン...</translation>
     </message>
     <message>
         <source>Terminate</source>
-        <translation type="unfinished">終了</translation>
+        <translation>終了</translation>
     </message>
     <message>
         <source>Terminate Server</source>
-        <translation type="unfinished">サーバーを終了</translation>
+        <translation>サーバーを終了</translation>
     </message>
     <message>
         <source>Reboot</source>
-        <translation type="unfinished">再起動</translation>
+        <translation>再起動</translation>
     </message>
     <message>
         <source>Restart Server</source>
-        <translation type="unfinished">サーバーの再スタート</translation>
+        <translation>サーバーの再スタート</translation>
     </message>
     <message>
         <source>Shutdown</source>
-        <translation type="unfinished">シャットダウン</translation>
+        <translation>シャットダウン</translation>
     </message>
     <message>
         <source>&lt;p&gt;
 These termination options are provided primarily for use while developing and testing the Qtopia system. In a normal environment, these concepts are unnecessary.</source>
-        <translation type="unfinished">&lt;p&gt;これらの終了オプションは、主としてQtopiaシステムのテスト中及び開発中に使用するため提供されています。通常の環境では、これらのコンセプトは不要です。</translation>
+        <translation>&lt;p&gt;
+これらの終了オプションは、主としてQtopiaシステムのテスト中及び開発中に使用するため提供されています。通常の環境では、これらのコンセプトは不要です。</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished">取り消し</translation>
+        <translation>取り消し</translation>
     </message>
 </context>
 <context>
     <name>SyncAuthentication</name>
     <message>
         <source>Sync Connection</source>
-        <translation type="unfinished"></translation>
+        <translation>同期接続</translation>
     </message>
     <message>
         <source>&lt;p&gt;An unauthorized system is requesting access to this device.&lt;p&gt;If you are using a version of Qtopia Desktop older than 1.5.1, please upgrade.</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;無許可のシステムがこのデバイスにアクセスを要請しています。&lt;p&gt;1.5.1より古いバージョンのQtopia Desktopをご使用の場合にはアップグレードを行なってください。</translation>
     </message>
     <message>
         <source>Deny</source>
-        <translation type="unfinished"></translation>
+        <translation>拒否</translation>
     </message>
     <message>
         <source>&lt;p&gt;An unrecognized system is requesting access to this device.&lt;p&gt;If you have just initiated a Sync for the first time, this is normal.</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;未認可のシステムがこのデバイスにアクセスを要請しています。&lt;p&gt;はじめての同期を開始したばかりの場合には、これが標準です。</translation>
     </message>
     <message>
         <source>Allow</source>
-        <translation type="unfinished"></translation>
+        <translation>許可</translation>
     </message>
 </context>
 <context>
     <name>SyncDialog</name>
     <message>
         <source>Syncing</source>
-        <translation type="unfinished">同期中</translation>
+        <translation>同期中</translation>
     </message>
     <message>
         <source>&lt;b&gt;Contacts&lt;/b&gt;</source>
-        <translation type="unfinished">&lt;b&gt;連絡先&lt;/b&gt;</translation>
+        <translation>&lt;b&gt;連絡先&lt;/b&gt;</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation type="unfinished">(&amp;C)取り消し</translation>
+        <translation>(&amp;C)取り消し</translation>
     </message>
 </context>
 <context>
     <name>TempScreenSaverMonitor</name>
     <message>
         <source>&lt;qt&gt;The running applications disabled the screen saver for more than the allowed time (%1).&lt;p&gt;The system was forced to suspend&lt;/p&gt;&lt;/qt&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;qt&gt;実行中のアプリケーションが許可時間を越えてスクリーンセーバーを無効にしました(%1)。&lt;p&gt;システムは強制的に停止になりました。&lt;/p&gt;&lt;/qt&gt;</translation>
     </message>
     <message>
         <source>Forced suspend</source>
-        <translation type="unfinished"></translation>
+        <translation>強制停止</translation>
     </message>
 </context>
 </TS>

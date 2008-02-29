@@ -1,4 +1,6 @@
 [Desktop Entry]
 Name=Email
 Comment=Displays the number of new and unsent emails.
+Name[ja]=電子メール
+Comment[ja]=新着メールと未送信メールの件数を表示します。
 X-QPE-Library=libemailplugin.so

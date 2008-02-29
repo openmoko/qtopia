@@ -57,6 +57,8 @@ FontDatabase Class | fontdatabase.html
 FontDatabase Member List | fontdatabase-members.html
 FontFactoryInterface Class | fontfactoryinterface.html
 FontFactoryInterface Member List | fontfactoryinterface-members.html
+FreeType Class | freetype.html
+FreeType Member List | freetype-members.html
 GSM Class | gsm.html
 GSM Member List | gsm-members.html
 Global Class | global.html
@@ -96,6 +98,8 @@ NetworkInterface Class | networkinterface.html
 NetworkInterface Member List | networkinterface-members.html
 Node Class | node.html
 Node Member List | node-members.html
+Pickboard Class | pickboard.html
+Pickboard Member List | pickboard-members.html
 PimContact Class | pimcontact.html
 PimContact Member List | pimcontact-members.html
 PimEvent Class | pimevent.html
@@ -688,9 +692,9 @@ QXmlSimpleReader Member List | qxmlsimplereader-members.html
 Qt Class | qt.html
 Qt Member List | qt-members.html
 Qtopia | index.html
-Qtopia - All Functions | functions.html
-Qtopia - Header Files | headers.html
-Qtopia - Library Classes | classes.html
+Qtopia - All Functions | qtopiafunctions.html
+Qtopia - Header Files | qtopiaheaders.html
+Qtopia - Library Classes | qtopiaclasses.html
 Qtopia Classes | qtopiaemb.html
 Qtopia Desktop Classes | qtopiadesktop.html
 Qtopia Desktop and Syncing Framework | qtopiadesktopoverview.html
@@ -963,12 +967,13 @@ xmlreader.h Include File | xmlreader-h.html
  | licensing.html
  | mainfunc.html
  | pluginintro.html
- | porting.html
  | qcop.html
- | release-1.6.0.html
+ | qtopiaporting.html
+ | release-1.6.1.html
  | release-1.6beta2.html
  | release-1.6beta3.html
  | release-1.6beta4.html
  | release-1.6beta5.html
  | services.html
+ | servicesapi.html
  | start.html

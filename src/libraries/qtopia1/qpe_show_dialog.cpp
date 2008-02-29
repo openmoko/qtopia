@@ -21,9 +21,8 @@
 
 // This is #included by qtopia/qpeapplication.cpp and
 //                      qtopia1/qpeapplication.cpp
-
 #ifdef Q_WS_QWS
-extern QRect qt_maxWindowRect;
+extern Q_EXPORT QRect qt_maxWindowRect;
 #endif
 
 static void qpe_show_dialog( QDialog* d, bool nomax )
@@ -44,7 +43,7 @@ static void qpe_show_dialog( QDialog* d, bool nomax )
     int maxX = s.width() - (d->frameGeometry().width() - d->geometry().width());
     int maxY = s.height() - (d->frameGeometry().height() - d->geometry().height());
 
-    if ( (w > maxX && h > maxY) || ( (!nomax) && ( w > s.width()*3/4 || h > s.height()*3/4 ) ) ) {
+    if ( (w >= maxX && h >= maxY) || ( (!nomax) && ( w > s.width()*3/4 || h > s.height()*3/4 ) ) ) {
 	d->showMaximized();
     } else {
 	// try centering the dialog around its parent

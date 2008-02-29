@@ -92,7 +92,7 @@ Clock::Clock( QWidget * parent, const char *, WFlags f )
     clockLcd->setFixedWidth( clockLcd->sizeHint().width() );
     date->setText( TimeString::localYMD( QDate::currentDate(), TimeString::Long ) );
     if ( qApp->desktop()->width() < 200 )
-	date->setFont( QFont("Helvetica", 14, QFont::Bold) );
+	date->setFont( QFont(date->font().family(), 14, QFont::Bold) );
     if ( qApp->desktop()->height() > 240 ) {
 	clockLcd->setFixedHeight( 30 );
 	stopwatchLcd->setFixedHeight( 30 );

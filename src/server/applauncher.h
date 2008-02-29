@@ -21,8 +21,13 @@
 #ifndef APP_LAUNCHER_H
 #define APP_LAUNCHER_H
 
+#include <qtopia/qpeglobal.h>
 #include <qobject.h>
 #include <qmap.h>
+#ifdef Q_OS_WIN32
+#include <qtopia/qprocess.h>
+#include <qlist.h>
+#endif
 
 class AppLnkSet;
 
@@ -46,6 +51,7 @@ protected slots:
     void sigStopped(int sigPid, int sigStatus);
     void received(const QCString& msg, const QByteArray& data);
     void newQcopChannel(const QString& channel);
+    void processExited();
 
 protected:
     bool event(QEvent *);
@@ -57,6 +63,9 @@ private:
     
 private:    
     QMap<int,QString> runningApps;
+#ifdef Q_OS_WIN32
+    QList<QProcess> runningAppsProc; 
+#endif
     const AppLnkSet *appLnkSet;
 };
 

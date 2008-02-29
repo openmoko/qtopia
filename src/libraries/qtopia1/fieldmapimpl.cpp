@@ -50,6 +50,12 @@ FieldMap::FieldMap(QWidget *parent, const char* name)
 
     displayBox->setSelectionMode( QListBox::Multi );
     fieldBox->setSelectionMode( QListBox::Multi );
+
+    connect(displayBox, SIGNAL(selectionChanged()),
+	    this, SLOT(enableButtons()) );
+    connect(fieldBox, SIGNAL(selectionChanged()),
+	    this, SLOT(enableButtons()) );
+    enableButtons();
 }
 
 void FieldMap::init()
@@ -114,6 +120,12 @@ void FieldMap::init()
     grid->addLayout( Layout6, 1, 1 );
     QSpacerItem* spacer_3 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
     grid->addItem( spacer_3, 1, 0 );
+
+    setTabOrder(fieldBox, addButton);
+    setTabOrder(addButton, displayBox);
+    setTabOrder(displayBox, removeButton);
+    setTabOrder(removeButton, moveUpButton);
+    setTabOrder(moveUpButton, moveDownButton);
 }
 
 void FieldMap::setFields( const QMap<int,QString> &all, const QValueList<int> &display)
@@ -133,6 +145,7 @@ void FieldMap::setFields( const QMap<int,QString> &all, const QValueList<int> &d
     for ( QValueList<int>::ConstIterator e = display.begin(); e != display.end(); ++e) {
 	displayBox->insertItem( all[*e] );
     }
+    enableButtons();
 }
 
 QValueList<int> FieldMap::fields()
@@ -161,6 +174,7 @@ void FieldMap::addClicked()
 	    item = item->next();
 	}
     }
+    enableButtons();
 }
 
 void FieldMap::removeClicked()
@@ -176,6 +190,7 @@ void FieldMap::removeClicked()
 	    item = item->next();
 	}
     }
+    enableButtons();
 }
 
 void FieldMap::moveUp()
@@ -219,5 +234,26 @@ void FieldMap::moveDown()
 	    item = item->prev();
 	}
     }
+}
+
+void FieldMap::enableButtons()
+{
+    addButton->setEnabled( containsSelection(fieldBox) );
+    bool enable = containsSelection(displayBox);
+    removeButton->setEnabled( enable );
+    moveUpButton->setEnabled( enable );
+    moveDownButton->setEnabled( enable );
+}
+
+bool FieldMap::containsSelection(QListBox *b)
+{
+    QListBoxItem *item = b->firstItem();
+    while ( item ) {
+	if ( item->selected() )
+	    return TRUE;
+	item = item->next();
+    }
+    
+    return FALSE;
 }
 

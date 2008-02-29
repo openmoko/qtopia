@@ -42,7 +42,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
+#ifndef Q_OS_WIN32
 #include <unistd.h>
+#else
+#include <process.h>
+#endif
 
 #if defined(QPE_NEED_CALIBRATION)
 #include "../calibrate/calibrate.h"
@@ -293,6 +297,9 @@ static void initKeyboard()
     int arp = config.readNumEntry( "RepeatPeriod" );
     if ( ard > 0 && arp > 0 )
 	qwsSetKeyboardAutoRepeat( ard, arp );
+
+    QString layout = config.readEntry( "Layout", "us101" );
+    Launcher::setKeyboardLayout( layout );
 }
 
 static void firstUse()

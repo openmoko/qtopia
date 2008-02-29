@@ -63,9 +63,9 @@
 #include "mrulist.h"
 #include "qrsync.h"
 #include <stdlib.h>
-#include <unistd.h>
 
 #if defined(_OS_LINUX_) || defined(Q_OS_LINUX)
+#include <unistd.h>
 #include <stdio.h>
 #include <sys/vfs.h>
 #include <mntent.h>
@@ -522,7 +522,7 @@ void CategoryTabBar::paint( QPainter * p, QTab * t, bool selected ) const
 	that->setPalette( pal );
 	setPal = TRUE;
     }
-#if QT_VERSION >= 300
+#if QT_VERSION >= 0x030000
     QStyle::SFlags flags = QStyle::Style_Default;
     if ( selected )
         flags |= QStyle::Style_Selected;
@@ -555,7 +555,7 @@ void CategoryTabBar::paint( QPainter * p, QTab * t, bool selected ) const
     int h = QMAX(p->fontMetrics().height() + 4, ih );
     paintLabel( p, QRect( r.left() + (r.width()-w)/2 - 3,
 			  r.top() + (r.height()-h)/2, w, h ), t,
-#if QT_VERSION >= 300
+#if QT_VERSION >= 0x030000
 			    t->identifier() == keyboardFocusTab()
 #else
 			    t->identitifer() == keyboardFocusTab()
@@ -707,15 +707,20 @@ void Launcher::updateMimeTypes(AppLnkSet* folder)
 
 void Launcher::loadDocs()
 {
-    QVBox vb(0,0,WStyle_Customize | WStyle_NoBorder | WStyle_Tool);
-    vb.setFrameStyle(QFrame::WinPanel+QFrame::Raised);
-    QLabel l(tr("Finding documents..."),&vb);
+    QLabel l(tr("Finding documents..."),0,0, WStyle_Customize | WStyle_NoBorder | WStyle_Tool | WStyle_StaysOnTop | WPaintUnclipped);
+    l.setFrameStyle(QFrame::WinPanel+QFrame::Raised);
     l.setMargin(10);
-    vb.resize(vb.sizeHint());
-    QSize pos = (size()-vb.size())/2;
-    vb.move(pos.width(),pos.height());
-    vb.show();
-    qApp->processEvents(); // ###### not best way
+    l.resize(l.sizeHint());
+    QSize pos = (size()-l.size())/2;
+    l.move(pos.width(),pos.height());
+    l.show();
+
+    // Force a repaint now.
+    QPainter p(&l);
+    p.fillRect(l.rect(),l.backgroundColor());
+    p.end();
+    l.repaint();
+
     delete docsFolder;
     docsFolder = new DocLnkSet;
     Global::findDocuments(docsFolder);
@@ -840,7 +845,7 @@ static const KeyOverride jp109keys[] = {
    { 0x00, {   0,          0xffff  , 0xffff  , 0xffff  } }
 };
 
-static void setKeyboardLayout( const QString &kb ) 
+void Launcher::setKeyboardLayout( const QString &kb ) 
 {
     //quick demo version that can be extended 
 
@@ -1055,6 +1060,9 @@ void Launcher::systemMessage( const QCString &msg, const QByteArray &data)
 	QString kb;
 	stream >> kb;
 	setKeyboardLayout( kb );
+	Config cfg( "qpe" );
+	cfg.setGroup("Keyboard");
+	cfg.writeEntry( "Layout", kb );
 #endif
 #ifndef QT_NO_COP
     } else if (msg == "applyStyle()") {

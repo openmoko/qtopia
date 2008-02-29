@@ -37,12 +37,15 @@ const int CITIES = 6;    // the number of cities...
 #define Q_DEFINED_QLABEL
 #endif
 #include <common/qpcwinexports.h>
+#define WORLDTIME_EXPORT QPC_EXPORT
+#else
+#define WORLDTIME_EXPORT
 #endif
 
 
 class ZoneMap;
 
-class QPC_EXPORT WorldTime : public WorldTimeBase
+class WORLDTIME_EXPORT WorldTime : public WorldTimeBase
 {
     Q_OBJECT
 public:

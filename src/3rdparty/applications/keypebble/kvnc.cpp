@@ -49,15 +49,16 @@ const int StatusTextId = 0;
   \brief The KVNC class is a VNC client.
 
   \legalese
-    Keypebble, the VNC client for Qtopia is based on Keystone from 
-    the KDE project. Keystone, and hence Keypebble, are distributed
-    under the terms of the GNU General Public License.
+    Keypebble, the VNC client for Qtopia, is based on Keystone from 
+    the KDE project. Keystone and Keypebble are distributed
+    under the terms of the GNU General Public License. The VNC server
+    code in Qt/Embedded is copyright Trolltech.
 
     A primary copyright holder is Richard Moore &lt;rich@kde.org&gt;.
 
-    This software owes a lot to Markus Wuebben's kvncviewer
-    which some of the code is derived from.
-    Thanks also go to ORL for making the RFB protocol and servers GPL.
+    This software owes a lot to Markus Wuebben's kvncviewer,
+    which some of the code is derived from. Thanks also go to ORL for
+    making the RFB protocol and servers GPL.
 */
 
 KVNC::KVNC( const char *name ) : QMainWindow( 0, name )

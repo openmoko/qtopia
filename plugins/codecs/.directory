@@ -1,3 +1,5 @@
 [Desktop Entry]
 Name=Media Codecs
 Comment=Plugins to support various media formats.
+Name[ja]=メディアコーデック
+Comment[ja]=多数のメディア形式をサポートするプラグイン

@@ -42,7 +42,7 @@
 
 #include <stdlib.h>
 
-extern QRect qt_maxWindowRect; 
+extern Q_EXPORT QRect qt_maxWindowRect;
 
 #define WHATSTHIS_MODE
 

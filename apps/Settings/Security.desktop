@@ -3,6 +3,6 @@ Type=Application
 Exec=security
 Icon=Security
 Name=Security
-Name[ja]=???
+Name[ja]=セキュリティ
 Name[de]=Sicherheits einstellungen
 CanFastload=0

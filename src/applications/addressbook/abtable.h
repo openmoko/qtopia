@@ -106,13 +106,13 @@ protected slots:
     void rowHeightChanged( int row );
 
     void slotCurrentChanged(int row, int col );
+    void readSettings();
 
 private:
     void refresh();
     
     void setSelection(int fromRow, int toRow);
     PimContact pimForUid(const QUuid &);
-    void readSettings();
     void saveSettings();
     
     QString findContactName( const PimContact &entry );

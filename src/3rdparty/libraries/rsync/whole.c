@@ -34,7 +34,9 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#if !defined (_OS_WIN32_)
 #include <unistd.h>
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>

@@ -7,4 +7,5 @@ SOURCES		= fresh.cpp
 TARGET		= freshstyle
 DESTDIR		= $(QPEDIR)/plugins/styles
 VERSION		= 1.0.0
+TRANSLATIONS = libfresh-en_GB.ts libfresh-de.ts libfresh-ja.ts libfresh-no.ts
 

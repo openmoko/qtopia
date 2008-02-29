@@ -39,6 +39,7 @@
 #include <qtopia/qpeapplication.h>  // needed for qpe_setBackLight
 #include <qtopia/devicebuttonmanager.h>
 #include <qtopia/pluginloader.h>
+#include <qtopia/resource.h>
 
 #ifdef Q_WS_QWS
 #include <qtopia/qcopenvelope_qws.h>
@@ -52,13 +53,14 @@
 #ifdef Q_OS_WIN32
 #include <io.h>
 #include <process.h>
+#else
+#include <unistd.h>
 #endif
 #include <qmainwindow.h>
 #include <qmessagebox.h>
 #include <qtimer.h>
 
 #include <stdlib.h>
-#include <unistd.h>
 
 /*  Apply light/power settings for current power source */
 static void applyLightSettings(PowerStatus *p)
@@ -596,12 +598,15 @@ static bool blanked=FALSE;
 static void blankScreen()
 {
 #ifdef QWS
-    if ( !qt_screen ) return;
-    /* Should use a big black window instead.
-    QGfx* g = qt_screen->screenGfx();
-    g->fillRect(0,0,qt_screen->width(),qt_screen->height());
-    delete g;
-    */
+    QWidget w(0, 0, Qt::WStyle_Customize | Qt::WStyle_NoBorder | Qt::WStyle_Tool | Qt::WStyle_StaysOnTop | Qt::WPaintUnclipped);
+    w.resize( qt_screen->width(), qt_screen->height() );
+    w.move(0, 0);
+    
+    QPainter p(&w);
+    p.fillRect(w.rect(), QBrush(QColor(255,255,255)) );
+    p.end();
+    w.repaint();
+
     blanked = TRUE;
 #endif
 }
@@ -614,12 +619,6 @@ static void darkScreen()
 
 void Desktop::togglePower()
 {
-    bool wasloggedin = loggedin;
-    loggedin=0;
-    darkScreen();
-    if ( wasloggedin )
-	blankScreen();
-
     static int haveAPM = -1;
     if ( haveAPM < 0 ) {
 	if ( QFile::exists( "/proc/apm" ) ) {
@@ -629,19 +628,32 @@ void Desktop::togglePower()
 	    qWarning( "Cannot suspend - no APM support in kernel" );
 	}
     }
+    
     if ( haveAPM ) {
+	bool wasloggedin = loggedin;
+	loggedin=0;
+	if ( wasloggedin ) {
+	    Config cfg( QPEApplication::qpeDir()+"/etc/Security.conf", Config::File);
+	    cfg.setGroup("Passcode");
+	    QString passcode = cfg.readEntry("passcode");
+	    if ( !passcode.isEmpty() && cfg.readNumEntry("passcode_poweron",0) )
+		blankScreen();
+	}
+	
 	system("apm --suspend");
-    }
+    
 #ifndef QT_NO_COP
-    QWSServer::screenSaverActivate( FALSE );
-    {
-	QCopEnvelope("QPE/Card", "mtabChanged()" ); // might have changed while asleep
-	QCopEnvelope e("QPE/System", "setBacklight(int)");
-	e << -3; // Force on
-    }
+	QWSServer::screenSaverActivate( FALSE );
+	{
+	    QCopEnvelope("QPE/Card", "mtabChanged()" ); // might have changed while asleep
+	    QCopEnvelope e("QPE/System", "setBacklight(int)");
+	    e << -3; // Force on
+	}
 #endif
-    if ( wasloggedin )
-	login(TRUE);
+	if ( wasloggedin )
+	    login(TRUE);
+    } 
+    
     //qcopBridge->closeOpenConnections();
     //qDebug("called togglePower()!!!!!!");
 }

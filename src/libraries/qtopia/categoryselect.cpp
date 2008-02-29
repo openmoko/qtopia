@@ -329,10 +329,14 @@ public:
 
     void setType()
 	{
+#ifndef QTOPIA_DESKTOP
+	    type = CategorySelect::ComboBox;
+#else
 	    if ( qApp->desktop()->height() >= 600 && !usingAll )
 		type = CategorySelect::ListView;
 	    else
 		type = CategorySelect::ComboBox;
+#endif
 	}
 
     QArray<int> mRec;
@@ -653,6 +657,7 @@ void CategorySelect::init(int width)
 	d->layout->addWidget( d->editButton, 1, 1 );
 
 	connect( d->catSelector, SIGNAL( clicked( QListViewItem *) ), d, SLOT( itemClicked( QListViewItem *) ) );
+	connect( d->catSelector, SIGNAL( spacePressed( QListViewItem *) ), d, SLOT( itemClicked( QListViewItem *) ) );
 	connect( d->editButton, SIGNAL( clicked() ),
 		 this, SIGNAL( editCategoriesClicked() ) );
 #ifndef QTOPIA_DESKTOP

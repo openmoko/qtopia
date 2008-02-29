@@ -219,12 +219,12 @@ $(OBJECTS_DIR)/pluginmanager.o: pluginmanager.cpp \
 		pluginmanagerbase.h \
 		$(QPEDIR)/include/qtopia/qpeapplication.h \
 		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/timestring.h \
-		$(QPEDIR)/include/qtopia/pluginloader.h \
 		$(QPEDIR)/include/qtopia/qlibrary.h \
 		$(QPEDIR)/include/qtopia/qcom.h \
 		$(QPEDIR)/include/qtopia/quuid.h \
 		$(QPEDIR)/include/qtopia/qtopiawinexport.h \
+		$(QPEDIR)/include/qtopia/timestring.h \
+		$(QPEDIR)/include/qtopia/pluginloader.h \
 		$(QPEDIR)/include/qtopia/global.h \
 		$(QPEDIR)/include/qtopia/config.h \
 		$(QPEDIR)/include/qtopia/qcopenvelope_qws.h \
@@ -236,6 +236,10 @@ $(OBJECTS_DIR)/main.o: main.cpp \
 		pluginmanagerbase.h \
 		$(QPEDIR)/include/qtopia/qpeapplication.h \
 		$(QPEDIR)/include/qtopia/qpeglobal.h \
+		$(QPEDIR)/include/qtopia/qlibrary.h \
+		$(QPEDIR)/include/qtopia/qcom.h \
+		$(QPEDIR)/include/qtopia/quuid.h \
+		$(QPEDIR)/include/qtopia/qtopiawinexport.h \
 		$(QPEDIR)/include/qtopia/timestring.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
@@ -278,7 +282,7 @@ ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done
 
 package: ipkg
-	cd $(QPEDIR)/ipkg; 	../scripts/mkPackages
+	cd $(QPEDIR)/ipkg; 	../bin/mkPackages
 
 Makefile: pluginmgr.pro
 	cd $(QPEDIR)/src; 	./configure  -platform generic -make settings/pluginmgr

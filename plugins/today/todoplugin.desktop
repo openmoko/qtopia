@@ -1,4 +1,6 @@
 [Desktop Entry]
 Name=Todo
 Comment=Displays the open tasks.
+Name[ja]=チェックリスト
+Comment[ja]=オープンタスクを表示します。
 X-QPE-Library=libtodoplugin.so

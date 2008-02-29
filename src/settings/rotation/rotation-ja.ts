@@ -22,11 +22,11 @@
     </message>
     <message>
         <source>Rotation</source>
-        <translation type="unfinished"></translation>
+        <translation>回転</translation>
     </message>
     <message>
         <source>&lt;p&gt;The chosen rotation will take affect immediately.</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;選択した回転はただちに有効になります。</translation>
     </message>
 </context>
 </TS>

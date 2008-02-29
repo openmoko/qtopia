@@ -38,6 +38,22 @@
 #include <qwindowsystem_qws.h>
 #endif
 
+/*! \class Pickboard
+  \brief The Pickboard class provides an input method
+  based on a virtual keyboard combined with word-completion.
+
+  This version of Pickboard is Dual Licensed Software. However, for you to be
+  able to license the technology to others, you may require a T9(R) Text
+  Input license from Tegic Communications Corporation. More information can
+  be found at http://www.t9.com/.
+
+  \legalese
+  This version of Pickboard is Dual Licensed Software. However, for you to be
+  able to license the technology to others, you may require a T9(R) Text
+  Input license from Tegic Communications Corporation. More information can
+  be found at http://www.t9.com/.
+*/
+
 /* XPM */
 static const char * const menu_xpm[]={
 "9 9 2 1",

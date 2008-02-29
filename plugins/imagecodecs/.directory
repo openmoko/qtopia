@@ -1,4 +1,6 @@
 [Desktop Entry]
 Name=Image Codecs
 Comment=Image codecs add support for loading different image formats.
+Name[ja]=イメージコーデック
+Comment[ja]=イメージコーデックで異なるイメージ形式をロードするためのサポートを追加します。
 Apply=QPE/System restart()

@@ -153,7 +153,7 @@ private:
 };
 
 TodoTable::TodoTable(TodoXmlIO *tasks, QWidget *parent, const char *name, const char *appPath )
-    : QTable( 0, 3, parent, name ),
+    : QTable( 0, 0, parent, name ),
       mCat( 0 ),
       currFindRow( -2 )
 {
@@ -188,6 +188,7 @@ TodoTable::TodoTable(TodoXmlIO *tasks, QWidget *parent, const char *name, const 
     setFrameStyle( NoFrame );
 #endif
     verticalHeader()->hide();
+    horizontalHeader()->hide();
 
     connect(horizontalHeader(), SIGNAL(clicked(int)), this, SLOT(headerClicked(int)) );
     mSortColumn = -1;
@@ -203,12 +204,15 @@ TodoTable::TodoTable(TodoXmlIO *tasks, QWidget *parent, const char *name, const 
              this, SLOT( slotCurrentChanged( int, int ) ) );
 
     //connect( &ta, SIGNAL( todolistUpdated() ), this, SLOT(refresh()));
-    readSettings();
 
     menuTimer = new QTimer( this );
     connect( menuTimer, SIGNAL(timeout()), this, SIGNAL(pressed()) );
 
-    constructorDone = TRUE;
+#ifdef QTOPIA_DESKTOP
+    readSettings();
+#else
+    QTimer::singleShot(0, this, SLOT(readSettings()) );
+#endif
 }
 
 TodoTable::~TodoTable()
@@ -581,8 +585,6 @@ void TodoTable::contentsMouseReleaseEvent( QMouseEvent *e )
     QTable::contentsMouseReleaseEvent( e );
 }
 
-static bool needColumnResize = TRUE;
-
 void TodoTable::resizeEvent( QResizeEvent *e )
 {
     QTable::resizeEvent( e );
@@ -590,17 +592,14 @@ void TodoTable::resizeEvent( QResizeEvent *e )
     // we receive a resize event from qtable in the middle of the constrution, since
     // QTable::columnwidth does qApp->processEvents.  Ignore this event as it causes
     // all sorts of init problems for us
-    if ( !constructorDone )
-	return;
 }
 
 void TodoTable::showEvent( QShowEvent *e)
 {
     QTable::showEvent(e);
-    if ( needColumnResize ) {
-	needColumnResize = FALSE;
-	fitHeadersToWidth();
-    }
+#ifdef QTOPIA_DESKTOP
+    fitHeadersToWidth();
+#endif
 }
 
 void TodoTable::fitHeadersToWidth()
@@ -765,6 +764,8 @@ int TodoTable::rowAt( int pos ) const
 
 void TodoTable::paintFocus(QPainter *p, const QRect &r)
 {
+    if ( !constructorDone )
+	return;
     QRect fr(0, 0, r.width(), r.height() );
     if ( mSel == NoSelection ) {
 	QTable::paintFocus(p, r);
@@ -778,6 +779,9 @@ void TodoTable::paintFocus(QPainter *p, const QRect &r)
 void TodoTable::paintCell(QPainter *p, int row, int col,
 	const QRect &cr, bool)
 {
+    if ( !constructorDone )
+	return;
+
 #if defined(Q_WS_WIN)
     const QColorGroup &cg = ( style().styleHint( QStyle::SH_ItemView_ChangeHighlightOnFocus ) ? palette().inactive() : colorGroup() );
 #else
@@ -1023,8 +1027,15 @@ void TodoTable::readSettings()
 
     if ( mSortColumn > -1 ) {
 	reload(); 
+#ifndef Q_OS_WIN32
 	horizontalHeader()->setSortIndicator(mSortColumn,!ascSort);
+#else
+	horizontalHeader()->setSortIndicator(mSortColumn, ascSort);
+#endif
     }
+    constructorDone = TRUE;
+    fitHeadersToWidth();
+    refresh();
 }
 
 void TodoTable::saveSettings()
@@ -1079,7 +1090,6 @@ void TodoTable::setFields(QValueList<int> f)
     
     setFields(f, sizes);
 
-    needColumnResize = TRUE;
     if ( isVisible() )
 	fitHeadersToWidth();
 }
@@ -1130,6 +1140,7 @@ void TodoTable::setFields(QValueList<int> f, QStringList sizes)
 	
 	i++;
     }
+    horizontalHeader()->show();
 }
 
 QValueList<int> TodoTable::fields()
@@ -1176,7 +1187,12 @@ void TodoTable::headerClicked(int h)
 	ascSort = FALSE;
     } else
 	ascSort = !ascSort;
+
+#ifndef Q_OS_WIN32
     horizontalHeader()->setSortIndicator(mSortColumn,!ascSort);
+#else
+    horizontalHeader()->setSortIndicator(mSortColumn, ascSort);
+#endif
     reload();
 }
 

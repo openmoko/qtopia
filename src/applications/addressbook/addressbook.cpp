@@ -332,10 +332,12 @@ void AddressbookWindow::receiveFile( const QString &filename )
 	return;
     }
 
+    QWidget *mbParent = isVisible() ? this : 0;
+
     QValueList<PimContact> cl = PimContact::readVCard( targetFile );
 
     if ( cl.count() == 0 ) {
-	QMessageBox::warning(this, tr("Could not read VCard document"),
+	QMessageBox::warning(mbParent, tr("Could not read VCard document"),
 	    tr("The VCard document did not \ncontain any valid VCards") );
 	return;
     }
@@ -360,7 +362,7 @@ void AddressbookWindow::receiveFile( const QString &filename )
 	}
 
 	QString msg = tr("%1 new VCard(s) for \n%2\nDo you want to add them to\nyour addressbook?").arg( newContacts.count() ).arg(list);
-	if ( QMessageBox::information(this, tr("New contact(s)"), msg, QMessageBox::Ok, QMessageBox::Cancel) ==
+	if ( QMessageBox::information(mbParent, tr("New contact(s)"), msg, QMessageBox::Ok, QMessageBox::Cancel) ==
 	    QMessageBox::Ok ) {
 
 	    for ( QValueList<PimContact>::Iterator it = newContacts.begin(); it != newContacts.end(); ++it) {
@@ -381,7 +383,7 @@ void AddressbookWindow::receiveFile( const QString &filename )
 	}
 
 	QString msg = tr("%1 old VCard(s) for \n%2\nThe document only contained \nVCards already in your addressbook").arg( oldContacts.count() ).arg(list);
-	QMessageBox::information(this, tr("Contact(s) already registered"), msg, QMessageBox::Ok);
+	QMessageBox::information(mbParent, tr("Contact(s) already registered"), msg, QMessageBox::Ok);
 
     }
 }
@@ -527,6 +529,9 @@ bool AddressbookWindow::checkSyncing()
 void AddressbookWindow::slotListNew()
 {
     PimContact cnt;
+    QArray<int> cats(1);
+    cats[0] = catSelect->currentCategory();
+    cnt.setCategories( cats );
     if( !checkSyncing() ) {
 	if ( abEditor )
 	    abEditor->setEntry( cnt );
@@ -908,7 +913,14 @@ void AddressbookWindow::editEntry( EntryMode entryMode )
     PimContact entry;
     if ( bAbEditFirstTime ) {
 	abEditor = new AbEditor( isVisible() ? this : 0 );
+	
+	if ( entryMode == NewEntry ) {
+	    QArray<int> cats(1);
+	    cats[0] = catSelect->currentCategory();
+	    entry.setCategories( cats );
+	}
 	abEditor->setEntry( entry );
+	
 	bAbEditFirstTime = FALSE;
 	if ( entryMode == EditEntry )
 	    abEditor->setEntry( abList->currentEntry() );

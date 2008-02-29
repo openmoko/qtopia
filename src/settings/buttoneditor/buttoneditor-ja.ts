@@ -19,7 +19,7 @@
     </message>
     <message>
         <source>Buttons</source>
-        <translation type="unfinished"></translation>
+        <translation>ボタン</translation>
     </message>
 </context>
 <context>

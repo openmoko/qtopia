@@ -106,9 +106,10 @@ Displays a number with LCD-like digits. | QLCDNumber
 Drag-and-drop object for transferring colors. | QColorDrag
 Drag-and-drop object for transferring images. | QImageDrag
 Drag-and-drop object for transferring plain and Unicode text. | QTextDrag
-Dummy class. The atd program is based on Russ Nelson's lightweight At daemon. It is distributed under the terms of the GNU General Public License. | atd
-Dummy class. The avformat and avcodec code was extracted from the FFMPEG project. The author and primary copyright holder is Fabrice Bellard &lt;fabrice.bellard at free.fr&gt;. The FFMPEG project is distributed under the GNU Lesser General Public License. | FFMpeg
-Dummy class. The gsm code was extracted from verison 12.17.3 of the Sox sound tools. The author of Sox is Chris Bagwell &lt;cbagwell at users.sourceforge.net&gt;. Sox is distributed under the terms of the GNU General Public License. | GSM
+Dummy class. | FreeType
+Dummy class. GSM is a codec optimised for recording human speech, and is used by the MediaRecorder. | GSM
+Dummy class. The atd program is based on Russ Nelson's lightweight At daemon. The At daemon will run a program at a specified time. It is distributed under the terms of the GNU General Public License. | atd
+Dummy class. The avformat and avcodec code was extracted from the FFMPEG project. FFMPEG is a large project that allows recording, conversion and streaming of audio and video data. avformat and avcodec are used by the MediaPlayer.The author and primary copyright holder is Fabrice Bellard &lt;fabrice.bellard at free.fr&gt;. The FFMPEG project is distributed under the GNU Lesser General Public License. More information can be found at http://ffmpeg.sourceforge.net. | FFMpeg
 Encapsulates I/O asynchronicity. | QAsyncIO
 Encapsulates MIME-based information transfer. | QDragObject
 Encapsulates a text format. | QStyleSheetItem
@@ -158,7 +159,6 @@ Implements a splitter widget. | QSplitter
 Implements basic support for sending objects over an infrared communication link. | Ir
 Implements checkable list view items. | QCheckListItem
 Implements the FTP protocol. | QFtp
-Implements the Konsole application. | Konsole
 Implements the default Qtopia widget style. | QPEStyle
 Implements various system services that are available to all Qtopia applications. | QPEApplication
 Incremental image decoder for a specific image format. | QImageFormat
@@ -167,6 +167,7 @@ Incrementally loads an animation or image, signalling as it progresses. | QMovie
 Information about a paint device. | QPaintDeviceMetrics
 Information about available fonts. | FontDatabase
 Information about the features of the DOM implementation. | QDomImplementation
+Input method based on a virtual keyboard combined with word-completion. | Pickboard
 Integer value within a range. | QRangeControl
 Interface for Qtopia input methods. | InputMethodInterface
 Interface for Qtopia taskbar applet plugins. | TaskbarAppletInterface
@@ -324,6 +325,7 @@ The base class of widgets that can have a frame. | QFrame
 The representation of an XML document. | QDomDocument
 The representation of the DTD in the document tree. | QDomDocumentType
 The source where XML data is read from. | QXmlInputSource
+The top-level widget for the Terminal application. | Konsole
 There is one and only one QFontManager per Qt/Embedded application (qt_fontmanager is a global variable that points to it). It keeps a list of font factories, a cache of rendered fonts and a list of fonts available on disk. QFontManager is called when a new font needs to be rendered from a Freetype-compatible or BDF font on disk; this only happens if there isn't an appropriate QPF font already available. | QFontManager
 This class is the base class of the QGfxRaster<depth> template and contains the non-depth-dependent code. The QGfxRaster class is used for drawing in software on raw framebuffers of varying depths and is subclassed by hardware drivers. It handles clipping and a movable origin in order to support subwindows. It is available <em>only</em> in Qt/Embedded. QWidget and QPixmap both return a QGfxRaster via their respective graphicsContext() methods, already initialised with the appropriate origin, framebuffer and clip region. QGfxRasterBase and its template subclasses should effectively be considered as one class; a raw QGfxRasterBase is never used, it's simply a handy place to put some of the functionality. | QGfxRasterBase
 This class is used to define operations for network protocols and return the state, arguments, etc. | QNetworkOperation

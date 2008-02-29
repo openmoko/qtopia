@@ -3,13 +3,13 @@
     <name>AlarmServer</name>
     <message>
         <source>Out of Space</source>
-        <translation type="unfinished">空き容量がありません</translation>
+        <translation>空き容量がありません</translation>
     </message>
     <message>
         <source>Unable to schedule alarm.
 Free some memory and try again.</source>
-        <translation type="unfinished">アラームを設定できません。
-空き容量を確保してからやり直してください。</translation>
+        <translation>アラームを設定できません。
+空き容量を確保してやり直してください。</translation>
     </message>
 </context>
 <context>
@@ -20,7 +20,7 @@ Free some memory and try again.</source>
     </message>
     <message>
         <source>Unfiled</source>
-        <translation>ファイルになし</translation>
+        <translation>未整理</translation>
     </message>
     <message>
         <source> (multi.)</source>
@@ -44,7 +44,7 @@ Free some memory and try again.</source>
     <message>
         <source> (multi.)</source>
         <comment>short &apos;multiple&apos;</comment>
-        <translation type="unfinished">（複数)</translation>
+        <translation>（複数)</translation>
     </message>
 </context>
 <context>
@@ -63,30 +63,32 @@ Free some memory and try again.</source>
     </message>
     <message>
         <source>Duplicate categories</source>
-        <translation type="unfinished"></translation>
+        <translation>カテゴリの重複</translation>
     </message>
     <message>
         <source>There is already a category named
 %1.
 Please choose another name, or delete
 the duplicate.</source>
-        <translation type="unfinished"></translation>
+        <translation>%1という名前のカテゴリがすでに存在します。
+別の名前を選ぶか、重複しているカテゴリを
+削除してください。</translation>
     </message>
     <message>
         <source>Removing Category</source>
-        <translation type="unfinished"></translation>
+        <translation>カテゴリの削除中</translation>
     </message>
     <message>
         <source>Making a global category local will delete it from all other applications that may use it. Any items in this category will become unfiled. Are you sure you want to do this?</source>
-        <translation type="unfinished"></translation>
+        <translation>グローバルカテゴリをローカルに作成するとそれを使用する可能性があるすべてのアプリケーションから削除することになります。このカテゴリにあるすべてのアイテムは未整理になります。本当に削除しますか?</translation>
     </message>
     <message>
         <source>Deleting a local category will make all items in this category unfiled. Are you sure you want to do this?</source>
-        <translation type="unfinished"></translation>
+        <translation>ローカルカテゴリの削除をすると、このカテゴリにあるすべてのアイテムが未整理になります。本当にこのカテゴリを削除してよろしいですか?</translation>
     </message>
     <message>
         <source>Deleting a global category will delete it from all applications. Any items in this category will become unfiled. Are you sure you want to do this?</source>
-        <translation type="unfinished"></translation>
+        <translation>グローバルカテゴリの削除をすると、すべてのアプリケーションからそのカテゴリを削除することになります。このカテゴリにあるすべてのアイテムは未整理になります。本当に削除しますか?</translation>
     </message>
 </context>
 <context>
@@ -137,7 +139,7 @@ the duplicate.</source>
     </message>
     <message>
         <source>New</source>
-        <translation type="unfinished"></translation>
+        <translation>新規</translation>
     </message>
 </context>
 <context>
@@ -148,7 +150,7 @@ the duplicate.</source>
     </message>
     <message>
         <source>Unfiled</source>
-        <translation>ファイルになし</translation>
+        <translation>未整理</translation>
     </message>
 </context>
 <context>
@@ -173,14 +175,14 @@ editing categories.</source>
     </message>
     <message>
         <source>Categories</source>
-        <translation type="unfinished">カテゴリ</translation>
+        <translation>カテゴリ</translation>
     </message>
 </context>
 <context>
     <name>Config</name>
     <message>
         <source>Out of Space</source>
-        <translation type="unfinished">空き容量がありません</translation>
+        <translation>空き容量がありません</translation>
     </message>
     <message>
         <source>There was a problem creating
@@ -189,7 +191,7 @@ for this program.
 
 Please free up some space and
 try again.</source>
-        <translation type="unfinished">このプログラム用の
+        <translation>このプログラム用の
 設定情報の作成に問題が
 ありました。
 
@@ -201,276 +203,276 @@ try again.</source>
     <name>Contact</name>
     <message>
         <source>&lt;b&gt;Work Address:&lt;/b&gt;</source>
-        <translation type="unfinished">&lt;b&gt;勤務先所在地:&lt;/b&gt;</translation>
+        <translation>&lt;b&gt;勤務先所在地:&lt;/b&gt;</translation>
     </message>
     <message>
         <source>&lt;b&gt;Home Address:&lt;/b&gt;</source>
-        <translation type="unfinished">&lt;b&gt;自宅住所:&lt;/b&gt;</translation>
+        <translation>&lt;b&gt;自宅住所:&lt;/b&gt;</translation>
     </message>
     <message>
         <source>Email Addresses: </source>
-        <translation type="unfinished">電子メールアドレス:</translation>
+        <translation>電子メールアドレス:</translation>
     </message>
     <message>
         <source>Home Phone: </source>
-        <translation type="unfinished">自宅電話番号:</translation>
+        <translation>自宅 電話番号:</translation>
     </message>
     <message>
         <source>Home Fax: </source>
-        <translation type="unfinished">自宅ファックス番号:</translation>
+        <translation>自宅ファックス番号:</translation>
     </message>
     <message>
         <source>Home Mobile: </source>
-        <translation type="unfinished">個人用携帯電話:</translation>
+        <translation>個人用携帯電話:</translation>
     </message>
     <message>
         <source>Home Web Page: </source>
-        <translation type="unfinished">個人ウェブページ:</translation>
+        <translation>個人ウェブページ:</translation>
     </message>
     <message>
         <source>Business Web Page: </source>
-        <translation type="unfinished">ビジネスウェブページ:</translation>
+        <translation>ビジネスウェブページ:</translation>
     </message>
     <message>
         <source>Office: </source>
-        <translation type="unfinished">オフィス:</translation>
+        <translation>オフィス:</translation>
     </message>
     <message>
         <source>Business Phone: </source>
-        <translation type="unfinished">勤務先電話番号:</translation>
+        <translation>勤務先 電話番号:</translation>
     </message>
     <message>
         <source>Business Fax: </source>
-        <translation type="unfinished">勤務先ファックス番号:</translation>
+        <translation>勤務先 ファックス番号:</translation>
     </message>
     <message>
         <source>Business Mobile: </source>
-        <translation type="unfinished">ビジネス用携帯電話:</translation>
+        <translation>ビジネス用 携帯電話:</translation>
     </message>
     <message>
         <source>Business Pager: </source>
-        <translation type="unfinished">ビジネス用ポケベル:</translation>
+        <translation>ビジネス用 ポケベル:</translation>
     </message>
     <message>
         <source>Profession: </source>
-        <translation type="unfinished">職業:</translation>
+        <translation>職業:</translation>
     </message>
     <message>
         <source>Assistant: </source>
-        <translation type="unfinished">アシスタント:</translation>
+        <translation>アシスタント:</translation>
     </message>
     <message>
         <source>Manager: </source>
-        <translation type="unfinished">マネージャ:</translation>
+        <translation>マネージャ:</translation>
     </message>
     <message>
         <source>Male</source>
-        <translation type="unfinished">男性</translation>
+        <translation>男性</translation>
     </message>
     <message>
         <source>Female</source>
-        <translation type="unfinished">女性</translation>
+        <translation>女性</translation>
     </message>
     <message>
         <source>Gender: </source>
-        <translation type="unfinished">性別:</translation>
+        <translation>性別:</translation>
     </message>
     <message>
         <source>Spouse: </source>
-        <translation type="unfinished">配偶者:</translation>
+        <translation>配偶者:</translation>
     </message>
     <message>
         <source>Birthday: </source>
-        <translation type="unfinished">誕生日:</translation>
+        <translation>誕生日:</translation>
     </message>
     <message>
         <source>Anniversary: </source>
-        <translation type="unfinished">記念日:</translation>
+        <translation>記念日:</translation>
     </message>
     <message>
         <source>Nickname: </source>
-        <translation type="unfinished">ニックネーム:</translation>
+        <translation>ニックネーム:</translation>
     </message>
     <message>
         <source>Name Title</source>
-        <translation type="unfinished">名前タイトル</translation>
+        <translation>タイトル名</translation>
     </message>
     <message>
         <source>First Name</source>
-        <translation type="unfinished">名</translation>
+        <translation>名</translation>
     </message>
     <message>
         <source>Middle Name</source>
-        <translation type="unfinished">ミドルネーム</translation>
+        <translation>ミドルネーム</translation>
     </message>
     <message>
         <source>Last Name</source>
-        <translation type="unfinished">姓</translation>
+        <translation>姓</translation>
     </message>
     <message>
         <source>Suffix</source>
-        <translation type="unfinished">接尾語</translation>
+        <translation>接尾語</translation>
     </message>
     <message>
         <source>File As</source>
-        <translation type="unfinished">ファイル名</translation>
+        <translation>ファイル名</translation>
     </message>
     <message>
         <source>Job Title</source>
-        <translation type="unfinished">役職</translation>
+        <translation>役職</translation>
     </message>
     <message>
         <source>Department</source>
-        <translation type="unfinished">部署</translation>
+        <translation>部署</translation>
     </message>
     <message>
         <source>Company</source>
-        <translation type="unfinished">会社</translation>
+        <translation>会社</translation>
     </message>
     <message>
         <source>Business Phone</source>
-        <translation type="unfinished">勤務先電話番号</translation>
+        <translation>勤務先 電話番号</translation>
     </message>
     <message>
         <source>Business Fax</source>
-        <translation type="unfinished">勤務先ファックス番号</translation>
+        <translation>勤務先 ファックス番号</translation>
     </message>
     <message>
         <source>Business Mobile</source>
-        <translation type="unfinished">ビジネス用携帯番号</translation>
+        <translation>ビジネス用 携帯番号</translation>
     </message>
     <message>
         <source>Default Email</source>
-        <translation type="unfinished">デフォルト電子メール</translation>
+        <translation>デフォルト電子メール</translation>
     </message>
     <message>
         <source>Emails</source>
-        <translation type="unfinished">電子メール</translation>
+        <translation>電子メール</translation>
     </message>
     <message>
         <source>Home Phone</source>
-        <translation type="unfinished">自宅電話番号</translation>
+        <translation>自宅 電話番号</translation>
     </message>
     <message>
         <source>Home Fax</source>
-        <translation type="unfinished">自宅ファックス番号</translation>
+        <translation>自宅ファックス番号</translation>
     </message>
     <message>
         <source>Home Mobile</source>
-        <translation type="unfinished">個人用携帯番号</translation>
+        <translation>個人用携帯番号</translation>
     </message>
     <message>
         <source>Business Street</source>
-        <translation type="unfinished">勤務先 番地</translation>
+        <translation>勤務先 番地</translation>
     </message>
     <message>
         <source>Business City</source>
-        <translation type="unfinished">勤務先 市町村</translation>
+        <translation>勤務先 市町村</translation>
     </message>
     <message>
         <source>Business State</source>
-        <translation type="unfinished">勤務先 都道府県</translation>
+        <translation>勤務先 都道府県</translation>
     </message>
     <message>
         <source>Business Zip</source>
-        <translation type="unfinished">勤務先 郵便番号</translation>
+        <translation>勤務先 郵便番号</translation>
     </message>
     <message>
         <source>Business Country</source>
-        <translation type="unfinished">勤務先 国</translation>
+        <translation>勤務先 国</translation>
     </message>
     <message>
         <source>Business Pager</source>
-        <translation type="unfinished">勤務先ポケベル</translation>
+        <translation>ビジネス用 ポケベル</translation>
     </message>
     <message>
         <source>Business WebPage</source>
-        <translation type="unfinished">ビジネスウェブページ</translation>
+        <translation>ビジネスウェブページ</translation>
     </message>
     <message>
         <source>Office</source>
-        <translation type="unfinished">オフィス</translation>
+        <translation>オフィス</translation>
     </message>
     <message>
         <source>Profession</source>
-        <translation type="unfinished">職業</translation>
+        <translation>職業</translation>
     </message>
     <message>
         <source>Assistant</source>
-        <translation type="unfinished">アシスタント</translation>
+        <translation>アシスタント</translation>
     </message>
     <message>
         <source>Manager</source>
-        <translation type="unfinished">マネージャ</translation>
+        <translation>マネージャ</translation>
     </message>
     <message>
         <source>Home Street</source>
-        <translation type="unfinished">自宅 番地</translation>
+        <translation>自宅 番地</translation>
     </message>
     <message>
         <source>Home City</source>
-        <translation type="unfinished">自宅 市町村</translation>
+        <translation>自宅 市町村</translation>
     </message>
     <message>
         <source>Home State</source>
-        <translation type="unfinished">自宅 都道府県</translation>
+        <translation>自宅 都道府県</translation>
     </message>
     <message>
         <source>Home Zip</source>
-        <translation type="unfinished">自宅 郵便番号</translation>
+        <translation>自宅 郵便番号</translation>
     </message>
     <message>
         <source>Home Country</source>
-        <translation type="unfinished">自宅 国</translation>
+        <translation>自宅 国</translation>
     </message>
     <message>
         <source>Home Web Page</source>
-        <translation type="unfinished">個人用ウェブページ</translation>
+        <translation>個人ウェブページ</translation>
     </message>
     <message>
         <source>Spouse</source>
-        <translation type="unfinished">配偶者</translation>
+        <translation>配偶者</translation>
     </message>
     <message>
         <source>Gender</source>
-        <translation type="unfinished">性別</translation>
+        <translation>性別</translation>
     </message>
     <message>
         <source>Birthday</source>
-        <translation type="unfinished">誕生日</translation>
+        <translation>誕生日</translation>
     </message>
     <message>
         <source>Anniversary</source>
-        <translation type="unfinished">記念日</translation>
+        <translation>記念日</translation>
     </message>
     <message>
         <source>Nickname</source>
-        <translation type="unfinished">ニックネーム</translation>
+        <translation>ニックネーム</translation>
     </message>
     <message>
         <source>Children</source>
-        <translation type="unfinished">子供</translation>
+        <translation>子供</translation>
     </message>
     <message>
         <source>Notes</source>
-        <translation type="unfinished">メモ</translation>
+        <translation>メモ</translation>
     </message>
     <message>
         <source>Groups</source>
-        <translation type="unfinished">グループ</translation>
+        <translation>グループ</translation>
     </message>
 </context>
 <context>
     <name>DateBookDB</name>
     <message>
         <source>Out of Space</source>
-        <translation type="unfinished">空き容量がありません</translation>
+        <translation>空き容量がありません</translation>
     </message>
     <message>
         <source>Unable to create start up files
 Please free up some space
 before entering data</source>
-        <translation type="unfinished">スタートアップファイルを作成できません
+        <translation>スタートアップファイルを作成できません
 データを入力する前に空き容量を
 確保してください</translation>
     </message>
@@ -530,7 +532,7 @@ before entering data</source>
     </message>
     <message>
         <source>New Document</source>
-        <translation type="unfinished">新規のドキュメント</translation>
+        <translation>新規ドキュメント</translation>
     </message>
 </context>
 <context>
@@ -1036,30 +1038,30 @@ Free some memory and try again.</source>
     </message>
     <message>
         <source>Restore</source>
-        <translation type="unfinished">復元</translation>
+        <translation>復元</translation>
     </message>
     <message>
         <source>Move</source>
-        <translation type="unfinished">移動</translation>
+        <translation>移動</translation>
     </message>
     <message>
         <source>Size</source>
-        <translation type="unfinished">サイズ</translation>
+        <translation>サイズ</translation>
     </message>
     <message>
         <source>Maximize</source>
-        <translation type="unfinished">最大化</translation>
+        <translation>最大化</translation>
     </message>
     <message>
         <source>Close</source>
-        <translation type="unfinished">閉じる</translation>
+        <translation>閉じる</translation>
     </message>
 </context>
 <context>
     <name>QPEMessageBox</name>
     <message>
         <source>Are you sure you want to delete: %1?</source>
-        <translation type="unfinished"></translation>
+        <translation>本当に削除してもよろしいですか:%1?</translation>
     </message>
 </context>
 <context>
@@ -1101,11 +1103,11 @@ Free some memory and try again.</source>
     </message>
     <message>
         <source>M</source>
-        <translation type="unfinished">月</translation>
+        <translation>月</translation>
     </message>
     <message>
         <source>Y</source>
-        <translation type="unfinished">年</translation>
+        <translation>年</translation>
     </message>
     <message>
         <source>day</source>
@@ -1113,64 +1115,54 @@ Free some memory and try again.</source>
     </message>
     <message>
         <source>month</source>
-        <translation type="unfinished">月</translation>
+        <translation>月</translation>
     </message>
     <message>
         <source>year</source>
-        <translation type="unfinished">年</translation>
+        <translation>年</translation>
     </message>
     <message>
         <source>, </source>
         <comment>day-date separator</comment>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>, </source>
         <comment>year-date seperator</comment>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <source>%1 %2</source>
         <comment>1=Monday 2=January 12</comment>
-        <translation type="unfinished">%1 %2</translation>
+        <translation>%1 %2</translation>
     </message>
     <message>
         <source>%1, %2</source>
         <comment>1=Monday 2=12 January</comment>
-        <translation type="unfinished"></translation>
+        <translation>%1 %2</translation>
     </message>
     <message>
         <source>PM</source>
-        <translation type="unfinished">PM</translation>
+        <translation>PM</translation>
     </message>
     <message>
         <source>AM</source>
-        <translation type="unfinished">AM</translation>
+        <translation>AM</translation>
     </message>
     <message>
         <source>%1 %2</source>
         <comment>1=Monday 2=12:45</comment>
-        <translation type="unfinished">%1 %2</translation>
+        <translation>%1 %2</translation>
     </message>
     <message>
         <source>D</source>
         <comment>day in month</comment>
-        <translation type="unfinished">日付</translation>
+        <translation>日</translation>
     </message>
     <message>
         <source>day</source>
         <comment>in month</comment>
-        <translation type="unfinished">日付</translation>
-    </message>
-    <message>
-        <source> </source>
-        <comment>day-date separator</comment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source> </source>
-        <comment>month-date separator</comment>
-        <translation type="unfinished"></translation>
+        <translation>日</translation>
     </message>
 </context>
 <context>
@@ -1211,7 +1203,7 @@ Please free up space and try again</source>
     <message>
         <source>Default</source>
         <comment>List box text for default window decoration</comment>
-        <translation type="unfinished"></translation>
+        <translation>デフォルト</translation>
     </message>
 </context>
 </TS>

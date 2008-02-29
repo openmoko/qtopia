@@ -22,7 +22,7 @@
         <translation>スタイルを選択します。スタイルはボタンやスクロールバーなどユーザーインターフェースコントロールの外観を決定します。</translation>
     </message>
     <message>
-        <source>Windows</source>
+        <source>Frame</source>
         <translation>ウィンドウ</translation>
     </message>
     <message>
@@ -90,7 +90,7 @@
     <message>
         <source>Default</source>
         <comment>List box text for default window decoration</comment>
-        <translation type="unfinished"></translation>
+        <translation>デフォルト</translation>
     </message>
 </context>
 </TS>

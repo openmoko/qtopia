@@ -18,26 +18,18 @@
         <translation>開いている全ての仕事</translation>
     </message>
     <message>
-        <source>Tasks due the next</source>
-        <translation type="obsolete">次の期限の仕事</translation>
-    </message>
-    <message>
-        <source> days</source>
-        <translation type="obsolete">日数 [Days or number of days?]</translation>
-    </message>
-    <message>
         <source>Todo Options</source>
         <translation>チェックリストオプション</translation>
     </message>
     <message>
         <source>Tasks due the next</source>
         <comment>... 3 days</comment>
-        <translation type="unfinished">次の期限の仕事</translation>
+        <translation>次の期限内の仕事</translation>
     </message>
     <message>
         <source> days</source>
         <comment>Tasks due the next... 5 days</comment>
-        <translation type="unfinished">日数 [Days or number of days?]</translation>
+        <translation>日</translation>
     </message>
 </context>
 <context>
@@ -76,7 +68,7 @@
     </message>
     <message>
         <source>Todo List</source>
-        <translation type="unfinished"></translation>
+        <translation>チェックリスト</translation>
     </message>
 </context>
 </TS>

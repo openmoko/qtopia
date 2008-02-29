@@ -83,6 +83,7 @@ public:
 
     void paintCell(QPainter * p, int row, int col,
 	    const QRect & cr, bool selected);
+    //virtual void paintFocus ( QPainter * p, const QRect & cr );
 
     // 3.0 sig.
     //void paintCell(QPainter * p, int row, int col,
@@ -99,6 +100,8 @@ public slots:
     void timeStringChanged();
 
 protected:
+    void keyPressEvent( QKeyEvent *e );
+
     QSize sizeHint() const;
     void contentsMousePressEvent(QMouseEvent *e)
     {
@@ -153,7 +156,7 @@ DatePickerHeader::DatePickerHeader( QWidget *parent, const char *name )
     for ( int i = 0; i < 12; ++i )
 	month->insertItem( Calendar::nameOfMonth( i + 1 ) );
 
-    // this is almost certainly wrong on the other end.  
+    // this is almost certainly wrong on the other end.
     // date is a uint + 1752 some day.  Thats a lot of days, 11 M years or so.
     year = new QSpinBox( 1753, 3000, 1, this );
 
@@ -280,6 +283,12 @@ void DatePickerTable::setWeekStartsMonday( bool monday )
     setupLabels();
 }
 
+//void DatePickerTable::paintFocus ( QPainter * p, const QRect & cr )
+//{
+    //qDebug("DatePickerTable::paintFocus at x=%d y=%d", p->pos().x(), p->pos().y());
+    //QTable::paintFocus( p, cr );
+//}
+
 void DatePickerTable::paintCell(QPainter * p, int row, int col,
 	const QRect & cr, bool selected)
 {
@@ -291,8 +300,25 @@ void DatePickerTable::paintCell(QPainter * p, int row, int col,
     const QColorGroup &cg = colorGroup();
 #endif
 
+    //qDebug("DatePickerTable::paintCell [%d,%d] cur [%d,%d]", row, col,
+    //   currentRow(), currentColumn());
     ((QPEDatePicker *)parentWidget())->paintCell(row, col, p, cr, selected, cg);
+#ifdef QTOPIA_DESKTOP
+    if ( currentRow() == row && currentColumn() == col ) {
+	p->drawRect( 0, 0, cr.width()-1, cr.height()-1 );
+    }
+#endif
+}
 
+void DatePickerTable::keyPressEvent( QKeyEvent *e )
+{
+#ifdef QTOPIA_DESKTOP
+    e->ignore();
+#else
+    // ### after 1.6.1 remove this else; just too dangerous a change before
+    // the release
+    QTable::keyPressEvent( e );
+#endif
 }
 
 void DatePickerTable::setupLabels()
@@ -329,7 +355,7 @@ void DatePickerTable::setupLabels()
   \fn void QPEDatePicker::dateClicked( const QDate &date );
 
   This signal is emitted when a date in the calendar is clicked.
-  \a date contains the date that was clicked 
+  \a date contains the date that was clicked
 */
 
 /*!
@@ -510,6 +536,7 @@ void QPEDatePicker::setDate( const QDate &d )
     day = d.day();
     int r, c;
     Calendar::coordForDate(d.year(), d.month(), d, r, c, table->weekStartsMonday());
+    //qDebug("QPEDatePicker::setCurrentCell [%d, %d] = %s", r, c, d.toString().latin1() );
     table->setCurrentCell(r,c);
 }
 
@@ -552,12 +579,15 @@ void QPEDatePicker::keyPressEvent( QKeyEvent *e )
 	case Key_Right:
 	    setDate(QDate(year, month, day).addDays(1));
 	    break;
+#ifdef QTOPIA_DESKTOP
+	    // ### enable this for all versions after 1.6.1
+        case Key_Enter:
+        case Key_Return:
+#endif
 	case Key_Space:
-	    qWarning("space");
 	    emit dateClicked(QDate(year, month, day));
 	    break;
 	default:
-	    qWarning("ignore");
 	    e->ignore();
 	    break;
     }

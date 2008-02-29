@@ -310,7 +310,6 @@ $(OBJECTS_DIR)/taskbar.o: taskbar.cpp \
 		../applications/mediaplayer/maindocumentwidgetstack.h \
 		../applications/textedit/textedit.h \
 		../games/fifteen/fifteen.h \
-		../games/go/gowidget.h \
 		../games/mindbreaker/mindbreaker.h \
 		../games/minesweep/minesweep.h \
 		../games/qasteroids/toplevel.h \

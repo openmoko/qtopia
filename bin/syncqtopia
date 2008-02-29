@@ -149,7 +149,7 @@ if ($isUnix){
   symlink_files($basedir. "/include/qtopia", $basedir. "/include/qpe");
 }else{
   print `"rmdir /Q /S $basedir\\include\\qpe\\"`;
-  print `"xcopy /E /Y /S $basedir\\include\\qtopia\\*.* $basedir\\include\\qpe\\"`;
+  print `"xcopy /E /S $basedir\\include\\qtopia\\*.* $basedir\\include\\qpe\\"`;
 }
 exit 0;
 

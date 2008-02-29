@@ -24,12 +24,12 @@
 #include "custom.h"
 #endif
 
-#include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
-#ifndef Q_OS_WIN32
+#if defined(Q_OS_LINUX) || defined(_OS_LINUX_)
 #include <sys/ioctl.h>
+#include <unistd.h>
 #endif
 
 #ifdef QT_QWS_IPAQ_NO_APM

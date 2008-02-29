@@ -201,7 +201,6 @@
                         <property stdset="1">
                             <name>font</name>
                             <font>
-                                <family>helvetica</family>
                                 <pointsize>16</pointsize>
                                 <bold>1</bold>
                             </font>

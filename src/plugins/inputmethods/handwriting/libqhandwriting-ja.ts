@@ -3,52 +3,52 @@
     <name>Handwriting</name>
     <message>
         <source>[Esc]</source>
-        <translation type="unfinished"></translation>
+        <translation>[Esc]</translation>
     </message>
     <message>
         <source>[Tab]</source>
-        <translation type="unfinished"></translation>
+        <translation>[Tab]</translation>
     </message>
     <message>
         <source>[BackSpace]</source>
-        <translation type="unfinished"></translation>
+        <translation>[BackSpace]</translation>
     </message>
     <message>
         <source>[Return]</source>
-        <translation type="unfinished"></translation>
+        <translation>[Return]</translation>
     </message>
     <message>
         <source>[Uppercase]</source>
-        <translation type="unfinished"></translation>
+        <translation>[Uppercase]</translation>
     </message>
     <message>
         <source>[Caps Lock]</source>
-        <translation type="unfinished"></translation>
+        <translation>[Caps Lock]</translation>
     </message>
     <message>
         <source>[Shortcut]</source>
-        <translation type="unfinished"></translation>
+        <translation>[Shortcut]</translation>
     </message>
     <message>
         <source>[Punctuation]</source>
-        <translation type="unfinished"></translation>
+        <translation>[Punctuation]</translation>
     </message>
     <message>
         <source>[Symbol]</source>
-        <translation type="unfinished"></translation>
+        <translation>[Symbol]</translation>
     </message>
     <message>
         <source>[Extended]</source>
-        <translation type="unfinished"></translation>
+        <translation>[Extended]</translation>
     </message>
     <message>
         <source>Handwriting</source>
-        <translation type="unfinished">手書き</translation>
+        <translation>手書き</translation>
     </message>
     <message>
         <source>Unnamed</source>
         <comment>Character set name</comment>
-        <translation type="unfinished"></translation>
+        <translation>名前がありません</translation>
     </message>
 </context>
 <context>
@@ -150,11 +150,11 @@
     </message>
     <message>
         <source>OK</source>
-        <translation type="unfinished">OK</translation>
+        <translation>OK</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished">取り消し</translation>
+        <translation>取り消し</translation>
     </message>
 </context>
 <context>
@@ -225,7 +225,7 @@ Quit anyway?</source>
     <message>
         <source>%1 ms</source>
         <comment>milliseconds</comment>
-        <translation type="unfinished">%1 ms [unkown, need explanation]</translation>
+        <translation>%1ミリ秒</translation>
     </message>
 </context>
 </TS>

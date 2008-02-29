@@ -3,5 +3,5 @@ Type=Application
 Exec=sound
 Icon=Sound
 Name=Sound
-Name[ja]=???
+Name[ja]=サウンド
 CanFastload=0

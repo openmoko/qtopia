@@ -149,6 +149,7 @@ void BatteryStatus::drawContents( QPainter *p )
 
     p->setPen( black );
     ypos += 60;
+    p->eraseRect( marg, ypos, width()-marg*2, height()-marg-ypos);
     p->drawText( marg, ypos, width()-marg*2, height()-marg-ypos, AlignVCenter, text );
 }
 

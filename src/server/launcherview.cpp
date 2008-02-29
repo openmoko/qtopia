@@ -559,6 +559,8 @@ LauncherView::LauncherView( QWidget* parent, const char* name, WFlags fl )
 
 LauncherView::~LauncherView()
 {
+    if ( bgCache && bgCache->contains( bgName ) )
+	(*bgCache)[bgName]->ref--;
 }
 
 void LauncherView::setToolsEnabled(bool y)
@@ -636,6 +638,10 @@ void LauncherView::updateTools()
     catmb->setAllCategories( TRUE );
     catmb->setCurrentCategory(pcat);
 
+    // if type has changed we need to redisplay
+    if ( typemb->currentText() != prev )
+	showType( typemb->currentItem() );
+    
     connect(typemb, SIGNAL(activated(int)), this, SLOT(showType(int)));
     connect(catmb, SIGNAL(signalSelected(int)), this, SLOT(showCategory(int)));
 }
@@ -786,12 +792,13 @@ void LauncherView::setBackgroundType( BackgroundType t, const QString &val )
 		    (*bgCache)[bgName]->ref++;
 		    bg = (*bgCache)[bgName]->pm;
 		} else {
+		    QString imgFile = bgName;
 		    bool tile = FALSE;
-		    if ( bgName[0]!='/' || !QFile::exists(bgName) ) {
-			bgName = Resource::findPixmap( "wallpaper/" + bgName );
+		    if ( imgFile[0]!='/' || !QFile::exists(imgFile) ) {
+			imgFile = Resource::findPixmap( "wallpaper/" + imgFile );
 			tile = TRUE;
 		    }
-		    QImage img = loadBackgroundImage(bgName);
+		    QImage img = loadBackgroundImage(imgFile);
 
 
 		    if ( img.depth() == 1 )
@@ -805,19 +812,10 @@ void LauncherView::setBackgroundType( BackgroundType t, const QString &val )
 	    break;
     }
 
-    // remove unreferenced backgrounds.
-    QMap<QString,BgPixmap*>::Iterator it = bgCache->begin();
-    while ( it != bgCache->end() ) {
-	QMap<QString,BgPixmap*>::Iterator curr = it;
-	++it;
-	if ( (*curr)->ref == 0 ) {
-	    delete (*curr);
-	    bgCache->remove( curr );
-	}
-    }
-
     bgType = t;
     icons->viewport()->update();
+
+    QTimer::singleShot( 1000, this, SLOT(flushBgCache()) );
 }
 
 void LauncherView::setTextColor( const QColor &tc )
@@ -961,3 +959,20 @@ void LauncherView::relayout(void)
 {
     icons->hideOrShowItems(FALSE);
 }
+
+void LauncherView::flushBgCache()
+{
+    if ( !bgCache )
+	return;
+    // remove unreferenced backgrounds.
+    QMap<QString,BgPixmap*>::Iterator it = bgCache->begin();
+    while ( it != bgCache->end() ) {
+	QMap<QString,BgPixmap*>::Iterator curr = it;
+	++it;
+	if ( (*curr)->ref == 0 ) {
+	    delete (*curr);
+	    bgCache->remove( curr );
+	}
+    }
+}
+

@@ -142,9 +142,10 @@ private slots:
     bool nextImage();
     bool prevImage();
     void handleKeypress(int keycode);
-    void categoryChanged(void);
-    void typeChanged(void);
+    void docsChanged(void);
     void properties(void);
+    void linkChanged(const QString&);
+    void cardMessage(const QCString &msg, const QByteArray &);
 
 private:
     QImage  image;	    // the loaded image

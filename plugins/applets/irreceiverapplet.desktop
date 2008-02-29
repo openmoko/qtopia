@@ -1,4 +1,6 @@
 [Desktop Entry]
 Name=Beaming
 Comment=Adds beaming controls to the Q-Menu.
+Name[ja]=赤外線レシーバ
+Comment[ja]=Q-Menuに赤外線レシーバ制御を与えます。
 X-QPE-Library=libirreceiverapplet.so

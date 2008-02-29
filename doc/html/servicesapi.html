@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12684/qtopia/doc/services.doc:153 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+<a href="classes.html"><font color="white">Qt API</font></a>
+<font color="white">|</font>
+<a href="qtopiaemb.html"> <font color="white">Qtopia API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table>
+
+<p> <h2> Qtopia - Defined Services
+</h2>
+<a name="1"></a><p> The <a href="services.html">services</a> below are defined by Trolltech as basic services
+that may be available on a Qtopia device, and the messages which
+such services handle.
+<p> All services respond to the following messages:
+<ul>
+<li> raise()
+Bring a user interface for the service to the top of the window stack.
+<li> quit()
+Remove any user interface for the service. Note that sending this message
+when the service is not started will start the service (and immediately
+terminate it).
+</ul>
+<p> The following actions are defined for <a href="docwidget.html">document
+oriented</a> services:
+<ul>
+<li> Open/<i>mimetype</i>
+<ul>
+<li> setDocument(<a href="qstring.html">QString</a> <i>document</i>)
+<li> openFile(QString <i>filepath</i>) <i>Version 1.01 only</i>
+</ul>
+<li> View/<i>mimetype</i>
+<ul>
+<li> setDocument(QString <i>document</i>)
+<li> viewFile(QString <i>filepath</i>) <i>Version 1.01 only</i>
+</ul>
+<li> Receive/<i>mimetype</i>
+<ul>
+<li> receiveData(QString <i>filename</i>, QString <i>type</i>)
+<ul>
+<li> <i>filename</i> = name of file containing data
+<li> <i>type</i> = MIME type of the data
+</ul>
+<p>The service should delete the file after reading it.
+</ul>
+</ul>
+<p> The services defined by Trolltech are:
+<ul>
+<li> Email
+<ul>
+<li> writeMail()
+In response to this message, the Email service interacts with the
+user to complete the email message, and then, if confirmed by the
+user, send the email message.
+<li> writeMail(QMap(QString,QString) <i>values</i>)
+<ul>
+<li> <i>values</i> = set of header names -&gt; value mappings (eg. names are "To", "Subject"),
+plus optionally a "BODY" -&gt; value mapping giving the body content, plus optionally
+a "ATTACHMENT&lt;n&gt;" -> value mapping. The attachments value is ...
+</ul>
+In response to this message, the Email service interacts with the
+user to complete the email message, and then, if confirmed by the
+user, send the email message.
+<li> writeMail(<a href="qstring.html">QString</a> <i>name</i>,QString <i>email</i>)
+<ul>
+<li> <i>name</i> = the name of the recipient, or the empty string.
+<li> <i>email</i> = the email address of the recipient.
+</ul>
+In response to this message, the Email service interacts with the
+user to complete the email message, and then, if confirmed by the
+user, send the email message.
+</ul>
+<li> WebAccess
+<ul>
+<li> openURL(QString <i>url</i>)
+<ul>
+<li> <i>url</i> = a fully-specified URL
+</ul>
+In response to this message, the WebAccess service retrieves the
+resource specified by the URL and either displays it to the user,
+invokes further services to display the resource, or notifies the
+user that no facility exists for displaying the resource.
+If the resource cannot be retrieved, the WebAccess notifies the user.
+<li> retrieveURL(QString <i>url</i>)
+<ul>
+<li> <i>url</i> = a fully-specified URL
+</ul>
+In response to this message, the WebAccess service retrieves the
+resource specified by the URL, creates a document containing the
+resource. Then, if services exist to display the document, the
+WebAccess service gives the user the option to display the document.
+If the resource cannot be retrieved, the WebAccess notifies the user.
+<li> getURL(<a href="qstring.html">QString</a> <i>url</i>, QString <i>doclnk</i>)
+<ul>
+<li> <i>url</i> = a fully-specified URL
+<li> <i>doclnk</i> = the filename of a .desktop file
+</ul>
+In response to this message, the WebAccess service retrieves the
+resource specified by the URL, creates a document containing the
+resource using the given doclnk as the document link file. The
+document is created even if the resource could not be retrieved.
+As a result of creating the document, Qtopia will send the
+QPE/System linkChanged(QString) message, with the doclnk as the
+argument.
+</ul>
+<li> PlayMedia
+<ul>
+<li> openURL(QString <i>url</i>, QString <i>mimetype</i>)
+<ul>
+<li> <i>url</i> = a fully-specified URL
+<li> <i>mimetype</i> = the mimetype of the media file.
+</ul>
+</ul>
+<li> Contacts
+<ul>
+<li> addContact(<a href="pimcontact.html">PimContact</a>)
+<li> addAndEditContact(PimContact)
+<li> removeContact(PimContact)
+<li> updateContact(PimContact)
+<li> showContact(PimContact)
+<li> beamBusinessCard()
+</ul>
+<li> <a href="calendar.html">Calendar</a>
+<ul>
+<li> raiseToday()
+<li> newEvent()
+<li> newEvent(QDataTime,QDataTime,QString,QString)
+<li> showEvent(<a href="quuid.html">QUuid</a>)
+<li> showEvent(QUuid,QDate)
+<li> newEvent(<a href="qdatetime.html">QDateTime</a> <i>start</i>, QDateTime <i>end</i>, <a href="qstring.html">QString</a> <i>description</i>, QString <i>notes</i>)
+<ul>
+<li> <i>start</i> = start time for the event (invalid = use default)
+<li> <i>end</i> = start time for the event (invalid = use default)
+<li> <i>description</i> = one-line description of the event
+<li> <i>notes</i> = detailed notes for the event
+</ul>
+</ul>
+<li> Tasks
+<ul>
+<li> newTask()
+<li> addTask(<a href="pimtask.html">PimTask</a>)
+<li> removeTask(PimTask)
+<li> updateTask(PimTask)
+<li> showTask(QUuid)
+</ul>
+<li> TimeMonitor
+<ul>
+<li> timeChange(QString <i>timezone_id</i>)
+<ul>
+<li> <i>timezone_id</i> = the new TimeZone id.
+</ul>
+</ul>
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.1</div>
+</table></div></address></body>
+</html>

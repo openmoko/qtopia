@@ -37,6 +37,8 @@ struct QtopiaPimMapEntry {
     int uniqueness;
 };
 
+// field keys after this are reserved for custom fields.
+#define CustomFieldsStart 0x40000000
 
 class QTOPIAPIM_EXPORT PimRecord
 {

@@ -65,7 +65,7 @@
 #endif
 
 #include "qpeapplication.h"
-#if QT_VERSION >= 300
+#if QT_VERSION >= 0x030000
 #  include <qstylefactory.h>
 #else
 #  include <qwindowsstyle.h>
@@ -123,7 +123,7 @@ public:
 };
 
 #ifdef Q_WS_QWS
-extern QRect qt_maxWindowRect;
+extern Q_EXPORT QRect qt_maxWindowRect;
 #endif
 
 class QPEApplicationData {
@@ -869,8 +869,16 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
     connect(this, SIGNAL(lastWindowClosed()), this, SLOT(hideOrQuit()));
 #if defined(Q_WS_QWS) && !defined(QT_NO_COP)
 
+#ifdef Q_OS_UNIX
     QString qcopfn("/tmp/qcop-msg-");
     qcopfn += QString(argv[0]); // append command name
+#else
+    QString qcopfn(QString(getenv("TEMP")) + "/qcop-msg-");
+    if (QApplication::winVersion() != Qt::WV_98)
+	qcopfn += QString(argv[0]); // append command name
+    else
+	qcopfn += QString(argv[0]).lower(); // append command name
+#endif
 
     QFile f(qcopfn);
     if ( f.open(IO_ReadOnly) ) {
@@ -884,7 +892,15 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
     connect( sysChannel, SIGNAL(received(const QCString &, const QByteArray &)),
 	     this, SLOT(systemMessage( const QCString &, const QByteArray &)) );
 
+#ifdef Q_OS_UNIX
     QCString channel = QCString(argv[0]);
+#else
+    QCString channel;
+    if (QApplication::winVersion() != Qt::WV_98)
+	channel += QString(argv[0]); // append command name
+    else
+	channel += QString(argv[0]).lower(); // append command name
+#endif
     channel.replace(QRegExp(".*/"),"");
     d->appName = channel;
     channel = "QPE/Application/" + channel;
@@ -933,26 +949,27 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
 #endif
 
 #ifndef QT_NO_TRANSLATION
+    QStringList qms;
+    qms << "libqpe";
+    qms << "libqtopia";
+    qms << d->appName;
+
     QStringList langs = Global::languageList();
+
     for (QStringList::ConstIterator it = langs.begin(); it!=langs.end(); ++it) {
 	QString lang = *it;
 
 	QTranslator * trans;
 	QString tfn;
 
-	trans = new QTranslator(this);
-	tfn = qpeDir()+"i18n/"+lang+"/libqpe.qm";
-	if ( trans->load( tfn ))
-	    installTranslator( trans );
-	else
-	    delete trans;
-
-	trans = new QTranslator(this);
-	tfn = qpeDir()+"i18n/"+lang+"/"+d->appName+".qm";
-	if ( trans->load( tfn ))
-	    installTranslator( trans );
-	else
-	    delete trans;
+	for (QStringList::ConstIterator qmit = qms.begin(); qmit!=qms.end(); ++qmit) {
+	    trans = new QTranslator(this);
+	    tfn = qpeDir() + "i18n/" + lang + "/" + *qmit + ".qm";
+	    if ( trans->load( tfn ))
+		installTranslator( trans );
+	    else
+		delete trans;
+	}
 
 	//###language/font hack; should look it up somewhere
 #ifdef Q_WS_QWS
@@ -1203,11 +1220,23 @@ QPEApplication::~QPEApplication()
 QString QPEApplication::qpeDir()
 {
 #ifdef Q_WS_QWS
-    const char *base = getenv( "QPEDIR" );
-    if ( base )
-	return QString( base ) + "/";
-
-    return QString( "../" );
+    QString base, dir;
+    if (getenv( "QPEDIR" ))
+    	base = QString(getenv("QPEDIR")).stripWhiteSpace();
+    if ( !base.isNull() && (base.length() > 0 )){
+#ifdef Q_OS_WIN32
+	QString temp(base);
+	if (temp[(int)temp.length()-1] != QDir::separator())
+	    temp.append(QDir::separator());    
+	dir = temp;
+#else
+	dir = QString( base ) + "/";
+#endif
+    }else{ 
+	dir = QString( ".." ) + QDir::separator();
+    }
+    
+    return dir;
 #elif defined(QTOPIA_DESKTOP)
 
 #ifdef __GNUG__
@@ -1729,7 +1758,7 @@ void QPEApplication::internalSetStyle( const QString &style )
 
     QStyle *newStyle = 0;
 
-#if QT_VERSION >= 300
+#if QT_VERSION >= 0x030000
     if ( style == "QPE"  || style == "Qtopia" ) {
 	newStyle = new QPEStyle;
     } else {
@@ -1762,7 +1791,7 @@ void QPEApplication::internalSetStyle( const QString &style )
     }
     setStyle( newStyle );
 
-#if QT_VERSION < 300
+#if QT_VERSION < 0x030000
     // cleanup old plugin.
     if ( oldIface )
 	d->styleLoader.releaseInterface( oldIface );

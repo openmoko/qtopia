@@ -86,7 +86,7 @@ PimEvent DateBookAccess::eventForId(const QUuid &u, bool *ok) const
 void DateBookAccess::updateEvent(const PimEvent& event)
 {
 #ifndef QT_NO_COP
-    QCopEnvelope e(Service::channel("Events"),
+    QCopEnvelope e(Service::channel("Calendar"),
 	    "updateEvent(PimEvent)");
     e << event;
 #endif
@@ -101,7 +101,7 @@ void DateBookAccess::updateEvent(const PimEvent& event)
 void DateBookAccess::removeEvent(const PimEvent& ev)
 {
 #ifndef QT_NO_COP
-    QCopEnvelope e(Service::channel("Events"),
+    QCopEnvelope e(Service::channel("Calendar"),
 	    "removeEvent(PimEvent)");
 
     e << ev;
@@ -117,7 +117,7 @@ void DateBookAccess::removeEvent(const PimEvent& ev)
 void DateBookAccess::addEvent(const PimEvent& ev)
 {
 #ifndef QT_NO_COP
-    QCopEnvelope e(Service::channel("Events"),
+    QCopEnvelope e(Service::channel("Calendar"),
 	    "addEvent(PimEvent)");
 
     e << ev;
@@ -134,7 +134,7 @@ void DateBookAccess::addEvent(const PimEvent& ev)
 bool DateBookAccess::editSupported() const
 {
 #ifdef Q_WS_QWS
-    return Service::list().contains("Events"); // No tr
+    return Service::list().contains("Calendar"); // No tr
 #else
     return FALSE;
 #endif

@@ -43,7 +43,7 @@
     </message>
     <message>
         <source>Date/Time</source>
-        <translation type="unfinished"></translation>
+        <translation>日付/時刻</translation>
     </message>
 </context>
 <context>

@@ -49,6 +49,7 @@ private slots:
 private:
     void paintEvent( QPaintEvent * );
     void mouseReleaseEvent( QMouseEvent * );
+    void keyPressEvent( QKeyEvent *e );
 
     void loadPixmaps();
 

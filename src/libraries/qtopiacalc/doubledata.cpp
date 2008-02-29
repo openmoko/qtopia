@@ -27,7 +27,7 @@ DoubleData::DoubleData(): Data() {};
 void DoubleData::set(double d) {
     dbl = d;
     edited = FALSE;
-    formattedOutput.setNum(dbl,'g',16);
+    formattedOutput.setNum(dbl,'g',15);
     if (!strcmp(formattedOutput.latin1(),"nan")) { // No tr
 	systemEngine->setError(eNotANumber);
 	return;

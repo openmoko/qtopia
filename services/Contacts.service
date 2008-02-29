@@ -1,9 +1,10 @@
 [Service]
-Actions = addContact(PimContact);addAndEditContact(PimContact);removeContact(PimContact);updateContact(PimContact);showContact(PimContact);beamBusinessCard()
+Actions = addContact(PimContact);addAndEditContact(PimContact);removeContact(PimContact);updateContact(PimContact);showContact(QUuid);beamBusinessCard()
 Icon = AddressBook
-Name = Addressbook
-Name[ja] = ???
+Name = Contacts
+Name[ja] = アドレス帳
 [beamBusinessCard()]
 Icon = beam
 Name = Beam business card
 Name[ja] = ???
+Name[ja] = ビジネスカードのビーム

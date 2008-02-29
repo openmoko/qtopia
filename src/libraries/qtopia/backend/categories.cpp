@@ -637,10 +637,11 @@ void Categories::setGlobal( const QString &appname,
 			    bool global )
 {
     // if in global and should be in app; then move it
-    if ( mGlobalCats.contains( catname ) && !global ) {
+    if ( !global && mGlobalCats.contains( catname ) ) {
+	int oldId = mGlobalCats.id(catname);
 	mGlobalCats.remove( catname );
-	addCategory( appname, catname );
-	return ;
+	addCategory( appname, catname, oldId );
+	return;
     }
 
     // if in app and should be in global, then move it

@@ -27,7 +27,7 @@
 #include "qwindowsstyle.h"
 #endif // QT_H
 
-#if QT_VERSION >= 300
+#if QT_VERSION >= 0x030000
 
 class QTOPIA_EXPORT QPEStyle : public QWindowsStyle
 {

@@ -144,13 +144,18 @@ DateEntry::DateEntry( bool startOnMonday, const PimEvent &event,
 	    repeatSelect->setCurrentItem(3);
 	else
 	    repeatSelect->setCurrentItem(4);
-	if (mEvent.repeatForever())
+	if (mEvent.repeatForever()) {
+	    // so that when opens, will have view at or close to start date of event,
+	    endDateSelect->setDate(mEvent.start().date());
 	    endDateSelect->setDate(QDate());
-	else
+	} else {
 	    endDateSelect->setDate(mEvent.repeatTill());
+	}
     } else {
 	repeatSelect->setCurrentItem(0);
 	endDateSelect->setEnabled(FALSE);
+	// so that when opens, will have view at or close to start date of event,
+	endDateSelect->setDate(mEvent.start().date());
 	endDateSelect->setDate(QDate());
     }
     setRepeatLabel();

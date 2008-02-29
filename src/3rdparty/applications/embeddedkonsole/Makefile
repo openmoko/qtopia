@@ -419,7 +419,7 @@ ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done
 
 package: ipkg
-	cd $(QPEDIR)/ipkg; 	../scripts/mkPackages
+	cd $(QPEDIR)/ipkg; 	../bin/mkPackages
 
 Makefile: embeddedkonsole.pro
 	cd $(QPEDIR)/src; 	./configure  -platform generic -make 3rdparty/applications/embeddedkonsole

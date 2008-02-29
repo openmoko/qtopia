@@ -1,4 +1,6 @@
 [Desktop Entry]
 Name=Handwriting
 Comment=Natural handwriting input.
+Name[ja]=手書き
+Comment[ja]=自然な手書き入力
 X-QPE-Library=libqhandwriting.so

@@ -1,4 +1,6 @@
 [Desktop Entry]
 Name=Clock
 Comment=Displays a clock in the Taskbar.
+Name[ja]=時計
+Comment[ja]=タスクバー内で時計を表示します。
 X-QPE-Library=libclockapplet.so
