@@ -486,7 +486,7 @@ QString Qtopia::homePath()
 QString Qtopia::defaultButtonsFile()
 {
     QString r;
-#if !defined(QTOPIA_HOST) && !defined(QT_NO_QWS_VFB)
+#if !defined(QTOPIA_HOST) && !defined(QT_NO_QWS_VFB) && !defined(Q_WS_X11)
     r = QString("/tmp/qtembedded-%1/defaultbuttons.conf").arg(qtopia_display_id());
     if ( QFileInfo(r).exists() )
         return r;
