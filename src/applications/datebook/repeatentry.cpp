@@ -20,8 +20,8 @@
 
 #include "repeatentry.h"
 
-#include "datepicker.h"
-#include <qtopia/pim/calendar.h>
+#include <qtopia/datepicker.h>
+#include <qtopia/calendar.h>
 
 #include <qtopia/qpeapplication.h>
 
@@ -39,16 +39,29 @@
 #include <qsimplerichtext.h>
 #include <qpainter.h>
 
+int currentID( QButtonGroup *group )
+{
+    for (int i = 0; i < group->count(); i++) {
+	if (group->find(i)->isOn())
+	    return i;
+    }
+    return -1;
+}
+
 class RichLabel : public QLabel
 {
 public:
     RichLabel(QWidget *p) : QLabel(p) { }
-protected: 
+protected:
     void drawContents(QPainter *p)
     {
 	QSimpleRichText rt(text(), p->font());
 	rt.setWidth(width());
+#if (QT_VERSION-0 >= 0x030000)
+	rt.draw(p, pos().x(),pos().y(), geometry(), colorGroup());
+#else
 	rt.draw(p, 0,0, QRegion(geometry()), palette());
+#endif
     }
 };
 
@@ -109,15 +122,15 @@ WeekGroup::WeekGroup(int oM, QWidget *parent)
 	    b1->setEnabled(FALSE);
 	    //b1->setOn(TRUE);
 	}
-	b1->setText(PimCalendar::nameOfDay(oM));
+	b1->setText(Calendar::nameOfDay(oM));
 	insert(b1, oM);
 	fe->addWidget(b1);
 	oM++;
-	if (oM > 7) 
+	if (oM > 7)
 	    oM = 1;
     }
 
-   /* 
+   /*
     QToolButton *b1 = new QToolButton(this);
     b1->setText(tr("Mon"));
     b1->setToggleButton(TRUE);
@@ -186,7 +199,7 @@ void WeekGroup::toggleDay(int i, bool b)
     //}
 }
 
-// internal 
+// internal
 void WeekGroup::setDay(int i)
 {
     QToolButton *bt = (QToolButton *)find(i);
@@ -204,8 +217,8 @@ void WeekGroup::setDay(int i)
     }
 }
 
-RepeatEntry::RepeatEntry( bool startOnMonday, const PimEvent &rp, 
-	QWidget *parent, const char *name, bool modal, 
+RepeatEntry::RepeatEntry( bool startOnMonday, const PimEvent &rp,
+	QWidget *parent, const char *name, bool modal,
 	WFlags fl) : QDialog(parent, name, modal, fl), mEvent(rp)
 {
 
@@ -214,30 +227,43 @@ RepeatEntry::RepeatEntry( bool startOnMonday, const PimEvent &rp,
     layout->setMargin(6);
     layout->setSpacing(6);
 
-    typeSelector = new QTabBar(this);
-    typeSelector->addTab(new QTab(tr("None")));
-    typeSelector->addTab(new QTab(tr("Day")));
-    typeSelector->addTab(new QTab(tr("Week")));
-    typeSelector->addTab(new QTab(tr("Month")));
-    typeSelector->addTab(new QTab(tr("Year")));
+    QHBoxLayout *buttonLayout = new QHBoxLayout(layout);
+    buttonLayout->setSpacing(0);
+    typeSelector = new QButtonGroup(this);
+    typeSelector->hide();
+    typeSelector->setExclusive(TRUE);
+    QPushButton *pb = new QPushButton(tr("Day"), this);
+    pb->setToggleButton(TRUE);
+    buttonLayout->addWidget(pb);
+    typeSelector->insert(pb, 0);
+    pb = new QPushButton(tr("Week"), this);
+    pb->setToggleButton(TRUE);
+    buttonLayout->addWidget(pb);
+    typeSelector->insert(pb, 1);
+    pb = new QPushButton(tr("Month"), this);
+    pb->setToggleButton(TRUE);
+    buttonLayout->addWidget(pb);
+    typeSelector->insert(pb, 2);
+    pb = new QPushButton(tr("Year"), this);
+    pb->setToggleButton(TRUE);
+    buttonLayout->addWidget(pb);
+    typeSelector->insert(pb, 3);
 
     switch(mEvent.repeatType()) {
 	case PimEvent::NoRepeat:
-	    typeSelector->setCurrentTab(0);
-	    break;
 	case PimEvent::Daily:
-	    typeSelector->setCurrentTab(1);
+	    typeSelector->find(0)->toggle();
 	    break;
 	case PimEvent::Weekly:
-	    typeSelector->setCurrentTab(2);
+	    typeSelector->find(1)->toggle();
 	    break;
 	case PimEvent::MonthlyDate:
 	case PimEvent::MonthlyDay:
 	case PimEvent::MonthlyEndDay:
-	    typeSelector->setCurrentTab(3);
+	    typeSelector->find(2)->toggle();
 	    break;
 	case PimEvent::Yearly:
-	    typeSelector->setCurrentTab(4);
+	    typeSelector->find(3)->toggle();
 	    break;
     }
 
@@ -251,8 +277,6 @@ RepeatEntry::RepeatEntry( bool startOnMonday, const PimEvent &rp,
     QVBoxLayout *subLayout = new QVBoxLayout(freqBox);
     QHBoxLayout *subLayout2 = new QHBoxLayout(subLayout);
     subLayout2->setSpacing(6);
-    QHBoxLayout *subLayout3 = new QHBoxLayout(subLayout);
-    subLayout3->setSpacing(6);
 
     QLabel *l = new QLabel(tr("Every:"), freqBox);
     subLayout2->addWidget(l);
@@ -264,15 +288,9 @@ RepeatEntry::RepeatEntry( bool startOnMonday, const PimEvent &rp,
 
     freqSelector->setValue(mEvent.frequency());
 
-    l = new QLabel(tr("End On:"), freqBox);
-    subLayout3->addWidget(l);
-    endSelect = new QPEDateButton(freqBox);
-    subLayout3->addWidget(endSelect);
-    hasEndCheck = new QCheckBox(tr("No End Date"), freqBox);
-    subLayout3->addWidget(hasEndCheck);
-
     freqSelector->setValue(mEvent.frequency());
 
+    /*
     endSelect->setDate(mEvent.repeatTill());
     if (mEvent.hasRepeat()) {
 	endSelect->setEnabled(!mEvent.repeatForever());
@@ -281,6 +299,7 @@ RepeatEntry::RepeatEntry( bool startOnMonday, const PimEvent &rp,
 	endSelect->setEnabled(FALSE);
 	hasEndCheck->setChecked(TRUE);
     }
+    */
 
     fStack->addWidget(freqBox, 1);
 
@@ -304,25 +323,27 @@ RepeatEntry::RepeatEntry( bool startOnMonday, const PimEvent &rp,
     b1->setToggleButton(TRUE);
     */
 
-    strDate = tr("the %1 of the month.");
-    strWeekDay = tr("the %1 %2 of the month.");
-    strEndWeekDay = tr("the %1last %2 of the month.");
+    strDate = tr("the %1 of the month.","eg. %1 = 3rd");
+    strWeekDay = tr("the %1 %2 of the month.","eg. %1 %2 = 2nd Friday");
+    QString strEndWeekDay1 = tr("the last %1 of the month.","eg. %1 = Friday");
+    strEndWeekDay = tr("the %1 last %2 of the month.","eg. %1 last %2 = 2nd last Friday");
 
     strDate = strDate
-	.arg(PimCalendar::ordinalNumber(mEvent.start().date().day()));
+	.arg(Calendar::ordinalNumber(mEvent.start().date().day()));
     strWeekDay = strWeekDay
-	.arg(PimCalendar::ordinalNumber(
-		    PimCalendar::weekOfDate(mEvent.start().date())))
-	.arg(PimCalendar::nameOfDay(mEvent.start().date(), TRUE));
+	.arg(Calendar::ordinalNumber(
+		    Calendar::weekInMonth(mEvent.start().date())))
+	.arg(Calendar::nameOfDay(mEvent.start().date(), TRUE));
 
-    int fromEndOfWeek = mEvent.start().date().daysInMonth() 
+    int fromEndOfWeek = mEvent.start().date().daysInMonth()
 	- mEvent.start().date().day();
     fromEndOfWeek = fromEndOfWeek > 0 ? fromEndOfWeek / 7 + 1 : 1;
 
-    strEndWeekDay = strEndWeekDay
-	.arg( fromEndOfWeek > 1 ? PimCalendar::ordinalNumber(fromEndOfWeek) + " " 
-		: QString(""))
-	.arg( PimCalendar::nameOfDay( mEvent.start().date(), TRUE ) );
+    strEndWeekDay =
+	((fromEndOfWeek > 1)
+	    ? strEndWeekDay.arg( Calendar::ordinalNumber(fromEndOfWeek) )
+	    : strEndWeekDay1)
+	.arg( Calendar::nameOfDay( mEvent.start().date(), TRUE ) );
 
     QRadioButton *r1 = new QRadioButton(strDate, monthGroup);
     r1 = new QRadioButton(strWeekDay, monthGroup);
@@ -352,19 +373,28 @@ RepeatEntry::RepeatEntry( bool startOnMonday, const PimEvent &rp,
     layout->addWidget(fr);
 
     // pretend we just changed repeat types.
-    setRepeatType(typeSelector->currentTab());
+    setRepeatType(currentID(typeSelector));
+
+#ifdef QTOPIA_DESKTOP
+    QHBoxLayout *hb = new QHBoxLayout(layout);
+    QSpacerItem *s = new QSpacerItem(10,1);
+    QPushButton *okBtn = new QPushButton(tr("OK"), this);
+    QPushButton *cancelBtn = new QPushButton(tr("Cancel"), this);
+    hb->addItem(s);
+    hb->addWidget(okBtn);
+    hb->addWidget(cancelBtn);
+
+    connect(okBtn, SIGNAL(clicked()), this, SLOT(accept()));
+    connect(cancelBtn, SIGNAL(clicked()), this, SLOT(reject()));
+#endif
 
     // Connection time.
-    connect(typeSelector, SIGNAL(selected(int)), this, SLOT(setRepeatType(int)));
-    connect(freqSelector, SIGNAL(valueChanged(int)), 
+    connect(typeSelector, SIGNAL(clicked(int)), this, SLOT(setRepeatType(int)));
+    connect(freqSelector, SIGNAL(valueChanged(int)),
 	    this, SLOT(setFrequency(int)));
-    connect(hasEndCheck, SIGNAL(toggled(bool)), 
-	    this, SLOT(setHasEndDate(bool)));
-    connect(endSelect, SIGNAL(dateSelected(int,int,int)), 
-	    this, SLOT(setEndDate(int,int,int)));
-    connect(weekGroup, SIGNAL(dayToggled(int, bool)), 
+    connect(weekGroup, SIGNAL(dayToggled(int, bool)),
 	    this, SLOT(setRepeatOnWeekDay(int,bool)));
-    connect(monthGroup, SIGNAL(clicked(int)), 
+    connect(monthGroup, SIGNAL(clicked(int)),
 	    this, SLOT(setSubRepeatType(int)));
 }
 
@@ -378,52 +408,178 @@ void RepeatEntry::refreshLabels()
 	    descLabel->setText(tr("Don't repeat."));
 	    break;
 	case PimEvent::Daily:
-	    descLabel->setText(tr("Repeat every %1 days.").arg(mEvent.frequency()));
+	    if (mEvent.frequency() == 1)
+		descLabel->setText(tr("Repeat every day."));
+	    else
+		descLabel->setText(tr("Repeat every %1 days.").arg(mEvent.frequency()));
 	    typeLabel->setText(tr("day(s)"));
 	    break;
 	case PimEvent::Weekly:
 	    {
-		QString buf = tr("Repeat every %1 weeks on ");
-		QString lastday;
-		bool multi = FALSE;
+		typeLabel->setText(tr("week(s)"));
+		// first work out how many items in the list of weeks
+		int i;
+		int count = 0;
 		int dow = mEvent.start().date().dayOfWeek();
-		for (int i = 0; i < 7; i++) {
+		int firstday = dow;
+		int lastday = dow;
+		for (i = 0; i < 7; i++) {
 		    if (mEvent.repeatOnWeekDay(dow)) {
-			if (!lastday.isEmpty()) {
-			    if (multi)
-				buf += ", ";
-			    buf += lastday;
-			    multi = TRUE;
-			}
-			lastday = PimCalendar::nameOfDay(dow, TRUE);
+			count++;
+			lastday = dow;
 		    }
 		    dow++;
 		    if (dow > 7) dow = 1;
 		}
-		if (multi)
-		    buf += tr(" and ");
-		buf += lastday + ".";
-		typeLabel->setText(tr("week(s)"));
-		descLabel->setText(buf.arg(mEvent.frequency()));
+		// pick a string
+		QString buf;
+		if (mEvent.frequency() == 1) {
+		    switch(count) {
+			default:
+			case 1:
+			    buf = tr("Repeat every week on %1.", "e.g. %1 = Monday" );
+			    break;
+			case 2:
+			    buf = tr("Repeat every week on %1 and %2.", "e.g. %1 = Monday, %2 = Wednesday..." );
+			    break;
+			case 3:
+			    buf = tr("Repeat every week on %1, %2 and %3.", "e.g. %1 = Monday, %2 = Wednesday..." );
+			    break;
+			case 4:
+			    buf = tr("Repeat every week on %1, %2, %3 and %4.", "e.g. %1 = Monday, %2 = Wednesday..." );
+			    break;
+			case 5:
+			    buf = tr("Repeat every week on %1, %2, %3, %4 and %5.", "e.g. %1 = Monday, %2 = Wednesday..." );
+			    break;
+			case 6:
+			    buf = tr("Repeat every week on %1, %2, %3, %4, %5 and %6.", "e.g. %1 = Monday, %2 = Wednesday..." );
+			    break;
+			case 7:
+			    buf = tr("Repeat every day.");
+			    break;
+		    }
+		} else {
+		    switch(count) {
+			default:
+			case 1:
+			    buf = tr("Repeat every %1 weeks on %2.", "e.g. %1 = 3, %2 = Monday" );
+			    break;
+			case 2:
+			    buf = tr("Repeat every %1 weeks on %2 and %3.", "e.g. %1 = 3, %2 = Monday, %3 = Wednesday..." );
+			    break;
+			case 3:
+			    buf = tr("Repeat every %1 weeks on %2, %3 and %4.", "e.g. %1 = 3, %2 = Monday, %3 = Wednesday..." );
+			    break;
+			case 4:
+			    buf = tr("Repeat every %1 weeks on %2, %3, %4 and %5.", "e.g. %1 = 3, %2 = Monday, %3 = Wednesday..." );
+			    break;
+			case 5:
+			    buf = tr("Repeat every %1 weeks on %2, %3, %4, %5 and %6.", "e.g. %1 = 3, %2 = Monday, %3 = Wednesday..." );
+			    break;
+			case 6:
+			    buf = tr("Repeat every %1 weeks on %2, %3, %4, %5, %6 and %7.", "e.g. %1 = 3, %2 = Monday, %3 = Wednesday..." );
+			    break;
+			case 7:
+			    // more complex.... 
+			    buf = tr("Repeat every %1 weeks from %2 to %3.", 
+				    "e.g. %1 = 3, %2 = Monday, %3 = Sunday.  "
+				    "Describes an event that occurs each day of the "
+				    "week for a full week, starting on %2 and ending on %3, every %1 weeks." );
+			    break;
+		    }
+		    buf = buf.arg(mEvent.frequency());
+		    if (count == 7) {
+			// fill in aditional days now.
+			buf = buf.arg( Calendar::nameOfDay(firstday, TRUE) );
+			buf = buf.arg( Calendar::nameOfDay(lastday, TRUE) );
+		    }
+		}
+
+		if (count != 7) {
+		    dow = mEvent.start().date().dayOfWeek();
+		    for (i = 0; i < 7; i++) {
+			if (mEvent.repeatOnWeekDay(dow))
+			    buf = buf.arg( Calendar::nameOfDay(dow, TRUE) );
+			dow++;
+			if (dow > 7) dow = 1;
+		    }
+		}
+		descLabel->setText(buf);
 	    }
 	    break;
 	case PimEvent::MonthlyDate:
-	    descLabel->setText(tr("Repeat every %1 months on ")
-		    .arg(mEvent.frequency()) + strDate);
+	    if (mEvent.frequency() == 1)
+		descLabel->setText(
+			tr("Repeat every month on the %1 of the month.","eg. %1 = 3rd")
+			.arg(Calendar::ordinalNumber(mEvent.start().date().day()))
+			);
+	    else
+		descLabel->setText(
+			tr("Repeat every %1 months on the %2 of the month.", "eg. %1 = 4, %2 = 3rd")
+			.arg(mEvent.frequency())
+			.arg(Calendar::ordinalNumber(mEvent.start().date().day()))
+			);
 	    typeLabel->setText(tr("month(s)"));
 	    break;
 	case PimEvent::MonthlyDay:
-	    descLabel->setText(tr("Repeat every %1 months on ")
-		    .arg(mEvent.frequency()) + strWeekDay);
+	    if (mEvent.frequency() == 1)
+		descLabel->setText(tr("Repeat every month on the %1 %2 of the month.", "eg. %1 %2 = 2nd Friday")
+			.arg(Calendar::ordinalNumber(
+				Calendar::weekInMonth(mEvent.start().date())))
+			.arg(Calendar::nameOfDay(mEvent.start().date(), TRUE))
+			);
+	    else
+		descLabel->setText(tr("Repeat every %1 months on the %2 %3 of the month.", "eg. %1 = 4, %2 %3 = 2nd Friday")
+			.arg(mEvent.frequency()) 
+			.arg(Calendar::ordinalNumber(
+				Calendar::weekInMonth(mEvent.start().date())))
+			.arg(Calendar::nameOfDay(mEvent.start().date(), TRUE))
+			);
 	    typeLabel->setText(tr("month(s)"));
 	    break;
 	case PimEvent::MonthlyEndDay:
-	    descLabel->setText(tr("Repeat every %1 months on ")
-		    .arg(mEvent.frequency()) + strEndWeekDay);
-	    typeLabel->setText(tr("month(s)"));
+	    {
+		int fromEndOfWeek = mEvent.start().date().daysInMonth()
+		    - mEvent.start().date().day();
+		fromEndOfWeek = fromEndOfWeek > 0 ? fromEndOfWeek / 7 + 1 : 1;
+
+		if (mEvent.frequency() == 1) {
+		    if (fromEndOfWeek > 1) {
+			descLabel->setText(
+				tr("Repeat every month on the last %1 of the month.","eg. %1 = Friday")
+				.arg( Calendar::nameOfDay( mEvent.start().date(), TRUE ) )
+				);
+		    } else {
+			descLabel->setText(
+				tr("Repeat every month on %1 last %2 of the month.", "eg. %1 = 2nd, %2 = Friday")
+				.arg( Calendar::ordinalNumber(fromEndOfWeek) )
+				.arg( Calendar::nameOfDay( mEvent.start().date(), TRUE ) )
+				);
+		    }
+		} else {
+		    if (fromEndOfWeek > 1) {
+			descLabel->setText(
+				tr("Repeat every %2 months on the last %1 of the month.","eg. %1 = Friday, %2 = 4")
+				.arg( Calendar::nameOfDay( mEvent.start().date(), TRUE ) )
+				.arg(mEvent.frequency()) 
+				);
+		    } else {
+			descLabel->setText(
+				tr("Repeat every %3 months on %1 last %2 of the month.", "eg. %1 = 2nd, %2 = Friday, %3 = 4")
+				.arg( Calendar::ordinalNumber(fromEndOfWeek) )
+				.arg( Calendar::nameOfDay( mEvent.start().date(), TRUE ) )
+				.arg(mEvent.frequency()) 
+				);
+		    }
+		}
+		typeLabel->setText(tr("month(s)"));
+	    }
 	    break;
 	case PimEvent::Yearly:
-	    descLabel->setText(tr("Repeat every %1 years.").arg(mEvent.frequency()));
+	    if (mEvent.frequency() == 1)
+		descLabel->setText(tr("Repeat every year."));
+	    else
+		descLabel->setText(tr("Repeat every %1 years.").arg(mEvent.frequency()));
 	    typeLabel->setText(tr("year(s)"));
 	    break;
 	default:
@@ -440,26 +596,20 @@ PimEvent RepeatEntry::event() const
 void RepeatEntry::setRepeatType(int t)
 {
     int i;
-    bool setRForever = (t != 0 && !mEvent.hasRepeat());
     switch (t) {
 	case 0:
-	    mEvent.setRepeatType(PimEvent::NoRepeat);
-	    fStack->raiseWidget(0);
-	    subStack->raiseWidget(0);
-	    break;
-	case 1:
 	    mEvent.setRepeatType(PimEvent::Daily);
 	    fStack->raiseWidget(1);
 	    subStack->raiseWidget(0);
 	    break;
-	case 2:
+	case 1:
 	    mEvent.setRepeatType(PimEvent::Weekly);
 	    fStack->raiseWidget(1);
 	    subStack->raiseWidget(1);
 	    for(i = 1; i <= 7; i++)
 		weekGroup->toggleDay(i, mEvent.repeatOnWeekDay(i));
 	    break;
-	case 3:
+	case 2:
 	    // because has sub type, check if we are initializing by
 	    // if we are already in this tab.  if not, then go the default.
 	    switch (mEvent.repeatType()) {
@@ -480,18 +630,11 @@ void RepeatEntry::setRepeatType(int t)
 	    fStack->raiseWidget(1);
 	    subStack->raiseWidget(2);
 	    break;
-	case 4:
+	case 3:
 	    mEvent.setRepeatType(PimEvent::Yearly);
 	    fStack->raiseWidget(1);
 	    subStack->raiseWidget(0);
 	    break;
-    }
-    if (setRForever) {
-	// default from a non-repeater to a repeater is to set repeat
-	// foerever to true
-	endSelect->setEnabled(FALSE);
-	hasEndCheck->setChecked(TRUE);
-	mEvent.setRepeatForever(TRUE);
     }
 
     refreshLabels();
@@ -499,7 +642,7 @@ void RepeatEntry::setRepeatType(int t)
 
 void RepeatEntry::setSubRepeatType(int t)
 {
-    if (typeSelector->currentTab() == 3) {
+    if (currentID(typeSelector) == 2) {
 	switch (t) {
 	    case 0:
 		mEvent.setRepeatType(PimEvent::MonthlyDate);
@@ -521,24 +664,6 @@ void RepeatEntry::setFrequency(int f)
     refreshLabels();
 }
 
-void RepeatEntry::setEndDate( const QDate &d )
-{
-    mEvent.setRepeatTill(d);
-    refreshLabels();
-}
-
-void RepeatEntry::setEndDate( int y, int m, int d )
-{
-    setEndDate(QDate(y,m,d));
-}
-
-void RepeatEntry::setHasEndDate(bool b)
-{
-    mEvent.setRepeatForever(b);
-    endSelect->setEnabled(!b);
-    refreshLabels();
-}
-
 void RepeatEntry::setRepeatOnWeekDay(int d, bool b)
 {
     mEvent.setRepeatOnWeekDay(d, b);
@@ -548,7 +673,6 @@ void RepeatEntry::setRepeatOnWeekDay(int d, bool b)
 void RepeatEntry::setStartOnMonday(bool b)
 {
     weekGroup->setStartOnMonday(b);
-    endSelect->setWeekStartsMonday(b);
 }
 
 #include "repeatentry.moc"

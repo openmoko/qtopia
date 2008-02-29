@@ -20,6 +20,7 @@
 
 #include "menubutton.h"
 #include <qpopupmenu.h>
+#include <qapplication.h>
 
 /*!
   \class MenuButton menubutton.h
@@ -124,7 +125,7 @@ void MenuButton::insertItems( const QStringList& items )
 
   \sa insertItems()
 */
-void MenuButton::insertItem( const QIconSet& icon, const QString& text=QString::null )
+void MenuButton::insertItem( const QIconSet& icon, const QString& text)
 {
     pop->insertItem(icon, text, nitems++);
     if ( nitems==1 ) select(0);
@@ -212,5 +213,24 @@ void MenuButton::updateLabel()
     if ( !lab.isEmpty() )
 	t = lab.arg(t);
     setText(t);
+}
+
+void MenuButton::keyPressEvent( QKeyEvent *e )
+{
+    if (e->key() == Key_Left) {
+	return;
+    }
+    if (e->key() == Key_Escape) {
+	e=new QKeyEvent(QEvent::KeyPress, Qt::Key_Tab, 0, 0);
+	QApplication::sendEvent(this,e);
+	QApplication::sendEvent(this,e);
+	return;
+    }
+    if (e->key() == Key_Up || e->key() == Key_Down) {
+	e=new QKeyEvent(QEvent::KeyPress, Qt::Key_Space, 0, 0);
+	QApplication::sendEvent(this,e);
+	return;
+    }
+    QPushButton::keyPressEvent( e );
 }
 

@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -132,11 +138,11 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 
 HEADERS =	flat.h
 SOURCES =	flat.cpp
-OBJECTS =	flat.o
+OBJECTS =	$(OBJECTS_DIR)/flat.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
-SRCMOC	=	flat.moc
+SRCMOC	=	$(MOC_DIR)/flat.moc
 OBJMOC	=	
 
 
@@ -203,25 +209,22 @@ REQUIRES=
 
 ####### Compile
 
-flat.o: flat.cpp \
-		flat.moc \
-		flat.h \
-		$(QPEDIR)/include/qpe/styleinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h
+$(OBJECTS_DIR)/flat.o: flat.cpp \
+		$(MOC_DIR)/flat.moc \
+		flat.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/flat.o flat.cpp
 
-flat.moc: flat.cpp
-	$(MOC) flat.cpp -o flat.moc
+$(MOC_DIR)/flat.moc: flat.cpp
+	$(MOC) flat.cpp -o $(MOC_DIR)/flat.moc
 
 
 
 lupdate:
-	lupdate flat.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <flat.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease flat.pro
+	$(QPEDIR)/bin/qtopia-linstall flat.pro
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

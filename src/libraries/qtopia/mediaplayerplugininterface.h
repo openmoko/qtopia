@@ -20,7 +20,9 @@
 #ifndef MEDIA_PLAYER_PLUGIN_INTERFACE_H
 #define MEDIA_PLAYER_PLUGIN_INTERFACE_H
 
-#include <qpe/qcom.h>
+#include <qtopia/qcom.h>
+#include <qstring.h>
+#include <qurl.h>
 
 #ifndef QT_NO_COMPONENT
 // {c0093632-b44c-4cf7-a279-d82fe8a8890c}
@@ -61,7 +63,7 @@ public:
     virtual int audioSamples( int stream ) = 0;
     virtual bool audioSetSample( long sample, int stream ) = 0;
     virtual long audioGetSample( int stream ) = 0;
-    virtual bool audioReadSamples( short *samples, int channels, long samples, long& samplesRead, int stream ) = 0;
+    virtual bool audioReadSamples( short *samples, int channels, long count, long& samplesRead, int stream ) = 0;
 
     // If decoder doesn't support video then return 0 here
     virtual int videoStreams() = 0;
@@ -97,6 +99,59 @@ public:
 
 
 class MediaPlayerEncoder;
+
+
+#ifndef QT_NO_COMPONENT
+// {4193445c-ed33-11d6-93da-0050bad6ea87}
+# ifndef IID_MediaPlayerPlugin_1_6
+#  define IID_MediaPlayerPlugin_1_6 QUuid( 0x4193445c, 0xed33, 0x11d6, 0x93, 0xda, 0x00, 0x50, 0xba, 0xd6, 0xea, 0x87 )
+# endif
+#endif
+
+
+class MediaPlayerDecoder_1_6 : public MediaPlayerDecoder {
+public:
+    // Streaming and seeking availability extensions for 1.6
+
+    virtual bool supportsStreaming() = 0; // plugin feature
+    virtual bool canStreamURL( const QUrl& url, const QString& mimetype ) = 0; // Test if the URL is supported
+    virtual bool openURL( const QUrl& url, const QString& mimetype ) = 0; // Opens a URL for streaming
+    virtual bool streamed() = 0; // Is the open file a streamed file
+
+    virtual bool syncAvailable() = 0;
+    virtual bool sync() = 0; // sync up the video to the catch up to the audio
+
+    virtual bool seekAvailable() = 0; // Availability depends on stream
+    virtual bool seek( long pos ) = 0; // seek to byte offset from beginning
+
+    virtual bool tellAvailable() = 0; // Hard to imagine why this wouldn't be possible 
+    virtual long tell() = 0; // byte offset from beginning
+
+    virtual bool lengthAvailable() = 0; // Availability depends on stream
+    virtual long length() = 0; // in bytes
+
+    virtual bool totalTimeAvailable() = 0; // Availability depends on stream
+    virtual long totalTime() = 0; // in milliseconds
+
+    virtual bool currentTimeAvailable() = 0; // Availability depends on stream
+    virtual long currentTime() = 0; // in milliseconds
+
+/*
+    virtual bool supportsQuality() = 0; // plugin feature
+    virtual int quality() = 0; // Value from 0-100
+    virtual void setQuality(int) = 0; // Hint to decoder to run faster (loose quality)
+
+    virtual bool playtimeAvailable() = 0; // Availability depends on stream
+    virtual long playtime() = 0;
+
+    virtual bool timestampsAvailable() = 0; // Availability depends on stream
+    virtual long timestamp() = 0;
+*/
+
+};
+
+
+class MediaPlayerEncoder_1_6;
 
 
 struct MediaPlayerPluginInterface : public QUnknownInterface

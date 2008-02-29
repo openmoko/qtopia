@@ -1,22 +1,27 @@
-TEMPLATE	= app
-CONFIG		= qtopia warn_on release
-DESTDIR		= $(QPEDIR)/bin
+multiprocess:TEMPLATE	= app
+multiprocess:DESTDIR	= $(QPEDIR)/bin
+singleprocess:TEMPLATE	= lib
+singleprocess:DESTDIR	= $(QPEDIR)/lib
+
+CONFIG		+= qtopia warn_on release
 HEADERS		= addressbook.h \
                   abeditor.h \
 		  ablabel.h \
 		  abtable.h \
-		  addresssettings.h
-SOURCES		= main.cpp \
-		  addressbook.cpp \
+		  emaildlgimpl.h
+SOURCES		= addressbook.cpp \
 		  abeditor.cpp \
 		  ablabel.cpp \
 		  abtable.cpp \
-		  addresssettings.cpp
-INTERFACES	= addresssettingsbase.ui
+		  emaildlgimpl.cpp
+
+multiprocess:SOURCES+=main.cpp
+
+INTERFACES	= emaildlg.ui
 
 TARGET		= addressbook
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH	+= $(QPEDIR)/include
-LIBS            += -lqpe -lqpepim
 
-TRANSLATIONS = $(QPEDIR)/i18n/de/addressbook.ts
+unix:LIBS       += -lqpepim
+win32:LIBS      += $(QPEDIR)/lib/qpepim.lib
+
+TRANSLATIONS = addressbook-en_GB.ts addressbook-de.ts addressbook-ja.ts addressbook-no.ts

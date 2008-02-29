@@ -17,40 +17,42 @@
 ** not clear to you.
 **
 **********************************************************************/
-
-// WARNING: Do *NOT* define this yourself. The SL5xxx from SHARP does NOT
-//      have this class.
-#define QTOPIA_INTERNAL_FSLP
+#include "global.h"
 
 #include "fileselector.h"
 #include "fileselector_p.h"
-#include "global.h"
+
 #include "resource.h"
 #include "config.h"
 #include "applnk.h"
 #include "storage.h"
 #include "qpemenubar.h"
-#ifdef QWS
+#ifdef Q_WS_QWS
 #include "qcopchannel_qws.h"
 #endif
-#include "lnkproperties.h"
 #include "applnk.h"
 #include "qpeapplication.h"
 #include "categorymenu.h"
 #include "categoryselect.h"
 #include "mimetype.h"
 #include "categories.h"
+#include "qpemessagebox.h"
 
 #include <stdlib.h>
 
+#include <qtimer.h>
 #include <qdir.h>
 #include <qwidget.h>
+#include <qregexp.h>
 #include <qpopupmenu.h>
 #include <qtoolbutton.h>
 #include <qpushbutton.h>
 #include <qheader.h>
+#include <qpainter.h>
 #include <qtooltip.h>
 #include <qwhatsthis.h>
+
+QIconSet qtopia_internal_loadIconSet( const QString &pix );
 
 class TypeCombo : public QComboBox
 {
@@ -235,7 +237,9 @@ public:
     NewDocItem *newDocItem;
     DocLnkSet files;
     QHBox *toolbar;
-    StorageInfo *storage; 
+    StorageInfo *storage;
+    bool needReread;
+    QTimer *rereadTimer;
 };
 
 /*!
@@ -264,6 +268,9 @@ public:
   doclnk.html DocLnk\endlink is available from the selected()
   function. If the file selector is no longer necessary the closeMe()
   signal is emitted.
+
+  The typeChanged() and categoryChanged() signals are emitted when
+  either a different file type or category are selected.
 
   \ingroup qtopiaemb
   \sa FileManager
@@ -299,11 +306,16 @@ FileSelector::FileSelector( const QString &f, QWidget *parent, const char *name,
     d->toolbar->setSpacing( 0 );
     d->toolbar->hide();
 
+    d->rereadTimer = new QTimer( this );
+    connect( d->rereadTimer, SIGNAL(timeout()), this, SLOT(reread()) );
+
+    d->needReread = FALSE;
+
     QWidget *spacer = new QWidget( d->toolbar );
     spacer->setBackgroundMode( PaletteButton );
 
     QToolButton *tb = new QToolButton( d->toolbar );
-    tb->setPixmap( Resource::loadPixmap( "close" ) );
+    tb->setIconSet( qtopia_internal_loadIconSet( "close" ) );
     connect( tb, SIGNAL( clicked() ), this, SIGNAL( closeMe() ) );
     buttonClose = tb;
     tb->setFixedSize( 18, 20 ); // tb->sizeHint() );
@@ -341,6 +353,8 @@ FileSelector::FileSelector( const QString &f, QWidget *parent, const char *name,
 
     d->storage = new StorageInfo;
     connect( d->storage, SIGNAL( disksChanged() ), SLOT( cardChanged() ) );
+
+    connect( qApp, SIGNAL(linkChanged(const QString&)), this, SLOT(linkChanged(const QString&)) );
 
     reread();
     updateWhatsThis();
@@ -386,16 +400,20 @@ void FileSelector::fileClicked( int button, QListViewItem *i, const QPoint &, in
     }
 }
 
+
 void FileSelector::filePressed( int button, QListViewItem *i, const QPoint &, int )
 {
     if ( !i || i == d->newDocItem )
 	return;
     if ( button == Qt::RightButton ) {
 	DocLnk l = ((FileSelectorItem *)i)->file();
-	LnkProperties prop( &l );
-	prop.showMaximized();
-	prop.exec();
-	reread();
+	QPopupMenu pop( this );
+	pop.insertItem( tr("Delete"), 1 );
+	if ( pop.exec(QCursor::pos()) == 1 && 
+	     QPEMessageBox::confirmDelete( this, tr("Delete"), l.name() ) ) {
+	    l.removeFiles();
+	    reread();
+	}
     }
 }
 
@@ -418,19 +436,33 @@ void FileSelector::typeSelected( const QString &type )
     for( QStringList::Iterator it = subFilter.begin(); it != subFilter.end(); ++it )
 	d->mimeFilters.append( QRegExp(*it, FALSE, TRUE) );
     updateView();
+
+    emit typeChanged();
 }
 
 void FileSelector::catSelected( int c )
 {
     d->catId = c;
     updateView();
+
+    emit categoryChanged();
 }
 
 void FileSelector::cardChanged()
 {
-    reread();
+    if ( isVisible() )
+	d->rereadTimer->start( 200, TRUE );
+    else
+	d->needReread = TRUE;
 }
 
+void FileSelector::linkChanged( const QString &lf )
+{
+    if ( isVisible() )
+	d->rereadTimer->start( 200, TRUE );
+    else
+	d->needReread = TRUE;
+}
 
 const DocLnk *FileSelector::selected()
 {
@@ -498,10 +530,20 @@ void FileSelector::setCloseVisible( bool b )
 */
 void FileSelector::reread()
 {
+#ifdef Q_WS_QWS
     d->files.clear();
     Global::findDocuments(&d->files, filter);
     d->typeCombo->reread( d->files, filter );
+#endif
+    d->needReread = FALSE;
     updateView();
+}
+
+void FileSelector::showEvent( QShowEvent *e )
+{
+    if ( d->needReread )
+	d->rereadTimer->start( 200, TRUE );
+    QVBox::showEvent( e );
 }
 
 void FileSelector::updateView()

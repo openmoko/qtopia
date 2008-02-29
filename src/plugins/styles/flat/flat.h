@@ -22,11 +22,11 @@
 #define FLATSTYLE_H
 
 #include <qwindowsstyle.h>
-#include <qpe/styleinterface.h>
+#include <qtopia/styleinterface.h>
 
 class FlatStylePrivate;
 
-class Q_EXPORT FlatStyle : public QWindowsStyle
+class QTOPIA_PLUGIN_EXPORT FlatStyle : public QWindowsStyle
 {
 public:
     FlatStyle();
@@ -73,6 +73,7 @@ public:
 		    const QColorGroup& , QCOORD c, Orientation orient );
     void drawSliderGroove ( QPainter * p, int x, int y, int w, int h, const QColorGroup & g, QCOORD c, Orientation );
     void drawTab( QPainter *, const QTabBar *, QTab *, bool selected );
+    void polishPopupMenu ( QPopupMenu * );
     int extraPopupMenuItemWidth( bool checkable, int maxpmw, QMenuItem*, const QFontMetrics& );
     int popupMenuItemHeight( bool checkable, QMenuItem*, const QFontMetrics& );
     void drawPopupMenuItem( QPainter* p, bool checkable, int maxpmw, int tab, QMenuItem* mi,
@@ -94,7 +95,7 @@ private:
 };
 
 
-class FlatStyleImpl : public StyleInterface
+class QTOPIA_PLUGIN_EXPORT FlatStyleImpl : public StyleInterface
 {
 public:
     FlatStyleImpl();

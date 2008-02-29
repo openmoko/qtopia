@@ -23,7 +23,7 @@
 
 #include <qmainwindow.h>
 #include <qmenubar.h>
-#include <qpe/applnk.h>
+#include <qtopia/applnk.h>
 #include "mediaplayerstate.h"
 
 

@@ -19,13 +19,19 @@
 **********************************************************************/
 
 #include "task.h"
+#ifdef Q_WS_QWS
 #include <qtopia/qcopenvelope_qws.h>
-#include <qtopia/services/services.h>
+#endif
+#ifndef QT_NO_COP
+#include <qtopia/services.h>
+#endif
 #include "todoaccess.h"
 #include "todoxmlio_p.h"
 
 #include <sys/types.h>
+#ifndef Q_WS_WIN32
 #include <unistd.h>
+#endif
 #include <stdlib.h>
 
 /*! \class TodoAccess
@@ -34,8 +40,8 @@
   \brief The TodoAccess class provides a safe API for accessing PimTasks.
 
   TodoAccess provides a safe API for accessing PimTasks stored by
-  Qtopia's Todo application.  TodoAccess tries to keep the Todo 
-  application in sync with modifications, and alerts the user of 
+  Qtopia's Todo application.  TodoAccess tries to keep the Todo
+  application in sync with modifications, and alerts the user of
   the library when modifications have been made by other applications.
 */
 
@@ -43,7 +49,7 @@
 /*!
  Constructor.
 */
-TodoAccess::TodoAccess() 
+TodoAccess::TodoAccess()
 : taskio(0L) {
   taskio = new TodoXmlIO(TaskIO::ReadOnly);
 
@@ -54,7 +60,7 @@ TodoAccess::TodoAccess()
 /*!
   Cleans up the the Addressbook access.
 */
-TodoAccess::~TodoAccess() 
+TodoAccess::~TodoAccess()
 {
   delete taskio;
 }
@@ -62,51 +68,61 @@ TodoAccess::~TodoAccess()
 /*!
   If supported will update \a task in the pim data.
 
-  Updating tasks requires the EditTasks service to be available.
+  Updating tasks requires the Tasks service to be available.
 */
-void TodoAccess::updateTask(const PimTask& task) 
+void TodoAccess::updateTask(const PimTask& task)
 {
-    QCopEnvelope e(Service::channel("EditTasks"),
+#ifndef QT_NO_COP
+    QCopEnvelope e(Service::channel("Tasks"),
 	    "updateTask(PimTask)");
     e << task;
+#endif
 }
 
 
 /*!
   If supported will remove \a task from the pim data;
 
-  Removing tasks requires the EditTasks service to be available.
+  Removing tasks requires the Tasks service to be available.
  */
-void TodoAccess::removeTask(const PimTask& task) 
+void TodoAccess::removeTask(const PimTask& task)
 {
-    QCopEnvelope e(Service::channel("EditTasks"),
+#ifndef QT_NO_COP
+    QCopEnvelope e(Service::channel("Tasks"),
 	    "removeTask(PimTask)");
     e << task;
+#endif
 }
 
 /*!
- If supported will assign a new unique ID to \a task and add the task to the 
+ If supported will assign a new unique ID to \a task and add the task to the
  pim data.
 
- Adding tasks requires the EditTasks service to be available.
+ Adding tasks requires the Tasks service to be available.
  */
-void TodoAccess::addTask(const PimTask& task) 
+void TodoAccess::addTask(const PimTask& task)
 {
-    QCopEnvelope e(Service::channel("EditTasks"),
+#ifndef QT_NO_COP
+    QCopEnvelope e(Service::channel("Tasks"),
 	    "addTask(PimTask)");
     e << task;
+#endif
 }
 
 /*!
   Returns TRUE if it is possible to add, remove and update tasks in
   the pim data.  Otherwise returns FALSE.
 
-  Adding, removing and tasks contacts requires the EditTasks service to be
+  Adding, removing and tasks contacts requires the Tasks service to be
   available
 */
 bool TodoAccess::editSupported() const
 {
-    return Service::list().contains("EditTasks");
+#ifdef Q_WS_QWS
+    return Service::list().contains("Tasks");
+#else
+    return FALSE;
+#endif
 }
 
 
@@ -120,7 +136,7 @@ bool TodoAccess::editSupported() const
   \ingroup qpepim
   \brief The TodoIterator class provides iterators of TodoAccess.
 
-  The only way to traverse the data of an TodoAccess is with an 
+  The only way to traverse the data of an TodoAccess is with an
   TodoIterator.
 */
 
@@ -167,7 +183,7 @@ TodoIterator &TodoIterator::operator=(const TodoIterator &other)
 /*!
   Destroys the iterator
 */
-TodoIterator::~TodoIterator() 
+TodoIterator::~TodoIterator()
 {
     if ( machine && machine->deref() ) delete machine;
 }
@@ -176,7 +192,7 @@ TodoIterator::~TodoIterator()
   Returns TRUE if the iterator is at the first item of the data.
   Otherwise returns FALSE.
 */
-bool TodoIterator::atFirst() const 
+bool TodoIterator::atFirst() const
 {
     return machine ? machine->atFirst() : FALSE;
 }
@@ -192,20 +208,20 @@ bool TodoIterator::atLast() const
 
 /*!
   Sets the iterator to the first item of the data.
-  If a PimTask exists in the data will return a const pointer to the 
+  If a PimTask exists in the data will return a const pointer to the
   PimTask.  Otherwise returns 0.
 */
-const PimTask *TodoIterator::toFirst() 
+const PimTask *TodoIterator::toFirst()
 {
     return machine ? machine->toFirst() : 0;
 }
 
 /*!
   Sets the iterator to the last item of the data.
-  If a PimTask exists in the data will return a const pointer to the 
+  If a PimTask exists in the data will return a const pointer to the
   PimTask.  Otherwise returns 0.
 */
-const PimTask *TodoIterator::toLast() 
+const PimTask *TodoIterator::toLast()
 {
     return machine ? machine->toLast() : 0;
 }
@@ -221,7 +237,7 @@ const PimTask *TodoIterator::operator++()
 }
 
 /*!
-  If the iterator is at a valid PimTask returns a const pointer to 
+  If the iterator is at a valid PimTask returns a const pointer to
   the current PimTask.  Otherwise returns 0.
 */
 const PimTask* TodoIterator::operator*() const
@@ -230,7 +246,7 @@ const PimTask* TodoIterator::operator*() const
 }
 
 /*!
-  If the iterator is at a valid PimTask returns a const pointer to 
+  If the iterator is at a valid PimTask returns a const pointer to
   the current PimTask.  Otherwise returns 0.
 */
 const PimTask* TodoIterator::current() const

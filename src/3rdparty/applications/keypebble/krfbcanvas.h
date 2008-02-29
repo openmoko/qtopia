@@ -47,6 +47,7 @@ protected slots:
   void viewportUpdate( int x, int y, int w, int h );
   void clipboardChanged();
   void doAutoScroll();
+  void updateSizeChanged(int, int);
 
 private:
   KRFBConnection *connection_;

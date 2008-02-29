@@ -67,6 +67,11 @@
 #include <sys/types.h>
 #include <signal.h>
 
+#ifndef S_ISDIR
+// Need for WIN32
+#define S_ISDIR(st_mode) ((st_mode | S_IFDIR) != 0) 
+#endif
+
 #include <assert.h>
 
 // #include "TEWidget.moc"

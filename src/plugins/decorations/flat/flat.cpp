@@ -286,7 +286,8 @@ void FlatDecoration::drawArea( Area a, QPainter *p, const WindowData *wd ) const
     }
 }
 
-void FlatDecoration::drawButton( Button b, QPainter *p, const WindowData *wd, int x, int y, int w, int h, QWSButton::State state ) const
+void FlatDecoration::drawButton( Button b, QPainter *p, const WindowData *wd,
+    int x, int y, int /* w */, int /* h */, QWSButton::State state ) const
 {
     QColor c;
     const QColorGroup &cg = wd->palette.active();

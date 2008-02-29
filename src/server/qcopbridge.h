@@ -20,6 +20,7 @@
 #ifndef __qcopbridge_h__
 #define __qcopbridge_h__
 
+#include <qtopia/qpeglobal.h>
 #include <qserversocket.h>
 #include <qsocket.h>
 #include <qdir.h>

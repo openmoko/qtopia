@@ -26,6 +26,9 @@
 class QTimer;
 class QLabel;
 class QDialog;
+class AnalogClock;
+class QBoxLayout;
+class QToolButton;
 
 class Clock : public ClockBase
 {
@@ -38,29 +41,49 @@ public:
 private slots:
     void stopStartStopWatch();
     void resetStopWatch();
+    void prevLap();
+    void nextLap();
+    void lapTimeout();
     void tabChanged(QWidget*);
     void updateClock();
     void changeClock( bool );
     void setDailyAmPm( int );
     void setDailyMinute( int );
+    void enableDaily( bool );
     void appMessage(const QCString& msg, const QByteArray& data);
     void alarmTimeout();
     void applyDailyAlarm();
 
 protected:
     QDateTime nextAlarm( int h, int m );
+    int dayBtnIdx( int ) const;
     void closeEvent( QCloseEvent *e );
+    void updateLap();
+    void setSwatchLcd( QLCDNumber *lcd, int ms, bool showMs );
+    bool eventFilter( QObject *, QEvent * );
 
 private:
     QTimer *t;
     QTimer *alarmt;
     QTime swatch_start;
     int swatch_totalms;
+    QArray<int> swatch_splitms;
     bool swatch_running;
+    int swatch_currLap;
+    int swatch_dispLap;
+    QToolButton *prevLapBtn;
+    QToolButton *nextLapBtn;
+    QTimer *lapTimer;
+    AnalogClock* analogStopwatch;
+    QLCDNumber* stopwatchLcd;
+    QBoxLayout *swLayout;
     bool ampm;
+    bool onMonday;
     int alarmCount;
     QDialog* alarmDlg;
     QLabel* alarmDlgLabel;
+    QToolButton **dayBtn;
+    bool init;
 };
 
 #endif

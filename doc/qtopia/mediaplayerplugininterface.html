@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/src/libraries/qtopia/mediaplayerplugininterface.cpp:423 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/src/libraries/qtopia/mediaplayerplugininterface.cpp:437 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -43,13 +43,17 @@ The MediaPlayerPluginInterface class is used to access <a href="mediaplayerdecod
 <h3 class=fn><a href="mediaplayerdecoder.html">MediaPlayerDecoder</a>&nbsp;* <a name="decoder"></a>MediaPlayerPluginInterface::decoder ()<tt> [pure virtual]</tt>
 </h3>
 
-<p> This function returns a <a href="mediaplayerdecoder.html">MediaPlayerDecoder</a> object.
+<p> This function returns a <a href="mediaplayerdecoder.html">MediaPlayerDecoder</a> object (or a <a href="mediaplayerdecoder_1_6.html">MediaPlayerDecoder_1_6</a>
+extended MediaPlayerDecoder object if this interface returns that it supports
+the 1_6 API extensions).
 
 <h3 class=fn>MediaPlayerEncoder * <a name="encoder"></a>MediaPlayerPluginInterface::encoder ()<tt> [pure virtual]</tt>
 </h3>
 
 <p> This function returns a MediaPlayerEncoder object, however 
-the MediaPlayerEncoder interface is yet to be defined.
+the MediaPlayerEncoder interface is yet to be defined. Please refer to the
+documentation on the MediaRecoderEncoder documentation which provides an
+audio encoder API.
 
 <!-- eof -->
 <hr><p>

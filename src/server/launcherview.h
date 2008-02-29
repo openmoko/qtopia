@@ -20,7 +20,7 @@
 #ifndef LAUNCHERVIEW_H
 #define LAUNCHERVIEW_H
 
-#include <qpe/storage.h>
+#include <qtopia/storage.h>
 
 #include <qvbox.h>
 

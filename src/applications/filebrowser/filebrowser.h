@@ -55,9 +55,11 @@ class FileView : public QListView
 public:
     FileView( const QString & dir, QWidget * parent = 0,
 			  const char * name = 0 );
+    ~FileView(void);
     void    setDir( const QString & dir );
     QString cd(){ return currentDir; }
     QStringList history() const { return dirHistory; }
+    void    scaleIcons(void);
 
 public slots:
     void updateDir();

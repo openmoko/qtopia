@@ -3,16 +3,15 @@
 **
 ** This file is part of the Qtopia Environment.
 **
-** Licensees holding valid Qtopia Developer license may use this
-** file in accordance with the Qtopia Developer License Agreement
-** provided with the Software.
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING
-** THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-** PURPOSE.
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
-** email sales@trolltech.com for information about Qtopia License
-** Agreements.
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
@@ -31,14 +30,6 @@
 #include <qtopia/private/palmtopuidgen.h>
 
 class CategoryGroup;
-
-#if defined(QTOPIA_TEMPLATEDLL)
-// MOC_SKIP_BEGIN
-QTOPIA_TEMPLATEEXTERN template class QTOPIA_EXPORT QMap<int, QString>;
-QTOPIA_TEMPLATEEXTERN template class QTOPIA_EXPORT QMap<QString, int>;
-QTOPIA_TEMPLATEEXTERN template class QTOPIA_EXPORT QMap< QString, CategoryGroup >;
-// MOC_SKIP_END
-#endif
 
 class QTOPIA_EXPORT CategoryGroup
 {
@@ -81,9 +72,16 @@ private:
     QMap<int, QString> mIdLabelMap;
     QMap<QString, int> mLabelIdMap;
 
+#ifndef Q_OS_WIN32
     static Qtopia::UidGen &uidGen() { return sUidGen; }
+#else
+	static Qtopia::UidGen &uidGen();
+#endif
     static Qtopia::UidGen sUidGen;
 };
+
+#define QTOPIA_DEFINED_CATEGORYGROUP
+#include <qtopia/qtopiawinexport.h>
 
 class QTOPIA_EXPORT Categories : public QObject
 {
@@ -121,13 +119,8 @@ public:
 			bool includeGlobal = TRUE,
 			ExtraLabels extra = NoExtra ) const;
 
-    // inlined to keep 1.5.0 binary compatibility
-    QStringList labels( const QString & app,
-			const QArray<int> &catids ) const {
-	QStringList strs = mGlobalCats.labels( catids );
-	strs += mAppCats[app].labels( catids );
-	return strs;
-    }
+    QStringList labels( const QString &app,
+			const QArray<int> &catids ) const; // libqtopia
 
     enum DisplaySingle { ShowMulti, ShowAll, ShowFirst };
 
@@ -162,6 +155,9 @@ public:
     const QMap<QString, CategoryGroup> &appGroupMap() const{ return mAppCats; }
     const CategoryGroup &globalGroup() const { return mGlobalCats; }
 
+#ifdef QTOPIA_DESKTOP
+    static void setCategoryFileName(const QString &s);
+#endif
 signals:
     /** emitted if added a category;
     *  the second param is the application the category was added to
@@ -187,6 +183,9 @@ private:
     QMap< QString, CategoryGroup > mAppCats;
 };
 
+#define QTOPIA_DEFINED_CATEGORIES
+#include <qtopia/qtopiawinexport.h>
+
 class QTOPIA_EXPORT CheckedListView : public QListView
 {
 public:
@@ -194,5 +193,8 @@ public:
     void setChecked( const QStringList &checked );
     QStringList checked() const;
 };
+
+#define QTOPIA_DEFINED_CHECKLISTVIEW
+#include <qtopia/qtopiawinexport.h>
 
 #endif

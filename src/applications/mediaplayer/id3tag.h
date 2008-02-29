@@ -26,6 +26,7 @@
 
 
 class ID3Tag : public QObject {
+    Q_OBJECT
 public:
     ID3Tag();
 

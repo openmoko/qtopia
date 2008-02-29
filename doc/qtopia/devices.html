@@ -1,0 +1,61 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/doc/devices.doc:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+|<a href="classes.html">
+<font color="white">Classes</font></a>
+<font color="white">|</font>
+<a href="functions.html"><font color="white">Functions</font></a>
+<font color="white">|</font>
+<a href="../qt/index.html"><font color="white">Qt API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table>
+<p> 
+<p> <h2> Qtopia - Installing Qtopia on a Device
+</h2>
+<a name="1"></a><p> This document provides some recommendations for installing Qtopia on a
+device.
+<p> <h3> Device-Specific Code
+</h3>
+<a name="1-1"></a><p> Device specific code is found in src/libraries/qtopia/, in the files
+<tt>custom-*.*</tt>. See the existing files, especially the linux-generic
+file, for guidance.
+<p> <h3> Device-Specific Files
+</h3>
+<a name="1-2"></a><p> The default hardware button mappings for a device are defined
+by the etc/defaultbuttons-*.conf files. See the existing files, especially
+the generic file, for guidance. Images of the buttons, which should correspond
+to the appearance of the device hardware, are in pics/Button/<i>n</i>.png, with
+<i>n</i> corresponding to the button number in the configuration file.
+<p> <h3> Non-installed Components
+</h3>
+<a name="1-3"></a><p> There are a number of applications/features supplied with Qtopia that are
+not intended to be shipped with a production device:
+<p> <ul>
+<li> Rotation Setting - This is provided to demonstrate Qtopia's ability
+to display in different orientations.
+<li> Shutdown Setting - This is provided as a development tool.  It should
+not be necessary in a production device.  It can be removed by deleting
+apps/Settings/quit.desktop
+</ul>
+<p> 
+<!-- eof -->
+<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

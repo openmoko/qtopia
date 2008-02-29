@@ -29,7 +29,7 @@
 #include <qtopia/private/contact.h>
 #include <qtopia/private/event.h>
 #include <qtopia/private/task.h>
-#include <qtopia/services/services.h>
+#include <qtopia/services.h>
 
 #include <qpushbutton.h>
 #include <qframe.h>
@@ -37,7 +37,7 @@
 #include <qfile.h>
 #include <qprogressbar.h>
 
-ReceiveDialog::ReceiveDialog( QIrServer* irserver, QWidget *parent = 0, const char *name = 0)
+ReceiveDialog::ReceiveDialog( QIrServer* irserver, QWidget *parent, const char *name )
     : ReceiveDialogBase( parent, name, FALSE )//, WStyle_StaysOnTop )
 {
     server = irserver;
@@ -128,6 +128,8 @@ static QString vcalInfo( const QString &filename, bool *todo, bool *cal )
 
 void ReceiveDialog::received()
 {
+    QCopEnvelope env("QPE/Obex","received()");
+
     MimeType mt( filename->text() );
     QString service = "Receive/"+mt.id();
     QCString receiveChannel = Service::channel(service);

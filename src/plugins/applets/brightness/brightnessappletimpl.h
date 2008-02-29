@@ -20,11 +20,12 @@
 #ifndef BRIGHTNESSAPPLETIMPL_H
 #define BRIGHTNESSAPPLETIMPL_H
 
-#include <qpe/taskbarappletinterface.h>
+#include <qtopia/qpeglobal.h>
+#include <qtopia/taskbarappletinterface.h>
 
 class BrightnessApplet;
 
-class BrightnessAppletImpl : public TaskbarAppletInterface
+class QTOPIA_PLUGIN_EXPORT BrightnessAppletImpl : public TaskbarAppletInterface
 {
 public:
     BrightnessAppletImpl();

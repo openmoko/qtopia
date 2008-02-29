@@ -20,7 +20,7 @@
 
 #include "clipboard.h"
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
 #include <qpainter.h>
 #include <qpopupmenu.h>
@@ -28,14 +28,20 @@
 #include <qclipboard.h>
 #include <qwindowsystem_qws.h>
 
+#include <qtopia/applnk.h>
 
 //===========================================================================
 
 ClipboardApplet::ClipboardApplet( QWidget *parent, const char *name )
     : QWidget( parent, name )
 {
-    clipboardPixmap = Resource::loadPixmap( "clipboard" );
-    setFixedWidth( clipboardPixmap.width() );
+    QImage  img = Resource::loadImage("clipboard");
+    img = img.smoothScale(AppLnk::smallIconSize(), AppLnk::smallIconSize());
+    clipboardPixmap.convertFromImage(img);
+
+    setFixedWidth(AppLnk::smallIconSize());
+//    setFixedHeight(AppLnk::smallIconSize());
+
     menu = 0;
 }
 
@@ -47,9 +53,9 @@ void ClipboardApplet::mousePressEvent( QMouseEvent *)
 {
     if ( !menu ) {
 	menu = new QPopupMenu(this);
-	menu->insertItem(tr("Cut"),0);
-	menu->insertItem(tr("Copy"),1);
-	menu->insertItem(tr("Paste"),2);
+	menu->insertItem(Resource::loadIconSet("cut"), tr("Cut"),0);
+	menu->insertItem(Resource::loadIconSet("copy"), tr("Copy"),1);
+	menu->insertItem(Resource::loadIconSet("paste"), tr("Paste"),2);
 	connect(menu, SIGNAL(activated(int)), this, SLOT(action(int)));
 	connect(qApp->clipboard(), SIGNAL(dataChanged()), this, SLOT(clipboardChanged()) );
 	clipboardChanged();

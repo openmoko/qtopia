@@ -20,11 +20,12 @@
 #ifndef VOLUMEAPPLETIMPL_H
 #define VOLUMEAPPLETIMPL_H
 
-#include <qpe/taskbarappletinterface.h>
+#include <qtopia/qpeglobal.h>
+#include <qtopia/taskbarappletinterface.h>
 
 class VolumeApplet;
 
-class VolumeAppletImpl : public TaskbarAppletInterface
+class QTOPIA_PLUGIN_EXPORT VolumeAppletImpl : public TaskbarAppletInterface
 {
 public:
     VolumeAppletImpl();

@@ -21,12 +21,12 @@
 #include "minesweep.h"
 #include "minefield.h"
 
-#include <qpe/qpeapplication.h>
-#include <qpe/resource.h>
-#include <qpe/config.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/resource.h>
+#include <qtopia/config.h>
 
-#include <qpe/qpetoolbar.h>
-#include <qpe/qpemenubar.h>
+#include <qtopia/qpetoolbar.h>
+#include <qtopia/qpemenubar.h>
 #include <qpopupmenu.h>
 #include <qpushbutton.h>
 #include <qlcdnumber.h>
@@ -198,6 +198,7 @@ void ResultIndicator::center()
 
     QPoint pp = w->mapToGlobal( QPoint(0,0) ); 
     QSize s = sizeHint()*3;
+    s.setWidth( QMIN(s.width(), w->width()) );
     pp = QPoint( pp.x() + w->width()/2 - s.width()/2,
 		pp.y() + w->height()/ 2 - s.height()/2 );
 
@@ -224,8 +225,11 @@ class MineFrame : public QFrame
 {
 public:
     MineFrame( QWidget *parent, const char *name = 0 )
-	:QFrame( parent, name ) {}
-    void setField( MineField *f ) { field = f; }
+	:QFrame( parent, name ), field(0) {}
+    void setField( MineField *f ) {
+	field = f;
+	setMinimumSize( field->sizeHint() );
+    }
 protected:
     void resizeEvent( QResizeEvent *e ) {
 	field->setAvailableRect( contentsRect());
@@ -306,7 +310,6 @@ MineSweep::MineSweep( QWidget* parent, const char* name, WFlags f )
     connect( field, SIGNAL( gameStarted()), this, SLOT( startPlaying() ) );
 
     timer = new QTimer( this );
-
     connect( timer, SIGNAL( timeout() ), this, SLOT( updateTime() ) );
 
     readConfig();

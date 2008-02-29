@@ -23,16 +23,17 @@ SOURCES		= TEScreen.cpp \
 		  session.cpp \
 		  keytrans.cpp \
 		  konsole.cpp \
-		  main.cpp \
-		  MyPty.cpp
+		  main.cpp 
+
+unix:SOURCES  += MyPty.cpp 
+win32:SOURCES +=  \
+                  ../../../server/qprocess.cpp \
+                  ../../../server/qprocess_win.cpp 
+
+win32:HEADERS += ../../../server/qprocess.h 
 
 TARGET		= embeddedkonsole
 
-INCLUDEPATH	+= $(QPEDIR)/include
-
-DEPENDPATH	+= $(QPEDIR)/include
-
-LIBS            += -lqpe
-
 REQUIRES	= embeddedkonsole
 
+TRANSLATIONS = embeddedkonsole-en_GB.ts embeddedkonsole-de.ts embeddedkonsole-ja.ts embeddedkonsole-no.ts

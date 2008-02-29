@@ -20,7 +20,7 @@
 
 #include "ablabel.h"
 
-#include <qpe/stringutil.h>
+#include <qtopia/stringutil.h>
 
 #include <qregexp.h>
 #include <qstylesheet.h>

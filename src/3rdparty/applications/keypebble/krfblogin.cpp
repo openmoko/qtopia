@@ -111,7 +111,7 @@ void KRFBLogin::gotServerVersion()
   qWarning("Server Version: %03d.%03d", serverMajor, serverMinor );
 
   if ( serverMajor != 3 ) {
-    QString msg = tr( "Error: Unsupported server version, %1" )
+    QString msg = tr( "Unsupported server version, %1" )
       .arg( rfbString );
 
     qWarning( msg );
@@ -142,6 +142,7 @@ void KRFBLogin::gotAuthScheme()
   scheme = Swap32IfLE( scheme );
 
   static QString statusMsgOk = tr( "Logged in" );
+  static QString statusMsgFailed = tr("Login failed");
 
   switch ( scheme ) {
   case 0:
@@ -149,6 +150,8 @@ void KRFBLogin::gotAuthScheme()
     // Handle failure
     connect( con, SIGNAL( gotEnoughData() ), SLOT( gotFailureReasonSize() ) );
     con->waitForData( FailureReasonSizeLength );
+    emit status(statusMsgFailed);
+    emit error(statusMsgFailed);
     break;
   case 1:
     // Handle no auth
@@ -198,6 +201,9 @@ void KRFBLogin::getPassword()
   vncEncryptBytes( (unsigned char *) challenge, con->pass_.data() );
   con->write( challenge, ChallengeLength );
 
+  // Don't leave password lying around in memory.
+  con->pass_ = 0;
+
   connect( con, SIGNAL( gotEnoughData() ), SLOT( gotAuthResult() ) );
   con->waitForData( AuthResultLength );
 }
@@ -220,9 +226,10 @@ void KRFBLogin::gotAuthResult()
 
   qWarning( "Authentication Result is 0x%08lx", result );
 
-  static QString failed = tr( "Error: The password you specified was incorrect." );
-  static QString tooMany = tr( "Error: Too many invalid login attempts have been made\n"
-				 "to this account, please try later." );
+  static QString failed = tr( "Login failed:\nInvalid password.");
+  static QString tooMany = tr("Login failed: Too many invalid\n"
+			      "login attempts to this account.\n"
+			      "Try again later.");
 
   static QString statusMsgOk = tr( "Logged in" );
   static QString statusMsgFailed = tr( "Login Failed" );

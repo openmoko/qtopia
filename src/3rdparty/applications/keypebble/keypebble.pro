@@ -14,7 +14,6 @@ HEADERS		= d3des.h \
 		  kvnc.h \
 		  kvncconnectdlg.h \
 		  kvncoptionsdlg.h \
-		  version.h \
 		  vncauth.h
 
 SOURCES		= d3des.c \
@@ -32,7 +31,4 @@ SOURCES		= d3des.c \
 INTERFACES	= vncoptionsbase.ui
 TARGET          = keypebble
 
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH      += $(QPEDIR)/include
-LIBS            += -lqpe
-
+TRANSLATIONS = keypebble-en_GB.ts keypebble-de.ts keypebble-ja.ts keypebble-no.ts

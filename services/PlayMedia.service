@@ -1,0 +1,7 @@
+[Service]
+Actions = openURL(QString,QString)
+Icon = MediaPlayer 
+Name = Play Media
+[openURL(QString,QString)]
+Icon = MediaPlayer 
+Name = Open Media File

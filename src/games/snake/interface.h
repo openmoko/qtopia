@@ -21,6 +21,9 @@
 #include <qcanvas.h>
 #include <qlabel.h>
 
+#ifndef SNAKEGAME
+#define SNAKEGAME
+
 #include "snake.h"
 #include "target.h"
 #include "obstacle.h"
@@ -55,6 +58,7 @@ private slots:
  
 private:
     void showScore(int);
+    void setupWalls(void);
     QCanvasView* cv;
     QLabel* scorelabel;
     QCanvas canvas;
@@ -67,4 +71,14 @@ private:
     int notargets;
     bool waitover;
     bool gamestopped;
+
+    Obstacle	*ob_top;
+    Obstacle	*ob_bottom;
+    Border	*border_north;
+    Border	*border_south;
+    Border	*border_east;
+    Border	*border_west;
+    
 };
+
+#endif

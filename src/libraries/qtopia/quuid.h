@@ -18,6 +18,10 @@
 **
 **********************************************************************/
 
+#if QT_VERSION >= 300
+#include <quuid.h>
+#else
+
 #ifndef QUUID_H
 #define QUUID_H
 
@@ -29,7 +33,7 @@
 
 #include <memory.h>
 
-#if defined(Q_OS_WIN32)
+#if defined(Q_OS_WIN32) && !defined(GUID_DEFINED)
 #ifndef GUID_DEFINED
 #define GUID_DEFINED
 typedef struct _GUID
@@ -41,8 +45,7 @@ typedef struct _GUID
 } GUID;
 #endif
 #endif
-
-#if defined( Q_WS_QWS ) && !defined( UUID_H_INCLUDED )
+#if defined( Q_WS_QWS ) && !defined( UUID_H_INCLUDED ) && !defined(UNICODE)
 typedef unsigned char uuid_t[16];
 #endif
 
@@ -102,7 +105,7 @@ struct QTOPIA_EXPORT QUuid
 	return ( memcmp(this, &orig, sizeof(QUuid) ) > 0);
     }
     
-#if defined(Q_WS_WIN32)
+#ifdef Q_OS_WIN32
     // On Windows we have a type GUID that is used by the platform API, so we
     // provide convenience operators to cast from and to this type.
     QUuid( const GUID &guid )
@@ -130,20 +133,10 @@ struct QTOPIA_EXPORT QUuid
     bool operator!=( const GUID &guid ) const
     {
 	return !( *this == guid );
-    }
-    
-    inline bool operator<(const QUuid &orig) const
-    {
-	return ( memcmp(this, &orig, sizeof(QUuid) ) < 0);
-    }
-    
-    inline bool operator>(const QUuid &orig) const
-    {
-	return ( memcmp(this, &orig, sizeof(QUuid) ) > 0);
-    }
+    }    
     
 #endif
-#if defined (Q_WS_QWS)
+#if defined (Q_WS_QWS) && !defined(Q_OS_WIN32) 
     QUuid( uuid_t uuid ) 
     {
 	memcpy( this, uuid, sizeof(uuid_t) );
@@ -161,5 +154,7 @@ struct QTOPIA_EXPORT QUuid
     ushort  data3;
     uchar   data4[ 8 ];
 };
+
+#endif	// include <quuid.h>
 
 #endif //QUUID_H

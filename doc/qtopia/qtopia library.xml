@@ -1,22 +1,11 @@
 <!DOCTYPE DCF>
 <DCF ref="index.html" category="qtopia library/reference" title="Qtopia library Reference Documentation">
-<section ref="accessory.html" title="Accessory Class Reference">
-    <keyword ref="accessory.html">Accessory</keyword>
-    <keyword ref="accessory.html#activated">activated</keyword>
-    <keyword ref="accessory.html#iconSet">iconSet</keyword>
-    <keyword ref="accessory.html#popup">popup</keyword>
-    <keyword ref="accessory.html#setIconSet">setIconSet</keyword>
-    <keyword ref="accessory.html#setText">setText</keyword>
-    <keyword ref="accessory.html#text">text</keyword>
-    <keyword ref="accessory.html#~Accessory">~Accessory</keyword>
-    <section ref="accessory-members.html" title="List of All Member Functions"/>
-    <section ref="accessory-h.html" title="Header File"/>
-</section>
 <section ref="addressbookaccess.html" title="AddressBookAccess Class Reference">
     <keyword ref="addressbookaccess.html">AddressBookAccess</keyword>
     <keyword ref="addressbookaccess.html#addContact">addContact</keyword>
     <keyword ref="addressbookaccess.html#addressBookUpdated">addressBookUpdated</keyword>
     <keyword ref="addressbookaccess.html#editSupported">editSupported</keyword>
+    <keyword ref="addressbookaccess.html#personalDetails">personalDetails</keyword>
     <keyword ref="addressbookaccess.html#removeContact">removeContact</keyword>
     <keyword ref="addressbookaccess.html#updateContact">updateContact</keyword>
     <keyword ref="addressbookaccess.html#~AddressBookAccess">~AddressBookAccess</keyword>
@@ -58,7 +47,6 @@
     <keyword ref="applnk.html#fileKnown">fileKnown</keyword>
     <keyword ref="applnk.html#icon">icon</keyword>
     <keyword ref="applnk.html#id">id</keyword>
-    <keyword ref="applnk.html#invoke">invoke</keyword>
     <keyword ref="applnk.html#isValid">isValid</keyword>
     <keyword ref="applnk.html#linkFile">linkFile</keyword>
     <keyword ref="applnk.html#linkFileKnown">linkFileKnown</keyword>
@@ -73,7 +61,6 @@
     <keyword ref="applnk.html#setBigIconSize">setBigIconSize</keyword>
     <keyword ref="applnk.html#setCategories">setCategories</keyword>
     <keyword ref="applnk.html#setComment">setComment</keyword>
-    <keyword ref="applnk.html#setExec">setExec</keyword>
     <keyword ref="applnk.html#setFile">setFile</keyword>
     <keyword ref="applnk.html#setIcon">setIcon</keyword>
     <keyword ref="applnk.html#setLinkFile">setLinkFile</keyword>
@@ -280,25 +267,6 @@
     <section ref="fontfactoryinterface-members.html" title="List of All Member Functions"/>
     <section ref="fontfactoryinterface-h.html" title="Header File"/>
 </section>
-<section ref="global.html" title="Global Class Reference">
-    <keyword ref="global.html">Global</keyword>
-    <keyword ref="global.html#addWords">addWords</keyword>
-    <keyword ref="global.html#addedDawg">addedDawg</keyword>
-    <keyword ref="global.html#applicationFileName">applicationFileName</keyword>
-    <keyword ref="global.html#dawg">dawg</keyword>
-    <keyword ref="global.html#execute">execute</keyword>
-    <keyword ref="global.html#findDocuments">findDocuments</keyword>
-    <keyword ref="global.html#fixedDawg">fixedDawg</keyword>
-    <keyword ref="global.html#hideInputMethod">hideInputMethod</keyword>
-    <keyword ref="global.html#invoke">invoke</keyword>
-    <keyword ref="global.html#shellQuote">shellQuote</keyword>
-    <keyword ref="global.html#showInputMethod">showInputMethod</keyword>
-    <keyword ref="global.html#statusMessage">statusMessage</keyword>
-    <keyword ref="global.html#stringQuote">stringQuote</keyword>
-    <keyword ref="global.html#writeHWClock">writeHWClock</keyword>
-    <section ref="global-members.html" title="List of All Member Functions"/>
-    <section ref="global-h.html" title="Header File"/>
-</section>
 <section ref="imagecodecinterface.html" title="ImageCodecInterface Class Reference">
     <keyword ref="imagecodecinterface.html">ImageCodecInterface</keyword>
     <keyword ref="imagecodecinterface.html#installIOHandler">installIOHandler</keyword>
@@ -324,11 +292,6 @@
     <section ref="ir-members.html" title="List of All Member Functions"/>
     <section ref="ir-h.html" title="Header File"/>
 </section>
-<section ref="konsole.html" title="Konsole Class Reference">
-    <keyword ref="konsole.html">Konsole</keyword>
-    <section ref="konsole-members.html" title="List of All Member Functions"/>
-    <section ref="konsole-h.html" title="Header File"/>
-</section>
 <section ref="kvnc.html" title="KVNC Class Reference">
     <keyword ref="kvnc.html">KVNC</keyword>
     <section ref="kvnc-members.html" title="List of All Member Functions"/>
@@ -338,11 +301,6 @@
     <keyword ref="libflashplugin.html">LibFlashPlugin</keyword>
     <section ref="libflashplugin-members.html" title="List of All Member Functions"/>
     <section ref="libflashplugin-h.html" title="Header File"/>
-</section>
-<section ref="libmpeg3plugin.html" title="LibMpeg3Plugin Class Reference">
-    <keyword ref="libmpeg3plugin.html">LibMpeg3Plugin</keyword>
-    <section ref="libmpeg3plugin-members.html" title="List of All Member Functions"/>
-    <section ref="libmpeg3plugin-h.html" title="Header File"/>
 </section>
 <section ref="mediaplayerdecoder.html" title="MediaPlayerDecoder Class Reference">
     <keyword ref="mediaplayerdecoder.html">MediaPlayerDecoder</keyword>
@@ -386,12 +344,46 @@
     <section ref="mediaplayerdecoder-members.html" title="List of All Member Functions"/>
     <section ref="mediaplayerplugininterface-h.html" title="Header File"/>
 </section>
+<section ref="mediaplayerdecoder_1_6.html" title="MediaPlayerDecoder_1_6 Class Reference">
+    <keyword ref="mediaplayerdecoder_1_6.html">MediaPlayerDecoder_1_6</keyword>
+    <section ref="mediaplayerdecoder_1_6-members.html" title="List of All Member Functions"/>
+    <section ref="mediaplayerplugininterface-h.html" title="Header File"/>
+</section>
 <section ref="mediaplayerplugininterface.html" title="MediaPlayerPluginInterface Class Reference">
     <keyword ref="mediaplayerplugininterface.html">MediaPlayerPluginInterface</keyword>
     <keyword ref="mediaplayerplugininterface.html#decoder">decoder</keyword>
     <keyword ref="mediaplayerplugininterface.html#encoder">encoder</keyword>
     <section ref="mediaplayerplugininterface-members.html" title="List of All Member Functions"/>
     <section ref="mediaplayerplugininterface-h.html" title="Header File"/>
+</section>
+<section ref="mediarecorderencoder.html" title="MediaRecorderEncoder Class Reference">
+    <keyword ref="mediarecorderencoder.html">MediaRecorderEncoder</keyword>
+    <keyword ref="mediarecorderencoder.html#addComment">addComment</keyword>
+    <keyword ref="mediarecorderencoder.html#begin">begin</keyword>
+    <keyword ref="mediarecorderencoder.html#end">end</keyword>
+    <keyword ref="mediarecorderencoder.html#estimateAudioBps">estimateAudioBps</keyword>
+    <keyword ref="mediarecorderencoder.html#isActive">isActive</keyword>
+    <keyword ref="mediarecorderencoder.html#pluginComment">pluginComment</keyword>
+    <keyword ref="mediarecorderencoder.html#pluginFormatName">pluginFormatName</keyword>
+    <keyword ref="mediarecorderencoder.html#pluginFormatTag">pluginFormatTag</keyword>
+    <keyword ref="mediarecorderencoder.html#pluginMimeType">pluginMimeType</keyword>
+    <keyword ref="mediarecorderencoder.html#pluginNumFormats">pluginNumFormats</keyword>
+    <keyword ref="mediarecorderencoder.html#pluginVersion">pluginVersion</keyword>
+    <keyword ref="mediarecorderencoder.html#requiresDirectAccess">requiresDirectAccess</keyword>
+    <keyword ref="mediarecorderencoder.html#setAudioChannels">setAudioChannels</keyword>
+    <keyword ref="mediarecorderencoder.html#setAudioFrequency">setAudioFrequency</keyword>
+    <keyword ref="mediarecorderencoder.html#supportsAudio">supportsAudio</keyword>
+    <keyword ref="mediarecorderencoder.html#supportsComments">supportsComments</keyword>
+    <keyword ref="mediarecorderencoder.html#supportsVideo">supportsVideo</keyword>
+    <keyword ref="mediarecorderencoder.html#writeAudioSamples">writeAudioSamples</keyword>
+    <section ref="mediarecorderencoder-members.html" title="List of All Member Functions"/>
+    <section ref="mediarecorderplugininterface-h.html" title="Header File"/>
+</section>
+<section ref="mediarecorderplugininterface.html" title="MediaRecorderPluginInterface Class Reference">
+    <keyword ref="mediarecorderplugininterface.html">MediaRecorderPluginInterface</keyword>
+    <keyword ref="mediarecorderplugininterface.html#encoder">encoder</keyword>
+    <section ref="mediarecorderplugininterface-members.html" title="List of All Member Functions"/>
+    <section ref="mediarecorderplugininterface-h.html" title="Header File"/>
 </section>
 <section ref="menubutton.html" title="MenuButton Class Reference">
     <keyword ref="menubutton.html">MenuButton</keyword>
@@ -463,13 +455,13 @@
     <keyword ref="pimcontact.html#businessZip">businessZip</keyword>
     <keyword ref="pimcontact.html#children">children</keyword>
     <keyword ref="pimcontact.html#childrenList">childrenList</keyword>
+    <keyword ref="pimcontact.html#clearEmailList">clearEmailList</keyword>
     <keyword ref="pimcontact.html#company">company</keyword>
     <keyword ref="pimcontact.html#defaultEmail">defaultEmail</keyword>
     <keyword ref="pimcontact.html#department">department</keyword>
     <keyword ref="pimcontact.html#displayBusinessAddress">displayBusinessAddress</keyword>
     <keyword ref="pimcontact.html#displayHomeAddress">displayHomeAddress</keyword>
     <keyword ref="pimcontact.html#emailList">emailList</keyword>
-    <keyword ref="pimcontact.html#emails">emails</keyword>
     <keyword ref="pimcontact.html#fileAs">fileAs</keyword>
     <keyword ref="pimcontact.html#firstName">firstName</keyword>
     <keyword ref="pimcontact.html#fullName">fullName</keyword>
@@ -489,12 +481,14 @@
     <keyword ref="pimcontact.html#manager">manager</keyword>
     <keyword ref="pimcontact.html#match">match</keyword>
     <keyword ref="pimcontact.html#middleName">middleName</keyword>
+    <keyword ref="pimcontact.html#nameTitle">nameTitle</keyword>
     <keyword ref="pimcontact.html#nickname">nickname</keyword>
     <keyword ref="pimcontact.html#notes">notes</keyword>
     <keyword ref="pimcontact.html#office">office</keyword>
     <keyword ref="pimcontact.html#profession">profession</keyword>
     <keyword ref="pimcontact.html#pronunciation">pronunciation</keyword>
     <keyword ref="pimcontact.html#readVCard">readVCard</keyword>
+    <keyword ref="pimcontact.html#removeEmail">removeEmail</keyword>
     <keyword ref="pimcontact.html#setAnniversary">setAnniversary</keyword>
     <keyword ref="pimcontact.html#setAssistant">setAssistant</keyword>
     <keyword ref="pimcontact.html#setBirthday">setBirthday</keyword>
@@ -512,7 +506,7 @@
     <keyword ref="pimcontact.html#setCompany">setCompany</keyword>
     <keyword ref="pimcontact.html#setDefaultEmail">setDefaultEmail</keyword>
     <keyword ref="pimcontact.html#setDepartment">setDepartment</keyword>
-    <keyword ref="pimcontact.html#setEmails">setEmails</keyword>
+    <keyword ref="pimcontact.html#setEmailList">setEmailList</keyword>
     <keyword ref="pimcontact.html#setFileAs">setFileAs</keyword>
     <keyword ref="pimcontact.html#setFirstName">setFirstName</keyword>
     <keyword ref="pimcontact.html#setGender">setGender</keyword>
@@ -529,6 +523,7 @@
     <keyword ref="pimcontact.html#setLastName">setLastName</keyword>
     <keyword ref="pimcontact.html#setManager">setManager</keyword>
     <keyword ref="pimcontact.html#setMiddleName">setMiddleName</keyword>
+    <keyword ref="pimcontact.html#setNameTitle">setNameTitle</keyword>
     <keyword ref="pimcontact.html#setNickname">setNickname</keyword>
     <keyword ref="pimcontact.html#setNotes">setNotes</keyword>
     <keyword ref="pimcontact.html#setOffice">setOffice</keyword>
@@ -536,10 +531,8 @@
     <keyword ref="pimcontact.html#setPronunciation">setPronunciation</keyword>
     <keyword ref="pimcontact.html#setSpouse">setSpouse</keyword>
     <keyword ref="pimcontact.html#setSuffix">setSuffix</keyword>
-    <keyword ref="pimcontact.html#setTitle">setTitle</keyword>
     <keyword ref="pimcontact.html#spouse">spouse</keyword>
     <keyword ref="pimcontact.html#suffix">suffix</keyword>
-    <keyword ref="pimcontact.html#title">title</keyword>
     <keyword ref="pimcontact.html#toRichText">toRichText</keyword>
     <keyword ref="pimcontact.html#writeVCard">writeVCard</keyword>
     <keyword ref="pimcontact.html#~PimContact">~PimContact</keyword>
@@ -559,8 +552,10 @@
     <keyword ref="pimevent.html#endInTZ">endInTZ</keyword>
     <keyword ref="pimevent.html#frequency">frequency</keyword>
     <keyword ref="pimevent.html#hasAlarm">hasAlarm</keyword>
+    <keyword ref="pimevent.html#hasExceptions">hasExceptions</keyword>
     <keyword ref="pimevent.html#hasRepeat">hasRepeat</keyword>
     <keyword ref="pimevent.html#isAllDay">isAllDay</keyword>
+    <keyword ref="pimevent.html#isException">isException</keyword>
     <keyword ref="pimevent.html#location">location</keyword>
     <keyword ref="pimevent.html#nextOccurrence">nextOccurrence</keyword>
     <keyword ref="pimevent.html#notes">notes</keyword>
@@ -570,6 +565,7 @@
     <keyword ref="pimevent.html#repeatTill">repeatTill</keyword>
     <keyword ref="pimevent.html#repeatTillInTZ">repeatTillInTZ</keyword>
     <keyword ref="pimevent.html#repeatType">repeatType</keyword>
+    <keyword ref="pimevent.html#seriesUid">seriesUid</keyword>
     <keyword ref="pimevent.html#setAlarm">setAlarm</keyword>
     <keyword ref="pimevent.html#setAllDay">setAllDay</keyword>
     <keyword ref="pimevent.html#setDescription">setDescription</keyword>
@@ -596,9 +592,6 @@
 </section>
 <section ref="pimrecord.html" title="PimRecord Class Reference">
     <keyword ref="pimrecord.html">PimRecord</keyword>
-    <keyword ref="pimrecord.html#categories">categories</keyword>
-    <keyword ref="pimrecord.html#customField">customField</keyword>
-    <keyword ref="pimrecord.html#generateUuid">generateUuid</keyword>
     <keyword ref="pimrecord.html#operator!-eq">operator!=</keyword>
     <keyword ref="pimrecord.html#operator-eq">operator=</keyword>
     <keyword ref="pimrecord.html#operator-eq-eq">operator==</keyword>
@@ -612,18 +605,32 @@
 </section>
 <section ref="pimtask.html" title="PimTask Class Reference">
     <keyword ref="pimtask.html">PimTask</keyword>
+    <keyword ref="pimtask.html#PriorityValue">PriorityValue</keyword>
+    <keyword ref="pimtask.html#TaskStatus">TaskStatus</keyword>
     <keyword ref="pimtask.html#clearDueDate">clearDueDate</keyword>
+    <keyword ref="pimtask.html#completedDate">completedDate</keyword>
     <keyword ref="pimtask.html#description">description</keyword>
     <keyword ref="pimtask.html#dueDate">dueDate</keyword>
     <keyword ref="pimtask.html#hasDueDate">hasDueDate</keyword>
+    <keyword ref="pimtask.html#hasStartedDate">hasStartedDate</keyword>
     <keyword ref="pimtask.html#isCompleted">isCompleted</keyword>
     <keyword ref="pimtask.html#match">match</keyword>
+    <keyword ref="pimtask.html#notes">notes</keyword>
+    <keyword ref="pimtask.html#percentCompleted">percentCompleted</keyword>
     <keyword ref="pimtask.html#priority">priority</keyword>
     <keyword ref="pimtask.html#readVCalendar">readVCalendar</keyword>
     <keyword ref="pimtask.html#setCompleted">setCompleted</keyword>
+    <keyword ref="pimtask.html#setCompletedDate">setCompletedDate</keyword>
     <keyword ref="pimtask.html#setDescription">setDescription</keyword>
     <keyword ref="pimtask.html#setDueDate">setDueDate</keyword>
+    <keyword ref="pimtask.html#setNotes">setNotes</keyword>
+    <keyword ref="pimtask.html#setPercentCompleted">setPercentCompleted</keyword>
     <keyword ref="pimtask.html#setPriority">setPriority</keyword>
+    <keyword ref="pimtask.html#setStartedDate">setStartedDate</keyword>
+    <keyword ref="pimtask.html#setStatus">setStatus</keyword>
+    <keyword ref="pimtask.html#startedDate">startedDate</keyword>
+    <keyword ref="pimtask.html#status">status</keyword>
+    <keyword ref="pimtask.html#toRichText">toRichText</keyword>
     <keyword ref="pimtask.html#writeVCalendar">writeVCalendar</keyword>
     <keyword ref="pimtask.html#~PimTask">~PimTask</keyword>
     <section ref="pimtask-members.html" title="List of All Member Functions"/>
@@ -649,20 +656,22 @@
     <section ref="qdawg-members.html" title="List of All Member Functions"/>
     <section ref="qdawg-h.html" title="Header File"/>
 </section>
-<section ref="qlibrary.html" title="QLibrary Class Reference">
-    <keyword ref="qlibrary.html">QLibrary</keyword>
-    <keyword ref="qlibrary.html#Policy">Policy</keyword>
-    <keyword ref="qlibrary.html#isLoaded">isLoaded</keyword>
-    <keyword ref="qlibrary.html#library">library</keyword>
-    <keyword ref="qlibrary.html#load">load</keyword>
-    <keyword ref="qlibrary.html#policy">policy</keyword>
-    <keyword ref="qlibrary.html#queryInterface">queryInterface</keyword>
-    <keyword ref="qlibrary.html#resolve">resolve</keyword>
-    <keyword ref="qlibrary.html#setPolicy">setPolicy</keyword>
-    <keyword ref="qlibrary.html#unload">unload</keyword>
-    <keyword ref="qlibrary.html#~QLibrary">~QLibrary</keyword>
-    <section ref="qlibrary-members.html" title="List of All Member Functions"/>
-    <section ref="qlibrary-h.html" title="Header File"/>
+<section ref="qeucjpcodec.html" title="QEucJpCodec Class Reference">
+    <keyword ref="qeucjpcodec.html">QEucJpCodec</keyword>
+    <keyword ref="qeucjpcodec.html#mibEnum">mibEnum</keyword>
+    <keyword ref="qeucjpcodec.html#~QEucJpCodec">~QEucJpCodec</keyword>
+    <section ref="qeucjpcodec-members.html" title="List of All Member Functions"/>
+    <section ref="qeucjpcodec-h.html" title="Header File"/>
+</section>
+<section ref="qjiscodec.html" title="QJisCodec Class Reference">
+    <keyword ref="qjiscodec.html">QJisCodec</keyword>
+    <section ref="qjiscodec-members.html" title="List of All Member Functions"/>
+    <section ref="qjiscodec-h.html" title="Header File"/>
+</section>
+<section ref="qjpunicodeconv.html" title="QJpUnicodeConv Class Reference">
+    <keyword ref="qjpunicodeconv.html">QJpUnicodeConv</keyword>
+    <section ref="qjpunicodeconv-members.html" title="List of All Member Functions"/>
+    <section ref="qjpunicode-h.html" title="Header File"/>
 </section>
 <section ref="qobex.html" title="QObex Class Reference">
     <keyword ref="qobex.html">QObex</keyword>
@@ -706,17 +715,10 @@
     <section ref="qpetoolbar-members.html" title="List of All Member Functions"/>
     <section ref="qpetoolbar-h.html" title="Header File"/>
 </section>
-<section ref="quuid.html" title="QUuid Class Reference">
-    <keyword ref="quuid.html">QUuid</keyword>
-    <keyword ref="quuid.html#isNull">isNull</keyword>
-    <keyword ref="quuid.html#operator!-eq">operator!=</keyword>
-    <keyword ref="quuid.html#operator-lt">operator&lt;</keyword>
-    <keyword ref="quuid.html#operator-eq">operator=</keyword>
-    <keyword ref="quuid.html#operator-eq-eq">operator==</keyword>
-    <keyword ref="quuid.html#operator-gt">operator&gt;</keyword>
-    <keyword ref="quuid.html#toString">toString</keyword>
-    <section ref="quuid-members.html" title="List of All Member Functions"/>
-    <section ref="quuid-h.html" title="Header File"/>
+<section ref="qsjiscodec.html" title="QSjisCodec Class Reference">
+    <keyword ref="qsjiscodec.html">QSjisCodec</keyword>
+    <section ref="qsjiscodec-members.html" title="List of All Member Functions"/>
+    <section ref="qsjiscodec-h.html" title="Header File"/>
 </section>
 <section ref="resource.html" title="Resource Class Reference">
     <keyword ref="resource.html">Resource</keyword>
@@ -724,7 +726,6 @@
     <keyword ref="resource.html#findPixmap">findPixmap</keyword>
     <keyword ref="resource.html#findSound">findSound</keyword>
     <keyword ref="resource.html#loadBitmap">loadBitmap</keyword>
-    <keyword ref="resource.html#loadIconSet">loadIconSet</keyword>
     <keyword ref="resource.html#loadImage">loadImage</keyword>
     <keyword ref="resource.html#loadPixmap">loadPixmap</keyword>
     <section ref="resource-members.html" title="List of All Member Functions"/>
@@ -870,6 +871,9 @@
 <section ref="overview.html" title="Qtopia Overview">
     <keyword ref="overview.html">Qtopia Overview</keyword>
 </section>
+<section ref="devices.html" title="">
+    <keyword ref="devices.html"></keyword>
+</section>
 <section ref="distrib.html" title="">
     <keyword ref="distrib.html"></keyword>
 </section>
@@ -899,6 +903,9 @@
 </section>
 <section ref="qcop.html" title="">
     <keyword ref="qcop.html"></keyword>
+</section>
+<section ref="release-1.6beta2.html" title="">
+    <keyword ref="release-1.6beta2.html"></keyword>
 </section>
 <section ref="services.html" title="">
     <keyword ref="services.html"></keyword>

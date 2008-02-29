@@ -21,61 +21,68 @@
 #include <qtopia/calc/doubleinstruction.h>
 #include "simple.h"
 
+
 FormSimple::FormSimple(QWidget *parent,const char *name,WFlags fl)
 	:QWidget(parent,name,fl) {
     if ( !name )
 	setName( "Simple" );
-    resize( 384, 476 );
-    setSizePolicy( QSizePolicy( (QSizePolicy::SizeType)7, (QSizePolicy::SizeType)7, sizePolicy().hasHeightForWidth() ) );
+    QSizePolicy mySizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred,FALSE);
 
-    SimpleLayout = new QGridLayout( this, 2, 4, 0, 0, "SimpleLayout");
+    QVBoxLayout *vbl = new QVBoxLayout(this);
+    QHBoxLayout *SimpleLayout = new QHBoxLayout( vbl, 0, "SimpleLayout");
     QFont big(font());
     big.setPointSize(big.pointSize()*2);
 
-    PBMPlus = new QPushButton(this,"PBM+");
+    QPushButton *PBMPlus = new QPushButton(this,"PBM+");
+    PBMPlus->setSizePolicy(mySizePolicy);
     PBMPlus->setText(tr("M+"));
     PBMPlus->setFont(big);
-    SimpleLayout->addWidget(PBMPlus,0,0);
+    SimpleLayout->addWidget(PBMPlus);
 
-    PBMC = new QPushButton(this,"PBMC");
+    QPushButton *PBMC = new QPushButton(this,"PBMC");
+    PBMC->setSizePolicy(mySizePolicy);
     PBMC->setText(tr("MC"));
     PBMC->setFont(big);
-    SimpleLayout->addWidget(PBMC,0,1);
+    SimpleLayout->addWidget(PBMC);
 
-    PBMR = new QPushButton(this,"PBMR");
+    QPushButton *PBMR = new QPushButton(this,"PBMR");
+    PBMR->setSizePolicy(mySizePolicy);
     PBMR->setText(tr("MR"));
     PBMR->setFont(big);
-    SimpleLayout->addWidget(PBMR,0,2);
+    SimpleLayout->addWidget(PBMR);
 
-    PBCE = new QPushButton(this,"PBCE");
+    QPushButton *PBCE = new QPushButton(this,"PBCE");
+    PBCE->setSizePolicy(mySizePolicy);
     PBCE->setText(tr("CE/C"));
     PBCE->setFont(big);
-    SimpleLayout->addWidget(PBCE,0,3);
+    SimpleLayout->addWidget(PBCE);
 
     connect (PBCE, SIGNAL(clicked()), this, SLOT(CEClicked()));
     connect (PBMR, SIGNAL(clicked()), this, SLOT(MRClicked()));
     connect (PBMC, SIGNAL(clicked()), this, SLOT(MCClicked()));
     connect (PBMPlus, SIGNAL(clicked()), this, SLOT(MPlusClicked()));
 
-    siw = new Type1DecimalInputWidget(this,"SIW");
-    SimpleLayout->addMultiCellWidget(siw,1,1,0,3);
+    Type1DecimalInputWidget *siw = new Type1DecimalInputWidget(this,"SIW");
+    siw->setSizePolicy(mySizePolicy);
+    vbl->addWidget(siw);
+    vbl->setStretchFactor(siw,4);
 }
 
 void FormSimple::showEvent ( QShowEvent *e ) {
-    sys.setAccType(new DoubleData());
+    systemEngine->setAccType("DOUBLE");
     QWidget::showEvent(e);
 }
 
 void FormSimple::CEClicked() {
-    sys.dualReset();
+    systemEngine->dualReset();
 }
 void FormSimple::MCClicked() {
-    sys.memoryReset();
+    systemEngine->memoryReset();
 }
 void FormSimple::MRClicked() {
-    sys.memoryRecall();
+    systemEngine->memoryRecall();
 }
 void FormSimple::MPlusClicked() {
-    sys.memorySave();
+    systemEngine->memorySave();
 }
 

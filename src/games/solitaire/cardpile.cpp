@@ -21,7 +21,7 @@
 #include "cardpile.h"
 #include "card.h"
 
-#include <qpe/config.h>
+#include <qtopia/config.h>
 #include <qpoint.h>
 
 #include <qlist.h>

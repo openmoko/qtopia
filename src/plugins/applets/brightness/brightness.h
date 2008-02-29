@@ -21,6 +21,7 @@
 #ifndef BRIGHTNESS_APPLET_H
 #define BRIGHTNESS_APPLET_H
 
+#include <qtopia/qpeglobal.h>
 #include <qwidget.h>
 #include <qframe.h>
 #include <qpixmap.h>

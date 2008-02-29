@@ -23,8 +23,8 @@
 
 #include <qmainwindow.h>
 #include <qframe.h>
-#include <qpe/qlibrary.h>
-#include <qpe/mediaplayerplugininterface.h>
+#include <qtopia/qlibrary.h>
+#include <qtopia/mediaplayerplugininterface.h>
 
 
 class DocLnk;
@@ -57,12 +57,15 @@ private slots:
     void updateOnscreenDisplay();
     void hideOnscreenDisplay();
 
+public slots:
+    void openURL( const QString &url, const QString &mimetype );
     bool eventFilter( QObject *o, QEvent *e );
     bool keyPressEvent( QKeyEvent *e );
     bool keyReleaseEvent( QKeyEvent *e );
 
 protected:
     void timerEvent( QTimerEvent *e );
+    void setPlaying( const QString& URL );
 
 private:
     void error( const QString& error, const QString& errorMsg ); 

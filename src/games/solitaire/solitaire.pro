@@ -1,14 +1,15 @@
-TEMPLATE	= app
+multiprocess:TEMPLATE	= app
+multiprocess:DESTDIR	= $(QPEDIR)/bin
+singleprocess:TEMPLATE	= lib
+singleprocess:DESTDIR   = $(QPEDIR)/lib
+
 CONFIG		+= qtopia warn_on release
-DESTDIR		= $(QPEDIR)/bin
 
 HEADERS		= cardmetrics.h   canvascard.h   canvasshapes.h   cardgame.h   cardgamelayout.h   cardpile.h   card.h   carddeck.h   canvascardgame.h   freecellcardgame.h   patiencecardgame.h   canvascardwindow.h
-SOURCES		= cardmetrics.cpp canvascard.cpp canvasshapes.cpp cardgame.cpp cardgamelayout.cpp cardpile.cpp card.cpp carddeck.cpp canvascardgame.cpp freecellcardgame.cpp patiencecardgame.cpp canvascardwindow.cpp main.cpp
+SOURCES		= cardmetrics.cpp canvascard.cpp canvasshapes.cpp cardgame.cpp cardgamelayout.cpp cardpile.cpp card.cpp carddeck.cpp canvascardgame.cpp freecellcardgame.cpp patiencecardgame.cpp canvascardwindow.cpp 
 
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH	+= $(QPEDIR)/include
-LIBS            += -lqpe
+multiprocess:SOURCES+=main.cpp
 
 TARGET		= patience
 
-TRANSLATIONS	= $(QPEDIR)/i18n/de/patience.ts
+TRANSLATIONS = patience-en_GB.ts patience-de.ts patience-ja.ts patience-no.ts

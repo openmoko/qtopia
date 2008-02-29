@@ -27,13 +27,7 @@
 #include <limits.h>
 #include <stdio.h>
 
-// for mmap
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <unistd.h>
+#include "qmemoryfile_p.h"
 
 class QDawgPrivate;
 class QTrie;
@@ -112,7 +106,7 @@ void QTrie::insertWord(const QString& s, uint index)
     if ( index == s.length() ) {
 	isword = TRUE;
     } else {
-	QTrie* t = children.findAdd(s[index]);
+	QTrie* t = children.findAdd(s[(int)index]);
 	t->insertWord(s,index+1);
     }
 }
@@ -163,13 +157,15 @@ void QTrie::distributeKeys(TrieClubDirectory& directory)
 QTrie* QTrie::clubLeader(TrieClubDirectory& directory)
 {
     if ( !key ) return directory[0]->first();
-    for (TrieList::Iterator it=children.begin(); it!=children.end(); ++it) {
-	QTrie* t= (*it).p->clubLeader(directory);
-	(*it).p = t;
+    for (TrieList::Iterator itList=children.begin(); 
+	 itList!=children.end(); ++itList) {
+	QTrie* t= (*itList).p->clubLeader(directory);
+	(*itList).p = t;
     }
     TrieClub *club = directory[key];
-    for (TrieClub::Iterator it = club->begin(); it != club->end(); ++it) {
-	QTrie* o = *it;
+    for (TrieClub::Iterator itClub = club->begin(); 
+	 itClub != club->end(); ++itClub) {
+	QTrie* o = *itClub;
 	if ( o->equal(this) )
 	    return o;
     }
@@ -243,9 +239,24 @@ public:
 
     bool ok() const { return node; }
 
-    QDawgPrivate(uchar* mem)
+    QDawgPrivate::~QDawgPrivate()
     {
-	if ( !strncmp(dawg_sig,(char*)mem,8) ) {
+	delete memoryFile;
+    }
+
+private:
+    QMemoryFile *memoryFile;
+
+public:
+
+    QDawgPrivate(const QString &fileName)
+    {
+	uchar* mem = 0;
+	memoryFile = new QMemoryFile(fileName);
+	if (memoryFile)
+	    mem = (uchar*)memoryFile->data();
+
+	if (mem && !strncmp(dawg_sig, (char*)mem,8) ) {
 	    mem += 8;
 
 	    int n = ((mem[0]*256+mem[1])*256+mem[2])*256+mem[3];
@@ -515,20 +526,13 @@ QStringList QDawg::allWords() const
 bool QDawg::readFile(const QString& filename)
 {
     delete d;
-    d = 0;
-    int f = ::open( QFile::encodeName(filename), O_RDONLY );
-    if ( f < 0 )
-	return FALSE;
-    struct stat st;
-    if ( !fstat( f, &st ) ) {
-	char * tmp = (char*)mmap( 0, st.st_size, // any address, whole file
-                       PROT_READ, // read-only memory
-                       MAP_FILE | MAP_PRIVATE, // swap-backed map from file
-                       f, 0 ); // from offset 0 of f
-	if ( tmp && tmp != (char*)MAP_FAILED )
-	    d = new QDawgPrivate((uchar*)tmp);
+
+    d = new QDawgPrivate(filename);
+    if ((char*)d == 0){
+	// failed to load file into memory 
+	delete d;
+	d = 0;
     }
-    ::close( f );
     return d;
 }
 

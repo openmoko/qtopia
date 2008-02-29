@@ -251,6 +251,13 @@ bool Task::match ( const QRegExp &regexp ) const
     return match;
 }
 
+#ifdef Q_OS_WIN32
+Qtopia::UidGen & Task::uidGen()
+{
+    return sUidGen;
+}
+#endif
+
 /*
   \internal
 */

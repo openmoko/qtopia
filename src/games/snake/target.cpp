@@ -21,7 +21,7 @@
 #include "target.h"
 #include "codes.h"
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
 #include <stdlib.h>
 

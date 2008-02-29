@@ -3,6 +3,6 @@ Type=Application
 Exec=qipkg
 MimeType=application/ipkg
 Icon=Ipkg
-Name=Add/Remove Software
+Name=Software Packages
 Name[hu]=Csomag- kezelõ
 Name[de]=Software

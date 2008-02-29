@@ -26,6 +26,7 @@ class PowerStatus;
 
 class BatteryStatus : public QFrame
 {
+    Q_OBJECT
 public:
     BatteryStatus( const PowerStatus *s, bool pop, QWidget *parent=0, WFlags f=0 );
     ~BatteryStatus();

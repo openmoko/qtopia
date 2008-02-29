@@ -20,13 +20,13 @@
 
 #include "gowidget.h"
 
-#include <qpe/config.h>
-#include <qpe/resource.h>
+#include <qtopia/config.h>
+#include <qtopia/resource.h>
 
 #include <qpainter.h>
 #include <qpixmap.h>
-#include <qpe/qpetoolbar.h>
-#include <qpe/qpemenubar.h>
+#include <qtopia/qpetoolbar.h>
+#include <qtopia/qpemenubar.h>
 #include <qpopupmenu.h>
 #include <qaction.h>
 #include <qapplication.h> //processEvents()
@@ -38,6 +38,8 @@
 #include "goplayutils.h"
 
 static const enum bVal computer_color = BLACK;
+static QPixmap *blackStone;
+static QPixmap *whiteStone;
     
 static int current_handicap = 1;
 
@@ -46,8 +48,6 @@ static QBrush *goBrush;
 //static QImage *blackStone;
 //static QImage *whiteStone;
 static QPixmap *newBlackStone;
-static QPixmap *blackStone;
-static QPixmap *whiteStone;
 
 static bool smallStones = FALSE;
 
@@ -66,37 +66,38 @@ static bool smallStones = FALSE;
     by Three Rivers Computer Corp.
 */
 
-GoMainWidget::GoMainWidget( QWidget *parent, const char* name) :
-	QMainWindow( parent, name ) 
+GoMainWidget::GoMainWidget( QWidget *parent, const char* name, WFlags fl) :
+	QMainWindow( parent, name, fl ) 
 {
-     setToolBarsMovable( FALSE );
+    setToolBarsMovable( FALSE );
     GoWidget *go = new GoWidget(this);
 
-    setCentralWidget(go);
+    QPEToolBar *tb = new QPEToolBar(this);
+    QPEMenuBar *mb = new QPEMenuBar(tb);
+    mb->setMargin(0);
+
     toolbar = new QPEToolBar(this);
     toolbar->setHorizontalStretchable( TRUE );
-    addToolBar(toolbar);
 
-    QPEMenuBar *mb = new QPEMenuBar( toolbar );
-    mb->setMargin(0);
     QPopupMenu *file = new QPopupMenu( this );
 
     QAction *a = new QAction( tr( "New Game" ), QString::null, 0, this, 0 );
     connect( a, SIGNAL( activated() ), go, SLOT( newGame() ) );
     a->addTo( file );
 
-    a = new QAction( tr( "Pass" ), Resource::loadPixmap( "pass" ), QString::null, 0, this, 0 );
+    a = new QAction( tr( "Pass" ), Resource::loadIconSet( "pass" ), QString::null, 0, this, 0 );
     connect( a, SIGNAL( activated() ), go, SLOT( pass() ) );
     a->addTo( file );
     a->addTo( toolbar );
     
     
-    a = new QAction( tr( "Resign" ), Resource::loadPixmap( "reset" ), QString::null, 0, this, 0 );
+    a = new QAction( tr( "Resign" ), Resource::loadIconSet( "reset" ), QString::null, 0, this, 0 );
     connect( a, SIGNAL( activated() ), go, SLOT( resign() ) );
     a->addTo( file );
 
     a = new QAction( tr( "Two player option" ),  QString::null, 0, this, 0 );
     a->setToggleAction( TRUE );
+    a->setOn(go->isTwoPlayer());
     connect( a, SIGNAL( toggled(bool) ), go, SLOT( setTwoplayer(bool) ) );
     a->addTo( file );
     
@@ -106,16 +107,19 @@ GoMainWidget::GoMainWidget( QWidget *parent, const char* name) :
     turnLabel->setBackgroundMode( PaletteButton );
     connect( go, SIGNAL(showTurn(const QPixmap&)), 
 	     turnLabel, SLOT(setPixmap(const QPixmap&)) );
+    turnLabel->setPixmap(go->currentPebble());
 
     
     QLabel * scoreLabel = new QLabel( toolbar );
     scoreLabel->setBackgroundMode( PaletteButton );
     connect( go, SIGNAL(showScore(const QString&)), 
 	     scoreLabel, SLOT(setText(const QString&)) );
+    scoreLabel->setText(go->score());
 
     toolbar->setStretchableWidget( scoreLabel );
     
-    go->readConfig();
+    setCentralWidget(go);
+
 }
 
 void GoMainWidget::resizeEvent( QResizeEvent * )
@@ -139,7 +143,6 @@ GoWidget::GoWidget( QWidget *parent, const char* name) :
     self = this;
     twoplayer = FALSE;
 
-    
     d = bx = by = 1;
     
     QPixmap pix = Resource::loadPixmap( "pine" );
@@ -156,7 +159,7 @@ GoWidget::GoWidget( QWidget *parent, const char* name) :
     whiteStone = new QPixmap(Resource::loadPixmap( "Go-white" ));
     newBlackStone = new QPixmap(Resource::loadPixmap( "Go-black-highlight" ));
 
-    init();
+    readConfig();
 }
 
 GoWidget::~GoWidget()
@@ -185,7 +188,7 @@ void GoWidget::writeConfig()
 
 void GoWidget::readConfig()
 {
-    init();
+    clearBoard();
     Config cfg("Go");
     cfg.setGroup("Game");
     twoplayer = cfg.readBoolEntry("TwoPlayer");
@@ -205,7 +208,19 @@ void GoWidget::readConfig()
     blackPrisoners = cfg.readNumEntry("BlackPrisoners",0);
     whitePrisoners = cfg.readNumEntry("WhitePrisoners",0);
     reportPrisoners(blackPrisoners,whitePrisoners);
+
+
+    // either needs to start a new game, or continue the current.
+    gameActive = TRUE;
+    if (lastX == -1 && lastY == -1 && !twoplayer) {
+	doComputerMove();
+    }
     emit showTurn( currentPlayer == WHITE ? *whiteStone : *blackStone );
+}
+
+const QPixmap &GoWidget::currentPebble() const
+{ 
+    return (currentPlayer == WHITE ?  *whiteStone : *blackStone );
 }
 
 void GoWidget::resizeEvent( QResizeEvent * )
@@ -229,16 +244,19 @@ void GoWidget::resizeEvent( QResizeEvent * )
     }
 }
 
-void GoWidget::init()
+void GoWidget::clearBoard()
 {
     lastX = lastY = newX = newY = -1;
     nPassed = 0;
     for ( int i = 0; i < 19; i++ )
 	for ( int j = 0; j < 19; j++ )
 	    board[i][j]=-1;
-    gameActive = TRUE;
     goRestart(current_handicap);
+}
 
+void GoWidget::startGame()
+{
+    gameActive = TRUE;
     if ( twoplayer ) {
 	currentPlayer = BLACK;
     } else {
@@ -296,10 +314,11 @@ void GoWidget::doMove( int x, int y )
 {
 
     if ( !GoPlaceStone( currentPlayer, x, y ) ) {
-	//printf( "Illegal move (%d,%d)\n", x, y );
+	//qDebug( "Illegal move (%d,%d)", x, y );
+	refresh(x,y);
 	return;
     }
-    //printf( "you do (%d,%d)\n", x, y );
+    //qDebug( "you do (%d,%d)", x, y );
     nPassed = 0;
     if ( twoplayer )
 	currentPlayer = (currentPlayer==WHITE) ? BLACK : WHITE;
@@ -330,7 +349,8 @@ void GoWidget::resign()
 
 void GoWidget::newGame()
 {
-    init();
+    clearBoard();
+    startGame();
     update();
 }
 
@@ -341,14 +361,14 @@ void GoWidget::endGame()
 
     int w,b;
     CountUp( &w, &b);
-    QString s = tr("White %1, Black %2. ").arg(w).arg(b);
+    scoreString = tr("White %1, Black %2. ").arg(w).arg(b);
     if ( w > b )
-	s += tr("White wins.");
+	scoreString += tr("White wins.");
     else if ( w < b )
-	s += tr("Black wins.");
+	scoreString += tr("Black wins.");
     else
-	s += tr("A draw.");
-    emit showScore( s );
+	scoreString += tr("A draw.");
+    emit showScore( scoreString );
 }
 
 void GoWidget::doComputerMove()
@@ -367,7 +387,8 @@ void GoWidget::doComputerMove()
 	GoPlaceStone(computer_color,x,y);
 	nPassed = 0;
     } else {
-	emit showScore( tr("I pass") );
+	scoreString = tr("I pass");
+	emit showScore( scoreString );
 	nPassed++;
 	if ( nPassed >= 2 )
 	    endGame();
@@ -438,8 +459,8 @@ void GoWidget::placeStone (enum bVal c, short x, short y )
 
 void GoWidget::reportPrisoners( int blackcnt, int whitecnt )
 {
-    QString s = tr( "Prisoners: black %1, white %2" ).arg(blackcnt).arg(whitecnt);
-    emit showScore( s );
+    scoreString = tr( "Prisoners: black %1, white %2" ).arg(blackcnt).arg(whitecnt);
+    emit showScore( scoreString );
 }
 
 void GoWidget::setTwoplayer( bool b )

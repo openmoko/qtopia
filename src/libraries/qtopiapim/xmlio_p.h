@@ -23,11 +23,16 @@
 
 #include <qvector.h>
 #include <qlist.h>
+#include <qdatetime.h>
+#include <qtopia/pim/qtopiapim.h>
 #include <qtopia/pim/pimrecord.h>
+#ifdef Q_OS_WIN32
+#include <qxml.h> // needed for import of QMap<QString,QString>
+#endif
 
 class QFile;
 
-class PrRecord : public PimRecord
+class QTOPIAPIM_EXPORT PrRecord : public PimRecord
 {
 public:
     void setUid(QUuid u) { p_setUid(u); }
@@ -36,7 +41,7 @@ public:
     QMap<QString, QString> &customRef() { return customMap; }
 };
 
-class PimVector : public QVector<PimRecord> {
+class QTOPIAPIM_EXPORT PimVector : public QVector<PimRecord> {
 public:
     PimVector();
 
@@ -65,16 +70,16 @@ private:
 };
 
 template <class T>
-class SortedRecords : public PimVector
+class  SortedRecords : public PimVector
 {
 public:
-    SortedRecords() : PimVector() {}
+    SortedRecords() : PimVector() { mKey = -1; mAscending = FALSE; }
 
-    SortedRecords(uint size) : PimVector(size) {}
+    SortedRecords(uint size) : PimVector(size) {mKey = -1; mAscending = FALSE;} 
 
     ~SortedRecords() {}
 
-    const T* operator[](int i) const { return (T*)PimVector::at(i); }
+    //const T* operator[](int i) const { return (T*)PimVector::at(i); }
     const T* at(int i) const { return (T*)PimVector::at(i); }
 
     // fast but utimately slow if you want to keep it sorted.
@@ -84,24 +89,49 @@ public:
 
     void remove( T *i )
     { PimVector::remove((PimRecord *)i); }
+    
+    void setSorting(int key, bool ascending = FALSE)
+    { mKey = key; mAscending = ascending; setDirty(); }
+    
+    int sortKey() const { return mKey; }
+    bool ascending() const { return mAscending; }
 
 protected:
     virtual int compareItems(Item d1, Item d2)
     { return PimVector::compareItems(d1, d2); }
+
+    int mKey;
+    bool mAscending;
 };
 
-class PimXmlIO {
- public:
-  PimXmlIO();
+class QTOPIAPIM_EXPORT PimXmlIO {
+public:
+    // subclass contstructors should call setDataFilename and setJournalFilename
+    PimXmlIO( const QMap<int,QCString> &, const QMap<QCString,int> & );
   virtual ~PimXmlIO();
 
   bool loadData();
   bool saveData(const QList<PimRecord> &);
 
-protected:
-  virtual const QString dataFilename() const = 0;
-  virtual const QString journalFilename() const = 0;
+  static QArray<int>idsFromString( const QString &str );
+  QString customToXml(const PimRecord * ) const;
+  static QString idsToString( const QArray<int> &ids );
 
+  static QString dateToXml( const QDate &d );
+  static QDate xmlToDate( const QString &s );
+
+  void setDataFilename(const QString &str) { mFilename = str; };
+  void setJournalFilename(const QString &str) { mJournalFilename = str; };
+
+  QString dataFilename() const { return mFilename; };
+  QString journalFilename() const { return mJournalFilename; };
+
+  // should perhaps be moved back to protected
+  static QUuid uuidFromInt( int );
+  static int uuidToInt( const QUuid &);
+  static int generateUid(); 
+
+protected:
   virtual const char *recordStart() const = 0;
   virtual const char *listStart() const = 0;
   virtual const char *listEnd() const = 0;
@@ -113,21 +143,13 @@ protected:
   virtual bool internalRemoveRecord(PimRecord *) = 0;
   virtual bool internalUpdateRecord(PimRecord *) = 0;
 
-  virtual void assignField(PimRecord *, const QCString &attr, const QString &value) = 0;
-  virtual QString recordToXml(const PimRecord *) = 0;
+  virtual QString recordToXml(const PimRecord *);
 
   // helper functions
-  static QArray<int>idsFromString( const QString &str );
-  QString customToXml(const PimRecord * ) const;
-  static QString idsToString( const QArray<int> &ids );
-
   void assignNewUid(PimRecord *) const;
 
   void setUid(PimRecord &r, const QUuid &u) const;
   QUuid uid(const PimRecord &r) const;
-
-  static QUuid uuidFromInt( int );
-  static int uuidToInt( const QUuid &);
 
   enum journal_action { ACTION_ADD, ACTION_REMOVE, ACTION_REPLACE };
   void updateJournal(const PimRecord &, journal_action);
@@ -146,8 +168,10 @@ private:
 
 
   QDateTime mLastRead;
+  QString mFilename, mJournalFilename;
 
-  mutable int maxId;
+  const QMap<int,QCString> &keyToIdentifier;
+  const QMap<QCString,int> &identifierToKey;
 };
 
 #endif

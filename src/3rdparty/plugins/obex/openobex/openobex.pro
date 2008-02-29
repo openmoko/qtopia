@@ -1,5 +1,7 @@
 TEMPLATE	= lib
 CONFIG		+= qtopia warn_on
+win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
+#DEFINES+=OBEX_DEBUG=2
 HEADERS = inobex.h    \	
 	irda.h 	      \	
 	irda_wrap.h   \	

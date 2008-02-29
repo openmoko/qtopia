@@ -17,12 +17,6 @@
 ** not clear to you.
 **
 **********************************************************************/
-#include "config.h"
-#include "datebookmonth.h"
-#include "datebookdb.h"
-#include "resource.h"
-#include "qpeapplication.h"
-#include "timestring.h"
 
 #include <qtoolbutton.h>
 #include <qspinbox.h>
@@ -33,6 +27,14 @@
 #include <qvaluestack.h>
 #include <qwhatsthis.h>
 
+#include "config.h"
+#include "datebookmonth.h"
+#include "datebookdb.h"
+#include "resource.h"
+#include "qpeapplication.h"
+#include "timestring.h"
+
+QIconSet qtopia_internal_loadIconSet( const QString &pix );
 
 DateBookMonthHeader::DateBookMonthHeader( QWidget *parent, const char *name )
     : QHBox( parent, name )
@@ -41,14 +43,14 @@ DateBookMonthHeader::DateBookMonthHeader( QWidget *parent, const char *name )
 
     begin = new QToolButton( this );
     begin->setFocusPolicy(NoFocus);
-    begin->setPixmap( Resource::loadPixmap( "start" ) );
+    begin->setIconSet( qtopia_internal_loadIconSet( "start" ) );
     begin->setAutoRaise( TRUE );
     begin->setFixedSize( begin->sizeHint() );
     QWhatsThis::add( begin, tr("Show January in the selected year") );
 
     back = new QToolButton( this );
     back->setFocusPolicy(NoFocus);
-    back->setPixmap( Resource::loadPixmap( "back" ) );
+    back->setIconSet( qtopia_internal_loadIconSet( "back" ) );
     back->setAutoRaise( TRUE );
     back->setFixedSize( back->sizeHint() );
     QWhatsThis::add( back, tr("Show the previous month") );
@@ -61,14 +63,14 @@ DateBookMonthHeader::DateBookMonthHeader( QWidget *parent, const char *name )
 
     next = new QToolButton( this );
     next->setFocusPolicy(NoFocus);
-    next->setPixmap( Resource::loadPixmap( "forward" ) );
+    next->setIconSet( qtopia_internal_loadIconSet( "forward" ) );
     next->setAutoRaise( TRUE );
     next->setFixedSize( next->sizeHint() );
     QWhatsThis::add( next, tr("Show the next month") );
 
     end = new QToolButton( this );
     end->setFocusPolicy(NoFocus);
-    end->setPixmap( Resource::loadPixmap( "finish" ) );
+    end->setIconSet( qtopia_internal_loadIconSet( "finish" ) );
     end->setAutoRaise( TRUE );
     end->setFixedSize( end->sizeHint() );
     QWhatsThis::add( end, tr("Show December in the selected year") );
@@ -174,8 +176,9 @@ DateBookMonthTable::DateBookMonthTable( QWidget *parent, const char *name,
     d->onMonday = cfg.readBoolEntry( "MONDAY" );
 
     horizontalHeader()->setResizeEnabled( FALSE );
+    int i;
     // we have to do this here... or suffer the consequences later...
-    for ( int i = 0; i < 7; i++ ){
+    for ( i = 0; i < 7; i++ ){
 	horizontalHeader()->resizeSection( i, 30 );
 	setColumnStretchable( i, TRUE );
     }
@@ -183,7 +186,7 @@ DateBookMonthTable::DateBookMonthTable( QWidget *parent, const char *name,
 
     verticalHeader()->hide();
     setLeftMargin( 0 );
-    for ( int i = 0; i < 6; ++i )
+    for ( i = 0; i < 6; ++i )
 	    setRowStretchable( i, TRUE );
 
     setSelectionMode( NoSelection );
@@ -558,7 +561,7 @@ void DayItemMonth::paint( QPainter *p, const QColorGroup &cg,
 	int f = (*itDays).start().hour(); // assume Effective event 
 	int t = (*itDays).end().hour(); 	 // is truncated.
 
-	if (ev.isAllDay()) { 
+	if ( (*itDays).event().type() == Event::AllDay ) { 
 	    if (!ev.hasRepeat())
 		normalAllDay = TRUE;
 	    else
@@ -738,7 +741,7 @@ void DateButton::setDate( QDate d )
 
 }
 
-void DateButton::setDateFormat( DateFormat f )
+void DateButton::setDateFormat( ::DateFormat f )
 {
     df = f;
     setDate( currDate );

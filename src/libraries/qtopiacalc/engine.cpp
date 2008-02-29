@@ -18,30 +18,16 @@
 **
 **********************************************************************/
 #include "engine.h"
-#include "doubleinstruction.h"
-#include "fractioninstruction.h"
 
 #include <qtopia/qpeapplication.h>
+#include <qtopia/calc/doubleinstruction.h>
+//#include <qtopia/calc/fractioninstruction.h>
+//#include <qtopia/calc/integerinstruction.h>
 
 //#define QTEST
+// Braces
 
-// Static member variables
-State Engine::state = sStart;
-Data *Engine::mem = 0;
-Data *Engine::acc = 0;
-Data *Engine::k = 0;
-InstructionDescription *Engine::kDesc = 0;
-int Engine::braceCount = 0;
-int Engine::decimalPlaces = 0;
-int Engine::myCounter = 0;
-bool Engine::secondaryReset = FALSE;
-int Engine::previousInstructionsPrecedence = 0;
-QStack<InstructionDescription> Engine::stack;
-QList<InstructionDescription> Engine::list;
-QLineEdit *Engine::lcd = 0;
-QLabel *Engine::memMark = 0;
-QLabel *Engine::kMark = 0;
-
+// Braces
 class iBraceOpen:public Instruction {
 public:
     iBraceOpen():Instruction(){};
@@ -55,103 +41,144 @@ public:
     Instruction *getInstruction();
 };
 
-Engine::Engine() {
-    // Double
-    if (!myCounter) {
-	InstructionDescription *da = new AddDoubleDouble();
-	registerInstruction(da);
-	da = new MultiplyDoubleDouble();
-	registerInstruction(da);
-	da = new SubtractDoubleDouble();
-	registerInstruction(da);
-	da = new DivideDoubleDouble();
-	registerInstruction(da);
-	da = new ConvertDoubleDouble();
-	registerInstruction(da);
-	da = new ConvertFractionDouble();
-	registerInstruction(da);
-	da = new ConvertIntDouble();
-	registerInstruction(da);
-	da = new DoublePow();
-	registerInstruction(da);
-	da = new DoubleSin();
-	registerInstruction(da);
-	da = new DoubleCos();
-	registerInstruction(da);
-	da = new DoubleTan();
-	registerInstruction(da);
-	da = new DoubleASin();
-	registerInstruction(da);
-	da = new DoubleACos();
-	registerInstruction(da);
-	da = new DoubleATan();
-	registerInstruction(da);
-	da = new DoubleLog();
-	registerInstruction(da);
-	da = new DoubleLn();
-	registerInstruction(da);
-	da = new DoubleOneOverX();
-	registerInstruction(da);
-	da = new DoubleFactorial();
-	registerInstruction(da);
-	da = new DoubleSquareRoot();
-	registerInstruction(da);
-	da = new DoubleCubeRoot();
-	registerInstruction(da);
-	da = new DoubleXRootY();
-	registerInstruction(da);
-	da = new DoubleSquare();
-	registerInstruction(da);
-	da = new DoubleNegate();
-	registerInstruction(da);
-	// Fraction
-	da = new ConvertFractionFraction();
-	registerInstruction(da);
-	da = new ConvertDoubleFraction();
-	registerInstruction(da);
-	da = new AddFractionFraction();
-	registerInstruction(da);
-	da = new SubtractFractionFraction();
-	registerInstruction(da);
-	da = new MultiplyFractionFraction();
-	registerInstruction(da);
-	da = new DivideFractionFraction();
-	registerInstruction(da);
-	// System
-	da = new BraceOpen();
-	registerInstruction(da);
-	list.setAutoDelete(TRUE);
-	myCounter++;
-    }
+BraceOpen::BraceOpen():InstructionDescription() {
+    instructionName = "Open brace";
+    typeOne = typeTwo = type = "NONE";
+    precedence = 50;
+};
+BraceOpen::~BraceOpen(){};
+void Engine::closeBrace () {
+    braceCount++;
+    acc = evalStack(acc,TRUE);
+    updateDisplay();
 }
-Engine::~Engine() { }
+Data *iBraceOpen::eval(Data *d) {
+    systemEngine->decBraceCount();
+    return d;
+}
+Instruction *BraceOpen::getInstruction() {
+    return new iBraceOpen();
+}
+
+Engine::Engine() {
+    // Variable initialisation
+    state = sStart;
+    emptyDataCache = mem = acc = k = 0;
+    kDesc = 0;
+    lcd = 0;
+    memMark = kMark = 0;
+    braceCount = decimalPlaces = previousInstructionsPrecedence = 0;
+    secondaryReset = FALSE;
+    currentType = "NONE";
+
+    list.setAutoDelete(TRUE);
+
+    // Register the common instructions
+    // Double
+    InstructionDescription *da = new AddDoubleDouble();
+    registerInstruction(da);
+    da = new MultiplyDoubleDouble();
+    registerInstruction(da);
+    da = new SubtractDoubleDouble();
+    registerInstruction(da);
+    da = new DivideDoubleDouble();
+    registerInstruction(da);
+    da = new DoubleFactory();
+    registerInstruction(da);
+    da = new DoubleCopy();
+    registerInstruction(da);
+    da = new DoublePow();
+    registerInstruction(da);
+    da = new DoubleExp();
+    registerInstruction(da);
+    da = new DoubleSin();
+    registerInstruction(da);
+    da = new DoubleCos();
+    registerInstruction(da);
+    da = new DoubleTan();
+    registerInstruction(da);
+    da = new DoubleASin();
+    registerInstruction(da);
+    da = new DoubleACos();
+    registerInstruction(da);
+    da = new DoubleATan();
+    registerInstruction(da);
+    da = new DoubleLog();
+    registerInstruction(da);
+    da = new DoubleLn();
+    registerInstruction(da);
+    da = new DoubleOneOverX();
+    registerInstruction(da);
+    da = new DoubleFactorial();
+    registerInstruction(da);
+    da = new DoubleSquareRoot();
+    registerInstruction(da);
+    da = new DoubleCubeRoot();
+    registerInstruction(da);
+    da = new DoubleXRootY();
+    registerInstruction(da);
+    da = new DoubleSquare();
+    registerInstruction(da);
+    da = new DoubleNegate();
+    registerInstruction(da);
+    // Fraction
+#ifdef TYPE_CONVERSION
+    da = new ConvertFractionFraction();
+    registerInstruction(da);
+    da = new ConvertDoubleFraction();
+    registerInstruction(da);
+    da = new AddFractionFraction();
+    registerInstruction(da);
+    da = new SubtractFractionFraction();
+    registerInstruction(da);
+    da = new MultiplyFractionFraction();
+    registerInstruction(da);
+    da = new DivideFractionFraction();
+    registerInstruction(da);
+    da = new ConvertFractionDouble();
+    registerInstruction(da);
+    // Integer
+    da = new ConvertIntDouble();
+    registerInstruction(da);
+#endif
+    // System
+    da = new BraceOpen();
+    registerInstruction(da);
+}
+Engine::~Engine() {};
 
 void Engine::registerInstruction(InstructionDescription *d) { 
-    list.append(d);
-
-    /* Check if its already there?
+#ifdef QTEST
+qDebug("registerInstruction - %s for %s",d->instructionName.latin1(),d->type.latin1());
+#endif
     InstructionDescription *tmp;
-    uint it = 0;
-    bool found = FALSE;
-    for (; it < list.count(); it++) {
+    for (uint it = 0; it < list.count(); it++) {
 	tmp = list.at(it);
 	if (tmp->instructionName == d->instructionName &&
 		tmp->typeOne == d->typeOne &&
 		tmp->typeTwo == d->typeTwo)
-	    found = TRUE;
+	    return;
     }
-    if (!found) {
-qDebug("appending %p",d);
-	list.append(d);
-    }
-    */
+    list.append(d);
 }
-Instruction * Engine::resolveInstruction(InstructionDescription &d) {
+Instruction * Engine::resolveInstruction(QString name) {
+    QString type = currentType;
+#ifdef QTEST
+qDebug("resolveInstruction(%s)",name.latin1());
+#endif
+    InstructionDescription *id = resolveDescription(name);
+    if (!id)
+	return 0;
+    return resolveInstruction(id);
+}
+Instruction * Engine::resolveInstruction(InstructionDescription *d) {
+    if (!d)
+	return 0;
 #ifdef QTEST
 qDebug("Searching for %s %s %s in %d",
-	d.instructionName.latin1(),
-	d.typeOne.latin1(),
-	d.typeTwo.latin1(),
+	d->instructionName.latin1(),
+	d->typeOne.latin1(),
+	d->typeTwo.latin1(),
 	list.count());
 #endif
     // Create a shortlist of instructions with the same name
@@ -160,7 +187,7 @@ qDebug("Searching for %s %s %s in %d",
     uint it = 0;
     for (; it < list.count(); it++) {
 	tmp = list.at(it);
-	if (tmp->instructionName == d.instructionName) 
+	if (tmp->instructionName == d->instructionName) 
 	    shortList.append(list.at(it));
     }
 
@@ -175,15 +202,15 @@ qDebug("None found by that name");
     // Try to match exactly at first
     for (it = 0; it < shortList.count(); it++) {
 	tmp = shortList.at(it);
-	if (tmp->typeOne == d.typeOne &&
-		tmp->typeTwo == d.typeTwo) {
+	if (tmp->typeOne == d->typeOne &&
+		tmp->typeTwo == d->typeTwo) {
 #ifdef QTEST
 qDebug("Matched %s %s %s",tmp->instructionName.latin1(),
 	tmp->typeOne.latin1(),
 	tmp->typeTwo.latin1());
 #endif
 	    Instruction *ret = tmp->getInstruction();
-	    ret->num = d.num;
+	    ret->num = d->num;
 	    return ret;
 	}
     }
@@ -224,7 +251,7 @@ Data *Engine::evalStack(Data *intermediate,bool inbrace,int p) {
 		}
 	    }
 	    // Evaluate 
-	    i = resolveInstruction(*id);
+	    i = resolveInstruction(id);
 	    i->num = id->num;
 	    Data *tmp = i->eval(intermediate);
 
@@ -247,75 +274,169 @@ void Engine::dualReset() {
 	softReset();
 	secondaryReset = TRUE;
     }
-
 }
 void Engine::softReset() {
     decimalPlaces = -1;
-    acc->clear();
+    if (acc)
+	acc->clear();
+    else
+	executeInstructionOnStack("Factory",stack);
+    state = sStart;
+    updateDisplay();
+}
+void Engine::softReset2() {
+    decimalPlaces = -1;
+    if (dStack.isEmpty())
+	executeInstructionOnStack2("Factory",dStack);
+    if (dStack.isEmpty())
+	qDebug("factory didnt work");
+    dStack.top()->clear();
     state = sStart;
     updateDisplay();
 }
 void Engine::hardReset() {
     stack.clear();
+    dStack.clear();
+    iStack.clear();
     braceCount = 0;
     secondaryReset = FALSE;
     softReset();
 }
 
 // Input and output
+InstructionDescription *Engine::resolveDescription(QString name) {
+    QString type = currentType;
+#ifdef QTEST
+qDebug("resolveDescription(%s, %s)",name.latin1(),type.latin1());
+#endif
+    InstructionDescription *id;
+    for (uint i = 0;i < list.count();i++) {
+	id = list.at(i);
+#ifdef QTEST
+qDebug("  - comparing %s for %s",id->instructionName.latin1(),id->type.latin1());
+#endif
+	if (id->instructionName == name &&
+		id->type == type)
+	    return id;
+    }
+    return 0;
+}
+void Engine::immediateInstruction(QString name) {
+#ifdef QTEST
+qDebug("immediateInstruction(%s)",name.latin1());
+#endif
+    if (state == sError || name.isEmpty())
+	return;
+    previousInstructionsPrecedence = 0;
+    secondaryReset = FALSE;
+    executeInstructionOnStack(name,stack);
+    updateDisplay();
+}
+void Engine::pushInstruction2(QString name) {
+    if (state == sError)
+	return;
+    InstructionDescription *id = resolveDescription(name);
+    if (!id)
+	return;
+    previousInstructionsPrecedence = id->precedence;
+    secondaryReset = FALSE;
+    if (!id->precedence) {
+	executeInstructionOnStack2(name,dStack);
+	updateDisplay();
+	delete id;
+	return;
+    }
+    if (!iStack.isEmpty()
+	    && state == sStart
+	    && id->precedence
+	    && previousInstructionsPrecedence) {
+	iStack.pop();
+    }
+    if (!iStack.isEmpty()) {
+	InstructionDescription *top = resolveDescription(*(iStack.top()));
+	if (id->precedence <= top->precedence) {
+	    acc = evalStack(acc,FALSE,top->precedence);
+	    updateDisplay();
+	}
+    }
+
+    Instruction *copy = resolveInstruction("Copy");
+    if (!copy)
+	return;
+    id->num = copy->eval(acc);
+    delete copy;
+    if ( state == sError )
+	return;
+    stack.push(id);
+    state = sStart;
+}
 void Engine::pushInstruction(InstructionDescription *i) {
     if (state == sError)
 	return;
-    if (stack.count()
+    previousInstructionsPrecedence = i->precedence;
+    secondaryReset = FALSE;
+    if (!i->precedence) {
+	executeInstructionOnStack(i->instructionName,stack);
+	updateDisplay();
+	delete i;
+	return;
+    }
+    if (!stack.isEmpty()
 	    && state == sStart
 	    && i->precedence
 	    && previousInstructionsPrecedence) {
 	stack.pop();
     }
-    previousInstructionsPrecedence = i->precedence;
-
-    secondaryReset = FALSE;
-    InstructionDescription desc;
-    desc.typeOne = desc.typeTwo = acc->getType();
-    if (!i->precedence) {
-	desc.instructionName = i->instructionName;
-	desc.precedence = 0;
-	desc.num = acc;
-	delete i;
-    } else {
-	// TODO: this is the rest of the evalStack hack
-	if (!stack.isEmpty())
-	    if (i->precedence <= stack.top()->precedence) {
-		acc = evalStack(acc,FALSE,stack.top()->precedence);
-	    }
-	desc.instructionName = QString("CONVERT");
-	i->num = acc;
-	stack.push(i);
+    if (!stack.isEmpty()) {
+	if (i->precedence <= stack.top()->precedence) {
+	    acc = evalStack(acc,FALSE,stack.top()->precedence);
+	    updateDisplay();
+	}
     }
-    Instruction *in = resolveInstruction(desc);
-    acc = in->eval(acc);
-    delete in;
-    if ( state != sError )
-	state = sStart;
-    // this could be causing some flicker, convert
-    // the top of the stack instead of acc
-    updateDisplay();
+
+    InstructionDescription *id = resolveDescription(i->instructionName);
+    if (!id)
+	return;
+    Instruction *copy = resolveInstruction("Copy");
+    if (!copy)
+	return;
+    i->num = copy->eval(acc);
+    delete copy;
+    if ( state == sError )
+	return;
+    stack.push(i);
+    state = sStart;
 }
 void Engine::pushChar(char c) {
-    if (state == sError)
+    if (!checkState())
 	return;
-    if (state == sAppend) {
-	acc->push(c);
-    } else if (state == sStart) {
+    if (state == sStart) {
 	softReset();
 	state = sAppend;
-	acc->push(c);
     }
+    acc->push(c);
+    secondaryReset = FALSE;
+    updateDisplay();
+}
+void Engine::pushChar2(char c) {
+    if (state == sError)
+	return;
+    if (dStack.isEmpty())
+	executeInstructionOnStack2("Factory",dStack);
+    if (dStack.isEmpty()) {
+	setError(eNoDataFactory);
+	return;
+    }
+    if (state == sStart) {
+	softReset2();
+	state = sAppend;
+    }
+    dStack.top()->push(c);
     secondaryReset = FALSE;
     updateDisplay();
 }
 void Engine::delChar() {
-    if (state == sError)
+    if (!checkState())
 	return;
     acc->del();
     updateDisplay();
@@ -323,53 +444,115 @@ void Engine::delChar() {
 void Engine::updateDisplay() {
     if (state == sError)
 	return;
-    if (lcd) 
+    if (!acc)
+	executeInstructionOnStack("Factory",stack);
+    if (lcd)
 	lcd->setText(acc->getFormattedOutput());
-    else
-	setError(qApp->translate("Engine",
-		    "Error in main programs: LCD has not been set"));
+}
+void Engine::updateDisplay2() {
+    if (state == sError)
+	return;
+    if (dStack.isEmpty())
+	executeInstructionOnStack2("Factory",dStack);
+    if (dStack.isEmpty())
+	qDebug("still empty, type = %s, state = %d,stack size = %d",currentType.latin1(),state,dStack.count());
+    if (lcd) 
+	lcd->setText(dStack.top()->getFormattedOutput());
+}
+bool Engine::checkState() {
+    if (state == sError)
+	return FALSE;
+    if (!acc) //stack.isEmpty())
+	executeInstructionOnStack("Factory",stack);
+    if (!acc) //stack.isEmpty())
+	return FALSE;
+    if (currentType == "NONE")
+	return FALSE;
+    return TRUE;
 }
 
 // Memory
 void Engine::memorySave() {
+    if (!checkState())
+	return;
+
+    if (!mem) {
+	Instruction *factory = resolveInstruction("Factory");
+	if (!factory) {
+	    setError(eNoDataFactory);
+	    return;
+	}
+	mem = factory->eval(new Data());
+	delete factory;
+	memMark->show();
+#ifdef QTEST
+qDebug("creating the new memory data at %p, value = %s" ,mem,mem->getFormattedOutput().latin1());
+#endif
+    }
+    Instruction *add = resolveInstruction("Add");
+    if (!add)
+	return;
+    add->num = acc; 
+    mem = add->eval(mem);
+    delete add;
+#ifdef QTEST
+qDebug("adding the new memory data to the old at %p, value = %s" ,mem,mem->getFormattedOutput().latin1());
+#endif
+    Instruction *factory = resolveInstruction("Factory");
+    if (factory) {
+	Data *memCmp = factory->eval(acc);
+	if (memCmp) {
+	    if (mem->getFormattedOutput() == memCmp->getFormattedOutput())
+		memoryReset();
+	    delete memCmp;
+	}
+	delete factory;
+    }
+    state = sStart;
+}
+void Engine::memorySave2() {
     if (state == sError)
 	return;
-    InstructionDescription f;
-    f.typeOne = acc->getType();
+    if (dStack.isEmpty())
+	return;
+
+    QStack<Data> tmp;
     if (!mem) {
-	f.instructionName = "CONVERT";
-	f.typeTwo = f.typeOne;
-	memMark->show();
-    } else {
-	f.instructionName = "ADD";
-	f.num = mem;
-	f.typeTwo = mem->getType();
+	executeInstructionOnStack2("Factory",tmp);
+	mem = tmp.pop();
     }
-    Data *tmp = convert(acc,acc);
-    Instruction *i = resolveInstruction(f);
-    tmp = i->eval(tmp);
-    delete i;
-    if (mem)
-	delete mem;
-    if (acc == tmp)
-	acc = convert(acc,acc);
-    mem = tmp;
+    tmp.push(dStack.pop());
+    tmp.push(mem);
+    executeInstructionOnStack2("Add",tmp);
+
     state = sStart;
 }
 void Engine::memoryRecall() {
-    if (mem) {
-	Data *tmp = convert(mem,acc);
-	setAcc(tmp);
-    } else
-	softReset();
+    softReset();
+    if (!mem)
+	return;
+#ifdef QTEST
+qDebug("contents of memory at memoryRecall() = %s", mem->getFormattedOutput().latin1());
+#endif
+    Instruction *copy = resolveInstruction("Copy");
+    if (!copy)
+	return;
+    if (acc)
+	delete acc;
+    acc = copy->eval(mem);
+    delete copy;
+    updateDisplay();
+    state = sStart;
 }
 void Engine::memoryReset() {
     if (mem) {
 	delete mem;
 	mem = 0;
-	memMark->hide();
     }
+    memMark->hide();
 }
+
+// Uninteresting functions
 void Engine::setError(Error e){
     QString s;
     switch (e) {
@@ -401,6 +584,9 @@ void Engine::setError(Error e){
 	    s = qApp->translate("Engine",
 		    "Not solvable");
 	    break;
+	case eNoDataFactory:
+	    s = qApp->translate("Engine",
+		    "No data factory found");
 	case eError:
 	default:
 	    s = qApp->translate("Engine",
@@ -410,6 +596,8 @@ void Engine::setError(Error e){
     setError(s);
 }
 void Engine::setError(QString s) {
+    if (s.isEmpty())
+	s = "Error";
     state = sError;
     lcd->setText(s);
 }
@@ -429,62 +617,122 @@ void Engine::setDisplay(QLineEdit *l) {
     kMark->move( 4, 14 );
     kMark->hide();
 }
-void Engine::setAcc(Data *d) {
-    if (acc && d != acc)
-	delete acc;
-    acc = d;
-    state = sStart;
-    updateDisplay();
+// this function is convoluted because acc is not (yet) the top of the stack
+void Engine::executeInstructionOnStack(QString name,QStack<InstructionDescription> ds) {
+    Instruction *i = resolveInstruction(name);
+    if (name == "Factory") {
+	if (!i)
+	    setError(eNoDataFactory);
+	else {
+	    if (acc) {
+		InstructionDescription *id = new InstructionDescription();
+		id->num = acc;
+		stack.push(id);
+	    }
+	    acc = i->eval(new Data());
+	    delete i;
+	}
+	return;
+    }
+
+    if (!acc) // i->argCount)
+	executeInstructionOnStack("Factory",ds);
+    if (state == sError)
+	return;
+
+    acc = i->eval(acc);
+    delete i;
 }
-void Engine::setAccType(Data *d) {
+void Engine::executeInstructionOnStack2(QString name,QStack<Data> ds) {
+    InstructionDescription *id = resolveDescription(name);
+    if (!id) {
+#ifdef QTEST
+qDebug("desc not found for %s",name.latin1());
+#endif
+	return;
+    }
+    Instruction *i = resolveInstruction(id);
+    if (name == "Factory") {
+	if (!i) {
+#ifdef QTEST
+qDebug("Instruction not found for %s",name.latin1());
+#endif
+	    setError(eNoDataFactory);
+	} else {
+qDebug("before eval stack size is %d",ds.count());
+	    ds.push(i->eval(0));
+qDebug("after eval stack size is %d",ds.count());
+	    delete id;
+	    delete i;
+	}
+	return;
+    }
+    if (!i) {
+#ifdef QTEST
+qDebug("Instruction not found for %s",name.latin1());
+#endif
+	return;
+    }
+    while (iStack.count() < uint(id->argCount)) // might be better to
+	executeInstructionOnStack2("Factory",ds); // just bail out
+    if (state == sError) {
+#ifdef QTEST
+qDebug("trouble in recursive call");
+#endif
+	return;
+    }
+    Data *ret = i->eval(ds.pop());
+    if (!ret) {
+#ifdef QTEST
+qDebug("error in evaluating instruction");
+#endif
+	return;
+    }
+    if (state == sError) {
+#ifdef QTEST
+qDebug("Error in evaluating %s",name.latin1());
+#endif
+	delete ret;
+	return;
+    }
+    ds.push(ret);
+    delete i;
+    delete id;
+#ifdef QTEST
+qDebug("end");
+#endif
+}
+
+void Engine::setAccType(QString type) {
+    if (currentType == type)
+	return;
+    currentType = type;
     if (!acc) {
-	acc = d;
-	acc->clear();
+	executeInstructionOnStack("Factory",stack);
 	state = sStart;
     } else {
-	Data *tmp = convert(acc,d);
-	if (acc != tmp)
-	    delete acc;
-	acc = tmp;
-	if (acc != d)
-	    delete d;
-	if (stack.count())
-	    stack.top()->typeTwo = acc->getType();
+	executeInstructionOnStack("Convert",stack);
     }
     updateDisplay();
 }
-Data * Engine::getAcc() {
-    return acc;
-}
-Data *Engine::convert(Data *from, Data *to) {
-    InstructionDescription f;
-    f.instructionName = "CONVERT";
-    f.typeOne = from->getType();
-    f.typeTwo = to->getType();
-    Data *tmp = resolveInstruction(f)->eval(from);
-    return tmp;
-}
-
-// Braces
-BraceOpen::BraceOpen():InstructionDescription() {
-    instructionName = "BRACE_OPEN";
-    typeOne = typeTwo = "ALL";
-    precedence = 50;
-};
-BraceOpen::~BraceOpen(){};
-void Engine::closeBrace () {
-    braceCount++;
-    acc = evalStack(acc,TRUE);
+void Engine::setAccType2(QString type) {
+qDebug("setAccType2");
+    if (currentType == type)
+	return;
+    currentType = type;
+    if (dStack.isEmpty()) {
+	executeInstructionOnStack2("Factory",dStack);
+	state = sStart;
+    } else {
+	executeInstructionOnStack2("Convert",dStack);
+    }
     updateDisplay();
+}
+QString Engine::getDisplay() {
+    return acc->getFormattedOutput();
 }
 void Engine::openBrace () {
     stack.push(new BraceOpen());
     state = sStart;
 }
-Data *iBraceOpen::eval(Data *d) {
-    Engine::braceCount--;
-    return d;
-}
-Instruction *BraceOpen::getInstruction() {
-    return new iBraceOpen();
-}
+

@@ -20,9 +20,9 @@
 
 #include "interface.h"
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
-#include <qpe/qpetoolbar.h>
+#include <qtopia/qpetoolbar.h>
 #include <qtoolbutton.h>
 #include <qstyle.h>
 #include <qapplication.h>
@@ -30,7 +30,10 @@
 
 SnakeGame::SnakeGame(QWidget* parent, const char* name, WFlags f) :
     QMainWindow(parent,name,f),
-    canvas(232, 258)
+    canvas(232, 258),
+    ob_top(NULL), ob_bottom(NULL),
+    border_north(NULL), border_south(NULL),
+    border_east(NULL), border_west(NULL)
 {
     setCaption( tr("Snake") );
     QPixmap bg = Resource::loadPixmap("grass");
@@ -78,6 +81,12 @@ void SnakeGame::resizeEvent(QResizeEvent *)
     QSize s = centralWidget()->size();
     int fw = style().defaultFrameWidth();
     canvas.resize( s.width() - fw - 2, s.height() - fw - 2);
+
+    if (snake) {
+	newGame();
+    } else {
+	setupWalls();
+    }
 }
 
 void SnakeGame::welcomescreen()
@@ -135,16 +144,32 @@ void SnakeGame::newGame()
     showScore(0);
     gamestopped = false;
     waitover = true;
-    int y = canvas.height()-50;
-    (void)new Obstacle(&canvas, 64);
-    (void)new Obstacle(&canvas, y);
 
-    (void)new Border(&canvas, Border::North);
-    (void)new Border(&canvas, Border::West);
-    (void)new Border(&canvas, Border::East);
-    (void)new Border(&canvas, Border::South);
-
+    setupWalls();
     createTargets();
+}
+
+//
+// Create walls and obstacles.
+//
+void
+SnakeGame::setupWalls(void)
+{
+    if (ob_top) {	    // if one is setup, all are setup
+	delete ob_top;
+	delete ob_bottom;
+	delete border_north;
+	delete border_west;
+	delete border_east;
+	delete border_south;
+    }
+
+    ob_top = new Obstacle(&canvas, 64);
+    ob_bottom = new Obstacle(&canvas, canvas.height() - 50);
+    border_north = new Border(&canvas, Border::North);
+    border_west = new Border(&canvas, Border::West);
+    border_east = new Border(&canvas, Border::East);
+    border_south = new Border(&canvas, Border::South);
 }
 
 
@@ -189,6 +214,13 @@ void SnakeGame::clear()
    for (QCanvasItemList::Iterator it=l.begin(); it!=l.end(); ++it) {
         delete *it;
    }  
+
+    ob_top = NULL;
+    ob_bottom = NULL;
+    border_north = NULL;
+    border_west = NULL;
+    border_east = NULL;
+    border_south = NULL;
 }
 
 void SnakeGame::gameOver()

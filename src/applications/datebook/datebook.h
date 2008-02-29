@@ -33,6 +33,7 @@ class PimEvent;
 class QDateTime;
 class QDate;
 class Ir;
+class QMessageBox;
 
 class DateBook : public QMainWindow
 {
@@ -78,15 +79,17 @@ private slots:
     void showDay( int y, int m, int d );
     void showDay( const QDate & );
 
-    void editEvent( const PimEvent &e );
-    void removeEvent( const PimEvent &e );
+    void editOccurrence( const Occurrence &e );
+    void removeOccurrence( const Occurrence &e );
+
     void editCurrentEvent();
     void removeCurrentEvent();
-    void beamCurrentEvent();
 
     void updateIcons();
     void setDocument( const QString & );
     void beamEvent( const PimEvent &e );
+
+    void beamCurrentEvent();
     void beamDone( Ir *ir );
 
 private:
@@ -100,12 +103,14 @@ private:
     void initDay();
     void initWeek();
     void initMonth();
+    void initExceptionMb();
     void loadSettings();
     void saveSettings();
     bool receiveFile( const QString &filename );
 
     bool eventSelected() const;
     PimEvent currentEvent() const;
+    Occurrence currentOccurrence() const;
 
 private:
     DateBookTable *db;
@@ -125,6 +130,8 @@ private:
     bool inSearch;
 
     QString checkEvent(const PimEvent &);
+
+    QMessageBox *exceptionMb;
 };
 
 #endif

@@ -21,12 +21,11 @@
 #define TODO_PLUGIN_IMPL_H
 
 
-#include <qpe/todayplugininterface.h>
-
+#include <qtopia/todayplugininterface.h>
 
 class TodoPlugin;
 
-class TodoPluginImpl : public TodayInterface
+class QTOPIA_PLUGIN_EXPORT TodoPluginImpl : public TodayInterface
 {
 public:
     TodoPluginImpl();

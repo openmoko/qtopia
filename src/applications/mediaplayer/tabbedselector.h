@@ -17,7 +17,7 @@
 ** not clear to you.
 **
 **********************************************************************/
-#include <qpe/applnk.h>
+#include <qtopia/applnk.h>
 #include <qtabwidget.h>
 
 

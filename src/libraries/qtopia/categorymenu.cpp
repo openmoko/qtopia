@@ -18,10 +18,9 @@
 **
 **********************************************************************/
 
+#include <qtopia/categories.h>
 #include "categorymenu.h"
 #include "categoryselect.h"
-
-#include <qtopia/categories.h>
 
 #include <qstring.h>
 #include <qmap.h>
@@ -55,8 +54,8 @@
   If \a globals is TRUE then it will also poplulate the menu with the
   global categories.
 */
-CategoryMenu::CategoryMenu( const QString &application, bool globals = TRUE,
-	QWidget *parent = 0, const char *name = 0 ) :
+CategoryMenu::CategoryMenu( const QString &application, bool globals,
+	QWidget *parent, const char *name) :
     QPopupMenu(parent, name),
 	appName(application),
 	includeGlobal(globals)

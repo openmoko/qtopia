@@ -18,6 +18,8 @@
 **
 **********************************************************************/
 
+#define QPE_USE_MALLOC_FOR_NEW
+#define QPE_NEED_CALIBRATION
 #define QPE_OWNAPM
 #define QPE_HAVE_TOGGLELIGHT
 #define QPE_NOCIBAUD
@@ -145,3 +147,10 @@ static void initMemalerter() \
     } \
     return numLock; \
 }
+
+#define SoftKey	0x8000
+
+extern void qtopia_buz_touch(bool press);
+#define CUSTOM_SOUND_TOUCH(press) qtopia_buz_touch(press)
+extern void qtopia_buz_key(int keycode, bool press, bool repeat);
+#define CUSTOM_SOUND_KEYCLICK(k,p,r) qtopia_buz_key(k,p,r)

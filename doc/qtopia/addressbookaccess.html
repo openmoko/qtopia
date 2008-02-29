@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/src/libraries/qtopiapim/addressbookaccess.cpp:35 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/src/libraries/qtopiapim/addressbookaccess.cpp:39 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -37,6 +37,7 @@ body { background: #ffffff; color: black; }
 <li><div class=fn>void <a href="#updateContact"><b>updateContact</b></a> ( const&nbsp;PimContact&nbsp;&amp;&nbsp;contact )</div></li>
 <li><div class=fn>void <a href="#removeContact"><b>removeContact</b></a> ( const&nbsp;PimContact&nbsp;&amp;&nbsp;contact )</div></li>
 <li><div class=fn>void <a href="#addContact"><b>addContact</b></a> ( const&nbsp;PimContact&nbsp;&amp;&nbsp;contact )</div></li>
+<li><div class=fn>PimContact <a href="#personalDetails"><b>personalDetails</b></a> () const</div></li>
 </ul>
 <h2>Signals</h2>
 <ul>
@@ -48,7 +49,7 @@ body { background: #ffffff; color: black; }
 
 The AddressBookAccess class provides a safe API for accessing address book data.
 <p> AddressBookAccess provides a safe API for accessing PimContacts stored by
-Qtopia's contacts application.  AddressBookAccess tries to keep in sync with 
+Qtopia's contacts application.  AddressBookAccess tries to keep in sync with
 modifications, and alerts the user of the library when modifications have been made
 to the data.
 <p>See also <a href="qpepim.html">QPEPIM Library</a>.
@@ -60,13 +61,13 @@ Constructs a new AddressBookAccess.
 
 <h3 class=fn><a name="~AddressBookAccess"></a>AddressBookAccess::~AddressBookAccess ()
 </h3>
-Cleans up the the Addressbook access.  
+Cleans up the the Addressbook access.
 
 <h3 class=fn>void <a name="addContact"></a>AddressBookAccess::addContact ( const&nbsp;<a href="pimcontact.html">PimContact</a>&nbsp;&amp;&nbsp;contact )
 </h3>
-If supported will assign a new unique ID to <em>contact</em> and add the contact 
+If supported will assign a new unique ID to <em>contact</em> and add the contact
 to the pim data.
-<p> Adding contacts requires the EditContacts service to be available.
+<p> Adding contacts requires the Contacts service to be available.
 
 <h3 class=fn>void <a name="addressBookUpdated"></a>AddressBookAccess::addressBookUpdated ()<tt> [signal]</tt>
 </h3> 
@@ -76,18 +77,22 @@ to the pim data.
 </h3>
 Returns TRUE if it is possible to add, remove and update contacts in
 the pim data.  Otherwise returns FALSE.
-<p> Adding, removing and updating contacts requires the EditContacts service to be
+<p> Adding, removing and updating contacts requires the Contacts service to be
 available
+
+<h3 class=fn><a href="pimcontact.html">PimContact</a> <a name="personalDetails"></a>AddressBookAccess::personalDetails () const
+</h3>
+Returns the <a href="pimcontact.html">PimContact</a> marked as Personal Details.
 
 <h3 class=fn>void <a name="removeContact"></a>AddressBookAccess::removeContact ( const&nbsp;<a href="pimcontact.html">PimContact</a>&nbsp;&amp;&nbsp;contact )
 </h3>
 If supported will remove <em>contact</em> from pim data.
-<p> Removing contacts requires the EditContacts service to be available.
+<p> Removing contacts requires the Contacts service to be available.
 
 <h3 class=fn>void <a name="updateContact"></a>AddressBookAccess::updateContact ( const&nbsp;<a href="pimcontact.html">PimContact</a>&nbsp;&amp;&nbsp;contact )
 </h3>
 If supported will update <em>contact</em> in pim data.
-<p> Updating contacts requires the EditContacts service to be available.
+<p> Updating contacts requires the Contacts service to be available.
 
 <!-- eof -->
 <hr><p>

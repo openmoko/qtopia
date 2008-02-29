@@ -1,12 +1,11 @@
 TEMPLATE	= lib
 CONFIG		+= qtopia warn_on release
+win32:CONFIG += dll
+win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
 HEADERS		= volume.h volumeappletimpl.h
 SOURCES		= volume.cpp volumeappletimpl.cpp
 TARGET		= volumeapplet
 DESTDIR		= $(QPEDIR)/plugins/applets
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH      += $(QPEDIR)/include
-LIBS            += -lqpe
 VERSION		= 1.0.0
 
-TRANSLATIONS	+= $(QPEDIR)/i18n/de/libvolumeapplet.ts
+TRANSLATIONS = libvolumeapplet-en_GB.ts libvolumeapplet-de.ts libvolumeapplet-ja.ts libvolumeapplet-no.ts

@@ -17,23 +17,34 @@
 ** not clear to you.
 **
 **********************************************************************/
+
 #define QTOPIA_INTERNAL_LANGLIST
+#include "custom.h"
 #include <stdlib.h>
+#if defined Q_OS_WIN32 && defined Q_WS_QWS
 #include <unistd.h>
+#endif
+#include "qlibrary.h"
 #include <qfile.h>
+
+#ifdef QTOPIA_DESKTOP
+#  include <qsettings.h>
+#endif
+
 #ifdef Q_WS_QWS
-#ifndef QT_NO_COP
-#if QT_VERSION <= 231
-#define private public
-#define sendLocally processEvent
-#include "qcopenvelope_qws.h"
-#undef private
-#else
-#include "qcopenvelope_qws.h"
+#  ifndef QT_NO_COP
+#    if QT_VERSION <= 231
+#      define private public
+#      define sendLocally processEvent
+#      include "qcopenvelope_qws.h"
+#      undef private
+#    else
+#      include "qcopenvelope_qws.h"
+#    endif
+#  endif
+#  include <qwindowsystem_qws.h>
 #endif
-#endif
-#include <qwindowsystem_qws.h>
-#endif
+
 #include <qtextstream.h>
 #include <qpalette.h>
 #include <qbuffer.h>
@@ -47,53 +58,76 @@
 #include <qevent.h>
 #include <qtooltip.h>
 #include <qsignal.h>
+
+#ifdef Q_WS_QWS
+#include <qwsdisplay_qws.h>
+#endif
+
 #include "qpeapplication.h"
-#include "qpestyle.h"
 #if QT_VERSION >= 300
-#include <qstylefactory.h>
+#  include <qstylefactory.h>
 #else
-#include <qwindowsstyle.h>
+#  include <qwindowsstyle.h>
 #endif
 #include "global.h"
-#include "resource.h"
 #if QT_VERSION <= 230 && defined(QT_NO_CODECS)
-#include "qutfcodec.h"
+#  include "qutfcodec.h"
 #endif
 #include "config.h"
 #include "network.h"
-#ifdef QWS
-#include "fontmanager.h"
+#  include "applnk.h"
+#ifdef Q_WS_QWS
+#  include "fontmanager.h"
+#  include "fontdatabase.h"
+#  include "power.h"
+#  include "qpemenubar.h"
+#  include "imagecodecinterface.h"
+#  include "textcodecinterface.h"
+#  include "styleinterface.h"
+#  include "resource.h"
+#  include "qpestyle.h"
 #endif
-#include "power.h"
 #include "alarmserver.h"
-#include "applnk.h"
-#include "qpemenubar.h"
-#include "qlibrary.h"
-#include "imagecodecinterface.h"
-#include "textcodecinterface.h"
-#include "styleinterface.h"
-#include "fontdatabase.h"
 
+#include <stdlib.h>
+#ifndef Q_OS_WIN32
 #include <unistd.h>
 #include <sys/file.h>
 #include <sys/ioctl.h>
 #include <sys/soundcard.h>
-
-// for setBacklight()
-#if defined(QT_QWS_IPAQ) || defined(QT_QWS_EBX)
-#include <linux/fb.h>
+#else
+#include <windows.h>
+#include <winbase.h>
+#include <mmsystem.h>
+#include <io.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #endif
+
 #include <stdlib.h>
 
+#include "../qtopia1/qpe_show_dialog.cpp"
+
+class HackWidget : public QWidget
+{
+public:
+    bool needsOk()
+    { return (getWState() & WState_Reserved1 ); }
+
+    QRect normalGeometry()
+    { return topData()->normalGeometry; };
+};
 
 class QPEApplicationData {
 public:
     QPEApplicationData() : presstimer(0), presswidget(0), rightpressed(FALSE),
 	kbgrabber(0), kbregrab(FALSE), notbusysent(FALSE), preloaded(FALSE),
 	forceshow(FALSE), nomaximize(FALSE), qpe_main_widget(0),
-	keep_running(TRUE), skiptimechanged(FALSE), styleLib(0), styleIface(0)
+	keep_running(TRUE), skiptimechanged(FALSE)
+#ifdef Q_WS_QWS
+	, styleLib(0), styleIface(0)
+#endif
     {
 	qcopq.setAutoDelete(TRUE);
     }
@@ -109,7 +143,12 @@ public:
     struct QCopRec {
 	QCopRec(const QCString &ch, const QCString &msg,
                                const QByteArray &d) :
-	    channel(ch), message(msg), data(d) { }
+	    channel(ch), message(msg), data(d)
+	    {
+		channel.detach();
+		message.detach();
+		data.detach();
+	    }
 
 	QCString channel;
 	QCString message;
@@ -118,6 +157,7 @@ public:
     bool preloaded;
     bool forceshow;
     bool nomaximize;
+
     QWidget* qpe_main_widget;
     bool keep_running;
     int skiptimechanged;
@@ -130,32 +170,104 @@ public:
     }
     void sendQCopQ()
     {
-	QCopRec* r;
 #ifndef QT_NO_COP
+	QCopRec* r;
 	for (QListIterator<QCopRec> it(qcopq); (r=it.current()); ++it)
 	    QCopChannel::sendLocally(r->channel,r->message,r->data);
 #endif
 	qcopq.clear();
     }
 
-    static void show_mx(QWidget* mw, bool nomaximize)
+    static void show_mx(QWidget* mw, bool nomaximize, QString &strName)
     {
-	if ( mw->layout() && mw->inherits("QDialog") ) {
-	    QPEApplication::showDialog((QDialog*)mw,nomaximize);
+	if ( mw->isVisible() ) {
+	    mw->raise();
 	} else {
-	    if ( !mw->isVisible() ) {
-		int x = (qApp->desktop()->width()-mw->frameGeometry().width())/2;
-		int y = (qApp->desktop()->height()-mw->frameGeometry().height())/2;
-		mw->move( QMAX(x,0), QMAX(y,0) );
+	    if ( mw->layout() && mw->inherits("QDialog") ) {
+		bool max;
+		QRect r = read_widget_rect(strName, max);
+		if ( !r.isNull() ) {
+		    mw->setGeometry( r );
+
+		    if ( max )
+			mw->showMaximized();
+		    else
+			mw->show();
+		} else {
+		    qpe_show_dialog((QDialog*)mw,nomaximize);
+		}
+	    } else {
+		bool max;
+		QRect r = read_widget_rect(strName, max);
+		if ( !r.isNull() ) {
+		    mw->setGeometry( r );
+		} else {    //no stored rectangle, make an estimation
+		    int x = (qApp->desktop()->width()-mw->frameGeometry().width())/2;
+		    int y = (qApp->desktop()->height()-mw->frameGeometry().height())/2;
+		    mw->move( QMAX(x,0), QMAX(y,0) );
 #ifdef Q_WS_QWS
-		if ( !nomaximize )
+		    if ( !nomaximize )
+			mw->showMaximized();
+#endif
+		}
+		if ( max )
 		    mw->showMaximized();
 		else
-#endif
-		mw->show();
-	    } else {
-		mw->raise();
+		    mw->show();
 	    }
+	}
+    }
+
+    static QRect read_widget_rect(QString &app, bool &maximized)
+    {
+	QRect r;
+	maximized = TRUE;
+
+	// 350 is the trigger in qwsdefaultdecoration for providing a resize button
+	if ( qApp->desktop()->width() <= 350 )
+	    return r;
+
+	Config cfg( "qpe" );
+	cfg.setGroup("ApplicationPositions");
+	QString s = cfg.readEntry( app, QString::null );
+	QStringList l = QStringList::split(",", s);
+
+	if ( s != QString::null && l.count() == 5) {
+	    r.setRect( QMAX(0, l[0].toInt()),
+		       QMAX(0, l[1].toInt()),
+		       l[2].toInt(),
+		       l[3].toInt() );
+
+	    r.setRight( QMIN(r.right(), qApp->desktop()->width() ) );
+	    r.setBottom( QMIN(r.bottom(), qApp->desktop()->height() ) );
+	    maximized = l[4].toInt();
+
+	    // Resizing and moving the window out of bounds could result in a 1 line window.
+	    // If we're very tiny, ignore the stored rectangle
+	    if ( r.height() < 40 || r.width() < 40 )
+		return QRect();
+	}
+
+	return r;
+    }
+
+    static void store_widget_rect(QWidget *w, QString &app)
+    {
+	// 350 is the trigger in qwsdefaultdecoration for providing a resize button
+	if ( qApp->desktop()->width() <= 350 )
+	    return;
+
+	QRect r;
+	if ( w->isMaximized() )
+	    r = ( (HackWidget *) w)->normalGeometry();
+	else
+	    r = w->geometry();
+	{
+	    Config cfg( "qpe" );
+	    cfg.setGroup("ApplicationPositions");
+	    QString s;
+	    s.sprintf("%d,%d,%d,%d,%d", r.left(), r.top(), r.width(), r.height(), w->isMaximized() );
+	    cfg.writeEntry( app, s );
 	}
     }
 
@@ -193,21 +305,31 @@ public:
 #endif
 	if ( preloaded ) {
 	    if(forceshow)
-		show_mx(mw,nomax);
+		show_mx(mw,nomax, appName);
 	} else if ( keep_running ) {
-	    show_mx(mw,nomax);
+	    show_mx(mw,nomax, appName);
 	}
     }
 
+#ifdef Q_WS_QWS
     void loadTextCodecs()
     {
-	QString path = QPEApplication::qpeDir() + "/plugins/textcodecs";
+	QString path = QPEApplication::qpeDir() + "plugins/textcodecs";
+#ifndef Q_OS_WIN32
 	QDir dir( path, "lib*.so" );
+#else
+	QDir dir (path, "*.dll");
+#endif
+
 	QStringList list = dir.entryList();
 	QStringList::Iterator it;
 	for ( it = list.begin(); it != list.end(); ++it ) {
 	    TextCodecInterface *iface = 0;
+#if (QT_VERSION-0 >= 0x030000)
+	    QComLibrary *lib = new QComLibrary( path + "/" + *it );
+#else
 	    QLibrary *lib = new QLibrary( path + "/" + *it );
+#endif
 	    if ( lib->queryInterface( IID_QtopiaTextCodec, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
 		QValueList<int> mibs = iface->mibEnums();
 		for (QValueList<int>::ConstIterator i=mibs.begin(); i!=mibs.end(); ++i) {
@@ -223,13 +345,21 @@ public:
 
     void loadImageCodecs()
     {
-	QString path = QPEApplication::qpeDir() + "/plugins/imagecodecs";
+	QString path = QPEApplication::qpeDir() + "plugins/imagecodecs";
+#ifndef Q_OS_WIN32
 	QDir dir( path, "lib*.so" );
+#else
+	QDir dir (path, "*.dll");
+#endif
 	QStringList list = dir.entryList();
 	QStringList::Iterator it;
 	for ( it = list.begin(); it != list.end(); ++it ) {
 	    ImageCodecInterface *iface = 0;
+#if (QT_VERSION-0 >= 0x030000)
+	    QComLibrary *lib = new QComLibrary( path + "/" + *it );
+#else
 	    QLibrary *lib = new QLibrary( path + "/" + *it );
+#endif
 	    if ( lib->queryInterface( IID_QtopiaImageCodec, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
 		QStringList formats = iface->keys();
 		for (QStringList::ConstIterator i=formats.begin(); i!=formats.end(); ++i) {
@@ -242,10 +372,13 @@ public:
 	    }
 	}
     }
+#endif
 
+#ifdef Q_WS_QWS
     QLibrary *styleLib;
     StyleInterface *styleIface;
     QString styleName;
+#endif
     QString decorationName;
 };
 
@@ -254,8 +387,10 @@ class ResourceMimeFactory : public QMimeSourceFactory {
 public:
     ResourceMimeFactory()
     {
+#ifdef Q_WS_QWS
 	setFilePath( Global::helpPath() );
 	setExtensionType("html","text/html;charset=UTF-8");
+#endif
     }
 
     const QMimeSource* data(const QString& abs_name) const
@@ -269,16 +404,18 @@ public:
 		int dot = name.findRev('.');
 		if ( dot >= 0 )
 		    name = name.left(dot);
+#ifdef Q_WS_QWS
 		QImage img = Resource::loadImage(name);
 		if ( !img.isNull() )
 		    r = new QImageDrag(img);
+#endif
 	    } while (!r && sl>0);
 	}
 	return r;
     }
 };
 
-static int muted=0;
+int qtopia_muted=0;
 
 static void setVolume(int t=0, int percent=-1)
 {
@@ -289,26 +426,33 @@ static void setVolume(int t=0, int percent=-1)
 	    if ( percent < 0 )
 		percent = cfg.readNumEntry("Volume",50);
 	    int fd = 0;
+#ifndef Q_OS_WIN32
 	    if ((fd = open("/dev/mixer", O_RDWR))>=0) {
-		int vol = muted ? 0 : percent;
+		int vol = qtopia_muted ? 0 : percent;
 		// set both channels to same volume
 		vol |= vol << 8;
 		ioctl(fd, MIXER_WRITE(0), &vol);
 		::close(fd);
 	    }
+#else
+	    HWAVEOUT handle;
+	    WAVEFORMATEX formatData;
+	    formatData.cbSize = sizeof(WAVEFORMATEX);
+	    formatData.wFormatTag = WAVE_FORMAT_PCM;
+	    formatData.nAvgBytesPerSec = 4 * 44000;
+	    formatData.nBlockAlign = 4;
+	    formatData.nChannels = 2;
+	    formatData.nSamplesPerSec = 44000;
+	    formatData.wBitsPerSample = 16;
+	    waveOutOpen(&handle, WAVE_MAPPER, &formatData, 0L, 0L, CALLBACK_NULL);
+	    int vol = qtopia_muted ? 0 : percent;
+	    unsigned int volume = (vol << 24) | (vol << 8);
+	    if ( waveOutSetVolume( handle, volume ) )
+		qDebug( "set volume of audio device failed" );
+	    waveOutClose( handle );
+#endif
 	} break;
     }
-}
-
-int qpe_sysBrightnessSteps()
-{
-#if defined(QT_QWS_IPAQ)
-    return 255;
-#elif defined(QT_QWS_EBX)
-    return 4;
-#else
-    return 255; // ?
-#endif
 }
 
 
@@ -336,6 +480,9 @@ static int backlight()
     return curbl;
 }
 
+#ifdef Q_WS_QWS
+void qpe_setBrightness(int bright);
+
 static void setBacklight(int bright)
 {
     if ( bright == -3 ) {
@@ -356,57 +503,12 @@ static void setBacklight(int bright)
 	config.setGroup( "Screensaver" );
 	bright = config.readNumEntry("Brightness",255);
     }
-#if defined(QT_QWS_IPAQ) || defined(QT_QWS_EBX)
-    if ( QFile::exists("/usr/bin/bl") ) {
-	QString cmd = "/usr/bin/bl 1 ";
-	cmd += bright<=0 ? "0 " : "1 ";
-	cmd += QString::number(bright);
-	system(cmd.latin1());
-#if defined(QT_QWS_EBX)
-    } else if ( QFile::exists("/dev/fl") ) {
-#define FL_IOCTL_STEP_CONTRAST    100
-	int fd = open("/dev/fl", O_WRONLY);
-	if (fd >= 0 ) {
-	    int steps = qpe_sysBrightnessSteps();
-	    int bl = ( bright * steps + 127 ) / 255;
-	    if ( bright && !bl ) bl = 1;
-	    bl = ioctl(fd, FL_IOCTL_STEP_CONTRAST, bl);
-	    close(fd);
-	}
-    }
-#elif defined(QT_QWS_IPAQ)
-    } else if ( QFile::exists("/dev/ts") || QFile::exists("/dev/h3600_ts") ) {
-	typedef struct {
-	    unsigned char mode;
-	    unsigned char pwr;
-	    unsigned char brightness;
-	} FLITE_IN;
-# ifndef FLITE_ON
-#  ifndef _LINUX_IOCTL_H
-#   include <linux/ioctl.h>
-#  endif
-#  define FLITE_ON                _IOW('f', 7, FLITE_IN)
-# endif
-	int fd;
-	if ( QFile::exists("/dev/ts") )
-	    fd = open("/dev/ts", O_WRONLY);
-	else
-	    fd = open("/dev/h3600_ts", O_WRONLY);
-	if (fd >= 0 ) {
-	    FLITE_IN bl;
-	    bl.mode = 1;
-	    bl.pwr = bright ? 1 : 0;
-	    bl.brightness = bright;
-	    ioctl(fd, FLITE_ON, &bl);
-	    close(fd);
-	}
-    }
-#endif
-#endif
+    qpe_setBrightness(bright);
     curbl = bright;
 }
 
 void qpe_setBacklight(int bright) { setBacklight(bright); }
+#endif
 
 static bool dim_on = FALSE;
 static bool lightoff_on = FALSE;
@@ -416,17 +518,23 @@ static int disable_suspend = 100;
 
 static bool powerOnlineStopsSuspend()
 {
+#ifdef Q_WS_QWS
     return !poweredsuspend_on && PowerStatusManager::readStatus().acStatus() == PowerStatus::Online;
+#else
+    return FALSE;
+#endif
 }
 
 static bool networkOnlineStopsSuspend()
 {
-#ifdef QWS
+#ifdef Q_WS_QWS
     return !networkedsuspend_on && Network::networkOnline();
+#else
+    return FALSE;
 #endif
 }
 
-#ifdef QWS
+#ifdef Q_WS_QWS
 class QPEScreenSaver : public QWSScreenSaver
 {
 
@@ -500,7 +608,7 @@ static void setScreenSaverIntervals(int i1, int i2, int i3)
     lightoff_on = ( (i2 != 0 ) ? config.readNumEntry("LightOff",1) : FALSE );
     poweredsuspend_on = config.readNumEntry("Suspend",0);
     networkedsuspend_on = config.readNumEntry("NetworkedSuspend",1);
-#ifdef QWS
+#ifdef Q_WS_QWS
     if ( !i1 && !i2 && !i3 )
 	QWSServer::setScreenSaverInterval(0);
     else
@@ -668,22 +776,30 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
     : QApplication( hack(argc), argv, t )
 {
     d = new QPEApplicationData;
+#ifdef Q_WS_QWS
     d->loadTextCodecs();
     d->loadImageCodecs();
+#endif
 
     int dw = desktop()->width();
     if ( dw < 200 ) {
 	setFont( QFont( "helvetica", 8 ) );
+#ifdef Q_WS_QWS
 	AppLnk::setSmallIconSize(10);
 	AppLnk::setBigIconSize(28);
+#endif
     } else if ( dw > 600 ) {
 	setFont( QFont( "helvetica", 12 ) );
+#ifdef Q_WS_QWS
 	AppLnk::setSmallIconSize(24);
-	AppLnk::setBigIconSize(48);	
+	AppLnk::setBigIconSize(48);
+#endif
     } else if ( dw > 400 ) {
 	setFont( QFont( "helvetica", 12 ) );
+#ifndef Q_WS_QWS
 	AppLnk::setSmallIconSize(16);
-	AppLnk::setBigIconSize(32);	
+	AppLnk::setBigIconSize(32);
+#endif
     }
 
     QMimeSourceFactory::setDefaultFactory(new ResourceMimeFactory);
@@ -696,7 +812,10 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
 
     QFile f(qcopfn);
     if ( f.open(IO_ReadOnly) ) {
+#ifndef Q_OS_WIN32
+	//##### revise
 	flock(f.handle(), LOCK_EX);
+#endif
     }
 
     sysChannel = new QCopChannel( "QPE/System", this );
@@ -720,8 +839,10 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
 	    ds >> channel >> message >> data;
 	    d->enqueueQCop(channel,message,data);
 	}
-
+#ifndef Q_OS_WIN32
+	//#### revise
 	flock(f.handle(), LOCK_UN);
+#endif
 	f.close();
 	f.remove();
     }
@@ -745,8 +866,9 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
     setArgs(argc, argv);
 
 #endif
-
+#if defined(Q_WS_QWS)
     FontDatabase::loadRenderers();  // load font factory plugins.
+#endif
 
 #ifndef QT_NO_TRANSLATION
     QStringList langs = Global::languageList();
@@ -757,21 +879,21 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
 	QString tfn;
 
 	trans = new QTranslator(this);
-	tfn = qpeDir()+"/i18n/"+lang+"/libqpe.qm";
+	tfn = qpeDir()+"i18n/"+lang+"/libqpe.qm";
 	if ( trans->load( tfn ))
 	    installTranslator( trans );
 	else
 	    delete trans;
 
 	trans = new QTranslator(this);
-	tfn = qpeDir()+"/i18n/"+lang+"/"+d->appName+".qm";
+	tfn = qpeDir()+"i18n/"+lang+"/"+d->appName+".qm";
 	if ( trans->load( tfn ))
 	    installTranslator( trans );
 	else
 	    delete trans;
 
 	//###language/font hack; should look it up somewhere
-#ifdef QWS
+#ifdef Q_WS_QWS
 	if ( lang == "ja" || lang == "zh_CN" || lang == "zh_TW" || lang == "ko" ) {
 	    QFont fn = FontManager::unicodeFont( FontManager::Proportional );
 	    setFont( fn );
@@ -785,13 +907,15 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
     if ( type() == GuiServer ) {
 	setScreenSaverInterval(-1);
 	setVolume();
-#ifdef QWS
+#ifdef Q_WS_QWS
 	QWSServer::setScreenSaver(new QPEScreenSaver);
 #endif
     }
     installEventFilter( this );
 
+#ifdef Q_WS_QWS
     QPEMenuToolFocusManager::initialize();
+#endif
 
 #ifdef QT_NO_QWS_CURSOR
     // if we have no cursor, probably don't want tooltips
@@ -865,19 +989,12 @@ void QPEApplication::mapToDefaultAction( QWSKeyEvent *ke, int key )
     if ( activePopupWidget() && activePopupWidget()->inherits( "QPopupMenu" ) )
 	key = Qt::Key_Return;
 
-#ifdef QWS
+#ifdef Q_WS_QWS
     ke->simpleData.keycode = key;
 #endif
 }
 
-class HackWidget : public QWidget
-{
-public:
-    bool needsOk()
-    { return (getWState() & WState_Reserved1 ); }
-};
-
-#ifdef QWS
+#ifdef Q_WS_QWS
 /*!
   Filters Qt events to implement Qtopia-specific functionality.
 */
@@ -885,8 +1002,10 @@ bool QPEApplication::qwsEventFilter( QWSEvent *e )
 {
     if ( !d->notbusysent && e->type == QWSEvent::Focus ) {
 	if ( qApp->type() != QApplication::GuiServer ) {
+#ifndef QT_NO_COP
 	    QCopEnvelope e("QPE/System", "notBusy(QString)" );
 	    e << d->appName;
+#endif
 	}
 	d->notbusysent=TRUE;
     }
@@ -949,8 +1068,8 @@ bool QPEApplication::qwsEventFilter( QWSEvent *e )
 	}
 
 #if QT_VERSION < 231
-    // Filter out the F4/Launcher key from apps
-    // ### The launcher key may not always be F4 on all devices
+	// Filter out the F4/Launcher key from apps
+	// ### The launcher key may not always be F4 on all devices
 	if ( ((QWSKeyEvent *)e)->simpleData.keycode == Qt::Key_F4 )
 	    return TRUE;
 #endif
@@ -1000,8 +1119,10 @@ QPEApplication::~QPEApplication()
 	// maybe we didn't map a window - still tell the server we're not
 	// busy anymore.
 	if ( qApp->type() != QApplication::GuiServer ) {
+#ifndef QT_NO_COP
 	    QCopEnvelope e("QPE/System", "notBusy(QString)" );
 	    e << d->appName;
+#endif
 	}
     }
     ungrabKeyboard();
@@ -1019,11 +1140,35 @@ QPEApplication::~QPEApplication()
 */
 QString QPEApplication::qpeDir()
 {
+#ifdef Q_WS_QWS
     const char *base = getenv( "QPEDIR" );
     if ( base )
 	return QString( base ) + "/";
 
     return QString( "../" );
+#elif defined(QTOPIA_DESKTOP)
+
+#ifdef __GNUG__
+#warning "Should be able to change given a 'developing' parameter"
+#endif
+
+    QSettings settings;
+    settings.insertSearchPath( QSettings::Unix,
+	    QDir::homeDirPath() + "/.palmtopcenter/" );
+    settings.insertSearchPath( QSettings::Windows, "/Trolltech" );
+
+    QString key = "/palmtopcenter/qtopiadir";
+    bool okay;
+    QString dir = settings.readEntry(key, QString::null, &okay);
+    if (!okay || dir.isNull()) {
+	dir = "/opt/Qtopia/qtopiadesktop";
+	settings.writeEntry( key, dir);
+    }
+    return dir;
+#else
+    qWarning("Cannot determine the install path");
+    return QString::null;
+#endif // Q_WS_QWS
 }
 
 /*!
@@ -1031,9 +1176,15 @@ QString QPEApplication::qpeDir()
 */
 QString QPEApplication::documentDir()
 {
-    const char *base = getenv( "HOME" );
-    if ( base )
-	return QString( base ) + "/Documents/";
+    QString r = QDir::homeDirPath(); 
+#ifdef QTOPIA_DESKTOP
+    r += "/.palmtopcenter/";
+#endif
+
+    QString base = r;
+    if (base.length() > 0){
+	return base + "/Documents/";
+    }
 
     return QString( "../Documents/" );
 }
@@ -1112,24 +1263,43 @@ void QPEApplication::applyStyle()
 
     setPalette( pal, TRUE );
 
+#ifdef Q_WS_QWS
     // Window Decoration
     QString dec = config.readEntry( "Decoration", "Qtopia" );
     if ( dec != d->decorationName ) {
 	qwsSetDecoration( new QPEDecoration( dec ) );
 	d->decorationName = dec;
     }
+#endif
 
     // Font
     QString ff = config.readEntry( "FontFamily", font().family() );
     int fs = config.readNumEntry( "FontSize", font().pointSize() );
-    setFont( QFont(ff,fs), TRUE );
+    QFont fn(ff,fs);
+
+    // Icon size
+#ifndef QPE_FONT_HEIGHT_TO_ICONSIZE
+#define QPE_FONT_HEIGHT_TO_ICONSIZE(x) (x+1)
+#endif
+    int is = config.readNumEntry( "IconSize", -1 );
+    if ( is < 0 ) {
+	QFontMetrics fm(fn);
+	config.writeEntry( "IconSize", QPE_FONT_HEIGHT_TO_ICONSIZE(fm.height()) );
+	config.write();
+    }
+
+    setFont( fn, TRUE );
 }
 
 void QPEApplication::systemMessage( const QCString &msg, const QByteArray &data)
 {
 #ifdef Q_WS_QWS
     QDataStream stream( data, IO_ReadOnly );
-    if ( msg == "applyStyle()" ) {
+    if ( msg == "linkChanged(QString)" ) {
+	QString lf;
+	stream >> lf;
+	emit linkChanged( lf );
+    } else if ( msg == "applyStyle()" ) {
 	applyStyle();
     } else if ( msg == "setScreenSaverInterval(int)" ) {
 	if ( type() == GuiServer ) {
@@ -1150,11 +1320,25 @@ void QPEApplication::systemMessage( const QCString &msg, const QByteArray &data)
 	    setBacklight(bright);
 	}
     } else if ( msg == "setDefaultRotation(int)" ) {
-	if ( type() == GuiServer ) {
-	    int r;
-	    stream >> r;
+	int r;
+	stream >> r;
+	if ( type() == GuiServer )
 	    setDefaultRotation(r);
+# if QT_VERSION >= 234
+	int t = 0;
+	switch ( r ) {
+	    case 90:
+		t = 1;
+		break;
+	    case 180:
+		t = 2;
+		break;
+	    case 270:
+		t = 3;
+		break;
 	}
+	QWSDisplay::setTransformation( t );
+# endif
     } else if ( msg == "shutdown()" ) {
 	if ( type() == GuiServer )
 	    shutdown();
@@ -1199,6 +1383,8 @@ void QPEApplication::systemMessage( const QCString &msg, const QByteArray &data)
 	    setenv( "TZ", t.latin1(), 1 );
 	// emit the signal so everyone else knows...
 	emit timeChanged();
+    } else if ( msg =="categoriesChanged()" ) {
+	emit categoriesChanged();
     } else if ( msg == "execute(QString)" ) {
 	if ( type() == GuiServer ) {
 	    QString t;
@@ -1236,18 +1422,27 @@ void QPEApplication::systemMessage( const QCString &msg, const QByteArray &data)
 	stream >> tmp;
 	emit weekChanged( tmp );
     } else if ( msg == "setDateFormat(DateFormat)" ) {
-	DateFormat tmp;
+	::DateFormat tmp;
 	stream >> tmp;
 	emit dateFormatChanged( tmp );
     } else if ( msg == "setVolume(int,int)" ) {
 	int t,v;
 	stream >> t >> v;
 	setVolume(t,v);
-	emit volumeChanged( muted );
+	emit volumeChanged( qtopia_muted );
     } else if ( msg == "volumeChange(bool)" ) {
-	stream >> muted;
+	stream >> qtopia_muted;
 	setVolume();
-	emit volumeChanged( muted );
+	emit volumeChanged( qtopia_muted );
+    } else if ( msg == "flush()" ) {
+	emit flush();
+	// we need to tell the desktop
+#ifndef QT_NO_COP
+	QCopEnvelope e( "QPE/Desktop", "flushDone(QString)" );
+	e << d->appName;
+#endif
+    } else if ( msg == "reload()" ) {
+	emit reload();
     } else if ( msg == "setScreenSaverMode(int)" ) {
 	if ( type() == GuiServer ) {
 	    int old = disable_suspend;
@@ -1274,12 +1469,14 @@ bool QPEApplication::raiseAppropriateWindow()
 	if ( top->isVisible() )
 	    r = TRUE;
 	else if (d->preloaded) {
-	  // We are preloaded and not visible.. pretend we just started..
- 	  QCopEnvelope e("QPE/System", "fastAppShowing(QString)");
- 	  e << d->appName;
+	    // We are preloaded and not visible.. pretend we just started..
+#ifndef QT_NO_COP
+	    QCopEnvelope e("QPE/System", "fastAppShowing(QString)");
+	    e << d->appName;
+#endif
 	}
-	
-	d->show_mx(top,d->nomaximize);
+
+	d->show_mx(top,d->nomaximize, d->appName);
 	top->raise();
 	top->setActiveWindow();
     }
@@ -1290,9 +1487,11 @@ bool QPEApplication::raiseAppropriateWindow()
 	topm->setActiveWindow();
 	// If we haven't already handled the fastAppShowing message
 	if (!top && d->preloaded) {
- 	  QCopEnvelope e("QPE/System", "fastAppShowing(QString)");
- 	  e << d->appName;
-	}	
+#ifndef QT_NO_COP
+	    QCopEnvelope e("QPE/System", "fastAppShowing(QString)");
+	    e << d->appName;
+#endif
+	}
 	r = FALSE;
     }
     return r;
@@ -1301,7 +1500,6 @@ bool QPEApplication::raiseAppropriateWindow()
 void QPEApplication::pidMessage( const QCString &msg, const QByteArray & data)
 {
 #ifdef Q_WS_QWS
-
     if ( msg == "quit()" ) {
 	tryQuit();
     } else if ( msg == "quitIfInvisible()" ) {
@@ -1314,8 +1512,8 @@ void QPEApplication::pidMessage( const QCString &msg, const QByteArray & data)
 	d->keep_running = TRUE;
 	/* so that quit will quit */
     } else if ( msg == "enablePreload()" ) {
-      if (d->qpe_main_widget)
-	d->preloaded = TRUE;
+	if (d->qpe_main_widget)
+	    d->preloaded = TRUE;
 	d->keep_running = TRUE;
 	/* so next quit won't quit */
     } else if ( msg == "raise()" ) {
@@ -1323,13 +1521,17 @@ void QPEApplication::pidMessage( const QCString &msg, const QByteArray & data)
 	d->notbusysent = FALSE;
 	raiseAppropriateWindow();
 	// Tell the system we're still chugging along...
+#ifndef QT_NO_COP
 	QCopEnvelope e("QPE/System", "appRaised(QString)");
 	e << d->appName;
+#endif
     } else if ( msg == "flush()" ) {
 	emit flush();
 	// we need to tell the desktop
+#ifndef QT_NO_COP
 	QCopEnvelope e( "QPE/Desktop", "flushDone(QString)" );
 	e << d->appName;
+#endif
     } else if ( msg == "reload()" ) {
 	emit reload();
     } else if ( msg == "setDocument(QString)" ) {
@@ -1368,8 +1570,10 @@ void QPEApplication::pidMessage( const QCString &msg, const QByteArray & data)
 	    raiseAppropriateWindow();
 	    if ( !p ) {
 		// Tell the system we're still chugging along...
+#ifndef QT_NO_COP
 		QCopEnvelope e("QPE/System", "appRaised(QString)");
 		e << d->appName;
+#endif
 	    }
 	}
 	if ( p )
@@ -1404,8 +1608,10 @@ void QPEApplication::showMainWidget( QWidget* mw, bool nomaximize )
 */
 void QPEApplication::showMainDocumentWidget( QWidget* mw, bool nomaximize )
 {
+#ifdef Q_WS_QWS
     if ( mw && argc() == 2 )
 	Global::setDocument( mw, QString::fromUtf8(argv()[1]) );
+#endif
 
     d->show(mw,nomaximize);
 }
@@ -1445,6 +1651,12 @@ bool QPEApplication::keepRunning() const
 */
 void QPEApplication::internalSetStyle( const QString &style )
 {
+#ifdef Q_WS_QWS
+#ifndef Q_OS_WIN32
+    QString dllExtension(".so");
+#else
+    QString dllExtension(".dll");
+#endif
     if ( style == d->styleName )
 	return;
 
@@ -1466,8 +1678,8 @@ void QPEApplication::internalSetStyle( const QString &style )
 	newStyle = new QWindowsStyle;
     } else if ( style == "QPE" || style == "Qtopia" ) {
 	newStyle = new QPEStyle;
-    } else if ( style.findRev( ".so" ) == (int)style.length()-3 ) {
-	QString path = QPEApplication::qpeDir() + "/plugins/styles";
+    } else if ( style.findRev( dllExtension ) == (int)style.length() - (int)dllExtension.length() ) {
+	QString path = QPEApplication::qpeDir() + "plugins/styles";
 	StyleInterface *iface = 0;
 	QLibrary *lib = new QLibrary( path + "/" + style );
 	if ( lib->queryInterface( IID_Style, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
@@ -1478,7 +1690,7 @@ void QPEApplication::internalSetStyle( const QString &style )
 	    lib->unload();
 	    delete lib;
 	}
-    } 
+    }
 #endif
 
     if ( !newStyle ) {
@@ -1497,6 +1709,7 @@ void QPEApplication::internalSetStyle( const QString &style )
 	delete oldLib;
     }
 #endif
+#endif
 }
 
 /*!
@@ -1507,7 +1720,15 @@ void QPEApplication::prepareForTermination(bool willrestart)
     if ( willrestart ) {
 	// Draw a big wait icon, the image can be altered in later revisions
 //	QWidget *d = QApplication::desktop();
-	QPixmap pix = Resource::loadPixmap("bigwait");
+
+	QPixmap pix;
+
+#ifdef Q_WS_QWS
+	pix = Resource::loadPixmap("bigwait");
+#else
+	//### revise add a different pix map
+	qDebug("Missing pixmap : QPEApplication::prepareForTermination()");
+#endif
 	QLabel *lblWait = new QLabel(0, "wait hack!", QWidget::WStyle_Customize |
 				  QWidget::WStyle_NoBorder | QWidget::WStyle_Tool );
 	lblWait->setPixmap( pix );
@@ -1520,7 +1741,11 @@ void QPEApplication::prepareForTermination(bool willrestart)
     { QCopEnvelope envelope("QPE/System", "forceQuit()"); }
 #endif
     processEvents(); // ensure the message goes out.
+#ifndef Q_OS_WIN32
     sleep(1); // You have 1 second to comply.
+#else
+    Sleep(1000);
+#endif
 #endif
 }
 
@@ -1745,8 +1970,8 @@ int QPEApplication::exec()
 
 #ifndef QT_NO_COP
     {
-    QCopEnvelope e("QPE/System", "closing(QString)" );
-    e << d->appName;
+	QCopEnvelope e("QPE/System", "closing(QString)" );
+	e << d->appName;
     }
 #endif
     processEvents();
@@ -1764,10 +1989,12 @@ void QPEApplication::tryQuit()
 	return; // Inside modal loop or konsole. Too hard to save state.
 #ifndef QT_NO_COP
     {
-       QCopEnvelope e("QPE/System", "closing(QString)" );
-       e << d->appName;
+	QCopEnvelope e("QPE/System", "closing(QString)" );
+	e << d->appName;
     }
 #endif
+    d->store_widget_rect(d->qpe_main_widget, d->appName);
+
     processEvents();
 
     quit();
@@ -1781,19 +2008,19 @@ void QPEApplication::tryQuit()
 */
 void QPEApplication::hideOrQuit()
 {
+    d->store_widget_rect(d->qpe_main_widget, d->appName);
+
     processEvents();
 
     // If we are a preloaded application we don't actually quit, so emit
     // a System message indicating we're quasi-closing.
-    if ( d->preloaded && d->qpe_main_widget )
+    if ( d->preloaded && d->qpe_main_widget ) {
 #ifndef QT_NO_COP
-      {
 	QCopEnvelope e("QPE/System", "fastAppHiding(QString)" );
 	e << d->appName;
-	d->qpe_main_widget->hide();
-      }
 #endif
-    else
+	d->qpe_main_widget->hide();
+    } else
 	quit();
 }
 
@@ -1815,7 +2042,19 @@ void QPEApplication::hideOrQuit()
     \a nomax forces it to not be maximized.
 */
 
-#if defined(QT_QWS_IPAQ) || defined(QT_QWS_EBX)
+#if (__GNUC__ > 2)
+extern "C" void __cxa_pure_virtual();
+
+void __cxa_pure_virtual()
+{
+    fprintf( stderr, "Pure virtual called\n");
+    abort();
+
+}
+
+#endif
+
+#if defined(QPE_USE_MALLOC_FOR_NEW)
 
 // The libraries with the skiff package (and possibly others) have
 // completely useless implementations of builtin new and delete that
@@ -1852,30 +2091,4 @@ void operator delete(void* p, size_t /*size*/)
     free(p);
 }
 
-#endif
-
-#if ( QT_VERSION <= 230 ) && !defined(SINGLE_APP)
-#include <qwidgetlist.h>
-#ifdef QWS
-#include <qgfx_qws.h>
-extern QRect qt_maxWindowRect;
-void qt_setMaxWindowRect(const QRect& r)
-{
-    qt_maxWindowRect = qt_screen->mapFromDevice(r,
-	qt_screen->mapToDevice(QSize(qt_screen->width(),qt_screen->height())));
-    // Re-resize any maximized windows
-    QWidgetList* l = QApplication::topLevelWidgets();
-    if ( l ) {
-        QWidget *w = l->first();
-        while ( w ) {
-            if ( w->isVisible() && w->isMaximized() )
-            {
-                w->showMaximized();
-            }
-            w = l->next();
-        }
-        delete l;
-    }
-}
-#endif
 #endif

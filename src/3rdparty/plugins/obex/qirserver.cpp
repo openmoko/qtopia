@@ -21,6 +21,8 @@
 #include "qirserver.h"
 
 #include <qtopia/mimetype.h>
+#include <qtopia/global.h>
+#include <qtopia/qcopenvelope_qws.h>
 
 #include <qsocketnotifier.h>
 #include <qfile.h>
@@ -67,7 +69,7 @@ private slots:
 
 
 
-QObexBase::QObexBase( QObject *parent = 0, const char *name = 0 )
+QObexBase::QObexBase( QObject *parent , const char *name )
     :QObject( parent, name )
 {
     finished = FALSE;
@@ -315,6 +317,11 @@ void QObexSender::putFile( const QString &filename, const QString& mimetype )
 	OBEX_ObjectAddHeader(self, object,
 			     OBEX_HDR_LENGTH, hd, 4, 0);
         
+	/* Add type header */
+	hd.bs = (uchar*)mimetype.latin1();
+	OBEX_ObjectAddHeader(self, object,
+			     OBEX_HDR_TYPE, hd, mimetype.length()+1, 0);
+        
 	/* Add unicode name header*/
 	
 	QString uc = filename + QChar( 0x0 );
@@ -370,23 +377,25 @@ void QObexSender::doPending()
 
 
 
-static void qobex_sender_callback(obex_t *handle, obex_object_t *obj, gint /*mode*/, gint event, gint /*obex_cmd*/, gint /*obex_rsp*/)
+static void qobex_sender_callback(obex_t *handle, obex_object_t *obj, gint /*mode*/, gint event, gint obex_cmd, gint /*obex_rsp*/)
 {
-    //qDebug( "qobex_sender_callback %p, %p, %d, event %x, cmd %x, rsp %x",
-    //    handle, obj, mode, event, obex_cmd, obex_rsp );
-
     QObexSender *sender = (QObexSender*)OBEX_GetUserData( handle );
+
+    //qDebug( "qobex_sender_callback %p, %p, %p, %d, event %x, cmd %x, rsp %x",
+        //sender, handle, obj, mode, event, obex_cmd, obex_rsp );
 
 
     switch (event) {
     case OBEX_EV_REQDONE:
 	sender->finished = TRUE;
-	emit sender->done();
-	
+	if ( obex_cmd == OBEX_CMD_PUT ) {
+	    emit sender->done();
+	}
+	// else if OBEX_CMD_CONNECT, we could give feedback
 	break;
-	
+
     case OBEX_EV_LINKERR:
-	sender->finished = TRUE;
+	abort();
 	sender->state = QObexSender::Error;
 	emit sender->done();
 	break;
@@ -427,8 +436,6 @@ QObexSender::~QObexSender()
 
 void QObexSender::beam( const QString& filename, const QString& mimetype )
 {
-    qDebug( "beaming %s", filename.latin1() );
-
     file_to_send = filename;
     mime_to_send = mimetype;
 
@@ -450,14 +457,21 @@ void QObexSender::tryConnecting()
 	
     int retc = IrOBEX_TransportConnect(self, "OBEX");
         
-
     if ( retc < 0 ) {
-	qDebug( "Connection attempt %d failed. Retrying...",
-		connectCount );
-	QTimer::singleShot( 500, this, SLOT(tryConnecting()) );
+	const int maxTry = 20;
+	if ( connectCount > maxTry ) {
+	    abort();
+	} else {
+	    Global::statusMessage(tr("Beam failed (%1/%2). Retrying...","eg. 1/3")
+		.arg(connectCount).arg(maxTry));
+	    QTimer::singleShot( 500, this, SLOT(tryConnecting()) );
+	}
 	return;
     }
-    
+
+    Global::statusMessage(tr("Sending..."));
+    QCopEnvelope env("QPE/Obex","sending()");
+
     connectSocket();
 
     obex_object_t *object;
@@ -469,9 +483,6 @@ void QObexSender::tryConnecting()
     state = QObexSender::Connecting;
 
     process( object );
-
-
-
 }
 
 //-----------------------------------------------------------------------
@@ -541,13 +552,13 @@ static void qobex_server_callback(obex_t *handle, obex_object_t * /*object*/, gi
     switch (event)        {
     case OBEX_EV_ACCEPTHINT:
 	{
-	    qDebug( "#####------ OBEX_EV_ACCEPTHINT ------########" );
+	    //qDebug( "#####------ OBEX_EV_ACCEPTHINT ------########" );
 
 	    server->spawnReceiver( handle );
 	}
 	break;
     default:
-	qFatal( " Unexpected event in server" );
+	qWarning( " Unexpected event in server" );
 	break;
     }
 
@@ -579,7 +590,6 @@ QObexReceiver::QObexReceiver( obex_t *handle, QObject *parent, const char *name 
 
 QObexReceiver::~QObexReceiver()
 {
-    qDebug( "~~~~~~~~~~~~~~~~~~~~~~~~~~~~QObexReceiver()" );
 }
 
 
@@ -705,8 +715,7 @@ void QObexReceiver::readData( obex_object_t *object )
 
 static void qobex_receiver_callback(obex_t *handle, obex_object_t *object, gint /*mode*/, gint event, gint obex_cmd, gint obex_rsp)
 {
-
-       qDebug( "qobex_receiver_callback %p event %x cmd %x rsp %x", object, event, obex_cmd, obex_rsp );
+    //qDebug( "qobex_receiver_callback %p event %x cmd %x rsp %x", object, event, obex_cmd, obex_rsp );
 
 
     QObexReceiver* receiver = 
@@ -804,7 +813,7 @@ void QObexReceiver::doPending()
 
 #include "qirserver.moc"
 
-QIrServer::QIrServer( QObject *parent = 0, const char *name = 0 )
+QIrServer::QIrServer( QObject *parent, const char *name )
     :QObject( parent, name )
 {
     (void)new QObexServer( this );

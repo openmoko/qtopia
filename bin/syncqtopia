@@ -1,0 +1,299 @@
+#!/usr/bin/perl
+############################################################################
+# $Id: $
+#
+# Synchronizes Qtopia header files - internal Trolltech tool.
+#   - Creates symlinks on Unix.
+#   - Copies files on Windows.
+#
+# Copyright (C) 1997-2002 by Trolltech AS.  All rights reserved.
+#
+############################################################################
+
+use strict;
+use File::Basename;
+
+die "syncqtopia: QPEDIR not defined" if ! $ENV{"QPEDIR"};
+my $fast=0;
+my $force_win=0;
+my $force_relative=0;
+$force_relative=1 if ( -d "/System/Library/Frameworks" );
+
+my $basedir = $ENV{"QPEDIR"};
+my $QTDIR = $ENV{"QTDIR"};
+ 
+my $includedir = $basedir . "/include/qtopia";
+
+my $showonly = undef;
+my $showonlypriv = undef;
+
+while ( $#ARGV >= 0 ) {
+    if ( $ARGV[0] eq "-fast" ) {
+	$fast=1;
+    } elsif ( $ARGV[0] eq "-inc" ) {
+	shift;
+	$includedir = $ARGV[0];
+	if ( $includedir !~ /^\// ) {
+	    $includedir = `pwd`;
+	    chomp $includedir;
+	    $includedir .= "/". $includedir;
+	}
+    } elsif ( $ARGV[0] eq "-show" ) {
+	$showonly++;
+    } elsif ( $ARGV[0] eq "-showpriv" ) {
+	$showonlypriv++;
+    } elsif ( $ARGV[0] eq "-windows" ) {
+	$force_win=1;
+    } elsif ( $ARGV[0] eq "-relative" ) {
+        $force_relative=1;
+    }
+    shift;
+}
+
+undef $/;
+
+mkdir($basedir . "/include", 0777);
+mkdir($basedir . "/include/qtopia", 0777);
+mkdir($basedir . "/include/qpe", 0777);
+chdir($basedir);
+# a map of where headers can be found to where headers are to be put
+my %includeDirs = ( "qtopia" => "qtopia", "qtopia1" => "qtopia", "qtopiapim" => "qtopia/pim", 
+		"qtopiadb" => "qtopia/db", "qtopiacalc" => "qtopia/calc", 
+		"qtopiamail" => "qtopia/mail");
+
+#make these extra links 
+my @files;
+my @pfiles;
+my $isUnix;
+my $destDir;
+my $f;
+my $key;
+my $file;
+my $cmdLine;
+$isUnix = check_unix();
+for $key (keys %includeDirs){
+    $destDir = $includeDirs{$key};
+    @files = find_files( "src/libraries/". $key, "^[-a-z0-9]*(?:_[^p].*)?\\.h\$", 0);
+    @pfiles = find_files( "src/libraries/". $key, "[-z0-9]*[__][p]\\.h\$" , 0 );
+        
+    if ( $showonly ) {
+	foreach ( @files ) {
+	    print "$_\n";
+	}
+    }else{
+
+	mkdir($basedir . "/include/" .  $destDir, 0777);
+	if ($isUnix){
+	    foreach $file (@files){
+		$f = basename($file, ""); 
+		symlink_files($basedir."/".$file, $basedir . "/include/" . $destDir."/".$f);
+	    }
+	}else{
+	    foreach $file (@files){
+		$f = basename($file, "");
+		sync_files("$file",  "include/" . $destDir."/".$f, $fast);
+	    }
+	}  
+    }
+    
+    if ( $showonlypriv ) {
+	foreach ( @pfiles ) {
+	    print "$_\n";
+	}
+    }else{
+        mkdir($basedir . "/include/" .  $destDir . "/private" , 0777);
+        if ($isUnix){
+	    foreach $file (@pfiles){
+	        $f = basename($file, "");
+		symlink_files($basedir."/".$file, $basedir . "/include/" . $destDir . "/private/" . $f);
+	    }
+	}else{
+	    foreach $file (@pfiles){
+		$f = basename($file, "");
+		sync_files("$file",  "include/" . $destDir . "/private/" . $f, $fast);
+	    }
+	}	
+    }
+}
+@files = find_files("src/libraries/qtopia/backend", ".*\\.h", 0);
+if ( $showonly ) {
+    foreach (@files){
+	print "$_\n";
+    }
+}else{
+    if ($isUnix){
+	foreach $file (@files){
+	    $f = basename($file, "");
+	    symlink_files($basedir."/".$file, $basedir . "/include/qtopia/private/" . $f);
+	}
+    }else{
+	foreach $file (@files){
+	    $f = basename($file, "");
+	    sync_files("$file",  $basedir . "/include/qtopia/private/" . $f, $fast);
+	}
+    }
+}
+
+if ($isUnix){        
+  symlink_files($basedir. "/include/qtopia", $basedir. "/include/qpe");
+}else{
+  print `"rmdir /Q /S $basedir\\include\\qpe\\"`;
+  print `"xcopy /E /Y /S $basedir\\include\\qtopia\\*.* $basedir\\include\\qpe\\"`;
+}
+
+if (! $showonly){
+    if ($isUnix){
+        symlink_files($basedir. "/src/libraries/qtopia/custom-linux-generic-g++.cpp", $basedir. "/src/libraries/qtopia/custom.cpp");
+        symlink_files($basedir. "/src/libraries/qtopia/custom-linux-generic-g++.h", $basedir. "/src/libraries/qtopia/custom..h");
+    }else{
+	sync_files($basedir . "/src/libraries/qtopia/custom-win32-msvc.cpp", $basedir . "/src/libraries/qtopia/custom.cpp");
+	sync_files($basedir . "/src/libraries/qtopia/custom-win32-msvc.h", $basedir . "/src/libraries/qtopia/custom.h");
+    }
+}
+
+exit 0;
+
+
+#
+# symlink_files(file,ifile)
+#
+# file is symlinked to ifile
+#
+
+sub symlink_files
+{
+  my ($file, $ifile) = @_;
+  if ( $force_relative ) {
+    my $t = `pwd`; 
+    my $c = -1; 
+    my $p = "../";
+    $t =~ s-^$basedir/--;
+    $p .= "../" while( ($c = index( $t, "/", $c + 1)) != -1 );
+    $file =~ s-^$basedir/-$p-;
+    print " ($file)\n"
+  }
+  
+  if (! -l $ifile){
+    if (-e $ifile && -f $ifile){
+	unlink $ifile;
+	print "Deleting normal file $ifile\n";
+    }
+    symlink($file, $ifile);
+    print "symlink created for $file to $ifile\n";
+  }else{
+    print "symlink exits for $file\n";
+  }
+}
+
+#
+# sync_files(file,ifile)
+#
+# If ifile does not exist, file is copied to ifile, otherwise
+# the newest file is copied over the older file.
+#
+
+sub sync_files
+{
+    my ($file,$ifile,$fast,$copy,$knowdiff,$filecontents,$ifilecontents) = @_;
+
+    if ( $fast ) {
+	# Uni-directional synchronization
+	if ( (stat($ifile))[9] < (stat($file))[9] ) {
+	    open( I, "< " . $file ) || die "Could not open $file for reading";
+	    binmode I;
+	    $filecontents = <I>;
+	    close I;
+	    $copy = -1;
+	    $knowdiff = 1;
+	}
+    } else {
+	# Bi-directional synchronization
+	open( I, "< " . $file ) || die "Could not open $file for reading";
+	binmode I;
+	$filecontents = <I>;
+	close I;
+	if ( open(I, "< " . $ifile) ) {
+	    binmode I;
+	    $ifilecontents = <I>;
+	    close I;
+	    $copy = (stat($ifile))[9] <=> (stat($file))[9];
+	    $knowdiff = 0,
+	} else {
+	    $copy = -1;
+	    $knowdiff = 1;
+	}
+    }
+
+    if ( $knowdiff || ($filecontents ne $ifilecontents) ) {
+	if ( $copy > 0 ) {
+	    open(O, "> " . $file) || die "Could not open $file for writing";
+	    binmode O;
+	    print O $ifilecontents;
+	    close O;
+	    print "$file written\n";
+	} elsif ( $copy < 0 ) {
+	    open(O, "> " . $ifile) || die "Could not open $ifile for writing";
+	    binmode O;
+	    print O $filecontents;
+	    close O;
+	    print "$ifile written\n";
+	}
+    }
+}
+
+
+#
+# Finds files.
+#
+# Examples:
+#   find_files("/usr","\.cpp$",1)   - finds .cpp files in /usr and below
+#   find_files("/tmp","^#",0)	    - finds #* files in /tmp
+#
+
+sub find_files {
+    my($dir,$match,$descend) = @_;
+    my($file,$p,@files);
+    local(*D);
+    $dir =~ s=\\=/=g;
+    ($dir eq "") && ($dir = ".");
+    if ( opendir(D,$dir) ) {
+	if ( $dir eq "." ) {
+	    $dir = "";
+	} else {
+	    ($dir =~ /\/$/) || ($dir .= "/");
+	}
+	foreach $file ( readdir(D) ) {
+	    next if ( $file  =~ /^\.\.?$/ );
+	    $p = $dir . $file;
+	    ($file =~ /$match/) && (push @files, $p);
+	    if ( $descend && -d $p && ! -l $p ) {
+		push @files, &find_files($p,$match,$descend);
+	    }
+	}
+	closedir(D);
+    }
+    return @files;
+}
+
+
+#
+# check_unix()
+#
+# Returns 1 if this is a Unix, 0 otherwise.
+#
+
+sub check_unix {
+    my($r);
+    $r = 0;
+    if ( $force_win != 0) {
+	return 0;
+    }
+    if ( -f "/bin/uname" ) {
+	$r = 1;
+	(-f "\\bin\\uname") && ($r = 0);
+    } elsif ( -f "/usr/bin/uname" ) {
+        $r = 1;
+	(-f "\\usr\\bin\\uname") && ($r = 0);
+    }
+    return $r;
+}

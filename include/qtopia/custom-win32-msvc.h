@@ -1,0 +1,1 @@
+../../src/libraries/qtopia/custom-win32-msvc.h

@@ -17,17 +17,24 @@
 ** not clear to you.
 **
 **********************************************************************/
+
+
 #define QTOPIA_INTERNAL_LANGLIST
-#define  QTOPIA_FILEOPERATIONS
-#include <qtopia/qpedebug.h>
+#ifndef QTOPIA_FILEOPERATIONS
+#define QTOPIA_FILEOPERATIONS
+#endif
 #include <qtopia/global.h>
+
+#ifdef Q_WS_QWS
+#include <qtopia/qpedebug.h>
 #include <qtopia/qdawg.h>
 #include <qtopia/qpeapplication.h>
 #include <qtopia/resource.h>
 #include <qtopia/storage.h>
 #include <qtopia/applnk.h>
+#endif
 #if defined(Q_WS_QWS) && !defined(QT_NO_COP)
-#include "qpe/qcopenvelope_qws.h"
+#include <qtopia/qcopenvelope_qws.h>
 #endif
 
 #include <qfile.h>
@@ -38,10 +45,15 @@
 #include <qdir.h>
 #include <qmessagebox.h>
 #include <qregexp.h>
+#include <qdatetime.h>
+
+#ifdef QTOPIA_DESKTOP
+#include <qsettings.h>
+#endif
 
 #include <stdlib.h>
 #include <stdio.h>
-#if !defined ( _OS_WIN32_)
+#ifndef Q_OS_WIN32
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/types.h>
@@ -51,16 +63,20 @@
 #include <process.h>
 #include <io.h>
 #include <sys/locking.h>
+#include <string.h> // for strerror function
+#include <stdlib.h>
+#include <windows.h>
+#include <winbase.h>
 #endif
 
+#ifdef Q_WS_QWS
 
-#ifdef QWS
+Global::Command* Global::builtin=0;
+QGuardedPtr<QWidget> *Global::running=0;
+
 #include <qwindowsystem_qws.h> // for qwsServer
-#endif
-#include <qdatetime.h>
 
 //#include "quickexec_p.h"
-
 class Emitter : public QObject {
     Q_OBJECT
 public:
@@ -97,7 +113,7 @@ StartingAppList* StartingAppList::appl = 0;
 StartingAppList::StartingAppList( QObject *parent, const char* name )
     :QObject( parent, name )
 {
-#ifdef QWS
+#ifdef Q_WS_QWS
 #if QT_VERSION >= 232 && !defined(QT_NO_COP)
     connect( qwsServer, SIGNAL( newChannel(const QString&)),
 	     this, SLOT( handleNewChannel(const QString&)) );
@@ -147,16 +163,9 @@ static bool docDirCreated = FALSE;
 static QDawg* fixed_dawg = 0;
 static QDict<QDawg> *named_dawg = 0;
 
-static QString qpeDir()
-{
-    QString dir = getenv("QPEDIR");
-    if ( dir.isEmpty() ) dir = "..";
-    return dir;
-}
-
 static QString dictDir()
 {
-    return qpeDir() + "/etc/dict";
+    return QPEApplication::qpeDir() + "etc/dict";
 }
 
 /*!
@@ -340,63 +349,32 @@ void Global::addWords(const QString& dictname, const QStringList& wordlist)
 
 
 /*!
-  Returns the full path for the application called \a appname, with the
-  given \a filename. Returns QString::null if there was a problem creating
-  the directory tree for \a appname.
-  If \a filename contains "/", it is the caller's responsibility to
-  ensure that those directories exist.
-*/
-QString Global::applicationFileName(const QString& appname, const QString& filename)
-{
-    QDir d;
-    QString r = getenv("HOME");
-    r += "/Applications/";
-    if ( !QFile::exists( r ) )
-	if ( d.mkdir(r) == false )
-	    return QString::null;
-    r += appname;
-    if ( !QFile::exists( r ) )
-	if ( d.mkdir(r) == false )
-	    return QString::null;
-    r += "/"; r += filename;
-    return r;
-}
-
-/*!
   \internal
 */
 void Global::createDocDir()
 {
     if ( !docDirCreated ) {
-	docDirCreated = TRUE;
-#if !defined ( _OS_WIN32_)
-	mkdir( QPEApplication::documentDir().latin1(), 0755 );
-#else
 	QDir d;
-	d.mkdir(QPEApplication::documentDir().latin1());
+	if (!d.exists(QPEApplication::documentDir().latin1())){
+	    docDirCreated = TRUE;
+#ifndef Q_WS_WIN32
+	    mkdir( QPEApplication::documentDir().latin1(), 0755 );
+#else
+	    d.mkdir(QPEApplication::documentDir().latin1());	
 #endif
+	}else{
+	    docDirCreated = TRUE;
+	}
     }
 }
 
-
-/*!
-  Displays a status \a message to the user. This usually appears
-  in the taskbar for a short amount of time, then disappears.
-*/
-void Global::statusMessage(const QString& message)
-{
-#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
-    QCopEnvelope e( "QPE/TaskBar", "message(QString)" );
-    e << message;
-#endif
-}
 
 /*!
   \internal
 */
 void Global::applyStyle()
 {
-#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
+#ifndef QT_NO_COP
     QCopChannel::send( "QPE/System", "applyStyle()" );
 #else
     ((QPEApplication *)qApp)->applyStyle(); // apply without needing QCop for floppy version
@@ -408,7 +386,7 @@ void Global::applyStyle()
 */
 QWidget *Global::shutdown( bool )
 {
-#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
+#ifndef QT_NO_COP
     QCopChannel::send( "QPE/System", "shutdown()" );
 #endif
     return 0;
@@ -437,7 +415,7 @@ QWidget *Global::restart( bool )
 */
 void Global::showInputMethod()
 {
-#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
+#ifndef QT_NO_COP
     QCopChannel::send( "QPE/TaskBar", "showInputMethod()" );
 #endif
 }
@@ -452,7 +430,7 @@ void Global::showInputMethod()
 */
 void Global::hideInputMethod()
 {
-#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
+#ifndef QT_NO_COP
     QCopChannel::send( "QPE/TaskBar", "hideInputMethod()" );
 #endif
 }
@@ -472,9 +450,6 @@ bool Global::isBuiltinCommand( const QString &name )
     }
     return FALSE;
 }
-
-Global::Command* Global::builtin=0;
-QGuardedPtr<QWidget> *Global::running=0;
 
 /*!
   \class Global::Command
@@ -551,7 +526,7 @@ void Global::invoke(const QString &c)
     // Convert the command line in to a list of arguments
     QStringList list = QStringList::split(QRegExp("  *"),c);
 
-#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
+#ifndef QT_NO_COP
     QString ap=list[0];
     // see if the application is already running
     // XXX should lock file /tmp/qcop-msg-ap
@@ -588,15 +563,15 @@ void Global::invoke(const QString &c)
 	args[j] = slist.at(j);
     args[j] = NULL;
 
-#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
+#ifndef QT_NO_COP
     // an attempt to show a wait...
     // more logic should be used, but this will be fine for the moment...
     QCopEnvelope ( "QPE/System", "busy()" );
 #endif
 
-#if !defined (_OS_WIN32_)
+#ifndef Q_OS_WIN32
 #ifdef HAVE_QUICKEXEC
-    QString libexe = qpeDir()+"/binlib/lib"+args[0] + ".so";
+    QString libexe = QPEApplication::qpeDir()+"binlib/lib"+args[0] + ".so";
     qDebug("libfile = %s", libexe.latin1() );
     if ( QFile::exists( libexe ) ) {
 	qDebug("calling quickexec %s", libexe.latin1() );
@@ -609,7 +584,7 @@ void Global::invoke(const QString &c)
 		::close( fd );
 	    ::setpgid( ::getpid(), ::getppid() );
 	    // Try bindir first, so that foo/bar works too
-	    ::execv( qpeDir()+"/bin/"+args[0], (char * const *)args );
+	    ::execv( QPEApplication::qpeDir()+"bin/"+args[0], (char * const *)args );
 	    ::execvp( args[0], (char * const *)args );
 	    _exit( -1 );
 	}
@@ -636,7 +611,7 @@ void Global::execute( const QString &c, const QString& document )
     if ( qApp->type() != QApplication::GuiServer ) {
 //       qDebug("Global: Asking the server to execute %s", c.latin1());
 	// ask the server to do the work
-#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
+#ifndef QT_NO_COP
 	if ( document.isNull() ) {
 	    QCopEnvelope e( "QPE/System", "execute(QString)" );
 	    e << c;
@@ -676,7 +651,7 @@ void Global::execute( const QString &c, const QString& document )
     // Convert the command line in to a list of arguments
     QStringList list = QStringList::split(QRegExp("  *"),c);
 
-#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
+#ifndef QT_NO_COP
     QString ap=list[0];
 
 //     qDebug("executing %s", ap.latin1() );
@@ -745,7 +720,7 @@ QString Global::stringQuote(const QString& s)
 */
 void Global::findDocuments(DocLnkSet* folder, const QString &mimefilter)
 {
-    QString homedocs = QString(getenv("HOME")) + "/Documents";
+    QString homedocs = QDir::homeDirPath() + "/Documents";
     DocLnkSet d(homedocs,mimefilter);
     folder->appendFrom(d);
     StorageInfo storage;
@@ -758,11 +733,24 @@ void Global::findDocuments(DocLnkSet* folder, const QString &mimefilter)
 	    folder->appendFrom(ide);
 	}
     }
+
 }
+#endif // Q_WS_QWS
 
 QStringList Global::languageList()
 {
-    QString lang = getenv("LANG");
+    QString lang;
+#ifdef QTOPIA_DESKTOP
+    QSettings settings;
+    settings.insertSearchPath( QSettings::Unix,
+	    QDir::homeDirPath() + "/.palmtopcenter/" );
+    settings.insertSearchPath( QSettings::Windows, "/Trolltech" );
+
+    lang = settings.readEntry( "/palmtopcenter/language" );
+#endif
+    if (lang.isEmpty())
+	lang = getenv("LANG");
+
     QStringList langs;
     langs.append(lang);
     int i  = lang.find(".");
@@ -774,6 +762,7 @@ QStringList Global::languageList()
     return langs;
 }
 
+#ifdef Q_WS_QWS
 QStringList Global::helpPath()
 {
     QStringList path;
@@ -781,32 +770,75 @@ QStringList Global::helpPath()
     for (QStringList::ConstIterator it = langs.fromLast(); it!=langs.end(); --it) {
 	QString lang = *it;
 	if ( !lang.isEmpty() )
-	    path += QPEApplication::qpeDir() + "/help/" + lang + "/html";
+	    path += QPEApplication::qpeDir() + "help/" + lang + "/html";
     }
-    path += QPEApplication::qpeDir() + "/pics";
-    path += QPEApplication::qpeDir() + "/help/html";
-    path += QPEApplication::qpeDir() + "/docs";
+    path += QPEApplication::qpeDir() + "pics";
+    path += QPEApplication::qpeDir() + "help/html";
+    path += QPEApplication::qpeDir() + "docs";
     return path;
 }
+#endif
 
+/*!
+  Returns the full path for the application called \a appname, with the
+  given \a filename. Returns QString::null if there was a problem creating
+  the directory tree for \a appname.
+  If \a filename contains "/", it is the caller's responsibility to
+  ensure that those directories exist.
+*/
+QString Global::applicationFileName(const QString& appname, const QString& filename)
+{
+    QDir d;
+    QString r = QDir::homeDirPath(); 
+#ifdef QTOPIA_DESKTOP
+    r += "/.palmtopcenter/";
+#else
+    r += "/Applications/";
+#endif
+    if ( !QFile::exists( r ) )
+	if ( d.mkdir(r) == false )
+	    return QString::null;
+    r += appname;
+    if ( !QFile::exists( r ) )
+	if ( d.mkdir(r) == false )
+	    return QString::null;
+    r += "/"; r += filename;
 
+    //qDebug("Global::applicationFileName = %s", r.latin1());
+    return r;
+}
+
+/*!
+  Displays a status \a message to the user. This usually appears
+  in the taskbar for a short amount of time, then disappears.
+*/
+void Global::statusMessage(const QString& message)
+{
+#if defined(Q_WS_QWS) && !defined(QT_NO_COP)
+    QCopEnvelope e( "QPE/TaskBar", "message(QString)" );
+    e << message;
+#endif
+}
+
+#ifdef Q_WS_QWS
 #ifdef QTOPIA_FILEOPERATIONS
   /*! \enum Global::Lockflags
     \internal
      This enum controls what type of locking is performed on file.
-    
+
      Current defined values are:
 
      \value LockShare Allow lock to be shared. Reserved for future use
      \value LockWrite Create at a write lock.
      \value LockBlock Block the process when lock is encountered. Under WIN32
-                      this blocking is limited to ten(10) failed attempts to 
-                      access locked file. Reserved for future use. 
+                      this blocking is limited to ten(10) failed attempts to
+                      access locked file. Reserved for future use.
 
    */
 #endif
 
-#if !defined (_OS_WIN32_)
+
+#ifndef Q_OS_WIN32
 /*!
   \internal
   Lock region of file. Any locks created should be released before the program exits. Returns TRUE if sucessfull
@@ -826,7 +858,7 @@ bool Global::lockFile(QFile &f, int flags){
 
   fileLock.l_len = f.size();
 
-  
+
   if (flags == -1){
       lockMode =  F_RDLCK;
       if (f.mode() == IO_ReadOnly)
@@ -836,9 +868,9 @@ bool Global::lockFile(QFile &f, int flags){
       lockCommand = F_SETLK;
   }else{
       if (flags & Global::LockWrite)
-	  fileLock.l_type = F_WRLCK;	  
+	  fileLock.l_type = F_WRLCK;
       else
-	  fileLock.l_type = F_RDLCK;	
+	  fileLock.l_type = F_RDLCK;
       if (flags & Global::LockBlock)
 	  lockCommand = F_SETLK;
       else
@@ -857,7 +889,8 @@ bool Global::lockFile(QFile &f, int flags){
   Unlock a region of file
   \a f must be an open file previously locked
  */
-bool Global::unlockFile(QFile &f){
+bool Global::unlockFile(QFile &f)
+{
   struct flock fileLock;
 
   if (!f.isOpen())
@@ -881,9 +914,10 @@ bool Global::unlockFile(QFile &f){
   \internal
  Could a request to lock file with given flags succeed
  \a f must be an opened file
- \a flags the desired lock type required 
+ \a flags the desired lock type required
 */
-bool Global::isFileLocked(QFile &f, int flags){
+bool Global::isFileLocked(QFile &f, int flags)
+{
   struct flock fileLock;
 
   if (!f.isOpen())
@@ -917,40 +951,25 @@ bool Global::truncateFile(QFile &f, int size){
     if (!f.isOpen())
       return FALSE;
 
-    return ::ftruncate(f.handle(), size) != -1; 
+    return ::ftruncate(f.handle(), size) != -1;
 }
 
 #else
 
-bool Global::lockFile(QFile &f, int flags){
-    int lockMode;
-
-    if (!f.isOpen())
-      return FALSE;
-
-   if (flags & Global::LockBlock)
-       lockMode = _LK_LOCK;
-   else
-       lockMode = _LK_NBLCK;
-
-   if (::locking(f.handle(), _LK_NBLCK, f.size()) == 0)
-       return TRUE;
-   else
-       return FALSE;
+bool Global::lockFile(QFile &f, int flags)
+{
+    // If the file has been opened then a lock has been achieved
+    return f.isOpen();
 }
 
 bool Global::unlockFile(QFile &f)
-    if (!f.isOpen())
-      return FALSE;
-
-   if (::locking(f.handle(), _LK_UNLCK, f.size()) == 0)
-       return TRUE;
-   else
-       return FALSE;
+{
+    // No need to do anything as we do not open file using sharing
+    return TRUE;
 }
 
-bool Global::truncateFile(QFile &f, int size){
-
+bool Global::truncateFile(QFile &f, int size)
+{
     if (!f.isOpen())
       return FALSE;
 
@@ -963,13 +982,16 @@ bool Global::truncateFile(QFile &f, int size){
 	return FALSE;
 }
 
-bool Global::isFileLocked(QFile &f, int flags){
-    bool result = lockFile(f, flags);
-    if (result)
-	unlockFile(f);
-
-    return result;
+bool Global::isFileLocked(QFile &f, int flags)
+{
+    // if the file is open then we must have achieved a file lock
+    return f.isOpen();
 }
+
 #endif
 
 #include "global.moc"
+
+#endif  //qws
+
+

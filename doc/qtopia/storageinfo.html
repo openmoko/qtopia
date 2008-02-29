@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/src/libraries/qtopia/storage.cpp:64 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/src/libraries/qtopia/storage.cpp:69 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -33,7 +33,7 @@ body { background: #ffffff; color: black; }
 <ul>
 <li><div class=fn><a href="#StorageInfo"><b>StorageInfo</b></a> ( QObject&nbsp;*&nbsp;parent = 0 )</div></li>
 <li><div class=fn>const QList&lt;FileSystem&gt; &amp; <a href="#fileSystems"><b>fileSystems</b></a> () const</div></li>
-<li><div class=fn>const FileSystem * <a href="#fileSystemOf"><b>fileSystemOf</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;mountpoint )</div></li>
+<li><div class=fn>const FileSystem * <a href="#fileSystemOf"><b>fileSystemOf</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;filename )</div></li>
 <li><div class=fn>QStringList <a href="#fileSystemStrings"><b>fileSystemStrings</b></a> () const</div></li>
 </ul>
 <h2>Public Slots</h2>
@@ -65,9 +65,9 @@ The standard <em>parent</em> parameters is passed on to QObject.
 Gets emitted when a disk has been mounted or unmounted, such as when
 a CF card has been inserted.
 
-<h3 class=fn>const&nbsp;<a href="filesystem.html">FileSystem</a>&nbsp;* <a name="fileSystemOf"></a>StorageInfo::fileSystemOf ( const&nbsp;QString&nbsp;&amp;&nbsp;mountpoint )
-</h3> Returns the first <a href="filesystem.html">FileSystem</a> that starts with <em>mountpoint</em> as a mount
-point
+<h3 class=fn>const&nbsp;<a href="filesystem.html">FileSystem</a>&nbsp;* <a name="fileSystemOf"></a>StorageInfo::fileSystemOf ( const&nbsp;QString&nbsp;&amp;&nbsp;filename )
+</h3> Returns the longest matching <a href="filesystem.html">FileSystem</a> that starts with the
+same prefix as <em>filename</em> as its mount point.
 
 <h3 class=fn>QStringList <a name="fileSystemStrings"></a>StorageInfo::fileSystemStrings () const
 </h3> 
@@ -76,7 +76,7 @@ Returns a list of filesystem names.
 <h3 class=fn>const QList&lt;FileSystem&gt; &amp; <a name="fileSystems"></a>StorageInfo::fileSystems () const
 </h3> 
 Returns a list of all available mounted file systems.
-<p> <b>Warning:</b> This may change in Qtopia 3.x to return only relevent Qtopia file systems (and ignore mount points such as /tmp)
+<p> <b>Warning:</b> This may change in Qtopia 3.x to return only relevant Qtopia file systems (and ignore mount points such as /tmp)
 
 <h3 class=fn>void <a name="update"></a>StorageInfo::update ()<tt> [slot]</tt>
 </h3> Updates the mount and free space available information for each mount

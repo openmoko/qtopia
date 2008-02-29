@@ -21,11 +21,11 @@
 #include "qcopbridge.h"
 #include "transferserver.h"
 
-#ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
+#ifdef Q_WS_QWS
+#include <qtopia/qcopenvelope_qws.h>
 #endif
-#include <qpe/qpeapplication.h>
-#include <qpe/version.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/version.h>
 
 #include <qdir.h>
 #include <qfile.h>
@@ -34,14 +34,18 @@
 #include <qstringlist.h>
 #include <qfileinfo.h>
 #include <qregexp.h>
-#ifdef QWS
+#ifdef Q_WS_QWS
 #include <qcopchannel_qws.h>
 #endif
 
+#ifndef _XOPEN_SOURCE
 #define _XOPEN_SOURCE
+#endif
+#ifndef Q_OS_WIN32
 #include <pwd.h>
-#include <sys/types.h>
 #include <unistd.h>
+#include <sys/types.h>
+#endif
 
 #if defined(_OS_LINUX_)
 #include <shadow.h>
@@ -51,8 +55,8 @@
 
 const int block_size = 51200;
 
-QCopBridge::QCopBridge( Q_UINT16 port, QObject *parent = 0,
-        const char* name = 0)
+QCopBridge::QCopBridge( Q_UINT16 port, QObject *parent,
+        const char* name )
     : QServerSocket( port, 1, parent, name ),
       desktopChannel( 0 ),
       cardChannel( 0 )
@@ -123,7 +127,7 @@ void QCopBridge::desktopMessage( const QCString &command, const QByteArray &args
     }
 
     QString params = command.mid( paren + 1 );
-    if ( params[params.length()-1] != ')' ) {
+    if ( params[(int)params.length()-1] != ')' ) {
 	qDebug("DesktopMessage: bad qcop syntax");
 	return;
     }
@@ -200,7 +204,7 @@ void QCopBridge::timerEvent( QTimerEvent * )
 }
 
 
-QCopBridgePI::QCopBridgePI( int socket, QObject *parent = 0, const char* name = 0 )
+QCopBridgePI::QCopBridgePI( int socket, QObject *parent, const char* name )
     : QSocket( parent, name )
 {
     setSocket( socket );
@@ -213,7 +217,7 @@ QCopBridgePI::QCopBridgePI( int socket, QObject *parent = 0, const char* name = 
 	state = Forbidden;
 	startTimer( 0 );
     } else
-#endif	
+#endif
     {
 	state = Connected;
 	sendSync = FALSE;
@@ -350,7 +354,7 @@ void QCopBridgePI::process( const QString& message )
 	    }
 
 	    QString params = command.mid( paren + 1 );
-	    if ( params[params.length()-1] != ')' ) {
+	    if ( params[(int)params.length()-1] != ')' ) {
 		send( "500 Syntax error, command unrecognized" ); // No tr
 		return;
 	    }
@@ -397,7 +401,7 @@ void QCopBridgePI::process( const QString& message )
 		return;
 	    }
 #endif
-	
+
 #ifndef QT_NO_COP
 	    if ( paramList.count() )
 		QCopChannel::send( channel.latin1(), command.latin1(), buffer );

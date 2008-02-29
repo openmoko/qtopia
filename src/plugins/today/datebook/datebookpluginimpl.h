@@ -25,7 +25,7 @@
 
 class DatebookPlugin;
 
-class DatebookPluginImpl : public TodayInterface
+class QTOPIA_PLUGIN_EXPORT DatebookPluginImpl : public TodayInterface
 {
 public:
     DatebookPluginImpl();

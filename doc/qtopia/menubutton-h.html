@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/include/qtopia/menubutton.h:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/include/qtopia/menubutton.h:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -50,10 +50,11 @@ body { background: #ffffff; color: black; }
 #ifndef MENUBUTTON_H
 #define MENUBUTTON_H
 
+#include &lt;qtopia/qpeglobal.h&gt;
 #include &lt;qpushbutton.h&gt;
 #include &lt;qstringlist.h&gt;
 
-class MenuButton : public QPushButton {
+class QTOPIA_EXPORT MenuButton : public QPushButton {
     Q_OBJECT
 public:
     MenuButton( QWidget* parent, const char* name=0);
@@ -78,6 +79,9 @@ signals:
 public slots:
     void select(int);
     void select(const QString&amp;);
+
+protected:
+    void keyPressEvent(QKeyEvent *e);
 
 private:
     void init();

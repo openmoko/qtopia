@@ -23,7 +23,7 @@
 
 #include <qstring.h>
 #include <qapplication.h>
-#include <qpe/mediaplayerplugininterface.h>
+#include <qtopia/mediaplayerplugininterface.h>
 
 
 // #define OLD_MEDIAPLAYER_API

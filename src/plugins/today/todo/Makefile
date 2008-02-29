@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,10 +118,10 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
-INCPATH =	-I$(QPEDIR)/include -I.. -I../library
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+INCPATH =	-I$(MOC_DIR) -I.. -I../library
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
-LIBS	=	$(SUBLIBS) -lqpe -lqpepim $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
+LIBS	=	$(SUBLIBS) -lqpepim -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
 UIC	=	$(SYSCONF_UIC)
 
@@ -136,17 +142,17 @@ HEADERS =	todoplugin.h \
 SOURCES =	todoplugin.cpp \
 		todopluginimpl.cpp \
 		todopluginoptions.cpp
-OBJECTS =	todoplugin.o \
-		todopluginimpl.o \
-		todopluginoptions.o \
-		todooptionsbase.o
+OBJECTS =	$(OBJECTS_DIR)/todoplugin.o \
+		$(OBJECTS_DIR)/todopluginimpl.o \
+		$(OBJECTS_DIR)/todopluginoptions.o \
+		$(OBJECTS_DIR)/todooptionsbase.o
 INTERFACES =    todooptionsbase.ui
 UICDECLS =      todooptionsbase.h
 UICIMPLS =      todooptionsbase.cpp
-SRCMOC	=	moc_todoplugin.cpp \
-		moc_todooptionsbase.cpp
-OBJMOC	=	moc_todoplugin.o \
-		moc_todooptionsbase.o
+SRCMOC	=	$(MOC_DIR)/moc_todoplugin.cpp \
+		$(MOC_DIR)/moc_todooptionsbase.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_todoplugin.o \
+		$(OBJECTS_DIR)/moc_todooptionsbase.o
 
 
 ####### Implicit rules
@@ -212,41 +218,21 @@ REQUIRES=
 
 ####### Compile
 
-todoplugin.o: todoplugin.cpp \
+$(OBJECTS_DIR)/todoplugin.o: todoplugin.cpp \
 		todoplugin.h \
-		$(QPEDIR)/include/qtopia/todayplugininterface.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qtopia/pim/task.h \
-		$(QPEDIR)/include/qtopia/stringutil.h \
-		$(QPEDIR)/include/qtopia/pim/pimrecord.h \
 		todopluginoptions.h \
-		todooptionsbase.h \
-		$(QPEDIR)/include/qtopia/timestring.h \
-		$(QPEDIR)/include/qtopia/config.h \
-		$(QPEDIR)/include/qtopia/pim/todoaccess.h \
-		$(QPEDIR)/include/qtopia/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qtopia/services/services.h \
-		$(QPEDIR)/include/qtopia/applnk.h \
-		$(QPEDIR)/include/qtopia/resource.h
+		todooptionsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/todoplugin.o todoplugin.cpp
 
-todopluginimpl.o: todopluginimpl.cpp \
+$(OBJECTS_DIR)/todopluginimpl.o: todopluginimpl.cpp \
 		todoplugin.h \
-		$(QPEDIR)/include/qtopia/todayplugininterface.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qtopia/pim/task.h \
-		$(QPEDIR)/include/qtopia/stringutil.h \
-		$(QPEDIR)/include/qtopia/pim/pimrecord.h \
-		todopluginimpl.h \
-		$(QPEDIR)/include/qpe/todayplugininterface.h
+		todopluginimpl.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/todopluginimpl.o todopluginimpl.cpp
 
-todopluginoptions.o: todopluginoptions.cpp \
+$(OBJECTS_DIR)/todopluginoptions.o: todopluginoptions.cpp \
 		todopluginoptions.h \
-		todooptionsbase.h \
-		$(QPEDIR)/include/qtopia/config.h
+		todooptionsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/todopluginoptions.o todopluginoptions.cpp
 
 todooptionsbase.h: todooptionsbase.ui
 	$(UIC) todooptionsbase.ui -o $(INTERFACE_DECL_PATH)/todooptionsbase.h
@@ -254,36 +240,33 @@ todooptionsbase.h: todooptionsbase.ui
 todooptionsbase.cpp: todooptionsbase.ui
 	$(UIC) todooptionsbase.ui -i todooptionsbase.h -o todooptionsbase.cpp
 
-todooptionsbase.o: todooptionsbase.cpp \
+$(OBJECTS_DIR)/todooptionsbase.o: todooptionsbase.cpp \
 		todooptionsbase.h \
 		todooptionsbase.ui
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/todooptionsbase.o todooptionsbase.cpp
 
-moc_todoplugin.o: moc_todoplugin.cpp \
-		todoplugin.h \
-		$(QPEDIR)/include/qtopia/todayplugininterface.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qtopia/pim/task.h \
-		$(QPEDIR)/include/qtopia/stringutil.h \
-		$(QPEDIR)/include/qtopia/pim/pimrecord.h
+$(OBJECTS_DIR)/moc_todoplugin.o: $(MOC_DIR)/moc_todoplugin.cpp \
+		todoplugin.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_todoplugin.o $(MOC_DIR)/moc_todoplugin.cpp
 
-moc_todooptionsbase.o: moc_todooptionsbase.cpp \
+$(OBJECTS_DIR)/moc_todooptionsbase.o: $(MOC_DIR)/moc_todooptionsbase.cpp \
 		todooptionsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_todooptionsbase.o $(MOC_DIR)/moc_todooptionsbase.cpp
 
-moc_todoplugin.cpp: todoplugin.h
-	$(MOC) todoplugin.h -o moc_todoplugin.cpp
+$(MOC_DIR)/moc_todoplugin.cpp: todoplugin.h
+	$(MOC) todoplugin.h -o $(MOC_DIR)/moc_todoplugin.cpp
 
-moc_todooptionsbase.cpp: todooptionsbase.h
-	$(MOC) todooptionsbase.h -o moc_todooptionsbase.cpp
+$(MOC_DIR)/moc_todooptionsbase.cpp: todooptionsbase.h
+	$(MOC) todooptionsbase.h -o $(MOC_DIR)/moc_todooptionsbase.cpp
 
 
 
 lupdate:
-	lupdate todo.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <todo.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease todo.pro
+	$(QPEDIR)/bin/qtopia-linstall todo.pro
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

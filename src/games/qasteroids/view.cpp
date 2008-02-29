@@ -24,7 +24,7 @@
 
 #include "view.h"
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
 #include <qapplication.h>
 #include <qkeycode.h>

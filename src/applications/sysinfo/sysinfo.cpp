@@ -26,7 +26,7 @@
 #include "sysinfo.h"
 
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
 #include <qtabwidget.h>
 #include <qlayout.h>

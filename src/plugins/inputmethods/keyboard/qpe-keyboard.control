@@ -3,7 +3,7 @@ Priority: optional
 Section: qpe/inputmethods
 Maintainer: Trolltech (www.trolltech.com)
 Architecture: arm
-Version: $QPE_VERSION-7
-Depends: qpe-base ($QPE_VERSION)
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia
 Description: Keyboard input method
  Keyboard input method for the Qtopia environment.

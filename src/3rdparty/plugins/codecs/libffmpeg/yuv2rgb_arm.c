@@ -56,14 +56,13 @@
  * performance considerably.
  */
 
-#ifdef __arm__
+#include <linux/config.h>
+#ifdef CONFIG_ARM
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
-
-//#include "yuv2rgb.h"
 
 
 struct dummy {
@@ -72,7 +71,10 @@ struct dummy {
 };
 
 
-extern "C" void convert_yuv420_rgb565(struct dummy *picture, unsigned char *results, int w, int h) ;
+#ifdef __cplusplus
+extern "C" 
+#endif
+void convert_yuv420_rgb565(struct dummy *picture, unsigned char *results, int w, int h);
 
 
 static void arm_rgb16 (yuv2rgb_t *c_this, uint8_t * _dst,
@@ -89,7 +91,7 @@ static void arm_rgb16 (yuv2rgb_t *c_this, uint8_t * _dst,
 //		printf( "calling arm (%dx%d)\n", c_this-> dest_width, c_this-> dest_height );
 
 		convert_yuv420_rgb565 ( &d, _dst, c_this->dest_width, c_this->dest_height );
-		
+
 //		printf ( "arm done\n" );
     }
     else {
@@ -121,23 +123,28 @@ static void arm_rgb16 (yuv2rgb_t *c_this, uint8_t * _dst,
 		    width = c_this->dest_width >> 3;
 
 		    do {
-		 RGB(0);
+		 RGB16(0);
 		 DST1(0);
 
-		 RGB(1);
+		 RGB16(1);
 		 DST1(1);
 		    
-		 RGB(2);
+		 RGB16(2);
 		 DST1(2);
 
-		 RGB(3);
+		 RGB16(3);
 		 DST1(3);
 
 		 pu += 4;
 		 pv += 4;
 		 py_1 += 8;
 		 dst_1 += 8;
+
 		    } while (--width);
+
+		    int edge_pixels = c_this->dest_width % 8;
+		    for ( int i = 0; i < edge_pixels; i++ )
+		      *dst_1++ = 0;
 
 		    dy += c_this->step_dy;
 		    _dst += c_this->rgb_stride;

@@ -3,7 +3,7 @@ Priority: optional
 Section: qpe/applications
 Maintainer: Trolltech (www.trolltech.com)
 Architecture: arm
-Version: $QPE_VERSION-7
-Depends: qpe-base ($QPE_VERSION), timezones
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia, timezones
 Description: Time-zone / world clock settings
  The time-zone manager for the Qtopia environment.

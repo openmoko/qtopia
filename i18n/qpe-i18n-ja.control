@@ -2,7 +2,7 @@ Files: i18n/ja/.directory i18n/ja/*.qm
 Priority: optional
 Section: qpe/i18n
 Maintainer: Trolltech (www.trolltech.com)
-Version: $QPE_VERSION-7
-Depends: qpe-base ($QPE_VERSION), qpf-cyberbit-120-50-t10
+Version: $QPE_VERSION-9
+Depends: qpf-cyberbit-120-50-t10
 Description: i18n: Japanese
  Japanese UI texts for Qtopia environment.

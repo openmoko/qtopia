@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/src/libraries/qtopia/applnk.cpp:118 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/src/libraries/qtopia/applnk.cpp:128 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -58,7 +58,6 @@ body { background: #ffffff; color: black; }
 <li><div class=fn>void <a href="#removeFiles"><b>removeFiles</b></a> ()</div></li>
 <li><div class=fn>void <a href="#removeLinkFile"><b>removeLinkFile</b></a> ()</div></li>
 <li><div class=fn>void <a href="#setName"><b>setName</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;docname )</div></li>
-<li><div class=fn>void <a href="#setExec"><b>setExec</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;exec )</div></li>
 <li><div class=fn>void <a href="#setFile"><b>setFile</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;filename )</div></li>
 <li><div class=fn>void <a href="#setLinkFile"><b>setLinkFile</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;filename )</div></li>
 <li><div class=fn>void <a href="#setComment"><b>setComment</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;comment )</div></li>
@@ -68,6 +67,8 @@ body { background: #ffffff; color: black; }
 <li><div class=fn>bool <a href="#writeLink"><b>writeLink</b></a> () const</div></li>
 <li><div class=fn>void <a href="#setProperty"><b>setProperty</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key, const&nbsp;QString&nbsp;&amp;&nbsp;value )</div></li>
 <li><div class=fn>QString <a href="#property"><b>property</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;key ) const</div></li>
+<li><div class=fn>bool <b>setLocation</b> ( const&nbsp;QString&nbsp;&amp;&nbsp;docPath )</div></li>
+<li><div class=fn>AppLnk &amp; <b>operator=</b> ( const&nbsp;AppLnk&nbsp;&amp;&nbsp;other )</div></li>
 </ul>
 <h2>Static Public Members</h2>
 <ul>
@@ -78,7 +79,6 @@ body { background: #ffffff; color: black; }
 </ul>
 <h2>Protected Members</h2>
 <ul>
-<li><div class=fn>virtual void <a href="#invoke"><b>invoke</b></a> ( const&nbsp;QStringList&nbsp;&amp;&nbsp;args ) const</div></li>
 <li><div class=fn>bool <a href="#ensureLinkExists"><b>ensureLinkExists</b></a> () const</div></li>
 </ul>
 <hr><a name="details"></a><h2>Detailed Description</h2>
@@ -151,7 +151,7 @@ about the application:
 <tr bgcolor="#f0f0f0"> <td valign="top"><a href="#type">type</a>() 	    <td valign="top"><a href="#setType">setType</a>()    <td valign="top">see <a href="#Types">Types</a> above
 <tr bgcolor="#d0d0d0"> <td valign="top"><a href="#rotation">rotation</a>()   <td valign="top"><em>none</em>	    <td valign="top">0, 90, 180 or 270 degrees
 <tr bgcolor="#f0f0f0"> <td valign="top"><a href="#comment">comment</a>()    <td valign="top"><a href="#setComment">setComment</a>() <td valign="top">text for the Details dialog
-<tr bgcolor="#d0d0d0"> <td valign="top"><a href="#exec">exec</a>()	    <td valign="top"><a href="#setExec">setExec</a>()    <td valign="top">executable's filename
+<tr bgcolor="#d0d0d0"> <td valign="top"><a href="#exec">exec</a>()	    <td valign="top">setExec()    <td valign="top">executable's filename
 <tr bgcolor="#f0f0f0"> <td valign="top"><a href="#file">file</a>()	    <td valign="top"><em>none</em>	    <td valign="top">document's filename
 <tr bgcolor="#d0d0d0"> <td valign="top"><a href="#linkFile">linkFile</a>()   <td valign="top"><a href="#setLinkFile">setLinkFile</a>()	<td valign="top"><em>.desktop</em> filename
 <tr bgcolor="#f0f0f0"> <td valign="top"><a href="#mimeTypes">mimeTypes</a>()  <td valign="top"><em>none</em>	    <td valign="top">the mime types the application can view or edit
@@ -228,7 +228,7 @@ successful; otherwise returns FALSE.
 
 <p> Returns the Exec property. This is the name of the executable
 program associated with the AppLnk.
-<p> <p>See also <a href="#setExec">setExec</a>().
+<p> <p>See also setExec().
 
 <h3 class=fn>void <a name="execute"></a>AppLnk::execute ( const&nbsp;QStringList&nbsp;&amp;&nbsp;args ) const
 </h3>
@@ -266,13 +266,6 @@ known. If FALSE, calling <a href="#file">file</a>() will generate a file name.
 this value is 0, otherwise it is a value that is unique for the
 duration of the current process.
 <p> <p>See also <a href="applnkset.html#find">AppLnkSet::find</a>().
-
-<h3 class=fn>void <a name="invoke"></a>AppLnk::invoke ( const&nbsp;QStringList&nbsp;&amp;&nbsp;args ) const<tt> [virtual protected]</tt>
-</h3>
-Invokes the application associated with this AppLnk, with
-<em>args</em> as arguments. Rotation is not taken into account by
-this function, so you should not call it directly.
-<p> <p>See also <a href="#execute">execute</a>().
 
 <h3 class=fn>bool <a name="isValid"></a>AppLnk::isValid () const
 </h3>
@@ -353,11 +346,6 @@ Sets the Comment property to <em>comment</em>.
 <p> This text is displayed in the 'Details Dialog', for example if the
 user uses the 'press-and-hold' gesture.
 <p> <p>See also <a href="#comment">comment</a>().
-
-<h3 class=fn>void <a name="setExec"></a>AppLnk::setExec ( const&nbsp;QString&nbsp;&amp;&nbsp;exec )
-</h3>
-Sets the Exec property to <em>exec</em>.
-<p> <p>See also <a href="#exec">exec</a>() and <a href="#name">name</a>().
 
 <h3 class=fn>void <a name="setFile"></a>AppLnk::setFile ( const&nbsp;QString&nbsp;&amp;&nbsp;filename )
 </h3>

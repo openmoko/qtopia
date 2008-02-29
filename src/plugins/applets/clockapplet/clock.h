@@ -20,6 +20,7 @@
 #ifndef __LAUNCHER_CLOCK_H__
 #define __LAUNCHER_CLOCK_H__
 
+#include <qtopia/qpeglobal.h>
 #include <qlabel.h>
 #include <qdatetime.h>
 

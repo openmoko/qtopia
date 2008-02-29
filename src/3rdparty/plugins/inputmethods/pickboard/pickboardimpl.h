@@ -20,7 +20,7 @@
 #ifndef PICKBOARDIMPL_H
 #define PICKBOARDIMPL_H
 
-#include <qpe/inputmethodinterface.h>
+#include <qtopia/inputmethodinterface.h>
 
 class Pickboard;
 class QPixmap;

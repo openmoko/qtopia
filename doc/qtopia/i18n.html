@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/doc/i18n.doc:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/doc/i18n.doc:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -93,6 +93,42 @@ found in:
 <p> <em>Qt Linguist</em> supports incremental translation, which helps you keep
 track of any additional content which is added to Qtopia that needs
 translation.
+<p> <h3> How to localize Qtopia
+</h3>
+<a name="1-5"></a><p> <ol>
+<li>Acquire <tt><i>application</i>-<i>LanguageCode</i>.ts</tt> for each
+application.
+<li>Use Qt Linguist (from Qt 3) to translate the <tt>.ts</tt> files.
+<li><p>Any strings which are ambiguous or otherwise unclear or suspect
+in any way should be translated to whatever degree is possible,
+but left in the <i>unfinished</i> state, and a comment should be
+appended to the translation in square brackets:
+</p>
+<br>
+<p>(ambiguous)
+<br><b>Source text</b>
+<br>&nbsp;&nbsp;View
+<br><b>Translation</b>
+<br>&nbsp;&nbsp;Vue [Noun or verb?]
+<br>
+</p>
+<br>
+<p>(unclear / suspect)
+<br><b>Source text</b>
+<br>&nbsp;&nbsp;%1:%2
+<br><b>Translation</b>
+<br>&nbsp;&nbsp;%1:%2 [What is this? Note that in Fooish, the time
+"14:30" is written "30foo14", except on Tuesday when it is
+written "30bar14"]
+<br>
+<br>
+</p>
+<li>Submit entire <tt>.ts</tt> file to Trolltech, you will receive
+feedback on all comments to unfinished items (usually by adding comments
+to the <tt>.ts</tt> files so that future translators are similarly
+informed), and implementations will be changed as necessary/possible
+(which should hopefully be sufficient to complete the translation).
+</ol>
 <p> 
 <!-- eof -->
 <p><address><hr><div align=center>

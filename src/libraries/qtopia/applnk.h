@@ -1,3 +1,4 @@
+//depot/qtopia/1/src/libraries/qtopia/applnk.h#3 - edit change 78786 (text)
 /**********************************************************************
 ** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
 **
@@ -20,6 +21,7 @@
 #ifndef __APPLNK_H__
 #define __APPLNK_H__
 
+#include <qtopia/qpeglobal.h>
 #include <qobject.h>
 #include <qiconset.h>
 #include <qlist.h>
@@ -29,7 +31,7 @@
 class AppLnkSetPrivate;
 class AppLnkPrivate;
 
-class AppLnk
+class QTOPIA_EXPORT AppLnk
 {
 public:
     AppLnk();
@@ -47,7 +49,7 @@ public:
     QString name() const { return mName; }
     const QPixmap& pixmap() const;
     const QPixmap& bigPixmap() const;
-    QString icon() const { return mIconFile; }
+    QString icon() const;   // libqtopia
     virtual QString exec() const { return mExec; }
     QString type() const;
     QString rotation() const { return mRotation; }
@@ -59,8 +61,8 @@ public:
     const QArray<int> &categories() const;
     int id() const { return mId; }
 
-    bool fileKnown() const { return !mFile.isNull(); }
-    bool linkFileKnown() const { return !mLinkFile.isNull(); }
+    bool fileKnown() const;	// libqtopia
+    bool linkFileKnown() const;	// libqtopia
 
     void execute() const;
     void execute(const QStringList& args) const;
@@ -68,7 +70,9 @@ public:
     void removeLinkFile();
 
     void setName( const QString& docname );
+#ifdef Q_WS_QWS
     void setExec( const QString& exec );
+#endif
     void setFile( const QString& filename );
     void setLinkFile( const QString& filename );
     void setComment( const QString& comment );
@@ -80,14 +84,16 @@ public:
     void setProperty(const QString& key, const QString& value);
     QString property(const QString& key) const;
 
+    bool setLocation( const QString& docPath );
+    
 #ifdef QTOPIA_INTERNAL_PRELOADACCESS
+// MOC_SKIP_BEGIN
     bool isPreloaded() const;
     void setPreloaded(bool yesNo);
+// MOC_SKIP_END
 #endif
 
-#ifdef QTOPIA_INTERNAL_APPLNKASSIGN
     AppLnk &operator=(const AppLnk &other);
-#endif
 
 protected:
     QString mName;
@@ -106,13 +112,19 @@ protected:
     static int lastId;
     AppLnkPrivate *d;
     friend class AppLnkSet;
-
+#ifdef Q_WS_QWS
     virtual void invoke(const QStringList& args) const;
+#endif
     bool ensureLinkExists() const;
+
+private:
     void storeLink() const;
 };
 
-class DocLnk : public AppLnk
+#define QTOPIA_DEFINED_APPLNK
+#include <qtopia/qtopiawinexport.h>
+
+class QTOPIA_EXPORT DocLnk : public AppLnk
 {
 public:
     DocLnk();
@@ -122,9 +134,7 @@ public:
     virtual ~DocLnk();
 
 
-#ifdef QTOPIA_INTERNAL_APPLNKASSIGN
-    DocLnk &operator=(const DocLnk &other) { AppLnk::operator=(other); return *this; }
-#endif
+    DocLnk &operator=(const DocLnk &other);
 
     QString exec() const;
 
@@ -135,7 +145,10 @@ private:
     void init(const QString &file);
 };
 
-class AppLnkSet
+#define QTOPIA_DEFINED_DOCLNK
+#include <qtopia/qtopiawinexport.h>
+
+class QTOPIA_EXPORT AppLnkSet
 {
 public:
     AppLnkSet();
@@ -179,7 +192,10 @@ private:
     void findChildren(const QString &, const QString& t, const QString& lt, int depth = 0);
 };
 
-class DocLnkSet : public AppLnkSet
+#define QTOPIA_DEFINED_APPLNKSET
+#include <qtopia/qtopiawinexport.h>
+
+class QTOPIA_EXPORT DocLnkSet : public AppLnkSet
 {
 public:
     DocLnkSet();
@@ -194,6 +210,8 @@ private:
     void findChildren(const QString &dr, const QValueList<QRegExp> &mimeFilters, QDict<void> &reference, int depth=0);
 };
 
+#define QTOPIA_DEFINED_DOCLNKSET
+#include <qtopia/qtopiawinexport.h>
 
 #endif // __APPLNK_H__
 

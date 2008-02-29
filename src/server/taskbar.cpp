@@ -30,14 +30,12 @@
 #include "taskbar.h"
 #include "desktop.h"
 
-#include <qpe/qpeapplication.h>
+#include <qtopia/qpeapplication.h>
 #ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
-#include <qpe/global.h>
-#ifdef QT_QWS_CUSTOM
-#include <qpe/custom.h>
-#endif
+#include <qtopia/global.h>
+#include <qtopia/custom.h>
 
 #include <qlabel.h>
 #include <qlayout.h>
@@ -77,12 +75,12 @@
 static Global::Command builtins[] = {
 
 #ifdef SINGLE_APP
-#define APP(a,b,c,d) { a, new##b, c },
+#define APP(a,b,c,d) { a, new##b, c, d },
 #include "apps.h"
 #undef APP
 #endif
 
-#if defined(QT_QWS_IPAQ) || defined(QT_QWS_CASSIOPEIA) || defined(QT_QWS_EBX)
+#if defined(QPE_NEED_CALIBRATION)
         { "calibrate",          TaskBar::calibrate,	1, 0 }, // No tr
 #endif
 #if !defined(QT_QWS_CASSIOPEIA)
@@ -230,8 +228,13 @@ void TaskBar::stopWait()
 
 void TaskBar::resizeEvent( QResizeEvent *e )
 {
+    bool imv = inputMethods->inputRect().isValid();
+    if ( imv )
+	inputMethods->hideInputMethod();
     QHBox::resizeEvent( e );
     calcMaxWindowRect();
+    if ( imv )
+	inputMethods->showInputMethod();
 }
 
 void TaskBar::styleChange( QStyle &s )
@@ -273,6 +276,10 @@ void TaskBar::receive( const QCString &msg, const QByteArray &data )
 	inputMethods->hideInputMethod();
     } else if ( msg == "showInputMethod()" ) {
 	inputMethods->showInputMethod();
+    } else if ( msg == "showInputMethod(QString)" ) {
+        QString name;
+        stream >> name;
+	inputMethods->showInputMethod(name);
     } else if ( msg == "reloadInputMethods()" ) {
 	inputMethods->loadInputMethods();
     } else if ( msg == "reloadApps()" ) {
@@ -316,10 +323,11 @@ void TaskBar::toggleCapsLockState()
 
 void TaskBar::toggleSymbolInput()
 {
-    if ( inputMethods->currentShown() == "Unicode" ) {
+    QString unicodeInput = qApp->translate( "InputMethods", "Unicode" );
+    if ( inputMethods->currentShown() == unicodeInput ) {
 	inputMethods->hideInputMethod();
     } else {
-	inputMethods->showInputMethod("Unicode");
+	inputMethods->showInputMethod( unicodeInput );
     }
 }
 

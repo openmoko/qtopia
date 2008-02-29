@@ -23,7 +23,9 @@
 #endif // QT_H
 
 #ifndef QT_NO_PROCESS
-
+#ifndef QTOPIA_WIN32PROCESS_SUPPORT
+#define QTOPIA_WIN32PROCESS_SUPPORT
+#endif
 //#include "qplatformdefs.h"
 #include <stdio.h>
 #include <unistd.h>
@@ -498,5 +500,14 @@ error:
     return FALSE;
 }
 
+
+#ifdef QTOPIA_WIN32PROCESS_SUPPORT
+/*!
+  Only used under Windows (but moc does not know about #if defined()).
+*/
+#endif
+void Process::timeout()
+{
+}
 
 #endif // QT_NO_PROCESS

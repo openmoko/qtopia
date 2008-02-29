@@ -20,15 +20,17 @@
 
 #include "textedit.h"
 
-#include <qpe/global.h>
-#include <qpe/fileselector.h>
-#include <qpe/applnk.h>
-#include <qpe/resource.h>
-#include <qpe/config.h>
-#include <qpe/qpeapplication.h>
-#include <qpe/qpemenubar.h>
-#include <qpe/qpetoolbar.h>
-//#include <qpe/finddialog.h>
+#include <qtopia/global.h>
+#include <qtopia/fileselector.h>
+#include <qtopia/applnk.h>
+#include <qtopia/resource.h>
+#include <qtopia/config.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/qpemenubar.h>
+#include <qtopia/qpetoolbar.h>
+#include <qtopia/docproperties.h>
+//#include <qtopia/finddialog.h>
+#include <qtopia/fontdatabase.h>
 
 #include <qaction.h>
 #include <qcolordialog.h>
@@ -129,8 +131,8 @@ static int get_unique_id()
     return u_id++;
 }
 
-static const int nfontsizes = 6;
-static const int fontsize[nfontsizes] = {8,10,12,14,18,24};
+static int nfontsizes;
+static int *fontsize;
 
 TextEdit::TextEdit( QWidget *parent, const char *name, WFlags f )
     : QMainWindow( parent, name, f ), bFromDocView( FALSE )
@@ -158,15 +160,21 @@ TextEdit::TextEdit( QWidget *parent, const char *name, WFlags f )
     bar = new QPEToolBar( this );
     editBar = bar;
 
-    QAction *a = new QAction( tr( "New" ), Resource::loadPixmap( "new" ), QString::null, 0, this, 0 );
+    QAction *a = new QAction( tr( "New" ), Resource::loadIconSet( "new" ), QString::null, 0, this, 0 );
     connect( a, SIGNAL( activated() ), this, SLOT( fileNew() ) );
     a->setWhatsThis( tr("Create a new text document.") );
     a->addTo( bar );
     a->addTo( file );
 
-    a = new QAction( tr( "Open" ), Resource::loadPixmap( "fileopen" ), QString::null, 0, this, 0 );
+    a = new QAction( tr( "Open" ), Resource::loadIconSet( "fileopen" ), QString::null, 0, this, 0 );
     connect( a, SIGNAL( activated() ), this, SLOT( fileOpen() ) );
     a->setWhatsThis( tr("Open a document.") );
+    a->addTo( bar );
+    a->addTo( file );
+
+    a = new QAction( tr( "Properties" ), Resource::loadIconSet( "fileproperties" ), QString::null, 0, this, 0 );
+    connect( a, SIGNAL( activated() ), this, SLOT( fileName() ) );
+    a->setWhatsThis( tr("Change properties") );
     a->addTo( bar );
     a->addTo( file );
 
@@ -191,7 +199,7 @@ TextEdit::TextEdit( QWidget *parent, const char *name, WFlags f )
     pasteAction->addTo( edit );
     clipboardChanged();
 
-    a = new QAction( tr( "Find" ), Resource::loadPixmap( "find" ), QString::null, 0, this, 0 );
+    a = new QAction( tr( "Find" ), Resource::loadIconSet( "find" ), QString::null, 0, this, 0 );
     a->setToggleAction( TRUE );
     connect( a, SIGNAL(toggled(bool)), this, SLOT(editFind(bool)) );
     a->setWhatsThis( tr("Click to find text in the document.\nClick again to hide the search bar.") );
@@ -209,6 +217,21 @@ TextEdit::TextEdit( QWidget *parent, const char *name, WFlags f )
 	defi = cfg.readBoolEntry("Italic",FALSE);
 	wrap = cfg.readBoolEntry("Wrap",TRUE);
     }
+
+    editorStack = new QWidgetStack( this );
+    setCentralWidget( editorStack );
+
+    editor = new QpeEditor( editorStack );
+    editor->setFrameStyle( QFrame::NoFrame );
+    editorStack->addWidget( editor, get_unique_id() );
+    connect( editor, SIGNAL(findWrapped()), this, SLOT(findWrapped()) );
+    connect( editor, SIGNAL(findNotFound()), this, SLOT(findNotFound()) );
+    connect( editor, SIGNAL(findFound()), this, SLOT(findFound()) );
+    connect( editor, SIGNAL(copyAvailable(bool)), cutAction, SLOT(setEnabled(bool)) );
+    connect( editor, SIGNAL(copyAvailable(bool)), copyAction, SLOT(setEnabled(bool)) );
+
+
+    setupFontSizes();
 
     zin = new QAction( tr("Zoom in"), QString::null, 0, this, 0 );
     connect( zin, SIGNAL( activated() ), this, SLOT( zoomIn() ) );
@@ -245,6 +268,12 @@ TextEdit::TextEdit( QWidget *parent, const char *name, WFlags f )
     wa->setToggleAction(TRUE);
     wa->addTo( font );
 
+    QAction *fixed = new QAction( tr("Fixed-width"), QString::null,0,this,0);
+    connect( fixed, SIGNAL(toggled(bool) ), this, SLOT( setFixedWidth(bool)));
+    fixed->setWhatsThis( tr("Fixed-width fonts make some documents more readable.") );
+    fixed->setToggleAction(TRUE);
+    fixed->addTo( font );
+
     searchBar = new QPEToolBar(this);
     addToolBar( searchBar,  "Search", QMainWindow::Top, TRUE );
 
@@ -256,16 +285,13 @@ TextEdit::TextEdit( QWidget *parent, const char *name, WFlags f )
 			 this, SLOT( search() ) );
     connect( searchEdit, SIGNAL(returnPressed()), this, SLOT(search()) );
 
-    a = new QAction( tr( "Find Next" ), Resource::loadPixmap( "next" ), QString::null, 0, this, 0 );
+    a = new QAction( tr( "Find Next" ), Resource::loadIconSet( "next" ), QString::null, 0, this, 0 );
     connect( a, SIGNAL(activated()), this, SLOT(search()) );
     a->setWhatsThis( tr("Find the next occurrence of the search text.") );
     a->addTo( searchBar );
 
     searchBar->hide();
 				
-    editorStack = new QWidgetStack( this );
-    setCentralWidget( editorStack );
-
     searchVisible = FALSE;
 
     fileSelector = new FileSelector( "text/*", editorStack, "fileselector" ,
@@ -275,25 +301,23 @@ TextEdit::TextEdit( QWidget *parent, const char *name, WFlags f )
     connect( fileSelector, SIGNAL( fileSelected( const DocLnk &) ), this, SLOT( openFile( const DocLnk & ) ) );
     fileOpen();
 
-    editor = new QpeEditor( editorStack );
-    editor->setFrameStyle( QFrame::NoFrame );
-    editorStack->addWidget( editor, get_unique_id() );
-    connect( editor, SIGNAL(findWrapped()), this, SLOT(findWrapped()) );
-    connect( editor, SIGNAL(findNotFound()), this, SLOT(findNotFound()) );
-    connect( editor, SIGNAL(findFound()), this, SLOT(findFound()) );
-    connect( editor, SIGNAL(copyAvailable(bool)), cutAction, SLOT(setEnabled(bool)) );
-    connect( editor, SIGNAL(copyAvailable(bool)), copyAction, SLOT(setEnabled(bool)) );
-
     connect( qApp->clipboard(), SIGNAL(dataChanged()), this, SLOT(clipboardChanged()) );
+    connect( qApp, SIGNAL(linkChanged(const QString&)), this, SLOT(linkChanged(const QString&)) );
 
     resize( 200, 300 );
 
-    setFontSize(defsize,TRUE);
+    variableFontSize = defsize;
+    zoomOutLast = TRUE;
+    setFontSize(defsize,zoomOutLast);
     wa->setOn(wrap);
 }
 
 TextEdit::~TextEdit()
 {
+    if (fontsize) {
+	delete fontsize;
+    }
+
     save();
 
     Config cfg("TextEdit");
@@ -305,14 +329,43 @@ TextEdit::~TextEdit()
     cfg.writeEntry("Wrap",editor->wordWrap() == QMultiLineEdit::WidgetWidth);
 }
 
+//
+// Figure out how many "zoom" levels there for the given font.
+//
+void
+TextEdit::setupFontSizes(void)
+{
+    FontDatabase	fd;
+    QValueList<int> pointSizes = fd.pointSizes(editor->font().family().lower());
+    QValueList<int>::Iterator it;
+
+    nfontsizes = pointSizes.count();
+    fontsize = new int[nfontsizes];
+
+    if (fontsize) {
+	int i = 0;
+	for (it = pointSizes.begin(); it != pointSizes.end();
+	    ++it) {
+	    int foo = *it;
+	    fontsize[i++] = foo;
+	}
+    } else {
+	nfontsizes = 0;
+    }
+}
+
 void TextEdit::zoomIn()
 {
-    setFontSize(editor->font().pointSize()+1,FALSE);
+    zoomOutLast = FALSE;
+    variableFontSize = editor->font().pointSize()+1;
+    setFontSize(variableFontSize,FALSE);
 }
 
 void TextEdit::zoomOut()
 {
-    setFontSize(editor->font().pointSize()-1,TRUE);
+    zoomOutLast = TRUE;
+    variableFontSize = editor->font().pointSize()-1;
+    setFontSize(variableFontSize,TRUE);
 }
 
 
@@ -363,9 +416,44 @@ void TextEdit::setWordWrap(bool y)
     editor->setEdited( state );
 }
 
+void TextEdit::setFixedWidth(bool y)
+{
+    if (y) {
+	editor->setFont(QFont("fixed"));
+	zinE = zin->isEnabled();
+	zoutE = zout->isEnabled();
+	zin->setEnabled(FALSE);
+	zout->setEnabled(FALSE);
+    } else {
+	editor->setFont(QFont());
+	setFontSize(variableFontSize,zoomOutLast);
+	zin->setEnabled(zinE);
+	zout->setEnabled(zoutE);
+    }
+}
+
 void TextEdit::clipboardChanged()
 {
     pasteAction->setEnabled( !qApp->clipboard()->text().isEmpty() );
+}
+
+void TextEdit::linkChanged( const QString &linkfile )
+{
+    if ( doc ) {
+	DocLnk dl( linkfile );
+	if ( doc->linkFileKnown() && doc->linkFile() == linkfile ||
+	     doc->fileKnown() &&
+	     (doc->file() == linkfile || dl.isValid() && dl.file() == doc->file()) ) {
+	    if ( !QFile::exists(doc->file()) && !QFile::exists(doc->linkFile()) ) {
+		// deleted
+		fileRevert();
+	    } else {
+		if ( doc->name() != dl.name() )
+		    updateCaption(dl.name());
+		*doc = dl;
+	    }
+	}
+    }
 }
 
 void TextEdit::fileNew()
@@ -394,7 +482,6 @@ void TextEdit::fileOpen()
     menu->hide();
     editBar->hide();
     searchBar->hide();
-    clearWState (WState_Reserved1 );
     editorStack->raiseWidget( fileSelector );
     fileSelector->reread();
     updateCaption();
@@ -466,7 +553,6 @@ void TextEdit::newFile( const DocLnk &f )
     nf.setType("text/plain");
     clear();
     editorStack->raiseWidget( editor );
-    setWState (WState_Reserved1 );
     editor->setFocus();
     doc = new DocLnk(nf);
     updateCaption();
@@ -480,10 +566,15 @@ void TextEdit::setDocument(const QString& f)
     openFile(nf);
     showEditTools();
     // Show filename in caption
-    QString name = f;
-    int sep = name.findRev( '/' );
-    if ( sep > 0 )
-	name = name.mid( sep+1 );
+    QString name;
+    if ( nf.linkFileKnown() && !nf.name().isEmpty() ) {
+	name = nf.name();
+    } else {
+	name = f;
+	int sep = name.findRev( '/' );
+	if ( sep > 0 )
+	    name = name.mid( sep+1 );
+    }
     updateCaption( name );
 }
 
@@ -540,24 +631,8 @@ bool TextEdit::save()
 
     QString rt = editor->text();
 
-    if ( doc->name().isEmpty() ) {
-	QString pt = rt.simplifyWhiteSpace();
-	int i = pt.find( ' ' );
-	QString docname = pt;
-	if ( i > 0 )
-	    docname = pt.left( i );
-	// remove "." at the beginning
-	while( docname.startsWith( "." ) )
-	    docname = docname.mid( 1 );
-	docname.replace( QRegExp("/"), "_" );
-	// cut the length. filenames longer than that don't make sense and something goes wrong when they get too long.
-	if ( docname.length() > 40 )
-	    docname = docname.left(40);
-	if ( docname.isEmpty() )
-	    docname = "Empty Text";
-	doc->setName(docname);
-    }
-
+    if ( doc->name().isEmpty() )
+	doc->setName(calculateName(rt));
 	
     FileManager fm;
     if ( !fm.saveFile( *doc, rt ) ) {
@@ -567,6 +642,37 @@ bool TextEdit::save()
     doc = 0;
     editor->setEdited( false );
     return true;
+}
+
+QString TextEdit::calculateName(QString rt) {
+    QString pt = rt.simplifyWhiteSpace();
+    int i = pt.find( ' ' );
+    QString docname = pt;
+    if ( i > 0 )
+	docname = pt.left( i );
+    // remove "." at the beginning
+    while( docname.startsWith( "." ) )
+	docname = docname.mid( 1 );
+    docname.replace( QRegExp("/"), "_" );
+    // cut the length. filenames longer than that don't make sense and something goes wrong when they get too long.
+    if ( docname.length() > 40 )
+	docname = docname.left(40);
+    if ( docname.isEmpty() )
+	docname = "Empty Text";
+    return docname;
+}
+
+void TextEdit::fileName()
+{
+    if (!doc)
+	newFile(DocLnk());
+    if (doc->name().isEmpty())
+	doc->setName(calculateName(editor->text()));
+    DocPropertiesDialog *lp = new DocPropertiesDialog(doc);
+    lp->showMaximized();
+    lp->exec();
+    delete lp;
+    updateCaption(doc->name());
 }
 
 void TextEdit::clear()
@@ -594,7 +700,7 @@ void TextEdit::closeEvent( QCloseEvent *e )
 {
     if ( editorStack->visibleWidget() == editor && !bFromDocView ) {
 	e->ignore();
-	fileRevert();
+	fileOpen();
     } else {
 	bFromDocView = FALSE;
 	e->accept();

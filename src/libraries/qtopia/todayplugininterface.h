@@ -33,7 +33,7 @@ class QWidget;
 #endif
 #endif
 
-class TodayPluginInterface
+class QTOPIA_PLUGIN_EXPORT TodayPluginInterface
 {
 public:
     virtual QString name() const = 0;
@@ -50,7 +50,7 @@ public:
     virtual void itemSelected(const QString &) const = 0;
 };
 
-struct TodayInterface:public QUnknownInterface {
+struct QTOPIA_PLUGIN_EXPORT TodayInterface:public QUnknownInterface {
     virtual TodayPluginInterface* object(QObject *parent, const char *name) = 0;
     virtual QObject* objectFor(TodayPluginInterface *) = 0;
 };

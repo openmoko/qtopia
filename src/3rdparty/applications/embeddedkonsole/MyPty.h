@@ -22,8 +22,13 @@
 #ifndef MY_PTY_H
 #define MY_PTY_H
 
+#include <qglobal.h>
 #include <qobject.h>
 #include <qstrlist.h>
+#if defined (_OS_WIN32_)
+#include "../../../server/qprocess.h"
+#include <qarray.h>
+#endif
 
 
 class MyPty : public QObject
@@ -78,11 +83,15 @@ Q_OBJECT
     int  openPty();
 
   private:
-
+#if !defined (_OS_WIN32_)
     char ptynam[16]; // "/dev/ptyxx" | "/dev/ptmx"
     char ttynam[16]; // "/dev/ttyxx" | "/dev/pts/########..."
     int fd;
     int cpid;
+#else
+    QProcess terminalProcess;
+    QByteArray stdInBuffer;
+#endif
 };
 
 #endif

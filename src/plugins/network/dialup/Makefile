@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -134,22 +140,23 @@ HEADERS =	dialup.h \
 		../proxiespage.h
 SOURCES =	dialup.cpp \
 		../proxiespage.cpp
-OBJECTS =	dialup.o \
-		../proxiespage.o \
-		dialupbase.o \
-		../proxiespagebase_p.o
+OBJECTS =	$(OBJECTS_DIR)/dialup.o \
+		$(OBJECTS_DIR)/proxiespage.o \
+		$(OBJECTS_DIR)/dialupbase.o \
+		$(OBJECTS_DIR)/proxiespagebase_p.o
 INTERFACES =    dialupbase.ui \
 		../proxiespagebase_p.ui
 UICDECLS =      dialupbase.h \
 		../proxiespagebase_p.h
 UICIMPLS =      dialupbase.cpp \
 		../proxiespagebase_p.cpp
-SRCMOC	=	../moc_proxiespage.cpp \
-		moc_dialupbase.cpp \
-		../moc_proxiespagebase_p.cpp
-OBJMOC	=	../moc_proxiespage.o \
-		moc_dialupbase.o \
-		../moc_proxiespagebase_p.o
+SRCMOC	=	$(MOC_DIR)/moc_proxiespage.cpp \
+		$(MOC_DIR)/moc_dialupbase.cpp \
+		$(MOC_DIR)/moc_proxiespagebase_p.cpp \
+		$(MOC_DIR)/dialup.moc
+OBJMOC	=	$(OBJECTS_DIR)/moc_proxiespage.o \
+		$(OBJECTS_DIR)/moc_dialupbase.o \
+		$(OBJECTS_DIR)/moc_proxiespagebase_p.o
 
 
 ####### Implicit rules
@@ -215,22 +222,17 @@ REQUIRES=
 
 ####### Compile
 
-dialup.o: dialup.cpp \
+$(OBJECTS_DIR)/dialup.o: dialup.cpp \
+		$(MOC_DIR)/dialup.moc \
 		dialup.h \
-		$(QPEDIR)/include/qpe/networkinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
 		dialupbase.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
 		../proxiespage.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/dialup.o dialup.cpp
 
-../proxiespage.o: ../proxiespage.cpp \
+$(OBJECTS_DIR)/proxiespage.o: ../proxiespage.cpp \
 		../proxiespage.h \
-		$(QPEDIR)/include/qpe/config.h \
 		proxiespagebase_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/proxiespage.o ../proxiespage.cpp
 
 dialupbase.h: dialupbase.ui
 	$(UIC) dialupbase.ui -o $(INTERFACE_DECL_PATH)/dialupbase.h
@@ -247,36 +249,44 @@ proxiespagebase_p.h: ../proxiespagebase_p.ui
 ../proxiespagebase_p.cpp: ../proxiespagebase_p.ui
 	$(UIC) ../proxiespagebase_p.ui -i proxiespagebase_p.h -o ../proxiespagebase_p.cpp
 
-dialupbase.o: dialupbase.cpp
+$(OBJECTS_DIR)/dialupbase.o: dialupbase.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/dialupbase.o dialupbase.cpp
 
-../proxiespagebase_p.o: ../proxiespagebase_p.cpp
+$(OBJECTS_DIR)/proxiespagebase_p.o: ../proxiespagebase_p.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/proxiespagebase_p.o ../proxiespagebase_p.cpp
 
-../moc_proxiespage.o: ../moc_proxiespage.cpp \
-		../proxiespage.h \
-		$(QPEDIR)/include/qpe/config.h
+$(OBJECTS_DIR)/moc_proxiespage.o: $(MOC_DIR)/moc_proxiespage.cpp \
+		../proxiespage.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_proxiespage.o $(MOC_DIR)/moc_proxiespage.cpp
 
-moc_dialupbase.o: moc_dialupbase.cpp \
+$(OBJECTS_DIR)/moc_dialupbase.o: $(MOC_DIR)/moc_dialupbase.cpp \
 		dialupbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_dialupbase.o $(MOC_DIR)/moc_dialupbase.cpp
 
-../moc_proxiespagebase_p.o: ../moc_proxiespagebase_p.cpp \
+$(OBJECTS_DIR)/moc_proxiespagebase_p.o: $(MOC_DIR)/moc_proxiespagebase_p.cpp \
 		../proxiespagebase_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_proxiespagebase_p.o $(MOC_DIR)/moc_proxiespagebase_p.cpp
 
-../moc_proxiespage.cpp: ../proxiespage.h
-	$(MOC) ../proxiespage.h -o ../moc_proxiespage.cpp
+$(MOC_DIR)/moc_proxiespage.cpp: ../proxiespage.h
+	$(MOC) ../proxiespage.h -o $(MOC_DIR)/moc_proxiespage.cpp
 
-moc_dialupbase.cpp: dialupbase.h
-	$(MOC) dialupbase.h -o moc_dialupbase.cpp
+$(MOC_DIR)/dialup.moc: dialup.cpp
+	$(MOC) dialup.cpp -o $(MOC_DIR)/dialup.moc
 
-../moc_proxiespagebase_p.cpp: ../proxiespagebase_p.h
-	$(MOC) ../proxiespagebase_p.h -o ../moc_proxiespagebase_p.cpp
+$(MOC_DIR)/moc_dialupbase.cpp: dialupbase.h
+	$(MOC) dialupbase.h -o $(MOC_DIR)/moc_dialupbase.cpp
+
+$(MOC_DIR)/moc_proxiespagebase_p.cpp: ../proxiespagebase_p.h
+	$(MOC) ../proxiespagebase_p.h -o $(MOC_DIR)/moc_proxiespagebase_p.cpp
 
 
 
 lupdate:
-	lupdate dialup.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <dialup.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease dialup.pro
+	$(QPEDIR)/bin/qtopia-linstall dialup.pro
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

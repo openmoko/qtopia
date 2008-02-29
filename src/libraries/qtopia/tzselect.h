@@ -20,6 +20,7 @@
 #ifndef TZSELECT_H
 #define TZSELECT_H
 
+#include <qtopia/qpeglobal.h>
 #include <qhbox.h>
 #include <qcombobox.h>
 #include <qstringlist.h>
@@ -28,9 +29,9 @@ class QToolButton;
 class TimeZoneSelector;
 
 // a function to load defaults in case there is no file
-QStringList timezoneDefaults( void );
+QTOPIA_EXPORT QStringList timezoneDefaults( void );
 
-class TZCombo : public QComboBox
+class QTOPIA_EXPORT TZCombo : public QComboBox
 {
     Q_OBJECT
 public:
@@ -55,7 +56,7 @@ private:
 };
 
 class TimeZoneSelectorPrivate;
-class TimeZoneSelector : public QHBox
+class QTOPIA_EXPORT TimeZoneSelector : public QHBox
 {
     Q_OBJECT
 public:

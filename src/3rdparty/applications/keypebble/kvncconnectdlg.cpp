@@ -5,7 +5,7 @@
 #include <qcombobox.h>
 #include <qlabel.h>
 #include <qfont.h>
-#include <qpe/config.h>
+#include <qtopia/config.h>
 
 #include <assert.h>
 
@@ -37,7 +37,9 @@ KVNCConnectDlg::KVNCConnectDlg( KRFBConnection *con,
     if ( hlist.isEmpty() ) {
 #ifdef DEBUG
 	hostNameCombo->insertItem( "localhost" );
-#endif
+#else // DEBUG
+	hostNameCombo->insertItem("");
+#endif // DEBUG
     } else {
 	hostNameCombo->insertStringList( hlist );
     }

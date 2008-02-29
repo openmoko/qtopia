@@ -21,6 +21,7 @@
 #ifndef __packageslave_h__
 #define __packageslave_h__
 
+#include <qtopia/qpeglobal.h>
 #include <qobject.h>
 
 class QCopChannel;

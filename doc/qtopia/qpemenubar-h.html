@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/include/qtopia/qpemenubar.h:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/include/qtopia/qpemenubar.h:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -51,11 +51,15 @@ body { background: #ffffff; color: black; }
 #ifndef QPEMENUBAR_H
 #define QPEMENUBAR_H
 
+#include &lt;qtopia/qpeglobal.h&gt;
 #include &lt;qmenubar.h&gt;
 #include &lt;qguardedptr.h&gt;
 #include &lt;qvaluelist.h&gt;
+#include &lt;qwidget.h&gt;
 
-class QPEMenuToolFocusManager : public QObject
+typedef QGuardedPtr&lt;QWidget&gt; GuardedWidget;
+
+class QTOPIA_EXPORT QPEMenuToolFocusManager : public QObject
 {
     Q_OBJECT
 public:
@@ -68,7 +72,6 @@ public:
     void moveFocus( bool next );
 
     static QPEMenuToolFocusManager *manager();
-    static void initialize();
 
 protected:
     void setFocus( QWidget *w, bool next=TRUE );
@@ -78,15 +81,19 @@ private slots:
     void deactivate();
 
 private:
-    typedef QGuardedPtr&lt;QWidget&gt; GuardedWidget;
+    friend class QPEApplication;
+    static void initialize();
     QValueList&lt;GuardedWidget&gt; list;
     GuardedWidget inFocus;
     GuardedWidget oldFocus;
     static QPEMenuToolFocusManager *me;
 };
 
+#define QTOPIA_DEFINED_QPEMENUTOOLFOCUSMANAGER
+#include &lt;qtopia/qtopiawinexport.h&gt;
 
-class QPEMenuBar : public QMenuBar
+
+class QTOPIA_EXPORT QPEMenuBar : public QMenuBar
 {
     Q_OBJECT
 public:
@@ -96,6 +103,9 @@ public:
 protected:
     virtual void keyPressEvent( QKeyEvent *e );
 };
+
+#define QTOPIA_DEFINED_QPEMENUBAR
+#include &lt;qtopia/qtopiawinexport.h&gt;
 
 #endif
 

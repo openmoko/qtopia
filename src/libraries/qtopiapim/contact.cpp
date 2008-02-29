@@ -21,11 +21,12 @@
 #define QTOPIA_INTERNAL_CONTACT_MRE
 
 #include "contact.h"
-#include <qpe/private/vobject_p.h>
-#include <qpe/private/qfiledirect_p.h>
+#include <qtopia/private/vobject_p.h>
+#include <qtopia/private/qfiledirect_p.h>
 
-#include <qpe/stringutil.h>
-#include <qpe/timeconversion.h>
+#include <qtopia/stringutil.h>
+#include <qtopia/timeconversion.h>
+#include <qtopia/pim/private/xmlio_p.h>
 
 #include <qobject.h>
 #include <qregexp.h>
@@ -34,6 +35,8 @@
 #include <qtextcodec.h>
 
 #include <stdio.h>
+
+QString emailSeparator() { return " "; }
 
 /*!
   \class PimContact
@@ -52,6 +55,14 @@
 PimContact::PimContact()
     : PimRecord(), mMap(), d( 0 )
 {
+}
+
+/*!
+  \internal
+*/
+void PimContact::fromMap( const QMap<int,QString> &m)
+{
+    setFields( m );
 }
 
 /*!
@@ -139,7 +150,7 @@ QString PimContact::toRichText() const
 
     // the others...
     QString str;
-    str = emails();
+    str = emailList().join(", ");
     if ( !str.isEmpty() )
 	text += "<b>" + QObject::tr("Email Addresses: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
@@ -207,11 +218,11 @@ QString PimContact::toRichText() const
     if ( !str.isEmpty() )
 	text += "<b>" + QObject::tr("Spouse: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
-    str = birthday();
+    str = PimXmlIO::dateToXml( birthday() );
     if ( !str.isEmpty() )
 	text += "<b>" + QObject::tr("Birthday: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
-    str = anniversary();
+    str = PimXmlIO::dateToXml( anniversary() );
     if ( !str.isEmpty() )
 	text += "<b>" + QObject::tr("Anniversary: ") + "</b>"
 		+ Qtopia::escapeString(str) + "<br>";
@@ -242,6 +253,69 @@ void PimContact::insert( int key, const QString &v )
 	mMap.remove( key );
     else
 	mMap.insert( key, value );
+}
+
+/*!
+  \internal
+*/
+void PimContact::setField(int key,const QString &s)
+{
+    if (key < CommonFieldsEnd)
+	PimRecord::setField(key,s);
+    else if (key > ContactFieldsEnd)
+	qDebug("custom field");
+    else {
+	QString fixedStr = s;
+
+	//
+	// Replace ';' and ',' with appropriate separator.
+	//
+	if ( key == Emails ){
+	    if ( fixedStr.contains(";") )
+		fixedStr.replace(QRegExp(";"), emailSeparator() );
+	    else if ( fixedStr.contains(",") )
+		fixedStr.replace(QRegExp(","), emailSeparator() );
+	}
+
+	mMap[key] = fixedStr;
+    }
+}
+
+/*!
+  \internal
+*/
+QString PimContact::field(int key) const
+{
+    if (key < CommonFieldsEnd)
+	return PimRecord::field(key);
+    else if (key > ContactFieldsEnd) {
+	qDebug("custom field");
+	return QString::null;
+    } else
+	return mMap[key];
+}
+
+static QMap<int, int> *uniquenessMapPtr = 0;
+static QMap<QCString, int> *identifierToKeyMapPtr = 0;
+static QMap<int, QCString> *keyToIdentifierMapPtr = 0;
+static QMap<int, QString> * trFieldsMapPtr = 0;
+
+QMap<int, QString> PimContact::fields() const
+{
+    QMap<int, QString> m = PimRecord::fields();
+
+    if (!keyToIdentifierMapPtr)
+	initMaps();
+    QMap<int, QCString>::Iterator it;
+    for (it = keyToIdentifierMapPtr->begin(); 
+	    it != keyToIdentifierMapPtr->end(); ++it) {
+	int i = it.key();
+	QString str = field(i);
+	if (!str.isEmpty())
+	    m.insert(i, str);
+    }
+
+    return m;
 }
 
 /*!
@@ -309,17 +383,54 @@ QString PimContact::displayHomeAddress() const
 			   homeCountry() );
 }
 
-/*! 
+/*!
+  Sets the persons birthday. Note that this does not create
+  an PimEvent for it in the Calendar (yet).
+*/
+void PimContact::setBirthday( const QDate &d )
+{
+    replace( Birthday, PimXmlIO::dateToXml( d ) );
+}
+
+/*!
+  Return the person's birthday. QDate will be null if there
+  is birthday has not been set.
+*/
+QDate PimContact::birthday() const
+{
+    return PimXmlIO::xmlToDate( find( Birthday ) );
+}
+
+/*!
+  Sets the persons anniversary. Note that this does not create
+  an PimEvent for it in the Calendar (yet).
+*/
+void PimContact::setAnniversary( const QDate &d )
+{
+    replace( Anniversary, PimXmlIO::dateToXml( d ) );
+}
+
+/*!
+  Return the person's anniversary date.  QDate will be null if there
+  is  anniversary has not been set.
+*/
+QDate PimContact::anniversary() const
+{
+    return PimXmlIO::xmlToDate( find( Anniversary ) );
+}
+
+
+/*!
   Returns the full name of the contact, generated from the
   title, suffix, first, middle and last name of the contact.
 */
 QString PimContact::fullName() const
 {
-    QString title = find( Qtopia::Title );
-    QString firstName = find( Qtopia::FirstName );
-    QString middleName = find( Qtopia::MiddleName );
-    QString lastName = find( Qtopia::LastName );
-    QString suffix = find( Qtopia::Suffix );
+    QString title = find( NameTitle );
+    QString firstName = find( FirstName );
+    QString middleName = find( MiddleName );
+    QString lastName = find( LastName );
+    QString suffix = find( Suffix );
 
     QString name = title;
     if ( !firstName.isEmpty() ) {
@@ -350,15 +461,7 @@ QString PimContact::fullName() const
 */
 QStringList PimContact::childrenList() const
 {
-    return QStringList::split( " ", find( Qtopia::Children ) );
-}
-
-/*!
-  Returns the list of emails fo the contact.
-*/
-QStringList PimContact::emailList() const
-{
-    return QStringList::split( ";", find( Qtopia::Emails ) );
+    return QStringList::split( " ", find( Children ) );
 }
 
 /*!
@@ -369,9 +472,9 @@ void PimContact::setFileAs()
 {
     QString lastName, firstName, middleName, fileas;
 
-    lastName = find( Qtopia::LastName );
-    firstName = find( Qtopia::FirstName );
-    middleName = find( Qtopia::MiddleName );
+    lastName = find( LastName );
+    firstName = find( FirstName );
+    middleName = find( MiddleName );
     if ( !lastName.isEmpty() && !firstName.isEmpty()
 	 && !middleName.isEmpty() )
 	fileas = lastName + ", " + firstName + " " + middleName;
@@ -383,166 +486,17 @@ void PimContact::setFileAs()
 		 + middleName + ( middleName.isEmpty() ? "" : " " )
 		 + lastName;
 
-    replace( Qtopia::FileAs, fileas );
-}
-
-/*!
-  \internal
-  Return the list of field names for a contact, suitable for use in reading
-  and writing the contact to disk.   String will not be translated.
-*/
-QStringList PimContact::fields()
-{
-    QStringList list;
-
-    list.append( "Title" );  // Not Used!
-    list.append( "FirstName" );
-    list.append( "MiddleName" );
-    list.append( "LastName" );
-    list.append( "Suffix" );
-    list.append( "FileAs" );
-
-    list.append( "JobTitle" );
-    list.append( "Department" );
-    list.append( "Company" );
-    list.append( "BusinessPhone" );
-    list.append( "BusinessFax" );
-    list.append( "BusinessMobile" );
-
-    list.append( "DefaultEmail" );
-    list.append( "Emails" );
-
-    list.append( "HomePhone" );
-    list.append( "HomeFax" );
-    list.append( "HomeMobile" );
-
-    list.append( "BusinessStreet" );
-    list.append( "BusinessCity" );
-    list.append( "BusinessState" );
-    list.append( "BusinessZip" );
-    list.append( "BusinessCountry" );
-    list.append( "BusinessPager" );
-    list.append( "BusinessWebPage" );
-
-    list.append( "Office" );
-    list.append( "Profession" );
-    list.append( "Assistant" );
-    list.append( "Manager" );
-
-    list.append( "HomeStreet" );
-    list.append( "HomeCity" );
-    list.append( "HomeState" );
-    list.append( "HomeZip" );
-    list.append( "HomeCountry" );
-    list.append( "HomeWebPage" );
-
-    list.append( "Spouse" );
-    list.append( "Gender" );
-    list.append( "Birthday" );
-    list.append( "Anniversary" );
-    list.append( "Nickname" );
-    list.append( "Children" );
-
-    list.append( "Notes" );
-
-    // the next 3 fields are here due to idiocy and shouldn't have to be here.
-    list.append( "Groups" );
-    list.append( "Rid" );
-    list.append( "RidInfo" );
-
-    // just so we can include this one which is needed and should be here.
-    list.append( "Pronunciation" );
-
-    return list;
-}
-
-/*!
-  \internal
-  Return the list of translated field names for a contact, suitable 
-  Displaying to the user of the device.  Strings will be translated if
-  as suitable translation can be found.
-*/
-QStringList PimContact::trfields()
-{
-    QStringList list;
-
-    list.append( QObject::tr( "Name Title") );
-    list.append( QObject::tr( "First Name" ) );
-    list.append( QObject::tr( "Middle Name" ) );
-    list.append( QObject::tr( "Last Name" ) );
-    list.append( QObject::tr( "Suffix" ) );
-    list.append( QObject::tr( "File As" ) );
-
-    list.append( QObject::tr( "Job Title" ) );
-    list.append( QObject::tr( "Department" ) );
-    list.append( QObject::tr( "Company" ) );
-    list.append( QObject::tr( "Business Phone" ) );
-    list.append( QObject::tr( "Business Fax" ) );
-    list.append( QObject::tr( "Business Mobile" ) );
-
-    list.append( QObject::tr( "Default Email" ) );
-    list.append( QObject::tr( "Emails" ) );
-
-    list.append( QObject::tr( "Home Phone" ) );
-    list.append( QObject::tr( "Home Fax" ) );
-    list.append( QObject::tr( "Home Mobile" ) );
-
-    list.append( QObject::tr( "Business Street" ) );
-    list.append( QObject::tr( "Business City" ) );
-    list.append( QObject::tr( "Business State" ) );
-    list.append( QObject::tr( "Business Zip" ) );
-    list.append( QObject::tr( "Business Country" ) );
-    list.append( QObject::tr( "Business Pager" ) );
-    list.append( QObject::tr( "Business WebPage" ) );
-
-    list.append( QObject::tr( "Office" ) );
-    list.append( QObject::tr( "Profession" ) );
-    list.append( QObject::tr( "Assistant" ) );
-    list.append( QObject::tr( "Manager" ) );
-
-    list.append( QObject::tr( "Home Street" ) );
-    list.append( QObject::tr( "Home City" ) );
-    list.append( QObject::tr( "Home State" ) );
-    list.append( QObject::tr( "Home Zip" ) );
-    list.append( QObject::tr( "Home Country" ) );
-    list.append( QObject::tr( "Home Web Page" ) );
-
-    list.append( QObject::tr( "Spouse" ) );
-    list.append( QObject::tr( "Gender" ) );
-    list.append( QObject::tr( "Birthday" ) );
-    list.append( QObject::tr( "Anniversary" ) );
-    list.append( QObject::tr( "Nickname" ) );
-    list.append( QObject::tr( "Children" ) );
-
-    list.append( QObject::tr( "Notes" ) );
-
-    // the next 3 fields are here due to idiocy and shouldn't have to be here.
-    list.append( QObject::tr( "Groups" ) );
-    list.append( QObject::tr( "Rid" ) );
-    list.append( QObject::tr( "RidInfo" ) );
-
-    // just so we can include this one which is needed and should be here.
-    list.append( QObject::tr( "Pronunciation" ) );
-
-    return list;
-}
-
-/*!
-  Set the email address of the contact to be the space separated list \a v. 
-*/
-void PimContact::setEmails( const QString &v )
-{
-    replace( Qtopia::Emails, v );
-    if ( v.isEmpty() )
-        setDefaultEmail( QString::null );
+    replace( FileAs, fileas );
 }
 
 /*!
   Adds \a email to the list of email address for the contact.
+  If no default email is set, the default email will
+  be set to \a email.
 */
 void PimContact::insertEmail( const QString &email )
 {
-    //qDebug("insertEmail %s", email.latin1());
+    //qDebug("insertEmail %s", v.latin1());
     QString e = email.simplifyWhiteSpace();
     QString def = defaultEmail();
 
@@ -553,14 +507,98 @@ void PimContact::insertEmail( const QString &email )
     }
 
     // otherwise, insert assuming doesn't already exist
-    QString emailsStr = find( Qtopia::Emails );
+    QString emailsStr = find( Emails );
     if ( emailsStr.contains( e ))
 	return;
     if ( !emailsStr.isEmpty() )
-	//emailsStr += emailSeparator();
-	emailsStr += " ";
+	emailsStr += emailSeparator();
     emailsStr += e;
-    replace( Qtopia::Emails, emailsStr );
+    replace( Emails, emailsStr );
+}
+
+/*!
+  Removes \a email from the list of email address for the contact.
+  If the email is the default email, the default email will
+  be set to the first one in the list.
+*/
+void PimContact::removeEmail( const QString &email )
+{
+    QString e = email.simplifyWhiteSpace();
+    QString def = defaultEmail();
+    QString emailsStr = find( Emails );
+    QStringList emails = emailList();
+
+    // otherwise, must first contain it
+    if ( !emailsStr.contains( e ) )
+	return;
+
+    // remove it
+    //qDebug(" removing email from list %s", e.latin1());
+    emails.remove( e );
+    // reset the string
+    emailsStr = emails.join(emailSeparator()); // Sharp's brain dead separator
+    replace( Emails, emailsStr );
+
+    // if default, then replace the default email with the first one
+    if ( def == e ) {
+	//qDebug("removeEmail is default; setting new default");
+	if ( !emails.count() )
+	    clearEmailList();
+	else // setDefaultEmail will remove e from the list
+	    setDefaultEmail( emails.first() );
+    }
+}
+/*!
+  Clear the email list for the contact, including
+  the default email.
+*/
+void PimContact::clearEmailList()
+{
+    mMap.remove( DefaultEmail );
+    mMap.remove( Emails );
+}
+
+/*!
+  Returns a list of email addresses belonging to the contact, including
+  the default email address.
+*/
+QStringList PimContact::emailList() const
+{
+    QString emailStr = find( Emails );
+
+    QStringList r;
+    if ( !emailStr.isEmpty() ) {
+	QStringList l = QStringList::split( emailSeparator(), emailStr );
+	for ( QStringList::ConstIterator it = l.begin();it != l.end();++it )
+	    r += (*it).simplifyWhiteSpace();
+    }
+
+    return r;
+}
+
+/*!
+  Sets the default email and adds it to the list.
+*/
+void PimContact::setDefaultEmail( const QString &v )
+{
+    QString e = v.simplifyWhiteSpace();
+
+    //qDebug("PimContact::setDefaultEmail %s", e.latin1());
+    replace( DefaultEmail, e );
+
+    if ( !e.isEmpty() )
+	insertEmail( e );
+
+}
+
+/*!
+  Sets the email list to \a emails
+*/
+void PimContact::setEmailList( const QStringList &emails )
+{
+    clearEmailList();
+    for ( QStringList::ConstIterator it = emails.begin(); it != emails.end(); ++it )
+	insertEmail( *it );
 }
 
 /*!
@@ -568,7 +606,7 @@ void PimContact::insertEmail( const QString &email )
 */
 void PimContact::setChildren( const QString &children )
 {
-    replace( Qtopia::Children, children );
+    replace( Children, children );
 }
 
 // vcard conversion code
@@ -606,7 +644,7 @@ VObject *PimContact::createVObject( const PimContact &c )
     safeAddPropValue( name, VCFamilyNameProp, c.lastName() );
     safeAddPropValue( name, VCGivenNameProp, c.firstName() );
     safeAddPropValue( name, VCAdditionalNamesProp, c.middleName() );
-    safeAddPropValue( name, VCNamePrefixesProp, c.title() );
+    safeAddPropValue( name, VCNamePrefixesProp, c.nameTitle() );
     safeAddPropValue( name, VCNameSuffixesProp, c.suffix() );
     safeAddPropValue( name, VCPronunciationProp, c.pronunciation() );
 
@@ -670,7 +708,7 @@ VObject *PimContact::createVObject( const PimContact &c )
 
     safeAddPropValue( vcard, VCNoteProp, c.notes() );
 
-    safeAddPropValue( vcard, VCBirthDateProp, c.birthday() );
+    safeAddPropValue( vcard, VCBirthDateProp, PimXmlIO::dateToXml( c.birthday() ) );
 
     if ( !c.company().isEmpty() || !c.department().isEmpty() || !c.office().isEmpty() ) {
 	VObject *org = safeAddProp( vcard, VCOrgProp );
@@ -686,7 +724,7 @@ VObject *PimContact::createVObject( const PimContact &c )
 
     safeAddPropValue( vcard, "X-Qtopia-Spouse", c.spouse() );
     safeAddPropValue( vcard, "X-Qtopia-Gender", c.gender() );
-    safeAddPropValue( vcard, "X-Qtopia-Anniversary", c.anniversary() );
+    safeAddPropValue( vcard, "X-Qtopia-Anniversary", PimXmlIO::dateToXml( c.anniversary() ) );
     safeAddPropValue( vcard, "X-Qtopia-Nickname", c.nickname() );
     safeAddPropValue( vcard, "X-Qtopia-Children", c.children() );
 
@@ -718,7 +756,7 @@ static PimContact parseVObject( VObject *obj )
 	QString value;
 	if (tc)
 	    value = tc->toUnicode( vObjectStringZValue( o ) );
-	else 
+	else
 	    value = vObjectStringZValue( o );
 
 	if ( name == VCNameProp ) {
@@ -732,11 +770,11 @@ static PimContact parseVObject( VObject *obj )
 		    value = tc->toUnicode( vObjectStringZValue( o ) );
 		    qDebug("Orig %s, utf %s", vObjectStringZValue( o ), value.utf8().data());
 		}
-		else 
+		else
 		    value = vObjectStringZValue( o );
 		//QString value = vObjectStringZValue( o );
 		if ( name == VCNamePrefixesProp )
-		    c.setTitle( value );
+		    c.setNameTitle( value );
 		else if ( name == VCNameSuffixesProp )
 		    c.setSuffix( value );
 		else if ( name == VCFamilyNameProp )
@@ -764,7 +802,7 @@ static PimContact parseVObject( VObject *obj )
 		QCString name = vObjectName( o );
 		if (tc)
 		    value = tc->toUnicode( vObjectStringZValue( o ) );
-		else 
+		else
 		    value = vObjectStringZValue( o );
 		//QString value = vObjectStringZValue( o );
 		if ( name == VCHomeProp )
@@ -861,7 +899,7 @@ static PimContact parseVObject( VObject *obj )
 	    QString email;
 	    if (tc)
 		email = tc->toUnicode( vObjectStringZValue( o ) );
-	    else 
+	    else
 		email = vObjectStringZValue( o );
 	    //QString email = vObjectStringZValue( o );
 	    VObjectIterator nit;
@@ -873,15 +911,11 @@ static PimContact parseVObject( VObject *obj )
 		if ( name == VCPreferredProp)
 		    isDefaultEmail = TRUE;
 	    }
-	    QString str = c.emails();
-	    if ( !str.isEmpty() )
-		str += ","+email;
-	    else
-		str = email;
-	    c.setEmails( str );
 
-	    if (isDefaultEmail)
+	    if ( isDefaultEmail )
 		c.setDefaultEmail( email );
+	    else
+		c.insertEmail( email );
 	}
 	else if ( name == VCURLProp ) {
 	    VObjectIterator nit;
@@ -903,7 +937,7 @@ static PimContact parseVObject( VObject *obj )
 		QCString name = vObjectName( o );
 		if (tc)
 		    value = tc->toUnicode( vObjectStringZValue( o ) );
-		else 
+		else
 		    value = vObjectStringZValue( o );
 		//QString value = vObjectStringZValue( o );
 		if ( name == VCOrgNameProp )
@@ -921,7 +955,7 @@ static PimContact parseVObject( VObject *obj )
 	    c.setNotes( value );
 	}
 	else if (name == VCBirthDateProp ) {
-	    c.setBirthday( value );
+	    c.setBirthday( PimXmlIO::xmlToDate( value)  );
 	}
 	else if ( name == "X-Qtopia-Profession" ) {
 	    c.setProfession( value );
@@ -939,7 +973,7 @@ static PimContact parseVObject( VObject *obj )
 	    c.setGender( value );
 	}
 	else if ( name == "X-Qtopia-Anniversary" ) {
-	    c.setAnniversary( value );
+	    c.setAnniversary( PimXmlIO::xmlToDate( value ) );
 	}
 	else if ( name == "X-Qtopia-Nickname" ) {
 	    c.setNickname( value );
@@ -967,8 +1001,9 @@ static PimContact parseVObject( VObject *obj )
     return c;
 }
 
+
 /*!
-   Write the list of \a contacts as vCard objects to the file 
+   Write the list of \a contacts as vCard objects to the file
    specified by \a filename.
 
    \sa readVCard()
@@ -991,7 +1026,7 @@ void PimContact::writeVCard( const QString &filename, const QValueList<PimContac
 }
 
 /*!
-   Write the \a contact as a vCard object to the file 
+   Write the \a contact as a vCard object to the file
    specified by \a filename.
 
    \sa readVCard()
@@ -1037,7 +1072,7 @@ QValueList<PimContact> PimContact::readVCard( const QString &filename )
     return contacts;
 }
 
-/*! 
+/*!
   Returns TRUE if the part of contact matches \a regexp. Otherwise returns FALSE.
 */
 bool PimContact::match( const QString &regexp ) const
@@ -1045,7 +1080,7 @@ bool PimContact::match( const QString &regexp ) const
     return match(QRegExp(regexp));
 }
 
-/*! 
+/*!
   Returns TRUE if the part of contact matches \a r. Otherwise returns FALSE.
 */
 bool PimContact::match( const QRegExp &r ) const
@@ -1110,7 +1145,126 @@ QDataStream &operator<<( QDataStream &s, const PimContact &c )
 }
 #endif
 
-/*! \fn void PimContact::setTitle( const QString &str )
+
+static const QtopiaPimMapEntry addressbookentries[] = {
+    // name
+    { "Title", QT_TRANSLATE_NOOP("PimContact",  "Title"), PimContact::NameTitle, 0 },
+    { "FirstName", QT_TRANSLATE_NOOP("PimContact",  "First Name" ), PimContact::FirstName, 20 },
+    { "MiddleName", QT_TRANSLATE_NOOP("PimContact",  "Middle Name" ), PimContact::MiddleName, 10 },
+    { "LastName", QT_TRANSLATE_NOOP("PimContact",  "Last Name" ), PimContact::LastName, 60 },
+    { "Suffix", QT_TRANSLATE_NOOP("PimContact",  "Suffix" ), PimContact::Suffix, 0 },
+    { "FileAs", QT_TRANSLATE_NOOP("PimContact",  "File As" ), PimContact::FileAs, 0 },
+
+    // email
+    { "DefaultEmail", QT_TRANSLATE_NOOP("PimContact",  "Default Email" ), PimContact::DefaultEmail, 50 },
+    { "Emails", QT_TRANSLATE_NOOP("PimContact",  "Emails" ), PimContact::Emails, 50 },
+
+    // home
+    { "HomeStreet", QT_TRANSLATE_NOOP("PimContact",  "Home Street" ), PimContact::HomeStreet, 10 },
+    { "HomeCity", QT_TRANSLATE_NOOP("PimContact",  "Home City" ), PimContact::HomeCity, 0 },
+    { "HomeState", QT_TRANSLATE_NOOP("PimContact",  "Home State" ), PimContact::HomeState, 0 },
+    { "HomeZip", QT_TRANSLATE_NOOP("PimContact",  "Home Zip" ), PimContact::HomeZip, 0 },
+    { "HomeCountry", QT_TRANSLATE_NOOP("PimContact",  "Home Country" ), PimContact::HomeCountry, 0 },
+    { "HomePhone", QT_TRANSLATE_NOOP("PimContact",  "Home Phone" ), PimContact::HomePhone, 10 },
+    { "HomeFax", QT_TRANSLATE_NOOP("PimContact",  "Home Fax" ), PimContact::HomeFax, 10 },
+    { "HomeMobile", QT_TRANSLATE_NOOP("PimContact",  "Home Mobile" ), PimContact::HomeMobile, 30 },
+    { "HomeWebPage", QT_TRANSLATE_NOOP("PimContact",  "Home Web Page" ), PimContact::HomeWebPage, 10 },
+
+    // business
+    { "Company", QT_TRANSLATE_NOOP("PimContact",  "Company" ), PimContact::Company, 10 },
+    { "BusinessStreet", QT_TRANSLATE_NOOP("PimContact",  "Business Street" ), PimContact::BusinessStreet, 10 },
+    { "BusinessCity", QT_TRANSLATE_NOOP("PimContact",  "Business City" ), PimContact::BusinessCity, 0 },
+    { "BusinessState", QT_TRANSLATE_NOOP("PimContact",  "Business State" ), PimContact::BusinessState, 0 },
+    { "BusinessZip", QT_TRANSLATE_NOOP("PimContact",  "Business Zip" ), PimContact::BusinessZip, 0 },
+    { "BusinessCountry", QT_TRANSLATE_NOOP("PimContact",  "Business Country" ), PimContact::BusinessCountry, 0 },
+    { "BusinessWebPage", QT_TRANSLATE_NOOP("PimContact",  "Business Web Page" ), PimContact::BusinessWebPage, 10 },
+    { "JobTitle", QT_TRANSLATE_NOOP("PimContact",  "Job Title" ), PimContact::JobTitle, 10 },
+    { "Department", QT_TRANSLATE_NOOP("PimContact",  "Department" ), PimContact::Department, 0 },
+    { "Office", QT_TRANSLATE_NOOP("PimContact",  "Office" ), PimContact::Office, 0 },
+    { "BusinessPhone", QT_TRANSLATE_NOOP("PimContact",  "Business Phone" ), PimContact::BusinessPhone, 10 },
+    { "BusinessFax", QT_TRANSLATE_NOOP("PimContact",  "Business Fax" ), PimContact::BusinessFax, 10 },
+    { "BusinessMobile", QT_TRANSLATE_NOOP("PimContact",  "Business Mobile" ), PimContact::BusinessMobile, 20 },
+    { "BusinessPager", QT_TRANSLATE_NOOP("PimContact",  "Business Pager" ), PimContact::BusinessPager, 10 },
+    { "Profession", QT_TRANSLATE_NOOP("PimContact",  "Profession" ), PimContact::Profession, 0 },
+    { "Assistant", QT_TRANSLATE_NOOP("PimContact",  "Assistant" ), PimContact::Assistant, 0 },
+    { "Manager", QT_TRANSLATE_NOOP("PimContact",  "Manager" ), PimContact::Manager, 0 },
+
+    //personal
+    { "Spouse", QT_TRANSLATE_NOOP("PimContact",  "Spouse" ), PimContact::Spouse, 10 },
+    { "Gender", QT_TRANSLATE_NOOP("PimContact",  "Gender" ), PimContact::Gender, 0 },
+    { "Birthday", QT_TRANSLATE_NOOP("PimContact",  "Birthday" ), PimContact::Birthday, 50 },
+    { "Anniversary", QT_TRANSLATE_NOOP("PimContact",  "Anniversary" ), PimContact::Anniversary, 0 },
+    { "Nickname", QT_TRANSLATE_NOOP("PimContact",  "Nickname" ), PimContact::Nickname, 0 },
+    { "Children", QT_TRANSLATE_NOOP("PimContact",  "Children" ), PimContact::Children, 20 },
+
+    // other
+    { "Notes", QT_TRANSLATE_NOOP("PimContact",  "Notes" ), PimContact::Notes, 0 },
+
+    // Added in Qtopia 1.6
+    { "Pronunciation", QT_TRANSLATE_NOOP("PimContact",  "Pronunciation" ), PimContact::Pronunciation, 0 },
+
+    { 0, 0, 0, 0 }
+};
+
+void PimContact::initMaps()
+{
+    delete keyToIdentifierMapPtr;
+    keyToIdentifierMapPtr = new QMap<int, QCString>;
+
+    delete identifierToKeyMapPtr;
+    identifierToKeyMapPtr = new QMap<QCString, int>;
+
+    delete trFieldsMapPtr;
+    trFieldsMapPtr = new QMap<int,QString>;
+
+    delete uniquenessMapPtr;
+    uniquenessMapPtr = new QMap<int, int>;
+
+    PimRecord::initMaps(addressbookentries, *uniquenessMapPtr, *identifierToKeyMapPtr, *keyToIdentifierMapPtr,
+			*trFieldsMapPtr );
+}
+
+/*!
+  \internal
+*/
+const QMap<int, QCString> &PimContact::keyToIdentifierMap()
+{
+    if ( !keyToIdentifierMapPtr )
+	initMaps();
+    return *keyToIdentifierMapPtr;
+}
+
+/*!
+  \internal
+*/
+const QMap<QCString,int> &PimContact::identifierToKeyMap()
+{
+    if ( !identifierToKeyMapPtr )
+	initMaps();
+    return *identifierToKeyMapPtr;
+}
+
+/*!
+  \internal
+*/
+const QMap<int, QString> & PimContact::trFieldsMap()
+{
+    if ( !trFieldsMapPtr )
+	initMaps();
+    return *trFieldsMapPtr;
+}
+
+/*!
+  \internal
+*/
+const QMap<int,int> & PimContact::uniquenessMap()
+{
+    if ( !uniquenessMapPtr )
+	initMaps();
+    return *uniquenessMapPtr;
+}
+
+/*! \fn void PimContact::setNameTitle( const QString &str )
   Sets the title of the contact to \a str.
 */
 
@@ -1141,10 +1295,6 @@ QDataStream &operator<<( QDataStream &s, const PimContact &c )
 
 /*! \fn void PimContact::setFileAs( const QString &str )
   Sets the contact to filed as \a str.
-*/
-
-/*! \fn void PimContact::setDefaultEmail( const QString &str )
-  Sets the default email of the contact to \a str.
 */
 
 /*! \fn void PimContact::setHomeStreet( const QString &str )
@@ -1259,14 +1409,6 @@ QDataStream &operator<<( QDataStream &s, const PimContact &c )
   Sets the gender of the contact to \a str.
 */
 
-/*! \fn void PimContact::setBirthday( const QString &str )
-  Sets the birthday for the contact to \a str.
-*/
-
-/*! \fn void PimContact::setAnniversary( const QString &str )
-  Sets the anniversary of the contact to \a str.
-*/
-
 /*! \fn void PimContact::setNickname( const QString &str )
   Sets the nickname of the contact to \a str.
 */
@@ -1275,7 +1417,7 @@ QDataStream &operator<<( QDataStream &s, const PimContact &c )
   Sets the notes about the contact to \a str.
 */
 
-/*! \fn QString PimContact::title() const
+/*! \fn QString PimContact::nameTitle() const
   Returns the title of the contact.
 */
 
@@ -1301,11 +1443,6 @@ QDataStream &operator<<( QDataStream &s, const PimContact &c )
 
 /*! \fn QString PimContact::defaultEmail() const
   Returns the default email address of the contact.
-*/
-
-/*! \fn QString PimContact::emails() const
-  Returns the list of email address for a contact separated by ';'s in a single
-  string.
 */
 
 /*! \fn QString PimContact::homeStreet() const
@@ -1420,14 +1557,6 @@ QDataStream &operator<<( QDataStream &s, const PimContact &c )
   Returns the gender of the contact.
 */
 
-/*! \fn QString PimContact::birthday() const
-  Returns the birthday of the contact.
-*/
-
-/*! \fn QString PimContact::anniversary() const
-  Returns the anniversary of the contact.
-*/
-
 /*! \fn QString PimContact::nickname() const
   Returns the nickname of the contact.
 */
@@ -1440,11 +1569,13 @@ QDataStream &operator<<( QDataStream &s, const PimContact &c )
   Returns the notes relating to the the contact.
 */
 
-/*! \fn QString PimContact::field(int) const
-  \internal
-*/
-
 /*!
   \fn void PimContact::p_setUid(QUuid)
   \internal
 */
+
+/*!
+  \fn virtual int PimContact::endFieldMarker() const
+  \internal
+*/
+

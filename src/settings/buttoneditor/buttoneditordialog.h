@@ -23,13 +23,14 @@
 #include <qdialog.h>
 #include <qlist.h>
 #include <qstringlist.h>
-#include <qtopia/services/services.h>
+#include <qtopia/services.h>
 
 class DeviceButton;
 class QComboBox;
 class AppLnk;
 
 class ButtonEditorDialog : public QDialog {
+    Q_OBJECT
 public:
     ButtonEditorDialog();
     virtual ~ButtonEditorDialog();

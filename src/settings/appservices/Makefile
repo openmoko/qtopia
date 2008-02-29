@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,10 +118,10 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
-LIBS	=	$(SUBLIBS) -lqpe -lqtopiaservices $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
+LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
 UIC	=	$(SYSCONF_UIC)
 
@@ -133,16 +139,16 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 HEADERS =	appservices.h
 SOURCES =	appservices.cpp \
 		main.cpp
-OBJECTS =	appservices.o \
-		main.o \
-		appservicesbase.o
+OBJECTS =	$(OBJECTS_DIR)/appservices.o \
+		$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/appservicesbase.o
 INTERFACES =    appservicesbase.ui
 UICDECLS =      appservicesbase.h
 UICIMPLS =      appservicesbase.cpp
-SRCMOC	=	moc_appservices.cpp \
-		moc_appservicesbase.cpp
-OBJMOC	=	moc_appservices.o \
-		moc_appservicesbase.o
+SRCMOC	=	$(MOC_DIR)/moc_appservices.cpp \
+		$(MOC_DIR)/moc_appservicesbase.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_appservices.o \
+		$(OBJECTS_DIR)/moc_appservicesbase.o
 
 
 ####### Implicit rules
@@ -208,23 +214,15 @@ REQUIRES=
 
 ####### Compile
 
-appservices.o: appservices.cpp \
+$(OBJECTS_DIR)/appservices.o: appservices.cpp \
 		appservices.h \
-		appservicesbase.h \
-		$(QPEDIR)/include/qtopia/applnk.h \
-		$(QPEDIR)/include/qtopia/resource.h \
-		$(QPEDIR)/include/qtopia/mimetype.h \
-		$(QPEDIR)/include/qtopia/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/config.h \
-		$(QPEDIR)/include/qtopia/services/services.h
+		appservicesbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/appservices.o appservices.cpp
 
-main.o: main.cpp \
+$(OBJECTS_DIR)/main.o: main.cpp \
 		appservices.h \
-		appservicesbase.h \
-		$(QPEDIR)/include/qtopia/applnk.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
+		appservicesbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
 appservicesbase.h: appservicesbase.ui
 	$(UIC) appservicesbase.ui -o $(INTERFACE_DECL_PATH)/appservicesbase.h
@@ -232,31 +230,34 @@ appservicesbase.h: appservicesbase.ui
 appservicesbase.cpp: appservicesbase.ui
 	$(UIC) appservicesbase.ui -i appservicesbase.h -o appservicesbase.cpp
 
-appservicesbase.o: appservicesbase.cpp \
+$(OBJECTS_DIR)/appservicesbase.o: appservicesbase.cpp \
 		appservicesbase.h \
 		appservicesbase.ui
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/appservicesbase.o appservicesbase.cpp
 
-moc_appservices.o: moc_appservices.cpp \
+$(OBJECTS_DIR)/moc_appservices.o: $(MOC_DIR)/moc_appservices.cpp \
 		appservices.h \
-		appservicesbase.h \
-		$(QPEDIR)/include/qtopia/applnk.h
-
-moc_appservicesbase.o: moc_appservicesbase.cpp \
 		appservicesbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_appservices.o $(MOC_DIR)/moc_appservices.cpp
 
-moc_appservices.cpp: appservices.h
-	$(MOC) appservices.h -o moc_appservices.cpp
+$(OBJECTS_DIR)/moc_appservicesbase.o: $(MOC_DIR)/moc_appservicesbase.cpp \
+		appservicesbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_appservicesbase.o $(MOC_DIR)/moc_appservicesbase.cpp
 
-moc_appservicesbase.cpp: appservicesbase.h
-	$(MOC) appservicesbase.h -o moc_appservicesbase.cpp
+$(MOC_DIR)/moc_appservices.cpp: appservices.h
+	$(MOC) appservices.h -o $(MOC_DIR)/moc_appservices.cpp
+
+$(MOC_DIR)/moc_appservicesbase.cpp: appservicesbase.h
+	$(MOC) appservicesbase.h -o $(MOC_DIR)/moc_appservicesbase.cpp
 
 
 
 lupdate:
-	lupdate appservices.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <appservices.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease appservices.pro
+	$(QPEDIR)/bin/qtopia-linstall appservices.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

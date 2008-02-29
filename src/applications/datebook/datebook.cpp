@@ -21,18 +21,20 @@
 #define QTOPIA_INTERNAL_FD
 
 #include "datebook.h"
-#include "datebookday.h"
+#include "dayview.h"
 #include "datebooksettings.h"
 #include "datebookweek.h"
 #include "dateentryimpl.h"
 #include "monthview.h"
+#include "finddialog.h"
 
 #include <qtopia/qpeapplication.h>
 #include <qtopia/config.h>
 #include <qtopia/qpedebug.h>
 #include <qtopia/pim/event.h>
-#include <qtopia/finddialog.h>
+#ifdef Q_WS_QWS
 #include <qtopia/ir.h>
+#endif
 #include <qtopia/qpemenubar.h>
 #include <qtopia/qpemessagebox.h>
 #include <qtopia/resource.h>
@@ -42,11 +44,9 @@
 #include <qtopia/tzselect.h>
 #include <qtopia/xmlreader.h>
 #include <qtopia/applnk.h>
+#include <qtopia/pim/private/eventio_p.h>
 
 #include <qaction.h>
-#ifdef QWS
-#include <qcopchannel_qws.h>
-#endif
 #include <qdatetime.h>
 #include <qdialog.h>
 #include <qdir.h>
@@ -61,14 +61,19 @@
 #include <qtl.h>
 #include <qwidgetstack.h>
 #include <qvbox.h>
-#ifdef QWS
-#include <qwindowsystem_qws.h>
-#endif
+#include <qregexp.h>
+//#ifdef QWS
+////#include <qwindowsystem_qws.h>
+////#include <qcopchannel_qws.h>
+////#endif
 #include <qarray.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <fcntl.h>
+
+#ifndef Q_OS_WIN32
 #include <unistd.h>
+#endif
 
 #include <stdlib.h>
 
@@ -84,6 +89,7 @@ class VScrollBox : public QVBox
 public:
     VScrollBox( QWidget *parent, const char *name=0 )
 	: QVBox( parent, name ) {}
+#if defined(_WS_QWS_)
     QSize sizeHint() const {
 	int width = QVBox::sizeHint().width();
 	if ( width > qApp->desktop()->width()-style().scrollBarExtent().width() )
@@ -91,6 +97,7 @@ public:
 	width = QMAX(width, QVBox::minimumSize().width());
 	return QSize( width, QVBox::sizeHint().height());
     }
+#endif
 };
 
 
@@ -100,9 +107,10 @@ DateBook::DateBook( QWidget *parent, const char *, WFlags f )
       presetTime( -1 ),
       startTime( 8 ), // an acceptable default
       syncing(FALSE),
-      inSearch(FALSE)
+      inSearch(FALSE),
+      exceptionMb(0)
 {
-    int timingLoad, timingReady, timingOther;
+    int timingLoad, timingOther;
 
     QTime t;
     t.start();
@@ -134,46 +142,47 @@ DateBook::DateBook( QWidget *parent, const char *, WFlags f )
     QActionGroup *g = new QActionGroup( this );
     g->setExclusive( TRUE );
 
-    QAction *a = new QAction( tr( "New Event" ), Resource::loadPixmap( "new" ),
+    QAction *a = new QAction( tr( "New Event" ), Resource::loadIconSet( "new" ),
                               QString::null, 0, this, 0 );
     a->setWhatsThis( tr("Create a new event") );
     connect( a, SIGNAL( activated() ), this, SLOT( fileNew() ) );
     a->addTo( sub_bar );
     a->addTo( eventMenu );
 
-    editAction = new QAction( tr( "Edit Event" ), 
+    editAction = new QAction( tr( "Edit Event" ),
 	    Resource::loadIconSet( "edit" ), QString::null, 0, this, 0 );
     connect( editAction, SIGNAL( activated() ), this, SLOT( editCurrentEvent() ) );
     editAction->setWhatsThis( tr("Edit the selected event") );
     editAction->addTo( eventMenu );
 
-    removeAction = new QAction( tr( "Delete Event" ), 
+    removeAction = new QAction( tr( "Delete Event" ),
 	    Resource::loadIconSet( "trash" ), QString::null, 0, this, 0 );
     connect( removeAction, SIGNAL( activated() ), this, SLOT( removeCurrentEvent() ) );
     removeAction->setWhatsThis( tr("Delete the selected event") );
     removeAction->addTo( eventMenu );
 
+#ifdef Q_WS_QWS
     if (Ir::supported()) {
-	beamAction = new QAction( tr( "Beam Event" ), 
+	beamAction = new QAction( tr( "Beam Event" ),
 	    Resource::loadIconSet( "beam" ), QString::null, 0, this, 0 );
 	connect( beamAction, SIGNAL( activated() ),
 	    this, SLOT( beamCurrentEvent() ) );
 	beamAction->setWhatsThis( tr("Beam the selected event") );
 	beamAction->addTo( eventMenu );
     }
+#endif
 
     eventMenu->insertSeparator();
 
     /*
-    a = new QAction( tr( "Delete Events" ), Resource::loadPixmap( "trash" ),
+    a = new QAction( tr( "Delete Events" ), Resource::loadIconSet( "trash" ),
                             QString::null, 0, this, 0 );
     connect( a, SIGNAL( activated() ), this, SLOT( fileNew() ) );
     a->addTo( sub_bar );
     a->addTo( eventMenu );
     */
 
-    a = new QAction( tr( "Day" ), Resource::loadPixmap( "day" ), QString::null, 0, g, 0 );
-    connect( a, SIGNAL( activated() ), this, SLOT( viewDay() ) );
+    a = new QAction( tr( "Day" ), Resource::loadIconSet( "day" ), QString::null, 0, g, 0 );
     a->setWhatsThis( tr("Show selected day's events") );
     if (!thinScreen)
 	a->addTo( sub_bar );
@@ -181,7 +190,8 @@ DateBook::DateBook( QWidget *parent, const char *, WFlags f )
     a->setToggleAction( TRUE );
     a->setOn( TRUE );
     dayAction = a;
-    a = new QAction( tr( "Week" ), Resource::loadPixmap( "week" ), QString::null, 0, g, 0 );
+    connect( dayAction, SIGNAL( activated() ), this, SLOT( viewDay() ) );
+    a = new QAction( tr( "Week" ), Resource::loadIconSet( "week" ), QString::null, 0, g, 0 );
     connect( a, SIGNAL( activated() ), this, SLOT( viewWeek() ) );
     a->setWhatsThis( tr("Show selected week's events") );
     if (!thinScreen)
@@ -189,7 +199,7 @@ DateBook::DateBook( QWidget *parent, const char *, WFlags f )
     a->addTo( view );
     a->setToggleAction( TRUE );
     weekAction = a;
-    a = new QAction( tr( "Month" ), Resource::loadPixmap( "month" ), QString::null, 0, g, 0 );
+    a = new QAction( tr( "Month" ), Resource::loadIconSet( "month" ), QString::null, 0, g, 0 );
     connect( a, SIGNAL( activated() ), this, SLOT( viewMonth() ) );
     a->setWhatsThis( tr("Show selected months's events") );
     if (!thinScreen)
@@ -198,12 +208,12 @@ DateBook::DateBook( QWidget *parent, const char *, WFlags f )
     a->setToggleAction( TRUE );
     monthAction = a;
 
-    a = new QAction( tr( "Find Event" ), Resource::loadPixmap( "find" ), QString::null, 0, g, 0 );
+    a = new QAction( tr( "Find Event" ), Resource::loadIconSet( "find" ), QString::null, 0, g, 0 );
     connect( a, SIGNAL(activated()), this, SLOT(slotFind()) );
     //a->addTo( sub_bar );
     a->addTo( eventMenu );
 
-    a = new QAction( tr( "Today" ), Resource::loadPixmap( "today" ), QString::null, 0, g, 0 );
+    a = new QAction( tr( "Today" ), Resource::loadIconSet( "today" ), QString::null, 0, g, 0 );
     connect( a, SIGNAL( activated() ), this, SLOT( slotToday() ) );
     a->setWhatsThis( tr("Show today's events") );
     a->addTo( sub_bar );
@@ -227,6 +237,18 @@ DateBook::DateBook( QWidget *parent, const char *, WFlags f )
              this, SLOT(changeClock(bool)) );
     connect( qApp, SIGNAL(weekChanged(bool)),
              this, SLOT(changeWeek(bool)) );
+
+    connect( qApp, SIGNAL( appMessage(const QCString &, const QByteArray &) ), 
+	    this, SLOT( appMessage(const QCString &, const QByteArray &) ) );
+
+    connect( qApp, SIGNAL( timeChanged() ), 
+	    this, SLOT( refreshWidgets() ) );
+
+    connect( qApp, SIGNAL( flush() ), 
+	    this, SLOT( flush() ) );
+
+    connect( qApp, SIGNAL( reload() ), 
+	    this, SLOT( reload() ) );
 }
 
 void DateBook::refreshWidgets()
@@ -371,7 +393,7 @@ void DateBook::viewMonth( const QDate& dt)
 {
     initMonth();
     monthAction->setOn( TRUE );
-    monthView->setDate( dt.year(), dt.month(), dt.day() );
+    monthView->setDate( dt );
     views->raiseWidget( monthView );
     monthView->updateOccurrences();
 
@@ -383,13 +405,44 @@ void DateBook::updateIcons()
     bool s = eventSelected();
 
     removeAction->setEnabled(s);
+#ifdef Q_WS_QWS
     if (Ir::supported()) {
 	beamAction->setEnabled(s);
     }
+#endif
     editAction->setEnabled(s);
 }
 
-void DateBook::editEvent( const PimEvent &e )
+void DateBook::initExceptionMb() {
+    exceptionMb = new QMessageBox(tr("Calendar"),
+	    tr("Edit all events in this series or just this single event."),
+	    QMessageBox::Warning, QMessageBox::Yes,
+	    QMessageBox::No | QMessageBox::Default, QMessageBox::Cancel, this);
+
+    exceptionMb->setButtonText(QMessageBox::Yes, tr("All"));
+    exceptionMb->setButtonText(QMessageBox::No, tr("Single"));
+    exceptionMb->setTextFormat(RichText);
+}
+
+// a bit to extreme.
+// should be possible to check each exception for if it still fits
+// on a valid date.
+bool affectsExceptions(const PimEvent &ne, const PimEvent &oe)
+{
+    if (oe.hasExceptions()) {
+	if (ne.start() != oe.start())
+	    return TRUE;
+	if (ne.frequency() != oe.frequency())
+	    return TRUE;
+	if (ne.repeatType() != oe.repeatType())
+	    return TRUE;
+	if ( ((PrEvent &)ne).p_weekMask() != ((PrEvent &)oe).p_weekMask())
+	    return TRUE;
+    }
+    return FALSE;
+}
+
+void DateBook::editOccurrence( const Occurrence &ev )
 {
     if (syncing) {
 	QMessageBox::warning( this, tr("Calendar"),
@@ -397,10 +450,54 @@ void DateBook::editEvent( const PimEvent &e )
 	return;
     }
 
+
+    // if this event is an exception, or has exceptions we may need to do somethign different.
+    bool asException;
+    PimEvent e;
+    if (ev.event().isException() || ev.event().hasRepeat()) {
+	// ask if just this one or is series?
+	if (!exceptionMb)
+	    initExceptionMb();
+	exceptionMb->setText(tr("Edit all events in this series or just this single event."));
+	switch (exceptionMb->exec()) {
+	    default:
+		return;
+	    case QMessageBox::Yes:
+		if (ev.event().isException()) {
+		    e = db->find(ev.event().seriesUid());
+		} else {
+		    e = ev.event();
+		}
+		asException = FALSE;
+		break;
+	    case QMessageBox::No:
+		if (ev.event().isException()) {
+		    e = ev.event();
+		    asException = FALSE;
+		} else {
+		    e = ev.event();
+		    // modify e to be an exceptional event.
+		    // with no uid (yet).
+		    e.setSeriesUid(ev.event().uid());
+		    e.setRepeatType(PimEvent::NoRepeat);
+		    e.setStart(ev.start());
+		    e.clearExceptions();
+		    asException = TRUE;
+		}
+		break;
+	}
+    } else {
+	e = ev.event();
+	asException = FALSE;
+    }
+
     // workaround added for text input.
     QDialog editDlg( this, 0, TRUE );
     DateEntry *entry;
-    editDlg.setCaption( tr("Edit Event") );
+    if (e.isException())
+	editDlg.setCaption( tr("Edit Event Exception") );
+    else
+	editDlg.setCaption( tr("Edit Event") );
     QVBoxLayout *vb = new QVBoxLayout( &editDlg );
     QScrollView *sv = new QScrollView( &editDlg, "scrollview" );
     sv->setResizePolicy( QScrollView::AutoOneFit );
@@ -409,6 +506,13 @@ void DateBook::editEvent( const PimEvent &e )
     vb->addWidget( sv );
     VScrollBox *vsb = new VScrollBox( &editDlg );
     entry = new DateEntry( onMonday, e, ampm, vsb, "editor" );
+
+    // connect the qApp stuff.
+    connect( qApp, SIGNAL( clockChanged( bool ) ),
+	     entry, SLOT( set24HourClock( bool ) ) );
+    connect( qApp, SIGNAL(weekChanged(bool)),
+	     entry, SLOT(setWeekStartsMonday(bool)) );
+
     entry->timezone->setEnabled(FALSE);
     sv->addChild( vsb );
 
@@ -420,14 +524,31 @@ void DateBook::editEvent( const PimEvent &e )
 			error, "Fix it", "Continue", 0, 0, 1) == 0)
 		continue;
 	}
-	db->updateEvent(newEv);
+	if (asException) {
+	    db->addException(ev.date(),ev.event(), newEv);
+	} else {
+	    if (affectsExceptions(newEv, e)) {
+		if (QMessageBox::warning(this, tr("Calendar"),
+			    tr( "<p>Changes to the start time or recurrence pattern"
+				" of this event will cause all exceptions to this event"
+				" to be lost.  Continue?"),
+			    QMessageBox::Ok, QMessageBox::Cancel|QMessageBox::Default
+			    ) != QMessageBox::Ok)
+		    return;
+		/// need to clear exceptions
+		db->removeExceptions(newEv);
+		newEv.clearExceptions();
+	    }
+	    db->updateEvent(newEv);
+	}
 	emit newEvent();
 	break;
     }
 }
 
-void DateBook::removeEvent( const PimEvent &e )
+void DateBook::removeOccurrence( const Occurrence &o )
 {
+    PimEvent e = o.event();
     if (syncing) {
 	QMessageBox::warning( this, tr("Calendar"),
 	                      tr( "Can not edit data, currently syncing") );
@@ -435,11 +556,36 @@ void DateBook::removeEvent( const PimEvent &e )
     }
 
     QString strName = e.description();
+    if (e.isException() || e.hasRepeat()) {
+	// ask if just this one or is series?
+	if (!exceptionMb)
+	    initExceptionMb();
+	exceptionMb->setText(
+		tr("Delete all events in this series or just this single event:<br>%1")
+		.arg(strName)
+		);
+	switch (exceptionMb->exec()) {
+	    default:
+		return;
+	    case QMessageBox::Yes:
+		if (e.isException()) {
+		    e = db->find(e.seriesUid());
+		}
+		db->removeEvent( e );
+		break;
+	    case QMessageBox::No:
+		if (e.isException()) {
+		    db->removeEvent( e );
+		} else {
+		    db->addException( o.start().date(), e );
+		}
+	}
+    } else  {
+	if ( !QPEMessageBox::confirmDelete( this, tr( "Calendar" ),strName ) )
+	    return;
+	db->removeEvent( e );
+    }
 
-    if ( !QPEMessageBox::confirmDelete( this, tr( "Calendar" ),strName ) )
-	return;
-
-    db->removeEvent( e );
     if ( views->visibleWidget() == dayView && dayView )
         dayView->redraw();
 }
@@ -454,20 +600,23 @@ void DateBook::addEvent( const PimEvent &e )
 void DateBook::editCurrentEvent()
 {
     if (eventSelected())
-	editEvent(currentEvent());
+	editOccurrence(currentOccurrence());
 }
 
 void DateBook::removeCurrentEvent()
 {
     if (eventSelected())
-	removeEvent(currentEvent());
+	removeOccurrence(currentOccurrence());
 }
 
 void DateBook::beamCurrentEvent()
 {
+#ifdef Q_WS_QWS
     if (eventSelected())
 	beamEvent(currentEvent());
+#endif
 }
+
 
 bool DateBook::eventSelected() const
 {
@@ -480,6 +629,11 @@ bool DateBook::eventSelected() const
 PimEvent DateBook::currentEvent() const
 {
     return dayView->currentEvent();
+}
+
+Occurrence DateBook::currentOccurrence() const
+{
+    return dayView->currentItem();
 }
 
 void DateBook::showDay( int year, int month, int day )
@@ -508,16 +662,23 @@ void DateBook::initDay()
 		 dayView, SLOT( redraw() ) );
 	connect( dayView, SIGNAL( newEvent() ),
 		 this, SLOT( fileNew() ) );
-	connect( dayView, SIGNAL( removeEvent( const PimEvent & ) ),
-		 this, SLOT( removeEvent( const PimEvent & ) ) );
-	connect( dayView, SIGNAL( editEvent( const PimEvent & ) ),
-		 this, SLOT( editEvent( const PimEvent & ) ) );
+	connect( dayView, SIGNAL( removeOccurrence( const Occurrence & ) ),
+		 this, SLOT( removeOccurrence( const Occurrence & ) ) );
+	connect( dayView, SIGNAL( editOccurrence( const Occurrence & ) ),
+		 this, SLOT( editOccurrence( const Occurrence & ) ) );
 	connect( dayView, SIGNAL( beamEvent( const PimEvent & ) ),
 		 this, SLOT( beamEvent( const PimEvent & ) ) );
-	connect( dayView, SIGNAL(sigNewEvent(const QString &)),
+	connect( dayView, SIGNAL(newEvent(const QString &)),
 		 this, SLOT(newEvent(const QString &)) );
 	connect( dayView, SIGNAL(selectionChanged()),
 		 this, SLOT(updateIcons()) );
+
+	// qApp connections
+	connect( qApp, SIGNAL(weekChanged(bool)),
+		dayView, SLOT(setStartOnMonday(bool)) );
+
+	connect( qApp, SIGNAL(clockChanged(bool)),
+		dayView, SLOT(set24HourClock(bool)) );
     }
 }
 
@@ -531,6 +692,13 @@ void DateBook::initWeek()
              this, SLOT( showDay( const QDate & ) ) );
 	connect( this, SIGNAL( newEvent() ),
 		 weekView, SLOT( redraw() ) );
+
+	// qApp connections
+	connect( qApp, SIGNAL(weekChanged(bool)),
+		weekView, SLOT(setStartOnMonday(bool)) );
+
+	connect( qApp, SIGNAL(clockChanged(bool)),
+		weekView, SLOT(setTwelveHour(bool)) );
     }
 }
 
@@ -539,8 +707,8 @@ void DateBook::initMonth()
     if ( !monthView ) {
 	monthView = new MonthView( db, views, "month view", FALSE );
 	views->addWidget( monthView, MONTH );
-	connect( monthView, SIGNAL( dateClicked( int, int, int ) ),
-             this, SLOT( showDay( int, int, int ) ) );
+	connect( monthView, SIGNAL( dateClicked( const QDate &) ),
+             this, SLOT( showDay( const QDate &) ) );
 	connect( this, SIGNAL( newEvent() ),
 		 monthView, SLOT( updateOccurrences() ) );
 	qApp->processEvents();
@@ -578,7 +746,7 @@ void DateBook::saveSettings()
 void DateBook::appMessage(const QCString& msg, const QByteArray& data)
 {
     bool needShow = FALSE;
-    
+
     if ( msg == "alarm(QDateTime,int)" ) {
 	QDataStream ds(data,IO_ReadOnly);
 	QDateTime when; int warn;
@@ -613,8 +781,7 @@ void DateBook::appMessage(const QCString& msg, const QByteArray& data)
 
 	    msg += TimeString::dateString(item.event().start(),ampm)
 		+ (warn
-			? tr(" (in " + QString::number(warn)
-			    + tr(" minutes)"))
+			? " " + tr("(in %1 minutes)").arg(warn)
 			: QString(""))
 		+ "<BR>"
 		+ item.event().notes() + "</CENTER>";
@@ -734,7 +901,7 @@ void DateBook::nextView()
 void DateBook::reload()
 {
     // reload isn't as meaningful anymore.
-    //db->reload();} else 
+    //db->reload();} else
     db->reload();
     if ( dayAction->isOn() )
 	viewDay();
@@ -785,16 +952,17 @@ void DateBook::slotToday()
     // we need to view today
     QDate dt = QDate::currentDate();
     if ( views->visibleWidget() == dayView ) {
-	showDay( dt.year(), dt.month(), dt.day() );
+	showDay( dt );
     } else if (views->visibleWidget() == weekView) {
 	weekView->selectDate( dt );
     } else if (views->visibleWidget() == monthView){
-	monthView->setDate( dt.year(), dt.month(), dt.day() );
+	monthView->setDate( dt );
     }
 }
 
 void DateBook::closeEvent( QCloseEvent *e )
 {
+    slotToday();
     if(syncing) {
 	/* no need to save, did that at flush */
 	e->accept();
@@ -983,25 +1151,31 @@ static const char * beamfile = "/tmp/obex/event.vcs";
 
 void DateBook::beamEvent( const PimEvent &e )
 {
+#ifdef Q_WS_QWS
     unlink( beamfile ); // delete if exists
-#if defined (_OS_WIN32_)
+
+#if defined (Q_OS_WIN32)
     QDir d;
     d.mkdir("/tmp/obex/");
 #else
--   ::mkdir("/tmp/obex/", 0755);
+    ::mkdir("/tmp/obex/", 0755);
 #endif
     PimEvent::writeVCalendar( beamfile, e );
     Ir *ir = new Ir( this );
     connect( ir, SIGNAL( done( Ir * ) ), this, SLOT( beamDone( Ir * ) ) );
     QString description = e.description();
     ir->send( beamfile, description, "text/x-vCalendar" );
+#endif
 }
 
 void DateBook::beamDone( Ir *ir )
 {
+#ifdef Q_WS_QWS
     delete ir;
     unlink( beamfile );
+#endif
 }
+
 
 void DateBook::slotFind()
 {

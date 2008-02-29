@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -132,19 +138,19 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 
 HEADERS =	minefield.h \
 		minesweep.h
-SOURCES =	main.cpp \
-		minefield.cpp \
-		minesweep.cpp
-OBJECTS =	main.o \
-		minefield.o \
-		minesweep.o
+SOURCES =	minefield.cpp \
+		minesweep.cpp \
+		main.cpp
+OBJECTS =	$(OBJECTS_DIR)/minefield.o \
+		$(OBJECTS_DIR)/minesweep.o \
+		$(OBJECTS_DIR)/main.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
-SRCMOC	=	moc_minefield.cpp \
-		moc_minesweep.cpp
-OBJMOC	=	moc_minefield.o \
-		moc_minesweep.o
+SRCMOC	=	$(MOC_DIR)/moc_minefield.cpp \
+		$(MOC_DIR)/moc_minesweep.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_minefield.o \
+		$(OBJECTS_DIR)/moc_minesweep.o
 
 
 ####### Implicit rules
@@ -210,44 +216,41 @@ REQUIRES=
 
 ####### Compile
 
-main.o: main.cpp \
-		minesweep.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
-
-minefield.o: minefield.cpp \
-		minefield.h \
-		$(QPEDIR)/include/qpe/config.h
-
-minesweep.o: minesweep.cpp \
-		minesweep.h \
-		minefield.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h \
-		$(QPEDIR)/include/qpe/qpemenubar.h
-
-moc_minefield.o: moc_minefield.cpp \
+$(OBJECTS_DIR)/minefield.o: minefield.cpp \
 		minefield.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/minefield.o minefield.cpp
 
-moc_minesweep.o: moc_minesweep.cpp \
+$(OBJECTS_DIR)/minesweep.o: minesweep.cpp \
+		minesweep.h \
+		minefield.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/minesweep.o minesweep.cpp
+
+$(OBJECTS_DIR)/main.o: main.cpp \
 		minesweep.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
-moc_minefield.cpp: minefield.h
-	$(MOC) minefield.h -o moc_minefield.cpp
+$(OBJECTS_DIR)/moc_minefield.o: $(MOC_DIR)/moc_minefield.cpp \
+		minefield.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_minefield.o $(MOC_DIR)/moc_minefield.cpp
 
-moc_minesweep.cpp: minesweep.h
-	$(MOC) minesweep.h -o moc_minesweep.cpp
+$(OBJECTS_DIR)/moc_minesweep.o: $(MOC_DIR)/moc_minesweep.cpp \
+		minesweep.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_minesweep.o $(MOC_DIR)/moc_minesweep.cpp
+
+$(MOC_DIR)/moc_minefield.cpp: minefield.h
+	$(MOC) minefield.h -o $(MOC_DIR)/moc_minefield.cpp
+
+$(MOC_DIR)/moc_minesweep.cpp: minesweep.h
+	$(MOC) minesweep.h -o $(MOC_DIR)/moc_minesweep.cpp
 
 
 
 lupdate:
-	lupdate minesweep.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <minesweep.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease minesweep.pro
+	$(QPEDIR)/bin/qtopia-linstall minesweep.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

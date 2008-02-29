@@ -23,11 +23,13 @@
 #include "receivedialog.h"
 #include "senddialog.h"
 
-#include <qpe/qpeapplication.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/qcopenvelope_qws.h>
 
 #include <qdir.h>
 #include <qmessagebox.h>
-#include <qcopchannel_qws.h>
+
+//#define QTOPIA_IR_DEBUG
 
 QIr::QIr( QObject *parent, const char *name )
     : QObject( parent, name ),
@@ -57,8 +59,10 @@ QIr::~QIr()
 
 void QIr::receiving( int size, const QString &filename, const QString &mimetype)
 {
+#ifdef QTOPIA_IR_DEBUG
   qDebug("receiving obex object, size=%d, filename=%s, mimetype=%s", 
 	 size, filename.latin1(), mimetype.latin1());
+#endif
 
   if ( receiveDialog )
       delete receiveDialog;
@@ -71,7 +75,9 @@ void QIr::receiving( int size, const QString &filename, const QString &mimetype)
 
 void QIr::progress( int size )
 {
+#ifdef QTOPIA_IR_DEBUG
   qDebug("progress obex object, size=%d", size );
+#endif
 
   if ( receiveDialog )
       receiveDialog->progress( size );
@@ -80,27 +86,32 @@ void QIr::progress( int size )
 
 void QIr::obexMessage( const QCString &msg , const QByteArray &data )
 {
+#ifdef QTOPIA_IR_DEBUG
     qDebug("received message on QPE/Obex: msg=%s", msg.data() );
+#endif
     QDataStream stream( data, IO_ReadOnly );
-    QString description;
+    QString name;
     QString filename;
     QString mimetype;
     if ( msg == "send(QString,QString,QString)" ) {
-        stream >> description >> filename >> mimetype;
-	qDebug("sending obex object, filename=%s, mimetype=%s", filename.latin1(), mimetype.latin1());
+        stream >> name >> filename >> mimetype;
     } else if ( msg == "send(QString)" ) {
         QString filename;
         stream >> filename;
-	qDebug("sending obex object, filename=%s", filename.latin1());
-	// ### do we need to get to know the mimetype???
-	obexServer->beam( filename, QString::null );
     } else {
-	qDebug("wrong qcop call");
 	return;
     }
-    if ( description.isEmpty() ) 
-	description = filename;
     if ( !filename.isEmpty() && !sendDialog && !receiveDialog ) {
+	QString description;
+	QFileInfo fi(filename);
+	if ( !name.isEmpty() ) {
+	    description = tr("%1 as file \"%2\"").arg(name).arg(fi.fileName());
+	} else {
+	    description = tr("file \"%1\"").arg(fi.fileName());
+	}
+#ifdef QTOPIA_IR_DEBUG
+	qDebug("sending obex object, filename=%s, mimetype=%s", filename.latin1(), mimetype.latin1());
+#endif
 	obexServer->beam( filename, mimetype );
 	sendDialog = new SendDialog( obexServer, description );
 	connect( sendDialog, SIGNAL( destroyed() ), this, SLOT( sendDialogDestroyed() ) );
@@ -125,4 +136,6 @@ void QIr::done()
     if ( sendDialog )
 	delete sendDialog;
     sendDialog = 0;
+
+    QCopEnvelope env("QPE/Obex","sent()");
 }

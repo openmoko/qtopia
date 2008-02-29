@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/include/qtopia/resource.h:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/include/qtopia/resource.h:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -50,12 +50,13 @@ body { background: #ffffff; color: black; }
 #ifndef PIXMAPLOADER_H
 #define PIXMAPLOADER_H
 
+#include &lt;qtopia/qpeglobal.h&gt;
 #include &lt;qimage.h&gt;
 #include &lt;qbitmap.h&gt;
 #include &lt;qiconset.h&gt;
 #include &lt;qstringlist.h&gt;
 
-class Resource
+class QTOPIA_EXPORT Resource
 {
 public:
     Resource() {}
@@ -71,17 +72,6 @@ public:
     static QString findSound( const QString &amp;name );
     static QStringList allSounds();
 };
-
-// Inline for compatibility with SHARP ROMs
-inline QIconSet Resource::loadIconSet( const QString &amp;pix ) 
-{
-    QPixmap dpm = loadPixmap( pix + "_disabled" );
-    QPixmap pm = loadPixmap( pix );
-    QIconSet is( pm );
-    if ( !dpm.isNull() )
-	is.setPixmap( dpm, pm.width() &lt;= 22 ? QIconSet::Small : QIconSet::Large, QIconSet::Disabled );
-    return is;
-}
 
 
 #endif

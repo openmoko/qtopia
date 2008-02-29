@@ -22,7 +22,7 @@
 #define __MRU_LIST_H__
 
 
-#include <qpe/applnk.h>
+#include <qtopia/applnk.h>
 
 #include <qframe.h>
 #include <qlist.h>

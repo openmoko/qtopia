@@ -1,0 +1,87 @@
+<html>
+<title>
+Calculator Test List
+</title>
+
+<body>
+
+<h1>Calculator Test List</h1>
+
+
+<a name=features>
+<h2>Feature Tests</h2>
+</a>
+<!-- feature tests correspond 1-to-1 with features
+
+    Note: TITLEs may be used as identifiers in bug reports.
+-->
+
+<p><h3>Backspace</h3>
+<pre>Enter a multi-digit number, delete some digits with backspace,
+use the resulting number in a calculation and check the result is
+correct.</pre>
+
+<p><h3>Double operations</h3>
+<pre>Enter a number, enter a common operation (such as addition), enter
+another number, press equals, check the result.</pre>
+
+<p><h3>Common user interface elements.</h3>
+<pre>Keypad usage
+
+Make sure all numeric key presses display the value clicked.
+The maximum number of digits available to be keyed in is 16.
+
+Enter the following...
+12345678901234567
+The last 7 will not be displayed, or be used in any calculation.
+
+Enter the following:
+12345678901234567
++
+1
+=
+
+The answer should be 1234567890123457.</pre>
+
+<!--
+Framework can automatically convert data types to match operations.
+Select "Simple" plugin. Enter the following :
+3
++
+Select "Fraction" plugin.
+5/10
+=
+Result should be "3 1/2".
+--!>
+
+<p><h3>Memory operations</h3>
+<pre>Enter a number, press M+ to save it to memory.
+Clear the display.
+Press MR to retrieve the number entered.
+Enter another number.
+Press M+ to add it to the number already saved in memory.
+Clear the display.
+Press MR to retrieve the total of the two numbers entered.</pre>
+
+<p><h3>Most-recently-used plugin is active when the calculator is restarted.</h3>
+<p>Start calculator. Select a different plugin from the one currently active.
+Close calculator. Start calculator. Ensure the plugin selected is now active.</p>
+
+<h3>Braces</h3>
+<pre>Select "Advanced" plugin.
+Enter the following:
+2
+*
+(
+3
++
+4
+)
+
+7 should be displayed.
+
+Enter =
+14 should be displayed.</pre>
+
+</body>
+</html>

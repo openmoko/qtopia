@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -137,28 +143,28 @@ SOURCES =	main.cpp \
 		launchersettings.cpp \
 		wallpaperselector.cpp \
 		colorselector.cpp
-OBJECTS =	main.o \
-		launchersettings.o \
-		wallpaperselector.o \
-		colorselector.o \
-		launchersettingsbase.o \
-		wallpaperselectorbase.o
+OBJECTS =	$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/launchersettings.o \
+		$(OBJECTS_DIR)/wallpaperselector.o \
+		$(OBJECTS_DIR)/colorselector.o \
+		$(OBJECTS_DIR)/launchersettingsbase.o \
+		$(OBJECTS_DIR)/wallpaperselectorbase.o
 INTERFACES =    launchersettingsbase.ui \
 		wallpaperselectorbase.ui
 UICDECLS =      launchersettingsbase.h \
 		wallpaperselectorbase.h
 UICIMPLS =      launchersettingsbase.cpp \
 		wallpaperselectorbase.cpp
-SRCMOC	=	moc_launchersettings.cpp \
-		moc_wallpaperselector.cpp \
-		moc_colorselector.cpp \
-		moc_launchersettingsbase.cpp \
-		moc_wallpaperselectorbase.cpp
-OBJMOC	=	moc_launchersettings.o \
-		moc_wallpaperselector.o \
-		moc_colorselector.o \
-		moc_launchersettingsbase.o \
-		moc_wallpaperselectorbase.o
+SRCMOC	=	$(MOC_DIR)/moc_launchersettings.cpp \
+		$(MOC_DIR)/moc_wallpaperselector.cpp \
+		$(MOC_DIR)/moc_colorselector.cpp \
+		$(MOC_DIR)/moc_launchersettingsbase.cpp \
+		$(MOC_DIR)/moc_wallpaperselectorbase.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_launchersettings.o \
+		$(OBJECTS_DIR)/moc_wallpaperselector.o \
+		$(OBJECTS_DIR)/moc_colorselector.o \
+		$(OBJECTS_DIR)/moc_launchersettingsbase.o \
+		$(OBJECTS_DIR)/moc_wallpaperselectorbase.o
 
 
 ####### Implicit rules
@@ -224,41 +230,27 @@ REQUIRES=
 
 ####### Compile
 
-main.o: main.cpp \
+$(OBJECTS_DIR)/main.o: main.cpp \
 		launchersettings.h \
-		launchersettingsbase.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
+		launchersettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
-launchersettings.o: launchersettings.cpp \
+$(OBJECTS_DIR)/launchersettings.o: launchersettings.cpp \
 		launchersettings.h \
 		launchersettingsbase.h \
 		wallpaperselector.h \
 		wallpaperselectorbase.h \
-		colorselector.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		$(QPEDIR)/include/qpe/mimetype.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qpe/fontdatabase.h \
-		$(QPEDIR)/include/qpe/fontfactoryinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/quuid.h
-
-wallpaperselector.o: wallpaperselector.cpp \
-		wallpaperselector.h \
-		wallpaperselectorbase.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qpe/applnk.h
-
-colorselector.o: colorselector.cpp \
 		colorselector.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/launchersettings.o launchersettings.cpp
+
+$(OBJECTS_DIR)/wallpaperselector.o: wallpaperselector.cpp \
+		wallpaperselector.h \
+		wallpaperselectorbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/wallpaperselector.o wallpaperselector.cpp
+
+$(OBJECTS_DIR)/colorselector.o: colorselector.cpp \
+		colorselector.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/colorselector.o colorselector.cpp
 
 launchersettingsbase.h: launchersettingsbase.ui
 	$(UIC) launchersettingsbase.ui -o $(INTERFACE_DECL_PATH)/launchersettingsbase.h
@@ -272,49 +264,57 @@ wallpaperselectorbase.h: wallpaperselectorbase.ui
 wallpaperselectorbase.cpp: wallpaperselectorbase.ui
 	$(UIC) wallpaperselectorbase.ui -i wallpaperselectorbase.h -o wallpaperselectorbase.cpp
 
-launchersettingsbase.o: launchersettingsbase.cpp
+$(OBJECTS_DIR)/launchersettingsbase.o: launchersettingsbase.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/launchersettingsbase.o launchersettingsbase.cpp
 
-wallpaperselectorbase.o: wallpaperselectorbase.cpp
+$(OBJECTS_DIR)/wallpaperselectorbase.o: wallpaperselectorbase.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/wallpaperselectorbase.o wallpaperselectorbase.cpp
 
-moc_launchersettings.o: moc_launchersettings.cpp \
+$(OBJECTS_DIR)/moc_launchersettings.o: $(MOC_DIR)/moc_launchersettings.cpp \
 		launchersettings.h \
 		launchersettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_launchersettings.o $(MOC_DIR)/moc_launchersettings.cpp
 
-moc_wallpaperselector.o: moc_wallpaperselector.cpp \
+$(OBJECTS_DIR)/moc_wallpaperselector.o: $(MOC_DIR)/moc_wallpaperselector.cpp \
 		wallpaperselector.h \
 		wallpaperselectorbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_wallpaperselector.o $(MOC_DIR)/moc_wallpaperselector.cpp
 
-moc_colorselector.o: moc_colorselector.cpp \
+$(OBJECTS_DIR)/moc_colorselector.o: $(MOC_DIR)/moc_colorselector.cpp \
 		colorselector.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_colorselector.o $(MOC_DIR)/moc_colorselector.cpp
 
-moc_launchersettingsbase.o: moc_launchersettingsbase.cpp \
+$(OBJECTS_DIR)/moc_launchersettingsbase.o: $(MOC_DIR)/moc_launchersettingsbase.cpp \
 		launchersettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_launchersettingsbase.o $(MOC_DIR)/moc_launchersettingsbase.cpp
 
-moc_wallpaperselectorbase.o: moc_wallpaperselectorbase.cpp \
+$(OBJECTS_DIR)/moc_wallpaperselectorbase.o: $(MOC_DIR)/moc_wallpaperselectorbase.cpp \
 		wallpaperselectorbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_wallpaperselectorbase.o $(MOC_DIR)/moc_wallpaperselectorbase.cpp
 
-moc_launchersettings.cpp: launchersettings.h
-	$(MOC) launchersettings.h -o moc_launchersettings.cpp
+$(MOC_DIR)/moc_launchersettings.cpp: launchersettings.h
+	$(MOC) launchersettings.h -o $(MOC_DIR)/moc_launchersettings.cpp
 
-moc_wallpaperselector.cpp: wallpaperselector.h
-	$(MOC) wallpaperselector.h -o moc_wallpaperselector.cpp
+$(MOC_DIR)/moc_wallpaperselector.cpp: wallpaperselector.h
+	$(MOC) wallpaperselector.h -o $(MOC_DIR)/moc_wallpaperselector.cpp
 
-moc_colorselector.cpp: colorselector.h
-	$(MOC) colorselector.h -o moc_colorselector.cpp
+$(MOC_DIR)/moc_colorselector.cpp: colorselector.h
+	$(MOC) colorselector.h -o $(MOC_DIR)/moc_colorselector.cpp
 
-moc_launchersettingsbase.cpp: launchersettingsbase.h
-	$(MOC) launchersettingsbase.h -o moc_launchersettingsbase.cpp
+$(MOC_DIR)/moc_launchersettingsbase.cpp: launchersettingsbase.h
+	$(MOC) launchersettingsbase.h -o $(MOC_DIR)/moc_launchersettingsbase.cpp
 
-moc_wallpaperselectorbase.cpp: wallpaperselectorbase.h
-	$(MOC) wallpaperselectorbase.h -o moc_wallpaperselectorbase.cpp
+$(MOC_DIR)/moc_wallpaperselectorbase.cpp: wallpaperselectorbase.h
+	$(MOC) wallpaperselectorbase.h -o $(MOC_DIR)/moc_wallpaperselectorbase.cpp
 
 
 
 lupdate:
-	lupdate launcher.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <launcher.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease launcher.pro
+	$(QPEDIR)/bin/qtopia-linstall launcher.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

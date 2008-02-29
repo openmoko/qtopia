@@ -3,7 +3,7 @@ Priority: optional
 Section: qpe/applications
 Maintainer: Trolltech (www.trolltech.com)
 Architecture: arm
-Version: $QPE_VERSION-8
-Depends: qpe-base ($QPE_VERSION), ptydevs
+Version: $QPE_VERSION-13
+Depends: qpe-libqtopia, ptydevs
 Description: KDE's konsole (shell terminal)
  Ported to the Qtopia environment.

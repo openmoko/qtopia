@@ -70,12 +70,24 @@ bool SettingsDialog::reverse() const
 void SettingsDialog::setRotate(bool r)
 {
     rotateCheck->setChecked(r);
+    clockwiseCheck->setEnabled( r );
 }
 
 bool SettingsDialog::rotate() const
 {
     return rotateCheck->isChecked();
 }
+
+void SettingsDialog::setClockwise(bool r)
+{
+    clockwiseCheck->setChecked(r);
+}
+
+bool SettingsDialog::clockwise() const
+{
+    return clockwiseCheck->isChecked();
+}
+
 
 void SettingsDialog::setFastLoad(bool f)
 {

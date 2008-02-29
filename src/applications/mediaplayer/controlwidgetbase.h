@@ -68,12 +68,16 @@ public:
     ControlWidgetBase( QWidget* parent, const QString& skin, const QString& audio, const char* name );
     ~ControlWidgetBase();
 
+    // Format seconds as 0:00
+    static QString toTimeString( long );
+
 public slots:
     void sliderPressed();
     void sliderReleased();
     void setPosition( long );
     void setLength( long );
     void setPaused( bool b );
+    void setSeekable( bool b );
     void setLooping( bool b );
     void setPlaying( bool b );
     void setFullscreen( bool b );
@@ -96,8 +100,11 @@ signals:
     void backwardReleased();
 
 protected:
-    virtual void internalResize() = 0; // Make the class abstract
-    virtual void internalPaint( QPaintEvent *event ) = 0;
+    virtual void virtualResize() = 0; // Make the class abstract
+    virtual void virtualPaint( QPaintEvent *event ) = 0;
+    virtual void virtualUpdateSlider() = 0;
+    virtual void paintButton( QPainter& p, int i );
+    QString timeAsString( long );
 
     void mouseMoveEvent( QMouseEvent *event );
     void mousePressEvent( QMouseEvent *event );
@@ -105,14 +112,11 @@ protected:
     void closeEvent( QCloseEvent *event );
     void resizeEvent( QResizeEvent *event );
     void paintEvent( QPaintEvent *event );
+    void resetButtons();
+    void updateSlider();
 
-    virtual void updateSlider( long, long );
-    virtual QString timeAsString( long );
-    virtual void paintButton( QPainter& p, int i );
-
-    void updateSliderBase( long, long );
     void setButtonData( MediaButton *mediaButtons, int count );
-    int resizeObjects( int w, int h, int scaleW, int scaleH );
+    int resizeObjects( int w, int h, int scaleW, int scaleH, int cornerWidgetWidth = 0 );
     void setToggleButton( MediaButtonType, bool );
     void toggleButton( int );
     void paintAllButtons( QPainter& p );
@@ -124,7 +128,7 @@ protected:
     int skinScaleW, skinScaleH;
     int actualScaleW, actualScaleH;
     QString skinType;
-    QString skinName;
+    QString skinFile;
     QString skin;
 
     MediaButton *buttons;
@@ -154,6 +158,7 @@ protected:
 
     bool hadFirstResize;
     bool resized;
+    bool canPaint;
 
     MySlider slider;
     QLineEdit time;

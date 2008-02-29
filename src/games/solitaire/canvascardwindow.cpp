@@ -23,7 +23,7 @@
 #include "freecellcardgame.h"
 #include "cardmetrics.h"
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
 #include <qapplication.h>
 #include <qmainwindow.h>
@@ -33,7 +33,7 @@
 
 CanvasCardWindow::CanvasCardWindow(QWidget* parent, const char* name, WFlags f) :
     QMainWindow(parent, name, f), canvas(1, 1), snapOn(TRUE), cardBack(0), gameType(0),
-    cardGame(0)
+    cardGame(0), drawThree(TRUE)
 {
     setIcon( Resource::loadPixmap( "cards" ) );
 
@@ -226,6 +226,7 @@ void CanvasCardWindow::snapToggle()
 
 void CanvasCardWindow::drawnToggle()
 {
+    drawThree = !drawThree;
     cardGame->toggleCardsDrawn();
     updateDraw();
 }

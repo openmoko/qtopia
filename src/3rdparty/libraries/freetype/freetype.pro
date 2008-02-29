@@ -1,8 +1,11 @@
 TEMPLATE	= lib
-CONFIG		= qtopia warn_on release
+CONFIG	       += warn_on release
+CONFIG         -= qtopia
+CONFIG	       -= qt
 HEADERS		= 
-SOURCES		= $(QTDIR)/src/3rdparty/freetype/builds/unix/ftsystem.c \
-		  $(QTDIR)/src/3rdparty/freetype/src/base/ftdebug.c \
+unix:SOURCES	= $(QTDIR)/src/3rdparty/freetype/builds/unix/ftsystem.c
+win32:SOURCES	= $(QTDIR)/src/3rdparty/freetype/src/base/ftsystem.c 
+SOURCES += 	  $(QTDIR)/src/3rdparty/freetype/src/base/ftdebug.c \
 		  $(QTDIR)/src/3rdparty/freetype/src/base/ftinit.c \
 		  $(QTDIR)/src/3rdparty/freetype/src/base/ftbase.c \
 		  $(QTDIR)/src/3rdparty/freetype/src/base/ftglyph.c \
@@ -24,5 +27,6 @@ SOURCES		= $(QTDIR)/src/3rdparty/freetype/builds/unix/ftsystem.c \
 TARGET		= freetype
 DESTDIR		= $(QPEDIR)/lib$(PROJMAK)
 INCLUDEPATH	+= $(QTDIR)/src/3rdparty/freetype/src $(QTDIR)/src/3rdparty/freetype/include $(QTDIR)/src/3rdparty/freetype/builds/unix
+
 VERSION		= 6.0.1
 

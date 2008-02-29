@@ -22,7 +22,7 @@
 
 
 #include <qlistview.h>
-#include <qpe/applnk.h>
+#include <qtopia/applnk.h>
 
     
 class PlayListSelectionData;
@@ -67,6 +67,7 @@ private:
     bool filtersMatch( const DocLnk& lnk );
     PlayListSelectionItem *newItem( const DocLnk& lnk );
     void deleteItem( PlayListSelectionItem *item );
+    bool sbVis;
 
     PlayListSelectionData *d;
 };

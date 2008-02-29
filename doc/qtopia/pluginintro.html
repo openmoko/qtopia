@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/doc/pluginintro.doc:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/doc/pluginintro.doc:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -96,7 +96,7 @@ public:
     virtual QWidget *widget( QWidget *parent );
     virtual QString name() const;
 
-    QRESULT queryInterface( const <a href="quuid.html">QUuid</a>&amp;, QUnknownInterface** );
+    QRESULT queryInterface( const QUuid&amp;, QUnknownInterface** );
     Q_REFCOUNT
 
 protected:
@@ -131,7 +131,7 @@ CirclePlugin::~CirclePlugin()
 <p> The queryInterface() function can be implemented using the
 following boilerplate code:
 <p> <pre>
-QRESULT CirclePlugin::queryInterface( const <a href="quuid.html">QUuid</a> &amp;uuid, QUnknownInterface **iface )
+QRESULT CirclePlugin::queryInterface( const QUuid &amp;uuid, QUnknownInterface **iface )
 {
     *iface = 0;
     if ( uuid == IID_QUnknown )

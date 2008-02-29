@@ -21,6 +21,7 @@
 #define __VOLUME_APPLET_H__
 
 
+#include <qtopia/qpeglobal.h>
 #include <qwidget.h>
 #include <qframe.h>
 #include <qpixmap.h>

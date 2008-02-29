@@ -34,7 +34,6 @@ public:
 public slots:
 
     void beam( const QString& filename, const QString& mimetype );
-    void beam( const QString& filename ) { beam( filename, QString::null ); }
     void cancel();
 
     void setReceivingEnabled( bool );

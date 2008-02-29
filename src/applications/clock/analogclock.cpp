@@ -27,6 +27,12 @@
 
 const double deg2rad = 0.017453292519943295769;	// pi/180
 
+AnalogClock::AnalogClock( QWidget *parent, const char *name )
+    : QFrame( parent, name ), clear(false)
+{
+    setMinimumSize(50,50);
+}
+
 QSizePolicy AnalogClock::sizePolicy() const
 {
     return QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
@@ -35,11 +41,16 @@ QSizePolicy AnalogClock::sizePolicy() const
 void AnalogClock::drawContents( QPainter *p )
 {
     QRect r = contentsRect();
+
+    if ( r.width() < r.height() ) {
+	r.setY( (r.height() - r.width())/2 );
+	r.setHeight( r.width() );
+    }
+
     QPoint center( r.x() + r.width() / 2, r.y() + r.height() / 2 );
 
     const int w_tick = r.width()/300+1;
     const int w_sec = r.width()/400+1;
-    const int w_min = r.width()/150+1;
     const int w_hour = r.width()/80+1;
 
     QPoint l1( r.x() + r.width() / 2, r.y() + 2 );

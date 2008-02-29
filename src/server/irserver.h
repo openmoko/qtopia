@@ -21,11 +21,12 @@
 #ifndef IRSERVER_H
 #define IRSERVER_H
 
+#include <qtopia/qpeglobal.h> 
 #include <qobject.h>
 
 class QCopChannel;
 class QLibrary;
-class ObexInterface;
+struct ObexInterface;
 
 class IrServer : public QObject
 {

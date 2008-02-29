@@ -20,7 +20,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-
+#include "config_rsync.h"
 
 #if defined(HAVE_STDINT_H)
 #  include <stdint.h>

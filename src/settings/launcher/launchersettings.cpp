@@ -20,13 +20,13 @@
 #include "launchersettings.h"
 #include "wallpaperselector.h"
 #include "colorselector.h"
-#include <qpe/qpeapplication.h>
-#include <qpe/resource.h>
-#include <qpe/applnk.h>
-#include <qpe/mimetype.h>
-#include <qpe/config.h>
-#include <qpe/qcopenvelope_qws.h>
-#include <qpe/fontdatabase.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/resource.h>
+#include <qtopia/applnk.h>
+#include <qtopia/mimetype.h>
+#include <qtopia/config.h>
+#include <qtopia/qcopenvelope_qws.h>
+#include <qtopia/fontdatabase.h>
 #include <qcombobox.h>
 #include <qbuttongroup.h>
 #include <qtabwidget.h>
@@ -150,8 +150,8 @@ void LauncherSettings::initialize()
     fontFamily->insertItem( tr("[ Default Font ]") );
     FontDatabase fd;
     QStringList f = fd.families();
-    for ( QStringList::ConstIterator it=f.begin(); it!=f.end(); ++it ) {
-	QString n = *it;
+    for ( QStringList::ConstIterator itConst=f.begin(); itConst!=f.end(); ++itConst ) {
+	QString n = *itConst;
 	n[0] = n[0].upper();
 	fontFamily->insertItem(n);
     }
@@ -169,9 +169,13 @@ void LauncherSettings::showTabSettings( const QString &id )
     colorButton->setDefaultColor( colorGroup().base() );
     if ( !ts.bgColor.isEmpty() )
 	colorButton->setColor( ts.bgColor );
+    else
+	colorButton->setColor( colorGroup().base() );
     textColorButton->setDefaultColor( colorGroup().text() );
     if ( !ts.textColor.isEmpty() )
 	textColorButton->setColor( ts.textColor );
+    else
+	textColorButton->setColor( colorGroup().text() );
     selectButton->setEnabled( ts.bgType == Image );
     colorButton->setEnabled( ts.bgType == SolidColor );
     if ( ts.customFont ) {

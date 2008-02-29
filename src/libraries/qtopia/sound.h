@@ -20,10 +20,12 @@
 #ifndef SOUND_H
 #define SOUND_H
 
+#include <qtopia/qpeglobal.h>
+
 class QString;
 class SoundData;
 
-class Sound {
+class QTOPIA_EXPORT Sound {
 public:
     Sound(const QString& name);
     ~Sound();

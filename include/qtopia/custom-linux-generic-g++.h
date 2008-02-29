@@ -1,0 +1,1 @@
+../../src/libraries/qtopia/custom-linux-generic-g++.h

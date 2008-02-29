@@ -19,7 +19,7 @@
 **********************************************************************/
 #include "batterystatus.h"
 
-#include <qpe/power.h>
+#include <qtopia/power.h>
 
 #include <qpainter.h>
 #include <qpushbutton.h> 
@@ -31,7 +31,6 @@ BatteryStatus::BatteryStatus( const PowerStatus *p, bool pop, QWidget *parent, W
 {
     setCaption( tr("Battery Status") );
     percent = ps->batteryPercentRemaining();
-    show();
 }
 
 BatteryStatus::~BatteryStatus()
@@ -51,19 +50,19 @@ void BatteryStatus::updatePercent( int pc )
 
 void BatteryStatus::drawSegment( QPainter *p, const QRect &r, const QColor &topgrad, const QColor &botgrad, const QColor &highlight, int hightlight_height )
 {
-    int h1, h2, s1, s2, v1, v2, ng = r.height(), hy = ng*30/100, hh = hightlight_height;
+    int j, h1, h2, s1, s2, v1, v2, ng = r.height(), hy = ng*30/100, hh = hightlight_height;
     topgrad.hsv( &h1, &s1, &v1 );
     botgrad.hsv( &h2, &s2, &v2 );
-    for ( int j = 0; j < hy-2; j++ ) {
+    for ( j = 0; j < hy-2; j++ ) {
 	p->setPen( QColor( h1 + ((h2-h1)*j)/(ng-1), s1 + ((s2-s1)*j)/(ng-1),
 		    v1 + ((v2-v1)*j)/(ng-1),  QColor::Hsv ) );
 	p->drawLine( r.x(), r.top()+hy-2-j, r.x()+r.width(), r.top()+hy-2-j );
     }
-    for ( int j = 0; j < hh; j++ ) {
+    for ( j = 0; j < hh; j++ ) {
 	p->setPen( highlight );
 	p->drawLine( r.x(), r.top()+hy-2+j, r.x()+r.width(), r.top()+hy-2+j );
     }
-    for ( int j = 0; j < ng-hy-hh; j++ ) {
+    for ( j = 0; j < ng-hy-hh; j++ ) {
 	p->setPen( QColor( h1 + ((h2-h1)*j)/(ng-1), s1 + ((s2-s1)*j)/(ng-1),
 		    v1 + ((v2-v1)*j)/(ng-1),  QColor::Hsv ) );
 	p->drawLine( r.x(), r.top()+hy+hh-2+j, r.x()+r.width(), r.top()+hy+hh-2+j );

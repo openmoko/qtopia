@@ -21,119 +21,114 @@
 #include <qfile.h>
 #include <qasciidict.h>
 #include "task.h"
-#include <qpe/config.h>
-#include <qpe/global.h>
-#include <qpe/stringutil.h>
+#include <qtopia/config.h>
+#include <qtopia/global.h>
+#include <qtopia/stringutil.h>
 #include <qfileinfo.h>
-#include <qpe/qcopenvelope_qws.h>
+#ifdef Q_WS_QWS
+#include <qtopia/qcopenvelope_qws.h>
+#endif
 #include <qapplication.h>
 #include <errno.h>
-#include <unistd.h>
 #include <sys/types.h>
 #include <stdlib.h>
 #include "todoxmlio_p.h"
+#include "task.h"
+#ifdef Q_OS_WIN32
+#include <process.h>
+#else
+#include <unistd.h>
+#endif
 
 SortedTasks::SortedTasks()
-    : SortedRecords<PimTask>(), so(Completed)
+    : SortedRecords<PimTask>()
 {}
 
 
 SortedTasks::SortedTasks(uint s)
-    : SortedRecords<PimTask>(s), so(Completed)
+    : SortedRecords<PimTask>(s)
 {}
 
 SortedTasks::~SortedTasks() {}
 
-int SortedTasks::compareItems(QCollection::Item d1, QCollection::Item d2) 
+int SortedTasks::compareItems(QCollection::Item d1, QCollection::Item d2)
 {
     PrTask *pt1 = (PrTask *)d1;
     PrTask *pt2 = (PrTask *)d2;
 
-    int p, d, t, c;
+    int result = 0;
+    if ( mKey != -1 )
+	result = compareTaskField( (PimTask::TaskFields) mKey, pt1, pt2);
+    if ( !result )
+	result = compareTaskField( PimTask::Completed, pt1, pt2);
+    if ( !result )
+	result = compareTaskField( PimTask::Priority, pt1, pt2);
+    if ( !result )
+	result = compareTaskField( PimTask::DueDateYear, pt1, pt2);
+    if ( !result )
+	result = compareTaskField( PimTask::Description, pt1, pt2);
 
-    p =  pt1->priority() - pt2->priority();
+    if ( mAscending )
+	result = -result;
 
-    if (pt1->hasDueDate() && pt2->hasDueDate()) 
-	d =  pt2->dueDate().daysTo(pt1->dueDate());
-    else if (pt1->hasDueDate())
-	d = -1;
-    else if (pt2->hasDueDate())
-	d = 1;
-    else
-	d = 0;
-  
-    t = QString::compare(pt1->description(), pt2->description());
+    return result;
+}
 
-    c = 0;
-    if (pt1->isCompleted())
-	c++;
-    if (pt2->isCompleted())
-	c--;
+int SortedTasks::compareTaskField(int key, PrTask *pt1, PrTask *pt2)
+{
+    switch (key) {
+	case PimTask::Completed:
+	    {
+		int c = 0;
+		if (pt1->isCompleted())
+		    c++;
+		if (pt2->isCompleted())
+		    c--;
 
-    switch (so) {
-	case Completed:
-	    if (c)
 		return c;
-	    break;
-	case Priority:
-	    if (p)
-		return p;
-	    break;
-	case DueDate:
-	    if (d)
-		return d;
-	    break;
-	case Description:
-	    if (t)
-		return t;
-	    break;
+	    }
+	case PimTask::Priority: return ( pt1->priority() - pt2->priority() );
+	case PimTask::DueDateYear:
+	    if (pt1->hasDueDate() && pt2->hasDueDate())
+		return ( pt2->dueDate().daysTo(pt1->dueDate()) );
+	    else if (pt1->hasDueDate())
+		return -1;
+	    else if (pt2->hasDueDate())
+		return 1;
+
+	    return 0;
+	case PimTask::Description: return QString::compare(pt1->description().lower(), pt2->description().lower());
+	case -1:
+	default: return 0;
     }
-
-    // default order;
-    if (c)
-	return c;
-    if (p)
-	return p;
-    if (d)
-	return d;
-    return t;
 }
 
-
-void SortedTasks::setSortOrder(SortOrder s)
+TodoXmlIO::TodoXmlIO(AccessMode m,
+		     const QString &file,
+		     const QString &journal ) :
+    TaskIO(m),
+    PimXmlIO(PimTask::keyToIdentifierMap(), PimTask::identifierToKeyMap() ),
+    cFilter(-2), cCompFilter(FALSE), needsSave(FALSE)
 {
-    so = s;
-    setDirty();
-}
+    if ( file != QString::null )
+	setDataFilename( file );
+    else setDataFilename( Global::applicationFileName( "todolist", "todolist.xml" ) );
+    if ( journal != QString::null )
+	setJournalFilename( journal );
+    else setJournalFilename( Global::journalFileName( ".todojournal" ) );
 
-SortedTasks::SortOrder SortedTasks::sortOrder() const
-{
-    return so;
-}
-
-TodoXmlIO::TodoXmlIO(AccessMode m) : TaskIO(m), cFilter(-2), cCompFilter(FALSE), dict(10), needsSave(FALSE)
-{
     m_Tasks.setAutoDelete(TRUE);
 
-    dict.setAutoDelete( TRUE );
-    dict.insert( "Completed", new int(FCompleted) );
-    dict.insert( "HasDate", new int(FHasDate) );
-    dict.insert( "Priority", new int(FPriority) );
-    dict.insert( "Categories", new int(FCategories) );
-    dict.insert( "Description", new int(FDescription) );
-    dict.insert( "DateYear", new int(FDateYear) );
-    dict.insert( "DateMonth", new int(FDateMonth) );
-    dict.insert( "DateDay", new int(FDateDay) );
-    dict.insert( "Uid", new int(FUid) );
-
-    ensureDataCurrent();
+    loadData();
 
     if (m == ReadOnly) {
+#ifndef QT_NO_COP
 	QCopChannel *channel = new QCopChannel( "QPE/PIM",  this );
 
 	connect( channel, SIGNAL(received(const QCString&, const QByteArray&)),
 		this, SLOT(pimMessage(const QCString&, const QByteArray&)) );
 
+#endif
     }
 }
 
@@ -170,77 +165,13 @@ void TodoXmlIO::pimMessage(const QCString &message, const QByteArray &data)
     }
 }
 
-void TodoXmlIO::assignField(PimRecord *rec, const QCString &attr, const QString &value)
+TodoXmlIO::~TodoXmlIO()
 {
-    static int dtY = 0;
-    static int dtM = 0;
-    static int dtD = 0;
-    static PimRecord *prevrec = 0;
-
-    if (rec != prevrec) {
-	dtY = 0;
-	dtM = 0;
-	dtD = 0;
-	prevrec = rec;
-    }
-
-    PrTask *todo = (PrTask *)rec;
-
-    int *lookup = dict[ attr.data() ];
-    if ( !lookup ) {
-	todo->setCustomField(attr, value);
-	return;
-    }
-
-    switch( *lookup ) {
-	case FCompleted:
-	    todo->setCompleted( value.toInt() );
-	    break;
-	case FHasDate:
-	    // leave...
-	    // currently default is no due date, setting true is
-	    // done by actually getting a due date.
-	    //hasDueDate = value.toInt();
-	    break;
-	case FPriority:
-	    todo->setPriority( value.toInt() );
-	    break;
-	case FCategories:
-	    todo->setCategories( idsFromString( value ) );
-	    break;
-	case FDescription:
-	    todo->setDescription( value );
-	    break;
-	case FDateYear:
-	    dtY = value.toInt();
-	    break;
-	case FDateMonth:
-	    dtM = value.toInt();
-	    break;
-	case FDateDay:
-	    dtD = value.toInt();
-	    break;
-	case FUid:
-	    setUid(*todo, uuidFromInt(value.toInt()));
-	    break;
-	default:
-	    qDebug( "TodoXmlIO::assignField(): Missing attribute: %s", attr.data() );
-	    break;
-    }
-
-    if ( dtY != 0 && dtM != 0 && dtD != 0 ) {
-	todo->setDueDate( QDate( dtY, dtM, dtD) );
-    }
-}
-
-
-TodoXmlIO::~TodoXmlIO() 
-{
-    if (accessMode() == ReadWrite)
+    if (accessMode() != ReadOnly )
 	saveData();
 }
 
-bool TodoXmlIO::internalAddRecord(PimRecord *r) 
+bool TodoXmlIO::internalAddRecord(PimRecord *r)
 {
     PrTask *todo = (PrTask *)r;
     m_Tasks.append( todo );
@@ -301,7 +232,7 @@ TaskIteratorMachine *TodoXmlIO::begin() const
  */
 QList<PrTask>& TodoXmlIO::tasks() {
   ensureDataCurrent();
-  return m_Tasks;    
+  return m_Tasks;
 }
 
 /**
@@ -310,18 +241,18 @@ QList<PrTask>& TodoXmlIO::tasks() {
  */
 const SortedTasks& TodoXmlIO::sortedTasks() {
   ensureDataCurrent();
-  return m_Filtered;    
+  return m_Filtered;
 }
 
 /**
  * Saves the current task data.  Returns true if
  * successful.
  */
-bool TodoXmlIO::saveData() 
+bool TodoXmlIO::saveData()
 {
     if (!needsSave)
 	return TRUE;
-    if (accessMode() == ReadWrite) {
+    if (accessMode() != ReadOnly) {
 	if (PimXmlIO::saveData((QList<PimRecord> &)m_Tasks)) {
 	    needsSave = FALSE;
 	    return TRUE;
@@ -334,60 +265,52 @@ bool TodoXmlIO::loadData()
 {
     if (PimXmlIO::loadData()) {
 	m_Filtered.sort();
+	emit tasksUpdated();
 	return TRUE;
     }
     return FALSE;
 }
 
-QString TodoXmlIO::recordToXml(const PimRecord *rec) 
+
+QString TodoXmlIO::recordToXml(const PimRecord *p)
 {
-    const PrTask *task = (const PrTask *)rec;
+    const PrTask *e = (const PrTask *)p;
 
-    QString buf;
+    QMap<int,QString> data = p->fields();
 
-    buf += "Completed=\"";
-    buf += QString::number( (int)task->isCompleted() );
-    buf += "\"";
-    buf += " HasDate=\"";
-    buf += QString::number( (int)task->hasDueDate() );
-    buf += "\"";
-    buf += " Priority=\"";
-    buf += QString::number( (int)task->priority() );
-    buf += "\"";
-    buf += " Categories=\"";
-    buf += idsToString( task->categories() );
-    buf += "\"";
-    buf += " Description=\"";
-    buf += Qtopia::escapeString( task->description() );
-    buf += "\"";
-    if ( task->hasDueDate() ) {
-	QDate mDDate = task->dueDate();
-	buf += " DateYear=\"";
-	buf += QString::number( mDDate.year() );
-	buf += "\"";
-	buf += " DateMonth=\"";
-	buf += QString::number( mDDate.month() );
-	buf += "\"";
-	buf += " DateDay=\"";
-	buf += QString::number( mDDate.day() );
-	buf += "\"";
+    bool hasDueDate = e->hasDueDate();
+
+    const QMap<int,QCString> keyToIdentifier = PimTask::keyToIdentifierMap();
+    QString out;
+    for ( QMap<int, QString>::ConstIterator fit = data.begin();
+	    fit != data.end(); ++fit ) {
+
+	int key = fit.key();
+	if ( !hasDueDate ) {
+	    if ( key == PimTask::DueDateYear || key == PimTask::DueDateMonth || key == PimTask::DueDateDay )
+		continue;
+	}
+
+	const QString &value = fit.data();
+	if ( !value.isEmpty() ) {
+	    out += keyToIdentifier[key];
+	    out += "=\"" + Qtopia::escapeString(value) + "\" ";
+	}
     }
-    buf += " Uid=\"";
-    buf += QString::number( uuidToInt(task->uid()) );
-    // terminate it in the application...
-    buf += "\"";
 
-    buf += customToXml(task);
-    return buf;
+    out += customToXml( p );
+
+    return out;
 }
-  
-void TodoXmlIO::addTask(const PimTask &task)
+
+void TodoXmlIO::addTask(const PimTask &task, bool assignUid )
 {
-    if (accessMode() != ReadWrite)
+    if (accessMode() == ReadOnly)
 	return;
 
     PrTask *tsk = new PrTask((const PrTask &)task);
-    assignNewUid(tsk);
+    if ( assignUid || tsk->uid().isNull() )
+	assignNewUid(tsk);
     if (internalAddRecord(tsk)) {
 	needsSave = TRUE;
 	m_Filtered.sort();
@@ -395,16 +318,18 @@ void TodoXmlIO::addTask(const PimTask &task)
 	updateJournal(*tsk, ACTION_ADD);
 
 	{
-	    QCopEnvelope e("QPE/PIM", "addedTask(int,PimTask)"); 
+#ifndef QT_NO_COP
+	    QCopEnvelope e("QPE/PIM", "addedTask(int,PimTask)");
 	    e << getpid();
 	    e << *tsk;
+#endif
 	}
     }
 }
 
 void TodoXmlIO::removeTask(const PimTask &task)
 {
-    if (accessMode() != ReadWrite)
+    if (accessMode() == ReadOnly)
 	return;
 
     PrTask *tsk = new PrTask((const PrTask &)task);
@@ -415,16 +340,18 @@ void TodoXmlIO::removeTask(const PimTask &task)
 	updateJournal(task, ACTION_REMOVE);
 
 	{
-	    QCopEnvelope e("QPE/PIM", "removedTask(int,PimTask)"); 
+#ifndef QT_NO_COP
+	    QCopEnvelope e("QPE/PIM", "removedTask(int,PimTask)");
 	    e << getpid();
 	    e << task;
+#endif
 	}
     }
 }
 
 void TodoXmlIO::updateTask(const PimTask &task)
 {
-    if (accessMode() != ReadWrite)
+    if (accessMode() == ReadOnly)
 	return;
 
     PrTask *tsk = new PrTask((const PrTask &)task);
@@ -435,32 +362,23 @@ void TodoXmlIO::updateTask(const PimTask &task)
 	updateJournal(task, ACTION_REPLACE);
 
 	{
-	    QCopEnvelope e("QPE/PIM", "updatedTask(int,PimTask)"); 
+#ifndef QT_NO_COP
+	    QCopEnvelope e("QPE/PIM", "updatedTask(int,PimTask)");
 	    e << getpid();
 	    e << task;
+#endif
 	}
     }
 }
 
-void TodoXmlIO::ensureDataCurrent(bool forceReload) {
-  if (isDataCurrent() && !forceReload)
-    return;
-  
-  m_Tasks.clear();
-  m_Filtered.clear();
-  loadData();
-}
+void TodoXmlIO::ensureDataCurrent(bool forceReload)
+{
+    if (accessMode() == WriteOnly || ( isDataCurrent() && !forceReload) )
+	return;
 
-const QString TodoXmlIO::dataFilename() const {
-  QString filename = Global::applicationFileName("todolist",
-						 "todolist.xml");
-  return filename;
-}
-
-const QString TodoXmlIO::journalFilename() const {
-  QString str = getenv("HOME");
-  str +="/.todojournal";
-  return str;
+    m_Tasks.clear();
+    m_Filtered.clear();
+    loadData();
 }
 
 const char *TodoXmlIO::recordStart() const
@@ -507,7 +425,7 @@ int TodoXmlIO::filter() const
     return cFilter;
 }
 
-void TodoXmlIO::setFilter(int f) 
+void TodoXmlIO::setFilter(int f)
 {
     if (f != cFilter) {
 	cFilter = f;
@@ -527,7 +445,7 @@ bool TodoXmlIO::completedFilter() const
     return cCompFilter;
 }
 
-void TodoXmlIO::setCompletedFilter(bool f) 
+void TodoXmlIO::setCompletedFilter(bool f)
 {
     if (f != cCompFilter) {
 	cCompFilter = f;
@@ -542,15 +460,20 @@ void TodoXmlIO::setCompletedFilter(bool f)
     }
 }
 
-SortedTasks::SortOrder TodoXmlIO::sortOrder() const
+int TodoXmlIO::sortKey() const
 {
-    return m_Filtered.sortOrder();
+    return m_Filtered.sortKey();
 }
 
-void TodoXmlIO::setSortOrder( SortedTasks::SortOrder so )
+bool TodoXmlIO::sortAcending() const
 {
-    if (so != m_Filtered.sortOrder() ) {
-	m_Filtered.setSortOrder(so);
+    return m_Filtered.ascending();
+}
+
+void TodoXmlIO::setSorting(int key, bool ascending)
+{
+    if (key != m_Filtered.sortKey() || ascending != m_Filtered.ascending() ) {
+	m_Filtered.setSorting( key, ascending );
 	m_Filtered.sort();
     }
 }

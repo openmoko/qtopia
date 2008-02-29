@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/include/qtopia/fileselector.h:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/include/qtopia/fileselector.h:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -50,6 +50,7 @@ body { background: #ffffff; color: black; }
 #ifndef FILESELECTOR_H
 #define FILESELECTOR_H
 
+#include &lt;qtopia/qpeglobal.h&gt;
 #include &lt;qhbox.h&gt;
 #include &lt;qvbox.h&gt;
 #include &lt;qtoolbutton.h&gt;
@@ -62,7 +63,7 @@ class QPopupMenu;
 class QPushButton;
 class FileSelectorView;
 
-class FileSelectorItem : public QListViewItem
+class QTOPIA_EXPORT FileSelectorItem : public QListViewItem
 {
 public:
     FileSelectorItem( QListView *parent, const DocLnk&amp; f );
@@ -75,7 +76,7 @@ private:
 };
 
 class FileSelectorPrivate;
-class FileSelector : public QVBox
+class QTOPIA_EXPORT FileSelector : public QVBox
 {
     Q_OBJECT
 
@@ -84,39 +85,23 @@ public:
     ~FileSelector();
     void setNewVisible( bool b );
     void setCloseVisible( bool b );
-    void reread();
     int fileCount();
-    DocLnk selectedDocument() const
-    {
-	const DocLnk* rp = ((FileSelector*)this)-&gt;selected();
-	if (!rp) {
-	    DocLnk r;
-	    return r;
-	}
-	DocLnk r(*rp);
-	delete rp;
-	return r;
-    }
+    DocLnk selectedDocument() const;	    // libqtopia
+    QValueList&lt;DocLnk&gt; fileList() const;    // libqtopia
     const DocLnk *selected(); // use selectedDocument() instead
 
-    QValueList&lt;DocLnk&gt; fileList() const
-    {
-	((FileSelector*)this)-&gt;fileCount(); // ensure all loaded when this is extended
-
-	QValueList&lt;DocLnk&gt; list;
-	FileSelectorItem *item = (FileSelectorItem *)((QListView*)view)-&gt;firstChild();
-	while (item) {
-	    list.append(item-&gt;file());
-	    item = (FileSelectorItem *)item-&gt;nextSibling();
-	}
-
-	return list;
-    }
+public slots:
+    void reread();
 
 signals:
     void fileSelected( const DocLnk &amp; );
     void newSelected( const DocLnk &amp; );
     void closeMe();
+    void typeChanged(void);
+    void categoryChanged(void);
+
+protected:
+    void showEvent( QShowEvent * );
 
 private slots:
     void createNew();
@@ -127,6 +112,7 @@ private slots:
     void typeSelected( const QString &amp;type );
     void catSelected( int );
     void cardChanged();
+    void linkChanged( const QString &amp; );
 
 private:
     void updateView();

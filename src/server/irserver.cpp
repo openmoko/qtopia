@@ -21,8 +21,8 @@
 
 #include "irserver.h"
 
-#include <qpe/qlibrary.h>
-#include <qpe/qpeapplication.h>
+#include <qtopia/qlibrary.h>
+#include <qtopia/qpeapplication.h>
 
 #include <qtranslator.h>
 #include <stdlib.h>
@@ -34,8 +34,12 @@
 IrServer::IrServer( QObject *parent, const char *name )
   : QObject( parent, name ), lib(0), obexIface(0)
 {
-    QString path = QPEApplication::qpeDir() + "/plugins/obex/";
+    QString path = QPEApplication::qpeDir() + "plugins/obex/";
+#ifndef Q_OS_WIN32
     QDir dir( path, "lib*.so" );
+#else
+    QDir dir( path, "*.dll");
+#endif
     QStringList list = dir.entryList();
     QStringList::Iterator it;
     for ( it = list.begin(); it != list.end(); ++it ) {
@@ -48,7 +52,7 @@ IrServer::IrServer( QObject *parent, const char *name )
 	    QString lang = getenv( "LANG" );
 	    QTranslator * trans = new QTranslator(qApp);
 	    QString type = (*it).left( (*it).find(".") );
-	    QString tfn = QPEApplication::qpeDir()+"/i18n/"+lang+"/"+type+".qm";
+	    QString tfn = QPEApplication::qpeDir()+"i18n/"+lang+"/"+type+".qm";
 	    qDebug("tr for obex: %s", tfn.latin1() );
 	    if ( trans->load( tfn ))
 		qApp->installTranslator( trans );

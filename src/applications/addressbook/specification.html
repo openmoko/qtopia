@@ -1,0 +1,214 @@
+<html>
+<title>
+Address Book Specification
+</title>
+
+<body>
+
+<h1>Address Book Specification</h1>
+
+
+<!--
+<h2>Specification goals</h2>
+This specification:
+<ol>
+<li> Describes all of the end-user stories and interactions.
+    (eg. the user can view a slide show of images from a digital camera).
+<li> Lists all features, derived from end-user stories,
+    in enough detail to allow the definition of
+    tests for all features.
+<li> Defines contraints and limitations on the application.
+    (eg. can view image sizes as large as 1MB).
+<li>Aides the developer on focusing on the most important aspects of
+    the application and ensuring all important elements are completed.
+</ol>
+-->
+
+<a name=description>
+</a>
+<!-- A one-line description of what this application is and does.
+    This description is then duplicated in the .desktop Comment and
+    the .control file description.
+
+    (eg. The image viewer allows viewing and very minor editing of image files.)
+-->
+An address book for storing, using and transfering contact information.
+<!-- A one-paragraph description of what this application is and does.
+    This description is then duplicated in the .desktop Comment and
+    the .control file description.
+
+    (eg. The image viewer allows viewing and very minor editing
+    of image files. It assists format conversion, beaming logos
+    to phones, captioning, etc.)
+-->
+<p>
+The contacts application or address book allows the user to create
+contacts for storing information such as name, phone numbers,
+addresses and other personal information. It is optimized for quick
+lookup by using find and categories. The address book is also
+integrated with other applictions such as the default email
+application. Beaming any contact to other mobile devices is also
+supported.
+</p>
+
+<p>
+Status: BT
+</p>
+
+<a name=usecases>
+<h2>Use Cases</h2>
+</a>
+<!-- Describe real-world stories. Implicit in these use cases is
+	"these things are easy to do".
+    (eg.
+	Roving News Reporter
+
+	The journalist/cameraman takes photos with a digital camera,
+	loads them into the PDAs via CF card, adjusts the contrast,
+	blacks-out a license plate, adds a copyright caption, and
+	emails the image and short story to Reuters.
+    )
+
+    Note: TITLEs may be used as identifiers in bug reports.
+ -->
+<ul>
+<li><b>Meeting attendees</b> 
+	<p>A business women goes to a meeting and needs to record
+	  the contact information of the meeting attendents. For
+	  previously unknown attendees, she stores their names,
+	  email addresses, company and primary contact phone number.
+	  She associates all attendees with a record of the meeting.
+	  Later, she produces a report about the meeting, including
+	  the list of attendees.
+<li><b>Party invitations</b>
+	<p>A cool guy decides to have a party. He opens his
+	address book and looks up all his friends to give them a call.
+<li><b>Exchanging business cards</b>
+	<p>While at a conference, a marketing guy meets a new contact.
+	After each presses a button on their device,
+	they have each other's business cards.
+	The marketing guy, later edits the details of the business cards
+	he has received.
+<li><b>Receiving multiple business cards</b>
+	<p>At a meeting between three companies, single representatives from
+	each company transmit the business cards of their colleagues
+	to each other.
+<li><b>Running late to work</b>
+	<p>The 8am train is delayed by 20 minutes.
+	A business man passenger pulls out his device, reschedules his 8:15
+	meeting, and notifies the other attendees.
+<li><b>Little black book</b>
+	<p>A bachelor meets a woman while at a bar. He records some details
+	in his device. When he wakes late the next day,
+	he decides to call her, but he can barely
+	remember her name.  He finds her in his address book and
+	makes an appointment to call her in two weeks.
+</ul>
+
+<a name=features>
+<h2>Features</h2>
+</a>
+<!-- features are brief
+
+    (eg. 
+	* Slide show: view multiple images in sequence
+	    * Configurable delay between images.
+	    * Hardware-button-controlled stepping between images.
+	* Big images: view larger-than-available-RAM images in some formats.
+	* Formats: view JPEG, PNG, GIF format images.
+	* Scribbling: draw black or white lines on images.
+	* Save: in JPEG, PNG formats.
+    )
+
+    Note: TITLEs may be used as identifiers in bug reports.
+-->
+
+<ul>
+<li>Add contact: contacts can be added with the following fields
+	<ul> 
+	  <li>First Name
+	  <li>Last Name
+	  <li>Pronounciation
+	  <li>Categories
+	  <li>Middle Name
+	  <li>Suffix
+	  <li>Job Title
+	  <li>Department
+	  <li>Company
+	  <li>Business Phone
+	  <li>Business Fax
+	  <li>Home Mobile
+	  <li>Business Street
+	  <li>Business City
+	  <li>Business Zipcode
+	  <li>Business Country
+	  <li>Business Pager
+	  <li>Business web page
+	  <li>Office
+	  <li>Profession
+	  <li>Assistant
+	  <li>Manager
+	  <li>Home Street
+	  <li>Home City
+	  <li>Home State
+	  <li>Home Zip
+	  <li>Home Country
+	  <li>Home web page
+	  <li>Spouse
+	  <li>Birthday
+	  <li>Anniversary
+	  <li>Nickname
+	  <li>Children
+	  <li>Gender
+	</ul>
+<li>Receiving a beamed contact: A contact can be received from another device
+that is sent using the protocal that Palm OS uses.
+<li>Emailing a contact: A contact with a valid email address can be
+emailed by launching the default email application with the contact's
+name (from "File As") and email address in the To field.
+<li>Deleting a contact: A contact can be deleted.
+The user verifies deletion of any contact.
+<li>Finding a contact: A find field is shown without blocking the rest
+of the user interface. The find algorithm looks for any occurence of
+the search string in any field of each contact. Clicking the next
+button will highlight the next contact found.
+<li>Categories: There are displays showing:
+	<ul> 
+	  <li> all contacts (default)
+	  <li> contacts filtered by a selected category
+	  <li> contacts not in any category
+	</ul>
+<li>Beaming: A contact can be beamed to another device using
+IR. All data stored in the contact is transfered.
+<li>Multiple Beaming: All contacts in a category display can be beamed
+as a single transfer.
+<li>Duplication: A contact can be duplicated to a new contact that has
+the same contents.
+</ul>
+
+<a name=prerequisites>
+<h2>Prerequisites</h2>
+</a>
+<!--
+    Describes unresolved limitations that cannot
+    be shown within the features list.
+
+    Describes memory and other requirements quantitatively.
+
+    This is a short list, mainly intended as a "known bugs"
+    list for missing features.
+
+    (eg.
+	* Stylus: required for Scribbling.
+	* Memory: requires 250 bytes per event, plus content strings.
+    )
+
+    Note: TITLEs may be used as identifiers in bug reports.
+-->
+
+<ul>
+<li>None.
+</ul>
+
+</body>
+</html>

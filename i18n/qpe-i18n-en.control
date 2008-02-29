@@ -2,7 +2,6 @@ Files: i18n/en/.directory etc/dict/dawg
 Priority: optional
 Section: qpe/i18n
 Maintainer: Trolltech (www.trolltech.com)
-Version: $QPE_VERSION-7
-Depends: qpe-base ($QPE_VERSION)
+Version: $QPE_VERSION-9
 Description: i18n: English
  English dictionary for Qtopia environment.

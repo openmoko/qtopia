@@ -19,6 +19,9 @@
 **********************************************************************/
 #include <qcanvas.h> 
 
+#ifndef SNAKEBORDER
+#define SNAKEBORDER
+
 class Border: public QCanvasSprite
 {
 public:
@@ -30,3 +33,5 @@ public:
     void newBorder(borderSide s);
     int rtti() const;
 };
+
+#endif

@@ -23,13 +23,13 @@
 #include "engine.h"
 
 // Maths libraries
-#include <qpe/qmath.h>
+#include <qtopia/qmath.h>
 #include <math.h>
 
-// Automatic type casting
+// Base class automatic type casting
 BaseDoubleInstructionDescription::BaseDoubleInstructionDescription()
     :InstructionDescription() {
-    typeOne = typeTwo = "DOUBLE";
+    typeOne = typeTwo = type = "DOUBLE";
 }
 Data *BaseDoubleInstruction::eval(Data *d) {
     doubleNum = (DoubleData *)num;
@@ -37,15 +37,28 @@ Data *BaseDoubleInstruction::eval(Data *d) {
     return ret;
 }
 
-// Conversion functions
-Data * iConvertDoubleDouble::eval(Data *d) {
+// Factory
+Data * iDoubleFactory::eval(Data * /* d */) {
     DoubleData *ret = new DoubleData();
-    ret->set(((DoubleData *)d)->get());
+    ret->clear();
     return ret;
 }
-ConvertDoubleDouble::ConvertDoubleDouble():BaseDoubleInstructionDescription() {
-    instructionName = "CONVERT";
+DoubleFactory::DoubleFactory():BaseDoubleInstructionDescription() {
+    instructionName = "Factory";
 };
+
+// Copy
+Data *iDoubleCopy::eval(Data *d) {
+    DoubleData *ret = new DoubleData();
+    ret->clear();
+    ret->set(((DoubleData *)d)->get());
+    return ret;
+};
+DoubleCopy::DoubleCopy():BaseDoubleInstructionDescription() {
+    instructionName = "Copy";
+};
+
+#ifdef TYPE_CONVERSION
 Data * iConvertIntDouble::eval(Data *d) {
     DoubleData *ret = new DoubleData();;
     IntegerData *i = (IntegerData *)d;
@@ -53,7 +66,7 @@ Data * iConvertIntDouble::eval(Data *d) {
     return ret;
 }
 ConvertIntDouble::ConvertIntDouble():InstructionDescription() {
-    instructionName = "CONVERT";
+    instructionName = "Convert";
     typeOne = "INT";
     typeTwo = "DOUBLE";
 }
@@ -61,8 +74,7 @@ Data * iConvertFractionDouble::eval(Data *d) {
     DoubleData *ret = new DoubleData();
     FractionData *f = (FractionData *)d;
     if (!f->getDenominator()) {
-	Engine i;
-	i.setError(eDivZero);
+	systemEngine->setError(eDivZero);
 	ret->set(0);
     } else {
 	double num = f->getNumerator();
@@ -73,14 +85,16 @@ Data * iConvertFractionDouble::eval(Data *d) {
     return ret;
 }
 ConvertFractionDouble::ConvertFractionDouble():InstructionDescription() {
-    instructionName = "CONVERT";
+    instructionName = "Convert";
     typeOne = "FRACTION";
     typeTwo = "DOUBLE";
 }
-
+#endif
 // Mathematical functions
 Data * iAddDoubleDouble::doEval(DoubleData *d) {
+//qDebug("%d + %d", doubleNum->get(),d->get());
     d->set(doubleNum->get() + d->get());
+//qDebug("= %d",d->get());
     return d;
 }
 Data * iSubtractDoubleDouble::doEval(DoubleData *d) {
@@ -99,6 +113,11 @@ Data * iDoublePow::doEval(DoubleData *d) {
     d->set( pow(doubleNum->get(),d->get()) );
     return d;
 }
+DoubleXRootY::DoubleXRootY():BaseDoubleInstructionDescription() {
+    instructionName = "X root y";
+    precedence = 20;
+}
+
 
 // Immediate
 Data * iDoubleSin::doEval(DoubleData *d) {
@@ -143,14 +162,11 @@ Data * iDoubleOneOverX::doEval(DoubleData *d) {
 }
 Data * iDoubleFactorial::doEval(DoubleData *d) {
     if (d->get() < 0) {
-	Engine i;
-	i.setError(eNonPositive);
+	systemEngine->setError(eNonPositive);
     } else if ( d->get() > 180 ) {
-	Engine i;
-	i.setError(eOutOfRange);
+	systemEngine->setError(eOutOfRange);
     } else if ( d->get() != int(d->get()) ) {
-	Engine i;
-	i.setError(eNonInteger);
+	systemEngine->setError(eNonInteger);
     } else {
 	int count = (int)d->get();
 	d->set(1);
@@ -166,7 +182,11 @@ Data * iDoubleSquareRoot::doEval(DoubleData *d) {
     return d;
 }
 Data * iDoubleCubeRoot::doEval(DoubleData *d) {
+#ifndef Q_OS_WIN32
     d->set( cbrt(d->get()) );
+#else
+    qDebug("Cubic root not available for WIN32");
+#endif
     return d;
 }
 Data * iDoubleXRootY::doEval(DoubleData *d) {
@@ -185,72 +205,97 @@ Data * iDoubleNegate::doEval(DoubleData *d) {
 }
 
 AddDoubleDouble::AddDoubleDouble():BaseDoubleInstructionDescription() {
-    instructionName = "ADD";
+    instructionName = "Add";
     precedence = 10;
 }
 SubtractDoubleDouble::SubtractDoubleDouble():BaseDoubleInstructionDescription() {
-    instructionName = "SUBTRACT";
+    instructionName = "Subtract";
     precedence = 10;
 }
 MultiplyDoubleDouble::MultiplyDoubleDouble():BaseDoubleInstructionDescription() {
-    instructionName = "MULTIPLY";
+    instructionName = "Multiply";
     precedence = 15;
 }
 DivideDoubleDouble::DivideDoubleDouble():BaseDoubleInstructionDescription() {
-    instructionName = "DIVIDE";
+    instructionName = "Divide";
     precedence = 15;
 }
 DoublePow::DoublePow():BaseDoubleInstructionDescription() {
-    instructionName = "POW";
+    instructionName = "Pow";
     precedence = 20;
 }
 DoubleSin::DoubleSin():BaseDoubleInstructionDescription() {
-    instructionName = "SIN";
+    precedence = 0;
+    argCount = 1;
+    instructionName = "Sin";
 }
 DoubleCos::DoubleCos():BaseDoubleInstructionDescription() {
-    instructionName = "COS";
+    precedence = 0;
+    argCount = 1;
+    instructionName = "Cos";
 }
 DoubleTan::DoubleTan():BaseDoubleInstructionDescription() {
-    instructionName = "TAN";
+    precedence = 0;
+    argCount = 1;
+    instructionName = "Tan";
 }
 DoubleASin::DoubleASin():BaseDoubleInstructionDescription() {
-    instructionName = "ASIN";
+    precedence = 0;
+    argCount = 1;
+    instructionName = "aSin";
 }
 DoubleACos::DoubleACos():BaseDoubleInstructionDescription() {
-    instructionName = "ACOS";
+    precedence = 0;
+    argCount = 1;
+    instructionName = "aCos";
 }
 DoubleATan::DoubleATan():BaseDoubleInstructionDescription() {
-    instructionName = "ATAN";
+    precedence = 0;
+    argCount = 1;
+    instructionName = "aTan";
 }
 DoubleLog::DoubleLog():BaseDoubleInstructionDescription() {
-    instructionName = "LOG";
+    precedence = 0;
+    argCount = 1;
+    instructionName = "Log";
 }
 DoubleLn::DoubleLn():BaseDoubleInstructionDescription() {
-    instructionName = "LN";
+    precedence = 0;
+    argCount = 1;
+    instructionName = "Ln";
 }
 DoubleExp::DoubleExp():BaseDoubleInstructionDescription() {
-    instructionName = "EXP";
+    precedence = 0;
+    argCount = 1;
+    instructionName = "Exp";
 }
 DoubleOneOverX::DoubleOneOverX():BaseDoubleInstructionDescription() {
-    instructionName = "ONEOVERX";
+    precedence = 0;
+    argCount = 1;
+    instructionName = "One over x";
 }
 DoubleFactorial::DoubleFactorial():BaseDoubleInstructionDescription() {
-    instructionName = "XFACTORIAL";
+    precedence = 0;
+    argCount = 1;
+    instructionName = "Factorial";
 }
 DoubleSquareRoot::DoubleSquareRoot():BaseDoubleInstructionDescription() {
-    instructionName = "SQUAREROOT";
+    precedence = 0;
+    argCount = 1;
+    instructionName = "Square root";
 }
 DoubleCubeRoot::DoubleCubeRoot():BaseDoubleInstructionDescription() {
-    instructionName = "CUBEROOT";
+    precedence = 0;
+    argCount = 1;
+    instructionName = "Cube root";
 }
-DoubleXRootY::DoubleXRootY():BaseDoubleInstructionDescription() {
-    instructionName = "XROOTY";
-    precedence = 20;
-}
-
 DoubleSquare::DoubleSquare():BaseDoubleInstructionDescription() {
-    instructionName = "SQUARE";
+    precedence = 0;
+    argCount = 1;
+    instructionName = "Square";
 }
 DoubleNegate::DoubleNegate():BaseDoubleInstructionDescription() {
-    instructionName = "NEGATE";
+    precedence = 0;
+    argCount = 1;
+    instructionName = "Negate";
 }

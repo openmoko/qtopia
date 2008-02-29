@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -133,16 +139,16 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 HEADERS =	soundsettings.h
 SOURCES =	soundsettings.cpp \
 		main.cpp
-OBJECTS =	soundsettings.o \
-		main.o \
-		soundsettingsbase.o
+OBJECTS =	$(OBJECTS_DIR)/soundsettings.o \
+		$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/soundsettingsbase.o
 INTERFACES =    soundsettingsbase.ui
 UICDECLS =      soundsettingsbase.h
 UICIMPLS =      soundsettingsbase.cpp
-SRCMOC	=	moc_soundsettings.cpp \
-		moc_soundsettingsbase.cpp
-OBJMOC	=	moc_soundsettings.o \
-		moc_soundsettingsbase.o
+SRCMOC	=	$(MOC_DIR)/moc_soundsettings.cpp \
+		$(MOC_DIR)/moc_soundsettingsbase.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_soundsettings.o \
+		$(OBJECTS_DIR)/moc_soundsettingsbase.o
 
 
 ####### Implicit rules
@@ -208,17 +214,15 @@ REQUIRES=
 
 ####### Compile
 
-soundsettings.o: soundsettings.cpp \
+$(OBJECTS_DIR)/soundsettings.o: soundsettings.cpp \
 		soundsettings.h \
-		soundsettingsbase.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h
+		soundsettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/soundsettings.o soundsettings.cpp
 
-main.o: main.cpp \
+$(OBJECTS_DIR)/main.o: main.cpp \
 		soundsettings.h \
-		soundsettingsbase.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
+		soundsettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
 soundsettingsbase.h: soundsettingsbase.ui
 	$(UIC) soundsettingsbase.ui -o $(INTERFACE_DECL_PATH)/soundsettingsbase.h
@@ -226,30 +230,34 @@ soundsettingsbase.h: soundsettingsbase.ui
 soundsettingsbase.cpp: soundsettingsbase.ui
 	$(UIC) soundsettingsbase.ui -i soundsettingsbase.h -o soundsettingsbase.cpp
 
-soundsettingsbase.o: soundsettingsbase.cpp \
+$(OBJECTS_DIR)/soundsettingsbase.o: soundsettingsbase.cpp \
 		soundsettingsbase.h \
 		soundsettingsbase.ui
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/soundsettingsbase.o soundsettingsbase.cpp
 
-moc_soundsettings.o: moc_soundsettings.cpp \
+$(OBJECTS_DIR)/moc_soundsettings.o: $(MOC_DIR)/moc_soundsettings.cpp \
 		soundsettings.h \
 		soundsettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_soundsettings.o $(MOC_DIR)/moc_soundsettings.cpp
 
-moc_soundsettingsbase.o: moc_soundsettingsbase.cpp \
+$(OBJECTS_DIR)/moc_soundsettingsbase.o: $(MOC_DIR)/moc_soundsettingsbase.cpp \
 		soundsettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_soundsettingsbase.o $(MOC_DIR)/moc_soundsettingsbase.cpp
 
-moc_soundsettings.cpp: soundsettings.h
-	$(MOC) soundsettings.h -o moc_soundsettings.cpp
+$(MOC_DIR)/moc_soundsettings.cpp: soundsettings.h
+	$(MOC) soundsettings.h -o $(MOC_DIR)/moc_soundsettings.cpp
 
-moc_soundsettingsbase.cpp: soundsettingsbase.h
-	$(MOC) soundsettingsbase.h -o moc_soundsettingsbase.cpp
+$(MOC_DIR)/moc_soundsettingsbase.cpp: soundsettingsbase.h
+	$(MOC) soundsettingsbase.h -o $(MOC_DIR)/moc_soundsettingsbase.cpp
 
 
 
 lupdate:
-	lupdate sound.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <sound.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease sound.pro
+	$(QPEDIR)/bin/qtopia-linstall sound.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

@@ -39,7 +39,7 @@ class KAstTopLevel : public QMainWindow
 {
     Q_OBJECT
 public:
-    KAstTopLevel( QWidget *parent=0, const char *name=0 );
+    KAstTopLevel( QWidget *parent=0, const char *name=0, WFlags fl=0 );
     virtual ~KAstTopLevel();
 
 private:

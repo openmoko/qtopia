@@ -38,7 +38,14 @@
 
 #include <unistd.h>
 #include <stdio.h>
+#if !defined (_OS_WIN32_)
 #include <sys/file.h>
+#else
+#define vsnprintf _vsnprintf
+#define snprintf _snprintf
+#define write _write
+#include <io.h>
+#endif
 #include <string.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -115,7 +122,8 @@ rs_log_va(int flags, char const *fn, char const *fmt, va_list va)
         char            full_buf[1000];
 
         vsnprintf(buf, sizeof buf - 1, fmt, va);
-
+        //### revise 
+        printf("rs_log_va inconplete %s:%s", __FILE__, __LINE__);
         if (flags & RS_LOG_NONAME) { 
             snprintf(full_buf, sizeof full_buf - 1,
                      "%s: %s%s\n",
@@ -163,8 +171,12 @@ rs_log0(int level, char const *fn, char const *fmt, ...)
 void
 rs_trace_stderr(int UNUSED(level), char const *msg)
 {
+#if !defined (_OS_WIN32_)    
     /* NOTE NO TRAILING NUL */
     write(STDERR_FILENO, msg, strlen(msg));
+#else
+    write(fileno(stderr), msg, strlen(msg));    
+#endif
 }
 
 

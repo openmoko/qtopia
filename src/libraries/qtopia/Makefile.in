@@ -3,10 +3,10 @@
 ####### Compiler, tools and options
 
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
-CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
+CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB) -DQTOPIA_WIN32PROCESS_SUPPORT
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB) -DQTOPIA_WIN32PROCESS_SUPPORT
+INCPATH =	-I$(MOC_DIR) -I$(QPEDIR)/include
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -ldl -lcrypt -lm $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -29,17 +29,11 @@ HEADERS =	calendar.h \
 		xmlreader.h \
 		mimetype.h \
 		menubutton.h \
-		network.h \
-		networkinterface.h \
 		filemanager.h \
-		fontmanager.h \
-		qdawg.h \
 		datebookmonth.h \
 		fileselector.h \
 		fileselector_p.h \
 		imageedit.h \
-		qcopenvelope_qws.h \
-		qpedecoration_qws.h \
 		qpeapplication.h \
 		qpestyle.h \
 		qpedialog.h \
@@ -50,12 +44,9 @@ HEADERS =	calendar.h \
 		qmath.h \
 		datebookdb.h \
 		alarmserver.h \
-		process.h \
 		password.h \
 		timestring.h \
 		fontfactoryinterface.h \
-		fontdatabase.h \
-		power.h \
 		storage.h \
 		qpemessagebox.h \
 		timeconversion.h \
@@ -64,42 +55,44 @@ HEADERS =	calendar.h \
 		qpetoolbar.h \
 		categories.h \
 		stringutil.h \
-		backend/palmtopuid.h \
 		backend/palmtoprecord.h \
 		backend/task.h \
 		backend/event.h \
 		backend/contact.h \
+		backend/qfiledirect_p.h \
 		categorymenu.h \
 		categoryedit_p.h \
 		categoryselect.h \
 		categorywidget.h \
-		ir.h \
 		backend/vobject_p.h \
-		findwidget_p.h \
-		finddialog.h \
-		lnkproperties.h \
 		styleinterface.h \
 		windowdecorationinterface.h \
+		qdawg.h \
 		quuid.h \
 		qcom.h \
 		qlibrary.h \
-		qlibrary_p.h
+		qlibrary_p.h \
+		process.h \
+		fontmanager.h \
+		fontdatabase.h \
+		qpedecoration_qws.h \
+		network.h \
+		networkinterface.h \
+		qcopenvelope_qws.h \
+		power.h \
+		ir.h \
+		qmemoryfile_p.h
 SOURCES =	calendar.cpp \
 		global.cpp \
+		custom.cpp \
 		xmlreader.cpp \
 		mimetype.cpp \
 		menubutton.cpp \
-		network.cpp \
-		networkinterface.cpp \
 		filemanager.cpp \
-		fontmanager.cpp \
-		qdawg.cpp \
 		datebookmonth.cpp \
 		fileselector.cpp \
 		imageedit.cpp \
 		resource.cpp \
-		qpedecoration_qws.cpp \
-		qcopenvelope_qws.cpp \
 		qpeapplication.cpp \
 		qpestyle.cpp \
 		qpedialog.cpp \
@@ -107,15 +100,11 @@ SOURCES =	calendar.cpp \
 		applnk.cpp \
 		sound.cpp \
 		tzselect.cpp \
-		qmath.c \
+		qmath.cpp \
 		datebookdb.cpp \
 		alarmserver.cpp \
 		password.cpp \
-		process.cpp \
-		process_unix.cpp \
 		timestring.cpp \
-		fontdatabase.cpp \
-		power.cpp \
 		storage.cpp \
 		qpemessagebox.cpp \
 		backend/timeconversion.cpp \
@@ -132,146 +121,140 @@ SOURCES =	calendar.cpp \
 		categoryedit_p.cpp \
 		categoryselect.cpp \
 		categorywidget.cpp \
-		ir.cpp \
 		backend/vcc_yacc.cpp \
 		backend/vobject.cpp \
-		findwidget_p.cpp \
-		finddialog.cpp \
-		lnkproperties.cpp \
+		mediarecorderplugininterface.cpp \
+		qdawg.cpp \
 		quuid.cpp \
 		qlibrary.cpp \
-		qlibrary_unix.cpp
-OBJECTS =	calendar.o \
-		global.o \
-		xmlreader.o \
-		mimetype.o \
-		menubutton.o \
-		network.o \
-		networkinterface.o \
-		filemanager.o \
-		fontmanager.o \
-		qdawg.o \
-		datebookmonth.o \
-		fileselector.o \
-		imageedit.o \
-		resource.o \
-		qpedecoration_qws.o \
-		qcopenvelope_qws.o \
-		qpeapplication.o \
-		qpestyle.o \
-		qpedialog.o \
-		config.o \
-		applnk.o \
-		sound.o \
-		tzselect.o \
-		qmath.o \
-		datebookdb.o \
-		alarmserver.o \
-		password.o \
-		process.o \
-		process_unix.o \
-		timestring.o \
-		fontdatabase.o \
-		power.o \
-		storage.o \
-		qpemessagebox.o \
-		backend/timeconversion.o \
-		qpedebug.o \
-		qpemenubar.o \
-		qpetoolbar.o \
-		backend/categories.o \
-		backend/stringutil.o \
-		backend/palmtoprecord.o \
-		backend/task.o \
-		backend/event.o \
-		backend/contact.o \
-		categorymenu.o \
-		categoryedit_p.o \
-		categoryselect.o \
-		categorywidget.o \
-		ir.o \
-		backend/vcc_yacc.o \
-		backend/vobject.o \
-		findwidget_p.o \
-		finddialog.o \
-		lnkproperties.o \
-		quuid.o \
-		qlibrary.o \
-		qlibrary_unix.o \
-		passwordbase_p.o \
-		categoryeditbase_p.o \
-		findwidgetbase_p.o \
-		lnkpropertiesbase_p.o
+		process.cpp \
+		process_unix.cpp \
+		qlibrary_unix.cpp \
+		fontmanager.cpp \
+		fontdatabase.cpp \
+		qpedecoration_qws.cpp \
+		network.cpp \
+		networkinterface.cpp \
+		qcopenvelope_qws.cpp \
+		power.cpp \
+		ir.cpp \
+		qmemoryfile.cpp \
+		qmemoryfile_unix.cpp
+OBJECTS =	$(OBJECTS_DIR)/calendar.o \
+		$(OBJECTS_DIR)/global.o \
+		$(OBJECTS_DIR)/custom.o \
+		$(OBJECTS_DIR)/xmlreader.o \
+		$(OBJECTS_DIR)/mimetype.o \
+		$(OBJECTS_DIR)/menubutton.o \
+		$(OBJECTS_DIR)/filemanager.o \
+		$(OBJECTS_DIR)/datebookmonth.o \
+		$(OBJECTS_DIR)/fileselector.o \
+		$(OBJECTS_DIR)/imageedit.o \
+		$(OBJECTS_DIR)/resource.o \
+		$(OBJECTS_DIR)/qpeapplication.o \
+		$(OBJECTS_DIR)/qpestyle.o \
+		$(OBJECTS_DIR)/qpedialog.o \
+		$(OBJECTS_DIR)/config.o \
+		$(OBJECTS_DIR)/applnk.o \
+		$(OBJECTS_DIR)/sound.o \
+		$(OBJECTS_DIR)/tzselect.o \
+		$(OBJECTS_DIR)/qmath.o \
+		$(OBJECTS_DIR)/datebookdb.o \
+		$(OBJECTS_DIR)/alarmserver.o \
+		$(OBJECTS_DIR)/password.o \
+		$(OBJECTS_DIR)/timestring.o \
+		$(OBJECTS_DIR)/storage.o \
+		$(OBJECTS_DIR)/qpemessagebox.o \
+		$(OBJECTS_DIR)/timeconversion.o \
+		$(OBJECTS_DIR)/qpedebug.o \
+		$(OBJECTS_DIR)/qpemenubar.o \
+		$(OBJECTS_DIR)/qpetoolbar.o \
+		$(OBJECTS_DIR)/categories.o \
+		$(OBJECTS_DIR)/stringutil.o \
+		$(OBJECTS_DIR)/palmtoprecord.o \
+		$(OBJECTS_DIR)/task.o \
+		$(OBJECTS_DIR)/event.o \
+		$(OBJECTS_DIR)/contact.o \
+		$(OBJECTS_DIR)/categorymenu.o \
+		$(OBJECTS_DIR)/categoryedit_p.o \
+		$(OBJECTS_DIR)/categoryselect.o \
+		$(OBJECTS_DIR)/categorywidget.o \
+		$(OBJECTS_DIR)/vcc_yacc.o \
+		$(OBJECTS_DIR)/vobject.o \
+		$(OBJECTS_DIR)/mediarecorderplugininterface.o \
+		$(OBJECTS_DIR)/qdawg.o \
+		$(OBJECTS_DIR)/quuid.o \
+		$(OBJECTS_DIR)/qlibrary.o \
+		$(OBJECTS_DIR)/process.o \
+		$(OBJECTS_DIR)/process_unix.o \
+		$(OBJECTS_DIR)/qlibrary_unix.o \
+		$(OBJECTS_DIR)/fontmanager.o \
+		$(OBJECTS_DIR)/fontdatabase.o \
+		$(OBJECTS_DIR)/qpedecoration_qws.o \
+		$(OBJECTS_DIR)/network.o \
+		$(OBJECTS_DIR)/networkinterface.o \
+		$(OBJECTS_DIR)/qcopenvelope_qws.o \
+		$(OBJECTS_DIR)/power.o \
+		$(OBJECTS_DIR)/ir.o \
+		$(OBJECTS_DIR)/qmemoryfile.o \
+		$(OBJECTS_DIR)/qmemoryfile_unix.o \
+		$(OBJECTS_DIR)/passwordbase_p.o \
+		$(OBJECTS_DIR)/categoryeditbase_p.o
 INTERFACES =    passwordbase_p.ui \
-		categoryeditbase_p.ui \
-		findwidgetbase_p.ui \
-		lnkpropertiesbase_p.ui
+		categoryeditbase_p.ui
 UICDECLS =      passwordbase_p.h \
-		categoryeditbase_p.h \
-		findwidgetbase_p.h \
-		lnkpropertiesbase_p.h
+		categoryeditbase_p.h
 UICIMPLS =      passwordbase_p.cpp \
-		categoryeditbase_p.cpp \
-		findwidgetbase_p.cpp \
-		lnkpropertiesbase_p.cpp
-SRCMOC	=	moc_menubutton.cpp \
-		moc_datebookmonth.cpp \
-		moc_fileselector.cpp \
-		moc_fileselector_p.cpp \
-		moc_imageedit.cpp \
-		moc_qpedecoration_qws.cpp \
-		moc_qpeapplication.cpp \
-		moc_qpedialog.cpp \
-		moc_tzselect.cpp \
-		moc_process.cpp \
-		moc_storage.cpp \
-		moc_qpemenubar.cpp \
-		moc_qpetoolbar.cpp \
-		moc_categories.cpp \
-		moc_categorymenu.cpp \
-		moc_categoryedit_p.cpp \
-		moc_categoryselect.cpp \
-		moc_ir.cpp \
-		moc_findwidget_p.cpp \
-		moc_finddialog.cpp \
-		moc_lnkproperties.cpp \
-		moc_qlibrary_p.cpp \
-		global.moc \
-		network.moc \
-		fileselector.moc \
-		password.moc \
-		process_unix.moc \
-		timestring.moc \
-		moc_passwordbase_p.cpp \
-		moc_categoryeditbase_p.cpp \
-		moc_findwidgetbase_p.cpp \
-		moc_lnkpropertiesbase_p.cpp
-OBJMOC	=	moc_menubutton.o \
-		moc_datebookmonth.o \
-		moc_fileselector.o \
-		moc_fileselector_p.o \
-		moc_imageedit.o \
-		moc_qpedecoration_qws.o \
-		moc_qpeapplication.o \
-		moc_qpedialog.o \
-		moc_tzselect.o \
-		moc_process.o \
-		moc_storage.o \
-		moc_qpemenubar.o \
-		moc_qpetoolbar.o \
-		moc_categories.o \
-		moc_categorymenu.o \
-		moc_categoryedit_p.o \
-		moc_categoryselect.o \
-		moc_ir.o \
-		moc_findwidget_p.o \
-		moc_finddialog.o \
-		moc_lnkproperties.o \
-		moc_qlibrary_p.o \
-		moc_passwordbase_p.o \
-		moc_categoryeditbase_p.o \
-		moc_findwidgetbase_p.o \
-		moc_lnkpropertiesbase_p.o
+		categoryeditbase_p.cpp
+SRCMOC	=	$(MOC_DIR)/moc_menubutton.cpp \
+		$(MOC_DIR)/moc_datebookmonth.cpp \
+		$(MOC_DIR)/moc_fileselector.cpp \
+		$(MOC_DIR)/moc_fileselector_p.cpp \
+		$(MOC_DIR)/moc_imageedit.cpp \
+		$(MOC_DIR)/moc_qpeapplication.cpp \
+		$(MOC_DIR)/moc_qpedialog.cpp \
+		$(MOC_DIR)/moc_tzselect.cpp \
+		$(MOC_DIR)/moc_storage.cpp \
+		$(MOC_DIR)/moc_qpemenubar.cpp \
+		$(MOC_DIR)/moc_qpetoolbar.cpp \
+		$(MOC_DIR)/moc_categories.cpp \
+		$(MOC_DIR)/moc_categorymenu.cpp \
+		$(MOC_DIR)/moc_categoryedit_p.cpp \
+		$(MOC_DIR)/moc_categoryselect.cpp \
+		$(MOC_DIR)/moc_qlibrary_p.cpp \
+		$(MOC_DIR)/moc_process.cpp \
+		$(MOC_DIR)/moc_qpedecoration_qws.cpp \
+		$(MOC_DIR)/moc_ir.cpp \
+		$(MOC_DIR)/moc_passwordbase_p.cpp \
+		$(MOC_DIR)/moc_categoryeditbase_p.cpp \
+		$(MOC_DIR)/global.moc \
+		$(MOC_DIR)/fileselector.moc \
+		$(MOC_DIR)/alarmserver.moc \
+		$(MOC_DIR)/password.moc \
+		$(MOC_DIR)/timestring.moc \
+		$(MOC_DIR)/process_unix.moc \
+		$(MOC_DIR)/network.moc
+OBJMOC	=	$(OBJECTS_DIR)/moc_menubutton.o \
+		$(OBJECTS_DIR)/moc_datebookmonth.o \
+		$(OBJECTS_DIR)/moc_fileselector.o \
+		$(OBJECTS_DIR)/moc_fileselector_p.o \
+		$(OBJECTS_DIR)/moc_imageedit.o \
+		$(OBJECTS_DIR)/moc_qpeapplication.o \
+		$(OBJECTS_DIR)/moc_qpedialog.o \
+		$(OBJECTS_DIR)/moc_tzselect.o \
+		$(OBJECTS_DIR)/moc_storage.o \
+		$(OBJECTS_DIR)/moc_qpemenubar.o \
+		$(OBJECTS_DIR)/moc_qpetoolbar.o \
+		$(OBJECTS_DIR)/moc_categories.o \
+		$(OBJECTS_DIR)/moc_categorymenu.o \
+		$(OBJECTS_DIR)/moc_categoryedit_p.o \
+		$(OBJECTS_DIR)/moc_categoryselect.o \
+		$(OBJECTS_DIR)/moc_qlibrary_p.o \
+		$(OBJECTS_DIR)/moc_process.o \
+		$(OBJECTS_DIR)/moc_qpedecoration_qws.o \
+		$(OBJECTS_DIR)/moc_ir.o \
+		$(OBJECTS_DIR)/moc_passwordbase_p.o \
+		$(OBJECTS_DIR)/moc_categoryeditbase_p.o
 
 
 ####### Implicit rules
@@ -337,48 +320,43 @@ REQUIRES=
 
 ####### Compile
 
-calendar.o: calendar.cpp \
+$(OBJECTS_DIR)/calendar.o: calendar.cpp \
 		calendar.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/calendar.o calendar.cpp
 
-global.o: global.cpp \
-		global.moc \
+$(OBJECTS_DIR)/global.o: global.cpp \
+		$(MOC_DIR)/global.moc \
 		process.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/global.o global.cpp
 
-xmlreader.o: xmlreader.cpp \
+$(OBJECTS_DIR)/custom.o: custom.cpp \
+		power.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/custom.o custom.cpp
+
+$(OBJECTS_DIR)/xmlreader.o: xmlreader.cpp \
 		xmlreader.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/xmlreader.o xmlreader.cpp
 
-mimetype.o: mimetype.cpp \
+$(OBJECTS_DIR)/mimetype.o: mimetype.cpp \
 		mimetype.h \
 		applnk.h \
 		resource.h \
 		qpeapplication.h \
 		qpedecoration_qws.h \
 		windowdecorationinterface.h \
-		timestring.h \
 		config.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/mimetype.o mimetype.cpp
 
-menubutton.o: menubutton.cpp \
+$(OBJECTS_DIR)/menubutton.o: menubutton.cpp \
 		menubutton.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/menubutton.o menubutton.cpp
 
-network.o: network.cpp \
-		network.moc
-
-networkinterface.o: networkinterface.cpp \
-		networkinterface.h \
-		network.h \
-		config.h
-
-filemanager.o: filemanager.cpp \
+$(OBJECTS_DIR)/filemanager.o: filemanager.cpp \
 		filemanager.h \
 		applnk.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/filemanager.o filemanager.cpp
 
-fontmanager.o: fontmanager.cpp \
-		fontmanager.h
-
-qdawg.o: qdawg.cpp \
-		qdawg.h
-
-datebookmonth.o: datebookmonth.cpp \
+$(OBJECTS_DIR)/datebookmonth.o: datebookmonth.cpp \
 		config.h \
 		datebookmonth.h \
 		calendar.h \
@@ -388,249 +366,301 @@ datebookmonth.o: datebookmonth.cpp \
 		qpeapplication.h \
 		qpedecoration_qws.h \
 		windowdecorationinterface.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/datebookmonth.o datebookmonth.cpp
 
-fileselector.o: fileselector.cpp \
-		fileselector.moc \
+$(OBJECTS_DIR)/fileselector.o: fileselector.cpp \
+		$(MOC_DIR)/fileselector.moc \
+		global.h \
 		fileselector.h \
 		filemanager.h \
 		applnk.h \
 		fileselector_p.h \
-		global.h \
 		resource.h \
 		config.h \
 		storage.h \
 		qpemenubar.h \
-		lnkproperties.h \
 		qpeapplication.h \
 		qpedecoration_qws.h \
 		windowdecorationinterface.h \
-		timestring.h \
 		categorymenu.h \
 		categoryselect.h \
 		mimetype.h \
-		categories.h
+		categories.h \
+		qpemessagebox.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/fileselector.o fileselector.cpp
 
-imageedit.o: imageedit.cpp \
+$(OBJECTS_DIR)/imageedit.o: imageedit.cpp \
 		imageedit.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/imageedit.o imageedit.cpp
 
-resource.o: resource.cpp \
-		qpeapplication.h \
-		qpedecoration_qws.h \
-		windowdecorationinterface.h \
-		timestring.h \
-		resource.h \
-		mimetype.h \
-		inlinepics_p.h
-
-qpedecoration_qws.o: qpedecoration_qws.cpp \
-		qcopenvelope_qws.h \
-		qpedecoration_qws.h \
-		windowdecorationinterface.h \
-		qpeapplication.h \
-		timestring.h \
-		resource.h \
-		global.h \
-		qlibrary.h
-
-qcopenvelope_qws.o: qcopenvelope_qws.cpp \
-		qcopenvelope_qws.h \
-		global.h
-
-qpeapplication.o: qpeapplication.cpp \
-		qcopenvelope_qws.h \
-		qpeapplication.h \
-		qpedecoration_qws.h \
-		windowdecorationinterface.h \
-		timestring.h \
-		qpestyle.h \
-		global.h \
+$(OBJECTS_DIR)/resource.o: resource.cpp \
 		resource.h \
 		config.h \
-		network.h \
-		fontmanager.h \
-		power.h \
-		alarmserver.h \
-		applnk.h \
-		qpemenubar.h \
+		mimetype.h \
+		inlinepics_p.h \
+		qpeapplication.h \
+		qpedecoration_qws.h \
+		windowdecorationinterface.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/resource.o resource.cpp
+
+$(OBJECTS_DIR)/qpeapplication.o: qpeapplication.cpp \
+		custom.h \
 		qlibrary.h \
+		qcopenvelope_qws.h \
+		qpeapplication.h \
+		qpedecoration_qws.h \
+		windowdecorationinterface.h \
+		global.h \
+		config.h \
+		network.h \
+		applnk.h \
+		fontmanager.h \
+		fontdatabase.h \
+		power.h \
+		qpemenubar.h \
 		imagecodecinterface.h \
 		textcodecinterface.h \
 		styleinterface.h \
-		fontdatabase.h
+		resource.h \
+		qpestyle.h \
+		alarmserver.h \
+		../qtopia1/qpe_show_dialog.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qpeapplication.o qpeapplication.cpp
 
-qpestyle.o: qpestyle.cpp \
+$(OBJECTS_DIR)/qpestyle.o: qpestyle.cpp \
 		qpestyle.h \
 		qpeapplication.h \
 		qpedecoration_qws.h \
-		windowdecorationinterface.h \
-		timestring.h
+		windowdecorationinterface.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qpestyle.o qpestyle.cpp
 
-qpedialog.o: qpedialog.cpp \
+$(OBJECTS_DIR)/qpedialog.o: qpedialog.cpp \
 		qpedialog.h \
 		qpeapplication.h \
 		qpedecoration_qws.h \
-		windowdecorationinterface.h \
-		timestring.h
+		windowdecorationinterface.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qpedialog.o qpedialog.cpp
 
-config.o: config.cpp \
+$(OBJECTS_DIR)/config.o: config.cpp \
 		config.h \
 		global.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/config.o config.cpp
 
-applnk.o: applnk.cpp \
+$(OBJECTS_DIR)/applnk.o: applnk.cpp \
 		applnk.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/applnk.o applnk.cpp
 
-sound.o: sound.cpp
+$(OBJECTS_DIR)/sound.o: sound.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/sound.o sound.cpp
 
-tzselect.o: tzselect.cpp \
+$(OBJECTS_DIR)/tzselect.o: tzselect.cpp \
 		tzselect.h \
 		resource.h \
 		global.h \
 		config.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/tzselect.o tzselect.cpp
 
-qmath.o: qmath.c \
+$(OBJECTS_DIR)/qmath.o: qmath.cpp \
 		qmath.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qmath.o qmath.cpp
 
-datebookdb.o: datebookdb.cpp \
+$(OBJECTS_DIR)/datebookdb.o: datebookdb.cpp \
 		datebookdb.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/datebookdb.o datebookdb.cpp
 
-alarmserver.o: alarmserver.cpp \
+$(OBJECTS_DIR)/alarmserver.o: alarmserver.cpp \
+		$(MOC_DIR)/alarmserver.moc \
+		qlibrary.h \
 		qpeapplication.h \
 		qpedecoration_qws.h \
 		windowdecorationinterface.h \
-		timestring.h \
 		global.h \
 		resource.h \
 		qcopenvelope_qws.h \
-		alarmserver.h
+		alarmserver.h \
+		process.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/alarmserver.o alarmserver.cpp
 
-password.o: password.cpp \
-		password.moc \
+$(OBJECTS_DIR)/password.o: password.cpp \
+		$(MOC_DIR)/password.moc \
 		password.h \
 		config.h \
 		global.h \
 		backend/contact.h \
 		passwordbase_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/password.o password.cpp
 
-process.o: process.cpp \
-		process.h
-
-process_unix.o: process_unix.cpp \
-		process_unix.moc \
-		process.h
-
-timestring.o: timestring.cpp \
-		timestring.moc \
+$(OBJECTS_DIR)/timestring.o: timestring.cpp \
+		$(MOC_DIR)/timestring.moc \
 		timestring.h \
-		qpeapplication.h \
-		qpedecoration_qws.h \
-		windowdecorationinterface.h \
 		config.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/timestring.o timestring.cpp
 
-fontdatabase.o: fontdatabase.cpp \
-		qpeapplication.h \
-		qpedecoration_qws.h \
-		windowdecorationinterface.h \
-		timestring.h \
-		fontfactoryinterface.h \
-		fontdatabase.h
+$(OBJECTS_DIR)/storage.o: storage.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/storage.o storage.cpp
 
-power.o: power.cpp \
-		power.h \
-		custom.h
-
-storage.o: storage.cpp
-
-qpemessagebox.o: qpemessagebox.cpp \
+$(OBJECTS_DIR)/qpemessagebox.o: qpemessagebox.cpp \
 		qpemessagebox.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qpemessagebox.o qpemessagebox.cpp
 
-backend/timeconversion.o: backend/timeconversion.cpp
+$(OBJECTS_DIR)/timeconversion.o: backend/timeconversion.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/timeconversion.o backend/timeconversion.cpp
 
-qpedebug.o: qpedebug.cpp \
+$(OBJECTS_DIR)/qpedebug.o: qpedebug.cpp \
 		qpedebug.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qpedebug.o qpedebug.cpp
 
-qpemenubar.o: qpemenubar.cpp \
+$(OBJECTS_DIR)/qpemenubar.o: qpemenubar.cpp \
 		qpemenubar.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qpemenubar.o qpemenubar.cpp
 
-qpetoolbar.o: qpetoolbar.cpp \
+$(OBJECTS_DIR)/qpetoolbar.o: qpetoolbar.cpp \
 		qpetoolbar.h \
 		qpemenubar.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qpetoolbar.o qpetoolbar.cpp
 
-backend/categories.o: backend/categories.cpp
+$(OBJECTS_DIR)/categories.o: backend/categories.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/categories.o backend/categories.cpp
 
-backend/stringutil.o: backend/stringutil.cpp
+$(OBJECTS_DIR)/stringutil.o: backend/stringutil.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/stringutil.o backend/stringutil.cpp
 
-backend/palmtoprecord.o: backend/palmtoprecord.cpp
+$(OBJECTS_DIR)/palmtoprecord.o: backend/palmtoprecord.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/palmtoprecord.o backend/palmtoprecord.cpp
 
-backend/task.o: backend/task.cpp \
+$(OBJECTS_DIR)/task.o: backend/task.cpp \
 		backend/task.h \
 		backend/recordfields.h \
-		backend/qpcglobal.h \
 		backend/vobject_p.h \
 		backend/qfiledirect_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/task.o backend/task.cpp
 
-backend/event.o: backend/event.cpp \
+$(OBJECTS_DIR)/event.o: backend/event.cpp \
 		backend/event.h \
 		backend/qfiledirect_p.h \
 		backend/vobject_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/event.o backend/event.cpp
 
-backend/contact.o: backend/contact.cpp \
+$(OBJECTS_DIR)/contact.o: backend/contact.cpp \
 		backend/contact.h \
 		backend/vobject_p.h \
 		backend/qfiledirect_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/contact.o backend/contact.cpp
 
-categorymenu.o: categorymenu.cpp \
+$(OBJECTS_DIR)/categorymenu.o: categorymenu.cpp \
 		categorymenu.h \
 		categoryselect.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/categorymenu.o categorymenu.cpp
 
-categoryedit_p.o: categoryedit_p.cpp \
+$(OBJECTS_DIR)/categoryedit_p.o: categoryedit_p.cpp \
 		categoryedit_p.h \
 		categoryeditbase_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/categoryedit_p.o categoryedit_p.cpp
 
-categoryselect.o: categoryselect.cpp \
+$(OBJECTS_DIR)/categoryselect.o: categoryselect.cpp \
 		categorywidget.h \
 		categoryselect.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/categoryselect.o categoryselect.cpp
 
-categorywidget.o: categorywidget.cpp \
+$(OBJECTS_DIR)/categorywidget.o: categorywidget.cpp \
 		categoryedit_p.h \
 		categoryeditbase_p.h \
 		categorywidget.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/categorywidget.o categorywidget.cpp
 
-ir.o: ir.cpp \
+$(OBJECTS_DIR)/vcc_yacc.o: backend/vcc_yacc.cpp \
+		backend/vobject_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/vcc_yacc.o backend/vcc_yacc.cpp
+
+$(OBJECTS_DIR)/vobject.o: backend/vobject.cpp \
+		backend/vobject_p.h \
+		backend/qfiledirect_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/vobject.o backend/vobject.cpp
+
+$(OBJECTS_DIR)/mediarecorderplugininterface.o: mediarecorderplugininterface.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/mediarecorderplugininterface.o mediarecorderplugininterface.cpp
+
+$(OBJECTS_DIR)/qdawg.o: qdawg.cpp \
+		qdawg.h \
+		qmemoryfile_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qdawg.o qdawg.cpp
+
+$(OBJECTS_DIR)/quuid.o: quuid.cpp \
+		quuid.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/quuid.o quuid.cpp
+
+$(OBJECTS_DIR)/qlibrary.o: qlibrary.cpp \
+		qlibrary_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qlibrary.o qlibrary.cpp
+
+$(OBJECTS_DIR)/process.o: process.cpp \
+		process.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/process.o process.cpp
+
+$(OBJECTS_DIR)/process_unix.o: process_unix.cpp \
+		$(MOC_DIR)/process_unix.moc \
+		process.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/process_unix.o process_unix.cpp
+
+$(OBJECTS_DIR)/qlibrary_unix.o: qlibrary_unix.cpp \
+		qlibrary_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qlibrary_unix.o qlibrary_unix.cpp
+
+$(OBJECTS_DIR)/fontmanager.o: fontmanager.cpp \
+		fontmanager.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/fontmanager.o fontmanager.cpp
+
+$(OBJECTS_DIR)/fontdatabase.o: fontdatabase.cpp \
+		qpeapplication.h \
+		qpedecoration_qws.h \
+		windowdecorationinterface.h \
+		fontfactoryinterface.h \
+		fontdatabase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/fontdatabase.o fontdatabase.cpp
+
+$(OBJECTS_DIR)/qpedecoration_qws.o: qpedecoration_qws.cpp \
+		qcopenvelope_qws.h \
+		qpedecoration_qws.h \
+		windowdecorationinterface.h \
+		qpeapplication.h \
+		resource.h \
+		global.h \
+		qlibrary.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qpedecoration_qws.o qpedecoration_qws.cpp
+
+$(OBJECTS_DIR)/network.o: network.cpp \
+		$(MOC_DIR)/network.moc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/network.o network.cpp
+
+$(OBJECTS_DIR)/networkinterface.o: networkinterface.cpp \
+		networkinterface.h \
+		network.h \
+		config.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/networkinterface.o networkinterface.cpp
+
+$(OBJECTS_DIR)/qcopenvelope_qws.o: qcopenvelope_qws.cpp \
+		qcopenvelope_qws.h \
+		global.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qcopenvelope_qws.o qcopenvelope_qws.cpp
+
+$(OBJECTS_DIR)/power.o: power.cpp \
+		power.h \
+		custom.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/power.o power.cpp
+
+$(OBJECTS_DIR)/ir.o: ir.cpp \
 		ir.h \
 		qcopenvelope_qws.h \
 		applnk.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/ir.o ir.cpp
 
-backend/vcc_yacc.o: backend/vcc_yacc.cpp \
-		backend/vobject_p.h
+$(OBJECTS_DIR)/qmemoryfile.o: qmemoryfile.cpp \
+		qmemoryfile_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qmemoryfile.o qmemoryfile.cpp
 
-backend/vobject.o: backend/vobject.cpp \
-		backend/vobject_p.h \
-		backend/qfiledirect_p.h
-
-findwidget_p.o: findwidget_p.cpp \
-		findwidget_p.h \
-		findwidgetbase_p.h
-
-finddialog.o: finddialog.cpp \
-		finddialog.h \
-		findwidget_p.h \
-		findwidgetbase_p.h
-
-lnkproperties.o: lnkproperties.cpp \
-		lnkproperties.h \
-		lnkpropertiesbase_p.h \
-		ir.h
-
-quuid.o: quuid.cpp \
-		quuid.h
-
-qlibrary.o: qlibrary.cpp \
-		qlibrary_p.h \
-		qlibrary.h
-
-qlibrary_unix.o: qlibrary_unix.cpp \
-		qlibrary_p.h \
-		qlibrary.h
+$(OBJECTS_DIR)/qmemoryfile_unix.o: qmemoryfile_unix.cpp \
+		qmemoryfile_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qmemoryfile_unix.o qmemoryfile_unix.cpp
 
 passwordbase_p.h: passwordbase_p.ui
 	$(UIC) passwordbase_p.ui -o $(INTERFACE_DECL_PATH)/passwordbase_p.h
@@ -644,233 +674,186 @@ categoryeditbase_p.h: categoryeditbase_p.ui
 categoryeditbase_p.cpp: categoryeditbase_p.ui
 	$(UIC) categoryeditbase_p.ui -i categoryeditbase_p.h -o categoryeditbase_p.cpp
 
-findwidgetbase_p.h: findwidgetbase_p.ui
-	$(UIC) findwidgetbase_p.ui -o $(INTERFACE_DECL_PATH)/findwidgetbase_p.h
+$(OBJECTS_DIR)/passwordbase_p.o: passwordbase_p.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/passwordbase_p.o passwordbase_p.cpp
 
-findwidgetbase_p.cpp: findwidgetbase_p.ui
-	$(UIC) findwidgetbase_p.ui -i findwidgetbase_p.h -o findwidgetbase_p.cpp
+$(OBJECTS_DIR)/categoryeditbase_p.o: categoryeditbase_p.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/categoryeditbase_p.o categoryeditbase_p.cpp
 
-lnkpropertiesbase_p.h: lnkpropertiesbase_p.ui
-	$(UIC) lnkpropertiesbase_p.ui -o $(INTERFACE_DECL_PATH)/lnkpropertiesbase_p.h
-
-lnkpropertiesbase_p.cpp: lnkpropertiesbase_p.ui
-	$(UIC) lnkpropertiesbase_p.ui -i lnkpropertiesbase_p.h -o lnkpropertiesbase_p.cpp
-
-passwordbase_p.o: passwordbase_p.cpp
-
-categoryeditbase_p.o: categoryeditbase_p.cpp
-
-findwidgetbase_p.o: findwidgetbase_p.cpp
-
-lnkpropertiesbase_p.o: lnkpropertiesbase_p.cpp
-
-moc_menubutton.o: moc_menubutton.cpp \
+$(OBJECTS_DIR)/moc_menubutton.o: $(MOC_DIR)/moc_menubutton.cpp \
 		menubutton.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_menubutton.o $(MOC_DIR)/moc_menubutton.cpp
 
-moc_datebookmonth.o: moc_datebookmonth.cpp \
+$(OBJECTS_DIR)/moc_datebookmonth.o: $(MOC_DIR)/moc_datebookmonth.cpp \
 		datebookmonth.h \
 		calendar.h \
 		timestring.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_datebookmonth.o $(MOC_DIR)/moc_datebookmonth.cpp
 
-moc_fileselector.o: moc_fileselector.cpp \
+$(OBJECTS_DIR)/moc_fileselector.o: $(MOC_DIR)/moc_fileselector.cpp \
 		fileselector.h \
 		filemanager.h \
 		applnk.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_fileselector.o $(MOC_DIR)/moc_fileselector.cpp
 
-moc_fileselector_p.o: moc_fileselector_p.cpp \
+$(OBJECTS_DIR)/moc_fileselector_p.o: $(MOC_DIR)/moc_fileselector_p.cpp \
 		fileselector_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_fileselector_p.o $(MOC_DIR)/moc_fileselector_p.cpp
 
-moc_imageedit.o: moc_imageedit.cpp \
+$(OBJECTS_DIR)/moc_imageedit.o: $(MOC_DIR)/moc_imageedit.cpp \
 		imageedit.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_imageedit.o $(MOC_DIR)/moc_imageedit.cpp
 
-moc_qpedecoration_qws.o: moc_qpedecoration_qws.cpp \
+$(OBJECTS_DIR)/moc_qpeapplication.o: $(MOC_DIR)/moc_qpeapplication.cpp \
+		qpeapplication.h \
 		qpedecoration_qws.h \
 		windowdecorationinterface.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qpeapplication.o $(MOC_DIR)/moc_qpeapplication.cpp
 
-moc_qpeapplication.o: moc_qpeapplication.cpp \
-		qpeapplication.h \
-		qpedecoration_qws.h \
-		windowdecorationinterface.h \
-		timestring.h
-
-moc_qpedialog.o: moc_qpedialog.cpp \
+$(OBJECTS_DIR)/moc_qpedialog.o: $(MOC_DIR)/moc_qpedialog.cpp \
 		qpedialog.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qpedialog.o $(MOC_DIR)/moc_qpedialog.cpp
 
-moc_tzselect.o: moc_tzselect.cpp \
+$(OBJECTS_DIR)/moc_tzselect.o: $(MOC_DIR)/moc_tzselect.cpp \
 		tzselect.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_tzselect.o $(MOC_DIR)/moc_tzselect.cpp
 
-moc_process.o: moc_process.cpp \
-		process.h
-
-moc_storage.o: moc_storage.cpp \
+$(OBJECTS_DIR)/moc_storage.o: $(MOC_DIR)/moc_storage.cpp \
 		storage.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_storage.o $(MOC_DIR)/moc_storage.cpp
 
-moc_qpemenubar.o: moc_qpemenubar.cpp \
+$(OBJECTS_DIR)/moc_qpemenubar.o: $(MOC_DIR)/moc_qpemenubar.cpp \
 		qpemenubar.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qpemenubar.o $(MOC_DIR)/moc_qpemenubar.cpp
 
-moc_qpetoolbar.o: moc_qpetoolbar.cpp \
+$(OBJECTS_DIR)/moc_qpetoolbar.o: $(MOC_DIR)/moc_qpetoolbar.cpp \
 		qpetoolbar.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qpetoolbar.o $(MOC_DIR)/moc_qpetoolbar.cpp
 
-moc_categories.o: moc_categories.cpp \
+$(OBJECTS_DIR)/moc_categories.o: $(MOC_DIR)/moc_categories.cpp \
 		categories.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_categories.o $(MOC_DIR)/moc_categories.cpp
 
-moc_categorymenu.o: moc_categorymenu.cpp \
+$(OBJECTS_DIR)/moc_categorymenu.o: $(MOC_DIR)/moc_categorymenu.cpp \
 		categorymenu.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_categorymenu.o $(MOC_DIR)/moc_categorymenu.cpp
 
-moc_categoryedit_p.o: moc_categoryedit_p.cpp \
+$(OBJECTS_DIR)/moc_categoryedit_p.o: $(MOC_DIR)/moc_categoryedit_p.cpp \
 		categoryedit_p.h \
 		categoryeditbase_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_categoryedit_p.o $(MOC_DIR)/moc_categoryedit_p.cpp
 
-moc_categoryselect.o: moc_categoryselect.cpp \
+$(OBJECTS_DIR)/moc_categoryselect.o: $(MOC_DIR)/moc_categoryselect.cpp \
 		categoryselect.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_categoryselect.o $(MOC_DIR)/moc_categoryselect.cpp
 
-moc_ir.o: moc_ir.cpp \
-		ir.h
+$(OBJECTS_DIR)/moc_qlibrary_p.o: $(MOC_DIR)/moc_qlibrary_p.cpp \
+		qlibrary_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qlibrary_p.o $(MOC_DIR)/moc_qlibrary_p.cpp
 
-moc_findwidget_p.o: moc_findwidget_p.cpp \
-		findwidget_p.h \
-		findwidgetbase_p.h
-
-moc_finddialog.o: moc_finddialog.cpp \
-		finddialog.h
-
-moc_lnkproperties.o: moc_lnkproperties.cpp \
-		lnkproperties.h
-
-moc_qlibrary_p.o: moc_qlibrary_p.cpp \
-		qlibrary_p.h \
-		qlibrary.h
-
-moc_passwordbase_p.o: global.moc \
-		global.cpp \
+$(OBJECTS_DIR)/moc_process.o: $(MOC_DIR)/moc_process.cpp \
 		process.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_process.o $(MOC_DIR)/moc_process.cpp
 
-moc_categoryeditbase_p.o: network.moc \
-		network.cpp
-
-moc_findwidgetbase_p.o: fileselector.moc \
-		fileselector.cpp \
-		fileselector.h \
-		filemanager.h \
-		applnk.h \
-		fileselector_p.h \
-		global.h \
-		resource.h \
-		config.h \
-		storage.h \
-		qpemenubar.h \
-		lnkproperties.h \
-		qpeapplication.h \
+$(OBJECTS_DIR)/moc_qpedecoration_qws.o: $(MOC_DIR)/moc_qpedecoration_qws.cpp \
 		qpedecoration_qws.h \
-		windowdecorationinterface.h \
-		timestring.h \
-		categorymenu.h \
-		categoryselect.h \
-		mimetype.h \
-		categories.h
+		windowdecorationinterface.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qpedecoration_qws.o $(MOC_DIR)/moc_qpedecoration_qws.cpp
 
-moc_lnkpropertiesbase_p.o: password.moc \
-		password.cpp \
-		password.h \
-		config.h \
-		global.h \
-		backend/contact.h \
+$(OBJECTS_DIR)/moc_ir.o: $(MOC_DIR)/moc_ir.cpp \
+		ir.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_ir.o $(MOC_DIR)/moc_ir.cpp
+
+$(OBJECTS_DIR)/moc_passwordbase_p.o: $(MOC_DIR)/moc_passwordbase_p.cpp \
 		passwordbase_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_passwordbase_p.o $(MOC_DIR)/moc_passwordbase_p.cpp
 
-moc_menubutton.cpp: menubutton.h
-	$(MOC) menubutton.h -o moc_menubutton.cpp
+$(OBJECTS_DIR)/moc_categoryeditbase_p.o: $(MOC_DIR)/moc_categoryeditbase_p.cpp \
+		categoryeditbase_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_categoryeditbase_p.o $(MOC_DIR)/moc_categoryeditbase_p.cpp
 
-moc_datebookmonth.cpp: datebookmonth.h
-	$(MOC) datebookmonth.h -o moc_datebookmonth.cpp
+$(MOC_DIR)/moc_menubutton.cpp: menubutton.h
+	$(MOC) menubutton.h -o $(MOC_DIR)/moc_menubutton.cpp
 
-moc_fileselector.cpp: fileselector.h
-	$(MOC) fileselector.h -o moc_fileselector.cpp
+$(MOC_DIR)/moc_datebookmonth.cpp: datebookmonth.h
+	$(MOC) datebookmonth.h -o $(MOC_DIR)/moc_datebookmonth.cpp
 
-moc_fileselector_p.cpp: fileselector_p.h
-	$(MOC) fileselector_p.h -o moc_fileselector_p.cpp
+$(MOC_DIR)/moc_fileselector.cpp: fileselector.h
+	$(MOC) fileselector.h -o $(MOC_DIR)/moc_fileselector.cpp
 
-moc_imageedit.cpp: imageedit.h
-	$(MOC) imageedit.h -o moc_imageedit.cpp
+$(MOC_DIR)/moc_fileselector_p.cpp: fileselector_p.h
+	$(MOC) fileselector_p.h -o $(MOC_DIR)/moc_fileselector_p.cpp
 
-moc_qpedecoration_qws.cpp: qpedecoration_qws.h
-	$(MOC) qpedecoration_qws.h -o moc_qpedecoration_qws.cpp
+$(MOC_DIR)/moc_imageedit.cpp: imageedit.h
+	$(MOC) imageedit.h -o $(MOC_DIR)/moc_imageedit.cpp
 
-moc_qpeapplication.cpp: qpeapplication.h
-	$(MOC) qpeapplication.h -o moc_qpeapplication.cpp
+$(MOC_DIR)/moc_qpeapplication.cpp: qpeapplication.h
+	$(MOC) qpeapplication.h -o $(MOC_DIR)/moc_qpeapplication.cpp
 
-moc_qpedialog.cpp: qpedialog.h
-	$(MOC) qpedialog.h -o moc_qpedialog.cpp
+$(MOC_DIR)/moc_qpedialog.cpp: qpedialog.h
+	$(MOC) qpedialog.h -o $(MOC_DIR)/moc_qpedialog.cpp
 
-moc_tzselect.cpp: tzselect.h
-	$(MOC) tzselect.h -o moc_tzselect.cpp
+$(MOC_DIR)/moc_tzselect.cpp: tzselect.h
+	$(MOC) tzselect.h -o $(MOC_DIR)/moc_tzselect.cpp
 
-moc_process.cpp: process.h
-	$(MOC) process.h -o moc_process.cpp
+$(MOC_DIR)/moc_storage.cpp: storage.h
+	$(MOC) storage.h -o $(MOC_DIR)/moc_storage.cpp
 
-moc_storage.cpp: storage.h
-	$(MOC) storage.h -o moc_storage.cpp
+$(MOC_DIR)/moc_qpemenubar.cpp: qpemenubar.h
+	$(MOC) qpemenubar.h -o $(MOC_DIR)/moc_qpemenubar.cpp
 
-moc_qpemenubar.cpp: qpemenubar.h
-	$(MOC) qpemenubar.h -o moc_qpemenubar.cpp
+$(MOC_DIR)/moc_qpetoolbar.cpp: qpetoolbar.h
+	$(MOC) qpetoolbar.h -o $(MOC_DIR)/moc_qpetoolbar.cpp
 
-moc_qpetoolbar.cpp: qpetoolbar.h
-	$(MOC) qpetoolbar.h -o moc_qpetoolbar.cpp
+$(MOC_DIR)/moc_categories.cpp: categories.h
+	$(MOC) categories.h -o $(MOC_DIR)/moc_categories.cpp
 
-moc_categories.cpp: categories.h
-	$(MOC) categories.h -o moc_categories.cpp
+$(MOC_DIR)/moc_categorymenu.cpp: categorymenu.h
+	$(MOC) categorymenu.h -o $(MOC_DIR)/moc_categorymenu.cpp
 
-moc_categorymenu.cpp: categorymenu.h
-	$(MOC) categorymenu.h -o moc_categorymenu.cpp
+$(MOC_DIR)/moc_categoryedit_p.cpp: categoryedit_p.h
+	$(MOC) categoryedit_p.h -o $(MOC_DIR)/moc_categoryedit_p.cpp
 
-moc_categoryedit_p.cpp: categoryedit_p.h
-	$(MOC) categoryedit_p.h -o moc_categoryedit_p.cpp
+$(MOC_DIR)/moc_categoryselect.cpp: categoryselect.h
+	$(MOC) categoryselect.h -o $(MOC_DIR)/moc_categoryselect.cpp
 
-moc_categoryselect.cpp: categoryselect.h
-	$(MOC) categoryselect.h -o moc_categoryselect.cpp
+$(MOC_DIR)/moc_qlibrary_p.cpp: qlibrary_p.h
+	$(MOC) qlibrary_p.h -o $(MOC_DIR)/moc_qlibrary_p.cpp
 
-moc_ir.cpp: ir.h
-	$(MOC) ir.h -o moc_ir.cpp
+$(MOC_DIR)/moc_process.cpp: process.h
+	$(MOC) process.h -o $(MOC_DIR)/moc_process.cpp
 
-moc_findwidget_p.cpp: findwidget_p.h
-	$(MOC) findwidget_p.h -o moc_findwidget_p.cpp
+$(MOC_DIR)/moc_qpedecoration_qws.cpp: qpedecoration_qws.h
+	$(MOC) qpedecoration_qws.h -o $(MOC_DIR)/moc_qpedecoration_qws.cpp
 
-moc_finddialog.cpp: finddialog.h
-	$(MOC) finddialog.h -o moc_finddialog.cpp
+$(MOC_DIR)/moc_ir.cpp: ir.h
+	$(MOC) ir.h -o $(MOC_DIR)/moc_ir.cpp
 
-moc_lnkproperties.cpp: lnkproperties.h
-	$(MOC) lnkproperties.h -o moc_lnkproperties.cpp
+$(MOC_DIR)/global.moc: global.cpp
+	$(MOC) global.cpp -o $(MOC_DIR)/global.moc
 
-moc_qlibrary_p.cpp: qlibrary_p.h
-	$(MOC) qlibrary_p.h -o moc_qlibrary_p.cpp
+$(MOC_DIR)/fileselector.moc: fileselector.cpp
+	$(MOC) fileselector.cpp -o $(MOC_DIR)/fileselector.moc
 
-global.moc: global.cpp
-	$(MOC) global.cpp -o global.moc
+$(MOC_DIR)/alarmserver.moc: alarmserver.cpp
+	$(MOC) alarmserver.cpp -o $(MOC_DIR)/alarmserver.moc
 
-network.moc: network.cpp
-	$(MOC) network.cpp -o network.moc
+$(MOC_DIR)/password.moc: password.cpp
+	$(MOC) password.cpp -o $(MOC_DIR)/password.moc
 
-fileselector.moc: fileselector.cpp
-	$(MOC) fileselector.cpp -o fileselector.moc
+$(MOC_DIR)/timestring.moc: timestring.cpp
+	$(MOC) timestring.cpp -o $(MOC_DIR)/timestring.moc
 
-password.moc: password.cpp
-	$(MOC) password.cpp -o password.moc
+$(MOC_DIR)/process_unix.moc: process_unix.cpp
+	$(MOC) process_unix.cpp -o $(MOC_DIR)/process_unix.moc
 
-process_unix.moc: process_unix.cpp
-	$(MOC) process_unix.cpp -o process_unix.moc
+$(MOC_DIR)/network.moc: network.cpp
+	$(MOC) network.cpp -o $(MOC_DIR)/network.moc
 
-timestring.moc: timestring.cpp
-	$(MOC) timestring.cpp -o timestring.moc
+$(MOC_DIR)/moc_passwordbase_p.cpp: passwordbase_p.h
+	$(MOC) passwordbase_p.h -o $(MOC_DIR)/moc_passwordbase_p.cpp
 
-moc_passwordbase_p.cpp: passwordbase_p.h
-	$(MOC) passwordbase_p.h -o moc_passwordbase_p.cpp
-
-moc_categoryeditbase_p.cpp: categoryeditbase_p.h
-	$(MOC) categoryeditbase_p.h -o moc_categoryeditbase_p.cpp
-
-moc_findwidgetbase_p.cpp: findwidgetbase_p.h
-	$(MOC) findwidgetbase_p.h -o moc_findwidgetbase_p.cpp
-
-moc_lnkpropertiesbase_p.cpp: lnkpropertiesbase_p.h
-	$(MOC) lnkpropertiesbase_p.h -o moc_lnkpropertiesbase_p.cpp
+$(MOC_DIR)/moc_categoryeditbase_p.cpp: categoryeditbase_p.h
+	$(MOC) categoryeditbase_p.h -o $(MOC_DIR)/moc_categoryeditbase_p.cpp
 
 

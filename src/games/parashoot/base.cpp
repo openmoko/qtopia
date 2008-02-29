@@ -21,7 +21,7 @@
 #include "base.h"
 #include "man.h"
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
 #include <qregexp.h>
 
@@ -68,4 +68,10 @@ Base::~Base()
 int Base::rtti() const
 {
    return base_rtti;
+}
+
+void
+Base::reposition(void)
+{
+    move(2, canvas()->height()-50);
 }

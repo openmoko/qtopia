@@ -23,11 +23,17 @@
 #include <qdatetime.h>
 #include <qstring.h>
 
+#if (QT_VERSION-0 >= 0x030000)
+#define DateFormat QPEDateFormat
+#endif
+
+#include <qtopia/qpeglobal.h>
+
 // return a string with the time based on whether or not you want
 // you want it in 12 hour form.   if ampm is true, then return
 // it in 12 hour (am/pm) form otherwise return it in 24 hour form
 // in theory Qt 3,0 handles this better (hopefully obsoleteing this)
-class DateFormat 
+class QTOPIA_EXPORT DateFormat 
 {
 public:
     // date format type 001,010,100 = day month year
@@ -91,7 +97,7 @@ QDataStream &operator<<(QDataStream &s, const DateFormat&df);
 QDataStream &operator>>(QDataStream &s, DateFormat&df);
 #endif
 
-class TimeString
+class QTOPIA_EXPORT TimeString
 {
 public:
 

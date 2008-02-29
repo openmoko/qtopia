@@ -18,7 +18,7 @@
 **
 **********************************************************************/
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
 #include <qregexp.h>
 
@@ -38,10 +38,9 @@ shotsfired=0;
     cannonarray->readPixmaps(c0,17);
     setSequence(cannonarray);
     setFrame(index);
-    move(canvas->width()/2-20, canvas->height()-32);
-    // co ords for barrel of cannon when upright
-    barrelypos = canvas->height()-32;
-    barrelxpos = canvas->width()/2;
+
+    reposition();
+
     movedir = NoDir;
     moveDelay = 0;
     setAnimated(TRUE);
@@ -137,4 +136,15 @@ Cannon::~Cannon()
 int Cannon::rtti() const
 {
    return cannon_rtti;
+}
+
+void Cannon::reposition(void)
+{
+    move(canvas()->width()/2-20, canvas()->height()-32);
+    // co ords for barrel of cannon when upright
+    barrelypos = canvas()->height()-32;
+    barrelxpos = canvas()->width()/2;
+
+    setFrame(index);
+    setCoords();
 }

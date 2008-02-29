@@ -1,0 +1,76 @@
+<html>
+<title>
+Light and Power Settings Specification
+</title>
+
+<body>
+
+<h1>Light and Power Settings Specification</h1>
+
+<a name=description>
+</a>
+The Light and Power Settings control the display to save power.
+<p>
+The Light and Power Settings control the lighting of the display under different
+lighting and power supply conditions. It also controls the idle time required
+to have elapsed before certain power-saving levels are reached.
+</p>
+
+<p>
+Status: RT
+
+<a name=usecases>
+<h2>Use Cases</h2>
+</a>
+<ul>
+<li><b>Quick Suspend</b>
+    <p>
+    To help reduce power consumption while on battery power,
+    the user sets the device to dim the
+    light after 10 seconds of inactivity; after another 10 seconds, the
+    light turns off completely (but the screen is still visible by ambient light);
+    after another 10 seconds, the device enters a suspend mode. However, when
+    the device is on mains power, the user sets it to dim the display after 5
+    minutes, and not power down any further.
+<li><b>Network download</b>
+    <p>
+    While online with a slow connection, the user must often wait for
+    many minutes for downloads and other operations to complete. He therefore
+    configures his device to never suspend while the network is up.
+<li><b>Automatic light control</b>
+    <p>
+    The user configures the screen light to vary automatically based on
+    the amount of ambient light. This way, in dark places the light is low,
+    in medium-lit places it is bright, and in very bright places it is turned
+    off (for reflective displays).  (not implemented on current devices)
+</ul>
+
+<a name=features>
+<h2>Features</h2>
+</a>
+
+<ul>
+<li>Separate configs for battery and external power: a different configuration
+    of light and power settings is available depending on power source.
+<li>Backlight control: the backlight can be dimmed and turned off after set
+    periods of time.
+<li>Device suspend: the entire device can be powered down to sleep after a set
+    period of time.
+<li>Network influence: an option is provided to not power down if
+    a network is active.
+<li>Screen brightness: the intensity of the screen light can be adjusted.
+<li>Auto: if supported by device hardware, an option is provided to adjust the
+    intensity of the screen light automatically to compensate for ambient
+    lighting conditions (not implemented on current devices).
+</ul>
+
+<a name=prerequisites>
+<h2>Prerequisites</h2>
+</a>
+
+<ul>
+<li>For automatic light control, light sensor hardware is required.
+</ul>
+
+</body>
+</html>

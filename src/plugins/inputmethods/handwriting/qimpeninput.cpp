@@ -26,10 +26,10 @@
 #include "qimpenmatch.h"
 #include "qimpenhelp.h"
 
-#include <qpe/qpeapplication.h>
-#include <qpe/qdawg.h>
-#include <qpe/config.h>
-#include <qpe/global.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/qdawg.h>
+#include <qtopia/config.h>
+#include <qtopia/global.h>
 
 #include <qlayout.h>
 #include <qpushbutton.h>
@@ -63,7 +63,7 @@ static const char * const pen_xpm[] = {
 
 
 /* XPM */
-static char * bs_xpm[] = {
+static const char * const bs_xpm[] = {
 "12 12 5 1",
 " 	c None",
 ".	c #333333",
@@ -85,7 +85,7 @@ static char * bs_xpm[] = {
 
 
 /* XPM */
-static char * enter_xpm[] = {
+static const char * const enter_xpm[] = {
 "12 12 5 1",
 " 	c None",
 ".	c #333333",
@@ -108,7 +108,7 @@ static char * enter_xpm[] = {
 
 
 /* XPM */
-static char * help_xpm[] = {
+static const char * const help_xpm[] = {
 "12 12 5 1",
 " 	c None",
 ".	c #000000",
@@ -154,9 +154,9 @@ QIMPenInput::QIMPenInput( QWidget *parent, const char *name, WFlags f )
 	     this, SLOT(matchedCharacters(const QIMPenCharMatchList &)) );
     connect( matcher, SIGNAL(matchedWords(const QIMPenMatch::MatchWordList&)),
 	     wordPicker, SLOT(setWords(const QIMPenMatch::MatchWordList&)) );
-    QFont f("smallsmooth",9);
-    QFontInfo fi( f );
-    wordPicker->setFont( f );
+    QFont smoothFont("smallsmooth",9);
+    QFontInfo fi( smoothFont );
+    wordPicker->setFont( smoothFont );
     wordPicker->setBackgroundColor( white );
     gl->addMultiCellWidget( wordPicker, 0, 0, 0, 1 );
     if ( !Global::fixedDawg().root() || !matcher->isWordMatchingEnabled() )
@@ -307,10 +307,11 @@ void QIMPenInput::selectProfile( const QString &name )
 void QIMPenInput::wordPicked( const QString &w )
 {
     int bs = matcher->word().length();
-    for ( int i = 0; i < bs; i++ )
+    int i;
+    for ( i = 0; i < bs; i++ )
 	keypress( Qt::Key_Backspace << 16 );
 
-    for ( unsigned int i = 0; i < w.length(); i++ )
+    for ( i = 0; i < (int)w.length(); i++ )
 	keypress( w[i].unicode() );
 
     matcher->resetState();
@@ -483,7 +484,6 @@ void QIMPenInput::setup()
     if ( !setupDlg ) {
 	// We are working with our copy of the char sets here.
 	setupDlg = new QIMPenSetup( profile, 0, 0, TRUE );
-	setupDlg->editor()->selectCharSet( profile->charSets().at(1) );	// lower case? This is crap.
 	if ( qApp->desktop()->width() < 640 )
 	    setupDlg->showMaximized();
 	Global::hideInputMethod();

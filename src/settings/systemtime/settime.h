@@ -24,13 +24,12 @@
 #include <qdatetime.h>
 #include <qdialog.h>
 
-#include <qpe/timestring.h>
+#include <qtopia/timestring.h>
 
 class QToolButton;
 class QSpinBox;
 class QLabel;
 class TimeZoneSelector;
-class DateBookMonth;
 class QComboBox;
 class QPEDialogListener;
 
@@ -61,7 +60,7 @@ protected:
     QSpinBox *sbMin;
 };
 
-class DateButton;
+class QPEDateButton;
 
 class SetDateTime : public QDialog
 {
@@ -72,13 +71,14 @@ public:
 protected slots:
     void tzChange( const QString &tz );
     void formatChanged(int);
+    void weekStartChanged(int);
 
 protected:
     virtual void accept();
     virtual void done(int);
 
     SetTime *time;
-    DateButton *date;
+    QPEDateButton *date;
     TimeZoneSelector *tz;
     QComboBox *weekStartCombo;
     QComboBox *ampmCombo;

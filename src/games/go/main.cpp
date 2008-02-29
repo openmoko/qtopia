@@ -20,7 +20,7 @@
 
 #include "gowidget.h"
 
-#include <qpe/qpeapplication.h>
+#include <qtopia/qpeapplication.h>
 
 #include <stdio.h>
 

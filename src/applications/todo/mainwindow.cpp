@@ -24,31 +24,35 @@
 #include "todoentryimpl.h"
 #include "todotable.h"
 
-#include <qpe/applnk.h>
-#include <qpe/qpeapplication.h>
-#include <qpe/config.h>
-#include <qpe/finddialog.h>
-#include <qpe/global.h>
-#include <qpe/ir.h>
-#include <qpe/qpemenubar.h>
-#include <qpe/qpemessagebox.h>
-#include <qpe/resource.h>
-#include <qpe/pim/task.h>
-#include <qpe/qpetoolbar.h>
-#include <qpe/categoryselect.h>
-#include <qpe/categories.h>
+#include <qtopia/applnk.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/config.h>
+#include <qtopia/global.h>
+#include <qtopia/ir.h>
+#include <qtopia/qpemenubar.h>
+#include <qtopia/qpemessagebox.h>
+#include <qtopia/resource.h>
+#include <qtopia/pim/task.h>
+#include <qtopia/pim/private/taskio_p.h>
+#include <qtopia/qpetoolbar.h>
+#include <qtopia/categoryselect.h>
+#include <qtopia/categories.h>
+#include <qtopia/pim/contact.h>
 
 #include <qaction.h>
 #include <qarray.h>
 #include <qdatastream.h>
 #include <qdatetime.h>
+#if defined (Q_OS_WIN32)
+#include <qdir.h>
+#endif
 #include <qfile.h>
 #include <qmessagebox.h>
 #include <qpopupmenu.h>
-#include <qvbox.h>
 #include <qcombobox.h>
 #include <qlineedit.h>
 #include <qwhatsthis.h>
+#include <qlayout.h>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -57,8 +61,25 @@
 
 #include <stdlib.h>
 
-TodoWindow::TodoWindow( QWidget *parent, const char *name, WFlags f = 0 ) :
-    QMainWindow( parent, name, f )
+TodoSettings::TodoSettings(QWidget *parent, const char *name, bool modal, WFlags fl)
+    : QDialog(parent, name, modal, fl)
+{
+    setCaption("Configure columns to display");
+
+    QGridLayout *grid = new QGridLayout(this);
+    map = new FieldMap(this);
+    grid->addWidget(map, 0, 0);
+}
+
+void TodoSettings::setCurrentFields(const QValueList<int> &f)
+{
+    QMap<int,QString> m = PimTask::trFieldsMap();
+    m.remove( PimRecord::Categories );
+    map->setFields(m, f);
+}
+
+TodoWindow::TodoWindow( QWidget *parent, const char *name, WFlags f) :
+    QMainWindow( parent, name, f ), tasks(TaskIO::ReadWrite)
 {
 //     QTime t;
 //     t.start();
@@ -66,11 +87,16 @@ TodoWindow::TodoWindow( QWidget *parent, const char *name, WFlags f = 0 ) :
     setCaption( tr("Todo") );
     setBackgroundMode( PaletteButton );
 
-    QVBox *vb = new QVBox( this );
+    vb = new QVBox( this );
     
-    QString str;
-    table = new TodoTable( vb );
-    table->setColumnWidth( 2, 10 );
+    Config config( "todo" );
+    config.setGroup( "View" );
+    bool complete = config.readBoolEntry( "ShowComplete", true );
+    tasks.setCompletedFilter( !complete );
+
+    tView = 0;
+    table = new TodoTable(tasks.sortedTasks(), vb );
+    table->setSelectionMode( TodoTable::Extended );
     QWhatsThis::add( table, tr("List of tasks matching the completion and category filters.") );
 
     setCentralWidget( vb );
@@ -78,22 +104,16 @@ TodoWindow::TodoWindow( QWidget *parent, const char *name, WFlags f = 0 ) :
 
 //     qDebug("after load: t=%d", t.elapsed() );
     
-    Config config( "todo" );
-    config.setGroup( "View" );
-    bool complete = config.readBoolEntry( "ShowComplete", true );
-    table->setShowCompleted( complete );
-
     QPEToolBar *bar = new QPEToolBar( this );
     bar->setHorizontalStretchable( TRUE );
 
     QPEMenuBar *mb = new QPEMenuBar( bar );
 
     QPopupMenu *edit = new QPopupMenu( this );
-    contextMenu = new QPopupMenu( this );
 
     bar = new QPEToolBar( this );
 
-    QAction *a = new QAction( tr( "New Task" ), Resource::loadPixmap( "new" ),
+    QAction *a = new QAction( tr( "New Task" ), Resource::loadIconSet( "new" ),
 			      QString::null, 0, this, 0 );
     connect( a, SIGNAL( activated() ),
              this, SLOT( slotNew() ) );
@@ -107,7 +127,6 @@ TodoWindow::TodoWindow( QWidget *parent, const char *name, WFlags f = 0 ) :
     a->setWhatsThis( tr("Edit the highlighted task.") );
     a->addTo( bar );
     a->addTo( edit );
-    a->addTo( contextMenu );
     a->setEnabled( FALSE );
     editAction = a;
     a = new QAction( tr( "Delete" ), Resource::loadIconSet( "trash" ),
@@ -117,7 +136,6 @@ TodoWindow::TodoWindow( QWidget *parent, const char *name, WFlags f = 0 ) :
     a->setWhatsThis( tr("Delete the highlighted task.") );
     a->addTo( bar );
     a->addTo( edit );
-    a->addTo( contextMenu );
     a->setEnabled( FALSE );
     deleteAction = a;
 
@@ -144,8 +162,14 @@ TodoWindow::TodoWindow( QWidget *parent, const char *name, WFlags f = 0 ) :
     a->addTo( edit );
     findAction = a;
 
-    mb->insertItem( tr( "Task" ), edit );
+    QPopupMenu *view = new QPopupMenu(this);
+    view->insertItem( tr("Select All"), this, SLOT( selectAll() ) );
+    view->insertSeparator();
+    view->insertItem( tr("Configure headers"), this, SLOT( configure() ) );
 
+    mb->insertItem( tr( "Task" ), edit );
+    mb->insertItem( tr( "View" ), view );
+    
     // Search bar
     searchBar = new QPEToolBar(this);
     addToolBar( searchBar,  "Search", QMainWindow::Top, TRUE );
@@ -158,7 +182,7 @@ TodoWindow::TodoWindow( QWidget *parent, const char *name, WFlags f = 0 ) :
 	    this, SLOT(search()) );
     connect( searchEdit, SIGNAL(returnPressed()), this, SLOT(search()) );
 
-    a = new QAction( tr( "Find Next" ), Resource::loadPixmap( "next" ), QString::null, 0, this, 0 );
+    a = new QAction( tr( "Find Next" ), Resource::loadIconSet( "next" ), QString::null, 0, this, 0 );
     connect( a, SIGNAL(activated()), this, SLOT(search()) );
     a->setWhatsThis( tr("Find the next matching task.") );
     a->addTo( searchBar );
@@ -171,12 +195,10 @@ TodoWindow::TodoWindow( QWidget *parent, const char *name, WFlags f = 0 ) :
     QComboBox *cb = new QComboBox( hb );
     cb->insertItem( tr("Pending Tasks") );
     cb->insertItem( tr("All Tasks") );
-    cb->setCurrentItem( table->showCompleted() ? 1 : 0 );
+    cb->setCurrentItem( tasks.completedFilter() ? 0 : 1 );
     connect( cb, SIGNAL(activated(int)), this, SLOT(setShowCompleted(int)) );
     QWhatsThis::add( cb, tr("Show tasks with this completion status.") );
 
-    Categories c;
-    c.load(categoryFileName());
     QArray<int> vl( 0 );
     catSelect = new CategorySelect( hb );
     catSelect->setRemoveCategoryEdit( TRUE );
@@ -186,12 +208,10 @@ TodoWindow::TodoWindow( QWidget *parent, const char *name, WFlags f = 0 ) :
     QWhatsThis::add( catSelect, tr("Show tasks in this category.") );
 
     resize( 200, 300 );
-    if ( table->numRows() > 0 )
+    if ( table->hasCurrentEntry() )
         currentEntryChanged( 0, 0 );
-    connect( table, SIGNAL( signalEdit() ),
-             this, SLOT( slotEdit() ) );
-    connect( table, SIGNAL(signalShowMenu(const QPoint &)),
-	     this, SLOT( slotShowPopup(const QPoint &)) );
+    connect( table, SIGNAL( clicked() ),
+	    this, SLOT( slotDetailView() ) );
 
 //     qDebug("mainwindow #3: t=%d", t.elapsed() );
     connect( table, SIGNAL(findWrapAround()), this, SLOT(findWrapped()) );
@@ -202,39 +222,72 @@ TodoWindow::TodoWindow( QWidget *parent, const char *name, WFlags f = 0 ) :
     catSelect->setCurrentCategory( currCat );
     catSelected( currCat );
 
+    connect( table, SIGNAL( updateTask(const PimTask &) ),
+	     this, SLOT( updateEntry( const PimTask &) ) );
     connect( table, SIGNAL( currentChanged( int, int ) ),
              this, SLOT( currentEntryChanged( int, int ) ) );
 
 //     qDebug("done: t=%d", t.elapsed() );
+    connect(qApp, SIGNAL( appMessage(const QCString &, const QByteArray &) ), 
+	    this, SLOT( appMessage(const QCString &, const QByteArray &) ) );
+    connect(qApp, SIGNAL(reload()), this, SLOT(reload()));
+    connect(qApp, SIGNAL(flush()), this, SLOT(flush()));
 }
 
 TodoWindow::~TodoWindow()
 {
 }
 
+void TodoWindow::addEntry( const PimTask &todo )
+{
+    tasks.addTask( todo );
+    table->reload(tasks.sortedTasks());
+}
+
+void TodoWindow::removeEntry(const PimTask &todo )
+{
+    tasks.removeTask( todo );
+    table->reload(tasks.sortedTasks());
+}
+
+void TodoWindow::updateEntry(const PimTask &todo )
+{
+    tasks.updateTask( todo );
+    table->reload(tasks.sortedTasks());
+}
+
 void TodoWindow::appMessage(const QCString &msg, const QByteArray &data)
 {
     bool needShow = FALSE;
-    if ( msg == "addTask(PimTask)" ) {
+    if ( msg == "newTask()" ) {
+	slotNew();
+    } else if ( msg == "addTask(PimTask)" ) {
 	QDataStream stream(data,IO_ReadOnly);
 	PimTask c;
 	stream >> c;
-	table->addEntry(c);
+	addEntry(c);
     } else if ( msg == "removeTask(PimTask)" ) {
 	QDataStream stream(data,IO_ReadOnly);
 	PimTask c;
 	stream >> c;
-	table->removeEntry(c);
+	removeEntry(c);
     } else if ( msg == "updateTask(PimTask)" ) {
 	QDataStream stream(data,IO_ReadOnly);
 	PimTask c;
 	stream >> c;
-	table->updateEntry(c);
+	updateEntry(c);
     } else if ( msg == "showTask(QUuid)" ) {
 	// If we're in edit mode, we need to stay there (which we currently do)
 	QDataStream stream(data,IO_ReadOnly);
 	QUuid u;
 	stream >> u;
+
+	//
+	// Searching for the right category given just the uid may be
+	// expensive.  Default to the "All" category for now.
+	//
+	catSelect->setCurrentCategory(-2);
+	catSelected(catSelect->currentCategory());
 	table->setCurrentEntry(u);
 	needShow = TRUE;
     } else if ( msg == "receiveData(QString,QString)" ) {
@@ -245,7 +298,8 @@ void TodoWindow::appMessage(const QCString &msg, const QByteArray &data)
 	    if ( receiveFile(f) )
 		needShow = TRUE;
 	QFile::remove(f);
-    }
+    } 
+    
     if ( needShow ) {
 #if defined(Q_WS_QWS) || defined(_WS_QWS_)
 //	showMaximized();
@@ -258,6 +312,42 @@ void TodoWindow::appMessage(const QCString &msg, const QByteArray &data)
     }
 }
 
+void TodoWindow::slotListView()
+{
+    if ( !table->isVisible() ) {
+	todoView()->hide();
+	setCentralWidget( vb );
+	table->show();
+	table->setFocus();
+	setCaption( tr("Todo") );
+    }
+}
+
+void TodoWindow::slotDetailView()
+{
+    todoView()->init( table->currentEntry() );
+    showView();
+}
+
+TodoView* TodoWindow::todoView()
+{
+    if ( !tView )
+	tView = new TodoView(this);
+
+    return tView;
+}
+
+void TodoWindow::showView()
+{
+    if ( table->isVisible() ) {
+	table->hide();
+	setCentralWidget( todoView() );
+	tView->show();
+	tView->setFocus();  //To avoid events being passed to QTable
+	setCaption( tr("Task Details") );
+    }
+}
+
 void TodoWindow::slotNew()
 {
     int id;
@@ -267,6 +357,7 @@ void TodoWindow::slotNew()
     if ( ids.count() )
 	id = ids[0];
     NewTaskDialog e( id, this, 0, TRUE );
+    e.setCurrentCategory(catSelect->currentCategory());
 
     PimTask todo;
 
@@ -274,9 +365,10 @@ void TodoWindow::slotNew()
 
     if ( ret == QDialog::Accepted ) {
         todo = e.todoEntry();
-        table->addEntry( todo );
+        addEntry( todo );
 	findAction->setEnabled( TRUE );
         currentEntryChanged( 0, 0 );
+	slotListView();
     }
 }
 
@@ -287,14 +379,46 @@ void TodoWindow::slotDelete()
 
     QString strName = table->currentEntry().description().left(30);
 
-    if ( !QPEMessageBox::confirmDelete( this, tr( "Todo" ),
+    if ( table->selectionMode() == TodoTable::Extended ) {
+	QValueList<QUuid> t = table->selectedTasks();
+	
+	if ( !t.count() ) return;
+	
+	QString str;
+	if ( t.count() > 1 )
+	    str = QString("Are you sure you want to delete the %1 selected tasks?").arg( t.count() );
+	else
+	    str = QString("Are you sure you want to delete:\n%1?").arg( table->currentEntry().description().left(30)  );
+
+	switch( QMessageBox::warning( this, tr("Todo"), tr(str), tr("Yes"), tr("No"), 0, 0, 1 ) ) {
+	    case 0:
+	    {
+		deleteTasks(t);
+		currentEntryChanged(0, 0);
+		slotListView();
+	    }
+	    break;
+	    case 1: break;
+	}
+    } else if ( QPEMessageBox::confirmDelete( this, tr( "Todo" ),
 	strName.simplifyWhiteSpace() ) ) {
 	return;
+	
+	removeEntry( table->currentEntry() );
+	currentEntryChanged(0, 0);
+	slotListView();
     }
+}
 
-    table->removeCurrentEntry();
-
-    currentEntryChanged(0, 0);
+void TodoWindow::deleteTasks(const QValueList<QUuid> &t)
+{
+    for (QValueList<QUuid>::ConstIterator it = t.begin(); it != t.end(); ++it) {
+	PrTask t;
+	t.setUid( *it );
+	tasks.removeTask(t);
+    }
+    
+    table->reload( tasks.sortedTasks() );
 }
 
 void TodoWindow::slotEdit()
@@ -308,26 +432,23 @@ void TodoWindow::slotEdit()
 
     if ( ret == QDialog::Accepted ) {
         todo = e.todoEntry();
-	table->updateEntry( todo );
+	updateEntry( todo );
+	slotListView();
     }
-
-}
-
-void TodoWindow::slotShowPopup( const QPoint &p )
-{
-    contextMenu->popup( p );
+    
 }
 
 void TodoWindow::setShowCompleted( int s )
 {
     if ( !table->isUpdatesEnabled() )
 	return;
-    table->setShowCompleted( s == 1 );
+    tasks.setCompletedFilter( s != 1 );
+    table->reload(tasks.sortedTasks());
 }
 
-void TodoWindow::currentEntryChanged( int r, int )
+void TodoWindow::currentEntryChanged( int , int )
 {
-    bool    entrySelected = table->numRows() > 0;
+    bool entrySelected = table->hasCurrentEntry();
 
     editAction->setEnabled(entrySelected);
     deleteAction->setEnabled(entrySelected);
@@ -342,36 +463,46 @@ void TodoWindow::reload()
 {
     QArray<int> vl( 0 );
     catSelect->setCategories( vl, "Todo List", tr("Todo List") );
-    table->reload();
+    catSelect->setAllCategories( TRUE );
+    
+    tasks.ensureDataCurrent(TRUE);
+    catSelected( catSelect->currentCategory() );
 }
 
 void TodoWindow::flush()
 {
-    table->flush();
+    tasks.saveData();
 }
 
 void TodoWindow::catSelected( int c )
 {
-    table->setShowCategory( c );
+    tasks.setFilter( c );
     setCaption( tr("Todo") + " - " + table->categoryLabel( c ) );
+    table->reload(tasks.sortedTasks());
     currentEntryChanged(0, 0);
 }
 
 void TodoWindow::closeEvent( QCloseEvent *e )
 {
-    e->accept();
-    // repeat for categories...
-    // if writing configs fail, it will emit an
-    // error, but I feel that it is "ok" for us to exit
-    // espically since we aren't told if the write succeeded...
-    Config config( "todo" );
-    config.setGroup( "View" );
-    config.writeEntry( "ShowComplete", table->showCompleted() );
-    config.writeEntry( "Category", table->showCategory() );
+    if ( !table->isVisible() ) {
+	slotListView();
+	e->ignore();
+    } else {
+	e->accept();
+	// repeat for categories...
+	// if writing configs fail, it will emit an
+	// error, but I feel that it is "ok" for us to exit
+	// espically since we aren't told if the write succeeded...
+	Config config( "todo" );
+	config.setGroup( "View" );
+	config.writeEntry( "ShowComplete", !tasks.completedFilter() );
+	config.writeEntry( "Category", tasks.filter() );
+    }
 }
 
 void TodoWindow::slotFind( bool s )
 {
+    slotListView();
     if ( s ) {
 	searchBar->show();
 	searchEdit->setFocus();
@@ -385,7 +516,7 @@ void TodoWindow::slotFind( bool s )
 
 void TodoWindow::search()
 {
-    table->slotDoFind( searchEdit->text(), table->showCategory() );
+    table->slotDoFind( searchEdit->text(), tasks.filter() );
 }
 
 void TodoWindow::findNotFound()
@@ -422,7 +553,7 @@ bool TodoWindow::receiveFile( const QString &filename )
     if ( QMessageBox::information(this, tr("New Tasks"),
 	    msg, QMessageBox::Ok, QMessageBox::Cancel)==QMessageBox::Ok ) {
 	for( QValueList<PimTask>::Iterator it = tl.begin(); it != tl.end(); ++it ) {
-	    table->addEntry( *it );
+	    addEntry( *it );
 	}
 	return TRUE;
     }
@@ -433,13 +564,36 @@ static const char * beamfile = "/tmp/obex/todo.vcs";
 
 void TodoWindow::slotBeam()
 {
+    if ( !table->hasCurrentEntry() ) {
+	qWarning("todo::slotBeam called with nothing to beam");
+	return;
+    }
+    
+    QString description;
+
     unlink( beamfile ); // delete if exists
     PimTask c = table->currentEntry();
+#ifndef Q_OS_WIN32
     mkdir("/tmp/obex/", 0755);
-    PimTask::writeVCalendar( beamfile, c );
+#else
+    QDir d;
+    d.mkdir("/tmp/obex");
+#endif
+    if ( table->selectionMode() == TodoTable::Extended ) {
+	QValueList<PimTask> l = table->selected();
+	PimTask::writeVCalendar( beamfile, l );
+	
+	if ( l.count() > 1 )
+	    description = QString("the %1 selected tasks").arg( l.count() );
+	else
+	    description = c.description();
+    } else {
+	PimTask::writeVCalendar( beamfile, c );
+	description = c.description();
+    }
+    
     Ir *ir = new Ir( this );
     connect( ir, SIGNAL( done( Ir * ) ), this, SLOT( beamDone( Ir * ) ) );
-    QString description = c.description();
     ir->send( beamfile, description, "text/x-vCalendar" );
 }
 
@@ -448,3 +602,19 @@ void TodoWindow::beamDone( Ir *ir )
     delete ir;
     unlink( beamfile );
 }
+
+void TodoWindow::configure()
+{
+    TodoSettings settings(this, "", TRUE);
+    settings.setCurrentFields( table->fields() );
+    if ( QPEApplication::execDialog(&settings) == QDialog::Accepted ) {
+	table->setFields( settings.fields() );
+	table->reload( tasks.sortedTasks() );
+    }
+}
+
+void TodoWindow::selectAll()
+{
+    table->selectAll();
+}
+

@@ -20,20 +20,22 @@
 #ifndef QMATH_H
 #define QMATH_H
 
+#include <qtopia/qpeglobal.h>
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-double qSqrt( double value );
-double qSin( double a );
-double qCos( double a );
-double qATan2( double y, double x );
-double qATan( double a );
-double qASin( double a );
-double qTan( double a );
-double qFloor( double a );
-double qFabs( double a );
+QTOPIA_EXPORT double qSqrt( double value );
+QTOPIA_EXPORT double qSin( double a );
+QTOPIA_EXPORT double qCos( double a );
+QTOPIA_EXPORT double qATan2( double y, double x );
+QTOPIA_EXPORT double qATan( double a );
+QTOPIA_EXPORT double qASin( double a );
+QTOPIA_EXPORT double qTan( double a );
+QTOPIA_EXPORT double qFloor( double a );
+QTOPIA_EXPORT double qFabs( double a );
 
 #ifdef __cplusplus
 }

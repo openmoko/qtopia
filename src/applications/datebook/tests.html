@@ -1,0 +1,52 @@
+<html>
+<title>
+Calendar Test List
+</title>
+
+<body>
+
+<h1>Calendar Test List</h1>
+
+
+<a name=features>
+<h2>Feature Tests</h2>
+</a>
+<!-- feature tests correspond 1-to-1 with features
+
+    Note: TITLEs may be used as identifiers in bug reports.
+-->
+
+<h3>Each repeat pattern is correct at a frequency of 1, 2, and 3.</h3>
+For each repeat type (or repeat type combination) should test that the pattern is
+correct in each view for a frequency of 1, 2, or 3.  This includes the
+"Gray" area of the month view.
+
+<h3>Weekly repeat pattern</h3>
+Weekly repeat patterns need to be tested starting on Saturdays, Sundays,
+and some other day of the week.  For each of these should also test on
+the combination of Saturdays, Sundays and some other day of the week.
+
+<h3>Alarms should work with respect to timezone and repeats</h3>
+Alarm testing should include both timezone shifted events and
+recurring events on the initial occurrance and following occurances.
+
+<h3>Beaming of an event</h3>
+Beaming of events should both send and recieve all corresponding fields
+as well as result in a sensible representation on the destination device.
+
+Because of various feature patterns, not all recurring patterns should be
+expected to match excactly on a send or receive.
+
+<h3>AllDay events time-zone independent</h3>
+All day events should not change date when changing the locale of the device,
+and should have different representations in the views from events which are not
+all day events.
+
+<h3>Midnight events</h3>
+Events should be tested over end of day, end of week and end of month boundries.
+This includes events that cross boundries in their local timezone and ones that
+only cross boundries in alturnate timezones.  Testing should be done with
+both allday and non-allday events.
+
+</body>
+</html>

@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/src/libraries/qtopiapim/datebookaccess.cpp:31 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/src/libraries/qtopiapim/datebookaccess.cpp:40 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -48,8 +48,8 @@ body { background: #ffffff; color: black; }
 
 The DateBookAccess class provides a safe API for accessing PimEvents.
 <p> DateBookAccess provides a safe API for accessing PimEvents stored by
-Qtopia's Datebook application.  DateBookAccess tries to keep the Datebook 
-application in sync with modifications, and alerts the user of 
+Qtopia's Datebook application.  DateBookAccess tries to keep the Datebook
+application in sync with modifications, and alerts the user of
 the library when modifications ahve been made by other applications.
 <p>See also <a href="qpepim.html">QPEPIM Library</a>.
 
@@ -64,9 +64,9 @@ Cleans up the the DataBookAccess.
 
 <h3 class=fn>void <a name="addEvent"></a>DateBookAccess::addEvent ( const&nbsp;<a href="pimevent.html">PimEvent</a>&nbsp;&amp;&nbsp;ev )
 </h3>
-If supported will assign a new unique ID to <em>ev</em> and add the event to 
+If supported will assign a new unique ID to <em>ev</em> and add the event to
 the pim data.
-<p> Adding event requires the EditEvents service to be available.
+<p> Adding event requires the Events service to be available.
 
 <h3 class=fn>void <a name="dateBookUpdated"></a>DateBookAccess::dateBookUpdated ()<tt> [signal]</tt>
 </h3> 
@@ -76,18 +76,18 @@ Emitted whenever the datebook is updated.
 </h3>
 Returns TRUE if it is possible to add, remove and update events in
 the pim data.  Otherwise returns FALSE.
-<p> Adding, removing and updating events requires the EditEvents service to be
+<p> Adding, removing and updating events requires the Events service to be
 available
 
 <h3 class=fn>void <a name="removeEvent"></a>DateBookAccess::removeEvent ( const&nbsp;<a href="pimevent.html">PimEvent</a>&nbsp;&amp;&nbsp;ev )
 </h3>
 If supported will remove event <em>ev</em> from the pim data.
-<p> Removing events requires the EditEvents service to be available.
+<p> Removing events requires the Events service to be available.
 
 <h3 class=fn>void <a name="updateEvent"></a>DateBookAccess::updateEvent ( const&nbsp;<a href="pimevent.html">PimEvent</a>&nbsp;&amp;&nbsp;event )
 </h3>
 If supported will update <em>event</em> in the pim data.
-<p> Updating events requires the EditEvents service to be available.
+<p> Updating events requires the Events service to be available.
 
 <!-- eof -->
 <hr><p>

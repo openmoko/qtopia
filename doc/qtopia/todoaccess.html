@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/src/libraries/qtopiapim/todoaccess.cpp:31 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/src/libraries/qtopiapim/todoaccess.cpp:37 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -48,8 +48,8 @@ body { background: #ffffff; color: black; }
 
 The TodoAccess class provides a safe API for accessing PimTasks.
 <p> TodoAccess provides a safe API for accessing PimTasks stored by
-Qtopia's Todo application.  TodoAccess tries to keep the Todo 
-application in sync with modifications, and alerts the user of 
+Qtopia's Todo application.  TodoAccess tries to keep the Todo
+application in sync with modifications, and alerts the user of
 the library when modifications have been made by other applications.
 <p>See also <a href="qpepim.html">QPEPIM Library</a>.
 
@@ -64,21 +64,21 @@ Cleans up the the Addressbook access.
 
 <h3 class=fn>void <a name="addTask"></a>TodoAccess::addTask ( const&nbsp;<a href="pimtask.html">PimTask</a>&nbsp;&amp;&nbsp;task )
 </h3>
-If supported will assign a new unique ID to <em>task</em> and add the task to the 
+If supported will assign a new unique ID to <em>task</em> and add the task to the
 pim data.
-<p> Adding tasks requires the EditTasks service to be available.
+<p> Adding tasks requires the Tasks service to be available.
 
 <h3 class=fn>bool <a name="editSupported"></a>TodoAccess::editSupported () const
 </h3>
 Returns TRUE if it is possible to add, remove and update tasks in
 the pim data.  Otherwise returns FALSE.
-<p> Adding, removing and tasks contacts requires the EditTasks service to be
+<p> Adding, removing and tasks contacts requires the Tasks service to be
 available
 
 <h3 class=fn>void <a name="removeTask"></a>TodoAccess::removeTask ( const&nbsp;<a href="pimtask.html">PimTask</a>&nbsp;&amp;&nbsp;task )
 </h3>
 If supported will remove <em>task</em> from the pim data;
-<p> Removing tasks requires the EditTasks service to be available.
+<p> Removing tasks requires the Tasks service to be available.
 
 <h3 class=fn>void <a name="todoListUpdated"></a>TodoAccess::todoListUpdated ()<tt> [signal]</tt>
 </h3>
@@ -88,7 +88,7 @@ Emitted whenever the addressbook is updated.
 <h3 class=fn>void <a name="updateTask"></a>TodoAccess::updateTask ( const&nbsp;<a href="pimtask.html">PimTask</a>&nbsp;&amp;&nbsp;task )
 </h3>
 If supported will update <em>task</em> in the pim data.
-<p> Updating tasks requires the EditTasks service to be available.
+<p> Updating tasks requires the Tasks service to be available.
 
 <!-- eof -->
 <hr><p>

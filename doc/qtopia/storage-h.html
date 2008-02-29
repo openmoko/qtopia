@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/include/qtopia/storage.h:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/include/qtopia/storage.h:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -50,6 +50,7 @@ body { background: #ffffff; color: black; }
 #ifndef __storage_h__
 #define __storage_h__
 
+#include &lt;qtopia/qpeglobal.h&gt;
 #include &lt;qobject.h&gt;
 #include &lt;qlist.h&gt;
 
@@ -58,7 +59,14 @@ class FileSystem;
 class QCopChannel;
 #endif
 
-class StorageInfo : public QObject
+
+#if defined (QTOPIA_TEMPLATEDLL)
+//MOC_SKIP_BEGIN
+template class QTOPIA_EXPORT QList&lt;FileSystem&gt;;
+//MOC_SKIP_END
+#endif
+
+class QTOPIA_EXPORT StorageInfo : public QObject
 {
     Q_OBJECT
 public:
@@ -66,7 +74,7 @@ public:
 
     const QList&lt;FileSystem&gt; &amp;fileSystems() const { return mFileSystems; }
     const FileSystem *fileSystemOf( const QString &amp;filename );
-    QStringList fileSystemStrings() const;
+    QStringList fileSystemStrings() const; // libqtopia
 
 signals:
     void disksChanged();
@@ -83,7 +91,7 @@ private:
 #endif
 };
 
-class FileSystem
+class QTOPIA_EXPORT FileSystem
 {
 public:
     const QString &amp;disk() const { return fsdisk; }
@@ -113,6 +121,7 @@ private:
 
 
 // Useful for construction a QComboBox from the Storage Info list
+/*
 inline QStringList StorageInfo::fileSystemStrings() const
 {
     QListIterator&lt;FileSystem&gt; it( mFileSystems );
@@ -121,6 +130,7 @@ inline QStringList StorageInfo::fileSystemStrings() const
 	strings &lt;&lt; (*it)-&gt;name();
     return strings;
 }
+*/
 
 #endif
 </pre>

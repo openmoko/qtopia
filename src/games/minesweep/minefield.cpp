@@ -19,7 +19,8 @@
 **********************************************************************/
 #include "minefield.h"
 
-#include <qpe/config.h>
+#include <qtopia/config.h>
+#include <qtopia/qpeapplication.h>
 
 #include <qpainter.h>
 #include <qdrawutil.h>
@@ -69,7 +70,7 @@ static const char *pix_mine[]={
 
 
 static const int maxGrid = 28;
-static const int minGrid = 9;
+static const int minGrid = 12;
 
 
 
@@ -184,7 +185,9 @@ void Mine::paint( QPainter* p, const QColorGroup &cg, const QRect& cr )
 {
     int x = cr.x();
     int y = cr.y();
-    if ( !knownField ) {
+    if ( !knownField || knownField->width() != cr.width() ||
+	 knownField->height() != cr.height() ) {
+	delete knownField;
 	knownField = new QPixmap( cr.width(), cr.height() );
 	QPainter pp( knownField );
 	QBrush br( cg.button().dark(115) );
@@ -193,19 +196,25 @@ void Mine::paint( QPainter* p, const QColorGroup &cg, const QRect& cr )
 
     const int pmmarg=cr.width()/5;
 
-    if ( !unknownField ) {
+    if ( !unknownField || unknownField->width() != cr.width() ||
+         unknownField->height() != cr.height() ) {
+	delete unknownField;
 	unknownField = new QPixmap( cr.width(), cr.height() );
 	QPainter pp( unknownField );
 	QBrush br( cg.button() );
 	qDrawWinButton( &pp, cr, cg, FALSE, &br );
     }
 
-    if ( !flag_pix ) {
+    if ( !flag_pix || flag_pix->width() != cr.width()-pmmarg*2 ||
+	 flag_pix->height() != cr.height()-pmmarg*2 ) {
+	delete flag_pix;
 	flag_pix = new QPixmap( cr.width()-pmmarg*2, cr.height()-pmmarg*2 );
 	flag_pix->convertFromImage( QImage(pix_flag).smoothScale(cr.width()-pmmarg*2, cr.height()-pmmarg*2) );
     }
 
-    if ( !mine_pix ) {
+    if ( !mine_pix || mine_pix->width() != cr.width()-pmmarg*2 ||
+	 mine_pix->height() != cr.height()-pmmarg*2 ) {
+	delete mine_pix;
 	mine_pix = new QPixmap( cr.width()-pmmarg*2, cr.height()-pmmarg*2 );
 	mine_pix->convertFromImage( QImage(pix_mine).smoothScale(cr.width()-pmmarg*2, cr.height()-pmmarg*2) );
     }
@@ -334,9 +343,9 @@ void MineField::setup( int level )
 	minecount = 12;
 	break;
     case 2:
-	numRows = 16;
-	numCols = 16;
-	minecount = 45;
+	numRows = 13;
+	numCols = 13;
+	minecount = 33;
 	break;
     case 3:
 	numCols = 18;
@@ -344,7 +353,7 @@ void MineField::setup( int level )
 	minecount = 66 ;
 	break;
     }
-    mines = new (Mine*)[numRows*numCols];
+    mines = new Mine* [numRows*numCols];
     for ( i = 0; i < numCols*numRows; i++ )
 	mines[i] = new Mine( this );
 
@@ -398,8 +407,8 @@ void MineField::setAvailableRect( const QRect &r )
 
 int MineField::findCellSize()
 {
-    int w = availableRect.width() - 1;
-    int h = availableRect.height() - 1;
+    int w = availableRect.width() - 2;
+    int h = availableRect.height() - 2;
     int cellsize;
     
     cellsize = QMIN( w/numCols, h/numRows );
@@ -412,18 +421,23 @@ void MineField::setCellSize( int cellsize )
 {
     cellSize = cellsize;
     
-    int w = availableRect.width();
-    int h = availableRect.height();
+    int b = 2;
     
     int w2 = cellsize*numCols;
     int h2 = cellsize*numRows;
     
+    int w = QMIN( availableRect.width(), w2+b );
+    int h = QMIN( availableRect.height(), h2+b );
+    
     resizeContents( w2, h2 );
+
+    if ( availableRect.height() < h2 &&
+	 availableRect.width() - w > style().scrollBarExtent().width() ) {
+	w += style().scrollBarExtent().width();
+    }
     
-    int b = 2;
-    
-    setGeometry( availableRect.x() + (w-w2)/2, availableRect.y() + (h-h2)/2,
-		 QMIN(w,w2+b), QMIN(h,h2+b) );
+    setGeometry( availableRect.x() + (availableRect.width()-w)/2,
+	    availableRect.y() + (availableRect.height()-h)/2, w, h );
 }
 
 
@@ -671,11 +685,12 @@ void MineField::readConfig(Config& cfg)
     ignoreClick = FALSE;
     currRow = currCol = 0;
     QString grid = cfg.readEntry("Grid");
+    int x;
     if ( !grid.isEmpty() ) {
 	int i=0;
 	minecount=0;
 	mineguess=0;
-	for ( int x = 0; x < numCols; x++ ) {
+	for ( x = 0; x < numCols; x++ ) {
 	    for ( int y = 0; y < numRows; y++ ) {
 		char code='A'+(x*17+y*101)%21; // Reduce the urge to cheat
 		int st = (char)(QChar)grid[i++]-code;
@@ -701,7 +716,7 @@ void MineField::readConfig(Config& cfg)
 		}
 	    }
 	}
-	for ( int x = 0; x < numCols; x++ ) {
+	for ( x = 0; x < numCols; x++ ) {
 	    for ( int y = 0; y < numRows; y++ ) {
 		Mine* m = mine( y, x );
 		if ( m->state() == Mine::Empty )
@@ -711,5 +726,13 @@ void MineField::readConfig(Config& cfg)
     }
     setState( Playing );
     emit mineCount( mineguess );
+}
+
+QSize MineField::sizeHint() const
+{
+    if ( qApp->desktop()->width() >= 240 )
+	return QSize(200,200);
+    else
+	return QSize(160, 160);
 }
 

@@ -20,7 +20,7 @@
 
 #include "unikeyboard.h"
 
-#include <qpe/fontmanager.h>
+#include <qtopia/fontmanager.h>
 
 #include <qpainter.h>
 #include <qfontmetrics.h>

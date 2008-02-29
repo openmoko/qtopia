@@ -29,7 +29,7 @@
 #include <qtopia/pim/event.h>
 
 class EventIO;
-class PrEvent : public PimEvent {
+class QTOPIAPIM_EXPORT PrEvent : public PimEvent {
 public:
     PrEvent() : PimEvent() {}
     PrEvent(const PrEvent &t) : PimEvent(t) {}
@@ -47,10 +47,18 @@ public:
     void setStartAsUTC(time_t t) { PimEvent::setStartAsUTC(t); }
     void setEndAsUTC(time_t t) { PimEvent::setEndAsUTC(t); }
     void setRepeatTillAsUTC(time_t t) { PimEvent::setRepeatTillAsUTC(t); }
+
+    const QValueList<QDate> &exceptions() const { return mExceptions; }
+    const QValueList<QUuid> &childUids() const { return mChildren; }
+    QUuid parentUid( ) const { return mParent; }
+
+    void addException( const QDate &d ) { mExceptions.append(d); }
+    void addChildUid( const QUuid &u ) { mChildren.append(u); }
+    void setParentUid( const QUuid &u ) { mParent = u; }
 };
 
 
-class EventIteratorMachine : public QShared
+class QTOPIAPIM_EXPORT EventIteratorMachine : public QShared
 {
 public:
     virtual ~EventIteratorMachine() {}
@@ -66,14 +74,15 @@ public:
     virtual const PrEvent *current() const = 0;
 };
 
-class EventIO : public QObject {
+class QTOPIAPIM_EXPORT EventIO : public QObject {
 
 Q_OBJECT
 
 public:
     enum AccessMode {
 	ReadOnly,
-	ReadWrite
+	ReadWrite,
+	WriteOnly
     };
 
     EventIO(AccessMode m) : amode(m) { }

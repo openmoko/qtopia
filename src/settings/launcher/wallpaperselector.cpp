@@ -19,10 +19,10 @@
 **********************************************************************/
 
 #include "wallpaperselector.h"
-#include <qpe/qpeapplication.h>
-#include <qpe/resource.h>
-#include <qpe/global.h>
-#include <qpe/applnk.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/resource.h>
+#include <qtopia/global.h>
+#include <qtopia/applnk.h>
 #include <qdir.h>
 #include <qlistbox.h>
 #include <qbuttongroup.h>

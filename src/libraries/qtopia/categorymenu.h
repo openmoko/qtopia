@@ -21,13 +21,14 @@
 #ifndef __CATEGORYMENU_H__
 #define __CATEGORYMENU_H__
 
+#include <qtopia/qpeglobal.h>
 #include <qpopupmenu.h>
 #include <qstring.h>
 #include <qarray.h>
 #include <qmap.h>
 
 class CategoryMenuPrivate;
-class CategoryMenu : public QPopupMenu
+class QTOPIA_EXPORT CategoryMenu : public QPopupMenu
 {
     Q_OBJECT
 public:
@@ -60,5 +61,8 @@ private:
 
     CategoryMenuPrivate *d;
 };
+
+#define QTOPIA_DEFINED_CATEGORYMENU
+#include <qtopia/qtopiawinexport.h>
 
 #endif

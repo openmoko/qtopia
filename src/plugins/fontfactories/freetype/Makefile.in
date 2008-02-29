@@ -5,10 +5,10 @@
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
-INCPATH =	-I$(QTDIR)/src/3rdparty/freetype/include -I$(QTDIR)/src/3rdparty/freetype/include/freetype/config -I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+INCPATH =	-I$(MOC_DIR) -I$(QTDIR)/src/3rdparty/freetype/include -I$(QTDIR)/src/3rdparty/freetype/include/freetype/config
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
-LIBS	=	$(SUBLIBS) -lqpe -lfreetype $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
+LIBS	=	$(SUBLIBS) -lfreetype -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
 UIC	=	$(SYSCONF_UIC)
 
@@ -28,8 +28,8 @@ HEADERS =	fontfactoryttf_qws.h \
 		qfontdata_p.h
 SOURCES =	fontfactoryttf_qws.cpp \
 		freetypefactoryimpl.cpp
-OBJECTS =	fontfactoryttf_qws.o \
-		freetypefactoryimpl.o
+OBJECTS =	$(OBJECTS_DIR)/fontfactoryttf_qws.o \
+		$(OBJECTS_DIR)/freetypefactoryimpl.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
@@ -100,17 +100,15 @@ REQUIRES=
 
 ####### Compile
 
-fontfactoryttf_qws.o: fontfactoryttf_qws.cpp \
+$(OBJECTS_DIR)/fontfactoryttf_qws.o: fontfactoryttf_qws.cpp \
 		fontfactoryttf_qws.h \
 		qfontdata_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/fontfactoryttf_qws.o fontfactoryttf_qws.cpp
 
-freetypefactoryimpl.o: freetypefactoryimpl.cpp \
+$(OBJECTS_DIR)/freetypefactoryimpl.o: freetypefactoryimpl.cpp \
 		fontfactoryttf_qws.h \
 		qfontdata_p.h \
-		freetypefactoryimpl.h \
-		$(QPEDIR)/include/qtopia/fontfactoryinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h
+		freetypefactoryimpl.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/freetypefactoryimpl.o freetypefactoryimpl.cpp
 
 

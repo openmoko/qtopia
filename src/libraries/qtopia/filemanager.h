@@ -20,6 +20,7 @@
 #ifndef FILEMANAGER_H
 #define FILEMANAGER_H
 
+#include <qtopia/qpeglobal.h>
 #include <qstring.h>
 #include <qstringlist.h>
 
@@ -27,7 +28,7 @@ class AppLnk;
 class DocLnk;
 class FileManagerPrivate;
 
-class FileManager
+class QTOPIA_EXPORT FileManager
 {
 public:
     FileManager();

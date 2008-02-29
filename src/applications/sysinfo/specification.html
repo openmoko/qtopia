@@ -1,0 +1,145 @@
+<html>
+<title>
+System Info Specification
+</title>
+
+<body>
+
+<h1>System Info Specification</h1>
+
+
+<!--
+<h2>Specification goals</h2>
+This specification:
+<ol>
+<li> Describes all of the end-user stories and interactions.
+    (eg. the user can view a slide show of images from a digital camera).
+<li> Lists all features, derived from end-user stories,
+    in enough detail to allow the definition of
+    tests for all features.
+<li> Defines contraints and limitations on the application.
+    (eg. can view image sizes as large as 1MB).
+<li>Aides the developer on focusing on the most important aspects of
+    the application and ensuring all important elements are completed.
+</ol>
+-->
+
+<a name=description>
+</a>
+<!-- A one-line description of what this application is and does.
+    This description is then duplicated in the .desktop Comment and
+    the .control file description.
+
+    (eg. The image viewer allows viewing and very minor editing of image files.)
+-->
+The System Info application shows information about the system.
+<!-- A one-paragraph description of what this application is and does.
+    This description is then duplicated in the .desktop Comment and
+    the .control file description.
+
+    (eg. The image viewer allows viewing and very minor editing
+    of image files. It assists format conversion, beaming logos
+    to phones, captioning, etc.)
+-->
+<p>
+System Info allows the user to view the state of the running system
+and various other information.
+
+</p>
+
+<p>
+Status: RT
+</p>
+
+<a name=usecases>
+<h2>Use Cases</h2>
+</a>
+<!-- Describe real-world stories. Implicit in these use cases is
+	"these things are easy to do".
+    (eg.
+	Roving News Reporter
+
+	The journalist/cameraman takes photos with a digital camera,
+	loads them into the PDAs via CF card, adjusts the contrast,
+	blacks-out a license plate, adds a copyright caption, and
+	emails the image and short story to Reuters.
+    )
+
+    Note: TITLEs may be used as identifiers in bug reports.
+ -->
+<ul>
+<li><b>Resolving an error</b>
+    <p>Something doesn't work quite right, so the user starts the
+System Info application. She looks at the Memory view and sees that
+there is plenty of free memory, then switches to the Storage view to
+check that Internal Storage isn't full. Finally she switches to the
+Version view to find the version of the system to submit a bug report.
+
+<li><b>If the system is slow</b>
+    <p>A bored product marketing manager is playing Asteroids, but the
+    game feels slow. He fires up system info and switches to the CPU
+    information view.  It shows that system CPU usage is low, so he knows
+    that there is no other application using all the CPU. He then
+    switches to the Memory view and sees that there is no free memory
+    and very little cached memory.  The user therefore turns off
+    fast-loading on his todo-list with 5000 items in it, and this
+    frees up enough memory to make the game fast and responsive.
+
+</ul>
+
+<a name=features>
+<h2>Features</h2>
+</a>
+<!-- features are brief
+
+    (eg. 
+	* Slide show: view multiple images in sequence
+	    * Configurable delay between images.
+	    * Hardware-button-controlled stepping between images.
+	* Big images: view larger-than-available-RAM images in some formats.
+	* Formats: view JPEG, PNG, GIF format images.
+	* Scribbling: draw black or white lines on images.
+	* Save: in JPEG, PNG formats.
+    )
+
+    Note: TITLEs may be used as identifiers in bug reports.
+-->
+
+<ul>
+<li>Memory info: Shows how much memory is used, buffered, cached or free.
+<li>Storage inf: Shows how much space is left in internal storage and in
+	    each of the removable media.
+<li>CPU info: Shows how much of the CPU is being used by applications and
+	      by the operating system.
+<li>Version info: Shows the version number and vendor of Qtopia, the operating
+		system and optionally other components.
+</ul>
+
+<a name=prerequisites>
+<h2>Prerequisites</h2>
+</a>
+<!--
+    Describes unresolved limitations that cannot
+    be shown within the features list.
+
+    Describes memory and other requirements quantitatively.
+
+    This is a short list, mainly intended as a "known bugs"
+    list for missing features.
+
+    (eg.
+	* Stylus: required for Scribbling.
+	* Memory: requires 250 bytes per event, plus content strings.
+    )
+
+    Note: TITLEs may be used as identifiers in bug reports.
+
+<ul>
+<li>[PREREQUISITE TITLE]: [PREREQUISITE DETAILS]
+<li>[PREREQUISITE TITLE]: [PREREQUISITE DETAILS]
+<li>[PREREQUISITE TITLE]: [PREREQUISITE DETAILS]
+</ul>
+--> None.
+
+</body>
+</html>

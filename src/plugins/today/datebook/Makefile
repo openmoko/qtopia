@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,10 +118,10 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
-INCPATH =	-I$(QPEDIR)/include -I.. -I../library
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+INCPATH =	-I$(MOC_DIR) -I.. -I../library
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
-LIBS	=	$(SUBLIBS) -lqpe -lqpepim $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
+LIBS	=	$(SUBLIBS) -lqpepim -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
 UIC	=	$(SYSCONF_UIC)
 
@@ -136,19 +142,19 @@ HEADERS =	datebookplugin.h \
 SOURCES =	datebookplugin.cpp \
 		datebookpluginimpl.cpp \
 		datebookpluginoptions.cpp
-OBJECTS =	datebookplugin.o \
-		datebookpluginimpl.o \
-		datebookpluginoptions.o \
-		datebookoptionsbase.o
+OBJECTS =	$(OBJECTS_DIR)/datebookplugin.o \
+		$(OBJECTS_DIR)/datebookpluginimpl.o \
+		$(OBJECTS_DIR)/datebookpluginoptions.o \
+		$(OBJECTS_DIR)/datebookoptionsbase.o
 INTERFACES =    datebookoptionsbase.ui
 UICDECLS =      datebookoptionsbase.h
 UICIMPLS =      datebookoptionsbase.cpp
-SRCMOC	=	moc_datebookplugin.cpp \
-		moc_datebookpluginoptions.cpp \
-		moc_datebookoptionsbase.cpp
-OBJMOC	=	moc_datebookplugin.o \
-		moc_datebookpluginoptions.o \
-		moc_datebookoptionsbase.o
+SRCMOC	=	$(MOC_DIR)/moc_datebookplugin.cpp \
+		$(MOC_DIR)/moc_datebookpluginoptions.cpp \
+		$(MOC_DIR)/moc_datebookoptionsbase.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_datebookplugin.o \
+		$(OBJECTS_DIR)/moc_datebookpluginoptions.o \
+		$(OBJECTS_DIR)/moc_datebookoptionsbase.o
 
 
 ####### Implicit rules
@@ -214,38 +220,21 @@ REQUIRES=
 
 ####### Compile
 
-datebookplugin.o: datebookplugin.cpp \
+$(OBJECTS_DIR)/datebookplugin.o: datebookplugin.cpp \
 		datebookplugin.h \
-		$(QPEDIR)/include/qtopia/todayplugininterface.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
 		datebookpluginoptions.h \
-		datebookoptionsbase.h \
-		$(QPEDIR)/include/qtopia/timestring.h \
-		$(QPEDIR)/include/qtopia/config.h \
-		$(QPEDIR)/include/qtopia/pim/datebookaccess.h \
-		$(QPEDIR)/include/qpe/pim/event.h \
-		$(QPEDIR)/include/qtopia/pim/pimrecord.h \
-		$(QPEDIR)/include/qtopia/timeconversion.h \
-		$(QPEDIR)/include/qtopia/pim/event.h \
-		$(QPEDIR)/include/qtopia/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qtopia/services/services.h \
-		$(QPEDIR)/include/qtopia/applnk.h \
-		$(QPEDIR)/include/qtopia/resource.h
+		datebookoptionsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/datebookplugin.o datebookplugin.cpp
 
-datebookpluginimpl.o: datebookpluginimpl.cpp \
+$(OBJECTS_DIR)/datebookpluginimpl.o: datebookpluginimpl.cpp \
 		datebookplugin.h \
-		$(QPEDIR)/include/qtopia/todayplugininterface.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
 		datebookpluginimpl.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/datebookpluginimpl.o datebookpluginimpl.cpp
 
-datebookpluginoptions.o: datebookpluginoptions.cpp \
+$(OBJECTS_DIR)/datebookpluginoptions.o: datebookpluginoptions.cpp \
 		datebookpluginoptions.h \
-		datebookoptionsbase.h \
-		$(QPEDIR)/include/qtopia/config.h
+		datebookoptionsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/datebookpluginoptions.o datebookpluginoptions.cpp
 
 datebookoptionsbase.h: datebookoptionsbase.ui
 	$(UIC) datebookoptionsbase.ui -o $(INTERFACE_DECL_PATH)/datebookoptionsbase.h
@@ -253,40 +242,41 @@ datebookoptionsbase.h: datebookoptionsbase.ui
 datebookoptionsbase.cpp: datebookoptionsbase.ui
 	$(UIC) datebookoptionsbase.ui -i datebookoptionsbase.h -o datebookoptionsbase.cpp
 
-datebookoptionsbase.o: datebookoptionsbase.cpp \
+$(OBJECTS_DIR)/datebookoptionsbase.o: datebookoptionsbase.cpp \
 		datebookoptionsbase.h \
 		datebookoptionsbase.ui
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/datebookoptionsbase.o datebookoptionsbase.cpp
 
-moc_datebookplugin.o: moc_datebookplugin.cpp \
-		datebookplugin.h \
-		$(QPEDIR)/include/qtopia/todayplugininterface.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h
+$(OBJECTS_DIR)/moc_datebookplugin.o: $(MOC_DIR)/moc_datebookplugin.cpp \
+		datebookplugin.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_datebookplugin.o $(MOC_DIR)/moc_datebookplugin.cpp
 
-moc_datebookpluginoptions.o: moc_datebookpluginoptions.cpp \
+$(OBJECTS_DIR)/moc_datebookpluginoptions.o: $(MOC_DIR)/moc_datebookpluginoptions.cpp \
 		datebookpluginoptions.h \
 		datebookoptionsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_datebookpluginoptions.o $(MOC_DIR)/moc_datebookpluginoptions.cpp
 
-moc_datebookoptionsbase.o: moc_datebookoptionsbase.cpp \
+$(OBJECTS_DIR)/moc_datebookoptionsbase.o: $(MOC_DIR)/moc_datebookoptionsbase.cpp \
 		datebookoptionsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_datebookoptionsbase.o $(MOC_DIR)/moc_datebookoptionsbase.cpp
 
-moc_datebookplugin.cpp: datebookplugin.h
-	$(MOC) datebookplugin.h -o moc_datebookplugin.cpp
+$(MOC_DIR)/moc_datebookplugin.cpp: datebookplugin.h
+	$(MOC) datebookplugin.h -o $(MOC_DIR)/moc_datebookplugin.cpp
 
-moc_datebookpluginoptions.cpp: datebookpluginoptions.h
-	$(MOC) datebookpluginoptions.h -o moc_datebookpluginoptions.cpp
+$(MOC_DIR)/moc_datebookpluginoptions.cpp: datebookpluginoptions.h
+	$(MOC) datebookpluginoptions.h -o $(MOC_DIR)/moc_datebookpluginoptions.cpp
 
-moc_datebookoptionsbase.cpp: datebookoptionsbase.h
-	$(MOC) datebookoptionsbase.h -o moc_datebookoptionsbase.cpp
+$(MOC_DIR)/moc_datebookoptionsbase.cpp: datebookoptionsbase.h
+	$(MOC) datebookoptionsbase.h -o $(MOC_DIR)/moc_datebookoptionsbase.cpp
 
 
 
 lupdate:
-	lupdate datebook.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <datebook.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease datebook.pro
+	$(QPEDIR)/bin/qtopia-linstall datebook.pro
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,10 +118,10 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include -Ilibrary
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR) -Ilibrary
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
-LIBS	=	$(SUBLIBS) -lqpe -lqtopiaservices -Wl,-export-dynamic $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
+LIBS	=	$(SUBLIBS) -lqtopia -Wl,-export-dynamic -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
 UIC	=	$(SYSCONF_UIC)
 
@@ -135,19 +141,19 @@ HEADERS =	today.h \
 SOURCES =	today.cpp \
 		todayoptions.cpp \
 		main.cpp
-OBJECTS =	today.o \
-		todayoptions.o \
-		main.o \
-		todayoptionsbase.o
+OBJECTS =	$(OBJECTS_DIR)/today.o \
+		$(OBJECTS_DIR)/todayoptions.o \
+		$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/todayoptionsbase.o
 INTERFACES =    todayoptionsbase.ui
 UICDECLS =      todayoptionsbase.h
 UICIMPLS =      todayoptionsbase.cpp
-SRCMOC	=	moc_today.cpp \
-		moc_todayoptions.cpp \
-		moc_todayoptionsbase.cpp
-OBJMOC	=	moc_today.o \
-		moc_todayoptions.o \
-		moc_todayoptionsbase.o
+SRCMOC	=	$(MOC_DIR)/moc_today.cpp \
+		$(MOC_DIR)/moc_todayoptions.cpp \
+		$(MOC_DIR)/moc_todayoptionsbase.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_today.o \
+		$(OBJECTS_DIR)/moc_todayoptions.o \
+		$(OBJECTS_DIR)/moc_todayoptionsbase.o
 
 
 ####### Implicit rules
@@ -213,46 +219,21 @@ REQUIRES=
 
 ####### Compile
 
-today.o: today.cpp \
+$(OBJECTS_DIR)/today.o: today.cpp \
 		today.h \
-		$(QPEDIR)/include/qtopia/qlibrary.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qtopia/todayplugininterface.h \
+		todayoptions.h \
+		todayoptionsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/today.o today.cpp
+
+$(OBJECTS_DIR)/todayoptions.o: todayoptions.cpp \
 		todayoptions.h \
 		todayoptionsbase.h \
-		$(QPEDIR)/include/qtopia/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/config.h \
-		$(QPEDIR)/include/qtopia/global.h \
-		$(QPEDIR)/include/qtopia/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qtopia/services/services.h \
-		$(QPEDIR)/include/qtopia/applnk.h \
-		$(QPEDIR)/include/qtopia/datebookmonth.h \
-		$(QPEDIR)/include/qtopia/private/event.h \
-		$(QPEDIR)/include/qtopia/private/palmtoprecord.h \
-		$(QPEDIR)/include/qtopia/timeconversion.h
+		today.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/todayoptions.o todayoptions.cpp
 
-todayoptions.o: todayoptions.cpp \
-		todayoptions.h \
-		todayoptionsbase.h \
-		today.h \
-		$(QPEDIR)/include/qtopia/qlibrary.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qtopia/todayplugininterface.h \
-		$(QPEDIR)/include/qtopia/resource.h \
-		$(QPEDIR)/include/qtopia/config.h
-
-main.o: main.cpp \
-		today.h \
-		$(QPEDIR)/include/qtopia/qlibrary.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qtopia/todayplugininterface.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h
+$(OBJECTS_DIR)/main.o: main.cpp \
+		today.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
 todayoptionsbase.h: todayoptionsbase.ui
 	$(UIC) todayoptionsbase.ui -o $(INTERFACE_DECL_PATH)/todayoptionsbase.h
@@ -260,47 +241,42 @@ todayoptionsbase.h: todayoptionsbase.ui
 todayoptionsbase.cpp: todayoptionsbase.ui
 	$(UIC) todayoptionsbase.ui -i todayoptionsbase.h -o todayoptionsbase.cpp
 
-todayoptionsbase.o: todayoptionsbase.cpp \
+$(OBJECTS_DIR)/todayoptionsbase.o: todayoptionsbase.cpp \
 		todayoptionsbase.h \
 		todayoptionsbase.ui
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/todayoptionsbase.o todayoptionsbase.cpp
 
-moc_today.o: moc_today.cpp \
-		today.h \
-		$(QPEDIR)/include/qtopia/qlibrary.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qtopia/todayplugininterface.h
+$(OBJECTS_DIR)/moc_today.o: $(MOC_DIR)/moc_today.cpp \
+		today.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_today.o $(MOC_DIR)/moc_today.cpp
 
-moc_todayoptions.o: moc_todayoptions.cpp \
+$(OBJECTS_DIR)/moc_todayoptions.o: $(MOC_DIR)/moc_todayoptions.cpp \
 		todayoptions.h \
 		todayoptionsbase.h \
-		today.h \
-		$(QPEDIR)/include/qtopia/qlibrary.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qtopia/todayplugininterface.h
+		today.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_todayoptions.o $(MOC_DIR)/moc_todayoptions.cpp
 
-moc_todayoptionsbase.o: moc_todayoptionsbase.cpp \
+$(OBJECTS_DIR)/moc_todayoptionsbase.o: $(MOC_DIR)/moc_todayoptionsbase.cpp \
 		todayoptionsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_todayoptionsbase.o $(MOC_DIR)/moc_todayoptionsbase.cpp
 
-moc_today.cpp: today.h
-	$(MOC) today.h -o moc_today.cpp
+$(MOC_DIR)/moc_today.cpp: today.h
+	$(MOC) today.h -o $(MOC_DIR)/moc_today.cpp
 
-moc_todayoptions.cpp: todayoptions.h
-	$(MOC) todayoptions.h -o moc_todayoptions.cpp
+$(MOC_DIR)/moc_todayoptions.cpp: todayoptions.h
+	$(MOC) todayoptions.h -o $(MOC_DIR)/moc_todayoptions.cpp
 
-moc_todayoptionsbase.cpp: todayoptionsbase.h
-	$(MOC) todayoptionsbase.h -o moc_todayoptionsbase.cpp
+$(MOC_DIR)/moc_todayoptionsbase.cpp: todayoptionsbase.h
+	$(MOC) todayoptionsbase.h -o $(MOC_DIR)/moc_todayoptionsbase.cpp
 
 
 
 lupdate:
-	lupdate today.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <today.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease today.pro
+	$(QPEDIR)/bin/qtopia-linstall today.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

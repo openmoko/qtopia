@@ -32,7 +32,7 @@
 class QProcessPrivate;
 
 
-class Q_EXPORT QProcess : public QObject
+class QProcess : public QObject
 {
     Q_OBJECT
 public:

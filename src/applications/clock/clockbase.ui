@@ -11,8 +11,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>226</width>
-            <height>249</height>
+            <width>221</width>
+            <height>337</height>
         </rect>
     </property>
     <property stdset="1">
@@ -22,7 +22,7 @@
     <property>
         <name>layoutMargin</name>
     </property>
-    <grid>
+    <vbox>
         <property stdset="1">
             <name>margin</name>
             <number>6</number>
@@ -31,7 +31,7 @@
             <name>spacing</name>
             <number>6</number>
         </property>
-        <widget row="0"  column="0" >
+        <widget>
             <class>QTabWidget</class>
             <property stdset="1">
                 <name>name</name>
@@ -89,6 +89,13 @@
                                 <property stdset="1">
                                     <name>name</name>
                                     <cstring>Frame3</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>sizePolicy</name>
+                                    <sizepolicy>
+                                        <hsizetype>7</hsizetype>
+                                        <vsizetype>5</vsizetype>
+                                    </sizepolicy>
                                 </property>
                                 <property stdset="1">
                                     <name>frameShape</name>
@@ -151,7 +158,7 @@
                                 </property>
                                 <property stdset="1">
                                     <name>text</name>
-                                    <string>am</string>
+                                    <string>...</string>
                                 </property>
                                 <property stdset="1">
                                     <name>alignment</name>
@@ -166,6 +173,13 @@
                                 <property stdset="1">
                                     <name>name</name>
                                     <cstring>Frame4</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>sizePolicy</name>
+                                    <sizepolicy>
+                                        <hsizetype>7</hsizetype>
+                                        <vsizetype>5</vsizetype>
+                                    </sizepolicy>
                                 </property>
                                 <property stdset="1">
                                     <name>frameShape</name>
@@ -193,7 +207,7 @@
                         </property>
                         <property stdset="1">
                             <name>text</name>
-                            <string>TextLabel2</string>
+                            <string>...</string>
                         </property>
                         <property stdset="1">
                             <name>alignment</name>
@@ -218,37 +232,209 @@
                 <vbox>
                     <property stdset="1">
                         <name>margin</name>
-                        <number>4</number>
+                        <number>6</number>
                     </property>
                     <property stdset="1">
                         <name>spacing</name>
                         <number>4</number>
                     </property>
                     <widget>
-                        <class>AnalogClock</class>
+                        <class>QFrame</class>
                         <property stdset="1">
                             <name>name</name>
-                            <cstring>analogStopwatch</cstring>
+                            <cstring>swFrame</cstring>
                         </property>
-                    </widget>
-                    <widget>
-                        <class>QLCDNumber</class>
                         <property stdset="1">
-                            <name>name</name>
-                            <cstring>stopwatchLcd</cstring>
+                            <name>sizePolicy</name>
+                            <sizepolicy>
+                                <hsizetype>5</hsizetype>
+                                <vsizetype>7</vsizetype>
+                            </sizepolicy>
                         </property>
                         <property stdset="1">
                             <name>frameShape</name>
                             <enum>NoFrame</enum>
                         </property>
                         <property stdset="1">
-                            <name>numDigits</name>
-                            <number>10</number>
+                            <name>frameShadow</name>
+                            <enum>Raised</enum>
                         </property>
+                    </widget>
+                    <widget>
+                        <class>QLayoutWidget</class>
                         <property stdset="1">
-                            <name>segmentStyle</name>
-                            <enum>Flat</enum>
+                            <name>name</name>
+                            <cstring>Layout7</cstring>
                         </property>
+                        <property>
+                            <name>layoutSpacing</name>
+                        </property>
+                        <grid>
+                            <property stdset="1">
+                                <name>margin</name>
+                                <number>0</number>
+                            </property>
+                            <property stdset="1">
+                                <name>spacing</name>
+                                <number>0</number>
+                            </property>
+                            <widget row="1"  column="3" >
+                                <class>QLCDNumber</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>lapLcd</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>sizePolicy</name>
+                                    <sizepolicy>
+                                        <hsizetype>7</hsizetype>
+                                        <vsizetype>1</vsizetype>
+                                    </sizepolicy>
+                                </property>
+                                <property stdset="1">
+                                    <name>maximumSize</name>
+                                    <size>
+                                        <width>32767</width>
+                                        <height>20</height>
+                                    </size>
+                                </property>
+                                <property stdset="1">
+                                    <name>frameShape</name>
+                                    <enum>NoFrame</enum>
+                                </property>
+                                <property stdset="1">
+                                    <name>numDigits</name>
+                                    <number>11</number>
+                                </property>
+                                <property stdset="1">
+                                    <name>segmentStyle</name>
+                                    <enum>Flat</enum>
+                                </property>
+                            </widget>
+                            <widget row="0"  column="1"  rowspan="2"  colspan="1" >
+                                <class>QLCDNumber</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>lapNumLcd</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>sizePolicy</name>
+                                    <sizepolicy>
+                                        <hsizetype>7</hsizetype>
+                                        <vsizetype>1</vsizetype>
+                                    </sizepolicy>
+                                </property>
+                                <property stdset="1">
+                                    <name>frameShape</name>
+                                    <enum>NoFrame</enum>
+                                </property>
+                                <property stdset="1">
+                                    <name>numDigits</name>
+                                    <number>2</number>
+                                </property>
+                                <property stdset="1">
+                                    <name>segmentStyle</name>
+                                    <enum>Flat</enum>
+                                </property>
+                            </widget>
+                            <widget row="0"  column="0"  rowspan="2"  colspan="1" >
+                                <class>QFrame</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>lapFrame</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>minimumSize</name>
+                                    <size>
+                                        <width>15</width>
+                                        <height>0</height>
+                                    </size>
+                                </property>
+                                <property stdset="1">
+                                    <name>frameShape</name>
+                                    <enum>NoFrame</enum>
+                                </property>
+                                <property stdset="1">
+                                    <name>frameShadow</name>
+                                    <enum>Raised</enum>
+                                </property>
+                            </widget>
+                            <widget row="0"  column="2" >
+                                <class>QLabel</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>TextLabel4</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>text</name>
+                                    <string>Split</string>
+                                </property>
+                                <property stdset="1">
+                                    <name>alignment</name>
+                                    <set>AlignTop|AlignRight</set>
+                                </property>
+                                <property>
+                                    <name>hAlign</name>
+                                </property>
+                                <property>
+                                    <name>vAlign</name>
+                                </property>
+                            </widget>
+                            <widget row="0"  column="3" >
+                                <class>QLCDNumber</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>splitLcd</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>sizePolicy</name>
+                                    <sizepolicy>
+                                        <hsizetype>7</hsizetype>
+                                        <vsizetype>1</vsizetype>
+                                    </sizepolicy>
+                                </property>
+                                <property stdset="1">
+                                    <name>maximumSize</name>
+                                    <size>
+                                        <width>32767</width>
+                                        <height>20</height>
+                                    </size>
+                                </property>
+                                <property stdset="1">
+                                    <name>frameShape</name>
+                                    <enum>NoFrame</enum>
+                                </property>
+                                <property stdset="1">
+                                    <name>numDigits</name>
+                                    <number>11</number>
+                                </property>
+                                <property stdset="1">
+                                    <name>segmentStyle</name>
+                                    <enum>Flat</enum>
+                                </property>
+                            </widget>
+                            <widget row="1"  column="2" >
+                                <class>QLabel</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>TextLabel3_2</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>text</name>
+                                    <string>Lap</string>
+                                </property>
+                                <property stdset="1">
+                                    <name>alignment</name>
+                                    <set>AlignTop|AlignRight</set>
+                                </property>
+                                <property>
+                                    <name>hAlign</name>
+                                </property>
+                                <property>
+                                    <name>vAlign</name>
+                                </property>
+                            </widget>
+                        </grid>
                     </widget>
                     <widget>
                         <class>QLayoutWidget</class>
@@ -302,7 +488,7 @@
                                 </property>
                                 <property stdset="1">
                                     <name>text</name>
-                                    <string>Reset</string>
+                                    <string>Lap/Split</string>
                                 </property>
                                 <property>
                                     <name>whatsThis</name>
@@ -330,13 +516,13 @@
                     </property>
                     <property stdset="1">
                         <name>spacing</name>
-                        <number>6</number>
+                        <number>4</number>
                     </property>
                     <widget>
                         <class>QGroupBox</class>
                         <property stdset="1">
                             <name>name</name>
-                            <cstring>GroupBox1</cstring>
+                            <cstring>dailyGroup</cstring>
                         </property>
                         <property stdset="1">
                             <name>title</name>
@@ -348,7 +534,7 @@
                         <vbox>
                             <property stdset="1">
                                 <name>margin</name>
-                                <number>11</number>
+                                <number>6</number>
                             </property>
                             <property stdset="1">
                                 <name>spacing</name>
@@ -510,6 +696,32 @@
                                         </property>
                                     </widget>
                                 </hbox>
+                            </widget>
+                            <widget>
+                                <class>QLabel</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>TextLabel1</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>text</name>
+                                    <string>Days:</string>
+                                </property>
+                            </widget>
+                            <widget>
+                                <class>QFrame</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>daysFrame</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>frameShape</name>
+                                    <enum>NoFrame</enum>
+                                </property>
+                                <property stdset="1">
+                                    <name>frameShadow</name>
+                                    <enum>Raised</enum>
+                                </property>
                             </widget>
                         </vbox>
                     </widget>
@@ -674,7 +886,7 @@
                 </vbox>
             </widget>
         </widget>
-    </grid>
+    </vbox>
 </widget>
 <customwidgets>
     <customwidget>

@@ -21,11 +21,12 @@
 #ifndef QPEMESSAGEBOX_H
 #define QPEMESSAGEBOX_H
 
+#include <qtopia/qpeglobal.h>
 #include <qstring.h>
 
 class QWidget;
 
-class QPEMessageBox
+class QTOPIA_EXPORT QPEMessageBox
 {
 public:
     static bool confirmDelete( QWidget *parent, const QString & caption,

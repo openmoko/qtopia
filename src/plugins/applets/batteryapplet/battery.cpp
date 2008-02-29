@@ -20,24 +20,26 @@
 #include "battery.h"
 #include "batterystatus.h"
 
-#include <qpe/power.h>
-#include <qpe/config.h>
+#include <qtopia/power.h>
+#include <qtopia/config.h>
 
 #if defined(Q_WS_QWS) && !defined(QT_NO_COP)
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
 
 #include <qpainter.h>
 #include <qtimer.h>
 #include <qapplication.h>
 
+#include <qtopia/applnk.h>
 
 BatteryMeter::BatteryMeter( QWidget *parent )
     : QWidget( parent ), charging(false)
 {
     ps = new PowerStatus;
     startTimer( 10000 );
-    setFixedHeight(14);
+    setFixedWidth(QMAX(AppLnk::smallIconSize()*3/4,6));
+    setFixedHeight(AppLnk::smallIconSize());
     chargeTimer = new QTimer( this );
     connect( chargeTimer, SIGNAL(timeout()), this, SLOT(chargeTimeout()) );
     timerEvent(0);
@@ -50,7 +52,7 @@ BatteryMeter::~BatteryMeter()
 
 QSize BatteryMeter::sizeHint() const
 {
-    return QSize(10,12);
+    return QSize(QMAX(AppLnk::smallIconSize()*3/4,6),AppLnk::smallIconSize());
 }
 
 void BatteryMeter::mousePressEvent( QMouseEvent *)
@@ -67,7 +69,6 @@ void BatteryMeter::mousePressEvent( QMouseEvent *)
 	    int lp = qApp->desktop()->width() - batteryView->sizeHint().width();
 	    batteryView->move( lp, curPos.y()-batteryView->sizeHint().height()-1 );
 	    batteryView->resize( batteryView->sizeHint() );
-	    batteryView->show();
 	} else {
 	    if ( !batteryView )
 		batteryView = new BatteryStatus( ps, FALSE, 0, WDestructiveClose );
@@ -134,37 +135,86 @@ void BatteryMeter::paintEvent( QPaintEvent* )
 	lightc = c.light(160);
     }
 
-    int w = 6;
-    int h = height()-3;
-    int pix = (percent * h) / 100;
-    int y2 = height() - 2;
-    int y = y2 - pix;
-    int x1 = (width() - w) / 2;
+    //
+    // To simulate a 3-d battery, we use 4 bands of colour.  From left
+    // to right, these are: medium, light, medium, dark.  To avoid
+    // hardcoding values for band "width", figure everything out on the run.
+    //
+    int	batt_width;		    // width of each band
+    int	batt_height;		    // battery height (not including terminal)
+    int	used_height;		    // used amount of battery (scanlines)
 
-    p.setPen(QColor(80,80,80));
-    p.drawLine(x1+w/4,0,x1+w/4+w/2,0);
-    p.drawRect(x1,1,w,height()-1);
-    p.setBrush(c);
+    int	batt_yoffset;		    // top of terminal
+    int batt_xoffset;		    // left edge of core
 
-    int extra = ((percent * h) % 100)/(100/4);
+    int	band_width;		    // width of colour band
 
-#define Y(i) ((i<=extra)?y-1:y)
-#define DRAWUPPER(i) if ( Y(i) >= 2 ) p.drawLine(i+x1,2,i+x1,Y(i));
-    p.setPen(  gray );
-    DRAWUPPER(1);
-    DRAWUPPER(3);
-    p.setPen( gray.light(130) );
-    DRAWUPPER(2);
-    p.setPen( gray.dark(120) );
-    DRAWUPPER(4);
+    int w = QMIN(height()/2, width());
+    band_width = (w-2) / 4;
+    if ( band_width < 1 )
+	band_width = 1;
 
-#define DRAW(i) { if ( Y(i) < y2 ) p.drawLine(i+x1,Y(i)+1,i+x1,y2); }
-    p.setPen( c );
-    DRAW(1);
-    DRAW(3);
-    p.setPen( lightc );
-    DRAW(2);
-    p.setPen(darkc);
-    DRAW(4);
+    batt_width = 4 * band_width + 2;	// +2 for 1 pixel border on both sides
+    batt_height = height()-2;
+    batt_xoffset = (width() - batt_width) / 2;
+    batt_yoffset = (height() - batt_height) / 2;
+
+    //
+    // Battery border.  +1 to make space for the terminal at row 0.
+    //
+    p.setPen(QColor(80, 80, 80));
+    p.drawRect(batt_xoffset, batt_yoffset+1, batt_width, batt_height);
+
+    //
+    // Draw terminal.  +1 to take into account the left border.
+    //
+    p.drawLine(batt_xoffset + band_width + 1, batt_yoffset,
+	batt_xoffset + 3 * band_width, batt_yoffset);
+
+    batt_height -= 2;	// -2 because we don't want to include border
+    batt_yoffset += 2;  // +2 to account for border and terminal
+    batt_xoffset++;
+
+    //
+    // 100 - percent, since percent is amount remaining, and we draw
+    // reverse to this.
+    //
+    used_height = (100 - percent) * batt_height / 100;
+    if (used_height < 0)
+	used_height = 0;
+
+    //
+    // Drained section.
+    //
+    if (used_height != 0) {
+	p.setPen(NoPen);
+	p.setBrush(gray);
+	p.drawRect(batt_xoffset, batt_yoffset, band_width, used_height);
+	p.drawRect(batt_xoffset+2*band_width, batt_yoffset, band_width, used_height);
+
+	p.setBrush(gray.light(130));
+	p.drawRect(batt_xoffset+band_width, batt_yoffset, band_width, used_height);
+
+	p.setBrush(gray.dark(120));
+	p.drawRect(batt_xoffset+3*band_width, batt_yoffset, band_width, used_height);
+    }
+
+    //
+    // Unused section.
+    //
+    if ( batt_height - used_height > 0 ) {
+	int unused_offset = used_height + batt_yoffset;
+	int unused_height = batt_height - used_height;
+	p.setPen(NoPen);
+	p.setBrush(c);
+	p.drawRect(batt_xoffset, unused_offset, band_width, unused_height);
+	p.drawRect(batt_xoffset+2*band_width, unused_offset, band_width, unused_height);
+
+	p.setBrush(lightc);
+	p.drawRect(batt_xoffset+band_width, unused_offset, band_width, unused_height);
+
+	p.setBrush(darkc);
+	p.drawRect(batt_xoffset+3*band_width, unused_offset, band_width, unused_height);
+    }
 }
 

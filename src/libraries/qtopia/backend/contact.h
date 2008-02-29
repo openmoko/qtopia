@@ -26,11 +26,7 @@
 
 #include <qstringlist.h>
 
-#if defined(QTOPIA_TEMPLATEDLL)
-// MOC_SKIP_BEGIN
-QTOPIA_TEMPLATEEXTERN template class QTOPIA_EXPORT QMap<int, QString>;
-// MOC_SKIP_END
-#endif
+#include <qmap.h>
 
 class ContactPrivate;
 class QTOPIA_EXPORT Contact : public Qtopia::Record
@@ -56,12 +52,9 @@ public:
     void setFileAs();
 
     // default email address
-    void setDefaultEmail( const QString &v );
-    // inserts email to list and ensure's doesn't already exist
-    void insertEmail( const QString &v );
-    void removeEmail( const QString &v );
-    void clearEmails();
-    void insertEmails( const QStringList &v );
+    void setDefaultEmail( const QString &v ) { replace( Qtopia::DefaultEmail, v ); }
+    // the emails should be seperated by a comma
+    void setEmails( const QString &v );
 
     // home
     void setHomeStreet( const QString &v ) { replace( Qtopia::HomeStreet, v ); }
@@ -126,6 +119,7 @@ public:
 
     // email
     QString defaultEmail() const { return find( Qtopia::DefaultEmail ); }
+    QString emails() const { return find( Qtopia::Emails ); }
     QStringList emailList() const;
 
     // home
@@ -210,9 +204,6 @@ private:
     friend class XMLIO;
 
     QString emailSeparator() const { return " "; }
-     // the emails should be seperated by a comma
-    void setEmails( const QString &v );
-    QString emails() const { return find( Qtopia::Emails ); }
 
     void insert( int key, const QString &value );
     void replace( int key, const QString &value );
@@ -224,83 +215,10 @@ private:
 			    const QString &zip,
 			    const QString &country ) const;
 
-    Qtopia::UidGen &uidGen() { return sUidGen; }
+    Qtopia::UidGen &uidGen();
     static Qtopia::UidGen sUidGen;
     QMap<int, QString> mMap;
     ContactPrivate *d;
 };
-
-// these methods are inlined to keep binary compatability with Qtopia 1.5
-inline void Contact::insertEmail( const QString &v )
-{
-    //qDebug("insertEmail %s", v.latin1());
-    QString e = v.simplifyWhiteSpace();
-    QString def = defaultEmail();
-
-    // if no default, set it as the default email and don't insert
-    if ( def.isEmpty() ) {
-	setDefaultEmail( e ); // will insert into the list for us
-	return;
-    }
-
-    // otherwise, insert assuming doesn't already exist
-    QString emailsStr = find( Qtopia::Emails );
-    if ( emailsStr.contains( e ))
-	return;
-    if ( !emailsStr.isEmpty() )
-	emailsStr += emailSeparator();
-    emailsStr += e;
-    replace( Qtopia::Emails, emailsStr );
-}
-
-inline void Contact::removeEmail( const QString &v )
-{
-    QString e = v.simplifyWhiteSpace();
-    QString def = defaultEmail();
-    QString emailsStr = find( Qtopia::Emails );
-    QStringList emails = emailList();
-	
-    // otherwise, must first contain it
-    if ( !emailsStr.contains( e ) )
-	return;
-
-    // remove it
-    //qDebug(" removing email from list %s", e.latin1());
-    emails.remove( e );
-    // reset the string
-    emailsStr = emails.join(emailSeparator()); // Sharp's brain dead separator
-    replace( Qtopia::Emails, emailsStr );
-
-    // if default, then replace the default email with the first one
-    if ( def == e ) {
-	//qDebug("removeEmail is default; setting new default");
-	if ( !emails.count() )
-	    clearEmails();
-	else // setDefaultEmail will remove e from the list
-	    setDefaultEmail( emails.first() );
-    }
-}
-inline void Contact::clearEmails()
-{
-    mMap.remove( Qtopia::DefaultEmail );
-    mMap.remove( Qtopia::Emails );
-}
-inline void Contact::setDefaultEmail( const QString &v )
-{
-    QString e = v.simplifyWhiteSpace();
-
-    //qDebug("Contact::setDefaultEmail %s", e.latin1());
-    replace( Qtopia::DefaultEmail, e );
-
-    if ( !e.isEmpty() )	
-	insertEmail( e );
-	
-}
-
-inline void Contact::insertEmails( const QStringList &v )
-{
-    for ( QStringList::ConstIterator it = v.begin(); it != v.end(); ++it )
-	insertEmail( *it );
-}
 
 #endif

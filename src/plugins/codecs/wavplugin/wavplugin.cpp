@@ -21,14 +21,24 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <unistd.h>
 #include <qfile.h>
 #include "wavplugin.h"
+#ifndef Q_OS_WIN32
+#include <unistd.h>
+#endif
+
+extern "C" {
+#include "gsm.h"
+};
 
 
 //#define debugMsg(a)	    qDebug(a)
 #define debugMsg(a)
 
+#ifndef Q_OS_WIN32
+// Win32 has a different name for the same function
+#define strncasecmp strncmp	
+#endif
 
 struct RiffChunk {
     char id[4];
@@ -47,7 +57,17 @@ struct ChunkData {
 };
 
 
+struct GsmExtHeader {
+    Q_INT16 wExtSize;
+    Q_INT16 samplesPerBlock;
+};
+
+
 const int sound_buffer_size = 4096;
+
+
+#define WAVE_FORMAT_PCM    1
+#define WAVE_FORMAT_GSM610 0x31
 
 
 class WavPluginData {
@@ -56,17 +76,28 @@ public:
 
     int wavedata_remaining;
     ChunkData chunkdata;
+    GsmExtHeader gsmext;
     RiffChunk chunk;
     uchar data[sound_buffer_size+32]; // +32 to handle badly aligned input data
     int out,max;
     int samples_due;
     int samples;
+    gsm gsmhandle;
+    gsm_signal gsmsamples[320];
+    int gsmnext;
 
     WavPluginData() {
 	max = out = sound_buffer_size;
 	wavedata_remaining = 0;
 	samples_due = 0;
 	samples = -1;
+	gsmhandle = 0;
+	gsmnext = 320;
+    }
+    ~WavPluginData() {
+	if ( gsmhandle ) {
+	    gsm_destroy( gsmhandle );
+	}
     }
 
     // expands out samples to the frequency of 44kHz
@@ -79,23 +110,49 @@ public:
 	    return FALSE;
 	}
 
-        while ( count ) {
-            int l,r;
-            if ( getSample(l, r) == FALSE ) {
-		// Make the loopcontrol think we played to the end
-		done = count;
-		return FALSE;
+	if ( chunkdata.formatTag == WAVE_FORMAT_PCM ) {
+	    // read PCM samples
+	    while ( count ) {
+		int l,r;
+		if ( getSample(l, r) == FALSE ) {
+		    // Make the loopcontrol think we played to the end
+		    done = count;
+		    return FALSE;
+		}
+		samples_due += 44100;
+		while ( count && ( samples_due > chunkdata.samplesPerSec ) ) {
+		    *output++ = l;
+		    if ( stereo )
+			*output++ = r;
+		    samples_due -= chunkdata.samplesPerSec;
+		    count--;
+		    done++;
+		}
 	    }
-            samples_due += 44100;
-            while ( count && ( samples_due > chunkdata.samplesPerSec ) ) {
-		*output++ = l;
-		if ( stereo )
-		    *output++ = r;
-                samples_due -= chunkdata.samplesPerSec;
-                count--;
-		done++;
-            }
-        }
+        } else {
+	    // read GSM samples
+	    while ( count ) {
+		int samp;
+		if ( gsmnext < 320 ) {
+		    samp = gsmsamples[gsmnext++];
+		} else if ( nextGsmBlock() ) {
+		    samp = gsmsamples[gsmnext++];
+		} else {
+		    // Make the loopcontrol think we played to the end
+		    done = count;
+		    return FALSE;
+		}
+		samples_due += 44100;
+		while ( count && ( samples_due > chunkdata.samplesPerSec ) ) {
+		    *output++ = samp;
+		    if ( stereo )
+			*output++ = samp;
+		    samples_due -= chunkdata.samplesPerSec;
+		    count--;
+		    done++;
+		}
+	    }
+	}
 
         return TRUE;
     }
@@ -103,6 +160,11 @@ public:
     bool initialise() {
 	if ( input == 0 )
 	    return FALSE;
+
+	if ( gsmhandle ) {
+	    gsm_destroy( gsmhandle );
+	    gsmhandle = 0;
+	}
 
 	wavedata_remaining = -1;
 
@@ -118,8 +180,13 @@ public:
 	    if ( qstrncmp(chunk.id,"data",4) == 0 ) { // No tr
 		wavedata_remaining = chunk.size;
 		// approx. number of 44.1KHz samples
-		samples = wavedata_remaining / chunkdata.channels
-		    * 441 / (chunkdata.samplesPerSec/100);
+		if ( chunkdata.formatTag == WAVE_FORMAT_GSM610 ) {
+		    samples = (wavedata_remaining / 65) * 320;
+		    samples = samples * 441 / (chunkdata.samplesPerSec/100);
+		} else {
+		    samples = wavedata_remaining / chunkdata.channels
+			* 441 / (chunkdata.samplesPerSec/100);
+		}
 	    } else if ( qstrncmp(chunk.id,"RIFF",4) == 0 ) {
 		char d[4];
 		if ( input->readBlock(d,4) != 4 ) {
@@ -132,12 +199,31 @@ public:
 		    }
 		}
 	    } else if ( qstrncmp(chunk.id,"fmt ",4) == 0 ) {
+		int cur_pos = input->at();
 		if ( input->readBlock((char*)&chunkdata,sizeof(chunkdata)) != sizeof(chunkdata) ) {
 		    return FALSE;
 		}
-#define WAVE_FORMAT_PCM 1
-		if ( chunkdata.formatTag != WAVE_FORMAT_PCM ) {
+		if ( chunkdata.formatTag == WAVE_FORMAT_GSM610 ) {
+		    // validate the GSM header details.
+		    if ( chunk.size < (sizeof(chunkdata) + 4) ) {
+			qDebug( "WAV file: BAD GSM HEADER SIZE" );
+			return FALSE;
+		    }
+		    if ( input->readBlock( (char *)&gsmext, sizeof(gsmext) ) != sizeof(gsmext) ) {
+			qDebug( "WAV file: TRUNCATED GSM HEADER" );
+			return FALSE;
+		    }
+		    if ( gsmext.wExtSize != 2 ||
+		         gsmext.samplesPerBlock != 320 ||
+			 chunkdata.blockAlign != 65 ) {
+			qDebug( "WAV file: INCORRECT GSM PARAMETERS" );
+			return FALSE;
+		    }
+		} else if ( chunkdata.formatTag != WAVE_FORMAT_PCM ) {
 		    qDebug("WAV file: UNSUPPORTED FORMAT %d",chunkdata.formatTag);
+		    return FALSE;
+		}
+		if ( chunk.size > 1000000000 || !input->at( cur_pos + chunk.size ) ) {
 		    return FALSE;
 		}
 	    } else {
@@ -147,6 +233,16 @@ public:
 		}
 	    }
 	} // while
+
+	// initialize the GSM decompression code.
+	if ( chunkdata.formatTag == WAVE_FORMAT_GSM610 ) {
+	    gsmhandle = gsm_create();
+	    if ( !gsmhandle ) {
+		return FALSE;
+	    }
+	    int value = 1;
+	    gsm_option( gsmhandle, GSM_OPT_WAV49, &value );
+	}
 
 	return TRUE;
     }
@@ -192,6 +288,39 @@ public:
 	}
 	return TRUE;
     } // getSample
+
+    // get the next block of GSM data to be played
+    bool nextGsmBlock()
+    {
+	if ( input == 0 )
+	    return FALSE;
+
+	if ( (wavedata_remaining < 0) || !max )
+	    return FALSE;
+
+	if ( out >= max ) {
+	    // read as many 65-byte GSM frames as possible
+	    int size = QMIN(sound_buffer_size,wavedata_remaining);
+	    size -= size % 65;
+	    max = input->readBlock( (char*)data, (uint)size );
+
+	    wavedata_remaining -= max;
+
+	    out = 0;
+	    if ( max < 65 ) {
+		max = 0;
+		return FALSE;
+	    }
+	}
+
+	// decode the two halves of the 65-byte GSM frame
+	gsm_decode( gsmhandle, (gsm_byte *)(data + out), gsmsamples );
+	gsm_decode( gsmhandle, (gsm_byte *)(data + out + 33), gsmsamples + 160 );
+	out += 65;
+	gsmnext = 0;
+
+	return TRUE;
+    } // nextGsmBlock
 
 };
 

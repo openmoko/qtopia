@@ -51,7 +51,7 @@ TodayOptions::TodayOptions(QWidget *parent, const char *name, WFlags fl)
     connect(inactiveView, SIGNAL( clicked(QListViewItem *) ),
 	    this, SLOT( addItemToView(QListViewItem *) ) );
     inactiveView->setAllColumnsShowFocus( TRUE );
-    QWhatsThis::add(inactiveView, tr("Lists the plugins which are availble but not enabled.  Tap a plugin to enable it.") );
+    QWhatsThis::add(inactiveView, tr("Lists the plugins which are available but not enabled.  Tap a plugin to enable it.") );
 }
 
 void TodayOptions::accept()

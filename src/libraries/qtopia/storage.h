@@ -20,6 +20,7 @@
 #ifndef __storage_h__
 #define __storage_h__
 
+#include <qtopia/qpeglobal.h>
 #include <qobject.h>
 #include <qlist.h>
 
@@ -28,7 +29,14 @@ class FileSystem;
 class QCopChannel;
 #endif
 
-class StorageInfo : public QObject
+
+#if defined (QTOPIA_TEMPLATEDLL)
+//MOC_SKIP_BEGIN
+template class QTOPIA_EXPORT QList<FileSystem>;
+//MOC_SKIP_END
+#endif
+
+class QTOPIA_EXPORT StorageInfo : public QObject
 {
     Q_OBJECT
 public:
@@ -36,7 +44,7 @@ public:
 
     const QList<FileSystem> &fileSystems() const { return mFileSystems; }
     const FileSystem *fileSystemOf( const QString &filename );
-    QStringList fileSystemStrings() const;
+    QStringList fileSystemStrings() const; // libqtopia
 
 signals:
     void disksChanged();
@@ -53,7 +61,7 @@ private:
 #endif
 };
 
-class FileSystem
+class QTOPIA_EXPORT FileSystem
 {
 public:
     const QString &disk() const { return fsdisk; }
@@ -83,6 +91,7 @@ private:
 
 
 // Useful for construction a QComboBox from the Storage Info list
+/*
 inline QStringList StorageInfo::fileSystemStrings() const
 {
     QListIterator<FileSystem> it( mFileSystems );
@@ -91,5 +100,6 @@ inline QStringList StorageInfo::fileSystemStrings() const
 	strings << (*it)->name();
     return strings;
 }
+*/
 
 #endif

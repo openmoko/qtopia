@@ -20,7 +20,7 @@
 
 #include "datebooksettings.h"
 
-#include <qpe/qpeapplication.h>
+#include <qtopia/qpeapplication.h>
 
 #include <qspinbox.h>
 #include <qcheckbox.h>

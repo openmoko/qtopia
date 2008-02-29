@@ -30,23 +30,26 @@
 //#include "info.h"
 //#include "mrulist.h"
 
-#include <qpe/applnk.h>
-#include <qpe/mimetype.h>
-#include <qpe/password.h>
-#include <qpe/config.h>
-#include <qpe/power.h>
-#include <qpe/services/services.h>
-#include "devicebuttonmanager.h"
-#ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
-#endif
-#include <qpe/global.h>
-#ifdef QT_QWS_CUSTOM
-#include "qpe/custom.h"
-#endif
+#include <qtopia/applnk.h>
+#include <qtopia/mimetype.h>
+#include <qtopia/password.h>
+#include <qtopia/config.h>
+#include <qtopia/power.h>
+#include <qtopia/services.h>
+#include <qtopia/qpeapplication.h>  // needed for qpe_setBackLight
+#include <qtopia/devicebuttonmanager.h>
 
-#ifdef QWS
+#ifdef Q_WS_QWS
+#include <qtopia/qcopenvelope_qws.h>
+#endif
+#include <qtopia/global.h>
+#include <qtopia/custom.h>
+
+#ifdef Q_WS_QWS
 #include <qgfx_qws.h>
+#endif
+#ifdef Q_OS_WIN32
+#include <io.h>
 #endif
 #include <qmainwindow.h>
 #include <qmessagebox.h>
@@ -60,7 +63,7 @@ static void applyLightSettings(PowerStatus *p)
 {
     int initbright, intervalDim, intervalLightOff, intervalSuspend;
     bool dim, lightoff, suspend;
-    
+
     {
 	Config config("qpe");
 	bool defsus;
@@ -93,12 +96,12 @@ static void applyLightSettings(PowerStatus *p)
 
     int i_dim =      (dim ? intervalDim : 0);
     int i_lightoff = (lightoff ? intervalLightOff : 0);
-    int i_suspend =  suspend;
+    int i_suspend =  (suspend ? intervalSuspend : 0);
 
 #ifndef QT_NO_COP
     QCopEnvelope eB("QPE/System", "setBacklight(int)" );
     eB << initbright;
-    
+
     QCopEnvelope e("QPE/System", "setScreenSaverIntervals(int,int,int)" );
     e << i_dim << i_lightoff << i_suspend;
 #endif
@@ -185,7 +188,7 @@ void KeyFilter::timerEvent(QTimerEvent* e)
 }
 
 bool KeyFilter::filter(int /*unicode*/, int keycode, int modifiers, bool press,
-		  bool /*autoRepeat*/)
+		  bool autoRepeat)
 {
     if ( !loggedin && keycode != Key_F34 )
 	return TRUE;
@@ -234,8 +237,7 @@ bool KeyFilter::filter(int /*unicode*/, int keycode, int modifiers, bool press,
     if ( keycode == Key_CapsLock ) {
 	if ( press ) emit capsLockStateToggle();
     }
-    if ( press )
-	qpedesktop->keyClick();
+    qpedesktop->keyClick(keycode,press,autoRepeat);
     return FALSE;
 }
 
@@ -244,9 +246,9 @@ DesktopApplication::DesktopApplication( int& argc, char **argv, Type t )
     : QPEApplication( argc, argv, t )
 {
 
-    QTimer *t = new QTimer( this );
-    connect( t, SIGNAL(timeout()), this, SLOT(psTimeout()) );
-    t->start( 10000 );
+    QTimer *timer = new QTimer( this );
+    connect( timer, SIGNAL(timeout()), this, SLOT(psTimeout()) );
+    timer->start( 10000 );
     ps = new PowerStatus;
     pa = new DesktopPowerAlerter( 0 );
     KeyFilter* kf = new KeyFilter(this);
@@ -258,6 +260,8 @@ DesktopApplication::DesktopApplication( int& argc, char **argv, Type t )
     connect(kf,SIGNAL(numLockStateToggle()),this,SIGNAL(numLockStateToggle()));
     connect(kf,SIGNAL(capsLockStateToggle()),this,SIGNAL(capsLockStateToggle()));
     connect(kf,SIGNAL(activate(const DeviceButton*,bool)),this,SIGNAL(activate(const DeviceButton*,bool)));
+
+    applyLightSettings(ps);
 }
 
 
@@ -281,10 +285,11 @@ bool DesktopApplication::qwsEventFilter( QWSEvent *e )
 	if ( me->simpleData.state&LeftButton ) {
 	    if ( up ) {
 		up = FALSE;
-		qpedesktop->screenClick();
+		qpedesktop->screenClick(TRUE);
 	    }
-	} else {
+	} else if ( !up ) {
 	    up = TRUE;
+	    qpedesktop->screenClick(FALSE);
 	}
     }
 
@@ -296,8 +301,8 @@ void DesktopApplication::psTimeout()
 {
     qpedesktop->checkMemory(); // in case no events are being generated
 
-    PowerStatus prev = *ps;	
-    
+    PowerStatus prev = *ps;
+
     *ps = PowerStatusManager::readStatus();
 
     if ( prev != *ps ) {
@@ -305,7 +310,7 @@ void DesktopApplication::psTimeout()
 	applyLightSettings(ps);
     }
 
-    
+
     if ( (ps->batteryStatus() == PowerStatus::VeryLow ) ) {
 	pa->alert( tr( "Battery is running very low." ), 6 );
     }
@@ -350,14 +355,7 @@ Desktop::Desktop() :
     connect(launcher, SIGNAL(busy()), tb, SLOT(startWait()));
     connect(launcher, SIGNAL(notBusy(const QString&)), tb, SLOT(stopWait(const QString&)));
 
-    int displayw = qApp->desktop()->width();
-    int displayh = qApp->desktop()->height();
-
-
-    QSize sz = tb->sizeHint();
-
-    setGeometry( 0, displayh-sz.height(), displayw, sz.height() );
-    tb->setGeometry( 0, displayh-sz.height(), displayw, sz.height() );
+    layoutLauncher();
 
     tb->show();
     launcher->showMaximized();
@@ -376,6 +374,9 @@ Desktop::Desktop() :
     connect(qApp, SIGNAL(activate(const DeviceButton*,bool)),this,SLOT(activate(const DeviceButton*,bool)));
 
     qApp->installEventFilter( this );
+    qApp->desktop()->installEventFilter( this );
+
+    setGeometry( -10, -10, 9, 9 );
 }
 
 void Desktop::show()
@@ -481,7 +482,7 @@ void Desktop::activate(const DeviceButton* button, bool held)
 	if ( sr.message() == "raise()" && vis ) {
 	    sr.setMessage("nextView()");
 	} else {
-	    // "back door" 
+	    // "back door"
 	    sr << (int)vis;
 	}
     }
@@ -501,7 +502,7 @@ void Desktop::raiseMenu()
 }
 
 #if defined(QPE_HAVE_TOGGLELIGHT)
-#include <qpe/config.h>
+#include <qtopia/config.h>
 
 #include <sys/ioctl.h>
 #include <sys/types.h>
@@ -529,7 +530,6 @@ static void blankScreen()
 
 static void darkScreen()
 {
-    extern void qpe_setBacklight(int);
     qpe_setBacklight(0); // force off
 }
 
@@ -594,12 +594,7 @@ void Desktop::toggleCapsLockState()
 void Desktop::styleChange( QStyle &s )
 {
     QWidget::styleChange( s );
-    int displayw = qApp->desktop()->width();
-    int displayh = qApp->desktop()->height();
-
-    QSize sz = tb->sizeHint();
-
-    tb->setGeometry( 0, displayh-sz.height(), displayw, sz.height() );
+    layoutLauncher();
 }
 
 void DesktopApplication::shutdown()
@@ -616,11 +611,21 @@ void DesktopApplication::shutdown( ShutdownImpl::Type t )
 {
     switch ( t ) {
 	case ShutdownImpl::ShutdownSystem:
+#ifndef Q_OS_WIN32
 	    execlp("shutdown", "shutdown", "-h", "now", (void*)0); // No tr
+#else
+	    qDebug("DesktopApplication::shutdown fixme, can't shutdown");      
+#endif
 	    break;
+
 	case ShutdownImpl::RebootSystem:
+#ifndef Q_OS_WIN32
 	    execlp("shutdown", "shutdown", "-r", "now", (void*)0); // No tr
+#else
+	    qDebug("DesktopApplication::shutdown fixme, can't reboot");      
+#endif
 	    break;
+
 	case ShutdownImpl::RestartDesktop:
 	    restart();
 	    break;
@@ -638,12 +643,16 @@ void DesktopApplication::restart()
 #ifdef Q_WS_QWS
     for ( int fd = 3; fd < 100; fd++ )
 	close( fd );
+#ifndef Q_OS_WIN32
 #if defined(QT_DEMO_SINGLE_FLOPPY)
     execl( "/sbin/init", "qpe", 0 );
 #elif defined(QT_QWS_CASSIOPEIA)
     execl( "/bin/sh", "sh", 0 );
 #else
-    execl( (qpeDir()+"/bin/qpe").latin1(), "qpe", 0 );
+    execl( (qpeDir()+"bin/qpe").latin1(), "qpe", 0 );
+#endif
+#else
+    qDebug("DesktopApplication::restart fixme, can't restart");      
 #endif
     exit(1);
 #endif
@@ -708,19 +717,19 @@ void Desktop::pokeTimeMonitors()
     }
 }
 
-void Desktop::keyClick()
+void Desktop::keyClick(int keycode, bool press, bool repeat)
 {
 #ifdef CUSTOM_SOUND_KEYCLICK
     if ( keyclick )
-	CUSTOM_SOUND_KEYCLICK;
+	CUSTOM_SOUND_KEYCLICK(keycode,press,repeat);
 #endif
 }
 
-void Desktop::screenClick()
+void Desktop::screenClick(bool press)
 {
 #ifdef CUSTOM_SOUND_TOUCH
     if ( touchclick )
-	CUSTOM_SOUND_TOUCH;
+	CUSTOM_SOUND_TOUCH(press);
 #endif
 }
 
@@ -731,7 +740,17 @@ void Desktop::soundAlarm()
 #endif
 }
 
-bool Desktop::eventFilter( QObject *, QEvent *ev )
+void Desktop::layoutLauncher()
+{
+    int displayw = qApp->desktop()->width();
+    int displayh = qApp->desktop()->height();
+
+    QSize sz = tb->sizeHint();
+    tb->setGeometry( 0, displayh-sz.height(), displayw, sz.height() );
+    tb->calcMaxWindowRect();
+}
+
+bool Desktop::eventFilter( QObject *o, QEvent *ev )
 {
 #ifdef QT_QWS_CUSTOM
     if ( ev->type() == QEvent::KeyPress ) {
@@ -746,5 +765,9 @@ bool Desktop::eventFilter( QObject *, QEvent *ev )
 	}
     }
 #endif
+    if ( o == qApp->desktop() && ev->type() == QEvent::Resize ) {
+	if ( qpedesktop )
+	    qpedesktop->layoutLauncher();
+    }
     return FALSE;
 }

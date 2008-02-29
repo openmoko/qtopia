@@ -20,12 +20,12 @@
 
 #include "clock.h"
 
-#include <qpe/global.h>
-#include <qpe/qpeapplication.h>
-#include <qpe/config.h>
-#include <qpe/resource.h>
+#include <qtopia/global.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/config.h>
+#include <qtopia/resource.h>
 #ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
 
 #include <qmainwindow.h>
@@ -35,6 +35,7 @@
 #include <qdatetime.h>
 #include <qtimer.h>
 #include <qpopupmenu.h>
+#include <qpainter.h>
 #include <qlabel.h>
 #include <stdlib.h>
 
@@ -56,30 +57,27 @@ LauncherClock::LauncherClock( QWidget *parent ) : QLabel( parent )
 void LauncherClock::mousePressEvent( QMouseEvent * )
 {
     QPopupMenu *menu = new QPopupMenu(this);
-    menu->insertItem(tr("Set time"), 0);
+    menu->insertItem(tr("Set time..."), 0);
     menu->insertSeparator();
-    menu->insertItem(tr("Clock"), 1);
+    menu->insertItem(tr("Clock.."), 1);
     Config config( "Clock" );
     config.setGroup( "Daily Alarm" );
     bool alarmOn = config.readBoolEntry("Enabled", FALSE);
-    if ( alarmOn )
-	menu->insertItem(Resource::loadPixmap("smallalarm"), tr("Alarm"), 2);
-    else
-	menu->insertItem(tr("Alarm"), 2);
-    menu->setItemChecked( 2, alarmOn );
+    QIconSet alarmIc(Resource::loadIconSet(alarmOn?"smallalarm":"smallalarm_off"));
+    menu->insertItem(alarmIc, tr("Alarm..."), 2);
     QPoint curPos = mapToGlobal( QPoint(0,0) );
     QSize sh = menu->sizeHint();
     switch (menu->exec( curPos-QPoint((sh.width()-width())/2,sh.height()) )) {
 	case 0:
 	    Global::execute( "systemtime" );
 	    break;
-	case 1:
-	    Global::execute( "clock" );
+	case 1: {
+	    //Global::execute( "clock" );
+	    QCopEnvelope e("QPE/Application/clock", "showClock()" );
+	    }
 	    break;
-	case 2:
-	    {
-		QCopEnvelope e("QPE/Application/clock", "setDailyEnabled(int)" );
-		e << (menu->isItemChecked(2) ? 0 : 1);
+	case 2: {
+		QCopEnvelope e("QPE/Application/clock", "editDailyAlarm()" );
 	    }
 	    break;
 	default:

@@ -21,11 +21,11 @@
 #define QTOPIA_INTERNAL_LANGLIST
 #include "inputmethods.h"
 
-#include <qpe/config.h>
-#include <qpe/qpeapplication.h>
-#include <qpe/inputmethodinterface.h>
-#include <qpe/qlibrary.h>
-#include <qpe/global.h>
+#include <qtopia/config.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/inputmethodinterface.h>
+#include <qtopia/qlibrary.h>
+#include <qtopia/global.h>
 
 #include <qpopupmenu.h>
 #include <qpushbutton.h>
@@ -41,12 +41,13 @@
 #ifdef Q_WS_QWS
 #include <qwindowsystem_qws.h>
 #include <qwsevent_qws.h>
+#include <qcopchannel_qws.h>
 #endif
 
-#ifdef SINGLE_APP
-#include "handwritingimpl.h"
-#include "keyboardimpl.h"
-#include "pickboardimpl.h"
+#ifdef QT_NO_COMPONENT
+#include "../plugins/inputmethods/handwriting/handwritingimpl.h"
+#include "../plugins/inputmethods/keyboard/keyboardimpl.h"
+#include "../3rdparty/plugins/inputmethods/pickboard/pickboardimpl.h"
 #endif
 
 
@@ -73,7 +74,8 @@ static const int inputWidgetStyle = QWidget::WStyle_Customize |
 InputMethods::InputMethods( QWidget *parent ) :
     QWidget( parent, "InputMethods", WStyle_Tool | WStyle_Customize )
 {
-    mkeyboard = NULL;
+    mkeyboard = 0;
+    imethod = 0;
 
     QHBoxLayout *hbox = new QHBoxLayout( this );
 
@@ -116,6 +118,10 @@ InputMethods::InputMethods( QWidget *parent ) :
     connect( imChoice, SIGNAL(clicked()), this, SLOT(chooseIm()) );
 
     loadInputMethods();
+
+    QCopChannel *channel = new QCopChannel( "QPE/IME", this );
+    connect( channel, SIGNAL(received(const QCString&, const QByteArray&)),
+	     this, SLOT(qcopReceive(const QCString&, const QByteArray&)) );
 }
 
 InputMethods::~InputMethods()
@@ -139,7 +145,8 @@ void InputMethods::showInputMethod(const QString& name)
     QValueList<InputMethod>::Iterator it;
     InputMethod *im = 0;
     for ( it = inputMethodList.begin(); it != inputMethodList.end(); ++it, i++ ) {
-	if ( (*it).name() == name ) {
+	QString lname = (*it).library->library().mid((*it).library->library().findRev('/') + 1);
+	if ( (*it).name() == name || lname == name ) {
 	    im = &(*it);
 	    break;
 	}
@@ -164,15 +171,16 @@ QRect InputMethods::inputRect() const
 
 void InputMethods::unloadInputMethods()
 {
-#ifndef SINGLE_APP
+#ifndef QT_NO_COMPONENT
+    int i;
     // reverse order of load
-    for ( int i = inputMethodList.count()-1; i >= 0; i-- ) {
+    for ( i = inputMethodList.count()-1; i >= 0; i-- ) {
 	InputMethod &im = inputMethodList[i];
 	im.release();
 	im.library->unload();
 	delete im.library;
     }
-    for ( int i = inputModifierList.count()-1; i >= 0; i-- ) {
+    for ( i = inputModifierList.count()-1; i >= 0; i-- ) {
 	InputMethod &im = inputModifierList[i];
 	im.release();
 	im.library->unload();
@@ -185,14 +193,18 @@ void InputMethods::unloadInputMethods()
 
 void InputMethods::loadInputMethods()
 {
-#ifndef SINGLE_APP
+#ifndef QT_NO_COMPONENT
     hideInputMethod();
     mkeyboard = 0;
 
     unloadInputMethods();
 
-    QString path = QPEApplication::qpeDir() + "/plugins/inputmethods";
+    QString path = QPEApplication::qpeDir() + "plugins/inputmethods";
+#ifndef Q_OS_WIN32
     QDir dir( path, "lib*.so" );
+#else
+    QDir dir (path, "*.dll");
+#endif
     QStringList list = dir.entryList();
     QStringList::Iterator it;
     for ( it = list.begin(); it != list.end(); ++it ) {
@@ -201,9 +213,9 @@ void InputMethods::loadInputMethods()
 
 	QLibrary *lib = new QLibrary( path + "/" + *it );
 
-	qDebug("loading input method %s", (*it).latin1());
+	//qDebug("loading input method %s", (*it).latin1());
 	if ( lib->queryInterface( IID_InputMethod, (QUnknownInterface**)&iface ) == QS_OK ) {
-	    qDebug("old input method");
+	    //qDebug("old input method");
 	    InputMethod input;
 	    input.library = lib;
 	    input.newIM = FALSE;
@@ -217,7 +229,7 @@ void InputMethods::loadInputMethods()
 	    for (QStringList::ConstIterator lit = langs.begin(); lit!=langs.end(); ++lit) {
 		QString lang = *lit;
 		QTranslator * trans = new QTranslator(qApp);
-		QString tfn = QPEApplication::qpeDir()+"/i18n/"+lang+"/"+type+".qm";
+		QString tfn = QPEApplication::qpeDir()+"i18n/"+lang+"/"+type+".qm";
 		if ( trans->load( tfn ))
 		    qApp->installTranslator( trans );
 		else
@@ -225,7 +237,7 @@ void InputMethods::loadInputMethods()
 	    }
 
 	} else if ( lib->queryInterface( IID_ExtInputMethod, (QUnknownInterface**)&eface ) == QS_OK ) {
-	    qDebug("new input method");
+	    //qDebug("new input method");
 	    InputMethod input;
 	    input.library = lib;
 	    input.newIM = TRUE;
@@ -233,20 +245,20 @@ void InputMethods::loadInputMethods()
 	    input.widget = input.extInterface->keyboardWidget( 0, inputWidgetStyle );
 	    // may be either a simple, or advanced.
 	    if (input.widget) {
-		qDebug("its a keyboard");
+		//qDebug("its a keyboard");
 		inputMethodList.append( input );
 	    } else {
-		qDebug("its a real im");
+		//qDebug("its a real im");
 		input.widget = input.extInterface->statusWidget( 0, 0 );
 		if (input.widget) { 
-		    qDebug("blah");
+		    //qDebug("blah");
 		    inputModifierList.append( input );
 		    imButton->addWidget(input.widget, inputModifierList.count());
 		}
 	    }
 
 	} else {
-	    qDebug("unkown");
+	    //qDebug("unkown");
 	    delete lib;
 	}
     }
@@ -265,31 +277,25 @@ void InputMethods::loadInputMethods()
     input.interface->onKeyPress( this, SLOT(sendKey(ushort,ushort,ushort,bool,bool)) );
     inputMethodList.append( input );
 #endif
-    if ( !inputMethodList.isEmpty() ) {
-	mkeyboard = &inputMethodList[0];
-	kbdButton->setPixmap( *mkeyboard->icon() );
-    }
-    if ( !inputMethodList.isEmpty() )
-	kbdButton->show();
-    else
-	kbdButton->hide();
-    if ( inputMethodList.count() > 1 )
-	kbdChoice->show();
-    else
-	kbdChoice->hide();
-
-
+    
     QWSServer::setCurrentInputMethod( 0 );
     if ( !inputModifierList.isEmpty() ) {
 	imethod = &inputModifierList[0];
 	imButton->raiseWidget(imethod->widget);
 	QWSServer::setCurrentInputMethod( imethod->extInterface->inputMethod() );
+    } else {
+	imethod = 0;
     }
+    
+    // we need to update keyboards afterwards, as some of them may not be compatible with
+    // the current input method
+    updateKeyboards(imethod);
 
     if ( !inputModifierList.isEmpty() )
 	imButton->show();
     else
 	imButton->hide();
+    
     if ( inputModifierList.count() > 1 )
 	imChoice->show();
     else
@@ -349,7 +355,7 @@ void InputMethods::chooseIm()
 	    pop.setItemChecked( i, TRUE );
     }
 
-    QPoint pt = mapToGlobal(kbdChoice->geometry().topRight());
+    QPoint pt = mapToGlobal(imChoice->geometry().topRight());
     QSize s = pop.sizeHint();
     pt.ry() -= s.height();
     pt.rx() -= s.width();
@@ -375,16 +381,91 @@ void InputMethods::chooseKeyboard(InputMethod* im)
 	showKbd( TRUE );
 }
 
+static bool keyboardCompatible(InputMethod *keyb, const QString &imname ) 
+{
+    if ( !keyb || !keyb->newIM || !keyb->extInterface->compatible().count() )
+	return TRUE;
+
+    if ( keyb->extInterface->compatible().contains(imname) )
+	return TRUE;
+    
+    return FALSE;
+}
+
+// Updates the display of the soft keyboards available to the current input method
+void InputMethods::updateKeyboards(InputMethod *im)
+{
+    uint count;
+
+    if ( im ) {
+	QString imname = im->library->library().mid(im->library->library().findRev('/') + 1);
+
+	if ( mkeyboard && !keyboardCompatible(mkeyboard, imname) ) {
+	    kbdButton->setOn( FALSE );
+	    showKbd( FALSE );
+	    mkeyboard = 0;
+	}
+	
+	count = 0;
+
+	QValueList<InputMethod>::Iterator it;
+	for ( it = inputMethodList.begin(); it != inputMethodList.end(); ++it ) {
+	    if ( keyboardCompatible( &(*it), imname ) ) {
+		if ( !mkeyboard ) {
+		    mkeyboard = &(*it);
+		    kbdButton->setPixmap( *mkeyboard->icon() );
+		}
+
+		count++;
+	    } 
+	}
+    } else {
+	count = inputMethodList.count();
+	if ( count && !mkeyboard ) {
+	    mkeyboard = &inputMethodList[0];
+	    kbdButton->setPixmap( *mkeyboard->icon() );
+	} else {
+	    mkeyboard = 0;  //might be redundant
+	}
+    }
+
+    if ( count > 1 )
+	kbdChoice->show();
+    else 
+	kbdChoice->hide();
+
+    if ( count )
+	kbdButton->show();
+    else
+	kbdButton->hide();
+}
 
 void InputMethods::chooseMethod(InputMethod* im)
 {
     if ( im != imethod ) {
+	updateKeyboards( im );
+	
 	QWSServer::setCurrentInputMethod( 0 );
 	imethod = im;
-	if ( imethod->newIM )
+	if ( imethod && imethod->newIM )
 	    QWSServer::setCurrentInputMethod( imethod->extInterface->inputMethod() );
+	else
+	    QWSServer::setCurrentInputMethod( 0 );
+	
+	if ( im )
+	    imButton->raiseWidget(im->widget);
+	else
+	    imButton->hide(); //### good UI? make sure it is shown again!
     }
 }
+
+void InputMethods::qcopReceive( const QCString &msg, const QByteArray &data )
+{
+    if ( imethod && imethod->newIM )
+	imethod->extInterface->qcopReceive( msg, data );
+}
+
+
 void InputMethods::showKbd( bool on )
 {
     if ( !mkeyboard )

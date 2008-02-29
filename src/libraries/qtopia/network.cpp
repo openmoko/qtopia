@@ -19,16 +19,16 @@
 **********************************************************************/
 
 #define QTOPIA_INTERNAL_LANGLIST
-#include "qpe/network.h"
-#include "qpe/networkinterface.h"
-#include "qpe/global.h"
-#include "qpe/config.h"
-#include "qpe/resource.h"
-#include "qpe/qpeapplication.h"
+#include <qtopia/network.h>
+#include <qtopia/networkinterface.h>
+#include <qtopia/global.h>
+#include <qtopia/config.h>
+#include <qtopia/resource.h>
+#include <qtopia/qpeapplication.h>
 #ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
-#include <qpe/qlibrary.h>
+#include <qtopia/qlibrary.h>
 
 #include <qlistbox.h>
 #include <qdir.h>
@@ -73,25 +73,6 @@ void Network::start(const QString& choice, const QString& password)
   \brief The Network class provides network access functionality.
   \internal
 */
-
-// copy the proxy settings of the active config over to the Proxies.conf file
-/*!
-  \internal
-*/
-void Network::writeProxySettings( Config &cfg )
-{
-    Config proxy( Network::settingsDir() + "/Proxies.conf", Config::File );
-    proxy.setGroup("Properties");
-    cfg.setGroup("Proxy");
-    proxy.writeEntry("type", cfg.readEntry("type") );
-    proxy.writeEntry("autoconfig", cfg.readEntry("autoconfig") );
-    proxy.writeEntry("httphost", cfg.readEntry("httphost") );
-    proxy.writeEntry("httpport", cfg.readEntry("httpport") );
-    proxy.writeEntry("ftphost", cfg.readEntry("ftphost") );
-    proxy.writeEntry("ftpport", cfg.readEntry("ftpport") );
-    proxy.writeEntry("noproxies", cfg.readEntry("noproxies") );
-    cfg.setGroup("Properties");
-}
 
 
 
@@ -229,6 +210,17 @@ private:
 	    cfg.setGroup("Info");
 	    QString type = cfg.readEntry("Type");
 	    NetworkInterface* plugin = Network::loadPlugin(type);
+//#define DEBUG_IGNORE_LAN
+#ifdef DEBUG_IGNORE_LAN
+	    // Qtopia doesn't currently understand multiple
+	    // services being active simultaneously (and doesn't
+	    // support the routing control needed to make that useful).
+	    // For debugging purposes, we can hide the LAN connection
+	    // (eg. NFS mounted development system), so that the other
+	    // services can be started.
+	    if ( type == "lan" )
+		plugin = 0;
+#endif
 	    cfg.setGroup("Properties");
 	    if ( plugin ) {
 		if ( plugin->isActive(cfg) ) {
@@ -367,15 +359,39 @@ bool Network::serviceNeedsPassword(const QString& service)
     cfg.setGroup("Properties");
     return plugin ? plugin->needPassword(cfg) : FALSE;
 }
-
+#endif // QT_NO_COP
 /*!
   \internal
 */
 bool Network::networkOnline()
 {
+#ifndef QT_NO_COP
     return ns && ns->networkOnline();
+#else
+    return FALSE;
+#endif
 }
 
+// copy the proxy settings of the active config over to the Proxies.conf file
+/*!
+  \internal
+*/
+void Network::writeProxySettings( Config &cfg )
+{
+    Config proxy( Network::settingsDir() + "/Proxies.conf", Config::File );
+    proxy.setGroup("Properties");
+    cfg.setGroup("Proxy");
+    proxy.writeEntry("type", cfg.readEntry("type") );
+    proxy.writeEntry("autoconfig", cfg.readEntry("autoconfig") );
+    proxy.writeEntry("httphost", cfg.readEntry("httphost") );
+    proxy.writeEntry("httpport", cfg.readEntry("httpport") );
+    proxy.writeEntry("ftphost", cfg.readEntry("ftphost") );
+    proxy.writeEntry("ftpport", cfg.readEntry("ftpport") );
+    proxy.writeEntry("noproxies", cfg.readEntry("noproxies") );
+    cfg.setGroup("Properties");
+}
+
+#ifndef QT_NO_COP
 /*!
   \internal
 */
@@ -420,7 +436,7 @@ NetworkInterface* Network::loadPlugin(const QString& type)
     if ( !ifaces ) ifaces = new QDict<NetworkInterface>;
     NetworkInterface *iface = ifaces->find(type);
     if ( !iface ) {
-	QString libfile = QPEApplication::qpeDir() + "/plugins/network/lib" + type + ".so";
+	QString libfile = QPEApplication::qpeDir() + "plugins/network/lib" + type + ".so";
 	QLibrary lib(libfile);
 	if ( !lib.queryInterface( IID_Network, (QUnknownInterface**)&iface ) == QS_OK )
 	    return 0;
@@ -429,7 +445,7 @@ NetworkInterface* Network::loadPlugin(const QString& type)
 	for (QStringList::ConstIterator it = langs.begin(); it!=langs.end(); ++it) {
 	    QString lang = *it;
 	    QTranslator * trans = new QTranslator(qApp);
-	    QString tfn = QPEApplication::qpeDir()+"/i18n/"+lang+"/lib"+type+".qm";
+	    QString tfn = QPEApplication::qpeDir()+"i18n/"+lang+"/lib"+type+".qm";
 	    if ( trans->load( tfn ))
 		qApp->installTranslator( trans );
 	    else

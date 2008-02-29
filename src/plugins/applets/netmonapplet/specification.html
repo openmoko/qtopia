@@ -1,0 +1,153 @@
+<html>
+<title>
+Network Monitor Specification
+</title>
+
+<body>
+
+<h1>Network Monitor Specification</h1>
+
+
+<!--
+<h2>Specification goals</h2>
+This specification:
+<ol>
+<li> Describes all of the end-user stories and interactions.
+    (eg. the user can view a slide show of images from a digital camera).
+<li> Lists all features, derived from end-user stories,
+    in enough detail to allow the definition of
+    tests for all features.
+<li> Defines contraints and limitations on the application.
+    (eg. can view image sizes as large as 1MB).
+<li>Aides the developer on focusing on the most important aspects of
+    the application and ensuring all important elements are completed.
+</ol>
+-->
+
+<a name=description>
+</a>
+<!-- A one-line description of what this application is and does.
+    This description is then duplicated in the .desktop Comment and
+    the .control file description.
+
+    (eg. The image viewer allows viewing and very minor editing of image files.)
+-->
+The Network Monitor is the user interface for activating networking.
+<!-- A one-paragraph description of what this application is and does.
+    This description is then duplicated in the .desktop Comment and
+    the .control file description.
+
+    (eg. The image viewer allows viewing and very minor editing
+    of image files. It assists format conversion, beaming logos
+    to phones, captioning, etc.)
+-->
+<p>
+The Network Monitor presents available services to the user, allows
+services to be initiated, prompting for passwords if required, and
+continuously showing the status of networking when relevant.
+</p>
+
+<p>
+Status: RT
+</p>
+
+<a name=usecases>
+<h2>Use Cases</h2>
+</a>
+<!-- Describe real-world stories. Implicit in these use cases is
+	"these things are easy to do".
+    (eg.
+	Roving News Reporter
+
+	The journalist/cameraman takes photos with a digital camera,
+	loads them into the PDAs via CF card, adjusts the contrast,
+	blacks-out a license plate, adds a copyright caption, and
+	emails the image and short story to Reuters.
+    )
+
+    Note: TITLEs may be used as identifiers in bug reports.
+ -->
+<ul>
+<li><b>LAN card</b>
+    <p>User plugs in a CF LAN card, and can then access the Internet.
+<li><b>Multiple LAN</b>
+    <p>(not implemented: User plugs in a CF LAN card, but as 2 differently-configured
+	services are defined, the user must choose a service before any connection is made.)
+<li><b>Modem card</b>
+    <p>User plugs in a CF Modem card, and can then access the Internet.
+	As an option, the password for the service must be input before
+	the connection proceeds. At any time, user can drop connection
+	via a menu or by pulling out the CF card. The menu can be used
+	to re-establish the connection.
+<li><b>Cellphone Modem</b>
+    <p>(not implemented: User puts cellphone near th device IR, then requests that a
+	IrDA, Bluetooth, etc. network be established. Once connected,
+	the user can then access the Internet. At any time, user can drop connection
+        via a menu or by breaking the connection on the phone.
+	The menu can be used to re-establish the connection.)
+<li><b>Demand Dialing</b>
+    <p>User runs web browser and goes to a URL. An appropriate
+	network service is initiated, possibly requiring user interaction
+	(eg.  selecting service, entering password).
+<li><b>New Hardware</b>
+    <p>User buys hypothetical new NURV Synapsis CF Card, which includes
+	a software package for the device. After installing the software
+	package, the NURV card can be used in the same manner as other
+	services.
+</ul>
+
+<a name=features>
+<h2>Features</h2>
+</a>
+<!-- features are brief
+
+    (eg. 
+	* Slide show: view multiple images in sequence
+	    * Configurable delay between images.
+	    * Hardware-button-controlled stepping between images.
+	* Big images: view larger-than-available-RAM images in some formats.
+	* Formats: view JPEG, PNG, GIF format images.
+	* Scribbling: draw black or white lines on images.
+	* Save: in JPEG, PNG formats.
+    )
+
+    Note: TITLEs may be used as identifiers in bug reports.
+-->
+
+<ul>
+<li>Choose services: a menu shows available network services.
+<li>Password: some services require a password to be entered,
+	and this functionality is provided in the architecture.
+<li>Current state: an icon indicates current network availability.
+<li>Network plugins: network services are ultimately defined by executable code
+	in plugins coupled with configuration parameters. In this way,
+	new software can be supplied for new hardware.
+</ul>
+
+<a name=prerequisites>
+<h2>Prerequisites</h2>
+</a>
+<!--
+    Describes unresolved limitations that cannot
+    be shown within the features list.
+
+    Describes memory and other requirements quantitatively.
+
+    This is a short list, mainly intended as a "known bugs"
+    list for missing features.
+
+    (eg.
+	* Stylus: required for Scribbling.
+	* Memory: requires 250 bytes per event, plus content strings.
+    )
+
+    Note: TITLEs may be used as identifiers in bug reports.
+-->
+
+<ul>
+<li>Demand Dialing: demand dialing requires that the PPP service
+	can support the "demand" option.
+</ul>
+
+</body>
+</html>

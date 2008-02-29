@@ -22,7 +22,7 @@
 #include "base.h"
 #include "helicopter.h"
 
-#include <qpe/sound.h>
+#include <qtopia/sound.h>
 
 #include <qmainwindow.h>
 #include <qtimer.h>

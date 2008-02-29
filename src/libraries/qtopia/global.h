@@ -21,12 +21,13 @@
 #define GLOBAL_H
 
 #include <qtopia/qpeglobal.h>
+#include <qtopia/quuid.h>
 #include <qstringlist.h>
 #include <qguardedptr.h>
+#include <qwidget.h>
 
 class QDawg;
 class QLabel;
-class QWidget;
 class AppLnk;
 class DocLnkSet;
 class QFile;
@@ -34,6 +35,22 @@ class QFile;
 class QTOPIA_EXPORT Global
 {
 public:
+    static QUuid generateUuid();
+
+    static QString homeDirPath();
+    static QString journalFileName(const QString &filename);
+    static QString applicationFileName(const QString& appname, const QString& filename);
+    static void findDocuments(DocLnkSet* folder, const QString &mimefilter=QString::null);
+
+#ifdef QTOPIA_INTERNAL_LANGLIST
+    static QStringList languageList();
+    static QStringList helpPath();
+#endif
+
+    static void statusMessage(const QString&);
+
+#ifdef Q_WS_QWS
+
     Global();
 
     // Dictionaries
@@ -47,9 +64,8 @@ public:
 
     static void createDocDir();
 
-    static void findDocuments(DocLnkSet* folder, const QString &mimefilter=QString::null);
-
-    static QString applicationFileName(const QString& appname, const QString& filename);
+    static QString deviceId();
+    static QString ownerName();
 
     struct Command {
 	const char *file;
@@ -68,7 +84,6 @@ public:
 
     // system messaging
     static void applyStyle();
-    static void statusMessage(const QString&);
     static QWidget *shutdown( bool = FALSE );
     static QWidget *restart( bool = FALSE );
     static void hideInputMethod();
@@ -88,16 +103,11 @@ public:
     static bool isFileLocked(QFile &f, int flags = -1);
 #endif
 
-
-#ifdef QTOPIA_INTERNAL_LANGLIST
-    static QStringList languageList();
-    static QStringList helpPath();
-#endif
-
 private:
     static void invoke( const QString &exec);
     static Command* builtin;
     static QGuardedPtr<QWidget> *running;
+#endif
 };
 
 

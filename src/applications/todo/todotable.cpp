@@ -21,8 +21,10 @@
 #include "todotable.h"
 
 #include <qtopia/categoryselect.h>
-#include <qtopia/xmlreader.h>
 #include <qtopia/resource.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/config.h>
+#include <qtopia/timestring.h>
 
 #include <qasciidict.h>
 #include <qcombobox.h>
@@ -31,91 +33,344 @@
 #include <qtextcodec.h>
 #include <qtimer.h>
 #include <qdatetime.h>
+#include <qstyle.h>
+#include <qheader.h>
+#include <qpushbutton.h>
+#include <qwidget.h>
 
 #include <qcursor.h>
 #include <qregexp.h>
+
+#ifdef QTOPIA_DESKTOP
+#include <qsettings.h>
+#endif
 
 #include <errno.h>
 #include <stdlib.h>
 
 
-static const int BoxSize = 14;
-static const int RowHeight = 20;
+static int BoxSize = 14;
+static int RowHeight = 20;
+
+static Qt::ButtonState bState = Qt::NoButton;
+static int selectionBeginRow = -1;
+
+static QString applicationPath;
 
 static bool taskCompare( const PimTask &task, const QRegExp &r, int category );
 
-TodoTable::TodoTable( QWidget *parent, const char *name )
-    : QTable( 0, 3, parent, name ),
-      ta(TaskIO::ReadWrite),
-      mCat( 0 ),
-      currFindRow( -2 ) 
+/* XPM */
+static char * menu_xpm[] = {
+"12 12 5 1",
+" 	c None",
+".	c #000000",
+"+	c #FFFDAD",
+"@	c #FFFF00",
+"#	c #E5E100",
+"            ",
+"            ",
+"  ......... ",
+"  .+++++++. ",
+"  .+@@@@#.  ",
+"  .+@@@#.   ",
+"  .+@@#.    ",
+"  .+@#.     ",
+"  .+#.      ",
+"  .+.       ",
+"  ..        ",
+"            "};
+
+class TablePrivate
 {
+public:
+    TablePrivate()
+    {
+	mEditedField = -1;
+	mModified = FALSE;
+	scrollButton = 0;
+	wEditor = 0;
+    }
+
+    QUuid modifiedTask() { return mUid; }
+    void clearModifiedTask()
+    {
+	mModified = FALSE;
+	if ( scrollButton )
+	    scrollButton->hide();
+    }
+
+    QPushButton *cornerButton(QWidget *parent)
+    {
+	if ( !scrollButton ) {
+	    scrollButton = new QPushButton(parent);
+	    scrollButton->setPixmap( QPixmap( (const char**)menu_xpm) );
+	    scrollButton->hide();
+	}
+
+	return scrollButton;
+    }
+
+    void setModifiedTask(QUuid id, int field)
+    {
+	mUid = id;
+	mEditedField = field;
+	mModified = TRUE;
+	if ( scrollButton )
+	    scrollButton->show();
+    }
+
+    int editedTaskField() { return mEditedField; }
+    bool hasModifiedTask() { return mModified; }
+
+    /*	EditorWidget */
+    void setEditorWidget(QWidget *w, int row, int col)
+    {
+	wEditor = w;
+	editRow = row;
+	editCol = col;
+    }
+
+    void clearEditorWidget()
+    {
+	wEditor = 0;
+	editRow = -1;
+	editCol = -1;
+    }
+
+    QWidget *editorWidget() { return wEditor; }
+    int editorColumn() { return editCol; }
+    int editorRow() { return editRow; }
+
+private:
+    int mEditedField;
+    QUuid mUid;
+    bool mModified;
+    QPushButton *scrollButton;
+
+    QWidget *wEditor;
+    int editCol, editRow;
+};
+
+TodoTable::TodoTable(const SortedTasks &tasks, QWidget *parent, const char *name, const char *appPath )
+    : QTable( 0, 3, parent, name ),
+      mCat( 0 ),
+      currFindRow( -2 )
+{
+    applicationPath = appPath;
+
+    QFont f = font();
+    QFontMetrics fm(f);
+    RowHeight = QMAX(20, fm.height() + 2);
+
+    // keep it an even number, a bit over 3 / 4 of rowHeight.
+    BoxSize =  ( RowHeight * 3 ) / 4;
+    BoxSize += BoxSize % 2;
+    
+    // do not!! put the below assignment in the constructor init, as the todoplugin for
+    // qtopiadesktop fails to resolve the symbol
+    mTasks = tasks;
+    mSel = NoSelection;
+
+    d = new TablePrivate();
+
+    setCornerWidget( d->cornerButton(this) );
+    cornerWidget()->hide();
+    connect( d->cornerButton(this), SIGNAL( clicked() ),
+	    this, SLOT( cornerButtonClicked() ) );
+
     mCat.load( categoryFileName() );
     setSorting( TRUE );
-    setSelectionMode( NoSelection );
-    setColumnStretchable( 2, TRUE );
-    setColumnWidth( 0, 21 );
-    setColumnWidth( 1, 35 );
+    QTable::setSelectionMode( QTable::NoSelection );
+
     setLeftMargin( 0 );
     setFrameStyle( NoFrame );
     verticalHeader()->hide();
-    horizontalHeader()->setLabel( 0, Resource::loadPixmap("task-completed"), "" );
-    horizontalHeader()->setLabel( 1, tr( "Prior." ) );
-    horizontalHeader()->setLabel( 2, tr( "Description" ) );
+
+    connect(horizontalHeader(), SIGNAL(clicked(int)), this, SLOT(headerClicked(int)) );
+    mSortColumn = -1;
+
     connect( this, SIGNAL( clicked( int, int, int, const QPoint & ) ),
 	     this, SLOT( slotClicked( int, int, int, const QPoint & ) ) );
     connect( this, SIGNAL( pressed( int, int, int, const QPoint & ) ),
 	     this, SLOT( slotPressed( int, int, int, const QPoint & ) ) );
+    connect( this, SIGNAL( doubleClicked( int, int, int, const QPoint & ) ),
+	     this, SLOT( slotDoubleClicked( int, int, int, const QPoint & ) ) );
     connect( this, SIGNAL( currentChanged( int, int ) ),
              this, SLOT( slotCurrentChanged( int, int ) ) );
 
     //connect( &ta, SIGNAL( todolistUpdated() ), this, SLOT(refresh()));
+    readSettings();
 
     menuTimer = new QTimer( this );
-    connect( menuTimer, SIGNAL(timeout()), this, SLOT(slotShowMenu()) );
+    connect( menuTimer, SIGNAL(timeout()), this, SIGNAL(pressed()) );
 }
 
-void TodoTable::addEntry( const PimTask &todo )
+TodoTable::~TodoTable()
 {
-    ta.addTask(todo);
+    saveSettings();
+    delete d;
+}
+
+void TodoTable::setSelectionMode(SelectionMode m)
+{
+    if ( m == NoSelection && mSel != m ) {
+	mSelected.clear();
+	refresh();
+    }
+
+    mSel = m;
+}
+
+QValueList<QUuid> TodoTable::selectedTasks()
+{
+    QValueList<QUuid> list;
+    if ( mSel == Single ) {
+    	if ( hasCurrentEntry() )
+	    list.append( currentEntry().uid() );
+    } else if ( mSel == Extended ) {
+	list = mSelected;
+	
+	// set current entry as selected when none is selected
+	if ( !list.count() && hasCurrentEntry() )
+	    list.append( currentEntry().uid() );
+    }
+
+    return list;
+}
+
+QValueList<PimTask> TodoTable::selected()
+{
+    QValueList<PimTask> list;
+    if ( mSel == Single ) {
+    	if ( hasCurrentEntry() )
+	    list.append( currentEntry() );
+    } else if ( mSel == Extended ) {
+	for ( QValueList<QUuid>::Iterator it = mSelected.begin(); it != mSelected.end(); ++it) {
+	    int i = pos( *it );
+	    if ( i > -1 )
+		list.append( *mTasks.at(i) );
+	}
+	
+	// set current entry as selected when none is selected
+	if ( !list.count() && hasCurrentEntry() )
+	    list.append( currentEntry() );
+    }
+
+    return list;
+
+}
+
+void TodoTable::selectAll()
+{
+    if ( mSel == NoSelection || mSel == Single )
+	return;
+
+    selectionBeginRow = -1;
+    mSelected.clear();
+    for ( uint u = 0; u < mTasks.count(); u++ ) {
+	mSelected.append( mTasks.at(u)->uid() );
+    }
     refresh();
 }
 
-void TodoTable::updateEntry( const PimTask &todo )
+// rework to support new selection mode
+void TodoTable::setSelection(int /* row */)
 {
-    ta.updateTask(todo);
-    refresh();
+/*
+    if ( mSel != NoSelection ) {
+	PimTask task(*mTasks[row]);
+
+	if ( mSel == Extended ) {
+	    QValueList<QUuid>::Iterator it = mSelected.find( task.uid() );
+
+	    if ( (bState & Qt::ControlButton) || (bState & Qt::ShiftButton) ) {
+		if ( it == mSelected.end() )
+		    mSelected.append( task.uid() );
+		else
+		    mSelected.remove( task.uid() );
+	    } else {
+		mSelected.clear();
+		mSelected.append( task.uid() );
+	    }
+	    bState = Qt::NoButton;
+	} else if ( mSel == Single ) {
+	    mSelected.clear();
+	    mSelected.append( task.uid() );
+	}
+
+	if ( mSelected.count() == 0 )
+	    emit currentChanged();
+    }
+*/
 }
 
-void TodoTable::removeEntry( const PimTask &todo )
+// We clear the selection and loop through all the rows since currentChanged
+// will skip some rows if you move the pointing device fast enough
+void TodoTable::setSelection(int fromRow, int toRow)
 {
-    ta.removeTask(todo);
-    refresh();
+    // fromLow must be lower
+    if ( toRow < fromRow ) {
+	int t = toRow;
+	toRow = fromRow;
+	fromRow = t;
+    }
+    
+    int row = fromRow;
+    mSelected.clear();
+    while ( row <= toRow ) {
+	mSelected.append( mTasks.at(row)->uid() );
+	row++;
+    }
 }
 
-void TodoTable::flush()
+void TodoTable::reload(const SortedTasks &tasks)
 {
-    ta.saveData();
+    // If the user applies outside filters we have to clear our internal state
+    if ( d->editorWidget() ) {
+	endEdit(d->editorRow(), d->editorColumn(), FALSE, TRUE );
+	d->clearEditorWidget();
+    }
+
+    mTasks = tasks;
+    mSelected.clear();
+
+    if ( mSortColumn > -1 ) {
+	mTasks.setSorting( headerKeyFields[ mSortColumn ] , FALSE );
+	mTasks.sort();
+    }
+
+    refresh();
+    setFocus();	// in case of inline widgets grabbing focus
 }
 
-void TodoTable::reload()
+int TodoTable::pos(const QUuid &id)
 {
-    ta.ensureDataCurrent(TRUE);
-    refresh();
+    for ( uint u = 0; u < mTasks.count(); u++ ) {
+	if ( mTasks.at(u)->uid() == id )
+	    return u;
+    }
+
+    return -1;
 }
 
 void TodoTable::slotClicked( int row, int col, int , const QPoint &pos )
 {
+    if ( d->editorWidget() ) {
+	endEdit(d->editorRow(), d->editorColumn(), FALSE, TRUE );
+	d->clearEditorWidget();
+    }
+
     if ( !cellGeometry( row, col ).contains(pos) )
 	return;
-    if (row < 0 || row >= (int)ta.sortedTasks().count())
+    if (row < 0 || row >= (int)mTasks.count())
 	return;
 
-    PimTask task(*ta.sortedTasks()[row]);
-    // let's switch on the column number...
-    switch ( col )
+    PimTask task(*mTasks.at(row));
+
+    int field = headerKeyFields[ currentColumn() ];
+    switch ( field )
     {
-        case 0: 
+        case PimTask::CompletedField:
 	    {
 		int x = pos.x() - columnPos( col );
 		int y = pos.y() - rowPos( row );
@@ -124,23 +379,71 @@ void TodoTable::slotClicked( int row, int col, int , const QPoint &pos )
 		if ( x >= ( w - BoxSize ) / 2 && x <= ( w - BoxSize ) / 2 + BoxSize &&
 			y >= ( h - BoxSize ) / 2 && y <= ( h - BoxSize ) / 2 + BoxSize ) {
 		    task.setCompleted(!task.isCompleted());
-		    ta.updateTask(task);
-		    refresh();
+		    task.setCompletedDate( QDate::currentDate() );
+		    d->setModifiedTask( task.uid(), PimTask::CompletedField);
+		    emit updateTask( task );
+		    return;
 		}
 	    }
             break;
-        case 1:
-	    // fake a double click.
+        case PimTask::Priority:
 	    {
+		QWidget *w = beginEdit(row, col, FALSE);
+		d->setEditorWidget(w, row, col );
 		QKeyEvent e(QEvent::KeyPress, 0x20, 0, Key_Space, " ");
-		QTable::keyPressEvent(&e);
+		QPEApplication::sendEvent(w, &e);
+		return;
 	    }
             break;
-        case 2:
-            // may as well edit it...
+        default:
 	    menuTimer->stop();
-//            emit signalEdit();
+	    emit clicked();
             break;
+    }
+}
+
+void TodoTable::keyPressEvent( QKeyEvent *e )
+{
+    if ( d->editorWidget() ) {
+	endEdit(d->editorRow(), d->editorColumn(), FALSE, TRUE );
+	d->clearEditorWidget();
+	setFocus();
+    }
+
+    int col  = currentColumn();
+    int row = currentRow();
+
+    if (row < 0 || row >= (int)mTasks.count())
+	return;
+
+    if ( e->key() == Key_Space || e->key() == Key_Return ) {
+	int field = headerKeyFields[ col ];
+	switch ( field ) {
+	    case PimTask::CompletedField:
+		{
+		    PimTask task(*(mTasks.at(row)));
+		    task.setCompleted(!task.isCompleted());
+		    task.setCompletedDate( QDate::currentDate() );
+		    d->setModifiedTask( task.uid(), PimTask::CompletedField);
+		    emit updateTask( task );
+		    return;
+		}
+		break;
+	    case PimTask::Priority:
+		{
+		    QWidget *w = beginEdit(row, col, FALSE);
+		    d->setEditorWidget(w, row, col );
+		    QKeyEvent ek(QEvent::KeyPress, 0x20, 0, Key_Space, " ");
+		    QPEApplication::sendEvent(w, &ek);
+		    return;
+		}
+		break;
+	    default:
+		emit clicked();
+	    break;
+	}
+    } else {
+	QTable::keyPressEvent( e );
     }
 }
 
@@ -150,26 +453,54 @@ void TodoTable::slotPressed( int row, int col, int, const QPoint &pos )
 	menuTimer->start( 750, TRUE );
 }
 
-void TodoTable::slotShowMenu()
+void TodoTable::slotDoubleClicked(int, int, int, const QPoint &)
 {
-    emit signalShowMenu( QCursor::pos() );
+    emit doubleClicked();
 }
 
-void TodoTable::slotCurrentChanged( int, int )
+void TodoTable::slotCurrentChanged( int row, int )
 {
+//    qDebug("slotCurrentChanged %d", row );
+    bool needRefresh = d->hasModifiedTask();
+
+    if ( mSel == Extended ) {
+	if ( (bState & Qt::LeftButton) ) {
+	    if ( selectionBeginRow == -1 )
+		selectionBeginRow = row;
+	    else 
+		setSelection( selectionBeginRow, row);
+
+	    needRefresh = TRUE;
+	} else {
+	    mSelected.clear();
+	    needRefresh = TRUE;
+	}
+    }
+    
+    if ( needRefresh ) {
+	d->clearModifiedTask();
+	refresh();
+    }
+
     menuTimer->stop();
+    emit currentChanged();
+}
+
+bool TodoTable::hasCurrentEntry()
+{
+    return mTasks.count() != 0;
 }
 
 PimTask TodoTable::currentEntry()
 {
-    if (ta.sortedTasks().count() == 0)
+    if (mTasks.count() == 0)
 	return PimTask();
-    if (currentRow() >= (int)ta.sortedTasks().count()) {
-	setCurrentCell(ta.sortedTasks().count() - 1, currentColumn());
+    if (currentRow() >= (int)mTasks.count()) {
+	setCurrentCell(mTasks.count() - 1, currentColumn());
     } else if (currentRow() < 0) {
 	setCurrentCell(0, currentColumn());
     }
-    return PimTask(*(ta.sortedTasks()[currentRow()]));
+    return PimTask(*(mTasks.at(currentRow())));
 }
 
 void TodoTable::setCurrentEntry(QUuid &u)
@@ -178,21 +509,16 @@ void TodoTable::setCurrentEntry(QUuid &u)
     rows = numRows();
 
     for ( row = 0; row < rows; row++ ) {
-	if ( ta.sortedTasks().at(row)->uid() == u) {
+	if ( mTasks.at(row)->uid() == u) {
 	    setCurrentCell(row, currentColumn());
 	    break;
 	}
     }
 }
 
-void TodoTable::removeCurrentEntry()
+void TodoTable::sortColumn( int , bool, bool )
 {
-    ta.removeTask(currentEntry());
-    refresh();
-}
-
-void TodoTable::sortColumn( int col, bool /*ascending*/, bool /*wholeRows*/ )
-{
+/*
     // external sort.
     switch(col) {
 	case 0:
@@ -210,36 +536,45 @@ void TodoTable::sortColumn( int col, bool /*ascending*/, bool /*wholeRows*/ )
     }
     // gets QTable to repaint....
     refresh();
+*/
 }
 
 void TodoTable::rowHeightChanged( int )
 {
 }
 
-void TodoTable::keyPressEvent( QKeyEvent *e )
+void TodoTable::fontChange( const QFont &oldFont )
 {
-    if ( e->key() == Key_Space || e->key() == Key_Return ) {
-	switch ( currentColumn() ) {
-	    case 0: 
-		{
-		    PimTask task(*(ta.sortedTasks()[currentRow()]));
-		    task.setCompleted(!task.isCompleted());
-		    ta.updateTask(task);
-		    refresh();
-		}
-		break;
-	    case 1:
-		//Opens the widget
-		QTable::keyPressEvent( e );
-		break;
-	    case 2:
-		emit signalEdit();
-	    default:
-		break;
-	}
-    } else {
-	QTable::keyPressEvent( e );
+    QFont f = font();
+    QFontMetrics fm(f);
+    RowHeight = QMAX(20, fm.height() + 2);
+
+    // keep it an even number, a bit over 3 / 4 of rowHeight.
+    BoxSize =  ( RowHeight * 3 ) / 4;
+    BoxSize += BoxSize % 2;
+
+    QTable::fontChange(oldFont);
+}
+
+void TodoTable::contentsMousePressEvent( QMouseEvent *e )
+{
+    if ( mSel == Extended ) {
+	mSelected.clear();
+	bState = e->button();
     }
+
+    QTable::contentsMousePressEvent( e );
+}
+
+void TodoTable::contentsMouseReleaseEvent( QMouseEvent *e )
+{
+    if ( mSel == Extended ) {
+	selectionBeginRow = -1;
+	bState = Qt::NoButton;
+	qDebug("selected %d tasks", mSelected.count() );
+    }
+
+    QTable::contentsMouseReleaseEvent( e );
 }
 
 QString TodoTable::categoryLabel( int id )
@@ -254,9 +589,34 @@ QString TodoTable::categoryLabel( int id )
     return mCat.label( "Todo List", id );
 }
 
+void TodoTable::cornerButtonClicked()
+{
+    int row = pos( d->modifiedTask() );
+    if ( row > -1 ) {
+	int col = currentColumn();
+	setCurrentCell( row, col );
+	ensureCellVisible( row, col );
+
+    }
+}
+
 void TodoTable::refresh()
 {
-    setNumRows(ta.sortedTasks().count());
+    if ( d->hasModifiedTask() ) {
+	// we might have an invalid uid at this point.  Check row within bounds
+	// just to be sure
+	if ( currentRow() < (int) mTasks.count() && mTasks.at(currentRow())->uid() == d->modifiedTask() ) {
+	    d->clearModifiedTask();
+	} else  {
+	    // Our modified task can have been filtered out
+	    int i = pos( d->modifiedTask() );
+	    if ( i == -1 )
+		d->clearModifiedTask();
+	}
+    }
+
+    qDebug("refresh called");
+    setNumRows(mTasks.count());
 }
 
 void TodoTable::slotDoFind( const QString &findString, int category )
@@ -278,7 +638,7 @@ void TodoTable::slotDoFind( const QString &findString, int category )
     int rows = numRows();
     int row;
     for ( row = currFindRow + 1; row < rows; row++ ) {
-	if ( taskCompare( *(ta.sortedTasks()[row]), r, category) )
+	if ( taskCompare( *(mTasks.at(row)), r, category) )
 	    break;
     }
     if ( row >= rows ) {
@@ -337,76 +697,147 @@ int TodoTable::rowAt( int pos ) const
     return QMIN( pos/RowHeight, numRows()-1 );
 }
 
+void TodoTable::paintFocus(QPainter *p, const QRect &r)
+{
+    QRect fr(0, 0, r.width(), r.height() );
+    if ( mSel == NoSelection ) {
+	QTable::paintFocus(p, r);
+    } else {
+	p->setPen( QPen( black, 1) );
+	p->setBrush( NoBrush );
+	p->drawRect( fr.x(), fr.y(), fr.width()-1, fr.height()-1 );
+    }
+}
+
 void TodoTable::paintCell(QPainter *p, int row, int col,
-	const QRect &cr, bool) 
+	const QRect &cr, bool)
 {
 #if defined(Q_WS_WIN)
-    const QColorGroup &cg = ( !drawActiveSelection && style().styleHint( QStyle::SH_ItemView_ChangeHighlightOnFocus ) ? palette().inactive() : colorGroup() );
+    const QColorGroup &cg = ( style().styleHint( QStyle::SH_ItemView_ChangeHighlightOnFocus ) ? palette().inactive() : colorGroup() );
 #else
     const QColorGroup &cg = colorGroup();
 #endif
 
     p->save();
 
-    PimTask task(*(ta.sortedTasks()[row]));
-    p->fillRect( 0, 0, cr.width(), cr.height(), cg.brush( QColorGroup::Base ) );
-    QPen op = p->pen();
-    p->setPen(cg.mid());
+    PimTask task(*(mTasks.at(row)));
+    
+    bool selected = FALSE;
+    if ( mSel != NoSelection  && mSelected.find(task.uid()) != mSelected.end() )
+	selected = TRUE;
+/*    
+    bool current = (row == currentRow() );
+    bool focusCell = (row == currentRow() && col == currentColumn());
+*/    
+    int field = headerKeyFields[ col ];
+    
+    if ( selected /*&& !focusCell */ ) {
+	p->fillRect( 0, 0, cr.width(), cr.height(), cg.brush( QColorGroup::Highlight ) );
+	p->setPen(cg.highlightedText());
+    } else if ( d->hasModifiedTask() && task.uid() == d->modifiedTask() ) {
+	if ( field == d->editedTaskField() ) {
+	    p->fillRect( 0, 0, cr.width(), cr.height(), cg.brush( QColorGroup::Base ) );
+	    p->setPen(cg.text() );
+	} else {
+	    p->fillRect( 0, 0, cr.width(), cr.height(), cg.brush( QColorGroup::Mid ) );
+	    p->setPen(cg.light() );
+	}
+    } else {
+	p->fillRect( 0, 0, cr.width(), cr.height(), cg.brush( QColorGroup::Base ) );
+	p->setPen(cg.text());
+    }
+
     p->drawLine( 0, cr.height() - 1, cr.width() - 1, cr.height() - 1 );
     p->drawLine( cr.width() - 1, 0, cr.width() - 1, cr.height() - 1 );
-    p->setPen(op);
-
     QFont f = p->font();
     QFontMetrics fm(f);
 
-    switch(col) {
-	case 0: 
+    switch(field) {
+	case PimTask::CompletedField:
 	    {
+		qDebug("BoxSize, Rowheight, %d, %d", BoxSize, RowHeight);
 		// completed field
 		int marg = ( cr.width() - BoxSize ) / 2;
 		int x = 0;
 		int y = ( cr.height() - BoxSize ) / 2;
-		p->setPen( QPen( cg.text() ) );
+//		if ( !selected ) {
+//		    p->setPen( QPen( cg.highlightedText() ) );
+//		} else {
+		    p->setPen( QPen( cg.text() ) );
+//		}
+		
 		p->drawRect( x + marg, y, BoxSize, BoxSize );
 		p->drawRect( x + marg+1, y+1, BoxSize-2, BoxSize-2 );
+		p->fillRect( x + marg+2, y+2, BoxSize-4, BoxSize-4, cg.brush( QColorGroup::Base ) );
+		
 		p->setPen( darkGreen );
 		x += 1;
 		y += 1;
 		if ( task.isCompleted() ) {
-		    QPointArray a( 9*2 );
 		    int i, xx, yy;
-		    xx = x+2+marg;
-		    yy = y+4;
-		    for ( i=0; i<4; i++ ) {
-			a.setPoint( 2*i,   xx, yy );
-			a.setPoint( 2*i+1, xx, yy+2 );
-			xx++; yy++;
-		    }
-		    yy -= 2;
-		    for ( i=4; i<9; i++ ) {
-			a.setPoint( 2*i,   xx, yy );
-			a.setPoint( 2*i+1, xx, yy+2 );
-			xx++; yy--;
+		    int sseg = BoxSize / 4;
+		    int lseg = BoxSize / 2;
+		    sseg -=2; // to fit in BoxSize.
+		    lseg -=1;
+		    xx = x+sseg+marg;
+		    yy = y + lseg;
+		    QPointArray a( 6*2 );
+		    // tripple thickens line.
+		    for (i=0; i < 3; i++) {
+			a.setPoint(4*i, xx, yy);
+			a.setPoint(4*i+1, xx+sseg, yy+sseg);
+			a.setPoint(4*i+2, xx+sseg, yy+sseg);
+			a.setPoint(4*i+3, xx+sseg+lseg, yy+sseg-lseg);
+			yy++;
 		    }
 		    p->drawLineSegments( a );
 		}
 	    }
 	    break;
-	case 1:
+	case PimTask::Priority:
 	    // priority field
 	    {
 		QString text = QString::number(task.priority());
 		p->drawText(2,2 + fm.ascent(), text);
 	    }
 	    break;
-	case 2:
+	case PimTask::Description:
 	    // description field
 	    {
-		QString text = task.description();
-		p->drawText(2,2 + fm.ascent(), text);
+		p->drawText(2,2 + fm.ascent(), task.description() );
 	    }
 	    break;
-	case 3:
+	case PimTask::Notes:
+		p->drawText(2,2 + fm.ascent(), task.notes() ); break;
+	case PimTask::StartedDate:
+	    {
+		if ( task.hasStartedDate() )
+		    p->drawText(2,2 + fm.ascent(), TimeString::shortDate( task.startedDate() ) );
+		else
+		    p->drawText(2,2 + fm.ascent(), tr("Not started") );
+	    }
+	    break;
+	case PimTask::CompletedDate:
+	    {
+		if ( task.isCompleted() )
+		    p->drawText(2,2 + fm.ascent(), TimeString::shortDate( task.completedDate() ) );
+		else
+		    p->drawText(2,2 + fm.ascent(), tr("Unfinished") );
+	    }
+	    break;
+
+	case PimTask::PercentCompleted:
+	    {
+		p->drawText(2,2 + fm.ascent(), QString::number( task.percentCompleted() ) + "%" );
+	    }
+	    break;
+	case PimTask::Status:
+	{
+		p->drawText(2,2 + fm.ascent(), statusToText( task.status() ));
+	}
+	break;
+	/*
+	case PimTask:::
 	    {
 		QString text;
 		if (task.hasDueDate()) {
@@ -417,31 +848,11 @@ void TodoTable::paintCell(QPainter *p, int row, int col,
 		p->drawText(2,2 + fm.ascent(), text);
 	    }
 	    break;
+	*/
     }
     p->restore();
 }
 
-void TodoTable::setShowCompleted(bool b)
-{
-    ta.setCompletedFilter(!b);
-    refresh();
-}
-
-bool TodoTable::showCompleted() const
-{
-    return !ta.completedFilter();
-}
-
-int TodoTable::showCategory() const 
-{
-    return ta.filter();
-}
-
-void TodoTable::setShowCategory(int c)
-{
-    ta.setFilter(c);
-    refresh();
-}
 
 /*  Need to store changes in priority as the user selects them.  Otherwise they
     might be lost in a closeevent
@@ -453,10 +864,9 @@ void TodoTable::priorityChanged(int)
 
 QWidget *TodoTable::createEditor(int row, int col, bool ) const
 {
-    switch (col) {
-	case 0:
-	    return 0;
-	case 1:
+    int field = headerKeyFields[ col ];
+    switch (field) {
+	case PimTask::Priority:
 	    {
 		QComboBox *cb = new QComboBox( viewport() );
 		cb->insertItem( "1" );
@@ -464,8 +874,8 @@ QWidget *TodoTable::createEditor(int row, int col, bool ) const
 		cb->insertItem( "3" );
 		cb->insertItem( "4" );
 		cb->insertItem( "5" );
-		cb->setCurrentItem( ta.sortedTasks()[row]->priority() - 1 );
-		
+		cb->setCurrentItem( mTasks.at(row)->priority() - 1 );
+
 		connect( cb, SIGNAL(activated(int)), this, SLOT(priorityChanged(int)) );
 		return cb;
 	    }
@@ -483,14 +893,206 @@ void TodoTable::setCellContentFromEditor()
 void TodoTable::setCellContentFromEditor(int row, int col)
 {
     QWidget *w = cellWidget(row,col);
-    
-    PimTask task(*(ta.sortedTasks()[row]));
-    if (w->inherits("QComboBox") && col == 1) {
+
+    PimTask task(*(mTasks.at(row)));
+    if (w->inherits("QComboBox") ) {
 	int res = ((QComboBox *)w)->currentItem() + 1;
 	if (task.priority() != res) {
-	    task.setPriority( ((QComboBox *)w)->currentItem() + 1);
-	    ta.updateTask(task);
-	    refresh();
+	    int i = ((QComboBox *)w)->currentItem() + 1;
+	    task.setPriority( (PimTask::PriorityValue) i);
+	    d->setModifiedTask( task.uid(), PimTask::Priority);
+	    emit updateTask( task );
+	    //refresh();
+	} else {
+	    setFocus();
+	    d->clearModifiedTask();
 	}
     }
 }
+
+void TodoTable::clearCellWidget(int row, int col)
+{
+    qDebug("clear cell widget called");
+    QTable::clearCellWidget(row, col);
+}
+
+void TodoTable::readSettings()
+{
+    QStringList selectedFields, sizeList;
+
+#ifdef QTOPIA_DESKTOP
+    QSettings settings;
+    settings.insertSearchPath( QSettings::Unix, applicationPath );
+    settings.insertSearchPath( QSettings::Windows, "/Trolltech" );
+
+    selectedFields = settings.readListEntry("/palmtopcenter/todolist/fields" );
+    sizeList = settings.readListEntry("/palmtopcenter/todolist/colwidths" );
+
+    mSortColumn = settings.readNumEntry("/palmtopcenter/todolist/sortcolumn", 0);
+#else
+    Config config( "todo" );
+    config.setGroup( "View" );
+
+    selectedFields = config.readListEntry("fields", ',');
+    sizeList = config.readListEntry("colwidths",',');
+    mSortColumn = config.readNumEntry("sortcolumn", 0 );
+#endif
+
+    if ( !selectedFields.count() ) {
+	setFields( defaultFields() );
+    } else {
+	QMap<QCString, int> identifierToKey = PimTask::identifierToKeyMap();
+	for ( QStringList::Iterator it = selectedFields.begin(); it != selectedFields.end(); ++it) {
+	    int field = identifierToKey[ (*it).data() ];
+	    headerKeyFields.append( field );
+	}
+
+	setFields( headerKeyFields, sizeList );
+    }
+
+    if ( mSortColumn > -1 )
+	reload( mTasks );
+}
+
+void TodoTable::saveSettings()
+{
+    QMap<int,QCString> keyToIdentifier = PimTask::keyToIdentifierMap();
+    QHeader *header = horizontalHeader();
+    QStringList fieldList, sizeList;
+    for ( int i = 0; i < header->count(); i++) {
+	fieldList.append( keyToIdentifier[ headerKeyFields[i]  ]  );
+	sizeList.append( QString::number(header->sectionSize(i)) );
+    }
+
+#ifdef QTOPIA_DESKTOP
+    QSettings settings;
+    settings.insertSearchPath( QSettings::Unix, applicationPath );
+    settings.insertSearchPath( QSettings::Windows, "/Trolltech" );
+
+    settings.writeEntry( "/palmtopcenter/todolist/fields", fieldList );
+    settings.writeEntry( "/palmtopcenter/todolist/colwidths", sizeList );
+    settings.writeEntry( "/palmtopcenter/todolist/sortcolumn", mSortColumn );
+#else
+    Config config( "todo" );
+    config.setGroup( "View" );
+    config.writeEntry("fields", fieldList, ',' );
+    config.writeEntry("colwidths", sizeList, ',' );
+    config.writeEntry("sortcolumn", mSortColumn );
+#endif
+
+}
+
+void TodoTable::setFields(QValueList<int> f)
+{
+    QHeader *header = horizontalHeader();
+    QStringList sizes;
+
+    if ( f.count() == 0 ) {
+	f = defaultFields();
+	headerKeyFields.clear();
+    }
+
+    // map old sizes to new pos in header list
+    for ( int i = 0; i < (int) f.count(); i++) {
+	int pos = headerKeyFields.findIndex( *f.at(i) );
+	//qDebug(" f key %d found at %d", *f.at(i), pos );
+	if ( pos > -1 && pos < header->count() )
+	    sizes.append( QString::number( header->sectionSize(pos) ) );
+	else
+	    sizes.append( QString::number( defaultFieldSize( (PimTask::TaskFields) *f.at(i) ) ));
+    }
+    
+    setFields(f, sizes);
+}
+
+void TodoTable::setFields(QValueList<int> f, QStringList sizes)
+{
+    QHeader *header = horizontalHeader();
+    int prevSortKey = -1;
+
+    if ( mSortColumn > -1 && headerKeyFields.count() )
+	prevSortKey = headerKeyFields[mSortColumn];
+
+    headerKeyFields = f;
+
+    while ( header->count() )
+	header->removeLabel( header->count() - 1 );
+    
+    // We have to create the internal list before calling QTable::setNumCols as
+    // setnNumCols forces a repaint
+    QValueList<int>::ConstIterator iit;
+    int i = 0;
+    for (iit = f.begin(); iit != f.end(); ++iit) {
+	if ( *iit == prevSortKey ) {
+	    mSortColumn = i;
+	    break;
+	}
+	i++;
+    }
+    setNumCols( f.count() );
+    
+    QMap<int, QString> trFields = PimTask::trFieldsMap();
+    i = 0;
+    for (iit = f.begin(); iit != f.end(); ++iit) {
+	if ( *iit == PimTask::CompletedField )
+	    header->setLabel( i++, Resource::loadPixmap("task-completed"), "" );
+	else
+	    header->setLabel(i++, trFields[*iit] );
+    }
+
+    i = 0;
+    for (QStringList::ConstIterator it = sizes.begin(); it != sizes.end(); ++it) {
+	if ( i < (int) f.count() )
+	    setColumnWidth(i, (*it).toInt() );
+	i++;
+    }
+}
+
+QValueList<int> TodoTable::fields()
+{
+    return headerKeyFields;
+}
+
+QValueList<int> TodoTable::defaultFields()
+{
+    QValueList<int> l;
+    l.append( PimTask::CompletedField );
+    l.append( PimTask::Priority );
+    l.append( PimTask::Description );
+
+    return l;
+}
+
+int TodoTable::defaultFieldSize(PimTask::TaskFields f)
+{
+    switch( f ) {
+	case PimTask::CompletedField: return 31;
+	case PimTask::Status: return 70;
+	case PimTask::Description: return 90;
+	case PimTask::Priority: return 42;
+	case PimTask::PercentCompleted: return 45;
+	case PimTask::StartedDate: return 100;
+	case PimTask::CompletedDate: return 100;
+	default: return 70;
+    }
+}
+
+void TodoTable::headerClicked(int h)
+{
+    if ( h != mSortColumn ) {
+	mSortColumn = h;
+	reload( mTasks );
+    }
+}
+
+QString TodoTable::statusToText(PimTask::TaskStatus s)
+{
+    switch( s ) {
+	default: return tr("Not Started");
+	case PimTask::InProgress: return tr("In Progress");
+	case PimTask::Completed: return tr("Completed");
+	case PimTask::Waiting: return tr("Waiting");
+	case PimTask::Deferred:  return tr("Deferred");
+    }
+}
+

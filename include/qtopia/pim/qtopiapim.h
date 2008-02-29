@@ -1,0 +1,1 @@
+../../../src/libraries/qtopiapim/qtopiapim.h

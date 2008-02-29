@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -132,22 +138,22 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 
 HEADERS =	showimg.h \
 		settingsdialog.h
-SOURCES =	main.cpp \
-		settingsdialog.cpp \
-		showimg.cpp
-OBJECTS =	main.o \
-		settingsdialog.o \
-		showimg.o \
-		settingsdialogbase.o
+SOURCES =	settingsdialog.cpp \
+		showimg.cpp \
+		main.cpp
+OBJECTS =	$(OBJECTS_DIR)/settingsdialog.o \
+		$(OBJECTS_DIR)/showimg.o \
+		$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/settingsdialogbase.o
 INTERFACES =    settingsdialogbase.ui
 UICDECLS =      settingsdialogbase.h
 UICIMPLS =      settingsdialogbase.cpp
-SRCMOC	=	moc_showimg.cpp \
-		moc_settingsdialog.cpp \
-		moc_settingsdialogbase.cpp
-OBJMOC	=	moc_showimg.o \
-		moc_settingsdialog.o \
-		moc_settingsdialogbase.o
+SRCMOC	=	$(MOC_DIR)/moc_showimg.cpp \
+		$(MOC_DIR)/moc_settingsdialog.cpp \
+		$(MOC_DIR)/moc_settingsdialogbase.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_showimg.o \
+		$(OBJECTS_DIR)/moc_settingsdialog.o \
+		$(OBJECTS_DIR)/moc_settingsdialogbase.o
 
 
 ####### Implicit rules
@@ -202,7 +208,7 @@ listaddonentmodules:
 	@echo 
 
 
-REQUIRES=showimg
+REQUIRES=
 
 ####### Sub-libraries
 
@@ -213,29 +219,22 @@ REQUIRES=showimg
 
 ####### Compile
 
-main.o: main.cpp \
-		showimg.h \
-		settingsdialog.h \
-		settingsdialogbase.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
-
-settingsdialog.o: settingsdialog.cpp \
+$(OBJECTS_DIR)/settingsdialog.o: settingsdialog.cpp \
 		settingsdialog.h \
 		settingsdialogbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/settingsdialog.o settingsdialog.cpp
 
-showimg.o: showimg.cpp \
+$(OBJECTS_DIR)/showimg.o: showimg.cpp \
 		showimg.h \
 		settingsdialog.h \
-		settingsdialogbase.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/fileselector.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h \
-		$(QPEDIR)/include/qpe/config.h
+		settingsdialogbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/showimg.o showimg.cpp
+
+$(OBJECTS_DIR)/main.o: main.cpp \
+		showimg.h \
+		settingsdialog.h \
+		settingsdialogbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
 settingsdialogbase.h: settingsdialogbase.ui
 	$(UIC) settingsdialogbase.ui -o $(INTERFACE_DECL_PATH)/settingsdialogbase.h
@@ -243,38 +242,43 @@ settingsdialogbase.h: settingsdialogbase.ui
 settingsdialogbase.cpp: settingsdialogbase.ui
 	$(UIC) settingsdialogbase.ui -i settingsdialogbase.h -o settingsdialogbase.cpp
 
-settingsdialogbase.o: settingsdialogbase.cpp \
+$(OBJECTS_DIR)/settingsdialogbase.o: settingsdialogbase.cpp \
 		settingsdialogbase.h \
 		settingsdialogbase.ui
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/settingsdialogbase.o settingsdialogbase.cpp
 
-moc_showimg.o: moc_showimg.cpp \
+$(OBJECTS_DIR)/moc_showimg.o: $(MOC_DIR)/moc_showimg.cpp \
 		showimg.h \
 		settingsdialog.h \
 		settingsdialogbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_showimg.o $(MOC_DIR)/moc_showimg.cpp
 
-moc_settingsdialog.o: moc_settingsdialog.cpp \
+$(OBJECTS_DIR)/moc_settingsdialog.o: $(MOC_DIR)/moc_settingsdialog.cpp \
 		settingsdialog.h \
 		settingsdialogbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_settingsdialog.o $(MOC_DIR)/moc_settingsdialog.cpp
 
-moc_settingsdialogbase.o: moc_settingsdialogbase.cpp \
+$(OBJECTS_DIR)/moc_settingsdialogbase.o: $(MOC_DIR)/moc_settingsdialogbase.cpp \
 		settingsdialogbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_settingsdialogbase.o $(MOC_DIR)/moc_settingsdialogbase.cpp
 
-moc_showimg.cpp: showimg.h
-	$(MOC) showimg.h -o moc_showimg.cpp
+$(MOC_DIR)/moc_showimg.cpp: showimg.h
+	$(MOC) showimg.h -o $(MOC_DIR)/moc_showimg.cpp
 
-moc_settingsdialog.cpp: settingsdialog.h
-	$(MOC) settingsdialog.h -o moc_settingsdialog.cpp
+$(MOC_DIR)/moc_settingsdialog.cpp: settingsdialog.h
+	$(MOC) settingsdialog.h -o $(MOC_DIR)/moc_settingsdialog.cpp
 
-moc_settingsdialogbase.cpp: settingsdialogbase.h
-	$(MOC) settingsdialogbase.h -o moc_settingsdialogbase.cpp
+$(MOC_DIR)/moc_settingsdialogbase.cpp: settingsdialogbase.h
+	$(MOC) settingsdialogbase.h -o $(MOC_DIR)/moc_settingsdialogbase.cpp
 
 
 
 lupdate:
-	lupdate imageviewer.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <imageviewer.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease imageviewer.pro
+	$(QPEDIR)/bin/qtopia-linstall imageviewer.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

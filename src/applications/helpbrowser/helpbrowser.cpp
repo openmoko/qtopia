@@ -18,18 +18,22 @@
 **
 **********************************************************************/
 
+#define QTOPIA_INTERNAL_LANGLIST
+
 #include "helpbrowser.h"
 
-#include <qpe/qpeapplication.h>
-#include <qpe/resource.h>
-#include <qpe/global.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/resource.h>
+#include <qtopia/mimetype.h>
+#include <qtopia/applnk.h>
+#include <qtopia/global.h>
 
 #include <qstatusbar.h>
 #include <qdragobject.h>
 #include <qpixmap.h>
 #include <qpopupmenu.h>
-#include <qpe/qpemenubar.h>
-#include <qpe/qpetoolbar.h>
+#include <qtopia/qpemenubar.h>
+#include <qtopia/qpetoolbar.h>
 #include <qtoolbutton.h>
 #include <qiconset.h>
 #include <qfile.h>
@@ -58,12 +62,72 @@ HelpBrowser::HelpBrowser( QWidget* parent, const char *name, WFlags f )
     init( "index.html" );
 }
 
+class MagicTextBrowser : public QTextBrowser {
+public:
+    MagicTextBrowser(QWidget* parent) :
+	QTextBrowser(parent)
+    {
+    }
+    
+    void setSource( const QString& source )
+    {
+	QTextBrowser::setSource(source);
+	if ( magic(source,"applications") || magic(source,"games") || magic(source,"settings") )
+	    return;
+	// Just those are magic (for now). Could do CGI here,
+	// or in Qtopia's mime source factory.
+    }
+
+    bool magic(const QString& source, const QString& name)
+    {
+	if ( name+".html" == source ) {
+	    QString fn = mimeSourceFactory()->makeAbsolute( source, context() );
+	    const QMimeSource* m = mimeSourceFactory()->data( fn, context() );
+	    if ( m ) {
+		QString txt;
+		if ( QTextDrag::decode(m,txt) ) {
+		    QRegExp re("<qtopia-"+name+">.*</qtopia-"+name+">");
+		    int start,len;
+		    if ( (start=re.match(txt,0,&len))>=0 ) {
+			QString generated = generate(name);
+			txt.replace(start,len,generated);
+			setText(txt);
+			return TRUE;
+		    }
+		}
+	    }
+	}
+	return FALSE;
+    }
+
+    QString generate(const QString& name) const
+    {
+	QString dir = MimeType::appsFolderName()+"/"+name[0].upper()+name.mid(1);
+	AppLnkSet lnkset(dir);
+	AppLnk* lnk;
+	QString r;
+	for (QListIterator<AppLnk> it(lnkset.children()); (lnk=it.current()); ++it) {
+	    QString name = lnk->name();
+	    QString icon = lnk->icon();
+	    QString helpFile = lnk->exec()+".html";
+	    QStringList helpPath = Global::helpPath();
+	    bool helpExists = FALSE;
+	    for (QStringList::ConstIterator it=helpPath.begin(); it!=helpPath.end() && !helpExists; ++it)
+		helpExists = QFile::exists( *it + "/" + helpFile );
+	    if ( helpExists ) {
+		r += "<h3><a href="+helpFile+"><img src="+icon+">"+name+"</a></h3>\n";
+	    }
+	}
+	return r;
+    }
+};
+
 void HelpBrowser::init( const QString& _home )
 {
     setIcon( Resource::loadPixmap( "HelpBrowser" ) );
     setBackgroundMode( PaletteButton );
 
-    browser = new QTextBrowser( this );
+    browser = new MagicTextBrowser( this );
     browser->setFrameStyle( QFrame::Panel | QFrame::Sunken );
     connect( browser, SIGNAL( textChanged() ),
 	     this, SLOT( textChanged() ) );
@@ -98,7 +162,7 @@ void HelpBrowser::init( const QString& _home )
     forwardAction->addTo( toolbar );
     forwardAction->setEnabled( FALSE );
 
-    QAction *a = new QAction( tr( "Home" ), Resource::loadPixmap( "home" ), QString::null, 0, this, 0 );
+    QAction *a = new QAction( tr( "Home" ), Resource::loadIconSet( "home" ), QString::null, 0, this, 0 );
     connect( a, SIGNAL( activated() ), browser, SLOT( home() ) );
     //a->addTo( go );
     a->addTo( toolbar );

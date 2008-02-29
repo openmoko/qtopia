@@ -4,9 +4,10 @@ HEADERS		= battery.h batterystatus.h batteryappletimpl.h
 SOURCES		= battery.cpp batterystatus.cpp batteryappletimpl.cpp
 TARGET		= batteryapplet
 DESTDIR		= $(QPEDIR)/plugins/applets
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH      += $(QPEDIR)/include ..
-LIBS            += -lqpe
+DEPENDPATH      += ..
 VERSION		= 1.0.0
 
-TRANSLATIONS	+= $(QPEDIR)/i18n/de/libbatteryapplet.ts
+win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
+win32:CONFIG += dll
+
+TRANSLATIONS = libbatteryapplet-en_GB.ts libbatteryapplet-de.ts libbatteryapplet-ja.ts libbatteryapplet-no.ts

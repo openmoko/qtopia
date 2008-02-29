@@ -18,125 +18,84 @@
 **
 **********************************************************************/
 
+#include <qtopia/global.h>
+#include "contact.h"
+#include "contactxmlio_p.h"
+#include <qtopia/config.h>
+#include <qtopia/stringutil.h>
+
+#ifdef Q_WS_QWS
+#include <qtopia/qcopenvelope_qws.h>
+#endif
+
+#include <qapplication.h>
+#include <qfileinfo.h>
 #include <qfile.h>
 #include <qasciidict.h>
-#include "contact.h"
-#include <qpe/config.h>
-#include <qpe/global.h>
-#include <qfileinfo.h>
-#include <qpe/qcopenvelope_qws.h>
-#include <qpe/stringutil.h>
-#include <qapplication.h>
-#include <errno.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include "contactxmlio_p.h"
 
-SortedContacts::SortedContacts() 
-    : SortedRecords<PimContact>(), so(Label)
+#include <errno.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#ifdef Q_OS_WIN32
+#include <process.h>
+#else
+#include <unistd.h>
+#endif
+
+SortedContacts::SortedContacts()
+    : SortedRecords<PimContact>()
 {}
 
 
-SortedContacts::SortedContacts(uint s) 
-    : SortedRecords<PimContact>(s), so(Label)
+SortedContacts::SortedContacts(uint s)
+    : SortedRecords<PimContact>(s)
 {}
 
 SortedContacts::~SortedContacts() {}
 
-int SortedContacts::compareItems(QCollection::Item d1, QCollection::Item d2) 
+int SortedContacts::compareItems(QCollection::Item d1, QCollection::Item d2)
 {
     PrContact *pc1 = (PrContact *)d1;
     PrContact *pc2 = (PrContact *)d2;
 
+    if ( mKey == -1 )
+	return 0;
+
     QString key1, key2;
-    switch (so) {
-	case Label:
-	    key1 = pc1->bestLabel().lower();
-	    key2 = pc2->bestLabel().lower();
-	    break;
-	case LastName:
-	    key1 = pc1->lastName().lower();
-	    key2 = pc2->lastName().lower();
-	    break;
-	case FirstName:
-	    key1 = pc1->firstName().lower();
-	    key2 = pc2->firstName().lower();
-	    break;
-	default:
-	    return 0;
+
+    if ( mKey >= PimContact::ContactFieldsEnd ) {
+	key1 = pc1->bestLabel().lower();
+	key2 = pc2->bestLabel().lower();
+    } else {
+	key1 = pc1->field( mKey ).lower();
+	key2 = pc2->field( mKey ).lower();
     }
+
+
+    if ( mAscending )
+	return -( Qtopia::compare(key1, key2) );
 
     return Qtopia::compare(key1, key2);
 }
 
-void SortedContacts::setSortOrder(SortOrder s)
+ContactXmlIO::ContactXmlIO(AccessMode m,
+			   const QString &file,
+			   const QString &journal )
+    : ContactIO(m),
+      PimXmlIO(PimContact::keyToIdentifierMap(), PimContact::identifierToKeyMap() ),
+      cFilter(-2), needsSave(FALSE)
 {
-    so = s;
-    setDirty();
-}
+    if ( file != QString::null )
+	setDataFilename( file );
+    else setDataFilename( Global::applicationFileName( "addressbook", "addressbook.xml" ) );
+    if ( journal != QString::null )
+	setJournalFilename( journal );
+    else setJournalFilename( Global::journalFileName( ".abjournal" ) );
 
-SortedContacts::SortOrder SortedContacts::sortOrder() const
-{
-    return so;
-}
-
-ContactXmlIO::ContactXmlIO(AccessMode m) : ContactIO(m), cFilter(-2) , dict(48), needsSave(FALSE)
-{
     m_Contacts.setAutoDelete(TRUE);
+    loadData();
 
-    // **********************************
-    // CHANGE THE SIZE OF THE DICT IF YOU ADD ANY MORE FIELDS!!!!
-    // **********************************
-    dict.setAutoDelete( TRUE );
-    dict.insert( "Uid", new int(Qtopia::AddressUid) );
-    dict.insert( "Title", new int(Qtopia::Title) ); // No tr
-    dict.insert( "FirstName", new int(Qtopia::FirstName) );
-    dict.insert( "MiddleName", new int(Qtopia::MiddleName) );
-    dict.insert( "LastName", new int(Qtopia::LastName) );
-    dict.insert( "Suffix", new int(Qtopia::Suffix) ); // No tr
-    dict.insert( "FileAs", new int(Qtopia::FileAs) ); // No tr
-    dict.insert( "Categories", new int(Qtopia::AddressCategory) ); // No tr
-    dict.insert( "DefaultEmail", new int(Qtopia::DefaultEmail) );
-    dict.insert( "Emails", new int(Qtopia::Emails) );
-    dict.insert( "HomeStreet", new int(Qtopia::HomeStreet) );
-    dict.insert( "HomeCity", new int(Qtopia::HomeCity) );
-    dict.insert( "HomeState", new int(Qtopia::HomeState) );
-    dict.insert( "HomeZip", new int(Qtopia::HomeZip) );
-    dict.insert( "HomeCountry", new int(Qtopia::HomeCountry) );
-    dict.insert( "HomePhone", new int(Qtopia::HomePhone) );
-    dict.insert( "HomeFax", new int(Qtopia::HomeFax) );
-    dict.insert( "HomeMobile", new int(Qtopia::HomeMobile) );
-    dict.insert( "HomeWebPage", new int(Qtopia::HomeWebPage) );
-    dict.insert( "Company", new int(Qtopia::Company) ); // No tr
-    dict.insert( "BusinessStreet", new int(Qtopia::BusinessStreet) );
-    dict.insert( "BusinessCity", new int(Qtopia::BusinessCity) );
-    dict.insert( "BusinessState", new int(Qtopia::BusinessState) );
-    dict.insert( "BusinessZip", new int(Qtopia::BusinessZip) );
-    dict.insert( "BusinessCountry", new int(Qtopia::BusinessCountry) );
-    dict.insert( "BusinessWebPage", new int(Qtopia::BusinessWebPage) );
-    dict.insert( "JobTitle", new int(Qtopia::JobTitle) );
-    dict.insert( "Department", new int(Qtopia::Department) ); // No tr
-    dict.insert( "Office", new int(Qtopia::Office) ); // No tr
-    dict.insert( "BusinessPhone", new int(Qtopia::BusinessPhone) );
-    dict.insert( "BusinessFax", new int(Qtopia::BusinessFax) );
-    dict.insert( "BusinessMobile", new int(Qtopia::BusinessMobile) );
-    dict.insert( "BusinessPager", new int(Qtopia::BusinessPager) );
-    dict.insert( "Profession", new int(Qtopia::Profession) ); // No tr
-    dict.insert( "Assistant", new int(Qtopia::Assistant) ); // No tr
-    dict.insert( "Manager", new int(Qtopia::Manager) ); // No tr
-    dict.insert( "Spouse", new int(Qtopia::Spouse) ); // No tr
-    dict.insert( "Children", new int(Qtopia::Children) ); // No tr
-    dict.insert( "Gender", new int(Qtopia::Gender) ); // No tr
-    dict.insert( "Birthday", new int(Qtopia::Birthday) ); // No tr
-    dict.insert( "Anniversary", new int(Qtopia::Anniversary) ); // No tr
-    dict.insert( "Nickname", new int(Qtopia::Nickname) ); // No tr
-    dict.insert( "Notes", new int(Qtopia::Notes) ); // No tr
-    dict.insert( "Pronunciation", new int(Qtopia::Pronunciation) ); // No tr
-
-    ensureDataCurrent();
-
+#ifndef QT_NO_COP
     if (m == ReadOnly) {
 	QCopChannel *channel = new QCopChannel( "QPE/PIM",  this );
 
@@ -144,6 +103,8 @@ ContactXmlIO::ContactXmlIO(AccessMode m) : ContactIO(m), cFilter(-2) , dict(48),
 		this, SLOT(pimMessage(const QCString&, const QByteArray&)) );
 
     }
+#endif
+
 }
 
 void ContactXmlIO::pimMessage(const QCString &message, const QByteArray &data)
@@ -179,46 +140,19 @@ void ContactXmlIO::pimMessage(const QCString &message, const QByteArray &data)
     }
 }
 
-ContactXmlIO::~ContactXmlIO() 
+ContactXmlIO::~ContactXmlIO()
 {
     saveData();
 }
 
-bool ContactXmlIO::loadData() 
+bool ContactXmlIO::loadData()
 {
     if (PimXmlIO::loadData()) {
 	m_Filtered.sort();
+	emit contactsUpdated();
     	return TRUE;
     }
     return FALSE;
-}
-
-void ContactXmlIO::assignField(PimRecord *rec, const QCString &attr, const QString &value)
-{
-    PrContact *cnt = (PrContact *)rec;
-
-    int *find = dict[ attr.data() ];
-
-    if ( !find ) {
-	cnt->setCustomField(attr, value);
-	return;
-    }
-    switch( *find ) {
-	case Qtopia::AddressUid:
-	    // We don't let PrContacts with a bogus UID through...
-	    if (value.toInt() == 0) {
-		assignNewUid(cnt);
-	    } else {
-		setUid( *cnt, uuidFromInt(value.toInt()) );
-	    }
-	    break;
-	case Qtopia::AddressCategory:
-	    cnt->setCategories( idsFromString( value ));
-	    break;
-	default:
-	    cnt->insertField( *find, value );
-	    break;
-    }
 }
 
 bool ContactXmlIO::internalAddRecord(PimRecord *r)
@@ -277,28 +211,28 @@ bool ContactXmlIO::internalUpdateRecord(PimRecord *r)
  */
 QList<PrContact>& ContactXmlIO::contacts() {
   ensureDataCurrent();
-  return m_Contacts;    
+  return m_Contacts;
 }
 
 /**
  * Returns the filtered contact list.  This is guaranteed
  * to be current against what is stored by other apps.
  */
-const QVector<PimContact> &ContactXmlIO::sortedContacts() 
+const SortedContacts &ContactXmlIO::sortedContacts()
 {
   ensureDataCurrent();
-  return (QVector<PimContact> &)m_Filtered;
+  return m_Filtered;
 }
 
 /**
  * Saves the current contact data.  Returns true if
  * successful.
  */
-bool ContactXmlIO::saveData() 
+bool ContactXmlIO::saveData()
 {
     if (!needsSave)
 	return TRUE;
-    if (accessMode() == ReadWrite) {
+    if (accessMode() != ReadOnly ) {
 	if (PimXmlIO::saveData((QList<PimRecord> &)m_Contacts)) {
 	    needsSave = FALSE;
 	    return TRUE;
@@ -307,121 +241,160 @@ bool ContactXmlIO::saveData()
     return FALSE;
 }
 
-QString ContactXmlIO::recordToXml( const PimRecord *rec )
+QValueList<PimContact> ContactXmlIO::contactValueList() const
 {
-    const PrContact *contact = (const PrContact *)rec;
-
-    QString out;
-    static const QStringList SLFIELDS = contact->fields();
-
-    const QMap<int, QString> mMap = contact->mapRef();
-    for ( QMap<int, QString>::ConstIterator fit = mMap.begin();
-	    fit != mMap.end(); ++fit ) {
-	const QString &value = fit.data();
-	int key = fit.key();
-	if ( !value.isEmpty() ) {
-	    if ( key == Qtopia::AddressCategory || key == Qtopia::AddressUid)
-		continue;
-
-	    key -= Qtopia::AddressCategory+1;
-	    out += SLFIELDS[key];
-	    out += "=\"" + Qtopia::escapeString(value) + "\" ";
-	}
+    QValueList<PimContact> r;
+    for ( QListIterator<PrContact> it(m_Contacts); it.current(); ++it ) {
+	r.append( *(it.current() ) );
     }
-
-    if ( contact->categories().count() > 0 )
-	out += "Categories=\"" + idsToString( contact->categories() ) + "\" "; // No tr
-    out += "Uid=\"" + QString::number( uuidToInt(contact->uid()) ) + "\" ";
-
-    out += customToXml( contact );
-
-    return out;
+    return r;
 }
 
-void ContactXmlIO::addContact(const PimContact &contact)
+void ContactXmlIO::clear()
 {
-    if (accessMode() != ReadWrite)
+    cFilter = -2;
+    m_Filtered.clear();
+    m_Contacts.clear();
+    needsSave = TRUE;
+}
+
+void ContactXmlIO::setContacts( const QValueList<PimContact> &l )
+{
+    clear();
+    for ( QValueList<PimContact>::ConstIterator it = l.begin(); it != l.end(); ++it ) {
+	PrContact *cnt = new PrContact(*it);
+	m_Contacts.append( cnt );
+	m_Filtered.append( cnt );
+    }
+    m_Filtered.sort();
+}
+
+void ContactXmlIO::addContact(const PimContact &contact, bool newUid )
+{
+    if (accessMode() == ReadOnly)
 	return;
 
     PrContact *cnt = new PrContact((const PrContact &)contact);
-    assignNewUid(cnt);
-    if (internalAddRecord(cnt)) {
+
+    if (cnt->customField("BusinessCard") == "TRUE") {
+	// set the config.
+	Config cfg("Security");
+	cfg.setGroup("Sync");
+	cfg.writeEntry("ownername", cnt->fullName());
+    }
+
+    if ( newUid || cnt->uid().isNull() )
+	assignNewUid(cnt);
+    if (internalAddRecord(cnt )) {
 	needsSave = TRUE;
 	m_Filtered.sort();
 
 	updateJournal(*cnt, ACTION_ADD);
-
+#ifndef QT_NO_COP
 	{
-	    QCopEnvelope e("QPE/PIM", "addedContact(int,PimContact)"); 
+	    QCopEnvelope e("QPE/PIM", "addedContact(int,PimContact)");
 	    e << getpid();
 	    e << *cnt;
 	}
+#endif
     }
 }
 
-void ContactXmlIO::removeContact(const PimContact &contact)
+bool ContactXmlIO::removeContact(const PimContact &contact)
 {
-    if (accessMode() != ReadWrite)
-	return;
+    if (accessMode() == ReadOnly)
+	return FALSE;
 
     PrContact *cnt = new PrContact((const PrContact &)contact);
-    if (internalRemoveRecord(cnt)) {
-	needsSave = TRUE;
-	m_Filtered.sort();
 
-	updateJournal(contact, ACTION_REMOVE);
-	{
-	    QCopEnvelope e("QPE/PIM", "removedContact(int,PimContact)"); 
-	    e << getpid();
-	    e << contact;
-	}
+    if (cnt->customField("BusinessCard") == "TRUE") {
+	// set the config.
+	Config cfg("Security");
+	cfg.setGroup("Sync");
+	cfg.writeEntry("ownername", "");
     }
+
+    if ( !internalRemoveRecord(cnt) )
+	return FALSE;
+
+    needsSave = TRUE;
+    m_Filtered.sort();
+
+    updateJournal(contact, ACTION_REMOVE);
+#ifndef QT_NO_COP
+    {
+	QCopEnvelope e("QPE/PIM", "removedContact(int,PimContact)");
+	e << getpid();
+	e << contact;
+    }
+#endif
+    return TRUE;
 }
 
 void ContactXmlIO::updateContact(const PimContact &contact)
 {
-    if (accessMode() != ReadWrite)
+    if (accessMode() == ReadOnly)
 	return;
 
     PrContact *cnt = new PrContact((const PrContact &)contact);
+
+    if (cnt->customField("BusinessCard") == "TRUE") {
+	// set the config.
+	Config cfg("Security");
+	cfg.setGroup("Sync");
+	cfg.writeEntry("ownername", cnt->fullName());
+    }
 
     if (internalUpdateRecord(cnt)) {
 	needsSave = TRUE;
 	m_Filtered.sort();
 
 	updateJournal(contact, ACTION_REPLACE);
+#ifndef QT_NO_COP
 	{
-	    QCopEnvelope e("QPE/PIM", "updatedContact(int,PimContact)"); 
+	    QCopEnvelope e("QPE/PIM", "updatedContact(int,PimContact)");
 	    e << getpid();
 	    e << contact;
 	}
+#endif
     }
 }
 
-void ContactXmlIO::ensureDataCurrent(bool forceReload) {
-  if (isDataCurrent() && !forceReload)
-    return;
-  qDebug("ContactXmlIO: Reloading data...");
-
-  m_Contacts.clear();
-  m_Filtered.clear();
-  loadData();
-}
-
-const QString ContactXmlIO::dataFilename() const {
-  QString filename = Global::applicationFileName("addressbook",
-						 "addressbook.xml");
-  return filename;
-}
-
-const QString ContactXmlIO::journalFilename() const {
-  QString str = getenv("HOME");
-  str +="/.abjournal";
-  return str;
-}
-
-bool ContactXmlIO::select(const PrContact &c) const 
+// conservative on the yes vote.
+bool ContactXmlIO::contains( const PimContact &c ) const
 {
+    //### FIXME: this should use the Qtopia Desktop match algorithm;
+    // this probably will require some code reorganization
+    QString regExp(c.fileAs());
+
+    QListIterator<PrContact> it(m_Contacts);
+    for (; it.current(); ++it) {
+	if ( !c.uid().isNull() && it.current()->uid() == c.uid() )
+	    return TRUE;
+	//expensive compare; but rich text is only done if match passes
+	else if ( it.current()->match(regExp) &&
+		  (c.toRichText() == (*it)->toRichText() )  )
+	    return TRUE;
+    }
+    return FALSE;
+}
+
+
+void ContactXmlIO::ensureDataCurrent(bool forceReload)
+{
+    if (accessMode() == WriteOnly || ( isDataCurrent() && !forceReload) )
+	return;
+    qDebug("ContactXmlIO: Reloading data...");
+
+    m_Contacts.clear();
+    m_Filtered.clear();
+    loadData();
+}
+
+bool ContactXmlIO::select(const PrContact &c) const
+{
+    // -1 is unfiled
+    // -2 is all
     QArray<int> cats = c.categories();
     if ( cFilter == -1 ) {
 	if ( cats.count() > 0 )
@@ -429,14 +402,6 @@ bool ContactXmlIO::select(const PrContact &c) const
     }  else if ( cFilter != -2 ) {
 	if (cats.find(cFilter) == -1)
 	    return FALSE;
-	/*
-	for (int i = 0; i < int(cats.count()); i++) {
-	    if (cats[i] == cFilter) {
-		return TRUE;
-	    }
-	}
-	return FALSE;
-	*/
     }
     return TRUE;
 }
@@ -460,15 +425,69 @@ void ContactXmlIO::setFilter(int f) {
     }
 }
 
-SortedContacts::SortOrder ContactXmlIO::sortOrder() const
+int ContactXmlIO::sortKey() const
 {
-    return m_Filtered.sortOrder();
+    return m_Filtered.sortKey();
 }
 
-void ContactXmlIO::setSortOrder( SortedContacts::SortOrder so )
+bool ContactXmlIO::sortAcending() const
 {
-    if (so != m_Filtered.sortOrder() ) {
-	m_Filtered.setSortOrder(so);
+    return m_Filtered.ascending();
+}
+
+void ContactXmlIO::setSorting(int key, bool ascending)
+{
+    if (key != m_Filtered.sortKey() || ascending != m_Filtered.ascending() ) {
+	m_Filtered.setSorting( key, ascending );
 	m_Filtered.sort();
     }
 }
+
+PrContact ContactXmlIO::personal() const
+{
+    QListIterator<PrContact> it(m_Contacts);
+    for (; it.current(); ++it) {
+	if (it.current()->customField("BusinessCard") == "TRUE")
+	    return PrContact(*(it.current()));
+    }
+    return PrContact();
+}
+
+// ### slow, but safe for now
+bool ContactXmlIO::hasPersonal() const
+{
+    return !personal().uid().isNull();
+}
+
+void ContactXmlIO::setAsPersonal(const QUuid &u)
+{
+    if (u.isNull())
+	return;
+
+    PrContact oldBC;
+    PrContact newBC;
+    bool foundOld = FALSE;
+    bool foundNew = FALSE;
+    QListIterator<PrContact> it(m_Contacts);
+    for (; it.current(); ++it) {
+	if (it.current()->customField("BusinessCard") == "TRUE") {
+	    oldBC = *(it.current());
+	    foundOld = TRUE;
+	}
+	if (it.current()->uid() == u) {
+	    newBC = *(it.current());
+	    foundNew = TRUE;
+	}
+    }
+    if (newBC.uid() != oldBC.uid()) {
+	if (foundNew) {
+	    newBC.setCustomField("BusinessCard", "TRUE");
+	    updateContact(newBC);
+	}
+	if (foundOld) {
+	    oldBC.removeCustomField("BusinessCard");
+	    updateContact(oldBC);
+	}
+    }
+}
+

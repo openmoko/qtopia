@@ -1,7 +1,7 @@
 
 
 #include <qurl.h>
-#include <qpe/qpeapplication.h>
+#include <qtopia/qpeapplication.h>
 #include "kvnc.h"
 
 int main( int argc, char **argv )

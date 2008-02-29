@@ -30,7 +30,7 @@
 #include <qspinbox.h>
 #include "fileinfo.h"
 
-#include <qpe/mediaplayerplugininterface.h>
+#include <qtopia/mediaplayerplugininterface.h>
 #include "mediaplayerstate.h"
 #include "id3tag.h"
 
@@ -39,8 +39,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define QTOPIA_INTERNAL_FSLP
-#include <qpe/lnkproperties.h>
+#include <qtopia/docproperties.h>
 
 
 class ID3TagEditWidget : public QWidget {
@@ -125,14 +124,16 @@ void ID3TagEditWidget::writeTagData()
 
 class MediaFileInfoWidgetPrivate {
     public:
-	LnkProperties *prop;
+    DocPropertiesWidget *prop; 
 	ID3TagEditWidget *tagEdit;
 	DocLnk docLnk;
 };
 
 
 class InfoListView : public QListView {
-    public:
+    Q_OBJECT
+
+public:
 	InfoListView( QWidget *parent ) : QListView( parent ) {
 	    setSorting( -1 );
 	    addColumn( "Column1" );
@@ -162,8 +163,8 @@ class InfoListView : public QListView {
 };
 
 
-MediaFileInfoWidget::MediaFileInfoWidget( const DocLnk& fileInfo, QWidget *parent, const char *name = 0 )
-    : QDialog( parent, name, FALSE )
+MediaFileInfoWidget::MediaFileInfoWidget( const DocLnk& fileInfo, QWidget *parent, const char *name )
+    : QDialog( parent, name, TRUE )
 {
     d = new MediaFileInfoWidgetPrivate;
 
@@ -175,9 +176,9 @@ MediaFileInfoWidget::MediaFileInfoWidget( const DocLnk& fileInfo, QWidget *paren
     QTabWidget *tw = new QTabWidget( vb );
 
     d->docLnk = DocLnk( fileInfo );
-    d->prop = new LnkProperties( &d->docLnk, 0 );
-    // ### Work around LnkProperties poor API
-    // ### Luckily this works and it gets reparented in to the tab
+    d->prop = new DocPropertiesWidget( &d->docLnk, tw );
+    connect( d->prop, SIGNAL(done()), this, SLOT(reject()) );
+    
     tw->addTab( d->prop, "Categories" );
 
     QVBox *vbox = new QVBox( tw );
@@ -185,11 +186,11 @@ MediaFileInfoWidget::MediaFileInfoWidget( const DocLnk& fileInfo, QWidget *paren
     tw->addTab( vbox, "Details" );
     QHBox *title = new QHBox( vbox );
 
-    QLabel *name = new QLabel( title );
+    QLabel *filename = new QLabel( title );
     QLabel *spacing = new QLabel( title );
     QLabel *icon = new QLabel( title );
 
-    name->setText( " " + fileInfo.name() );
+    filename->setText( " " + fileInfo.name() );
     title->setStretchFactor( spacing, 1 );
     icon->setPixmap( fileInfo.bigPixmap() );
 
@@ -213,12 +214,8 @@ MediaFileInfoWidget::~MediaFileInfoWidget()
 
 void MediaFileInfoWidget::accept()
 {
-    {
-	// Work around LnkProperties poor API
-	QObject dummy;
-	connect( &dummy, SIGNAL( destroyed() ), d->prop, SLOT( accept() ) );
-    }
-
+    d->prop->applyChanges();
+    
     QFileInfo fi( d->docLnk.file() );
     if ( fi.extension( FALSE ).upper() == "MP3" ) 
 	d->tagEdit->writeTagData();
@@ -226,13 +223,4 @@ void MediaFileInfoWidget::accept()
     QDialog::accept();    
 }
 
-
-void MediaFileInfoWidget::reject()
-{
-    {
-	QObject dummy;
-	connect( &dummy, SIGNAL( destroyed() ), d->prop, SLOT( reject() ) );
-    }
-    QDialog::reject();
-}
-
+#include "fileinfo.moc"

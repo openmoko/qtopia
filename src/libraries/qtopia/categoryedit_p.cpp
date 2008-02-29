@@ -20,7 +20,8 @@
 
 #include "categoryedit_p.h"
 
-#include <qpe/categories.h>
+#include <qtopia/categories.h>
+#include <qtopia/global.h>
 
 #include <qdir.h>
 #include <qcheckbox.h>
@@ -33,7 +34,9 @@
 #include <sys/stat.h>
 
 #include <stdlib.h>
+#ifndef Q_OS_WIN32
 #include <unistd.h>
+#endif
 
 
 using namespace Qtopia;
@@ -210,10 +213,10 @@ QArray<int> CategoryEdit::newCategories()
 	    if ( reinterpret_cast<QCheckListItem*>(it.current())->isOn() )
 		l.append( d->mCategories.id( d->mStrApp, it.current()->text(0) ) );
 	}
-	uint i = 0;
+	int i = 0;
 	a.resize( l.count() );
 	for ( QValueList<int>::Iterator lit = l.begin(); lit != l.end(); ++lit )
-	    a[i++] = *lit;
+	    a[(int)i++] = *lit;
     }
     return a;
 }
@@ -225,15 +228,34 @@ void CategoryEdit::accept()
     //    QDialog::accept();
 }
 
+#ifdef QTOPIA_DESKTOP
+static QString mCatFileName;
+
+void Categories::setCategoryFileName(const QString &s)
+{
+    mCatFileName = s;
+}
+#endif
+
 QString categoryFileName()
 {
-    QDir dir = (QString(getenv("HOME")) + "/Settings");
+#ifdef QTOPIA_DESKTOP
+    return mCatFileName;
+#else
+
+    QDir dir = QString(QDir::homeDirPath() + "/Settings");
     if ( !dir.exists() )
+#ifndef Q_OS_WIN32
 	mkdir( dir.path().local8Bit(), 0700 );
+#else
+        dir.mkdir(dir.path());
+#endif
     return dir.path() + "/" + "Categories" + ".xml";
+#endif // QTOPIA_DESKTOP
 }
 
 void CategoryEdit::kludge()
 {
     lvView->setMaximumHeight( 130 );
 }
+

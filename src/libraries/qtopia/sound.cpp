@@ -18,10 +18,10 @@
 **
 **********************************************************************/
 
-#include <qpe/resource.h>
-#include <qpe/sound.h>
+#include <qtopia/resource.h>
+#include <qtopia/sound.h>
 #ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
 
 #include <qsound.h>

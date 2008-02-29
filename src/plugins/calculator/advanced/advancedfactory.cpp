@@ -24,7 +24,7 @@
 
 QWidget * AdvancedInterface::create (QWidget *parent) {
     if ( !input )
-	input = new FormAdvanced(parent,"Advanced",0);
+	input = new FormAdvanced(parent,"Scientific",0);
     return input;
 }
 

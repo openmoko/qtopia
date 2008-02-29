@@ -19,14 +19,16 @@
 **********************************************************************/
 
 #include "event.h"
-#include "calendar.h"
-
+#include <qtopia/calendar.h>
 #include <qtopia/qpeapplication.h>
 #include <qtopia/private/qfiledirect_p.h>
 #include <qtopia/timeconversion.h>
 #include <qtopia/stringutil.h>
 #include <qtopia/private/recordfields.h>
 #include <qtopia/private/vobject_p.h>
+
+#include <qtopia/pim/private/xmlio_p.h>
+#include <qtopia/pim/private/eventio_p.h>
 
 #include <qbuffer.h>
 #include <qtextcodec.h>
@@ -105,7 +107,7 @@
   \fn bool PimEvent::hasAlarm() const
 
   Returns TRUE if there is an alarm set for the event.  Otherwise
- returns FALSE. 
+ returns FALSE.
 
  \sa setAlarm()
 */
@@ -195,6 +197,12 @@
 */
 
 /*!
+  \fn virtual int PimEvent::endFieldMarker() const
+  \internal
+*/
+
+
+/*!
   Constructs a new PimEvent.
 */
 PimEvent::PimEvent() : PimRecord()
@@ -210,13 +218,25 @@ PimEvent::PimEvent() : PimRecord()
 PimEvent::PimEvent(const QDateTime &start, const QDateTime &end)
 {
     // smallest event 5 minutes
-    if (end < start.addSecs(5 * 60)) 
+    if (end < start.addSecs(5 * 60))
 	init(start, start.addSecs(5 * 60));
-
-    init(start, end);
+    else 
+	init(start, end);
 }
 
-void PimEvent::init(const QDateTime &s, const QDateTime &e) 
+/*!
+  \internal
+*/
+void PimEvent::fromMap( const QMap<int,QString> &m )
+{
+    QDateTime start = QDateTime::currentDateTime();
+    QDateTime end = start.addSecs(5 * 60);
+    init(start, end);
+
+    setFields( m );
+}
+
+void PimEvent::init(const QDateTime &s, const QDateTime &e)
 {
     mStart = s;
     mEnd = e;
@@ -304,7 +324,7 @@ void PimEvent::setEnd( const QDateTime &time )
 
   \sa notes()
 */
-void PimEvent::setNotes( const QString &text ) 
+void PimEvent::setNotes( const QString &text )
 {
     mNotes = text;
 }
@@ -323,7 +343,7 @@ void PimEvent::setTimeZone( const QString &text )
 
 /*!
   \internal for the moment. finish documenting when adding travel events.
-  Sets the end TimeZone of the event.  
+  Sets the end TimeZone of the event.
 */
 void PimEvent::setEndTimeZone( const QString &text )
 {
@@ -400,7 +420,7 @@ void PimEvent::setAllDay( bool enable )
 /*!
   Returns the time zone of the event or a empty string if the event has
   no time zone.  All day events allways have no time zone.
-  
+
   \sa setTimeZone(), isAllDay()
 */
 QString PimEvent::timeZone() const
@@ -496,14 +516,14 @@ bool PimEvent::repeatOnWeekDay(int day) const
     if (repeatType() != Weekly)
 	return FALSE;
 
-    if (day == mStart.date().dayOfWeek()) 
+    if (day == mStart.date().dayOfWeek())
 	return TRUE; // always repeat on the start day of week.
 
     return ((1 << (day - 1) & weekMask) != 0);
 }
 
 /*!
-  Sets the event to repeat on the \a day of the wekif \a enable is TRUE.  
+  Sets the event to repeat on the \a day of the wekif \a enable is TRUE.
   Otherwise sets the event not to repeat on the \a day of the week.
 
   Event will always repeat on the day of the week that it started on.
@@ -517,7 +537,7 @@ void PimEvent::setRepeatOnWeekDay(int day, bool enable)
 }
 
 // helper functions
-int monthsTo(const QDate &from, const QDate &to) 
+int monthsTo(const QDate &from, const QDate &to)
 {
     int result = 12 * (to.year() - from.year());
     result += (to.month() - from.month());
@@ -539,17 +559,122 @@ int weeksForDayInMonth(int dayOfWeek, const QDate &date)
 
     return (result.daysInMonth() - fromStart - 1) / 7 + 1;
 }
+/*! \fn PimEvent::seriesUid() const
+  Returns the UID for the recurring event this event is an exception to.
+  If this event does nto represent an exception to another repeating event,
+  an empty UID will be returned.
+
+  \sa hasExceptions(), isException()
+*/
+
+/*!
+  Returns TRUE if this event represents an exception to the repeat
+  pattern of another event.  Otherwise returns FALSE.
+  
+  For example if a daily event at 10am
+  starts on 11am one day, the 11am would be represent an exception
+  to the 10am repeating event.
+
+  \sa hasExceptions(), seriesUid()
+*/
+bool PimEvent::isException() const
+{
+    return !mParent.isNull();
+}
+
+/*!
+  Returns TRUE if the event is a repeating event 
+  that has exceptions to the repeat pattern for that event.
+  Otherwise returns FALSE.
+
+  \sa isException(), seriesUid()
+*/
+bool PimEvent::hasExceptions() const
+{
+    return !mExceptions.isEmpty();
+}
+
+/*! \internal */
+void PimEvent::setSeriesUid( const QUuid &u )
+{
+    mParent = u;
+}
+
+/*! \internal */
+void PimEvent::addException( const QDate &d, const QUuid &u )
+{
+    mExceptions.append(d);
+    mChildren.append(u);
+}
+
+/*! \internal */
+void PimEvent::clearExceptions()
+{
+    mExceptions.clear();
+    mChildren.clear();
+}
+
+/*! \internal */
+void PimEvent::removeException( const QDate &d )
+{
+    QValueList<QDate>::Iterator eit = mExceptions.begin();
+    QValueList<QUuid>::Iterator cit = mChildren.begin();
+
+    for(; eit != mExceptions.end() && cit != mChildren.end(); ++eit, ++cit) {
+	if (*eit == d) {
+	    mExceptions.remove(eit);
+	    mChildren.remove(cit);
+	    break;
+	}
+    }
+}
+
+/*! \internal */
+void PimEvent::removeException( const QUuid &u )
+{
+    QValueList<QDate>::Iterator eit = mExceptions.begin();
+    QValueList<QUuid>::Iterator cit = mChildren.begin();
+
+    for(; eit != mExceptions.end() && cit != mChildren.end(); ++eit, ++cit) {
+	if (*cit == u) {
+	    mExceptions.remove(eit);
+	    mChildren.remove(cit);
+	    break;
+	}
+    }
+}
 
 /*!
   Returns the first date on or after \a from that the event will next occur.
   If the event only occurs once (no repeat) will return the date of the
   start of the event if the start of the event is on or after \a from.
 
-  If \a ok is non-null, *ok is set to TRUE if the event occurs on or 
-  after \a from and FALSE if the event does not occur on or after 
+  If \a ok is non-NULL, *ok is set to TRUE if the event occurs on or
+  after \a from and FALSE if the event does not occur on or after
   \a from.
 */
 QDate PimEvent::nextOccurrence( const QDate &from, bool *ok) const
+{
+    bool stillLooking;
+    QDate looking = p_nextOccurrence(from, &stillLooking);
+    while (stillLooking && mExceptions.contains(looking)) {
+	looking = p_nextOccurrence(looking.addDays(p_duration()), &stillLooking);
+    }
+    if (ok)
+	*ok = stillLooking;
+    return looking;
+}
+
+int PimEvent::p_duration() const
+{
+    return mStart.daysTo(mEnd) + 1;
+}
+
+/*!
+  \internal
+  Does the work of nextOccurence, apart from the exception check
+*/
+QDate PimEvent::p_nextOccurrence( const QDate &from, bool *ok) const
 {
     QDate result = mStart.date();
     // from should be for the start of the possible event.
@@ -576,7 +701,7 @@ QDate PimEvent::nextOccurrence( const QDate &from, bool *ok) const
 	    if (ok)
 		*ok = FALSE;
 	    return result;
-	case Daily: 
+	case Daily:
 	    {
 		int daysBetween = mStart.daysTo(after);
 		int outBy = daysBetween % mFrequency;
@@ -595,10 +720,10 @@ QDate PimEvent::nextOccurrence( const QDate &from, bool *ok) const
 		int mod = diff % (mFrequency * 7);
 
 		// if diff is < 7, it may be not the day of week of the start
-		// day.  Check.  Don't look more than 6 days after the start 
+		// day.  Check.  Don't look more than 6 days after the start
 		// day.
 		if (mod < 7) {
-		    // go after % to 6.  if day of week match, to a normal but 
+		    // go after % to 6.  if day of week match, to a normal but
 		    // start with that day.
 		    for (int i = mod; i < 7; i++) {
 			if (repeatOnWeekDay(result.addDays(i).dayOfWeek())) {
@@ -625,31 +750,31 @@ QDate PimEvent::nextOccurrence( const QDate &from, bool *ok) const
 	case MonthlyDate:
 	    {
 		int monthsBetween = monthsTo(mStart.date(), after);
-		
+
 		// check to see if will be in after month.
 		if (mStart.date().day() < after.day()) {
 		    // wont be in after month, move to the next month.
 		    monthsBetween++;
-		    after = PimCalendar::addMonths(1, after);
+		    after = Calendar::addMonths(1, after);
 		}
 
 		int outBy = monthsBetween % mFrequency;
 		if (outBy) {
 		    outBy = mFrequency - outBy;
 		}
-		result = PimCalendar::addMonths(outBy, after);
+		result = Calendar::addMonths(outBy, after);
 
 		if (mShowOnNearest) {
 		    if (mStart.date().day() < result.daysInMonth())
 			result.setYMD(result.year(), result.month(), mStart.date().day());
-		    else 
+		    else
 			result.setYMD(result.year(), result.month(), result.daysInMonth());
 		} else {
 		    // can't show on nearest, when is the next valid date.
 		    while (!QDate::isValid(
 				result.year(), result.month(), mStart.date().day())
 			    ) {
-			result = PimCalendar::addMonths(mFrequency, result);
+			result = Calendar::addMonths(mFrequency, result);
 		    }
 		    result.setYMD(result.year(), result.month(), mStart.date().day());
 		}
@@ -667,7 +792,7 @@ QDate PimEvent::nextOccurrence( const QDate &from, bool *ok) const
 		if (outBy) {
 		    outBy = mFrequency - outBy;
 		}
-		result = PimCalendar::addMonths(outBy, after);
+		result = Calendar::addMonths(outBy, after);
 
 		// this is tricky.  Need to move by mFreq months till we
 		// get a good one.
@@ -676,7 +801,7 @@ QDate PimEvent::nextOccurrence( const QDate &from, bool *ok) const
 		    int day;
 		    int weeks = weeksForDayInMonth(mStart.date().dayOfWeek(), result);
 		    // get to first day for that day of week.
-		    int weekShift = mStart.date().dayOfWeek() 
+		    int weekShift = mStart.date().dayOfWeek()
 			- QDate(result.year(), result.month(), 1).dayOfWeek();
 		    if (weekShift < 0)
 			weekShift += 7;
@@ -694,15 +819,15 @@ QDate PimEvent::nextOccurrence( const QDate &from, bool *ok) const
 			    day += 7;
 		    } else {
 			if (day > result.daysInMonth() || day < 1) {
-			    result = PimCalendar::addMonths(mFrequency, result);
+			    result = Calendar::addMonths(mFrequency, result);
 			    continue;
 			}
 		    }
 
 		    result.setYMD(result.year(), result.month(), day);
 		    if (result < after)
-			result = PimCalendar::addMonths(mFrequency, result);
-		    else 
+			result = Calendar::addMonths(mFrequency, result);
+		    else
 			foundDate = TRUE; // success.
 		}
 	    }
@@ -715,22 +840,22 @@ QDate PimEvent::nextOccurrence( const QDate &from, bool *ok) const
 		    outBy = mFrequency - outBy;
 		}
 
-		result = PimCalendar::addYears(yearsBetween + outBy, mStart.date());
+		result = Calendar::addYears(yearsBetween + outBy, mStart.date());
 
 		if (result < after)
-		    result = PimCalendar::addYears(mFrequency, result);
+		    result = Calendar::addYears(mFrequency, result);
 
 		// at least after, may not be valid though.
 		if (!mShowOnNearest) {
-		    while (!QDate::isValid(result.year(), result.month(), mStart.date().day())) 
-			result = PimCalendar::addYears(mFrequency, result);
+		    while (!QDate::isValid(result.year(), result.month(), mStart.date().day()))
+			result = Calendar::addYears(mFrequency, result);
 		    result.setYMD(result.year(), result.month(), mStart.date().day());
 		}
 	    }
 	    break;
     }
-    if (ok) 
-	*ok = (result < repeatTill() || repeatForever());
+    if (ok)
+	*ok = (result <= repeatTill() || repeatForever());
 
     return result;
 }
@@ -908,7 +1033,7 @@ static PimEvent parseVObject( VObject *obj )
 }
 
 /*!
-   Write the list of \a events as vCalendar objects to the file 
+   Write the list of \a events as vCalendar objects to the file
    specified by \a filename.
 
    \sa readVCalendar()
@@ -1001,7 +1126,7 @@ QColor PimEvent::color(bool t)
 {
     if (t)
 	return QColor(0,0,255);
-    else 
+    else
 	return QColor(255,0,0);
 }
 
@@ -1052,7 +1177,7 @@ QDateTime asDateTime(time_t time, const QString &z)
 QDateTime shiftZones(const QDateTime &time, const QString &z1, const QString &z2)
 {
     // need to do a conversion.  to utc and back out again on the start.. then
-    
+
     // 1. store current timezone
     QString realTZ = QString::fromLocal8Bit( getenv("TZ") );
 
@@ -1087,7 +1212,7 @@ QDateTime shiftZones(const QDateTime &time, const QString &z1, const QString &z2
 
 /*!
   Returns the start time of the event in timezone \a zone.
-  If \a zone is null, returns the start time of the event
+  If \a zone is NULL, returns the start time of the event
   in the current time zone.
 
   \sa start()
@@ -1099,7 +1224,7 @@ QDateTime PimEvent::startInTZ(const QString &zone) const
 
     // if no zone given.. assume local
     if (zone.isEmpty())
-	return shiftZones(start(), timeZone(), 
+	return shiftZones(start(), timeZone(),
 		QString::fromLocal8Bit( getenv("TZ") ) );
 
     return shiftZones(start(), timeZone(), zone);
@@ -1107,7 +1232,7 @@ QDateTime PimEvent::startInTZ(const QString &zone) const
 
 /*!
   Returns the end time of the event in timezone \a zone.
-  If \a zone is null, returns the end time of the event
+  If \a zone is NULL, returns the end time of the event
   in the current time zone.
 
   \sa end()
@@ -1121,7 +1246,7 @@ QDateTime PimEvent::endInTZ(const QString &zone) const
     // if no zone given.. assume local
     QDateTime nStart;
     if (zone.isEmpty())
-	nStart = shiftZones(start(), timeZone(), 
+	nStart = shiftZones(start(), timeZone(),
 	    QString::fromLocal8Bit( getenv("TZ") ) );
     else
 	nStart = shiftZones(start(), timeZone(), zone);
@@ -1131,7 +1256,7 @@ QDateTime PimEvent::endInTZ(const QString &zone) const
 
 /*!
   Returns the date the event will repeat till in timezone \a zone.
-  If \a zone is null, returns the date the event will repeat till
+  If \a zone is NULL, returns the date the event will repeat till
   in the current time zone.
 
   \sa repeatTill()
@@ -1145,7 +1270,7 @@ QDate PimEvent::repeatTillInTZ(const QString &zone) const
     // if no zone given.. assume local
     QDateTime nStart;
     if (zone.isEmpty())
-	nStart = shiftZones(start(), timeZone(), 
+	nStart = shiftZones(start(), timeZone(),
 	    QString::fromLocal8Bit( getenv("TZ") ) );
     else
 	nStart = shiftZones(start(), timeZone(), zone);
@@ -1229,29 +1354,389 @@ QDateTime Occurrence::end() const
 
 // Timezone dependent functions...
 
-QDateTime Occurrence::startInTZ(const QString &zone) const 
+QDateTime Occurrence::startInTZ(const QString &zone) const
 {
     if (eventCache.timeZone().isEmpty())
 	return start();
     // if no zone given.. assume local
     if (zone.isEmpty())
-	return shiftZones(start(), eventCache.timeZone(), 
+	return shiftZones(start(), eventCache.timeZone(),
 		QString::fromLocal8Bit( getenv("TZ") ) );
 
     return shiftZones(start(), eventCache.timeZone(), zone);
 }
 
-QDateTime Occurrence::endInTZ(const QString &zone) const 
+QDateTime Occurrence::endInTZ(const QString &zone) const
 {
     if (eventCache.timeZone().isEmpty())
 	return end();
     // if no zone given.. assume local
     if (zone.isEmpty())
-	return shiftZones(end(), eventCache.timeZone(), 
+	return shiftZones(end(), eventCache.timeZone(),
 		QString::fromLocal8Bit( getenv("TZ") ) );
 
     return shiftZones(end(), eventCache.timeZone(), zone);
 }
+
+// used when loading to finalize records.
+static time_t startUtc = 0;
+static time_t endUtc = 0;
+static time_t endDateUtc = 0;
+static bool hasTimeZone = FALSE;
+
+/*!
+  \internal
+*/
+void PimEvent::setFields(const QMap<int,QString> &m)
+{
+    // Reimplemenmted to handle post processing of reading an event
+    startUtc = 0;
+    endUtc = 0;
+    endDateUtc = 0;
+    hasTimeZone = FALSE;
+
+    PimRecord::setFields( m );
+
+    finalizeRecord();
+}
+
+// post Processing.
+void PimEvent::finalizeRecord()
+{
+    if (!hasTimeZone) {
+	// make one up.  Can't be "None" because in old datebook all
+	// events were in UTC.  So make it the current locale.
+	setTimeZone( QString::fromLocal8Bit( getenv( "TZ" ) ) );
+    }
+
+    // if there was a timezone, it would be set by now.
+    setStartAsUTC( startUtc );
+    setEndAsUTC( endUtc );
+    if (hasRepeat() && endDateUtc != 0 && !repeatForever())
+	setRepeatTillAsUTC( endDateUtc );
+
+    // 0' out elements although this will be done in assignField anyway
+    startUtc = 0;
+    endUtc = 0;
+    endDateUtc = 0;
+    hasTimeZone = FALSE;
+}
+
+/*!
+  \internal
+
+  Don't do flow-on values here..  gets are direct from data bypassing
+  relavent checks, puts will be the same.
+*/
+void PimEvent::setField(int key,const QString &value)
+{
+    switch( key ) {
+	case Description:
+	    setDescription( value );
+	    break;
+	case Location:
+	    setLocation( value );
+	    break;
+	case TimeZone:
+	    if (value != "None")
+		setTimeZone( value);
+	    // hasTimeZone in that one is set, even if it is none.
+	    hasTimeZone = TRUE;
+	    break;
+	case Notes:
+	    setNotes( value );
+	    break;
+	case StartDateTime:
+	    startUtc = (time_t) value.toLong();
+	    break;
+	case EndDateTime:
+	    endUtc = (time_t) value.toLong();
+	    break;
+	case DatebookType:
+	    setAllDay( value == "AllDay" );
+	    break;
+	case HasAlarm:
+	    if ( value.contains("true", FALSE)) {
+		mHasAlarm = TRUE;
+	    } else {
+		mHasAlarm = FALSE;
+	    }
+	    break;
+	case AlarmDelay:
+	    mAlarmDelay = value.toInt();
+	    break;
+	case SoundType:
+	    mAlarmSound = value == "loud" ? Loud : Silent;
+	    break;
+	case RepeatPattern:
+	    if ( value == "Daily" )
+		setRepeatType(Daily);
+	    else if ( value == "Weekly" )
+		setRepeatType(Weekly);
+	    else if ( value == "MonthlyDay" )
+		setRepeatType(MonthlyDay);
+	    else if ( value == "MonthlyDate" )
+		setRepeatType(MonthlyDate);
+	    else if ( value == "MonthlyEndDay" )
+		setRepeatType(MonthlyEndDay);
+	    else if ( value == "Yearly" )
+		setRepeatType(Yearly);
+	    else
+		setRepeatType(NoRepeat);
+	    break;
+	case RepeatFrequency:
+	    if (value.toInt() != 0) {
+		setFrequency( value.toInt() );
+	    }
+	    break;
+	case RepeatHasEndDate:
+	    if ( value.toInt() != 0 ) {
+		setRepeatForever( FALSE );
+	    } else {
+		setRepeatForever( TRUE );
+	    }
+	    break;
+	case RepeatWeekdays:
+	    weekMask = value.toInt();
+	    break;
+	case RepeatEndDate:
+	    endDateUtc = (time_t) value.toLong();
+	    break;
+
+	case RecordParent:
+	    mParent = PimXmlIO::uuidFromInt(value.toInt());
+	    break;
+	case RecordChildren:
+	    {
+		QStringList list = QStringList::split(' ', value);
+		for ( QStringList::Iterator it = list.begin(); it != list.end(); ++it ) {
+		    mChildren.append( PimXmlIO::uuidFromInt((*it).toInt()) );
+		}
+	    }
+	    break;
+	case Exceptions:
+	    {
+		QStringList list = QStringList::split(' ', value);
+		for ( QStringList::Iterator it = list.begin(); it != list.end(); ++it ) {
+		    int tday = 1, tmonth = 1, tyear = 2000;
+		    switch( (*it).length() ) {
+			case 8:
+			    tday = (*it).right( 2 ).toInt();
+			case 6:
+			    tmonth = (*it).mid( 4, 2 ).toInt();
+			case 4:
+			    tyear = (*it).left( 4 ).toInt();
+			    break;
+			default:
+			    break;
+		    }
+		    //QDate date = TimeConversion::fromISO8601( QCString(*it) ).date();
+		    QDate date(tyear, tmonth, tday);
+		    mExceptions.append( date );
+		}
+	    }
+	    break;
+	default: PimRecord::setField(key, value);
+    }
+}
+
+/*!
+  \internal
+*/
+QString PimEvent::field(int key) const
+{
+    switch( key ) {
+	case Description: return mDescription;
+	case Location: return mLocation;
+	case TimeZone: return mTimeZone;
+	case Notes: return mNotes;
+	case StartDateTime: return QString::number( startAsUTC() );
+	case EndDateTime: return QString::number( endAsUTC() );
+	case DatebookType:
+	{
+	    if ( isAllDay() )
+		return "AllDay";
+	    else
+		return "Timed";
+	}
+
+	case HasAlarm: return hasAlarm() ? "true" : "false";
+	case AlarmDelay: return QString::number( alarmDelay() );
+	case SoundType:
+	{
+	    if ( alarmSound() == Loud )
+		return "loud";
+	    else
+		return "silent";
+	}
+
+	case RepeatPattern:
+	{
+	    switch ( repeatType() ) {
+		case Daily: return "Daily";
+		case Weekly: return "Weekly";
+		case MonthlyDay: return "MonthlyDay";
+		case MonthlyEndDay: return "MonthlyEndDay";
+		case MonthlyDate: return "MonthlyDate";
+		case Yearly: return "Yearly";
+		default: return "NoRepeat";
+	    }
+	}
+	case RepeatFrequency: return QString::number( frequency() );
+	case RepeatHasEndDate: return QString::number( !repeatForever() );
+	case RepeatEndDate: return QString::number( repeatTillAsUTC() );
+	case RepeatWeekdays: return QString::number( weekMask );
+	case RecordParent: return QString::number( PimXmlIO::uuidToInt( mParent ) );
+	case RecordChildren:
+	{
+	    const QValueList<QUuid> &vlc = mChildren;
+	    QValueList<QUuid>::ConstIterator cit;
+	    QString out;
+	    for( cit = vlc.begin(); cit != vlc.end(); ++cit ) {
+		if (cit != vlc.begin())
+		    out += " ";
+		out += QString::number( PimXmlIO::uuidToInt(*cit) );
+	    }
+
+	    return out;
+	}
+	case Exceptions:
+	{
+	    const QValueList<QDate> &vle = mExceptions;
+	    QValueList<QDate>::ConstIterator eit;
+	    QString out;
+	    for( eit = vle.begin(); eit != vle.end(); ++eit ) {
+		QDate date = *eit;
+		if (eit != vle.begin())
+		    out += " ";
+
+		QCString str;
+		str.sprintf("%04d%02d%02d", date.year(), date.month(), date.day());
+		out += str;
+	    }
+	    return out;
+	}
+
+	default: return PimRecord::field(key);
+    }
+}
+
+static QMap<int, int> *uniquenessMapPtr = 0;
+static QMap<QCString, int> *identifierToKeyMapPtr = 0;
+static QMap<int, QCString> *keyToIdentifierMapPtr = 0;
+static QMap<int, QString> * trFieldsMapPtr = 0;
+
+
+QMap<int, QString> PimEvent::fields() const
+{
+    QMap<int, QString> m = PimRecord::fields();
+
+    if (!keyToIdentifierMapPtr)
+	initMaps();
+    QMap<int, QCString>::Iterator it;
+    for (it = keyToIdentifierMapPtr->begin(); 
+	    it != keyToIdentifierMapPtr->end(); ++it) {
+	int i = it.key();
+	QString str = field(i);
+	if (!str.isEmpty())
+	    m.insert(i, str);
+    }
+
+    return m;
+}
+
+static const QtopiaPimMapEntry datebookentries[] = {
+    { "description", QT_TRANSLATE_NOOP("PimEvent", "Description"), PimEvent::Description, 40},
+    { "location", QT_TRANSLATE_NOOP("PimEvent", "Location"), PimEvent::Location, 0 },
+    { "timezone", QT_TRANSLATE_NOOP("PimEvent", "Time zone"), PimEvent::TimeZone, 0 },
+    { "note", QT_TRANSLATE_NOOP("PimEvent", "Notes"), PimEvent::Notes, 0 },
+    { "start", QT_TRANSLATE_NOOP("PimEvent", "Start Date"), PimEvent::StartDateTime, 25 },
+    { "end", QT_TRANSLATE_NOOP("PimEvent", "End Date"), PimEvent::EndDateTime, 25 },
+    { "type", NULL, PimEvent::DatebookType, 0 },
+    { "alarm", NULL, PimEvent::AlarmDelay, 0 },
+    { "balarm", NULL, PimEvent::HasAlarm, 0 },
+    { "sound", NULL, PimEvent::SoundType, 0 },
+
+    { "rtype", NULL, PimEvent::RepeatPattern, 10 },
+    { "rfreq", NULL, PimEvent::RepeatFrequency, 0 },
+    { "rweekdays", NULL, PimEvent::RepeatWeekdays, 0 },
+    { "rhasenddate", NULL, PimEvent::RepeatHasEndDate, 0 },
+    { "enddt", NULL, PimEvent::RepeatEndDate, 0 },
+
+    { "recparent", NULL, PimEvent::RecordParent, 0 },
+    { "recchildren", NULL, PimEvent::RecordChildren, 0 },
+    { "exceptions", NULL, PimEvent::Exceptions, 0 },
+
+    { 0, 0, 0, 0 }
+};
+
+void PimEvent::initMaps()
+{
+    delete keyToIdentifierMapPtr;
+    keyToIdentifierMapPtr = new QMap<int, QCString>;
+
+    delete identifierToKeyMapPtr;
+    identifierToKeyMapPtr = new QMap<QCString, int>;
+
+    delete trFieldsMapPtr;
+    trFieldsMapPtr = new QMap<int,QString>;
+
+    delete uniquenessMapPtr;
+    uniquenessMapPtr = new QMap<int, int>;
+
+    PimRecord::initMaps(datebookentries, *uniquenessMapPtr, *identifierToKeyMapPtr, *keyToIdentifierMapPtr,
+			*trFieldsMapPtr );
+
+    // Datebook xml file used lowercase letters for Categories and Uid
+    (*keyToIdentifierMapPtr)[UID_ID] = "uid";
+    identifierToKeyMapPtr->remove("Uid");
+    (*identifierToKeyMapPtr)["uid"] = UID_ID;
+
+    (*keyToIdentifierMapPtr)[Categories] = "categories";
+    identifierToKeyMapPtr->remove("Categories");
+    (*identifierToKeyMapPtr)["categories"] = Categories;
+}
+
+/*!
+  \internal
+*/
+const QMap<int, QCString> &PimEvent::keyToIdentifierMap()
+{
+    if ( !keyToIdentifierMapPtr )
+	initMaps();
+    return *keyToIdentifierMapPtr;
+}
+
+/*!
+  \internal
+*/
+const QMap<QCString,int> &PimEvent::identifierToKeyMap()
+{
+    if ( !identifierToKeyMapPtr )
+	initMaps();
+    return *identifierToKeyMapPtr;
+}
+
+/*!
+  \internal
+*/
+const QMap<int, QString> & PimEvent::trFieldsMap()
+{
+    if ( !trFieldsMapPtr )
+	initMaps();
+    return *trFieldsMapPtr;
+}
+
+/*!
+  \internal
+*/
+const QMap<int,int> & PimEvent::uniquenessMap()
+{
+    if ( !uniquenessMapPtr )
+	initMaps();
+    return *uniquenessMapPtr;
+}
+
 
 #ifndef QT_NO_DATASTREAM
 QDataStream &operator>>( QDataStream &s, PimEvent &c )
@@ -1281,6 +1766,12 @@ QDataStream &operator>>( QDataStream &s, PimEvent &c )
     s >> c.weekMask;
     s >> val;
     c.mAllDay = val == 0 ? FALSE : TRUE;
+
+    // exceptions.
+    s >> c.mExceptions;
+    s >> c.mParent;
+    s >> c.mChildren;
+
     return s;
 }
 
@@ -1304,6 +1795,12 @@ QDataStream &operator<<( QDataStream &s, const PimEvent &c )
     s << (c.mShowOnNearest ? (uchar)1 : (uchar)0);
     s << c.weekMask;
     s << (c.mAllDay ? (uchar)1 : (uchar)0);
+
+    // exceptions.
+    s << c.mExceptions;
+    s << c.mParent;
+    s << c.mChildren;
+
     return s;
 }
 #endif

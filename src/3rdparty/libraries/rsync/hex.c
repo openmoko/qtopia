@@ -23,7 +23,9 @@
 
 #include <assert.h>
 #include <sys/types.h>
+#if !defined (_OS_WIN32_)
 #include <inttypes.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 

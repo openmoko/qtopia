@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,10 +118,10 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include -I$(QPEDIR)/src/settings/calibrate -I$(QPEDIR)/src/3rdparty/libraries/rsync
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR) -I$(QPEDIR)/src/settings/calibrate -I$(QPEDIR)/src/3rdparty/libraries/rsync
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
-LIBS	=	$(SUBLIBS) -lqtopiaservices -lqpe -lcrypt -luuid $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
+LIBS	=	$(SUBLIBS) -lcrypt -luuid -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
 UIC	=	$(SYSCONF_UIC)
 
@@ -148,8 +154,6 @@ HEADERS =	desktop.h \
 		qcopbridge.h \
 		packageslave.h \
 		irserver.h \
-		devicebutton.h \
-		devicebuttonmanager.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/buf.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/checksum.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/command.h \
@@ -170,7 +174,6 @@ HEADERS =	desktop.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.h
 SOURCES =	desktop.cpp \
 		qprocess.cpp \
-		qprocess_unix.cpp \
 		appicons.cpp \
 		taskbar.cpp \
 		runningappbar.cpp \
@@ -188,8 +191,6 @@ SOURCES =	desktop.cpp \
 		qcopbridge.cpp \
 		startmenu.cpp \
 		main.cpp \
-		devicebutton.cpp \
-		devicebuttonmanager.cpp \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/base64.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/buf.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/checksum.c \
@@ -215,103 +216,100 @@ SOURCES =	desktop.cpp \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/util.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/version.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/whole.c \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.cpp
-OBJECTS =	desktop.o \
-		qprocess.o \
-		qprocess_unix.o \
-		appicons.o \
-		taskbar.o \
-		runningappbar.o \
-		stabmon.o \
-		inputmethods.o \
-		systray.o \
-		wait.o \
-		shutdownimpl.o \
-		launcher.o \
-		launcherview.o \
-		$(QPEDIR)/src/settings/calibrate/calibrate.o \
-		transferserver.o \
-		packageslave.o \
-		irserver.o \
-		qcopbridge.o \
-		startmenu.o \
-		main.o \
-		devicebutton.o \
-		devicebuttonmanager.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/base64.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/buf.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/checksum.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/command.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/delta.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/emit.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/hex.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/job.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/mdfour.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/mksum.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/msg.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/netint.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/patch.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/prototab.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/readsums.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/scoop.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/search.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/stats.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/stream.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/sumset.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/trace.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/tube.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/util.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/version.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/whole.o \
-		$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.o \
-		shutdown.o \
-		syncdialog.o
+		$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.cpp \
+		qprocess_unix.cpp
+OBJECTS =	$(OBJECTS_DIR)/desktop.o \
+		$(OBJECTS_DIR)/qprocess.o \
+		$(OBJECTS_DIR)/appicons.o \
+		$(OBJECTS_DIR)/taskbar.o \
+		$(OBJECTS_DIR)/runningappbar.o \
+		$(OBJECTS_DIR)/stabmon.o \
+		$(OBJECTS_DIR)/inputmethods.o \
+		$(OBJECTS_DIR)/systray.o \
+		$(OBJECTS_DIR)/wait.o \
+		$(OBJECTS_DIR)/shutdownimpl.o \
+		$(OBJECTS_DIR)/launcher.o \
+		$(OBJECTS_DIR)/launcherview.o \
+		$(OBJECTS_DIR)/calibrate.o \
+		$(OBJECTS_DIR)/transferserver.o \
+		$(OBJECTS_DIR)/packageslave.o \
+		$(OBJECTS_DIR)/irserver.o \
+		$(OBJECTS_DIR)/qcopbridge.o \
+		$(OBJECTS_DIR)/startmenu.o \
+		$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/base64.o \
+		$(OBJECTS_DIR)/buf.o \
+		$(OBJECTS_DIR)/checksum.o \
+		$(OBJECTS_DIR)/command.o \
+		$(OBJECTS_DIR)/delta.o \
+		$(OBJECTS_DIR)/emit.o \
+		$(OBJECTS_DIR)/hex.o \
+		$(OBJECTS_DIR)/job.o \
+		$(OBJECTS_DIR)/mdfour.o \
+		$(OBJECTS_DIR)/mksum.o \
+		$(OBJECTS_DIR)/msg.o \
+		$(OBJECTS_DIR)/netint.o \
+		$(OBJECTS_DIR)/patch.o \
+		$(OBJECTS_DIR)/prototab.o \
+		$(OBJECTS_DIR)/readsums.o \
+		$(OBJECTS_DIR)/scoop.o \
+		$(OBJECTS_DIR)/search.o \
+		$(OBJECTS_DIR)/stats.o \
+		$(OBJECTS_DIR)/stream.o \
+		$(OBJECTS_DIR)/sumset.o \
+		$(OBJECTS_DIR)/trace.o \
+		$(OBJECTS_DIR)/tube.o \
+		$(OBJECTS_DIR)/util.o \
+		$(OBJECTS_DIR)/version.o \
+		$(OBJECTS_DIR)/whole.o \
+		$(OBJECTS_DIR)/qrsync.o \
+		$(OBJECTS_DIR)/qprocess_unix.o \
+		$(OBJECTS_DIR)/shutdown.o \
+		$(OBJECTS_DIR)/syncdialog.o
 INTERFACES =    shutdown.ui \
 		syncdialog.ui
 UICDECLS =      shutdown.h \
 		syncdialog.h
 UICIMPLS =      shutdown.cpp \
 		syncdialog.cpp
-SRCMOC	=	moc_desktop.cpp \
-		moc_qprocess.cpp \
-		moc_appicons.cpp \
-		moc_taskbar.cpp \
-		moc_runningappbar.cpp \
-		moc_inputmethods.cpp \
-		moc_systray.cpp \
-		moc_shutdownimpl.cpp \
-		moc_launcher.cpp \
-		moc_launcherview.cpp \
-		$(QPEDIR)/src/settings/calibrate/moc_calibrate.cpp \
-		moc_startmenu.cpp \
-		moc_transferserver.cpp \
-		moc_qcopbridge.cpp \
-		moc_packageslave.cpp \
-		moc_irserver.cpp \
-		moc_devicebuttonmanager.cpp \
-		qprocess_unix.moc \
-		appicons.moc \
-		moc_shutdown.cpp \
-		moc_syncdialog.cpp
-OBJMOC	=	moc_desktop.o \
-		moc_qprocess.o \
-		moc_appicons.o \
-		moc_taskbar.o \
-		moc_runningappbar.o \
-		moc_inputmethods.o \
-		moc_systray.o \
-		moc_shutdownimpl.o \
-		moc_launcher.o \
-		moc_launcherview.o \
-		$(QPEDIR)/src/settings/calibrate/moc_calibrate.o \
-		moc_startmenu.o \
-		moc_transferserver.o \
-		moc_qcopbridge.o \
-		moc_packageslave.o \
-		moc_irserver.o \
-		moc_devicebuttonmanager.o \
-		moc_shutdown.o \
-		moc_syncdialog.o
+SRCMOC	=	$(MOC_DIR)/moc_desktop.cpp \
+		$(MOC_DIR)/moc_qprocess.cpp \
+		$(MOC_DIR)/moc_appicons.cpp \
+		$(MOC_DIR)/moc_taskbar.cpp \
+		$(MOC_DIR)/moc_runningappbar.cpp \
+		$(MOC_DIR)/moc_inputmethods.cpp \
+		$(MOC_DIR)/moc_systray.cpp \
+		$(MOC_DIR)/moc_shutdownimpl.cpp \
+		$(MOC_DIR)/moc_launcher.cpp \
+		$(MOC_DIR)/moc_launcherview.cpp \
+		$(MOC_DIR)/moc_calibrate.cpp \
+		$(MOC_DIR)/moc_startmenu.cpp \
+		$(MOC_DIR)/moc_transferserver.cpp \
+		$(MOC_DIR)/moc_qcopbridge.cpp \
+		$(MOC_DIR)/moc_packageslave.cpp \
+		$(MOC_DIR)/moc_irserver.cpp \
+		$(MOC_DIR)/moc_shutdown.cpp \
+		$(MOC_DIR)/moc_syncdialog.cpp \
+		$(MOC_DIR)/appicons.moc \
+		$(MOC_DIR)/qprocess_unix.moc
+OBJMOC	=	$(OBJECTS_DIR)/moc_desktop.o \
+		$(OBJECTS_DIR)/moc_qprocess.o \
+		$(OBJECTS_DIR)/moc_appicons.o \
+		$(OBJECTS_DIR)/moc_taskbar.o \
+		$(OBJECTS_DIR)/moc_runningappbar.o \
+		$(OBJECTS_DIR)/moc_inputmethods.o \
+		$(OBJECTS_DIR)/moc_systray.o \
+		$(OBJECTS_DIR)/moc_shutdownimpl.o \
+		$(OBJECTS_DIR)/moc_launcher.o \
+		$(OBJECTS_DIR)/moc_launcherview.o \
+		$(OBJECTS_DIR)/moc_calibrate.o \
+		$(OBJECTS_DIR)/moc_startmenu.o \
+		$(OBJECTS_DIR)/moc_transferserver.o \
+		$(OBJECTS_DIR)/moc_qcopbridge.o \
+		$(OBJECTS_DIR)/moc_packageslave.o \
+		$(OBJECTS_DIR)/moc_irserver.o \
+		$(OBJECTS_DIR)/moc_shutdown.o \
+		$(OBJECTS_DIR)/moc_syncdialog.o
 
 
 ####### Implicit rules
@@ -377,277 +375,179 @@ REQUIRES=
 
 ####### Compile
 
-desktop.o: desktop.cpp \
+$(OBJECTS_DIR)/desktop.o: desktop.cpp \
 		desktop.h \
 		shutdownimpl.h \
 		shutdown.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
 		launcher.h \
-		$(QPEDIR)/include/qpe/config.h \
 		launcherview.h \
-		$(QPEDIR)/include/qpe/storage.h \
 		qcopbridge.h \
 		startmenu.h \
 		taskbar.h \
-		$(QPEDIR)/include/qpe/custom.h \
 		transferserver.h \
 		irserver.h \
-		packageslave.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		$(QPEDIR)/include/qpe/mimetype.h \
-		$(QPEDIR)/include/qpe/password.h \
-		$(QPEDIR)/include/qpe/power.h \
-		$(QPEDIR)/include/qpe/services/services.h \
-		$(QPEDIR)/include/qtopia/applnk.h \
-		devicebuttonmanager.h \
-		devicebutton.h \
-		$(QPEDIR)/include/qtopia/services/services.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qpe/global.h
+		packageslave.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/desktop.o desktop.cpp
 
-qprocess.o: qprocess.cpp \
+$(OBJECTS_DIR)/qprocess.o: qprocess.cpp \
 		qprocess.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qprocess.o qprocess.cpp
 
-qprocess_unix.o: qprocess_unix.cpp \
-		qprocess_unix.moc \
-		qprocess.h \
-		qcleanuphandler_p.h
+$(OBJECTS_DIR)/appicons.o: appicons.cpp \
+		$(MOC_DIR)/appicons.moc \
+		appicons.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/appicons.o appicons.cpp
 
-appicons.o: appicons.cpp \
-		appicons.moc \
-		appicons.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h
-
-taskbar.o: taskbar.cpp \
+$(OBJECTS_DIR)/taskbar.o: taskbar.cpp \
 		startmenu.h \
 		inputmethods.h \
-		$(QPEDIR)/include/qpe/inputmethodinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
 		mrulist.h \
-		$(QPEDIR)/include/qpe/applnk.h \
 		runningappbar.h \
-		$(QPEDIR)/include/qtopia/applnk.h \
 		systray.h \
-		$(QPEDIR)/include/qpe/taskbarappletinterface.h \
 		$(QPEDIR)/src/settings/calibrate/calibrate.h \
 		wait.h \
-		$(QPEDIR)/include/qpe/resource.h \
 		appicons.h \
 		taskbar.h \
-		$(QPEDIR)/include/qpe/custom.h \
 		desktop.h \
 		shutdownimpl.h \
 		shutdown.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qpe/global.h \
 		apps.h \
-		../settings/systemtime/settime.h \
-		$(QPEDIR)/include/qpe/timestring.h
+		../applications/addressbook/addressbook.h \
+		../applications/datebook/datebook.h \
+		../applications/todo/mainwindow.h \
+		../libraries/qtopiacalc/calculator.h \
+		../applications/clock/clock.h \
+		../applications/helpbrowser/helpbrowser.h \
+		../applications/imageviewer/showimg.h \
+		../applications/mediaplayer/maindocumentwidgetstack.h \
+		../applications/textedit/textedit.h \
+		../games/fifteen/fifteen.h \
+		../games/go/gowidget.h \
+		../games/mindbreaker/mindbreaker.h \
+		../games/minesweep/minesweep.h \
+		../games/qasteroids/toplevel.h \
+		../games/snake/interface.h \
+		../games/solitaire/canvascardwindow.h \
+		../settings/systemtime/settime.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/taskbar.o taskbar.cpp
 
-runningappbar.o: runningappbar.cpp \
+$(OBJECTS_DIR)/runningappbar.o: runningappbar.cpp \
 		qprocess.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qpe/global.h \
-		runningappbar.h \
-		$(QPEDIR)/include/qtopia/applnk.h
+		runningappbar.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/runningappbar.o runningappbar.cpp
 
-stabmon.o: stabmon.cpp \
-		stabmon.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h
+$(OBJECTS_DIR)/stabmon.o: stabmon.cpp \
+		stabmon.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/stabmon.o stabmon.cpp
 
-inputmethods.o: inputmethods.cpp \
+$(OBJECTS_DIR)/inputmethods.o: inputmethods.cpp \
 		inputmethods.h \
-		$(QPEDIR)/include/qpe/inputmethodinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qpe/qlibrary.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qpe/global.h
+		../plugins/inputmethods/handwriting/handwritingimpl.h \
+		../plugins/inputmethods/keyboard/keyboardimpl.h \
+		../3rdparty/plugins/inputmethods/pickboard/pickboardimpl.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/inputmethods.o inputmethods.cpp
 
-systray.o: systray.cpp \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/qlibrary.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qpe/config.h \
+$(OBJECTS_DIR)/systray.o: systray.cpp \
 		quicklauncher.h \
 		systray.h \
-		$(QPEDIR)/include/qpe/taskbarappletinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h
+		../plugins/applets/clockapplet/clockappletimpl.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/systray.o systray.cpp
 
-wait.o: wait.cpp \
-		wait.h \
-		$(QPEDIR)/include/qpe/resource.h
+$(OBJECTS_DIR)/wait.o: wait.cpp \
+		wait.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/wait.o wait.cpp
 
-shutdownimpl.o: shutdownimpl.cpp \
+$(OBJECTS_DIR)/shutdownimpl.o: shutdownimpl.cpp \
 		shutdownimpl.h \
-		shutdown.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
+		shutdown.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/shutdownimpl.o shutdownimpl.cpp
 
-launcher.o: launcher.cpp \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qpe/mimetype.h \
-		$(QPEDIR)/include/qpe/storage.h \
-		$(QPEDIR)/include/qpe/categories.h \
-		$(QPEDIR)/include/qtopia/private/palmtopuidgen.h \
-		$(QPEDIR)/include/qpe/version.h \
+$(OBJECTS_DIR)/launcher.o: launcher.cpp \
 		launcherview.h \
 		launcher.h \
 		syncdialog.h \
 		desktop.h \
 		shutdownimpl.h \
 		shutdown.h \
-		$(QPEDIR)/include/qpe/lnkproperties.h \
 		mrulist.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/launcher.o launcher.cpp
 
-launcherview.o: launcherview.cpp \
-		launcherview.h \
-		$(QPEDIR)/include/qpe/storage.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		$(QPEDIR)/include/qpe/qpedebug.h \
-		$(QPEDIR)/include/qpe/categories.h \
-		$(QPEDIR)/include/qtopia/private/palmtopuidgen.h \
-		$(QPEDIR)/include/qpe/categoryselect.h \
-		$(QPEDIR)/include/qpe/menubutton.h \
-		$(QPEDIR)/include/qpe/mimetype.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h
+$(OBJECTS_DIR)/launcherview.o: launcherview.cpp \
+		launcherview.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/launcherview.o launcherview.cpp
 
-$(QPEDIR)/src/settings/calibrate/calibrate.o: $(QPEDIR)/src/settings/calibrate/calibrate.cpp \
-		$(QPEDIR)/src/settings/calibrate/calibrate.h \
-		$(QPEDIR)/include/qpe/resource.h
+$(OBJECTS_DIR)/calibrate.o: $(QPEDIR)/src/settings/calibrate/calibrate.cpp \
+		$(QPEDIR)/src/settings/calibrate/calibrate.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/calibrate.o $(QPEDIR)/src/settings/calibrate/calibrate.cpp
 
-transferserver.o: transferserver.cpp \
-		$(QPEDIR)/include/qpe/process.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qtopia/private/contact.h \
-		$(QPEDIR)/include/qtopia/private/palmtoprecord.h \
-		$(QPEDIR)/include/qtopia/private/recordfields.h \
-		$(QPEDIR)/include/qpe/quuid.h \
-		$(QPEDIR)/include/qpe/version.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
+$(OBJECTS_DIR)/transferserver.o: transferserver.cpp \
 		transferserver.h \
 		qprocess.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/transferserver.o transferserver.cpp
 
-packageslave.o: packageslave.cpp \
+$(OBJECTS_DIR)/packageslave.o: packageslave.cpp \
 		packageslave.h \
-		qprocess.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h
+		qprocess.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/packageslave.o packageslave.cpp
 
-irserver.o: irserver.cpp \
+$(OBJECTS_DIR)/irserver.o: irserver.cpp \
 		irserver.h \
-		$(QPEDIR)/include/qpe/qlibrary.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		obexinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h
+		obexinterface.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/irserver.o irserver.cpp
 
-qcopbridge.o: qcopbridge.cpp \
+$(OBJECTS_DIR)/qcopbridge.o: qcopbridge.cpp \
 		qcopbridge.h \
-		transferserver.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/version.h
+		transferserver.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qcopbridge.o qcopbridge.cpp
 
-startmenu.o: startmenu.cpp \
+$(OBJECTS_DIR)/startmenu.o: startmenu.cpp \
 		startmenu.h \
 		sidething.h \
-		mrulist.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qpe/resource.h
+		mrulist.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/startmenu.o startmenu.cpp
 
-main.o: main.cpp \
+$(OBJECTS_DIR)/main.o: main.cpp \
 		desktop.h \
 		shutdownimpl.h \
 		shutdown.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
 		taskbar.h \
-		$(QPEDIR)/include/qpe/custom.h \
 		stabmon.h \
 		launcher.h \
-		$(QPEDIR)/include/qpe/config.h \
 		launcherview.h \
-		$(QPEDIR)/include/qpe/storage.h \
-		$(QPEDIR)/include/qpe/network.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qpe/alarmserver.h \
-		$(QPEDIR)/src/settings/calibrate/../calibrate/calibrate.h \
-		$(QPEDIR)/include/qpe/global.h
+		$(QPEDIR)/src/settings/calibrate/../calibrate/calibrate.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
-devicebutton.o: devicebutton.cpp \
-		$(QPEDIR)/include/qtopia/resource.h \
-		devicebutton.h \
-		$(QPEDIR)/include/qtopia/services/services.h \
-		$(QPEDIR)/include/qtopia/applnk.h
-
-devicebuttonmanager.o: devicebuttonmanager.cpp \
-		devicebutton.h \
-		$(QPEDIR)/include/qtopia/services/services.h \
-		$(QPEDIR)/include/qtopia/applnk.h \
-		devicebuttonmanager.h \
-		$(QPEDIR)/include/qtopia/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/config.h \
-		$(QPEDIR)/include/qtopia/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qtopia/resource.h
-
-$(QPEDIR)/src/3rdparty/libraries/rsync/base64.o: $(QPEDIR)/src/3rdparty/libraries/rsync/base64.c \
+$(OBJECTS_DIR)/base64.o: $(QPEDIR)/src/3rdparty/libraries/rsync/base64.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/base64.o $(QPEDIR)/src/3rdparty/libraries/rsync/base64.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/buf.o: $(QPEDIR)/src/3rdparty/libraries/rsync/buf.c \
+$(OBJECTS_DIR)/buf.o: $(QPEDIR)/src/3rdparty/libraries/rsync/buf.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/trace.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/buf.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/util.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/buf.o $(QPEDIR)/src/3rdparty/libraries/rsync/buf.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/checksum.o: $(QPEDIR)/src/3rdparty/libraries/rsync/checksum.c \
+$(OBJECTS_DIR)/checksum.o: $(QPEDIR)/src/3rdparty/libraries/rsync/checksum.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/checksum.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/checksum.o $(QPEDIR)/src/3rdparty/libraries/rsync/checksum.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/command.o: $(QPEDIR)/src/3rdparty/libraries/rsync/command.c \
+$(OBJECTS_DIR)/command.o: $(QPEDIR)/src/3rdparty/libraries/rsync/command.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/command.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/command.o $(QPEDIR)/src/3rdparty/libraries/rsync/command.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/delta.o: $(QPEDIR)/src/3rdparty/libraries/rsync/delta.c \
+$(OBJECTS_DIR)/delta.o: $(QPEDIR)/src/3rdparty/libraries/rsync/delta.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
@@ -660,8 +560,9 @@ $(QPEDIR)/src/3rdparty/libraries/rsync/delta.o: $(QPEDIR)/src/3rdparty/libraries
 		$(QPEDIR)/src/3rdparty/libraries/rsync/checksum.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/search.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/types.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/delta.o $(QPEDIR)/src/3rdparty/libraries/rsync/delta.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/emit.o: $(QPEDIR)/src/3rdparty/libraries/rsync/emit.c \
+$(OBJECTS_DIR)/emit.o: $(QPEDIR)/src/3rdparty/libraries/rsync/emit.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
@@ -673,13 +574,15 @@ $(QPEDIR)/src/3rdparty/libraries/rsync/emit.o: $(QPEDIR)/src/3rdparty/libraries/
 		$(QPEDIR)/src/3rdparty/libraries/rsync/netint.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/sumset.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/job.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/emit.o $(QPEDIR)/src/3rdparty/libraries/rsync/emit.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/hex.o: $(QPEDIR)/src/3rdparty/libraries/rsync/hex.c \
+$(OBJECTS_DIR)/hex.o: $(QPEDIR)/src/3rdparty/libraries/rsync/hex.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/hex.o $(QPEDIR)/src/3rdparty/libraries/rsync/hex.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/job.o: $(QPEDIR)/src/3rdparty/libraries/rsync/job.c \
+$(OBJECTS_DIR)/job.o: $(QPEDIR)/src/3rdparty/libraries/rsync/job.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
@@ -688,15 +591,17 @@ $(QPEDIR)/src/3rdparty/libraries/rsync/job.o: $(QPEDIR)/src/3rdparty/libraries/r
 		$(QPEDIR)/src/3rdparty/libraries/rsync/sumset.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/job.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/trace.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/job.o $(QPEDIR)/src/3rdparty/libraries/rsync/job.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/mdfour.o: $(QPEDIR)/src/3rdparty/libraries/rsync/mdfour.c \
+$(OBJECTS_DIR)/mdfour.o: $(QPEDIR)/src/3rdparty/libraries/rsync/mdfour.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/trace.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/types.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/mdfour.o $(QPEDIR)/src/3rdparty/libraries/rsync/mdfour.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/mksum.o: $(QPEDIR)/src/3rdparty/libraries/rsync/mksum.c \
+$(OBJECTS_DIR)/mksum.o: $(QPEDIR)/src/3rdparty/libraries/rsync/mksum.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
@@ -708,13 +613,15 @@ $(QPEDIR)/src/3rdparty/libraries/rsync/mksum.o: $(QPEDIR)/src/3rdparty/libraries
 		$(QPEDIR)/src/3rdparty/libraries/rsync/netint.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/trace.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/checksum.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/mksum.o $(QPEDIR)/src/3rdparty/libraries/rsync/mksum.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/msg.o: $(QPEDIR)/src/3rdparty/libraries/rsync/msg.c \
+$(OBJECTS_DIR)/msg.o: $(QPEDIR)/src/3rdparty/libraries/rsync/msg.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/msg.o $(QPEDIR)/src/3rdparty/libraries/rsync/msg.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/netint.o: $(QPEDIR)/src/3rdparty/libraries/rsync/netint.c \
+$(OBJECTS_DIR)/netint.o: $(QPEDIR)/src/3rdparty/libraries/rsync/netint.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
@@ -722,8 +629,9 @@ $(QPEDIR)/src/3rdparty/libraries/rsync/netint.o: $(QPEDIR)/src/3rdparty/librarie
 		$(QPEDIR)/src/3rdparty/libraries/rsync/netint.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/trace.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/stream.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/netint.o $(QPEDIR)/src/3rdparty/libraries/rsync/netint.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/patch.o: $(QPEDIR)/src/3rdparty/libraries/rsync/patch.c \
+$(OBJECTS_DIR)/patch.o: $(QPEDIR)/src/3rdparty/libraries/rsync/patch.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
@@ -736,16 +644,18 @@ $(QPEDIR)/src/3rdparty/libraries/rsync/patch.o: $(QPEDIR)/src/3rdparty/libraries
 		$(QPEDIR)/src/3rdparty/libraries/rsync/prototab.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/stream.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/job.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/patch.o $(QPEDIR)/src/3rdparty/libraries/rsync/patch.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/prototab.o: $(QPEDIR)/src/3rdparty/libraries/rsync/prototab.c \
+$(OBJECTS_DIR)/prototab.o: $(QPEDIR)/src/3rdparty/libraries/rsync/prototab.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/protocol.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/command.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/prototab.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/prototab.o $(QPEDIR)/src/3rdparty/libraries/rsync/prototab.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/readsums.o: $(QPEDIR)/src/3rdparty/libraries/rsync/readsums.c \
+$(OBJECTS_DIR)/readsums.o: $(QPEDIR)/src/3rdparty/libraries/rsync/readsums.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
@@ -756,8 +666,9 @@ $(QPEDIR)/src/3rdparty/libraries/rsync/readsums.o: $(QPEDIR)/src/3rdparty/librar
 		$(QPEDIR)/src/3rdparty/libraries/rsync/protocol.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/util.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/stream.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/readsums.o $(QPEDIR)/src/3rdparty/libraries/rsync/readsums.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/scoop.o: $(QPEDIR)/src/3rdparty/libraries/rsync/scoop.c \
+$(OBJECTS_DIR)/scoop.o: $(QPEDIR)/src/3rdparty/libraries/rsync/scoop.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
@@ -765,8 +676,9 @@ $(QPEDIR)/src/3rdparty/libraries/rsync/scoop.o: $(QPEDIR)/src/3rdparty/libraries
 		$(QPEDIR)/src/3rdparty/libraries/rsync/stream.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/trace.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/util.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/scoop.o $(QPEDIR)/src/3rdparty/libraries/rsync/scoop.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/search.o: $(QPEDIR)/src/3rdparty/libraries/rsync/search.c \
+$(OBJECTS_DIR)/search.o: $(QPEDIR)/src/3rdparty/libraries/rsync/search.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
@@ -775,37 +687,42 @@ $(QPEDIR)/src/3rdparty/libraries/rsync/search.o: $(QPEDIR)/src/3rdparty/librarie
 		$(QPEDIR)/src/3rdparty/libraries/rsync/sumset.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/search.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/checksum.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/search.o $(QPEDIR)/src/3rdparty/libraries/rsync/search.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/stats.o: $(QPEDIR)/src/3rdparty/libraries/rsync/stats.c \
+$(OBJECTS_DIR)/stats.o: $(QPEDIR)/src/3rdparty/libraries/rsync/stats.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/trace.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/stats.o $(QPEDIR)/src/3rdparty/libraries/rsync/stats.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/stream.o: $(QPEDIR)/src/3rdparty/libraries/rsync/stream.c \
+$(OBJECTS_DIR)/stream.o: $(QPEDIR)/src/3rdparty/libraries/rsync/stream.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/stream.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/util.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/trace.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/stream.o $(QPEDIR)/src/3rdparty/libraries/rsync/stream.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/sumset.o: $(QPEDIR)/src/3rdparty/libraries/rsync/sumset.c \
+$(OBJECTS_DIR)/sumset.o: $(QPEDIR)/src/3rdparty/libraries/rsync/sumset.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/sumset.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/util.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/trace.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/sumset.o $(QPEDIR)/src/3rdparty/libraries/rsync/sumset.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/trace.o: $(QPEDIR)/src/3rdparty/libraries/rsync/trace.c \
+$(OBJECTS_DIR)/trace.o: $(QPEDIR)/src/3rdparty/libraries/rsync/trace.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/util.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/trace.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/trace.o $(QPEDIR)/src/3rdparty/libraries/rsync/trace.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/tube.o: $(QPEDIR)/src/3rdparty/libraries/rsync/tube.c \
+$(OBJECTS_DIR)/tube.o: $(QPEDIR)/src/3rdparty/libraries/rsync/tube.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
@@ -813,20 +730,23 @@ $(QPEDIR)/src/3rdparty/libraries/rsync/tube.o: $(QPEDIR)/src/3rdparty/libraries/
 		$(QPEDIR)/src/3rdparty/libraries/rsync/util.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/job.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/stream.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/tube.o $(QPEDIR)/src/3rdparty/libraries/rsync/tube.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/util.o: $(QPEDIR)/src/3rdparty/libraries/rsync/util.c \
+$(OBJECTS_DIR)/util.o: $(QPEDIR)/src/3rdparty/libraries/rsync/util.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/util.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/trace.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/util.o $(QPEDIR)/src/3rdparty/libraries/rsync/util.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/version.o: $(QPEDIR)/src/3rdparty/libraries/rsync/version.c \
+$(OBJECTS_DIR)/version.o: $(QPEDIR)/src/3rdparty/libraries/rsync/version.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/version.o $(QPEDIR)/src/3rdparty/libraries/rsync/version.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/whole.o: $(QPEDIR)/src/3rdparty/libraries/rsync/whole.c \
+$(OBJECTS_DIR)/whole.o: $(QPEDIR)/src/3rdparty/libraries/rsync/whole.c \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_rsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/config_linux.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h \
@@ -837,10 +757,18 @@ $(QPEDIR)/src/3rdparty/libraries/rsync/whole.o: $(QPEDIR)/src/3rdparty/libraries
 		$(QPEDIR)/src/3rdparty/libraries/rsync/buf.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/whole.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/util.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/whole.o $(QPEDIR)/src/3rdparty/libraries/rsync/whole.c
 
-$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.o: $(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.cpp \
+$(OBJECTS_DIR)/qrsync.o: $(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.cpp \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.h \
 		$(QPEDIR)/src/3rdparty/libraries/rsync/rsync.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qrsync.o $(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.cpp
+
+$(OBJECTS_DIR)/qprocess_unix.o: qprocess_unix.cpp \
+		$(MOC_DIR)/qprocess_unix.moc \
+		qprocess.h \
+		qcleanuphandler_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qprocess_unix.o qprocess_unix.cpp
 
 shutdown.h: shutdown.ui
 	$(UIC) shutdown.ui -o $(INTERFACE_DECL_PATH)/shutdown.h
@@ -854,163 +782,156 @@ syncdialog.h: syncdialog.ui
 syncdialog.cpp: syncdialog.ui
 	$(UIC) syncdialog.ui -i syncdialog.h -o syncdialog.cpp
 
-shutdown.o: shutdown.cpp
+$(OBJECTS_DIR)/shutdown.o: shutdown.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/shutdown.o shutdown.cpp
 
-syncdialog.o: syncdialog.cpp
+$(OBJECTS_DIR)/syncdialog.o: syncdialog.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/syncdialog.o syncdialog.cpp
 
-moc_desktop.o: moc_desktop.cpp \
+$(OBJECTS_DIR)/moc_desktop.o: $(MOC_DIR)/moc_desktop.cpp \
 		desktop.h \
 		shutdownimpl.h \
-		shutdown.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
+		shutdown.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_desktop.o $(MOC_DIR)/moc_desktop.cpp
 
-moc_qprocess.o: moc_qprocess.cpp \
+$(OBJECTS_DIR)/moc_qprocess.o: $(MOC_DIR)/moc_qprocess.cpp \
 		qprocess.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qprocess.o $(MOC_DIR)/moc_qprocess.cpp
 
-moc_appicons.o: moc_appicons.cpp \
+$(OBJECTS_DIR)/moc_appicons.o: $(MOC_DIR)/moc_appicons.cpp \
 		appicons.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_appicons.o $(MOC_DIR)/moc_appicons.cpp
 
-moc_taskbar.o: moc_taskbar.cpp \
-		taskbar.h \
-		$(QPEDIR)/include/qpe/custom.h
+$(OBJECTS_DIR)/moc_taskbar.o: $(MOC_DIR)/moc_taskbar.cpp \
+		taskbar.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_taskbar.o $(MOC_DIR)/moc_taskbar.cpp
 
-moc_runningappbar.o: moc_runningappbar.cpp \
-		runningappbar.h \
-		$(QPEDIR)/include/qtopia/applnk.h
+$(OBJECTS_DIR)/moc_runningappbar.o: $(MOC_DIR)/moc_runningappbar.cpp \
+		runningappbar.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_runningappbar.o $(MOC_DIR)/moc_runningappbar.cpp
 
-moc_inputmethods.o: moc_inputmethods.cpp \
-		inputmethods.h \
-		$(QPEDIR)/include/qpe/inputmethodinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h
+$(OBJECTS_DIR)/moc_inputmethods.o: $(MOC_DIR)/moc_inputmethods.cpp \
+		inputmethods.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_inputmethods.o $(MOC_DIR)/moc_inputmethods.cpp
 
-moc_systray.o: moc_systray.cpp \
-		systray.h \
-		$(QPEDIR)/include/qpe/taskbarappletinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h
+$(OBJECTS_DIR)/moc_systray.o: $(MOC_DIR)/moc_systray.cpp \
+		systray.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_systray.o $(MOC_DIR)/moc_systray.cpp
 
-moc_shutdownimpl.o: moc_shutdownimpl.cpp \
+$(OBJECTS_DIR)/moc_shutdownimpl.o: $(MOC_DIR)/moc_shutdownimpl.cpp \
 		shutdownimpl.h \
 		shutdown.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_shutdownimpl.o $(MOC_DIR)/moc_shutdownimpl.cpp
 
-moc_launcher.o: moc_launcher.cpp \
+$(OBJECTS_DIR)/moc_launcher.o: $(MOC_DIR)/moc_launcher.cpp \
 		launcher.h \
-		$(QPEDIR)/include/qpe/config.h \
-		launcherview.h \
-		$(QPEDIR)/include/qpe/storage.h
+		launcherview.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_launcher.o $(MOC_DIR)/moc_launcher.cpp
 
-moc_launcherview.o: moc_launcherview.cpp \
-		launcherview.h \
-		$(QPEDIR)/include/qpe/storage.h
+$(OBJECTS_DIR)/moc_launcherview.o: $(MOC_DIR)/moc_launcherview.cpp \
+		launcherview.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_launcherview.o $(MOC_DIR)/moc_launcherview.cpp
 
-$(QPEDIR)/src/settings/calibrate/moc_calibrate.o: $(QPEDIR)/src/settings/calibrate/moc_calibrate.cpp \
+$(OBJECTS_DIR)/moc_calibrate.o: $(MOC_DIR)/moc_calibrate.cpp \
 		$(QPEDIR)/src/settings/calibrate/calibrate.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_calibrate.o $(MOC_DIR)/moc_calibrate.cpp
 
-moc_startmenu.o: moc_startmenu.cpp \
+$(OBJECTS_DIR)/moc_startmenu.o: $(MOC_DIR)/moc_startmenu.cpp \
 		startmenu.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_startmenu.o $(MOC_DIR)/moc_startmenu.cpp
 
-moc_transferserver.o: moc_transferserver.cpp \
+$(OBJECTS_DIR)/moc_transferserver.o: $(MOC_DIR)/moc_transferserver.cpp \
 		transferserver.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_transferserver.o $(MOC_DIR)/moc_transferserver.cpp
 
-moc_qcopbridge.o: moc_qcopbridge.cpp \
+$(OBJECTS_DIR)/moc_qcopbridge.o: $(MOC_DIR)/moc_qcopbridge.cpp \
 		qcopbridge.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qcopbridge.o $(MOC_DIR)/moc_qcopbridge.cpp
 
-moc_packageslave.o: moc_packageslave.cpp \
+$(OBJECTS_DIR)/moc_packageslave.o: $(MOC_DIR)/moc_packageslave.cpp \
 		packageslave.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_packageslave.o $(MOC_DIR)/moc_packageslave.cpp
 
-moc_irserver.o: moc_irserver.cpp \
+$(OBJECTS_DIR)/moc_irserver.o: $(MOC_DIR)/moc_irserver.cpp \
 		irserver.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_irserver.o $(MOC_DIR)/moc_irserver.cpp
 
-moc_devicebuttonmanager.o: moc_devicebuttonmanager.cpp \
-		devicebuttonmanager.h \
-		devicebutton.h \
-		$(QPEDIR)/include/qtopia/services/services.h \
-		$(QPEDIR)/include/qtopia/applnk.h
+$(OBJECTS_DIR)/moc_shutdown.o: $(MOC_DIR)/moc_shutdown.cpp \
+		shutdown.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_shutdown.o $(MOC_DIR)/moc_shutdown.cpp
 
-moc_shutdown.o: qprocess_unix.moc \
-		qprocess_unix.cpp \
-		qprocess.h \
-		qcleanuphandler_p.h
+$(OBJECTS_DIR)/moc_syncdialog.o: $(MOC_DIR)/moc_syncdialog.cpp \
+		syncdialog.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_syncdialog.o $(MOC_DIR)/moc_syncdialog.cpp
 
-moc_syncdialog.o: appicons.moc \
-		appicons.cpp \
-		appicons.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h
+$(MOC_DIR)/moc_desktop.cpp: desktop.h
+	$(MOC) desktop.h -o $(MOC_DIR)/moc_desktop.cpp
 
-moc_desktop.cpp: desktop.h
-	$(MOC) desktop.h -o moc_desktop.cpp
+$(MOC_DIR)/moc_qprocess.cpp: qprocess.h
+	$(MOC) qprocess.h -o $(MOC_DIR)/moc_qprocess.cpp
 
-moc_qprocess.cpp: qprocess.h
-	$(MOC) qprocess.h -o moc_qprocess.cpp
+$(MOC_DIR)/moc_appicons.cpp: appicons.h
+	$(MOC) appicons.h -o $(MOC_DIR)/moc_appicons.cpp
 
-moc_appicons.cpp: appicons.h
-	$(MOC) appicons.h -o moc_appicons.cpp
+$(MOC_DIR)/moc_taskbar.cpp: taskbar.h
+	$(MOC) taskbar.h -o $(MOC_DIR)/moc_taskbar.cpp
 
-moc_taskbar.cpp: taskbar.h
-	$(MOC) taskbar.h -o moc_taskbar.cpp
+$(MOC_DIR)/moc_runningappbar.cpp: runningappbar.h
+	$(MOC) runningappbar.h -o $(MOC_DIR)/moc_runningappbar.cpp
 
-moc_runningappbar.cpp: runningappbar.h
-	$(MOC) runningappbar.h -o moc_runningappbar.cpp
+$(MOC_DIR)/moc_inputmethods.cpp: inputmethods.h
+	$(MOC) inputmethods.h -o $(MOC_DIR)/moc_inputmethods.cpp
 
-moc_inputmethods.cpp: inputmethods.h
-	$(MOC) inputmethods.h -o moc_inputmethods.cpp
+$(MOC_DIR)/moc_systray.cpp: systray.h
+	$(MOC) systray.h -o $(MOC_DIR)/moc_systray.cpp
 
-moc_systray.cpp: systray.h
-	$(MOC) systray.h -o moc_systray.cpp
+$(MOC_DIR)/moc_shutdownimpl.cpp: shutdownimpl.h
+	$(MOC) shutdownimpl.h -o $(MOC_DIR)/moc_shutdownimpl.cpp
 
-moc_shutdownimpl.cpp: shutdownimpl.h
-	$(MOC) shutdownimpl.h -o moc_shutdownimpl.cpp
+$(MOC_DIR)/moc_launcher.cpp: launcher.h
+	$(MOC) launcher.h -o $(MOC_DIR)/moc_launcher.cpp
 
-moc_launcher.cpp: launcher.h
-	$(MOC) launcher.h -o moc_launcher.cpp
+$(MOC_DIR)/moc_launcherview.cpp: launcherview.h
+	$(MOC) launcherview.h -o $(MOC_DIR)/moc_launcherview.cpp
 
-moc_launcherview.cpp: launcherview.h
-	$(MOC) launcherview.h -o moc_launcherview.cpp
+$(MOC_DIR)/moc_calibrate.cpp: $(QPEDIR)/src/settings/calibrate/calibrate.h
+	$(MOC) $(QPEDIR)/src/settings/calibrate/calibrate.h -o $(MOC_DIR)/moc_calibrate.cpp
 
-$(QPEDIR)/src/settings/calibrate/moc_calibrate.cpp: $(QPEDIR)/src/settings/calibrate/calibrate.h
-	$(MOC) $(QPEDIR)/src/settings/calibrate/calibrate.h -o $(QPEDIR)/src/settings/calibrate/moc_calibrate.cpp
+$(MOC_DIR)/moc_startmenu.cpp: startmenu.h
+	$(MOC) startmenu.h -o $(MOC_DIR)/moc_startmenu.cpp
 
-moc_startmenu.cpp: startmenu.h
-	$(MOC) startmenu.h -o moc_startmenu.cpp
+$(MOC_DIR)/moc_transferserver.cpp: transferserver.h
+	$(MOC) transferserver.h -o $(MOC_DIR)/moc_transferserver.cpp
 
-moc_transferserver.cpp: transferserver.h
-	$(MOC) transferserver.h -o moc_transferserver.cpp
+$(MOC_DIR)/moc_qcopbridge.cpp: qcopbridge.h
+	$(MOC) qcopbridge.h -o $(MOC_DIR)/moc_qcopbridge.cpp
 
-moc_qcopbridge.cpp: qcopbridge.h
-	$(MOC) qcopbridge.h -o moc_qcopbridge.cpp
+$(MOC_DIR)/moc_packageslave.cpp: packageslave.h
+	$(MOC) packageslave.h -o $(MOC_DIR)/moc_packageslave.cpp
 
-moc_packageslave.cpp: packageslave.h
-	$(MOC) packageslave.h -o moc_packageslave.cpp
+$(MOC_DIR)/moc_irserver.cpp: irserver.h
+	$(MOC) irserver.h -o $(MOC_DIR)/moc_irserver.cpp
 
-moc_irserver.cpp: irserver.h
-	$(MOC) irserver.h -o moc_irserver.cpp
+$(MOC_DIR)/appicons.moc: appicons.cpp
+	$(MOC) appicons.cpp -o $(MOC_DIR)/appicons.moc
 
-moc_devicebuttonmanager.cpp: devicebuttonmanager.h
-	$(MOC) devicebuttonmanager.h -o moc_devicebuttonmanager.cpp
+$(MOC_DIR)/qprocess_unix.moc: qprocess_unix.cpp
+	$(MOC) qprocess_unix.cpp -o $(MOC_DIR)/qprocess_unix.moc
 
-qprocess_unix.moc: qprocess_unix.cpp
-	$(MOC) qprocess_unix.cpp -o qprocess_unix.moc
+$(MOC_DIR)/moc_shutdown.cpp: shutdown.h
+	$(MOC) shutdown.h -o $(MOC_DIR)/moc_shutdown.cpp
 
-appicons.moc: appicons.cpp
-	$(MOC) appicons.cpp -o appicons.moc
-
-moc_shutdown.cpp: shutdown.h
-	$(MOC) shutdown.h -o moc_shutdown.cpp
-
-moc_syncdialog.cpp: syncdialog.h
-	$(MOC) syncdialog.h -o moc_syncdialog.cpp
+$(MOC_DIR)/moc_syncdialog.cpp: syncdialog.h
+	$(MOC) syncdialog.h -o $(MOC_DIR)/moc_syncdialog.cpp
 
 
 
 lupdate:
-	lupdate server.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <server.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease server.pro
+	$(QPEDIR)/bin/qtopia-linstall server.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

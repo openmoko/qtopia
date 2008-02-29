@@ -28,7 +28,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
+#ifndef Q_OS_WIN32
 #include <sys/ioctl.h>
+#endif
 
 #ifdef QT_QWS_IPAQ_NO_APM
 #include <linux/h3600_ts.h>
@@ -37,17 +39,10 @@
 PowerStatusManager *PowerStatusManager::powerManager = 0;
 PowerStatus *PowerStatusManager::ps = 0;
 
-static bool haveProcApm = false;
-
 PowerStatusManager::PowerStatusManager()
 {
     powerManager = this;
     ps = new PowerStatus;
-    FILE *f = fopen("/proc/apm", "r");
-    if ( f ) {
-	fclose(f);
-	haveProcApm = TRUE;
-    }
 }
 
 const PowerStatus &PowerStatusManager::readStatus()
@@ -131,98 +126,4 @@ bool PowerStatusManager::getProcApmStatus( int &ac, int &bs, int &bf, int &pc, i
 
     return ok;
 }
-
-#ifdef QT_QWS_CUSTOM
-
-void PowerStatusManager::getStatus()
-{
-    int ac, bs, bf, pc, sec;
-    ps->percentAccurate = TRUE; // not for long...
-
-    if ( haveProcApm && getProcApmStatus( ac, bs, bf, pc, sec ) ) {
-	// special case
-	if ( bs == 0x7f )
-	    ps->bs = PowerStatus::VeryLow;
-	pc = -1; // fake percentage
-	if ( pc < 0 ) {
-	    switch ( bs ) {
-		case 0x00: ps->percentRemain = 100; break; // High
-		case 0x01: ps->percentRemain = 30; break; // Low
-		case 0x7f: ps->percentRemain = 10; break; // Very Low
-		case 0x02: ps->percentRemain = 5; break; // Critical
-		case 0x03: ps->percentRemain = -1; break; // Charging
-	    }
-	    ps->percentAccurate = FALSE;
-	}
-    }
-
-    char *device = "/dev/apm_bios";
-    int fd = ::open (device, O_WRONLY);
-    if ( fd >= 0 ) {
-	int bbat_status = ioctl( fd, APM_IOC_BATTERY_BACK_CHK, 0 );
-	switch ( bbat_status ) {
-	    case 0x00:
-		ps->bbs = PowerStatus::High;
-		break;
-	    case 0x01:
-		ps->bbs = PowerStatus::Low;
-		break;
-	    case 0x7f:
-		ps->bbs = PowerStatus::VeryLow;
-		break;
-	    case 0x02:
-		ps->bbs = PowerStatus::Critical;
-		break;
-	    case 0x03:
-		ps->bbs = PowerStatus::Charging;
-		break;
-	    case 0x04:
-		ps->bbs = PowerStatus::NotPresent;
-		break;
-	}
-	::close(fd);
-    }
-}
-
-#else
-
-void PowerStatusManager::getStatus()
-{
-    bool usedApm = FALSE;
-
-    ps->percentAccurate = TRUE;
-
-    // Some iPAQ kernel builds don't have APM. If this is not the case we
-    // save ourselves an ioctl by testing if /proc/apm exists in the
-    // constructor and we use /proc/apm instead
-    int ac, bs, bf, pc, sec;
-    if ( haveProcApm )
-	usedApm = getProcApmStatus( ac, bs, bf, pc, sec );
-
-    if ( !usedApm ) {
-#ifdef QT_QWS_IPAQ_NO_APM
-	int fd;
-	int err;
-	struct bat_dev batt_info;
-
-	memset(&batt_info, 0, sizeof(batt_info));
-
-	fd = ::open("/dev/ts",O_RDONLY);
-	if( fd < 0 )
-	    return;
-
-	ioctl(fd, GET_BATTERY_STATUS, &batt_info);
-	ac_status = batt_info.ac_status;
-	ps->percentRemain = ( 425 * batt_info.batt1_voltage ) / 1000 - 298; // from h3600_ts.c
-	ps->secsRemain = -1; // seconds is bogus on iPAQ
-	::close (fd);
-#else
-	ps->percentRemain = 100;
-	ps->secsRemain = -1;
-	ps->percentAccurate = FALSE;
-#endif
-    }
-}
-
-#endif
 

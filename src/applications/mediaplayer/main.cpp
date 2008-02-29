@@ -17,40 +17,16 @@
 ** not clear to you.
 **
 **********************************************************************/
-#include <qpe/qpeapplication.h>
-#include "mediaplayerstate.h"
-#include "playlistwidget.h"
-#include "audiowidget.h"
-#include "videowidget.h"
-#include "loopcontrol.h"
-#include "mediaplayer.h"
+#include <qtopia/qpeapplication.h>
+#include "maindocumentwidgetstack.h"
 
 
-MediaPlayerState *mediaPlayerState = 0;
-PlayListWidget *playList = 0;
-LoopControl *loopControl = 0;
-
-
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     QPEApplication a(argc,argv);
 
-    MediaPlayerState st( 0, "mediaPlayerState" );
-    mediaPlayerState = &st;
-
-    PlayListWidget pl( 0, "playList" );
-    playList = &pl;
-    pl.setCaption( MediaPlayer::tr("Media Player") );
-    pl.showMaximized(); // show First
-    a.processEvents(); // (shows up quicker)
-    
-    st.loadPlugins(); // Load plugins and
-    LoopControl lc( 0, "loopControl" );
-    loopControl = &lc;
-    MediaPlayer mp( 0, "mediaPlayer" );
-    pl.loadFiles(); // Load files after getting the main window up
-
-    // Set for recieving setDocument
-    a.showMainDocumentWidget(&pl);
+    MainDocumentWidgetStack tlw( 0, "Widget Stack" );
+    a.showMainDocumentWidget(&tlw);
 
     return a.exec();
 }

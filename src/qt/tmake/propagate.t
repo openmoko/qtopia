@@ -31,14 +31,30 @@
 	Project('TMAKE_LFLAGS *= $(SYSCONF_LFLAGS_OPENGL)');
 	Project('TMAKE_LIBS *= $(SYSCONF_LIBS_OPENGL)');
     }
-    if ( Config("qtopia") ) {
+    if ( Config("qdesktop") ) {
+	Project('CONFIG *= qt');
+ 	Project('TMAKE_CXXFLAGS *= $(SYSCONF_CXXFLAGS_QTOPIA)');
+	Project('TMAKE_CFLAGS *= $(SYSCONF_CFLAGS_QTOPIA)');
+        Project('TMAKE_LFLAGS *= $(SYSCONF_LFLAGS_QTOPIA)');
+	Project('TMAKE_LFLAGS *= $(SYSCONF_RPATH_QTOPIA)');
+        if (!(Project("TARGET") eq "qd-qpe" && Project("TEMPLATE") eq "lib")){
+	     Project('TMAKE_LIBS *= -lqd-qpe');
+	    if (!(Project("TARGET") eq "qd-qtopia" && Project("TEMPLATE") eq "lib")){
+		Project('TMAKE_LIBS *= $(SYSCONF_LIBS_QTOPIA)');
+	    }
+        } 
+    } elsif ( Config("qtopia") ) {
 	Project('CONFIG *= qt');
 	Project('TMAKE_CXXFLAGS *= $(SYSCONF_CXXFLAGS_QTOPIA)');
-	Project('TMAKE_LFLAGS *= $(SYSCONF_LFLAGS_QTOPIA)');
+	Project('TMAKE_CFLAGS *= $(SYSCONF_CFLAGS_QTOPIA)');
+        Project('TMAKE_LFLAGS *= $(SYSCONF_LFLAGS_QTOPIA)');
 	Project('TMAKE_LFLAGS *= $(SYSCONF_RPATH_QTOPIA)');
-	if ( Project("TARGET") ne "qpe" ) {
-	    Project('TMAKE_LIBS *= $(SYSCONF_LIBS_QTOPIA)');
-	}
+        if (!(Project("TARGET") eq "qpe" && Project("TEMPLATE") eq "lib")){
+	     Project('TMAKE_LIBS *= -lqpe');
+	    if (!(Project("TARGET") eq "qtopia" && Project("TEMPLATE") eq "lib")){
+		Project('TMAKE_LIBS *= $(SYSCONF_LIBS_QTOPIA)');
+	    }
+        } 
     }
     if ( Config("qt") ) {
 	$moc_aware = 1;

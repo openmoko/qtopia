@@ -21,12 +21,13 @@
 #ifndef IR_H
 #define IR_H
 
+#include <qtopia/qpeglobal.h>
 #include <qstring.h>
 #include <qobject.h>
 class DocLnk;
 class QCopChannel;
 
-class Ir : public QObject
+class QTOPIA_EXPORT Ir : public QObject
 {
     Q_OBJECT
 public:

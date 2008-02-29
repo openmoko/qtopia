@@ -21,7 +21,7 @@
 #define DBMONTH
 
 #include <qtopia/pim/event.h>
-#include "datepicker.h"
+#include <qtopia/datepicker.h>
 #include "datebookdb.h"
 
 #include <qdatetime.h>
@@ -40,7 +40,7 @@ public:
     bool tAllDay;
 };
 
-class MonthView : public DatePicker
+class MonthView : public QPEDatePicker
 {
     Q_OBJECT
 
@@ -52,19 +52,20 @@ public slots:
     void updateOccurrences();
     void getEventsForMonth(int y, int m);
 
-    //void setDate(int y, int m);
-    void setDate(int y, int m, int d);
+    void setDate(const QDate &);
 
 protected slots:
-    void paintDay(const QDate &, QPainter *, const QRect &, bool, 
+    void paintDayBackground(const QDate &, QPainter *, const QRect &,
 	    const QColorGroup &);
 
 private:
+    void resizeEvent(QResizeEvent *e);
     QValueList<Occurrence> daysEvents;
 
     DateBookTable *mDb;
 
     QVector<DayPaintCache> paintCache;
+    int line_height;
 };
 
 #endif

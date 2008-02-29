@@ -20,9 +20,10 @@
 #ifndef PASSWORD_H
 #define PASSWORD_H
 
+#include <qtopia/qpeglobal.h>
 #include <qstring.h>
 
-class Password
+class QTOPIA_EXPORT Password
 { 
 public:
     static void authenticate(bool atpoweron=FALSE);

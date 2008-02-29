@@ -62,8 +62,6 @@ public slots:
 
     void databaseUpdated();
 
-
-public slots:
     void redraw();
 
 protected slots:

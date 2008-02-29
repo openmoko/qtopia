@@ -1103,6 +1103,8 @@ static Contact parseVObject( VObject *obj )
 {
     Contact c;
 
+    bool haveDefaultEmail = FALSE;
+
     VObjectIterator it;
     initPropIterator( &it, obj );
     while( moreIteration( &it ) ) {
@@ -1242,7 +1244,28 @@ static Contact parseVObject( VObject *obj )
 		    valid = FALSE;
 	    }
 	    if ( valid ) {
-		c.insertEmail( email );
+		if ( haveDefaultEmail ) {
+		    QString str = c.emails();
+		    if ( !str.isEmpty() )
+			str += " "+email;
+		    c.setEmails( str );
+		} else {
+		    haveDefaultEmail = TRUE;
+		    {
+			QString newEmail = email;
+			int where;
+
+			newEmail.replace(QRegExp("<"), " "); //all '<' to ' '
+			newEmail.replace(QRegExp(">"), " "); //all '>' to ' '
+			where = newEmail.find( ' ' );
+			if (where >= 0)
+			    newEmail = newEmail.left(where);
+
+			newEmail = newEmail.stripWhiteSpace();
+			c.setDefaultEmail( newEmail );
+		    }
+		    c.setEmails( email );
+		}
 	    }
 	}
 	else if ( name == VCURLProp ) {
@@ -1406,4 +1429,9 @@ bool Contact::match( const QRegExp &r ) const
 	}
     }
     return match;
+}
+
+Qtopia::UidGen & Contact::uidGen()
+{
+  return sUidGen;
 }

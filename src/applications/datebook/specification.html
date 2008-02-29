@@ -1,0 +1,175 @@
+<html>
+<title>
+Calendar Specification
+</title>
+
+<body>
+
+<h1>Calendar Specification</h1>
+
+
+<!--
+<h2>Specification goals</h2>
+This specification:
+<ol>
+<li> Describes all of the end-user stories and interactions.
+    (eg. the user can view a slide show of images from a digital camera).
+<li> Lists all features, derived from end-user stories,
+    in enough detail to allow the definition of
+    tests for all features.
+<li> Defines contraints and limitations on the application.
+    (eg. can view image sizes as large as 1MB).
+<li>Aides the developer on focusing on the most important aspects of
+    the application and ensuring all important elements are completed.
+</ol>
+-->
+
+<a name=description>
+</a>
+<!-- A one-line description of what this application is and does.
+    This description is then duplicated in the .desktop Comment and
+    the .control file description.
+
+    (eg. The image viewer allows viewing and very minor editing of image files.)
+-->
+The Calendar program helps the user manage their schedule.
+<!-- A one-paragraph description of what this application is and does.
+    This description is then duplicated in the .desktop Comment and
+    the .control file description.
+
+    (eg. The image viewer allows viewing and very minor editing
+    of image files. It assists format conversion, beaming logos
+    to phones, captioning, etc.)
+-->
+<p>
+The Calendar program helps the user manage their schedule.  This includes timed
+events such as meetings, day events such as birthdays, and multi-day events.
+Also provided is the ability to have alarms for events and to specify a
+recurrence pattern for the event.
+</p>
+
+<p>
+Status: BT
+</p>
+
+<a name=usecases>
+<h2>Use Cases</h2>
+</a>
+<!-- Describe real-world stories. Implicit in these use cases is
+	"these things are easy to do".
+    (eg.
+	Roving News Reporter
+
+	The journalist/cameraman takes photos with a digital camera,
+	loads them into the PDAs via CF card, adjusts the contrast,
+	blacks-out a license plate, adds a copyright caption, and
+	emails the image and short story to Reuters.
+    )
+
+    Note: TITLEs may be used as identifiers in bug reports.
+ -->
+<ul>
+<li><b>Business person</b>
+    <p>A businessman living in London is currently in Tokyo on a business trip.
+    He has promised his wife that
+    he will call her at home at 7pm every night. He receives a call from a customer in
+    New York who says "can you meet me in Los Angeles, at 11am tomorrow". Examining his
+    schedule, he can quickly see that he will be talking with his wife at that time,
+    and replies "No, but I can meet you for an hour in New York at 1pm".
+<li><b>Socialite</b>
+    <p>A socialite has a World Wildlife Fund meeting on the first Friday
+    of each month, a Greenpeace meeting every two weeks on the Wednesday
+    and Thursday nights.  She is thinking of joining the National Rifle Association,
+    which meets on the 13th of each month. She wants to know how many times
+    in the year this will cause conflicts.
+<li><b>Student</b>
+    <p>A student enters his class schedule.  The lecturer in one subject
+    announces that she is spending the last two weeks of May on her honeymoon,
+    that the lectures for those weeks are cancelled and that her lectures
+    in June will each be extended by an hour.
+    The student modifies his schedule accordingly.
+<li><b>Communication</b>
+    <p>Bob is going to a concert in a few months.  He beams the details of
+    the concert to his friend Betty who is also keen on going.
+    (not implemented: Later, Betty looks up
+    the concert online, adds more detail to her copy of the event, and emails
+    the result back to Bob, who adds it into his calendar.)
+</ul>
+
+<a name=features>
+<h2>Features</h2>
+</a>
+<!-- features are brief
+
+    (eg. 
+	* Slide show: view multiple images in sequence
+	    * Configurable delay between images.
+	    * Hardware-button-controlled stepping between images.
+	* Big images: view larger-than-available-RAM images in some formats.
+	* Formats: view JPEG, PNG, GIF format images.
+	* Scribbling: draw black or white lines on images.
+	* Save: in JPEG, PNG formats.
+    )
+
+    Note: TITLEs may be used as identifiers in bug reports.
+-->
+
+<ul>
+   <li>Beaming: Send and receive events via beaming.
+   <li>Recursion: Must be able to determin the pattern
+	of user events in a defined period of time.
+	<ul>
+	    <li>Daily - every N days.
+	    <li>Weekly - every N weeks, on days specified bye WEEKMASK
+	    <li>Monthly Day - The Xth week of every N months,
+			X being day of week and week of the month for 
+			the first event in the series.
+	    <li>Monthly End Day - The Xth last week of every N months,
+			X being day of week and week of the month (from end of month)
+			for the first event in the series.
+	    <li>Monthly Date - The Xth day of the month every N months,
+			X being the day of the month for the first event in 
+			the series.
+	    <li>Yearly Date - The Xth day of the Year every N years,
+			X being the day of the year for the first event in 
+			the series.
+	</ul>
+        For a week mask, the mask should describe a week starting on the
+	starting date of the series.  Hence a mask of Wednesday, Saturday, Monday
+	Should occur that Wednesday, the immidiately following Saturday, then the 
+	immidiately following Monday.
+    <li>Display: Should display information clearly, for day, week and month views.
+	Should not show a time as blank if an event occurs in that time, and 
+	accordingly should not show an event for a time if the event does not occur
+	during that time.
+    <li>Navigation: Should be easy and clear how to navigate between dates.  Shown
+	Date must be clear at all times.
+    <li>Alarms: Alarmed events should emit an alarm at the user specified time.
+    <li>AllDay events: These events should not be affected by time-zone changes.
+</ul>
+
+<a name=prerequisites>
+<h2>Prerequisites</h2>
+</a>
+<!--
+    Describes unresolved limitations that cannot
+    be shown within the features list.
+
+    Describes memory and other requirements quantitatively.
+
+    This is a short list, mainly intended as a "known bugs"
+    list for missing features.
+
+    (eg.
+	* Stylus: required for Scribbling.
+	* Memory: requires 250 bytes per event, plus content strings.
+    )
+
+    Note: TITLEs may be used as identifiers in bug reports.
+-->
+
+<ul>
+</ul>
+
+</body>
+</html>

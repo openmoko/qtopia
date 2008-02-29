@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -135,19 +141,19 @@ HEADERS =	clock.h \
 SOURCES =	clock.cpp \
 		analogclock.cpp \
 		main.cpp
-OBJECTS =	clock.o \
-		analogclock.o \
-		main.o \
-		clockbase.o
+OBJECTS =	$(OBJECTS_DIR)/clock.o \
+		$(OBJECTS_DIR)/analogclock.o \
+		$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/clockbase.o
 INTERFACES =    clockbase.ui
 UICDECLS =      clockbase.h
 UICIMPLS =      clockbase.cpp
-SRCMOC	=	moc_clock.cpp \
-		moc_analogclock.cpp \
-		moc_clockbase.cpp
-OBJMOC	=	moc_clock.o \
-		moc_analogclock.o \
-		moc_clockbase.o
+SRCMOC	=	$(MOC_DIR)/moc_clock.cpp \
+		$(MOC_DIR)/moc_analogclock.cpp \
+		$(MOC_DIR)/moc_clockbase.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_clock.o \
+		$(OBJECTS_DIR)/moc_analogclock.o \
+		$(OBJECTS_DIR)/moc_clockbase.o
 
 
 ####### Implicit rules
@@ -213,27 +219,20 @@ REQUIRES=
 
 ####### Compile
 
-clock.o: clock.cpp \
+$(OBJECTS_DIR)/clock.o: clock.cpp \
 		clock.h \
 		clockbase.h \
-		analogclock.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/timestring.h \
-		$(QPEDIR)/include/qpe/alarmserver.h \
-		$(QPEDIR)/include/qpe/sound.h \
-		$(QPEDIR)/include/qpe/resource.h
-
-analogclock.o: analogclock.cpp \
 		analogclock.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/clock.o clock.cpp
 
-main.o: main.cpp \
+$(OBJECTS_DIR)/analogclock.o: analogclock.cpp \
+		analogclock.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/analogclock.o analogclock.cpp
+
+$(OBJECTS_DIR)/main.o: main.cpp \
 		clock.h \
-		clockbase.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
+		clockbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
 clockbase.h: clockbase.ui
 	$(UIC) clockbase.ui -o $(INTERFACE_DECL_PATH)/clockbase.h
@@ -241,36 +240,41 @@ clockbase.h: clockbase.ui
 clockbase.cpp: clockbase.ui
 	$(UIC) clockbase.ui -i clockbase.h -o clockbase.cpp
 
-clockbase.o: clockbase.cpp \
+$(OBJECTS_DIR)/clockbase.o: clockbase.cpp \
 		clockbase.h \
 		clockbase.ui
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/clockbase.o clockbase.cpp
 
-moc_clock.o: moc_clock.cpp \
+$(OBJECTS_DIR)/moc_clock.o: $(MOC_DIR)/moc_clock.cpp \
 		clock.h \
 		clockbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_clock.o $(MOC_DIR)/moc_clock.cpp
 
-moc_analogclock.o: moc_analogclock.cpp \
+$(OBJECTS_DIR)/moc_analogclock.o: $(MOC_DIR)/moc_analogclock.cpp \
 		analogclock.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_analogclock.o $(MOC_DIR)/moc_analogclock.cpp
 
-moc_clockbase.o: moc_clockbase.cpp \
+$(OBJECTS_DIR)/moc_clockbase.o: $(MOC_DIR)/moc_clockbase.cpp \
 		clockbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_clockbase.o $(MOC_DIR)/moc_clockbase.cpp
 
-moc_clock.cpp: clock.h
-	$(MOC) clock.h -o moc_clock.cpp
+$(MOC_DIR)/moc_clock.cpp: clock.h
+	$(MOC) clock.h -o $(MOC_DIR)/moc_clock.cpp
 
-moc_analogclock.cpp: analogclock.h
-	$(MOC) analogclock.h -o moc_analogclock.cpp
+$(MOC_DIR)/moc_analogclock.cpp: analogclock.h
+	$(MOC) analogclock.h -o $(MOC_DIR)/moc_analogclock.cpp
 
-moc_clockbase.cpp: clockbase.h
-	$(MOC) clockbase.h -o moc_clockbase.cpp
+$(MOC_DIR)/moc_clockbase.cpp: clockbase.h
+	$(MOC) clockbase.h -o $(MOC_DIR)/moc_clockbase.cpp
 
 
 
 lupdate:
-	lupdate clock.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <clock.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease clock.pro
+	$(QPEDIR)/bin/qtopia-linstall clock.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

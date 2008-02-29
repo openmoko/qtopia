@@ -22,7 +22,7 @@
 #include <qvaluelist.h>
 #include <qrect.h>
 #include <qdatetime.h>
-#include <qpe/pim/event.h>
+#include <qtopia/pim/event.h>
 #include "datebookdb.h"
 
 class LayoutItem
@@ -35,7 +35,7 @@ public:
     { setGeometry(QRect(x,y,w,h)); }
     QRect geometry() const { return r; }
 
-    Occurrence occurance() const { return eevent; }
+    Occurrence occurrence() const { return eevent; }
     PimEvent event() const { return eevent.event(); }
 
 private:

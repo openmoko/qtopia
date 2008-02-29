@@ -1,22 +1,21 @@
+singleprocess:singleprocess=true
+#include <h.h>
 TEMPLATE	= lib
 CONFIG		+= qtopia warn_on release
+win32:CONFIG	+= dll
+DEFINES += QTOPIA_WIN32PROCESS_SUPPORT 
+
 HEADERS	=   calendar.h \
 	    global.h \
 	    resource.h \
 	    xmlreader.h \
 	    mimetype.h \
 	    menubutton.h \
-	    network.h \
-	    networkinterface.h \
 	    filemanager.h \
-	    fontmanager.h \
-	    qdawg.h \
 	    datebookmonth.h \
 	    fileselector.h \
 	    fileselector_p.h \
 	    imageedit.h \
-	    qcopenvelope_qws.h \
-	    qpedecoration_qws.h \
 	    qpeapplication.h \
 	    qpestyle.h \
 	    qpedialog.h \
@@ -27,12 +26,9 @@ HEADERS	=   calendar.h \
 	    qmath.h \
 	    datebookdb.h \
 	    alarmserver.h \
-	    process.h \
 	    password.h \
 	    timestring.h \
 	    fontfactoryinterface.h \
-	    fontdatabase.h \
-	    power.h \
 	    storage.h \
 	    qpemessagebox.h \
 	    timeconversion.h \
@@ -41,39 +37,31 @@ HEADERS	=   calendar.h \
 	    qpetoolbar.h \
 	    categories.h \
 	    stringutil.h \
-	    backend/palmtopuid.h \
 	    backend/palmtoprecord.h \
             backend/task.h \
 	    backend/event.h \
 	    backend/contact.h\
+	    backend/qfiledirect_p.h \
 	    categorymenu.h \
 	    categoryedit_p.h \
 	    categoryselect.h \
 	    categorywidget.h \
-	    ir.h \
 	    backend/vobject_p.h \
-	    findwidget_p.h \
-	    finddialog.h \
-	    lnkproperties.h \
 	    styleinterface.h \
-	    windowdecorationinterface.h
+	    windowdecorationinterface.h \
+	    qdawg.h
 
 SOURCES	=   calendar.cpp \
 	    global.cpp \
+	    custom.cpp \
 	    xmlreader.cpp \
 	    mimetype.cpp \
 	    menubutton.cpp \
-	    network.cpp \
-	    networkinterface.cpp \
 	    filemanager.cpp \
-	    fontmanager.cpp \
-	    qdawg.cpp \
 	    datebookmonth.cpp \
 	    fileselector.cpp \
 	    imageedit.cpp \
 	    resource.cpp \
-	    qpedecoration_qws.cpp \
-	    qcopenvelope_qws.cpp \
 	    qpeapplication.cpp \
 	    qpestyle.cpp \
 	    qpedialog.cpp \
@@ -81,15 +69,11 @@ SOURCES	=   calendar.cpp \
 	    applnk.cpp \
 	    sound.cpp \
 	    tzselect.cpp \
-	    qmath.c \
+	    qmath.cpp \
 	    datebookdb.cpp \
 	    alarmserver.cpp \
 	    password.cpp \
-	    process.cpp \
-	    process_unix.cpp \
 	    timestring.cpp \
-	    fontdatabase.cpp \
-	    power.cpp \
 	    storage.cpp \
 	    qpemessagebox.cpp \
             backend/timeconversion.cpp \
@@ -106,24 +90,124 @@ SOURCES	=   calendar.cpp \
 	categoryedit_p.cpp \
 	categoryselect.cpp \
 	categorywidget.cpp \
-	ir.cpp \
 	backend/vcc_yacc.cpp \
 	backend/vobject.cpp \
-	findwidget_p.cpp \
-	finddialog.cpp \
-	lnkproperties.cpp
-
+	mediarecorderplugininterface.cpp \
+	qdawg.cpp
+	
 # Qt 3 compatibility
-qt2:HEADERS += quuid.h qcom.h qlibrary.h qlibrary_p.h
-qt2:SOURCES += quuid.cpp qlibrary.cpp qlibrary_unix.cpp
+qt2:CONFIG+=notqt2unix notqt2win 
+unix:CONFIG-=notqt2unix
+win32:CONFIG-=notqt2win
+
+qt2:HEADERS += quuid.h \
+	    qcom.h \
+	    qlibrary.h \
+	    qlibrary_p.h \
+	    process.h
+qt2:SOURCES += quuid.cpp \
+	qlibrary.cpp \
+	process.cpp 
+
+notqt2win:SOURCES += process_unix.cpp qlibrary_unix.cpp
+notqt2unix:SOURCES += process_win.cpp qlibrary_win.cpp
+
+embedded:HEADERS +=	fontmanager.h \
+			fontdatabase.h \
+			qpedecoration_qws.h \
+			network.h \
+			networkinterface.h \
+			qcopenvelope_qws.h \
+			power.h \
+			ir.h
+
+embedded:SOURCES += 	fontmanager.cpp \
+			fontdatabase.cpp \
+			qpedecoration_qws.cpp \
+			network.cpp \
+		   	networkinterface.cpp \
+	    		qcopenvelope_qws.cpp \
+	    		power.cpp \
+			ir.cpp
 
 INCLUDEPATH += $(QPEDIR)/include
-LIBS		+= -ldl -lcrypt -lm
+win32:INCLUDEPATH += $(QPEDIR)/src/server
+unix:LIBS		+= -ldl -lcrypt -lm
+win32:LIBS	+= rpcrt4.lib
 
-INTERFACES = passwordbase_p.ui categoryeditbase_p.ui findwidgetbase_p.ui lnkpropertiesbase_p.ui
+INTERFACES += passwordbase_p.ui \
+	    categoryeditbase_p.ui 
 
-TARGET		= qpe
+TARGET = qpe
+qdesktop:TARGET	= qd-qpe
 DESTDIR		= $(QPEDIR)/lib$(PROJMAK)
 VERSION		= 1.5.2 # Note: this is the library version. The Qtopia version is different
+win32:DEFINES += QTOPIA_MAKEDLL QTOPIA_PLUGIN_MAKEDLL\
+		QTOPIA_INTERNAL_APPLNKASSIGN QTOPIA_INTERNAL_FSLP QTOPIA_INTERNAL_PRELOADACCESS QTOPIA_INTERNAL_FD 
 
-TRANSLATIONS = ../i18n/de/libqpe.ts
+TRANSLATIONS = libqpe-en_GB.ts libqpe-de.ts libqpe-ja.ts libqpe-no.ts
+
+
+
+QTOPIA1DIR = ../qtopia1
+
+# don't touch if you don't know what you are doing
+# compile in qtopia1 libraries under Windows
+CONFIG += win32emb
+CONFIG += notwin32 notembedded
+win32:CONFIG -= notwin32
+notwin32:CONFIG-=win32emb
+embedded:CONFIG-=notembedded
+notembedded:CONFIG-=win32emb
+
+win32emb:HEADERS +=	$$QTOPIA1DIR/services.h \
+			$$QTOPIA1DIR/devicebuttonmanager.h \
+		    	$$QTOPIA1DIR/devicebutton.h \
+			$$QTOPIA1DIR/qwizard.h	\
+    			$$QTOPIA1DIR/docproperties.h
+		    
+
+win32emb:SOURCES +=  	$$QTOPIA1DIR/services.cpp \
+			$$QTOPIA1DIR/devicebuttonmanager.cpp \
+			$$QTOPIA1DIR/devicebutton.cpp \
+			$$QTOPIA1DIR/qwizard.cpp \
+    			$$QTOPIA1DIR/docproperties.cpp
+	    
+
+win32:HEADERS	+=  $$QTOPIA1DIR/accessory.h \
+	    	    $$QTOPIA1DIR/datepicker.h \
+		    $$QTOPIA1DIR/datetimeedit.h \
+		    $$QTOPIA1DIR/fieldmapimpl.h
+
+win32:SOURCES	+=  $$QTOPIA1DIR/applnk1.cpp \
+		    $$QTOPIA1DIR/categories1.cpp \
+		    $$QTOPIA1DIR/categoryselect1.cpp \
+		    $$QTOPIA1DIR/fileselector1.cpp \
+		    $$QTOPIA1DIR/qpeapplication1.cpp \
+		    $$QTOPIA1DIR/accessory.cpp \
+		    $$QTOPIA1DIR/calendar1.cpp \
+		    $$QTOPIA1DIR/datepicker.cpp \
+		    $$QTOPIA1DIR/datetimeedit.cpp \
+		    $$QTOPIA1DIR/global1.cpp \
+		    $$QTOPIA1DIR/storage1.cpp \
+		    $$QTOPIA1DIR/resource1.cpp \
+		    $$QTOPIA1DIR/fieldmapimpl.cpp
+
+win32emb:INTERFACES +=	$$QTOPIA1DIR/docpropertiesbase_p.ui 
+win32emb:DEPENDPATH +=  $$QTOPIA1DIR
+
+qt3:CONFIG += notqt3win32 notqt3unix
+win32:CONFIG -= notqt3win32 
+unix:CONFIG -= notqt3unix
+qt2:CONFIG -= notqt3win32 notqt3unix
+
+# we need to supply QMemoryFile for Qt2.x and Qt3.x for the moment
+#qt3:SOURCES += qmemoryfile.cpp
+#qt3:HEADERS += qmemoryfile_p.h
+#notqt3unix:SOURCES  += qmemoryfile_win.cpp
+#notqt3win32:SOURCES += qmemoryfile_unix.cpp
+SOURCES += qmemoryfile.cpp
+HEADERS += qmemoryfile_p.h
+win32:SOURCES  += qmemoryfile_win.cpp
+unix:SOURCES += qmemoryfile_unix.cpp
+

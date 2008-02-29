@@ -25,13 +25,13 @@
 #include "showimg.h"
 #include "settingsdialog.h"
 
-#include <qpe/qpeapplication.h>
-#include <qpe/resource.h>
-#include <qpe/fileselector.h>
-#include <qpe/applnk.h>
-#include <qpe/qpemenubar.h>
-#include <qpe/qpetoolbar.h>
-#include <qpe/config.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/resource.h>
+#include <qtopia/fileselector.h>
+#include <qtopia/applnk.h>
+#include <qtopia/qpemenubar.h>
+#include <qtopia/qpetoolbar.h>
+#include <qtopia/config.h>
 #include <qwidgetstack.h>
 #include <qaction.h>
 #include <qfiledialog.h>
@@ -41,13 +41,14 @@
 #include <qpainter.h>
 #include <qapplication.h>
 #include <qtimer.h>
+#include <qtopia/docproperties.h>
 
 //===========================================================================
 /*
   Contains the scaled image area and the status label
 */
 
-ImagePane::ImagePane( QWidget *parent=0 ) : QWidget( parent ), vb(0)
+ImagePane::ImagePane( QWidget *parent ) : QWidget( parent ), vb(0)
 {
     image = new ImageWidget( this );
     connect( image, SIGNAL( clicked() ), this, SIGNAL( clicked() ) );
@@ -64,6 +65,12 @@ void ImagePane::setPixmap( const QPixmap &pm )
     imageWidth = pm.width();
     imageHeight = pm.height();
 }
+
+void ImagePane::showBusy()
+{
+    image->showBusy();
+}
+
 
 void ImagePane::showStatus()
 {
@@ -107,9 +114,27 @@ void ImageWidget::paintEvent( QPaintEvent *e )
 
     if ( pixmap.size() != QSize( 0, 0 ) ) { // is an image loaded?
 	painter.drawPixmap((width() - pixmap.width()) / 2,
-	(height() - pixmap.height()) / 2, pixmap);
+	    (height() - pixmap.height()) / 2, pixmap);
     }
 }
+
+/*
+  Shows a busy indicator
+ */
+void ImageWidget::showBusy()
+{
+    QPainter painter(this);
+    painter.setBrush( white );
+    QPixmap wait = Resource::loadPixmap( "wait" );
+    int pw = wait.width();
+    int ph = wait.height();
+    int w = pw * 3/2;
+    int h = ph * 3/2;
+    painter.drawEllipse( 0, 0, w, h );
+    painter.drawPixmap( (w-pw)/2+1, (h-ph)/2+1, wait  );
+    
+}
+
 
 void ImageWidget::mouseReleaseEvent(QMouseEvent *)
 {
@@ -122,7 +147,9 @@ void ImageWidget::mouseReleaseEvent(QMouseEvent *)
 */
 
 ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
-    : QMainWindow( parent, name, wFlags ), filename( 0 ), 
+    : QMainWindow( parent, name, wFlags ),
+      filename( 0 ), 
+      doc(NULL),
       bFromDocView( FALSE )
 {
     setCaption( tr("Image Viewer") );
@@ -154,6 +181,8 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
     fileSelector = new FileSelector("image/*", stack, "fs", FALSE, FALSE);
     connect( fileSelector, SIGNAL( closeMe() ), this, SLOT( closeFileSelector() ) );
     connect( fileSelector, SIGNAL( fileSelected( const DocLnk &) ), this, SLOT( openFile( const DocLnk & ) ) );
+    connect(fileSelector, SIGNAL(categoryChanged()), this, SLOT(categoryChanged()));
+    connect(fileSelector, SIGNAL(typeChanged()), this, SLOT(typeChanged()));
     imageList = fileSelector->fileList();
 
     QPopupMenu *edit = new QPopupMenu( menubar );
@@ -183,6 +212,9 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
     connect( a, SIGNAL( activated() ), this, SLOT( rot90() ) );
     a->addTo( toolBar );
     a->addTo( edit );
+
+    edit->insertSeparator();
+    edit->insertItem(tr("Properties..."), this, SLOT(properties()), 0);
 
     a = new QAction( tr( "Fullscreen" ), Resource::loadIconSet( "fullscreen" ), QString::null, 0, this, 0 );
     connect( a, SIGNAL( activated() ), this, SLOT( fullScreen() ) );
@@ -227,14 +259,54 @@ ImageViewer::ImageViewer( QWidget *parent, const char *name, int wFlags )
     slideReverse = config.readBoolEntry("Reverse", FALSE);
 
     config.setGroup("Default");
-    rotateOnLoad = config.readBoolEntry("Rotate", FALSE);
+    rotateOnLoad = config.readBoolEntry("Rotate", TRUE);
+    rotateClockwise = config.readBoolEntry("Clockwise", TRUE);
     fastLoad = config.readBoolEntry("FastLoad", TRUE);
 }
 
 ImageViewer::~ImageViewer()
 {
+    if (doc != NULL) {
+	delete doc;
+    }
+
     if ( isFullScreen)
 	delete imagePanel; // when fullScreen, it is reparented off the QWidgetStack
+}
+
+//
+// Popup image properties dialog.
+//
+void
+ImageViewer::properties(void)
+{
+    if (stack->visibleWidget() == fileSelector) {
+	if (doc == NULL) {
+	    doc = new DocLnk();
+	}
+	*doc = fileSelector->selectedDocument();
+    }
+
+    if (doc) {
+	DocPropertiesDialog *dp = new DocPropertiesDialog(doc);
+	dp->showMaximized();
+	dp->exec();
+	delete dp;
+
+	fileSelector->reread();
+    }
+}
+
+void ImageViewer::categoryChanged(void)
+{
+    imageList.clear();
+    imageList = fileSelector->fileList();
+}
+
+void ImageViewer::typeChanged(void)
+{
+    imageList.clear();
+    imageList = fileSelector->fileList();
 }
 
 void ImageViewer::settings()
@@ -244,6 +316,7 @@ void ImageViewer::settings()
     dlg.setRepeat( slideRepeat );
     dlg.setReverse( slideReverse );
     dlg.setRotate(rotateOnLoad);
+    dlg.setClockwise(rotateClockwise);
     dlg.setFastLoad(fastLoad);
 
     if ( QPEApplication::execDialog(&dlg) == QDialog::Accepted ) {
@@ -251,6 +324,7 @@ void ImageViewer::settings()
 	slideRepeat = dlg.repeat();
 	slideReverse = dlg.reverse();
 	rotateOnLoad = dlg.rotate();
+        rotateClockwise = dlg.clockwise();
 	fastLoad = dlg.fastLoad();
 
 	Config config( "ImageViewer" );
@@ -260,6 +334,7 @@ void ImageViewer::settings()
 	config.writeEntry("Reverse", slideReverse);
 
 	config.setGroup("Default");
+	config.writeEntry("Clockwise", rotateClockwise);
 	config.writeEntry("Rotate", rotateOnLoad);
 	config.writeEntry("FastLoad", fastLoad);
     }
@@ -269,6 +344,10 @@ void ImageViewer::setDocument(const QString& fileref)
 {
     bFromDocView = TRUE;
     DocLnk link( fileref );
+
+    delete doc;
+    doc = new DocLnk(fileref);
+
     if ( link.isValid() )
 	openFile( link.name(), link.file() );
     else
@@ -277,17 +356,24 @@ void ImageViewer::setDocument(const QString& fileref)
 
 void ImageViewer::show()
 {
-    normalView();
     QMainWindow::show();
+    normalView();
 }
 
 void ImageViewer::openFile( const DocLnk &file )
 {
+    delete doc;
+    doc = new DocLnk(file);
+
     openFile( file.name(), file.file() );
 }
 
 void ImageViewer::openFile( const QString &name, const QString &file )
 {
+    if (stack->visibleWidget() == fileSelector) {
+	imagePanel->setPixmap(QPixmap());
+    }
+
     closeFileSelector();
     updateCaption( name );
     loadFilename( file );
@@ -327,6 +413,9 @@ void ImageViewer::updateCaption( QString name )
 void ImageViewer::loadFilename( const QString &file ) {
     if ( file && file != filename ) {
 	filename = file;
+	if ( !slideTimer->isActive() )
+	    imagePanel->showBusy();
+
 	imagePanel->statusLabel()->setText( tr("Loading image...") );
 	qApp->processEvents();
 
@@ -336,7 +425,12 @@ void ImageViewer::loadFilename( const QString &file ) {
 	iio.setFileName(filename);
 
 	iio.setParameters("GetHeaderInformation");
-	iio.read();
+	if (iio.read() == FALSE) {
+	    image.reset();
+	    imagePanel->statusLabel()->setText(tr("Image load failed"));
+	    imagePanel->setPixmap(QPixmap());
+	    return;
+	}
 	imagewidth = iio.image().width();
 	imageheight = iio.image().height();
 	if ( !iio.image().bits() ) {
@@ -361,9 +455,20 @@ void ImageViewer::loadFilename( const QString &file ) {
 	matrix.reset();
 	rotated90 = FALSE;
 
-	if (rotateOnLoad) {
-	    rotated90 = TRUE;
-	    matrix.rotate( -90.0 );
+	//
+	// Don't rotate if the image is square.
+	//
+	if (imageheight != imagewidth) {
+	    bool portraitDisplay = imagePanel->height() > imagePanel->width();
+	    bool portraitImage = imageheight > imagewidth;
+	
+	    if (rotateOnLoad && portraitImage != portraitDisplay ) {
+		rotated90 = TRUE;
+		if ( rotateClockwise )
+		    matrix.rotate( -90.0 );
+		else
+		    matrix.rotate( 90.0 );
+	    }
 	}
 	scale( TRUE );
     } else {
@@ -376,6 +481,9 @@ bool ImageViewer::loadSelected()
     if ( stack->visibleWidget() == fileSelector ) {
 	DocLnk link = fileSelector->selectedDocument();
 	if ( link.fileKnown() ) {
+	    delete doc;
+	    doc = new DocLnk(link);
+
 	    openFile( link.name(), link.file() );
 	    filename = link.file();
 	    return true;
@@ -402,33 +510,42 @@ int ImageViewer::h()
 const QPixmap &ImageViewer::scaledPixmap( bool newImage )
 {
     Q_UNUSED( newImage );
+
+    int	sw = 0;
+    int	sh = 0;
+
+    if (!image.isNull()) {
+	//
+	// Setup scaling first.
+	//
+	sw = rotated90 ? h() : imagePanel->width();
+	sh = rotated90 ? imagePanel->width() : h();
+
+	int t1 = image.width() * sh;
+	int t2 = image.height() * sw;
+
+	if (t1 > t2) {
+	    sh = t2 / image.width();
+	} else {
+	    sw = t1 / image.height();
+	}
+    }
+
+    //
+    // Scale (and rotate, if required).
+    //
     if ( rotated90 ) {
 	if ( needPmScaled90 ) {
 	    needPmScaled90 = FALSE;
-	    // Fit the image rotated 90 to the size of the widget
-	    // Only scale if it is a new image, or the width and the
-	    // height of the widget changes
-	    double r = QMIN((double)h()/image.width(),
-		(double)width()/image.height());
-	    int w = int(image.width() * r);
-	    int h = int(image.height() * r);
-
-	    if ( !pmScaled90.convertFromImage( image.smoothScale( w, h ) ) )
+	    if ( !pmScaled90.convertFromImage( image.smoothScale( sw, sh ) ) )
 		pmScaled90.resize( 0, 0 );
-	    // qDebug("doing scale 90");
 	}
 	return pmScaled = pmScaled90.xForm( matrix );
     } else {
 	if ( needPmScaled0 ) {
 	    needPmScaled0 = FALSE;
-	    // Fit the image to the size of the widget
-	    double r = QMIN((double)h()/image.height(),
-		(double)width()/image.width());
-	    int w = int(image.width() * r);
-	    int h = int(image.height() * r);
-	    if ( !pmScaled0.convertFromImage( image.smoothScale( w, h ) ) )
+	    if ( !pmScaled0.convertFromImage( image.smoothScale( sw, sh ) ) )
 		pmScaled0.resize( 0, 0 );
-	    // qDebug("doing scale 0");
 	}
 	return pmScaled = pmScaled0.xForm( matrix );
     }
@@ -518,7 +635,7 @@ void ImageViewer::toggleFullscreen()
 
 void ImageViewer::normalView()
 {
-    if ( !imagePanel->parentWidget() ) {
+    if ( bFromDocView || !imagePanel->parentWidget() ) {
 	isFullScreen = FALSE;
 	stack->addWidget( imagePanel, 1 );
 	scale( FALSE );

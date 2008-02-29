@@ -20,7 +20,7 @@
 
 #include "shutdownimpl.h"
 
-#include <qpe/global.h>
+#include <qtopia/global.h>
 
 #include <qtimer.h>
 #include <qprogressbar.h>

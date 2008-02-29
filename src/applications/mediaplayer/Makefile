@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,10 +118,10 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
-LIBS	=	$(SUBLIBS) -lqpe -lpthread $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
+LIBS	=	$(SUBLIBS) -lpthread -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
 UIC	=	$(SYSCONF_UIC)
 
@@ -130,12 +136,13 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 
 ####### Files
 
-HEADERS =	controlwidgetbase.h \
+HEADERS =	maindocumentwidgetstack.h \
+		controlwidgetbase.h \
 		imageutil.h \
 		documentlist.h \
 		loopcontrol.h \
-		mediaplayerplugininterface.h \
 		playlistselection.h \
+		framebuffer.h \
 		id3tag.h \
 		action.h \
 		fileinfo.h \
@@ -146,10 +153,11 @@ HEADERS =	controlwidgetbase.h \
 		playlistwidget.h \
 		mediaplayer.h \
 		audiodevice.h
-SOURCES =	controlwidgetbase.cpp \
+SOURCES =	maindocumentwidgetstack.cpp \
+		controlwidgetbase.cpp \
 		imageutil.cpp \
 		documentlist.cpp \
-		main.cpp \
+		framebuffer.cpp \
 		loopcontrol.cpp \
 		playlistselection.cpp \
 		mediaplayerstate.cpp \
@@ -160,51 +168,59 @@ SOURCES =	controlwidgetbase.cpp \
 		audiowidget.cpp \
 		playlistwidget.cpp \
 		mediaplayer.cpp \
-		audiodevice.cpp
-OBJECTS =	controlwidgetbase.o \
-		imageutil.o \
-		documentlist.o \
-		main.o \
-		loopcontrol.o \
-		playlistselection.o \
-		mediaplayerstate.o \
-		id3tag.o \
-		fileinfo.o \
-		tabbedselector.o \
-		videowidget.o \
-		audiowidget.o \
-		playlistwidget.o \
-		mediaplayer.o \
-		audiodevice.o
+		audiodevice.cpp \
+		main.cpp
+OBJECTS =	$(OBJECTS_DIR)/maindocumentwidgetstack.o \
+		$(OBJECTS_DIR)/controlwidgetbase.o \
+		$(OBJECTS_DIR)/imageutil.o \
+		$(OBJECTS_DIR)/documentlist.o \
+		$(OBJECTS_DIR)/framebuffer.o \
+		$(OBJECTS_DIR)/loopcontrol.o \
+		$(OBJECTS_DIR)/playlistselection.o \
+		$(OBJECTS_DIR)/mediaplayerstate.o \
+		$(OBJECTS_DIR)/id3tag.o \
+		$(OBJECTS_DIR)/fileinfo.o \
+		$(OBJECTS_DIR)/tabbedselector.o \
+		$(OBJECTS_DIR)/videowidget.o \
+		$(OBJECTS_DIR)/audiowidget.o \
+		$(OBJECTS_DIR)/playlistwidget.o \
+		$(OBJECTS_DIR)/mediaplayer.o \
+		$(OBJECTS_DIR)/audiodevice.o \
+		$(OBJECTS_DIR)/main.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
-SRCMOC	=	moc_controlwidgetbase.cpp \
-		moc_documentlist.cpp \
-		moc_loopcontrol.cpp \
-		moc_playlistselection.cpp \
-		moc_action.cpp \
-		moc_fileinfo.cpp \
-		moc_tabbedselector.cpp \
-		moc_mediaplayerstate.cpp \
-		moc_videowidget.cpp \
-		moc_audiowidget.cpp \
-		moc_playlistwidget.cpp \
-		moc_mediaplayer.cpp \
-		moc_audiodevice.cpp
-OBJMOC	=	moc_controlwidgetbase.o \
-		moc_documentlist.o \
-		moc_loopcontrol.o \
-		moc_playlistselection.o \
-		moc_action.o \
-		moc_fileinfo.o \
-		moc_tabbedselector.o \
-		moc_mediaplayerstate.o \
-		moc_videowidget.o \
-		moc_audiowidget.o \
-		moc_playlistwidget.o \
-		moc_mediaplayer.o \
-		moc_audiodevice.o
+SRCMOC	=	$(MOC_DIR)/moc_maindocumentwidgetstack.cpp \
+		$(MOC_DIR)/moc_controlwidgetbase.cpp \
+		$(MOC_DIR)/moc_documentlist.cpp \
+		$(MOC_DIR)/moc_loopcontrol.cpp \
+		$(MOC_DIR)/moc_playlistselection.cpp \
+		$(MOC_DIR)/moc_id3tag.cpp \
+		$(MOC_DIR)/moc_action.cpp \
+		$(MOC_DIR)/moc_fileinfo.cpp \
+		$(MOC_DIR)/moc_tabbedselector.cpp \
+		$(MOC_DIR)/moc_mediaplayerstate.cpp \
+		$(MOC_DIR)/moc_videowidget.cpp \
+		$(MOC_DIR)/moc_audiowidget.cpp \
+		$(MOC_DIR)/moc_playlistwidget.cpp \
+		$(MOC_DIR)/moc_mediaplayer.cpp \
+		$(MOC_DIR)/moc_audiodevice.cpp \
+		$(MOC_DIR)/fileinfo.moc
+OBJMOC	=	$(OBJECTS_DIR)/moc_maindocumentwidgetstack.o \
+		$(OBJECTS_DIR)/moc_controlwidgetbase.o \
+		$(OBJECTS_DIR)/moc_documentlist.o \
+		$(OBJECTS_DIR)/moc_loopcontrol.o \
+		$(OBJECTS_DIR)/moc_playlistselection.o \
+		$(OBJECTS_DIR)/moc_id3tag.o \
+		$(OBJECTS_DIR)/moc_action.o \
+		$(OBJECTS_DIR)/moc_fileinfo.o \
+		$(OBJECTS_DIR)/moc_tabbedselector.o \
+		$(OBJECTS_DIR)/moc_mediaplayerstate.o \
+		$(OBJECTS_DIR)/moc_videowidget.o \
+		$(OBJECTS_DIR)/moc_audiowidget.o \
+		$(OBJECTS_DIR)/moc_playlistwidget.o \
+		$(OBJECTS_DIR)/moc_mediaplayer.o \
+		$(OBJECTS_DIR)/moc_audiodevice.o
 
 
 ####### Implicit rules
@@ -270,324 +286,262 @@ REQUIRES=
 
 ####### Compile
 
-controlwidgetbase.o: controlwidgetbase.cpp \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/mediaplayerplugininterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
+$(OBJECTS_DIR)/maindocumentwidgetstack.o: maindocumentwidgetstack.cpp \
+		mediaplayerstate.h \
+		playlistwidget.h \
+		loopcontrol.h \
+		mediaplayer.h \
+		maindocumentwidgetstack.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/maindocumentwidgetstack.o maindocumentwidgetstack.cpp
+
+$(OBJECTS_DIR)/controlwidgetbase.o: controlwidgetbase.cpp \
 		imageutil.h \
 		audiowidget.h \
 		controlwidgetbase.h \
 		mediaplayerstate.h \
-		action.h \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h
+		action.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/controlwidgetbase.o controlwidgetbase.cpp
 
-imageutil.o: imageutil.cpp \
+$(OBJECTS_DIR)/imageutil.o: imageutil.cpp \
 		imageutil.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/imageutil.o imageutil.cpp
 
-documentlist.o: documentlist.cpp \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qpe/storage.h \
+$(OBJECTS_DIR)/documentlist.o: documentlist.cpp \
 		playlistselection.h \
 		documentlist.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/documentlist.o documentlist.cpp
 
-main.o: main.cpp \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		mediaplayerstate.h \
-		playlistwidget.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		audiowidget.h \
-		controlwidgetbase.h \
-		action.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h \
-		videowidget.h \
-		loopcontrol.h \
-		mediaplayer.h \
-		$(QPEDIR)/include/qpe/qlibrary.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qpe/mediaplayerplugininterface.h \
-		$(QPEDIR)/include/qpe/qcom.h
+$(OBJECTS_DIR)/framebuffer.o: framebuffer.cpp \
+		framebuffer.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/framebuffer.o framebuffer.cpp
 
-loopcontrol.o: loopcontrol.cpp \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qpe/mediaplayerplugininterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
+$(OBJECTS_DIR)/loopcontrol.o: loopcontrol.cpp \
 		loopcontrol.h \
 		videowidget.h \
 		controlwidgetbase.h \
 		mediaplayerstate.h \
 		action.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h \
+		framebuffer.h \
 		audiodevice.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/loopcontrol.o loopcontrol.cpp
 
-playlistselection.o: playlistselection.cpp \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qpe/storage.h \
-		$(QPEDIR)/include/qpe/categoryselect.h \
+$(OBJECTS_DIR)/playlistselection.o: playlistselection.cpp \
 		mediaplayerstate.h \
 		playlistselection.h \
 		fileinfo.h \
 		id3tag.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/playlistselection.o playlistselection.cpp
 
-mediaplayerstate.o: mediaplayerstate.cpp \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/qlibrary.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qpe/mediaplayerplugininterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/global.h \
+$(OBJECTS_DIR)/mediaplayerstate.o: mediaplayerstate.cpp \
 		audiodevice.h \
 		mediaplayerstate.h \
 		audiowidget.h \
 		controlwidgetbase.h \
 		action.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h \
-		videowidget.h
+		videowidget.h \
+		framebuffer.h \
+		maindocumentwidgetstack.h \
+		../../3rdparty/plugins/codecs/libffmpeg/libffmpegpluginimpl.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/mediaplayerstate.o mediaplayerstate.cpp
 
-id3tag.o: id3tag.cpp \
+$(OBJECTS_DIR)/id3tag.o: id3tag.cpp \
 		id3tag.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/id3tag.o id3tag.cpp
 
-fileinfo.o: fileinfo.cpp \
+$(OBJECTS_DIR)/fileinfo.o: fileinfo.cpp \
+		$(MOC_DIR)/fileinfo.moc \
 		fileinfo.h \
-		$(QPEDIR)/include/qpe/applnk.h \
 		id3tag.h \
-		$(QPEDIR)/include/qpe/mediaplayerplugininterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		mediaplayerstate.h \
-		$(QPEDIR)/include/qpe/lnkproperties.h
+		mediaplayerstate.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/fileinfo.o fileinfo.cpp
 
-tabbedselector.o: tabbedselector.cpp \
-		$(QPEDIR)/include/qpe/fileselector.h \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/categoryselect.h \
+$(OBJECTS_DIR)/tabbedselector.o: tabbedselector.cpp \
 		tabbedselector.h \
-		$(QPEDIR)/include/qpe/applnk.h \
 		playlistselection.h \
 		mediaplayerstate.h \
 		audiowidget.h \
 		controlwidgetbase.h \
 		action.h \
-		documentlist.h \
-		$(QPEDIR)/include/qpe/storage.h
+		documentlist.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/tabbedselector.o tabbedselector.cpp
 
-videowidget.o: videowidget.cpp \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/mediaplayerplugininterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
+$(OBJECTS_DIR)/videowidget.o: videowidget.cpp \
 		imageutil.h \
 		videowidget.h \
 		controlwidgetbase.h \
 		mediaplayerstate.h \
 		action.h \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h
+		framebuffer.h \
+		maindocumentwidgetstack.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/videowidget.o videowidget.cpp
 
-audiowidget.o: audiowidget.cpp \
-		$(QPEDIR)/include/qpe/resource.h \
+$(OBJECTS_DIR)/audiowidget.o: audiowidget.cpp \
 		imageutil.h \
 		audiowidget.h \
 		controlwidgetbase.h \
 		mediaplayerstate.h \
 		action.h \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h
+		maindocumentwidgetstack.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/audiowidget.o audiowidget.cpp
 
-playlistwidget.o: playlistwidget.cpp \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h \
-		$(QPEDIR)/include/qpe/fileselector.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qpe/resource.h \
+$(OBJECTS_DIR)/playlistwidget.o: playlistwidget.cpp \
 		playlistselection.h \
 		playlistwidget.h \
 		mediaplayerstate.h \
 		tabbedselector.h \
 		action.h \
 		fileinfo.h \
-		id3tag.h
+		id3tag.h \
+		maindocumentwidgetstack.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/playlistwidget.o playlistwidget.cpp
 
-mediaplayer.o: mediaplayer.cpp \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/qlibrary.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/config.h \
+$(OBJECTS_DIR)/mediaplayer.o: mediaplayer.cpp \
 		mediaplayer.h \
-		$(QPEDIR)/include/qpe/mediaplayerplugininterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
 		playlistwidget.h \
-		$(QPEDIR)/include/qpe/applnk.h \
 		mediaplayerstate.h \
 		audiowidget.h \
 		controlwidgetbase.h \
 		action.h \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h \
 		loopcontrol.h \
-		audiodevice.h
-
-audiodevice.o: audiodevice.cpp \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/config.h \
 		audiodevice.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h
+		maindocumentwidgetstack.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/mediaplayer.o mediaplayer.cpp
 
-moc_controlwidgetbase.o: moc_controlwidgetbase.cpp \
+$(OBJECTS_DIR)/audiodevice.o: audiodevice.cpp \
+		audiodevice.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/audiodevice.o audiodevice.cpp
+
+$(OBJECTS_DIR)/main.o: main.cpp \
+		maindocumentwidgetstack.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
+
+$(OBJECTS_DIR)/moc_maindocumentwidgetstack.o: $(MOC_DIR)/moc_maindocumentwidgetstack.cpp \
+		maindocumentwidgetstack.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_maindocumentwidgetstack.o $(MOC_DIR)/moc_maindocumentwidgetstack.cpp
+
+$(OBJECTS_DIR)/moc_controlwidgetbase.o: $(MOC_DIR)/moc_controlwidgetbase.cpp \
 		controlwidgetbase.h \
 		mediaplayerstate.h \
-		action.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h
+		action.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_controlwidgetbase.o $(MOC_DIR)/moc_controlwidgetbase.cpp
 
-moc_documentlist.o: moc_documentlist.cpp \
-		documentlist.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		$(QPEDIR)/include/qpe/storage.h
+$(OBJECTS_DIR)/moc_documentlist.o: $(MOC_DIR)/moc_documentlist.cpp \
+		documentlist.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_documentlist.o $(MOC_DIR)/moc_documentlist.cpp
 
-moc_loopcontrol.o: moc_loopcontrol.cpp \
+$(OBJECTS_DIR)/moc_loopcontrol.o: $(MOC_DIR)/moc_loopcontrol.cpp \
 		loopcontrol.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_loopcontrol.o $(MOC_DIR)/moc_loopcontrol.cpp
 
-moc_playlistselection.o: moc_playlistselection.cpp \
-		playlistselection.h \
-		$(QPEDIR)/include/qpe/applnk.h
+$(OBJECTS_DIR)/moc_playlistselection.o: $(MOC_DIR)/moc_playlistselection.cpp \
+		playlistselection.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_playlistselection.o $(MOC_DIR)/moc_playlistselection.cpp
 
-moc_action.o: moc_action.cpp \
-		action.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h
-
-moc_fileinfo.o: moc_fileinfo.cpp \
-		fileinfo.h \
-		$(QPEDIR)/include/qpe/applnk.h \
+$(OBJECTS_DIR)/moc_id3tag.o: $(MOC_DIR)/moc_id3tag.cpp \
 		id3tag.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_id3tag.o $(MOC_DIR)/moc_id3tag.cpp
 
-moc_tabbedselector.o: moc_tabbedselector.cpp \
-		tabbedselector.h \
-		$(QPEDIR)/include/qpe/applnk.h
+$(OBJECTS_DIR)/moc_action.o: $(MOC_DIR)/moc_action.cpp \
+		action.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_action.o $(MOC_DIR)/moc_action.cpp
 
-moc_mediaplayerstate.o: moc_mediaplayerstate.cpp \
+$(OBJECTS_DIR)/moc_fileinfo.o: $(MOC_DIR)/moc_fileinfo.cpp \
+		fileinfo.h \
+		id3tag.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_fileinfo.o $(MOC_DIR)/moc_fileinfo.cpp
+
+$(OBJECTS_DIR)/moc_tabbedselector.o: $(MOC_DIR)/moc_tabbedselector.cpp \
+		tabbedselector.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_tabbedselector.o $(MOC_DIR)/moc_tabbedselector.cpp
+
+$(OBJECTS_DIR)/moc_mediaplayerstate.o: $(MOC_DIR)/moc_mediaplayerstate.cpp \
 		mediaplayerstate.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_mediaplayerstate.o $(MOC_DIR)/moc_mediaplayerstate.cpp
 
-moc_videowidget.o: moc_videowidget.cpp \
+$(OBJECTS_DIR)/moc_videowidget.o: $(MOC_DIR)/moc_videowidget.cpp \
 		videowidget.h \
 		controlwidgetbase.h \
 		mediaplayerstate.h \
 		action.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h
+		framebuffer.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_videowidget.o $(MOC_DIR)/moc_videowidget.cpp
 
-moc_audiowidget.o: moc_audiowidget.cpp \
+$(OBJECTS_DIR)/moc_audiowidget.o: $(MOC_DIR)/moc_audiowidget.cpp \
 		audiowidget.h \
 		controlwidgetbase.h \
 		mediaplayerstate.h \
-		action.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h
+		action.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_audiowidget.o $(MOC_DIR)/moc_audiowidget.cpp
 
-moc_playlistwidget.o: moc_playlistwidget.cpp \
+$(OBJECTS_DIR)/moc_playlistwidget.o: $(MOC_DIR)/moc_playlistwidget.cpp \
 		playlistwidget.h \
-		$(QPEDIR)/include/qpe/applnk.h \
 		mediaplayerstate.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_playlistwidget.o $(MOC_DIR)/moc_playlistwidget.cpp
 
-moc_mediaplayer.o: moc_mediaplayer.cpp \
-		mediaplayer.h \
-		$(QPEDIR)/include/qpe/qlibrary.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qpe/mediaplayerplugininterface.h \
-		$(QPEDIR)/include/qpe/qcom.h
+$(OBJECTS_DIR)/moc_mediaplayer.o: $(MOC_DIR)/moc_mediaplayer.cpp \
+		mediaplayer.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_mediaplayer.o $(MOC_DIR)/moc_mediaplayer.cpp
 
-moc_audiodevice.o: moc_audiodevice.cpp \
+$(OBJECTS_DIR)/moc_audiodevice.o: $(MOC_DIR)/moc_audiodevice.cpp \
 		audiodevice.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_audiodevice.o $(MOC_DIR)/moc_audiodevice.cpp
 
-moc_controlwidgetbase.cpp: controlwidgetbase.h
-	$(MOC) controlwidgetbase.h -o moc_controlwidgetbase.cpp
+$(MOC_DIR)/moc_maindocumentwidgetstack.cpp: maindocumentwidgetstack.h
+	$(MOC) maindocumentwidgetstack.h -o $(MOC_DIR)/moc_maindocumentwidgetstack.cpp
 
-moc_documentlist.cpp: documentlist.h
-	$(MOC) documentlist.h -o moc_documentlist.cpp
+$(MOC_DIR)/moc_controlwidgetbase.cpp: controlwidgetbase.h
+	$(MOC) controlwidgetbase.h -o $(MOC_DIR)/moc_controlwidgetbase.cpp
 
-moc_loopcontrol.cpp: loopcontrol.h
-	$(MOC) loopcontrol.h -o moc_loopcontrol.cpp
+$(MOC_DIR)/moc_documentlist.cpp: documentlist.h
+	$(MOC) documentlist.h -o $(MOC_DIR)/moc_documentlist.cpp
 
-moc_playlistselection.cpp: playlistselection.h
-	$(MOC) playlistselection.h -o moc_playlistselection.cpp
+$(MOC_DIR)/moc_loopcontrol.cpp: loopcontrol.h
+	$(MOC) loopcontrol.h -o $(MOC_DIR)/moc_loopcontrol.cpp
 
-moc_action.cpp: action.h
-	$(MOC) action.h -o moc_action.cpp
+$(MOC_DIR)/moc_playlistselection.cpp: playlistselection.h
+	$(MOC) playlistselection.h -o $(MOC_DIR)/moc_playlistselection.cpp
 
-moc_fileinfo.cpp: fileinfo.h
-	$(MOC) fileinfo.h -o moc_fileinfo.cpp
+$(MOC_DIR)/moc_id3tag.cpp: id3tag.h
+	$(MOC) id3tag.h -o $(MOC_DIR)/moc_id3tag.cpp
 
-moc_tabbedselector.cpp: tabbedselector.h
-	$(MOC) tabbedselector.h -o moc_tabbedselector.cpp
+$(MOC_DIR)/moc_action.cpp: action.h
+	$(MOC) action.h -o $(MOC_DIR)/moc_action.cpp
 
-moc_mediaplayerstate.cpp: mediaplayerstate.h
-	$(MOC) mediaplayerstate.h -o moc_mediaplayerstate.cpp
+$(MOC_DIR)/moc_fileinfo.cpp: fileinfo.h
+	$(MOC) fileinfo.h -o $(MOC_DIR)/moc_fileinfo.cpp
 
-moc_videowidget.cpp: videowidget.h
-	$(MOC) videowidget.h -o moc_videowidget.cpp
+$(MOC_DIR)/moc_tabbedselector.cpp: tabbedselector.h
+	$(MOC) tabbedselector.h -o $(MOC_DIR)/moc_tabbedselector.cpp
 
-moc_audiowidget.cpp: audiowidget.h
-	$(MOC) audiowidget.h -o moc_audiowidget.cpp
+$(MOC_DIR)/moc_mediaplayerstate.cpp: mediaplayerstate.h
+	$(MOC) mediaplayerstate.h -o $(MOC_DIR)/moc_mediaplayerstate.cpp
 
-moc_playlistwidget.cpp: playlistwidget.h
-	$(MOC) playlistwidget.h -o moc_playlistwidget.cpp
+$(MOC_DIR)/moc_videowidget.cpp: videowidget.h
+	$(MOC) videowidget.h -o $(MOC_DIR)/moc_videowidget.cpp
 
-moc_mediaplayer.cpp: mediaplayer.h
-	$(MOC) mediaplayer.h -o moc_mediaplayer.cpp
+$(MOC_DIR)/moc_audiowidget.cpp: audiowidget.h
+	$(MOC) audiowidget.h -o $(MOC_DIR)/moc_audiowidget.cpp
 
-moc_audiodevice.cpp: audiodevice.h
-	$(MOC) audiodevice.h -o moc_audiodevice.cpp
+$(MOC_DIR)/moc_playlistwidget.cpp: playlistwidget.h
+	$(MOC) playlistwidget.h -o $(MOC_DIR)/moc_playlistwidget.cpp
+
+$(MOC_DIR)/moc_mediaplayer.cpp: mediaplayer.h
+	$(MOC) mediaplayer.h -o $(MOC_DIR)/moc_mediaplayer.cpp
+
+$(MOC_DIR)/moc_audiodevice.cpp: audiodevice.h
+	$(MOC) audiodevice.h -o $(MOC_DIR)/moc_audiodevice.cpp
+
+$(MOC_DIR)/fileinfo.moc: fileinfo.cpp
+	$(MOC) fileinfo.cpp -o $(MOC_DIR)/fileinfo.moc
 
 
 
 lupdate:
-	lupdate mediaplayer.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <mediaplayer.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease mediaplayer.pro
+	$(QPEDIR)/bin/qtopia-linstall mediaplayer.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

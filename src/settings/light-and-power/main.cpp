@@ -20,11 +20,11 @@
 
 #include "settings.h"
 
-#include <qpe/qpeapplication.h>
+#include <qtopia/qpeapplication.h>
 #ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
-#include <qpe/global.h>
+#include <qtopia/global.h>
 
 
 int main(int argc, char** argv)

@@ -20,10 +20,11 @@
 #ifndef MENUBUTTON_H
 #define MENUBUTTON_H
 
+#include <qtopia/qpeglobal.h>
 #include <qpushbutton.h>
 #include <qstringlist.h>
 
-class MenuButton : public QPushButton {
+class QTOPIA_EXPORT MenuButton : public QPushButton {
     Q_OBJECT
 public:
     MenuButton( QWidget* parent, const char* name=0);
@@ -48,6 +49,9 @@ signals:
 public slots:
     void select(int);
     void select(const QString&);
+
+protected:
+    void keyPressEvent(QKeyEvent *e);
 
 private:
     void init();

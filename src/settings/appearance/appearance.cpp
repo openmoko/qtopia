@@ -19,17 +19,17 @@
 **********************************************************************/
 
 #include "appearance.h"
-#include <qpe/global.h>
-#include <qpe/fontdatabase.h>
-#include <qpe/config.h>
-#include <qpe/applnk.h>
-#include <qpe/qpeapplication.h>
-#include <qpe/qlibrary.h>
-#include <qpe/qpestyle.h>
-#include <qpe/styleinterface.h>
-#include <qpe/windowdecorationinterface.h>
+#include <qtopia/global.h>
+#include <qtopia/fontdatabase.h>
+#include <qtopia/config.h>
+#include <qtopia/applnk.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/qlibrary.h>
+#include <qtopia/qpestyle.h>
+#include <qtopia/styleinterface.h>
+#include <qtopia/windowdecorationinterface.h>
 #if defined(Q_WS_QWS) && !defined(QT_NO_COP)
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
 
 #include <qlabel.h>
@@ -58,14 +58,14 @@
 #include <qstylefactory.h>
 #endif
 
-#if defined(QT_QWS_IPAQ) || defined(QT_QWS_EBX)
-#include <unistd.h>
-#include <linux/fb.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#endif
+//#if defined(QT_QWS_IPAQ) || defined(QT_QWS_SL5XXX)
+//#include <unistd.h>
+//#include <linux/fb.h>
+//#include <sys/types.h>
+//#include <sys/stat.h>
+//#include <fcntl.h>
+//#include <sys/ioctl.h>
+//#endif
 #include <stdlib.h>
 
 #define SAMPLE_HEIGHT	115
@@ -348,8 +348,9 @@ AppearanceSettings::AppearanceSettings( QWidget* parent,  const char* name, WFla
     Config config("qpe");
     config.setGroup( "Appearance" );
     QString s = config.readEntry( "Style", "Qtopia" );
+    unsigned i;
     if ( s == "QPE" ) s = "Qtopia";
-    for ( unsigned i = 0; i < styleList->count(); i++ ) {
+    for ( i = 0; i < styleList->count(); i++ ) {
 	PluginItem *item = (PluginItem*)styleList->item(i);
 	if ( item->filename() == s || item->text() == s ) {
 	    styleList->setCurrentItem( i );
@@ -365,7 +366,7 @@ AppearanceSettings::AppearanceSettings( QWidget* parent,  const char* name, WFla
     colorList->setCurrentItem( colorList->findItem( s ) );
 
     s = config.readEntry( "Decoration" );
-    for ( unsigned i = 0; i < decorationList->count(); i++ ) {
+    for ( i = 0; i < decorationList->count(); i++ ) {
 	PluginItem *item = (PluginItem*)decorationList->item(i);
 	if ( item->filename() == s || item->text() == s ) {
 	    decorationList->setCurrentItem( i );
@@ -377,8 +378,8 @@ AppearanceSettings::AppearanceSettings( QWidget* parent,  const char* name, WFla
     decorationSelected( decorationList->currentItem() );
 
     s = config.readEntry( "FontFamily", "Helvetica" );
-    int pt = config.readNumEntry( "FontSize", font().pointSize() );
-    populateFontList(s,pt);
+    prefFontSize = config.readNumEntry( "FontSize", font().pointSize() );
+    populateFontList(s,prefFontSize);
     connect( fontList, SIGNAL(highlighted(const QString&)),
 	this, SLOT(fontSelected(const QString&)) );
     connect( fontSize, SIGNAL(activated(const QString&)),
@@ -422,8 +423,14 @@ void AppearanceSettings::accept()
     color = scheme.readEntry( "Base", "#FFFFFF" );
     config.writeEntry( "Base", color );
 
+    QFontMetrics fm(sample->fontMetrics());
     config.writeEntry( "FontFamily", fontList->currentText() );
     config.writeEntry( "FontSize", fontSize->currentText().toInt() );
+
+#ifndef QPE_FONT_HEIGHT_TO_ICONSIZE
+#define QPE_FONT_HEIGHT_TO_ICONSIZE(x) (x+1)
+#endif
+    config.writeEntry( "IconSize", QPE_FONT_HEIGHT_TO_ICONSIZE(fm.height()) );
 
     config.write(); // need to flush the config info first
     Global::applyStyle();
@@ -463,6 +470,11 @@ void AppearanceSettings::colorSelected( const QString &name )
 
 void AppearanceSettings::styleSelected( int idx )
 {
+#ifndef Q_OS_WIN32
+    QString dllExtension(".so");
+#else
+    QString dllExtension(".dll");
+#endif
     PluginItem *item = (PluginItem *)styleList->item( idx );
     QString style = item->filename().isEmpty() ? item->text() : item->filename();
 
@@ -476,8 +488,8 @@ void AppearanceSettings::styleSelected( int idx )
 	newStyle = new QWindowsStyle;
     } else if ( style == "QPE" || style == "Qtopia" ) {
 	newStyle = new QPEStyle;
-    } else if ( style.findRev( ".so" ) == (int)style.length()-3 ) {
-	QString path = QPEApplication::qpeDir() + "/plugins/styles";
+    } else if ( style.findRev(dllExtension) == int(style.length() - dllExtension.length()) ) {
+	QString path = QPEApplication::qpeDir() + "plugins/styles";
 	StyleInterface *iface = 0;
 	QLibrary *lib = new QLibrary( path + "/" + style );
 	if ( lib->queryInterface( IID_Style, (QUnknownInterface**)&iface ) == QS_OK && iface ) {
@@ -520,7 +532,7 @@ void AppearanceSettings::decorationSelected( int idx )
     }
     wdiface = 0;
 
-    QString path = QPEApplication::qpeDir() + "/plugins/decorations";
+    QString path = QPEApplication::qpeDir() + "plugins/decorations";
     QLibrary *lib = new QLibrary( path + "/" + dec );
     if ( lib->queryInterface( IID_WindowDecoration, (QUnknownInterface**)&wdiface ) == QS_OK && wdiface ) {
 	wdlib = lib;
@@ -554,8 +566,8 @@ void AppearanceSettings::fontSelected( const QString &name )
     for ( it = pointSizes.begin(); it != pointSizes.end(); ++it ) {
 	if ( *it <= maxFontSize ) {
 	    fontSize->insertItem( QString::number( *it ) );
-	    if ( QABS(*it-f.pointSize()) < diff ) {
-		diff = QABS(*it - f.pointSize());
+	    if ( QABS(*it-prefFontSize) < diff ) {
+		diff = QABS(*it - prefFontSize);
 		fontSize->setCurrentItem( fontSize->count()-1 );
 	    }
 	}
@@ -564,8 +576,9 @@ void AppearanceSettings::fontSelected( const QString &name )
 
 void AppearanceSettings::fontSizeSelected( const QString &sz )
 {
+    prefFontSize = sz.toInt();
     sample->setUpdatesEnabled( FALSE );
-    sample->setFont( QFont(fontList->currentText(),sz.toInt()) );
+    sample->setFont( QFont(fontList->currentText(),prefFontSize) );
     QTimer::singleShot( 0, this, SLOT(fixSampleGeometry()) );
 }
 
@@ -590,8 +603,12 @@ void AppearanceSettings::populateStyleList()
 //    styleList->insertStringList(QStyleFactory::styles());
 #else
     (void)new PluginItem( styleList, "Windows");
-    QString path = QPEApplication::qpeDir() + "/plugins/styles";
+    QString path = QPEApplication::qpeDir() + "plugins/styles";
+#ifndef Q_OS_WIN32
     QDir dir( path, "lib*.so" );
+#else
+    QDir dir (path, "*.dll");
+#endif
     QStringList list = dir.entryList();
     QStringList::Iterator it;
     for ( it = list.begin(); it != list.end(); ++it ) {
@@ -621,8 +638,12 @@ void AppearanceSettings::populateColorList()
 void AppearanceSettings::populateDecorationList()
 {
     (void)new PluginItem( decorationList, "Qtopia" );
-    QString path = QPEApplication::qpeDir() + "/plugins/decorations";
+    QString path = QPEApplication::qpeDir() + "plugins/decorations";
+#ifndef Q_OS_WIN32
     QDir dir( path, "lib*.so" );
+#else
+    QDir dir (path, "*.dll");
+#endif   
     QStringList list = dir.entryList();
     QStringList::Iterator it;
     for ( it = list.begin(); it != list.end(); ++it ) {

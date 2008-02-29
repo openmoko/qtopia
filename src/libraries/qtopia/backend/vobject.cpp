@@ -86,7 +86,7 @@ struct StrItem {
     unsigned int refCnt;
     };
 
-const char** fieldedProp;
+DLLEXPORT(const char**) fieldedProp;
 
 
 

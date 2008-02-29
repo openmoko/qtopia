@@ -24,12 +24,13 @@
 #include <qstring.h>
 #include <qwidget.h>
 #include <qobject.h>
+#include <qpixmap.h>
 
 #include <qtopia/todayplugininterface.h>
 
 class DatebookPluginPrivate;
 
-class DatebookPlugin : public QObject, public TodayPluginInterface
+class QTOPIA_PLUGIN_EXPORT DatebookPlugin : public QObject, public TodayPluginInterface
 {
     Q_OBJECT
 public:

@@ -20,8 +20,8 @@
 
 #include "filebrowser.h"
 
-#include <qpe/qpeapplication.h>
-#include <qpe/mimetype.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/mimetype.h>
 
 #include <qmainwindow.h>
 #include <qfileinfo.h>

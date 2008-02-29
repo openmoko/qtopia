@@ -23,7 +23,7 @@
 
 #include "lanbase.h"
 
-#include <qpe/networkinterface.h>
+#include <qtopia/networkinterface.h>
 
 #include <qmap.h>
 
@@ -40,6 +40,8 @@ public:
 
 private slots:
     void ipSelect( int id );
+    void chooseDefaultWepKey();
+    void chooseWepType(int i);
 
 private:
     void readConfig();

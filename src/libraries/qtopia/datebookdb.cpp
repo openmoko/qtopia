@@ -20,18 +20,19 @@
 
 #include <qasciidict.h>
 #include <qfile.h>
+#include <qdir.h>
 #include <qmessagebox.h>
 #include <qstring.h>
 #include <qtextcodec.h>
 #include <qtextstream.h>
 #include <qtl.h>
 
-#include <qpe/alarmserver.h>
-#include <qpe/global.h>
+#include <qtopia/alarmserver.h>
+#include <qtopia/global.h>
 #include <qtopia/private/event.h>
 #include "datebookdb.h"
-#include <qpe/stringutil.h>
-#include <qpe/timeconversion.h>
+#include <qtopia/stringutil.h>
+#include <qtopia/timeconversion.h>
 
 #include <errno.h>
 #include <stdlib.h>
@@ -48,7 +49,11 @@ public:
 
 static QString dateBookJournalFile()
 {
-    QString str = getenv("HOME");
+
+    QString str = QDir::homeDirPath(); 
+#ifdef QTOPIA_DESKTOP
+    str += "/.palmtopcenter/";
+#endif
     return QString( str +"/.caljournal" );
 }
 
@@ -1001,7 +1006,11 @@ bool DateBookDB::save()
     f.close();
 
     // now rename... I like to use the systemcall
-    if ( ::rename( strFileNew, dateBookFilename() ) < 0 ) {
+    QDir dir;
+#ifdef Q_OS_WIN32
+    QFile::remove( dateBookFilename() );
+#endif
+    if ( dir.rename( strFileNew, dateBookFilename() ) == FALSE ) {
 	qWarning( "problem renaming file %s to %s errno %d",
 		  strFileNew.latin1(), dateBookFilename().latin1(), errno  );
 	// remove the file, otherwise it will just stick around...

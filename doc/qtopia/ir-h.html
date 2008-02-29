@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/include/qtopia/ir.h:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/include/qtopia/ir.h:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -51,12 +51,13 @@ body { background: #ffffff; color: black; }
 #ifndef IR_H
 #define IR_H
 
+#include &lt;qtopia/qpeglobal.h&gt;
 #include &lt;qstring.h&gt;
 #include &lt;qobject.h&gt;
 class DocLnk;
 class QCopChannel;
 
-class Ir : public QObject
+class QTOPIA_EXPORT Ir : public QObject
 {
     Q_OBJECT
 public:

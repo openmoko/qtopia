@@ -99,11 +99,13 @@ For example:
 #define vCalendarMimeType	"text/x-vCalendar"
 
 #undef DLLEXPORT
-#include <qglobal.h>
-#if defined(Q_WS_WIN)
+#include <qtopia/qpeglobal.h>
+#if defined(QTOPIA_MAKEDLL)
 #define DLLEXPORT(t)   __declspec(dllexport) t
+#elif defined(QTOPIA_DLL)
+#define DLLEXPORT(t)   __declspec(dllimport) t
 #else
-#define DLLEXPORT(t)   t
+#define DLLEXPORT(t) t
 #endif
 
 #ifndef FALSE
@@ -351,7 +353,7 @@ extern DLLEXPORT(int) vObjectValueType(VObject *o);
 #define VCVT_VOBJECT	5
 	/* if the VObject has value set by setVObjectVObjectValue. */
 
-extern const char** fieldedProp;
+extern  DLLEXPORT(const char**) fieldedProp;
 
 /***************************************************
  * The methods below are implemented in vcc.c (generated from vcc.y )
@@ -368,7 +370,7 @@ your build directly then you may find them a more convenient API
 and you can go ahead and use them. If you try to use them with
 the DLL LIB you will get a link error.
 */
-extern void writeVObject(FILE *fp, VObject *o);
+extern DLLEXPORT(void) writeVObject(FILE *fp, VObject *o);
 
 
 
@@ -393,9 +395,9 @@ will get a link error.
 
 
 #if INCLUDEMFC
-extern VObject* Parse_MIME_FromFile(CFile *file);
+extern DLLEXPORT(VObject*) Parse_MIME_FromFile(CFile *file);
 #else
-extern VObject* Parse_MIME_FromFile(FILE *file);
+extern DLLEXPORT(VObject*) Parse_MIME_FromFile(FILE *file);
 #endif
 
 extern DLLEXPORT(const char *) vObjectTypeInfo(VObject *o);

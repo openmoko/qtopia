@@ -1,13 +1,14 @@
-TEMPLATE	= app
-CONFIG		= qtopia warn_on release
-DESTDIR		= $(QPEDIR)/bin
+multiprocess:TEMPLATE	= app
+multiprocess:DESTDIR	= $(QPEDIR)/bin
+singleprocess:TEMPLATE	= lib
+singleprocess:DESTDIR   = $(QPEDIR)/lib
+
+CONFIG		+= qtopia warn_on release
 
 HEADERS		= fifteen.h
-SOURCES		= fifteen.cpp \
-		  main.cpp
+SOURCES		= fifteen.cpp
 
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH	+= $(QPEDIR)/include
-LIBS            += -lqpe
+multiprocess:SOURCES+=main.cpp
 
 TARGET		= fifteen
+TRANSLATIONS = fifteen-en_GB.ts fifteen-de.ts fifteen-ja.ts fifteen-no.ts

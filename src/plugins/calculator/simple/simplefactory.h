@@ -24,7 +24,7 @@
 #include "simple.h"
 #include <qtopia/calc/plugininterface.h>
 
-class SimpleInterface : public CalculatorInterface
+class QTOPIA_PLUGIN_EXPORT SimpleInterface : public CalculatorInterface
 {
 public:
     SimpleInterface():CalculatorInterface(){input = 0;};

@@ -21,7 +21,7 @@
 #ifndef STYLEINTERFACE_H
 #define STYLEINTERFACE_H
 
-#include <qpe/qcom.h>
+#include <qtopia/qcom.h>
 
 #ifndef QT_NO_COMPONENT
 // {17AF792C-E461-49A9-9B71-068B9A8DDAE4} 
@@ -30,9 +30,8 @@
 #endif
 #endif
 
-class QStyle;
 
-struct StyleInterface : public QUnknownInterface
+struct QTOPIA_EXPORT StyleInterface : public QUnknownInterface
 {
     virtual QStyle *style() = 0;
     virtual QString name() const = 0;

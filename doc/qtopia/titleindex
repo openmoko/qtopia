@@ -1,5 +1,3 @@
-Accessory Class | accessory.html
-Accessory Member List | accessory-members.html
 AddressBookAccess Class | addressbookaccess.html
 AddressBookAccess Member List | addressbookaccess-members.html
 AddressBookIterator Class | addressbookiterator.html
@@ -36,8 +34,6 @@ FontDatabase Class | fontdatabase.html
 FontDatabase Member List | fontdatabase-members.html
 FontFactoryInterface Class | fontfactoryinterface.html
 FontFactoryInterface Member List | fontfactoryinterface-members.html
-Global Class | global.html
-Global Member List | global-members.html
 ImageCodecInterface Class | imagecodecinterface.html
 ImageCodecInterface Member List | imagecodecinterface-members.html
 InputMethodInterface Class | inputmethodinterface.html
@@ -46,16 +42,18 @@ Ir Class | ir.html
 Ir Member List | ir-members.html
 KVNC Class | kvnc.html
 KVNC Member List | kvnc-members.html
-Konsole Class | konsole.html
-Konsole Member List | konsole-members.html
 LibFlashPlugin Class | libflashplugin.html
 LibFlashPlugin Member List | libflashplugin-members.html
-LibMpeg3Plugin Class | libmpeg3plugin.html
-LibMpeg3Plugin Member List | libmpeg3plugin-members.html
 MediaPlayerDecoder Class | mediaplayerdecoder.html
 MediaPlayerDecoder Member List | mediaplayerdecoder-members.html
+MediaPlayerDecoder_1_6 Class | mediaplayerdecoder_1_6.html
+MediaPlayerDecoder_1_6 Member List | mediaplayerdecoder_1_6-members.html
 MediaPlayerPluginInterface Class | mediaplayerplugininterface.html
 MediaPlayerPluginInterface Member List | mediaplayerplugininterface-members.html
+MediaRecorderEncoder Class | mediarecorderencoder.html
+MediaRecorderEncoder Member List | mediarecorderencoder-members.html
+MediaRecorderPluginInterface Class | mediarecorderplugininterface.html
+MediaRecorderPluginInterface Member List | mediarecorderplugininterface-members.html
 MenuButton Class | menubutton.html
 MenuButton Member List | menubutton-members.html
 MimeType Class | mimetype.html
@@ -77,8 +75,12 @@ QCopEnvelope Member List | qcopenvelope-members.html
 QDawg Class | qdawg.html
 QDawg Member List | qdawg-members.html
 QDawgNode Class Reference | qdawg-node.html
-QLibrary Class | qlibrary.html
-QLibrary Member List | qlibrary-members.html
+QEucJpCodec Class | qeucjpcodec.html
+QEucJpCodec Member List | qeucjpcodec-members.html
+QJisCodec Class | qjiscodec.html
+QJisCodec Member List | qjiscodec-members.html
+QJpUnicodeConv Class | qjpunicodeconv.html
+QJpUnicodeConv Member List | qjpunicodeconv-members.html
 QObex Class | qobex.html
 QObex Member List | qobex-members.html
 QPEApplication Class | qpeapplication.html
@@ -89,8 +91,8 @@ QPEPIM Library | qpepim.html
 QPEPIM Library Overview | qpepim-overview.html
 QPEToolBar Class | qpetoolbar.html
 QPEToolBar Member List | qpetoolbar-members.html
-QUuid Class | quuid.html
-QUuid Member List | quuid-members.html
+QSjisCodec Class | qsjiscodec.html
+QSjisCodec Member List | qsjiscodec-members.html
 Qtopia | index.html
 Qtopia - All Functions | functions.html
 Qtopia - Header Files | headers.html
@@ -134,21 +136,19 @@ filemanager.h Include File | filemanager-h.html
 fileselector.h Include File | fileselector-h.html
 fontdatabase.h Include File | fontdatabase-h.html
 fontfactoryinterface.h Include File | fontfactoryinterface-h.html
-global.h Include File | global-h.html
 imagecodecinterface.h Include File | imagecodecinterface-h.html
 inputmethodinterface.h Include File | inputmethodinterface-h.html
 ir.h Include File | ir-h.html
 mediaplayerplugininterface.h Include File | mediaplayerplugininterface-h.html
+mediarecorderplugininterface.h Include File | mediarecorderplugininterface-h.html
 menubutton.h Include File | menubutton-h.html
 mimetype.h Include File | mimetype-h.html
 networkinterface.h Include File | networkinterface-h.html
 qcopenvelope_qws.h Include File | qcopenvelope_qws-h.html
 qdawg.h Include File | qdawg-h.html
-qlibrary.h Include File | qlibrary-h.html
 qpeapplication.h Include File | qpeapplication-h.html
 qpemenubar.h Include File | qpemenubar-h.html
 qpetoolbar.h Include File | qpetoolbar-h.html
-quuid.h Include File | quuid-h.html
 resource.h Include File | resource-h.html
 sound.h Include File | sound-h.html
 storage.h Include File | storage-h.html
@@ -158,6 +158,7 @@ textcodecinterface.h Include File | textcodecinterface-h.html
 todayplugininterface.h Include File | todayplugininterface-h.html
 windowdecorationinterface.h Include File | windowdecorationinterface-h.html
 xmlreader.h Include File | xmlreader-h.html
+ | devices.html
  | distrib.html
  | docwidget.html
  | files.html
@@ -168,5 +169,6 @@ xmlreader.h Include File | xmlreader-h.html
  | pluginintro.html
  | porting.html
  | qcop.html
+ | release-1.6beta2.html
  | services.html
  | start.html

@@ -20,7 +20,7 @@
 #include "datebookweek.h"
 #include "datebookweekheaderimpl.h"
 
-#include <qtopia/pim/calendar.h>
+#include <qtopia/calendar.h>
 #include "datebookdb.h"
 
 #include <qtopia/pim/event.h>
@@ -49,6 +49,9 @@ public:
     void moveToHour( int h );
     void setStartOfWeek( bool bOnMonday );
 
+    void set24HourClock( bool );
+    void alterDay( int );
+
 signals:
     void activateWeekDay( int d );
     void eventsSelected( QValueList<Occurrence> & );
@@ -57,15 +60,11 @@ signals:
 protected slots:
     void keyPressEvent(QKeyEvent *);
 
-private slots:
-    void clockTypeChanged( bool );
-    void alterDay( int );
-
 private:
     void positionItem( LayoutItem *i );
     LayoutItem *intersects( const LayoutItem * );
     void drawContents( QPainter *p, int cx, int cy, int cw, int ch );
-    void drawFrame( QPainter *p);
+    void drawContents( QPainter *p);
     void contentsMousePressEvent( QMouseEvent * );
     void contentsMouseReleaseEvent( QMouseEvent * );
     void mousePressEvent( QMouseEvent * );
@@ -74,6 +73,8 @@ private:
     void updateWeekNames(bool wsom);
 
 private:
+    int posOfHour(int h) const;
+    int hourAtPos(int p) const;
     QHeader *header;
     QVector<LayoutManager> items;
     QList<LayoutItem> dayItems;
@@ -104,9 +105,6 @@ WeekViewContents::WeekViewContents( WeekView *parent, const char *name )
 
 
     connect( header, SIGNAL(clicked(int)), this, SIGNAL(activateWeekDay(int)) );
-
-    QObject::connect(qApp, SIGNAL(clockChanged(bool)),
-	    this, SLOT(clockTypeChanged(bool)));
 
     QFontMetrics fm( font() );
     rowHeight = fm.height()+2;
@@ -215,7 +213,7 @@ void WeekViewContents::keyPressEvent( QKeyEvent *e )
     e->ignore();
 }
 
-void WeekViewContents::clockTypeChanged( bool c )
+void WeekViewContents::set24HourClock( bool c )
 {
     ampm = c;
     viewport()->update();
@@ -244,7 +242,7 @@ void WeekViewContents::alterDay( int day )
 // Only for all day items which we have a very custom layout for.
 void WeekViewContents::positionItem( LayoutItem *i )
 {
-    const Occurrence ev = i->occurance();
+    const Occurrence ev = i->occurrence();
 
     int dow, duration;
     if (ev.startInTZ().date() < ((WeekView *)parent())->weekDate())  {
@@ -314,7 +312,7 @@ void WeekViewContents::contentsMousePressEvent( QMouseEvent *e )
     QValueList<Occurrence> list;
     for (int j = 0; j < 7; j++) {
 	QVector<LayoutItem> v = items.at(j)->items();
-	int x = header->sectionPos(j+1)-2;
+	int x = header->sectionPos(j+1)-1;
 	for ( uint k = 0; k < v.size(); k++) {
 	    LayoutItem *i = v.at(k);
 	    // Change to
@@ -322,7 +320,7 @@ void WeekViewContents::contentsMousePressEvent( QMouseEvent *e )
 	    geo.moveBy(x,0);
 	    if ( geo.contains( e->pos() ) ) {
 		showingEvent = true;
-		list.append(i->occurance());
+		list.append(i->occurrence());
 	    }
 	}
     }
@@ -347,13 +345,20 @@ void WeekViewContents::contentsMouseReleaseEvent( QMouseEvent *e )
 
 void WeekViewContents::mousePressEvent( QMouseEvent *e )
 {
+//#if (QT_VERSION-0 >= 0x030000)
+#if 0
+    // hack to get around dumb 3.1 scrollview mouse events.
+    if  (e->pos().y() > topMargin())
+	return;
+#endif
+
     QValueList<Occurrence> list;
     QListIterator<LayoutItem> it(dayItems);
     for ( ; it.current(); ++it ) {
 	LayoutItem *i = it.current();
 	if ( i->geometry().contains( e->pos() ) ) {
 	    showingEvent = true;
-	    list.append(i->occurance());
+	    list.append(i->occurrence());
 	}
     }
     if (list.count())
@@ -362,6 +367,13 @@ void WeekViewContents::mousePressEvent( QMouseEvent *e )
 
 void WeekViewContents::mouseReleaseEvent( QMouseEvent *e )
 {
+//#if (QT_VERSION-0 >= 0x030000)
+#if 0
+    // hack to get around dumb 3.1 scrollview mouse events.
+    if  (e->pos().y() > topMargin())
+	return;
+#endif
+
     if ( showingEvent ) {
 	showingEvent = false;
 	emit selectionCleared();
@@ -373,7 +385,7 @@ void WeekViewContents::mouseReleaseEvent( QMouseEvent *e )
     }
 }
 
-void WeekViewContents::drawFrame( QPainter *p ) 
+void WeekViewContents::drawContents( QPainter *p ) 
 {
     p->fillRect(0, header->height(), header->width(), allDayHeight * 2, 
 	    white);
@@ -407,10 +419,9 @@ void WeekViewContents::drawContents( QPainter *p, int cx, int cy, int cw, int ch
     QRect ur( cx, cy, cw, ch );
     p->setPen( lightGray );
 
-    // -2 because end of last header, not this, and because contents are over by
-    // one any way.
+    // -1 because end of last header, not this.
     for ( int i = 1; i <= 7; i++ )
-	p->drawLine( header->sectionPos(i)-2, cy, header->sectionPos(i)-2, cy+ch );
+	p->drawLine( header->sectionPos(i)-1, cy, header->sectionPos(i)-1, cy+ch );
 
     p->setPen( black );
     for ( int t = 0; t < 24; t++ ) {
@@ -463,21 +474,37 @@ void WeekViewContents::drawContents( QPainter *p, int cx, int cy, int cw, int ch
 
 void WeekViewContents::resizeEvent( QResizeEvent *e )
 {
-    const int hourWidth = 20;
+    QFontMetrics fm(qApp->font());
+    rowHeight = QMIN(fm.height() * 3, QMAX(fm.height(), e->size().height() / 10));
+    int hourWidth = fm.maxWidth() * 3;
     QScrollView::resizeEvent( e );
-    int avail = width()-qApp->style().scrollBarExtent().width();
+    int avail = width() - ( qApp->style().scrollBarExtent().width() );
+    resizeContents( avail, posOfHour(24) );
     header->setGeometry( 0, 0, avail, header->sizeHint().height() );
-    setMargins( 0, header->height() + allDayHeight * 2, 0, 0 );
+    setMargins( 0, header->height() + allDayHeight * 2 + 1, 0, 0 );
     header->resizeSection( 0, hourWidth );
     int sw = (avail - hourWidth) / 7;
-    for ( int i = 1; i < 7; i++ )
+    int i;
+    for ( i = 1; i < 7; i++ )
 	header->resizeSection( i, sw );
     header->resizeSection( 7, avail - hourWidth - sw*6 );
+
+    ((WeekView*)parent())->redraw();
 }
 
 void WeekViewContents::setStartOfWeek( bool bStartOnMonday )
 {
     updateWeekNames(bStartOnMonday);
+}
+
+int WeekViewContents::posOfHour(int h) const
+{
+    return h*rowHeight;
+}
+
+int WeekViewContents::hourAtPos(int h) const
+{
+    return h == 0 ? 0 : h/rowHeight;
 }
 
 //-------------------------------------------------------------------
@@ -490,7 +517,7 @@ WeekView::WeekView( DateBookTable *newDB, bool ap, bool startOnMonday,
     QVBoxLayout *vb = new QVBoxLayout( this );
     header = new WeekViewHeader( startOnMonday, this );
     contents = new WeekViewContents( this );
-    //contents->setFrameStyle( QFrame::NoFrame );
+    contents->setFrameStyle( QFrame::NoFrame );
     contents->setFrameRect( QRect(0,0,0,0) );
     vb->addWidget( header );
     vb->addWidget( contents );
@@ -732,33 +759,49 @@ void WeekView::showEventsLabel( QValueList<Occurrence> &events )
 	}
 
 	str += "<b>" + strDesc + "</b><br>" + "<i>"
-	    + strCat + "</i>"
-	    + "<br>" + TimeString::longDateString( ev.date() )
-	    + "<br><b>";
+	    + strCat + "</i><br>";
 
-	if (ev.event().isAllDay()) {
-	    str += QObject::tr("All day");
-	} else {
-	    str += QObject::tr("Start") + "</b>: ";
-
-	    if (ev.event().start().date() != ev.event().end().date()) {
-		// multi-day event.  Show start date
-		str += TimeString::longDateString( ev.event().start().date() );
-		str += ", ";
-	    }
-	    str += TimeString::timeString(ev.event().start().time(),
-		cType, FALSE );
-
-	    str += "<br><b>" + QObject::tr("End") + "</b>: ";
-	    if (ev.event().start().date() != ev.event().end().date()) {
-		str += TimeString::longDateString( ev.event().end().date() );
-		str += ", ";
-	    }
-	    str += TimeString::timeString( ev.event().end().time(),
-		cType, FALSE );
+	if (ev.start().date() == ev.end().date()) {
+	    str += TimeString::longDateString( ev.date() )
+	    + "<br>";
 	}
 
-	str += "<br><br>" + strNote;
+	/*
+	if (ev.event().isAllDay()) {
+	    if (ev.event().start().date() != ev.event().end().date()) {
+		str += TimeString::longDateString( ev.event().end().date() );
+		str += "<br>";
+	    }
+	    str += "<b>" + QObject::tr("All day") + "</b>";
+	} else {
+	*/
+	if (ev.start().date() != ev.end().date() || !ev.event().isAllDay()) {
+	    str += "<b>" + QObject::tr("Start") + "</b>: ";
+
+	    if (ev.start().date() != ev.end().date()) {
+		// multi-day event.  Show start date
+		str += TimeString::longDateString( ev.start().date() );
+		str += ", ";
+	    }
+
+	    if (! ev.event().isAllDay())
+		str += TimeString::timeString(ev.start().time(),
+			cType, FALSE );
+
+	    str += "<br><b>" + QObject::tr("End") + "</b>: ";
+	    if (ev.start().date() != ev.end().date()) {
+		str += TimeString::longDateString( ev.end().date() );
+		str += ", ";
+	    }
+	    if (! ev.event().isAllDay())
+		str += TimeString::timeString( ev.end().time(),
+			cType, FALSE );
+	    str += "<br>";
+	}
+
+	if (ev.event().isAllDay())
+	    str += "<b>" + QObject::tr("All day") + "</b><br>";
+	str += "<br>" + strNote;
     }
 
     lblDesc->setText( str );
@@ -806,6 +849,7 @@ void WeekView::setStartsOnMonday( bool onMonday )
 void WeekView::setTwelveHour( bool ap )
 {
     cType = ap;
+    contents->set24HourClock(ap);
 }
 
 // return the date at the beginning of the week...

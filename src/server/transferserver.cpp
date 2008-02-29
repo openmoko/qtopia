@@ -18,6 +18,10 @@
 **
 **********************************************************************/
 #define _XOPEN_SOURCE
+
+#include <qtopia/qpeglobal.h>
+
+#ifndef Q_OS_WIN32
 #include <pwd.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -29,6 +33,12 @@ extern "C" {
 #include <uuid/uuid.h>
 #define UUID_H_INCLUDED
 }
+
+#else
+#include <stdlib.h>
+#include <time.h>
+#endif
+
 
 #if defined(_OS_LINUX_)
 #include <shadow.h>
@@ -42,15 +52,15 @@ extern "C" {
 #include <qstringlist.h>
 #include <qfileinfo.h>
 #include <qregexp.h>
-//#include <qpe/qcopchannel_qws.h>
-#include <qpe/process.h>
-#include <qpe/global.h>
-#include <qpe/config.h>
+//#include <qtopia/qcopchannel_qws.h>
+#include <qtopia/process.h>
+#include <qtopia/global.h>
+#include <qtopia/config.h>
 #include <qtopia/private/contact.h>
-#include <qpe/quuid.h>
-#include <qpe/version.h>
-#ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/quuid.h>
+#include <qtopia/version.h>
+#ifdef Q_WS_QWS
+#include <qtopia/qcopenvelope_qws.h>
 #endif
 
 #include "transferserver.h"
@@ -58,8 +68,8 @@ extern "C" {
 
 const int block_size = 51200;
 
-TransferServer::TransferServer( Q_UINT16 port, QObject *parent = 0,
-        const char* name = 0)
+TransferServer::TransferServer( Q_UINT16 port, QObject *parent,
+        const char* name)
     : QServerSocket( port, 1, parent, name )
 {
     if ( !ok() )
@@ -78,19 +88,12 @@ void TransferServer::newConnection( int socket )
 
 QString SyncAuthentication::serverId()
 {
-    Config cfg("Security");
-    cfg.setGroup("Sync");
-    QString r=cfg.readEntry("serverid");
-    if ( r.isEmpty() ) {
-	uuid_t uuid;
-	uuid_generate( uuid );
-	cfg.writeEntry("serverid",(r = QUuid( uuid ).toString()));
-    }
-    return r;
+    return Global::deviceId();
 }
 
 QString SyncAuthentication::ownerName()
 {
+    return Global::ownerName();
     QString vfilename = Global::applicationFileName("addressbook",
                 "businesscard.vcf");
     if (QFile::exists(vfilename)) {
@@ -104,9 +107,14 @@ QString SyncAuthentication::ownerName()
 
 QString SyncAuthentication::loginName()
 {
-    struct passwd *pw;
+    struct passwd *pw = 0L;
+#ifndef Q_OS_WIN32
     pw = getpwuid( geteuid() );
     return QString::fromLocal8Bit( pw->pw_name );
+#else
+    //### revise
+    return QString();
+#endif
 }
 
 int SyncAuthentication::isAuthorized(QHostAddress peeraddress)
@@ -180,8 +188,13 @@ bool SyncAuthentication::checkPassword( const QString& password )
 	cfg.setGroup("Sync");
 	QStringList pwds = cfg.readListEntry("Passwords",' ');
 	for (QStringList::ConstIterator it=pwds.begin(); it!=pwds.end(); ++it) {
+#ifndef Q_OS_WIN32	 
 	    QString cpassword = QString::fromLocal8Bit(
 		crypt( password.mid(8).local8Bit(), (*it).left(2).latin1() ) );
+#else
+	    // ### revise
+	    QString cpassword("");
+#endif
 	    if ( *it == cpassword ) {
 		lock--;
 		return TRUE;
@@ -194,7 +207,7 @@ bool SyncAuthentication::checkPassword( const QString& password )
 	    || QMessageBox::warning(0,tr("Sync Connection"),
 		tr("<p>An unrecognized system is requesting access to this device."
 		    "<p>If you have just initiated a Sync for the first time, this is normal."),
-		tr("Allow"),tr("Deny"))==1 )
+		tr("Deny"),tr("Allow"),QString::null)!=1 )
 	{
 	    denials++;
 	    lastdenial=now;
@@ -205,8 +218,13 @@ bool SyncAuthentication::checkPassword( const QString& password )
 	    char salt[2];
 	    salt[0]= salty[rand() % (sizeof(salty)-1)];
 	    salt[1]= salty[rand() % (sizeof(salty)-1)];
+#ifndef Q_OS_WIN32
 	    QString cpassword = QString::fromLocal8Bit(
 		crypt( password.mid(8).local8Bit(), salt ) );
+#else
+	    //### revise
+	    QString cpassword("");
+#endif
 	    denials=0;
 	    pwds.prepend(cpassword);
 	    cfg.writeEntry("Passwords",pwds,' ');
@@ -220,7 +238,7 @@ bool SyncAuthentication::checkPassword( const QString& password )
 }
 
 
-ServerPI::ServerPI( int socket, QObject *parent = 0, const char* name = 0 )
+ServerPI::ServerPI( int socket, QObject *parent, const char* name )
     : QSocket( parent, name ) , dtp( 0 ), serversocket( 0 ), waitsocket( 0 )
 {
     state = Connected;
@@ -235,11 +253,11 @@ ServerPI::ServerPI( int socket, QObject *parent = 0, const char* name = 0 )
 	state = Forbidden;
 	startTimer( 0 );
     } else
-#endif	
+#endif
     {
 	connect( this, SIGNAL( readyRead() ), SLOT( read() ) );
 	connect( this, SIGNAL( connectionClosed() ), SLOT( connectionClosed() ) );
-	
+
 	passiv = FALSE;
 	for( int i = 0; i < 4; i++ )
 	    wait[i] = FALSE;
@@ -638,7 +656,7 @@ void ServerPI::process( const QString& message )
 		    qDebug("sending back gzip guess of %d", guess);
 		    send( "213 " + QString::number(guess) );
 		}
-	    }			
+	    }
 	}
     }
     // name list (NLST)
@@ -969,7 +987,7 @@ void ServerPI::timerEvent( QTimerEvent * )
 }
 
 
-ServerDTP::ServerDTP( QObject *parent = 0, const char* name = 0)
+ServerDTP::ServerDTP( QObject *parent, const char* name)
   : QSocket( parent, name ), mode( Idle ), createTargzProc( 0 ),
     retrieveTargzProc( 0 ), gzipProc( 0 )
 {
@@ -1188,7 +1206,7 @@ void ServerDTP::readyRead()
     else if ( RetrieveGzipFile == mode ) {
 	if ( !gzipProc->isRunning() )
 	    gzipProc->start();
-	
+
       	QByteArray s;
 	s.resize( bytesAvailable() );
 	readBlock( s.data(), bytesAvailable() );
@@ -1271,7 +1289,7 @@ void ServerDTP::sendGzipFile( const QString &fn,
     connect( createTargzProc,
 	     SIGNAL( readyReadStdout() ), SLOT( gzipTarBlock() ) );
 
-    gzipProc->setArguments( "gzip" );	
+    gzipProc->setArguments( "gzip" );
     connect( gzipProc, SIGNAL( readyReadStdout() ),
 	     SLOT( writeTargzBlock() ) );
 }
@@ -1317,7 +1335,7 @@ void ServerDTP::retrieveGzipFile( const QString &fn )
     file.setName( fn );
     mode = RetrieveGzipFile;
 
-    gzipProc->setArguments( "gunzip" );	
+    gzipProc->setArguments( "gunzip" );
     connect( gzipProc, SIGNAL( readyReadStdout() ),
 	     SLOT( tarExtractBlock() ) );
     connect( gzipProc, SIGNAL( processExited() ),

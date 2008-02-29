@@ -4,7 +4,7 @@
 #include "krfboptions.h"
 #include "krfbbuffer.h"
 
-#include <qpe/config.h>
+#include <qtopia/config.h>
 
 #include <qapplication.h>
 #include <qclipboard.h>
@@ -92,6 +92,12 @@ void KRFBCanvas::bell()
   }
 }
 
+void KRFBCanvas::updateSizeChanged(int w, int h)
+{
+    resizeContents(w, h);
+    viewportUpdate(0, 0, w, h);
+}
+
 void KRFBCanvas::loggedIn()
 {
   qWarning( "Ok, we're logged in" );
@@ -106,7 +112,7 @@ void KRFBCanvas::loggedIn()
 
   // Start using the buffer
   connect( connection_->buffer(), SIGNAL( sizeChanged( int, int ) ),
-           this, SLOT( resizeContents(int,int) ) );
+           this, SLOT( updateSizeChanged(int,int) ) );
   connect( connection_->buffer(), SIGNAL( updated( int, int, int, int ) ),
            this, SLOT( viewportUpdate(int,int,int,int) ) );
   connect( connection_->buffer(), SIGNAL( bell() ),
@@ -122,7 +128,7 @@ void KRFBCanvas::viewportPaintEvent( QPaintEvent *e )
 
     if ( loggedIn_ ) {
 	QRegion bgr = QRegion(r) - QRect(0, 0, contentsWidth(), contentsHeight());
-	for ( int i = 0; i < bgr.rects().count(); i++ )
+	for ( uint i = 0; i < bgr.rects().count(); i++ )
 	    p.fillRect( bgr.rects()[i], colorGroup().dark() );
 	p.translate( -contentsX(), -contentsY() );
 	connection_->buffer()->paint( &p, r.x()+contentsX(),

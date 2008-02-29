@@ -22,7 +22,7 @@
 
 #include <qnamespace.h>
 #include <qstring.h>
-#include <qpe/qcom.h>
+#include <qtopia/qcom.h>
 
 #ifndef QT_NO_COMPONENT
 // {09794290-69d5-4c42-8a53-230cf2e53c50}
@@ -34,7 +34,7 @@
 class QWidget;
 class Config;
 
-struct NetworkInterface : public QUnknownInterface
+struct QTOPIA_EXPORT NetworkInterface : public QUnknownInterface
 {
     virtual bool doProperties( QWidget *parent, Config& ) = 0;
     virtual bool create( Config& ) = 0;

@@ -3,15 +3,15 @@
 #include <qpixmap.h>
 #include <qdom.h>
 #include <qaction.h>
-#include <qpe/qpemenubar.h>
+#include <qtopia/qpemenubar.h>
 #include <qstatusbar.h>
 #include <qpopupmenu.h>
 #include <qpushbutton.h>
-#include <qpe/qpetoolbar.h>
+#include <qtopia/qpetoolbar.h>
 #include <qtimer.h>
 #include <qmessagebox.h>
-#include <qpe/qpeapplication.h>
-#include <qpe/global.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/global.h>
 #include <assert.h>
 
 #include "kvnc.h"
@@ -143,6 +143,7 @@ void KVNC::toggleFullScreen( bool f )
     }
 
     fullscreen = f;
+    fullScreenAction->setOn(fullscreen);
 }
 
 void KVNC::connectToServer()
@@ -158,7 +159,9 @@ void KVNC::connectToServer()
 
 void KVNC::zoom( bool z )
 {
-    canvas->setViewScale( z ? 2 : 1 );
+    if (isConnected) {
+	canvas->setViewScale( z ? 2 : 1 );
+    }
 }
 
 void KVNC::showMenu()
@@ -190,12 +193,13 @@ void KVNC::disconnected()
 {
     static QString msg = tr( "Connection closed" );
     statusMessage( msg );
+
+    isConnected = false;
     fullScreenAction->setEnabled( false );
     fullScreenAction->setOn( false );
     zoomAction->setEnabled( false );
     zoomAction->setOn( false );
     connectAction->setText( tr("Connect...") );
-    isConnected = false;
 }
 
 void KVNC::statusMessage( const QString &m )
@@ -205,7 +209,6 @@ void KVNC::statusMessage( const QString &m )
 
 void KVNC::error( const QString &msg )
 {
-    statusMessage( msg );
     QMessageBox::warning( this, tr("VNC Viewer"), msg );
 }
 

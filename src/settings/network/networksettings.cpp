@@ -21,17 +21,17 @@
 #include "networksettings.h"
 #include "addnetworksetting.h"
 
-#include <qpe/networkinterface.h>
-#include <qpe/network.h>
-#include <qpe/global.h>
-#include <qpe/config.h>
-#include <qpe/resource.h>
-#include <qpe/qpeapplication.h>
+#include <qtopia/networkinterface.h>
+#include <qtopia/network.h>
+#include <qtopia/global.h>
+#include <qtopia/config.h>
+#include <qtopia/resource.h>
+#include <qtopia/qpeapplication.h>
 #ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
-#include <qpe/qlibrary.h>
-#include <qpe/qpemessagebox.h>
+#include <qtopia/qlibrary.h>
+#include <qtopia/qpemessagebox.h>
 
 
 #include <qmessagebox.h>
@@ -229,6 +229,7 @@ void NetworkSettings::doProperties(const QString& cfgfile)
     if ( plugin ) {
 	cfg.setGroup("Properties");
 	plugin->doProperties(this, cfg);
+	updateCurrent();
     }
 #endif
 }

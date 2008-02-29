@@ -2,7 +2,7 @@ Files: i18n/zh_TW/.directory i18n/zh_TW/*.qm
 Priority: optional
 Section: qpe/i18n
 Maintainer: Trolltech (www.trolltech.com)
-Version: $QPE_VERSION-7
-Depends: qpe-base ($QPE_VERSION), qpf-cyberbit-120-50-t10
+Version: $QPE_VERSION-9
+Depends: qpf-cyberbit-120-50-t10
 Description: i18n: Chinese (TW)
  Chinese UI texts for Qtopia environment.

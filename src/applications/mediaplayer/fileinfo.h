@@ -22,7 +22,7 @@
 
 #define QTOPIA_INTERNAL_APPLNKASSIGN
 
-#include <qpe/applnk.h>
+#include <qtopia/applnk.h>
 #include <qtabdialog.h>
 #include <qvbox.h>
 #include <qmap.h>
@@ -41,7 +41,6 @@ Q_OBJECT
 	MediaFileInfoWidget( const DocLnk& lnk, QWidget *parent, const char *name = 0 );
 	~MediaFileInfoWidget(); 
 	void accept(); 
-	void reject(); 
     private:
 	MediaFileInfoWidgetPrivate *d;
 };

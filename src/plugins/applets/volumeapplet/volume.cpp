@@ -20,11 +20,11 @@
 
 #include "volume.h"
 
-#include <qpe/resource.h>
-#include <qpe/qpeapplication.h>
-#include <qpe/config.h>
+#include <qtopia/resource.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/config.h>
 #if ( defined Q_WS_QWS || defined(_WS_QWS_) ) && !defined(QT_NO_COP)
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
 
 #include <qpainter.h>
@@ -34,8 +34,9 @@
 #include <qframe.h>
 #include <qpixmap.h>
 
+#include <qtopia/applnk.h>
 
-VolumeControl::VolumeControl( QWidget *parent, const char *name, WFlags f )
+VolumeControl::VolumeControl( QWidget *parent, const char *name, WFlags /* f */)
     : QFrame( parent, name, WStyle_StaysOnTop | WType_Popup )
 {
     setFrameStyle( QFrame::PopupPanel | QFrame::Raised );
@@ -80,9 +81,13 @@ void VolumeControl::keyPressEvent( QKeyEvent *e)
 VolumeApplet::VolumeApplet( QWidget *parent, const char *name )
     : QWidget( parent, name )
 {
-    setFixedHeight(18);
-    setFixedWidth( 14 );
-    volumePixmap = Resource::loadPixmap( "volume" );
+    setFixedHeight(AppLnk::smallIconSize());
+    setFixedWidth(AppLnk::smallIconSize());
+
+    QImage  img = Resource::loadImage("volume");
+    img = img.smoothScale(AppLnk::smallIconSize(), AppLnk::smallIconSize() - 4);
+    volumePixmap.convertFromImage(img);
+
     muted = FALSE; // ### read from pref
     volumePercent = 50; // ### read from pref
     connect( qApp, SIGNAL( volumeChanged(bool) ), this, SLOT( volumeChanged(bool) ) );
@@ -102,7 +107,10 @@ void VolumeApplet::mousePressEvent( QMouseEvent *)
     connect( vc->slider, SIGNAL( valueChanged( int ) ), this, SLOT( sliderMoved( int ) ) );
     connect( vc->muteBox, SIGNAL( toggled( bool ) ), this, SLOT( mute( bool ) ) );
     QPoint curPos = mapToGlobal( rect().topLeft() );
-    vc->move( curPos.x()-(vc->sizeHint().width()-width())/2, curPos.y() - 100 );
+    if ( curPos.x() + vc->sizeHint().width() > qApp->desktop()->width() )
+	vc->move( qApp->desktop()->width() - vc->sizeHint().width(), curPos.y() - 101 );
+    else 
+	vc->move( curPos.x()-(vc->sizeHint().width()-width())/2, curPos.y() - 101 );
     vc->show();
 }
 
@@ -178,9 +186,6 @@ void VolumeApplet::paintEvent( QPaintEvent* )
     QPainter p(this);
 
     int yoff=0;
-
-    if (volumePixmap.isNull())
-        volumePixmap = Resource::loadPixmap( "volume" );
     p.drawPixmap( 0, yoff, volumePixmap );
     p.setPen( darkGray );
     p.drawRect( 1, height() - 5, width() - 2, 4 );

@@ -27,13 +27,18 @@
 #include <qstring.h>
 #include <qapplication.h>
 #include <qfile.h>
-#ifdef QWS
+#ifdef Q_WS_QWS
 #include <qwindowsystem_qws.h>
 #endif
 
 #include <qdialog.h>
 
+#ifndef Q_OS_WIN32
 #include <unistd.h> //for sleep
+#else
+#include <windows.h>
+#include <winbase.h>
+#endif
 #include "passwordbase_p.h"
 
 class PasswordDialog : public PasswordBase
@@ -60,8 +65,15 @@ private:
     QString text;
 };
 
-
+#ifndef Q_OS_WIN32
 extern "C" char *crypt(const char *key, const char *salt);
+#else
+   char *crypt(const char *key, const char *salt){
+     //#### revise  
+     return (char*)key;
+   }
+#endif
+
 static QString qcrypt(const QString& k, const char *salt)
 {
     return QString::fromUtf8(crypt(k.utf8(),salt));
@@ -218,6 +230,7 @@ public:
 
 class OwnerDlg : public QDialog
 {
+    Q_OBJECT
 public:
 
     OwnerDlg( QWidget *parent, const char * name, Contact c,

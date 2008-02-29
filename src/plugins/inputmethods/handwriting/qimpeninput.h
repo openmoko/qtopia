@@ -23,7 +23,7 @@
 
 #include "qimpenprofile.h"
 
-#include <qpe/qdawg.h>
+#include <qtopia/qdawg.h>
 
 #include <qframe.h>
 #include <qlist.h>

@@ -33,10 +33,11 @@ public:
     TaskbarSettings( QWidget *parent=0, const char *name=0, bool modal=FALSE, WFlags f=0 );
 
 protected slots:
-    void appletChanged();
+    void itemClicked( QListViewItem *, const QPoint &, int );
 
 protected:
     void init();
+    bool eventFilter( QObject *, QEvent * );
     void accept();
     void done( int );
 

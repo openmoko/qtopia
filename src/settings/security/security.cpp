@@ -19,9 +19,9 @@
 **********************************************************************/
 #include "security.h"
 
-#include <qpe/config.h>
-#include <qpe/password.h>
-#include <qpe/qpedialog.h>
+#include <qtopia/config.h>
+#include <qtopia/password.h>
+#include <qtopia/qpedialog.h>
 
 #include <qcheckbox.h>
 #include <qpushbutton.h>
@@ -157,20 +157,25 @@ bool Security::parseNet(const QString& sn,int& auth_peer,int& auth_peer_bits)
 	auth_peer_bits = 32;
 	return TRUE;
     } else {
-	bool ok;
-	int x=0;
-	for (int i=0; i<4; i++) {
-	    int nx = sn.find(QChar(i==3 ? '/' : '.'),x);
-	    if ( nx < 0 )
-		return FALSE;
-	    auth_peer = (auth_peer<<8)|sn.mid(x,nx-x).toInt(&ok);
-	    if ( !ok )
-		return FALSE;
-	    x = nx+1;
+	QString a;
+	int sl = sn.find('/');
+	if ( sl < 0 ) {
+	    auth_peer_bits = 32;
+	    a = sn;
+	} else {
+	    int n=(uint)sn.find(' ',sl);
+	    if ( n>sl ) n-=sl;
+	    auth_peer_bits = sn.mid(sl+1,(uint)n).toInt();
+	    a = sn.left(sl);
 	}
-	uint n = (uint)sn.find(' ',x)-x;
-	auth_peer_bits = sn.mid(x,n).toInt(&ok);
-	return ok && auth_peer_bits>0;
+	QStringList b=QStringList::split(QChar('.'),a);
+	int x=1<<24;
+	auth_peer = 0;
+	for (QStringList::ConstIterator it=b.begin(); it!=b.end(); ++it) {
+	    auth_peer += (*it).toInt()*x;
+	    x >>= 8;
+	}
+	return x!=0 && auth_peer_bits && auth_peer;
     }
 }
 
@@ -212,14 +217,22 @@ void Security::changePassCode()
 {
     QString new1;
     QString new2;
+    bool    mismatch = FALSE;
 
     do {
-	new1 = enterPassCode(tr("Enter new passcode"));
+	if (mismatch) {
+	    new1 = enterPassCode(tr("Mismatch: Retry new code"));
+	} else {
+	    new1 = enterPassCode(tr("Enter new passcode"));
+	}
 	if ( new1.isNull() )
 	    return;
 	new2 = enterPassCode(tr("Re-enter new passcode"));
 	if ( new2.isNull() )
 	    return;
+
+	mismatch = new1 != new2;
+
     } while (new1 != new2);
 
     passcode = new1;

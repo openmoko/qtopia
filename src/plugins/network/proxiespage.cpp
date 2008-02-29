@@ -20,7 +20,7 @@
 
 #include "proxiespage.h"
 #include "proxiespagebase_p.h"
-#include <qpe/config.h>
+#include <qtopia/config.h>
 
 #include <qcombobox.h>
 #include <qlineedit.h>

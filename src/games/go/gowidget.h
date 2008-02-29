@@ -27,11 +27,12 @@
 
 class QToolBar;
 
+
 class GoMainWidget : public QMainWindow
 {
     Q_OBJECT
 public:
-    GoMainWidget( QWidget *parent=0, const char* name=0);
+    GoMainWidget( QWidget *parent=0, const char* name=0, WFlags=0);
 protected:
     void resizeEvent( QResizeEvent * );
 private:
@@ -50,6 +51,10 @@ public:
 
     void doMove( int x, int y );
     void doComputerMove();
+
+    bool isTwoPlayer() const { return twoplayer; }
+    const QString &score() const { return scoreString; }
+    const QPixmap &currentPebble() const;
 
     void readConfig();
     void writeConfig();
@@ -71,7 +76,8 @@ protected:
     void mouseReleaseEvent( QMouseEvent * );
     void resizeEvent( QResizeEvent * );
 private:
-    void init();
+    void startGame();
+    void clearBoard();
     void removeStone(short x, short y);
     void placeStone (enum bVal c, short x, short y );
 
@@ -96,6 +102,8 @@ private:
     
     int lastX,lastY;
     int newX,newY;
+
+    QString scoreString;
     
     static GoWidget *self;
 

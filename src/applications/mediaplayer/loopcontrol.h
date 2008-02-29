@@ -32,12 +32,12 @@ public:
     LoopControl( QObject *parent, const char *name );
     ~LoopControl();
 
-    bool init( const QString& filename );
+    bool init( const QString& filename, const QString& mimetype = QString::null, bool isURL = false );
 
     bool hasVideo() const { return hasVideoChannel; }
     bool hasAudio() const { return hasAudioChannel; }
     
-    long totalPlaytime() { return (long)(hasVideoChannel ? total_video_frames / framerate : total_audio_samples / freq); }
+    long totalPlaytime();
 
     // These are public to run them from global functions needed to start threads
     // Otherwise they would be private
@@ -71,10 +71,11 @@ private:
     long current_frame;
     long total_video_frames;
     long total_audio_samples;
-    
+
     float framerate;
     int freq;
-    int stream;
+    int astream;
+    int vstream; 
     int framecount;
     int channels;
      

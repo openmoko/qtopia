@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -134,13 +140,13 @@ HEADERS =	cardmon.h \
 		cardmonimpl.h
 SOURCES =	cardmon.cpp \
 		cardmonimpl.cpp
-OBJECTS =	cardmon.o \
-		cardmonimpl.o
+OBJECTS =	$(OBJECTS_DIR)/cardmon.o \
+		$(OBJECTS_DIR)/cardmonimpl.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
-SRCMOC	=	moc_cardmon.cpp
-OBJMOC	=	moc_cardmon.o
+SRCMOC	=	$(MOC_DIR)/moc_cardmon.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_cardmon.o
 
 
 ####### Implicit rules
@@ -206,31 +212,30 @@ REQUIRES=
 
 ####### Compile
 
-cardmon.o: cardmon.cpp \
-		cardmon.h \
-		$(QPEDIR)/include/qpe/resource.h
-
-cardmonimpl.o: cardmonimpl.cpp \
-		cardmon.h \
-		cardmonimpl.h \
-		$(QPEDIR)/include/qpe/taskbarappletinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h
-
-moc_cardmon.o: moc_cardmon.cpp \
+$(OBJECTS_DIR)/cardmon.o: cardmon.cpp \
 		cardmon.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/cardmon.o cardmon.cpp
 
-moc_cardmon.cpp: cardmon.h
-	$(MOC) cardmon.h -o moc_cardmon.cpp
+$(OBJECTS_DIR)/cardmonimpl.o: cardmonimpl.cpp \
+		cardmon.h \
+		cardmonimpl.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/cardmonimpl.o cardmonimpl.cpp
+
+$(OBJECTS_DIR)/moc_cardmon.o: $(MOC_DIR)/moc_cardmon.cpp \
+		cardmon.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_cardmon.o $(MOC_DIR)/moc_cardmon.cpp
+
+$(MOC_DIR)/moc_cardmon.cpp: cardmon.h
+	$(MOC) cardmon.h -o $(MOC_DIR)/moc_cardmon.cpp
 
 
 
 lupdate:
-	lupdate cardmon.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <cardmon.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease cardmon.pro
+	$(QPEDIR)/bin/qtopia-linstall cardmon.pro
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

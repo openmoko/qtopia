@@ -1,5 +1,5 @@
-#include <qpe/config.h>
-#include <qpe/qpeapplication.h>
+#include <qtopia/config.h>
+#include <qtopia/qpeapplication.h>
 #include "krfboptions.h"
 
 KRFBOptions::KRFBOptions()

@@ -22,9 +22,9 @@
 #define FRESHSTYLE_H
 
 #include <qwindowsstyle.h>
-#include <qpe/styleinterface.h>
+#include <qtopia/styleinterface.h>
 
-class Q_EXPORT FreshStyle : public QWindowsStyle
+class QTOPIA_PLUGIN_EXPORT FreshStyle : public QWindowsStyle
 {
 public:
     FreshStyle();
@@ -63,6 +63,7 @@ public:
     void drawSliderGrooveMask( QPainter *p, int x, int y, int w, int h,
 		    const QColorGroup& , QCOORD c, Orientation orient );
     void drawTab( QPainter *, const QTabBar *, QTab *, bool selected );
+    void polishPopupMenu ( QPopupMenu * );
     int extraPopupMenuItemWidth( bool checkable, int maxpmw, QMenuItem*, const QFontMetrics& );
     int popupMenuItemHeight( bool checkable, QMenuItem*, const QFontMetrics& );
     void drawPopupMenuItem( QPainter* p, bool checkable, int maxpmw, int tab, QMenuItem* mi,
@@ -80,7 +81,7 @@ private:	// Disabled copy constructor and operator=
 };
 
 
-class FreshStyleImpl : public StyleInterface
+class QTOPIA_PLUGIN_EXPORT FreshStyleImpl : public StyleInterface
 {
 public:
     FreshStyleImpl();

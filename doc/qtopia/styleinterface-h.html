@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/include/qtopia/styleinterface.h:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/include/qtopia/styleinterface.h:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -51,7 +51,7 @@ body { background: #ffffff; color: black; }
 #ifndef STYLEINTERFACE_H
 #define STYLEINTERFACE_H
 
-#include &lt;qpe/qcom.h&gt;
+#include &lt;qtopia/qcom.h&gt;
 
 #ifndef QT_NO_COMPONENT
 // {17AF792C-E461-49A9-9B71-068B9A8DDAE4} 
@@ -60,9 +60,8 @@ body { background: #ffffff; color: black; }
 #endif
 #endif
 
-class QStyle;
 
-struct StyleInterface : public QUnknownInterface
+struct QTOPIA_EXPORT StyleInterface : public QUnknownInterface
 {
     virtual QStyle *style() = 0;
     virtual QString name() const = 0;

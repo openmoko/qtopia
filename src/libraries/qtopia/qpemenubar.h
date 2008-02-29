@@ -21,11 +21,15 @@
 #ifndef QPEMENUBAR_H
 #define QPEMENUBAR_H
 
+#include <qtopia/qpeglobal.h>
 #include <qmenubar.h>
 #include <qguardedptr.h>
 #include <qvaluelist.h>
+#include <qwidget.h>
 
-class QPEMenuToolFocusManager : public QObject
+typedef QGuardedPtr<QWidget> GuardedWidget;
+
+class QTOPIA_EXPORT QPEMenuToolFocusManager : public QObject
 {
     Q_OBJECT
 public:
@@ -38,7 +42,6 @@ public:
     void moveFocus( bool next );
 
     static QPEMenuToolFocusManager *manager();
-    static void initialize();
 
 protected:
     void setFocus( QWidget *w, bool next=TRUE );
@@ -48,15 +51,19 @@ private slots:
     void deactivate();
 
 private:
-    typedef QGuardedPtr<QWidget> GuardedWidget;
+    friend class QPEApplication;
+    static void initialize();
     QValueList<GuardedWidget> list;
     GuardedWidget inFocus;
     GuardedWidget oldFocus;
     static QPEMenuToolFocusManager *me;
 };
 
+#define QTOPIA_DEFINED_QPEMENUTOOLFOCUSMANAGER
+#include <qtopia/qtopiawinexport.h>
 
-class QPEMenuBar : public QMenuBar
+
+class QTOPIA_EXPORT QPEMenuBar : public QMenuBar
 {
     Q_OBJECT
 public:
@@ -66,6 +73,9 @@ public:
 protected:
     virtual void keyPressEvent( QKeyEvent *e );
 };
+
+#define QTOPIA_DEFINED_QPEMENUBAR
+#include <qtopia/qtopiawinexport.h>
 
 #endif
 

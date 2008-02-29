@@ -1,18 +1,17 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000 Trolltech AS.  All rights reserved.
 **
-** This file is part of the Qtopia Environment.
+** This file is part of Qtopia Environment.
 **
-** Licensees holding valid Qtopia Developer license may use this
-** file in accordance with the Qtopia Developer License Agreement
-** provided with the Software.
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING
-** THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-** PURPOSE.
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
-** email sales@trolltech.com for information about Qtopia License
-** Agreements.
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
@@ -27,7 +26,7 @@
 #include "doubleinstruction.h"
 #include "fractioninstruction.h"
 
-class Type1BaseInputWidget : public QWidget
+class QTOPIA_EXPORT Type1BaseInputWidget : public QWidget
 {
     Q_OBJECT
 
@@ -36,7 +35,6 @@ public:
     ~Type1BaseInputWidget(){};
 
     QGridLayout* Type1BaseInputWidgetLayout;
-    Engine sys;
 private slots:
     void val0Clicked ();
     void val1Clicked ();
@@ -59,7 +57,7 @@ protected:
     QToolButton* PBEval;
 };
 
-class Type1DecimalInputWidget : public Type1BaseInputWidget
+class QTOPIA_EXPORT Type1DecimalInputWidget : public Type1BaseInputWidget
 {
     Q_OBJECT
 
@@ -80,7 +78,7 @@ private:
 };
 
 
-class Type1FractionInputWidget : public Type1BaseInputWidget
+class QTOPIA_EXPORT Type1FractionInputWidget : public Type1BaseInputWidget
 {
     Q_OBJECT
 
@@ -100,8 +98,7 @@ private:
     QToolButton* PBFraction;
 };
 
-
-class Type2InputWidget:public QWidget {
+class QTOPIA_EXPORT Type2InputWidget:public QWidget {
     Q_OBJECT
 public:
     Type2InputWidget( QWidget* parent = 0, const char* name = 0, WFlags fl = 0 );
@@ -137,7 +134,6 @@ private:
     QToolButton* PBDiv;
     QToolButton* PBEval;
     QToolButton* PBDecimal;
-    Engine sys;
 };
 
 #endif

@@ -20,7 +20,7 @@
 
 #include "textedit.h"
 
-#include <qpe/qpeapplication.h>
+#include <qtopia/qpeapplication.h>
 
 int main( int argc, char **argv )
 {
@@ -31,5 +31,5 @@ int main( int argc, char **argv )
     if ( argc == 3 && argv[1] == QCString("-f") )
 	e.setDocument(argv[2]);
 
-    a.exec();
+   return a.exec();
 }

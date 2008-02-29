@@ -24,11 +24,8 @@
 #include <qtopia/qpeglobal.h>
 #include <qapplication.h>
 #include <qdialog.h>
-#if defined(_WS_QWS_) && !defined(Q_WS_QWS)
-#define Q_WS_QWS
-#endif
 #include "qpedecoration_qws.h"
-#include "timestring.h"
+#include <qtopia/timestring.h>
 
 class QCopChannel;
 class QPEApplicationData;
@@ -76,8 +73,8 @@ public:
 
     void showMainWidget( QWidget*, bool nomax=FALSE );
     void showMainDocumentWidget( QWidget*, bool nomax=FALSE );
-    static void showDialog( QDialog*, bool nomax=FALSE );
-    static int execDialog( QDialog*, bool nomax=FALSE );
+    static void showDialog( QDialog*, bool nomax=FALSE );   // libqtopia
+    static int execDialog( QDialog*, bool nomax=FALSE );    // libqtopia
 
     static void setKeepRunning();
     bool keepRunning() const;
@@ -89,6 +86,7 @@ public:
 signals:
     void clientMoused();
     void timeChanged();
+    void categoriesChanged();
     void clockChanged( bool pm );
     void volumeChanged( bool muted );
     void appMessage( const QCString& msg, const QByteArray& data);
@@ -96,6 +94,7 @@ signals:
     void dateFormatChanged( DateFormat );
     void flush();
     void reload();
+    void linkChanged( const QString &linkFile );
     
 private slots:
     void systemMessage( const QCString &msg, const QByteArray &data );
@@ -129,6 +128,7 @@ private:
 
 };
 
+/*
 inline void QPEApplication::showDialog( QDialog* d, bool nomax )
 {
     QSize sh = d->sizeHint();
@@ -150,7 +150,12 @@ inline int QPEApplication::execDialog( QDialog* d, bool nomax )
     showDialog(d,nomax);
     return d->exec();
 }
+*/
 
-
+#ifdef Q_OS_WIN32
+#include <stdlib.h>
+QTOPIA_EXPORT int setenv(const char* name, const char* value, int overwrite);
+QTOPIA_EXPORT void unsetenv(const char *name);
+#endif
 #endif
 

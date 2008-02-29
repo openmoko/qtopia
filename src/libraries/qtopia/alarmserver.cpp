@@ -18,6 +18,8 @@
 **
 **********************************************************************/
 
+#include "qlibrary.h"
+
 #include <qdir.h>
 #include <qfile.h>
 #include <qmessagebox.h>
@@ -32,13 +34,17 @@
 #include "qcopenvelope_qws.h"
 #endif
 #include "alarmserver.h"
-#include <qpe/timeconversion.h>
+#include <qtopia/timeconversion.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
 
 #include <stdlib.h>
+#ifndef Q_OS_WIN32
 #include <unistd.h>
+#else
+#include <process.h>
+#endif
 
 struct timerEventItem {
     time_t UTCtime;
@@ -55,6 +61,7 @@ struct timerEventItem {
 
 class TimerReceiverObject : public QObject
 {
+  Q_OBJECT
 public:
   TimerReceiverObject() { }
   ~TimerReceiverObject() { }
@@ -226,7 +233,10 @@ void TimerReceiverObject::resetTimer()
 	    atfile.close();
 	    unlink( atfilename );
 	    QDir d; d.rename(fn+".new",fn);
+//### revise to suit WINNt?
+#ifndef Q_OS_WIN32
 	    chmod(fn.latin1(),0755);
+#endif
 	    atfilename = fn;
 	    triggerAtd( FALSE );
 	} else {
@@ -377,7 +387,7 @@ void AlarmServer::deleteAlarm (QDateTime when, const QCString& channel, const QC
 		} else
 		    ++it;
 	    }
-	    if ( updatenearest );
+	    if ( updatenearest )
 		setNearestTimerEvent();
 	}
 	if ( needSave )
@@ -390,6 +400,7 @@ void AlarmServer::deleteAlarm (QDateTime when, const QCString& channel, const QC
     }
 }
 
+#ifdef Q_WS_QWS
 /*!
   Writes the system clock to the hardware clock.
 */
@@ -400,3 +411,6 @@ void Global::writeHWClock()
 	system("/sbin/hwclock --systohc"); // ##### UTC?
     }
 }
+#endif
+
+#include "alarmserver.moc"

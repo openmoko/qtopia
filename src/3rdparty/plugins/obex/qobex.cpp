@@ -41,7 +41,6 @@
 QObex::QObex()
   : ref( 0 )
 {
-    qDebug("Obex constructor");
     qir = new QIr();
 }
 

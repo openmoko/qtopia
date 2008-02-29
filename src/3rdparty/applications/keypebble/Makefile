@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -141,7 +147,6 @@ HEADERS =	d3des.h \
 		kvnc.h \
 		kvncconnectdlg.h \
 		kvncoptionsdlg.h \
-		version.h \
 		vncauth.h
 SOURCES =	d3des.c \
 		vncauth.c \
@@ -155,40 +160,40 @@ SOURCES =	d3des.c \
 		kvncconnectdlg.cpp \
 		kvncoptionsdlg.cpp \
 		main.cpp
-OBJECTS =	d3des.o \
-		vncauth.o \
-		krfbbuffer.o \
-		krfbcanvas.o \
-		krfbconnection.o \
-		krfbdecoder.o \
-		krfblogin.o \
-		krfboptions.o \
-		kvnc.o \
-		kvncconnectdlg.o \
-		kvncoptionsdlg.o \
-		main.o \
-		vncoptionsbase.o
+OBJECTS =	$(OBJECTS_DIR)/d3des.o \
+		$(OBJECTS_DIR)/vncauth.o \
+		$(OBJECTS_DIR)/krfbbuffer.o \
+		$(OBJECTS_DIR)/krfbcanvas.o \
+		$(OBJECTS_DIR)/krfbconnection.o \
+		$(OBJECTS_DIR)/krfbdecoder.o \
+		$(OBJECTS_DIR)/krfblogin.o \
+		$(OBJECTS_DIR)/krfboptions.o \
+		$(OBJECTS_DIR)/kvnc.o \
+		$(OBJECTS_DIR)/kvncconnectdlg.o \
+		$(OBJECTS_DIR)/kvncoptionsdlg.o \
+		$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/vncoptionsbase.o
 INTERFACES =    vncoptionsbase.ui
 UICDECLS =      vncoptionsbase.h
 UICIMPLS =      vncoptionsbase.cpp
-SRCMOC	=	moc_krfbbuffer.cpp \
-		moc_krfbcanvas.cpp \
-		moc_krfbconnection.cpp \
-		moc_krfbdecoder.cpp \
-		moc_krfblogin.cpp \
-		moc_kvnc.cpp \
-		moc_kvncconnectdlg.cpp \
-		moc_kvncoptionsdlg.cpp \
-		moc_vncoptionsbase.cpp
-OBJMOC	=	moc_krfbbuffer.o \
-		moc_krfbcanvas.o \
-		moc_krfbconnection.o \
-		moc_krfbdecoder.o \
-		moc_krfblogin.o \
-		moc_kvnc.o \
-		moc_kvncconnectdlg.o \
-		moc_kvncoptionsdlg.o \
-		moc_vncoptionsbase.o
+SRCMOC	=	$(MOC_DIR)/moc_krfbbuffer.cpp \
+		$(MOC_DIR)/moc_krfbcanvas.cpp \
+		$(MOC_DIR)/moc_krfbconnection.cpp \
+		$(MOC_DIR)/moc_krfbdecoder.cpp \
+		$(MOC_DIR)/moc_krfblogin.cpp \
+		$(MOC_DIR)/moc_kvnc.cpp \
+		$(MOC_DIR)/moc_kvncconnectdlg.cpp \
+		$(MOC_DIR)/moc_kvncoptionsdlg.cpp \
+		$(MOC_DIR)/moc_vncoptionsbase.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_krfbbuffer.o \
+		$(OBJECTS_DIR)/moc_krfbcanvas.o \
+		$(OBJECTS_DIR)/moc_krfbconnection.o \
+		$(OBJECTS_DIR)/moc_krfbdecoder.o \
+		$(OBJECTS_DIR)/moc_krfblogin.o \
+		$(OBJECTS_DIR)/moc_kvnc.o \
+		$(OBJECTS_DIR)/moc_kvncconnectdlg.o \
+		$(OBJECTS_DIR)/moc_kvncoptionsdlg.o \
+		$(OBJECTS_DIR)/moc_vncoptionsbase.o
 
 
 ####### Implicit rules
@@ -254,82 +259,80 @@ REQUIRES=
 
 ####### Compile
 
-d3des.o: d3des.c \
+$(OBJECTS_DIR)/d3des.o: d3des.c \
 		d3des.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/d3des.o d3des.c
 
-vncauth.o: vncauth.c \
+$(OBJECTS_DIR)/vncauth.o: vncauth.c \
 		vncauth.h \
 		d3des.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/vncauth.o vncauth.c
 
-krfbbuffer.o: krfbbuffer.cpp \
+$(OBJECTS_DIR)/krfbbuffer.o: krfbbuffer.cpp \
 		krfbdecoder.h \
 		krfbbuffer.h \
 		krfbserverinfo.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/krfbbuffer.o krfbbuffer.cpp
 
-krfbcanvas.o: krfbcanvas.cpp \
+$(OBJECTS_DIR)/krfbcanvas.o: krfbcanvas.cpp \
 		kvncconnectdlg.h \
 		krfbconnection.h \
 		krfbcanvas.h \
 		krfboptions.h \
-		krfbbuffer.h \
-		$(QPEDIR)/include/qpe/config.h
+		krfbbuffer.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/krfbcanvas.o krfbcanvas.cpp
 
-krfbconnection.o: krfbconnection.cpp \
+$(OBJECTS_DIR)/krfbconnection.o: krfbconnection.cpp \
 		krfbconnection.h \
 		krfblogin.h \
 		krfboptions.h \
 		krfbdecoder.h \
 		krfbbuffer.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/krfbconnection.o krfbconnection.cpp
 
-krfbdecoder.o: krfbdecoder.cpp \
+$(OBJECTS_DIR)/krfbdecoder.o: krfbdecoder.cpp \
 		krfbconnection.h \
 		krfboptions.h \
 		krfbserverinfo.h \
 		krfbdecoder.h \
-		krfbbuffer.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
+		krfbbuffer.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/krfbdecoder.o krfbdecoder.cpp
 
-krfblogin.o: krfblogin.cpp \
+$(OBJECTS_DIR)/krfblogin.o: krfblogin.cpp \
 		vncauth.h \
 		krfblogin.h \
 		krfbconnection.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/krfblogin.o krfblogin.cpp
 
-krfboptions.o: krfboptions.cpp \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
+$(OBJECTS_DIR)/krfboptions.o: krfboptions.cpp \
 		krfboptions.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/krfboptions.o krfboptions.cpp
 
-kvnc.o: kvnc.cpp \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/global.h \
+$(OBJECTS_DIR)/kvnc.o: kvnc.cpp \
 		kvnc.h \
 		krfbcanvas.h \
 		kvncoptionsdlg.h \
 		vncoptionsbase.h \
 		krfbconnection.h \
 		krfboptions.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/kvnc.o kvnc.cpp
 
-kvncconnectdlg.o: kvncconnectdlg.cpp \
-		$(QPEDIR)/include/qpe/config.h \
+$(OBJECTS_DIR)/kvncconnectdlg.o: kvncconnectdlg.cpp \
 		krfbconnection.h \
 		kvncoptionsdlg.h \
 		vncoptionsbase.h \
 		kvncconnectdlg.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/kvncconnectdlg.o kvncconnectdlg.cpp
 
-kvncoptionsdlg.o: kvncoptionsdlg.cpp \
+$(OBJECTS_DIR)/kvncoptionsdlg.o: kvncoptionsdlg.cpp \
 		krfboptions.h \
 		kvncoptionsdlg.h \
 		vncoptionsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/kvncoptionsdlg.o kvncoptionsdlg.cpp
 
-main.o: main.cpp \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
+$(OBJECTS_DIR)/main.o: main.cpp \
 		kvnc.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
 vncoptionsbase.h: vncoptionsbase.ui
 	$(UIC) vncoptionsbase.ui -o $(INTERFACE_DECL_PATH)/vncoptionsbase.h
@@ -337,72 +340,83 @@ vncoptionsbase.h: vncoptionsbase.ui
 vncoptionsbase.cpp: vncoptionsbase.ui
 	$(UIC) vncoptionsbase.ui -i vncoptionsbase.h -o vncoptionsbase.cpp
 
-vncoptionsbase.o: vncoptionsbase.cpp \
+$(OBJECTS_DIR)/vncoptionsbase.o: vncoptionsbase.cpp \
 		vncoptionsbase.h \
 		vncoptionsbase.ui
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/vncoptionsbase.o vncoptionsbase.cpp
 
-moc_krfbbuffer.o: moc_krfbbuffer.cpp \
+$(OBJECTS_DIR)/moc_krfbbuffer.o: $(MOC_DIR)/moc_krfbbuffer.cpp \
 		krfbbuffer.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_krfbbuffer.o $(MOC_DIR)/moc_krfbbuffer.cpp
 
-moc_krfbcanvas.o: moc_krfbcanvas.cpp \
+$(OBJECTS_DIR)/moc_krfbcanvas.o: $(MOC_DIR)/moc_krfbcanvas.cpp \
 		krfbcanvas.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_krfbcanvas.o $(MOC_DIR)/moc_krfbcanvas.cpp
 
-moc_krfbconnection.o: moc_krfbconnection.cpp \
+$(OBJECTS_DIR)/moc_krfbconnection.o: $(MOC_DIR)/moc_krfbconnection.cpp \
 		krfbconnection.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_krfbconnection.o $(MOC_DIR)/moc_krfbconnection.cpp
 
-moc_krfbdecoder.o: moc_krfbdecoder.cpp \
+$(OBJECTS_DIR)/moc_krfbdecoder.o: $(MOC_DIR)/moc_krfbdecoder.cpp \
 		krfbdecoder.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_krfbdecoder.o $(MOC_DIR)/moc_krfbdecoder.cpp
 
-moc_krfblogin.o: moc_krfblogin.cpp \
+$(OBJECTS_DIR)/moc_krfblogin.o: $(MOC_DIR)/moc_krfblogin.cpp \
 		krfblogin.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_krfblogin.o $(MOC_DIR)/moc_krfblogin.cpp
 
-moc_kvnc.o: moc_kvnc.cpp \
+$(OBJECTS_DIR)/moc_kvnc.o: $(MOC_DIR)/moc_kvnc.cpp \
 		kvnc.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_kvnc.o $(MOC_DIR)/moc_kvnc.cpp
 
-moc_kvncconnectdlg.o: moc_kvncconnectdlg.cpp \
+$(OBJECTS_DIR)/moc_kvncconnectdlg.o: $(MOC_DIR)/moc_kvncconnectdlg.cpp \
 		kvncconnectdlg.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_kvncconnectdlg.o $(MOC_DIR)/moc_kvncconnectdlg.cpp
 
-moc_kvncoptionsdlg.o: moc_kvncoptionsdlg.cpp \
+$(OBJECTS_DIR)/moc_kvncoptionsdlg.o: $(MOC_DIR)/moc_kvncoptionsdlg.cpp \
 		kvncoptionsdlg.h \
 		vncoptionsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_kvncoptionsdlg.o $(MOC_DIR)/moc_kvncoptionsdlg.cpp
 
-moc_vncoptionsbase.o: moc_vncoptionsbase.cpp \
+$(OBJECTS_DIR)/moc_vncoptionsbase.o: $(MOC_DIR)/moc_vncoptionsbase.cpp \
 		vncoptionsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_vncoptionsbase.o $(MOC_DIR)/moc_vncoptionsbase.cpp
 
-moc_krfbbuffer.cpp: krfbbuffer.h
-	$(MOC) krfbbuffer.h -o moc_krfbbuffer.cpp
+$(MOC_DIR)/moc_krfbbuffer.cpp: krfbbuffer.h
+	$(MOC) krfbbuffer.h -o $(MOC_DIR)/moc_krfbbuffer.cpp
 
-moc_krfbcanvas.cpp: krfbcanvas.h
-	$(MOC) krfbcanvas.h -o moc_krfbcanvas.cpp
+$(MOC_DIR)/moc_krfbcanvas.cpp: krfbcanvas.h
+	$(MOC) krfbcanvas.h -o $(MOC_DIR)/moc_krfbcanvas.cpp
 
-moc_krfbconnection.cpp: krfbconnection.h
-	$(MOC) krfbconnection.h -o moc_krfbconnection.cpp
+$(MOC_DIR)/moc_krfbconnection.cpp: krfbconnection.h
+	$(MOC) krfbconnection.h -o $(MOC_DIR)/moc_krfbconnection.cpp
 
-moc_krfbdecoder.cpp: krfbdecoder.h
-	$(MOC) krfbdecoder.h -o moc_krfbdecoder.cpp
+$(MOC_DIR)/moc_krfbdecoder.cpp: krfbdecoder.h
+	$(MOC) krfbdecoder.h -o $(MOC_DIR)/moc_krfbdecoder.cpp
 
-moc_krfblogin.cpp: krfblogin.h
-	$(MOC) krfblogin.h -o moc_krfblogin.cpp
+$(MOC_DIR)/moc_krfblogin.cpp: krfblogin.h
+	$(MOC) krfblogin.h -o $(MOC_DIR)/moc_krfblogin.cpp
 
-moc_kvnc.cpp: kvnc.h
-	$(MOC) kvnc.h -o moc_kvnc.cpp
+$(MOC_DIR)/moc_kvnc.cpp: kvnc.h
+	$(MOC) kvnc.h -o $(MOC_DIR)/moc_kvnc.cpp
 
-moc_kvncconnectdlg.cpp: kvncconnectdlg.h
-	$(MOC) kvncconnectdlg.h -o moc_kvncconnectdlg.cpp
+$(MOC_DIR)/moc_kvncconnectdlg.cpp: kvncconnectdlg.h
+	$(MOC) kvncconnectdlg.h -o $(MOC_DIR)/moc_kvncconnectdlg.cpp
 
-moc_kvncoptionsdlg.cpp: kvncoptionsdlg.h
-	$(MOC) kvncoptionsdlg.h -o moc_kvncoptionsdlg.cpp
+$(MOC_DIR)/moc_kvncoptionsdlg.cpp: kvncoptionsdlg.h
+	$(MOC) kvncoptionsdlg.h -o $(MOC_DIR)/moc_kvncoptionsdlg.cpp
 
-moc_vncoptionsbase.cpp: vncoptionsbase.h
-	$(MOC) vncoptionsbase.h -o moc_vncoptionsbase.cpp
+$(MOC_DIR)/moc_vncoptionsbase.cpp: vncoptionsbase.h
+	$(MOC) vncoptionsbase.h -o $(MOC_DIR)/moc_vncoptionsbase.cpp
 
 
 
 lupdate:
-	lupdate keypebble.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <keypebble.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease keypebble.pro
+	$(QPEDIR)/bin/qtopia-linstall keypebble.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

@@ -21,8 +21,8 @@
 #define DOCUMENT_LIST_H 
 
 
-#include <qpe/applnk.h>
-#include <qpe/storage.h>
+#include <qtopia/applnk.h>
+#include <qtopia/storage.h>
 #include <qcopchannel_qws.h>
 #include <qfile.h>
 #include <qfileinfo.h>

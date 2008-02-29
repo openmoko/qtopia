@@ -31,13 +31,14 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#ifndef Q_OS_WIN32
 #include <unistd.h>
+#endif
 
 #define QTOPIA_INTERNAL_LANGLIST
 #define QTOPIA_INTERNAL_CONFIG_BYTEARRAY
 #include "config.h"
 #include "global.h"
-
 
 /*!
   \internal
@@ -48,14 +49,44 @@ QString Config::configFilename(const QString& name, Domain d)
 	case File:
 	    return name;
 	case User: {
-	    QDir dir = (QString(getenv("HOME")) + "/Settings");
+	  QString homeDirPath = QDir::homeDirPath();
+#ifdef QTOPIA_DESKTOP
+	  homeDirPath += "/.palmtopcenter/";
+#endif
+
+	  QDir dir = (homeDirPath + "/Settings");
 	    if ( !dir.exists() )
+#ifndef Q_OS_WIN32
 		mkdir(dir.path().local8Bit(),0700);
+#else
+	        dir.mkdir(dir.path());
+#endif
 	    return dir.path() + "/" + name + ".conf";
 	}
     }
     return name;
 }
+
+/* This cannot be made public because of binary compat issues */
+void Config::read( QTextStream &s )
+{
+#if QT_VERSION <= 230 && defined(QT_NO_CODECS)
+    // The below should work, but doesn't in Qt 2.3.0
+    s.setCodec( QTextCodec::codecForMib( 106 ) );
+#else
+    s.setEncoding( QTextStream::UnicodeUTF8 );
+#endif
+
+    QStringList list = QStringList::split('\n', s.read() );
+
+    for ( QStringList::Iterator it = list.begin(); it != list.end(); ++it ) {
+        if ( !parse( *it ) ) {
+            git = groups.end();
+            return;
+        }
+    }
+}
+
 
 /*!
   \class Config config.h
@@ -104,6 +135,18 @@ Config::Config( const QString &name, Domain domain )
     lang = l[0];
     glang = l[1];
 }
+
+#ifdef QTOPIA_DESKTOP
+Config::Config( QTextStream &s, const QString &name, Domain domain )
+    : filename( configFilename(name,domain) )
+{
+    git = groups.end();
+    read( s );
+    QStringList l = Global::languageList();
+    lang = l[0];
+    glang = l[1];
+}
+#endif
 
 /*!
   Writes any changes to disk and destroys the in-memory object.
@@ -446,13 +489,13 @@ QByteArray Config::readByteArrayEntry(const QString& key, const QByteArray dflt)
 QByteArray Config::decodeBase64( const QString &encoded ) const
 {
   QByteArray buffer;
-  uint len = encoded.length();
+  int len = encoded.length();
   buffer.resize( len * 3 / 4 + 2);
   uint bufCount = 0;
-  uint pos = 0, decodedCount = 0;
+  int pos = 0, decodedCount = 0;
   char src[4];
   char *destPtr = buffer.data();
-  
+
   while (pos < len ) {
     decodedCount = 4;
     int x = 0;
@@ -469,7 +512,7 @@ QByteArray Config::decodeBase64( const QString &encoded ) const
       bufCount += decodedCount;
     }
   }
-  
+
   return buffer;
 }
 
@@ -578,11 +621,16 @@ void Config::write( const QString &fn )
 
     f.close();
     // now rename the file...
-    if ( rename( strNewFile, filename ) < 0 ) {
+    QDir dir;
+#ifdef Q_OS_WIN32
+   dir.remove(filename); // Windows will fail rename if file already exists
+#endif
+    if ( dir.rename( strNewFile, filename ) == FALSE ) {
 	qWarning( "problem renaming the file %s to %s", strNewFile.latin1(),
 		  filename.latin1() );
 	QFile::remove( strNewFile );
     }
+    changed = FALSE;
 }
 
 /*!
@@ -619,22 +667,8 @@ void Config::read()
     f.ungetch('[');
 
     QTextStream s( &f );
-#if QT_VERSION <= 230 && defined(QT_NO_CODECS)
-    // The below should work, but doesn't in Qt 2.3.0
-    s.setCodec( QTextCodec::codecForMib( 106 ) );
-#else
-    s.setEncoding( QTextStream::UnicodeUTF8 );
-#endif
-
-    QStringList list = QStringList::split('\n', s.read() );
+    read( s );
     f.close();
-
-    for ( QStringList::Iterator it = list.begin(); it != list.end(); ++it ) {
-        if ( !parse( *it ) ) {
-            git = groups.end();
-            return;
-        }
-    }
 }
 
 /*!
@@ -663,26 +697,26 @@ bool Config::parse( const QString &l )
 }
 
 /*!
- \internal 
+ \internal
  Encodes \a origData using base64 mapping and returns a QString containing the
  encoded form.
 */
 QString Config::encodeBase64(const QByteArray origData) {
   // follows simple algorithm from rsync code
   uchar *in = (uchar*)origData.data();
-  
+
   int inbytes = origData.size();
   int outbytes = ((inbytes * 8) + 5) / 6;
 //   int spacing = (outbytes-1)/76;
   int padding = 4-outbytes%4; if ( padding == 4 ) padding = 0;
-  
+
 //   QByteArray outbuf(outbytes+spacing+padding);
   QByteArray outbuf(outbytes+padding);
   uchar* out = (uchar*)outbuf.data();
 
   const char *b64 =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-  
+
   for (int i = 0; i < outbytes; i++) {
 //     if ( i && i%76==0 )
 //       *out++ = '\n';
@@ -705,7 +739,7 @@ QString Config::encodeBase64(const QByteArray origData) {
   ASSERT(out == (uchar*)outbuf.data() + outbuf.size() - padding);
   while ( padding-- )
     *out++='=';
-  
+
   return QString(outbuf);
 }
 

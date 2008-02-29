@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -131,24 +137,24 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 ####### Files
 
 HEADERS =	wordgame.h
-SOURCES =	main.cpp \
-		wordgame.cpp
-OBJECTS =	main.o \
-		wordgame.o \
-		newgamebase.o \
-		rulesbase.o
+SOURCES =	wordgame.cpp \
+		main.cpp
+OBJECTS =	$(OBJECTS_DIR)/wordgame.o \
+		$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/newgamebase.o \
+		$(OBJECTS_DIR)/rulesbase.o
 INTERFACES =    newgamebase.ui \
 		rulesbase.ui
 UICDECLS =      newgamebase.h \
 		rulesbase.h
 UICIMPLS =      newgamebase.cpp \
 		rulesbase.cpp
-SRCMOC	=	moc_wordgame.cpp \
-		moc_newgamebase.cpp \
-		moc_rulesbase.cpp
-OBJMOC	=	moc_wordgame.o \
-		moc_newgamebase.o \
-		moc_rulesbase.o
+SRCMOC	=	$(MOC_DIR)/moc_wordgame.cpp \
+		$(MOC_DIR)/moc_newgamebase.cpp \
+		$(MOC_DIR)/moc_rulesbase.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_wordgame.o \
+		$(OBJECTS_DIR)/moc_newgamebase.o \
+		$(OBJECTS_DIR)/moc_rulesbase.o
 
 
 ####### Implicit rules
@@ -214,27 +220,17 @@ REQUIRES=
 
 ####### Compile
 
-main.o: main.cpp \
+$(OBJECTS_DIR)/wordgame.o: wordgame.cpp \
 		wordgame.h \
 		newgamebase.h \
-		rulesbase.h \
-		$(QPEDIR)/include/qpe/qdawg.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
+		rulesbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/wordgame.o wordgame.cpp
 
-wordgame.o: wordgame.cpp \
+$(OBJECTS_DIR)/main.o: main.cpp \
 		wordgame.h \
 		newgamebase.h \
-		rulesbase.h \
-		$(QPEDIR)/include/qpe/qdawg.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/filemanager.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h
+		rulesbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
 newgamebase.h: newgamebase.ui
 	$(UIC) newgamebase.ui -o $(INTERFACE_DECL_PATH)/newgamebase.h
@@ -248,39 +244,43 @@ rulesbase.h: rulesbase.ui
 rulesbase.cpp: rulesbase.ui
 	$(UIC) rulesbase.ui -i rulesbase.h -o rulesbase.cpp
 
-newgamebase.o: newgamebase.cpp
+$(OBJECTS_DIR)/newgamebase.o: newgamebase.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/newgamebase.o newgamebase.cpp
 
-rulesbase.o: rulesbase.cpp
+$(OBJECTS_DIR)/rulesbase.o: rulesbase.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/rulesbase.o rulesbase.cpp
 
-moc_wordgame.o: moc_wordgame.cpp \
+$(OBJECTS_DIR)/moc_wordgame.o: $(MOC_DIR)/moc_wordgame.cpp \
 		wordgame.h \
 		newgamebase.h \
-		rulesbase.h \
-		$(QPEDIR)/include/qpe/qdawg.h \
-		$(QPEDIR)/include/qpe/applnk.h
-
-moc_newgamebase.o: moc_newgamebase.cpp \
-		newgamebase.h
-
-moc_rulesbase.o: moc_rulesbase.cpp \
 		rulesbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_wordgame.o $(MOC_DIR)/moc_wordgame.cpp
 
-moc_wordgame.cpp: wordgame.h
-	$(MOC) wordgame.h -o moc_wordgame.cpp
+$(OBJECTS_DIR)/moc_newgamebase.o: $(MOC_DIR)/moc_newgamebase.cpp \
+		newgamebase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_newgamebase.o $(MOC_DIR)/moc_newgamebase.cpp
 
-moc_newgamebase.cpp: newgamebase.h
-	$(MOC) newgamebase.h -o moc_newgamebase.cpp
+$(OBJECTS_DIR)/moc_rulesbase.o: $(MOC_DIR)/moc_rulesbase.cpp \
+		rulesbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_rulesbase.o $(MOC_DIR)/moc_rulesbase.cpp
 
-moc_rulesbase.cpp: rulesbase.h
-	$(MOC) rulesbase.h -o moc_rulesbase.cpp
+$(MOC_DIR)/moc_wordgame.cpp: wordgame.h
+	$(MOC) wordgame.h -o $(MOC_DIR)/moc_wordgame.cpp
+
+$(MOC_DIR)/moc_newgamebase.cpp: newgamebase.h
+	$(MOC) newgamebase.h -o $(MOC_DIR)/moc_newgamebase.cpp
+
+$(MOC_DIR)/moc_rulesbase.cpp: rulesbase.h
+	$(MOC) rulesbase.h -o $(MOC_DIR)/moc_rulesbase.cpp
 
 
 
 lupdate:
-	lupdate wordgame.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <wordgame.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease wordgame.pro
+	$(QPEDIR)/bin/qtopia-linstall wordgame.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

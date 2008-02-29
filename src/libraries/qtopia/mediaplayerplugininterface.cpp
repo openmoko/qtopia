@@ -17,10 +17,10 @@
 ** not clear to you.
 **
 **********************************************************************/
-#include <qpe/mediaplayerplugininterface.h>
+#include <qtopia/mediaplayerplugininterface.h>
 
 /*!
-    \class MediaPlayerDecoder <qpe/mediaplayerplugininterface.h>
+    \class MediaPlayerDecoder <qtopia/mediaplayerplugininterface.h>
     \brief The MediaPlayerDecoder class provides an abstract base class for
     Qtopia MediaPlayer decoder plugins.
 
@@ -421,20 +421,39 @@
 */
 
 /*!
-    \class MediaPlayerPluginInterface <qpe/mediaplayerplugininterface.h>
+    \class MediaPlayerDecoder_1_6 <qtopia/mediaplayerplugininterface.h>
+    \brief The MediaPlayerDecoder_1_6 class provides an extension to the
+    MediaPlayerDecoder class for Qtopia MediaPlayer decoder plugins.
+*/
+
+/*!
+    \fn virtual bool MediaPlayerDecoder_1_6::seekable() = 0
+
+    Returns if the stream is seekable or not. For streamed media, it is possible
+    that seeking may not be able to be implemented in the plugin therefore
+    the plugin returns FALSE, otherwise if it can it returns TRUE.
+*/
+
+/*!
+    \class MediaPlayerPluginInterface <qtopia/mediaplayerplugininterface.h>
     \brief The MediaPlayerPluginInterface class is used to access MediaPlayerDecoder objects.
 */
 
 /*!
     \fn virtual MediaPlayerDecoder *MediaPlayerPluginInterface::decoder() = 0
 
-    This function returns a MediaPlayerDecoder object.
+    This function returns a MediaPlayerDecoder object (or a MediaPlayerDecoder_1_6
+    extended MediaPlayerDecoder object if this interface returns that it supports
+    the 1_6 API extensions).
 */
 
 /*!
-    \fn virtual MediaPlayerDecoder *MediaPlayerPluginInterface::encoder() = 0
+    \fn virtual MediaPlayerEncoder *MediaPlayerPluginInterface::encoder() = 0
 
     This function returns a MediaPlayerEncoder object, however 
-    the MediaPlayerEncoder interface is yet to be defined.
+    the MediaPlayerEncoder interface is yet to be defined. Please refer to the
+    documentation on the MediaRecoderEncoder documentation which provides an
+    audio encoder API.
 */
+
 

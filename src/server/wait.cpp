@@ -20,7 +20,7 @@
 
 #include "wait.h"
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
 #include <qwidget.h>
 #include <qpixmap.h>

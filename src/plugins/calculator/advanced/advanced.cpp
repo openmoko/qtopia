@@ -21,102 +21,139 @@
 #include <qtopia/calc/doubleinstruction.h>
 #include <qlayout.h>
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
 FormAdvanced::FormAdvanced(QWidget *parent,const char *name,WFlags fl)
 :QWidget(parent,name,fl) {
     if ( !name )
 	setName( "Advanced" );
-    resize( 384, 476 );
-    setSizePolicy( QSizePolicy( (QSizePolicy::SizeType)7, (QSizePolicy::SizeType)7, sizePolicy().hasHeightForWidth() ) );
+    QSizePolicy mySizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred,FALSE);
 
     QVBoxLayout *vbl = new QVBoxLayout(this);
     AdvancedLayout = new QGridLayout( vbl, 2, 4, 0, "AdvancedLayout");
+    
+    QFont fonty;
+    int fontSize = fonty.pixelSize();
+    if (fontSize == 12)
+	fontSize = 14;
 
     // Row 1
     PBMPlus = new QToolButton(this,"PBM+");
+    PBMPlus->setSizePolicy(mySizePolicy);
     PBMPlus->setText(tr("M+"));
     AdvancedLayout->addWidget(PBMPlus,0,0);
 
     PBMR = new QToolButton(this,"PBMR");
+    PBMPlus->setSizePolicy(mySizePolicy);
     PBMR->setText(tr("MR"));
     AdvancedLayout->addWidget(PBMR,0,1);
 
     PBMC = new QToolButton(this,"PBMC");
+    PBMPlus->setSizePolicy(mySizePolicy);
     PBMC->setText(tr("MC"));
     AdvancedLayout->addWidget(PBMC,0,2);
 
     PBC = new QToolButton(this,"PBC");
+    PBMPlus->setSizePolicy(mySizePolicy);
     PBC->setText(tr("CE/C"));
     AdvancedLayout->addWidget(PBC,0,3);
 
     // Row 2
     PBASin = new QToolButton(this,"PBASin");
+    PBMPlus->setSizePolicy(mySizePolicy);
     PBASin->setText(tr("asin"));
     AdvancedLayout->addWidget(PBASin,1,0);
 
     PBACos = new QToolButton(this,"PBACos");
+    PBMPlus->setSizePolicy(mySizePolicy);
     PBACos->setText(tr("acos"));
     AdvancedLayout->addWidget(PBACos,1,1);
 
     PBATan = new QToolButton(this,"PBATan");
+    PBMPlus->setSizePolicy(mySizePolicy);
     PBATan->setText(tr("atan"));
     AdvancedLayout->addWidget(PBATan,1,2);
 
     PBDel = new QToolButton(this,"PBDel");
+    PBMPlus->setSizePolicy(mySizePolicy);
     PBDel->setText(tr("<-"));
     AdvancedLayout->addWidget(PBDel,1,3);
 
     // Row 3
     PBSin = new QToolButton(this,"PBSin");
+    PBMPlus->setSizePolicy(mySizePolicy);
     PBSin->setText(tr("sin"));
     AdvancedLayout->addWidget(PBSin,2,0);
 
     PBCos = new QToolButton(this,"PBCos");
+    PBMPlus->setSizePolicy(mySizePolicy);
     PBCos->setText(tr("cos"));
     AdvancedLayout->addWidget(PBCos,2,1);
 
     PBTan = new QToolButton(this,"PBTan");
+    PBMPlus->setSizePolicy(mySizePolicy);
     PBTan->setText(tr("tan"));
     AdvancedLayout->addWidget(PBTan,2,2);
 
-    PBOneOverX = new QToolButton(this,"PBOneOverX");
-    PBOneOverX->setPixmap(Resource::findPixmap("calculator/onebyx"));
-    AdvancedLayout->addWidget(PBOneOverX,2,3);
+    PBFactorial = new QToolButton(this,"PBTan");
+    PBMPlus->setSizePolicy(mySizePolicy);
+    PBFactorial->setText(tr("n!"));
+    AdvancedLayout->addWidget(PBFactorial,2,3);
 
     // Row 4
-    PBLog = new QToolButton(this,"PBLog");
-    PBLog->setText(tr("log"));
-    AdvancedLayout->addWidget(PBLog,3,0);
+    PBSquareRoot = new QToolButton(this,"PBSquareRoot");
+    PBMPlus->setSizePolicy(mySizePolicy);
+    QString fontSizeName;
+    fontSizeName.setNum(fontSize);
+    fontSizeName.prepend("calculator/squareroot-");
+    PBSquareRoot->setPixmap(Resource::findPixmap(fontSizeName));
+    AdvancedLayout->addWidget(PBSquareRoot,3,0);
+
+    PBXRootY = new QToolButton(this,"PBXRootY");
+    PBMPlus->setSizePolicy(mySizePolicy);
+    fontSizeName.setNum(fontSize);
+    fontSizeName.prepend("calculator/xrooty-");
+    PBXRootY->setPixmap(Resource::loadPixmap(fontSizeName));
+    AdvancedLayout->addWidget(PBXRootY,3,1);
 
     PBLn = new QToolButton(this,"PBLn");
+    PBMPlus->setSizePolicy(mySizePolicy);
     PBLn->setText(tr("ln"));
-    AdvancedLayout->addWidget(PBLn,3,1);
-
-    PBFactorial = new QToolButton(this,"PBFactorial");
-    PBFactorial->setText(tr("x!"));
-    AdvancedLayout->addWidget(PBFactorial,3,2);
+    AdvancedLayout->addWidget(PBLn,3,2);
 
     PBNegate = new QToolButton(this,"PBNegate");
+    PBMPlus->setSizePolicy(mySizePolicy);
     PBNegate->setText(tr("+/-"));
     AdvancedLayout->addWidget(PBNegate,3,3);
 
     // Row 5
     PBSquare = new QToolButton(this,"PBSquare");
-    PBSquare->setPixmap(Resource::findPixmap("calculator/xsquared"));
+    PBMPlus->setSizePolicy(mySizePolicy);
+    fontSizeName.setNum(fontSize);
+    fontSizeName.prepend("calculator/xsquared-");
+    PBSquare->setPixmap(Resource::findPixmap(fontSizeName));
     AdvancedLayout->addWidget(PBSquare,4,0);
 
     PBPow = new QToolButton(this,"PBPow");
-    PBPow->setPixmap(Resource::loadPixmap("calculator/xpowy"));
+    PBMPlus->setSizePolicy(mySizePolicy);
+    fontSizeName.setNum(fontSize);
+    fontSizeName.prepend("calculator/xpowy-");
+    PBPow->setPixmap(Resource::loadPixmap(fontSizeName));
     AdvancedLayout->addWidget(PBPow,4,1);
 
-    PBSquareRoot = new QToolButton(this,"PBSquareRoot");
-    PBSquareRoot->setPixmap(Resource::findPixmap("calculator/squareroot"));
-    AdvancedLayout->addWidget(PBSquareRoot,4,2);
+    PBLog = new QToolButton(this,"PBLog");
+    PBMPlus->setSizePolicy(mySizePolicy);
+    fontSizeName.setNum(fontSize);
+    fontSizeName.prepend("calculator/epowx-");
+    PBLog->setPixmap(Resource::findPixmap(fontSizeName));
+    AdvancedLayout->addWidget(PBLog,4,2);
 
-    PBXRootY = new QToolButton(this,"PBXRootY");
-    PBXRootY->setPixmap(Resource::loadPixmap("calculator/xrooty"));
-    AdvancedLayout->addWidget(PBXRootY,4,3);
+    PBOneOverX = new QToolButton(this,"PBOneOverX");
+    PBMPlus->setSizePolicy(mySizePolicy);
+    fontSizeName.setNum(fontSize);
+    fontSizeName.prepend("calculator/onebyx-");
+    PBOneOverX->setPixmap(Resource::findPixmap(fontSizeName));
+    AdvancedLayout->addWidget(PBOneOverX,4,3);
 
     connect (PBMR, SIGNAL(clicked()), this, SLOT(MRClicked()));
     connect (PBMC, SIGNAL(clicked()), this, SLOT(MCClicked()));
@@ -148,68 +185,68 @@ FormAdvanced::FormAdvanced(QWidget *parent,const char *name,WFlags fl)
 }
 
 void FormAdvanced::showEvent ( QShowEvent *e ) {
-    sys.setAccType(new DoubleData());
+    systemEngine->setAccType("DOUBLE");
     QWidget::showEvent(e);
 }
 void FormAdvanced::MCClicked() {
-    sys.memoryReset();
+    systemEngine->memoryReset();
 }
 void FormAdvanced::MRClicked() {
-    sys.memoryRecall();
+    systemEngine->memoryRecall();
 }
 void FormAdvanced::MPlusClicked() {
-    sys.memorySave();
+    systemEngine->memorySave();
 }
 void FormAdvanced::CClicked() {
-    sys.dualReset();
+    systemEngine->dualReset();
 }
 
 void FormAdvanced::aSinClicked() {
-    sys.pushInstruction(new DoubleASin());
+    systemEngine->pushInstruction(new DoubleASin());
 }
 void FormAdvanced::aCosClicked() {
-    sys.pushInstruction(new DoubleACos());
+    systemEngine->pushInstruction(new DoubleACos());
 }
 void FormAdvanced::aTanClicked() {
-    sys.pushInstruction(new DoubleATan());
+    systemEngine->pushInstruction(new DoubleATan());
 }
 void FormAdvanced::DelClicked() {
-    sys.delChar();
+    systemEngine->delChar();
 }
 
 void FormAdvanced::SinClicked() {
-    sys.pushInstruction(new DoubleSin());
+    systemEngine->pushInstruction(new DoubleSin());
 }
 void FormAdvanced::CosClicked() {
-    sys.pushInstruction(new DoubleCos());
+    systemEngine->pushInstruction(new DoubleCos());
 }
 void FormAdvanced::TanClicked() {
-    sys.pushInstruction(new DoubleTan());
+    systemEngine->pushInstruction(new DoubleTan());
 }
 void FormAdvanced::OneOverXClicked() {
-    sys.pushInstruction(new DoubleOneOverX());
+    systemEngine->pushInstruction(new DoubleOneOverX());
 }
 void FormAdvanced::LogClicked() {
-    sys.pushInstruction(new DoubleLog());
+    systemEngine->pushInstruction(new DoubleExp());
 }
 void FormAdvanced::LnClicked() {
-    sys.pushInstruction(new DoubleLn());
+    systemEngine->pushInstruction(new DoubleLn());
 }
 void FormAdvanced::FactorialClicked() {
-    sys.pushInstruction(new DoubleFactorial());
+    systemEngine->pushInstruction(new DoubleFactorial());
 }
 void FormAdvanced::NegateClicked() {
-    sys.pushInstruction(new DoubleNegate());
+    systemEngine->pushInstruction(new DoubleNegate());
 }
 void FormAdvanced::SquareClicked() {
-    sys.pushInstruction(new DoubleSquare());
+    systemEngine->pushInstruction(new DoubleSquare());
 }
 void FormAdvanced::PowClicked() {
-    sys.pushInstruction(new DoublePow());
+    systemEngine->pushInstruction(new DoublePow());
 }
 void FormAdvanced::SquareRootClicked() {
-    sys.pushInstruction(new DoubleSquareRoot());
+    systemEngine->pushInstruction(new DoubleSquareRoot());
 }
 void FormAdvanced::XRootYClicked() {
-    sys.pushInstruction(new DoubleXRootY());
+    systemEngine->pushInstruction(new DoubleXRootY());
 }

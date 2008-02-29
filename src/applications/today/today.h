@@ -33,7 +33,7 @@
 #include <qtopia/qlibrary.h>
 #include <qtopia/todayplugininterface.h>
 
-
+class QTimer;
 
 /*  Browser (impl. to catch setSource)	*/
 class Browser: public QTextBrowser
@@ -79,6 +79,7 @@ protected slots:
     void optionButtonClicked();
     void settingsMenuClicked(int id);
     void reload();
+    void dayChange(void);
 
 private:
     void init();
@@ -91,9 +92,12 @@ private:
     void sort();
     void updateView();
 
+    void startDayTimer(void);
+
 private:
     Browser *todayView;
     QPopupMenu *pluginSettings;
+    QTimer  *daytimer;
 };
 
 class ConfigDialog: public QDialog

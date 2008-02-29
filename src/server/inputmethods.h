@@ -22,7 +22,7 @@
 #define __INPUT_METHODS_H__
 
 
-#include <qpe/inputmethodinterface.h>
+#include <qtopia/inputmethodinterface.h>
 
 #include <qwidget.h>
 #include <qvaluelist.h>
@@ -74,10 +74,14 @@ private slots:
     void showKbd( bool );
     void resetStates();
     void sendKey( ushort unicode, ushort scancode, ushort modifiers, bool, bool );
+    void qcopReceive( const QCString &msg, const QByteArray &data );
 
 private:
     void chooseMethod(InputMethod* im);
     void chooseKeyboard(InputMethod* im);
+    void updateKeyboards(InputMethod *im);
+
+private:
     QToolButton *kbdButton;
     QToolButton *kbdChoice;
     QWidgetStack *imButton; // later will be widget stack

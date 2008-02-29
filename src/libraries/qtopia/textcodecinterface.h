@@ -21,7 +21,7 @@
 #define TEXTCODECINTERFACE_H
 
 #include <qstringlist.h>
-#include <qpe/qcom.h>
+#include <qtopia/qcom.h>
 
 class QTextCodec;
 
@@ -31,7 +31,7 @@ class QTextCodec;
 #endif
 #endif
 
-struct TextCodecInterface : public QUnknownInterface
+struct QTOPIA_EXPORT TextCodecInterface : public QUnknownInterface
 {
 public:
     virtual QStringList names() const = 0;

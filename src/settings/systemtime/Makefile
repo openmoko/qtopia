@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -133,13 +139,13 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 HEADERS =	settime.h
 SOURCES =	settime.cpp \
 		main.cpp
-OBJECTS =	settime.o \
-		main.o
+OBJECTS =	$(OBJECTS_DIR)/settime.o \
+		$(OBJECTS_DIR)/main.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
-SRCMOC	=	moc_settime.cpp
-OBJMOC	=	moc_settime.o
+SRCMOC	=	$(MOC_DIR)/moc_settime.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_settime.o
 
 
 ####### Implicit rules
@@ -205,45 +211,29 @@ REQUIRES=
 
 ####### Compile
 
-settime.o: settime.cpp \
-		settime.h \
-		$(QPEDIR)/include/qpe/timestring.h \
-		$(QPEDIR)/include/qtopia/alarmserver.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/config.h \
-		$(QPEDIR)/include/qtopia/private/event.h \
-		$(QPEDIR)/include/qtopia/private/palmtoprecord.h \
-		$(QPEDIR)/include/qtopia/timeconversion.h \
-		$(QPEDIR)/include/qtopia/datebookdb.h \
-		$(QPEDIR)/include/qtopia/datebookmonth.h \
-		$(QPEDIR)/include/qtopia/global.h \
-		$(QPEDIR)/include/qtopia/resource.h \
-		$(QPEDIR)/include/qtopia/tzselect.h \
-		$(QPEDIR)/include/qtopia/timestring.h \
-		$(QPEDIR)/include/qtopia/qpedialog.h \
-		$(QPEDIR)/include/qtopia/qcopenvelope_qws.h
+$(OBJECTS_DIR)/settime.o: settime.cpp \
+		settime.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/settime.o settime.cpp
 
-main.o: main.cpp \
-		settime.h \
-		$(QPEDIR)/include/qpe/timestring.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
+$(OBJECTS_DIR)/main.o: main.cpp \
+		settime.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
-moc_settime.o: moc_settime.cpp \
-		settime.h \
-		$(QPEDIR)/include/qpe/timestring.h
+$(OBJECTS_DIR)/moc_settime.o: $(MOC_DIR)/moc_settime.cpp \
+		settime.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_settime.o $(MOC_DIR)/moc_settime.cpp
 
-moc_settime.cpp: settime.h
-	$(MOC) settime.h -o moc_settime.cpp
+$(MOC_DIR)/moc_settime.cpp: settime.h
+	$(MOC) settime.h -o $(MOC_DIR)/moc_settime.cpp
 
 
 
 lupdate:
-	lupdate systemtime.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <systemtime.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease systemtime.pro
+	$(QPEDIR)/bin/qtopia-linstall systemtime.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

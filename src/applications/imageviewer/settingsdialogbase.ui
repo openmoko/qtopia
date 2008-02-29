@@ -11,8 +11,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>246</width>
-            <height>201</height>
+            <width>238</width>
+            <height>283</height>
         </rect>
     </property>
     <property stdset="1">
@@ -25,170 +25,215 @@
     <property>
         <name>layoutSpacing</name>
     </property>
-    <vbox>
+    <widget>
+        <class>QGroupBox</class>
         <property stdset="1">
-            <name>margin</name>
-            <number>6</number>
+            <name>name</name>
+            <cstring>GroupBox1</cstring>
         </property>
         <property stdset="1">
-            <name>spacing</name>
-            <number>6</number>
+            <name>geometry</name>
+            <rect>
+                <x>11</x>
+                <y>11</y>
+                <width>220</width>
+                <height>186</height>
+            </rect>
         </property>
-        <widget>
-            <class>QGroupBox</class>
+        <property stdset="1">
+            <name>title</name>
+            <string>Slide Show</string>
+        </property>
+        <property>
+            <name>layoutMargin</name>
+        </property>
+        <property>
+            <name>layoutSpacing</name>
+        </property>
+        <vbox>
             <property stdset="1">
-                <name>name</name>
-                <cstring>GroupBox1</cstring>
+                <name>margin</name>
+                <number>11</number>
             </property>
             <property stdset="1">
-                <name>title</name>
-                <string>Slide Show</string>
+                <name>spacing</name>
+                <number>6</number>
             </property>
-            <property>
-                <name>layoutMargin</name>
-            </property>
-            <property>
-                <name>layoutSpacing</name>
-            </property>
-            <vbox>
+            <widget>
+                <class>QLayoutWidget</class>
                 <property stdset="1">
-                    <name>margin</name>
-                    <number>11</number>
+                    <name>name</name>
+                    <cstring>Layout3</cstring>
                 </property>
-                <property stdset="1">
-                    <name>spacing</name>
-                    <number>6</number>
-                </property>
-                <widget>
-                    <class>QLayoutWidget</class>
+                <grid>
                     <property stdset="1">
-                        <name>name</name>
-                        <cstring>Layout3</cstring>
+                        <name>margin</name>
+                        <number>0</number>
                     </property>
-                    <grid>
+                    <property stdset="1">
+                        <name>spacing</name>
+                        <number>6</number>
+                    </property>
+                    <widget row="0"  column="0"  rowspan="1"  colspan="2" >
+                        <class>QLabel</class>
                         <property stdset="1">
-                            <name>margin</name>
-                            <number>0</number>
+                            <name>name</name>
+                            <cstring>TextLabel1</cstring>
                         </property>
                         <property stdset="1">
-                            <name>spacing</name>
-                            <number>6</number>
+                            <name>text</name>
+                            <string>Delay between pictures</string>
                         </property>
-                        <widget row="0"  column="0"  rowspan="1"  colspan="2" >
-                            <class>QLabel</class>
-                            <property stdset="1">
-                                <name>name</name>
-                                <cstring>TextLabel1</cstring>
-                            </property>
-                            <property stdset="1">
-                                <name>text</name>
-                                <string>Delay between pictures</string>
-                            </property>
-                        </widget>
-                        <widget row="1"  column="0" >
-                            <class>QSlider</class>
-                            <property stdset="1">
-                                <name>name</name>
-                                <cstring>delaySlider</cstring>
-                            </property>
-                            <property stdset="1">
-                                <name>minValue</name>
-                                <number>5</number>
-                            </property>
-                            <property stdset="1">
-                                <name>maxValue</name>
-                                <number>60</number>
-                            </property>
-                            <property stdset="1">
-                                <name>lineStep</name>
-                                <number>5</number>
-                            </property>
-                            <property stdset="1">
-                                <name>orientation</name>
-                                <enum>Horizontal</enum>
-                            </property>
-                            <property stdset="1">
-                                <name>tickmarks</name>
-                                <enum>Right</enum>
-                            </property>
-                            <property stdset="1">
-                                <name>tickInterval</name>
-                                <number>10</number>
-                            </property>
-                        </widget>
-                        <widget row="1"  column="1" >
-                            <class>QLabel</class>
-                            <property stdset="1">
-                                <name>name</name>
-                                <cstring>delayText</cstring>
-                            </property>
-                            <property stdset="1">
-                                <name>minimumSize</name>
-                                <size>
-                                    <width>25</width>
-                                    <height>0</height>
-                                </size>
-                            </property>
-                            <property stdset="1">
-                                <name>text</name>
-                                <string>s</string>
-                            </property>
-                            <property stdset="1">
-                                <name>alignment</name>
-                                <set>AlignVCenter|AlignRight</set>
-                            </property>
-                            <property>
-                                <name>hAlign</name>
-                            </property>
-                        </widget>
-                    </grid>
-                </widget>
-                <widget>
-                    <class>QCheckBox</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>repeatCheck</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Repeat slideshow</string>
-                    </property>
-                </widget>
-                <widget>
-                    <class>QCheckBox</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>reverseCheck</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Show pictures in reverse</string>
-                    </property>
-                </widget>
-            </vbox>
-        </widget>
-        <widget>
-            <class>QCheckBox</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>rotateCheck</cstring>
-            </property>
-            <property stdset="1">
-                <name>text</name>
-                <string>Load pictures rotated 90 degrees</string>
-            </property>
-        </widget>
-        <widget>
-            <class>QCheckBox</class>
-            <property stdset="1">
-                <name>name</name>
-                <cstring>fastLoadCheck</cstring>
-            </property>
-            <property stdset="1">
-                <name>text</name>
-                <string>Fast load pictures</string>
-            </property>
-        </widget>
-    </vbox>
+                    </widget>
+                    <widget row="1"  column="0" >
+                        <class>QSlider</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>delaySlider</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>minValue</name>
+                            <number>5</number>
+                        </property>
+                        <property stdset="1">
+                            <name>maxValue</name>
+                            <number>60</number>
+                        </property>
+                        <property stdset="1">
+                            <name>lineStep</name>
+                            <number>5</number>
+                        </property>
+                        <property stdset="1">
+                            <name>orientation</name>
+                            <enum>Horizontal</enum>
+                        </property>
+                        <property stdset="1">
+                            <name>tickmarks</name>
+                            <enum>Right</enum>
+                        </property>
+                        <property stdset="1">
+                            <name>tickInterval</name>
+                            <number>10</number>
+                        </property>
+                    </widget>
+                    <widget row="1"  column="1" >
+                        <class>QLabel</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>delayText</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>minimumSize</name>
+                            <size>
+                                <width>25</width>
+                                <height>0</height>
+                            </size>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>s</string>
+                        </property>
+                        <property stdset="1">
+                            <name>alignment</name>
+                            <set>AlignVCenter|AlignRight</set>
+                        </property>
+                        <property>
+                            <name>hAlign</name>
+                        </property>
+                    </widget>
+                </grid>
+            </widget>
+            <widget>
+                <class>QCheckBox</class>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>repeatCheck</cstring>
+                </property>
+                <property stdset="1">
+                    <name>text</name>
+                    <string>Repeat slideshow</string>
+                </property>
+            </widget>
+            <widget>
+                <class>QCheckBox</class>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>reverseCheck</cstring>
+                </property>
+                <property stdset="1">
+                    <name>text</name>
+                    <string>Show pictures in reverse</string>
+                </property>
+            </widget>
+        </vbox>
+    </widget>
+    <widget>
+        <class>QCheckBox</class>
+        <property stdset="1">
+            <name>name</name>
+            <cstring>fastLoadCheck</cstring>
+        </property>
+        <property stdset="1">
+            <name>geometry</name>
+            <rect>
+                <x>11</x>
+                <y>253</y>
+                <width>220</width>
+                <height>19</height>
+            </rect>
+        </property>
+        <property stdset="1">
+            <name>text</name>
+            <string>Fast load pictures</string>
+        </property>
+    </widget>
+    <widget>
+        <class>QCheckBox</class>
+        <property stdset="1">
+            <name>name</name>
+            <cstring>rotateCheck</cstring>
+        </property>
+        <property stdset="1">
+            <name>geometry</name>
+            <rect>
+                <x>10</x>
+                <y>210</y>
+                <width>220</width>
+                <height>19</height>
+            </rect>
+        </property>
+        <property stdset="1">
+            <name>text</name>
+            <string>Rotate pictures to fit screen</string>
+        </property>
+    </widget>
+    <widget>
+        <class>QCheckBox</class>
+        <property stdset="1">
+            <name>name</name>
+            <cstring>clockwiseCheck</cstring>
+        </property>
+        <property stdset="1">
+            <name>geometry</name>
+            <rect>
+                <x>10</x>
+                <y>230</y>
+                <width>220</width>
+                <height>19</height>
+            </rect>
+        </property>
+        <property stdset="1">
+            <name>text</name>
+            <string>Rotate clockwise</string>
+        </property>
+    </widget>
 </widget>
+<connections>
+    <connection>
+        <sender>rotateCheck</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>clockwiseCheck</receiver>
+        <slot>setEnabled(bool)</slot>
+    </connection>
+</connections>
 </UI>

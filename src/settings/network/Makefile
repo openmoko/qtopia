@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -135,25 +141,25 @@ HEADERS =	networksettings.h \
 SOURCES =	main.cpp \
 		networksettings.cpp \
 		addnetworksetting.cpp
-OBJECTS =	main.o \
-		networksettings.o \
-		addnetworksetting.o \
-		addnetworksettingbase.o \
-		networksettingsbase.o
+OBJECTS =	$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/networksettings.o \
+		$(OBJECTS_DIR)/addnetworksetting.o \
+		$(OBJECTS_DIR)/addnetworksettingbase.o \
+		$(OBJECTS_DIR)/networksettingsbase.o
 INTERFACES =    addnetworksettingbase.ui \
 		networksettingsbase.ui
 UICDECLS =      addnetworksettingbase.h \
 		networksettingsbase.h
 UICIMPLS =      addnetworksettingbase.cpp \
 		networksettingsbase.cpp
-SRCMOC	=	moc_networksettings.cpp \
-		moc_addnetworksetting.cpp \
-		moc_addnetworksettingbase.cpp \
-		moc_networksettingsbase.cpp
-OBJMOC	=	moc_networksettings.o \
-		moc_addnetworksetting.o \
-		moc_addnetworksettingbase.o \
-		moc_networksettingsbase.o
+SRCMOC	=	$(MOC_DIR)/moc_networksettings.cpp \
+		$(MOC_DIR)/moc_addnetworksetting.cpp \
+		$(MOC_DIR)/moc_addnetworksettingbase.cpp \
+		$(MOC_DIR)/moc_networksettingsbase.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_networksettings.o \
+		$(OBJECTS_DIR)/moc_addnetworksetting.o \
+		$(OBJECTS_DIR)/moc_addnetworksettingbase.o \
+		$(OBJECTS_DIR)/moc_networksettingsbase.o
 
 
 ####### Implicit rules
@@ -219,40 +225,24 @@ REQUIRES=
 
 ####### Compile
 
-main.o: main.cpp \
+$(OBJECTS_DIR)/main.o: main.cpp \
 		networksettings.h \
-		networksettingsbase.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
+		networksettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
-networksettings.o: networksettings.cpp \
+$(OBJECTS_DIR)/networksettings.o: networksettings.cpp \
 		networksettings.h \
 		networksettingsbase.h \
 		addnetworksetting.h \
-		addnetworksettingbase.h \
-		$(QPEDIR)/include/qpe/networkinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qpe/network.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qpe/qlibrary.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qpe/qpemessagebox.h
+		addnetworksettingbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/networksettings.o networksettings.cpp
 
-addnetworksetting.o: addnetworksetting.cpp \
+$(OBJECTS_DIR)/addnetworksetting.o: addnetworksetting.cpp \
 		addnetworksetting.h \
 		addnetworksettingbase.h \
 		networksettings.h \
-		networksettingsbase.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/network.h
+		networksettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/addnetworksetting.o addnetworksetting.cpp
 
 addnetworksettingbase.h: addnetworksettingbase.ui
 	$(UIC) addnetworksettingbase.ui -o $(INTERFACE_DECL_PATH)/addnetworksettingbase.h
@@ -266,43 +256,50 @@ networksettingsbase.h: networksettingsbase.ui
 networksettingsbase.cpp: networksettingsbase.ui
 	$(UIC) networksettingsbase.ui -i networksettingsbase.h -o networksettingsbase.cpp
 
-addnetworksettingbase.o: addnetworksettingbase.cpp
+$(OBJECTS_DIR)/addnetworksettingbase.o: addnetworksettingbase.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/addnetworksettingbase.o addnetworksettingbase.cpp
 
-networksettingsbase.o: networksettingsbase.cpp
+$(OBJECTS_DIR)/networksettingsbase.o: networksettingsbase.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/networksettingsbase.o networksettingsbase.cpp
 
-moc_networksettings.o: moc_networksettings.cpp \
+$(OBJECTS_DIR)/moc_networksettings.o: $(MOC_DIR)/moc_networksettings.cpp \
 		networksettings.h \
 		networksettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_networksettings.o $(MOC_DIR)/moc_networksettings.cpp
 
-moc_addnetworksetting.o: moc_addnetworksetting.cpp \
+$(OBJECTS_DIR)/moc_addnetworksetting.o: $(MOC_DIR)/moc_addnetworksetting.cpp \
 		addnetworksetting.h \
 		addnetworksettingbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_addnetworksetting.o $(MOC_DIR)/moc_addnetworksetting.cpp
 
-moc_addnetworksettingbase.o: moc_addnetworksettingbase.cpp \
+$(OBJECTS_DIR)/moc_addnetworksettingbase.o: $(MOC_DIR)/moc_addnetworksettingbase.cpp \
 		addnetworksettingbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_addnetworksettingbase.o $(MOC_DIR)/moc_addnetworksettingbase.cpp
 
-moc_networksettingsbase.o: moc_networksettingsbase.cpp \
+$(OBJECTS_DIR)/moc_networksettingsbase.o: $(MOC_DIR)/moc_networksettingsbase.cpp \
 		networksettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_networksettingsbase.o $(MOC_DIR)/moc_networksettingsbase.cpp
 
-moc_networksettings.cpp: networksettings.h
-	$(MOC) networksettings.h -o moc_networksettings.cpp
+$(MOC_DIR)/moc_networksettings.cpp: networksettings.h
+	$(MOC) networksettings.h -o $(MOC_DIR)/moc_networksettings.cpp
 
-moc_addnetworksetting.cpp: addnetworksetting.h
-	$(MOC) addnetworksetting.h -o moc_addnetworksetting.cpp
+$(MOC_DIR)/moc_addnetworksetting.cpp: addnetworksetting.h
+	$(MOC) addnetworksetting.h -o $(MOC_DIR)/moc_addnetworksetting.cpp
 
-moc_addnetworksettingbase.cpp: addnetworksettingbase.h
-	$(MOC) addnetworksettingbase.h -o moc_addnetworksettingbase.cpp
+$(MOC_DIR)/moc_addnetworksettingbase.cpp: addnetworksettingbase.h
+	$(MOC) addnetworksettingbase.h -o $(MOC_DIR)/moc_addnetworksettingbase.cpp
 
-moc_networksettingsbase.cpp: networksettingsbase.h
-	$(MOC) networksettingsbase.h -o moc_networksettingsbase.cpp
+$(MOC_DIR)/moc_networksettingsbase.cpp: networksettingsbase.h
+	$(MOC) networksettingsbase.h -o $(MOC_DIR)/moc_networksettingsbase.cpp
 
 
 
 lupdate:
-	lupdate network.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <network.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease network.pro
+	$(QPEDIR)/bin/qtopia-linstall network.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

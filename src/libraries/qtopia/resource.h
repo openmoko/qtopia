@@ -20,12 +20,13 @@
 #ifndef PIXMAPLOADER_H
 #define PIXMAPLOADER_H
 
+#include <qtopia/qpeglobal.h>
 #include <qimage.h>
 #include <qbitmap.h>
 #include <qiconset.h>
 #include <qstringlist.h>
 
-class Resource
+class QTOPIA_EXPORT Resource
 {
 public:
     Resource() {}
@@ -41,17 +42,6 @@ public:
     static QString findSound( const QString &name );
     static QStringList allSounds();
 };
-
-// Inline for compatibility with SHARP ROMs
-inline QIconSet Resource::loadIconSet( const QString &pix ) 
-{
-    QPixmap dpm = loadPixmap( pix + "_disabled" );
-    QPixmap pm = loadPixmap( pix );
-    QIconSet is( pm );
-    if ( !dpm.isNull() )
-	is.setPixmap( dpm, pm.width() <= 22 ? QIconSet::Small : QIconSet::Large, QIconSet::Disabled );
-    return is;
-}
 
 
 #endif

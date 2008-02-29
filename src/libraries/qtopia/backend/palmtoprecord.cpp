@@ -21,6 +21,14 @@
 #include <qtopia/stringutil.h>
 #include <qstringlist.h>
 
+#if defined(Q_TEMPLATEDLL)
+// MOC_SKIP_BEGIN
+#if QT_VERSION >= 300
+Q_TEMPLATE_EXTERN template class Q_EXPORT QValueList<int>;
+#endif
+// MOC_SKIP_END
+#endif
+
 /*?
   \class Qtopia::PalmtopRecord palmtoprecord.h
   \brief The Qtopia::PalmtopRecord class is the base class for all PIM records.

@@ -593,7 +593,7 @@ void QWSDatabase::recover(QWSDatabaseIndex* i,
 	    default: // covers test_invalid.
 		// something has gone wrong, stop reading
 		if (truncate) {
-		    ftruncate(dbfile->handle(), offset);
+		    Global::truncateFile(dbfile->handle(), offset);
 		    dbfile->flush();
 		    d->dbend = offset;
 		} else {
@@ -795,7 +795,7 @@ bool QWSDatabase::attemptWriteBlock(uint offset, const char *data, uint size)
   This is a very important function.  It attempts (just once) to
   write the block type \a t into the 
   database file.  If an error occurs the database will pop a warning 
-  indicate that an unrecoverable error has occured.  The operation cannot
+  indicate that an unrecoverable error has occurred.  The operation cannot
   be completed.
 */
 bool QWSDatabase::attemptSetBlockType(unsigned char t) 
@@ -1005,7 +1005,7 @@ bool QWSDatabase::eraseRecord(uint offset, bool ignore_type)
     /* do what is needed to mark this record as erased */
 
     if (offset + erase_size >= d->dbend) {
-	ftruncate(dbfile->handle(), offset);
+	Global::truncateFile(dbfile->handle(), offset);
 	dbfile->flush();
 	d->dbend = offset;
 	return TRUE;
@@ -1110,7 +1110,7 @@ bool QWSDatabase::readHeader()
 	uint tmp_dirty;
 	ds >> tmp_dirty;
 	if (tmp_dirty != dirty) {
-	    /* some problem has occured in storing the header.
+	    /* some problem has occurred in storing the header.
 	       Attempt to recover the free lists */
 	    recover(0, TRUE, TRUE);
 	    hdrfile->close();

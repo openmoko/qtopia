@@ -1,0 +1,57 @@
+<html>
+<title>
+Today Specification
+</title>
+
+<body>
+
+<h1>Today Specification</h1>
+
+<a name=description>
+</a>
+The Today application displays information related to "today".
+<p>
+The Today application provides a summary of events related to the current
+date.  This can include such things like appointments (from the Calendar
+application), new or unsent email (from the Email application) or pending
+tasks (from the Todo application).
+</p>
+
+<p>
+Status: BT
+</p>
+
+<a name=usecases>
+<h2>Use Cases</h2>
+</a>
+<ul>
+<li><b>Summary of pending appointments</b>
+    <p>
+    A list of appointments for the next week can be displayed.
+</ul>
+
+<a name=features>
+<h2>Features</h2>
+</a>
+<ul>
+<li>Default Plugins: Summaries from Calendar, Email and Todo applications.
+<li>Dynamic Plugin Loading: Plugins can be added / removed from the current
+    Today view at run-time.
+<li>Plugin Configuration: Each plugin has it's own configuration dialog, which
+    can be customised.
+<li>Application Launcher: Each plugin can launch it's owner application.
+<li>Event Reloading: Adjustments made to events via owner applications will
+    be reflected in the plugin summary.
+<li>Completely Plugin Driven: New plugins can be written to display any sort of
+    information.
+</ul>
+
+<a name=prerequisites>
+<h2>Prerequisites</h2>
+</a>
+
+<ul>
+</ul>
+
+</body>
+</html>

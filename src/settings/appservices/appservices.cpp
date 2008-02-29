@@ -27,7 +27,7 @@
 #include <qtopia/mimetype.h>
 #include <qtopia/qpeapplication.h>
 #include <qtopia/config.h>
-#include <qtopia/services/services.h>
+#include <qtopia/services.h>
 
 #include <qlistview.h>
 #include <qdir.h>
@@ -39,11 +39,12 @@ public:
     ASCheckListItem(QListView *parent, const QString &sv, const AppLnk* lnk) :
 	QCheckListItem(parent,QString::null,Controller), link(lnk), svr(sv)
     {
-	QString svdir=QPEApplication::qpeDir()+"/services/"+sv;
+	QString svdir=QPEApplication::qpeDir()+"services/"+sv;
 	Config service(svdir+".service",Config::File);
+	QString icon;
 	if ( service.isValid() ) {
 	    setText(0,service.readEntry("Name"));
-	    setPixmap(0,Resource::loadPixmap(service.readEntry("Icon")));
+	    icon = service.readEntry("Icon");
 	} else if ( lnk ) {
 	    QString name=sv.mid(5); // Strip "Open/"
 	    if ( name.left(12)=="application/" ) {
@@ -55,11 +56,20 @@ public:
 		MimeType mt(name);
 		name = mt.extension().upper();
 	    } // else not translated
-	    setText(0,AppServices::tr("Open %1 file").arg(name));
-	    setPixmap(0,Resource::loadPixmap(lnk->icon()));
+	    setText(0,AppServices::tr("Open %1").arg(name));
+	    icon = lnk->icon();
 	} else {
 	    svr = QString::null;
 	}
+	int s = AppLnk::bigIconSize();
+	QImage img;
+	if ( !icon.isNull() )
+	    img = Resource::loadImage(icon);
+	if ( img.isNull() )
+	    img = Resource::loadImage("Generic");
+	img = img.smoothScale(s,s);
+	QPixmap pm; pm.convertFromImage(img);
+	setPixmap(0,pm);
     }
 
     ASCheckListItem(QCheckListItem *parent, const AppLnk* lnk) :
@@ -130,7 +140,7 @@ AppServices::AppServices( QWidget* parent,  const char* name, bool modal, WFlags
 
 void AppServices::check(QListViewItem* i)
 {
-    if ( i->parent() ) {
+    if ( i && i->parent() ) {
 	// must be checkbox
 	((QCheckListItem*)i)->setOn(TRUE);
     }
@@ -158,10 +168,10 @@ void AppServices::loadState()
     // All services
     QStringList s = Service::list();
     for (QStringList::ConstIterator it = s.begin(); it!=s.end(); ++it) {
-	QString sv=QPEApplication::qpeDir()+"/services/"+(*it);
+	QString sv=QPEApplication::qpeDir()+"services/"+(*it);
 	QDir dir(sv,QString::null,QDir::Name | QDir::IgnoreCase,QDir::Files);
 	QStringList apps = dir.entryList();
-	Config binding(Service::config(*it));
+	Config binding(Service::config(*it), Config::File);
 	binding.setGroup("Service");
 	ASCheckListItem* si = new ASCheckListItem(lv,(*it),0);
 	if ( si->isValid() ) {
@@ -202,7 +212,7 @@ void AppServices::loadState()
 		    servicedict.insert(sv,s);
 		    s->setOpen(TRUE);
 		}
-		Config binding(Service::config(sv));
+		Config binding(Service::config(sv), Config::File);
 		binding.setGroup("Service");
 		QString def = binding.readEntry("default");
 		ADDAPP(s,lnk,"1.00");

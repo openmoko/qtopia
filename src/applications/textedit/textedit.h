@@ -23,7 +23,7 @@
 
 #define QTEXTEDIT_OPEN_API
 
-#include <qpe/filemanager.h>
+#include <qtopia/filemanager.h>
 
 #include <qmainwindow.h>
 #include <qmultilineedit.h>
@@ -57,6 +57,7 @@ private slots:
     void fileNew();
     void fileRevert();
     void fileOpen();
+    void fileName();
 
     void editCut();
     void editCopy();
@@ -79,8 +80,10 @@ private slots:
     void setBold(bool y);
     void setItalic(bool y);
     void setWordWrap(bool y);
+    void setFixedWidth(bool y);
 
     void clipboardChanged();
+    void linkChanged( const QString & );
 
 private:
     void colorChanged( const QColor &c );
@@ -88,6 +91,7 @@ private:
     void clear();
     void updateCaption( const QString &name=QString::null );
     void setFontSize(int sz, bool round_down_not_up);
+    void setupFontSizes(void);
 
 private:
     QWidgetStack *editorStack;
@@ -100,6 +104,9 @@ private:
     bool searchVisible;
     bool bFromDocView;
     QAction *zin, *zout;
+    bool zinE,zoutE,zoomOutLast;
+    int variableFontSize;
+    QString calculateName(QString);
 };
 
 #endif

@@ -26,10 +26,16 @@
 #include <qlist.h>
 #include <qdatetime.h>
 #include <qtopia/pim/contact.h>
-#include "contactio_p.h"
-#include "xmlio_p.h"
+#include <qtopia/pim/private/contactio_p.h>
+#include <qtopia/pim/private/xmlio_p.h>
 
-class SortedContacts : public SortedRecords<PimContact>
+#ifdef QTOPIAPIM_TEMPLATEDLL
+//MOC_SKIP_BEGIN
+template class QTOPIAPIM_EXPORT QListIterator<class PrContact>;
+//MOC_SKIP_END
+#endif
+
+class QTOPIAPIM_EXPORT SortedContacts : public SortedRecords<PimContact>
 {
 public:
     SortedContacts();
@@ -37,23 +43,17 @@ public:
 
     ~SortedContacts();
 
-
-    enum SortOrder {
-	Label,
-	LastName,
-	FirstName
-    };
-
-    void setSortOrder(SortOrder);
-    SortOrder sortOrder() const;
-
 protected:
     int compareItems(QCollection::Item d1, QCollection::Item d2);
-private:
-    SortOrder so;
 };
 
-class ContactXmlIterator : public ContactIteratorMachine
+#ifdef QTOPIA_TEMPLATEDLL
+//MOC_SKIP_BEGIN
+QTOPIA_TEMPLATEDLL template class QTOPIAPIM_EXPORT QList<PrContact>;
+//MOC_SKIP_END
+#endif
+
+class QTOPIAPIM_EXPORT ContactXmlIterator : public ContactIteratorMachine
 {
 public:
     ContactXmlIterator(const QList<PrContact>&list) : it(list) {}
@@ -78,93 +78,107 @@ private:
     QListIterator<PrContact>it;
 };
 
-class ContactXmlIO : public ContactIO, private PimXmlIO {
+class QTOPIAPIM_EXPORT ContactXmlIO : public ContactIO, public PimXmlIO {
 
     Q_OBJECT
 
- public:
-  ContactXmlIO(AccessMode m);
-  ~ContactXmlIO();
+public:
+    ContactXmlIO(AccessMode m, 
+		 const QString &file = QString::null,
+		 const QString &journal = QString::null );
 
+    ~ContactXmlIO();
 
-  ContactIteratorMachine *begin() const
-  {
-      return new ContactXmlIterator(m_Contacts);
-  }
+    PrContact personal() const;
+    bool hasPersonal() const;
+    void setAsPersonal(const QUuid &);
 
-  /**
-   * Returns the full contact list.  This is guaranteed
-   * to be current against what is stored by other apps.
-   */
-  QList<PrContact>& contacts();
-  const QVector<PimContact> &sortedContacts();
+    ContactIteratorMachine *begin() const
+	{
+	    return new ContactXmlIterator(m_Contacts);
+	}
 
-  /**
-   * Loads the contact data into the internal list
-   */
-  bool loadData();
+    /**
+     * Returns the full contact list in a very expensive
+     * way. This is needed in a couple of places
+     * but should be avoided unless a valuelist is
+     * required
+     */
+    QValueList<PimContact> contactValueList() const;
 
-  /**
-   * Saves the current contact data.  Returns true if
-   * successful.
-   */
-  bool saveData();
+    /**
+     * Returns the full contact list.  This is guaranteed
+     * to be current against what is stored by other apps.
+     */
+    QList<PrContact>& contacts();
+    uint count() const { return m_Contacts.count(); }
+    const SortedContacts &sortedContacts();
 
-  // external methods.
-  void addContact(const PimContact &);
-  void updateContact( const PimContact &);
-  void removeContact( const PimContact &);  
+    /**
+     * Loads the contact data into the internal list
+     */
+    bool loadData();
 
+    /**
+     * Saves the current contact data.  Returns true if
+     * successful.
+     */
+    bool saveData();
 
-  SortedContacts::SortOrder sortOrder() const;
-  void setSortOrder(SortedContacts::SortOrder );
+    /** Do a direct set w/o assigning new UIDs */
+    void setContacts( const QValueList<PimContact> &l );
+    void clear();
 
-  int filter() const;
-  void setFilter(int);
+    // external methods.
+    void addContact(const PimContact &, bool assignNewUid = TRUE);
+    void updateContact( const PimContact &);
+    bool removeContact( const PimContact &);
 
-  /**
-   * Makes sure that the contact data is current.  Will reload
-   * if necessary.  If the data is current, it will have no effect if
-   * forceReload is false.  If forceReload is true, it will always refresh
-   * the data.
-   */
-  void ensureDataCurrent(bool forceReload = false);
+    bool contains( const PimContact &) const;
+
+    int sortKey() const;
+    bool sortAcending() const;
+    void setSorting(int key, bool ascending = FALSE);
+
+    int filter() const;
+    void setFilter(int);
+
+    /**
+     * Makes sure that the contact data is current.  Will reload
+     * if necessary.  If the data is current, it will have no effect if
+     * forceReload is false.  If forceReload is true, it will always refresh
+     * the data.
+     */
+    void ensureDataCurrent(bool forceReload = false);
 
 protected:
 
-  const QString dataFilename() const;
-  const QString journalFilename() const;
+    const char *recordStart() const { return "<Contact "; }
+    const char *listStart() const { return
+					"<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE Addressbook >"
+					"<AddressBook>\n<Groups>\n</Groups>\n<Contacts>\n"; }
+    const char *listEnd() const { return "</Contacts>\n</AddressBook>\n"; }
 
-  const char *recordStart() const { return "<Contact "; }
-  const char *listStart() const { return 
-  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE Addressbook >"
-      "<AddressBook>\n<Groups>\n</Groups>\n<Contacts>\n"; }
-  const char *listEnd() const { return "</Contacts>\n</AddressBook>\n"; }
-
-  PimRecord *createRecord() const { return new PrContact(); }
+    PimRecord *createRecord() const { return new PrContact(); }
 
 
-  bool internalAddRecord(PimRecord *);
-  bool internalRemoveRecord(PimRecord *);
-  bool internalUpdateRecord(PimRecord *);
+    bool internalAddRecord(PimRecord *);
+    bool internalRemoveRecord(PimRecord *);
+    bool internalUpdateRecord(PimRecord *);
 
-  QString recordToXml(const PimRecord *);
-  void assignField(PimRecord *, const QCString &attr, const QString &value);
-
-  bool select(const PrContact &) const;
+    bool select(const PrContact &) const;
 
 private slots:
-  void pimMessage(const QCString &message, const QByteArray &data);
+    void pimMessage(const QCString &message, const QByteArray &data);
 
- private:  
-  QList<PrContact> m_Contacts; // for the append and remove functions
-  			     // more than anything else.
-  SortedContacts m_Filtered;
+private:
+    QList<PrContact> m_Contacts; // for the append and remove functions
+    // more than anything else.
+    SortedContacts m_Filtered;
 
-  int cFilter;
+    int cFilter;
 
-  QAsciiDict<int> dict;
-  bool needsSave;
+    bool needsSave;
 };
 
 #endif

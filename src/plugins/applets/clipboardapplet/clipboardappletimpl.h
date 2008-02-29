@@ -20,11 +20,12 @@
 #ifndef CLIPBOARDAPPLETIMPL_H
 #define CLIPBOARDAPPLETIMPL_H
 
-#include <qpe/taskbarappletinterface.h>
+#include <qtopia/qpeglobal.h>
+#include <qtopia/taskbarappletinterface.h>
 
 class ClipboardApplet;
 
-class ClipboardAppletImpl : public TaskbarAppletInterface
+class QTOPIA_PLUGIN_EXPORT ClipboardAppletImpl : public TaskbarAppletInterface
 {
 public:
     ClipboardAppletImpl();

@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -134,11 +140,11 @@ HEADERS =	lan.h \
 		../proxiespage.h
 SOURCES =	lan.cpp \
 		../proxiespage.cpp
-OBJECTS =	lan.o \
-		../proxiespage.o \
-		lanbase.o \
-		lanstate.o \
-		../proxiespagebase_p.o
+OBJECTS =	$(OBJECTS_DIR)/lan.o \
+		$(OBJECTS_DIR)/proxiespage.o \
+		$(OBJECTS_DIR)/lanbase.o \
+		$(OBJECTS_DIR)/lanstate.o \
+		$(OBJECTS_DIR)/proxiespagebase_p.o
 INTERFACES =    lanbase.ui \
 		lanstate.ui \
 		../proxiespagebase_p.ui
@@ -148,17 +154,17 @@ UICDECLS =      lanbase.h \
 UICIMPLS =      lanbase.cpp \
 		lanstate.cpp \
 		../proxiespagebase_p.cpp
-SRCMOC	=	moc_lan.cpp \
-		../moc_proxiespage.cpp \
-		lan.moc \
-		moc_lanbase.cpp \
-		moc_lanstate.cpp \
-		../moc_proxiespagebase_p.cpp
-OBJMOC	=	moc_lan.o \
-		../moc_proxiespage.o \
-		moc_lanbase.o \
-		moc_lanstate.o \
-		../moc_proxiespagebase_p.o
+SRCMOC	=	$(MOC_DIR)/moc_lan.cpp \
+		$(MOC_DIR)/moc_proxiespage.cpp \
+		$(MOC_DIR)/moc_lanbase.cpp \
+		$(MOC_DIR)/moc_lanstate.cpp \
+		$(MOC_DIR)/moc_proxiespagebase_p.cpp \
+		$(MOC_DIR)/lan.moc
+OBJMOC	=	$(OBJECTS_DIR)/moc_lan.o \
+		$(OBJECTS_DIR)/moc_proxiespage.o \
+		$(OBJECTS_DIR)/moc_lanbase.o \
+		$(OBJECTS_DIR)/moc_lanstate.o \
+		$(OBJECTS_DIR)/moc_proxiespagebase_p.o
 
 
 ####### Implicit rules
@@ -224,27 +230,18 @@ REQUIRES=
 
 ####### Compile
 
-lan.o: lan.cpp \
-		lan.moc \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/network.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qpe/process.h \
+$(OBJECTS_DIR)/lan.o: lan.cpp \
+		$(MOC_DIR)/lan.moc \
 		../proxiespage.h \
 		lan.h \
 		lanbase.h \
-		$(QPEDIR)/include/qpe/networkinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
 		lanstate.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/lan.o lan.cpp
 
-../proxiespage.o: ../proxiespage.cpp \
+$(OBJECTS_DIR)/proxiespage.o: ../proxiespage.cpp \
 		../proxiespage.h \
-		$(QPEDIR)/include/qpe/config.h \
 		proxiespagebase_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/proxiespage.o ../proxiespage.cpp
 
 lanbase.h: lanbase.ui
 	$(UIC) lanbase.ui -o $(INTERFACE_DECL_PATH)/lanbase.h
@@ -267,72 +264,62 @@ proxiespagebase_p.h: ../proxiespagebase_p.ui
 ../proxiespagebase_p.cpp: ../proxiespagebase_p.ui
 	$(UIC) ../proxiespagebase_p.ui -i proxiespagebase_p.h -o ../proxiespagebase_p.cpp
 
-lanbase.o: lanbase.cpp
+$(OBJECTS_DIR)/lanbase.o: lanbase.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/lanbase.o lanbase.cpp
 
-lanstate.o: lanstate.cpp
+$(OBJECTS_DIR)/lanstate.o: lanstate.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/lanstate.o lanstate.cpp
 
-../proxiespagebase_p.o: ../proxiespagebase_p.cpp
+$(OBJECTS_DIR)/proxiespagebase_p.o: ../proxiespagebase_p.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/proxiespagebase_p.o ../proxiespagebase_p.cpp
 
-moc_lan.o: moc_lan.cpp \
+$(OBJECTS_DIR)/moc_lan.o: $(MOC_DIR)/moc_lan.cpp \
 		lan.h \
-		lanbase.h \
-		$(QPEDIR)/include/qpe/networkinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h
-
-../moc_proxiespage.o: ../moc_proxiespage.cpp \
-		../proxiespage.h \
-		$(QPEDIR)/include/qpe/config.h
-
-moc_lanbase.o: lan.moc \
-		lan.cpp \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/network.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qpe/process.h \
-		../proxiespage.h \
-		lan.h \
-		lanbase.h \
-		$(QPEDIR)/include/qpe/networkinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		lanstate.h
-
-moc_lanstate.o: moc_lanbase.cpp \
 		lanbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_lan.o $(MOC_DIR)/moc_lan.cpp
 
-../moc_proxiespagebase_p.o: moc_lanstate.cpp \
+$(OBJECTS_DIR)/moc_proxiespage.o: $(MOC_DIR)/moc_proxiespage.cpp \
+		../proxiespage.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_proxiespage.o $(MOC_DIR)/moc_proxiespage.cpp
+
+$(OBJECTS_DIR)/moc_lanbase.o: $(MOC_DIR)/moc_lanbase.cpp \
+		lanbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_lanbase.o $(MOC_DIR)/moc_lanbase.cpp
+
+$(OBJECTS_DIR)/moc_lanstate.o: $(MOC_DIR)/moc_lanstate.cpp \
 		lanstate.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_lanstate.o $(MOC_DIR)/moc_lanstate.cpp
 
-moc_lan.cpp: lan.h
-	$(MOC) lan.h -o moc_lan.cpp
+$(OBJECTS_DIR)/moc_proxiespagebase_p.o: $(MOC_DIR)/moc_proxiespagebase_p.cpp \
+		../proxiespagebase_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_proxiespagebase_p.o $(MOC_DIR)/moc_proxiespagebase_p.cpp
 
-../moc_proxiespage.cpp: ../proxiespage.h
-	$(MOC) ../proxiespage.h -o ../moc_proxiespage.cpp
+$(MOC_DIR)/moc_lan.cpp: lan.h
+	$(MOC) lan.h -o $(MOC_DIR)/moc_lan.cpp
 
-lan.moc: lan.cpp
-	$(MOC) lan.cpp -o lan.moc
+$(MOC_DIR)/moc_proxiespage.cpp: ../proxiespage.h
+	$(MOC) ../proxiespage.h -o $(MOC_DIR)/moc_proxiespage.cpp
 
-moc_lanbase.cpp: lanbase.h
-	$(MOC) lanbase.h -o moc_lanbase.cpp
+$(MOC_DIR)/lan.moc: lan.cpp
+	$(MOC) lan.cpp -o $(MOC_DIR)/lan.moc
 
-moc_lanstate.cpp: lanstate.h
-	$(MOC) lanstate.h -o moc_lanstate.cpp
+$(MOC_DIR)/moc_lanbase.cpp: lanbase.h
+	$(MOC) lanbase.h -o $(MOC_DIR)/moc_lanbase.cpp
 
-../moc_proxiespagebase_p.cpp: ../proxiespagebase_p.h
-	$(MOC) ../proxiespagebase_p.h -o ../moc_proxiespagebase_p.cpp
+$(MOC_DIR)/moc_lanstate.cpp: lanstate.h
+	$(MOC) lanstate.h -o $(MOC_DIR)/moc_lanstate.cpp
+
+$(MOC_DIR)/moc_proxiespagebase_p.cpp: ../proxiespagebase_p.h
+	$(MOC) ../proxiespagebase_p.h -o $(MOC_DIR)/moc_proxiespagebase_p.cpp
 
 
 
 lupdate:
-	lupdate lan.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <lan.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease lan.pro
+	$(QPEDIR)/bin/qtopia-linstall lan.pro
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

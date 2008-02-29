@@ -1,0 +1,10 @@
+[Service]
+Actions = addContact(PimContact);addAndEditContact(PimContact);removeContact(PimContact);updateContact(PimContact);showContact(PimContact);beamBusinessCard()
+Icon = AddressBook
+Name = Addressbook
+Name[de] = Adressbuch
+Name[hu] = Címtár
+Name[no] = Adressebok
+[beamBusinessCard()]
+Icon = beam
+Name = Beam business card

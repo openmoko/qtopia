@@ -20,9 +20,9 @@
 
 #include "mrulist.h"
 
-#include <qpe/global.h>
-#include <qpe/applnk.h>
-#include <qpe/resource.h>
+#include <qtopia/global.h>
+#include <qtopia/applnk.h>
+#include <qtopia/resource.h>
 
 #include <qframe.h>
 #include <qpushbutton.h>

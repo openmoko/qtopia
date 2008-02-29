@@ -56,6 +56,7 @@ void pause()
 void sstone(w, x, y, numb)
 short w, x, y, numb;
 { /* sstone */
+  numb = numb;	/* avoid unused variable warning */
   if (w == 1)
     placestone(mySType, x, y);
   else if (mySType == WHITE)

@@ -1,20 +1,23 @@
-TEMPLATE	= app
-CONFIG		= qtopia warn_on release
-DESTDIR		= $(QPEDIR)/bin
-HEADERS		= controlwidgetbase.h imageutil.h documentlist.h loopcontrol.h mediaplayerplugininterface.h playlistselection.h \
-		  id3tag.h action.h fileinfo.h tabbedselector.h mediaplayerstate.h \
+multiprocess:TEMPLATE	= app
+multiprocess:DESTDIR	= $(QPEDIR)/bin
+singleprocess:TEMPLATE	= lib
+singleprocess:DESTDIR   = $(QPEDIR)/lib
+
+CONFIG		+= qtopia warn_on release
+
+HEADERS		= maindocumentwidgetstack.h controlwidgetbase.h imageutil.h documentlist.h loopcontrol.h playlistselection.h \
+		  framebuffer.h id3tag.h action.h fileinfo.h tabbedselector.h mediaplayerstate.h \
 		  videowidget.h audiowidget.h playlistwidget.h mediaplayer.h audiodevice.h
-SOURCES		= controlwidgetbase.cpp imageutil.cpp documentlist.cpp main.cpp \
-		  loopcontrol.cpp playlistselection.cpp mediaplayerstate.cpp \
+SOURCES		= maindocumentwidgetstack.cpp controlwidgetbase.cpp imageutil.cpp documentlist.cpp \
+		  framebuffer.cpp loopcontrol.cpp playlistselection.cpp mediaplayerstate.cpp \
 		  id3tag.cpp fileinfo.cpp tabbedselector.cpp \
 		  videowidget.cpp audiowidget.cpp playlistwidget.cpp mediaplayer.cpp audiodevice.cpp
 TARGET		= mpegplayer
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH	+= $(QPEDIR)/include
-LIBS            += -lqpe -lpthread
 
-# CONFIG+=static
-# TMAKE_CXXFLAGS += -DQPIM_STANDALONE
-# LIBS		+= libmpeg3/libmpeg3.a -lpthread
+multiprocess:SOURCES += main.cpp
 
-TRANSLATIONS	= $(QPEDIR)/i18n/de/mpegplayer.ts
+unix:LIBS       += -lpthread
+
+static:LIBS	+= -L$(QPEDIR)/plugins/codecs -lffmpegplugin
+
+TRANSLATIONS = mpegplayer-en_GB.ts mpegplayer-de.ts mpegplayer-ja.ts mpegplayer-no.ts

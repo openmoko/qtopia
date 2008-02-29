@@ -2,7 +2,6 @@ Files: i18n/hu/.directory i18n/hu/*.qm etc/dict/dawg.hu
 Priority: optional
 Section: qpe/i18n
 Maintainer: Trolltech (www.trolltech.com)
-Version: $QPE_VERSION-7
-Depends: qpe-base ($QPE_VERSION)
+Version: $QPE_VERSION-9
 Description: i18n: Magyar
  Hungarian UI texts and dictionary for Qtopia environment.

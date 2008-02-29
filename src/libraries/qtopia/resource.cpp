@@ -19,8 +19,10 @@
 **********************************************************************/
 
 #define QTOPIA_INTERNAL_MIMEEXT
-#include "qpeapplication.h"
+
+
 #include "resource.h"
+#include "config.h"
 #include "mimetype.h"
 #include <qdir.h>
 #include <qfile.h>
@@ -29,6 +31,8 @@
 #include <qpainter.h>
 
 #include "inlinepics_p.h"
+
+#include "qpeapplication.h"
 
 static bool qpe_fast_findPixmap = FALSE;
 
@@ -98,6 +102,7 @@ QString Resource::findPixmap( const QString &pix )
     if ( QFile( f ).exists() )
 	return f;
 
+#ifdef Q_WS_QWS
     if ( !qpe_fast_findPixmap ) {
 	qDebug( "Doing slow search for image: %s", pix.latin1() );
 	// All formats...
@@ -117,6 +122,7 @@ QString Resource::findPixmap( const QString &pix )
 	if ( QFile( picsPath + pix ).exists() )
 	    return picsPath + pix;
     }
+#endif
 
     //qDebug("Cannot find pixmap: %s", pix.latin1());
     return QString();
@@ -147,7 +153,7 @@ QString Resource::findSound( const QString &name )
 */
 QStringList Resource::allSounds()
 {
-    QDir resourcedir( QPEApplication::qpeDir() + "sounds/", "*.wav" );
+    QDir resourcedir( QPEApplication::qpeDir() + "sounds/" , "*.wav" );
     QStringList entries = resourcedir.entryList();
     QStringList result;
     for (QStringList::Iterator i=entries.begin(); i != entries.end(); ++i)
@@ -155,67 +161,76 @@ QStringList Resource::allSounds()
     return result;
 }
 
-static QImage load_image(const QString &name)
-{
-    QImage img = qembed_findImage(name.latin1());
-    if ( img.isNull() ) {
-	// No inlined image, try file
-	QString f = Resource::findPixmap(name);
-	if ( !f.isEmpty() )
-	    img.load(f);
-    }
-    return img;
-}
 
 /*!
   Returns the QImage called \a name. You should avoid including
   any filename type extension (e.g. .png, .xpm).
+
+  For performance reasons, names ending in "_disabled" are only
+  supported as XPM or PNG files.
 */
 QImage Resource::loadImage( const QString &name)
 {
-#ifndef QT_NO_DEPTH_32	// have alpha-blended pixmaps
-    static QImage last_enabled;
-    static QString last_enabled_name;
-    if ( name == last_enabled_name )
-	return last_enabled;
-#endif
-    bool disabled = name[name.length()-1]=='d' && name.right(9)=="_disabled";
-    if ( disabled )
-	qpe_fast_findPixmap = TRUE;
-    QImage img = load_image(name);
-#ifndef QT_NO_DEPTH_32	// have alpha-blended pixmaps
+    QImage img = qembed_findImage(name.latin1());
     if ( img.isNull() ) {
-	// No file, try generating
-	if ( disabled ) {
-	    last_enabled_name = name.left(name.length()-9);
-	    last_enabled = load_image(last_enabled_name);
-	    if ( last_enabled.isNull() ) {
-		last_enabled_name = QString::null;
-	    } else {
-		img.detach();
-		img.create( last_enabled.width(), last_enabled.height(), 32 );
-		for ( int y = 0; y < img.height(); y++ ) {
-		    for ( int x = 0; x < img.width(); x++ ) {
-			QRgb p = last_enabled.pixel( x, y );
-			int a = qAlpha(p)/3;
-			int g = qGray(qRed(p),qGreen(p),qBlue(p));
-			img.setPixel( x, y, qRgba(g,g,g,a) );
-		    }
-		}
-		img.setAlphaBuffer( TRUE );
-	    }
-	}
+	// No inlined image, try file
+	// For *_disabled images, only search for XPM and PNG
+	bool disabled = name[(int)name.length()-1]=='d' && name.right(9)=="_disabled";
+	if ( disabled )
+	    qpe_fast_findPixmap = TRUE;
+	QString f = Resource::findPixmap(name);
+	if ( !f.isEmpty() )
+	    img.load(f);
+	if ( disabled )
+	    qpe_fast_findPixmap = FALSE;
     }
-#endif
-    if ( disabled )
-	qpe_fast_findPixmap = FALSE;
     return img;
 }
 
-/*!
-  \fn QIconSet Resource::loadIconSet( const QString &name )
 
-  Returns a QIconSet for the pixmap named \a name.  A disabled icon is
-  generated that conforms to the Qtopia look & feel.  You should avoid
-  including any filename type extension (eg. .png, .xpm).
-*/
+QIconSet qtopia_internal_loadIconSet( const QString &pix ) 
+// DUPLICATION from Resource::loadIconSet
+{
+    static int iconSetSize = -1;
+    if ( iconSetSize < 0 ) {
+	Config config( "qpe" );
+	config.setGroup( "Appearance" );
+	iconSetSize = config.readNumEntry("IconSize",0);
+    }
+
+    if ( iconSetSize ) {
+	// Force the icon to iconSetSize for small icons and 50% larger fo large icons.
+	QImage dimg = Resource::loadImage( pix + "_disabled" );
+	QImage img = Resource::loadImage(pix);
+	QPixmap pm;
+
+	QIconSet is;
+	if ( img.height()*2 >= iconSetSize*3 ) {
+	    pm.convertFromImage(img.smoothScale(iconSetSize,iconSetSize));
+	    is.reset(pm,QIconSet::Small);
+	    pm.convertFromImage(img.smoothScale(iconSetSize*3/2,iconSetSize*3/2));
+	    is.setPixmap(pm,QIconSet::Large);
+	    if ( !dimg.isNull() ) {
+		pm.convertFromImage(dimg.smoothScale(iconSetSize,iconSetSize));
+		is.setPixmap(pm,QIconSet::Small,QIconSet::Disabled);
+		pm.convertFromImage(dimg.smoothScale(iconSetSize*3/2,iconSetSize*3/2));
+		is.setPixmap(pm,QIconSet::Large,QIconSet::Disabled);
+	    }
+	} else {
+	    pm.convertFromImage(img.smoothScale(iconSetSize,iconSetSize));
+	    is.reset(pm,QIconSet::Small);
+	    if ( !dimg.isNull() ) {
+		pm.convertFromImage(dimg.smoothScale(iconSetSize,iconSetSize));
+		is.setPixmap(pm,QIconSet::Small,QIconSet::Disabled);
+	    }
+	}
+	return is;
+    } else {
+	QPixmap dpm = Resource::loadPixmap( pix + "_disabled" );
+	QPixmap pm = Resource::loadPixmap( pix );
+	QIconSet is( pm );
+	if ( !dpm.isNull() )
+	    is.setPixmap( dpm, pm.width() <= 22 ? QIconSet::Small : QIconSet::Large, QIconSet::Disabled );
+	return is;
+    }
+}

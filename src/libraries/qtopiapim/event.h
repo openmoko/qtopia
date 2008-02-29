@@ -3,16 +3,15 @@
 **
 ** This file is part of the Qtopia Environment.
 **
-** Licensees holding valid Qtopia Developer license may use this
-** file in accordance with the Qtopia Developer License Agreement
-** provided with the Software.
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING
-** THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-** PURPOSE.
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
-** email sales@trolltech.com for information about Qtopia License
-** Agreements.
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
@@ -32,13 +31,47 @@
 
 //#define EVENT_USE_CACHING
 
+#if defined (QTOPIA_TEMPLATEDLL)
+//MOC_SKIP_BEGIN
+template class QTOPIAPIM_EXPORT QValueList<QDate>;
+template class QTOPIAPIM_EXPORT QValueList<QUuid>;
+//MOC_SKIP_END
+#endif
 
 class QDataStream;
 class PimEventPrivate;
 
-class QTOPIA_EXPORT PimEvent : public PimRecord
+class QTOPIAPIM_EXPORT PimEvent : public PimRecord
 {
 public:
+    /*!
+      \internal
+    */
+    enum EventFields {
+	Description = CommonFieldsEnd,
+	Location,
+	TimeZone,
+	Notes,
+	StartDateTime,
+	EndDateTime,
+	DatebookType,
+	HasAlarm,
+	AlarmDelay,
+	SoundType,
+	
+	RepeatPattern,
+	RepeatFrequency,
+	RepeatWeekdays,
+	RepeatHasEndDate,
+	RepeatEndDate,
+
+	RecordParent,
+	RecordChildren,
+	Exceptions,
+	
+	EventFieldsEnd = 100
+    };
+    
     enum RepeatType 
     {
 	NoRepeat, 
@@ -56,6 +89,7 @@ public:
 
     PimEvent();
     PimEvent(const QDateTime &start, const QDateTime &end);
+    void fromMap( const QMap<int,QString> &);
     virtual ~PimEvent();
 
     QString description() const { return mDescription; }
@@ -81,6 +115,20 @@ public:
     bool repeatForever() const;
     bool showOnNearest() const { return mShowOnNearest; }
     bool repeatOnWeekDay(int day) const;
+
+    // convinence functions..
+    bool isException() const;
+    QUuid seriesUid() const { return isException() ? mParent : uid(); }
+    bool hasExceptions() const;
+
+    // Use these functions carefully.
+    void setSeriesUid( const QUuid &u );
+    void addException( const QDate &d, const QUuid &u );
+    void clearExceptions();
+    void removeException( const QDate &d ); // and the appropriate child.
+    void removeException( const QUuid &u ); // and the appropriate date.
+
+    // probably need some way of iterating over the exceptions...
 
     // helper functions
     bool isAllDay() const { return mAllDay; }
@@ -117,13 +165,26 @@ public:
 
     QColor color() const;
 
+    virtual void setFields(const QMap<int,QString> &);
+
+    virtual void setField(int,const QString &);
+    virtual QString field(int) const;
+    virtual QMap<int,QString> fields() const;
+    
+    static const QMap<int, QCString> &keyToIdentifierMap();
+    static const QMap<QCString,int> &identifierToKeyMap();
+    static const QMap<int, QString> & trFieldsMap();
+    // needed for Qtopia Desktop synchronization
+    static const QMap<int,int> &uniquenessMap();
+
 #ifndef QT_NO_DATASTREAM
-friend QTOPIA_EXPORT QDataStream &operator>>( QDataStream &, PimEvent & );
-friend QTOPIA_EXPORT QDataStream &operator<<( QDataStream &, const PimEvent & );
+friend QTOPIAPIM_EXPORT QDataStream &operator>>( QDataStream &, PimEvent & );
+friend QTOPIAPIM_EXPORT QDataStream &operator<<( QDataStream &, const PimEvent & );
 #endif
 
     // protected so that we have a way for PimLib to access the guts of this.
 protected:
+    //virtual int endFieldMarker() const {return EventFieldCount; }
 
     time_t startAsUTC() const;
     time_t endAsUTC() const;
@@ -154,15 +215,25 @@ protected:
     uchar weekMask;
     bool mAllDay;
 
+    // exceptions, Does this match the Outlook model?
+    QValueList<QDate> mExceptions; // I don't show on these dates
+    QUuid mParent; // if I edit series, its this event.
+    QValueList<QUuid> mChildren; // if I change recurrence (start or pattern), check the children.
+
 private:
+    static void initMaps();
+    void finalizeRecord();
     void init(const QDateTime &, const QDateTime &);
+
+    QDate p_nextOccurrence(const QDate &from, bool * = 0) const;
+    int p_duration() const;
 
     static QColor color(bool repeats);
 
     PimEventPrivate *d;
 };
 
-class QTOPIA_EXPORT Occurrence
+class QTOPIAPIM_EXPORT Occurrence
 {
     public:
 	Occurrence() {}
@@ -198,8 +269,8 @@ class QTOPIA_EXPORT Occurrence
 };
 
 #ifndef QT_NO_DATASTREAM
-QTOPIA_EXPORT QDataStream &operator>>( QDataStream &, PimEvent & );
-QTOPIA_EXPORT QDataStream &operator<<( QDataStream &, const PimEvent & );
+QTOPIAPIM_EXPORT QDataStream &operator>>( QDataStream &, PimEvent & );
+QTOPIAPIM_EXPORT QDataStream &operator<<( QDataStream &, const PimEvent & );
 #endif
 
 #endif

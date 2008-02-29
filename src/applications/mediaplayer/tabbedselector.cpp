@@ -24,11 +24,11 @@
 #include <qpushbutton.h>
 #include <qobjectlist.h>
 #include <qwidgetstack.h>
-#include <qpe/fileselector.h>
-#include <qpe/qpemenubar.h>
-#include <qpe/qpetoolbar.h>
-#include <qpe/resource.h>
-#include <qpe/categoryselect.h>
+#include <qtopia/fileselector.h>
+#include <qtopia/qpemenubar.h>
+#include <qtopia/qpetoolbar.h>
+#include <qtopia/resource.h>
+#include <qtopia/categoryselect.h>
 #include "tabbedselector.h"
 #include "playlistselection.h"
 #include "mediaplayerstate.h"

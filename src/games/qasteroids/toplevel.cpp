@@ -26,10 +26,9 @@
 #include "toplevel.h"
 #include "ledmeter.h"
 
-#include <qpe/qpeapplication.h>
-#include <qpe/resource.h>
-
-#include "../../server/devicebuttonmanager.h"
+#include <qtopia/qpeapplication.h>
+#include <qtopia/resource.h>
+#include <qtopia/devicebuttonmanager.h>
 
 #include <qaccel.h>
 #include <qlabel.h>
@@ -84,8 +83,8 @@ const char *soundDefaults[] =
 };
 
  
-KAstTopLevel::KAstTopLevel( QWidget *parent, const char *name )
-    : QMainWindow( parent, name )
+KAstTopLevel::KAstTopLevel( QWidget *parent, const char *name, WFlags fl )
+    : QMainWindow( parent, name, fl )
 {
     setCaption( tr("Asteroids") );
     QWidget *border = new QWidget( this );

@@ -18,7 +18,8 @@
 **
 **********************************************************************/
 // the next few lines have to come first
-#if defined(Q_WS_WIN32)
+#include <qtopia/qpeglobal.h>
+#ifdef Q_OS_WIN32
 #include <objbase.h>
 #else
 extern "C" {
@@ -93,10 +94,14 @@ QUuid Record::generateUuid()
     }
     return QUuid( guid );
 #else
+#if QT_VERSION < 300
     uuid_t uuid;
     uuid_generate( uuid );
 
     return QUuid( uuid );
+#else
+    return QUuid();
+#endif
 #endif
 }
 
@@ -170,7 +175,7 @@ void Record::setCategories( const QArray<int> &v )
 	insertBytes( categoryOffset(), sizeof(int) * (num - h->numCategories() ) );
     }
     int *ncat = (int *) ( data.data() + categoryOffset() );
-    for ( uint i = 0;  i < num; i++ ) 
+    for ( int i = 0;  i < num; i++ ) 
 	ncat[i] = htonl( v[i] );
     catsDirty = TRUE;
 }
@@ -197,7 +202,7 @@ QArray<int> Record::categories() const
     QArray<int> cats;
     cats.resize( num );
     int *ncat = (int *) ( data.data() + categoryOffset() );
-    for ( uint i = 0; i < num; i++ ) 
+    for ( int i = 0; i < num; i++ ) 
 	cats[i] = ntohl( ncat[i] );
     return cats;
 }
@@ -266,7 +271,7 @@ QDate Record::dateField( int id, bool *ok ) const
   Returns the datetime stored in the field \a id. If the field is not of type DateTime,
   *\a ok will be FALSE.  Returns an invalid datetime if the field does not exist.
 */
-QDateTime Record::dateTimeField( int id, bool *ok = 0 ) const
+QDateTime Record::dateTimeField( int id, bool *ok ) const
 {
     AttributeEntry *attr = findAttribute( id );
     if ( attr && attr->type() == DateTimeType ) {
@@ -281,7 +286,7 @@ QDateTime Record::dateTimeField( int id, bool *ok = 0 ) const
   Returns the integer stored in the field \a id. If the field is not of type Int,
   *\a ok will be FALSE.  Returns 0 if the field does not exist.
 */
-int Record::intField( int id, bool *ok = 0 ) const
+int Record::intField( int id, bool *ok ) const
 {
     AttributeEntry *attr = findAttribute( id );
     if ( attr && attr->type() == IntType ) {
@@ -296,7 +301,7 @@ int Record::intField( int id, bool *ok = 0 ) const
   Returns the string stored in the field \a id. If the field is not of type String,
   *\a ok will be false.  Returns a null string if the field does not exist.
 */
-QString Record::stringField( int id, bool *ok = 0 ) const
+QString Record::stringField( int id, bool *ok ) const
 {
     AttributeEntry *attr = findAttribute( id );
     //qDebug("looking for string, attr=%d, field found = [%d, %d, %d]", id, attr->id(), attr->type(), attr->offsetOrData() );
@@ -327,7 +332,7 @@ QString Record::stringField( int id, bool *ok = 0 ) const
   Returns the boolean stored in the field \a id. If the field is not of type Bool,
   *\a ok, will be FALSE.  Returns TRUE if the field does not exist.
 */
-bool Record::boolField( int id, bool *ok = 0 ) const
+bool Record::boolField( int id, bool *ok ) const
 {
     AttributeEntry *attr = findAttribute( id );
     if ( attr && attr->type() == BoolType ) {

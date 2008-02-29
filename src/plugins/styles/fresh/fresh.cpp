@@ -18,8 +18,7 @@
 **
 **********************************************************************/
 
-#include "fresh.h"
-#include <qpe/qpeapplication.h>
+#include <qtopia/qpeapplication.h>
 #include <qpushbutton.h>
 #include <qpainter.h>
 #include <qfontmetrics.h>
@@ -32,6 +31,9 @@
 
 #define INCLUDE_MENUITEM_DEF
 #include <qmenudata.h>
+#include <qpopupmenu.h>
+
+#include "fresh.h"
 
 #define QCOORDARRLEN(x) sizeof(x)/(sizeof(QCOORD)*2)
 
@@ -598,6 +600,12 @@ static const int motifTabSpacing	= 12;	// space between text and tab
 static const int motifCheckMarkHMargin	= 1;	// horiz. margins of check mark
 static const int windowsRightBorder	= 8;    // right border on windows
 static const int windowsCheckMarkWidth  = 2;    // checkmarks width on windows
+
+void FreshStyle::polishPopupMenu ( QPopupMenu *m )
+{
+    QWindowsStyle::polishPopupMenu( m );
+    m->setLineWidth( 1 );
+}
 
 /*! \reimp
 */

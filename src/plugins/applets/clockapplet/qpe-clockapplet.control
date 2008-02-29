@@ -3,7 +3,7 @@ Priority: optional
 Section: qpe/taskbar
 Maintainer: Trolltech (www.trolltech.com)
 Architecture: arm
-Version: $QPE_VERSION-7
-Depends: qpe-base ($QPE_VERSION)
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia
 Description: Clock applet
  Clock applet for the Qtopia environment taskbar.

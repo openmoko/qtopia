@@ -21,12 +21,12 @@
 #include "inlineedit.h"
 #include "filebrowser.h"
 
-#include <qpe/resource.h>
-#include <qpe/global.h>
-#include <qpe/mimetype.h>
-#include <qpe/applnk.h>
-#include <qpe/services/services.h>
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/resource.h>
+#include <qtopia/global.h>
+#include <qtopia/mimetype.h>
+#include <qtopia/applnk.h>
+#include <qtopia/services.h>
+#include <qtopia/qcopenvelope_qws.h>
 
 #ifdef QWS
 #include <qcopchannel_qws.h>
@@ -35,9 +35,9 @@
 #include <qdir.h>
 #include <qregexp.h>
 #include <qheader.h>
-#include <qpe/qpetoolbar.h>
+#include <qtopia/qpetoolbar.h>
 #include <qpopupmenu.h>
-#include <qpe/qpemenubar.h>
+#include <qtopia/qpemenubar.h>
 #include <qaction.h>
 #include <qstringlist.h>
 #include <qcursor.h>
@@ -48,6 +48,12 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+
+static QPixmap	*pmLockedFolder;
+static QPixmap	*pmFolder;
+static QPixmap	*pmLocked;
+static QPixmap	*pmLibrary;
+static QPixmap	*pmUnknown;
 
 //
 //  FileItem
@@ -74,18 +80,20 @@ FileItem::FileItem( QListView * parent, const QFileInfo & fi )
     QPixmap pm;
     if( fi.isDir() ){
 	if( !QDir( fi.filePath() ).isReadable() )
-	    pm = Resource::loadPixmap( "lockedfolder" );
+	    pm = *pmLockedFolder;
 	else
-	    pm = Resource::loadPixmap( "folder" );
+	    pm = *pmFolder;
     }
     else if( !fi.isReadable() )
-	pm = Resource::loadPixmap( "locked" );
+	pm = *pmLocked;
     else if( isLib() )
-	pm = Resource::loadPixmap( "library" );
+	pm = *pmLibrary;
     else
 	pm = mt.pixmap();
+
     if ( pm.isNull() )
-	pm = Resource::loadPixmap("UnknownDocument-14");
+	pm = *pmUnknown;
+
     setPixmap(0,pm);
 }
 
@@ -189,6 +197,7 @@ FileView::FileView( const QString & dir, QWidget * parent,
     // right align yize column
     setColumnAlignment( 1, AlignRight );
 
+    scaleIcons();
     generateDir( dir );
 
     connect( this, SIGNAL( clicked( QListViewItem * )),
@@ -197,6 +206,15 @@ FileView::FileView( const QString & dir, QWidget * parent,
 			 SLOT( itemDblClicked( QListViewItem * )) );
     connect( this, SIGNAL( selectionChanged() ), SLOT( cancelMenuTimer() ) );
     connect( &menuTimer, SIGNAL( timeout() ), SLOT( showFileMenu() ) );
+}
+
+FileView::~FileView(void)
+{
+    delete pmLockedFolder;
+    delete pmFolder;
+    delete pmLocked;
+    delete pmLibrary;
+    delete pmUnknown;
 }
 
 void FileView::resizeEvent( QResizeEvent *e )
@@ -218,7 +236,7 @@ void FileView::setDir( const QString & dir )
     if ( dir.startsWith( "/dev" ) ) {
 	menuTimer.stop();
 	QMessageBox::warning( this, tr( "File Manager" ),
-			      tr( "Can't show /dev/ directory." ), tr( "&Ok" ) );
+			      tr( "Can't show /dev/ directory." ), tr( "&OK" ) );
 	return;
     }
     dirHistory += currentDir;
@@ -302,7 +320,7 @@ void FileView::endRenaming()
 
 		if( !itemToRename->rename( le->text() ) ){
 			QMessageBox::warning( this, tr( "Rename file" ),
-								  tr( "Rename failed!" ), tr( "&Ok" ) );
+								  tr( "Rename failed!" ), tr( "&OK" ) );
 		} else {
 			updateDir();
 		}
@@ -367,7 +385,7 @@ void FileView::paste()
 
 		if ( err != 0 ) {
 			QMessageBox::warning( this, tr("Paste file"), tr("Paste failed!"),
-								  tr("Ok") );
+								  tr("OK") );
 			break;
 		} else {
 			updateDir();
@@ -414,11 +432,15 @@ bool FileView::copyFile( const QString & dest, const QString & src )
 		success = FALSE;
     }
 
+#if !defined (Q_OS_WIN32)
     // Set file permissions
     if( stat( (const char *) src, &status ) == 0 ){
 		chmod( (const char *) dest, status.st_mode );
     }
 
+#else
+    //#### revise set perms under WINNT?
+#endif
     return success;
 }
 
@@ -462,7 +484,7 @@ void FileView::cut()
  
         if ( err != 0 ) {
             QMessageBox::warning( this, tr("Cut file"), tr("Cut failed!"),
-                                  tr("Ok") );
+                                  tr("OK") );
             break;
         } else {
             updateDir();
@@ -512,7 +534,7 @@ void FileView::del()
 			err = system( (const char *) cmd );
 			if ( err != 0 ) {
 				QMessageBox::warning( this, tr("Delete"), tr("Delete failed!"),
-									  tr("Ok") );
+									  tr("OK") );
 				break;
 			}
 		}
@@ -529,11 +551,11 @@ void FileView::newFolder()
     while( QFile( nd ).exists() ){
 		nd.sprintf( "%s/NewFolder (%d)", (const char *) currentDir, t++ );
     }
-
-    if( mkdir( (const char *) nd, 0777 ) != 0){
+    QDir d;
+    if(d.mkdir( nd) == FALSE){
 		QMessageBox::warning( this, tr( "New folder" ),
 							  tr( "Folder creation failed!" ),
-							  tr( "Ok" ) );
+							  tr( "OK" ) );
 		return;
     }
     updateDir();
@@ -576,7 +598,7 @@ void FileView::itemDblClicked( QListViewItem * i)
     if(t == NULL) return;
     if(t->launch() == -1){
 		QMessageBox::warning( this, tr( "Launch Application" ),
-							  tr( "Launch failed!" ), tr( "Ok" ) );
+							  tr( "Launch failed!" ), tr( "OK" ) );
     }
 }
 
@@ -649,26 +671,59 @@ void FileView::showFileMenu()
 		if ( app )
 			m->insertItem( app->pixmap(), tr( "Open in " + app->name() ), this, SLOT( run() ) );
 		else if( i->isExecutable() )
-			m->insertItem( Resource::loadPixmap( i->text( 0 ) ), tr( "Run" ), this, SLOT( run() ) );
+			m->insertItem( Resource::loadIconSet( i->text( 0 ) ), tr( "Run" ), this, SLOT( run() ) );
 
-		m->insertItem( Resource::loadPixmap( "txt" ), tr( "View as text" ),
+		m->insertItem( Resource::loadIconSet( "txt" ), tr( "View as text" ),
 					   this, SLOT( viewAsText() ) );
 
 		m->insertSeparator();
     }
 
     m->insertItem( tr( "Rename" ), this, SLOT( rename() ) );
-    m->insertItem( Resource::loadPixmap("cut"),
+    m->insertItem( Resource::loadIconSet("cut"),
 				    tr( "Cut" ), this, SLOT( cut() ) );
-    m->insertItem( Resource::loadPixmap("copy"),
+    m->insertItem( Resource::loadIconSet("copy"),
 				   tr( "Copy" ), this, SLOT( copy() ) );
-    m->insertItem( Resource::loadPixmap("paste"),
+    m->insertItem( Resource::loadIconSet("paste"),
 				   tr( "Paste" ), this, SLOT( paste() ) );
     m->insertItem( tr( "Delete" ), this, SLOT( del() ) );
     m->insertSeparator();
     m->insertItem( tr( "Select all" ), this, SLOT( selectAll() ) );
     m->insertItem( tr( "Deselect all" ), this, SLOT( deselectAll() ) );
     m->popup( QCursor::pos() );
+}
+
+//
+// Load and scale the pixmaps that we load manually, according to the
+// iconsize that Applnk tells us.  We trust the size returned by AppLnk,
+// as it's the same size that MimeTypeData uses.
+//
+void    FileView::scaleIcons(void)
+{
+    int	    iconsize = AppLnk::smallIconSize();
+    QImage  img;
+
+    pmLockedFolder = new QPixmap();
+    pmFolder = new QPixmap();
+    pmLocked = new QPixmap();
+    pmLibrary = new QPixmap();
+    pmUnknown = new QPixmap();
+
+    img = Resource::loadImage("lockedfolder").smoothScale(iconsize, iconsize);
+    pmLockedFolder->convertFromImage(img);
+
+    img = Resource::loadImage("folder").smoothScale(iconsize, iconsize);
+    pmFolder->convertFromImage(img);
+
+    img = Resource::loadImage("locked").smoothScale(iconsize, iconsize);
+    pmLocked->convertFromImage(img);
+
+    img = Resource::loadImage("library").smoothScale(iconsize, iconsize);
+    pmLibrary->convertFromImage(img);
+
+    img = Resource::loadImage("UnknownDocument-14").
+	smoothScale(iconsize, iconsize);
+    pmUnknown->convertFromImage(img);
 }
 
 //
@@ -735,25 +790,25 @@ void FileBrowser::init(const QString & dir)
     upAction->addTo( toolBar );
     upAction->setWhatsThis( tr("Changes location to the parent directory") );
 
-    QAction *a = new QAction( tr("New folder"), Resource::loadPixmap( "newfolder" ),
+    QAction *a = new QAction( tr("New folder"), Resource::loadIconSet( "newfolder" ),
 					 QString::null, 0, this, 0 );
     connect( a, SIGNAL( activated() ), fileView, SLOT( newFolder() ) );
     a->addTo( toolBar );
     a->setWhatsThis( tr("Creates a new folder") );
 
-    a = new QAction( tr("Cut"), Resource::loadPixmap( "cut" ),
+    a = new QAction( tr("Cut"), Resource::loadIconSet( "cut" ),
 					 QString::null, 0, this, 0 );
     connect( a, SIGNAL( activated() ), fileView, SLOT( cut() ) );
     a->addTo( toolBar );
     a->setWhatsThis( tr("Deletes the selected item") );
 
-    a = new QAction( tr("Copy"), Resource::loadPixmap( "copy" ),
+    a = new QAction( tr("Copy"), Resource::loadIconSet( "copy" ),
 					 QString::null, 0, this, 0 );
     connect( a, SIGNAL( activated() ), fileView, SLOT( copy() ) );
     a->addTo( toolBar );
     a->setWhatsThis( tr("Copies the selected item") );
 
-    pasteAction = new QAction( tr("Paste"), Resource::loadPixmap( "paste" ),
+    pasteAction = new QAction( tr("Paste"), Resource::loadIconSet( "paste" ),
 							   QString::null, 0, this, 0 );
     connect( pasteAction, SIGNAL( activated() ), fileView, SLOT( paste() ) );
     pasteAction->addTo( toolBar );

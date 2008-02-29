@@ -20,12 +20,13 @@
 
 #include "todoentryimpl.h"
 
-#include <qpe/categoryselect.h>
-#include <qpe/datebookmonth.h>
-#include <qpe/global.h>
-#include <qpe/imageedit.h>
-#include <qpe/pim/task.h>
-#include <qpe/timestring.h>
+#include <qtopia/categoryselect.h>
+#include <qtopia/datebookmonth.h>
+#include <qtopia/global.h>
+#include <qtopia/imageedit.h>
+#include <qtopia/pim/task.h>
+#include <qtopia/timestring.h>
+#include <qtopia/datepicker.h>
 
 #include <qmessagebox.h>
 #include <qpopupmenu.h>
@@ -36,29 +37,49 @@
 #include <qmultilineedit.h>
 #include <qlabel.h>
 #include <qtimer.h>
+#include <qspinbox.h>
+#include <qtabwidget.h>
 #include <qapplication.h>
+#include <qscrollview.h>
+#include <qlayout.h>
 
 
 NewTaskDialog::NewTaskDialog( const PimTask& task, QWidget *parent,
 			      const char *name, bool modal, WFlags fl )
-    : NewTaskDialogBase( parent, name, modal, fl ),
+    : QDialog( parent, name, modal, fl ),
       todo( task )
 {
-    todo.setCategories( task.categories() );
-    if ( todo.hasDueDate() )
-	date = todo.dueDate();
-    else
-	date = QDate::currentDate();
-
     init();
-    comboPriority->setCurrentItem( task.priority() - 1 );
 
-    checkCompleted->setChecked( task.isCompleted() );
-    checkDate->setChecked( task.hasDueDate() );
-    buttonDate->setText( TimeString::longDateString( date ) );
+    todo.setCategories( task.categories() );
 
-    txtTodo->setText( task.description() );
-    txtTodo->setFocus();
+    s->inputDescription->setText( task.description() );
+    s->comboPriority->setCurrentItem( task.priority() - 1 );
+    if ( task.isCompleted() )
+	s->comboStatus->setCurrentItem( 2 );
+    else
+	s->comboStatus->setCurrentItem( task.status() );
+
+    s->spinComplete->setValue( task.percentCompleted() );
+
+    s->checkDue->setChecked( task.hasDueDate() );
+    QDate date = task.dueDate();
+    if ( task.hasDueDate() )
+	s->buttonDue->setDate( date );
+
+    date = task.startedDate();
+    if ( !date.isNull() )
+	s->buttonStart->setDate( date );
+
+    date = task.completedDate();
+    if ( !date.isNull() )
+	s->buttonEnd->setDate( date );
+
+    s->inputNotes->setText( task.notes() );
+
+    // set up enabled/disabled logic
+    dueButtonToggled();
+    statusChanged();
 }
 
 /*
@@ -70,40 +91,85 @@ NewTaskDialog::NewTaskDialog( const PimTask& task, QWidget *parent,
  */
 NewTaskDialog::NewTaskDialog( int id, QWidget* parent,  const char* name, bool modal,
 			      WFlags fl )
-    : NewTaskDialogBase( parent, name, modal, fl ),
-      date( QDate::currentDate() )
+    : QDialog( parent, name, modal, fl )
 {
     if ( id != -1 ) {
 	QArray<int> ids( 1 );
 	ids[0] = id;
 	todo.setCategories( ids );
     }
+
     init();
+
+    // set up enabled/disabled logic
+    dueButtonToggled();
+    statusChanged();
 }
 
 void NewTaskDialog::init()
 {
-    QPopupMenu *m1 = new QPopupMenu( this );
-    picker = new DateBookMonth( m1, 0, TRUE );
+    QScrollView *sv = new QScrollView(this);
+    sv->setResizePolicy(QScrollView::AutoOneFit);
 
-    //
-    // Geometry information for the DateBookMonth widget is
-    // setup by the QPopupMenu (parent).  However at 176x220,
-    // the widget hangs off the side of the screen.  Force the
-    // widget to be bounded by the desktop width.
-    //
-    picker->setMaximumWidth(qApp->desktop()->width());
+    QGridLayout *grid = new QGridLayout(this);
+    grid->addWidget(sv, 0, 0);
 
-    m1->insertItem( picker );
-    buttonDate->setPopup( m1 );
-    comboCategory->setCategories( todo.categories(), "Todo List", tr("Todo List") );
+    s = new NewTaskDialogBase( sv->viewport() );
+    sv->addChild( s );
 
-    connect( picker, SIGNAL( dateClicked( int, int, int ) ),
-             this, SLOT( dateChanged( int, int, int ) ) );
+#ifdef Q_WS_QWS
+    s->buttonCancel->hide();
+    s->buttonOk->hide();
+#else
+    connect( s->buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
+    connect( s->buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
+#endif
 
-    buttonDate->setText( TimeString::longDateString( date ) );
-    picker->setDate( date.year(), date.month(), date.day() );
-    txtTodo->setFocus();
+    s->buttonStart->setAllowNullDate( TRUE );
+
+    connect( s->buttonDue, SIGNAL( dateSelected( const QDate& ) ),
+             this, SLOT( dueDateChanged( const QDate& ) ) );
+    connect( s->buttonStart, SIGNAL( dateSelected( const QDate& ) ),
+             this, SLOT( startDateChanged( const QDate& ) ) );
+    connect( s->buttonEnd, SIGNAL( dateSelected( const QDate& ) ),
+             this, SLOT( endDateChanged( const QDate& ) ) );
+
+    QDate current = QDate::currentDate();
+
+    s->buttonDue->setDate( current );
+    s->buttonStart->setDate( QDate() );
+    s->buttonEnd->setDate( current );
+
+    s->comboCategory->setCategories( todo.categories(), "Todo List", tr("Todo List") );
+
+    connect( s->checkDue, SIGNAL( clicked() ), this, SLOT( dueButtonToggled() ) );
+    connect( s->comboStatus, SIGNAL( activated(int) ), this, SLOT( statusChanged() ) );
+    s->inputDescription->setFocus();
+
+    resize( 300, 300 );
+}
+
+void NewTaskDialog::dueButtonToggled()
+{
+    s->buttonDue->setEnabled( s->checkDue->isChecked() );
+    s->buttonStart->setEnabled( s->checkDue->isChecked() );
+}
+
+void NewTaskDialog::statusChanged()
+{
+    PimTask::TaskStatus t = (PimTask::TaskStatus)s->comboStatus->currentItem();
+
+    if ( t != PimTask::NotStarted ) {
+	s->checkDue->setChecked( TRUE );
+	dueButtonToggled();
+	if ( !s->buttonStart->date().isValid() )
+	    s->buttonStart->setDate( QDate::currentDate() );
+    }
+    else
+	s->buttonStart->setDate( QDate() );
+
+    s->buttonEnd->setEnabled( t == PimTask::Completed );
+    s->spinComplete->setEnabled( t != PimTask::NotStarted && t != PimTask::Completed );
 }
 
 /*
@@ -113,29 +179,75 @@ NewTaskDialog::~NewTaskDialog()
 {
     // no need to delete child widgets, Qt does it all for us
 }
-void NewTaskDialog::dateChanged( int y, int m, int d )
+void NewTaskDialog::dueDateChanged( const QDate& date )
 {
-    date = QDate( y, m, d );
-    buttonDate->setText( TimeString::longDateString( date ) );
+    // if the due date is before the start date, make the start date null;
+    // debated not changing the date (and telling the user, like outlook does)
+    // but I feel this will just frustrate the user, since the user is
+    // manually changing the dueDate; they can manually change the start
+    // date if they wish (which is what the dialog would have forced them to
+    // do) - Greg
+    if ( s->buttonStart->date().isValid() &&
+	 date < s->buttonStart->date() )
+	s->buttonStart->setDate( QDate() );
+}
+
+void NewTaskDialog::startDateChanged( const QDate& date )
+{
+    if ( s->buttonDue->date().isNull() )
+	s->buttonDue->setDate( date );
+    else if ( date.isValid() && s->buttonDue->date().isValid()
+	      && s->buttonDue->date() < date ) {
+	QMessageBox::information ( this, tr("Qtopia Desktop ToDo List"),
+				   tr("The start date must occur before the tasks due date.\nPlease change the due date first."), QMessageBox::Ok );
+	s->buttonStart->setDate( QDate() );
+    }
+    if ( date > s->buttonEnd->date() )
+	s->buttonEnd->setDate( date );
+}
+
+void NewTaskDialog::endDateChanged( const QDate& date )
+{
+    if ( date < s->buttonStart->date() )
+	s->buttonStart->setDate( date );
 }
 
 /*!
 */
 
+void NewTaskDialog::setCurrentCategory(int i)
+{
+    s->comboCategory->setCurrentCategory(i);
+}
+
 PimTask NewTaskDialog::todoEntry()
 {
-    if (checkDate->isChecked())
-	todo.setDueDate(date);
+    todo.setDescription( s->inputDescription->text() );
+    todo.setPriority( (PimTask::PriorityValue) (s->comboPriority->currentItem() + 1) );
+    if ( s->comboStatus->currentItem() == 2 ) {
+	todo.setCompleted( TRUE );
+	todo.setPercentCompleted( 0 );
+    } else {
+	todo.setCompleted( FALSE );
+	todo.setStatus( (PimTask::TaskStatus) s->comboStatus->currentItem() );
+
+	int percent = s->spinComplete->value();
+	if ( percent >= 100 )
+	    percent = 0;
+	todo.setPercentCompleted( percent );
+    }
+
+    if (s->checkDue->isChecked())
+	todo.setDueDate( s->buttonDue->date() );
     else
 	todo.clearDueDate();
 
-    if ( comboCategory->currentCategory() != -1 ) {
-	todo.setCategories( comboCategory->currentCategories() );
-    }
-    todo.setPriority( comboPriority->currentItem() + 1 );
-    todo.setCompleted( checkCompleted->isChecked() );
+    todo.setStartedDate( s->buttonStart->date() );
+    todo.setCompletedDate( s->buttonEnd->date() );
 
-    todo.setDescription( txtTodo->text() );
+    todo.setCategories( s->comboCategory->currentCategories() );
+
+    todo.setNotes( s->inputNotes->text() );
 
     return todo;
 }
@@ -145,13 +257,20 @@ PimTask NewTaskDialog::todoEntry()
 
 */
 
+void NewTaskDialog::reject()
+{
+    QDialog::reject();
+}
+
 void NewTaskDialog::accept()
 {
-    QString strText = txtTodo->text();
+/*
+    QString strText = inputDescription->text();
     if ( !strText || strText == "") {
        // hmm... just decline it then, the user obviously didn't care about it
        QDialog::reject();
        return;
     }
+*/
     QDialog::accept();
 }

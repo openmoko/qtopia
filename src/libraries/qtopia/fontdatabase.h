@@ -20,14 +20,15 @@
 #ifndef FONTFACTORY_H
 #define FONTFACTORY_H
 
-#include <qpe/fontfactoryinterface.h>
+#include <qtopia/qpeglobal.h>
+#include <qtopia/fontfactoryinterface.h>
 
 #include <qfontdatabase.h>
 #include <qvaluelist.h>
 
 class QLibrary;
 
-struct FontFactory
+struct QTOPIA_EXPORT FontFactory
 {
 #ifndef QT_NO_COMPONENT
     QLibrary *library;
@@ -36,7 +37,7 @@ struct FontFactory
     QFontFactory *factory;
 };
 
-class FontDatabase
+class QTOPIA_EXPORT FontDatabase
 #ifndef QT_NO_FONTDATABASE
     : public QFontDatabase
 #endif

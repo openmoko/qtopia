@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -133,16 +139,16 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 HEADERS =	settings.h
 SOURCES =	light.cpp \
 		main.cpp
-OBJECTS =	light.o \
-		main.o \
-		lightsettingsbase.o
+OBJECTS =	$(OBJECTS_DIR)/light.o \
+		$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/lightsettingsbase.o
 INTERFACES =    lightsettingsbase.ui
 UICDECLS =      lightsettingsbase.h
 UICIMPLS =      lightsettingsbase.cpp
-SRCMOC	=	moc_settings.cpp \
-		moc_lightsettingsbase.cpp
-OBJMOC	=	moc_settings.o \
-		moc_lightsettingsbase.o
+SRCMOC	=	$(MOC_DIR)/moc_settings.cpp \
+		$(MOC_DIR)/moc_lightsettingsbase.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_settings.o \
+		$(OBJECTS_DIR)/moc_lightsettingsbase.o
 
 
 ####### Implicit rules
@@ -208,26 +214,15 @@ REQUIRES=
 
 ####### Compile
 
-light.o: light.cpp \
+$(OBJECTS_DIR)/light.o: light.cpp \
 		settings.h \
-		$(QPEDIR)/include/qpe/power.h \
-		lightsettingsbase.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/fontmanager.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h
+		lightsettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/light.o light.cpp
 
-main.o: main.cpp \
+$(OBJECTS_DIR)/main.o: main.cpp \
 		settings.h \
-		$(QPEDIR)/include/qpe/power.h \
-		lightsettingsbase.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qpe/global.h
+		lightsettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
 lightsettingsbase.h: lightsettingsbase.ui
 	$(UIC) lightsettingsbase.ui -o $(INTERFACE_DECL_PATH)/lightsettingsbase.h
@@ -235,31 +230,34 @@ lightsettingsbase.h: lightsettingsbase.ui
 lightsettingsbase.cpp: lightsettingsbase.ui
 	$(UIC) lightsettingsbase.ui -i lightsettingsbase.h -o lightsettingsbase.cpp
 
-lightsettingsbase.o: lightsettingsbase.cpp \
+$(OBJECTS_DIR)/lightsettingsbase.o: lightsettingsbase.cpp \
 		lightsettingsbase.h \
 		lightsettingsbase.ui
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/lightsettingsbase.o lightsettingsbase.cpp
 
-moc_settings.o: moc_settings.cpp \
+$(OBJECTS_DIR)/moc_settings.o: $(MOC_DIR)/moc_settings.cpp \
 		settings.h \
-		$(QPEDIR)/include/qpe/power.h \
 		lightsettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_settings.o $(MOC_DIR)/moc_settings.cpp
 
-moc_lightsettingsbase.o: moc_lightsettingsbase.cpp \
+$(OBJECTS_DIR)/moc_lightsettingsbase.o: $(MOC_DIR)/moc_lightsettingsbase.cpp \
 		lightsettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_lightsettingsbase.o $(MOC_DIR)/moc_lightsettingsbase.cpp
 
-moc_settings.cpp: settings.h
-	$(MOC) settings.h -o moc_settings.cpp
+$(MOC_DIR)/moc_settings.cpp: settings.h
+	$(MOC) settings.h -o $(MOC_DIR)/moc_settings.cpp
 
-moc_lightsettingsbase.cpp: lightsettingsbase.h
-	$(MOC) lightsettingsbase.h -o moc_lightsettingsbase.cpp
+$(MOC_DIR)/moc_lightsettingsbase.cpp: lightsettingsbase.h
+	$(MOC) lightsettingsbase.h -o $(MOC_DIR)/moc_lightsettingsbase.cpp
 
 
 
 lupdate:
-	lupdate light-and-power.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <light-and-power.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease light-and-power.pro
+	$(QPEDIR)/bin/qtopia-linstall light-and-power.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

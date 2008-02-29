@@ -20,7 +20,7 @@
 #include <qpainter.h>
 #include <qcanvas.h>
 #include <qpixmap.h>
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 #include "canvasshapes.h"
 #include "cardmetrics.h"
 

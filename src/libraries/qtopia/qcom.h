@@ -18,10 +18,14 @@
 **
 **********************************************************************/
 
+#include <qnamespace.h>
+#include <qtopia/qpeglobal.h>
+#if (QT_VERSION-0 >= 0x030000)
+#include <private/qcom_p.h>
+#else
+
 #ifndef QCOM_H
 #define QCOM_H
-
-#include <qtopia/qpeglobal.h>
 #include <qstringlist.h>
 
 #ifndef QT_NO_COMPONENT
@@ -43,7 +47,27 @@
 #define IID_QUnknown QUuid(0x1d8518cd, 0xe8f5, 0x4366, 0x99, 0xe8, 0x87, 0x9f, 0xd7, 0xe4, 0x82, 0xde)
 #endif
 
-struct QTOPIA_EXPORT QUnknownInterface
+#if (defined(Q_OS_WIN32) || defined(Q_OS_WIN64) )
+
+#  if defined(QTOPIA_PLUGIN_MAKEDLL)   /* create a Qt DLL library for qtopia */
+#    if defined(QTOPIA_PLUGIN_DLL)
+#      undef QTOPIA_PLUGIN_DLL
+#    endif
+#    define QTOPIA_PLUGIN_EXPORT  __declspec(dllexport)
+#    define QTOPIA_PLUGIN_TEMPLATE_EXTERN
+#    define QTOPIA_PLUGIN_TEMPLATEDLL
+#    undef  QTOPIA_PLUGIN_DISABLE_COPY /* avoid unresolved externals */
+#  elif defined(QTOPIA_PLUGIN_DLL) || defined (QT_DLL)         /* use a Qt DLL library */
+#    define QTOPIA_PLUGIN_EXPORT  __declspec(dllimport)
+#    define QTOPIA_PLUGIN_TEMPLATE_EXTERN /*extern*/
+#    define QTOPIA_PLUGIN_TEMPLATEDLL
+#    undef  QTOPIA_PLUGIN_DISABLE_COPY /* avoid unresolved externals */
+#  endif
+#else
+#    define QTOPIA_PLUGIN_EXPORT
+#endif
+
+struct QTOPIA_PLUGIN_EXPORT QUnknownInterface
 {
     virtual QRESULT queryInterface( const QUuid&, QUnknownInterface** ) = 0;
     virtual ulong   addRef() = 0;
@@ -55,7 +79,7 @@ struct QTOPIA_EXPORT QUnknownInterface
 #define IID_QLibrary QUuid( 0xd16111d4, 0xe1e7, 0x4c47, 0x85, 0x99, 0x24, 0x48, 0x3d, 0xae, 0x2e, 0x07)
 #endif
  
-struct QTOPIA_EXPORT QLibraryInterface : public QUnknownInterface
+struct QTOPIA_PLUGIN_EXPORT QLibraryInterface : public QUnknownInterface
 {
     virtual bool    init() = 0;
     virtual void    cleanup() = 0;
@@ -68,8 +92,14 @@ struct QTOPIA_EXPORT QLibraryInterface : public QUnknownInterface
 	i->queryInterface( IID_QUnknown, &iface );      \
 	return iface;
 
+#ifndef Q_OS_WIN32 
 #define Q_EXPORT_INTERFACE() \
 	extern "C" QUnknownInterface* ucm_instantiate()
+#else
+#define Q_EXPORT_INTERFACE() \
+	extern "C" QTOPIA_PLUGIN_EXPORT QUnknownInterface* ucm_instantiate()
+#endif
+
 
 #define Q_REFCOUNT  ulong addRef() {return ref++;}ulong release() {if(!--ref){delete this;return 0;}return ref;}
 
@@ -82,3 +112,5 @@ struct Q_EXPORT QUnknownInterface
 #endif // QT_NO_COMPONENT
 
 #endif // QCOM_H
+
+#endif // qt >= 3.0

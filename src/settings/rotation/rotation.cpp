@@ -20,13 +20,13 @@
 
 #include "settings.h"
 
-#include <qpe/global.h>
-#include <qpe/fontmanager.h>
-#include <qpe/config.h>
-#include <qpe/applnk.h>
-#include <qpe/qpeapplication.h>
+#include <qtopia/global.h>
+#include <qtopia/fontmanager.h>
+#include <qtopia/config.h>
+#include <qtopia/applnk.h>
+#include <qtopia/qpeapplication.h>
 #if defined(Q_WS_QWS) && !defined(QT_NO_COP)
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
 
 #include <qlabel.h>
@@ -46,14 +46,14 @@
 #include <qstylefactory.h>
 #endif
 
-#if defined(QT_QWS_IPAQ) || defined(QT_QWS_EBX)
-#include <unistd.h>
-#include <linux/fb.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#endif
+//#if defined(QT_QWS_IPAQ) || defined(QT_QWS_SL5XXX)
+//#include <unistd.h>
+//#include <linux/fb.h>
+//#include <sys/types.h>
+//#include <sys/stat.h>
+//#include <fcntl.h>
+//#include <sys/ioctl.h>
+//#endif
 #include <stdlib.h>
 
 

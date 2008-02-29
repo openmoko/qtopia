@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -133,16 +139,16 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 HEADERS =	settings.h
 SOURCES =	language.cpp \
 		main.cpp
-OBJECTS =	language.o \
-		main.o \
-		languagesettingsbase.o
+OBJECTS =	$(OBJECTS_DIR)/language.o \
+		$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/languagesettingsbase.o
 INTERFACES =    languagesettingsbase.ui
 UICDECLS =      languagesettingsbase.h
 UICIMPLS =      languagesettingsbase.cpp
-SRCMOC	=	moc_settings.cpp \
-		moc_languagesettingsbase.cpp
-OBJMOC	=	moc_settings.o \
-		moc_languagesettingsbase.o
+SRCMOC	=	$(MOC_DIR)/moc_settings.cpp \
+		$(MOC_DIR)/moc_languagesettingsbase.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_settings.o \
+		$(OBJECTS_DIR)/moc_languagesettingsbase.o
 
 
 ####### Implicit rules
@@ -208,23 +214,15 @@ REQUIRES=
 
 ####### Compile
 
-language.o: language.cpp \
+$(OBJECTS_DIR)/language.o: language.cpp \
 		settings.h \
-		languagesettingsbase.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/fontmanager.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		$(QPEDIR)/include/qpe/qpedialog.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h
+		languagesettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/language.o language.cpp
 
-main.o: main.cpp \
+$(OBJECTS_DIR)/main.o: main.cpp \
 		settings.h \
-		languagesettingsbase.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
+		languagesettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
 languagesettingsbase.h: languagesettingsbase.ui
 	$(UIC) languagesettingsbase.ui -o $(INTERFACE_DECL_PATH)/languagesettingsbase.h
@@ -232,30 +230,34 @@ languagesettingsbase.h: languagesettingsbase.ui
 languagesettingsbase.cpp: languagesettingsbase.ui
 	$(UIC) languagesettingsbase.ui -i languagesettingsbase.h -o languagesettingsbase.cpp
 
-languagesettingsbase.o: languagesettingsbase.cpp \
+$(OBJECTS_DIR)/languagesettingsbase.o: languagesettingsbase.cpp \
 		languagesettingsbase.h \
 		languagesettingsbase.ui
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/languagesettingsbase.o languagesettingsbase.cpp
 
-moc_settings.o: moc_settings.cpp \
+$(OBJECTS_DIR)/moc_settings.o: $(MOC_DIR)/moc_settings.cpp \
 		settings.h \
 		languagesettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_settings.o $(MOC_DIR)/moc_settings.cpp
 
-moc_languagesettingsbase.o: moc_languagesettingsbase.cpp \
+$(OBJECTS_DIR)/moc_languagesettingsbase.o: $(MOC_DIR)/moc_languagesettingsbase.cpp \
 		languagesettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_languagesettingsbase.o $(MOC_DIR)/moc_languagesettingsbase.cpp
 
-moc_settings.cpp: settings.h
-	$(MOC) settings.h -o moc_settings.cpp
+$(MOC_DIR)/moc_settings.cpp: settings.h
+	$(MOC) settings.h -o $(MOC_DIR)/moc_settings.cpp
 
-moc_languagesettingsbase.cpp: languagesettingsbase.h
-	$(MOC) languagesettingsbase.h -o moc_languagesettingsbase.cpp
+$(MOC_DIR)/moc_languagesettingsbase.cpp: languagesettingsbase.h
+	$(MOC) languagesettingsbase.h -o $(MOC_DIR)/moc_languagesettingsbase.cpp
 
 
 
 lupdate:
-	lupdate language.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <language.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease language.pro
+	$(QPEDIR)/bin/qtopia-linstall language.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

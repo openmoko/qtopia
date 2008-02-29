@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -136,14 +142,16 @@ HEADERS =	battery.h \
 SOURCES =	battery.cpp \
 		batterystatus.cpp \
 		batteryappletimpl.cpp
-OBJECTS =	battery.o \
-		batterystatus.o \
-		batteryappletimpl.o
+OBJECTS =	$(OBJECTS_DIR)/battery.o \
+		$(OBJECTS_DIR)/batterystatus.o \
+		$(OBJECTS_DIR)/batteryappletimpl.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
-SRCMOC	=	moc_battery.cpp
-OBJMOC	=	moc_battery.o
+SRCMOC	=	$(MOC_DIR)/moc_battery.cpp \
+		$(MOC_DIR)/moc_batterystatus.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_battery.o \
+		$(OBJECTS_DIR)/moc_batterystatus.o
 
 
 ####### Implicit rules
@@ -209,38 +217,42 @@ REQUIRES=
 
 ####### Compile
 
-battery.o: battery.cpp \
+$(OBJECTS_DIR)/battery.o: battery.cpp \
 		battery.h \
-		batterystatus.h \
-		$(QPEDIR)/include/qpe/power.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h
+		batterystatus.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/battery.o battery.cpp
 
-batterystatus.o: batterystatus.cpp \
-		batterystatus.h \
-		$(QPEDIR)/include/qpe/power.h
+$(OBJECTS_DIR)/batterystatus.o: batterystatus.cpp \
+		batterystatus.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/batterystatus.o batterystatus.cpp
 
-batteryappletimpl.o: batteryappletimpl.cpp \
+$(OBJECTS_DIR)/batteryappletimpl.o: batteryappletimpl.cpp \
 		battery.h \
-		batteryappletimpl.h \
-		$(QPEDIR)/include/qpe/taskbarappletinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h
+		batteryappletimpl.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/batteryappletimpl.o batteryappletimpl.cpp
 
-moc_battery.o: moc_battery.cpp \
+$(OBJECTS_DIR)/moc_battery.o: $(MOC_DIR)/moc_battery.cpp \
 		battery.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_battery.o $(MOC_DIR)/moc_battery.cpp
 
-moc_battery.cpp: battery.h
-	$(MOC) battery.h -o moc_battery.cpp
+$(OBJECTS_DIR)/moc_batterystatus.o: $(MOC_DIR)/moc_batterystatus.cpp \
+		batterystatus.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_batterystatus.o $(MOC_DIR)/moc_batterystatus.cpp
+
+$(MOC_DIR)/moc_battery.cpp: battery.h
+	$(MOC) battery.h -o $(MOC_DIR)/moc_battery.cpp
+
+$(MOC_DIR)/moc_batterystatus.cpp: batterystatus.h
+	$(MOC) batterystatus.h -o $(MOC_DIR)/moc_batterystatus.cpp
 
 
 
 lupdate:
-	lupdate batteryapplet.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <batteryapplet.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease batteryapplet.pro
+	$(QPEDIR)/bin/qtopia-linstall batteryapplet.pro
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

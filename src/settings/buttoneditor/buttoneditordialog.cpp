@@ -30,10 +30,9 @@
 #include <qtopia/applnk.h>
 #include <qtopia/config.h>
 #include <qtopia/resource.h>
-#include <qtopia/services/services.h>
+#include <qtopia/services.h>
 
-// ### This should be changed to qpe/devicebuttonmanager.h in 3.0
-#include "../../server/devicebuttonmanager.h"
+#include <qtopia/devicebuttonmanager.h>
 #include "buttoneditordialog.h"
 
 ButtonEditorDialog::ButtonEditorDialog() 
@@ -134,16 +133,16 @@ void ButtonEditorDialog::initAppList()
     // Get the list of parameterless actions for all services
     m_Actions.clear();
     QStringList s = Service::list();
-    for (QStringList::ConstIterator it = s.begin(); it!=s.end(); ++it) {
-	Config srv(Service::config(*it),Config::File);
+    for (QStringList::ConstIterator itService = s.begin(); itService!=s.end(); ++itService) {
+	Config srv(Service::config(*itService),Config::File);
 	if ( srv.isValid() ) {
 	    srv.setGroup("Service");
-	    m_Actions += readActions(*it,srv);
+	    m_Actions += readActions(*itService,srv);
 	}
-	Config srvapp(Service::appConfig(*it),Config::File);
+	Config srvapp(Service::appConfig(*itService),Config::File);
 	if ( srvapp.isValid() ) {
 	    srvapp.setGroup("Extensions");
-	    m_Actions += readActions(*it,srvapp);
+	    m_Actions += readActions(*itService,srvapp);
 	}
     }
 }
@@ -161,6 +160,10 @@ void ButtonEditorDialog::buildGUI()
     vbox->setAutoAdd(TRUE);
     m_PressComboBoxes.setAutoDelete(FALSE);
     m_HoldComboBoxes.setAutoDelete(FALSE);
+
+    // Sanity check - is $QPEDIR/etc/defaultbuttons.conf missing?
+    if ( buttonList.count() == 0 )
+	new QLabel(tr("No buttons!"),this);
 
     for(; it != buttonList.end(); it++) {
 	ButtonRow* row = new ButtonRow(this);
@@ -197,7 +200,7 @@ void ButtonEditorDialog::populate(QComboBox* comboBox, const ServiceRequest& cur
     }
 
     // Since we don't have an applnk for QPE, we hardwire this one..
-    comboBox->insertItem(Resource::loadPixmap("home"),tr("Home"));
+    comboBox->insertItem(Resource::loadIconSet("home").pixmap(),tr("Home"));
     comboBox->insertItem(tr("No action"));
 
     int i;

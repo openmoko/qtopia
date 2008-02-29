@@ -28,8 +28,8 @@
 #include <qframe.h>
 #include <qfile.h>
 #include <qlineedit.h>
-#include <qpe/resource.h>
-#include <qpe/mediaplayerplugininterface.h>
+#include <qtopia/resource.h>
+#include <qtopia/mediaplayerplugininterface.h>
 #include "imageutil.h"
 #include "audiowidget.h"
 #include "mediaplayerstate.h"

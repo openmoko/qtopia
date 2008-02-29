@@ -18,6 +18,9 @@
 **
 **********************************************************************/
 
+#include <qtopia/qpeglobal.h>
+
+#ifndef Q_OS_WIN32
 #include "qpedebug.h"
 #include <stdio.h>
 #include <sys/time.h>
@@ -48,4 +51,5 @@ void qpe_debugTime( const char *file, int line, const char *desc )
     qpe_debuglast = tv;
 }
 
+#endif
 

@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/include/qtopia/inputmethodinterface.h:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/include/qtopia/inputmethodinterface.h:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -51,7 +51,7 @@ body { background: #ffffff; color: black; }
 #ifndef INPUTMETHODINTERFACE_H
 #define INPUTMETHODINTERFACE_H
 
-#include &lt;qpe/qcom.h&gt;
+#include &lt;qtopia/qcom.h&gt;
 
 #include &lt;qnamespace.h&gt;
 #include &lt;qstring.h&gt;
@@ -98,6 +98,7 @@ struct ExtInputMethodInterface : public QUnknownInterface
     virtual QWSInputMethod *inputMethod() = 0;
     virtual QWidget *statusWidget( QWidget *parent, Qt::WFlags f )= 0;
 
+    virtual void qcopReceive( const QCString &amp;msg, const QByteArray &amp;data )= 0;
 };
 
 

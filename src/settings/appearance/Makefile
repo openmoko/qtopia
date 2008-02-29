@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -133,17 +139,17 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 HEADERS =	appearance.h
 SOURCES =	appearance.cpp \
 		main.cpp
-OBJECTS =	appearance.o \
-		main.o \
-		appearancesettingsbase.o
+OBJECTS =	$(OBJECTS_DIR)/appearance.o \
+		$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/appearancesettingsbase.o
 INTERFACES =    appearancesettingsbase.ui
 UICDECLS =      appearancesettingsbase.h
 UICIMPLS =      appearancesettingsbase.cpp
-SRCMOC	=	moc_appearance.cpp \
-		appearance.moc \
-		moc_appearancesettingsbase.cpp
-OBJMOC	=	moc_appearance.o \
-		moc_appearancesettingsbase.o
+SRCMOC	=	$(MOC_DIR)/moc_appearance.cpp \
+		$(MOC_DIR)/moc_appearancesettingsbase.cpp \
+		$(MOC_DIR)/appearance.moc
+OBJMOC	=	$(OBJECTS_DIR)/moc_appearance.o \
+		$(OBJECTS_DIR)/moc_appearancesettingsbase.o
 
 
 ####### Implicit rules
@@ -209,31 +215,16 @@ REQUIRES=
 
 ####### Compile
 
-appearance.o: appearance.cpp \
-		appearance.moc \
+$(OBJECTS_DIR)/appearance.o: appearance.cpp \
+		$(MOC_DIR)/appearance.moc \
 		appearance.h \
-		appearancesettingsbase.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/fontdatabase.h \
-		$(QPEDIR)/include/qpe/fontfactoryinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qpe/qlibrary.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qpe/qpestyle.h \
-		$(QPEDIR)/include/qpe/styleinterface.h \
-		$(QPEDIR)/include/qpe/windowdecorationinterface.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h
+		appearancesettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/appearance.o appearance.cpp
 
-main.o: main.cpp \
+$(OBJECTS_DIR)/main.o: main.cpp \
 		appearance.h \
-		appearancesettingsbase.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
+		appearancesettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
 appearancesettingsbase.h: appearancesettingsbase.ui
 	$(UIC) appearancesettingsbase.ui -o $(INTERFACE_DECL_PATH)/appearancesettingsbase.h
@@ -241,50 +232,37 @@ appearancesettingsbase.h: appearancesettingsbase.ui
 appearancesettingsbase.cpp: appearancesettingsbase.ui
 	$(UIC) appearancesettingsbase.ui -i appearancesettingsbase.h -o appearancesettingsbase.cpp
 
-appearancesettingsbase.o: appearancesettingsbase.cpp \
+$(OBJECTS_DIR)/appearancesettingsbase.o: appearancesettingsbase.cpp \
 		appearancesettingsbase.h \
 		appearancesettingsbase.ui
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/appearancesettingsbase.o appearancesettingsbase.cpp
 
-moc_appearance.o: moc_appearance.cpp \
+$(OBJECTS_DIR)/moc_appearance.o: $(MOC_DIR)/moc_appearance.cpp \
 		appearance.h \
 		appearancesettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_appearance.o $(MOC_DIR)/moc_appearance.cpp
 
-moc_appearancesettingsbase.o: appearance.moc \
-		appearance.cpp \
-		appearance.h \
-		appearancesettingsbase.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/fontdatabase.h \
-		$(QPEDIR)/include/qpe/fontfactoryinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qpe/qlibrary.h \
-		$(QPEDIR)/include/qtopia/qcom.h \
-		$(QPEDIR)/include/qpe/qpestyle.h \
-		$(QPEDIR)/include/qpe/styleinterface.h \
-		$(QPEDIR)/include/qpe/windowdecorationinterface.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h
+$(OBJECTS_DIR)/moc_appearancesettingsbase.o: $(MOC_DIR)/moc_appearancesettingsbase.cpp \
+		appearancesettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_appearancesettingsbase.o $(MOC_DIR)/moc_appearancesettingsbase.cpp
 
-moc_appearance.cpp: appearance.h
-	$(MOC) appearance.h -o moc_appearance.cpp
+$(MOC_DIR)/moc_appearance.cpp: appearance.h
+	$(MOC) appearance.h -o $(MOC_DIR)/moc_appearance.cpp
 
-appearance.moc: appearance.cpp
-	$(MOC) appearance.cpp -o appearance.moc
+$(MOC_DIR)/appearance.moc: appearance.cpp
+	$(MOC) appearance.cpp -o $(MOC_DIR)/appearance.moc
 
-moc_appearancesettingsbase.cpp: appearancesettingsbase.h
-	$(MOC) appearancesettingsbase.h -o moc_appearancesettingsbase.cpp
+$(MOC_DIR)/moc_appearancesettingsbase.cpp: appearancesettingsbase.h
+	$(MOC) appearancesettingsbase.h -o $(MOC_DIR)/moc_appearancesettingsbase.cpp
 
 
 
 lupdate:
-	lupdate appearance.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <appearance.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease appearance.pro
+	$(QPEDIR)/bin/qtopia-linstall appearance.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

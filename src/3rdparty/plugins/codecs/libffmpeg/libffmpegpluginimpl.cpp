@@ -53,9 +53,12 @@ MediaPlayerEncoder *LibFFMpegPluginImpl::encoder()
 QRESULT LibFFMpegPluginImpl::queryInterface( const QUuid &uuid, QUnknownInterface **iface )
 {
     *iface = 0;
-    if ( ( uuid == IID_QUnknown )  || ( uuid == IID_MediaPlayerPlugin )  )
-	*iface = this, (*iface)->addRef();
-    return QS_OK;
+    if ( ( uuid == IID_QUnknown )  || ( uuid == IID_MediaPlayerPlugin ) || ( uuid == IID_MediaPlayerPlugin_1_6 ) ) {
+	*iface = this;
+	(*iface)->addRef();
+        return QS_OK;
+    }
+    return QS_FALSE;
 }
 
 

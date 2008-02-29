@@ -20,6 +20,7 @@
 #ifndef MIMETYPE_H
 #define MIMETYPE_H
 
+#include <qtopia/qpeglobal.h>
 #include <qstringlist.h>
 #include <qpixmap.h>
 #include <qlist.h>
@@ -30,7 +31,7 @@ class QStringList;
 class MimeTypeData;
 class AppLnkSet;
 
-class MimeType
+class QTOPIA_EXPORT MimeType
 {
 public:
     MimeType( const QString& ext_or_id );

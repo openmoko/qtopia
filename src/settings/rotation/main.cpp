@@ -20,7 +20,7 @@
 
 #include "settings.h"
 
-#include <qpe/qpeapplication.h>
+#include <qtopia/qpeapplication.h>
 
 
 int main(int argc, char** argv)

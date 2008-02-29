@@ -1,0 +1,57 @@
+<html>
+<title>
+Light and Power Settings Test List
+</title>
+
+<body>
+
+<h1>Light and Power Settings Test List</h1>
+
+<a name=features>
+<h2>Feature Tests</h2>
+</a>
+
+<h3>Separate configs for battery and external power</h3>
+<ol>
+<li>Start the <b>Light and Power</b> application from the <b>Settings</b>
+    dialog.  The <b>On power source</b> group box contains <b>Battery</b>
+    and <b>External</b> radio buttons.  Toggling this option will alter
+    the information displayed in the rest of the dialog.
+<li>Note that when <b>Battery</b> is selected, the <b>Suspend after</b>
+    checkbox is disabled.  This forces the unit to turn off after the time
+    period specified to avoid running the battery low.  This same checkbox
+    is enabled under <b>External</b> power.
+</ol>
+
+<h3>Backlight control</h3>
+<ol>
+<li>Ensure the unit is running on battery power.
+<li>Check <b>Battery</b> from the <b>On power source</b> box.
+<li>Change the amount of time for <b>Dim light after</b> to 10 seconds and
+    <b>Light off after</b> to 10 seconds.  Click <b>OK</b>.
+<li>After 10 seconds, the backlight will dim.  After an further 10 seconds,
+    the backlight will turn off completely.
+<li>Repeat the same tests with external power connected, and check
+    <b>External</b> from the <b>On power source</b> box.
+</ol>
+
+<h3>Device suspend</h3>
+<ol>
+<li>Ensure the unit is running on battery power.
+<li>Check <b>Battery</b> from the <b>On power source</b> box.
+<li>Change the <b>Dim light after</b> time to 10 seconds, the <b>Light off
+    after</b> time to 10 seconds, and the <b after</b> time to 30 seconds.
+    Click <b>OK</b>.
+<li>After 10 seconds, the screen will dim.  After another 10 seconds, the
+    backlight will turn off completely.  After a further 30 seconds, the unit
+    will turn itself off.
+</ol>
+
+<h3>Screen brightness</h3>
+<ol>
+<li>Move the slider left (dimmer) and right (brighter).  The screen will
+    become dimmer or brighter.
+</ol>
+
+</body>
+</html>

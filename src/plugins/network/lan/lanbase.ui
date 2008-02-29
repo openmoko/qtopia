@@ -11,8 +11,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>294</width>
-            <height>352</height>
+            <width>278</width>
+            <height>393</height>
         </rect>
     </property>
     <property stdset="1">
@@ -37,6 +37,12 @@
                 <name>name</name>
                 <cstring>tabs</cstring>
             </property>
+            <property>
+                <name>layoutMargin</name>
+            </property>
+            <property>
+                <name>layoutSpacing</name>
+            </property>
             <widget>
                 <class>QWidget</class>
                 <property stdset="1">
@@ -50,11 +56,11 @@
                 <grid>
                     <property stdset="1">
                         <name>margin</name>
-                        <number>11</number>
+                        <number>6</number>
                     </property>
                     <property stdset="1">
                         <name>spacing</name>
-                        <number>6</number>
+                        <number>4</number>
                     </property>
                     <widget row="0"  column="1" >
                         <class>QLineEdit</class>
@@ -103,7 +109,7 @@
                         </property>
                         <property stdset="1">
                             <name>text</name>
-                            <string>Specify TCP/IP Information</string>
+                            <string>Configure IP manually</string>
                         </property>
                     </widget>
                     <widget row="2"  column="0"  rowspan="1"  colspan="2" >
@@ -114,7 +120,7 @@
                         </property>
                         <property stdset="1">
                             <name>text</name>
-                            <string>Obtain TCP/IP Information Automatically</string>
+                            <string>Configure IP automatically (DHCP)</string>
                         </property>
                     </widget>
                     <widget row="1"  column="0"  rowspan="1"  colspan="2" >
@@ -138,38 +144,17 @@
                 </property>
                 <attribute>
                     <name>title</name>
-                    <string>TCP/IP</string>
+                    <string>IP</string>
                 </attribute>
                 <grid>
                     <property stdset="1">
                         <name>margin</name>
-                        <number>11</number>
+                        <number>6</number>
                     </property>
                     <property stdset="1">
                         <name>spacing</name>
-                        <number>6</number>
+                        <number>4</number>
                     </property>
-                    <spacer row="4"  column="1" >
-                        <property>
-                            <name>name</name>
-                            <cstring>Spacer7</cstring>
-                        </property>
-                        <property stdset="1">
-                            <name>orientation</name>
-                            <enum>Vertical</enum>
-                        </property>
-                        <property stdset="1">
-                            <name>sizeType</name>
-                            <enum>Expanding</enum>
-                        </property>
-                        <property>
-                            <name>sizeHint</name>
-                            <size>
-                                <width>20</width>
-                                <height>20</height>
-                            </size>
-                        </property>
-                    </spacer>
                     <widget row="0"  column="0" >
                         <class>QLabel</class>
                         <property stdset="1">
@@ -261,28 +246,7 @@
                             <cstring>broadcast</cstring>
                         </property>
                     </widget>
-                </grid>
-            </widget>
-            <widget>
-                <class>QWidget</class>
-                <property stdset="1">
-                    <name>name</name>
-                    <cstring>dns</cstring>
-                </property>
-                <attribute>
-                    <name>title</name>
-                    <string>DNS</string>
-                </attribute>
-                <grid>
-                    <property stdset="1">
-                        <name>margin</name>
-                        <number>11</number>
-                    </property>
-                    <property stdset="1">
-                        <name>spacing</name>
-                        <number>6</number>
-                    </property>
-                    <widget row="3"  column="1" >
+                    <widget row="5"  column="1" >
                         <class>QLineEdit</class>
                         <property stdset="1">
                             <name>name</name>
@@ -293,18 +257,7 @@
                             <string></string>
                         </property>
                     </widget>
-                    <widget row="2"  column="0" >
-                        <class>QLabel</class>
-                        <property stdset="1">
-                            <name>name</name>
-                            <cstring>TextLabel1_2</cstring>
-                        </property>
-                        <property stdset="1">
-                            <name>text</name>
-                            <string>First DNS</string>
-                        </property>
-                    </widget>
-                    <widget row="3"  column="0" >
+                    <widget row="5"  column="0" >
                         <class>QLabel</class>
                         <property stdset="1">
                             <name>name</name>
@@ -315,7 +268,7 @@
                             <string>Second DNS</string>
                         </property>
                     </widget>
-                    <widget row="2"  column="1" >
+                    <widget row="4"  column="1" >
                         <class>QLineEdit</class>
                         <property stdset="1">
                             <name>name</name>
@@ -326,10 +279,21 @@
                             <string></string>
                         </property>
                     </widget>
-                    <spacer row="4"  column="0"  rowspan="1"  colspan="2" >
+                    <widget row="4"  column="0" >
+                        <class>QLabel</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>TextLabel1_2</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>First DNS</string>
+                        </property>
+                    </widget>
+                    <spacer row="6"  column="1" >
                         <property>
                             <name>name</name>
-                            <cstring>Spacer8</cstring>
+                            <cstring>Spacer7</cstring>
                         </property>
                         <property stdset="1">
                             <name>orientation</name>
@@ -360,7 +324,371 @@
                     <string>Proxies</string>
                 </attribute>
             </widget>
+            <widget>
+                <class>QWidget</class>
+                <property stdset="1">
+                    <name>name</name>
+                    <cstring>wireless</cstring>
+                </property>
+                <attribute>
+                    <name>title</name>
+                    <string>Wireless</string>
+                </attribute>
+                <grid>
+                    <property stdset="1">
+                        <name>margin</name>
+                        <number>4</number>
+                    </property>
+                    <property stdset="1">
+                        <name>spacing</name>
+                        <number>2</number>
+                    </property>
+                    <widget row="1"  column="0" >
+                        <class>QLabel</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>TextLabel1_2_4</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>Network:</string>
+                        </property>
+                    </widget>
+                    <widget row="2"  column="0" >
+                        <class>QLabel</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>TextLabel3</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>Channel:</string>
+                        </property>
+                    </widget>
+                    <widget row="2"  column="1" >
+                        <class>QSpinBox</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>wlan_channel</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>enabled</name>
+                            <bool>false</bool>
+                        </property>
+                        <property stdset="1">
+                            <name>sizePolicy</name>
+                            <sizepolicy>
+                                <hsizetype>7</hsizetype>
+                                <vsizetype>0</vsizetype>
+                            </sizepolicy>
+                        </property>
+                        <property stdset="1">
+                            <name>maxValue</name>
+                            <number>14</number>
+                        </property>
+                        <property stdset="1">
+                            <name>value</name>
+                            <number>6</number>
+                        </property>
+                    </widget>
+                    <widget row="1"  column="1" >
+                        <class>QComboBox</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>wlan_ssid</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>editable</name>
+                            <bool>true</bool>
+                        </property>
+                    </widget>
+                    <widget row="0"  column="0"  rowspan="1"  colspan="2" >
+                        <class>QButtonGroup</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>ButtonGroup6</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>frameShape</name>
+                            <enum>NoFrame</enum>
+                        </property>
+                        <property stdset="1">
+                            <name>title</name>
+                            <string></string>
+                        </property>
+                        <hbox>
+                            <property stdset="1">
+                                <name>margin</name>
+                                <number>0</number>
+                            </property>
+                            <property stdset="1">
+                                <name>spacing</name>
+                                <number>6</number>
+                            </property>
+                            <widget>
+                                <class>QRadioButton</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>wlan_adhoc</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>text</name>
+                                    <string>Ad-hoc</string>
+                                </property>
+                            </widget>
+                            <widget>
+                                <class>QRadioButton</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>wlan_infrastructure</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>text</name>
+                                    <string>Infrastructure</string>
+                                </property>
+                                <property stdset="1">
+                                    <name>checked</name>
+                                    <bool>true</bool>
+                                </property>
+                            </widget>
+                        </hbox>
+                    </widget>
+                    <spacer row="5"  column="1" >
+                        <property>
+                            <name>name</name>
+                            <cstring>Spacer14</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>orientation</name>
+                            <enum>Vertical</enum>
+                        </property>
+                        <property stdset="1">
+                            <name>sizeType</name>
+                            <enum>Expanding</enum>
+                        </property>
+                        <property>
+                            <name>sizeHint</name>
+                            <size>
+                                <width>20</width>
+                                <height>20</height>
+                            </size>
+                        </property>
+                    </spacer>
+                    <widget row="4"  column="0"  rowspan="1"  colspan="2" >
+                        <class>QButtonGroup</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>wep_choice</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>frameShape</name>
+                            <enum>NoFrame</enum>
+                        </property>
+                        <property stdset="1">
+                            <name>title</name>
+                            <string></string>
+                        </property>
+                        <property>
+                            <name>layoutSpacing</name>
+                        </property>
+                        <grid>
+                            <property stdset="1">
+                                <name>margin</name>
+                                <number>0</number>
+                            </property>
+                            <property stdset="1">
+                                <name>spacing</name>
+                                <number>2</number>
+                            </property>
+                            <widget row="1"  column="0" >
+                                <class>QRadioButton</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>wep_key0_on</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>text</name>
+                                    <string>Key 1:</string>
+                                </property>
+                                <property stdset="1">
+                                    <name>buttonGroupId</name>
+                                    <number>1</number>
+                                </property>
+                            </widget>
+                            <widget row="1"  column="1" >
+                                <class>QLineEdit</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>wep_key0</cstring>
+                                </property>
+                            </widget>
+                            <widget row="2"  column="0" >
+                                <class>QRadioButton</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>wep_key1_on</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>text</name>
+                                    <string>Key 2:</string>
+                                </property>
+                                <property stdset="1">
+                                    <name>buttonGroupId</name>
+                                    <number>2</number>
+                                </property>
+                            </widget>
+                            <widget row="3"  column="0" >
+                                <class>QRadioButton</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>wep_key2_on</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>text</name>
+                                    <string>Key 3:</string>
+                                </property>
+                                <property stdset="1">
+                                    <name>buttonGroupId</name>
+                                    <number>3</number>
+                                </property>
+                            </widget>
+                            <widget row="4"  column="0" >
+                                <class>QRadioButton</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>wep_key3_on</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>text</name>
+                                    <string>Key 4:</string>
+                                </property>
+                                <property stdset="1">
+                                    <name>buttonGroupId</name>
+                                    <number>4</number>
+                                </property>
+                            </widget>
+                            <widget row="2"  column="1" >
+                                <class>QLineEdit</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>wep_key1</cstring>
+                                </property>
+                            </widget>
+                            <widget row="3"  column="1" >
+                                <class>QLineEdit</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>wep_key2</cstring>
+                                </property>
+                            </widget>
+                            <widget row="4"  column="1" >
+                                <class>QLineEdit</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>wep_key3</cstring>
+                                </property>
+                            </widget>
+                            <widget row="0"  column="0" >
+                                <class>QRadioButton</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>wep_passphrase_on</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>text</name>
+                                    <string>Passphrase:</string>
+                                </property>
+                                <property stdset="1">
+                                    <name>buttonGroupId</name>
+                                    <number>0</number>
+                                </property>
+                            </widget>
+                            <widget row="0"  column="1" >
+                                <class>QLineEdit</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>wep_passphrase</cstring>
+                                </property>
+                            </widget>
+                        </grid>
+                    </widget>
+                    <widget row="3"  column="1" >
+                        <class>QComboBox</class>
+                        <item>
+                            <property>
+                                <name>text</name>
+                                <string>None</string>
+                            </property>
+                        </item>
+                        <item>
+                            <property>
+                                <name>text</name>
+                                <string>40 bit</string>
+                            </property>
+                        </item>
+                        <item>
+                            <property>
+                                <name>text</name>
+                                <string>128 bit</string>
+                            </property>
+                        </item>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>wep_type</cstring>
+                        </property>
+                    </widget>
+                    <widget row="3"  column="0" >
+                        <class>QLabel</class>
+                        <property stdset="1">
+                            <name>name</name>
+                            <cstring>TextLabel1_3</cstring>
+                        </property>
+                        <property stdset="1">
+                            <name>text</name>
+                            <string>WEP:</string>
+                        </property>
+                    </widget>
+                </grid>
+            </widget>
         </widget>
     </vbox>
 </widget>
+<connections>
+    <connection>
+        <sender>wep_passphrase_on</sender>
+        <signal>clicked()</signal>
+        <receiver>wep_passphrase</receiver>
+        <slot>setFocus()</slot>
+    </connection>
+    <connection>
+        <sender>wep_key0_on</sender>
+        <signal>clicked()</signal>
+        <receiver>wep_key0</receiver>
+        <slot>setFocus()</slot>
+    </connection>
+    <connection>
+        <sender>wep_key1_on</sender>
+        <signal>clicked()</signal>
+        <receiver>wep_key1</receiver>
+        <slot>setFocus()</slot>
+    </connection>
+    <connection>
+        <sender>wep_key2_on</sender>
+        <signal>clicked()</signal>
+        <receiver>wep_key2</receiver>
+        <slot>setFocus()</slot>
+    </connection>
+    <connection>
+        <sender>wep_key3_on</sender>
+        <signal>clicked()</signal>
+        <receiver>wep_key3</receiver>
+        <slot>setFocus()</slot>
+    </connection>
+    <connection>
+        <sender>wlan_adhoc</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>wlan_channel</receiver>
+        <slot>setEnabled(bool)</slot>
+    </connection>
+</connections>
 </UI>

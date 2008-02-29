@@ -21,13 +21,13 @@
 #define WAV_PLUGIN_IMPL_H
 
 
-#include <qpe/mediaplayerplugininterface.h>
+#include <qtopia/mediaplayerplugininterface.h>
 
 
 class WavPlugin;
 
 
-class WavPluginImpl : public MediaPlayerPluginInterface
+class QTOPIA_PLUGIN_EXPORT WavPluginImpl : public MediaPlayerPluginInterface
 {
 public:
     WavPluginImpl();

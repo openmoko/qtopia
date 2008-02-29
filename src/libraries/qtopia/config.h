@@ -21,28 +21,49 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-// ##### could use QSettings with Qt 3.0
+#include <qtopia/qpeglobal.h>
 
+// ##### could use QSettings with Qt 3.0
 #include <qmap.h>
 #include <qstringlist.h>
 #include <qcstring.h>
 
+#include <qstring.h>
+#if defined(Q_TEMPLATEDLL)
+// MOC_SKIP_BEGIN
+Q_TEMPLATE_EXTERN template class Q_EXPORT QMap<QString, QString>;
+// MOC_SKIP_END
+#endif
+
+typedef QMap< QString, QString > ConfigGroup;
+typedef QMap< QString, ConfigGroup> ConfigGroupMap;
+
+#if defined (QTOPIA_TEMPLATEDLL)
+// MOC_SKIP_BEGIN
+template class QTOPIA_EXPORT QMap<QString, QMap<QString, QString> >;
+template class QTOPIA_EXPORT QMapIterator< QString, QMap< QString,  QString> >;
+// MOC_SKIP_END
+#endif
+
 class ConfigPrivate;
-class Config
+class QTextStream;
+class QTOPIA_EXPORT Config
 {
 public:
-    typedef QMap< QString, QString > ConfigGroup;
-    
+
     enum Domain { File, User };
     Config( const QString &name, Domain domain=User );
+#ifdef QTOPIA_DESKTOP
+    Config( QTextStream &s, const QString &saveName, Domain domain=User );
+#endif
     ~Config();
 
     bool operator == ( const Config & other ) const { return (filename == other.filename); }
     bool operator != ( const Config & other ) const { return (filename != other.filename); }
-    
+
     bool isValid() const;
     bool hasKey( const QString &key ) const;
-    
+
     void setGroup( const QString &gname );
     void writeEntry( const QString &key, const char* value );
     void writeEntry( const QString &key, const QString &value );
@@ -56,8 +77,8 @@ public:
     void writeEntry( const QString &key, const QByteArray byteArray);
 #endif
     void removeEntry( const QString &key );
-    
-    QString readEntry( const QString &key, const QString &deflt = QString::null ) const;   
+
+    QString readEntry( const QString &key, const QString &deflt = QString::null ) const;
     QString readEntryCrypt( const QString &key, const QString &deflt = QString::null ) const;
     QString readEntryDirect( const QString &key, const QString &deflt = QString::null ) const;
     int readNumEntry( const QString &key, int deflt = -1 ) const;
@@ -77,12 +98,12 @@ public:
     QStringList readListEntry( const QString &key, const QChar &sep );
 #ifdef QTOPIA_INTERNAL_CONFIG_BYTEARRAY
     QByteArray readByteArrayEntry(const QString& key);
-    QByteArray readByteArrayEntry(const QString& key, const QByteArray deflt);    
-#endif    
+    QByteArray readByteArrayEntry(const QString& key, const QByteArray deflt);
+#endif
     void clearGroup();
-    
+
     void write( const QString &fn = QString::null );
-    
+
 protected:
     void read();
     bool parse( const QString &line );
@@ -91,13 +112,17 @@ protected:
     int parse64base(char* src, char* bufOut) const;
 
     QMap< QString, ConfigGroup > groups;
-    QMap< QString, ConfigGroup >::Iterator git;
+    ConfigGroupMap::Iterator git;
     QString filename;
     QString lang;
     QString glang;
     bool changed;
     ConfigPrivate *d;
     static QString configFilename(const QString& name, Domain);
+
+private:
+    /* This cannot be made public or protected because of binary compat issues */
+    void read( QTextStream &s );
 };
 
 inline QString Config::readEntry( const QString &key, const QString &deflt ) const
@@ -114,7 +139,7 @@ inline QStringList Config::readListEntry( const QString &key, const QChar &sep )
 { return ((Config*)this)->readListEntry(key,sep); }
 
 #ifdef QTOPIA_INTERNAL_CONFIG_BYTEARRAY
-inline QByteArray Config::readByteArrayEntry(const QString& key) const 
+inline QByteArray Config::readByteArrayEntry(const QString& key) const
 { return ((Config*)this)->readByteArrayEntry(key); }
 inline QByteArray Config::readByteArrayEntry(const QString& key, const QByteArray deflt) const
 { return ((Config*)this)->readByteArrayEntry(key, deflt); }

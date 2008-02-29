@@ -1,0 +1,63 @@
+<html>
+<title>
+Clock Test List
+</title>
+
+<body>
+
+<h1>ClockTest List</h1>
+
+
+<a name=features>
+<h2>Feature Tests</h2>
+</a>
+<!-- feature tests correspond 1-to-1 with features
+
+    Note: TITLEs may be used as identifiers in bug reports.
+-->
+
+<h3>Clock</h3>
+<ol>
+<li>Start the clock.
+<li>Confirm that the Clock tab is displayed.
+<li>Check that the time displayed on the analog clock matches the device
+    system time.
+<li>Check that the time displayed on the digital clock matches the device
+    system time.
+<li>Check that the date displayed matches the device system date.
+</ol>
+
+<h3>Stopwatch</h3>
+<ol>
+<li>Start the clock.
+<li>Click on the Stopwatch tab.
+<li>Confirm that the stopwatch reads 00:00:00.00 and that the analog
+    hands indicate 00:00.
+<li>Press the Start button and confirm that the analog and digital
+    timers count up (resolution 1 sec).
+<li>Press the Stop button and confirm that the timers have stopped.  The
+    digital timer should show 1/100 sec resolution.
+<li>Press the Reset button and confirm that the stopwatch reads 00:00:00.00
+    and that the analog hands indicate 00:00.
+<li>Press the Start button and wait 3 seconds.  Press the Reset button and
+    confirm that the stopwatch resets to 0, and continues to count up
+    correctly.
+</ol>
+
+<h3>Daily Alarm</h3>
+<ol>
+<li>Start the Clock.
+<li>Click on the Alarms tab.
+<li>Set the alarm time 1-5 minutes in the future and check the Enabled box.
+<li>Confirm that when the alarm time is reached the alarm sounds and a message
+    box is displayed with the alarm details.
+<li>Set the alarm time 1-5 minutes in the future and uncheck the Enabled box.
+<li>Confirm that when the alarm time is reached no alarm is sounded.
+<li>Set the alarm time 1-5 minutes in the future, check Enabled, and close
+    the clock application.
+<li>Confirm that when the alarm time is reached the alarm sounds and a message
+    box is displayed with the alarm details.
+</ol>
+
+</body>
+</html>

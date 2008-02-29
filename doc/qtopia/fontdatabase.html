@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/src/libraries/qtopia/fontdatabase.cpp:59 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/src/libraries/qtopia/fontdatabase.cpp:59 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -51,6 +51,9 @@ TrueType fonts will be available to your application. Font renderer
 plugins have greater resource requirements than system fonts so they
 should be used only when necessary. You can force the loading of
 font renderer plugins with <a href="#loadRenderers">loadRenderers</a>().
+<p> Note that on the SHARP SL5500, some fonts return pointSizes() that
+are 10 times too large. A heuristic for detecting this case is that
+the first size in the list is more than 70.
 <p> 
 <p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
 

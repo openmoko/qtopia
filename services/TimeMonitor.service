@@ -1,0 +1,2 @@
+[Service]
+Actions = timeChanged(QString)

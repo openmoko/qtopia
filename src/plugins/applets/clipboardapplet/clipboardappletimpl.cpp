@@ -40,7 +40,7 @@ QWidget *ClipboardAppletImpl::applet( QWidget *parent )
 
 int ClipboardAppletImpl::position() const
 {
-    return 6;
+    return 7;
 }
 
 QRESULT ClipboardAppletImpl::queryInterface( const QUuid &uuid, QUnknownInterface **iface )

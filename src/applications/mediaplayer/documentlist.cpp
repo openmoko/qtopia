@@ -17,11 +17,11 @@
 ** not clear to you.
 **
 **********************************************************************/
-#include <qpe/qpeapplication.h>
-#include <qpe/applnk.h>
-#include <qpe/resource.h>
-#include <qpe/global.h>
-#include <qpe/storage.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/applnk.h>
+#include <qtopia/resource.h>
+#include <qtopia/global.h>
+#include <qtopia/storage.h>
 #include <qpainter.h>
 #include <qimage.h>
 #include <qcopchannel_qws.h>
@@ -48,8 +48,8 @@ public:
     QString mimeFilter;
 
     QFileInfo *nextFile();
-    DocLnk *iterate();
-    bool match( const DocLnk* dl );
+    const DocLnk *iterate();
+    bool store( DocLnk* dl );
 
     DocLnkSet dls;
     QDict<void> reference;
@@ -176,7 +176,7 @@ QFileInfo *DocumentListPrivate::nextFile( )
 }
 
 
-bool DocumentListPrivate::match( const DocLnk* dl )
+bool DocumentListPrivate::store( DocLnk* dl )
 {
     bool mtch = FALSE;
     if ( mimeFilters.count() == 0 ) {
@@ -189,18 +189,18 @@ bool DocumentListPrivate::match( const DocLnk* dl )
 		mtch = TRUE;
 	}
     }
-    if ( !mtch ) {
-	delete dl;
-	return 0;
-    } else {
-	DocLnk *doc = (DocLnk *)dl;
-	dls.add( doc );
+    if ( mtch ) {
+	dls.add( dl ); // store
 	return TRUE;
     }
+
+    // don't store - delete
+    delete dl;
+    return FALSE;
 }
 
 
-DocLnk *DocumentListPrivate::iterate()
+const DocLnk *DocumentListPrivate::iterate()
 {
     if ( state == Find ) {
 	//qDebug("state Find");
@@ -208,7 +208,7 @@ DocLnk *DocumentListPrivate::iterate()
 	while ( (fi = nextFile()) ) {
 	    if ( fi->extension(FALSE) == "desktop" ) {
 		DocLnk* dl = new DocLnk( fi->filePath() );
-		if ( match(dl) )
+		if ( store(dl) )
 		    return dl;
 	    } else {
 		if ( !reference.find( fi->filePath() ) ) {
@@ -237,7 +237,7 @@ DocLnk *DocumentListPrivate::iterate()
 		QFileInfo fi( dit->currentKey() );
 		dl->setFile( fi.filePath() );
 		dl->setName( fi.baseName() );
-		if ( match(dl) ) {
+		if ( store(dl) ) {
 		    ++*dit;
 		    return dl;
 		}
@@ -350,7 +350,7 @@ void DocumentList::systemMessage( const QCString &msg, const QByteArray &data )
 		qDebug( "found old link" );
 		DocLnk* dl = new DocLnk( arg );
 		// add new one if it exists and matches the mimetype
-		if ( d->match( dl ) ) {
+		if ( d->store( dl ) ) {
 		    // Existing link has been changed, send old link ref and a ref
 		    // to the new link
 		    qDebug( "change case" );
@@ -368,7 +368,7 @@ void DocumentList::systemMessage( const QCString &msg, const QByteArray &data )
 	}
 	// Didn't find existing link, must be new
 	DocLnk* dl = new DocLnk( arg );
-	if ( d->match( dl ) ) {
+	if ( d->store( dl ) ) {
 	    // Add if it's a link we are interested in
 	    qDebug( "add case" );
 	    add( *dl );
@@ -393,7 +393,7 @@ void DocumentList::timerEvent( QTimerEvent *te )
     if ( te->timerId() == d->tid ) {
 	// Do 10 at a time
 	for (int i = 0; i < 10; i++ ) {
-	    DocLnk *lnk = d->iterate();
+	    const DocLnk *lnk = d->iterate();
 	    if ( lnk ) {
 		add( *lnk );
 	    } else {

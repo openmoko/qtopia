@@ -28,9 +28,34 @@
 #include <qpixmap.h>
 #include <qpainter.h>
 #include <qimage.h>
+#include <qpushbutton.h>
 #include "controlwidgetbase.h"
 #include "mediaplayerstate.h"
 #include "action.h"
+#include "framebuffer.h"
+
+
+class VideoWidget;
+
+
+class VideoOutput : public QWidget {
+    Q_OBJECT
+public:
+    VideoOutput( VideoWidget* parent );
+    ~VideoOutput();
+    bool playVideo();
+protected:
+    void paintEvent( QPaintEvent *pe );
+    void mouseReleaseEvent( QMouseEvent *me );
+private:
+    VideoWidget *parentWidget;
+    QRect targetRect;
+    QImage *currentFrame;
+    QImage *rotatedFrame;
+    FrameBuffer imageFb;
+    FrameBuffer rotatedBuffer;
+    FrameBuffer directFb;
+};
 
 
 class VideoWidget : public ControlWidgetBase {
@@ -39,28 +64,39 @@ public:
     VideoWidget( QWidget* parent, const QString& skin, const char* name );
     ~VideoWidget();
 
-    bool playVideo();
+    enum Mode {
+	InvalidMode,
+	Fullscreen,
+	Large,
+	Normal
+    };
 
+    bool playVideo();
+    Mode mode() { return screenMode; }
 public slots:
     void makeVisible();
     void setView( View );
+    void setMode( int );
+    void setNextMode();
+    void doModeMenu();
 
 protected:
-    void internalPaint( QPaintEvent *pe );
-    void internalResize();
-    void mouseReleaseEvent( QMouseEvent *me );
-    void updateSlider( long, long );
+    void virtualPaint( QPaintEvent *pe );
+    void virtualResize();
+    void virtualUpdateSlider();
     void paintButton( QPainter& p, int i );
-    QString timeAsString( long );
 
 private:
-    int	scaledWidth;
-    int scaledHeight;
+    bool showCornerButton() { return width() >= 315; }
+    void updateVideoOutputGeometry();
     QRect innerMovieArea;
     QRect outerMovieArea;
     int movieBorder;
-
-    QImage *currentFrame;
+    QPushButton cornerButton;
+    QPopupMenu cornerMenu;
+    Mode screenMode;
+    VideoOutput videoOutput;
+    int buttonHeight;
 };
 
 

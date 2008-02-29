@@ -2,7 +2,7 @@ Files: i18n/de/.directory i18n/de/*.qm etc/dict/dawg.de
 Priority: optional
 Section: qpe/i18n
 Maintainer: Trolltech (www.trolltech.com)
-Version: $QPE_VERSION-7
-Depends: qpe-base ($QPE_VERSION)
+Version: $QPE_VERSION-9
+Depends: 
 Description: i18n: Deutsch
  German UI texts and dictionary for Qtopia environment.

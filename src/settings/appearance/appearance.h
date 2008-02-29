@@ -25,8 +25,8 @@
 #include <qasciidict.h>
 #include "appearancesettingsbase.h"
 
-class WindowDecorationInterface;
-class StyleInterface;
+struct WindowDecorationInterface;
+struct StyleInterface;
 class QLibrary;
 class SampleWindow;
 
@@ -63,6 +63,7 @@ private:
     StyleInterface *styleiface;
     QLibrary *stylelib;
     SampleWindow *sample;
+    int prefFontSize;
     int maxFontSize;
 };
 

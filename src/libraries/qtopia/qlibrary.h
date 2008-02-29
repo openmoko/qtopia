@@ -18,11 +18,19 @@
 **
 **********************************************************************/
 
+#include <qnamespace.h>
+#if (QT_VERSION-0 >= 0x030000)
+#include <qlibrary.h>
+#include <private/qcom_p.h>
+#include <private/qcomlibrary_p.h>
+#else
+
 #ifndef QLIBRARY_H
 #define QLIBRARY_H
 
 #include <qtopia/qpeglobal.h>
 #include <qstring.h>
+#include <qdict.h>
 
 #ifndef QT_NO_COMPONENT
 
@@ -75,4 +83,8 @@ private:	// Disabled copy constructor and operator=
 
 #endif // QT_NO_COMPONENT
 
+#define Q_DEFINED_QLIBRARY
+#include <qtopia/qtopiawinexport.h>
 #endif //QLIBRARY_H
+
+#endif // Qt < 3.0

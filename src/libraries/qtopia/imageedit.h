@@ -20,11 +20,12 @@
 #ifndef IMAGEEDIT_H
 #define IMAGEEDIT_H
 
+#include <qtopia/qpeglobal.h>
 #include <qscrollview.h>
 #include <qpixmap.h>
 
 class ImageEditPrivate;
-class ImageEdit : public QScrollView
+class QTOPIA_EXPORT ImageEdit : public QScrollView
 {
     Q_OBJECT
 

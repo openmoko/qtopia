@@ -3,7 +3,7 @@ Priority: optional
 Section: qpe/other
 Maintainer: Trolltech (www.trolltech.com)
 Architecture: arm
-Version: $QPE_VERSION-5
-Depends: qpe-base ($QPE_VERSION)
+Version: $QPE_VERSION-10
+Depends: qpe-libqtopia
 Description: Graphics performance tester
  Graphics performance tester for Qtopia.

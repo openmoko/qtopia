@@ -5,8 +5,8 @@
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -27,13 +27,13 @@ HEADERS =	clipboard.h \
 		clipboardappletimpl.h
 SOURCES =	clipboard.cpp \
 		clipboardappletimpl.cpp
-OBJECTS =	clipboard.o \
-		clipboardappletimpl.o
+OBJECTS =	$(OBJECTS_DIR)/clipboard.o \
+		$(OBJECTS_DIR)/clipboardappletimpl.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
-SRCMOC	=	moc_clipboard.cpp
-OBJMOC	=	moc_clipboard.o
+SRCMOC	=	$(MOC_DIR)/moc_clipboard.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_clipboard.o
 
 
 ####### Implicit rules
@@ -99,22 +99,20 @@ REQUIRES=
 
 ####### Compile
 
-clipboard.o: clipboard.cpp \
-		clipboard.h \
-		$(QPEDIR)/include/qpe/resource.h
-
-clipboardappletimpl.o: clipboardappletimpl.cpp \
-		clipboard.h \
-		clipboardappletimpl.h \
-		$(QPEDIR)/include/qpe/taskbarappletinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h
-
-moc_clipboard.o: moc_clipboard.cpp \
+$(OBJECTS_DIR)/clipboard.o: clipboard.cpp \
 		clipboard.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/clipboard.o clipboard.cpp
 
-moc_clipboard.cpp: clipboard.h
-	$(MOC) clipboard.h -o moc_clipboard.cpp
+$(OBJECTS_DIR)/clipboardappletimpl.o: clipboardappletimpl.cpp \
+		clipboard.h \
+		clipboardappletimpl.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/clipboardappletimpl.o clipboardappletimpl.cpp
+
+$(OBJECTS_DIR)/moc_clipboard.o: $(MOC_DIR)/moc_clipboard.cpp \
+		clipboard.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_clipboard.o $(MOC_DIR)/moc_clipboard.cpp
+
+$(MOC_DIR)/moc_clipboard.cpp: clipboard.h
+	$(MOC) clipboard.h -o $(MOC_DIR)/moc_clipboard.cpp
 
 

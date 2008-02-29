@@ -20,11 +20,12 @@
 #ifndef NETMONAPPLETIMPL_H
 #define NETMONAPPLETIMPL_H
 
-#include <qpe/taskbarappletinterface.h>
+#include <qtopia/qpeglobal.h>
+#include <qtopia/taskbarappletinterface.h>
 
 class NetMonitorApplet;
 
-class NetMonitorAppletImpl : public TaskbarAppletInterface
+class QTOPIA_PLUGIN_EXPORT NetMonitorAppletImpl : public TaskbarAppletInterface
 {
 public:
     NetMonitorAppletImpl();

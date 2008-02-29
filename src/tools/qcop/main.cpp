@@ -19,20 +19,22 @@
 **********************************************************************/
 
 #ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
 
-#include <qapplication.h>
+#include <qtopia/qpeapplication.h>
 #include <qstringlist.h>
 #include <qdatastream.h>
 #include <qtimer.h>
 
 #include <stdlib.h>
 #include <stdio.h>
-
-#include <pwd.h>
 #include <sys/types.h>
+
+#ifndef Q_OS_WIN32
+#include <pwd.h>
 #include <unistd.h>
+#endif
 
 // No tr() anywhere in this file
 
@@ -49,8 +51,6 @@ static void syntax( const QString &where, const QString &what )
 
 int main( int argc, char *argv[] )
 {
-    QApplication app( argc, argv );
-
     if ( argc > 1 ) {
 	QString opt = argv[1];
 	if ( opt == "-l" ) {
@@ -58,19 +58,24 @@ int main( int argc, char *argv[] )
 		usage();
 		exit(1);
 	    }
-	    QString username = argv[2];
-	    struct passwd *pwd = getpwnam( username.latin1() );
+#ifndef Q_OS_WIN32
+	    const char *username = argv[2];
+	    struct passwd *pwd = getpwnam( username );
 	    if ( !pwd ) {
-		fprintf( stderr, "Unknown user %s\n", username.latin1() );
+		fprintf( stderr, "Unknown user %s\n", username );
 		exit(1);
 	    }
 	    int uid =  pwd->pw_uid;
 
 	    if ( setuid( uid ) != 0 ) {
-		fprintf( stderr, "Could not run as user %s\n", username.latin1() );
+		fprintf( stderr, "Could not run as user %s\n", username );
 		exit(1);
 	    }
-
+	    setenv( "LOGNAME", username, 1 );
+#else
+	    setenv("LOGNAME", argv[2], 1);
+#endif
+	    
 	    argc -= 2;
 	    for ( int i = 1; i < argc; i++ ) {
 		argv[i] = argv[i+2];
@@ -78,6 +83,9 @@ int main( int argc, char *argv[] )
 	}
 		      
     }
+
+    QApplication app( argc, argv );
+    
     if ( argc < 3 ) {
 	usage();
 	exit(1);
@@ -92,7 +100,7 @@ int main( int argc, char *argv[] )
 	syntax( "command", command );
 
     QString params = command.mid( paren + 1 );
-    if ( params[params.length()-1] != ')' )
+    if ( params[(int)params.length()-1] != ')' )
 	syntax( "command", command );
 
     params.truncate( params.length()-1 );
@@ -110,7 +118,7 @@ int main( int argc, char *argv[] )
 	} else if ( *it == "int" ) {
 	    env << arg.toInt();
 	} else {
-	    syntax( "paramter type", *it );
+	    syntax( "parameter type", *it );
 	}
 	argIdx++;
     }

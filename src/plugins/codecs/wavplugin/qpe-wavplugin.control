@@ -3,7 +3,7 @@ Priority: optional
 Section: qpe/plugins
 Maintainer: Trolltech (www.trolltech.com)
 Architecture: arm
-Version: $QPE_VERSION-7
-Depends: qpe-base ($QPE_VERSION)
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia
 Description: WAV file plugin
  Plugin to play WAV files with the mediaplayer in the Qtopia environment.

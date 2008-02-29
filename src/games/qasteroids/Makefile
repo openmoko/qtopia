@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,10 +118,10 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
-LIBS	=	$(SUBLIBS) -lqtopiaservices -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
+LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
 UIC	=	$(SYSCONF_UIC)
 
@@ -133,32 +139,24 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 HEADERS =	ledmeter.h \
 		sprites.h \
 		toplevel.h \
-		view.h \
-		../../server/devicebuttonmanager.h \
-		../../server/devicebutton.h
+		view.h
 SOURCES =	ledmeter.cpp \
 		toplevel.cpp \
 		view.cpp \
-		main.cpp \
-		../../server/devicebuttonmanager.cpp \
-		../../server/devicebutton.cpp
-OBJECTS =	ledmeter.o \
-		toplevel.o \
-		view.o \
-		main.o \
-		../../server/devicebuttonmanager.o \
-		../../server/devicebutton.o
+		main.cpp
+OBJECTS =	$(OBJECTS_DIR)/ledmeter.o \
+		$(OBJECTS_DIR)/toplevel.o \
+		$(OBJECTS_DIR)/view.o \
+		$(OBJECTS_DIR)/main.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
-SRCMOC	=	moc_ledmeter.cpp \
-		moc_toplevel.cpp \
-		moc_view.cpp \
-		../../server/moc_devicebuttonmanager.cpp
-OBJMOC	=	moc_ledmeter.o \
-		moc_toplevel.o \
-		moc_view.o \
-		../../server/moc_devicebuttonmanager.o
+SRCMOC	=	$(MOC_DIR)/moc_ledmeter.cpp \
+		$(MOC_DIR)/moc_toplevel.cpp \
+		$(MOC_DIR)/moc_view.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_ledmeter.o \
+		$(OBJECTS_DIR)/moc_toplevel.o \
+		$(OBJECTS_DIR)/moc_view.o
 
 
 ####### Implicit rules
@@ -224,85 +222,60 @@ REQUIRES=
 
 ####### Compile
 
-ledmeter.o: ledmeter.cpp \
+$(OBJECTS_DIR)/ledmeter.o: ledmeter.cpp \
 		ledmeter.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/ledmeter.o ledmeter.cpp
 
-toplevel.o: toplevel.cpp \
+$(OBJECTS_DIR)/toplevel.o: toplevel.cpp \
 		toplevel.h \
 		view.h \
 		sprites.h \
-		ledmeter.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		../../server/devicebuttonmanager.h
-
-view.o: view.cpp \
-		view.h \
-		sprites.h \
-		$(QPEDIR)/include/qpe/resource.h
-
-main.o: main.cpp \
-		toplevel.h \
-		view.h \
-		sprites.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
-
-../../server/devicebuttonmanager.o: ../../server/devicebuttonmanager.cpp \
-		../../server/devicebutton.h \
-		$(QPEDIR)/include/qtopia/services/services.h \
-		$(QPEDIR)/include/qtopia/applnk.h \
-		../../server/devicebuttonmanager.h \
-		$(QPEDIR)/include/qtopia/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/config.h \
-		$(QPEDIR)/include/qtopia/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qtopia/resource.h
-
-../../server/devicebutton.o: ../../server/devicebutton.cpp \
-		$(QPEDIR)/include/qtopia/resource.h \
-		../../server/devicebutton.h \
-		$(QPEDIR)/include/qtopia/services/services.h \
-		$(QPEDIR)/include/qtopia/applnk.h
-
-moc_ledmeter.o: moc_ledmeter.cpp \
 		ledmeter.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/toplevel.o toplevel.cpp
 
-moc_toplevel.o: moc_toplevel.cpp \
+$(OBJECTS_DIR)/view.o: view.cpp \
+		view.h \
+		sprites.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/view.o view.cpp
+
+$(OBJECTS_DIR)/main.o: main.cpp \
 		toplevel.h \
 		view.h \
 		sprites.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
-moc_view.o: moc_view.cpp \
+$(OBJECTS_DIR)/moc_ledmeter.o: $(MOC_DIR)/moc_ledmeter.cpp \
+		ledmeter.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_ledmeter.o $(MOC_DIR)/moc_ledmeter.cpp
+
+$(OBJECTS_DIR)/moc_toplevel.o: $(MOC_DIR)/moc_toplevel.cpp \
+		toplevel.h \
 		view.h \
 		sprites.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_toplevel.o $(MOC_DIR)/moc_toplevel.cpp
 
-../../server/moc_devicebuttonmanager.o: ../../server/moc_devicebuttonmanager.cpp \
-		../../server/devicebuttonmanager.h \
-		../../server/devicebutton.h \
-		$(QPEDIR)/include/qtopia/services/services.h \
-		$(QPEDIR)/include/qtopia/applnk.h
+$(OBJECTS_DIR)/moc_view.o: $(MOC_DIR)/moc_view.cpp \
+		view.h \
+		sprites.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_view.o $(MOC_DIR)/moc_view.cpp
 
-moc_ledmeter.cpp: ledmeter.h
-	$(MOC) ledmeter.h -o moc_ledmeter.cpp
+$(MOC_DIR)/moc_ledmeter.cpp: ledmeter.h
+	$(MOC) ledmeter.h -o $(MOC_DIR)/moc_ledmeter.cpp
 
-moc_toplevel.cpp: toplevel.h
-	$(MOC) toplevel.h -o moc_toplevel.cpp
+$(MOC_DIR)/moc_toplevel.cpp: toplevel.h
+	$(MOC) toplevel.h -o $(MOC_DIR)/moc_toplevel.cpp
 
-moc_view.cpp: view.h
-	$(MOC) view.h -o moc_view.cpp
-
-../../server/moc_devicebuttonmanager.cpp: ../../server/devicebuttonmanager.h
-	$(MOC) ../../server/devicebuttonmanager.h -o ../../server/moc_devicebuttonmanager.cpp
+$(MOC_DIR)/moc_view.cpp: view.h
+	$(MOC) view.h -o $(MOC_DIR)/moc_view.cpp
 
 
 
 lupdate:
-	lupdate qasteroids.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <qasteroids.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease qasteroids.pro
+	$(QPEDIR)/bin/qtopia-linstall qasteroids.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

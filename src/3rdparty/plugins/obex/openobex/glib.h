@@ -38,6 +38,7 @@
 #include "glibconfig.h"
 #include "stdlib.h"
 #include "stdio.h"
+#include <netinet/in.h>
 
 
 #define xDebug( b... )		    fprintf( stderr, b )
@@ -142,6 +143,11 @@ static inline GSList *g_slist_append( GSList *list, gpointer data ) {
     }
     return new_list;
 }
+
+#define g_ntohl(val) ntohl(val)
+#define g_ntohs(val) ntohs(val)
+#define g_htonl(val) htonl(val)
+#define g_htons(val) htons(val)
 
 
 #endif // __QT_COMPATIBLE_OBEX_GLIB_H__

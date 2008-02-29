@@ -26,7 +26,7 @@
 #include <qtopia/pim/datebookaccess.h>
 #include <qtopia/pim/event.h>
 #include <qtopia/qcopenvelope_qws.h>
-#include <qtopia/services/services.h>
+#include <qtopia/services.h>
 #include <qtopia/quuid.h>
 #include <qtopia/resource.h>
 
@@ -42,6 +42,7 @@ public:
     QDateTime	end;
     QUuid	uid;
     bool	repeating;
+    bool	allday;
 
     bool	operator<(ShortDateEvent &s) { return start < s.start; }
     bool	operator>(ShortDateEvent &s) { return start > s.start; }
@@ -99,6 +100,7 @@ public:
 		e.start = event.start();
 		e.end = event.end();
 		e.uid = event.uid();
+		e.allday = event.isAllDay();
 
 		if (!e.repeating) {
 		    events.append( e );
@@ -176,23 +178,23 @@ QString DatebookPlugin::html(uint charWidth, uint /* lineHeight */) const
     uint eventCount = d->limit;
     d->getTaskList(eventCount);
 
-    if ( d->events.count() ) {
-	status = QString("You have %1 event%2 ").
-	    arg( d->events.count() ).
-	    arg((d->events.count() == 1) ? "" : "s");
+    if ( d->events.count() == 1 ) {
+	status = tr("You have 1 event");
+    } else if ( d->events.count() > 1 ) {
+	status = tr("You have %1 events").arg( d->events.count() );
     } else {
-	status = "You have no events ";
+	status = tr("You have no events");
     }
 
     if ( d->days == 1 ) {
-	status += " today";
+	status += tr(" today");
     } else {
-	status += QString(" over the next %1 days").arg( d->days);
+	status += tr(" over the next %1 days").arg( d->days);
     }
 
     QString str;
     str = "<table> <tr> <td> <a href=\"raise:datebook\"><img src=\"DateBook\" alt=\"DateBook\"></a> </td>";
-    str += "<td> <b> " + tr(status) + " </b> </td> </table>";
+    str += "<td> <b> " + status + " </b> </td> </table>";
 
     if ( d->limit ) {
 	str += " <table> ";
@@ -201,15 +203,19 @@ QString DatebookPlugin::html(uint charWidth, uint /* lineHeight */) const
 
 	    QString when;
 	    if ( t.start.date() == QDate::currentDate() ) {
-		when = "Starting " + TimeString::timeString( t.start.time() );
+		if (t.allday) {
+		    when = tr("All day");
+		} else {
+		    when = tr("Starting ") + TimeString::timeString(t.start.time());
+		}
 	    } else if (t.repeating) {
 		when = TimeString::longDateString(t.start.date());
 	    } else if ( t.end.date() == QDate::currentDate() ) {
-		when = "Ending " + TimeString::timeString( t.end.time() );
+		when = tr("Ending ") + TimeString::timeString( t.end.time() );
 	    } else if ( t.start.date() > QDate::currentDate() ) {
 		when = TimeString::longDateString( t.start.date() );
 	    } else {	// Date within bounds
-		when = "Finishes " + TimeString::longDateString( t.end.date() );
+		when = tr("Finishes ") + TimeString::longDateString( t.end.date() );
 	    }
 
 	    QString desc = t.description;
@@ -225,7 +231,7 @@ QString DatebookPlugin::html(uint charWidth, uint /* lineHeight */) const
 	    
 	    str += "<tr> <td> <a href=\"qcop:" +
 		    name() + QString(":%1\">").arg(i) + desc + "</a> "
-		    "</td> <td> " + tr(when) + " </td> </tr> <tr> ";
+		    "</td> <td> " + when + " </td> </tr> <tr> ";
 	}
 	str += " </tr> </table>";
     }
@@ -246,7 +252,7 @@ void DatebookPlugin::accepted(QWidget *w) const
 
 void DatebookPlugin::itemSelected(const QString &index) const
 {
-    QCopEnvelope e( Service::channel("datebook"), "showEvent(QUuid,QDate)");
+    QCopEnvelope e( Service::channel("Calendar"), "showEvent(QUuid,QDate)");
     e << d->events[ index.toInt() ].uid;
     e << d->events[ index.toInt() ].start.date();
 }

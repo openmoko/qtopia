@@ -21,10 +21,10 @@
 #include "netmon.h"
 #include "netpw.h"
 
-#include <qpe/resource.h>
-#include <qpe/network.h>
+#include <qtopia/resource.h>
+#include <qtopia/network.h>
 #ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
 
 #include <qpainter.h>

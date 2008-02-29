@@ -17,8 +17,9 @@
 ** not clear to you.
 **
 **********************************************************************/
-#include <qpe/qpeapplication.h>
-#include "calculator.h"
+#include <qtopia/qpeapplication.h>
+#include <calculator.h>
+#include <engine.h>
 
 int main (int argc, char **argv)
 {
@@ -33,7 +34,7 @@ int main (int argc, char **argv)
 	  */
   Calculator mw;
   QPEApplication::setInputMethodHint (&mw, QPEApplication::AlwaysOff);
-  mw.setCaption (Calculator::tr ("Calculator"));
+  mw.setCaption("Calculator");
   a.showMainWidget (&mw);
 
   return a.exec ();

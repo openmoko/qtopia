@@ -20,22 +20,20 @@
 
 #define QTOPIA_INTERNAL_MIMEEXT
 #define QTOPIA_INTERNAL_PRELOADACCESS
-#define QTOPIA_INTERNAL_APPLNKASSIGN
 
 #include "applnk.h"
 
-#include <qpe/qpeapplication.h>
-#include <qpe/categories.h>
-#include <qpe/categoryselect.h>
-#ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/categories.h>
+#include <qtopia/categoryselect.h>
+#ifdef Q_WS_QWS
+#include <qtopia/qcopenvelope_qws.h>
+#include <qtopia/storage.h>
 #endif
-#include <qpe/global.h>
-#include <qpe/mimetype.h>
-#include <qpe/config.h>
-#include <qpe/storage.h>
-#include <qpe/resource.h>
-
+#include <qtopia/global.h>
+#include <qtopia/mimetype.h>
+#include <qtopia/config.h>
+#include <qtopia/resource.h>
 #include <qdict.h>
 #include <qdir.h>
 #include <qregexp.h>
@@ -63,11 +61,21 @@ static QString safeFileName(const QString& n)
 
 static bool prepareDirectories(const QString& lf)
 {
-    if ( !QFile::exists(lf) ) {
+    QDir d(lf);
+    if ( !d.exists() ) {
 	// May need to create directories
 	QFileInfo fi(lf);
-	if ( system(("mkdir -p "+fi.dirPath(TRUE))) )
-	    return FALSE;
+	QString dirPath = QDir::convertSeparators( fi.dirPath(TRUE) );
+
+	QString param("");
+#ifndef Q_OS_WIN32
+	param = "-p ";
+#endif
+        QString cmdLine("mkdir " + param + dirPath.latin1());
+        if ( system(cmdLine.latin1()) ){
+            qDebug("System failed to execute command %s", cmdLine.latin1());
+            return FALSE;
+        }
     }
     return TRUE;
 }
@@ -75,6 +83,7 @@ static bool prepareDirectories(const QString& lf)
 class AppLnkPrivate
 {
 public:
+    // A CUT DOWN COPY OF THIS IS IN  applnk1.cpp
     QStringList mCatList; // always correct
     QArray<int> mCat; // cached value; correct if not empty
 
@@ -82,7 +91,8 @@ public:
     {
 	Categories cat( 0 );
 	cat.load( categoryFileName() );
-	mCatList = cat.labels("Document View",mCat);
+	mCatList = cat.globalGroup().labels( mCat );
+	mCatList += cat.appGroupMap()["Document View"].labels( mCat );
     }
 
     void setCatArrayDirty()
@@ -394,31 +404,6 @@ AppLnk::AppLnk( const QString &file )
     mId = 0;
 }
 
-AppLnk& AppLnk::operator=(const AppLnk &copy)
-{
-    if ( mId )
-	qWarning("Deleting AppLnk that is in an AppLnkSet");
-    if ( d )
-	delete d;
-    mName = copy.mName;
-    mPixmap = copy.mPixmap;
-    mBigPixmap = copy.mBigPixmap;
-    mExec = copy.mExec;
-    mType = copy.mType;
-    mRotation = copy.mRotation;
-    mComment = copy.mComment;
-    mFile = copy.mFile;
-    mLinkFile = copy.mLinkFile;
-    mIconFile = copy.mIconFile;
-    mMimeTypes = copy.mMimeTypes;
-    mMimeTypeIcons = copy.mMimeTypeIcons;
-    mId = 0;
-    d = new AppLnkPrivate();
-    d->mCat = copy.d->mCat;
-    d->mCatList = copy.d->mCatList;
-    return *this;
-}
-
 /*!
   Returns a small pixmap associated with the application.
 
@@ -522,7 +507,7 @@ QString AppLnk::file() const
 		    ? mLinkFile.left(mLinkFile.length()-8) : mLinkFile;
 	} else if ( mType.contains('/') ) {
 	    that->mFile =
-		QString(getenv("HOME"))+"/Documents/"+mType+"/"+safeFileName(that->mName);
+		QString(QDir::homeDirPath()+"/Documents/"+mType+"/"+safeFileName(that->mName));
 	    if ( QFile::exists(that->mFile+ext) || QFile::exists(that->mFile+".desktop") ) {
 		int n=1;
 		QString nn;
@@ -555,12 +540,18 @@ QString AppLnk::linkFile() const
     if ( mLinkFile.isNull() ) {
 	AppLnk* that = (AppLnk*)this;
 	if ( type().contains('/') ) {
+#ifdef Q_WS_QWS
 	    StorageInfo storage;
 	    const FileSystem *fs = storage.fileSystemOf( that->mFile );
 	    if ( fs && fs->isRemovable() ) {
 		that->mLinkFile = fs->path();
 	    } else
-		that->mLinkFile = getenv( "HOME" );
+#else
+		qWarning("AppLnk::linkFile is using home as the root for windows");
+#endif
+	    {
+		that->mLinkFile = QDir::homeDirPath();
+	    }
 	    that->mLinkFile += "/Documents/"+type()+"/"+safeFileName(that->mName);
 	    if ( QFile::exists(that->mLinkFile+".desktop") ) {
 		int n=1;
@@ -643,10 +634,11 @@ void AppLnk::execute(const QStringList& args) const
 	invoke(args);
 	setenv("QWS_DISPLAY", old.data(), 1);
     } else
-#endif
 	invoke(args);
+#endif
 }
 
+#ifdef Q_WS_QWS
 /*!
   Invokes the application associated with this AppLnk, with
   \a args as arguments. Rotation is not taken into account by
@@ -668,6 +660,7 @@ void AppLnk::setExec( const QString& exec )
 {
     mExec = exec;
 }
+#endif
 
 /*!
   Sets the Name property to \a docname.
@@ -886,7 +879,7 @@ void AppLnk::removeFiles()
 {
     bool needmsg = FALSE;
 
-    if ( linkFileKnown() ) {
+    if ( !mLinkFile.isNull() ) {
 	if ( !QFile::exists(linkFile()) || QFile::remove(linkFile()) ) {
 	    needmsg = TRUE;
 	} else {
@@ -894,23 +887,25 @@ void AppLnk::removeFiles()
 	}
     }
 
-    if ( fileKnown() ) {
+    if ( !mFile.isNull() ) {
 	if ( !QFile::exists(file()) || QFile::remove(file()) ) {
 	    needmsg = TRUE;
 	} else {
-	    if ( linkFileKnown() )
+	    if ( !mLinkFile.isNull() )
 		writeLink();
 	    return; // failure
 	}
     }
 
+#ifndef QT_NO_COP
     if ( needmsg ) {
 	QCopEnvelope e("QPE/System", "linkChanged(QString)");
-	if ( linkFileKnown() )
+	if ( !mLinkFile.isNull() )
 	    e << linkFile();
 	else
 	    e << file();
     }
+#endif
 
     // success
 }
@@ -922,7 +917,7 @@ void AppLnk::removeFiles()
 */
 void AppLnk::removeLinkFile()
 {
-    if ( isValid() && linkFileKnown() && QFile::remove(linkFile()) ) {
+    if ( isValid() && !mLinkFile.isNull() && QFile::remove(linkFile()) ) {
 #ifndef QT_NO_COP
 	QCopEnvelope e("QPE/System", "linkChanged(QString)");
 	e << linkFile();
@@ -1225,18 +1220,18 @@ DocLnkSet::DocLnkSet( const QString &directory, const QString& mimefilter ) :
 {
     QDir dir( directory );
     mFile = dir.dirName();
-    QDict<void> reference;
+    QDict<void> reference(1021);
 
     QStringList subFilter = QStringList::split(";", mimefilter);
     QValueList<QRegExp> mimeFilters;
-    for( QStringList::Iterator it = subFilter.begin(); it != subFilter.end(); ++ it )
-	mimeFilters.append( QRegExp(*it, FALSE, TRUE) );
+    for( QStringList::Iterator itList = subFilter.begin(); itList != subFilter.end(); ++ itList )
+	mimeFilters.append( QRegExp(*itList, FALSE, TRUE) );
 
     findChildren(directory, mimeFilters, reference);
 
     const QList<DocLnk> &list = children();
-    for ( QListIterator<DocLnk> it( list ); it.current(); ++it ) {
-	reference.remove( (*it)->file() );
+    for ( QListIterator<DocLnk> itDoc( list ); itDoc.current(); ++itDoc ) {
+	reference.remove( (*itDoc)->file() );
     }
 
     for ( QDictIterator<void> dit(reference); dit.current(); ++dit ) {
@@ -1289,7 +1284,7 @@ void DocLnkSet::findChildren(const QString &dr, const QValueList<QRegExp> &mimeF
 
     if ( dir.exists( ".Qtopia-ignore" ) )
 	return;
-    
+   
     const QFileInfoList *list = dir.entryInfoList();
     if ( list ) {
 	QFileInfo* fi;
@@ -1297,7 +1292,7 @@ void DocLnkSet::findChildren(const QString &dr, const QValueList<QRegExp> &mimeF
 	    QString bn = fi->fileName();
 	    if ( bn[0] != '.' ) {
 		if ( fi->isDir()  ) {
-		    if ( bn != "CVS" && bn != "Qtopia" && bn != "QtPalmtop" ) 
+		    if ( bn != "CVS" && bn != "Qtopia" && bn != "QtPalmtop" )
 			findChildren(fi->filePath(), mimeFilters, reference, depth);
 		} else {
 		    if ( fi->extension(FALSE) == "desktop" ) {
@@ -1321,8 +1316,9 @@ void DocLnkSet::findChildren(const QString &dr, const QValueList<QRegExp> &mimeF
 			if ( !match )
 			    delete dl;
 		    } else {
-			if ( !reference.find(fi->fileName()) )
+			if ( !reference.find(fi->fileName()) ){
 			    reference.insert(fi->filePath(), (void*)2);
+			}
 		    }
 		}
 	    }
@@ -1431,7 +1427,7 @@ void DocLnk::invoke(const QStringList& args) const
     const AppLnk* app = mt.application();
     if ( app ) {
 	QStringList a = args;
-	if ( linkFileKnown() && QFile::exists( linkFile() ) )
+	if ( !mLinkFile.isNull() && QFile::exists( linkFile() ) )
 	    a.append(linkFile());
 	else
 	    a.append(file());

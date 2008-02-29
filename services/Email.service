@@ -1,0 +1,10 @@
+[Service]
+Actions = writeMail();writeMail(QMap(QString,QString));writeMail(QString,QString)
+Icon = EMail
+Name = Email
+[writeMail()]
+Icon = EMail
+Name = Compose Email
+[writeMail(QString,QString)]
+Icon = EMail
+Name = Compose Email

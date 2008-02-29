@@ -1,13 +1,14 @@
-TEMPLATE	= app
-CONFIG		+= qtopia warn_on release
-DESTDIR		= $(QPEDIR)/bin
-HEADERS		= textedit.h
-SOURCES		= main.cpp textedit.cpp
+multiprocess:TEMPLATE	= app
+multiprocess:DESTDIR	= $(QPEDIR)/bin
+singleprocess:TEMPLATE	= lib
+singleprocess:DESTDIR   = $(QPEDIR)/lib
 
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH	+= $(QPEDIR)/include
-LIBS            += -lqpe
+CONFIG		+= qtopia warn_on release
+HEADERS		= textedit.h
+SOURCES		= textedit.cpp
+
+multiprocess:SOURCES+=main.cpp
 
 TARGET		= textedit
 
-TRANSLATIONS	= $(QPEDIR)/i18n/de/textedit.ts
+TRANSLATIONS = textedit-en_GB.ts textedit-de.ts textedit-ja.ts textedit-no.ts

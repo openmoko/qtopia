@@ -1,0 +1,114 @@
+<html>
+<title>
+Text Editor Test List
+</title>
+
+<body>
+
+<h1>Text Editor Test List</h1>
+
+
+<a name=features>
+<h2>Feature Tests</h2>
+</a>
+<!-- feature tests correspond n-to-1 with features.
+
+    Note: TITLEs may be used as identifiers in bug reports.
+	Tests of different facets of the same feature should
+	have " - [Qualifier]" appended.
+
+    (eg.
+	Add Task
+	Blah Blah.
+
+	Add Task - Empty
+	Blah Blah Blah.
+    )
+-->
+
+
+<h3>Create new text file</h3>
+<ol>
+        <li>Start Text editor from the launcher</li>
+        <li>Click the <b>New file</b> button</li>
+        <li>Verify that an empty file is display with the name "Unnamed"</li>
+        <li>Enter some text eg: "1234 test"</li>
+        <li>Click the <b>OK</b> button. This </li>
+        <li>Rename the created file by clicking and holding the stylus on the last
+             file listed. Enter an unique file name in the "Name" field</li>
+</ol>
+
+<h3>Edit an existing text file</h3>
+<ol>
+        <li>Start Text editor from the launcher</li>
+        <li>Select a existing file from the list of file, as named in previous step</li>
+        <li>Verify that the file contains "1234 test"</li>
+        <li>Change the text in the file and click  <b>OK</b> button</li>
+        <li>Verify that the changes made have been saved</li>
+        <li>An alternate path from step 2 is to make changes to the file click
+                the <b>Close</b> button And verify that the changes made
+                were not saved</li>
+</ol>
+
+<h3>Find text</h3>
+<ol>
+        <li>Start Text editor from the launcher</li>
+        <li>Select a existing file from the list of file, as named in previous step</li>
+        <li>Click <b>Find</b> button</li>
+        <li>Enter "t" in the topmost edit field</li>
+        <li>Verify that the first "t" is now displayed in highlighted font</li>
+</ol>
+<h3>Repeat last text find</h3>
+<ol>
+        <li>Followimg on from previous test case</li>
+        <li>Click the <b>Find next</b>Button and verify that the
+                second "t" is now displayed in highlighted font</li>
+</ol>
+
+
+<h3>Copy text</h3>
+<ol>
+        <li>Start Text editor from the launcher</li>
+        <li>Select a existing file from the list of file, as named in previous step</li>
+        <li>Select the first line text by in the file draging stylus across from left to right</li>
+        <li>Click the <b>Copy</b> button</li>
+</ol>
+
+<h3>Paste text</h3>
+<ol>
+        <li>Following on from previous test case, click the <b>Paste</b> button</li>
+        <li>Verify the text previously copied has now been pasted into where the text
+                cursor is postioned</li>
+</ol>
+
+<h3>Cut text</h3>
+<ol>
+        <li>Following on from previous test case, select the first line text by in the file
+                draging stylus across from left to right</li>
+        <li>Click the <b>Cut</b> button</li>
+        <li>Verify that the select text has been removed from the file</li>
+</ol>
+
+<h3>Line Wrapping</h3>
+<ol>
+<li>Click and drag the entire line of text.  Click <b>Copy</b> from the toolbar
+    or select <b>Copy</b> from the <b>Edit</b> menu.
+<li>Place the cursor at the end of the line, and click <b>Paste</b> from the
+    toolbar or select <b>Paste</b> from the <b>Edit</b> menu.  Repeat until
+    text appears on the second line.
+<li>Uncheck <b>Wrap lines</b> from the <b>View</b> menu.  The second line
+    disappears, and it's contents are placed back on the first line.
+</ol>
+
+<h3>Variable Level Zoom</h3>
+<ol>
+<li>Select <b>Zoom in</b> from the <b>View</b> menu.  The text will appear
+    slightly larger.  Repeatedly selecting <b>Zoom in</b> from the <b>View</b>
+    menu will cause the text to increase in size.
+<li>Select <b>Zoom out</b> from the <b>View</b> menu.  The text will appear
+    slightly smaller.  Repeatedly selecting <b>Zoom out</b> from the
+    <b>View</b> menu will cause the text to decrease in size.
+</ol>
+
+</body>
+</html>

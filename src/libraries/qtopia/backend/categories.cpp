@@ -22,6 +22,15 @@
 #include <qfile.h>
 #include <qcstring.h>
 #include <qtextstream.h>
+#ifdef Q_WS_QWS
+#include <qtopia/qcopenvelope_qws.h>
+#endif
+
+#if defined(Q_TEMPLATEDLL) && (QT_VERSION < 300)
+// MOC_SKIP_BEGIN
+template class Q_EXPORT QValueList<int>;
+// MOC_SKIP_END
+#endif
 
 using namespace Qtopia;
 
@@ -31,7 +40,7 @@ using namespace Qtopia;
  *
  **********************************************************/
 
-#ifdef PALMTOPCENTER
+#ifdef QTOPIA_DESKTOP
 UidGen CategoryGroup::sUidGen( UidGen::PalmtopCenter );
 #else
 UidGen CategoryGroup::sUidGen( UidGen::Qtopia );
@@ -203,6 +212,13 @@ QStringList CategoryGroup::labels(const QArray<int> &catids ) const
 	    labels += *it;
     return labels;
 }
+
+#ifdef Q_OS_WIN32
+Qtopia::UidGen & CategoryGroup::uidGen()
+{
+    return sUidGen;
+}
+#endif
 
 /***********************************************************
  *
@@ -471,7 +487,9 @@ QString Categories::displaySingle( const QString &app,
 				   const QArray<int> &catids,
 				   DisplaySingle display ) const
 {
-    QStringList strs = labels( app, catids );
+    QStringList strs = mGlobalCats.labels( catids );
+    strs += mAppCats[app].labels( catids );
+
     if ( !strs.count() )
 	return tr("Unfiled");
     strs.sort();
@@ -489,7 +507,7 @@ QString Categories::displaySingle( const QString &app,
 	    break;
 	}
     }
-    else r = strs.first(); 	
+    else r = strs.first();
     return r;
 }
 
@@ -696,6 +714,12 @@ bool Categories::save( const QString &fname ) const
 	QFile::remove( strNewFile );
     }
 
+#ifndef QT_NO_COP
+    {
+	QCopEnvelope e("QPE/System", "categoriesChanged()" );
+    }
+#endif
+
     return TRUE;
 }
 
@@ -879,7 +903,7 @@ void CheckedListView::setChecked( const QStringList &checked )
   \a cats is a const reference to this object
   \a appname is the CategoryGroup application name that the category was added to or QString::null if it was global
   \a uid is the unique identifier associated with the added category
-*/	
+*/
 
 /*! \fn void Categories::categoryRemoved( const Categories &cats, const QString &appname,
   int uid)
@@ -941,7 +965,7 @@ void CheckedListView::setChecked( const QStringList &checked )
   \enum Categories::ExtraLabels
     \value NoExtra - only the category labels
     \value AllUnfiled - add All and Unfiled labels
-    \value AllLabel - add All label 
+    \value AllLabel - add All label
     \value UnfiledLabel - add Unfiled label
 */
 

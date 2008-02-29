@@ -20,12 +20,13 @@
 #ifndef QDAWG_H
 #define QDAWG_H
 
+#include <qtopia/qpeglobal.h>
 #include <qstringlist.h>
 
 class QIODevice;
 class QDawgPrivate;
 
-class QDawg {
+class QTOPIA_EXPORT QDawg {
 public:
     QDawg();
     ~QDawg();
@@ -41,7 +42,11 @@ public:
     int countWords() const;
 
     // Unicode 0..3FFF; an offset can be used for other ranges
-    static const int nodebits=18;
+    //static const int nodebits=18;
+    enum {nodebits = 18};
+/*
+    static const int nodebits = 18;
+*/
 
     class Node {
 	friend class QDawgPrivate;
@@ -66,5 +71,6 @@ private:
     friend class QDawgPrivate;
     QDawgPrivate* d;
 };
+
 
 #endif

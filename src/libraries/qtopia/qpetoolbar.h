@@ -21,11 +21,12 @@
 #ifndef QPETOOLBAR_H
 #define QPETOOLBAR_H
 
+#include <qtopia/qpeglobal.h>
 #include <qtoolbar.h>
 
 class QMainWindow;
 
-class QPEToolBar : public QToolBar
+class QTOPIA_EXPORT QPEToolBar : public QToolBar
 {
     Q_OBJECT
 public:

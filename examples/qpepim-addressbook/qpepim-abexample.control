@@ -3,7 +3,7 @@ Priority: optional
 Section: qpe/applications
 Maintainer: Trolltech (www.trolltech.com)
 Architecture: arm
-Version: $QPE_VERSION-5
-Depends: qpe-pim, qpe-base ($QPE_VERSION)
+Version: $QPE_VERSION-7
+Depends: qpe-pim
 Description: Example Addressbook reader
  Simple example for using the QPEPIM access library.

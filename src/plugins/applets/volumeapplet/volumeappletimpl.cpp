@@ -40,7 +40,7 @@ QWidget *VolumeAppletImpl::applet( QWidget *parent )
 
 int VolumeAppletImpl::position() const
 {
-    return 6;
+    return 7;
 }
 
 QRESULT VolumeAppletImpl::queryInterface( const QUuid &uuid, QUnknownInterface **iface )

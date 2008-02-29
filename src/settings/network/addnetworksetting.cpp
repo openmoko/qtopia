@@ -20,9 +20,9 @@
 #include "addnetworksetting.h"
 #include "networksettings.h"
 
-#include <qpe/qpeapplication.h>
-#include <qpe/config.h>
-#include <qpe/network.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/config.h>
+#include <qtopia/network.h>
 
 #include <qlistbox.h>
 #include <qlabel.h>
@@ -56,7 +56,7 @@ AddNetworkSetting::~AddNetworkSetting()
 
 QString AddNetworkSetting::settingsDir() const
 {
-    return QPEApplication::qpeDir() + "/etc/network";
+    return QPEApplication::qpeDir() + "etc/network";
 }
 
 QString AddNetworkSetting::selectedFile() const

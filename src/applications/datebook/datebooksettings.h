@@ -24,6 +24,7 @@
 
 class DateBookSettings : public DateBookSettingsBase
 {
+    Q_OBJECT
 public:
     DateBookSettings( bool whichClock, QWidget *parent = 0,
                       const char *name = 0, bool modal = TRUE, WFlags = 0 );

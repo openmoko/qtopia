@@ -25,6 +25,8 @@
 
 #include <qvaluelist.h>
 #include <qdatetime.h>
+#include <qstring.h>
+#include <qmap.h>
 
 class TaskPrivate;
 class QTOPIA_EXPORT Task : public Qtopia::Record
@@ -54,8 +56,8 @@ public:
     const QString &description() const { return mDesc; }
 
     // Use THESE functions
-    void setDueDate( const QDate &date);
-    void clearDueDate();
+//    void setDueDate( const QDate &date);
+//    void clearDueDate();
    
     // Instead of these functions.
     void setDueDate( const QDate& date, bool hasDue ) { mDueDate = date; mDue = hasDue; }
@@ -71,7 +73,11 @@ public:
     bool match( const QRegExp &r ) const;
 
 private:
+#ifndef Q_OS_WIN32
     Qtopia::UidGen &uidGen() { return sUidGen; }
+#else
+	Qtopia::UidGen &uidGen();
+#endif
     static Qtopia::UidGen sUidGen;
 
     bool mDue;
@@ -87,6 +93,6 @@ private:
 };
 
 // MUST be inline.  (forwards compatability).
-inline void Task::setDueDate( const QDate &date) { setDueDate(date, date.isValid()); }
-inline void Task::clearDueDate() { setHasDueDate( FALSE ); }
+//inline void Task::setDueDate( const QDate &date) { setDueDate(date, date.isValid()); }
+//inline void Task::clearDueDate() { setHasDueDate( FALSE ); }
 #endif

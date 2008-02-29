@@ -3,13 +3,9 @@ TEMPLATE	= app
 DESTDIR		= $(QPEDIR)/bin
 
 HEADERS		= worldtime.h zonemap.h sun.h stylusnormalizer.h
-SOURCES		= worldtime.cpp zonemap.cpp main.cpp sun.c stylusnormalizer.cpp
+SOURCES		= worldtime.cpp zonemap.cpp main.cpp sun.cpp stylusnormalizer.cpp
 INTERFACES	= worldtimebase.ui
-
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH	+= $(QPEDIR)/include
-LIBS		+= -lqpe
 
 TARGET		= worldtime
 
-TRANSLATIONS	= $(QPEDIR)/i18n/de/worldtime.ts
+TRANSLATIONS = worldtime-en_GB.ts worldtime-de.ts worldtime-ja.ts worldtime-no.ts

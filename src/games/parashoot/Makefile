@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -136,29 +142,29 @@ HEADERS =	interface.h \
 		base.h \
 		bullet.h \
 		helicopter.h
-SOURCES =	main.cpp \
-		interface.cpp \
+SOURCES =	interface.cpp \
 		man.cpp \
 		cannon.cpp \
 		base.cpp \
 		bullet.cpp \
-		helicopter.cpp
-OBJECTS =	main.o \
-		interface.o \
-		man.o \
-		cannon.o \
-		base.o \
-		bullet.o \
-		helicopter.o
+		helicopter.cpp \
+		main.cpp
+OBJECTS =	$(OBJECTS_DIR)/interface.o \
+		$(OBJECTS_DIR)/man.o \
+		$(OBJECTS_DIR)/cannon.o \
+		$(OBJECTS_DIR)/base.o \
+		$(OBJECTS_DIR)/bullet.o \
+		$(OBJECTS_DIR)/helicopter.o \
+		$(OBJECTS_DIR)/main.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
-SRCMOC	=	moc_interface.cpp \
-		moc_cannon.cpp \
-		moc_bullet.cpp
-OBJMOC	=	moc_interface.o \
-		moc_cannon.o \
-		moc_bullet.o
+SRCMOC	=	$(MOC_DIR)/moc_interface.cpp \
+		$(MOC_DIR)/moc_cannon.cpp \
+		$(MOC_DIR)/moc_bullet.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_interface.o \
+		$(OBJECTS_DIR)/moc_cannon.o \
+		$(OBJECTS_DIR)/moc_bullet.o
 
 
 ####### Implicit rules
@@ -224,97 +230,88 @@ REQUIRES=
 
 ####### Compile
 
-main.o: main.cpp \
+$(OBJECTS_DIR)/interface.o: interface.cpp \
 		interface.h \
 		cannon.h \
 		bullet.h \
-		$(QPEDIR)/include/qpe/sound.h \
 		base.h \
 		helicopter.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
+		man.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/interface.o interface.cpp
 
-interface.o: interface.cpp \
+$(OBJECTS_DIR)/man.o: man.cpp \
+		codes.h \
+		man.h \
+		base.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/man.o man.cpp
+
+$(OBJECTS_DIR)/cannon.o: cannon.cpp \
+		codes.h \
+		cannon.h \
+		bullet.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/cannon.o cannon.cpp
+
+$(OBJECTS_DIR)/base.o: base.cpp \
+		codes.h \
+		base.h \
+		man.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/base.o base.cpp
+
+$(OBJECTS_DIR)/bullet.o: bullet.cpp \
+		codes.h \
+		bullet.h \
+		man.h \
+		helicopter.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/bullet.o bullet.cpp
+
+$(OBJECTS_DIR)/helicopter.o: helicopter.cpp \
+		helicopter.h \
+		man.h \
+		codes.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/helicopter.o helicopter.cpp
+
+$(OBJECTS_DIR)/main.o: main.cpp \
 		interface.h \
 		cannon.h \
 		bullet.h \
-		$(QPEDIR)/include/qpe/sound.h \
-		base.h \
-		helicopter.h \
-		man.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h
-
-man.o: man.cpp \
-		codes.h \
-		man.h \
-		$(QPEDIR)/include/qpe/sound.h \
-		base.h \
-		$(QPEDIR)/include/qpe/resource.h
-
-cannon.o: cannon.cpp \
-		$(QPEDIR)/include/qpe/resource.h \
-		codes.h \
-		cannon.h \
-		bullet.h \
-		$(QPEDIR)/include/qpe/sound.h
-
-base.o: base.cpp \
-		codes.h \
-		base.h \
-		$(QPEDIR)/include/qpe/sound.h \
-		man.h \
-		$(QPEDIR)/include/qpe/resource.h
-
-bullet.o: bullet.cpp \
-		codes.h \
-		bullet.h \
-		$(QPEDIR)/include/qpe/sound.h \
-		man.h \
-		helicopter.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/qmath.h
-
-helicopter.o: helicopter.cpp \
-		helicopter.h \
-		$(QPEDIR)/include/qpe/sound.h \
-		man.h \
-		codes.h \
-		$(QPEDIR)/include/qpe/resource.h
-
-moc_interface.o: moc_interface.cpp \
-		interface.h \
-		cannon.h \
-		bullet.h \
-		$(QPEDIR)/include/qpe/sound.h \
 		base.h \
 		helicopter.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
-moc_cannon.o: moc_cannon.cpp \
+$(OBJECTS_DIR)/moc_interface.o: $(MOC_DIR)/moc_interface.cpp \
+		interface.h \
 		cannon.h \
 		bullet.h \
-		$(QPEDIR)/include/qpe/sound.h
+		base.h \
+		helicopter.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_interface.o $(MOC_DIR)/moc_interface.cpp
 
-moc_bullet.o: moc_bullet.cpp \
-		bullet.h \
-		$(QPEDIR)/include/qpe/sound.h
+$(OBJECTS_DIR)/moc_cannon.o: $(MOC_DIR)/moc_cannon.cpp \
+		cannon.h \
+		bullet.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_cannon.o $(MOC_DIR)/moc_cannon.cpp
 
-moc_interface.cpp: interface.h
-	$(MOC) interface.h -o moc_interface.cpp
+$(OBJECTS_DIR)/moc_bullet.o: $(MOC_DIR)/moc_bullet.cpp \
+		bullet.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_bullet.o $(MOC_DIR)/moc_bullet.cpp
 
-moc_cannon.cpp: cannon.h
-	$(MOC) cannon.h -o moc_cannon.cpp
+$(MOC_DIR)/moc_interface.cpp: interface.h
+	$(MOC) interface.h -o $(MOC_DIR)/moc_interface.cpp
 
-moc_bullet.cpp: bullet.h
-	$(MOC) bullet.h -o moc_bullet.cpp
+$(MOC_DIR)/moc_cannon.cpp: cannon.h
+	$(MOC) cannon.h -o $(MOC_DIR)/moc_cannon.cpp
+
+$(MOC_DIR)/moc_bullet.cpp: bullet.h
+	$(MOC) bullet.h -o $(MOC_DIR)/moc_bullet.cpp
 
 
 
 lupdate:
-	lupdate parashoot.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <parashoot.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease parashoot.pro
+	$(QPEDIR)/bin/qtopia-linstall parashoot.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/include/qtopia/mimetype.h:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/include/qtopia/mimetype.h:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -50,6 +50,7 @@ body { background: #ffffff; color: black; }
 #ifndef MIMETYPE_H
 #define MIMETYPE_H
 
+#include &lt;qtopia/qpeglobal.h&gt;
 #include &lt;qstringlist.h&gt;
 #include &lt;qpixmap.h&gt;
 #include &lt;qlist.h&gt;
@@ -60,7 +61,7 @@ class QStringList;
 class MimeTypeData;
 class AppLnkSet;
 
-class MimeType
+class QTOPIA_EXPORT MimeType
 {
 public:
     MimeType( const QString&amp; ext_or_id );

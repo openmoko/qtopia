@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR) -I$(QPEDIR)/include
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -133,16 +139,16 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 HEADERS =	taskbarsettings.h
 SOURCES =	taskbarsettings.cpp \
 		main.cpp
-OBJECTS =	taskbarsettings.o \
-		main.o \
-		taskbarsettingsbase.o
+OBJECTS =	$(OBJECTS_DIR)/taskbarsettings.o \
+		$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/taskbarsettingsbase.o
 INTERFACES =    taskbarsettingsbase.ui
 UICDECLS =      taskbarsettingsbase.h
 UICIMPLS =      taskbarsettingsbase.cpp
-SRCMOC	=	moc_taskbarsettings.cpp \
-		moc_taskbarsettingsbase.cpp
-OBJMOC	=	moc_taskbarsettings.o \
-		moc_taskbarsettingsbase.o
+SRCMOC	=	$(MOC_DIR)/moc_taskbarsettings.cpp \
+		$(MOC_DIR)/moc_taskbarsettingsbase.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_taskbarsettings.o \
+		$(OBJECTS_DIR)/moc_taskbarsettingsbase.o
 
 
 ####### Implicit rules
@@ -208,24 +214,28 @@ REQUIRES=
 
 ####### Compile
 
-taskbarsettings.o: taskbarsettings.cpp \
+$(OBJECTS_DIR)/taskbarsettings.o: taskbarsettings.cpp \
 		taskbarsettings.h \
 		taskbarsettingsbase.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/qlibrary.h \
+		$(QPEDIR)/include/qtopia/config.h \
 		$(QPEDIR)/include/qtopia/qpeglobal.h \
+		$(QPEDIR)/include/qtopia/qlibrary.h \
 		$(QPEDIR)/include/qtopia/qcom.h \
 		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qpe/taskbarappletinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h
+		$(QPEDIR)/include/qtopia/qtopiawinexport.h \
+		$(QPEDIR)/include/qtopia/qpeapplication.h \
+		$(QPEDIR)/include/qtopia/timestring.h \
+		$(QPEDIR)/include/qtopia/taskbarappletinterface.h \
+		$(QPEDIR)/include/qtopia/qcopenvelope_qws.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/taskbarsettings.o taskbarsettings.cpp
 
-main.o: main.cpp \
+$(OBJECTS_DIR)/main.o: main.cpp \
 		taskbarsettings.h \
 		taskbarsettingsbase.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
+		$(QPEDIR)/include/qtopia/qpeapplication.h \
+		$(QPEDIR)/include/qtopia/qpeglobal.h \
+		$(QPEDIR)/include/qtopia/timestring.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
 taskbarsettingsbase.h: taskbarsettingsbase.ui
 	$(UIC) taskbarsettingsbase.ui -o $(INTERFACE_DECL_PATH)/taskbarsettingsbase.h
@@ -233,30 +243,34 @@ taskbarsettingsbase.h: taskbarsettingsbase.ui
 taskbarsettingsbase.cpp: taskbarsettingsbase.ui
 	$(UIC) taskbarsettingsbase.ui -i taskbarsettingsbase.h -o taskbarsettingsbase.cpp
 
-taskbarsettingsbase.o: taskbarsettingsbase.cpp \
+$(OBJECTS_DIR)/taskbarsettingsbase.o: taskbarsettingsbase.cpp \
 		taskbarsettingsbase.h \
 		taskbarsettingsbase.ui
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/taskbarsettingsbase.o taskbarsettingsbase.cpp
 
-moc_taskbarsettings.o: moc_taskbarsettings.cpp \
+$(OBJECTS_DIR)/moc_taskbarsettings.o: $(MOC_DIR)/moc_taskbarsettings.cpp \
 		taskbarsettings.h \
 		taskbarsettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_taskbarsettings.o $(MOC_DIR)/moc_taskbarsettings.cpp
 
-moc_taskbarsettingsbase.o: moc_taskbarsettingsbase.cpp \
+$(OBJECTS_DIR)/moc_taskbarsettingsbase.o: $(MOC_DIR)/moc_taskbarsettingsbase.cpp \
 		taskbarsettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_taskbarsettingsbase.o $(MOC_DIR)/moc_taskbarsettingsbase.cpp
 
-moc_taskbarsettings.cpp: taskbarsettings.h
-	$(MOC) taskbarsettings.h -o moc_taskbarsettings.cpp
+$(MOC_DIR)/moc_taskbarsettings.cpp: taskbarsettings.h
+	$(MOC) taskbarsettings.h -o $(MOC_DIR)/moc_taskbarsettings.cpp
 
-moc_taskbarsettingsbase.cpp: taskbarsettingsbase.h
-	$(MOC) taskbarsettingsbase.h -o moc_taskbarsettingsbase.cpp
+$(MOC_DIR)/moc_taskbarsettingsbase.cpp: taskbarsettingsbase.h
+	$(MOC) taskbarsettingsbase.h -o $(MOC_DIR)/moc_taskbarsettingsbase.cpp
 
 
 
 lupdate:
-	lupdate taskbar.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <taskbar.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease taskbar.pro
+	$(QPEDIR)/bin/qtopia-linstall taskbar.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

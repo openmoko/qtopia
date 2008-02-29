@@ -23,12 +23,16 @@
 #include <qregexp.h>
 #include <stdlib.h>
 
+/*!
+  Note: in Qtopia 1.5.0, invalid dates gave undefined results.
+*/
 QString TimeConversion::toString( const QDate &d )
 {
+    if ( !d.isValid() )
+	return QString::null;
     QString r = QString::number( d.day() ) + "." +
 		QString::number( d.month() ) + "." +
 		QString::number( d.year() );
-    //qDebug("TimeConversion::toString %s", r.latin1());
     return r;
 }
 
@@ -36,16 +40,12 @@ QDate TimeConversion::fromString( const QString &datestr )
 {
     int monthPos = datestr.find('.');
     int yearPos = datestr.find('.', monthPos+1 );
-    if ( monthPos == -1 || yearPos == -1 ) {
-	qDebug("fromString didn't find . in str = %s; mpos = %d ypos = %d", datestr.latin1(), monthPos, yearPos );
+    if ( monthPos == -1 || yearPos == -1 )
 	return QDate();
-    }
     int d = datestr.left( monthPos ).toInt();
     int m = datestr.mid( monthPos+1, yearPos - monthPos - 1 ).toInt();
     int y = datestr.mid( yearPos+1 ).toInt();
-    QDate date ( y,m,d );
-    //qDebug("TimeConversion::fromString ymd = %s => %d %d %d; mpos = %d ypos = %d", datestr.latin1(), y, m, d, monthPos, yearPos);
-    return date;
+    return QDate( y,m,d );
 }
 
 time_t TimeConversion::toUTC( const QDateTime& dt )
@@ -53,7 +53,7 @@ time_t TimeConversion::toUTC( const QDateTime& dt )
     time_t tmp;
     struct tm *lt;
 
-#if defined(_OS_WIN32) || defined (Q_OS_WIN32) || defined (Q_OS_WIN64)
+#if defined(Q_WS_WIN32) || defined (Q_OS_WIN64)
     _tzset();
 #else
     tzset();
@@ -84,7 +84,7 @@ QDateTime TimeConversion::fromUTC( time_t time )
 {
     struct tm *lt;
 
-#if defined(_OS_WIN32) || defined (Q_OS_WIN32) || defined (Q_OS_WIN64)
+#if defined(Q_WS_WIN32) || defined (Q_OS_WIN64)
     _tzset();
 #else
     tzset();
@@ -127,7 +127,7 @@ QCString TimeConversion::toISO8601( const QDateTime &dt )
 QDateTime TimeConversion::fromISO8601( const QCString &s )
 {
 
-#if defined(_OS_WIN32) || defined (Q_OS_WIN32) || defined (Q_OS_WIN64)
+#if defined(Q_WS_WIN32) || defined (Q_OS_WIN64)
     _tzset();
 #else
     tzset();

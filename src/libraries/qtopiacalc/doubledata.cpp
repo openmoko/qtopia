@@ -21,19 +21,21 @@
 #include "engine.h"
 #include <qstring.h>
 
-// Data type functions
+// Data type
+DoubleData::DoubleData(): Data() {
+    set(0);edited = FALSE;
+};
+
 void DoubleData::set(double d) {
     dbl = d;
     edited = FALSE;
     formattedOutput.setNum(dbl,'g',16);
 
     if (!strcmp(formattedOutput.latin1(),"nan")) {
-	Engine e;
-	e.setError(eNotANumber);
+	systemEngine->setError(eNotANumber);
 	return;
     } else if (!strcmp(formattedOutput.latin1(),"inf")) {
-	Engine e;
-	e.setError(eInf);
+	systemEngine->setError(eInf);
 	return;
     }
 }

@@ -20,6 +20,7 @@
 #ifndef __CLIPBOARD_APPLET_H__
 #define __CLIPBOARD_APPLET_H__
 
+#include <qtopia/qpeglobal.h>
 #include <qwidget.h>
 #include <qpixmap.h>
 

@@ -31,7 +31,7 @@
 #define QT_DLL // Internal
 #endif
 
-#if defined(QT_QWS_IPAQ) || defined(QT_QWS_CASSIOPEIA) || defined(QT_QWS_EBX)
+#if defined(QT_QWS_IPAQ) || defined(QT_QWS_CASSIOPEIA) || defined(QT_QWS_SL5XXX)
 # define QT_NO_QWS_CURSOR
 # define QT_NO_QWS_MOUSE_AUTO
 #endif
@@ -40,6 +40,9 @@
 #endif
 #define QT_NO_UNICODETABLES
 //#define QT_NO_IMAGEIO_BMP
+#ifndef QT_NO_IMAGEIO_MNG
+# define QT_NO_IMAGEIO_MNG
+#endif
 #define QT_NO_IMAGEIO_PPM
 //#define QT_NO_ASYNC_IO
 //#define QT_NO_ASYNC_IMAGE_IO
@@ -81,7 +84,10 @@
 //#define QT_NO_MESSAGEBOX
 #define QT_NO_PROGRESSDIALOG
 //#define QT_NO_TABDIALOG
-#define QT_NO_WIZARD
+//#define QT_NO_WIZARD
+#ifndef _WS_WIN32_
+#define QT_NO_WIZARD_IMPL
+#endif
 #define QT_NO_EFFECTS
 //#define QT_NO_COMPONENT
 #define QT_NO_DOM
@@ -96,4 +102,4 @@
 #define QT_NO_QWS_KDE2_WM_STYLE
 #define QT_NO_QWS_KDE_WM_STYLE
 #define QT_NO_QWS_WINDOWS_WM_STYLE
-
+#define QT_NO_QMEMORYFILE

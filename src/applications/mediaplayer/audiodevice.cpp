@@ -18,8 +18,8 @@
 **
 **********************************************************************/
 #include <stdlib.h>
-#include <qpe/qpeapplication.h>
-#include <qpe/config.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/config.h>
 #include "audiodevice.h"
 
 #if ( defined Q_WS_QWS || defined(_WS_QWS_) ) && !defined(QT_NO_COP)
@@ -116,8 +116,8 @@ void AudioDevice::getVolume( unsigned int& leftVolume, unsigned int& rightVolume
         close( mixerHandle );
     } else
 	qDebug( "get volume of audio device failed" );
-    leftVolume  = ((volume & 0x00FF) << 16) / 101;
-    rightVolume = ((volume & 0xFF00) <<  8) / 101;
+    leftVolume  = ((volume & 0x00FF) << 16) / 100;
+    rightVolume = ((volume & 0xFF00) <<  8) / 100;
 #endif
 }
 
@@ -150,7 +150,7 @@ void AudioDevice::setVolume( unsigned int leftVolume, unsigned int rightVolume, 
     waveOutClose( handle );
 #else
     // Volume can be from 0 to 100 which is 101 distinct values
-    unsigned int rV = (rightVolume * 101) >> 16;
+    unsigned int rV = (rightVolume * 101) / 65535;
 
 # if 0
     unsigned int lV = (leftVolume  * 101) >> 16;

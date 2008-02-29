@@ -1,0 +1,95 @@
+<html>
+<title>
+Help Browser Test List
+</title>
+
+<body>
+
+<h1>Help Browser Test List</h1>
+
+
+<a name=features>
+<h2>Feature Tests</h2>
+</a>
+<!-- feature tests correspond n-to-1 with features.
+
+    Note: TITLEs may be used as identifiers in bug reports.
+	Tests of different facets of the same feature should
+	have " - [Qualifier]" appended.
+
+    (eg.
+	Add Task
+	Blah Blah.
+
+	Add Task - Empty
+	Blah Blah Blah.
+    )
+-->
+
+<h3>First use</h3>
+<ol>
+        <li>Start Qtopia, and proceed to launcher</li>
+        <li>Start Help Browser.</li>
+        <li>Check that it is possible to browse to applications and use help for
+                <ul>
+                        <li>Help Browser</li>
+                        <li>Address Book</li>
+                        <li>Email</li>
+                </ul>
+        </li>
+        <li>Clock home button and check that it is possible to browse to setup
+                 and use help for
+                <ul>
+                        <li>Add/Remove software</li>
+                        <li>Appearance</li>
+                        <li>Date/Time</li>
+                        <li>Network</li>
+                </ul>
+        </li>
+
+
+</ol>
+
+<h3>How do I</h3>
+Consider what types of tasks the user will want to do. Check that there is clear where
+to find information about that task.
+
+<h3>Provide help when using an application</h3>
+For each application and setting accessable via the launcher check that there the
+help button is available at the top of the applications window that when the clicked
+causes the browser to
+
+<h3>Navigate to home page</h3>
+For every page accessable in the Help Browser check that the home button is available.
+This test case would only need to be done before a major release.
+
+<h3>Navigate to previous page</h3>
+<ol>
+<li>Browse to applications index page</li>
+<li>Browse to address book page</li>
+<li>Click the <b>Home</b> button</li>
+<li>Verify that clicking the <b>Back</b> button</li> twice causes
+    the applications index page to be displayed
+</ol>
+
+<h3>Add bookmark</h3>
+<ol>
+        <li>Browse to the applications index page</li>
+        <li>Click add bookmark item from the Bookmark menu</li>
+</ol>
+<h3>Browse to bookmark</h3>
+<ol>
+        <li>Browse to the home page</li>
+        <li>Click the book mark added in previous test case</li>
+        <li>Verify that the applications index page is now show</li>
+</ol>
+<h3>Remove bookmark</h3>
+<ol>
+        <li>Click the book mark added in previous test case</li>
+        <li>Click the remove bookmark item from the Bookmark menu</li>
+        <li>Verify that the applications index page has been removed from list of
+                bookmarks</li>
+</ol>
+
+</body>
+</html>

@@ -21,12 +21,12 @@
 #include "zonemap.h"
 #include "worldtime.h"
 
-#include <qpe/qpeapplication.h>
-#include <qpe/config.h>
-#include <qpe/timestring.h>
-#include <qpe/tzselect.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/config.h>
+#include <qtopia/timestring.h>
+#include <qtopia/tzselect.h>
 #if ( defined Q_WS_QWS || defined(_WS_QWS_) ) && !defined(QT_NO_COP)
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
 
 

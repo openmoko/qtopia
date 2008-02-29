@@ -18,9 +18,12 @@
 **
 **********************************************************************/
 #include "pimrecord.h"
+#include <qtopia/pim/private/xmlio_p.h>
 #include <qdatastream.h>
+#include <qobject.h>
 
 #if defined(Q_WS_WIN32)
+#define INITGUID
 #include <objbase.h>
 #else
 extern "C" {
@@ -52,15 +55,14 @@ extern "C" {
 */
 PimRecord::PimRecord() : mCategories(0)
 {
-    //setUid(generateUuid()); don't do this, allow access class to.
 }
 
 /*!
   Creates a clone of the record \a other.
 */
 PimRecord::PimRecord( const PimRecord &other )
-	: mUid(other.mUid), mCategories(other.mCategories), 
-	customMap(other.customMap) 
+	: mUid(other.mUid), mCategories(other.mCategories),
+	customMap(other.customMap)
 { }
 
 /*!
@@ -147,33 +149,6 @@ bool PimRecord::operator!=( const PimRecord &other ) const
 */
 
 /*!
-  Returns a new Universally Unique Identifier.
-*/
-QUuid PimRecord::generateUuid()
-{
-#if defined(Q_WS_WIN32)
-    GUID guid;
-    HRESULT h = CoCreateGuid( &guid );
-    if ( h != S_OK ) {
-	qWarning(" could not create a Uuid" );
-	return QUuid();
-    }
-    return QUuid( guid );
-#else
- //   uuid_t uuid;
-  //  uuid_generate( uuid );
-
-   // return QUuid( uuid );
-    // a uuid is 16 bytes (int, short, short, char[8])
-    // so is a uuid_t.
-    // I would be happier if this generate function was in QUuid.
-    QUuid uuid;
-    uuid_generate((unsigned char *)&uuid);
-    return uuid;
-#endif
-}
-
-/*!
   Returns the string stored for the custom field \a key.
   Returns a null string if the field does not exist.
  */
@@ -205,6 +180,98 @@ void PimRecord::removeCustomField(const QString &key)
     customMap.remove(key);
 }
 
+/*!
+  \internal
+*/
+void PimRecord::setField(int key,const QString &s)
+{
+    if ( key == Categories ) {
+	setCategories( PimXmlIO::idsFromString( s ) );
+    } else if ( key == UID_ID ) {
+	// DO NOT USE THIS WHEN CREATING A NEW CLASS
+	// this should only get called by the fromMap methods of the subclasses
+	QUuid id;
+	id.data1 = s.toInt();
+	p_setUid( id );
+    } else
+	qWarning("PimRecord::setField() Did not get passed a valid key %d", key);
+}
+
+/*!
+  \internal
+*/
+QString PimRecord::field(int key) const
+{
+    if ( key == Categories ) {
+	return PimXmlIO::idsToString( mCategories );
+    } else if ( key == UID_ID ) {
+	return QString::number( PimXmlIO::uuidToInt( mUid ) );
+    }
+
+    qWarning("PimRecord::field() Did not get passed a valid key %d", key);
+
+    return QString::null;
+}
+
+/*!
+  \internal
+*/
+void PimRecord::setFields(const QMap<int,QString> &m)
+{
+    for (QMap<int,QString>::ConstIterator it = m.begin(); it!= m.end(); ++it)
+    	setField( it.key(), (*it) );
+}
+
+/*!
+  \internal
+*/
+QMap<int,QString> PimRecord::fields() const
+{
+    QMap<int,QString> m;
+
+    QString str  = field(UID_ID);
+
+    if ( !str.isEmpty() )		//TODO: check whether we need to use QString::null instead
+	m.insert(UID_ID, str );
+    str = field(Categories);
+    if ( !str.isEmpty() )		//TODO: check whether we need to use QString::null instead
+	m.insert(Categories, str );
+
+    return m;
+}
+
+static const QtopiaPimMapEntry recentries[] = {
+    { "Uid", NULL, PimRecord::UID_ID, 0 },
+    { "Categories", QT_TRANSLATE_NOOP("PimRecord", "Categories"), PimRecord::Categories, 0 },
+
+    { 0, 0, 0, 0 }
+};
+
+
+/*!
+  \internal
+*/
+void PimRecord::initMaps(const QtopiaPimMapEntry *entries, QMap<int,int> &uniquenessMap, QMap<QCString,int> &identifierToKeyMap,
+			QMap<int,QCString> &keyToIdentifierMap, QMap<int,QString> &trFieldsMap)
+{
+    for ( const QtopiaPimMapEntry *entry = recentries; entry->identifier; ++entry ) {
+   	keyToIdentifierMap.insert( entry->id, entry->identifier );
+	identifierToKeyMap.insert( entry->identifier, entry->id );
+	if ( entry->trName )
+	    trFieldsMap.insert( entry->id, entry->trName );
+	uniquenessMap.insert( entry->id, entry->uniqueness );
+    }
+
+    for ( const QtopiaPimMapEntry *entry2 = entries; entry2->identifier; ++entry2 ) {
+	keyToIdentifierMap.insert( entry2->id, entry2->identifier );
+	identifierToKeyMap.insert( entry2->identifier, entry2->id );
+	if ( entry2->trName )
+	    trFieldsMap.insert( entry2->id, entry2->trName );
+	uniquenessMap.insert( entry2->id, entry2->uniqueness );
+    }
+}
+
+
 #ifndef QT_NO_DATASTREAM
 
 
@@ -234,7 +301,7 @@ QDataStream &operator<<( QDataStream &s, const PimRecord &r )
     //<< all parts into s;
     s << r.mUid;
     s << r.mCategories.size();
-    for (uint i = 0; i < r.mCategories.size(); i++) {
+    for (int i = 0; i < (int)r.mCategories.size(); i++) {
 	s << r.mCategories[i];
     }
     s << r.customMap;
@@ -247,7 +314,7 @@ QDataStream &operator>>( QDataStream &s, PimRecord &r )
     uint size;
     s >> size;
     r.mCategories.resize(size);
-    for (uint i = 0; i < size; i++) {
+    for (int i = 0; i < (int)size; i++) {
 	s >> r.mCategories[i];
     }
     s >> r.customMap;

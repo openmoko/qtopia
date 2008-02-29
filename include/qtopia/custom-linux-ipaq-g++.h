@@ -1,0 +1,1 @@
+../../src/libraries/qtopia/custom-linux-ipaq-g++.h

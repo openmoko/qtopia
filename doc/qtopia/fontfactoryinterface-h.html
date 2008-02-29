@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/include/qtopia/fontfactoryinterface.h:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/include/qtopia/fontfactoryinterface.h:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -50,20 +50,21 @@ body { background: #ffffff; color: black; }
 #ifndef FONTFACTORYINTERFACE_H
 #define FONTFACTORYINTERFACE_H
 
+#include &lt;qtopia/qpeglobal.h&gt;
 #include &lt;qnamespace.h&gt;
 #include &lt;qstring.h&gt;
-#include &lt;qpe/qcom.h&gt;
+#include &lt;qtopia/qcom.h&gt;
 
 class QFontFactory;
 
-#ifndef QT_NO_COMPONENT
+#ifndef QT_NO_COMPONENT 
 // {7F194DD6-FAA3-498F-8F30-9C297A570DFA}
 #ifndef IID_FontFactory
 #define IID_FontFactory QUuid( 0x7f194dd6, 0xfaa3, 0x498f, 0x8f, 0x30, 0x9c, 0x29, 0x7a, 0x57, 0x0d, 0xfa)
 #endif
 #endif
 
-struct FontFactoryInterface : public QUnknownInterface
+struct QTOPIA_EXPORT FontFactoryInterface : public QUnknownInterface
 {
     virtual QFontFactory *fontFactory() = 0;
 };

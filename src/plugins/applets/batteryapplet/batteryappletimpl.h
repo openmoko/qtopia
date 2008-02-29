@@ -20,11 +20,11 @@
 #ifndef BATTERYAPPLETIMPL_H
 #define BATTERYAPPLETIMPL_H
 
-#include <qpe/taskbarappletinterface.h>
+#include <qtopia/taskbarappletinterface.h>
 
 class BatteryMeter;
 
-class BatteryAppletImpl : public TaskbarAppletInterface
+class QTOPIA_PLUGIN_EXPORT BatteryAppletImpl : public TaskbarAppletInterface
 {
 public:
     BatteryAppletImpl();

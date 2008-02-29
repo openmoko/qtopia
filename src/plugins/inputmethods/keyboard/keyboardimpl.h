@@ -20,12 +20,12 @@
 #ifndef KEYBOARDIMPL_H
 #define KEYBOARDIMPL_H
 
-#include <qpe/inputmethodinterface.h>
+#include <qtopia/inputmethodinterface.h>
 
 class Keyboard;
 class QPixmap;
 
-class KeyboardImpl : public InputMethodInterface
+class QTOPIA_PLUGIN_EXPORT KeyboardImpl : public InputMethodInterface
 {
 public:
     KeyboardImpl();

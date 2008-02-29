@@ -21,7 +21,7 @@
 #include "obstacle.h"
 #include "codes.h"
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
 
 

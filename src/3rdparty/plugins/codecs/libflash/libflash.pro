@@ -1,5 +1,6 @@
 TEMPLATE	=  lib
 CONFIG		+= qtopia warn_on release
+win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
 HEADERS		=  libflashplugin.h   libflashpluginimpl.h
 SOURCES		=  libflashplugin.cpp libflashpluginimpl.cpp \
 		   adpcm.cc character.cc flash.cc graphic16.cc matrix.cc script.cc \
@@ -8,8 +9,6 @@ SOURCES		=  libflashplugin.cpp libflashpluginimpl.cpp \
 		   program.cc sound.cc text.cc
 TARGET		=  flashplugin
 DESTDIR		=  $(QPEDIR)/plugins/codecs
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH      += $(QPEDIR)/include
-LIBS            += -lqpe
 VERSION		=  1.0.0
 
+TRANSLATIONS = libflashplugin-en_GB.ts libflashplugin-de.ts libflashplugin-ja.ts libflashplugin-no.ts

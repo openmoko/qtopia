@@ -3,7 +3,7 @@ Priority: optional
 Section: qpe/taskbar
 Maintainer: Devin Butterfield <dbutter@wireless.net>
 Architecture: arm
-Version: $QPE_VERSION-7
-Depends: qpe-base ($QPE_VERSION)
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia
 Description: CF/PCMCIA Card Monitor applet
  CF/PCMCIA Card Monitor applet for the Qtopia environment taskbar.

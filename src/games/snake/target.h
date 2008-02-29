@@ -20,6 +20,9 @@
 #include <qcanvas.h> 
 #include <qdatetime.h>
 
+#ifndef SNAKETARGET
+#define SNAKETARGET
+
 class Target : public QCanvasSprite
 {
 
@@ -35,3 +38,5 @@ public:
 private:
    QCanvasPixmapArray* mouse;
 };
+
+#endif

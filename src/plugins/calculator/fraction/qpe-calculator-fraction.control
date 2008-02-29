@@ -3,7 +3,7 @@ Priority: optional
 Section: qpe/plugins
 Maintainer: Trolltech (www.trolltech.com)
 Architecture: arm
-Version: $QPE_VERSION-6
-Depends: qpe-base ($QPE_VERSION)
+Version: $QPE_VERSION-11
+Depends: qpe-libqtopia
 Description: Fractional calculator plugin
   A plugin for the calculator that provides fraction operations

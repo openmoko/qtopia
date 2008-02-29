@@ -1,0 +1,9 @@
+Files: plugins/codecs/libwavrecord.so.1.0.0 plugins/codecs/libwavrecord.so.1.0 plugins/codecs/libwavrecord.so.1 plugins/codecs/libwavrecord.so
+Priority: optional
+Section: qpe/plugins
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-10
+Depends: qpe-libqtopia
+Description: WAV file recording plugin
+ Plugin to record WAV files in the Qtopia environment.

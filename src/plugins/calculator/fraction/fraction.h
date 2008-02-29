@@ -21,7 +21,7 @@
 #ifndef STANDARDIMPL_H
 #define STANDARDIMPL_H
 
-#include <qpe/qmath.h>
+#include <qtopia/qmath.h>
 #include <qpushbutton.h>
 
 #include <qtopia/calc/engine.h>

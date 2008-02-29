@@ -1,22 +1,20 @@
-TEMPLATE        = app
+multiprocess:TEMPLATE	= app
+multiprocess:DESTDIR	= $(QPEDIR)/bin
+singleprocess:TEMPLATE	= lib
+singleprocess:DESTDIR   = $(QPEDIR)/lib
 
 CONFIG          += qtopia warn_on release
-DESTDIR         = $(QPEDIR)/bin
 
 HEADERS		= showimg.h \
 		  settingsdialog.h
 
-SOURCES		= main.cpp \
-		  settingsdialog.cpp \
+SOURCES		= settingsdialog.cpp \
 		  showimg.cpp
+
+multiprocess:SOURCES+=main.cpp
+
 INTERFACES	= settingsdialogbase.ui
 
 TARGET          = showimg
 
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH      += $(QPEDIR)/include
-LIBS            += -lqpe
-
-REQUIRES        = showimg
-
-TRANSLATIONS	= $(QPEDIR)/i18n/de/showimg.ts
+TRANSLATIONS = showimg-en_GB.ts showimg-de.ts showimg-ja.ts showimg-no.ts

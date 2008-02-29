@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -152,35 +158,35 @@ SOURCES =	qimpenchar.cpp \
 		qimpenwidget.cpp \
 		qimpenwordpick.cpp \
 		handwritingimpl.cpp
-OBJECTS =	qimpenchar.o \
-		qimpenprofile.o \
-		qimpencombining.o \
-		qimpenhelp.o \
-		qimpeninput.o \
-		qimpenmatch.o \
-		qimpensetup.o \
-		qimpenstroke.o \
-		qimpenwidget.o \
-		qimpenwordpick.o \
-		handwritingimpl.o \
-		qimpenprefbase.o
+OBJECTS =	$(OBJECTS_DIR)/qimpenchar.o \
+		$(OBJECTS_DIR)/qimpenprofile.o \
+		$(OBJECTS_DIR)/qimpencombining.o \
+		$(OBJECTS_DIR)/qimpenhelp.o \
+		$(OBJECTS_DIR)/qimpeninput.o \
+		$(OBJECTS_DIR)/qimpenmatch.o \
+		$(OBJECTS_DIR)/qimpensetup.o \
+		$(OBJECTS_DIR)/qimpenstroke.o \
+		$(OBJECTS_DIR)/qimpenwidget.o \
+		$(OBJECTS_DIR)/qimpenwordpick.o \
+		$(OBJECTS_DIR)/handwritingimpl.o \
+		$(OBJECTS_DIR)/qimpenprefbase.o
 INTERFACES =    qimpenprefbase.ui
 UICDECLS =      qimpenprefbase.h
 UICIMPLS =      qimpenprefbase.cpp
-SRCMOC	=	moc_qimpenhelp.cpp \
-		moc_qimpeninput.cpp \
-		moc_qimpenmatch.cpp \
-		moc_qimpensetup.cpp \
-		moc_qimpenwidget.cpp \
-		moc_qimpenwordpick.cpp \
-		moc_qimpenprefbase.cpp
-OBJMOC	=	moc_qimpenhelp.o \
-		moc_qimpeninput.o \
-		moc_qimpenmatch.o \
-		moc_qimpensetup.o \
-		moc_qimpenwidget.o \
-		moc_qimpenwordpick.o \
-		moc_qimpenprefbase.o
+SRCMOC	=	$(MOC_DIR)/moc_qimpenhelp.cpp \
+		$(MOC_DIR)/moc_qimpeninput.cpp \
+		$(MOC_DIR)/moc_qimpenmatch.cpp \
+		$(MOC_DIR)/moc_qimpensetup.cpp \
+		$(MOC_DIR)/moc_qimpenwidget.cpp \
+		$(MOC_DIR)/moc_qimpenwordpick.cpp \
+		$(MOC_DIR)/moc_qimpenprefbase.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_qimpenhelp.o \
+		$(OBJECTS_DIR)/moc_qimpeninput.o \
+		$(OBJECTS_DIR)/moc_qimpenmatch.o \
+		$(OBJECTS_DIR)/moc_qimpensetup.o \
+		$(OBJECTS_DIR)/moc_qimpenwidget.o \
+		$(OBJECTS_DIR)/moc_qimpenwordpick.o \
+		$(OBJECTS_DIR)/moc_qimpenprefbase.o
 
 
 ####### Implicit rules
@@ -246,103 +252,87 @@ REQUIRES=
 
 ####### Compile
 
-qimpenchar.o: qimpenchar.cpp \
+$(OBJECTS_DIR)/qimpenchar.o: qimpenchar.cpp \
 		qimpencombining.h \
 		qimpenchar.h \
 		qimpenstroke.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qimpenchar.o qimpenchar.cpp
 
-qimpenprofile.o: qimpenprofile.cpp \
+$(OBJECTS_DIR)/qimpenprofile.o: qimpenprofile.cpp \
 		qimpencombining.h \
 		qimpenchar.h \
 		qimpenstroke.h \
-		qimpenprofile.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/global.h
+		qimpenprofile.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qimpenprofile.o qimpenprofile.cpp
 
-qimpencombining.o: qimpencombining.cpp \
+$(OBJECTS_DIR)/qimpencombining.o: qimpencombining.cpp \
 		qimpencombining.h \
 		qimpenchar.h \
 		qimpenstroke.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qimpencombining.o qimpencombining.cpp
 
-qimpenhelp.o: qimpenhelp.cpp \
+$(OBJECTS_DIR)/qimpenhelp.o: qimpenhelp.cpp \
 		qimpenwidget.h \
 		qimpenchar.h \
 		qimpenstroke.h \
 		qimpencombining.h \
 		qimpenmatch.h \
-		$(QPEDIR)/include/qpe/qdawg.h \
 		qimpenhelp.h \
-		qimpenprofile.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/stringutil.h
+		qimpenprofile.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qimpenhelp.o qimpenhelp.cpp
 
-qimpeninput.o: qimpeninput.cpp \
+$(OBJECTS_DIR)/qimpeninput.o: qimpeninput.cpp \
 		qimpenwidget.h \
 		qimpenchar.h \
 		qimpenstroke.h \
 		qimpensetup.h \
 		qimpenprofile.h \
 		qimpeninput.h \
-		$(QPEDIR)/include/qpe/qdawg.h \
 		qimpencombining.h \
 		qimpenwordpick.h \
 		qimpenmatch.h \
-		qimpenhelp.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/global.h
+		qimpenhelp.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qimpeninput.o qimpeninput.cpp
 
-qimpenmatch.o: qimpenmatch.cpp \
+$(OBJECTS_DIR)/qimpenmatch.o: qimpenmatch.cpp \
 		qimpenmatch.h \
 		qimpenchar.h \
-		qimpenstroke.h \
-		$(QPEDIR)/include/qpe/qdawg.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
+		qimpenstroke.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qimpenmatch.o qimpenmatch.cpp
 
-qimpensetup.o: qimpensetup.cpp \
+$(OBJECTS_DIR)/qimpensetup.o: qimpensetup.cpp \
 		qimpenwidget.h \
 		qimpenchar.h \
 		qimpenstroke.h \
 		qimpenprefbase.h \
 		qimpensetup.h \
-		qimpenprofile.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/config.h
+		qimpenprofile.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qimpensetup.o qimpensetup.cpp
 
-qimpenstroke.o: qimpenstroke.cpp \
+$(OBJECTS_DIR)/qimpenstroke.o: qimpenstroke.cpp \
 		qimpenstroke.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qimpenstroke.o qimpenstroke.cpp
 
-qimpenwidget.o: qimpenwidget.cpp \
+$(OBJECTS_DIR)/qimpenwidget.o: qimpenwidget.cpp \
 		qimpenchar.h \
 		qimpenstroke.h \
 		qimpenwidget.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qimpenwidget.o qimpenwidget.cpp
 
-qimpenwordpick.o: qimpenwordpick.cpp \
+$(OBJECTS_DIR)/qimpenwordpick.o: qimpenwordpick.cpp \
 		qimpenwordpick.h \
 		qimpenmatch.h \
 		qimpenchar.h \
-		qimpenstroke.h \
-		$(QPEDIR)/include/qpe/qdawg.h
+		qimpenstroke.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qimpenwordpick.o qimpenwordpick.cpp
 
-handwritingimpl.o: handwritingimpl.cpp \
+$(OBJECTS_DIR)/handwritingimpl.o: handwritingimpl.cpp \
 		qimpeninput.h \
 		qimpenprofile.h \
 		qimpenchar.h \
 		qimpenstroke.h \
-		$(QPEDIR)/include/qpe/qdawg.h \
-		handwritingimpl.h \
-		$(QPEDIR)/include/qpe/inputmethodinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h
+		handwritingimpl.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/handwritingimpl.o handwritingimpl.cpp
 
 qimpenprefbase.h: qimpenprefbase.ui
 	$(UIC) qimpenprefbase.ui -o $(INTERFACE_DECL_PATH)/qimpenprefbase.h
@@ -350,78 +340,84 @@ qimpenprefbase.h: qimpenprefbase.ui
 qimpenprefbase.cpp: qimpenprefbase.ui
 	$(UIC) qimpenprefbase.ui -i qimpenprefbase.h -o qimpenprefbase.cpp
 
-qimpenprefbase.o: qimpenprefbase.cpp \
+$(OBJECTS_DIR)/qimpenprefbase.o: qimpenprefbase.cpp \
 		qimpenprefbase.h \
 		qimpenprefbase.ui
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qimpenprefbase.o qimpenprefbase.cpp
 
-moc_qimpenhelp.o: moc_qimpenhelp.cpp \
+$(OBJECTS_DIR)/moc_qimpenhelp.o: $(MOC_DIR)/moc_qimpenhelp.cpp \
 		qimpenhelp.h \
 		qimpenchar.h \
 		qimpenstroke.h \
 		qimpenprofile.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qimpenhelp.o $(MOC_DIR)/moc_qimpenhelp.cpp
 
-moc_qimpeninput.o: moc_qimpeninput.cpp \
+$(OBJECTS_DIR)/moc_qimpeninput.o: $(MOC_DIR)/moc_qimpeninput.cpp \
 		qimpeninput.h \
 		qimpenprofile.h \
 		qimpenchar.h \
-		qimpenstroke.h \
-		$(QPEDIR)/include/qpe/qdawg.h
+		qimpenstroke.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qimpeninput.o $(MOC_DIR)/moc_qimpeninput.cpp
 
-moc_qimpenmatch.o: moc_qimpenmatch.cpp \
+$(OBJECTS_DIR)/moc_qimpenmatch.o: $(MOC_DIR)/moc_qimpenmatch.cpp \
 		qimpenmatch.h \
 		qimpenchar.h \
-		qimpenstroke.h \
-		$(QPEDIR)/include/qpe/qdawg.h
+		qimpenstroke.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qimpenmatch.o $(MOC_DIR)/moc_qimpenmatch.cpp
 
-moc_qimpensetup.o: moc_qimpensetup.cpp \
+$(OBJECTS_DIR)/moc_qimpensetup.o: $(MOC_DIR)/moc_qimpensetup.cpp \
 		qimpensetup.h \
 		qimpenprofile.h \
 		qimpenchar.h \
 		qimpenstroke.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qimpensetup.o $(MOC_DIR)/moc_qimpensetup.cpp
 
-moc_qimpenwidget.o: moc_qimpenwidget.cpp \
+$(OBJECTS_DIR)/moc_qimpenwidget.o: $(MOC_DIR)/moc_qimpenwidget.cpp \
 		qimpenwidget.h \
 		qimpenchar.h \
 		qimpenstroke.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qimpenwidget.o $(MOC_DIR)/moc_qimpenwidget.cpp
 
-moc_qimpenwordpick.o: moc_qimpenwordpick.cpp \
+$(OBJECTS_DIR)/moc_qimpenwordpick.o: $(MOC_DIR)/moc_qimpenwordpick.cpp \
 		qimpenwordpick.h \
 		qimpenmatch.h \
 		qimpenchar.h \
-		qimpenstroke.h \
-		$(QPEDIR)/include/qpe/qdawg.h
+		qimpenstroke.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qimpenwordpick.o $(MOC_DIR)/moc_qimpenwordpick.cpp
 
-moc_qimpenprefbase.o: moc_qimpenprefbase.cpp \
+$(OBJECTS_DIR)/moc_qimpenprefbase.o: $(MOC_DIR)/moc_qimpenprefbase.cpp \
 		qimpenprefbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qimpenprefbase.o $(MOC_DIR)/moc_qimpenprefbase.cpp
 
-moc_qimpenhelp.cpp: qimpenhelp.h
-	$(MOC) qimpenhelp.h -o moc_qimpenhelp.cpp
+$(MOC_DIR)/moc_qimpenhelp.cpp: qimpenhelp.h
+	$(MOC) qimpenhelp.h -o $(MOC_DIR)/moc_qimpenhelp.cpp
 
-moc_qimpeninput.cpp: qimpeninput.h
-	$(MOC) qimpeninput.h -o moc_qimpeninput.cpp
+$(MOC_DIR)/moc_qimpeninput.cpp: qimpeninput.h
+	$(MOC) qimpeninput.h -o $(MOC_DIR)/moc_qimpeninput.cpp
 
-moc_qimpenmatch.cpp: qimpenmatch.h
-	$(MOC) qimpenmatch.h -o moc_qimpenmatch.cpp
+$(MOC_DIR)/moc_qimpenmatch.cpp: qimpenmatch.h
+	$(MOC) qimpenmatch.h -o $(MOC_DIR)/moc_qimpenmatch.cpp
 
-moc_qimpensetup.cpp: qimpensetup.h
-	$(MOC) qimpensetup.h -o moc_qimpensetup.cpp
+$(MOC_DIR)/moc_qimpensetup.cpp: qimpensetup.h
+	$(MOC) qimpensetup.h -o $(MOC_DIR)/moc_qimpensetup.cpp
 
-moc_qimpenwidget.cpp: qimpenwidget.h
-	$(MOC) qimpenwidget.h -o moc_qimpenwidget.cpp
+$(MOC_DIR)/moc_qimpenwidget.cpp: qimpenwidget.h
+	$(MOC) qimpenwidget.h -o $(MOC_DIR)/moc_qimpenwidget.cpp
 
-moc_qimpenwordpick.cpp: qimpenwordpick.h
-	$(MOC) qimpenwordpick.h -o moc_qimpenwordpick.cpp
+$(MOC_DIR)/moc_qimpenwordpick.cpp: qimpenwordpick.h
+	$(MOC) qimpenwordpick.h -o $(MOC_DIR)/moc_qimpenwordpick.cpp
 
-moc_qimpenprefbase.cpp: qimpenprefbase.h
-	$(MOC) qimpenprefbase.h -o moc_qimpenprefbase.cpp
+$(MOC_DIR)/moc_qimpenprefbase.cpp: qimpenprefbase.h
+	$(MOC) qimpenprefbase.h -o $(MOC_DIR)/moc_qimpenprefbase.cpp
 
 
 
 lupdate:
-	lupdate handwriting.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <handwriting.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease handwriting.pro
+	$(QPEDIR)/bin/qtopia-linstall handwriting.pro
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

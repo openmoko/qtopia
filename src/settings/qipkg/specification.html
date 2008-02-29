@@ -1,0 +1,79 @@
+<html>
+<title>
+Package Manager Specification
+</title>
+
+<body>
+
+<h1>Package Manager Specification</h1>
+
+<a name=description>
+</a>
+The Package Manager application installs and removes software to and from the 
+device.
+<p>
+The Package Manager application is used to manage the user installed software 
+on the device.  The Package Manager can retrieve software from a set of user 
+defined locations, install the software on the device or to removeable media, 
+and then later can be used to remove software from the device or removeable 
+media.
+<p>
+
+<p>
+Status: BT
+</p>
+
+<a name=usecases>
+<h2>Use Cases</h2>
+</a>
+<ul>
+<li><b>Installing software from network</b>
+    <p>
+    The user wants to install a new program.  They have an address for a 
+    website that is hosting the software.
+<li><b>Installing software from removable media</b>
+    <p>
+    A friend of the user downloads some software for the user, and places
+    it on an CF card using Qtopia Desktop.  They then lend the CF card to
+    the user who then installs the software on their device.
+<li><b>Installing software onto removable media</b>
+    <p>
+    The user has a program they want to install that is too large to install
+    onto the device.  The user installs the software onto an SD card using
+    the Package Manager.
+<li><b>Reviewing installed software</b>
+    <p>
+    The user checks to see what software they have already installed on 
+    their device.
+<li><b>Removing software</b>
+    <p>
+    The user uses the Package Manager to remove a package they have installed
+    but no longer use.
+</ul>
+
+<a name=features>
+<h2>Features</h2>
+</a>
+
+<ul>
+<li>Install from network: Packages can be installed from any webserver.
+<li>Install from local: Package can be installed from pre-downloaded packages.
+<li>Install to removeable media: Packages can be installed to removable media.
+<li>Searchable by category: Potential packages to be installed, or the list
+    of packages already installed can be filtered by the package type and
+    sub-category.
+<li>Uninstall: Installed packages can later be removed from the device.
+<li>Dependency checking: When installing from network the Package Manager
+    can determine if other available packages are required for the user
+    selected package to run correctly, and download the additional packages.
+</ul>
+
+<a name=prerequisites>
+<h2>Prerequisites</h2>
+</a>
+
+<ul>
+</ul>
+
+</body>
+</html>

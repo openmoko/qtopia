@@ -5,8 +5,8 @@
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -26,16 +26,16 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 HEADERS =	settings.h
 SOURCES =	rotation.cpp \
 		main.cpp
-OBJECTS =	rotation.o \
-		main.o \
-		rotationsettingsbase.o
+OBJECTS =	$(OBJECTS_DIR)/rotation.o \
+		$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/rotationsettingsbase.o
 INTERFACES =    rotationsettingsbase.ui
 UICDECLS =      rotationsettingsbase.h
 UICIMPLS =      rotationsettingsbase.cpp
-SRCMOC	=	moc_settings.cpp \
-		moc_rotationsettingsbase.cpp
-OBJMOC	=	moc_settings.o \
-		moc_rotationsettingsbase.o
+SRCMOC	=	$(MOC_DIR)/moc_settings.cpp \
+		$(MOC_DIR)/moc_rotationsettingsbase.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_settings.o \
+		$(OBJECTS_DIR)/moc_rotationsettingsbase.o
 
 
 ####### Implicit rules
@@ -101,22 +101,15 @@ REQUIRES=
 
 ####### Compile
 
-rotation.o: rotation.cpp \
+$(OBJECTS_DIR)/rotation.o: rotation.cpp \
 		settings.h \
-		rotationsettingsbase.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/fontmanager.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h
+		rotationsettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/rotation.o rotation.cpp
 
-main.o: main.cpp \
+$(OBJECTS_DIR)/main.o: main.cpp \
 		settings.h \
-		rotationsettingsbase.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
+		rotationsettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
 rotationsettingsbase.h: rotationsettingsbase.ui
 	$(UIC) rotationsettingsbase.ui -o $(INTERFACE_DECL_PATH)/rotationsettingsbase.h
@@ -124,21 +117,24 @@ rotationsettingsbase.h: rotationsettingsbase.ui
 rotationsettingsbase.cpp: rotationsettingsbase.ui
 	$(UIC) rotationsettingsbase.ui -i rotationsettingsbase.h -o rotationsettingsbase.cpp
 
-rotationsettingsbase.o: rotationsettingsbase.cpp \
+$(OBJECTS_DIR)/rotationsettingsbase.o: rotationsettingsbase.cpp \
 		rotationsettingsbase.h \
 		rotationsettingsbase.ui
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/rotationsettingsbase.o rotationsettingsbase.cpp
 
-moc_settings.o: moc_settings.cpp \
+$(OBJECTS_DIR)/moc_settings.o: $(MOC_DIR)/moc_settings.cpp \
 		settings.h \
 		rotationsettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_settings.o $(MOC_DIR)/moc_settings.cpp
 
-moc_rotationsettingsbase.o: moc_rotationsettingsbase.cpp \
+$(OBJECTS_DIR)/moc_rotationsettingsbase.o: $(MOC_DIR)/moc_rotationsettingsbase.cpp \
 		rotationsettingsbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_rotationsettingsbase.o $(MOC_DIR)/moc_rotationsettingsbase.cpp
 
-moc_settings.cpp: settings.h
-	$(MOC) settings.h -o moc_settings.cpp
+$(MOC_DIR)/moc_settings.cpp: settings.h
+	$(MOC) settings.h -o $(MOC_DIR)/moc_settings.cpp
 
-moc_rotationsettingsbase.cpp: rotationsettingsbase.h
-	$(MOC) rotationsettingsbase.h -o moc_rotationsettingsbase.cpp
+$(MOC_DIR)/moc_rotationsettingsbase.cpp: rotationsettingsbase.h
+	$(MOC) rotationsettingsbase.h -o $(MOC_DIR)/moc_rotationsettingsbase.cpp
 
 

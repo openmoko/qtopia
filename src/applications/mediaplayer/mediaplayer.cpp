@@ -17,10 +17,10 @@
 ** not clear to you.
 **
 **********************************************************************/
-#include <qpe/qpeapplication.h>
-#include <qpe/qlibrary.h>
-#include <qpe/resource.h>
-#include <qpe/config.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/qlibrary.h>
+#include <qtopia/resource.h>
+#include <qtopia/config.h>
 
 #include <qmainwindow.h>
 #include <qmessagebox.h>
@@ -34,6 +34,7 @@
 #include "audiodevice.h"
 
 #include "mediaplayerstate.h"
+#include "maindocumentwidgetstack.h"
 
 
 extern PlayListWidget *playList;
@@ -43,6 +44,7 @@ extern LoopControl *loopControl;
 MediaPlayer::MediaPlayer( QObject *parent, const char *name )
     : QObject( parent, name ), currentFile( NULL ), upTimerId( 0 ), dnTimerId( 0 ), rtTimerId( 0 ), ltTimerId( 0 )
 {
+    connect( mainDocumentWindow, SIGNAL( openURL( const QString&, const QString& ) ), this, SLOT( openURL( const QString&, const QString& ) ) );
     connect( mediaPlayerState, SIGNAL( playingToggled( bool ) ), this, SLOT( setPlaying( bool ) ) );
     connect( mediaPlayerState, SIGNAL( pausedToggled( bool ) ),  this, SLOT( pauseCheck( bool ) ) );
     connect( mediaPlayerState, SIGNAL( next() ),		 this, SLOT( next() ) );
@@ -78,9 +80,7 @@ void MediaPlayer::pauseCheck( bool b )
 
 void MediaPlayer::play()
 {
-    mediaPlayerState->setLength( 0 );
     mediaPlayerState->setPlaying( FALSE );
-    mediaPlayerState->setPosition( 0 );
     mediaPlayerState->setPlaying( TRUE );
 }
 
@@ -89,6 +89,32 @@ void MediaPlayer::error( const QString& error, const QString& errorMsg )
 {
     QMessageBox::critical( 0, error, errorMsg );
     mediaPlayerState->setPlaying( FALSE );
+}
+
+
+void MediaPlayer::openURL( const QString &URL, const QString &mimetype )
+{
+    setPlaying( false );
+
+    if ( !mediaPlayerState->streamingDecoder( URL, mimetype ) ) {
+	error( tr( "No decoder found"), tr( "Sorry, no appropriate decoders found for the url: %1" ).arg( "<i>" + URL + "</i>" ) );
+	return;
+    }
+
+    if ( !loopControl->init( URL, mimetype, true ) ) {
+	error( tr( "Error opening file"), tr( "Sorry, an error occurred trying to play the url: %1" ).arg( "<i>" + URL + "</i>" ) );
+	return;
+    }
+
+    loopControl->play();
+
+    if ( !loopControl->hasVideo() ) {
+	QString tickerText = " " + tr( "URL: %1" ).arg( URL );
+	long seconds = loopControl->totalPlaytime() / 1000;
+	if ( seconds > 0 ) 
+	    tickerText += "   " + tr( "Length: %1" ).arg( ControlWidgetBase::toTimeString( seconds ) );
+	mediaPlayerState->audioUI()->setTickerText( tickerText + "  " );
+    }
 }
 
 
@@ -117,29 +143,33 @@ void MediaPlayer::setPlaying( bool play )
 	return;
     }
 
-    if ( !QFile::exists( currentFile->file() ) ) {
-	error( tr( "File not found"), tr( "The following file was not found: <i>" ) + currentFile->file() + "</i>" );
+    QString fileStr = currentFile->file();
+    QString nameStr = currentFile->name();
+
+    if ( !QFile::exists( fileStr ) ) {
+	error( tr( "File not found" ), tr( "The following file was not found: <br>%1<br><i>%2</i>" ).arg( nameStr ).arg( fileStr ) );
 	return;
     }
 
-    if ( !mediaPlayerState->decoder( currentFile->file() ) ) {
-	error( tr( "No decoder found"), tr( "Sorry, no appropriate decoders found for this file: <i>" ) + currentFile->file() + "</i>" );
+    if ( !mediaPlayerState->decoder( fileStr ) ) {
+	error( tr( "No decoder found" ), tr( "Sorry, no appropriate decoders found for this file: <br>%1<br><i>%2</i>" ).arg( nameStr ).arg( fileStr ) );
 	return;
     }
 
-    if ( !loopControl->init( currentFile->file() ) ) {
-	error( tr( "Error opening file"), tr( "Sorry, an error occured trying to play the file: <i>" ) + currentFile->file() + "</i>" );
+    if ( !loopControl->init( fileStr ) ) {
+	error( tr( "Error opening file" ), tr( "Sorry, an error occurred trying to play the file: <br>%1<br><i>%2</i>" ).arg( nameStr ).arg( fileStr ) );
 	return;
     }
-
-    long seconds = loopControl->totalPlaytime();
-    QString time; time.sprintf("%li:%02i", seconds/60, (int)seconds%60 );
-    QString tickerText = tr( " File: " ) + currentFile->name() + tr(", Length: ") + time + ".";
 
     loopControl->play();
 
-    if ( !loopControl->hasVideo() )
-	mediaPlayerState->audioUI()->setTickerText( tickerText );
+    if ( !loopControl->hasVideo() ) {
+	QString tickerText = " " + tr( "File: %1" ).arg( nameStr );
+	long seconds = loopControl->totalPlaytime() / 1000;
+	if ( seconds > 0 ) 
+	    tickerText += "   " + tr( "Length: %1" ).arg( ControlWidgetBase::toTimeString( seconds ) );
+	mediaPlayerState->audioUI()->setTickerText( tickerText + "  " );
+    }
 }
 
 
@@ -181,6 +211,8 @@ void MediaPlayer::startIncreasingVolume()
 
 void MediaPlayer::startScanningBackward()
 {
+    if ( !mediaPlayerState->seekable() )
+	return;
     if ( ltTimerId )
 	return;
     ltTimerId = startTimer( 200 );
@@ -190,6 +222,8 @@ void MediaPlayer::startScanningBackward()
 
 void MediaPlayer::startScanningForward()
 {
+    if ( !mediaPlayerState->seekable() )
+	return;
     if ( rtTimerId )
 	return;
     rtTimerId = startTimer( 200 );
@@ -252,6 +286,9 @@ void MediaPlayer::updateOnscreenDisplay()
 
 void MediaPlayer::hideOnscreenDisplay()
 {
+    if ( drawnOnScreenDisplay == FALSE )
+	return;
+
     // Get rid of the on-screen display stuff
     drawnOnScreenDisplay = FALSE;
     onScreenDisplayVolume = 0;
@@ -268,33 +305,41 @@ void MediaPlayer::hideOnscreenDisplay()
 
 void MediaPlayer::stopDecreasingVolume()
 {
-    killTimer( dnTimerId );
-    dnTimerId = 0;
-    hideOnscreenDisplay();
+    if ( dnTimerId ) {
+	killTimer( dnTimerId );
+	dnTimerId = 0;
+	hideOnscreenDisplay();
+    }
 }
 
 
 void MediaPlayer::stopIncreasingVolume()
 {
-    killTimer( upTimerId );
-    upTimerId = 0;
-    hideOnscreenDisplay();
+    if ( upTimerId ) {
+	killTimer( upTimerId );
+	upTimerId = 0;
+	hideOnscreenDisplay();
+    }
 }
 
 
 void MediaPlayer::stopScanningBackward()
 {
-    killTimer( ltTimerId );
-    ltTimerId = 0;
-    mediaPlayerState->stopTemporaryMute( 500 );
+    if ( ltTimerId ) {
+	killTimer( ltTimerId );
+	ltTimerId = 0;
+	mediaPlayerState->stopTemporaryMute( 500 );
+    }
 }
 
 
 void MediaPlayer::stopScanningForward()
 {
-    killTimer( rtTimerId );
-    rtTimerId = 0;
-    mediaPlayerState->stopTemporaryMute( 500 );
+    if ( rtTimerId ) {
+	killTimer( rtTimerId );
+	rtTimerId = 0;
+	mediaPlayerState->stopTemporaryMute( 500 );
+    }
 }
 
 
@@ -387,6 +432,9 @@ bool MediaPlayer::keyPressEvent( QKeyEvent *e )
 		return TRUE;
 	    case Key_Space:
 		mediaPlayerState->setPaused( !mediaPlayerState->paused() );
+		return TRUE;
+	    case Key_Escape:
+		mediaPlayerState->setList();
 		return TRUE;
 	    default:
 		break;

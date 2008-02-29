@@ -1,18 +1,17 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000 Trolltech AS.  All rights reserved.
 **
-** This file is part of the Qtopia Environment.
+** This file is part of Qtopia Environment.
 **
-** Licensees holding valid Qtopia Developer license may use this
-** file in accordance with the Qtopia Developer License Agreement
-** provided with the Software.
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING
-** THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-** PURPOSE.
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
-** email sales@trolltech.com for information about Qtopia License
-** Agreements.
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
@@ -25,7 +24,7 @@
 #include "fractiondata.h"
 
 //Fraction instruction base
-class BaseFractionInstruction:public Instruction {
+class QTOPIA_EXPORT BaseFractionInstruction:public Instruction {
 public:
     BaseFractionInstruction():Instruction(){};
     ~BaseFractionInstruction(){};
@@ -35,32 +34,32 @@ public:
 protected:
     FractionData *fractionNum;
 };
-class BaseFractionInstructionDescription:public InstructionDescription {
+class QTOPIA_EXPORT BaseFractionInstructionDescription:public InstructionDescription {
 public:
     BaseFractionInstructionDescription();
     ~BaseFractionInstructionDescription(){};
 };
 
 // Conversions
-class iConvertFractionFraction:public BaseFractionInstruction {
+class QTOPIA_EXPORT iConvertFractionFraction:public BaseFractionInstruction {
 public:
     iConvertFractionFraction():BaseFractionInstruction(){};
     ~iConvertFractionFraction(){};
     Data *eval(Data *);
 };
-class ConvertFractionFraction:public BaseFractionInstructionDescription {
+class QTOPIA_EXPORT ConvertFractionFraction:public BaseFractionInstructionDescription {
 public:
     ConvertFractionFraction();
     ~ConvertFractionFraction(){};
     Instruction *getInstruction(){return new iConvertFractionFraction();};
 };
-class iConvertDoubleFraction:public BaseFractionInstruction {
+class QTOPIA_EXPORT iConvertDoubleFraction:public BaseFractionInstruction {
 public:
     iConvertDoubleFraction():BaseFractionInstruction(){};
     ~iConvertDoubleFraction(){};
     Data *eval(Data *);
 };
-class ConvertDoubleFraction:public InstructionDescription {
+class QTOPIA_EXPORT ConvertDoubleFraction:public InstructionDescription {
 public:
     ConvertDoubleFraction();
     ~ConvertDoubleFraction(){};
@@ -68,52 +67,52 @@ public:
 };
 
 // Mathematical functions
-class iAddFractionFraction:public BaseFractionInstruction {
+class QTOPIA_EXPORT iAddFractionFraction:public BaseFractionInstruction {
 public:
     iAddFractionFraction(){};
     ~iAddFractionFraction(){};
     Data *doEval(FractionData *);
 };
-class AddFractionFraction:public BaseFractionInstructionDescription {
+class QTOPIA_EXPORT AddFractionFraction:public BaseFractionInstructionDescription {
 public:
     AddFractionFraction();
     ~AddFractionFraction(){};
     Instruction *getInstruction() {return new iAddFractionFraction();};
 };
 
-class iSubtractFractionFraction:public BaseFractionInstruction {
+class QTOPIA_EXPORT iSubtractFractionFraction:public BaseFractionInstruction {
 public:
     iSubtractFractionFraction (){};
     ~iSubtractFractionFraction (){};
     Data *doEval(FractionData *);
 };
-class SubtractFractionFraction:public BaseFractionInstructionDescription {
+class QTOPIA_EXPORT SubtractFractionFraction:public BaseFractionInstructionDescription {
 public:
     SubtractFractionFraction();
     ~SubtractFractionFraction(){};
     Instruction *getInstruction() {return new iSubtractFractionFraction();};
 };
 
-class iMultiplyFractionFraction:public BaseFractionInstruction {
+class QTOPIA_EXPORT iMultiplyFractionFraction:public BaseFractionInstruction {
 public:
     iMultiplyFractionFraction (){};
     ~iMultiplyFractionFraction (){};
     Data *doEval(FractionData *);
 };
-class MultiplyFractionFraction:public BaseFractionInstructionDescription {
+class QTOPIA_EXPORT MultiplyFractionFraction:public BaseFractionInstructionDescription {
 public:
     MultiplyFractionFraction();
     ~MultiplyFractionFraction(){};
     Instruction *getInstruction() {return new iMultiplyFractionFraction();};
 };
 
-class iDivideFractionFraction:public BaseFractionInstruction {
+class QTOPIA_EXPORT iDivideFractionFraction:public BaseFractionInstruction {
 public:
     iDivideFractionFraction (){};
     ~iDivideFractionFraction (){};
     Data *doEval(FractionData *);
 };
-class DivideFractionFraction:public BaseFractionInstructionDescription {
+class QTOPIA_EXPORT DivideFractionFraction:public BaseFractionInstructionDescription {
 public:
     DivideFractionFraction();
     ~DivideFractionFraction(){};

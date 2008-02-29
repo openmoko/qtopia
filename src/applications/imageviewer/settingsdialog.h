@@ -38,6 +38,8 @@ public:
     bool reverse() const;
     void setRotate(bool r);
     bool rotate() const;
+    void setClockwise(bool r);
+    bool clockwise() const;
     void setFastLoad(bool f);
     bool fastLoad() const;
 

@@ -1,9 +1,9 @@
-Files: bin/addressbook apps/Applications/addressbook.desktop services/AddContact/addressbook
+Files: bin/addressbook apps/Applications/addressbook.desktop services/Contacts/addressbook
 Priority: optional
 Section: qpe/applications
 Maintainer: Trolltech (www.trolltech.com)
 Architecture: arm
-Version: $QPE_VERSION-7
-Depends: qpe-base ($QPE_VERSION), qpe-pim
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia, qpe-pim, qpe-service-Contacts
 Description: Contacts
  A simple addressbook for the Qtopia environment.

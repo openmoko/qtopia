@@ -20,7 +20,7 @@
 #ifndef HANDWRITINGIMPL_H
 #define HANDWRITINGIMPL_H
 
-#include <qpe/inputmethodinterface.h>
+#include <qtopia/inputmethodinterface.h>
 
 class QIMPenInput;
 class QPixmap;

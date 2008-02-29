@@ -383,6 +383,12 @@ void TEScreen::restoreCursor()
 
 void TEScreen::resizeImage(int new_lines, int new_columns)
 {
+  //
+  // Don't generate empty images.
+  //
+  if (new_lines == 0 || new_columns == 0) {
+    return;
+  }
 
   if (cuY > new_lines-1)
   { // attempt to preserve focus and lines
@@ -397,10 +403,11 @@ void TEScreen::resizeImage(int new_lines, int new_columns)
   ca* newimg = (ca*)malloc(new_lines*new_columns*sizeof(ca));
 
   clearSelection();
-
+  
+  int x, y;
   // clear new image
-  for (int y = 0; y < new_lines; y++)
-  for (int x = 0; x < new_columns; x++)
+  for (y = 0; y < new_lines; y++)
+  for (x = 0; x < new_columns; x++)
   {
     newimg[y*new_columns+x].c = ' ';
     newimg[y*new_columns+x].f = DEFAULT_FORE_COLOR;
@@ -410,8 +417,8 @@ void TEScreen::resizeImage(int new_lines, int new_columns)
   int cpy_lines   = QMIN(new_lines,  lines);
   int cpy_columns = QMIN(new_columns,columns);
   // copy to new image
-  for (int y = 0; y < cpy_lines; y++)
-  for (int x = 0; x < cpy_columns; x++)
+  for (y = 0; y < cpy_lines; y++)
+  for (x = 0; x < cpy_columns; x++)
   {
     newimg[y*new_columns+x].c = image[loc(x,y)].c;
     newimg[y*new_columns+x].f = image[loc(x,y)].f;

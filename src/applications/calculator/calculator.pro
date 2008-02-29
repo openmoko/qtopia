@@ -7,17 +7,15 @@ CONFIG += qtopia warn_on debug
 DESTDIR = $(QPEDIR)/bin
 
 # Input
-HEADERS += calculator.h plugininterface.h
-SOURCES += calculator.cpp main.cpp 
+HEADERS += 
+SOURCES += main.cpp 
 
-INCLUDEPATH += $(QPEDIR)/include \
-		library \
-		types/double
-DEPENDPATH += $(QPEDIR)/include \
-		library
+INCLUDEPATH += $(QPEDIR)/src/libraries/qtopiacalc	
 
-LIBS += -lqpe -lqtopiacalc
-#-Wl,-export-dynamic -lcalculator
+unix:LIBS   += -lqtopiacalc -Wl,-export-dynamic
+win32:LIBS  += $(QPEDIR)/lib/qtopiacalc.lib
+
+#-Wl,-export-dynamic
 #export-dynamic costs around 3.5kb
 
 TARGET = calculator

@@ -1,0 +1,147 @@
+<html>
+<title>
+Calculator Specification
+</title>
+
+<body>
+
+<h1>Calculator Specification</h1>
+
+
+<!--
+<h2>Specification goals</h2>
+This specification:
+<ol>
+<li> Describes all of the end-user stories and interactions.
+    (eg. the user can view a slide show of images from a digital camera).
+<li> Lists all features, derived from end-user stories,
+    in enough detail to allow the definition of
+    tests for all features.
+<li> Defines contraints and limitations on the application.
+    (eg. can view image sizes as large as 1MB).
+<li>Aides the developer on focusing on the most important aspects of
+    the application and ensuring all important elements are completed.
+</ol>
+-->
+
+<a name=description>
+</a>
+<!-- A one-line description of what this application is and does.
+    This description is then duplicated in the .desktop Comment and
+    the .control file description.
+
+    (eg. The image viewer allows viewing and very minor editing of image files.)
+-->
+The calculator allows flexible numerical calculation through plugins.
+<!-- A one-paragraph description of what this application is and does.
+    This description is then duplicated in the .desktop Comment and
+    the .control file description.
+
+    (eg. The image viewer allows viewing and very minor editing
+    of image files. It assists format conversion, beaming logos
+    to phones, captioning, etc.)
+-->
+<p>
+The calculator allows numerical calculations. User-defined types,
+functions and interfaces are provided through a plugin interface.
+Many components are supplied with the library, including integer,
+double and fraction data types, basic operations, and common
+calculator user-interface elements.
+</p>
+
+<p>
+Status: BT
+</p>
+
+<a name=usecases>
+<h2>Use Cases</h2>
+</a>
+<!-- Describe real-world stories. Implicit in these use cases is
+	"these things are easy to do".
+    (eg.
+	Roving News Reporter
+
+	The journalist/cameraman takes photos with a digital camera,
+	loads them into the PDAs via CF card, adjusts the contrast,
+	blacks-out a license plate, adds a copyright caption, and
+	emails the image and short story to Reuters.
+    )
+
+    Note: TITLEs may be used as identifiers in bug reports.
+ -->
+<ul>
+<li><b>Shopper</b>
+    <p>A shopper adds prices in the supermarket as she puts goods
+    into her trolley, in order to keep track of the running total.
+    When she has finished choosing goods, she calculates tax due on the
+    total.
+<li><b>Student</b>
+    <p>A student uses an emulated TI interface that he is familiar with
+    to solve fractional problems.
+<li><b>Engineer</b>
+    <p>An engineer writes a plugin to help him calculate stresses on
+    a bridge he is designing. The interface is customised to suit
+    the typical functions he needs to access.
+<li><b>Familiar</b>
+    <p>User throws away his old dedicated calculator, and uses the Qtopia
+    calculator without having to learn anything new. He even uses his
+    fingers poking at the device's touchscreen rather than a stylus.
+</ul>
+
+<a name=features>
+<h2>Features</h2>
+</a>
+<!-- features are brief
+
+    (eg. 
+	* Slide show: view multiple images in sequence
+	    * Configurable delay between images.
+	    * Hardware-button-controlled stepping between images.
+	* Big images: view larger-than-available-RAM images in some formats.
+	* Formats: view JPEG, PNG, GIF format images.
+	* Scribbling: draw black or white lines on images.
+	* Save: in JPEG, PNG formats.
+    )
+
+    Note: TITLEs may be used as identifiers in bug reports.
+-->
+
+<ul>
+<li>Backspace: delete last character of the current number
+<li>Double operations: various mathematical operations with double precision
+<li>Common user interface elements: standard input widgets available as part of the library
+<li>Memory operations: store and add, clear, retrieve
+<!--
+Framework automatically converts data types to match operations.
+--!>
+<li>Most-recently-used plugin: MRU plugin is active when the calculator is restarted.
+<li>Braces: change operator precedence
+<li>Error message: standard, translated error messages
+
+</ul>
+
+<a name=prerequisites>
+<h2>Prerequisites</h2>
+</a>
+<!--
+    Describes unresolved limitations that cannot
+    be shown within the features list.
+
+    Describes memory and other requirements quantitatively.
+
+    This is a short list, mainly intended as a "known bugs"
+    list for missing features.
+
+    (eg.
+	* Stylus: required for Scribbling.
+	* Memory: requires 250 bytes per event, plus content strings.
+    )
+
+    Note: TITLEs may be used as identifiers in bug reports.
+
+Automatic type-translation: Not yet finished
+--!>
+None.
+
+</body>
+</html>

@@ -20,12 +20,12 @@
 #ifndef PICKBOARDPICKS_H
 #define PICKBOARDPICKS_H
 
+#include <qtopia/qpeglobal.h>
 #include <qframe.h>
 #include <qlist.h>
 
 // Internal stuff...
-
-class PickboardConfig;
+#include "pickboardcfg.h" 
 
 class PickboardPicks : public QFrame {
     Q_OBJECT

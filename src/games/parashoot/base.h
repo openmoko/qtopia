@@ -18,7 +18,7 @@
 **
 **********************************************************************/
 
-#include <qpe/sound.h>
+#include <qtopia/sound.h>
 
 #include <qcanvas.h>
 
@@ -31,6 +31,8 @@ public:
     void damageBase();
     int rtti() const;
     static bool baseDestroyed();
+
+    void    reposition(void);
 
 private:
     QCanvasPixmapArray* basearray;

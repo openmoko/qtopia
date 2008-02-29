@@ -20,12 +20,12 @@
 #ifndef UNIKEYBOARDIMPL_H
 #define UNIKEYBOARDIMPL_H
 
-#include <qpe/inputmethodinterface.h>
+#include <qtopia/inputmethodinterface.h>
 
 class UniKeyboard;
 class QPixmap;
 
-class UniKeyboardImpl : public InputMethodInterface
+class QTOPIA_PLUGIN_EXPORT UniKeyboardImpl : public InputMethodInterface
 {
 public:
     UniKeyboardImpl();

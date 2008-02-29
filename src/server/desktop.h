@@ -24,7 +24,7 @@
 
 #include "shutdownimpl.h"
 
-#include <qpe/qpeapplication.h>
+#include <qtopia/qpeapplication.h>
 
 #include <qwidget.h>
 #ifdef QWS
@@ -112,8 +112,8 @@ public:
     void show();
     void checkMemory();
 
-    void keyClick();
-    void screenClick();
+    void keyClick(int keycode, bool press, bool repeat);
+    void screenClick(bool);
     static void soundAlarm();
     Launcher* appLauncher() { return launcher; }
 
@@ -129,6 +129,7 @@ public slots:
     void terminateServers();
     void rereadVolumes();
     void pokeTimeMonitors();
+    void layoutLauncher();
 
 private slots:
     void activate(const DeviceButton*,bool);

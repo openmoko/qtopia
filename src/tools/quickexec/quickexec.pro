@@ -1,10 +1,10 @@
 TEMPLATE	= app
-CONFIG		= qtopia warn_on release
+CONFIG		+= qtopia warn_on release
 DESTDIR		= $(QPEDIR)/bin
 
 HEADERS		= 
 SOURCES		= quickexec.cpp
 
-LIBS		+= -ldl -lqpe
+LIBS		+= -ldl
 
 TARGET		= quickexec

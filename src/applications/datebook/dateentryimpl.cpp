@@ -22,17 +22,20 @@
 
 #include "dateentryimpl.h"
 #include "repeatentry.h"
+#include "nulldb.h"
 
-#include "datetimeedit.h"
-#include <qpe/qpeapplication.h>
-#include <qpe/categoryselect.h>
-#include <qpe/global.h>
-#include <qpe/timeconversion.h>
-#include <qpe/timestring.h>
-#include <qpe/tzselect.h>
+#include <qtopia/datetimeedit.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/categoryselect.h>
+#include <qtopia/global.h>
+#include <qtopia/timeconversion.h>
+#include <qtopia/timestring.h>
+#include <qtopia/tzselect.h>
 
 
 #include <qcheckbox.h>
+#include <qstyle.h>
+#include <qregexp.h>
 #include <qcombobox.h>
 #include <qlayout.h>
 #include <qlineedit.h>
@@ -44,6 +47,27 @@
 #include <qlabel.h>
 
 #include <stdlib.h>
+
+bool onceAWeek(const PimEvent &e) 
+{
+    int orig = e.start().date().dayOfWeek();
+
+    for (int i = 1; i <= 7; i++) {
+	if (i != orig && e.repeatOnWeekDay(i))
+	    return FALSE;
+    }
+    return TRUE;
+}
+
+void setOnceAWeek( PimEvent &e )
+{
+    int orig = e.start().date().dayOfWeek();
+
+    for (int i = 1; i <= 7; i++) {
+	if (i != orig)
+	    e.setRepeatOnWeekDay(i, FALSE);
+    }
+}
 
 /*
  *  Constructs a DateEntry which is a child of 'parent', with the
@@ -106,9 +130,26 @@ DateEntry::DateEntry( bool startOnMonday, const PimEvent &event, bool whichClock
     if(!mEvent.notes().isEmpty())
 	editNote->setText(mEvent.notes());
     if ( mEvent.hasRepeat() ) {
-	cmdRepeat->setText( tr("Repeat...") );
+	if (mEvent.frequency() == 1 && mEvent.repeatType() == PimEvent::Daily)
+	    repeatSelect->setCurrentItem(1);
+	else if (mEvent.frequency() == 1 && mEvent.repeatType() == PimEvent::Weekly
+		&& onceAWeek(mEvent) )
+	    repeatSelect->setCurrentItem(2);
+	else if (mEvent.frequency() == 1 && mEvent.repeatType() == PimEvent::Yearly)
+	    repeatSelect->setCurrentItem(3);
+	else 
+	    repeatSelect->setCurrentItem(4);
+	if (mEvent.repeatForever())
+	    endDateSelect->setDate(QDate());
+	else
+	    endDateSelect->setDate(mEvent.repeatTill());
+    } else {
+	repeatSelect->setCurrentItem(0);
+	endDateSelect->setEnabled(FALSE);
+	endDateSelect->setDate(QDate());
     }
     setRepeatLabel();
+
 }
 
 void DateEntry::setDates( const QDateTime& s, const QDateTime& e )
@@ -121,8 +162,11 @@ void DateEntry::setDates( const QDateTime& s, const QDateTime& e )
 
 void DateEntry::init()
 {
+    // Disabled, it gets out of date too easily.  Need a better solution
+    // than breacking and rebuilding the layout.
+#if 0
     if (QApplication::desktop()->width() < 200) {
-	setMaximumWidth(QApplication::desktop()->width() 
+	setMaximumWidth(QApplication::desktop()->width()
 		- style().scrollBarExtent().width());
 	delete DateEntryBaseLayout;
 	DateEntryBaseLayout = new QGridLayout(this);
@@ -153,10 +197,11 @@ void DateEntry::init()
 	DateEntryBaseLayout->addMultiCellWidget(spinAlarm, 13,13, 1,1);
 
 	DateEntryBaseLayout->addMultiCellWidget(lblRepeat, 14,14, 0,1);
-	DateEntryBaseLayout->addMultiCellWidget(cmdRepeat, 15,15, 0,1);
+	DateEntryBaseLayout->addMultiCellWidget(repeatSelect, 15,15, 0,1);
 
 	DateEntryBaseLayout->addMultiCellWidget(editNote, 16,16, 0,1);
     }
+#endif
 
     // XXX enable these two lines to be able to specify local time events.
     //timezone->setLocalIncluded(TRUE);
@@ -168,13 +213,52 @@ void DateEntry::init()
     startButton->setClock(ampm);
     endButton->setClock(ampm);
 
-    connect( qApp, SIGNAL( clockChanged( bool ) ),
-	     this, SLOT( slotChangeClock( bool ) ) );
-    connect( qApp, SIGNAL(weekChanged(bool)),
-	     this, SLOT(slotChangeStartOfWeek(bool)) );
+    setTabOrder(comboDescription, comboLocation);
+    setTabOrder(comboLocation, (QWidget *)comboCategory->child("category combo"));
+#ifndef QTOPIA_DESKTOP
+    setTabOrder((QWidget *)comboCategory->child("category combo"),
+	    (QWidget *)comboCategory->child("category button"));
+    setTabOrder((QWidget *)comboCategory->child("category button"), 
+	    (QWidget *)startButton->child("date"));
+#else
+    setTabOrder((QWidget *)comboCategory->child("category combo"),
+	    (QWidget *)startButton->child("date"));
+#endif
+    setTabOrder((QWidget *)startButton->child("date"), 
+	    (QWidget *)startButton->child("time"));
+    setTabOrder((QWidget *)startButton->child("time"), 
+	    (QWidget *)endButton->child("date"));
+    setTabOrder((QWidget *)endButton->child("date"), 
+	    (QWidget *)endButton->child("time"));
+    setTabOrder((QWidget *)endButton->child("time"), checkAllDay);
+    setTabOrder(checkAllDay, (QWidget *)timezone->child("timezone combo"));
+    setTabOrder((QWidget *)timezone->child("timezone combo"),
+	    (QWidget *)timezone->child("timezone button"));
+    setTabOrder((QWidget *)timezone->child("timezone button"), comboSound);
+    setTabOrder(comboSound, spinAlarm);
+    setTabOrder(spinAlarm, repeatSelect);
+    setTabOrder(repeatSelect, endDateSelect);
+
+    comboDescription->setFocus();
+
+    // Now for the lines to do with eneabling for exception events.
+    if (mEvent.isException()) {
+	repeatSelect->setEnabled(FALSE);
+	repeatSelect->hide();
+	endDateSelect->setEnabled(FALSE);
+	endDateSelect->hide();
+	lblEndDate->hide();
+	lblRepeat->hide();
+    }
+
 
     connect( checkAllDay, SIGNAL(toggled(bool)),
 	     this, SLOT(updateDateEdits(bool)) );
+
+    connect( repeatSelect, SIGNAL(activated(int)),
+	    this, SLOT(setRepeatType(int)));
+    connect( endDateSelect, SIGNAL(dateSelected(const QDate &)),
+	    this, SLOT(setEndDate(const QDate &)));
 
     connect( spinAlarm, SIGNAL(valueChanged(int)),
 	     this, SLOT(turnOnAlarm()) );
@@ -226,11 +310,11 @@ void DateEntry::slotRepeat()
 
     if ( QPEApplication::execDialog(e) ) {
 	 mEvent = e->event();
-	setRepeatLabel();
     }
+    setRepeatLabel();
 }
 
-void DateEntry::slotChangeStartOfWeek( bool onMonday )
+void DateEntry::setWeekStartsMonday( bool onMonday )
 {
     startWeekOnMonday = onMonday;
 }
@@ -241,11 +325,18 @@ PimEvent DateEntry::event()
     mEvent.setLocation( comboLocation->currentText() );
     mEvent.setCategories( comboCategory->currentCategories() );
     mEvent.setAllDay( checkAllDay->isChecked() );
+
+    if (endDateSelect->date().isValid()) {
+	mEvent.setRepeatForever(FALSE);
+	mEvent.setRepeatTill(endDateSelect->date());
+    } else {
+	mEvent.setRepeatForever(TRUE);
+    }
     // don't set the time if theres no need too
 
     if (timezone->currentZone() != "None")
 	mEvent.setTimeZone(timezone->currentZone());
-    else 
+    else
 	mEvent.setTimeZone(QString::null);
 
     // we only have one type of sound at the moment... LOUD!!!
@@ -268,23 +359,21 @@ PimEvent DateEntry::event()
 void DateEntry::setRepeatLabel()
 {
 
-    switch( mEvent.repeatType() ) {
-	case PimEvent::Daily:
-	    cmdRepeat->setText( tr("Daily...") );
-	    break;
-	case PimEvent::Weekly:
-	    cmdRepeat->setText( tr("Weekly...") );
-	    break;
-	case PimEvent::MonthlyDay:
-	case PimEvent::MonthlyEndDay:
-	case PimEvent::MonthlyDate:
-	    cmdRepeat->setText( tr("Monthly...") );
-	    break;
-	case PimEvent::Yearly:
-	    cmdRepeat->setText( tr("Yearly...") );
-	    break;
-	default:
-	    cmdRepeat->setText( tr("No Repeat...") );
+    if (!mEvent.isException()) {
+	if ( mEvent.hasRepeat() ) {
+	    //cmdRepeat->setText( tr("Repeat...") );
+	    if (mEvent.frequency() == 1 && mEvent.repeatType() == PimEvent::Daily)
+		repeatSelect->setCurrentItem(1);
+	    else if (mEvent.frequency() == 1 && mEvent.repeatType() == PimEvent::Weekly
+		    && onceAWeek(mEvent))
+		repeatSelect->setCurrentItem(2);
+	    else if (mEvent.frequency() == 1 && mEvent.repeatType() == PimEvent::Yearly)
+		repeatSelect->setCurrentItem(3);
+	    else 
+		repeatSelect->setCurrentItem(4);
+	} else {
+	    repeatSelect->setCurrentItem(0);
+	}
     }
 }
 
@@ -304,7 +393,7 @@ void DateEntry::setAlarmEnabled( bool alarmPreset, int presetTime, PimEvent::Sou
     }
 }
 
-void DateEntry::slotChangeClock( bool whichClock )
+void DateEntry::set24HourClock( bool whichClock )
 {
     ampm = whichClock;
     startButton->setClock(ampm);
@@ -324,8 +413,49 @@ void DateEntry::turnOnAlarm()
 	comboSound->setCurrentItem(2);
 }
 
-void DateEntry::checkAlarmSpin(int nAType) 
+void DateEntry::checkAlarmSpin(int nAType)
 {
     if (nAType == 0 && spinAlarm->value() != 0)
 	spinAlarm->setValue(0);
+}
+
+void DateEntry::setRepeatType(int i)
+{
+    switch (i) {
+	case 0:
+	    mEvent.setRepeatType(PimEvent::NoRepeat);
+	    endDateSelect->setEnabled(FALSE);
+	    break;
+	case 1:
+	    mEvent.setRepeatType(PimEvent::Daily);
+	    mEvent.setFrequency(1);
+	    endDateSelect->setEnabled(TRUE);
+	    break;
+	case 2:
+	    mEvent.setRepeatType(PimEvent::Weekly);
+	    mEvent.setFrequency(1);
+	    setOnceAWeek(mEvent);
+	    endDateSelect->setEnabled(TRUE);
+	    break;
+	case 3:
+	    mEvent.setRepeatType(PimEvent::Yearly);
+	    mEvent.setFrequency(1);
+	    endDateSelect->setEnabled(TRUE);
+	    break;
+	case 4:
+	default:
+	    endDateSelect->setEnabled(TRUE);
+	    slotRepeat();
+	    break;
+    }
+}
+
+void DateEntry::setEndDate(const QDate &date)
+{
+    // chekc the date...
+    if (date.isValid() && date < startButton->date()) {
+	endDateSelect->blockSignals(TRUE);
+	endDateSelect->setDate(startButton->date());
+	endDateSelect->blockSignals(FALSE);
+    }
 }

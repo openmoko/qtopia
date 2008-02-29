@@ -21,17 +21,19 @@
 #include "interface.h"
 #include "man.h"
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
 #include <qlabel.h>
 #include <qmessagebox.h>
 #include <qapplication.h>
 #include <qstyle.h>
-#include <qpe/qpetoolbar.h>
+#include <qtopia/qpetoolbar.h>
 #include <qtoolbutton.h>
  
 ParaShoot::ParaShoot(QWidget* parent, const char* name, WFlags f) :
     QMainWindow(parent,name,f),
+    cannon(NULL),
+    base(NULL),
     fanfare("level_up"),
     score(0)
 {
@@ -46,7 +48,7 @@ ParaShoot::ParaShoot(QWidget* parent, const char* name, WFlags f) :
     toolbar->setHorizontalStretchable( TRUE );
 
     setCaption( tr("ParaShoot") );
-    QPixmap newicon = Resource::loadPixmap("parashoot/manicon");
+    QPixmap newicon = Resource::loadPixmap("ParaShoot");
     setIcon(newicon);
     new QToolButton(newicon, tr("New Game"), 0,
                            this, SLOT(newGame()), toolbar, "New Game");
@@ -81,6 +83,14 @@ void ParaShoot::resizeEvent(QResizeEvent *)
     bgpixmap.convertFromImage(bgimage.smoothScale(canvas.width(),
 	canvas.height()), QPixmap::Auto);
     canvas.setBackgroundPixmap(bgpixmap);
+
+    if (base) {
+	base->reposition();
+    }
+
+    if (cannon) {
+	cannon->reposition();
+    }
 }
 
 

@@ -1,0 +1,81 @@
+<html>
+<title>
+Security Settings Specification
+</title>
+
+<body>
+
+<h1>Security Settings Specification</h1>
+
+<a name=description>
+</a>
+The Security Settings application sets restrictions on access
+to the device.
+<p>
+The Security Settings application lets a user set restrictions on access
+to the device, which includes physical access and syncing from particular
+hosts.
+</p>
+
+<p>
+Status: RT
+</p>
+
+<a name=usecases>
+<h2>Use Cases</h2>
+</a>
+<ul>
+<li><b>Prevent Unauthorized Physical Access</b>
+    <p>
+    A Qtopia-powered device left unattended can be prevented from being
+    used casually by requiring the user's passcode be enabled at power-on.
+    An unattended device can still be stolen and compromised in various ways.
+<li><b>Prevent Unauthorized Network Access</b>
+    <p>
+    A malicious person may attempt to disrupt the owner of a device by repeatedly
+    attempting to connect (forcing the owner to deny the connection).
+    Qtopia provides features to prevent this "denial of service" attack.
+<li><b>Wireless Synchronization</b>
+    <p>
+    Rather than have to place his device in a cradle, the user leaves it in his
+    briefcase, and uses a wireless connection to connect to the device. The
+    connection is significantly faster than his serial cradle connection.
+</ul>
+
+<a name=features>
+<h2>Features</h2>
+</a>
+<ul>
+<li>Passcode required at power-on: Users are able to set their own passcodes.
+    The device will require the passcode at power-on to operate.
+<li>Connection confirmation: when a connection is attempted, Qtopia informs
+    the connector of the device ID. If the connector responds with a valid
+    password, then the connection proceeds, otherwise, a dialog is shown
+    to request confirmation from the user. If the user allows the connection,
+    the password is stored to allow future connections without interaction.
+    <!-- actually implemented in the server -->
+<li>Three attempts: after three connection attempts are denied by the user,
+    all connections will be refused until 10 minutes have elapse without any
+    unauthorized connections. Therefore a remote user can only attempt three
+    passwords every 10 minutes - far insufficient to crack the device by brute
+    force password search. Additionally, they cannot annoy the device user.
+    <!-- actually implemented in the server -->
+<li>Network sync restriction: Only allow the device to synchronize to hosts
+    specified. This gives the user additional security as often a single trusted
+    network will be used for synchronization.
+</ul>
+
+<a name=prerequisites>
+<h2>Prerequisites</h2>
+</a>
+
+<ul>
+<li>Network sync: requires TCP/IP network connectivity.
+<li>Additional filtering: specific devices may place additional restrictions on
+	connections, such as requiring that they come from a USB network
+	device (thereby restricting synchronization to occur only via
+	a USB cradle).
+</ul>
+
+</body>
+</html>

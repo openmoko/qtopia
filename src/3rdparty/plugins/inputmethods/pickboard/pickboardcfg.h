@@ -20,7 +20,8 @@
 #ifndef PICKBOARDCFG_H
 #define PICKBOARDCFG_H
 
-#include <qpe/qdawg.h>
+#include <qtopia/qpeglobal.h>
+#include <qtopia/qdawg.h>
 
 #include <qpushbutton.h>
 #include <qhbuttongroup.h>
@@ -199,8 +200,7 @@ class KeycodeConfig : public PickboardConfig {
     QValueList<int> keys2;
     QValueList<QPixmap> keypm1;
     QValueList<QPixmap> keypm2;
-    static const int xw = 8;
-    static const int xmarg = 8;
+    enum {xw = 8, xmarg = 8};
 
 public:
     KeycodeConfig(PickboardPicks* p) : PickboardConfig(p) { }

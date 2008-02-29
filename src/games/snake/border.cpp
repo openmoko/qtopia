@@ -21,7 +21,7 @@
 #include "border.h"
 #include "codes.h"
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 #include <qwmatrix.h>
 
 Border::Border(QCanvas* canvas, borderSide side)
@@ -33,10 +33,11 @@ Border::Border(QCanvas* canvas, borderSide side)
 void
 Border::newBorder(borderSide side)
 {
-    QRect	*piece;
+    int		px,py;
     QPixmap	wall(Resource::loadPixmap("snake/wall"));
     QPixmap	borderPix;
     QWMatrix	m;
+    px = py = 0;
 
     //
     // Setup a pixmap that uses the same wall texture as the
@@ -46,29 +47,25 @@ Border::newBorder(borderSide side)
     //
     switch (side) {
     case North:
-	piece = new QRect(QPoint(0, 0), QPoint(canvas()->width(), 8));
 	m.scale(double(canvas()->width()) / double(wall.width()), 1.0);
 	borderPix = wall.xForm(m);
 	break;
 
     case West:
-	piece = new QRect(QPoint(0, 0), QPoint(8, canvas()->height()));
 	m.scale(1.0, double(canvas()->height()) / double(wall.width()));
 	m.rotate(90.0);
 	borderPix = wall.xForm(m);
 	break;
 
     case East:
-	piece = new QRect(QPoint(canvas()->width() - 8, 0),
-	    QPoint(canvas()->width(), canvas()->height()));
+	px = canvas()->width() - 8 - (canvas()->width()-8) % 16;
 	m.scale(1.0, double(canvas()->height()) / double(wall.width()));
 	m.rotate(90.0);
 	borderPix = wall.xForm(m);
 	break;
 
     case South:
-	piece = new QRect(QPoint(0, canvas()->height() - 8),
-	    QPoint(canvas()->width(), canvas()->height()));
+	py = canvas()->height() - 8 - (canvas()->height()-8) % 16;
 	m.scale(double(canvas()->width()) / double(wall.width()), 1.0);
 	borderPix = wall.xForm(m);
 	break;
@@ -87,12 +84,10 @@ Border::newBorder(borderSide side)
     QCanvasPixmapArray* borderarray = new QCanvasPixmapArray(pixl, pl);
     setSequence(borderarray);
 
-    move(piece->topLeft().x(), piece->topLeft().y());
+    move(px,py);
     setZ( -100 );
     show();
     canvas()->update();
-
-    delete piece;
 }
 
 int Border::rtti() const

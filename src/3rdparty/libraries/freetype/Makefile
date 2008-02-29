@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,17 +106,22 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
 
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
-CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
+CXXFLAGS=	$(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
 CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
-INCPATH =	-I$(QTDIR)/src/3rdparty/freetype/src -I$(QTDIR)/src/3rdparty/freetype/include -I$(QTDIR)/src/3rdparty/freetype/builds/unix
-LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
-LIBS	=	$(SUBLIBS) $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
+INCPATH =	-I$(MOC_DIR) -I$(QTDIR)/src/3rdparty/freetype/src -I$(QTDIR)/src/3rdparty/freetype/include -I$(QTDIR)/src/3rdparty/freetype/builds/unix
+LFLAGS	=	$(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
+LIBS	=	$(SUBLIBS)  $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
 UIC	=	$(SYSCONF_UIC)
 
@@ -150,25 +156,25 @@ SOURCES =	$(QTDIR)/src/3rdparty/freetype/builds/unix/ftsystem.c \
 		$(QTDIR)/src/3rdparty/freetype/src/truetype/truetype.c \
 		$(QTDIR)/src/3rdparty/freetype/src/type1/type1.c \
 		$(QTDIR)/src/3rdparty/freetype/src/winfonts/winfnt.c
-OBJECTS =	$(QTDIR)/src/3rdparty/freetype/builds/unix/ftsystem.o \
-		$(QTDIR)/src/3rdparty/freetype/src/base/ftdebug.o \
-		$(QTDIR)/src/3rdparty/freetype/src/base/ftinit.o \
-		$(QTDIR)/src/3rdparty/freetype/src/base/ftbase.o \
-		$(QTDIR)/src/3rdparty/freetype/src/base/ftglyph.o \
-		$(QTDIR)/src/3rdparty/freetype/src/base/ftmm.o \
-		$(QTDIR)/src/3rdparty/freetype/src/base/ftbbox.o \
-		$(QTDIR)/src/3rdparty/freetype/src/autohint/autohint.o \
-		$(QTDIR)/src/3rdparty/freetype/src/cache/ftcache.o \
-		$(QTDIR)/src/3rdparty/freetype/src/cff/cff.o \
-		$(QTDIR)/src/3rdparty/freetype/src/cid/type1cid.o \
-		$(QTDIR)/src/3rdparty/freetype/src/psaux/psaux.o \
-		$(QTDIR)/src/3rdparty/freetype/src/psnames/psmodule.o \
-		$(QTDIR)/src/3rdparty/freetype/src/raster/raster.o \
-		$(QTDIR)/src/3rdparty/freetype/src/sfnt/sfnt.o \
-		$(QTDIR)/src/3rdparty/freetype/src/smooth/smooth.o \
-		$(QTDIR)/src/3rdparty/freetype/src/truetype/truetype.o \
-		$(QTDIR)/src/3rdparty/freetype/src/type1/type1.o \
-		$(QTDIR)/src/3rdparty/freetype/src/winfonts/winfnt.o
+OBJECTS =	$(OBJECTS_DIR)/ftsystem.o \
+		$(OBJECTS_DIR)/ftdebug.o \
+		$(OBJECTS_DIR)/ftinit.o \
+		$(OBJECTS_DIR)/ftbase.o \
+		$(OBJECTS_DIR)/ftglyph.o \
+		$(OBJECTS_DIR)/ftmm.o \
+		$(OBJECTS_DIR)/ftbbox.o \
+		$(OBJECTS_DIR)/autohint.o \
+		$(OBJECTS_DIR)/ftcache.o \
+		$(OBJECTS_DIR)/cff.o \
+		$(OBJECTS_DIR)/type1cid.o \
+		$(OBJECTS_DIR)/psaux.o \
+		$(OBJECTS_DIR)/psmodule.o \
+		$(OBJECTS_DIR)/raster.o \
+		$(OBJECTS_DIR)/sfnt.o \
+		$(OBJECTS_DIR)/smooth.o \
+		$(OBJECTS_DIR)/truetype.o \
+		$(OBJECTS_DIR)/type1.o \
+		$(OBJECTS_DIR)/winfnt.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
@@ -239,14 +245,17 @@ REQUIRES=
 
 ####### Compile
 
-$(QTDIR)/src/3rdparty/freetype/builds/unix/ftsystem.o: $(QTDIR)/src/3rdparty/freetype/builds/unix/ftsystem.c \
+$(OBJECTS_DIR)/ftsystem.o: $(QTDIR)/src/3rdparty/freetype/builds/unix/ftsystem.c \
 		$(QTDIR)/src/3rdparty/freetype/builds/unix/ftconfig.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/ftsystem.o $(QTDIR)/src/3rdparty/freetype/builds/unix/ftsystem.c
 
-$(QTDIR)/src/3rdparty/freetype/src/base/ftdebug.o: $(QTDIR)/src/3rdparty/freetype/src/base/ftdebug.c
+$(OBJECTS_DIR)/ftdebug.o: $(QTDIR)/src/3rdparty/freetype/src/base/ftdebug.c
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/ftdebug.o $(QTDIR)/src/3rdparty/freetype/src/base/ftdebug.c
 
-$(QTDIR)/src/3rdparty/freetype/src/base/ftinit.o: $(QTDIR)/src/3rdparty/freetype/src/base/ftinit.c
+$(OBJECTS_DIR)/ftinit.o: $(QTDIR)/src/3rdparty/freetype/src/base/ftinit.c
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/ftinit.o $(QTDIR)/src/3rdparty/freetype/src/base/ftinit.c
 
-$(QTDIR)/src/3rdparty/freetype/src/base/ftbase.o: $(QTDIR)/src/3rdparty/freetype/src/base/ftbase.c \
+$(OBJECTS_DIR)/ftbase.o: $(QTDIR)/src/3rdparty/freetype/src/base/ftbase.c \
 		$(QTDIR)/src/3rdparty/freetype/src/base/ftcalc.c \
 		$(QTDIR)/src/3rdparty/freetype/src/base/ftobjs.c \
 		$(QTDIR)/src/3rdparty/freetype/src/base/ftstream.c \
@@ -254,14 +263,18 @@ $(QTDIR)/src/3rdparty/freetype/src/base/ftbase.o: $(QTDIR)/src/3rdparty/freetype
 		$(QTDIR)/src/3rdparty/freetype/src/base/ftoutln.c \
 		$(QTDIR)/src/3rdparty/freetype/src/base/ftextend.c \
 		$(QTDIR)/src/3rdparty/freetype/src/base/ftnames.c
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/ftbase.o $(QTDIR)/src/3rdparty/freetype/src/base/ftbase.c
 
-$(QTDIR)/src/3rdparty/freetype/src/base/ftglyph.o: $(QTDIR)/src/3rdparty/freetype/src/base/ftglyph.c
+$(OBJECTS_DIR)/ftglyph.o: $(QTDIR)/src/3rdparty/freetype/src/base/ftglyph.c
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/ftglyph.o $(QTDIR)/src/3rdparty/freetype/src/base/ftglyph.c
 
-$(QTDIR)/src/3rdparty/freetype/src/base/ftmm.o: $(QTDIR)/src/3rdparty/freetype/src/base/ftmm.c
+$(OBJECTS_DIR)/ftmm.o: $(QTDIR)/src/3rdparty/freetype/src/base/ftmm.c
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/ftmm.o $(QTDIR)/src/3rdparty/freetype/src/base/ftmm.c
 
-$(QTDIR)/src/3rdparty/freetype/src/base/ftbbox.o: $(QTDIR)/src/3rdparty/freetype/src/base/ftbbox.c
+$(OBJECTS_DIR)/ftbbox.o: $(QTDIR)/src/3rdparty/freetype/src/base/ftbbox.c
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/ftbbox.o $(QTDIR)/src/3rdparty/freetype/src/base/ftbbox.c
 
-$(QTDIR)/src/3rdparty/freetype/src/autohint/autohint.o: $(QTDIR)/src/3rdparty/freetype/src/autohint/autohint.c \
+$(OBJECTS_DIR)/autohint.o: $(QTDIR)/src/3rdparty/freetype/src/autohint/autohint.c \
 		$(QTDIR)/src/3rdparty/freetype/src/autohint/ahangles.c \
 		$(QTDIR)/src/3rdparty/freetype/src/autohint/ahangles.h \
 		$(QTDIR)/src/3rdparty/freetype/src/autohint/ahtypes.h \
@@ -273,16 +286,18 @@ $(QTDIR)/src/3rdparty/freetype/src/autohint/autohint.o: $(QTDIR)/src/3rdparty/fr
 		$(QTDIR)/src/3rdparty/freetype/src/autohint/ahhint.c \
 		$(QTDIR)/src/3rdparty/freetype/src/autohint/ahhint.h \
 		$(QTDIR)/src/3rdparty/freetype/src/autohint/ahmodule.c
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/autohint.o $(QTDIR)/src/3rdparty/freetype/src/autohint/autohint.c
 
-$(QTDIR)/src/3rdparty/freetype/src/cache/ftcache.o: $(QTDIR)/src/3rdparty/freetype/src/cache/ftcache.c \
+$(OBJECTS_DIR)/ftcache.o: $(QTDIR)/src/3rdparty/freetype/src/cache/ftcache.c \
 		$(QTDIR)/src/3rdparty/freetype/src/cache/ftlru.c \
 		$(QTDIR)/src/3rdparty/freetype/src/cache/ftcmanag.c \
 		$(QTDIR)/src/3rdparty/freetype/src/cache/ftcglyph.c \
 		$(QTDIR)/src/3rdparty/freetype/src/cache/ftcchunk.c \
 		$(QTDIR)/src/3rdparty/freetype/src/cache/ftcimage.c \
 		$(QTDIR)/src/3rdparty/freetype/src/cache/ftcsbits.c
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/ftcache.o $(QTDIR)/src/3rdparty/freetype/src/cache/ftcache.c
 
-$(QTDIR)/src/3rdparty/freetype/src/cff/cff.o: $(QTDIR)/src/3rdparty/freetype/src/cff/cff.c \
+$(OBJECTS_DIR)/cff.o: $(QTDIR)/src/3rdparty/freetype/src/cff/cff.c \
 		$(QTDIR)/src/3rdparty/freetype/src/cff/t2driver.c \
 		$(QTDIR)/src/3rdparty/freetype/src/cff/t2driver.h \
 		$(QTDIR)/src/3rdparty/freetype/src/cff/t2gload.h \
@@ -294,8 +309,9 @@ $(QTDIR)/src/3rdparty/freetype/src/cff/cff.o: $(QTDIR)/src/3rdparty/freetype/src
 		$(QTDIR)/src/3rdparty/freetype/src/cff/t2load.h \
 		$(QTDIR)/src/3rdparty/freetype/src/cff/t2objs.c \
 		$(QTDIR)/src/3rdparty/freetype/src/cff/t2gload.c
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/cff.o $(QTDIR)/src/3rdparty/freetype/src/cff/cff.c
 
-$(QTDIR)/src/3rdparty/freetype/src/cid/type1cid.o: $(QTDIR)/src/3rdparty/freetype/src/cid/type1cid.c \
+$(OBJECTS_DIR)/type1cid.o: $(QTDIR)/src/3rdparty/freetype/src/cid/type1cid.c \
 		$(QTDIR)/src/3rdparty/freetype/src/cid/cidparse.c \
 		$(QTDIR)/src/3rdparty/freetype/src/cid/cidparse.h \
 		$(QTDIR)/src/3rdparty/freetype/src/cid/cidload.c \
@@ -307,25 +323,29 @@ $(QTDIR)/src/3rdparty/freetype/src/cid/type1cid.o: $(QTDIR)/src/3rdparty/freetyp
 		$(QTDIR)/src/3rdparty/freetype/src/cid/cidriver.c \
 		$(QTDIR)/src/3rdparty/freetype/src/cid/cidriver.h \
 		$(QTDIR)/src/3rdparty/freetype/src/cid/cidgload.c
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/type1cid.o $(QTDIR)/src/3rdparty/freetype/src/cid/type1cid.c
 
-$(QTDIR)/src/3rdparty/freetype/src/psaux/psaux.o: $(QTDIR)/src/3rdparty/freetype/src/psaux/psaux.c \
+$(OBJECTS_DIR)/psaux.o: $(QTDIR)/src/3rdparty/freetype/src/psaux/psaux.c \
 		$(QTDIR)/src/3rdparty/freetype/src/psaux/psobjs.c \
 		$(QTDIR)/src/3rdparty/freetype/src/psaux/psobjs.h \
 		$(QTDIR)/src/3rdparty/freetype/src/psaux/psauxmod.c \
 		$(QTDIR)/src/3rdparty/freetype/src/psaux/t1decode.c \
 		$(QTDIR)/src/3rdparty/freetype/src/psaux/t1decode.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/psaux.o $(QTDIR)/src/3rdparty/freetype/src/psaux/psaux.c
 
-$(QTDIR)/src/3rdparty/freetype/src/psnames/psmodule.o: $(QTDIR)/src/3rdparty/freetype/src/psnames/psmodule.c \
+$(OBJECTS_DIR)/psmodule.o: $(QTDIR)/src/3rdparty/freetype/src/psnames/psmodule.c \
 		$(QTDIR)/src/3rdparty/freetype/src/psnames/psmodule.h \
 		$(QTDIR)/src/3rdparty/freetype/src/psnames/pstables.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/psmodule.o $(QTDIR)/src/3rdparty/freetype/src/psnames/psmodule.c
 
-$(QTDIR)/src/3rdparty/freetype/src/raster/raster.o: $(QTDIR)/src/3rdparty/freetype/src/raster/raster.c \
+$(OBJECTS_DIR)/raster.o: $(QTDIR)/src/3rdparty/freetype/src/raster/raster.c \
 		$(QTDIR)/src/3rdparty/freetype/src/raster/ftraster.c \
 		$(QTDIR)/src/3rdparty/freetype/src/raster/ftraster.h \
 		$(QTDIR)/src/3rdparty/freetype/src/raster/ftrend1.c \
 		$(QTDIR)/src/3rdparty/freetype/src/raster/ftrend1.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/raster.o $(QTDIR)/src/3rdparty/freetype/src/raster/raster.c
 
-$(QTDIR)/src/3rdparty/freetype/src/sfnt/sfnt.o: $(QTDIR)/src/3rdparty/freetype/src/sfnt/sfnt.c \
+$(OBJECTS_DIR)/sfnt.o: $(QTDIR)/src/3rdparty/freetype/src/sfnt/sfnt.c \
 		$(QTDIR)/src/3rdparty/freetype/src/sfnt/ttload.c \
 		$(QTDIR)/src/3rdparty/freetype/src/sfnt/ttload.h \
 		$(QTDIR)/src/3rdparty/freetype/src/sfnt/ttcmap.h \
@@ -338,14 +358,16 @@ $(QTDIR)/src/3rdparty/freetype/src/sfnt/sfnt.o: $(QTDIR)/src/3rdparty/freetype/s
 		$(QTDIR)/src/3rdparty/freetype/src/sfnt/ttpost.h \
 		$(QTDIR)/src/3rdparty/freetype/src/sfnt/sfdriver.c \
 		$(QTDIR)/src/3rdparty/freetype/src/sfnt/sfdriver.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/sfnt.o $(QTDIR)/src/3rdparty/freetype/src/sfnt/sfnt.c
 
-$(QTDIR)/src/3rdparty/freetype/src/smooth/smooth.o: $(QTDIR)/src/3rdparty/freetype/src/smooth/smooth.c \
+$(OBJECTS_DIR)/smooth.o: $(QTDIR)/src/3rdparty/freetype/src/smooth/smooth.c \
 		$(QTDIR)/src/3rdparty/freetype/src/smooth/ftgrays.c \
 		$(QTDIR)/src/3rdparty/freetype/src/smooth/ftgrays.h \
 		$(QTDIR)/src/3rdparty/freetype/src/smooth/ftsmooth.c \
 		$(QTDIR)/src/3rdparty/freetype/src/smooth/ftsmooth.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/smooth.o $(QTDIR)/src/3rdparty/freetype/src/smooth/smooth.c
 
-$(QTDIR)/src/3rdparty/freetype/src/truetype/truetype.o: $(QTDIR)/src/3rdparty/freetype/src/truetype/truetype.c \
+$(OBJECTS_DIR)/truetype.o: $(QTDIR)/src/3rdparty/freetype/src/truetype/truetype.c \
 		$(QTDIR)/src/3rdparty/freetype/src/truetype/ttdriver.c \
 		$(QTDIR)/src/3rdparty/freetype/src/truetype/ttdriver.h \
 		$(QTDIR)/src/3rdparty/freetype/src/truetype/ttgload.h \
@@ -356,8 +378,9 @@ $(QTDIR)/src/3rdparty/freetype/src/truetype/truetype.o: $(QTDIR)/src/3rdparty/fr
 		$(QTDIR)/src/3rdparty/freetype/src/truetype/ttgload.c \
 		$(QTDIR)/src/3rdparty/freetype/src/truetype/ttobjs.c \
 		$(QTDIR)/src/3rdparty/freetype/src/truetype/ttinterp.c
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/truetype.o $(QTDIR)/src/3rdparty/freetype/src/truetype/truetype.c
 
-$(QTDIR)/src/3rdparty/freetype/src/type1/type1.o: $(QTDIR)/src/3rdparty/freetype/src/type1/type1.c \
+$(OBJECTS_DIR)/type1.o: $(QTDIR)/src/3rdparty/freetype/src/type1/type1.c \
 		$(QTDIR)/src/3rdparty/freetype/src/type1/t1parse.c \
 		$(QTDIR)/src/3rdparty/freetype/src/type1/t1parse.h \
 		$(QTDIR)/src/3rdparty/freetype/src/type1/t1load.c \
@@ -371,17 +394,20 @@ $(QTDIR)/src/3rdparty/freetype/src/type1/type1.o: $(QTDIR)/src/3rdparty/freetype
 		$(QTDIR)/src/3rdparty/freetype/src/type1/t1driver.h \
 		$(QTDIR)/src/3rdparty/freetype/src/type1/t1gload.c \
 		$(QTDIR)/src/3rdparty/freetype/src/type1/t1afm.c
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/type1.o $(QTDIR)/src/3rdparty/freetype/src/type1/type1.c
 
-$(QTDIR)/src/3rdparty/freetype/src/winfonts/winfnt.o: $(QTDIR)/src/3rdparty/freetype/src/winfonts/winfnt.c \
+$(OBJECTS_DIR)/winfnt.o: $(QTDIR)/src/3rdparty/freetype/src/winfonts/winfnt.c \
 		$(QTDIR)/src/3rdparty/freetype/src/winfonts/winfnt.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/winfnt.o $(QTDIR)/src/3rdparty/freetype/src/winfonts/winfnt.c
 
 
 
 lupdate:
-	lupdate freetype.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <freetype.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease freetype.pro
+	$(QPEDIR)/bin/qtopia-linstall freetype.pro
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

@@ -22,7 +22,7 @@
 
 #include "dateentry.h"
 
-#include <qpe/pim/event.h>
+#include <qtopia/pim/event.h>
 
 #include <qdatetime.h>
 
@@ -47,12 +47,16 @@ public slots:
     void endDateTimeChanged( const QDateTime & );
     void startDateTimeChanged( const QDateTime & );
     void slotRepeat();
-    void slotChangeClock( bool );
-    void slotChangeStartOfWeek( bool );
+    void set24HourClock( bool );
+    void setWeekStartsMonday( bool );
     void updateDateEdits(bool);
 
     void turnOnAlarm();
     void checkAlarmSpin(int);
+
+private slots:
+    void setRepeatType(int);
+    void setEndDate(const QDate &);
 
 private:
     void init();

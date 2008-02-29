@@ -3,16 +3,15 @@
 **
 ** This file is part of the Qtopia Environment.
 **
-** Licensees holding valid Qtopia Developer license may use this
-** file in accordance with the Qtopia Developer License Agreement
-** provided with the Software.
+** This file may be distributed and/or modified under the terms of the
+** GNUGeneral Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING
-** THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-** PURPOSE.
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
-** email sales@trolltech.com for information about Qtopia License
-** Agreements.
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
@@ -22,54 +21,114 @@
 #ifndef PIM_RECORD_H
 #define PIM_RECORD_H
 
-#include <qtopia/qpeglobal.h>
+#include <qtopia/pim/qtopiapim.h>
 #include <qcstring.h>
 #include <qmap.h>
+#include <qvaluelist.h>
 #include <qtopia/quuid.h>
 
 
-
+#if defined(Q_TEMPLATEDLL)
+// MOC_SKIP_BEGIN
+Q_TEMPLATE_EXTERN template class Q_EXPORT QMap<QString, QString>;
+Q_TEMPLATE_EXTERN template class Q_EXPORT QMap<int, QString>;
+Q_TEMPLATE_EXTERN template class Q_EXPORT QArray<int>;
+// MOC_SKIP_END
+#endif
 
 class PimRecordPrivate;
 
-class QTOPIA_EXPORT PimRecord
+
+struct QtopiaPimMapEntry {
+    const char *identifier; // name
+    const char *trName;
+    int id;
+    int uniqueness;
+};
+
+
+class QTOPIAPIM_EXPORT PimRecord
 {
 public:
+    /*!
+      \internal
+    */
+    enum PrivateFields {
+	UID_ID = 0,
+	PrivateFieldsEnd = 10
+    };
+    /*!
+      \internal
+    */
+    enum CommonFields {
+	Categories = PrivateFieldsEnd,
+	CommonFieldsEnd = 20
+    };
+    // The enum maps should internally UID and Category as keys, but the internal "private" enums should
+    // be set using the above values as the keys. The #define below allows the enum declerations in
+    // subclass to know which ID number is starting for their use
+
+
     PimRecord();
     PimRecord( const PimRecord &c );
     virtual ~PimRecord();
-    
+
     virtual PimRecord &operator=( const PimRecord &c );
 
     bool operator==( const PimRecord &r ) const;
     bool operator!= ( const PimRecord &r ) const;
 
-    void setCategories( const QArray<int> &categories ) 
-    { 
-	mCategories = categories; 
+    void setCategories( const QArray<int> &categories )
+    {
+	mCategories = categories;
     }
-    void setCategories( int id ) 
+    void setCategories( int id )
     {
 	mCategories.resize(1);
 	mCategories[0] = id;
     }
 
-    QArray<int> categories() const { return mCategories; } 
+    /*!
+      \internal
+    */
+    void reassignCategoryId( int oldId, int newId )
+    {
+	int index = mCategories.find( oldId );
+	if ( index >= 0 )
+	    mCategories[index] = newId;
+    }
+    
+    QArray<int> categories() const { return mCategories; }
 
     virtual QString customField(const QString &) const;
     virtual void setCustomField(const QString &, const QString &);
     virtual void removeCustomField(const QString &);
 
     QUuid uid() const { return p_uid(); }
-    //void setUid( QUuid u ) { p_setUid( u ); }
+#ifdef QTOPIA_DESKTOP
+    void setUid( QUuid u ) { p_setUid( u ); }
+#endif
+
+    virtual void setField(int,const QString &);
+    virtual QString field(int) const;
+
+    virtual void setFields(const QMap<int,QString> &);
+    virtual QMap<int,QString> fields() const;
 
 #ifndef QT_NO_DATASTREAM
-    friend QTOPIA_EXPORT QDataStream &operator>>( QDataStream &, PimRecord & );
-    friend QTOPIA_EXPORT QDataStream &operator<<( QDataStream &, const PimRecord & );
+    friend QTOPIAPIM_EXPORT QDataStream &operator>>( QDataStream &, PimRecord & );
+    friend QTOPIAPIM_EXPORT QDataStream &operator<<( QDataStream &, const PimRecord & );
 #endif
 
 protected:
+    /*!
+      \internal
+    */
+    //virtual int endFieldMarker() const = 0;
 
+    static void initMaps(const QtopiaPimMapEntry *, QMap<int,int> &, QMap<QCString,int> &,
+			QMap<int,QCString> &, QMap<int,QString> &);
+			
     // While it can store a full UID, we won't actually in the current
     // iteration.
     QUuid p_uid() const { return mUid; }
@@ -81,16 +140,15 @@ protected:
     QMap<QString, QString> customMap;
 
 private:
-    static QUuid generateUuid();
     PimRecordPrivate *d;
 };
 
 
 #ifndef QT_NO_DATASTREAM
-QTOPIA_EXPORT QDataStream &operator<<(QDataStream &s, const QUuid& df);
-QTOPIA_EXPORT QDataStream &operator>>(QDataStream &s, QUuid&df);
-QTOPIA_EXPORT QDataStream &operator<<( QDataStream &, const PimRecord & );
-QTOPIA_EXPORT QDataStream &operator>>( QDataStream &, PimRecord & );
+QTOPIAPIM_EXPORT QDataStream &operator<<(QDataStream &s, const QUuid& df);
+QTOPIAPIM_EXPORT QDataStream &operator>>(QDataStream &s, QUuid&df);
+QTOPIAPIM_EXPORT QDataStream &operator<<( QDataStream &, const PimRecord & );
+QTOPIAPIM_EXPORT QDataStream &operator>>( QDataStream &, PimRecord & );
 #endif
 
 #endif

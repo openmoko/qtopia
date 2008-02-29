@@ -21,7 +21,7 @@
 #ifndef OBEXINTERFACE_H
 #define OBEXINTERFACE_H
 
-#include <qpe/qcom.h>
+#include <qtopia/qcom.h>
 
 #ifndef QT_NO_COMPONENT
 // ### regenerate!!!!!!
@@ -33,7 +33,7 @@
 
 class QObject;
 
-struct ObexInterface : public QUnknownInterface
+struct QTOPIA_EXPORT ObexInterface : public QUnknownInterface
 {
 };
 

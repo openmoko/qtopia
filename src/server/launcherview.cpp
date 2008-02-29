@@ -20,15 +20,15 @@
 
 #include "launcherview.h"
 
-#include <qpe/qpeapplication.h>
-#include <qpe/applnk.h>
-#include <qpe/qpedebug.h>
-#include <qpe/categories.h>
-#include <qpe/categoryselect.h>
-#include <qpe/menubutton.h>
-#include <qpe/mimetype.h>
-#include <qpe/resource.h>
-#include <qpe/qpetoolbar.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/applnk.h>
+#include <qtopia/qpedebug.h>
+#include <qtopia/categories.h>
+#include <qtopia/categoryselect.h>
+#include <qtopia/menubutton.h>
+#include <qtopia/mimetype.h>
+#include <qtopia/resource.h>
+#include <qtopia/qpetoolbar.h>
 //#include <qtopia/private/palmtoprecord.h>
 
 #include <qtimer.h>
@@ -285,6 +285,9 @@ protected:
 	    setGridY( fontMetrics().height()+2 );
 	}
     }
+
+    void focusInEvent( QFocusEvent * ) {}
+    void focusOutEvent( QFocusEvent * ) {}
 
 private:
     QList<AppLnk> hidden;
@@ -559,6 +562,9 @@ void LauncherView::setToolsEnabled(bool y)
 
 	    // Type filter
 	    typemb = new QComboBox(tools);
+	    QSizePolicy p = typemb->sizePolicy();
+	    p.setHorData(QSizePolicy::Expanding);
+	    typemb->setSizePolicy(p);
 
 	    // Category filter
 	    catmb = new CategorySelect(tools);
@@ -598,9 +604,9 @@ void LauncherView::updateTools()
 	} else {
 	    t[0] = t[0].upper();
 	}
-	types += tr("%1 files").arg(t);
+	types += t;
     }
-    types << tr("All types of file");
+    types << tr("All types");
     prev = typemb->currentText();
     typemb->clear();
     typemb->insertStringList(types);
@@ -712,24 +718,32 @@ void LauncherView::setBackgroundType( BackgroundType t, const QString &val )
 
 	case Image:
 	    bgName = val;
+	    QPixmap bg;
 	    if ( bgCache->contains( bgName ) ) {
 		(*bgCache)[bgName]->ref++;
-		icons->setBackgroundPixmap( (*bgCache)[bgName]->pm );
+		bg = (*bgCache)[bgName]->pm;
 	    } else {
-		qDebug( "Loading image: %s", val.latin1() );
-		QPixmap bg( Resource::loadPixmap( "wallpaper/" + val ) );
-		if ( bg.isNull() ) {
-		    QImageIO imgio;
-		    imgio.setFileName( bgName );
+		bool tile = FALSE;
+		if ( bgName[0]!='/' || !QFile::exists(bgName) ) {
+		    bgName = Resource::findPixmap( "wallpaper/" + bgName );
+		    tile = TRUE;
+		}
+		QImageIO imgio;
+		imgio.setFileName( bgName );
+		if ( !tile ) {
 		    QSize ds = qApp->desktop()->size();
 		    QString param( "Scale( %1, %2, ScaleMin )" ); // No tr
 		    imgio.setParameters( param.arg(ds.width()).arg(ds.height()).latin1() );
-		    imgio.read();
-		    bg = imgio.image();
 		}
+		imgio.read();
+		QImage img = imgio.image();
+		if ( img.depth() == 1 )
+		    img = img.convertDepth(8);
+		img.setAlphaBuffer(FALSE);
+		bg.convertFromImage(img);
 		bgCache->insert( bgName, new BgPixmap(bg) );
-		icons->setBackgroundPixmap( bg );
 	    }
+	    icons->setBackgroundPixmap( bg );
 	    break;
     }
 

@@ -17,7 +17,7 @@
     </property>
     <property stdset="1">
         <name>caption</name>
-        <string>Form1</string>
+        <string>Pen Input</string>
     </property>
     <vbox>
         <property stdset="1">

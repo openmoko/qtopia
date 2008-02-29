@@ -8,6 +8,6 @@ INTERFACES	= taskbarsettingsbase.ui
 
 INCLUDEPATH	+= $(QPEDIR)/include
 DEPENDPATH	+= $(QPEDIR)/include
-LIBS            += -lqpe
 
 TARGET		= taskbarsettings
+TRANSLATIONS = taskbarsettings-en_GB.ts taskbarsettings-de.ts taskbarsettings-ja.ts taskbarsettings-no.ts

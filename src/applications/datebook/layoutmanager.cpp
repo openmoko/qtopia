@@ -171,7 +171,7 @@ int LayoutManager::timeToHeight( const QTime &time ) const
     return y;
 }
 
-QTime LayoutManager::heightToTime( int h ) const
+QTime LayoutManager::heightToTime( int ) const
 {
     // broken
     return QTime(0,0,0);
@@ -197,13 +197,13 @@ LayoutItem *LayoutManager::intersects(LayoutItem *item, QRect geom) const
 void LayoutManager::initializeGeometry(LayoutItem *item)
 {
     int y, yend;
-    if (referenceDate > item->occurance().startInTZ().date())
+    if (referenceDate > item->occurrence().startInTZ().date())
 	y = 0;
     else 
 	y = timeToHeight(item->event().startInTZ().time());
 
     if (referenceDate < 
-	    item->occurance().startInTZ().date().addDays( 
+	    item->occurrence().startInTZ().date().addDays( 
 		item->event().startInTZ().date().daysTo(item->event().endInTZ().date())
 		)
 	    )

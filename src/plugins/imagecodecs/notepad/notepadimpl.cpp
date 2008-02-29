@@ -50,11 +50,11 @@ static void read_npad_image(QImageIO* iio)
 	    d->getch();
     }
     if ( flags & 1 ) {
-	int bodylen = read_int(d);
+	read_int(d);		/* int bodylen = */
 	int width = read_int(d);
 	int height = read_int(d);
-	int l1 = read_int(d);
-	int l2 = read_int(d);
+	read_int(d);		/* int l1 = */
+	read_int(d);		/* int l2 = */
 	int datalen = read_int(d);
 	width = (width+15)/16*16;
 	if ( width > 0 && height > 0 ) {
@@ -76,9 +76,11 @@ static void read_npad_image(QImageIO* iio)
     }
 }
 
+/*
 static void write_npad_image(QImageIO* iio)
 {
 }
+*/
 
 NotePadImpl::NotePadImpl()
 {
@@ -96,7 +98,7 @@ QStringList NotePadImpl::keys() const
 bool NotePadImpl::installIOHandler( const QString &format )
 {
     if ( format == "NPD" ) {
-	QImageIO::defineIOHandler("NPD", "^npad", 0, read_npad_image, write_npad_image);
+	QImageIO::defineIOHandler("NPD", "^npad", 0, read_npad_image, 0);
 	return TRUE;
     }
     return FALSE;

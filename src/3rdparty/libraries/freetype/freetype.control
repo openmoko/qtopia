@@ -3,6 +3,6 @@ Priority: optional
 Section: qpe/system
 Maintainer: Martin Jones <mjones@trolltech.com>
 Architecture: arm
-Version: $QPE_VERSION-4
+Version: $QPE_VERSION-9
 Description: Freetype library for Qtopia
  Freetype library (www.freetype.org) for Qtopia freetype font factory plugin.

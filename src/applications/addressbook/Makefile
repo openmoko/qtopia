@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,10 +118,10 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
-LIBS	=	$(SUBLIBS) -lqpe -lqpepim $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
+LIBS	=	$(SUBLIBS) -lqpepim -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
 UIC	=	$(SYSCONF_UIC)
 
@@ -134,35 +140,36 @@ HEADERS =	addressbook.h \
 		abeditor.h \
 		ablabel.h \
 		abtable.h \
-		addresssettings.h
-SOURCES =	main.cpp \
-		addressbook.cpp \
+		emaildlgimpl.h
+SOURCES =	addressbook.cpp \
 		abeditor.cpp \
 		ablabel.cpp \
 		abtable.cpp \
-		addresssettings.cpp
-OBJECTS =	main.o \
-		addressbook.o \
-		abeditor.o \
-		ablabel.o \
-		abtable.o \
-		addresssettings.o \
-		addresssettingsbase.o
-INTERFACES =    addresssettingsbase.ui
-UICDECLS =      addresssettingsbase.h
-UICIMPLS =      addresssettingsbase.cpp
-SRCMOC	=	moc_addressbook.cpp \
-		moc_abeditor.cpp \
-		moc_ablabel.cpp \
-		moc_abtable.cpp \
-		moc_addresssettings.cpp \
-		moc_addresssettingsbase.cpp
-OBJMOC	=	moc_addressbook.o \
-		moc_abeditor.o \
-		moc_ablabel.o \
-		moc_abtable.o \
-		moc_addresssettings.o \
-		moc_addresssettingsbase.o
+		emaildlgimpl.cpp \
+		main.cpp
+OBJECTS =	$(OBJECTS_DIR)/addressbook.o \
+		$(OBJECTS_DIR)/abeditor.o \
+		$(OBJECTS_DIR)/ablabel.o \
+		$(OBJECTS_DIR)/abtable.o \
+		$(OBJECTS_DIR)/emaildlgimpl.o \
+		$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/emaildlg.o
+INTERFACES =    emaildlg.ui
+UICDECLS =      emaildlg.h
+UICIMPLS =      emaildlg.cpp
+SRCMOC	=	$(MOC_DIR)/moc_addressbook.cpp \
+		$(MOC_DIR)/moc_abeditor.cpp \
+		$(MOC_DIR)/moc_ablabel.cpp \
+		$(MOC_DIR)/moc_abtable.cpp \
+		$(MOC_DIR)/moc_emaildlgimpl.cpp \
+		$(MOC_DIR)/moc_emaildlg.cpp \
+		$(MOC_DIR)/abeditor.moc
+OBJMOC	=	$(OBJECTS_DIR)/moc_addressbook.o \
+		$(OBJECTS_DIR)/moc_abeditor.o \
+		$(OBJECTS_DIR)/moc_ablabel.o \
+		$(OBJECTS_DIR)/moc_abtable.o \
+		$(OBJECTS_DIR)/moc_emaildlgimpl.o \
+		$(OBJECTS_DIR)/moc_emaildlg.o
 
 
 ####### Implicit rules
@@ -228,162 +235,103 @@ REQUIRES=
 
 ####### Compile
 
-main.o: main.cpp \
-		addressbook.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h
-
-addressbook.o: addressbook.cpp \
+$(OBJECTS_DIR)/addressbook.o: addressbook.cpp \
 		abeditor.h \
-		$(QPEDIR)/include/qpe/pim/contact.h \
-		$(QPEDIR)/include/qtopia/pim/pimrecord.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qtopia/private/recordfields.h \
 		ablabel.h \
 		abtable.h \
-		$(QPEDIR)/include/qpe/categories.h \
-		$(QPEDIR)/include/qtopia/private/palmtopuidgen.h \
-		$(QPEDIR)/include/qpe/pim/private/contactxmlio_p.h \
-		$(QPEDIR)/include/qtopia/pim/contact.h \
-		addresssettings.h \
-		addresssettingsbase.h \
-		addressbook.h \
-		$(QPEDIR)/include/qtopia/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/config.h \
-		$(QPEDIR)/include/qtopia/global.h \
-		$(QPEDIR)/include/qtopia/resource.h \
-		$(QPEDIR)/include/qtopia/ir.h \
-		$(QPEDIR)/include/qtopia/qpemessagebox.h \
-		$(QPEDIR)/include/qtopia/categoryselect.h \
-		$(QPEDIR)/include/qtopia/categories.h \
-		$(QPEDIR)/include/qtopia/applnk.h \
-		$(QPEDIR)/include/qtopia/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qtopia/services/services.h \
-		$(QPEDIR)/include/qtopia/qpemenubar.h \
-		$(QPEDIR)/include/qtopia/qpetoolbar.h
-
-abeditor.o: abeditor.cpp \
-		abeditor.h \
-		$(QPEDIR)/include/qpe/pim/contact.h \
-		$(QPEDIR)/include/qtopia/pim/pimrecord.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qtopia/private/recordfields.h \
-		addresspicker.h \
-		$(QPEDIR)/include/qpe/categoryselect.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qpe/qpedialog.h
-
-ablabel.o: ablabel.cpp \
-		ablabel.h \
-		$(QPEDIR)/include/qpe/pim/contact.h \
-		$(QPEDIR)/include/qtopia/pim/pimrecord.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qtopia/private/recordfields.h \
-		$(QPEDIR)/include/qpe/stringutil.h
-
-abtable.o: abtable.cpp \
-		$(QPEDIR)/include/qpe/categoryselect.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/stringutil.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
-		abtable.h \
-		$(QPEDIR)/include/qpe/categories.h \
-		$(QPEDIR)/include/qtopia/private/palmtopuidgen.h \
-		$(QPEDIR)/include/qpe/pim/contact.h \
-		$(QPEDIR)/include/qtopia/pim/pimrecord.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qtopia/private/recordfields.h \
-		$(QPEDIR)/include/qpe/pim/private/contactxmlio_p.h \
-		$(QPEDIR)/include/qtopia/pim/contact.h
-
-addresssettings.o: addresssettings.cpp \
-		addresssettings.h \
-		addresssettingsbase.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/pim/contact.h \
-		$(QPEDIR)/include/qtopia/pim/pimrecord.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qtopia/private/recordfields.h
-
-addresssettingsbase.h: addresssettingsbase.ui
-	$(UIC) addresssettingsbase.ui -o $(INTERFACE_DECL_PATH)/addresssettingsbase.h
-
-addresssettingsbase.cpp: addresssettingsbase.ui
-	$(UIC) addresssettingsbase.ui -i addresssettingsbase.h -o addresssettingsbase.cpp
-
-addresssettingsbase.o: addresssettingsbase.cpp \
-		addresssettingsbase.h \
-		addresssettingsbase.ui
-
-moc_addressbook.o: moc_addressbook.cpp \
 		addressbook.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/addressbook.o addressbook.cpp
 
-moc_abeditor.o: moc_abeditor.cpp \
+$(OBJECTS_DIR)/abeditor.o: abeditor.cpp \
+		$(MOC_DIR)/abeditor.moc \
 		abeditor.h \
-		$(QPEDIR)/include/qpe/pim/contact.h \
-		$(QPEDIR)/include/qtopia/pim/pimrecord.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qtopia/private/recordfields.h
+		addresspicker.h \
+		emaildlgimpl.h \
+		emaildlg.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/abeditor.o abeditor.cpp
 
-moc_ablabel.o: moc_ablabel.cpp \
-		ablabel.h \
-		$(QPEDIR)/include/qpe/pim/contact.h \
-		$(QPEDIR)/include/qtopia/pim/pimrecord.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qtopia/private/recordfields.h
+$(OBJECTS_DIR)/ablabel.o: ablabel.cpp \
+		ablabel.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/ablabel.o ablabel.cpp
 
-moc_abtable.o: moc_abtable.cpp \
-		abtable.h \
-		$(QPEDIR)/include/qpe/categories.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/private/palmtopuidgen.h \
-		$(QPEDIR)/include/qpe/pim/contact.h \
-		$(QPEDIR)/include/qtopia/pim/pimrecord.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qtopia/private/recordfields.h \
-		$(QPEDIR)/include/qpe/pim/private/contactxmlio_p.h \
-		$(QPEDIR)/include/qtopia/pim/contact.h
+$(OBJECTS_DIR)/abtable.o: abtable.cpp \
+		abtable.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/abtable.o abtable.cpp
 
-moc_addresssettings.o: moc_addresssettings.cpp \
-		addresssettings.h \
-		addresssettingsbase.h
+$(OBJECTS_DIR)/emaildlgimpl.o: emaildlgimpl.cpp \
+		emaildlgimpl.h \
+		emaildlg.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/emaildlgimpl.o emaildlgimpl.cpp
 
-moc_addresssettingsbase.o: moc_addresssettingsbase.cpp \
-		addresssettingsbase.h
+$(OBJECTS_DIR)/main.o: main.cpp \
+		addressbook.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
-moc_addressbook.cpp: addressbook.h
-	$(MOC) addressbook.h -o moc_addressbook.cpp
+emaildlg.h: emaildlg.ui
+	$(UIC) emaildlg.ui -o $(INTERFACE_DECL_PATH)/emaildlg.h
 
-moc_abeditor.cpp: abeditor.h
-	$(MOC) abeditor.h -o moc_abeditor.cpp
+emaildlg.cpp: emaildlg.ui
+	$(UIC) emaildlg.ui -i emaildlg.h -o emaildlg.cpp
 
-moc_ablabel.cpp: ablabel.h
-	$(MOC) ablabel.h -o moc_ablabel.cpp
+$(OBJECTS_DIR)/emaildlg.o: emaildlg.cpp \
+		emaildlg.h \
+		emaildlg.ui
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/emaildlg.o emaildlg.cpp
 
-moc_abtable.cpp: abtable.h
-	$(MOC) abtable.h -o moc_abtable.cpp
+$(OBJECTS_DIR)/moc_addressbook.o: $(MOC_DIR)/moc_addressbook.cpp \
+		addressbook.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_addressbook.o $(MOC_DIR)/moc_addressbook.cpp
 
-moc_addresssettings.cpp: addresssettings.h
-	$(MOC) addresssettings.h -o moc_addresssettings.cpp
+$(OBJECTS_DIR)/moc_abeditor.o: $(MOC_DIR)/moc_abeditor.cpp \
+		abeditor.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_abeditor.o $(MOC_DIR)/moc_abeditor.cpp
 
-moc_addresssettingsbase.cpp: addresssettingsbase.h
-	$(MOC) addresssettingsbase.h -o moc_addresssettingsbase.cpp
+$(OBJECTS_DIR)/moc_ablabel.o: $(MOC_DIR)/moc_ablabel.cpp \
+		ablabel.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_ablabel.o $(MOC_DIR)/moc_ablabel.cpp
+
+$(OBJECTS_DIR)/moc_abtable.o: $(MOC_DIR)/moc_abtable.cpp \
+		abtable.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_abtable.o $(MOC_DIR)/moc_abtable.cpp
+
+$(OBJECTS_DIR)/moc_emaildlgimpl.o: $(MOC_DIR)/moc_emaildlgimpl.cpp \
+		emaildlgimpl.h \
+		emaildlg.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_emaildlgimpl.o $(MOC_DIR)/moc_emaildlgimpl.cpp
+
+$(OBJECTS_DIR)/moc_emaildlg.o: $(MOC_DIR)/moc_emaildlg.cpp \
+		emaildlg.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_emaildlg.o $(MOC_DIR)/moc_emaildlg.cpp
+
+$(MOC_DIR)/moc_addressbook.cpp: addressbook.h
+	$(MOC) addressbook.h -o $(MOC_DIR)/moc_addressbook.cpp
+
+$(MOC_DIR)/moc_abeditor.cpp: abeditor.h
+	$(MOC) abeditor.h -o $(MOC_DIR)/moc_abeditor.cpp
+
+$(MOC_DIR)/moc_ablabel.cpp: ablabel.h
+	$(MOC) ablabel.h -o $(MOC_DIR)/moc_ablabel.cpp
+
+$(MOC_DIR)/moc_abtable.cpp: abtable.h
+	$(MOC) abtable.h -o $(MOC_DIR)/moc_abtable.cpp
+
+$(MOC_DIR)/moc_emaildlgimpl.cpp: emaildlgimpl.h
+	$(MOC) emaildlgimpl.h -o $(MOC_DIR)/moc_emaildlgimpl.cpp
+
+$(MOC_DIR)/abeditor.moc: abeditor.cpp
+	$(MOC) abeditor.cpp -o $(MOC_DIR)/abeditor.moc
+
+$(MOC_DIR)/moc_emaildlg.cpp: emaildlg.h
+	$(MOC) emaildlg.h -o $(MOC_DIR)/moc_emaildlg.cpp
 
 
 
 lupdate:
-	lupdate addressbook.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <addressbook.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease addressbook.pro
+	$(QPEDIR)/bin/qtopia-linstall addressbook.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

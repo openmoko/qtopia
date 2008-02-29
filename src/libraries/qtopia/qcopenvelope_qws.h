@@ -20,12 +20,13 @@
 #ifndef QCOPENVELOPE_H
 #define QCOPENVELOPE_H
 
+#include <qtopia/qpeglobal.h>
 #include <qcopchannel_qws.h>
 #include <qdatastream.h>
 
 #ifndef QT_NO_COP
 
-class QCopEnvelope : public QDataStream {
+class QTOPIA_EXPORT QCopEnvelope : public QDataStream {
     QCString ch, msg;
 public:
     QCopEnvelope( const QCString& channel, const QCString& message );

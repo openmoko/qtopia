@@ -21,7 +21,7 @@
 #ifndef INPUTMETHODINTERFACE_H
 #define INPUTMETHODINTERFACE_H
 
-#include <qpe/qcom.h>
+#include <qtopia/qcom.h>
 
 #include <qnamespace.h>
 #include <qstring.h>
@@ -68,6 +68,7 @@ struct ExtInputMethodInterface : public QUnknownInterface
     virtual QWSInputMethod *inputMethod() = 0;
     virtual QWidget *statusWidget( QWidget *parent, Qt::WFlags f )= 0;
 
+    virtual void qcopReceive( const QCString &msg, const QByteArray &data )= 0;
 };
 
 

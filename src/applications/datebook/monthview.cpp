@@ -18,7 +18,7 @@
 **
 **********************************************************************/
 #include "monthview.h"
-#include <qtopia/pim/calendar.h>
+#include <qtopia/calendar.h>
 #include <qtopia/config.h>
 #include <qpainter.h>
 #include <qvaluestack.h>
@@ -28,8 +28,19 @@ static QColor normalColor(0,0,0);
 static bool foundRColor = FALSE;
 static bool foundNColor = FALSE;
 
-void MonthView::paintDay( const QDate &cDay, QPainter *p, 
-	const QRect &cr, bool selected, const QColorGroup &cg )
+// estimate cell height.
+void MonthView::resizeEvent( QResizeEvent *e )
+{
+    int ch = e->size().height() / 7; // 6 cells, one more for header.
+    if (ch > 0)
+	line_height = QMAX(5, ch / 6);
+    else
+	line_height = 5;
+    QPEDatePicker::resizeEvent(e);
+}
+
+void MonthView::paintDayBackground( const QDate &cDay, QPainter *p,
+	const QRect &cr, const QColorGroup &cg )
 {
     // one color for repeating, one for not, one for travel.
     //
@@ -43,15 +54,15 @@ void MonthView::paintDay( const QDate &cDay, QPainter *p,
     int yea = selectedDate().year();
     int mont = selectedDate().month();
 
-    bool sMon = weekStartsOnMonday();
+    bool sMon = weekStartsMonday();
 
-    int index = PimCalendar::positionOfDate(yea, mont, sMon, cDay);
+    int index = Calendar::indexForDate(yea, mont, cDay, sMon);
     if (index < 0)
-	return; // wrong action, but.... 
+	return; // wrong action, but....
     DayPaintCache *dpc = paintCache.at(index);
 
     if (!dpc) {
-	DatePicker::paintDay(cDay, p, cr, selected, cg);
+	QPEDatePicker::paintDayBackground(cDay, p, cr, cg);
 	return;
     }
 
@@ -62,48 +73,25 @@ void MonthView::paintDay( const QDate &cDay, QPainter *p,
     if (dpc->nAllDay || dpc->rAllDay || dpc->tAllDay) {
 	p->save();
 
-	if (dpc->nAllDay) 
+	if (dpc->nAllDay)
 	    if (dpc->rAllDay) {
-		p->fillRect( 0, 0, cr.width(), cr.height() / 2, 
+		p->fillRect( 0, 0, cr.width(), cr.height() / 2,
 			normalColor.light(175) );
-		p->fillRect( 0, cr.height() / 2, cr.width(), cr.height() / 2, 
+		p->fillRect( 0, cr.height() / 2, cr.width(), cr.height() / 2,
 			repeatColor.light(175) );
 	    } else
-		p->fillRect( 0, 0, cr.width(), cr.height(), 
+		p->fillRect( 0, 0, cr.width(), cr.height(),
 			normalColor.light(175) );
 	else if (dpc->rAllDay)
-	    p->fillRect( 0, 0, cr.width(), cr.height(), 
+	    p->fillRect( 0, 0, cr.width(), cr.height(),
 		    repeatColor.light(175) );
 
-
-
-	// in any case, we now need to draw the day, the outline, etc.
-	QPen tPen = p->pen();
-	p->setPen( cg.mid() );
-	p->drawLine( 0, cr.height() - 1, cr.width() - 1, cr.height() - 1 );
-	p->drawLine( cr.width() - 1, 0, cr.width() - 1, cr.height() - 1 );
-
-	p->setPen( cg.text() );
-
-	QFont f = p->font();
-	f.setPointSize( ( f.pointSize() / 3 ) * 2 );
-	p->setFont( f );
-	QFontMetrics fm( f );
-	if (QDate::currentDate() == cDay) {
-	    p->setPen(QColor(255,255,255));
-	    p->fillRect(1, 1, fm.width(QString::number( cDay.day() )) + 1, fm.height(), QColor(0,0,0));
-	    p->drawText( 1, 1 + fm.ascent(), QString::number( cDay.day() ) );
-	} else {
-	    p->setPen(QColor(0,0,0));
-	    p->drawText( 1, 1 + fm.ascent(), QString::number( cDay.day() ) );
-	}
-	p->setPen(tPen);
 	p->restore();
     } else
-	DatePicker::paintDay(cDay, p, cr, selected, cg);
+	QPEDatePicker::paintDayBackground(cDay, p, cr, cg);
 
     // now for the lines.
-    int h = 5;
+    int h = line_height;
     int y = cr.height() / 2 - h;
 
 
@@ -164,12 +152,12 @@ void MonthView::paintDay( const QDate &cDay, QPainter *p,
 }
 
 MonthView::MonthView( DateBookTable *db, QWidget *parent, const char *name, bool ac)
-    : DatePicker(parent, name, ac), mDb(db), paintCache(6*7)
+    : QPEDatePicker(parent, name, ac), mDb(db), paintCache(6*7), line_height(5)
 {
     paintCache.setAutoDelete(TRUE);
     // we need to get events from the mdb, we need to watch for changes as
     // well.
-    connect(mDb, SIGNAL(datebookUpdated()), 
+    connect(mDb, SIGNAL(datebookUpdated()),
 	    this, SLOT(updateOccurrences()));
     updateOccurrences();
 }
@@ -179,7 +167,7 @@ MonthView::~MonthView() {}
 void MonthView::updateOccurrences()
 {
     getEventsForMonth(selectedDate().year(), selectedDate().month());
-    repaintContents();
+    updateContents();
 }
 
 void MonthView::getEventsForMonth(int y, int m)
@@ -187,12 +175,10 @@ void MonthView::getEventsForMonth(int y, int m)
     paintCache.clear();
     paintCache.resize(6*7);
 
-    bool sMon = weekStartsOnMonday();
+    bool sMon = weekStartsMonday();
 
-    //QDate from(y, m, 1);
-    //QDate to(y, m, from.daysInMonth());
-    QDate from = PimCalendar::dateAtPosition(y, m, sMon, 0, 0);
-    QDate to = PimCalendar::dateAtPosition(y, m, sMon, 5, 6);
+    QDate from = Calendar::dateAtCoord(y, m, 0, 0, sMon);
+    QDate to = Calendar::dateAtCoord(y, m, 5, 6, sMon);
 
 
     daysEvents = mDb->getOccurrences(from, to);
@@ -232,8 +218,8 @@ void MonthView::getEventsForMonth(int y, int m)
 	    endPos = ev.endInTZ().time().hour();
 	}
 
-	int startIndex = PimCalendar::positionOfDate(y, m, sMon, f);
-	int endIndex = PimCalendar::positionOfDate(y, m, sMon, t);
+	int startIndex = Calendar::indexForDate(y, m, f, sMon);
+	int endIndex = Calendar::indexForDate(y, m, t, sMon);
 	if (f < from) {
 	    startIndex = 0;
 	    startPos = 0;
@@ -247,7 +233,7 @@ void MonthView::getEventsForMonth(int y, int m)
 	    continue;
 
 
-	for (int i = (startIndex < 0 ? 0 : startIndex); 
+	for (int i = (startIndex < 0 ? 0 : startIndex);
 		i <= (endIndex > 41 ? 41 : endIndex); i++) {
 
 	    // get item.
@@ -263,24 +249,24 @@ void MonthView::getEventsForMonth(int y, int m)
 		dpc->rAllDay = TRUE;
 	    } else {
 		if (ev.repeatType() == PimEvent::NoRepeat) {
-		    if (i == startIndex) 
+		    if (i == startIndex)
 			dpc->nLine.append(startPos);
-		    else 
+		    else
 			dpc->nLine.append(0);
 
-		    if (i == endIndex) 
+		    if (i == endIndex)
 			dpc->nLine.append(endPos);
-		    else 
+		    else
 			dpc->nLine.append(24);
 		} else {
-		    if (i == startIndex) 
+		    if (i == startIndex)
 			dpc->rLine.append(startPos);
-		    else 
+		    else
 			dpc->rLine.append(0);
 
-		    if (i == endIndex) 
+		    if (i == endIndex)
 			dpc->rLine.append(endPos);
-		    else 
+		    else
 			dpc->rLine.append(24);
 		}
 	    }
@@ -288,23 +274,11 @@ void MonthView::getEventsForMonth(int y, int m)
     }
 }
 
-/*
-void MonthView::setDate( int y, int m )
+void MonthView::setDate( const QDate &date )
 {
-    if (y != selectedDate().year() || m != selectedDate().month()) {
-	getEventsForMonth(y, m);
-	DatePicker::setDate(y, m);
-	//repaintContents();
+    if (date.year() != selectedDate().year() || date.month() != selectedDate().month()) {
+	getEventsForMonth(date.year(), date.month());
     }
-}
-*/
-
-void MonthView::setDate( int y, int m, int d )
-{
-    if (y != selectedDate().year() || m != selectedDate().month()) {
-	qDebug("getting for %d, %d", y, m);
-	getEventsForMonth(y, m);
-    }
-    DatePicker::setDate(y, m, d);
-    //repaintContents(); setting the date does a repeaint already
+    QPEDatePicker::setDate(date);
+    updateContents();
 }

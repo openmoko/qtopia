@@ -21,7 +21,7 @@
 #define IMAGECODECINTERFACE_H
 
 #include <qstringlist.h>
-#include <qpe/qcom.h>
+#include <qtopia/qcom.h>
 
 #ifndef QT_NO_COMPONENT
 #ifndef IID_QtopiaImageCodec

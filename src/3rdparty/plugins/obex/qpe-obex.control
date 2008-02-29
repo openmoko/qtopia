@@ -3,6 +3,6 @@ Priority: optional
 Section: qpe/infrared
 Maintainer: Trolltech (www.trolltech.com)
 Architecture: arm
-Version: $QPE_VERSION-4
-Depends: qpe-base ($QPE_VERSION)
+Version: $QPE_VERSION-9
+Depends: qpe-libqtopia
 Description: Support for infrared object exchange

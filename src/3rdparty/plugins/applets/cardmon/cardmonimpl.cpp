@@ -24,7 +24,7 @@ QWidget *CardMonitorImpl::applet( QWidget *parent )
 
 int CardMonitorImpl::position() const
 {
-    return 7;
+    return 0;
 }
 
 QString CardMonitorImpl::name() const

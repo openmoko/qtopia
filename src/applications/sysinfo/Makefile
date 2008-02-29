@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -136,35 +142,35 @@ HEADERS =	memory.h \
 		storage.h \
 		versioninfo.h \
 		sysinfo.h
-SOURCES =	main.cpp \
-		memory.cpp \
+SOURCES =	memory.cpp \
 		graph.cpp \
 		load.cpp \
 		storage.cpp \
 		versioninfo.cpp \
-		sysinfo.cpp
-OBJECTS =	main.o \
-		memory.o \
-		graph.o \
-		load.o \
-		storage.o \
-		versioninfo.o \
-		sysinfo.o
+		sysinfo.cpp \
+		main.cpp
+OBJECTS =	$(OBJECTS_DIR)/memory.o \
+		$(OBJECTS_DIR)/graph.o \
+		$(OBJECTS_DIR)/load.o \
+		$(OBJECTS_DIR)/storage.o \
+		$(OBJECTS_DIR)/versioninfo.o \
+		$(OBJECTS_DIR)/sysinfo.o \
+		$(OBJECTS_DIR)/main.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
-SRCMOC	=	moc_memory.cpp \
-		moc_graph.cpp \
-		moc_load.cpp \
-		moc_storage.cpp \
-		moc_versioninfo.cpp \
-		moc_sysinfo.cpp
-OBJMOC	=	moc_memory.o \
-		moc_graph.o \
-		moc_load.o \
-		moc_storage.o \
-		moc_versioninfo.o \
-		moc_sysinfo.o
+SRCMOC	=	$(MOC_DIR)/moc_memory.cpp \
+		$(MOC_DIR)/moc_graph.cpp \
+		$(MOC_DIR)/moc_load.cpp \
+		$(MOC_DIR)/moc_storage.cpp \
+		$(MOC_DIR)/moc_versioninfo.cpp \
+		$(MOC_DIR)/moc_sysinfo.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_memory.o \
+		$(OBJECTS_DIR)/moc_graph.o \
+		$(OBJECTS_DIR)/moc_load.o \
+		$(OBJECTS_DIR)/moc_storage.o \
+		$(OBJECTS_DIR)/moc_versioninfo.o \
+		$(OBJECTS_DIR)/moc_sysinfo.o
 
 
 ####### Implicit rules
@@ -230,81 +236,90 @@ REQUIRES=
 
 ####### Compile
 
-main.o: main.cpp \
-		sysinfo.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
-
-memory.o: memory.cpp \
+$(OBJECTS_DIR)/memory.o: memory.cpp \
 		graph.h \
 		memory.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/memory.o memory.cpp
 
-graph.o: graph.cpp \
+$(OBJECTS_DIR)/graph.o: graph.cpp \
 		graph.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/graph.o graph.cpp
 
-load.o: load.cpp \
+$(OBJECTS_DIR)/load.o: load.cpp \
 		load.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/load.o load.cpp
 
-storage.o: storage.cpp \
+$(OBJECTS_DIR)/storage.o: storage.cpp \
 		graph.h \
 		storage.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/storage.o storage.cpp
 
-versioninfo.o: versioninfo.cpp \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/version.h \
+$(OBJECTS_DIR)/versioninfo.o: versioninfo.cpp \
 		versioninfo.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/versioninfo.o versioninfo.cpp
 
-sysinfo.o: sysinfo.cpp \
+$(OBJECTS_DIR)/sysinfo.o: sysinfo.cpp \
 		memory.h \
 		load.h \
 		storage.h \
 		versioninfo.h \
-		sysinfo.h \
-		$(QPEDIR)/include/qpe/resource.h
-
-moc_memory.o: moc_memory.cpp \
-		memory.h
-
-moc_graph.o: moc_graph.cpp \
-		graph.h
-
-moc_load.o: moc_load.cpp \
-		load.h
-
-moc_storage.o: moc_storage.cpp \
-		storage.h
-
-moc_versioninfo.o: moc_versioninfo.cpp \
-		versioninfo.h
-
-moc_sysinfo.o: moc_sysinfo.cpp \
 		sysinfo.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/sysinfo.o sysinfo.cpp
 
-moc_memory.cpp: memory.h
-	$(MOC) memory.h -o moc_memory.cpp
+$(OBJECTS_DIR)/main.o: main.cpp \
+		sysinfo.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
-moc_graph.cpp: graph.h
-	$(MOC) graph.h -o moc_graph.cpp
+$(OBJECTS_DIR)/moc_memory.o: $(MOC_DIR)/moc_memory.cpp \
+		memory.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_memory.o $(MOC_DIR)/moc_memory.cpp
 
-moc_load.cpp: load.h
-	$(MOC) load.h -o moc_load.cpp
+$(OBJECTS_DIR)/moc_graph.o: $(MOC_DIR)/moc_graph.cpp \
+		graph.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_graph.o $(MOC_DIR)/moc_graph.cpp
 
-moc_storage.cpp: storage.h
-	$(MOC) storage.h -o moc_storage.cpp
+$(OBJECTS_DIR)/moc_load.o: $(MOC_DIR)/moc_load.cpp \
+		load.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_load.o $(MOC_DIR)/moc_load.cpp
 
-moc_versioninfo.cpp: versioninfo.h
-	$(MOC) versioninfo.h -o moc_versioninfo.cpp
+$(OBJECTS_DIR)/moc_storage.o: $(MOC_DIR)/moc_storage.cpp \
+		storage.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_storage.o $(MOC_DIR)/moc_storage.cpp
 
-moc_sysinfo.cpp: sysinfo.h
-	$(MOC) sysinfo.h -o moc_sysinfo.cpp
+$(OBJECTS_DIR)/moc_versioninfo.o: $(MOC_DIR)/moc_versioninfo.cpp \
+		versioninfo.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_versioninfo.o $(MOC_DIR)/moc_versioninfo.cpp
+
+$(OBJECTS_DIR)/moc_sysinfo.o: $(MOC_DIR)/moc_sysinfo.cpp \
+		sysinfo.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_sysinfo.o $(MOC_DIR)/moc_sysinfo.cpp
+
+$(MOC_DIR)/moc_memory.cpp: memory.h
+	$(MOC) memory.h -o $(MOC_DIR)/moc_memory.cpp
+
+$(MOC_DIR)/moc_graph.cpp: graph.h
+	$(MOC) graph.h -o $(MOC_DIR)/moc_graph.cpp
+
+$(MOC_DIR)/moc_load.cpp: load.h
+	$(MOC) load.h -o $(MOC_DIR)/moc_load.cpp
+
+$(MOC_DIR)/moc_storage.cpp: storage.h
+	$(MOC) storage.h -o $(MOC_DIR)/moc_storage.cpp
+
+$(MOC_DIR)/moc_versioninfo.cpp: versioninfo.h
+	$(MOC) versioninfo.h -o $(MOC_DIR)/moc_versioninfo.cpp
+
+$(MOC_DIR)/moc_sysinfo.cpp: sysinfo.h
+	$(MOC) sysinfo.h -o $(MOC_DIR)/moc_sysinfo.cpp
 
 
 
 lupdate:
-	lupdate sysinfo.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <sysinfo.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease sysinfo.pro
+	$(QPEDIR)/bin/qtopia-linstall sysinfo.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

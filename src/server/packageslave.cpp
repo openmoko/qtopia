@@ -21,25 +21,28 @@
 #include "packageslave.h"
 #include "qprocess.h"
 
-#ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
+#ifdef Q_WS_QWS
+#include <qtopia/qcopenvelope_qws.h>
 #endif
 
 #include <qdatastream.h>
-#ifdef QWS
+#ifdef Q_WS_QWS
 #include <qcopchannel_qws.h>
 #endif
 
 #include <qtextstream.h>
 #include <qdir.h>
 
-#include <unistd.h>
 #include <stdlib.h>
 #include <sys/stat.h> // mkdir()
 
 #if defined(_OS_LINUX_) || defined(Q_OS_LINUX)
+#include <unistd.h>
 #include <sys/vfs.h>
 #include <mntent.h>
+#elif defined(Q_OS_WIN32)
+#include <windows.h>
+#include <winbase.h>
 #endif
 
 
@@ -131,9 +134,18 @@ void PackageHandler::addPackageFiles( const QString &location,
 				      const QString &listfile )
 {
     QFile f(listfile);
+#ifndef Q_OS_WIN32
     //make a copy so we can remove the symlinks later
     mkdir( ("/usr/lib/ipkg/info/"+location).ascii(), 0777 );
     system(("cp " + f.name() + " /usr/lib/ipkg/info/"+location).ascii());
+#else
+    QDir d;
+    //#### revise 
+    qDebug("Copy file at %s: %s",  __FILE__, __LINE__ );
+    d.mkdir(("/usr/lib/ipkg/info/" + location).ascii());   
+    system(("copy " + f.name() + " /usr/lib/ipkg/info/"+location).ascii());
+#endif
+
 	    
     if ( f.open(IO_ReadOnly) ) {   
 	QTextStream ts(&f);
@@ -144,12 +156,24 @@ void PackageHandler::addPackageFiles( const QString &location,
 	    // for s, do link/mkdir.
 	    if ( s.right(1) == "/" ) {
 		qDebug("do mkdir for %s", s.ascii());
+#ifndef Q_OS_WIN32
 		mkdir( s.ascii(), 0777 );
 		//possible optimization: symlink directories
 		//that don't exist already. -- Risky.
+#else
+		d.mkdir( s.ascii());
+#endif
+
 	    } else {
+#ifndef Q_OS_WIN32
 		qDebug("do symlink for %s", s.ascii());
-		symlink( (location+s).ascii(), s.ascii() );
+		symlink( (location + s).ascii(), s.ascii() );
+#else
+		qDebug("Copy file instead of a symlink for WIN32");
+		if (!CopyFile((TCHAR*)qt_winTchar((location + s), TRUE), (TCHAR*)qt_winTchar(s, TRUE), FALSE))
+		  qWarning("Unable to create symlinkfor %s", 
+			   (location + s).ascii());
+#endif
 	    }
 	}
 	f.close();
@@ -186,11 +210,16 @@ void PackageHandler::cleanupPackageFiles( const QString &listfile  )
 	    if ( s.right(1) == "/" ) {
 		//should rmdir if empty, after all files have been removed
 	    } else {
+#ifndef Q_OS_WIN32
 		qDebug("remove symlink for %s", s.ascii());
 		//check if it is a symlink first (don't remove /etc/passwd...)
 		char buf[10]; //we don't care about the contents
 		if ( ::readlink( s.ascii(),buf, 10 >= 0 ) )
 		     ::unlink( s.ascii() );
+#else		
+		// ### revise
+		qWarning("Unable to remove symlink %s:%s", __FILE__, __LINE__);
+#endif
 	    }
 	}
 	f.close();

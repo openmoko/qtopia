@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/include/qtopia/windowdecorationinterface.h:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/include/qtopia/windowdecorationinterface.h:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -54,7 +54,8 @@ body { background: #ffffff; color: black; }
 #ifndef WINDOWDECORATIONINTERFACE_H
 #define WINDOWDECORATIONINTERFACE_H
 
-#include &lt;qpe/qcom.h&gt;
+#include &lt;qtopia/qpeglobal.h&gt;
+#include &lt;qtopia/qcom.h&gt;
 #include &lt;qpixmap.h&gt;
 #include &lt;qpalette.h&gt;
 #include &lt;qwsmanager_qws.h&gt;
@@ -64,7 +65,7 @@ body { background: #ffffff; color: black; }
 #define IID_WindowDecoration QUuid( 0x11a45864, 0x4cba, 0x4dda, 0x98, 0x46, 0xff, 0x23, 0x4f, 0xd3, 0x07, 0xcc)
 #endif
 
-struct WindowDecorationInterface : public QUnknownInterface
+struct QTOPIA_EXPORT WindowDecorationInterface : public QUnknownInterface
 {
     virtual ~WindowDecorationInterface() {}
 

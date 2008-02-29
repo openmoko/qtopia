@@ -19,11 +19,14 @@
 **********************************************************************/
 
 
+#ifndef FREETYPE_FLACTORY_IMPL_H
+#define FREETYPE_FLACTORY_IMPL_H
+
 #include <qtopia/fontfactoryinterface.h>
 
 class QFontFactoryFT;
 
-class FreeTypeFactoryImpl : public FontFactoryInterface
+class QTOPIA_PLUGIN_EXPORT FreeTypeFactoryImpl : public FontFactoryInterface
 {
 public:
     FreeTypeFactoryImpl();
@@ -38,3 +41,6 @@ private:
     QFontFactoryFT *factory;
     ulong ref;
 };
+
+#endif
+

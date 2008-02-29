@@ -1,18 +1,17 @@
-TEMPLATE	= app
-CONFIG		= qtopia warn_on release
-DESTDIR		= $(QPEDIR)/bin
+multiprocess:TEMPLATE	= app
+multiprocess:DESTDIR	= $(QPEDIR)/bin
+singleprocess:TEMPLATE	= lib
+singleprocess:DESTDIR   = $(QPEDIR)/lib
+
+CONFIG		+= qtopia warn_on release
 
 HEADERS		= minefield.h \
 		  minesweep.h
-SOURCES		= main.cpp \
-		  minefield.cpp \
+SOURCES		= minefield.cpp \
 		  minesweep.cpp
-INTERFACES	= 
 
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH	+= $(QPEDIR)/include
-LIBS            += -lqpe
+multiprocess:SOURCES+=main.cpp
 
 TARGET		= minesweep
 
-TRANSLATIONS	= $(QPEDIR)/i18n/de/minesweep.ts
+TRANSLATIONS = minesweep-en_GB.ts minesweep-de.ts minesweep-ja.ts minesweep-no.ts

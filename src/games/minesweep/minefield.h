@@ -42,6 +42,9 @@ public:
     int level() const { return lev; }
 
     void setAvailableRect( const QRect & );
+
+    QSize sizeHint() const;
+
 public slots:
     void setup( int level );
 

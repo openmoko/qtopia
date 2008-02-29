@@ -20,7 +20,7 @@
 
 #include "keyboard.h"
 
-#include <qpe/global.h>
+#include <qtopia/global.h>
 
 #ifdef QWS
 #include <qwindowsystem_qws.h>
@@ -94,17 +94,18 @@ QSize KeyboardPicks::sizeHint() const
 void  KeyboardConfig::generateText(const QString &s)
 {
 #if defined(Q_WS_QWS) || defined(_WS_QWS_)
-    for (int i=0; i<(int)backspaces; i++) {
-	parent->emitKey( 0, Qt::Key_Backspace, 0, true, false );
-	parent->emitKey( 0, Qt::Key_Backspace, 0, false, false );
+		  int i;
+    for ( i=0; i<(int)backspaces; i++) {
+			    parent->emitKey( 0, Qt::Key_Backspace, 0, true, false );
+	      parent->emitKey( 0, Qt::Key_Backspace, 0, false, false );
     }
-    for (int i=0; i<(int)s.length(); i++) {
-	uint code = 0;
-	if ( s[i].unicode() >= 'a' && s[i].unicode() <= 'z' ) {
-	    code = s[i].unicode() - 'a' + Key_A;
-	}
-	parent->emitKey( s[i].unicode(), code, 0, true, false );
-	parent->emitKey( s[i].unicode(), code, 0, false, false );
+    for ( i=0; i<(int)s.length(); i++) {
+	      uint code = 0;
+	      if ( s[i].unicode() >= 'a' && s[i].unicode() <= 'z' ) {
+	          code = s[i].unicode() - 'a' + Key_A;
+	      }
+	      parent->emitKey( s[i].unicode(), code, 0, true, false );
+	      parent->emitKey( s[i].unicode(), code, 0, false, false );
     }
     parent->emitKey( 0, Qt::Key_Space, 0, true, false );
     parent->emitKey( 0, Qt::Key_Space, 0, false, false );
@@ -400,7 +401,7 @@ typedef struct SpecialMap {
     int qcode;
     ushort unicode;
     const char * label;
-    const char * const * xpm;
+    const char * const *xpm;
 };
 
 

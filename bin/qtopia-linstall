@@ -1,0 +1,12 @@
+#!/usr/bin/perl
+
+while (<>) {
+    if ( /^TRANSLATIONS\s*=\s*(.*)/ ) {
+	for $ts ( split " ", $1 ) {
+	    ($target,$locale) = $ts =~ /^(.*)-(.*)\.ts$/;
+	    $dir = "$ENV{QPEDIR}/i18n/$locale";
+	    mkdir $dir if ! -d $dir;
+	    system("cp $target-$locale.qm $dir/$target.qm") && exit 1;
+	}
+    }
+}

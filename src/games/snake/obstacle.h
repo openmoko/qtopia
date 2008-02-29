@@ -19,6 +19,9 @@
 **********************************************************************/
 #include <qcanvas.h> 
 
+#ifndef SNAKEOBST
+#define SNAKEOBST
+
 class Obstacle : public QCanvasSprite
 {
 
@@ -28,3 +31,5 @@ public:
    void newObstacle(int y);
    int rtti() const;
 };
+
+#endif

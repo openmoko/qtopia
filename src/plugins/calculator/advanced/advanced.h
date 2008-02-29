@@ -36,7 +36,6 @@ public slots:
         void showEvent ( QShowEvent * );
 
 private:
-	Engine sys;
 	Type1DecimalInputWidget *siw;
 	QToolButton *PBDel,*PBC;
 	QToolButton *PBMR,*PBMC,*PBMPlus;

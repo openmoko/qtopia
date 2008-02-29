@@ -21,7 +21,7 @@
 #ifndef DIALUPSETTINGS_H
 #define DIALUPSETTINGS_H
 
-#include <qpe/networkinterface.h>
+#include <qtopia/networkinterface.h>
 #include "dialupbase.h"
 
 class ProxiesPage;
@@ -52,9 +52,11 @@ public:
     virtual bool start( Config&, const QString& );
     virtual bool stop( Config& );
     virtual bool needPassword( Config& ) const;
+    virtual bool isAvailable( Config& cfg ) const;
 
 private:
     ulong ref;
+    QString dev( Config& ) const;
 };
 
 #endif

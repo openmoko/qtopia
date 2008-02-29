@@ -23,8 +23,8 @@
 #include "man.h"
 #include "helicopter.h"
 
-#include <qpe/resource.h>
-#include <qpe/qmath.h>
+#include <qtopia/resource.h>
+#include <qtopia/qmath.h>
 
 
 int limit;

@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,10 +118,10 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
-LIBS	=	$(SUBLIBS) -lqtopiaservices -lqpe -luuid $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
+LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
 UIC	=	$(SYSCONF_UIC)
 
@@ -132,7 +138,6 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 
 HEADERS =	task.h \
 		event.h \
-		calendar.h \
 		contact.h \
 		pimrecord.h \
 		xmlio_p.h \
@@ -147,7 +152,6 @@ HEADERS =	task.h \
 		eventxmlio_p.h
 SOURCES =	task.cpp \
 		event.cpp \
-		calendar.cpp \
 		contact.cpp \
 		pimrecord.cpp \
 		xmlio.cpp \
@@ -157,39 +161,38 @@ SOURCES =	task.cpp \
 		todoxmlio.cpp \
 		datebookaccess.cpp \
 		eventxmlio.cpp
-OBJECTS =	task.o \
-		event.o \
-		calendar.o \
-		contact.o \
-		pimrecord.o \
-		xmlio.o \
-		addressbookaccess.o \
-		contactxmlio.o \
-		todoaccess.o \
-		todoxmlio.o \
-		datebookaccess.o \
-		eventxmlio.o
+OBJECTS =	$(OBJECTS_DIR)/task.o \
+		$(OBJECTS_DIR)/event.o \
+		$(OBJECTS_DIR)/contact.o \
+		$(OBJECTS_DIR)/pimrecord.o \
+		$(OBJECTS_DIR)/xmlio.o \
+		$(OBJECTS_DIR)/addressbookaccess.o \
+		$(OBJECTS_DIR)/contactxmlio.o \
+		$(OBJECTS_DIR)/todoaccess.o \
+		$(OBJECTS_DIR)/todoxmlio.o \
+		$(OBJECTS_DIR)/datebookaccess.o \
+		$(OBJECTS_DIR)/eventxmlio.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
-SRCMOC	=	moc_addressbookaccess.cpp \
-		moc_contactio_p.cpp \
-		moc_contactxmlio_p.cpp \
-		moc_todoaccess.cpp \
-		moc_taskio_p.cpp \
-		moc_todoxmlio_p.cpp \
-		moc_datebookaccess.cpp \
-		moc_eventio_p.cpp \
-		moc_eventxmlio_p.cpp
-OBJMOC	=	moc_addressbookaccess.o \
-		moc_contactio_p.o \
-		moc_contactxmlio_p.o \
-		moc_todoaccess.o \
-		moc_taskio_p.o \
-		moc_todoxmlio_p.o \
-		moc_datebookaccess.o \
-		moc_eventio_p.o \
-		moc_eventxmlio_p.o
+SRCMOC	=	$(MOC_DIR)/moc_addressbookaccess.cpp \
+		$(MOC_DIR)/moc_contactio_p.cpp \
+		$(MOC_DIR)/moc_contactxmlio_p.cpp \
+		$(MOC_DIR)/moc_todoaccess.cpp \
+		$(MOC_DIR)/moc_taskio_p.cpp \
+		$(MOC_DIR)/moc_todoxmlio_p.cpp \
+		$(MOC_DIR)/moc_datebookaccess.cpp \
+		$(MOC_DIR)/moc_eventio_p.cpp \
+		$(MOC_DIR)/moc_eventxmlio_p.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_addressbookaccess.o \
+		$(OBJECTS_DIR)/moc_contactio_p.o \
+		$(OBJECTS_DIR)/moc_contactxmlio_p.o \
+		$(OBJECTS_DIR)/moc_todoaccess.o \
+		$(OBJECTS_DIR)/moc_taskio_p.o \
+		$(OBJECTS_DIR)/moc_todoxmlio_p.o \
+		$(OBJECTS_DIR)/moc_datebookaccess.o \
+		$(OBJECTS_DIR)/moc_eventio_p.o \
+		$(OBJECTS_DIR)/moc_eventxmlio_p.o
 
 
 ####### Implicit rules
@@ -255,133 +258,144 @@ REQUIRES=
 
 ####### Compile
 
-task.o: task.cpp \
+$(OBJECTS_DIR)/task.o: task.cpp \
 		task.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/task.o task.cpp
 
-event.o: event.cpp \
-		event.h \
-		calendar.h
+$(OBJECTS_DIR)/event.o: event.cpp \
+		event.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/event.o event.cpp
 
-calendar.o: calendar.cpp \
-		calendar.h
-
-contact.o: contact.cpp \
+$(OBJECTS_DIR)/contact.o: contact.cpp \
 		contact.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/contact.o contact.cpp
 
-pimrecord.o: pimrecord.cpp \
+$(OBJECTS_DIR)/pimrecord.o: pimrecord.cpp \
 		pimrecord.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/pimrecord.o pimrecord.cpp
 
-xmlio.o: xmlio.cpp \
+$(OBJECTS_DIR)/xmlio.o: xmlio.cpp \
 		xmlio_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/xmlio.o xmlio.cpp
 
-addressbookaccess.o: addressbookaccess.cpp \
+$(OBJECTS_DIR)/addressbookaccess.o: addressbookaccess.cpp \
 		contact.h \
 		addressbookaccess.h \
-		contactxmlio_p.h \
-		contactio_p.h \
-		xmlio_p.h
+		contactxmlio_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/addressbookaccess.o addressbookaccess.cpp
 
-contactxmlio.o: contactxmlio.cpp \
+$(OBJECTS_DIR)/contactxmlio.o: contactxmlio.cpp \
 		contact.h \
-		contactxmlio_p.h \
-		contactio_p.h \
-		xmlio_p.h
+		contactxmlio_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/contactxmlio.o contactxmlio.cpp
 
-todoaccess.o: todoaccess.cpp \
+$(OBJECTS_DIR)/todoaccess.o: todoaccess.cpp \
 		task.h \
 		todoaccess.h \
 		todoxmlio_p.h \
 		taskio_p.h \
 		xmlio_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/todoaccess.o todoaccess.cpp
 
-todoxmlio.o: todoxmlio.cpp \
+$(OBJECTS_DIR)/todoxmlio.o: todoxmlio.cpp \
 		task.h \
 		todoxmlio_p.h \
 		taskio_p.h \
 		xmlio_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/todoxmlio.o todoxmlio.cpp
 
-datebookaccess.o: datebookaccess.cpp \
+$(OBJECTS_DIR)/datebookaccess.o: datebookaccess.cpp \
 		event.h \
 		datebookaccess.h \
 		eventxmlio_p.h \
 		eventio_p.h \
 		xmlio_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/datebookaccess.o datebookaccess.cpp
 
-eventxmlio.o: eventxmlio.cpp \
+$(OBJECTS_DIR)/eventxmlio.o: eventxmlio.cpp \
 		eventxmlio_p.h \
 		eventio_p.h \
 		xmlio_p.h \
 		event.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/eventxmlio.o eventxmlio.cpp
 
-moc_addressbookaccess.o: moc_addressbookaccess.cpp \
+$(OBJECTS_DIR)/moc_addressbookaccess.o: $(MOC_DIR)/moc_addressbookaccess.cpp \
 		addressbookaccess.h \
 		contact.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_addressbookaccess.o $(MOC_DIR)/moc_addressbookaccess.cpp
 
-moc_contactio_p.o: moc_contactio_p.cpp \
+$(OBJECTS_DIR)/moc_contactio_p.o: $(MOC_DIR)/moc_contactio_p.cpp \
 		contactio_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_contactio_p.o $(MOC_DIR)/moc_contactio_p.cpp
 
-moc_contactxmlio_p.o: moc_contactxmlio_p.cpp \
-		contactxmlio_p.h \
-		contactio_p.h \
-		xmlio_p.h
+$(OBJECTS_DIR)/moc_contactxmlio_p.o: $(MOC_DIR)/moc_contactxmlio_p.cpp \
+		contactxmlio_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_contactxmlio_p.o $(MOC_DIR)/moc_contactxmlio_p.cpp
 
-moc_todoaccess.o: moc_todoaccess.cpp \
+$(OBJECTS_DIR)/moc_todoaccess.o: $(MOC_DIR)/moc_todoaccess.cpp \
 		todoaccess.h \
 		task.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_todoaccess.o $(MOC_DIR)/moc_todoaccess.cpp
 
-moc_taskio_p.o: moc_taskio_p.cpp \
+$(OBJECTS_DIR)/moc_taskio_p.o: $(MOC_DIR)/moc_taskio_p.cpp \
 		taskio_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_taskio_p.o $(MOC_DIR)/moc_taskio_p.cpp
 
-moc_todoxmlio_p.o: moc_todoxmlio_p.cpp \
+$(OBJECTS_DIR)/moc_todoxmlio_p.o: $(MOC_DIR)/moc_todoxmlio_p.cpp \
 		todoxmlio_p.h \
 		taskio_p.h \
 		xmlio_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_todoxmlio_p.o $(MOC_DIR)/moc_todoxmlio_p.cpp
 
-moc_datebookaccess.o: moc_datebookaccess.cpp \
+$(OBJECTS_DIR)/moc_datebookaccess.o: $(MOC_DIR)/moc_datebookaccess.cpp \
 		datebookaccess.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_datebookaccess.o $(MOC_DIR)/moc_datebookaccess.cpp
 
-moc_eventio_p.o: moc_eventio_p.cpp \
+$(OBJECTS_DIR)/moc_eventio_p.o: $(MOC_DIR)/moc_eventio_p.cpp \
 		eventio_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_eventio_p.o $(MOC_DIR)/moc_eventio_p.cpp
 
-moc_eventxmlio_p.o: moc_eventxmlio_p.cpp \
+$(OBJECTS_DIR)/moc_eventxmlio_p.o: $(MOC_DIR)/moc_eventxmlio_p.cpp \
 		eventxmlio_p.h \
 		eventio_p.h \
 		xmlio_p.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_eventxmlio_p.o $(MOC_DIR)/moc_eventxmlio_p.cpp
 
-moc_addressbookaccess.cpp: addressbookaccess.h
-	$(MOC) addressbookaccess.h -o moc_addressbookaccess.cpp
+$(MOC_DIR)/moc_addressbookaccess.cpp: addressbookaccess.h
+	$(MOC) addressbookaccess.h -o $(MOC_DIR)/moc_addressbookaccess.cpp
 
-moc_contactio_p.cpp: contactio_p.h
-	$(MOC) contactio_p.h -o moc_contactio_p.cpp
+$(MOC_DIR)/moc_contactio_p.cpp: contactio_p.h
+	$(MOC) contactio_p.h -o $(MOC_DIR)/moc_contactio_p.cpp
 
-moc_contactxmlio_p.cpp: contactxmlio_p.h
-	$(MOC) contactxmlio_p.h -o moc_contactxmlio_p.cpp
+$(MOC_DIR)/moc_contactxmlio_p.cpp: contactxmlio_p.h
+	$(MOC) contactxmlio_p.h -o $(MOC_DIR)/moc_contactxmlio_p.cpp
 
-moc_todoaccess.cpp: todoaccess.h
-	$(MOC) todoaccess.h -o moc_todoaccess.cpp
+$(MOC_DIR)/moc_todoaccess.cpp: todoaccess.h
+	$(MOC) todoaccess.h -o $(MOC_DIR)/moc_todoaccess.cpp
 
-moc_taskio_p.cpp: taskio_p.h
-	$(MOC) taskio_p.h -o moc_taskio_p.cpp
+$(MOC_DIR)/moc_taskio_p.cpp: taskio_p.h
+	$(MOC) taskio_p.h -o $(MOC_DIR)/moc_taskio_p.cpp
 
-moc_todoxmlio_p.cpp: todoxmlio_p.h
-	$(MOC) todoxmlio_p.h -o moc_todoxmlio_p.cpp
+$(MOC_DIR)/moc_todoxmlio_p.cpp: todoxmlio_p.h
+	$(MOC) todoxmlio_p.h -o $(MOC_DIR)/moc_todoxmlio_p.cpp
 
-moc_datebookaccess.cpp: datebookaccess.h
-	$(MOC) datebookaccess.h -o moc_datebookaccess.cpp
+$(MOC_DIR)/moc_datebookaccess.cpp: datebookaccess.h
+	$(MOC) datebookaccess.h -o $(MOC_DIR)/moc_datebookaccess.cpp
 
-moc_eventio_p.cpp: eventio_p.h
-	$(MOC) eventio_p.h -o moc_eventio_p.cpp
+$(MOC_DIR)/moc_eventio_p.cpp: eventio_p.h
+	$(MOC) eventio_p.h -o $(MOC_DIR)/moc_eventio_p.cpp
 
-moc_eventxmlio_p.cpp: eventxmlio_p.h
-	$(MOC) eventxmlio_p.h -o moc_eventxmlio_p.cpp
+$(MOC_DIR)/moc_eventxmlio_p.cpp: eventxmlio_p.h
+	$(MOC) eventxmlio_p.h -o $(MOC_DIR)/moc_eventxmlio_p.cpp
 
 
 
 lupdate:
-	lupdate qtopiapim.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <qtopiapim.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease qtopiapim.pro
+	$(QPEDIR)/bin/qtopia-linstall qtopiapim.pro
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

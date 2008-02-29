@@ -60,7 +60,7 @@ private slots:
     void slotAveragePoint( void );  // return an averaged point
 
 private:
-    static const int SAMPLES = 10;
+    enum {SAMPLES = 10};
     _StylusEvent _ptList[SAMPLES];
     int _next;
     QTimer *_tExpire;

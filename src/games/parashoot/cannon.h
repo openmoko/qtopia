@@ -39,6 +39,8 @@ public:
 
 int shotsFired() { return shotsfired; };
 
+    void reposition(void);
+
 protected:
     void advance(int stage);
 

@@ -20,7 +20,7 @@
 #include "cardmetrics.h"
 #include <qwmatrix.h>
 #include <qpixmap.h>
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 #include <qlabel.h>
 
 

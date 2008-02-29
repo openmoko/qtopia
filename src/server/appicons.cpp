@@ -22,7 +22,7 @@
 #include "appicons.h"
 
 #ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
 
 #include <qtooltip.h>

@@ -20,7 +20,8 @@
 
 #include "timestring.h"
 #include <qobject.h>
-#include "qpeapplication.h" //for qApp
+#include <qdatetime.h>
+#include <qapplication.h> 
 #include "config.h"
 
 
@@ -48,9 +49,9 @@ private:
     {
 	Config config("qpe");
 	config.setGroup( "Date" );
-	format = DateFormat(QChar(config.readEntry("Separator", "/")[0]),
-		(DateFormat::Order)config .readNumEntry("ShortOrder", DateFormat::DayMonthYear), 
-		(DateFormat::Order)config.readNumEntry("LongOrder", DateFormat::DayMonthYear));
+	format = ::DateFormat(QChar(config.readEntry("Separator", "/")[0]),
+		(::DateFormat::Order)config .readNumEntry("ShortOrder", ::DateFormat::DayMonthYear), 
+		(::DateFormat::Order)config.readNumEntry("LongOrder", ::DateFormat::DayMonthYear));
 
 	connect( qApp, SIGNAL( dateFormatChanged(DateFormat) ),
 		 this, SLOT( formatChanged( DateFormat ) ) );

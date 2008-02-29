@@ -405,7 +405,7 @@ QString QLibrary::library() const
 	return libfile;
 
     QString filename = libfile;
-#if defined(Q_WS_WIN)
+#if defined(Q_WS_WIN32)
     if ( filename.find( ".dll" ) == -1 )
 	filename += ".dll";
 #elif defined(Q_OS_MACX)

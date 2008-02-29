@@ -28,7 +28,7 @@
 #include <qtopia/config.h>
 #include <qtopia/global.h>
 #include <qtopia/qcopenvelope_qws.h>
-#include <qtopia/services/services.h>
+#include <qtopia/services.h>
 #include <qtopia/datebookmonth.h>
 
 #include <qvaluelist.h>
@@ -39,29 +39,9 @@
 
 #include <qtooltip.h>
 #include <qwhatsthis.h>
+#include <qtimer.h>
 
-/* XPM */
-static char * menu_xpm[] = {
-"12 12 5 1",
-" 	c None",
-".	c #000000",
-"+	c #FFFDAD",
-"@	c #FFFF00",
-"#	c #E5E100",
-"            ",
-"            ",
-"  ......... ",
-"  .+++++++. ",
-"  .+@@@@#.  ",
-"  .+@@@#.   ",
-"  .+@@#.    ",
-"  .+@#.     ",
-"  .+#.      ",
-"  .+.       ",
-"  ..        ",
-"            "};
-
-Browser::Browser(QWidget *parent = 0, const char *name = 0)
+Browser::Browser(QWidget *parent, const char *name)
 	: QTextBrowser(parent, name)
 {
 }
@@ -77,27 +57,25 @@ Today::Today(QWidget *parent, const char *name, WFlags fl)
     : QMainWindow(parent, name, fl)
 {
     setCaption( tr("Today") );
+
+    daytimer = new QTimer();
+    connect(daytimer, SIGNAL(timeout()), this, SLOT(dayChange()));
+
     init();
 }
 
 Today::~Today()
 {
+    delete daytimer;
 }
 
 void Today::init()
 {
     todayView = new Browser(this, "todayView");
-    QWhatsThis::add(todayView, tr("Displays todays' activities.  Configure the view by pressing the button in the bottom right corner.") );
+    QWhatsThis::add(todayView, tr("Displays todays' activities.  Configure the view by tapping the Today icon."));
     setCentralWidget(todayView);
     connect(todayView, SIGNAL( taskClicked(const QString &) ),
 	this, SLOT( taskSelected(const QString &) ) );
-
-    QPushButton *cornerButton = new QPushButton(this);
-    cornerButton->setPixmap( QPixmap( (const char**)menu_xpm ) );
-    connect( cornerButton, SIGNAL( clicked() ),
-	this, SLOT( optionButtonClicked() ) );
-    todayView->setCornerWidget( cornerButton );
-    QWhatsThis::add(cornerButton, tr("Press this button to either configure which plugins to display, or to individually configure each plugin.") );
 
     loadPlugins();
     setupPluginMenu();
@@ -105,6 +83,37 @@ void Today::init()
     //	Don't call updateView as resizeEvent will handle that
     readConfig();
     sort();
+
+    startDayTimer();
+}
+
+//
+// Figure out how long till the change of day, and start the day change timer.
+//
+void
+Today::startDayTimer(void)
+{
+    QDateTime	now;
+    QDateTime	tomorrow;
+
+    now = QDateTime::currentDateTime();
+    tomorrow = now.addDays(1);
+    tomorrow.setTime(QTime(0, 0));
+
+    daytimer->stop();
+    daytimer->start(1000 * now.secsTo(tomorrow), TRUE);
+}
+
+//
+// Change-of-day timer has gone off.  Updating the view will grab new
+// info from the plugins.  Restart the timer so we catch the next
+// change-of-day.
+//
+void
+Today::dayChange(void)
+{
+    updateView();
+    startDayTimer();
 }
 
 void Today::update()
@@ -112,6 +121,7 @@ void Today::update()
     readConfig();
     sort();
     updateView();
+    startDayTimer();
 }
 
 void Today::appMessage(const QCString &msg, const QByteArray &)
@@ -171,10 +181,13 @@ void Today::loadPlugins()
 	delete (*tit).library;
     }
 
-    QString path = QPEApplication::qpeDir() + "/plugins/today";
+    QString path = QPEApplication::qpeDir() + "plugins/today";
 
+#ifndef Q_OS_WIN32
     QDir dir( path, "lib*.so" );
-
+#else
+    QDir dir (path, "*.dll");
+#endif
     QStringList list = dir.entryList();
     QStringList::Iterator it;
 
@@ -234,7 +247,12 @@ void Today::updateView()
 	return;
     }
 
-    QString txt = "<b> <big> <font color=#0000FF align=right> <a href=\"TodayDate\">" + TimeString::longDateString( QDate::currentDate() ) + " </a> </font> </big> </b> <body> ";
+    QString txt = "<table><tr>";
+    txt += "<td><a href=\"TodayOptions\"><img src=\"TodayApp\"></a></td>";
+    txt += "<td><b> <big> <font color=#0000FF><a href=\"TodayDate\">" +
+	TimeString::longDateString( QDate::currentDate() ) +
+	" </a> </font> </big> </b> <body></td>";
+    txt += "</tr></table>";
 
     uint count = 0;
     TodayPlugin plugin;
@@ -266,7 +284,7 @@ void Today::updateView()
     todayView->setText( txt );
 }
 
-void Today::resizeEvent(QResizeEvent *event)
+void Today::resizeEvent(QResizeEvent * /* event */)
 {
     updateView();
 }
@@ -277,12 +295,17 @@ void Today::taskSelected(const QString &id)
 {
     if ( id == "TodayPluginEdit" ) {
 	settingsMenuClicked(0);
+    } else if ( id == "TodayOptions" ) {
+	optionButtonClicked();
     } else if ( id == "TodayDate" ) {
+/*	This is just confusing.  Disabled for now.
+
 	QPopupMenu *pop = new QPopupMenu(this);
 	DateBookMonth *calendar = new DateBookMonth(this, "calendar", TRUE );
 	pop->insertItem( calendar);
 	
 	pop->popup( QCursor::pos() );
+*/
     } else {
 	int pos = id.find(":");
 	if ( pos == -1 )
@@ -375,7 +398,7 @@ void Today::reload()
 }
 
 /*  Config Dialog, which might be more advanced	*/
-ConfigDialog::ConfigDialog(QWidget *parent=0, const char *name=0, WFlags fl=0)
+ConfigDialog::ConfigDialog(QWidget *parent, const char *name, WFlags fl)
     : QDialog(parent, name, fl)
 {
     if ( layout() ) {

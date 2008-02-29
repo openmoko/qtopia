@@ -24,7 +24,8 @@
 #ifndef WINDOWDECORATIONINTERFACE_H
 #define WINDOWDECORATIONINTERFACE_H
 
-#include <qpe/qcom.h>
+#include <qtopia/qpeglobal.h>
+#include <qtopia/qcom.h>
 #include <qpixmap.h>
 #include <qpalette.h>
 #include <qwsmanager_qws.h>
@@ -34,7 +35,7 @@
 #define IID_WindowDecoration QUuid( 0x11a45864, 0x4cba, 0x4dda, 0x98, 0x46, 0xff, 0x23, 0x4f, 0xd3, 0x07, 0xcc)
 #endif
 
-struct WindowDecorationInterface : public QUnknownInterface
+struct QTOPIA_EXPORT WindowDecorationInterface : public QUnknownInterface
 {
     virtual ~WindowDecorationInterface() {}
 

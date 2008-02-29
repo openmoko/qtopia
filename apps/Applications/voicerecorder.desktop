@@ -1,0 +1,6 @@
+[Desktop Entry]
+Comment=A Voice Recording Program
+Exec=mediarecorder
+Icon=SoundPlayer
+Type=Application
+Name=Voice Recorder

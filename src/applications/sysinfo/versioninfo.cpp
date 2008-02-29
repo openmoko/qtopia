@@ -18,8 +18,8 @@
 **
 **********************************************************************/
 
-#include <qpe/resource.h>
-#include <qpe/version.h>
+#include <qtopia/resource.h>
+#include <qtopia/version.h>
 
 #include <qlabel.h>
 #include <qpixmap.h>

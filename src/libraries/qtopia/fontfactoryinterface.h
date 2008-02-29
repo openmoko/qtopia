@@ -20,20 +20,21 @@
 #ifndef FONTFACTORYINTERFACE_H
 #define FONTFACTORYINTERFACE_H
 
+#include <qtopia/qpeglobal.h>
 #include <qnamespace.h>
 #include <qstring.h>
-#include <qpe/qcom.h>
+#include <qtopia/qcom.h>
 
 class QFontFactory;
 
-#ifndef QT_NO_COMPONENT
+#ifndef QT_NO_COMPONENT 
 // {7F194DD6-FAA3-498F-8F30-9C297A570DFA}
 #ifndef IID_FontFactory
 #define IID_FontFactory QUuid( 0x7f194dd6, 0xfaa3, 0x498f, 0x8f, 0x30, 0x9c, 0x29, 0x7a, 0x57, 0x0d, 0xfa)
 #endif
 #endif
 
-struct FontFactoryInterface : public QUnknownInterface
+struct QTOPIA_EXPORT FontFactoryInterface : public QUnknownInterface
 {
     virtual QFontFactory *fontFactory() = 0;
 };

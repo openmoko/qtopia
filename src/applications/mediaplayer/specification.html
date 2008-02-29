@@ -1,0 +1,150 @@
+<html>
+<title>
+Qtopia Media Player Specification
+</title>
+
+<body>
+
+<h1>Qtopia Media Player Specification</h1>
+
+
+<!--
+<h2>Specification goals</h2>
+This specification:
+<ol>
+<li> Describes all of the end-user stories and interactions.
+    (eg. the user can view a slide show of images from a digital camera).
+<li> Lists all features, derived from end-user stories,
+    in enough detail to allow the definition of
+    tests for all features.
+<li> Defines contraints and limitations on the application.
+    (eg. can view image sizes as large as 1MB).
+<li>Aides the developer on focusing on the most important aspects of
+    the application and ensuring all important elements are completed.
+</ol>
+-->
+
+<a name=description>
+</a>
+<!-- A one-line description of what this application is and does.
+    This description is then duplicated in the .desktop Comment and
+    the .control file description.
+
+    (eg. The image viewer allows viewing and very minor editing of image files.)
+-->
+The Qtopia Media Player plays audio and video media files.
+<!-- A one-paragraph description of what this application is and does.
+    This description is then duplicated in the .desktop Comment and
+    the .control file description.
+
+    (eg. The image viewer allows viewing and very minor editing
+    of image files. It assists format conversion, beaming logos
+    to phones, captioning, etc.)
+-->
+<p>
+The Qtopia Media Player plays audio and video media files. It
+provides entertainment by stimulating the senses.
+</p>
+
+<p>
+Status: BT
+</p>
+
+<a name=usecases>
+<h2>Use Cases</h2>
+</a>
+<!-- Describe real-world stories. Implicit in these use cases is
+	"these things are easy to do".
+    (eg.
+	Roving News Reporter
+
+	The journalist/cameraman takes photos with a digital camera,
+	loads them into the PDAs via CF card, adjusts the contrast,
+	blacks-out a license plate, adds a copyright caption, and
+	emails the image and short story to Reuters.
+    )
+
+    Note: TITLEs may be used as identifiers in bug reports.
+ -->
+<ul>
+<li><b>Listen To Music</b>
+    <p>A commuter while waiting for her bus or train and during her commute is
+    entertained by listening to music. She makes a selection of music which she
+    can listen to continuously during her commute. She easily adjusts the
+    volume to changes in surrounding noise levels.
+<li><b>Watch News Clip</b>
+    <p>A buisness man during his morning commute to work on the train
+    watches a news report he has downloaded earlier. After he finishes
+    watching it, he deletes it from his device.
+<li><b>Watch Movie Preview</b>
+    <p>A movie fan downloads a movie trailer to decide if she wishes to
+    see that movie or not. She watches the trailer on the device and leaves
+    it on the device to show to her friends to see if they also wish to
+    see that movie.
+</ul>
+
+<a name=features>
+<h2>Features</h2>
+</a>
+<!-- features are brief
+
+    (eg. 
+	* Slide show: view multiple images in sequence
+	    * Configurable delay between images.
+	    * Hardware-button-controlled stepping between images.
+	* Big images: view larger-than-available-RAM images in some formats.
+	* Formats: view JPEG, PNG, GIF format images.
+	* Scribbling: draw black or white lines on images.
+	* Save: in JPEG, PNG formats.
+    )
+
+    Note: TITLEs may be used as identifiers in bug reports.
+-->
+
+<ul>
+<li>Play Music: Plays MP3 files 
+<li>Play Video Clips: Plays mpeg video files
+<li>Key Operation: Can be operated without a stylus
+<li>Fullscreen playback: Video files can be played fullscreen to
+        give the best possible display of the file if the user chooses this
+<li>Rotation: The video clip is always rotated appropriately for the
+	current playback area
+<li>Playlist: A selection of video and music files can be made to form a playlist
+<li>Skins: The user can choose the look of the audio and video buttons
+<li>Decoder Plugins: New decoder plugins can be installed to provide support
+	for new media file formats
+<li>ID3 Tags: ID3 tag fields attached to MP3 files can be displayed and edited
+</ul>
+
+<a name=prerequisites>
+<h2>Prerequisites</h2>
+</a>
+<!--
+    Describes unresolved limitations that cannot
+    be shown within the features list.
+
+    Describes memory and other requirements quantitatively.
+
+    This is a short list, mainly intended as a "known bugs"
+    list for missing features.
+
+    (eg.
+	* Stylus: required for Scribbling.
+	* Memory: requires 250 bytes per event, plus content strings.
+    )
+
+    Note: TITLEs may be used as identifiers in bug reports.
+-->
+
+<ul>
+<li>Requires decoder plugins:
+	To play MP3 music files and Mpeg video files, the Qtopia Media
+	Player requires decoder plugins for the formats it can support.
+<li>Requires data to be from a file:
+	The Qtopia Media Player can only open mpeg files. There is 
+	currently no streaming support. 
+</ul>
+
+
+</body>
+</html>

@@ -1,10 +1,9 @@
 TEMPLATE	= lib
 CONFIG		+= qtopia warn_on release
+win32:CONFIG += dll
+win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
 HEADERS		= notepadimpl.h
 SOURCES		= notepadimpl.cpp
 TARGET		= notepad
 DESTDIR		= $(QPEDIR)/plugins/imagecodecs
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH      += $(QPEDIR)/include
-LIBS            += -lqpe
 VERSION		= 1.0.0

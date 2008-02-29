@@ -83,6 +83,7 @@ public:
     void drawSliderGrooveMask( QPainter *p, int x, int y, int w, int h,
 		    const QColorGroup& , QCOORD c, Orientation orient );
     void drawTab( QPainter *, const QTabBar *, QTab *, bool selected );
+    void polishPopupMenu ( QPopupMenu * );
     int extraPopupMenuItemWidth( bool checkable, int maxpmw, QMenuItem*, const QFontMetrics& );
     int popupMenuItemHeight( bool checkable, QMenuItem*, const QFontMetrics& );
     void drawPopupMenuItem( QPainter* p, bool checkable, int maxpmw, int tab, QMenuItem* mi,

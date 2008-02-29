@@ -25,7 +25,7 @@
 #include <qtextcodec.h>
 #include <qlist.h>
 
-class Simple8Impl : public TextCodecInterface
+class QTOPIA_PLUGIN_EXPORT Simple8Impl : public TextCodecInterface
 {
 public:
     Simple8Impl();

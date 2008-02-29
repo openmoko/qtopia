@@ -20,11 +20,12 @@
 #ifndef __QPE_DIALOG_H__
 #define __QPE_DIALOG_H__
 
+#include <qtopia/qpeglobal.h>
 #include <qobject.h>
 
 class QPEDialogListenerData;
 
-class QPEDialogListener : public QObject
+class QTOPIA_EXPORT QPEDialogListener : public QObject
 {
     Q_OBJECT
 public:

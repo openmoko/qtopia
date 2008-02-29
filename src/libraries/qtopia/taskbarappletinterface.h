@@ -21,7 +21,7 @@
 #ifndef TASKBARAPPLETINTERFACE_H
 #define TASKBARAPPLETINTERFACE_H
 
-#include <qpe/qcom.h>
+#include <qtopia/qcom.h>
 #include <qpixmap.h>
 
 #ifndef QT_NO_COMPONENT
@@ -33,7 +33,7 @@
 
 class QWidget;
 
-struct TaskbarAppletInterface : public QUnknownInterface
+struct QTOPIA_PLUGIN_EXPORT TaskbarAppletInterface : public QUnknownInterface
 {
     virtual QWidget *applet( QWidget *parent ) = 0;
     virtual int position() const = 0;
@@ -44,7 +44,7 @@ struct TaskbarAppletInterface : public QUnknownInterface
 #define IID_TaskbarNamedApplet QUuid( 0x7505e192, 0x4977, 0x465a, 0xb7, 0x2f, 0x0a, 0x8d, 0xd4, 0x91, 0xcf, 0x43)
 #endif
 
-struct TaskbarNamedAppletInterface : public TaskbarAppletInterface
+struct QTOPIA_PLUGIN_EXPORT TaskbarNamedAppletInterface : public TaskbarAppletInterface
 {
     virtual QString name() const = 0;
     virtual QPixmap icon() const = 0;

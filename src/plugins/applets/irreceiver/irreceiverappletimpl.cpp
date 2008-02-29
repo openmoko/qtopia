@@ -43,7 +43,7 @@ QWidget *IRReceiverAppletImpl::applet( QWidget *parent )
 
 int IRReceiverAppletImpl::position() const
 {
-    return 6;
+    return 0;
 }
 
 QString IRReceiverAppletImpl::name() const

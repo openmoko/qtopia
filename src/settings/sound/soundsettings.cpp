@@ -19,9 +19,9 @@
 **********************************************************************/
 #include "soundsettings.h"
 
-#include <qpe/config.h>
+#include <qtopia/config.h>
 #ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
 
 #include <qslider.h>
@@ -51,13 +51,15 @@ void SoundSettings::reject()
 
 void SoundSettings::accept()
 {
-    Config config( "Sound" );
-    config.setGroup( "System" );
-    config.writeEntry("Volume",100-volume->value());
-    config.writeEntry("Touch",touchsound->isChecked());
-    config.writeEntry("Key",keysound->isChecked());
-    setVolume(volume->value());
     QDialog::accept();
+    {
+	Config config( "Sound" );
+	config.setGroup( "System" );
+	config.writeEntry("Volume",100-volume->value());
+	config.writeEntry("Touch",touchsound->isChecked());
+	config.writeEntry("Key",keysound->isChecked());
+    }
+    setVolume(volume->value());
 }
 
 void SoundSettings::done(int r) { 

@@ -28,8 +28,8 @@
 #include <pthread.h>
 
 extern "C" {
-#include "libavcodec/avcodec.h"
-#include "libav/avformat.h"
+#include "avcodec.h"
+#include "avformat.h"
 };
 
 #include "yuv2rgb.h"
@@ -38,10 +38,58 @@ extern "C" {
 #include <qstring.h>
 #include <qapplication.h>
 
-#include <qpe/mediaplayerplugininterface.h>
+#include <qtopia/mediaplayerplugininterface.h>
 
 
-class LibFFMpegPlugin : public MediaPlayerDecoder {
+class MediaPacket {
+    public:
+	int len;
+	unsigned char *ptr;
+	int frameInPacket;
+	AVPacket pkt;
+};
+
+
+class Mutex {
+public:
+    Mutex() {
+	pthread_mutexattr_t attr;
+	pthread_mutexattr_init( &attr );
+	pthread_mutex_init( &mutex, &attr );
+	pthread_mutexattr_destroy( &attr );
+    }
+
+    ~Mutex() {
+	pthread_mutex_destroy( &mutex );
+    }
+
+    void lock() {
+	pthread_mutex_lock( &mutex );
+    }
+
+    void unlock() {
+	pthread_mutex_unlock( &mutex );
+    }
+
+private:
+    pthread_mutex_t mutex;
+};
+
+
+class AutoLockUnlockMutex {
+public:
+    AutoLockUnlockMutex( Mutex *m ) : mutex( m ) {
+	mutex->lock();
+    }
+    ~AutoLockUnlockMutex() {
+	mutex->unlock();
+    }
+private:
+    Mutex *mutex;
+};
+
+
+class LibFFMpegPlugin : public MediaPlayerDecoder_1_6 {
 
 public:
     LibFFMpegPlugin();
@@ -49,6 +97,9 @@ public:
     const char *pluginName();
     const char *pluginComment();
     double pluginVersion();
+
+    void fileInit();
+    void pluginInit();
 
     bool isFileSupported( const QString& fileName );
     bool open( const QString& fileName );
@@ -96,46 +147,86 @@ public:
 
     long getPlayTime();
 
+    // 1.6 Extensions
+    bool supportsStreaming(); // plugin feature
+    bool canStreamURL( const QUrl& url, const QString& mimetype ); // Tests if the URL can be streamed
+    bool openURL( const QUrl& url, const QString& mimetype ); // Opens a URL for streaming
+    bool streamed(); // Is the open file a streamed file
+
+    bool syncAvailable();
+    bool sync(); // sync up the video to the catch up to the audio
+
+    bool seekAvailable(); // Availability depends on stream
+    bool seek( long pos ); // seek to byte
+
+    bool tellAvailable(); // Hard to imagine why this wouldn't be possible
+    long tell(); // byte offset from beginning
+
+    bool lengthAvailable(); // Availability depends on stream
+    long length(); // in bytes
+
+    bool totalTimeAvailable(); // Availability depends on stream
+    long totalTime(); // in milliseconds
+
+    bool currentTimeAvailable(); // Availability depends on stream
+    long currentTime(); // in milliseconds
+
 private:
     bool openFlag;
+    bool streamingFlag;
     int frame;
 
-    yuv2rgb_factory_t *YUVFactory;
-    bool configured;
-
-
-    pthread_mutex_t *pluginMutex;
-    ReSampleContext *resampleContext;
+    Mutex pluginMutex;
+    Mutex audioMutex;
+    Mutex videoMutex;
 
     int skipNext; // Number of frames to skip
 
-    bool internalOpen( const QString& fileName );
-
-    AVPacket *getAnotherPacket( int stream );
-
     int totalFrames;
-//    int framePosition[ 32000 ];
-//    int frameNumber[ 32000 ];
-    int totalKeyFrames;
-    int keyFramePosition[ 16000 ];
-    int keyFrameNumber[ 16000 ];
-    void indexStream();
 
-    QList<AVPacket> waitingVideoPackets;
-    QList<AVPacket> waitingAudioPackets;
+    int msecPerFrame;
+    int droppedFrames;
+    int fileLength;
+    int lengthScaleFactor;
+    long currentPacketTimeStamp;
+    long currentAudioTimeStamp;
+    long currentVideoTimeStamp;
+    bool haveTotalTimeCache;
+    long totalTimeCache;
+    bool needPluginInit;
+    int framesInLastPacket;
 
-    AVFormatContext *avFormatContext;
+    int scaleContextDepth;
+    int scaleContextInputWidth;
+    int scaleContextInputHeight;
+    int scaleContextPicture1Width;
+    int scaleContextPicture2Width;
+    int scaleContextOutputWidth;
+    int scaleContextOutputHeight;
+    int scaleContextLineStride;
+    int scaleContextFormat;
+
+    AVPicture picture;
+    MediaPacket *getAnotherPacket( int stream );
+    QList<MediaPacket> waitingVideoPackets;
+    QList<MediaPacket> waitingAudioPackets;
+    void removeCurrentVideoPacket();
+    void flushVideoPackets();
+    void flushAudioPackets();
 
     AVCodec *audioCodec;
     AVCodec *videoCodec;
-
-    AVCodecContext *audioCodecContext;
-    AVCodecContext *videoCodecContext;
 
     int videoStream;
     int audioStream;
 
     QString strInfo;
+
+    AVFormatContext	*streamContext;
+    AVCodecContext	*audioCodecContext;
+    AVCodecContext	*videoCodecContext;
+    ReSampleContext	*audioScaleContext;
+    yuv2rgb_factory_t	*videoScaleContext;
 };
 
 

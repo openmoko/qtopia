@@ -21,7 +21,7 @@
 
 #include <qtopia/calc/doubleinstruction.h>
 #include <qtopia/qpeapplication.h>
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
 #include <qlayout.h>
 #include <qfile.h>
@@ -75,7 +75,7 @@ FormConversion::FormConversion(QWidget *parent,const char *name,WFlags fl)
     // Row 3
     // read conversion data files
     conversionStack = new QWidgetStack(this);
-    QString path = QPEApplication::qpeDir() + "/etc/calculator/";
+    QString path = QPEApplication::qpeDir() + "etc/calculator/";
     QDir directory;
     directory.setPath(path);
     QStringList fileList = directory.entryList("*.cvt");
@@ -154,7 +154,7 @@ qDebug("DATA value = %f",nextData->factor);
 }
 
 void FormConversion::showEvent ( QShowEvent *e ) {
-    sys.setAccType(new DoubleData());
+    sys.setAccType("DOUBLE");
     QWidget::showEvent(e);
 }
 

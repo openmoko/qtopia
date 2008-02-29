@@ -24,7 +24,7 @@
 #include <qstrlist.h> 
 #include <qasciidict.h>
 
-#include <qpe/power.h>
+#include <qtopia/power.h>
 
 #include "lightsettingsbase.h"
 

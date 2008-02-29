@@ -21,9 +21,9 @@
 #include "sun.h"
 #include "zonemap.h"
 
-#include <qpe/resource.h>
-#include <qpe/timestring.h>
-#include <qpe/qpeapplication.h>
+#include <qtopia/resource.h>
+#include <qtopia/timestring.h>
+#include <qtopia/qpeapplication.h>
 
 #include <qdatetime.h>
 #include <qfile.h>
@@ -401,24 +401,19 @@ void ZoneMap::showCity( ZoneField *city )
     int tmpx, tmpy, x, y;
     zoneToWin( pLast->x(), pLast->y(), tmpx, tmpy );
     contentsToViewport(tmpx, tmpy, x, y);
-    if ( lblCity->width() > drawableW - x ) {
-	// oops... try putting it on the right
-	x = x - lblCity->width() - iLABELOFFSET;
-    } else {
-	// the default...
-	x += iLABELOFFSET;
+
+    //
+    // Put default position for the city label in the "above left"
+    // area.  This avoids obscuring the popup for quite a bit of
+    // the map.  Use the "below right" position for the border cases.
+    //
+    x -= iLABELOFFSET + lblCity->width();
+    if (x < 0) {
+	x += 2*iLABELOFFSET + lblCity->width();
     }
-    if ( lblCity->height() > drawableH - y ) {
-	// move it up...
-	y = y - lblCity->height() - iLABELOFFSET;
-    } else if ( y < 0 ) {
-	// the city is actually off the screen...
-	// this only happens on the a zoom when you are near the top,
-	// a quick workaround..
-	y = iLABELOFFSET;
-    } else {
-	// the default
-	y += iLABELOFFSET;
+    y -= iLABELOFFSET + lblCity->height();
+    if (y < 0) {
+	y += 2*iLABELOFFSET + lblCity->height();
     }
 
     // draw in the city and the label
@@ -497,7 +492,7 @@ static void dayNight(QImage *pImage)
         iMid,
         relw,
         i;
-    short wtab[ wImage ];
+    short * wtab = new short [ wImage ];
     time_t tCurrent;
     struct tm *pTm;
 
@@ -530,6 +525,7 @@ static void dayNight(QImage *pImage)
 	    darken( pImage, 0, wImage, i );
 	}
     }
+    delete wtab;
 }
 
 static inline void darken( QImage *pImage, int start, int stop, int row )

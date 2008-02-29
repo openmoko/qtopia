@@ -47,7 +47,7 @@ public:
     ~ImageWidget() { }
 
     void setPixmap( const QPixmap& pm ) { pixmap = pm; }
-
+    void showBusy();
 signals:
     void clicked();
 
@@ -74,6 +74,8 @@ public:
 
     int w() { return imageWidth; }
     int h() { return imageHeight; }
+
+    void showBusy();
 
 protected:
     void keyPressEvent(QKeyEvent *e);
@@ -140,6 +142,9 @@ private slots:
     bool nextImage();
     bool prevImage();
     void handleKeypress(int keycode);
+    void categoryChanged(void);
+    void typeChanged(void);
+    void properties(void);
 
 private:
     QImage  image;	    // the loaded image
@@ -158,6 +163,7 @@ private:
 
     QMenuBar *menubar;
     QToolBar *toolBar;
+    DocLnk  *doc;	    // for accessing properties
     
     QWidgetStack *stack;
     ImagePane *imagePanel;
@@ -174,7 +180,8 @@ private:
     int slideDelay;
     bool slideRepeat;
     bool slideReverse;	    // show slideshow in reverse order
-    bool rotateOnLoad;	    // rotate by 90 degrees on loading
+    bool rotateOnLoad;	    // rotate by 90 degrees on loading to fit
+    bool rotateClockwise;   // rotate clockwise
     bool fastLoad;
     QTimer *slideTimer;
 };

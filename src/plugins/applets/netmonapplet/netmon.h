@@ -20,7 +20,7 @@
 #ifndef __NETMON_APPLET_H__
 #define __NETMON_APPLET_H__
 
-
+#include <qtopia/qpeglobal.h>
 #include <qwidget.h>
 #include <qstringlist.h>
 #include <qpixmap.h>

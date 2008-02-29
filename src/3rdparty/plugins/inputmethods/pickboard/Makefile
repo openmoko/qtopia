@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -138,19 +144,19 @@ SOURCES =	pickboard.cpp \
 		pickboardcfg.cpp \
 		pickboardimpl.cpp \
 		pickboardpicks.cpp
-OBJECTS =	pickboard.o \
-		pickboardcfg.o \
-		pickboardimpl.o \
-		pickboardpicks.o
+OBJECTS =	$(OBJECTS_DIR)/pickboard.o \
+		$(OBJECTS_DIR)/pickboardcfg.o \
+		$(OBJECTS_DIR)/pickboardimpl.o \
+		$(OBJECTS_DIR)/pickboardpicks.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
-SRCMOC	=	moc_pickboard.cpp \
-		moc_pickboardcfg.cpp \
-		moc_pickboardpicks.cpp
-OBJMOC	=	moc_pickboard.o \
-		moc_pickboardcfg.o \
-		moc_pickboardpicks.o
+SRCMOC	=	$(MOC_DIR)/moc_pickboard.cpp \
+		$(MOC_DIR)/moc_pickboardcfg.cpp \
+		$(MOC_DIR)/moc_pickboardpicks.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_pickboard.o \
+		$(OBJECTS_DIR)/moc_pickboardcfg.o \
+		$(OBJECTS_DIR)/moc_pickboardpicks.o
 
 
 ####### Implicit rules
@@ -216,62 +222,57 @@ REQUIRES=
 
 ####### Compile
 
-pickboard.o: pickboard.cpp \
+$(OBJECTS_DIR)/pickboard.o: pickboard.cpp \
 		pickboard.h \
 		pickboardpicks.h \
+		pickboardcfg.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/pickboard.o pickboard.cpp
+
+$(OBJECTS_DIR)/pickboardcfg.o: pickboardcfg.cpp \
 		pickboardcfg.h \
-		$(QPEDIR)/include/qpe/qdawg.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
-
-pickboardcfg.o: pickboardcfg.cpp \
-		pickboardcfg.h \
-		$(QPEDIR)/include/qpe/qdawg.h \
-		pickboardpicks.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
-
-pickboardimpl.o: pickboardimpl.cpp \
-		pickboard.h \
-		pickboardimpl.h \
-		$(QPEDIR)/include/qpe/inputmethodinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h
-
-pickboardpicks.o: pickboardpicks.cpp \
-		pickboardpicks.h \
-		pickboardcfg.h \
-		$(QPEDIR)/include/qpe/qdawg.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
-
-moc_pickboard.o: moc_pickboard.cpp \
-		pickboard.h
-
-moc_pickboardcfg.o: moc_pickboardcfg.cpp \
-		pickboardcfg.h \
-		$(QPEDIR)/include/qpe/qdawg.h
-
-moc_pickboardpicks.o: moc_pickboardpicks.cpp \
 		pickboardpicks.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/pickboardcfg.o pickboardcfg.cpp
 
-moc_pickboard.cpp: pickboard.h
-	$(MOC) pickboard.h -o moc_pickboard.cpp
+$(OBJECTS_DIR)/pickboardimpl.o: pickboardimpl.cpp \
+		pickboard.h \
+		pickboardimpl.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/pickboardimpl.o pickboardimpl.cpp
 
-moc_pickboardcfg.cpp: pickboardcfg.h
-	$(MOC) pickboardcfg.h -o moc_pickboardcfg.cpp
+$(OBJECTS_DIR)/pickboardpicks.o: pickboardpicks.cpp \
+		pickboardpicks.h \
+		pickboardcfg.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/pickboardpicks.o pickboardpicks.cpp
 
-moc_pickboardpicks.cpp: pickboardpicks.h
-	$(MOC) pickboardpicks.h -o moc_pickboardpicks.cpp
+$(OBJECTS_DIR)/moc_pickboard.o: $(MOC_DIR)/moc_pickboard.cpp \
+		pickboard.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_pickboard.o $(MOC_DIR)/moc_pickboard.cpp
+
+$(OBJECTS_DIR)/moc_pickboardcfg.o: $(MOC_DIR)/moc_pickboardcfg.cpp \
+		pickboardcfg.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_pickboardcfg.o $(MOC_DIR)/moc_pickboardcfg.cpp
+
+$(OBJECTS_DIR)/moc_pickboardpicks.o: $(MOC_DIR)/moc_pickboardpicks.cpp \
+		pickboardpicks.h \
+		pickboardcfg.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_pickboardpicks.o $(MOC_DIR)/moc_pickboardpicks.cpp
+
+$(MOC_DIR)/moc_pickboard.cpp: pickboard.h
+	$(MOC) pickboard.h -o $(MOC_DIR)/moc_pickboard.cpp
+
+$(MOC_DIR)/moc_pickboardcfg.cpp: pickboardcfg.h
+	$(MOC) pickboardcfg.h -o $(MOC_DIR)/moc_pickboardcfg.cpp
+
+$(MOC_DIR)/moc_pickboardpicks.cpp: pickboardpicks.h
+	$(MOC) pickboardpicks.h -o $(MOC_DIR)/moc_pickboardpicks.cpp
 
 
 
 lupdate:
-	lupdate pickboard.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <pickboard.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease pickboard.pro
+	$(QPEDIR)/bin/qtopia-linstall pickboard.pro
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

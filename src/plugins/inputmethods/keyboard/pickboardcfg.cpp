@@ -21,7 +21,7 @@
 #include "pickboardcfg.h"
 #include "pickboardpicks.h"
 
-#include <qpe/global.h>
+#include <qtopia/global.h>
 
 #include <qpainter.h>
 #include <qlist.h>
@@ -37,17 +37,6 @@
 #ifdef QWS
 #include <qwindowsystem_qws.h>
 #endif
-
-static const char * pickboard_help =
-    QT_TRANSLATE_NOOP("PickboardConfig", "<h1>The Pickboard</h1>"
-    "<i>The smallest and fastest way to type.</i>"
-    "<p>"
-    "Enter a word by tapping letter-groups and picking the word."
-    "<br>Enter spaces with \"Space\", or other keys through \"KEY\"."
-    "<br>Use \"Shift\" to capitalize words that are not normally capitalized."
-    "<br>Press \"Shift\" twice for an all-capitals word."
-    "<br>Add custom words by picking them, then selecting \"Add...\" from the menu on the right.")
-    ;
 
 const int intermatchmargin=5;
 
@@ -132,12 +121,6 @@ void PickboardConfig::doMenu(int i)
 		updateRows(0,1);
 	    }
 	    break;
-	case 1: {
-	    QMessageBox help(tr("Pickboard Help"), pickboard_help,
-		QMessageBox::NoIcon, 1, 0, 0);
-	    help.showMaximized();
-	    help.exec();
-	}
     }
 }
 

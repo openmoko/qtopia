@@ -21,16 +21,17 @@
 #ifndef __CATEGORYCOMBO_H__
 #define __CATEGORYCOMBO_H__
 
+#include <qtopia/qpeglobal.h>
 #include <qcombobox.h>
 #include <qtoolbutton.h>
 #include <qhbox.h>
 #include <qstring.h>
 #include <qarray.h>
 
-extern QString categoryFileName();
+QTOPIA_EXPORT extern QString categoryFileName();
 
 class CategoryComboPrivate;
-class CategoryCombo : public QComboBox
+class QTOPIA_EXPORT CategoryCombo : public QComboBox
 {
     Q_OBJECT
 
@@ -60,7 +61,7 @@ private:
 };
 
 class CategorySelectPrivate;
-class CategorySelect : public QHBox
+class QTOPIA_EXPORT CategorySelect : public QHBox
 {
     Q_OBJECT
 public:
@@ -77,7 +78,7 @@ public:
 
     ~CategorySelect();
 
-    bool containsCategory( const QArray<int>& categories );
+    bool containsCategory( const QArray<int>& categories ); // libqtopia
 
     const QArray<int> &currentCategories() const;
     int currentCategory() const;
@@ -99,6 +100,7 @@ signals:
 
 private slots:
     void slotDialog();
+    void categoriesChanged();
 
 public slots:
     void slotNewCat( int id );
@@ -114,27 +116,6 @@ private:
 
 #define ALL_CATEGORIES_VALUE	    -2
 #define UNFILED_CATEGORIES_VALUE    -1
-
-
-inline bool CategorySelect::containsCategory( const QArray<int>& cats )
-{
-    if ( cmdCat && cmdCat->isEnabled() ) {
-	// Multi select mode
-	int noCats = cats.count();
-	for ( int i = 0; i < noCats; i++ )
-	    if ( currentCategories().contains( cats[i] ) ) 
-		return TRUE;
-    } else {
-	// Single select mode
-	int catId = currentCategory();
-	if ( catId == ALL_CATEGORIES_VALUE || cats.contains( catId )
-		|| (catId == UNFILED_CATEGORIES_VALUE && cats.isEmpty()) )
-	    return TRUE;
-    }
-
-    return FALSE;
-}
-
 
 #endif
 

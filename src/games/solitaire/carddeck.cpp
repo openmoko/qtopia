@@ -25,7 +25,7 @@
 
 CardDeck::CardDeck(int jokers) : numberOfJokers(jokers), deckCreated(FALSE)
 {
-    cards = new (Card *)[getNumberOfCards()];
+    cards = new Card *[getNumberOfCards()];
 }
 
 
@@ -39,10 +39,11 @@ CardDeck::~CardDeck()
 
 void CardDeck::createDeck()
 {
+    int i;
     if (!deckCreated) {
-        for (int i = 0; i < 52; i++)
+        for (i = 0; i < 52; i++)
 	    cards[i] = newCard( (eValue)((i % 13) + 1), (eSuit)((i / 13) + 1), FALSE );
-        for (int i = 0; i < getNumberOfJokers(); i++)
+        for (i = 0; i < getNumberOfJokers(); i++)
 	    cards[52 + i] = newCard( jokerVal, jokerSuit, FALSE );
         deckCreated = TRUE;
     }

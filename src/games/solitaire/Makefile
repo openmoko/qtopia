@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -155,24 +161,24 @@ SOURCES =	cardmetrics.cpp \
 		patiencecardgame.cpp \
 		canvascardwindow.cpp \
 		main.cpp
-OBJECTS =	cardmetrics.o \
-		canvascard.o \
-		canvasshapes.o \
-		cardgame.o \
-		cardgamelayout.o \
-		cardpile.o \
-		card.o \
-		carddeck.o \
-		canvascardgame.o \
-		freecellcardgame.o \
-		patiencecardgame.o \
-		canvascardwindow.o \
-		main.o
+OBJECTS =	$(OBJECTS_DIR)/cardmetrics.o \
+		$(OBJECTS_DIR)/canvascard.o \
+		$(OBJECTS_DIR)/canvasshapes.o \
+		$(OBJECTS_DIR)/cardgame.o \
+		$(OBJECTS_DIR)/cardgamelayout.o \
+		$(OBJECTS_DIR)/cardpile.o \
+		$(OBJECTS_DIR)/card.o \
+		$(OBJECTS_DIR)/carddeck.o \
+		$(OBJECTS_DIR)/canvascardgame.o \
+		$(OBJECTS_DIR)/freecellcardgame.o \
+		$(OBJECTS_DIR)/patiencecardgame.o \
+		$(OBJECTS_DIR)/canvascardwindow.o \
+		$(OBJECTS_DIR)/main.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
-SRCMOC	=	moc_canvascardwindow.cpp
-OBJMOC	=	moc_canvascardwindow.o
+SRCMOC	=	$(MOC_DIR)/moc_canvascardwindow.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_canvascardwindow.o
 
 
 ####### Implicit rules
@@ -238,50 +244,53 @@ REQUIRES=
 
 ####### Compile
 
-cardmetrics.o: cardmetrics.cpp \
-		cardmetrics.h \
-		$(QPEDIR)/include/qpe/resource.h
+$(OBJECTS_DIR)/cardmetrics.o: cardmetrics.cpp \
+		cardmetrics.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/cardmetrics.o cardmetrics.cpp
 
-canvascard.o: canvascard.cpp \
+$(OBJECTS_DIR)/canvascard.o: canvascard.cpp \
 		cardgame.h \
 		card.h \
 		cardpile.h \
 		carddeck.h \
 		cardgamelayout.h \
 		canvascard.h \
-		cardmetrics.h \
-		$(QPEDIR)/include/qpe/resource.h
+		cardmetrics.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/canvascard.o canvascard.cpp
 
-canvasshapes.o: canvasshapes.cpp \
-		$(QPEDIR)/include/qpe/resource.h \
+$(OBJECTS_DIR)/canvasshapes.o: canvasshapes.cpp \
 		canvasshapes.h \
 		cardmetrics.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/canvasshapes.o canvasshapes.cpp
 
-cardgame.o: cardgame.cpp \
+$(OBJECTS_DIR)/cardgame.o: cardgame.cpp \
 		cardgame.h \
 		card.h \
 		cardpile.h \
 		carddeck.h \
 		cardgamelayout.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/cardgame.o cardgame.cpp
 
-cardgamelayout.o: cardgamelayout.cpp \
+$(OBJECTS_DIR)/cardgamelayout.o: cardgamelayout.cpp \
 		cardgamelayout.h \
 		cardpile.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/cardgamelayout.o cardgamelayout.cpp
 
-cardpile.o: cardpile.cpp \
+$(OBJECTS_DIR)/cardpile.o: cardpile.cpp \
 		cardpile.h \
-		card.h \
-		$(QPEDIR)/include/qpe/config.h
+		card.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/cardpile.o cardpile.cpp
 
-card.o: card.cpp \
-		card.h \
-		$(QPEDIR)/include/qpe/config.h
+$(OBJECTS_DIR)/card.o: card.cpp \
+		card.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/card.o card.cpp
 
-carddeck.o: carddeck.cpp \
+$(OBJECTS_DIR)/carddeck.o: carddeck.cpp \
 		card.h \
 		carddeck.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/carddeck.o carddeck.cpp
 
-canvascardgame.o: canvascardgame.cpp \
+$(OBJECTS_DIR)/canvascardgame.o: canvascardgame.cpp \
 		cardgame.h \
 		card.h \
 		cardpile.h \
@@ -290,12 +299,10 @@ canvascardgame.o: canvascardgame.cpp \
 		canvasshapes.h \
 		canvascard.h \
 		canvascardgame.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
 		cardmetrics.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/canvascardgame.o canvascardgame.cpp
 
-freecellcardgame.o: freecellcardgame.cpp \
+$(OBJECTS_DIR)/freecellcardgame.o: freecellcardgame.cpp \
 		freecellcardgame.h \
 		patiencecardgame.h \
 		canvascardgame.h \
@@ -306,12 +313,10 @@ freecellcardgame.o: freecellcardgame.cpp \
 		cardgamelayout.h \
 		canvasshapes.h \
 		canvascard.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
 		cardmetrics.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/freecellcardgame.o freecellcardgame.cpp
 
-patiencecardgame.o: patiencecardgame.cpp \
+$(OBJECTS_DIR)/patiencecardgame.o: patiencecardgame.cpp \
 		patiencecardgame.h \
 		canvascardgame.h \
 		cardgame.h \
@@ -321,13 +326,11 @@ patiencecardgame.o: patiencecardgame.cpp \
 		cardgamelayout.h \
 		canvasshapes.h \
 		canvascard.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
 		cardmetrics.h \
 		canvascardwindow.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/patiencecardgame.o patiencecardgame.cpp
 
-canvascardwindow.o: canvascardwindow.cpp \
+$(OBJECTS_DIR)/canvascardwindow.o: canvascardwindow.cpp \
 		canvascardwindow.h \
 		patiencecardgame.h \
 		canvascardgame.h \
@@ -338,30 +341,29 @@ canvascardwindow.o: canvascardwindow.cpp \
 		cardgamelayout.h \
 		canvasshapes.h \
 		canvascard.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
 		cardmetrics.h \
 		freecellcardgame.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/canvascardwindow.o canvascardwindow.cpp
 
-main.o: main.cpp \
-		canvascardwindow.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
-
-moc_canvascardwindow.o: moc_canvascardwindow.cpp \
+$(OBJECTS_DIR)/main.o: main.cpp \
 		canvascardwindow.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
-moc_canvascardwindow.cpp: canvascardwindow.h
-	$(MOC) canvascardwindow.h -o moc_canvascardwindow.cpp
+$(OBJECTS_DIR)/moc_canvascardwindow.o: $(MOC_DIR)/moc_canvascardwindow.cpp \
+		canvascardwindow.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_canvascardwindow.o $(MOC_DIR)/moc_canvascardwindow.cpp
+
+$(MOC_DIR)/moc_canvascardwindow.cpp: canvascardwindow.h
+	$(MOC) canvascardwindow.h -o $(MOC_DIR)/moc_canvascardwindow.cpp
 
 
 
 lupdate:
-	lupdate solitaire.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <solitaire.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease solitaire.pro
+	$(QPEDIR)/bin/qtopia-linstall solitaire.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

@@ -6,8 +6,5 @@ HEADERS		= soundsettings.h
 SOURCES		= soundsettings.cpp main.cpp
 INTERFACES	= soundsettingsbase.ui
 
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH	+= $(QPEDIR)/include
-LIBS            += -lqpe
-
 TARGET		= sound
+TRANSLATIONS = sound-en_GB.ts sound-de.ts sound-ja.ts sound-no.ts

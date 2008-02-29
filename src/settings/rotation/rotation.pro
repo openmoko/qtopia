@@ -6,8 +6,5 @@ HEADERS		= settings.h
 SOURCES		= rotation.cpp main.cpp
 INTERFACES	= rotationsettingsbase.ui
 
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH	+= $(QPEDIR)/include
-LIBS            += -lqpe
-
 TARGET		= rotation 
+TRANSLATIONS = rotation-en_GB.ts rotation-de.ts rotation-ja.ts rotation-no.ts

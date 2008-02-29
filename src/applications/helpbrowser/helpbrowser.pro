@@ -1,12 +1,13 @@
-TEMPLATE	= app
-CONFIG		= qtopia warn_on release
-DESTDIR		= $(QPEDIR)/bin
-HEADERS		= helpbrowser.h
-SOURCES		= helpbrowser.cpp \
-		  main.cpp
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH	+= $(QPEDIR)/include
-LIBS            += -lqpe
-INTERFACES	= 
+multiprocess:TEMPLATE	= app
+multiprocess:DESTDIR	= $(QPEDIR)/bin
+singleprocess:TEMPLATE	= lib
+singleprocess:DESTDIR   = $(QPEDIR)/lib
 
-TRANSLATIONS	= $(QPEDIR)/i18n/de/helpbrowser.ts
+CONFIG		+= qtopia warn_on release
+HEADERS		= helpbrowser.h
+SOURCES		= helpbrowser.cpp 
+
+multiprocess:SOURCES+=main.cpp
+
+TARGET		= helpbrowser
+TRANSLATIONS = helpbrowser-en_GB.ts helpbrowser-de.ts helpbrowser-ja.ts helpbrowser-no.ts

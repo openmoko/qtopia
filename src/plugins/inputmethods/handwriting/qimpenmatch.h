@@ -23,7 +23,7 @@
 
 #include "qimpenchar.h"
 
-#include <qpe/qdawg.h>
+#include <qtopia/qdawg.h>
 
 #include <qlist.h>
 

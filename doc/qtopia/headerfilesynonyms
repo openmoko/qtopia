@@ -1,8 +1,11 @@
+qjpunicodeconv.h qjpunicode.h
 doclnk.h applnk.h
 applnkset.h applnk.h
 doclnkset.h applnk.h
 categorygroup.h categories.h
 mediaplayerdecoder.h mediaplayerplugininterface.h
+mediaplayerdecoder_1_6.h mediaplayerplugininterface.h
+mediarecorderencoder.h mediarecorderplugininterface.h
 storageinfo.h storage.h
 filesystem.h storage.h
 taskbarnamedappletinterface.h taskbarappletinterface.h

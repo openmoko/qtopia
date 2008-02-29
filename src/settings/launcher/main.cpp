@@ -19,7 +19,7 @@
 **********************************************************************/
 
 #include "launchersettings.h"
-#include <qpe/qpeapplication.h>
+#include <qtopia/qpeapplication.h>
 #include <qdialog.h>
 #include <qlayout.h>
 

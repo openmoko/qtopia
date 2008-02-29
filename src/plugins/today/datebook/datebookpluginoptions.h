@@ -24,6 +24,7 @@
 #ifndef DATEBOOK_PLUGIN_OPTIONS_H
 #define DATEBOOK_PLUGIN_OPTIONS_H
 
+#include <qtopia/qpeglobal.h>
 #include <qwidget.h>
 
 #include "datebookoptionsbase.h"

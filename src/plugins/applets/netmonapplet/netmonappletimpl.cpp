@@ -40,7 +40,7 @@ QWidget *NetMonitorAppletImpl::applet( QWidget *parent )
 
 int NetMonitorAppletImpl::position() const
 {
-    return 6;
+    return 4;
 }
 
 QRESULT NetMonitorAppletImpl::queryInterface( const QUuid &uuid, QUnknownInterface **iface )

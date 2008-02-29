@@ -24,9 +24,9 @@
 #include <qaction.h>
 #include <qslider.h>
 #include <qtoolbutton.h>
-#include <qpe/resource.h>
-#include <qpe/qpemenubar.h>
-#include <qpe/qpetoolbar.h>
+#include <qtopia/resource.h>
+#include <qtopia/qpemenubar.h>
+#include <qtopia/qpetoolbar.h>
 
 
 class Action : public QAction {

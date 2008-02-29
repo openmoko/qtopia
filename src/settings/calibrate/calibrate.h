@@ -42,7 +42,10 @@ private:
     bool sanityCheck();
     void moveCrosshair( QPoint pt );
     void paintEvent( QPaintEvent * );
+    void keyPressEvent( QKeyEvent *);
+    void keyReleaseEvent( QKeyEvent *);
     void mousePressEvent( QMouseEvent * );
+    void mouseMoveEvent( QMouseEvent * );
     void mouseReleaseEvent( QMouseEvent * );
 
 private slots:

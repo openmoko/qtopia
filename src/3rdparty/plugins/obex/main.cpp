@@ -18,7 +18,7 @@
 ** not clear to you.
 **
 **********************************************************************/
-#include <qpe/qpeapplication.h>
+#include <qtopia/qpeapplication.h>
 #include "qirserver.h"
 
 

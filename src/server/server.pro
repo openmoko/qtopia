@@ -1,10 +1,11 @@
 TEMPLATE	= app
 
-CONFIG		= qtopia warn_on release
+CONFIG		+= qtopia warn_on release
+win32:DEFINES   += QTOPIA_DLL
 
 DESTDIR		= $(QPEDIR)/bin
 
-HEADERS		= desktop.h \
+HEADERS		+= desktop.h \
 		  qprocess.h \
 		  appicons.h \
 		  taskbar.h \
@@ -22,8 +23,6 @@ HEADERS		= desktop.h \
 		  qcopbridge.h \
 		  packageslave.h \
 		  irserver.h \
-                  devicebutton.h \
-                  devicebuttonmanager.h \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/buf.h \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/checksum.h \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/command.h \
@@ -44,8 +43,8 @@ HEADERS		= desktop.h \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.h
 #		  quicklauncher.h \
 
-SOURCES		= desktop.cpp \
-		  qprocess.cpp qprocess_unix.cpp \
+SOURCES		+= desktop.cpp \
+		  qprocess.cpp \
 		  appicons.cpp \
 		  taskbar.cpp \
                   runningappbar.cpp \
@@ -63,8 +62,6 @@ SOURCES		= desktop.cpp \
 		  qcopbridge.cpp \
 		  startmenu.cpp \
 		  main.cpp \
-                  devicebutton.cpp \
-                  devicebuttonmanager.cpp \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/base64.c \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/buf.c \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/checksum.c \
@@ -92,10 +89,11 @@ SOURCES		= desktop.cpp \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/whole.c \
 	$(QPEDIR)/src/3rdparty/libraries/rsync/qrsync.cpp
 
-INTERFACES	= shutdown.ui syncdialog.ui
+unix:SOURCES += qprocess_unix.cpp
+win32:SOURCES += qprocess_win.cpp
 
-INCLUDEPATH += $(QPEDIR)/include
-DEPENDPATH	+= $(QPEDIR)/include .
+INTERFACES	+= shutdown.ui \
+		syncdialog.ui
 
 INCLUDEPATH += $(QPEDIR)/src/settings/calibrate
 DEPENDPATH	+= $(QPEDIR)/src/settings/calibrate
@@ -105,6 +103,7 @@ DEPENDPATH	+= $(QPEDIR)/src/3rdparty/libraries/rsync
 
 TARGET		= qpe
 
-LIBS		+= -lqtopiaservices -lqpe -lcrypt -luuid
+unix:LIBS	+= -lcrypt -luuid
+win32:LIBS      += 
 
-TRANSLATIONS = ../i18n/de/qpe.ts
+TRANSLATIONS = qpe-en_GB.ts qpe-de.ts qpe-ja.ts qpe-no.ts

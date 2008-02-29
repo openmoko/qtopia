@@ -18,12 +18,18 @@
 **
 **********************************************************************/
 
-#define protected public
+
 #include <qdialog.h>
-#undef protected
 
 #include "qpedialog.h"
 #include "qpeapplication.h"
+
+// Allow access to nornally protected accept and reject functions
+class HackedPrivateQDialog : public QDialog{
+public:
+    void accept() { QDialog::accept();}
+    void reject() { QDialog::reject();}
+};
 
 QPEDialogListener::QPEDialogListener(QDialog *di ) : QObject(di)
 {
@@ -38,9 +44,12 @@ void QPEDialogListener::appMessage( const QCString &msg, const QByteArray & )
 {
     if (!dialog) 
 	return;
+
+    HackedPrivateQDialog *hackedDialog = (HackedPrivateQDialog*)dialog;
+
     if (msg == "accept()") {
-	dialog->accept();
+	hackedDialog->accept();
     } else if (msg == "reject()") {
-	dialog->reject();
+	hackedDialog->reject();
     }
 }

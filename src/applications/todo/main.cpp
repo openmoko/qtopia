@@ -20,7 +20,7 @@
 
 #include "mainwindow.h"
 
-#include <qpe/qpeapplication.h>
+#include <qtopia/qpeapplication.h>
 
 int main( int argc, char **argv )
 {
@@ -28,11 +28,6 @@ int main( int argc, char **argv )
 
     TodoWindow mw;
     
-    QObject::connect( &a, SIGNAL( appMessage(const QCString &, const QByteArray &) ), 
-	    &mw, SLOT( appMessage(const QCString &, const QByteArray &) ) );
-    QObject::connect(&a, SIGNAL(reload()), &mw, SLOT(reload()));
-    QObject::connect(&a, SIGNAL(flush()), &mw, SLOT(flush()));
-
     a.showMainWidget(&mw);
     return a.exec();
 }

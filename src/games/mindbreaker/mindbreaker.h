@@ -51,6 +51,7 @@ static const int board_width = (panel_width + (bin_margin * 2) + peg_size);
 
 class Peg;
 class QToolButton;
+class QTimer;
 
 class MindBreakerBoard : public QCanvasView // QWidget
 {
@@ -62,6 +63,7 @@ public:
     void getScore(int *, int *);
 
     void resizeEvent(QResizeEvent*);
+    void fixSize();
 
 signals:
     void scoreChanged(int, int);
@@ -69,6 +71,9 @@ signals:
 public slots:
     void clear();
     void resetScore();
+
+private slots:
+    void doFixSize();
 
 protected:
     void contentsMousePressEvent(QMouseEvent *);
@@ -107,6 +112,8 @@ private:
 
     int total_turns;
     int total_games;
+
+    QTimer *widthTimer;
 };
 
 class MindBreaker : public QMainWindow // QWidget
@@ -117,6 +124,9 @@ public:
 
 public slots:
     void setScore(int, int);
+
+protected:
+    void resizeEvent( QResizeEvent * );
 
 private:
     QCanvas canvas;

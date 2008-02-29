@@ -20,7 +20,7 @@
 
 #include "calibrate.h"
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
 #include <qapplication.h>
 
@@ -33,7 +33,7 @@
 
 
 Calibrate::Calibrate(QWidget* parent, const char * name, WFlags wf) :
-    QDialog( parent, name, TRUE, wf | WStyle_Tool | WStyle_Customize | WStyle_StaysOnTop )
+    QDialog( parent, name, TRUE, wf | WStyle_Customize | WStyle_StaysOnTop )
 {
     showCross = TRUE;
     const int offset = 30;
@@ -55,6 +55,9 @@ Calibrate::Calibrate(QWidget* parent, const char * name, WFlags wf) :
 
     timer = new QTimer( this );
     connect( timer, SIGNAL(timeout()), this, SLOT(timeout()) );
+
+    setFocusPolicy( StrongFocus );
+    setFocus();
 }
 
 Calibrate::~Calibrate()
@@ -65,8 +68,10 @@ Calibrate::~Calibrate()
 void Calibrate::show()
 {
     grabMouse();
-    QWSServer::mouseHandler()->getCalibration(&goodcd);
-    QWSServer::mouseHandler()->clearCalibration();
+    if ( !isVisible() ) {
+	QWSServer::mouseHandler()->getCalibration(&goodcd);
+	QWSServer::mouseHandler()->clearCalibration();
+    }
     QDialog::show();
 }
 
@@ -172,7 +177,31 @@ void Calibrate::paintEvent( QPaintEvent * )
     }
 }
 
+void Calibrate::keyPressEvent( QKeyEvent *e )
+{
+    if ( e->key() == Key_Escape )
+	QDialog::keyPressEvent( e );
+}
+
+void Calibrate::keyReleaseEvent( QKeyEvent *e )
+{
+    if ( e->key() == Key_Escape )
+	QDialog::keyReleaseEvent( e );
+}
+
 void Calibrate::mousePressEvent( QMouseEvent *e )
+{
+    // map to device coordinates
+    QPoint devPos = qt_screen->mapToDevice( e->pos(),
+			QSize(qt_screen->width(), qt_screen->height()) );
+    if ( penPos.isNull() )
+	penPos = devPos;
+    else
+	penPos = QPoint( (penPos.x() + devPos.x())/2,
+			 (penPos.y() + devPos.y())/2 );
+}
+
+void Calibrate::mouseMoveEvent( QMouseEvent *e )
 {
     // map to device coordinates
     QPoint devPos = qt_screen->mapToDevice( e->pos(),

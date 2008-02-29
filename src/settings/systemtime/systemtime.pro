@@ -1,14 +1,15 @@
-TEMPLATE	= app
+multiprocess:TEMPLATE	= app
+multiprocess:DESTDIR	= $(QPEDIR)/bin
+singleprocess:TEMPLATE	= lib
+singleprocess:DESTDIR   = $(QPEDIR)/lib
+
 CONFIG		+= qtopia warn_on release
-DESTDIR		= $(QPEDIR)/bin
 
 HEADERS		= settime.h
-SOURCES		= settime.cpp main.cpp
+SOURCES		= settime.cpp
 
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH	+= $(QPEDIR)/include
-LIBS            += -lqpe
+multiprocess:SOURCES+=main.cpp
 
 TARGET		= systemtime
 
-TRANSLATIONS	= $(QPEDIR)/i18n/de/systemtime.ts 
+TRANSLATIONS = systemtime-en_GB.ts systemtime-de.ts systemtime-ja.ts systemtime-no.ts

@@ -32,6 +32,7 @@
 #include <qcombobox.h>
 #include <qtabbar.h>
 
+
 QPEStyle::QPEStyle()
 {
 }
@@ -429,6 +430,7 @@ QSize QPEStyle::sizeFromContents( ContentsType contents, const QWidget *widget,
 
 #define INCLUDE_MENUITEM_DEF
 #include <qmenudata.h>
+#include <qpopupmenu.h>
 
 QPEStyle::QPEStyle()
 {
@@ -988,6 +990,12 @@ static const int motifTabSpacing	= 12;	// space between text and tab
 static const int motifCheckMarkHMargin	= 1;	// horiz. margins of check mark
 static const int windowsRightBorder	= 8;    // right border on windows
 static const int windowsCheckMarkWidth  = 2;    // checkmarks width on windows
+
+void QPEStyle::polishPopupMenu ( QPopupMenu *m )
+{
+    QWindowsStyle::polishPopupMenu( m );
+    m->setLineWidth( 1 );
+}
 
 /*! \reimp
 */

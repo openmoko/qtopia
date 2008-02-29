@@ -26,10 +26,11 @@
 #include <qlist.h>
 #include <qdatetime.h>
 #include <qobject.h>
+#include <qtopia/pim/qtopiapim.h>
 #include <qtopia/pim/task.h>
 
 class TaskIO;
-class PrTask : public PimTask {
+class QTOPIAPIM_EXPORT PrTask : public PimTask {
 public:
     PrTask() : PimTask() {}
     PrTask(const PrTask &t) : PimTask(t) {}
@@ -38,7 +39,7 @@ public:
 };
 
 
-class TaskIteratorMachine : public QShared
+class QTOPIAPIM_EXPORT TaskIteratorMachine : public QShared
 {
 public:
     virtual ~TaskIteratorMachine() {}
@@ -48,20 +49,21 @@ public:
     virtual const PrTask *toFirst() = 0;
     virtual const PrTask *toLast() = 0;
 
-    virtual const PrTask *next() = 0;
+   virtual const PrTask *next() = 0;
     virtual const PrTask *prev() = 0;
 
     virtual const PrTask *current() const = 0;
 };
 
-class TaskIO : public QObject {
+class QTOPIAPIM_EXPORT TaskIO : public QObject {
 
 Q_OBJECT
 
 public:
     enum AccessMode {
 	ReadOnly,
-	ReadWrite
+	ReadWrite,
+	WriteOnly
     };
 
     TaskIO(AccessMode m) : amode(m) { }

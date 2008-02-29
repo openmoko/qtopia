@@ -29,9 +29,10 @@
 #include <qtopia/pim/contact.h>
 
 class ContactIO;
-class PrContact : public PimContact {
+class QTOPIAPIM_EXPORT PrContact : public PimContact {
 public:
     PrContact() : PimContact() {}
+    PrContact( const PimContact &t) : PimContact(t) { }
     PrContact(const PrContact &t) : PimContact(t) {}
 
     void setUid(QUuid u) { p_setUid(u); }
@@ -41,7 +42,7 @@ public:
 };
 
 
-class ContactIteratorMachine : public QShared
+class QTOPIAPIM_EXPORT ContactIteratorMachine : public QShared
 {
 public:
     virtual ~ContactIteratorMachine() {}
@@ -57,14 +58,15 @@ public:
     virtual const PrContact *current() const = 0;
 };
 
-class ContactIO : public QObject {
+class QTOPIAPIM_EXPORT ContactIO : public QObject {
 
 Q_OBJECT
 
 public:
     enum AccessMode {
 	ReadOnly,
-	ReadWrite
+	ReadWrite,
+	WriteOnly
     };
 
     ContactIO(AccessMode m) : amode(m) { }
@@ -73,6 +75,9 @@ public:
     AccessMode accessMode() const { return amode; }
 
     virtual ContactIteratorMachine *begin() const = 0;
+
+    virtual PrContact personal() const = 0;
+    virtual void setAsPersonal(const QUuid &) = 0;
 
 signals:
     void contactsUpdated();

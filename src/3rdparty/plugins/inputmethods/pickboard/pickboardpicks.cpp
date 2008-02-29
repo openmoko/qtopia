@@ -20,7 +20,7 @@
 #include "pickboardpicks.h"
 #include "pickboardcfg.h"
 
-#include <qpe/global.h>
+#include <qtopia/global.h>
 
 #include <qpainter.h>
 #include <qlist.h>

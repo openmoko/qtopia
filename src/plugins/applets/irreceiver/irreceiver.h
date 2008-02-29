@@ -20,7 +20,7 @@
 #ifndef __CLIPBOARD_APPLET_H__
 #define __CLIPBOARD_APPLET_H__
 
-#include <qpe/accessory/accessory.h>
+#include <qtopia/accessory.h>
 
 #include <qwidget.h>
 #include <qpixmap.h>
@@ -33,18 +33,21 @@ public:
     IRReceiverApplet( QWidget *parent = 0, const char *name=0 );
     ~IRReceiverApplet();
 
-    enum State { Off, On, On5Mins /*, On1Item*/ };
+    enum State { Off, On, On5Mins, On1Item };
 
 private slots:
     void activate(int choice);
+    void obexMessage(const QCString&, const QByteArray&);
 
 private:
+    void setState(State);
     void timerEvent(QTimerEvent*);
     void service(const QString& command);
 
     Accessory* acc;
     int it[4];
     int tid;
+    State state;
 };
 
 

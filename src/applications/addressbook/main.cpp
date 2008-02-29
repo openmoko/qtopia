@@ -20,9 +20,9 @@
 
 #include "addressbook.h"
 
-#include <qpe/qpeapplication.h>
+#include <qtopia/qpeapplication.h>
 #ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
 #include <qstring.h>
 

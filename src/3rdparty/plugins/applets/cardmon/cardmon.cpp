@@ -13,7 +13,7 @@
 
 #include "cardmon.h"
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
 #ifdef QWS
 #include <qcopchannel_qws.h>

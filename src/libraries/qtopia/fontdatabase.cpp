@@ -18,11 +18,11 @@
 **
 **********************************************************************/
 
+#include <qtopia/qlibrary.h>
 #include "qpeapplication.h"
 #include "fontfactoryinterface.h"
 #include "fontdatabase.h"
 
-#include <qpe/qlibrary.h>
 
 #ifdef QWS
 #include <qfontmanager_qws.h>
@@ -71,6 +71,10 @@ QValueList<FontFactory> *FontDatabase::factoryList = 0;
   should be used only when necessary. You can force the loading of
   font renderer plugins with loadRenderers().
 
+  Note that on the SHARP SL5500, some fonts return pointSizes() that
+  are 10 times too large. A heuristic for detecting this case is that
+  the first size in the list is more than 70.
+
   \ingroup qtopiaemb
 */
 
@@ -92,7 +96,23 @@ FontDatabase::FontDatabase()
 QStringList FontDatabase::families() const
 {
 #ifndef QT_NO_FONTDATABASE
-    return QFontDatabase::families();
+    QStringList f = QFontDatabase::families();
+    QStringList r;
+    for (QStringList::ConstIterator it=f.begin(); it!=f.end(); ++it) {
+	QString s = *it;
+	int dash=s.find('-');
+	if ( dash>=0 ) {
+	    // Skip foundry-based duplicates.
+	    // This allows a "font family" to include fonts from
+	    // different foundries. In particular, it allows bitmap
+	    // and TTF versions of fonts.
+	    s=s.mid(dash+1);
+	    if ( r.contains(s) )
+		continue;
+	}
+	r.append(s);
+    }
+    return r;
 #else
     QStringList list;
     QDict<void> familyDict;
@@ -146,7 +166,7 @@ QValueList<int> FontDatabase::standardSizes()
 */
 void FontDatabase::loadRenderers()
 {
-#ifndef QT_NO_COMPONENT
+#if !defined(QT_NO_COMPONENT) && (QT_VERSION-0 < 0x030000)
     if ( !factoryList )
 	factoryList = new QValueList<FontFactory>;
 
@@ -161,13 +181,22 @@ void FontDatabase::loadRenderers()
     }
     factoryList->clear();
 
-    QString path = QPEApplication::qpeDir() + "/plugins/fontfactories";
+    QString path = QPEApplication::qpeDir() + "plugins/fontfactories";
+#ifndef Q_OS_WIN32
     QDir dir( path, "lib*.so" );
+#else
+    QDir dir ( path, "*.dll");
+#endif
+
     QStringList list = dir.entryList();
     QStringList::Iterator it;
     for ( it = list.begin(); it != list.end(); ++it ) {
 	FontFactoryInterface *iface = 0;
+#if (QT_VERSION-0 >= 0x030000)
+	QComLibrary *lib = new QComLibrary( path + "/" + *it );
+#else
 	QLibrary *lib = new QLibrary( path + "/" + *it );
+#endif
 	if ( lib->queryInterface( IID_FontFactory, (QUnknownInterface**)&iface ) == QS_OK ) {
 	    FontFactory factory;
 	    factory.library = lib;

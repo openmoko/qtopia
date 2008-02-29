@@ -26,10 +26,18 @@
 #include <qlist.h>
 #include <qdatetime.h>
 #include <qtopia/pim/task.h>
+#include <qtopia/pim/qtopiapim.h>
 #include "taskio_p.h"
 #include "xmlio_p.h"
 
-class SortedTasks : public SortedRecords<PimTask>
+#ifdef QTOPIAPIM_TEMPLATEDLL
+//MOC_SKIP_BEGIN
+template class QTOPIAPIM_EXPORT QList<class PrTask>; 
+template class QTOPIAPIM_EXPORT QListIterator<class PrTask>; 
+//MOC_SKIP_END
+#endif
+
+class QTOPIAPIM_EXPORT SortedTasks : public SortedRecords<PimTask>
 {
 public:
     SortedTasks();
@@ -39,21 +47,11 @@ public:
 
     int compareItems(QCollection::Item d1, QCollection::Item d2);
 
-    enum SortOrder {
-	Priority,
-	DueDate,
-	Description,
-	Completed
-    };
-
-    void setSortOrder(SortOrder);
-    SortOrder sortOrder() const;
-
 private:
-    SortOrder so;
+    int compareTaskField(int f, PrTask *t1, PrTask *t2);
 };
 
-class TodoXmlIterator : public TaskIteratorMachine
+class QTOPIAPIM_EXPORT TodoXmlIterator : public TaskIteratorMachine
 {
 public:
     TodoXmlIterator(const QList<PrTask>&list) : it(list) {}
@@ -78,25 +76,16 @@ private:
     QListIterator<PrTask>it;
 };
 
-class TodoXmlIO : public TaskIO, private PimXmlIO {
+class QTOPIAPIM_EXPORT TodoXmlIO : public TaskIO, public PimXmlIO {
 
     Q_OBJECT
 
  public:
-  TodoXmlIO(AccessMode m);
-  ~TodoXmlIO();
+  TodoXmlIO(AccessMode m,
+	    const QString &file = QString::null,
+	    const QString &journal = QString::null );
 
-  enum Attribute {
-      FCompleted = 0,
-      FHasDate,
-      FPriority,
-      FCategories,
-      FDescription,
-      FDateYear,
-      FDateMonth,
-      FDateDay,
-      FUid,
-  };
+  ~TodoXmlIO();
 
   TaskIteratorMachine *begin() const;
 
@@ -121,10 +110,11 @@ class TodoXmlIO : public TaskIO, private PimXmlIO {
   // external methods.. use PimTask
   void updateTask(const PimTask& task);
   void removeTask(const PimTask& task);
-  void addTask(const PimTask& task);
+  void addTask(const PimTask& task, bool assignUid = TRUE);
      
-  SortedTasks::SortOrder sortOrder() const;
-  void setSortOrder(SortedTasks::SortOrder );
+  int sortKey() const;
+  bool sortAcending() const;
+  void setSorting(int key, bool ascending = FALSE);
 
   int filter() const;
   void setFilter(int);
@@ -135,22 +125,18 @@ class TodoXmlIO : public TaskIO, private PimXmlIO {
   void ensureDataCurrent(bool = FALSE);
 
 protected:
-  const QString dataFilename() const;
-  const QString journalFilename() const;
-
   const char *recordStart() const;
   const char *listStart() const;
   const char *listEnd() const;
 
+  virtual QString recordToXml(const PimRecord *);
+  
   PimRecord *createRecord() const;
 
   bool internalAddRecord(PimRecord *);
   bool internalRemoveRecord(PimRecord *);
   bool internalUpdateRecord(PimRecord *);
 
-  QString recordToXml(const PimRecord *);
-  void assignField(PimRecord *, const QCString &attr, const QString &value);
-  
   bool select(const PrTask &) const;
 
 protected slots:
@@ -162,7 +148,6 @@ private:
   SortedTasks m_Filtered;
   int cFilter;
   bool cCompFilter;
-  QAsciiDict<int> dict;
   bool needsSave;
 };
 

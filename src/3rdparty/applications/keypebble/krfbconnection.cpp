@@ -20,6 +20,8 @@ KRFBConnection::KRFBConnection( QObject *parent )
   updater = 0;
   decoder_ = 0;
   buffer_ = 0;
+
+  login = 0;
 }
 
 KRFBConnection::~KRFBConnection()
@@ -78,6 +80,12 @@ void KRFBConnection::disconnectDone()
   delete updater;
   delete decoder_;
   delete buffer_;
+  delete login;
+
+  updater = 0;
+  decoder_ = 0;
+  buffer_ = 0;
+  login = 0;
   emit disconnected();
 }
 

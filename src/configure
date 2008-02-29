@@ -8,8 +8,15 @@
 PLATFORM=generic
 SHARING=shared
 DEBUG=
+QDESKTOP=
 X11=
 QCONFIGARG=
+ECONFIG="CONFIG+=embedded"
+QMAKE_LFLAGS="QMAKE_LFLAGS=-Wl,-rpath,$QPEDIR/lib"
+SINGLE="CONFIG+=multiprocess"
+SINGLESINGLE="CONFIG+=singleprocess DEFINES+=SINGLE_APP"
+STATIC=
+STATICSTATIC="CONFIG+=static DEFINES+=QT_NO_COMPONENT"
 
 touch .test.qtopia.
 if [ '!' -f ${QPEDIR}/src/.test.qtopia. ];
@@ -37,6 +44,7 @@ VERSION_PAT=$(sed -n -e 's/.*QPE_VERSION "[0-9]*\.[0-9]*\.\([0-9]*\).*".*/\1/p' 
 
 TOMAKE=
 EXTRALIBS=
+lupdateargs=
 
 if grep -q 'VERSION_STR.*"3' $QTDIR/include/qglobal.h
 then
@@ -68,6 +76,25 @@ while [ -n "$1" ]; do
 	;;
    -static)
        SHARING=static
+       STATIC="$STATICSTATIC"
+	;;
+   -kde)
+	CONFIG_STR="$CONFIG_STR kde"
+	QT3=yes
+	;;
+   -rpath)
+	shift;
+	A="$A $1"
+	QMAKE_LFLAGS="QMAKE_LFLAGS=-Wl,-rpath,$1"
+	QT3=yes
+	;;
+   -noobsolete)
+	lupdateargs="$lupdateargs -noobsolete"
+	;;
+   -qtopiadesktop)
+	QDESKTOP="/qdesktop"
+	ECONFIG="CONFIG+=qdesktop"
+        QT3=yes
 	;;
    -qconfig)
 	# optional way to specify the qconfig-qtopia.h is to pass -qconfig qtopia
@@ -91,6 +118,9 @@ while [ -n "$1" ]; do
    -qt3)
        QT3=yes
        ;;
+    -single)
+	SINGLE="$SINGLESINGLE"
+	;;
     *)
 	HELP=yes;;
    esac
@@ -98,14 +128,14 @@ while [ -n "$1" ]; do
    shift
 done
 
-TARGET=configs/$PLATFORM-$SHARING$X11$DEBUG
+TARGET=configs$QDESKTOP/$PLATFORM-$SHARING$X11$DEBUG
 
 if [ '!' -f $TARGET ]
 then
-    if [ -f configs/linux-$PLATFORM-g++-$SHARING$X11$DEBUG ]
+    if [ -f configs$QDESKTOP/linux-$PLATFORM-g++-$SHARING$X11$DEBUG ]
     then
 	PLATFORM=linux-$PLATFORM-g++
-	TARGET=configs/$PLATFORM-$SHARING$X11$DEBUG
+	TARGET=configs$QDESKTOP/$PLATFORM-$SHARING$X11$DEBUG
     else
 	echo
 	echo '    The specified platform/compiler not supported: ' $TARGET
@@ -118,30 +148,45 @@ fi
 
 if [ "$HELP" = "yes" ]; then
     cat <<EOF
-Usage: $0 [-debug] [-release] [-shared] [-static] [-qt3] [-platform ...]
+Usage: $0 [-debug] [-release] [-shared] [-static] [-platform ...]
 
 The defaults (*) are usually acceptable.  Here is a short explanation of
 each option:
 
- *  -release ........... Compile and link Qt with debugging turned off.
-    -debug ............. Compile and link Qt with debugging turned on.
+ *  -release ........... Compile and link Qtopia with optimization turned on.
+    -debug ............. Compile and link Qtopia with debugging turned on.
 
- *  -shared ............ Create and use a shared Qt library (libqt.so)
-    -static ............ Create and use a static Qt library (libqt.a)
-
-    -qt3 ............... Configure for use with Qt 3.x
+ *  -shared ............ Create and use shared Qtopia libraries.
+    -static ............ Create and use static Qtopia libraries.
 
     -platform target ... The platform you are building on ($PLATFORM)
 EOF
-   exit 0;
+   exit 0
 fi
 
-rm -f libraries/qtopia/custom.h
-if [ -f libraries/qtopia/custom-$PLATFORM.h ]
-then
-    ln -s custom-$PLATFORM.h libraries/qtopia/custom.h
+if [ -n "$QDESKTOP" ]; then
+	rm -f libraries/qtopia/custom.h
+	rm -f libraries/qtopia/custom.cpp
+	ln -s custom-qdesktop.h libraries/qtopia/custom.h
+	ln -s custom-qdesktop.cpp libraries/qtopia/custom.cpp
 else
-    touch libraries/qtopia/custom.h
+    for ext in h cpp
+    do
+	rm -f libraries/qtopia/custom.$ext
+	if [ -f libraries/qtopia/custom-$PLATFORM.$ext ]
+	then
+	    ln -s custom-$PLATFORM.$ext libraries/qtopia/custom.$ext
+	else
+	    ln -s custom-linux-generic-g++.$ext libraries/qtopia/custom.$ext
+	fi
+    done
+fi
+
+rm -f ../etc/defaultbuttons.conf
+KEYARCH=$(echo $PLATFORM | sed -e 's/^[^-]*-\([^-]*\).*/\1/')
+if [ -f ../etc/defaultbuttons-$KEYARCH.conf ]
+then
+    cp ../etc/defaultbuttons-$KEYARCH.conf ../etc/defaultbuttons.conf
 fi
 
 mkdir -p ../include/qtopia
@@ -149,9 +194,18 @@ rm -rf ../include/qpe
 ln -s qtopia ../include/qpe
 mkdir -p ../include/qtopia/private
 
+# Need to rm the .h files for include qtopia now as it is not safe in the loop 
+# (Library order may change
+rm -f ../include/qtopia/*.h
+
 for LIBRARY in $(make showlibraries | grep -v '^make[^ ]*:')
 do
     case $LIBRARY in
+     libraries/qtopia1)
+	SRCDIR=../../src
+        ( cd ../include/qtopia; ln -s $SRCDIR/$LIBRARY/*.h .; \
+	for i in `find $SRCDIR/$LIBRARY -name *.ui`;do j=`echo $i | sed -e 's/ui$/h/'`;done )
+	;;
      libraries/qtopia*)
 	B=${LIBRARY#libraries/qtopia}
 	if [ -z "$B" ]
@@ -161,9 +215,21 @@ do
 	    SRCDIR=../../../src
 	fi
 	mkdir -p ../include/qtopia/$B
-	( cd ../include/qtopia/$B && rm -f *.h; ln -s $SRCDIR/$LIBRARY/*.h .; rm -f *_p.h; )
-    ;; *)
-	( cd ../include/qtopia; ln -s $SRCDIR/$LIBRARY/*.h .; )
+	if [ -z "$B" ]
+	then
+	    ( cd ../include/qtopia; ln -s $SRCDIR/$LIBRARY/*.h .; rm -f *_p.h; \
+	    for i in `find $SRCDIR/$LIBRARY -name *.ui`;do j=`echo $i | sed -e 's/ui$/h/'`;ln -s $j .;done )
+	else
+	    ( cd ../include/qtopia/$B && rm -f *.h; ln -s $SRCDIR/$LIBRARY/*.h .; rm -f *_p.h; \
+	    for i in `find $SRCDIR/$LIBRARY -name *.ui`;do j=`echo $i | sed -e 's/ui$/h/'`;ln -s $j .;done )
+	fi
+	;;
+    3rdparty/libraries/freetype)
+	# don't link, no header files.
+	;;
+	*)
+	( cd ../include/qtopia; ln -s $SRCDIR/$LIBRARY/*.h .; \
+	for i in `find $SRCDIR/$LIBRARY -name *.ui`;do j=`echo $i | sed -e 's/ui$/h/'`;ln -s $SRCDIR/$LIBRARY/$j .;done )
     esac
 done
 ( cd ../include/qtopia/private && rm -f *.h; ln -s ../../../src/libraries/qtopia/*_p.h .; ln -s ../../../src/libraries/qtopia/backend/*.h .;)
@@ -172,9 +238,6 @@ then
     mkdir -p ../include/qtopia/pim/private
     ( cd ../include/qtopia/pim/private && rm -f *.h; ln -s ../../../../src/libraries/qtopiapim/*_p.h .;)
 fi
-
-
-echo Creating makefiles...
 
 
 if [ "$QT3" = yes ]
@@ -187,7 +250,12 @@ fi
 H=`pwd`
 if [ -z "$TOMAKE" ]
 then
-    TOMAKE=`make showcomponents | grep -v '^make[^ ]*:'`
+    if [ "$QDESKTOP" = "/qdesktop" ]
+    then
+	TOMAKE=`make showdesktopcomponents | grep -v '^make[^ ]*:'`
+    else
+	TOMAKE=`make showcomponents | grep -v '^make[^ ]*:'`
+    fi
 fi
 
 if [ -f $TMAKEPATH/tmake.conf ]
@@ -202,7 +270,7 @@ then
     exit 1
 fi
 
-for a in $TOMAKE ; do
+for a in $TOMAKE server; do
     N=$a/Makefile
     M=$a/Makefile.in
     O=$a/Makefile.add
@@ -212,22 +280,49 @@ for a in $TOMAKE ; do
     then
 	if [ -f $a/$f.pro ]
 	then
+	    if [ $f != "server" ] && [ "$SINGLE" = "$SINGLESINGLE" ]
+	    then
+		if ! grep -e '^singleprocess:' $a/$f.pro >/dev/null 2>&1
+		then
+		    echo 'all clean distclean:' > $N
+		    echo -e "\t@echo Not building $f\n" >> $N
+		    continue
+		fi
+
+		if [ `echo $a | grep -v plugins` ] || [ $SHARING = "static" ]
+		then
+		    lib=`grep '^LIBS' $a/$f.pro | cut -d'=' -f2`
+		    SERVERLIBS="$SERVERLIBS ${lib}"
+		    lib=`grep '^[.*:]*static:[.*:]*LIBS' $a/$f.pro | cut -d'=' -f2`
+		    SERVERLIBS="$SERVERLIBS ${lib}"
+		    targ=`grep '^TARGET' $a/$f.pro | cut -d'=' -f2 | sed -e 's/ //g'`
+		    if [ -z $targ ];
+		    then
+			targ=$f
+		    fi
+		    SERVERLIBS="$SERVERLIBS -l${targ}"
+		fi
+		if [ $a = "libraries/qtopiacalc" ] || [ $a = "applications/mediaplayer" ] || [ $a = "3rdparty/plugins/codecs/libffmpeg" ]
+		then
+		    echo -e "\nHacking $a\n"
+		    HACK="CONFIG+=static DEFINES+=QT_NO_COMPONENT"
+		else
+		    unset HACK
+		fi
+	    fi
+
 	    (   cd $a;
-		tmake $QCONFIGARG CONFIG+=embedded $VCONFIG LIBS+="$EXTRALIBS" \
+		if [ "$f" = server ]
+		then 
+		    EXTRALIBS="$SERVERLIBS $EXTRALIBS"
+		fi
+		tmake $HACK $STATIC $SINGLE $VCONFIG $QCONFIGARG $ECONFIG LIBS+="$EXTRALIBS" \
+		OBJECTS_DIR="\$(OBJECTS_DIR)" MOC_DIR="\$(MOC_DIR)" INCLUDEPATH+="\$(MOC_DIR)" \
 		    -t $H/qt/tmake/propagate.t $f.pro |
 		    sed -e "s|$QTDIR|\$(QTDIR)|g" -e "s|$QPEDIR|\$(QPEDIR)|g" >Makefile.in;
 	    )
 	    echo -n "."
 	    appname=`grep '^TARGET' $a/$f.pro | sed 's/^TARGET.*=//' | sed 's/ //g'`
-	    translation=`grep '^TRANSLATION' $a/$f.pro | sed 's,^TRANSL.*=.*i18n\/.*\/,,' | sed 's/ //g' | sed 's,\.ts.*,,' | sed 's,^lib,,' `
-	    if [ -n "$translation" -a -n "$appname" ]
-	    then
-		if [ $appname != $translation ]
-		then 
-		    echo
-		    echo "Warning: translation and appname disagree in $a/$f.pro"
-		fi
-	    fi
 	fi
     fi
 
@@ -235,7 +330,7 @@ for a in $TOMAKE ; do
     then
        DEFAULTTARGET=all
     fi 
-	
+
 
     CONTROL=`ls $a/*.control 2> /dev/null`
     if [ $? -eq 0 ]
@@ -265,6 +360,7 @@ EOF
 
     SED=
     PLATFORM_CFLAGS=
+    OBJECTS_DIR=".obj\\/$PLATFORM$QDESKTOP"
 
     if [ "$f" = "embeddedkonsole" ]
     then
@@ -274,6 +370,99 @@ EOF
 		PLATFORM_CFLAGS="-DHAVE_OPENPTY"
 	    ;; *)
 		SED=
+	esac
+    elif [ "$f" = "libffmpeg" ]
+    then
+	PLATFORM_CFLAGS="-w -O5"
+	# Patch our Makefile.in file with the platform specifics for the libffmpeg plugin library
+	case $PLATFORM
+	in
+	      *arm*|*ipaq*|*sharp*)
+		#SED="$SED /SOURCES.*=/s/=/= yuv2rgb_arm4l.S /;"
+		#SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/yuv2rgb_arm4l.o /;"
+		#echo -e "\n.obj/$PLATFORM$QDESKTOP/yuv2rgb_arm4l.o: yuv2rgb_arm4l.S\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+	    ;; *)
+	esac
+    elif [ "$f" = "libavformat" ]
+    then
+	# Patch our Makefile.in file with the platform specifics for the libavformat library
+	case $PLATFORM
+	in
+	      *x86*|*mmx*)
+		PLATFORM_CFLAGS="-w -O5 -DARCH_X86=1"
+	    ;;*arm*|*ipaq*|*sharp*)
+		PLATFORM_CFLAGS="-w -O5 -DARCH_ARMV4L=1"
+	    ;;*alpha*)
+		PLATFORM_CFLAGS="-w -O5 -DARCH_ALPHA=1"
+	    ;;*powerpc*|*ppc*|*altivec*)
+		PLATFORM_CFLAGS="-w -O5 -DARCH_POWERPC=1 -DWORDS_BIGENDIAN=1"
+	    ;;*ps2*|*mmi*)
+		PLATFORM_CFLAGS="-w -O5 -DARCH_MIPS=1 -DWORDS_BIGENDIAN=1"
+	    ;;*cassiopeia*|*mips*)
+		PLATFORM_CFLAGS="-w -O5 -DARCH_MIPS=1"
+	    ;; *)
+		PLATFORM_CFLAGS="-w -O5"
+	esac
+    elif [ "$f" = "libavcodec" ]
+    then
+	# Patch our Makefile.in file with the platform specifics for the libavcodec library
+	case $PLATFORM
+	in
+	      *x86*|*mmx*)
+		# For x86 try to compile the MMX optimized code (some alternative 3DNow and SSE optimization also appear to exist in libavcodec).
+		PLATFORM_CFLAGS="-w -O5 -DARCH_X86=1 -DHAVE_MMX=1"
+		SED="$SED /SOURCES.*=/s/=/= i386\\/fdct_mmx.c i386\\/cputest.c i386\\/dsputil_mmx.c i386\\/mpegvideo_mmx.c i386\\/idct_mmx.c i386\\/motion_est_mmx.c i386\\/simple_idct_mmx.c \ /;"
+		SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/fdct_mmx.o $OBJECTS_DIR\\/cputest.o $OBJECTS_DIR\\/dsputil_mmx.o $OBJECTS_DIR\\/mpegvideo_mmx.o $OBJECTS_DIR\\/idct_mmx.o $OBJECTS_DIR\\/motion_est_mmx.o $OBJECTS_DIR\\/simple_idct_mmx.o \ /;"
+		echo -e "\n.obj/$PLATFORM$QDESKTOP/fdct_mmx.o: i386/fdct_mmx.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		echo -e "\n.obj/$PLATFORM$QDESKTOP/cputest.o: i386/cputest.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		echo -e "\n.obj/$PLATFORM$QDESKTOP/dsputil_mmx.o: i386/dsputil_mmx.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		echo -e "\n.obj/$PLATFORM$QDESKTOP/mpegvideo_mmx.o: i386/mpegvideo_mmx.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		echo -e "\n.obj/$PLATFORM$QDESKTOP/idct_mmx.o: i386/idct_mmx.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		echo -e "\n.obj/$PLATFORM$QDESKTOP/motion_est_mmx.o: i386/motion_est_mmx.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		echo -e "\n.obj/$PLATFORM$QDESKTOP/simple_idct_mmx.o: i386/simple_idct_mmx.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		#    %_sse.o : %_sse.c
+		#	    $(CC) $(CFLAGS) -msse -c -o $@ $< 
+		#    %_3dnow.o : %_3dnow.c
+		#	    $(CC) $(CFLAGS) -m3dnow -c -o $@ $< 
+	    ;;*arm*|*ipaq*|*sharp*)
+		# For StrongARM processors, compile these extra optimized source code files.
+		PLATFORM_CFLAGS="-w -O5 -DARCH_ARMV4L=1"
+		SED="$SED /SOURCES.*=/s/=/= armv4l\\/dsputil_arm.c armv4l\\/jrevdct_arm.S armv4l\\/mpegvideo_arm.c \ /;"
+		SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/dsputil_arm.o $OBJECTS_DIR\\/jrevdct_arm.o $OBJECTS_DIR\\/mpegvideo_arm.o \ /;"
+		echo -e "\n.obj/$PLATFORM$QDESKTOP/dsputil_arm.o: armv4l/dsputil_arm.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		echo -e "\n.obj/$PLATFORM$QDESKTOP/jrevdct_arm.o: armv4l/jrevdct_arm.S\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		echo -e "\n.obj/$PLATFORM$QDESKTOP/mpegvideo_arm.o: armv4l/mpegvideo_arm.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+	    ;;*alpha*)
+		# Ignore for now. Some alpha optimizations exist, but we have no hardware to test against :(
+		PLATFORM_CFLAGS="-w -O5 -DARCH_ALPHA=1"
+		echo There are alpha optimizations for libffmpeg, but they have not been configured.
+	    ;;*powerpc*|*ppc*|*altivec*)
+		# For PowerPC try to compile the AltiVec optimizations
+		PLATFORM_CFLAGS="-w -O5 -DARCH_POWERPC=1 -DWORDS_BIGENDIAN=1 -faltivec -DHAVE_ALTIVEC=1"
+		SED="$SED /SOURCES.*=/s/=/= ppc\\/dsputil_altivec.c ppc\\/dsputil_ppc.c ppc\\/idct_altivec.c ppc\\/mpegvideo_altivec.c ppc\\/mpegvideo_ppc.c \ /;"
+		SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/dsputil_altivec.o $OBJECTS_DIR\\/dsputil_ppc.o $OBJECTS_DIR\\/idct_altivec.o $OBJECTS_DIR\\/mpegvideo_altivec.o $OBJECTS_DIR\\/mpegvideo_ppc.o \ /;"
+		echo -e "\n.obj/$PLATFORM$QDESKTOP/dsputil_altivec.o: ppc/dsputil_altivec.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		echo -e "\n.obj/$PLATFORM$QDESKTOP/dsputil_ppc.o: ppc/dsputil_ppc.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		echo -e "\n.obj/$PLATFORM$QDESKTOP/idct_altivec.o: ppc/idct_altivec.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		echo -e "\n.obj/$PLATFORM$QDESKTOP/mpegvideo_altivec.o: ppc/mpegvideo_altivec.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		echo -e "\n.obj/$PLATFORM$QDESKTOP/mpegvideo_ppc.o: ppc/mpegvideo_ppc.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		echo Configuring AltiVec optimizations for PowerPC for the libffmpeg plugin.
+	    ;;*ps2*|*mmi*)
+		# For MMI optimizations
+		PLATFORM_CFLAGS="-w -O5 -DARCH_MIPS=1 -DWORDS_BIGENDIAN=1 -DHAVE_MMI=1"
+		SED="$SED /SOURCES.*=/s/=/= ps2\\/dsputil_mmi.c ps2\\/idct_mmi.c ps2\\/mpegvideo_mmi.c \ /;"
+		SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/dsputil_mmi.o $OBJECTS_DIR\\/idct_mmi.o $OBJECTS_DIR\\/mpegvideo_mmi.o \ /;"
+		echo -e "\n.obj/$PLATFORM$QDESKTOP/dsputil_mmi.o: ps2/dsputil_mmi.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		echo -e "\n.obj/$PLATFORM$QDESKTOP/idct_mmi.o: ps2/idct_mmi.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		echo -e "\n.obj/$PLATFORM$QDESKTOP/mpegvideo_mmi.o: ps2/mpegvideo_mmi.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		echo Configuring MMI optimizations for the libffmpeg plugin.
+	    ;;*cassiopeia*|*mips*)
+		# For MIPS set optimizations to O5
+		PLATFORM_CFLAGS="-w -O5 -DARCH_MIPS=1"
+		echo Configuring MIPS settings for the libffmpeg plugin.
+	    ;; *)
+		# For everything else:
+		PLATFORM_CFLAGS="-w -O5"
 	esac
     elif [ "$f" = "libmpeg3" ]
     then
@@ -287,6 +476,7 @@ EOF
 		# "-funroll-loops -fomit-frame-pointer -malign-loops=2 -malign-jumps=2 -malign-functions=2 -march=i486"
 		PLATFORM_CFLAGS="-DHAVE_MMX -DHAVE_CSS"
 		SED="$SED /SOURCES.*=/s/=/= video\\/mmxidct.S video\\/reconmmx.s\ /;"
+		SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/mmxidct.o $OBJECTS_DIR\\/reconmmx.o\ /;"
 	    # For generic turn on using floating point
 	    ;; *generic*)
 		PLATFORM_CFLAGS=""
@@ -309,13 +499,11 @@ EOF
 	    ;; *ipaq*)
 		PLATFORM_CFLAGS="-DFPM_ARM"
 		SED="$SED /SOURCES.*=/s/=/= idmt_arm.S /;"
-	    # For generic platforms use the C 64-bit implementation
+		SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/idmt_arm.o /;"
+	    # For generic and other platforms use the C 64-bit implementation
 	    ;; *generic*)
-		PLATFORM_CFLAGS="-DFPM_64BIT"
-	    # For 'other platforms' use the ARM code
 	    ;; *)
-		PLATFORM_CFLAGS="-DFPM_ARM"
-		SED="$SED /SOURCES.*=/s/=/= idmt_arm.S /;"
+		PLATFORM_CFLAGS="-DFPM_64BIT"
 	esac
     elif [ "$X11" = x11 -a "$f" = library ]
     then
@@ -331,6 +519,16 @@ EOF
 	SED="$SED /CXXFLAGS.*=.*/s/\$/ $PLATFORM_CFLAGS/;"
     fi
     cat $TARGET >> $N
+
+    echo >> $N
+    echo "# Platform output directories" >> $N
+    echo MOC_DIR = .moc/$PLATFORM$QDESKTOP/ >> $N
+    echo OBJECTS_DIR = .obj/$PLATFORM$QDESKTOP/ >> $N
+    echo >> $N
+
+    mkdir -p $a/.moc/$PLATFORM$QDESKTOP >/dev/null 2>&1
+    mkdir -p $a/.obj/$PLATFORM$QDESKTOP >/dev/null 2>&1
+
     if [ -n "$SED" ]
     then
 	sed -e "$SED" $M >> $N
@@ -354,10 +552,18 @@ EOF
     cat >> $N <<EOF
 
 lupdate:
-	lupdate $f.pro
+	sed -e 's/\$\$\$\$QTOPIA1DIR[^ ]*//' \
+	    -e 's/^static:.*//' \
+	    <$f.pro >t\$\$\$\$.pro ;\
+	lupdate $lupdateargs t\$\$\$\$.pro ;\
+	rm t\$\$\$\$.pro
+EOF
+
+    cat >> $N <<EOF
 
 lrelease:
 	lrelease $f.pro
+	\$(QPEDIR)/bin/qtopia-linstall $f.pro
 
 ipkg: $IPKGDEP # among other things...
 	CTL="\$(CONTROL)"; for ctrl in \$\$CTL; do cd \$(QPEDIR)/ipkg; ../bin/mkipks \$(QPEDIR)/src/\$\$ctrl; done
@@ -386,6 +592,6 @@ done
 
 MAKE=make
 echo
-echo "QPE is now configured for building. Just run $MAKE (or $MAKE single)."
+echo "QPE is now configured for building. Just run $MAKE."
 echo "To reconfigure, run $MAKE clean and configure."
 echo

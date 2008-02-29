@@ -3,7 +3,7 @@ Priority: required
 Section: qpe/system
 Maintainer: Trolltech (www.trolltech.com)
 Architecture: arm
-Version: 1.0.0-4
+Version: 1.0.0-9
 Depends: qpe-freetype
 Description: A sample TTF font
  A sample TTF font

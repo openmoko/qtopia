@@ -35,15 +35,16 @@ FreecellCardGame::FreecellCardGame(QCanvas *c, bool snap, QWidget *parent) : Can
     int spacing = 0;
     spaceBetweenPiles--;
 
-    for (int i = 0; i < 4; i++) {
+    int i;
+    for ( i = 0; i < 4; i++) {
 	freecellPiles[i] = new FreecellFreecellPile( xOrigin + i * spaceBetweenPiles, 10, canvas() );
 	addCardPile(freecellPiles[i]);
     }
-    for (int i = 0; i < 4; i++) {
+    for ( i = 0; i < 4; i++) {
 	discardPiles[i] = new FreecellDiscardPile( xOrigin + spacing + 6 + (i + 4) * spaceBetweenPiles, 10, canvas() );
 	addCardPile(discardPiles[i]);
     }
-    for (int i = 0; i < 8; i++) {
+    for ( i = 0; i < 8; i++) {
 	workingPiles[i] = new FreecellWorkingPile( xOrigin + spacing + 2 + i * spaceBetweenPiles, 15 + CardMetrics::height(), canvas() );
 	addCardPile(workingPiles[i]);
     }
@@ -95,20 +96,20 @@ void FreecellCardGame::readConfig( Config& cfg )
     beginDealing();
 
     highestZ = 1;
-
-    for (int k = 0; k < 4; k++) {
+    int k;
+    for ( k = 0; k < 4; k++) {
 	QString pile;
 	pile.sprintf( "FreeCellPile%i", k );
 	readPile( cfg, freecellPiles[k], pile, highestZ );
     }
 
-    for (int k = 0; k < 4; k++) {
+    for ( k = 0; k < 4; k++) {
 	QString pile;
 	pile.sprintf( "DiscardPile%i", k );
 	readPile( cfg, discardPiles[k], pile, highestZ );
     }
 
-    for (int k = 0; k < 8; k++) {
+    for ( k = 0; k < 8; k++) {
 	QString pile;
 	pile.sprintf( "WorkingPile%i", k );
 	readPile( cfg, workingPiles[k], pile, highestZ );
@@ -123,17 +124,18 @@ void FreecellCardGame::readConfig( Config& cfg )
 void FreecellCardGame::writeConfig( Config& cfg )
 {
     cfg.setGroup("GameState");
-    for ( int i = 0; i < 4; i++ ) {
+    int i;
+    for ( i = 0; i < 4; i++ ) {
 	QString pile;
 	pile.sprintf( "FreeCellPile%i", i );
 	freecellPiles[i]->writeConfig( cfg, pile );
     }
-    for ( int i = 0; i < 4; i++ ) {
+    for ( i = 0; i < 4; i++ ) {
 	QString pile;
 	pile.sprintf( "DiscardPile%i", i );
 	discardPiles[i]->writeConfig( cfg, pile );
     }
-    for ( int i = 0; i < 8; i++ ) {
+    for ( i = 0; i < 8; i++ ) {
 	QString pile;
 	pile.sprintf( "WorkingPile%i", i );
 	workingPiles[i]->writeConfig( cfg, pile );

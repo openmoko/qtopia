@@ -21,10 +21,6 @@
 #ifndef __TASKBAR_H__
 #define __TASKBAR_H__
 
-#ifdef QT_QWS_CUSTOM
-#include <qpe/custom.h>
-#endif
-
 #include <qhbox.h>
 
 class QLabel;
@@ -59,6 +55,7 @@ public slots:
     void toggleNumLockState();
     void toggleCapsLockState();
     void toggleSymbolInput();
+    void calcMaxWindowRect();
 
 protected:
     void resizeEvent( QResizeEvent * );
@@ -66,7 +63,6 @@ protected:
     void setStatusMessage( const QString &text );
     
 private slots:
-    void calcMaxWindowRect();
     void receive( const QCString &msg, const QByteArray &data );
 
 private:

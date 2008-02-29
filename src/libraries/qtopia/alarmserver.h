@@ -23,7 +23,7 @@
 #include <qtopia/qpeglobal.h>
 #include <qstring.h>
 #include <qdatetime.h>
-
+ 
 class QTOPIA_EXPORT AlarmServer
 {
 public:

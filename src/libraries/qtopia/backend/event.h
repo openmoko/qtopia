@@ -21,9 +21,13 @@
 #ifndef __EVENT_H__
 #define __EVENT_H__
 
+#include <qtopia/qpeglobal.h>
 #include <qdatetime.h>
 #include <qvaluelist.h>
 #include <qcolor.h>
+
+#include <qmap.h>
+#include <qstring.h>
 
 #ifdef PALMTOPCENTER
 #include <common/qsorter.h>
@@ -99,41 +103,20 @@ public:
     void setType( Type t ); // Don't use me.
     Type type() const; // Don't use me.
 
-    void setAllDay(bool);
-    bool isAllDay() const;
-
     void setStart( const QDateTime &d );
     void setStart( time_t time ); // don't use me.
-    QDateTime start( ) const;
-    QDateTime start( bool actual ) const; // don't use me.
+    QDateTime start( bool actual=FALSE ) const; // don't use me.
     time_t startTime() const { return startUTC; } // don't use me.
     void setEnd( const QDateTime &e );
     void setEnd( time_t time ); // don't use me
-    QDateTime end( ) const;
-    QDateTime end( bool actual ) const; // don't use me.
+    QDateTime end( bool actual=FALSE ) const; // don't use me.
     time_t endTime() const { return endUTC; } // don't use me.
     void setTimeZone( const QString & );
     const QString &timeZone() const;
-    void setAlarm( int minutes, SoundTypeChoice );
-    void clearAlarm();
     void setAlarm( bool b, int minutes, SoundTypeChoice ); // Don't use me.
     bool hasAlarm() const;
-    int alarmDelay() const;
     int alarmTime() const; // Don't use me.
     SoundTypeChoice alarmSound() const;
-
-    RepeatType repeatType() const;
-    int frequency() const;
-    int weekOffset() const;
-    QDate repeatTill() const;
-    bool repeatForever() const;
-    bool repeatOnWeekDay(int day) const;
-
-    void setRepeatType(RepeatType);
-    void setFrequency(int);
-    void setRepeatTill(const QDate &);
-    void setRepeatForever(bool);
-    void setRepeatOnWeekDay(int day, bool enable);
 
     // Don't use any of these.
     void setRepeat( bool b, const RepeatPattern &p );
@@ -164,7 +147,11 @@ public:
     static int monthDiff( const QDate& first, const QDate& second );
 
 private:
+#ifndef Q_OS_WIN32
     Qtopia::UidGen &uidGen() { return sUidGen; }
+#else
+    Qtopia::UidGen &uidGen();
+#endif
     static Qtopia::UidGen sUidGen;
 
     QString descript, locat, categ;
@@ -185,6 +172,9 @@ private:
     EventPrivate *d;
 
 };
+
+#define QTOPIA_DEFINED_EVENT
+#include <qtopia/qtopiawinexport.h>
 
 // Since an event spans multiple day, it is better to have this
 // class to represent a day instead of creating many
@@ -249,108 +239,8 @@ private:
 
 };
 
-inline void Event::setAlarm( int minutes, SoundTypeChoice s )
-{
-    setAlarm(TRUE, minutes, s);
-}
-
-inline void Event::clearAlarm()
-{
-    setAlarm(FALSE, 0, Silent);
-}
-
-inline int Event::alarmDelay() const
-{
-    return alarmTime();
-}
-
-inline void Event::setAllDay(bool enable)
-{
-    if (enable)
-	setType(AllDay);
-    else 
-	setType(Normal);
-}; 
-
-inline bool Event::isAllDay() const
-{
-    return type() == AllDay;
-}
-
-inline Event::RepeatType Event::repeatType() const
-{
-    return repeatPattern().type;
-}
-
-inline int Event::frequency() const
-{
-    return repeatPattern().frequency;
-}
-
-inline int Event::weekOffset() const
-{
-    if (start().date().day() == 1)
-	return 1;
-    return (start().date().day() - 1) / 7 + 1;
-}
-
-inline QDate Event::repeatTill() const
-{
-    return repeatPattern().endDate();
-}
-
-inline bool Event::repeatForever() const
-{
-    return !repeatPattern().hasEndDate;
-}
-
-inline void Event::setRepeatType(RepeatType t)
-{
-    pattern.type = t;
-}
-
-inline void Event::setFrequency(int f)
-{
-    pattern.frequency = f;
-}
-
-inline void Event::setRepeatTill(const QDate &d)
-{
-    pattern.setEndDate(d);
-    pattern.hasEndDate = TRUE;
-}
-
-inline void Event::setRepeatForever(bool b)
-{
-    if (!b == pattern.hasEndDate)
-	return;
-    if (!b && !pattern.hasEndDate)
-	pattern.setEndDate(end().date());
-    pattern.hasEndDate = !b;
-}
-
-inline bool Event::repeatOnWeekDay(int day) const
-{
-    if (pattern.type != Weekly)
-	return FALSE;
-    return ( (1 << (day - 1)) & pattern.days ) != 0;
-}
-
-inline void Event::setRepeatOnWeekDay(int day, bool enable)
-{
-    if ( repeatOnWeekDay( day ) != enable )
-	pattern.days ^= 1 << (day - 1);
-}
-
-inline QDateTime Event::start( ) const
-{
-    return start(FALSE);
-}
-
-inline QDateTime Event::end( ) const
-{
-    return end(FALSE);
-}
+#define QTOPIA_DEFINED_EFFECTIVEEVENTPRIVATE
+#include <qtopia/qtopiawinexport.h>
 
 #ifdef PALMTOPCENTER
 class QTOPIA_EXPORT EffectiveEventSizeSorter : public QSorter<EffectiveEvent>

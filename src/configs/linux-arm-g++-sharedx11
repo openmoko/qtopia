@@ -9,6 +9,7 @@ XROOT=/scratch/src/xfree86.41/xbinaries
 # Compiling with support libraries
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I$(XROOT)/usr/X11R6/include
 
 # Compiling YACC output

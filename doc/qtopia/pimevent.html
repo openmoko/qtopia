@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/src/libraries/qtopiapim/event.cpp:38 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/src/libraries/qtopiapim/event.cpp:40 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -57,6 +57,9 @@ body { background: #ffffff; color: black; }
 <li><div class=fn>bool <a href="#repeatForever"><b>repeatForever</b></a> () const</div></li>
 <li><div class=fn>bool <a href="#showOnNearest"><b>showOnNearest</b></a> () const</div></li>
 <li><div class=fn>bool <a href="#repeatOnWeekDay"><b>repeatOnWeekDay</b></a> ( int&nbsp;day ) const</div></li>
+<li><div class=fn>bool <a href="#isException"><b>isException</b></a> () const</div></li>
+<li><div class=fn>QUuid <a href="#seriesUid"><b>seriesUid</b></a> () const</div></li>
+<li><div class=fn>bool <a href="#hasExceptions"><b>hasExceptions</b></a> () const</div></li>
 <li><div class=fn>bool <a href="#isAllDay"><b>isAllDay</b></a> () const</div></li>
 <li><div class=fn>void <a href="#setAllDay"><b>setAllDay</b></a> ( bool&nbsp;enable = TRUE )</div></li>
 <li><div class=fn>void <a href="#setDescription"><b>setDescription</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;text )</div></li>
@@ -75,6 +78,7 @@ body { background: #ffffff; color: black; }
 <li><div class=fn>void <a href="#setRepeatOnWeekDay"><b>setRepeatOnWeekDay</b></a> ( int&nbsp;day, bool&nbsp;enable )</div></li>
 <li><div class=fn>QDate <a href="#nextOccurrence"><b>nextOccurrence</b></a> ( const&nbsp;QDate&nbsp;&amp;&nbsp;from, bool&nbsp;*&nbsp;ok = 0 ) const</div></li>
 <li><div class=fn>QColor <a href="#color"><b>color</b></a> () const</div></li>
+<li><div class=fn>virtual QMap&lt;int, QString&gt; <b>fields</b> () const</div></li>
 </ul>
 <h2>Static Public Members</h2>
 <ul>
@@ -166,7 +170,7 @@ returns the color associated with the event.
 <h3 class=fn>QDateTime <a name="endInTZ"></a>PimEvent::endInTZ ( const&nbsp;QString&nbsp;&amp;&nbsp;zone = QString::null ) const
 </h3>
 Returns the end time of the event in timezone <em>zone</em>.
-If <em>zone</em> is null, returns the end time of the event
+If <em>zone</em> is NULL, returns the end time of the event
 in the current time zone.
 <p> <p>See also <a href="#end">end</a>().
 
@@ -180,8 +184,15 @@ in the current time zone.
 </h3>
 
 <p> Returns TRUE if there is an alarm set for the event.  Otherwise
-returns FALSE. 
+returns FALSE.
 <p> <p>See also <a href="#setAlarm">setAlarm</a>().
+
+<h3 class=fn>bool <a name="hasExceptions"></a>PimEvent::hasExceptions () const
+</h3>
+Returns TRUE if the event is a repeating event 
+that has exceptions to the repeat pattern for that event.
+Otherwise returns FALSE.
+<p> <p>See also <a href="#isException">isException</a>() and <a href="#seriesUid">seriesUid</a>().
 
 <h3 class=fn>bool <a name="hasRepeat"></a>PimEvent::hasRepeat () const
 </h3>
@@ -195,6 +206,15 @@ returns FALSE.
 <p> Returns TRUE if the event is an all day event.  Otherwise returns FALSE.
 <p> <p>See also <a href="#setAllDay">setAllDay</a>().
 
+<h3 class=fn>bool <a name="isException"></a>PimEvent::isException () const
+</h3>
+Returns TRUE if this event represents an exception to the repeat
+pattern of another event.  Otherwise returns FALSE.
+<p> For example if a daily event at 10am
+starts on 11am one day, the 11am would be represent an exception
+to the 10am repeating event.
+<p> <p>See also <a href="#hasExceptions">hasExceptions</a>() and <a href="#seriesUid">seriesUid</a>().
+
 <h3 class=fn>QString <a name="location"></a>PimEvent::location () const
 </h3>
 
@@ -206,8 +226,8 @@ returns FALSE.
 Returns the first date on or after <em>from</em> that the event will next occur.
 If the event only occurs once (no repeat) will return the date of the
 start of the event if the start of the event is on or after <em>from</em>.
-<p> If <em>ok</em> is non-null, *ok is set to TRUE if the event occurs on or 
-after <em>from</em> and FALSE if the event does not occur on or after 
+<p> If <em>ok</em> is non-NULL, *ok is set to TRUE if the event occurs on or
+after <em>from</em> and FALSE if the event does not occur on or after
 <em>from</em>.
 
 <h3 class=fn>QString <a name="notes"></a>PimEvent::notes () const
@@ -241,7 +261,7 @@ Returns the date the event will repeat until
 <h3 class=fn>QDate <a name="repeatTillInTZ"></a>PimEvent::repeatTillInTZ ( const&nbsp;QString&nbsp;&amp;&nbsp;zone = QString::null ) const
 </h3>
 Returns the date the event will repeat till in timezone <em>zone</em>.
-If <em>zone</em> is null, returns the date the event will repeat till
+If <em>zone</em> is NULL, returns the date the event will repeat till
 in the current time zone.
 <p> <p>See also <a href="#repeatTill">repeatTill</a>().
 
@@ -250,6 +270,13 @@ in the current time zone.
 
 <p> Returns the RepeatType of the event.
 <p> <p>See also <a href="#setRepeatType">setRepeatType</a>() and <a href="#RepeatType-enum">RepeatType</a>.
+
+<h3 class=fn>QUuid <a name="seriesUid"></a>PimEvent::seriesUid () const
+</h3> 
+Returns the UID for the recurring event this event is an exception to.
+If this event does nto represent an exception to another repeating event,
+an empty UID will be returned.
+<p> <p>See also <a href="#hasExceptions">hasExceptions</a>() and <a href="#isException">isException</a>().
 
 <h3 class=fn>void <a name="setAlarm"></a>PimEvent::setAlarm ( int&nbsp;minutes, <a href="pimevent.html#SoundTypeChoice-enum">SoundTypeChoice</a>&nbsp;s )
 </h3>
@@ -299,7 +326,7 @@ will repeat until repeatUntil()
 
 <h3 class=fn>void <a name="setRepeatOnWeekDay"></a>PimEvent::setRepeatOnWeekDay ( int&nbsp;day, bool&nbsp;enable )
 </h3>
-Sets the event to repeat on the <em>day</em> of the wekif <em>enable</em> is TRUE.  
+Sets the event to repeat on the <em>day</em> of the wekif <em>enable</em> is TRUE.
 Otherwise sets the event not to repeat on the <em>day</em> of the week.
 <p> Event will always repeat on the day of the week that it started on.
 <p> <p>See also <a href="#repeatOnWeekDay">repeatOnWeekDay</a>().
@@ -353,7 +380,7 @@ if the exact date the event would occur is not a valid date.
 <h3 class=fn>QDateTime <a name="startInTZ"></a>PimEvent::startInTZ ( const&nbsp;QString&nbsp;&amp;&nbsp;zone = QString::null ) const
 </h3>
 Returns the start time of the event in timezone <em>zone</em>.
-If <em>zone</em> is null, returns the start time of the event
+If <em>zone</em> is NULL, returns the start time of the event
 in the current time zone.
 <p> <p>See also <a href="#start">start</a>().
 
@@ -375,7 +402,7 @@ if (weekOffset() == -1) event occurs in last week of the month.
 
 <h3 class=fn>void <a name="writeVCalendar"></a>PimEvent::writeVCalendar ( const&nbsp;QString&nbsp;&amp;&nbsp;filename, const&nbsp;QValueList&lt;PimEvent&gt;&nbsp;&amp;&nbsp;events )<tt> [static]</tt>
 </h3>
-Write the list of <em>events</em> as vCalendar objects to the file 
+Write the list of <em>events</em> as vCalendar objects to the file
 specified by <em>filename</em>.
 <p> <p>See also <a href="#readVCalendar">readVCalendar</a>().
 

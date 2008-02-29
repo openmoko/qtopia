@@ -22,14 +22,18 @@
 #include "addressbookaccess.h"
 #include "contactxmlio_p.h"
 
+#ifdef Q_WS_QWS
 #include <qtopia/qcopenvelope_qws.h>
-#include <qtopia/services/services.h>
+#include <qtopia/services.h>
+#endif
 
 #include <qmessagebox.h>
 #include <qlist.h>
 
 #include <sys/types.h>
+#ifndef Q_OS_WIN32
 #include <unistd.h>
+#endif
 #include <stdlib.h>
 
 /*! \class AddressBookAccess
@@ -38,7 +42,7 @@
   \brief The AddressBookAccess class provides a safe API for accessing address book data.
 
   AddressBookAccess provides a safe API for accessing PimContacts stored by
-  Qtopia's contacts application.  AddressBookAccess tries to keep in sync with 
+  Qtopia's contacts application.  AddressBookAccess tries to keep in sync with
   modifications, and alerts the user of the library when modifications have been made
   to the data.
 */
@@ -51,7 +55,7 @@
 /*!
  Constructs a new AddressBookAccess.
 */
-AddressBookAccess::AddressBookAccess() 
+AddressBookAccess::AddressBookAccess()
 : m_AccessPrivate(0L) {
   m_AccessPrivate = new ContactXmlIO(ContactIO::ReadOnly);
 
@@ -60,9 +64,9 @@ AddressBookAccess::AddressBookAccess()
 }
 
 /*!
-  Cleans up the the Addressbook access.  
+  Cleans up the the Addressbook access.
 */
-AddressBookAccess::~AddressBookAccess() 
+AddressBookAccess::~AddressBookAccess()
 {
   delete m_AccessPrivate;
 }
@@ -70,54 +74,72 @@ AddressBookAccess::~AddressBookAccess()
 /*!
   If supported will update \a contact in pim data.
 
- Updating contacts requires the EditContacts service to be available.
+ Updating contacts requires the Contacts service to be available.
 */
-void AddressBookAccess::updateContact(const PimContact& contact) 
+void AddressBookAccess::updateContact(const PimContact& contact)
 {
-    QCopEnvelope e(Service::channel("EditContacts"),
+#ifndef QT_NO_COP
+    QCopEnvelope e(Service::channel("Contacts"),
 	    "updateContact(PimContact)");
 
     e << contact;
+#endif
 }
 
 
 /*!
   If supported will remove \a contact from pim data.
 
- Removing contacts requires the EditContacts service to be available.
+ Removing contacts requires the Contacts service to be available.
  */
-void AddressBookAccess::removeContact(const PimContact& contact) 
+void AddressBookAccess::removeContact(const PimContact& contact)
 {
-    QCopEnvelope e(Service::channel("EditContacts"),
+#ifndef QT_NO_COP
+    QCopEnvelope e(Service::channel("Contacts"),
 	    "removeContact(PimContact)");
 
     e << contact;
+#endif
 }
 
 /*!
- If supported will assign a new unique ID to \a contact and add the contact 
+ If supported will assign a new unique ID to \a contact and add the contact
  to the pim data.
 
- Adding contacts requires the EditContacts service to be available.
+ Adding contacts requires the Contacts service to be available.
  */
-void AddressBookAccess::addContact(const PimContact& contact) 
+void AddressBookAccess::addContact(const PimContact& contact)
 {
-    QCopEnvelope e(Service::channel("EditContacts"),
+#ifndef QT_NO_COP
+    QCopEnvelope e(Service::channel("Contacts"),
 	    "addContact(PimContact)");
 
     e << contact;
+#endif
 }
 
 /*!
   Returns TRUE if it is possible to add, remove and update contacts in
   the pim data.  Otherwise returns FALSE.
 
-  Adding, removing and updating contacts requires the EditContacts service to be
+  Adding, removing and updating contacts requires the Contacts service to be
   available
 */
 bool AddressBookAccess::editSupported() const
 {
-    return Service::list().contains("EditContacts");
+#ifndef QT_NO_COP
+    return Service::list().contains("Contacts");
+#else
+    return FALSE;
+#endif
+}
+
+/*!
+  Returns the PimContact marked as Personal Details.
+*/
+PimContact AddressBookAccess::personalDetails() const
+{
+    return PimContact((const PimContact &)m_AccessPrivate->personal());
 }
 
 /*! \class AddressBookIterator
@@ -125,7 +147,7 @@ bool AddressBookAccess::editSupported() const
   \ingroup qpepim
   \brief The AddressBookIterator class provides iterators of AddressBookAccess.
 
-  The only way to traverse the data of an AddressBookAccess is with an 
+  The only way to traverse the data of an AddressBookAccess is with an
   AddressBookIterator.
 */
 
@@ -173,7 +195,7 @@ AddressBookIterator &AddressBookIterator::operator=(const AddressBookIterator &o
 /*!
   Destroys the iterator.
 */
-AddressBookIterator::~AddressBookIterator() 
+AddressBookIterator::~AddressBookIterator()
 {
     if ( machine && machine->deref() ) delete machine;
 }
@@ -182,7 +204,7 @@ AddressBookIterator::~AddressBookIterator()
   Returns TRUE if the iterator is at the first item of the data.
   Otherwise returns FALSE.
 */
-bool AddressBookIterator::atFirst() const 
+bool AddressBookIterator::atFirst() const
 {
     return machine ? machine->atFirst() : FALSE;
 }
@@ -198,20 +220,20 @@ bool AddressBookIterator::atLast() const
 
 /*!
   Sets the iterator to the first item of the data.
-  If a PimContact exists in the data will return a const pointer to the 
+  If a PimContact exists in the data will return a const pointer to the
   PimContact.  Otherwise returns 0.
 */
-const PimContact *AddressBookIterator::toFirst() 
+const PimContact *AddressBookIterator::toFirst()
 {
     return machine ? machine->toFirst() : 0;
 }
 
 /*!
   Sets the iterator to the last item of the data.
-  If a PimContact exists in the data will return a const pointer to the 
+  If a PimContact exists in the data will return a const pointer to the
   PimContact.  Otherwise returns 0.
 */
-const PimContact *AddressBookIterator::toLast() 
+const PimContact *AddressBookIterator::toLast()
 {
     return machine ? machine->toLast() : 0;
 }
@@ -227,7 +249,7 @@ const PimContact *AddressBookIterator::operator++()
 }
 
 /*!
-  If the iterator is at a valid PimContact returns a const pointer to 
+  If the iterator is at a valid PimContact returns a const pointer to
   the current PimContact.  Otherwise returns 0.
 */
 const PimContact* AddressBookIterator::operator*() const
@@ -236,7 +258,7 @@ const PimContact* AddressBookIterator::operator*() const
 }
 
 /*!
-  If the iterator is at a valid PimContact returns a const pointer to 
+  If the iterator is at a valid PimContact returns a const pointer to
   the current PimContact.  Otherwise returns 0.
 */
 const PimContact* AddressBookIterator::current() const

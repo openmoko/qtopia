@@ -23,10 +23,12 @@
 #include <qtopia/qpeglobal.h>
 #include <qstring.h>
 #include <qvaluelist.h>
+#include <qdatetime.h>
 
-class QTOPIA_EXPORT Calendar
+class  QTOPIA_EXPORT Calendar
 {
 public:
+    // obsolete
     struct Day
     {
 	enum Type { PrevMonth, ThisMonth, NextMonth };
@@ -38,11 +40,36 @@ public:
 	Type type;
 	bool holiday;
     };
+    // obsolete
+    static QValueList<Day> daysOfMonth( int year, int month, bool startWithMonday = FALSE );
 
     static QString nameOfMonth( int m );
     static QString nameOfDay( int d );
-    static QValueList<Day> daysOfMonth( int year, int month, bool startWithMonday = FALSE );
+    // New functions
+    static QString nameOfDay( int d, bool lname );
+    static QString nameOfDay( const QDate &d, bool lname = FALSE );
 
+    static QValueList<QDate> datesOfMonth( int year, int month, bool startWithMonday = FALSE );
+
+    static QDate dateAtIndex( int year, int month, int index, 
+	    bool startWithMonday = FALSE);
+
+    static QDate dateAtCoord( int year, int month, int row, int col,
+	    bool startWithMonday = FALSE);
+
+    static void coordForDate( int year, int month, const QDate &date, 
+	    int &row, int &col,
+	    bool startWithMonday = FALSE);
+
+    static int indexForDate( int year, int month, const QDate &date,
+	    bool startWithMonday = FALSE);
+
+    static int weekInMonth(const QDate &d);
+
+    static QString ordinalNumber(int);
+
+    static QDate addMonths(int nmonths, const QDate &orig);
+    static QDate addYears(int nyears, const QDate &orig);
 };
 
 #endif

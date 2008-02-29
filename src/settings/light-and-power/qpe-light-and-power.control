@@ -3,7 +3,7 @@ Priority: optional
 Section: qpe/settings
 Maintainer: Trolltech (www.trolltech.com)
 Architecture: arm
-Version: $QPE_VERSION-8
-Depends: qpe-base ($QPE_VERSION)
+Version: $QPE_VERSION-13
+Depends: qpe-libqtopia
 Description: Light and Power settings dialog
  For the Qtopia environment.

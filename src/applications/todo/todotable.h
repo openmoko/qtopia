@@ -21,43 +21,42 @@
 #ifndef TODOTABLE_H
 #define TODOTABLE_H
 
-#include <qpe/categories.h>
-#include <qpe/stringutil.h>
-#include <qpe/pim/task.h>
-#include <qpe/pim/private/todoxmlio_p.h>
-
 #include <qtable.h>
 #include <qmap.h>
 #include <qguardedptr.h>
+#include <qtopia/categories.h>
+#include <qtopia/pim/task.h>
+#include <qtopia/pim/private/todoxmlio_p.h>
 
 class QTimer;
+
+class TablePrivate;
+
+#if defined(QTOPIA_TEMPLATEDLL)
+// MOC_SKIP_BEGIN
+template class QTOPIAPIM_EXPORT SortedRecords<PimTask>;
+// MOC_SKIP_END
+#endif
 
 class TodoTable : public QTable
 {
     Q_OBJECT
 
 public:
-    TodoTable( QWidget *parent = 0, const char * name = 0 );
-    void addEntry( const PimTask &todo );
-    void removeEntry(const PimTask &todo );
-    void updateEntry(const PimTask &todo );
+    TodoTable( const SortedTasks &tasks, QWidget *parent = 0, const char * name = 0, const char *appPath=0 );
+    ~TodoTable();
+
     void clearFindRow() { currFindRow = -2; }
 
+    bool hasCurrentEntry();
     PimTask currentEntry();
     void setCurrentEntry(QUuid &);
 
     QString categoryLabel( int id );
 
-    void setShowCompleted( bool sc );
-    bool showCompleted() const;
+    virtual void sortColumn( int col, bool , bool);
 
-    void setShowCategory( int c );
-    int showCategory() const;
-
-    void removeCurrentEntry();
-
-    virtual void sortColumn( int col, bool ascending, bool /*wholeRows*/ );
-
+    void paintFocus(QPainter *p, const QRect &r);
     void paintCell(QPainter *p, int row, int col, 
 	    const QRect &, bool);
 
@@ -65,51 +64,96 @@ public:
     QTableItem * item(int, int) const { return 0; }
     void setItem(int,int,QTableItem*) { }
     void clearCell(int,int) { }
+    void clearCellWidget(int, int);
 
+    enum SelectionMode {
+	NoSelection,
+	Single,
+	Extended
+    };
+    
+    void setSelectionMode(SelectionMode m);
+    SelectionMode selectionMode() { return mSel; }
+    QValueList<QUuid> selectedTasks();
+    QValueList<PimTask> selected();
+    void selectAll();
+ 
+    void setFields(QValueList<int> f);
+    QValueList<int> fields();
+    
+    static QString statusToText(PimTask::TaskStatus s);
 
 public slots:
     void slotDoFind( const QString &findString, int category );
-    void refresh();
-    void reload();
-    void flush();
+    void reload(const SortedTasks &tasks);
 
 signals:
-    void signalEdit();
-    void signalDoneChanged( bool b );
-    void signalPriorityChanged( int i );
-    void signalShowMenu( const QPoint & );
+    void updateTask(const PimTask &);
+    void currentChanged();
+
+    void clicked();
+    void doubleClicked();
+    void pressed();
+
     void findNotFound();
     void findWrapAround();
     void findFound();
 
 protected:
+    void setFields(QValueList<int> f, QStringList sizes);
+    int defaultFieldSize(PimTask::TaskFields f);
+    QValueList<int> defaultFields();
+
     void keyPressEvent( QKeyEvent *e );
+    void contentsMousePressEvent( QMouseEvent *e );
+    void contentsMouseReleaseEvent( QMouseEvent *e );
 
     int rowHeight( int ) const;
     int rowPos( int row ) const;
     int rowAt( int pos ) const;
 
+    void fontChange( const QFont & );
+
     QWidget *createEditor(int,int,bool) const;
     void setCellContentFromEditor(int,int);
 
 private slots:
+    void cornerButtonClicked();
+    void refresh();
     void setCellContentFromEditor();
     void slotClicked( int row, int col, int button, const QPoint &pos );
     void slotPressed( int row, int col, int button, const QPoint &pos );
+    void slotDoubleClicked(int, int, int, const QPoint &);
     void slotCurrentChanged(int row, int col );
-    void slotShowMenu();
     void rowHeightChanged( int row );
     void priorityChanged(int);
 
-private:
-    friend class TodoWindow;
-    mutable TodoXmlIO ta;
+    void headerClicked(int);
 
-    QStringList categoryList;
-    QTimer *menuTimer;
+private:
+    void readSettings();
+    void saveSettings();
+
+    void setSelection(int fromRow, int toRow);
+    void setSelection(int row);
+    int pos(const QUuid &);
+
+
+private:
     Categories mCat;
     int currFindRow;
+    
+    SortedTasks mTasks;
+    QStringList categoryList;
+    QTimer *menuTimer;
     QString currFindString;
+    SelectionMode mSel;
+    QValueList<QUuid> mSelected;
+    
+    QValueList<int> headerKeyFields;
+
+    TablePrivate *d;
+    int mSortColumn;
 };
 
 #endif

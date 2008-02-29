@@ -20,11 +20,12 @@
 #ifndef CLOCKAPPLETIMPL_H
 #define CLOCKAPPLETIMPL_H
 
-#include <qpe/taskbarappletinterface.h>
+#include <qtopia/qpeglobal.h>
+#include <qtopia/taskbarappletinterface.h>
 
 class LauncherClock;
 
-class ClockAppletImpl : public TaskbarAppletInterface
+class QTOPIA_PLUGIN_EXPORT ClockAppletImpl : public TaskbarAppletInterface
 {
 public:
     ClockAppletImpl();

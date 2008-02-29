@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/src/libraries/qtopia/resource.cpp:35 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/src/libraries/qtopia/resource.cpp:39 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -35,7 +35,7 @@ body { background: #ffffff; color: black; }
 <li><div class=fn>QPixmap <a href="#loadPixmap"><b>loadPixmap</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;pix )</div></li>
 <li><div class=fn>QBitmap <a href="#loadBitmap"><b>loadBitmap</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;pix )</div></li>
 <li><div class=fn>QString <a href="#findPixmap"><b>findPixmap</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;pix )</div></li>
-<li><div class=fn>QIconSet <a href="#loadIconSet"><b>loadIconSet</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;name )</div></li>
+<li><div class=fn>QIconSet <b>loadIconSet</b> ( const&nbsp;QString&nbsp;&amp;&nbsp;name )</div></li>
 <li><div class=fn>QString <a href="#findSound"><b>findSound</b></a> ( const&nbsp;QString&nbsp;&amp;&nbsp;name )</div></li>
 <li><div class=fn>QStringList <a href="#allSounds"><b>allSounds</b></a> ()</div></li>
 </ul>
@@ -47,7 +47,7 @@ The Resource class provides access to named resources.
 <p> The <a href="#allSounds">allSounds</a>() function returns a list of all the sounds available.
 A particular sound can be searched for using <a href="#findSound">findSound</a>().
 <p> Images can be loaded with <a href="#loadImage">loadImage</a>(), <a href="#loadPixmap">loadPixmap</a>(), <a href="#loadBitmap">loadBitmap</a>()
-and <a href="#loadIconSet">loadIconSet</a>().
+and loadIconSet().
 <p> 
 <p>See also <a href="qtopiaemb.html">Qtopia Classes</a>.
 
@@ -75,17 +75,12 @@ by the library.
 Returns the QBitmap called <em>pix</em>. You should avoid including
 any filename type extension (e.g. .png, .xpm).
 
-<h3 class=fn>QIconSet <a name="loadIconSet"></a>Resource::loadIconSet ( const&nbsp;QString&nbsp;&amp;&nbsp;name )<tt> [static]</tt>
-</h3>
-
-<p> Returns a QIconSet for the pixmap named <em>name</em>.  A disabled icon is
-generated that conforms to the Qtopia look & feel.  You should avoid
-including any filename type extension (eg. .png, .xpm).
-
 <h3 class=fn>QImage <a name="loadImage"></a>Resource::loadImage ( const&nbsp;QString&nbsp;&amp;&nbsp;name )<tt> [static]</tt>
 </h3>
 Returns the QImage called <em>name</em>. You should avoid including
 any filename type extension (e.g. .png, .xpm).
+<p> For performance reasons, names ending in "_disabled" are only
+supported as XPM or PNG files.
 
 <h3 class=fn>QPixmap <a name="loadPixmap"></a>Resource::loadPixmap ( const&nbsp;QString&nbsp;&amp;&nbsp;pix )<tt> [static]</tt>
 </h3>

@@ -1,11 +1,14 @@
-TEMPLATE	= app
-CONFIG		+= qtopia warn_on release
-DESTDIR		= $(QPEDIR)/bin
+multiprocess:TEMPLATE	= app
+multiprocess:DESTDIR	= $(QPEDIR)/bin
+singleprocess:TEMPLATE	= lib
+singleprocess:DESTDIR   = $(QPEDIR)/lib
 
-HEADERS		= datebookday.h \
+CONFIG		+= qtopia warn_on release
+
+HEADERS		= dayview.h \
 		  datebook.h \
 		  dateentryimpl.h \
-		  datebookdayheaderimpl.h \
+		  dayviewheaderimpl.h \
 		  datebooksettings.h \
 		  datebookweek.h \
 		  datebookweekheaderimpl.h \
@@ -14,14 +17,13 @@ HEADERS		= datebookday.h \
 		  periodview.h \
 		  repeatentry.h \
 		  datebookdb.h \
-		  datepicker.h \
-		  datetimeedit.h
+		  finddialog.h \
+		  findwidget_p.h
 
-SOURCES		= main.cpp \
-		  datebookday.cpp \
+SOURCES		= dayview.cpp \
 		  datebook.cpp \
 		  dateentryimpl.cpp \
-		  datebookdayheaderimpl.cpp \
+		  dayviewheaderimpl.cpp \
 		  datebooksettings.cpp \
 		  datebookweek.cpp \
 		  datebookweekheaderimpl.cpp \
@@ -30,18 +32,21 @@ SOURCES		= main.cpp \
 		  periodview.cpp \
 		  repeatentry.cpp \
 		  datebookdb.cpp \
-		  datepicker.cpp \
-		  datetimeedit.cpp
+		  finddialog.cpp \
+		  findwidget_p.cpp
+
 
 INTERFACES	= dateentry.ui \
-		  datebookdayheader.ui \
+		  dayviewheader.ui \
 		  datebooksettingsbase.ui \
-		  datebookweekheader.ui
+		  datebookweekheader.ui \
+		  findwidgetbase_p.ui
 
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH	+= $(QPEDIR)/include
-LIBS            += -lqpe -lqpepim -luuid
+multiprocess:SOURCES += main.cpp
+
+unix:LIBS       += -lqpepim -luuid
+win32:LIBS      += $(QPEDIR)/lib/qpepim.lib 
 
 TARGET		= datebook
 
-TRANSLATIONS	= $(QPEDIR)/i18n/de/datebook.ts
+TRANSLATIONS = datebook-en_GB.ts datebook-de.ts datebook-ja.ts datebook-no.ts

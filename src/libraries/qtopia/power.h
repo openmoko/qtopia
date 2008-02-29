@@ -21,9 +21,10 @@
 #ifndef POWER_H
 #define POWER_H
 
+#include <qtopia/qpeglobal.h>
 #include <qobject.h>
 
-class PowerStatus
+class QTOPIA_EXPORT PowerStatus
 {
 public:
     PowerStatus() {
@@ -64,7 +65,7 @@ private:
 };
 
 
-class PowerStatusManager
+class QTOPIA_EXPORT PowerStatusManager
 {
 public:
     PowerStatusManager();
@@ -79,6 +80,9 @@ private:
     static PowerStatus *ps;
     static PowerStatusManager *powerManager;
 };
+
+QTOPIA_EXPORT void qpe_setBacklight(int bright); 
+QTOPIA_EXPORT int qpe_sysBrightnessSteps();
 
 
 #endif

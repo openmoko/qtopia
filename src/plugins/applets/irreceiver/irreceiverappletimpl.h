@@ -20,11 +20,11 @@
 #ifndef CLIPBOARDAPPLETIMPL_H
 #define CLIPBOARDAPPLETIMPL_H
 
-#include <qpe/taskbarappletinterface.h>
+#include <qtopia/taskbarappletinterface.h>
 
 class IRReceiverApplet;
 
-class IRReceiverAppletImpl : public TaskbarNamedAppletInterface
+class QTOPIA_PLUGIN_EXPORT IRReceiverAppletImpl : public TaskbarNamedAppletInterface
 {
 public:
     IRReceiverAppletImpl();

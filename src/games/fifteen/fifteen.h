@@ -24,6 +24,7 @@
 #include <qmainwindow.h>
 #include <qtableview.h>
 #include <qarray.h>
+#include <qpointarray.h>
 
 class QPopupMenu;
 
@@ -57,6 +58,8 @@ class PiecesTable : public QTableView
   QArray<QColor> _colors;
   QPopupMenu     *_menu;
   bool            _randomized;
+  QPointArray	light_border;
+  QPointArray	dark_border;
 
   enum MenuOp { mRandomize = 1, mReset = 2 };
 };
@@ -77,7 +80,7 @@ class FifteenMainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    FifteenMainWindow(QWidget *parent=0, const char* name=0);
+    FifteenMainWindow(QWidget *parent=0, const char* name=0, WFlags fl=0);
 };
 
 #endif

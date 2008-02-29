@@ -26,10 +26,11 @@
 #include <qpainter.h>
 #include <qframe.h>
 #include <qlineedit.h>
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 #include "imageutil.h"
 #include "audiowidget.h"
 #include "mediaplayerstate.h"
+#include "maindocumentwidgetstack.h"
 
 
 // Layout information for the audioButtons (and if it is a toggle button or not)
@@ -63,7 +64,7 @@ AudioWidget::~AudioWidget()
 }
 
 
-void AudioWidget::internalResize()
+void AudioWidget::virtualResize()
 {
     int h = height();
     int w = width();
@@ -83,20 +84,21 @@ void AudioWidget::internalResize()
 void AudioWidget::setView( View view )
 {
     if ( view == AudioView ) {
-	showMaximized();
+	mainDocumentWindow->raiseWidget( this );
     } else {
-	hide();
+	canPaint = FALSE;
     }
+    resetButtons();
 }
 
 
-void AudioWidget::updateSlider( long i, long max )
+void AudioWidget::virtualUpdateSlider()
 {
-    updateSliderBase( i, max );
+    updateSlider();
 }
 
 
-void AudioWidget::internalPaint( QPaintEvent *pe )
+void AudioWidget::virtualPaint( QPaintEvent *pe )
 {
     if ( !pe->erased() ) {
 	// Combine with background and double buffer
@@ -108,16 +110,13 @@ void AudioWidget::internalPaint( QPaintEvent *pe )
 	QPainter p2( this );
 	p2.drawPixmap( pe->rect().topLeft(), pix );
     } else {
-	slider.repaint();
-	time.repaint();
-	songInfo.repaint();
 	QPainter p( this );
 	paintAllButtons( p );
     }
 }
 
 
-Ticker::Ticker( QWidget* parent=0 ) : QFrame( parent )
+Ticker::Ticker( QWidget* parent ) : QFrame( parent )
 {
     setFrameStyle( WinPanel | Sunken );
     scrollText = tr( "No Song" );

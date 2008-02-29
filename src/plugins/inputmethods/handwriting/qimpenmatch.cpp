@@ -20,8 +20,8 @@
 
 #include "qimpenmatch.h"
 
-#include <qpe/qdawg.h>
-#include <qpe/global.h>
+#include <qtopia/qdawg.h>
+#include <qtopia/global.h>
 
 #include <qapplication.h>
 #include <qtimer.h>

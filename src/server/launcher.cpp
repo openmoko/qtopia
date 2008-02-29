@@ -18,26 +18,23 @@
 **
 **********************************************************************/
 
-// WARNING: Do *NOT* define this yourself. The SL5xxx from SHARP does NOT
-//      have this class.
-#define QTOPIA_INTERNAL_FSLP
-
-#ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qpeglobal.h>
+#ifdef Q_WS_QWS
+#include <qtopia/qcopenvelope_qws.h>
 #endif
-#include <qpe/resource.h>
-#include <qpe/applnk.h>
-#include <qpe/config.h>
-#include <qpe/global.h>
-#include <qpe/qpeapplication.h>
-#include <qpe/mimetype.h>
-#include <qpe/storage.h>
-#include <qpe/categories.h>
-
-#include <qpe/version.h>
+#include <qtopia/resource.h>
+#include <qtopia/applnk.h>
+#include <qtopia/config.h>
+#include <qtopia/global.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/mimetype.h>
+#include <qtopia/storage.h>
+#include <qtopia/categories.h>
+#include <qtopia/services.h>
+#include <qtopia/version.h>
 
 #include <qdir.h>
-#ifdef QWS
+#ifdef Q_WS_QWS
 #include <qwindowsystem_qws.h>
 #endif
 #include <qtimer.h>
@@ -61,7 +58,7 @@
 #include "launcher.h"
 #include "syncdialog.h"
 #include "desktop.h"
-#include <qpe/lnkproperties.h>
+#include <qtopia/docproperties.h>
 #include "mrulist.h"
 #include "qrsync.h"
 #include <stdlib.h>
@@ -71,6 +68,10 @@
 #include <stdio.h>
 #include <sys/vfs.h>
 #include <mntent.h>
+#endif
+
+#ifdef Q_WS_QWS
+#include <qkeyboard_qws.h>
 #endif
 
 //#define SHOW_ALL
@@ -169,27 +170,27 @@ void CategoryTabWidget::initializeCategories(AppLnkSet* rootFolder,
     Config cfg("Launcher");
 
     QStringList types = rootFolder->types();
-    for ( QStringList::Iterator it=types.begin(); it!=types.end(); ++it) {
-	if ( !(*it).isEmpty() ) {
-	    (void)newView(*it,rootFolder->typePixmap(*it),rootFolder->typeName(*it));
-	    setTabAppearance( *it, cfg );
+    for ( QStringList::Iterator ittypes=types.begin(); ittypes!=types.end(); ++ittypes) {
+	if ( !(*ittypes).isEmpty() ) {
+	    (void)newView(*ittypes,rootFolder->typePixmap(*ittypes),rootFolder->typeName(*ittypes));
+	    setTabAppearance( *ittypes, cfg );
 	}
     }
-    QListIterator<AppLnk> it( rootFolder->children() );
+    QListIterator<AppLnk> itapp( rootFolder->children() );
     AppLnk* l;
-    while ( (l=it.current()) ) {
+    while ( (l=itapp.current()) ) {
 	if ( l->type() == "Separator" ) { // No tr
 	    rootFolder->remove(l);
 	    delete l;
 	} else {
 	    int i=0;
-	    for ( QStringList::Iterator it=types.begin(); it!=types.end(); ++it) {
-		if ( *it == l->type() )
+	    for ( QStringList::Iterator itstring=types.begin(); itstring!=types.end(); ++itstring) {
+		if ( *itstring == l->type() )
 		    ((LauncherView*)stack->widget(i))->addItem(l,FALSE);
 		i++;
 	    }
 	}
-	++it;
+	++itapp;
     }
     rootFolder->detachChildren();
     for (int i=0; i<tabs; i++)
@@ -370,8 +371,9 @@ void CategoryTabBar::layoutTabs()
     QTab *t;
     int required = 0;
     int eventabwidth = (width()-1)/count();
+    int i;
     enum Mode { HideBackText, Pack, Even } mode=Even;
-    for ( int i = 0; i < count(); i++ ) {
+    for ( i = 0; i < count(); i++ ) {
 	t = tab(i);
 	int iw = fm.width( t->text() ) + hframe - overlap;
 	if ( i != middleTab ) {
@@ -388,7 +390,7 @@ void CategoryTabBar::layoutTabs()
     }
     if ( mode == Pack && required > width()-1 )
 	mode = HideBackText;
-    for ( int i = 0; i < count(); i++ ) {
+    for ( i = 0; i < count(); i++ ) {
 	t = tab(i);
 	if ( mode != HideBackText ) {
 	    int w = fm.width( t->text() );
@@ -572,7 +574,6 @@ Launcher::Launcher( QWidget* parent, const char* name, WFlags fl )
     docsFolder = 0;
 
     tabs = new CategoryTabWidget( this );
-    tabs->setMaximumWidth( qApp->desktop()->width() );
     setCentralWidget( tabs );
 
     connect( tabs, SIGNAL(selected(const QString&)),
@@ -632,6 +633,7 @@ void Launcher::showMaximized()
 void Launcher::doMaximize()
 {
     QMainWindow::showMaximized();
+    tabs->setMaximumWidth( qApp->desktop()->width() );
 }
 
 void Launcher::updateMimeTypes()
@@ -694,21 +696,21 @@ void Launcher::select( const AppLnk *appLnk )
 	// Not supported: flat is simpler for the user
     } else {
 	if ( appLnk->exec().isNull() ) {
-	    QMessageBox::information(this,tr("No application"),
+	    int i = QMessageBox::information(this,tr("No application"),
 		tr("<p>No application is defined for this document."
-		"<p>Type is %1.").arg(appLnk->type()));
+		"<p>Type is %1.").arg(appLnk->type()), tr("OK"), tr("View as text"), 0, 0, 1);
+	    
+	    if ( i == 1 ) {
+		QCopEnvelope e(Service::channel("Open/text/*"), "setDocument(QString)" );
+		e << appLnk->file();
+	    }
+	    
 	    return;
 	}
 	tabs->setBusy(TRUE);
 	emit executing( appLnk );
 	appLnk->execute();
     }
-}
-
-void Launcher::externalSelected(const AppLnk *appLnk)
-{
-    tabs->setBusy(TRUE);
-    emit executing( appLnk );
 }
 
 void Launcher::properties( AppLnk *appLnk )
@@ -718,8 +720,7 @@ void Launcher::properties( AppLnk *appLnk )
     } else {
 	in_lnk_props = TRUE;
 	got_lnk_change = FALSE;
-	LnkProperties prop(appLnk);
-	connect(&prop, SIGNAL(select(const AppLnk *)), this, SLOT(externalSelected(const AppLnk *)));
+	DocPropertiesDialog prop(appLnk);
 	prop.showMaximized();
 	prop.exec();
 	in_lnk_props = FALSE;
@@ -741,13 +742,19 @@ void Launcher::updateLink(const QString& link)
 
 
 #if 1 //### quick demo hack
-static const QWSServer::KeyOverride jp109keys[] = {
+typedef struct KeyOverride {
+    ushort scan_code;
+    QWSServer::KeyMap map;
+};
+
+
+static const KeyOverride jp109keys[] = {
    { 0x03, {   Qt::Key_2,      '2'     , 0x22     , 0x0000  } },
-   { 0x07, {   Qt::Key_6,      '6'     , '^'     , 0x0000  } },
+   { 0x07, {   Qt::Key_6,      '6'     , '&'     , 0x0000  } },
    { 0x08, {   Qt::Key_7,      '7'     , '\''     , 0x0000  } },
    { 0x09, {   Qt::Key_8,      '8'     , '('     , 0x0000  } },
    { 0x0a, {   Qt::Key_9,      '9'     , ')'     , 0x0000  } },
-   { 0x0b, {   Qt::Key_0,      '0'     , '~'     , 0x0000  } },
+   { 0x0b, {   Qt::Key_0,      '0'     , 0x0000  , 0x0000  } },
    { 0x0c, {   Qt::Key_Minus,      '-'     , '='     , 0x0000  } },
    { 0x0d, {   Qt::Key_AsciiCircum,'^'     , '~'     , '^' - 64  } },
    { 0x1a, {   Qt::Key_At,     '@'     , '`'     , 0x0000  } },
@@ -763,8 +770,19 @@ static const QWSServer::KeyOverride jp109keys[] = {
    { 0x7d, {   Qt::Key_yen,        0x00a5  , '|'     , 0x0000  } },
    { 0x00, {   0,          0x0000  , 0x0000  , 0x0000  } }
 };
-#endif
 
+static void setJP109Keys() 
+{
+    QIntDict<QWSServer::KeyMap> *om = new QIntDict<QWSServer::KeyMap>(37);
+    const KeyOverride *k = jp109keys;
+    while ( k->scan_code ) {
+	om->insert( k->scan_code, &k->map ); 
+	k++;
+    }
+    QWSServer::setOverrideKeys( om );
+}
+
+#endif
 
 void Launcher::systemMessage( const QCString &msg, const QByteArray &data)
 {
@@ -958,6 +976,14 @@ void Launcher::systemMessage( const QCString &msg, const QByteArray &data)
 	setenv("QWS_KEYBOARD",kb.latin1(),1);
 	qwsServer->openKeyboard();
 
+    } else if ( msg == "setKeyboardAutoRepeat(int,int)" ) {
+	int delay, period;
+	stream >> delay >> period;
+	qwsSetKeyboardAutoRepeat( delay, period );
+	Config cfg( "qpe" );
+	cfg.setGroup("Keyboard");
+	cfg.writeEntry( "RepeatDelay", delay );
+	cfg.writeEntry( "RepeatPeriod", period );
     } else if ( msg == "setKeyboardLayout(QString)" ) {
 	QString kb;
 	stream >> kb;
@@ -965,7 +991,7 @@ void Launcher::systemMessage( const QCString &msg, const QByteArray &data)
 	if ( kb == "us101" )
 	    QWSServer::setOverrideKeys( 0 );
 	else
-	    QWSServer::setOverrideKeys( jp109keys );
+	    setJP109Keys();
 #endif
     }
 }

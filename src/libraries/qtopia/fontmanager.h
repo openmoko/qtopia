@@ -21,9 +21,10 @@
 #ifndef FONTMANAGER_H
 #define FONTMANAGER_H
 
+#include <qtopia/qpeglobal.h>
 #include <qfont.h>
 
-class FontManager
+class QTOPIA_EXPORT FontManager
 {
 public:
     enum Spacing { Fixed, Proportional };

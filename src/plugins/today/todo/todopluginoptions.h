@@ -26,6 +26,7 @@
 
 #include <qwidget.h>
 
+#include <qtopia/qpeglobal.h>
 #include "todooptionsbase.h"
 
 class TodoPluginOptions : public TodoOptionsBase 

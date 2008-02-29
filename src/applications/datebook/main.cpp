@@ -19,7 +19,7 @@
 **********************************************************************/
 
 #include "datebook.h"
-#include <qpe/qpeapplication.h>
+#include <qtopia/qpeapplication.h>
 
 
 int main( int argc, char **argv )
@@ -28,18 +28,6 @@ int main( int argc, char **argv )
 
     DateBook mw;
     
-    QObject::connect( &a, SIGNAL( appMessage(const QCString &, const QByteArray &) ), 
-	    &mw, SLOT( appMessage(const QCString &, const QByteArray &) ) );
-
-    QObject::connect( &a, SIGNAL( timeChanged() ), 
-	    &mw, SLOT( refreshWidgets() ) );
-
-    QObject::connect( &a, SIGNAL( flush() ), 
-	    &mw, SLOT( flush() ) );
-
-    QObject::connect( &a, SIGNAL( reload() ), 
-	    &mw, SLOT( reload() ) );
-
     mw.setCaption( DateBook::tr("Calendar") );
     a.showMainWidget(&mw);
 

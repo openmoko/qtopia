@@ -1,12 +1,10 @@
 TEMPLATE	= lib
 CONFIG		+= qtopia warn_on release
+win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
 HEADERS	=	cardmon.h cardmonimpl.h
 SOURCES	=	cardmon.cpp cardmonimpl.cpp
 TARGET		= cardmonapplet
 DESTDIR		= $(QPEDIR)/plugins/applets
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH      += $(QPEDIR)/include
-LIBS            += -lqpe
 VERSION		= 1.0.0
 
-TRANSLATIONS	= $(QPEDIR)/i18n/de/libcardmonapplet.ts
+TRANSLATIONS = libcardmonapplet-en_GB.ts libcardmonapplet-de.ts libcardmonapplet-ja.ts libcardmonapplet-no.ts

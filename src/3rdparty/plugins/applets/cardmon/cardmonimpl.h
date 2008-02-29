@@ -1,6 +1,6 @@
 
 
-#include <qpe/taskbarappletinterface.h>
+#include <qtopia/taskbarappletinterface.h>
 
 class CardMonitor;
 class QPixmap;

@@ -23,8 +23,8 @@
 #include "newgamebase.h"
 #include "rulesbase.h"
 
-#include <qpe/qdawg.h>
-#include <qpe/applnk.h>
+#include <qtopia/qdawg.h>
+#include <qtopia/applnk.h>
 
 #include <qmainwindow.h>
 #include <qcanvas.h>

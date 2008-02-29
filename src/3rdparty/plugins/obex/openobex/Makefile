@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,10 +118,10 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
-INCPATH =	-I.
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+INCPATH =	-I$(MOC_DIR) -I.
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
-LIBS	=	$(SUBLIBS) $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
+LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
 UIC	=	$(SYSCONF_UIC)
 
@@ -155,17 +161,17 @@ SOURCES =	inobex.c \
 		obex_object.c \
 		obex_server.c \
 		obex_transport.c
-OBJECTS =	inobex.o \
-		irobex.o \
-		netbuf.o \
-		obex.o \
-		obex_client.o \
-		obex_connect.o \
-		obex_header.o \
-		obex_main.o \
-		obex_object.o \
-		obex_server.o \
-		obex_transport.o
+OBJECTS =	$(OBJECTS_DIR)/inobex.o \
+		$(OBJECTS_DIR)/irobex.o \
+		$(OBJECTS_DIR)/netbuf.o \
+		$(OBJECTS_DIR)/obex.o \
+		$(OBJECTS_DIR)/obex_client.o \
+		$(OBJECTS_DIR)/obex_connect.o \
+		$(OBJECTS_DIR)/obex_header.o \
+		$(OBJECTS_DIR)/obex_main.o \
+		$(OBJECTS_DIR)/obex_object.o \
+		$(OBJECTS_DIR)/obex_server.o \
+		$(OBJECTS_DIR)/obex_transport.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
@@ -236,7 +242,7 @@ REQUIRES=
 
 ####### Compile
 
-inobex.o: inobex.c \
+$(OBJECTS_DIR)/inobex.o: inobex.c \
 		config.h \
 		obex_main.h \
 		obex_const.h \
@@ -247,8 +253,9 @@ inobex.o: inobex.c \
 		obex_transport.h \
 		irda_wrap.h \
 		irda.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/inobex.o inobex.c
 
-irobex.o: irobex.c \
+$(OBJECTS_DIR)/irobex.o: irobex.c \
 		config.h \
 		irda_wrap.h \
 		irda.h \
@@ -260,13 +267,15 @@ irobex.o: irobex.c \
 		netbuf.h \
 		obex_transport.h \
 		irobex.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/irobex.o irobex.c
 
-netbuf.o: netbuf.c \
+$(OBJECTS_DIR)/netbuf.o: netbuf.c \
 		glib.h \
 		glibconfig.h \
 		netbuf.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/netbuf.o netbuf.c
 
-obex.o: obex.c \
+$(OBJECTS_DIR)/obex.o: obex.c \
 		config.h \
 		obex_main.h \
 		obex_const.h \
@@ -280,8 +289,9 @@ obex.o: obex.c \
 		obex_connect.h \
 		obex_client.h \
 		irobex.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/obex.o obex.c
 
-obex_client.o: obex_client.c \
+$(OBJECTS_DIR)/obex_client.o: obex_client.c \
 		config.h \
 		obex_main.h \
 		obex_const.h \
@@ -294,8 +304,9 @@ obex_client.o: obex_client.c \
 		irda.h \
 		obex_header.h \
 		obex_connect.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/obex_client.o obex_client.c
 
-obex_connect.o: obex_connect.c \
+$(OBJECTS_DIR)/obex_connect.o: obex_connect.c \
 		config.h \
 		obex_main.h \
 		obex_const.h \
@@ -308,8 +319,9 @@ obex_connect.o: obex_connect.c \
 		irda.h \
 		obex_header.h \
 		obex_connect.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/obex_connect.o obex_connect.c
 
-obex_header.o: obex_header.c \
+$(OBJECTS_DIR)/obex_header.o: obex_header.c \
 		config.h \
 		obex_main.h \
 		obex_const.h \
@@ -321,8 +333,9 @@ obex_header.o: obex_header.c \
 		irda_wrap.h \
 		irda.h \
 		obex_header.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/obex_header.o obex_header.c
 
-obex_main.o: obex_main.c \
+$(OBJECTS_DIR)/obex_main.o: obex_main.c \
 		config.h \
 		obex_main.h \
 		obex_const.h \
@@ -336,8 +349,9 @@ obex_main.o: obex_main.c \
 		obex_header.h \
 		obex_server.h \
 		obex_client.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/obex_main.o obex_main.c
 
-obex_object.o: obex_object.c \
+$(OBJECTS_DIR)/obex_object.o: obex_object.c \
 		config.h \
 		obex_main.h \
 		obex_const.h \
@@ -350,8 +364,9 @@ obex_object.o: obex_object.c \
 		irda.h \
 		obex_header.h \
 		obex_connect.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/obex_object.o obex_object.c
 
-obex_server.o: obex_server.c \
+$(OBJECTS_DIR)/obex_server.o: obex_server.c \
 		config.h \
 		obex_main.h \
 		obex_const.h \
@@ -364,8 +379,9 @@ obex_server.o: obex_server.c \
 		irda.h \
 		obex_header.h \
 		obex_connect.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/obex_server.o obex_server.c
 
-obex_transport.o: obex_transport.c \
+$(OBJECTS_DIR)/obex_transport.o: obex_transport.c \
 		config.h \
 		obex_main.h \
 		obex_const.h \
@@ -378,14 +394,16 @@ obex_transport.o: obex_transport.c \
 		irda.h \
 		irobex.h \
 		inobex.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/obex_transport.o obex_transport.c
 
 
 
 lupdate:
-	lupdate openobex.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <openobex.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease openobex.pro
+	$(QPEDIR)/bin/qtopia-linstall openobex.pro
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

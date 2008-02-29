@@ -22,16 +22,16 @@
 #include "pkfind.h"
 #include "pksettings.h"
 
-#include <qpe/process.h>
-#include <qpe/resource.h>
-#include <qpe/stringutil.h>
-#include <qpe/qpeapplication.h>
+#include <qtopia/process.h>
+#include <qtopia/resource.h>
+#include <qtopia/stringutil.h>
+#include <qtopia/qpeapplication.h>
 #ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
-#include <qpe/applnk.h>
+#include <qtopia/applnk.h>
 
-#include <qpe/storage.h>
+#include <qtopia/storage.h>
 #include <qradiobutton.h>
 #include <qvbuttongroup.h>
 #include <qlayout.h>

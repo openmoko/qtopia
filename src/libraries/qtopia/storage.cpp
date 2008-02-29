@@ -18,19 +18,24 @@
 **
 **********************************************************************/
 
-#include <qpe/storage.h>
+#include <qtopia/storage.h>
 #ifdef QT_QWS_CUSTOM
-#include <qpe/custom.h>
+#include <qtopia/custom.h>
 #endif
 
 #include <qtimer.h>
+#include <qfile.h>
 #ifdef QWS
 #include <qcopchannel_qws.h>
 #endif
 
 #include <stdio.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #if defined(_OS_LINUX_) || defined(Q_OS_LINUX)
+#include <unistd.h>
 #include <sys/vfs.h>
 #include <mntent.h>
 #endif
@@ -88,16 +93,56 @@ StorageInfo::StorageInfo( QObject *parent )
     update();
 }
 
-/*! Returns the first FileSystem that starts with \a mountpoint as a mount
-  point
+/*! Returns the longest matching FileSystem that starts with the
+   same prefix as \a filename as its mount point.
 */
-const FileSystem *StorageInfo::fileSystemOf( const QString &mountpoint )
+const FileSystem *StorageInfo::fileSystemOf( const QString &filename )
 {
+#if 0
+    // The filesystem way of doing things...
+    QString existingfilename = filename;
+    struct stat st;
+    while (stat(QFile::encodeName(existingfilename),&st)) {
+	int x = existingfilename.findRev('/');
+	if ( x < 0 )
+	    return 0;
+	if ( x )
+	    existingfilename.truncate(x-1);
+	else
+	    break;
+    }
+    int devno = st.st_dev;
     for (QListIterator<FileSystem> i(mFileSystems); i.current(); ++i) {
-	if ( mountpoint.startsWith( (*i)->path() ) )
-	     return (*i);
+	if ( 0==stat(QFile::encodeName((*i)->path()),&st) ) {
+	    if ( st.st_dev == devno ) {
+		return *i;
+	    }
+	}
     }
     return 0;
+#else
+    // The filename way (doesn't understand symlinks)
+    FileSystem *bestMatch = 0;
+    uint bestLen = 0;
+    uint currLen;
+
+    for (QListIterator<FileSystem> i(mFileSystems); i.current(); ++i) {
+	if ( filename.startsWith( (*i)->path() ) ) {
+	    currLen = (*i)->path().length();
+	    if ( currLen == 1 )
+		currLen = 0; // Fix checking '/' root mount which is a special case
+	    if ( filename.length() == currLen ||
+	         filename[(int)currLen] == '/' ||
+	         filename[(int)currLen] == '\\') {
+		if ( currLen > bestLen || bestLen == 0 ) {
+		    bestMatch = (*i);
+		    bestLen = currLen;
+		}
+	    }
+	}
+    }
+    return bestMatch;
+#endif
 }
 
 
@@ -159,8 +204,8 @@ void StorageInfo::update()
 	QStringList::ConstIterator optsIt=curopts.begin();
 	for (; it!=curdisks.end(); ++it, ++fsit, ++optsIt) {
 	    QString opts = *optsIt;
-	
-	    QString disk = *it;	
+
+	    QString disk = *it;
 	    QString humanname;
 	    bool removable = FALSE;
 	    if ( isCF(disk) ) {
@@ -196,7 +241,7 @@ void StorageInfo::update()
 /*! \fn const QList<FileSystem> &StorageInfo::fileSystems() const
   Returns a list of all available mounted file systems.
 
-  \warning This may change in Qtopia 3.x to return only relevent Qtopia file systems (and ignore mount points such as /tmp)
+  \warning This may change in Qtopia 3.x to return only relevant Qtopia file systems (and ignore mount points such as /tmp)
 */
 
 /*! \fn void StorageInfo::disksChanged()

@@ -219,8 +219,8 @@ void QIMPenWidget::timeout()
             QPainter paint( this );
             paint.setBrush( Qt::black );
             for ( unsigned i = 0; i < 3 && pointIndex < chain.count(); i++ ) {
-                lastPoint.rx() += chain[pointIndex].dx;
-                lastPoint.ry() += chain[pointIndex].dy;
+                lastPoint.rx() += chain[(int)pointIndex].dx;
+                lastPoint.ry() += chain[(int)pointIndex].dy;
                 pointIndex++;
                 paint.drawRect( lastPoint.x()-1, lastPoint.y()-1, 2, 2 );
             }
@@ -413,7 +413,7 @@ void QIMPenWidget::paintEvent( QPaintEvent * )
             QPoint p = it.current()->startingPoint() + off;
             paint.drawRect( p.x()-1, p.y()-1, 2, 2 );
             const QArray<QIMPenGlyphLink> &chain = it.current()->chain();
-            for ( unsigned i = 0; i < chain.count(); i++ ) {
+            for ( int i = 0; i < (int)chain.count(); i++ ) {
                     p.rx() += chain[i].dx;
                     p.ry() += chain[i].dy;
                     paint.drawRect( p.x()-1, p.y()-1, 2, 2 );

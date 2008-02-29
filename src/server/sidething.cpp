@@ -20,7 +20,7 @@
 
 #include "sidething.h"
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
 #include <qrect.h>
 #include <qpopupmenu.h>

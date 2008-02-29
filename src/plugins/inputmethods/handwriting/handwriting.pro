@@ -1,5 +1,8 @@
+singleprocess:singleprocess=true
 TEMPLATE    = lib
 CONFIG	    += qtopia warn_on release
+win32:CONFIG += dll
+win32:DEFINES += QTOPIA_PLUGIN_MAKEDLL QTOPIA_DLL
 HEADERS	    = qimpenchar.h \
 		qimpenprofile.h \
 		qimpencombining.h \
@@ -25,9 +28,6 @@ SOURCES	    = qimpenchar.cpp \
 INTERFACES  = qimpenprefbase.ui
 TARGET	    = qhandwriting
 DESTDIR	    = $(QPEDIR)/plugins/inputmethods
-INCLUDEPATH += $(QPEDIR)/include
-DEPENDPATH  += $(QPEDIR)/include
-LIBS	    += -lqpe
 VERSION	    = 1.0.0
 
-TRANSLATIONS += $(QPEDIR)/i18n/de/libqhandwriting.ts
+TRANSLATIONS = libqhandwriting-en_GB.ts libqhandwriting-de.ts libqhandwriting-ja.ts libqhandwriting-no.ts

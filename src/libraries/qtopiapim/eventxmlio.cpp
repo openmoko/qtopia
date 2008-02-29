@@ -20,28 +20,35 @@
 
 #include <qfile.h>
 #include <qasciidict.h>
-#include <qpe/config.h>
-#include <qpe/global.h>
-#include <qpe/stringutil.h>
-#include <qpe/quuid.h>
+#include <qtopia/config.h>
+#include <qtopia/global.h>
+#include <qtopia/stringutil.h>
+#include <qtopia/quuid.h>
 #include <qfileinfo.h>
-#include <qpe/qcopenvelope_qws.h>
-#include <qpe/timeconversion.h>
-#include <qpe/alarmserver.h>
+#ifdef Q_WS_QWS
+#include <qtopia/qcopenvelope_qws.h>
+#endif
+#include <qtopia/timeconversion.h>
+#include <qtopia/alarmserver.h>
 #include <qapplication.h>
 #include <errno.h>
 #include <sys/types.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include "eventxmlio_p.h"
 #include "event.h"
+
+#ifdef Q_OS_WIN32
+#include <process.h>
+#else
+#include <unistd.h>
+#endif
 
 
 // from time_t to QDateTime, but no timezone conversion.
 QDateTime asQDateTime( time_t time )
 {
     struct tm *lt;
-#if defined(_OS_WIN32) || defined (Q_OS_WIN32) || defined (Q_OS_WIN64)
+#if defined(Q_WS_WIN32) || defined (Q_OS_WIN64)
     _tzset();
 #else
     tzset();
@@ -58,7 +65,7 @@ time_t asTimeT( const QDateTime& dt )
     time_t tmp;
     struct tm *lt;
 
-#if defined(_OS_WIN32) || defined (Q_OS_WIN32) || defined (Q_OS_WIN64)
+#if defined(Q_WS_WIN32) || defined (Q_OS_WIN64)
     _tzset();
 #else
     tzset();
@@ -85,39 +92,33 @@ time_t asTimeT( const QDateTime& dt )
     return tmp;
 }
 
-
-EventXmlIO::EventXmlIO(AccessMode m) : EventIO(m), dict(20), needsSave(FALSE)
+EventXmlIO::EventXmlIO(AccessMode m,
+		     const QString &file,
+		     const QString &journal )
+    : EventIO(m),
+      PimXmlIO(PimEvent::keyToIdentifierMap(), PimEvent::identifierToKeyMap() ),
+      needsSave(FALSE)
 {
+    if ( file != QString::null )
+	setDataFilename( file );
+    else setDataFilename( Global::applicationFileName( "datebook", "datebook.xml" ) );
+    if ( journal != QString::null )
+	setJournalFilename( journal );
+    else setJournalFilename( Global::journalFileName( ".caljournal" ) );
+
     m_PrEvents.setAutoDelete(TRUE);
 
-    dict.setAutoDelete( TRUE );
-    dict.insert( "description", new int(FDescription) );
-    dict.insert( "location", new int(FLocation) );
-    dict.insert( "categories", new int(FCategories) );
-    dict.insert( "uid", new int(FUid) );
-    dict.insert( "type", new int(FType) );
-    dict.insert( "alarm", new int(FAlarm) );
-    dict.insert( "sound", new int(FSound) );
-    dict.insert( "rtype", new int(FRType) );
-    dict.insert( "rweekdays", new int(FRWeekdays) );
-    dict.insert( "rposition", new int(FRPosition) );
-    dict.insert( "rfreq", new int(FRFreq) );
-    dict.insert( "rhasenddate", new int(FRHasEndDate) );
-    dict.insert( "enddt", new int(FREndDate) );
-    dict.insert( "start", new int(FRStart) );
-    dict.insert( "end", new int(FREnd) );
-    dict.insert( "note", new int(FNote) );
-    dict.insert( "created", new int(FCreated) );
-    dict.insert( "timezone", new int (FTimeZone) );
-
-    ensureDataCurrent();
+    loadData();
 
     if (m == ReadOnly) {
+
+#ifndef QT_NO_COP
 	QCopChannel *channel = new QCopChannel( "QPE/PIM",  this );
 
 	connect( channel, SIGNAL(received(const QCString&, const QByteArray&)),
 		this, SLOT(pimMessage(const QCString&, const QByteArray&)) );
 
+#endif
     }
 }
 
@@ -157,169 +158,18 @@ void EventXmlIO::pimMessage(const QCString &message, const QByteArray &data)
 EventXmlIO::~EventXmlIO() {
 }
 
-// used when loading to finalize records.
-static bool loading = FALSE;
-static int alarmTime = -1;
-static PrEvent::SoundTypeChoice alarmSound = PrEvent::Loud;
-static bool isAllDay = FALSE;
-
-static time_t startUtc = 0;
-static time_t endUtc = 0;
-static time_t endDateUtc = 0;
-static bool hasTimeZone = FALSE;
-
 bool EventXmlIO::loadData()
 {
-    loading = TRUE;
-    bool result = PimXmlIO::loadData();
-    loading = FALSE;
-    return result;
+    if (PimXmlIO::loadData()) {
+	emit eventsUpdated();
+	return TRUE;
+    }
+    return FALSE;
 }
 
-void EventXmlIO::assignField(PimRecord *rec, const QCString &attr, const QString &value) 
-{
-    // used to finalize data
-    static PimRecord *prevrec = 0;
-
-    if (rec != prevrec) {
-	alarmTime = -1;
-	alarmSound = PrEvent::Loud;
-	isAllDay = FALSE;
-
-	startUtc = 0;
-	endUtc = 0;
-	endDateUtc = 0;
-	hasTimeZone = FALSE;
-	prevrec = rec;
-    }
-
-    PrEvent *ev = (PrEvent *)rec;
-
-    int *lookup = dict[ attr.data() ];
-    if ( !lookup ) {
-	ev->setCustomField(attr.data(), value);
-	return;
-    }
-
-    switch( *lookup ) {
-	case FDescription:
-	    ev->setDescription( value );
-	    break;
-	case FLocation:
-	    ev->setLocation( value );
-	    break;
-	case FCategories: 
-	    ev->setCategories( idsFromString( value ) );
-	    break;
-	case FUid:
-	    setUid( *ev, uuidFromInt(value.toInt()) );
-	    break;
-	case FType:
-	    isAllDay = TRUE;
-	    break;
-	case FAlarm:
-	    alarmTime = value.toInt();
-	    break;
-	case FSound:
-	    alarmSound = 
-		value == "loud" ? PrEvent::Loud : PrEvent::Silent;
-	    break;
-	case FRType:
-	    if ( value == "Daily" )
-		ev->setRepeatType(PrEvent::Daily);
-	    else if ( value == "Weekly" )
-		ev->setRepeatType(PrEvent::Weekly);
-	    else if ( value == "MonthlyDay" )
-		ev->setRepeatType(PrEvent::MonthlyDay);
-	    else if ( value == "MonthlyDate" )
-		ev->setRepeatType(PrEvent::MonthlyDate);
-	    else if ( value == "MonthlyEndDay" )
-		ev->setRepeatType(PrEvent::MonthlyEndDay);
-	    else if ( value == "Yearly" )
-		ev->setRepeatType(PrEvent::Yearly);
-	    else
-		ev->setRepeatType(PrEvent::NoRepeat);
-	    break;
-	case FRWeekdays:
-	    if (!ev->hasRepeat())
-		ev->setRepeatType(PrEvent::Weekly);
-	    ev->p_setWeekMask(value.toInt());
-	    break;
-	case FRFreq:
-	    if (!ev->hasRepeat())
-		ev->setRepeatType(PrEvent::Daily);
-	    ev->setFrequency( value.toInt() );
-	    break;
-	case FRHasEndDate:
-	    if (!ev->hasRepeat())
-		ev->setRepeatType(PrEvent::Daily);
-	    ev->setRepeatForever( value.toInt() == 0 );
-	    break;
-	case FREndDate:
-	    endDateUtc = (time_t) value.toLong();
-	    if (!ev->hasRepeat())
-		ev->setRepeatType(PrEvent::Daily);
-	    break;
-	case FRStart:
-	    startUtc = (time_t) value.toLong();
-	    break;
-	case FREnd:
-	    endUtc = (time_t) value.toLong();
-	    break;
-	case FNote:
-	    ev->setNotes( value );
-	    break;
-	case FTimeZone:
-	    if (value != "None")
-		ev->setTimeZone( value);
-	    // hasTimeZone in that one is set, even if it is none.
-	    hasTimeZone = TRUE;
-	    break;
-	default:
-	    // FCreated and FPosition Ignored.
-	    qDebug( "huh??? missing enum? -- attr.: %s", attr.data() );
-	    break;
-    }
-}
-
-void EventXmlIO::finalizeRecord(PrEvent *ev) 
-{
-    // post Processing.
-    if (!hasTimeZone) {
-	// make one up.  Can't be "None" because in old datebook all
-	// events were in UTC.  So make it the current locale.
-	ev->setTimeZone( QString::fromLocal8Bit( getenv( "TZ" ) ) );
-    }
-
-    // if there was a timezone, it would be set by now.
-    ev->setStartAsUTC( startUtc );
-    ev->setEndAsUTC( endUtc );
-    if (ev->hasRepeat() && endDateUtc != 0 && !ev->repeatForever())
-	ev->setRepeatTillAsUTC( endDateUtc );
-
-    if ( isAllDay )
-	ev->setAllDay( TRUE );
-
-    if (alarmTime >= 0)
-	ev->setAlarm(alarmTime, alarmSound);
-
-    // 0' out elements although this will be done in assignField anyway
-    alarmTime = -1;
-    alarmSound = PrEvent::Loud;
-    isAllDay = FALSE;
-
-    startUtc = 0;
-    endUtc = 0;
-    endDateUtc = 0;
-    hasTimeZone = FALSE;
-}
-
-bool EventXmlIO::internalAddRecord(PimRecord *rec) 
+bool EventXmlIO::internalAddRecord(PimRecord *rec)
 {
     PrEvent *ev = (PrEvent *)rec;
-
-    if (loading)
-	finalizeRecord(ev);
 
     m_PrEvents.append( ev );
     return TRUE;
@@ -328,8 +178,6 @@ bool EventXmlIO::internalAddRecord(PimRecord *rec)
 bool EventXmlIO::internalRemoveRecord(PimRecord *rec)
 {
     PrEvent *ev = (PrEvent *)rec;
-
-    // no need to finalize what we plan to delete
 
     for (m_PrEvents.first(); m_PrEvents.current(); m_PrEvents.next()) {
 	if (m_PrEvents.current()->uid() == ev->uid()) {
@@ -345,8 +193,6 @@ bool EventXmlIO::internalRemoveRecord(PimRecord *rec)
 bool EventXmlIO::internalUpdateRecord(PimRecord *rec)
 {
     PrEvent *ev = (PrEvent *)rec;
-    if (loading)
-	finalizeRecord(ev);
 
     for (m_PrEvents.first(); m_PrEvents.current(); m_PrEvents.next()) {
 	PrEvent *current = m_PrEvents.current();
@@ -360,12 +206,12 @@ bool EventXmlIO::internalUpdateRecord(PimRecord *rec)
     return FALSE;
 }
 
-bool EventXmlIO::saveData() 
+bool EventXmlIO::saveData()
 {
     if (!needsSave)
 	return TRUE;
 
-    if (accessMode() == ReadWrite) {
+    if (accessMode() != ReadOnly ) {
 	if (PimXmlIO::saveData((QList<PimRecord> &)m_PrEvents)) {
 	    needsSave = FALSE;
 	    return TRUE;
@@ -374,88 +220,47 @@ bool EventXmlIO::saveData()
     return FALSE;
 }
 
-QString EventXmlIO::recordToXml(const PimRecord *rec)
+QString EventXmlIO::recordToXml(const PimRecord *p)
 {
-    const PrEvent *e = (const PrEvent *)rec;
+    const PrEvent *e = (const PrEvent *)p;
 
-    QString buf;
-    buf += " description=\"" + Qtopia::escapeString(e->description()) + "\"";
-    if ( !e->location().isEmpty() )
-	buf += " location=\"" + Qtopia::escapeString(e->location()) + "\"";
-    // save the categoies differently....
-    QString strCats = idsToString( e->categories() );
-    buf += " categories=\"" + Qtopia::escapeString(strCats) + "\"";
-    buf += " uid=\"" + QString::number( uuidToInt(e->uid()) ) + "\"";
-    if ( e->isAllDay())
-	buf += " type=\"AllDay\"";
+    QMap<int,QString> data = p->fields();
 
+    bool hasAlarm = e->hasAlarm();
+    bool hasRepeat = e->hasRepeat();
+    bool isException = e->isException();
+    bool hasException = e->hasExceptions();
 
-    if ( !e->timeZone().isEmpty() ) {
-	buf += " timezone=\"" + Qtopia::escapeString(e->timeZone()) + "\"";
-    } else {
-	buf += " timezone=\"None\"";
-    }
+    const QMap<int,QCString> keyToIdentifier = PimEvent::keyToIdentifierMap();
+    QString out;
+    for ( QMap<int, QString>::ConstIterator fit = data.begin();
+	    fit != data.end(); ++fit ) {
 
-    if ( e->hasAlarm() ) {
-	buf += " alarm=\"" + QString::number( e->alarmDelay() ) + "\" sound=\"";
-	if ( e->alarmSound() == PrEvent::Loud )
-	    buf += "loud";
-	else
-	    buf += "silent";
-	buf += "\"";
-    }
-    if ( e->hasRepeat() ) {
-	buf += " rtype=\"";
-	switch ( e->repeatType() ) {
-	    case PrEvent::Daily:
-		buf += "Daily";
-		break;
-	    case PrEvent::Weekly:
-		buf += "Weekly";
-		break;
-	    case PrEvent::MonthlyDay:
-		buf += "MonthlyDay";
-		break;
-	    case PrEvent::MonthlyEndDay:
-		buf += "MonthlyEndDay";
-		break;
-	    case PrEvent::MonthlyDate:
-		buf += "MonthlyDate";
-		break;
-	    case PrEvent::Yearly:
-		buf += "Yearly";
-		break;
-	    default:
-		buf += "NoRepeat";
-		break;
+	int key = fit.key();
+	if ( !hasAlarm && ( key == PimEvent::HasAlarm || key == PimEvent::SoundType) || key == PimEvent::AlarmDelay)
+	    continue;
+	if ( !hasRepeat )  {
+	    if (key == PimEvent::RepeatPattern || key == PimEvent::RepeatWeekdays || key == PimEvent::RepeatFrequency )
+	    	continue;
+	    if ( key == PimEvent::RepeatHasEndDate || key == PimEvent::RepeatEndDate )
+		continue;
 	}
-	buf += "\"";
-	if ( e->repeatType() == PrEvent::Weekly )
-	    buf += " rweekdays=\"" + QString::number( static_cast<int>( e->p_weekMask() ) ) + "\"";
+	if ( !isException && key == PimEvent::RecordParent )
+	    continue;
 
-	buf += " rfreq=\"" + QString::number( e->frequency() ) + "\"";
-	buf += " rhasenddate=\"" + QString::number( static_cast<int>( !e->repeatForever() ) ) + "\"";
-	if ( !e->repeatForever() )
-	    buf += " enddt=\""
-		+ QString::number( e->repeatTillAsUTC() )
-		+ "\"";
+	if ( !hasException && ( key == PimEvent::RecordChildren || key == PimEvent::Exceptions ) )
+	    continue;
+
+	const QString &value = fit.data();
+	if ( !value.isEmpty() ) {
+	    out += keyToIdentifier[key];
+	    out += "=\"" + Qtopia::escapeString(value) + "\" ";
+	}
     }
 
-    buf += " start=\""
-	+ QString::number( e->startAsUTC() )
-	+ "\"";
+    out += customToXml( p );
 
-    buf += " end=\""
-	+ QString::number( e->endAsUTC() )
-	+ "\"";
-
-    if ( !e->notes().isEmpty() )
-	buf += " note=\"" + Qtopia::escapeString( e->notes() ) + "\"";
-
-    // custom last
-    buf += customToXml(e);
-
-    return buf;
+    return out;
 }
 
 const QList<PrEvent>& EventXmlIO::events()
@@ -467,7 +272,7 @@ const QList<PrEvent>& EventXmlIO::events()
 /*!
  Returns the events between \a from and \a to where \a from and \a to are in local time.
  */
-QValueList<Occurrence> EventXmlIO::getOccurrences(const QDate& from, const QDate& to) const 
+QValueList<Occurrence> EventXmlIO::getOccurrences(const QDate& from, const QDate& to) const
 {
     QString localZone = QString::fromLocal8Bit( getenv( "TZ" ) );
     return getOccurrencesInTZ(from, to, localZone);
@@ -477,7 +282,7 @@ QValueList<Occurrence> EventXmlIO::getOccurrences(const QDate& from, const QDate
  Returns the events between \a from and \a to where \a from and \a to are in
  in the time zone \a zone.
  */
-QValueList<Occurrence> EventXmlIO::getOccurrencesInTZ(const QDate& from, const QDate& to, const QString &zone) const 
+QValueList<Occurrence> EventXmlIO::getOccurrencesInTZ(const QDate& from, const QDate& to, const QString &zone) const
 {
     QValueList<Occurrence> results;
 
@@ -502,13 +307,15 @@ QValueList<Occurrence> EventXmlIO::getOccurrencesInTZ(const QDate& from, const Q
     return results;
 }
 
-void EventXmlIO::addEvent(const PimEvent &event)
+void EventXmlIO::addEvent(const PimEvent &event, bool assignUid )
 {
-    if (accessMode() != ReadWrite)
+    if (accessMode() == ReadOnly)
 	return;
 
     PrEvent *ev = new PrEvent((const PrEvent &)event);
-    assignNewUid(ev);
+
+    if ( assignUid || ev->uid().isNull() )
+	assignNewUid(ev);
 
     if (internalAddRecord(ev)) {
 	needsSave = TRUE;
@@ -518,18 +325,80 @@ void EventXmlIO::addEvent(const PimEvent &event)
 	updateJournal(*ev, ACTION_ADD);
 
 	{
-	    QCopEnvelope e("QPE/PIM", "addedEvent(int,PimEvent)"); 
+#ifndef QT_NO_COP
+	    QCopEnvelope e("QPE/PIM", "addedEvent(int,PimEvent)");
 	    e << getpid();
 	    e << *ev;
+#endif
 	}
     }
 }
 
+void EventXmlIO::addException(const QDate &d, const PimEvent &p)
+{
+    if (accessMode() == ReadOnly)
+	return;
+
+    PrEvent *parent = new PrEvent((const PrEvent &)p);
+    parent->addException(d);
+    parent->addChildUid(QUuid());
+
+    if (internalUpdateRecord(parent)) {
+	needsSave = TRUE;
+
+	updateJournal(*parent, ACTION_REPLACE);
+
+#ifndef QT_NO_COP
+	{
+	    QCopEnvelope e("QPE/PIM", "updatedEvent(int,PimEvent)");
+	    e << getpid();
+	    e << *parent;
+	}
+#endif
+    }
+}
+
+void EventXmlIO::addException(const QDate &d, const PimEvent &p, const PimEvent& event)
+{
+    if (accessMode() == ReadOnly)
+	return;
+
+    PrEvent *parent = new PrEvent((const PrEvent &)p);
+    PrEvent *ev = new PrEvent((const PrEvent &)event);
+
+    assignNewUid(ev);
+
+    ev->setParentUid(parent->uid());
+    parent->addException(d);
+    parent->addChildUid(ev->uid());
+
+    if (internalAddRecord(ev) && internalUpdateRecord(parent)) {
+	needsSave = TRUE;
+	if (ev->hasAlarm())
+	    addEventAlarm(*ev);
+
+	updateJournal(*ev, ACTION_ADD);
+	updateJournal(*parent, ACTION_REPLACE);
+
+#ifndef QT_NO_COP
+	{
+	    QCopEnvelope e("QPE/PIM", "addedEvent(int,PimEvent)");
+	    e << getpid();
+	    e << *ev;
+	}
+	{
+	    QCopEnvelope e("QPE/PIM", "updatedEvent(int,PimEvent)");
+	    e << getpid();
+	    e << *parent;
+	}
+#endif
+    }
+}
 
 void EventXmlIO::removeEvent(const PimEvent &event)
 {
 
-    if (accessMode() != ReadWrite)
+    if (accessMode() == ReadOnly)
 	return;
 
     PrEvent *ev = new PrEvent((const PrEvent &)event);
@@ -540,22 +409,24 @@ void EventXmlIO::removeEvent(const PimEvent &event)
 		delEventAlarm(*(m_PrEvents.current()));
 	}
     }
- 
+
 
     if (internalRemoveRecord(ev)) {
 	needsSave = TRUE;
 	updateJournal(event, ACTION_REMOVE);
 	{
-	    QCopEnvelope e("QPE/PIM", "removedEvent(int,PimEvent)"); 
+#ifndef QT_NO_COP
+	    QCopEnvelope e("QPE/PIM", "removedEvent(int,PimEvent)");
 	    e << getpid();
 	    e << event;
+#endif
 	}
     }
 }
 
 void EventXmlIO::updateEvent(const PimEvent &event)
 {
-    if (accessMode() != ReadWrite)
+    if (accessMode() == ReadOnly)
 	return;
 
     PrEvent *ev = new PrEvent((const PrEvent &)event);
@@ -574,38 +445,29 @@ void EventXmlIO::updateEvent(const PimEvent &event)
 
 	updateJournal(*ev, ACTION_REPLACE);
 	{
-	    QCopEnvelope e("QPE/PIM", "updatedEvent(int,PimEvent)"); 
+#ifndef QT_NO_COP
+	    QCopEnvelope e("QPE/PIM", "updatedEvent(int,PimEvent)");
 	    e << getpid();
 	    e << *ev;
+#endif
 	}
     }
 }
 
-void EventXmlIO::ensureDataCurrent(bool forceReload) {
-  if (isDataCurrent() && !forceReload)
-    return;
-  
-  // get rid of all events first
-  QListIterator<PrEvent> it(m_PrEvents);
-  for ( ; it.current(); ++it ) {
-      if ( it.current()->hasAlarm() )
-	  delEventAlarm( *(it.current()) );
-  }
+void EventXmlIO::ensureDataCurrent(bool forceReload)
+{
+    if (accessMode() == WriteOnly || ( isDataCurrent() && !forceReload) )
+	return;
 
-  m_PrEvents.clear();
-  loadData();
-}
+    // get rid of all events first
+    QListIterator<PrEvent> it(m_PrEvents);
+    for ( ; it.current(); ++it ) {
+	if ( it.current()->hasAlarm() )
+	    delEventAlarm( *(it.current()) );
+    }
 
-const QString EventXmlIO::dataFilename() const {
-  QString filename = Global::applicationFileName("datebook",
-						 "datebook.xml");
-  return filename;
-}
-
-const QString EventXmlIO::journalFilename() const {
-  QString str = getenv("HOME");
-  str +="/.caljournal";
-  return str;
+    m_PrEvents.clear();
+    loadData();
 }
 
 bool EventXmlIO::nextAlarm( const PrEvent &ev, QDateTime& when, int& warn)
@@ -632,20 +494,24 @@ bool EventXmlIO::nextAlarm( const PrEvent &ev, QDateTime& when, int& warn)
 
 void EventXmlIO::addEventAlarm(const PrEvent &ev)
 {
+#ifdef Q_WS_QWS
     QDateTime when;
     int warn;
     if (nextAlarm(ev, when, warn)) {
 	AlarmServer::addAlarm(when, "QPE/Application/datebook",
 		"alarm(QDateTime,int)", warn);
     }
+#endif
 }
 
 void EventXmlIO::delEventAlarm(const PrEvent &ev)
 {
+#ifdef Q_WS_QWS
     QDateTime when;
     int warn;
     if ( nextAlarm(ev,when,warn) ) {
 	AlarmServer::deleteAlarm( when, "QPE/Application/datebook",
 		"alarm(QDateTime,int)", warn);
     }
+#endif
 }

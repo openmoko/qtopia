@@ -135,15 +135,15 @@ void PolishedDecoration::drawBlend( QPainter *p, const QRect &r, const QColor &c
     c2.hsv( &h2, &s2, &v2 );
 
     int split = r.height()/3;
-
-    for ( int j = 0; j < split; j++ ) {
+    int j;
+    for ( j = 0; j < split; j++ ) {
 	p->setPen( QColor( h1 + ((h2-h1)*(j+split))/(2*split-1),
 		    s1 + ((s2-s1)*(j+split))/(2*split-1),
 		    v1 + ((v2-v1)*(j+split))/(2*split-1), QColor::Hsv ) );
 	p->drawLine( r.x(), r.y()+j, r.right(), r.y()+j );
     }
 
-    for ( int j = 0; j < r.height()-split; j++ ) {
+    for ( j = 0; j < r.height()-split; j++ ) {
 	p->setPen( QColor( h1 + ((h2-h1)*j)/(r.height()-split-1),
 		    s1 + ((s2-s1)*j)/(r.height()-split-1),
 		    v1 + ((v2-v1)*j)/(r.height()-split-1), QColor::Hsv ) );

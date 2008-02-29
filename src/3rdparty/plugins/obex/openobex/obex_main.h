@@ -53,8 +53,7 @@ typedef struct obex obex_t;
 #endif
 
 /* use 0 for production, 1 for verification, >2 for debug */
-#ifndef OBEX_DEBUG
-#define OBEX_DEBUG 0
+#ifdef OBEX_DEBUG
 unsigned int obex_debug;
 #endif
 

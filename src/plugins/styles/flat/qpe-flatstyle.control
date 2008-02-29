@@ -3,7 +3,7 @@ Priority: optional
 Section: qpe/styles
 Maintainer: Trolltech (www.trolltech.com)
 Architecture: arm
-Version: $QPE_VERSION-5
-Depends: qpe-base ($QPE_VERSION)
+Version: $QPE_VERSION-10
+Depends: qpe-libqtopia
 Description: Qtopia widget style
  Simple widget style for the Qtopia environment.

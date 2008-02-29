@@ -18,7 +18,7 @@
 **
 **********************************************************************/
 
-#include <qpe/sound.h>
+#include <qtopia/sound.h>
 
 #include <qcanvas.h>
 

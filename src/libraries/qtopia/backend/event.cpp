@@ -30,6 +30,7 @@
 #include <stdio.h>
 
 using namespace Qtopia;
+Qtopia::UidGen Event::sUidGen( Qtopia::UidGen::Qtopia );
 
 static void write( QString& buf, const Event::RepeatPattern &r )
 {
@@ -69,7 +70,6 @@ static void write( QString& buf, const Event::RepeatPattern &r )
     buf += " created=\"" + QString::number( r.createTime ) + "\"";
 }
 
-Qtopia::UidGen Event::sUidGen( Qtopia::UidGen::Qtopia );
 
 /*
   \internal
@@ -416,6 +416,15 @@ int Event::monthDiff( const QDate& first, const QDate& second )
     return ( second.year() - first.year() ) * 12 +
 	second.month() - first.month();
 }
+
+
+#ifdef Q_OS_WIN32 
+// compilation fails if this is an inline function 
+Qtopia::UidGen & Event::uidGen() 
+{ 
+    return sUidGen; 
+}
+#endif
 
 /*
   \internal

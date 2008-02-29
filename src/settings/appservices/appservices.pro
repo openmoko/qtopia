@@ -7,10 +7,6 @@ SOURCES		= appservices.cpp main.cpp
 
 INTERFACES	= appservicesbase.ui
 
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH	+= $(QPEDIR)/include
-LIBS            += -lqpe -lqtopiaservices
-
 TARGET		= appservices
 
-TRANSLATIONS    = $(QPEDIR)/i18n/de/appservices.ts
+TRANSLATIONS = appservices-en_GB.ts appservices-de.ts appservices-ja.ts appservices-no.ts

@@ -22,7 +22,7 @@
 #include "man.h"
 #include "base.h"
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
 #include <qregexp.h>
 
@@ -91,8 +91,15 @@ void Man::advance(int phase)
 	    setFrame(f%5);
 	    f++;
 	    move(x(), canvas()->height()-26);
-	    setVelocity(-2, 0);
-	} 
+	    setVelocity(-2.0, 0);
+	} else if (xVelocity() == -2.0) {
+	    //
+	    // There's been a resize event while this Man has
+	    // been on the ground.  No neat solution, kill this
+	    // Man.
+	    //
+	    dead = TRUE;
+	}
     }
 } 
 
@@ -122,6 +129,16 @@ void Man::checkCollision()
                  start();
              }
           }
+    }
+
+    //
+    // resize events may cause Man objects to appear
+    // outside the screen.  Get rid of them if this
+    // is the case.
+    //
+    if ((x() < 0) || (x() > canvas()->width())) {
+	delete this;
+	return;
     }
 }
 

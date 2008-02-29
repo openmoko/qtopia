@@ -21,7 +21,12 @@
 #define Addressbook_H
 
 #include <qmainwindow.h>
+#include <qdialog.h>
+#include <qstringlist.h>
 #include <qmap.h>
+#include <qtopia/pim/private/contactxmlio_p.h>
+#include <qtopia/categories.h>
+#include <qtopia/fieldmapimpl.h>
 
 class AbEditor;
 class AbLabel;
@@ -36,6 +41,19 @@ class QAction;
 class CategorySelect;
 class QVBox;
 
+class AbSettings : public QDialog
+{
+    Q_OBJECT
+public:
+    AbSettings(QWidget *parent = 0, const char *name = 0, bool modal = TRUE, WFlags = 0);
+
+    void setCurrentFields(const QValueList<int> &);
+    QValueList<int> fields() { return map->fields(); }
+
+private:
+    FieldMap *map;
+};
+
 class AddressbookWindow: public QMainWindow
 {
     Q_OBJECT
@@ -45,10 +63,7 @@ public:
 
 protected:
     void resizeEvent( QResizeEvent * e );
-    void showList();
-    void showView();
     enum EntryMode { NewEntry=0, EditEntry };
-    void editPersonal();
     void editEntry( EntryMode );
     void duplicateEntry();
     void closeEvent( QCloseEvent *e );
@@ -62,13 +77,14 @@ public slots:
 private slots:
     void slotListNew();
     void slotListView();
+    void slotDetailView();
     void slotListDelete();
     void slotViewBack();
     void slotViewEdit();
     void slotViewDuplicate();
     void slotPersonalView();
-    void listIsEmpty( bool );
-    void slotSettings();
+    void editPersonal();
+    void markCurrentAsPersonal();
     void writeMail();
     void slotBeam();
     void beamDone( Ir * );
@@ -78,20 +94,25 @@ private slots:
     void findNotFound();
     void findFound();
     void slotSetCategory( int );
-    void slotUpdateToolbar(int row, int col);
+    void updateIcons();
     void contactFilterSelected( int idx );
+    void selectAll();
+    void configure();
 
 private:
     void receiveFile( const QString & );
-    void initFields();	// inititialize our fields...
+    void readConfig();
+    void writeConfig();
+    QString categoryLabel( int id );
     AbLabel *abView();
+    void showView();
+    void deleteContacts(QValueList<QUuid> &);
 
+    ContactXmlIO contacts;
+    Categories cats;
     QPEToolBar *listTools;
     QToolButton *deleteButton;
     CategorySelect *catSelect;
-    QValueList<int> allFields,
-	            orderedFields;
-    QStringList slOrderedFields;
     enum Panes { paneList=0, paneView, paneEdit };
     QVBox *listView;
     AbEditor *abEditor;
@@ -101,13 +122,16 @@ private:
     QPEToolBar *searchBar;
     QLineEdit *searchEdit;
 
-    QAction *actionNew, *actionEdit, *actionTrash, *actionFind, *actionBeam, 
-	*actionPersonal, *actionMail, *actionDuplicate;
+    QAction *actionNew, *actionEdit, *actionTrash, *actionFind,
+	*actionBeam, *actionPersonal, *actionMail, *actionDuplicate,
+	*actionSetPersonal;
+
 
     bool bAbEditFirstTime;
     int viewMargin;
 
     bool syncing;
+    bool showingPersonal;
     QMap<int,int> contactMap;
 };
 

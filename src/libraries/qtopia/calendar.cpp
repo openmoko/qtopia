@@ -33,6 +33,10 @@ QString Calendar::nameOfDay( int d )
     return dt.dayName( d );
 }
 
+/*!
+  \obsolete
+  Don't use this function.
+*/
 QValueList<Calendar::Day> Calendar::daysOfMonth( int year, int month,
 						 bool startWithMonday )
 {

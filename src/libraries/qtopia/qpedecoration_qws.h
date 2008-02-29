@@ -34,6 +34,7 @@
 
 class QPEManager;
 class QTimer;
+#include <qwidget.h>
 
 class QTOPIA_EXPORT QPEDecoration : public QWSDefaultDecoration
 {
@@ -75,6 +76,9 @@ protected:
 };
 
 
+#define QTOPIA_DEFINED_QPEDECORATION
+#include <qtopia/qtopiawinexport.h>
+
 class QTOPIA_EXPORT QPEManager : public QObject
 {
     Q_OBJECT
@@ -105,6 +109,9 @@ protected:
     QGuardedPtr<QWidget> whatsThis;
 };
 
+
+#define QTOPIA_DEFINED_QPEMANAGER
+#include <qtopia/qtopiawinexport.h>
 
 #endif // QT_NO_QWS_QPE_WM_STYLE
 

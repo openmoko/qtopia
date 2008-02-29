@@ -17,28 +17,36 @@
 ** not clear to you.
 **
 **********************************************************************/
-#include <stdlib.h>
-#include <stdio.h>
-#include <qwidget.h>
-#include <qbitmap.h>
-#include <qpixmap.h>
-#include <qbutton.h>
-#include <qpainter.h>
-#include <qtimer.h>
-#include <qframe.h>
-#include <qfile.h>
-#include <qlineedit.h>
-#include <qpe/resource.h>
-#include <qpe/mediaplayerplugininterface.h>
 #include "imageutil.h"
 #include "audiowidget.h"
 #include "mediaplayerstate.h"
+
+#include <qtopia/config.h>
+#include <qtopia/mediaplayerplugininterface.h>
+#include <qtopia/resource.h>
+
+#include <qapplication.h>
+#include <qbitmap.h>
+#include <qbutton.h>
+#include <qfile.h>
+#include <qfontmetrics.h>
+#include <qframe.h>
+#include <qlineedit.h>
+#include <qpainter.h>
+#include <qpixmap.h>
+#include <qtimer.h>
+#include <qwidget.h>
+
+#include <stdlib.h>
+#include <stdio.h>
 
 
 ControlWidgetBase::ControlWidgetBase( QWidget* parent, const QString &skinPath, const QString &type, const char* name ) :
     QWidget( parent, name ), buttonCount( 0 ), slider( Qt::Horizontal, this ), time( this ), sliderBeingMoved( FALSE )
 {
     setCaption( tr("Media Player") );
+
+    setMouseTracking( TRUE );
 
     slider.setFixedHeight( 20 );
     slider.setMinValue( 0 );
@@ -54,12 +62,13 @@ ControlWidgetBase::ControlWidgetBase( QWidget* parent, const QString &skinPath, 
     skinScaleW = 0;
     skinScaleH = 0;
     skin = "";
-    skinName = skinPath;
+    skinFile = skinPath;
     skinType = type;
     imagesLoaded = FALSE;
     imagesScaled = FALSE;
     hadFirstResize = FALSE;
     resized = FALSE;
+    canPaint = FALSE;
 
     connect( &slider,	       SIGNAL( sliderPressed() ),      this, SLOT( sliderPressed() ) );
     connect( &slider,	       SIGNAL( sliderReleased() ),     this, SLOT( sliderReleased() ) );
@@ -68,6 +77,7 @@ ControlWidgetBase::ControlWidgetBase( QWidget* parent, const QString &skinPath, 
     connect( mediaPlayerState, SIGNAL( lengthChanged(long) ),  this, SLOT( setLength(long) ) );
     connect( mediaPlayerState, SIGNAL( positionChanged(long) ),this, SLOT( setPosition(long) ) );
     connect( mediaPlayerState, SIGNAL( positionUpdated(long) ),this, SLOT( setPosition(long) ) );
+    connect( mediaPlayerState, SIGNAL( seekableToggled(bool) ),this, SLOT( setSeekable(bool) ) );
     //connect( mediaPlayerState, SIGNAL( viewChanged(View) ),    this, SLOT( setView(View) ) );
     connect( mediaPlayerState, SIGNAL( loopingToggled(bool) ), this, SLOT( setLooping(bool) ) );
     connect( mediaPlayerState, SIGNAL( pausedToggled(bool) ),  this, SLOT( setPaused(bool) ) );
@@ -81,9 +91,9 @@ ControlWidgetBase::~ControlWidgetBase()
 }
 
 
-void ControlWidgetBase::setSkin( const QString& skinName )
+void ControlWidgetBase::setSkin( const QString& newskin )
 {
-    if ( skin == skinName )
+    if ( skin == newskin )
 	return;
 
     qDebug("set %s skin", skinType.latin1() );
@@ -101,7 +111,7 @@ void ControlWidgetBase::setSkin( const QString& skinName )
     imagesLoaded = FALSE;
     bgImgLoaded = FALSE;
 
-    skin = skinName;
+    skin = newskin;
 
     // setSkin can be called from selecting a skin in the menus. It looks bad
     // to load the images etc while the menu is up so we delay the loading in a timer
@@ -128,32 +138,37 @@ void ControlWidgetBase::loadImages()
     if ( imagesLoaded )
 	return;
 
-    qDebug("load %s images", skinType.latin1() ); 
+    //qDebug("load %s images", skinType.latin1() ); 
 
-    QString skinPath = "mediaplayer/skins/" + skin;
+    QString skinPath = "mediaplayer/skins/" + skin + "/";
+    // Using findPixmap is a bit of an abuse
+    Config cfg(Resource::findPixmap(skinPath+"config"), Config::File);
+    cfg.setGroup("Skin");
 
     if ( !bgImgLoaded ) {
-	bgPix = Resource::loadPixmap( QString("%1/background").arg(skinPath) );
+	bgPix = Resource::loadPixmap( skinPath+cfg.readEntry("background", "background") );
 	bgNeedsScaling = FALSE;
 	if ( bgPix.isNull() ) 
-	    bgPix = Resource::loadPixmap( QString("%1/background_tiled").arg(skinPath) );
+	    bgPix = Resource::loadPixmap( skinPath+cfg.readEntry("background_tiled", "background_tiled") );
 	if ( bgPix.isNull() ) {
-	    bgImg = Resource::loadImage( QString("%1/background_scaled").arg(skinPath) );
+	    bgImg = Resource::loadImage( skinPath+cfg.readEntry("background_scaled", "background_scaled") );
 	    bgNeedsScaling = TRUE;
 	}
 	bgImgLoaded = TRUE;
     }
     if ( !tmpButtonImgLoaded[0] ) {
-        tmpButtonImg[0] = Resource::loadImage( QString("%1/%2_up").arg(skinPath).arg(skinType) );
+        tmpButtonImg[0] = Resource::loadImage( skinPath+cfg.readEntry(skinType+"_up", skinType+"_up") );
 	tmpButtonImgLoaded[0] = TRUE;
     }
     if ( !tmpButtonImgLoaded[1] ) {
-	tmpButtonImg[1] = Resource::loadImage( QString("%1/%2_down").arg(skinPath).arg(skinType) );
+	tmpButtonImg[1] = Resource::loadImage( skinPath+cfg.readEntry(skinType+"_down", skinType+"_down") );
 	tmpButtonImgLoaded[1] = TRUE;
     }
     for ( int button = 0; button < buttonCount; button++ ) {
 	if ( !tmpButtonMaskLoaded[button] ) {
-	    QString filename = skinPath + "/" + skinType + "_mask_" + buttons[button].skinImage;
+	    QString filename = skinType + "_mask_" + buttons[button].skinImage;
+	    cfg.readEntry(filename,filename);
+	    filename = skinPath + filename;
 	    QString file = Resource::findPixmap( filename );
 	    if ( ( buttons[button].hasImage = !file.isNull() ) ) {
 		tmpButtonMask[button] = QImage( file ).convertDepth( 1 );
@@ -164,38 +179,48 @@ void ControlWidgetBase::loadImages()
 
     imagesLoaded = TRUE;
 
-    qDebug("loaded %s images", skinType.latin1() ); 
+    //qDebug("loaded %s images", skinType.latin1() ); 
+}
+
+
+void ControlWidgetBase::resetButtons()
+{
+    emit moreReleased(); 
+    emit lessReleased();
+    emit forwardReleased();
+    emit backwardReleased();
+
+    // Reset these buttons to unclicked 
+    for ( int i = 0; i < buttonCount; i++ ) {
+	switch ( buttons[i].buttonType ) {
+	    case VolumeUpButton:
+	    case VolumeDownButton:
+	    case ForwardButton:
+	    case BackwardButton:
+		buttons[i].isDown = FALSE;
+		buttons[i].isHeld = FALSE;
+	    default:
+		break;
+	}
+    }
 }
 
 
 void ControlWidgetBase::resizeEvent( QResizeEvent * )
 {
-/*
-    // Don't handle the first resize event we get because
-    // it is usually bogus and a waste of time scaling a stack of images
-    // only to get another resize event.
-    // This is made safe by the fact that if we get a paint event and
-    // we haven't handled a resize yet, we then handle a resize first
-    // in the paint event.
-    bool oldHadFirstResize = hadFirstResize;
-    hadFirstResize = TRUE;
-    if ( !oldHadFirstResize )
-	return;
-*/
     resized = TRUE;
-    internalResize();
+    virtualResize();
 }
 
 
 void ControlWidgetBase::paintEvent( QPaintEvent *pe )
 {
-qDebug("paint event");
-    if ( /*hadFirstResize &&*/ !resized ) {
-        internalResize();
+    if ( !resized ) {
+        virtualResize();
 	resized = TRUE;
     }
 
-    internalPaint( pe );
+    virtualPaint( pe );
 
     // Set up the masks
     for ( int i = 0; i < buttonCount; i++ ) 
@@ -203,9 +228,9 @@ qDebug("paint event");
 }
 
 
-int ControlWidgetBase::resizeObjects( int w, int h, int scaleW, int scaleH )
+int ControlWidgetBase::resizeObjects( int w, int h, int scaleW, int scaleH, int cornerWidgetWidth )
 {
-    qDebug("scale %s images -> %i %i %i %i", skinType.latin1(), w, h, scaleW, scaleH );
+    //qDebug("scale %s images -> %i %i %i %i", skinType.latin1(), w, h, scaleW, scaleH );
  
     loadImages();
 
@@ -227,16 +252,17 @@ int ControlWidgetBase::resizeObjects( int w, int h, int scaleW, int scaleH )
     actualScaleW = scaleW;
     actualScaleH = scaleH;
 
-    int border = w / 25;
-    const int timeWidth = 70;
-    const int timeHeight = 20;
+    int border = w / 40;
+    QFontMetrics fm( qApp->font() );
+    int timeWidth = fm.width( " 00:00 / 00:00 " );
+    int timeHeight = 20; // fm.height();
 
     imgButtonMask = QImage( scaleW, scaleH, 8, 255 );
     imgButtonMask.fill( 0 );
 
-    slider.setFixedWidth( w - timeWidth - 3 * border );
-    slider.setGeometry( QRect( border, h - timeHeight - border, w - timeWidth - 2 * border, timeHeight ) );
-    time.setGeometry( QRect( w - timeWidth - border, h - timeHeight - border, timeWidth, timeHeight ) );
+    slider.setFixedWidth( w - timeWidth - 3 * border - cornerWidgetWidth );
+    slider.setGeometry( border, h - timeHeight - border, w - timeWidth - 2 * border - cornerWidgetWidth, timeHeight );
+    time.setGeometry( w - timeWidth - border - cornerWidgetWidth, h - timeHeight - border, timeWidth, timeHeight );
 
     xoff = ( w - scaleW ) / 2; // Center buttons horizontally
     yoff = h - scaleH - 2 * border - timeHeight; // Position buttons above slider and the time lineedit
@@ -252,7 +278,7 @@ int ControlWidgetBase::resizeObjects( int w, int h, int scaleW, int scaleH )
 
     imagesScaled = TRUE;
 
-    qDebug("scaled %s images", skinType.latin1() ); 
+    //qDebug("scaled %s images", skinType.latin1() ); 
     return actualScaleH;
 }
 
@@ -261,7 +287,7 @@ void ControlWidgetBase::setButtonData( MediaButton *mediaButtons, int count )
 {
     buttons = mediaButtons;
     buttonCount = count;
-    setSkin( skinName );
+    setSkin( skinFile );
 
     // Intialise state
     setLength( mediaPlayerState->length() );
@@ -269,6 +295,7 @@ void ControlWidgetBase::setButtonData( MediaButton *mediaButtons, int count )
     setLooping( mediaPlayerState->looping() );
     setPaused( mediaPlayerState->paused() );
     setPlaying( mediaPlayerState->playing() );
+    setSeekable( mediaPlayerState->seekable() );
     setFullscreen( mediaPlayerState->fullscreen() );
 }
 
@@ -298,6 +325,12 @@ void ControlWidgetBase::setFullscreen( bool b )
 }
 
 
+void ControlWidgetBase::setSeekable( bool b )
+{
+    slider.setEnabled( b );
+}
+
+
 void ControlWidgetBase::setToggleButton( MediaButtonType butType, bool down )
 {
     for ( int i = 0; i < buttonCount; i++ )
@@ -318,18 +351,19 @@ void ControlWidgetBase::toggleButton( int i )
 void ControlWidgetBase::getButtonPix( bool down )
 {
     if ( !buttonPixCreated[down] ) {
-qDebug("scaling %s buttons", skinType.latin1() );
 	// QImage tmpImg = fastScale( tmpButtonImg[down], actualScaleW, actualScaleH );
 	QImage tmpImg = tmpButtonImg[down].smoothScale( actualScaleW, actualScaleH );
-	QPoint pt( xoff, yoff );
-	buttonPix[down].resize( actualScaleW, actualScaleH );
-	QPainter p;
-	p.begin( &buttonPix[down] );
-	p.drawTiledPixmap( buttonPix[down].rect(), bgPix, pt );
-	p.drawImage( 0, 0, tmpImg );
-	p.end();
-	buttonPixCreated[down] = TRUE;
-qDebug("scaled %s buttons", skinType.latin1() );
+	if (!tmpImg.isNull()) {
+	    QPoint pt( xoff, yoff );
+	    buttonPix[down].resize( actualScaleW, actualScaleH );
+	    QPainter p;
+	    p.begin( &buttonPix[down] );
+	    p.drawTiledPixmap( buttonPix[down].rect(), bgPix, pt );
+	    p.drawImage( 0, 0, tmpImg );
+	    p.end();
+	    buttonPixCreated[down] = TRUE;
+	    //qDebug("scaled %s buttons", skinType.latin1() );
+	}
     }
 }
 
@@ -345,7 +379,7 @@ void ControlWidgetBase::getButtonMask( int button )
 	if ( buttons[button].hasImage ) {
 	    getButtonPix( TRUE );
 
-	    qDebug( "creating %s %s file", skinType.latin1(), buttons[button].skinImage );
+	    //qDebug( "creating %s %s file", skinType.latin1(), buttons[button].skinImage );
 
 	    int w = actualScaleW;
 	    int h = actualScaleH;
@@ -384,7 +418,7 @@ void ControlWidgetBase::getButtonMask( int button )
 
 void ControlWidgetBase::paintButton( QPainter& p, int i )
 {
-    if ( !imagesLoaded || !imagesScaled || !buttons[i].hasImage )
+    if ( !canPaint || !imagesLoaded || !imagesScaled || !buttons[i].hasImage )
 	return;
     getButtonMask( i );
     bool down = buttons[i].isDown; 
@@ -399,10 +433,12 @@ void ControlWidgetBase::paintAllButtons( QPainter& p )
     buttonPix[0].setMask( QBitmap() );
     p.drawPixmap( xoff, yoff, buttonPix[0] );
 
+    canPaint = TRUE;
+
     // Paint any down buttons
     for ( int i = 0; i < buttonCount; i++ ) {
 	getButtonMask( i );
-	if ( buttons[i].isDown )
+	if ( buttons[i].isDown ) 
 	    paintButton( p, i );
     }
 }
@@ -429,45 +465,74 @@ void ControlWidgetBase::sliderReleased()
 }
 
 
-void ControlWidgetBase::setPosition( long i )
+void ControlWidgetBase::setPosition( long )
 {
-    long length = mediaPlayerState->length();
-    updateSlider( i, length );
+    virtualUpdateSlider();
 }
 
 
-void ControlWidgetBase::setLength( long max )
+void ControlWidgetBase::setLength( long )
 {
-    long pos = mediaPlayerState->position();
-    updateSlider( pos, max );
+    virtualUpdateSlider();
 }
 
 
-void ControlWidgetBase::updateSlider( long, long )
+QString ControlWidgetBase::toTimeString( long length )
 {
-}
-
-
-QString ControlWidgetBase::timeAsString( long length )
-{
-    if ( mediaPlayerState->decoder() ) {
-	int freq = mediaPlayerState->decoder()->audioFrequency( 0 );
-	if ( freq )
-	    length /= freq;
-    }
     int minutes = length / 60;
     int seconds = length % 60;
     return QString("%1:%2%3").arg( minutes ).arg( seconds / 10 ).arg( seconds % 10 );
 }
 
 
-void ControlWidgetBase::updateSliderBase( long i, long max )
+QString ControlWidgetBase::timeAsString( long length )
 {
-    time.setText( timeAsString( i ) + " / " + timeAsString( max ) );
+    if ( mediaPlayerState->decoder() ) {
+	if ( mediaPlayerState->decoder()->videoStreams() > 0 ) {
+	    double frameRate = mediaPlayerState->decoder()->videoFrameRate( 0 );
+	    if ( frameRate == 0.0 )
+		frameRate = 1.0;
+	    length = long((double)length / frameRate);
+	} else {
+	    int freq = mediaPlayerState->decoder()->audioFrequency( 0 );
+	    if ( freq )
+		length /= freq;
+	}
+    }
+    return toTimeString( length );
+}
+
+ 
+void ControlWidgetBase::updateSlider()
+{
+    int i = mediaPlayerState->position();
+    int max = mediaPlayerState->length();
+
+    QString currentTime;
+    QString totalTime;
+
+    // Work out currentTime and totalTime strings
+    if ( mediaPlayerState->decoderVersion() == Decoder_1_6 ) {
+	MediaPlayerDecoder_1_6 *decoder = (MediaPlayerDecoder_1_6 *)mediaPlayerState->decoder();
+	if ( decoder->currentTimeAvailable() ) 
+	    currentTime = toTimeString( decoder->currentTime() / 1000 );
+	else
+	    currentTime = "?:??";
+	if ( decoder->totalTimeAvailable() )
+	    totalTime = " / " + toTimeString( decoder->totalTime() / 1000 );
+    } else {
+	currentTime = timeAsString( i );
+	if ( max > 1 )
+	    totalTime = " / " + timeAsString( max );
+    }
+
+    time.setText( currentTime + totalTime );
+
     if ( max == 0 )
 	return;
-    // Will flicker too much if we don't do this
-    // Scale to something reasonable 
+
+    // Will flicker too much if we don't do this.
+    // Scale position to the pixel along the slider.
     int width = slider.width();
     int val = int((double)i * width / max);
     if ( !sliderBeingMoved ) {
@@ -481,9 +546,9 @@ void ControlWidgetBase::updateSliderBase( long i, long max )
 
 void ControlWidgetBase::stopPlaying()
 {
-    QString length = timeAsString( mediaPlayerState->length() );
     mediaPlayerState->setPlaying( FALSE );
-    time.setText( "0:00 / " + length );
+    setPosition( 0 );
+    slider.setValue( 0 );
 }
 
 

@@ -11,7 +11,7 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>261</width>
+            <width>257</width>
             <height>362</height>
         </rect>
     </property>
@@ -563,6 +563,12 @@
         <sender>screensaver_suspend</sender>
         <signal>toggled(bool)</signal>
         <receiver>interval_suspend</receiver>
+        <slot>setEnabled(bool)</slot>
+    </connection>
+    <connection>
+        <sender>screensaver_suspend</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>notnetworkedsuspend</receiver>
         <slot>setEnabled(bool)</slot>
     </connection>
 </connections>

@@ -24,11 +24,11 @@
 #include "canvasshapes.h"
 #include "canvascard.h"
 
-#include <qpe/resource.h>
-#include <qpe/config.h>
+#include <qtopia/resource.h>
+#include <qtopia/config.h>
 
 #include <qmainwindow.h>
-#include <qpe/qpemenubar.h>
+#include <qtopia/qpemenubar.h>
 #include <qpainter.h>
 
 #include <stdlib.h>
@@ -69,7 +69,7 @@ public:
     void toggleSnap() { snapOn = (snapOn == TRUE) ? FALSE : TRUE; }
     void toggleCardsDrawn() { numberToDraw = (numberToDraw == 1) ? 3 : 1; }
     int cardsDrawn() { return numberToDraw; }
-    void setNumberToDraw(int numToDraw) { this->numberToDraw = numToDraw; }
+    void setNumberToDraw(int numToDraw) { numberToDraw = numToDraw; }
 
     void readPile( Config& cfg, CardPile *pile, QString name, int& highestZ );
 

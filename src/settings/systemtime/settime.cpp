@@ -25,7 +25,7 @@
 #include <qtopia/config.h>
 #include <qtopia/private/event.h>
 #include <qtopia/datebookdb.h>
-#include <qtopia/datebookmonth.h>
+#include <qtopia/datepicker.h>
 #include <qtopia/global.h>
 #include <qtopia/resource.h>
 #include <qtopia/timeconversion.h>
@@ -77,7 +77,7 @@ SetDateTime::SetDateTime(QWidget *parent, const char *name, bool modal,  WFlags 
     QHBoxLayout *db = new QHBoxLayout( vb );
     QLabel *dateLabel = new QLabel( tr("Date"), this );
     db->addWidget( dateLabel, 1 );
-    date = new DateButton( TRUE, this );
+    date = new QPEDateButton( this, 0, TRUE );
     db->addWidget( date, 2 );
 
 
@@ -124,7 +124,7 @@ SetDateTime::SetDateTime(QWidget *parent, const char *name, bool modal,  WFlags 
     weekStartCombo->setCurrentItem( startMonday );
     
     connect( weekStartCombo, SIGNAL( activated(int)), 
-	     date, SLOT(setWeekStartsMonday(int)));
+	     this, SLOT(weekStartChanged(int)));
 
 
     QHBoxLayout *hb3 = new QHBoxLayout( vb );
@@ -281,6 +281,11 @@ void SetDateTime::formatChanged(int i)
     date->setDateFormat(date_formats[i]);
 }
 
+void SetDateTime::weekStartChanged(int s)
+{
+    date->setWeekStartsMonday(s==1);
+}
+
 static const int ValueAM = 0;
 static const int ValuePM = 1;
 
@@ -334,6 +339,7 @@ SetTime::SetTime( QWidget *parent, const char *name )
     sbMin->setMaxValue( 59 );
     sbMin->setWrapping(TRUE);
     sbMin->setValue( minute );
+    minuteChanged(minute);
     sbMin->setMinimumWidth( 30 );
     connect( sbMin, SIGNAL(valueChanged(int)), this, SLOT(minuteChanged(int)) );
     hb2->addWidget( sbMin );

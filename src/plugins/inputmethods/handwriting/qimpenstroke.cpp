@@ -264,7 +264,7 @@ QRect QIMPenStroke::boundingRect()
 	int y = startPoint.y();
 	bounding = QRect( x, y, 1, 1 );
 
-	for ( unsigned i = 0; i < links.count(); i++ ) {
+	for ( int i = 0; i < (int)links.count(); i++ ) {
 	    x += links[i].dx;
 	    y += links[i].dy;
 	    if ( x < bounding.left() )
@@ -296,7 +296,7 @@ int QIMPenStroke::calcError( const QArray<int> &base,
     int err = 0;
 
     for ( unsigned i = 0; i < win.count(); i++ ) {
-        int d = QABS( base[i+off] - win[i] );
+        int d = QABS( base[(int)i+off] - win[(int)i] );
         if ( t && d > 128 )
             d -= 256;
         err += QABS( d );
@@ -330,7 +330,7 @@ void QIMPenStroke::createTanSignature()
         tsig.resize(1);
         int dx = 0;
         int dy = 0;
-        for ( unsigned j = 0; j < links.count(); j++ ) {
+        for ( int j = 0; j < (int)links.count(); j++ ) {
             dx += links[j].dx;
             dy += links[j].dy;
         }
@@ -338,7 +338,7 @@ void QIMPenStroke::createTanSignature()
     } else {
         tsig.resize( (links.count()-dist+1) / 2 );
         int idx = 0;
-        for ( unsigned i = 0; i < links.count() - dist; i += 2 ) {
+        for ( int i = 0; i < (int)links.count() - dist; i += 2 ) {
             int dx = 0;
             int dy = 0;
             for ( int j = 0; j < dist; j++ ) {
@@ -368,7 +368,7 @@ void QIMPenStroke::createAngleSignature()
         asig.resize( links.count() );
 	QPoint current(0, 0);
         int idx = 0;
-        for ( unsigned i = 0; i < links.count(); i++ ) {
+        for ( int i = 0; i < (int)links.count(); i++ ) {
             int dx = c.x() - current.x();
             int dy = c.y() - current.y();
 	    int md = QMAX( QABS(dx), QABS(dy) );
@@ -412,8 +412,8 @@ void QIMPenStroke::createDistSignature()
 
     int minval = INT_MAX;
     int maxval = 0;
-    int idx = 0;
-    for ( unsigned i = 0; i < links.count(); i += 2 ) {
+    int idx = 0, i;
+    for ( i = 0; i < (int)links.count(); i += 2 ) {
         int dx = c.x() - pt.x();
         int dy = c.y() - pt.y();
         if ( dx == 0 && dy == 0 )
@@ -433,7 +433,7 @@ void QIMPenStroke::createDistSignature()
     // normalise 0-255
     int div = maxval - minval;
     if ( div == 0 ) div = 1;
-    for ( unsigned i = 0; i < dsig.count(); i++ ) {
+    for ( i = 0; i < (int)dsig.count(); i++ ) {
         dsig[i] = (dsig[i] - minval ) * 255 / div;
     }
 
@@ -452,19 +452,19 @@ QArray<int> QIMPenStroke::scale( const QArray<int> &s, unsigned count, bool t )
 {
     QArray<int> d(count);
 
-    unsigned si = 0;
+    int si = 0;
     if ( s.count() > count ) {
-        unsigned next = 0;
-        for ( unsigned i = 0; i < count; i++ ) {
+        int next = 0;
+        for ( int i = 0; i < count; i++ ) {
             next = (i+1) * s.count() / count;
             int maxval = 0;
             if ( t ) {
-                for ( unsigned j = si; j < next; j++ ) {
+                for ( int j = si; j < next; j++ ) {
                     maxval = s[j] > maxval ? s[j] : maxval;
                 }
             }
             int sum = 0;
-            for ( unsigned j = si; j < next; j++ ) {
+            for ( int j = si; j < next; j++ ) {
                 if ( t && maxval - s[j] > 128 )
                     sum += 256;
                 sum += s[j];
@@ -475,7 +475,7 @@ QArray<int> QIMPenStroke::scale( const QArray<int> &s, unsigned count, bool t )
             si = next;
         }
     } else {
-        for ( unsigned i = 0; i < count; i++ ) {
+        for ( int i = 0; i < (int)count; i++ ) {
             si = i * s.count() / count;
             d[i] = s[si];
         }
@@ -497,7 +497,7 @@ void QIMPenStroke::internalAddPoint( QPoint p )
         gl.dx = p.x() - lastPoint.x();
         gl.dy = p.y() - lastPoint.y();
         links.resize( links.size() + 1 );   //### resize by 1 is bad
-        links[links.size() - 1] = gl;
+        links[(int)links.size() - 1] = gl;
     }
 
     lastPoint = p;
@@ -513,7 +513,7 @@ QPoint QIMPenStroke::calcCenter()
     int ax = 0;
     int ay = 0;
 
-    for ( unsigned i = 0; i < links.count(); i++ ) {
+    for ( int i = 0; i < (int)links.count(); i++ ) {
         pt.rx() += links[i].dx;
         pt.ry() += links[i].dy;
         ax += pt.x();
@@ -577,12 +577,12 @@ int QIMPenStroke::arcTan( int dy, int dx )
 QArray<int> QIMPenStroke::createBase( const QArray<int> a, int e )
 {
     QArray<int> ra( a.count() + 2*e );
-
-    for ( int i = 0; i < e; i++ ) {
+    int i;
+    for ( i = 0; i < e; i++ ) {
         ra[i] = a[0];
-        ra[a.count() + e + i - 1] = a[a.count() - 1];
+        ra[(int)a.count() + e + i - 1] = a[(int)a.count() - 1];
     }
-    for ( unsigned i = 0; i < a.count(); i++ ) {
+    for ( i = 0; i < (int)a.count(); i++ ) {
         ra[i+e] = a[i];
     }
 
@@ -598,7 +598,7 @@ void QIMPenStroke::smooth( QArray<int> &sig)
     QArray<int> nsig = sig.copy();
 
     int a;
-    for ( unsigned i = 1; i < sig.count()-2; i++ ) {
+    for ( int i = 1; i < (int)sig.count()-2; i++ ) {
         a = 0;
         for ( int j = -1; j <= 1; j++ ) {
             a += sig[ i + j ];
@@ -616,7 +616,7 @@ QDataStream &operator<< (QDataStream &s, const QIMPenStroke &ws)
 {
     s << ws.startPoint;
     s << ws.links.count();
-    for ( unsigned i = 0; i < ws.links.count(); i++ ) {
+    for ( int i = 0; i < (int)ws.links.count(); i++ ) {
         s << (Q_INT8)ws.links[i].dx;
         s << (Q_INT8)ws.links[i].dy;
     }
@@ -635,7 +635,7 @@ QDataStream &operator>> (QDataStream &s, QIMPenStroke &ws)
     unsigned size;
     s >> size;
     ws.links.resize( size );
-    for ( unsigned i = 0; i < size; i++ ) {
+    for ( int i = 0; i < (int)size; i++ ) {
         s >> i8;
 	ws.links[i].dx = i8;
         s >> i8;

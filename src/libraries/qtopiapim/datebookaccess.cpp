@@ -19,13 +19,22 @@
 **********************************************************************/
 
 #include "event.h"
-#include <qpe/qcopenvelope_qws.h>
+
+#ifdef Q_WS_QWS
+#include <qtopia/qcopenvelope_qws.h>
+#endif
+
 #include "datebookaccess.h"
 #include "eventxmlio_p.h"
-#include <qtopia/services/services.h>
+
+#ifndef QT_NO_COP
+#include <qtopia/services.h>
+#endif
 
 #include <sys/types.h>
+#ifndef Q_OS_WIN32
 #include <unistd.h>
+#endif
 #include <stdlib.h>
 
 /*! \class DateBookAccess
@@ -34,15 +43,15 @@
   \brief The DateBookAccess class provides a safe API for accessing PimEvents.
 
   DateBookAccess provides a safe API for accessing PimEvents stored by
-  Qtopia's Datebook application.  DateBookAccess tries to keep the Datebook 
-  application in sync with modifications, and alerts the user of 
+  Qtopia's Datebook application.  DateBookAccess tries to keep the Datebook
+  application in sync with modifications, and alerts the user of
   the library when modifications ahve been made by other applications.
 */
 
 /*!
  Constructor.
 */
-DateBookAccess::DateBookAccess() 
+DateBookAccess::DateBookAccess()
 : m_AccessPrivate(0L) {
   m_AccessPrivate = new EventXmlIO(EventIO::ReadOnly);
 
@@ -60,54 +69,63 @@ DateBookAccess::~DateBookAccess() {
 /*!
   If supported will update \a event in the pim data.
 
-  Updating events requires the EditEvents service to be available.
+  Updating events requires the Events service to be available.
 */
 void DateBookAccess::updateEvent(const PimEvent& event)
 {
-    QCopEnvelope e(Service::channel("EditEvents"),
+#ifndef QT_NO_COP
+    QCopEnvelope e(Service::channel("Events"),
 	    "updateEvent(PimEvent)");
-
     e << event;
+#endif
 }
 
 
 /*!
   If supported will remove event \a ev from the pim data.
 
-  Removing events requires the EditEvents service to be available.
+  Removing events requires the Events service to be available.
 */
-void DateBookAccess::removeEvent(const PimEvent& ev) 
+void DateBookAccess::removeEvent(const PimEvent& ev)
 {
-    QCopEnvelope e(Service::channel("EditEvents"),
+#ifndef QT_NO_COP
+    QCopEnvelope e(Service::channel("Events"),
 	    "removeEvent(PimEvent)");
 
     e << ev;
+#endif
 }
 
 /*!
- If supported will assign a new unique ID to \a ev and add the event to 
+ If supported will assign a new unique ID to \a ev and add the event to
  the pim data.
 
- Adding event requires the EditEvents service to be available.
+ Adding event requires the Events service to be available.
  */
-void DateBookAccess::addEvent(const PimEvent& ev) 
+void DateBookAccess::addEvent(const PimEvent& ev)
 {
-    QCopEnvelope e(Service::channel("EditEvents"),
+#ifndef QT_NO_COP
+    QCopEnvelope e(Service::channel("Events"),
 	    "addEvent(PimEvent)");
 
     e << ev;
+#endif
 }
 
 /*!
   Returns TRUE if it is possible to add, remove and update events in
   the pim data.  Otherwise returns FALSE.
 
-  Adding, removing and updating events requires the EditEvents service to be
+  Adding, removing and updating events requires the Events service to be
   available
 */
 bool DateBookAccess::editSupported() const
 {
-    return Service::list().contains("EditEvents");
+#ifdef Q_WS_QWS
+    return Service::list().contains("Events");
+#else
+    return FALSE;
+#endif
 }
 
 /*! \fn void DateBookAccess::dateBookUpdated()
@@ -119,7 +137,7 @@ bool DateBookAccess::editSupported() const
   \ingroup qpepim
   \brief The DateBookIterator class provides iterators of DateBookAccess.
 
-  The only way to traverse the data of an DateBookAccess is with an 
+  The only way to traverse the data of an DateBookAccess is with an
   DateBookIterator.
 */
 
@@ -167,7 +185,7 @@ DateBookIterator &DateBookIterator::operator=(const DateBookIterator &other)
 /*!
   Destroys the iterator
 */
-DateBookIterator::~DateBookIterator() 
+DateBookIterator::~DateBookIterator()
 {
     if ( machine && machine->deref() ) delete machine;
 }
@@ -176,7 +194,7 @@ DateBookIterator::~DateBookIterator()
   Returns TRUE if the iterator is at the first item of the data.
   Otherwise returns FALSE.
 */
-bool DateBookIterator::atFirst() const 
+bool DateBookIterator::atFirst() const
 {
     return machine ? machine->atFirst() : FALSE;
 }
@@ -192,20 +210,20 @@ bool DateBookIterator::atLast() const
 
 /*!
   Sets the iterator to the first item of the data.
-  If a PimEvent exists in the data will return a const pointer to the 
+  If a PimEvent exists in the data will return a const pointer to the
   PimEvent.  Otherwise returns 0.
 */
-const PimEvent *DateBookIterator::toFirst() 
+const PimEvent *DateBookIterator::toFirst()
 {
     return machine ? machine->toFirst() : 0;
 }
 
 /*!
   Sets the iterator to the last item of the data.
-  If a PimEvent exists in the data will return a const pointer to the 
+  If a PimEvent exists in the data will return a const pointer to the
   PimEvent.  Otherwise returns 0.
 */
-const PimEvent *DateBookIterator::toLast() 
+const PimEvent *DateBookIterator::toLast()
 {
     return machine ? machine->toLast() : 0;
 }
@@ -221,7 +239,7 @@ const PimEvent *DateBookIterator::operator++()
 }
 
 /*!
-  If the iterator is at a valid PimEvent returns a const pointer to 
+  If the iterator is at a valid PimEvent returns a const pointer to
   the current PimEvent.  Otherwise returns 0.
 */
 const PimEvent* DateBookIterator::operator*() const
@@ -230,7 +248,7 @@ const PimEvent* DateBookIterator::operator*() const
 }
 
 /*!
-  If the iterator is at a valid PimEvent returns a const pointer to 
+  If the iterator is at a valid PimEvent returns a const pointer to
   the current PimEvent.  Otherwise returns 0.
 */
 const PimEvent* DateBookIterator::current() const

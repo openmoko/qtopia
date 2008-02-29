@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -133,12 +139,12 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 HEADERS =	packagemanager.h
 SOURCES =	packagemanager.cpp \
 		main.cpp
-OBJECTS =	packagemanager.o \
-		main.o \
-		packagemanagerbase.o \
-		pkdesc.o \
-		pkfind.o \
-		pksettings.o
+OBJECTS =	$(OBJECTS_DIR)/packagemanager.o \
+		$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/packagemanagerbase.o \
+		$(OBJECTS_DIR)/pkdesc.o \
+		$(OBJECTS_DIR)/pkfind.o \
+		$(OBJECTS_DIR)/pksettings.o
 INTERFACES =    packagemanagerbase.ui \
 		pkdesc.ui \
 		pkfind.ui \
@@ -151,16 +157,16 @@ UICIMPLS =      packagemanagerbase.cpp \
 		pkdesc.cpp \
 		pkfind.cpp \
 		pksettings.cpp
-SRCMOC	=	moc_packagemanager.cpp \
-		moc_packagemanagerbase.cpp \
-		moc_pkdesc.cpp \
-		moc_pkfind.cpp \
-		moc_pksettings.cpp
-OBJMOC	=	moc_packagemanager.o \
-		moc_packagemanagerbase.o \
-		moc_pkdesc.o \
-		moc_pkfind.o \
-		moc_pksettings.o
+SRCMOC	=	$(MOC_DIR)/moc_packagemanager.cpp \
+		$(MOC_DIR)/moc_packagemanagerbase.cpp \
+		$(MOC_DIR)/moc_pkdesc.cpp \
+		$(MOC_DIR)/moc_pkfind.cpp \
+		$(MOC_DIR)/moc_pksettings.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_packagemanager.o \
+		$(OBJECTS_DIR)/moc_packagemanagerbase.o \
+		$(OBJECTS_DIR)/moc_pkdesc.o \
+		$(OBJECTS_DIR)/moc_pkfind.o \
+		$(OBJECTS_DIR)/moc_pksettings.o
 
 
 ####### Implicit rules
@@ -226,26 +232,18 @@ REQUIRES=
 
 ####### Compile
 
-packagemanager.o: packagemanager.cpp \
+$(OBJECTS_DIR)/packagemanager.o: packagemanager.cpp \
 		packagemanager.h \
 		packagemanagerbase.h \
 		pkdesc.h \
 		pkfind.h \
-		pksettings.h \
-		$(QPEDIR)/include/qpe/process.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/stringutil.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		$(QPEDIR)/include/qpe/storage.h
+		pksettings.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/packagemanager.o packagemanager.cpp
 
-main.o: main.cpp \
+$(OBJECTS_DIR)/main.o: main.cpp \
 		packagemanager.h \
-		packagemanagerbase.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
+		packagemanagerbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
 packagemanagerbase.h: packagemanagerbase.ui
 	$(UIC) packagemanagerbase.ui -o $(INTERFACE_DECL_PATH)/packagemanagerbase.h
@@ -271,52 +269,62 @@ pksettings.h: pksettings.ui
 pksettings.cpp: pksettings.ui
 	$(UIC) pksettings.ui -i pksettings.h -o pksettings.cpp
 
-packagemanagerbase.o: packagemanagerbase.cpp
+$(OBJECTS_DIR)/packagemanagerbase.o: packagemanagerbase.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/packagemanagerbase.o packagemanagerbase.cpp
 
-pkdesc.o: pkdesc.cpp
+$(OBJECTS_DIR)/pkdesc.o: pkdesc.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/pkdesc.o pkdesc.cpp
 
-pkfind.o: pkfind.cpp
+$(OBJECTS_DIR)/pkfind.o: pkfind.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/pkfind.o pkfind.cpp
 
-pksettings.o: pksettings.cpp
+$(OBJECTS_DIR)/pksettings.o: pksettings.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/pksettings.o pksettings.cpp
 
-moc_packagemanager.o: moc_packagemanager.cpp \
+$(OBJECTS_DIR)/moc_packagemanager.o: $(MOC_DIR)/moc_packagemanager.cpp \
 		packagemanager.h \
 		packagemanagerbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_packagemanager.o $(MOC_DIR)/moc_packagemanager.cpp
 
-moc_packagemanagerbase.o: moc_packagemanagerbase.cpp \
+$(OBJECTS_DIR)/moc_packagemanagerbase.o: $(MOC_DIR)/moc_packagemanagerbase.cpp \
 		packagemanagerbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_packagemanagerbase.o $(MOC_DIR)/moc_packagemanagerbase.cpp
 
-moc_pkdesc.o: moc_pkdesc.cpp \
+$(OBJECTS_DIR)/moc_pkdesc.o: $(MOC_DIR)/moc_pkdesc.cpp \
 		pkdesc.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_pkdesc.o $(MOC_DIR)/moc_pkdesc.cpp
 
-moc_pkfind.o: moc_pkfind.cpp \
+$(OBJECTS_DIR)/moc_pkfind.o: $(MOC_DIR)/moc_pkfind.cpp \
 		pkfind.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_pkfind.o $(MOC_DIR)/moc_pkfind.cpp
 
-moc_pksettings.o: moc_pksettings.cpp \
+$(OBJECTS_DIR)/moc_pksettings.o: $(MOC_DIR)/moc_pksettings.cpp \
 		pksettings.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_pksettings.o $(MOC_DIR)/moc_pksettings.cpp
 
-moc_packagemanager.cpp: packagemanager.h
-	$(MOC) packagemanager.h -o moc_packagemanager.cpp
+$(MOC_DIR)/moc_packagemanager.cpp: packagemanager.h
+	$(MOC) packagemanager.h -o $(MOC_DIR)/moc_packagemanager.cpp
 
-moc_packagemanagerbase.cpp: packagemanagerbase.h
-	$(MOC) packagemanagerbase.h -o moc_packagemanagerbase.cpp
+$(MOC_DIR)/moc_packagemanagerbase.cpp: packagemanagerbase.h
+	$(MOC) packagemanagerbase.h -o $(MOC_DIR)/moc_packagemanagerbase.cpp
 
-moc_pkdesc.cpp: pkdesc.h
-	$(MOC) pkdesc.h -o moc_pkdesc.cpp
+$(MOC_DIR)/moc_pkdesc.cpp: pkdesc.h
+	$(MOC) pkdesc.h -o $(MOC_DIR)/moc_pkdesc.cpp
 
-moc_pkfind.cpp: pkfind.h
-	$(MOC) pkfind.h -o moc_pkfind.cpp
+$(MOC_DIR)/moc_pkfind.cpp: pkfind.h
+	$(MOC) pkfind.h -o $(MOC_DIR)/moc_pkfind.cpp
 
-moc_pksettings.cpp: pksettings.h
-	$(MOC) pksettings.h -o moc_pksettings.cpp
+$(MOC_DIR)/moc_pksettings.cpp: pksettings.h
+	$(MOC) pksettings.h -o $(MOC_DIR)/moc_pksettings.cpp
 
 
 
 lupdate:
-	lupdate qipkg.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <qipkg.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease qipkg.pro
+	$(QPEDIR)/bin/qtopia-linstall qipkg.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

@@ -27,6 +27,9 @@
 #include <qtopia/timeconversion.h>
 #include <qtopia/private/qfiledirect_p.h>
 
+#include <qtopia/pim/private/xmlio_p.h>
+#include <qtopia/pim/private/todoxmlio_p.h>
+
 #include <stdio.h>
 
 /*!
@@ -40,10 +43,10 @@
 */
 
 /*!
-  \fn void PimTask::setPriority( int priority )
+  \fn void PimTask::setPriority( PriorityValue priority )
 
   Sets the priority of the task to \a priority.
-  
+
   \sa priority()
 */
 
@@ -51,8 +54,24 @@
   \fn int PimTask::priority() const
 
   Returns the priority of the task.
-  
+
   \sa setPriority()
+*/
+
+/*!
+  \fn QString PimTask::notes() const
+
+  Returns any notes for the task.
+
+  \sa setNotes()
+*/
+
+/*!
+  \fn void PimTask::setNotes(const QString &s)
+
+  Sets the notes of the task to \a s.
+
+  \sa notes()
 */
 
 /*!
@@ -122,12 +141,88 @@
 */
 
 /*!
+  \fn const QDate &PimTask::startedDate() const
+
+  Returns the date the task was started.  If the task has not yet been started, the returned
+  date is undefined.
+
+  \sa hasStartedDate(), setStartedDate()
+*/
+
+/*!
+  \fn void PimTask::setStartedDate(const QDate &date)
+
+  Sets the tasks started date.
+
+  \sa hasStartedDate(), startedDate()
+*/
+
+/*!
+  \fn const QDate &PimTask::completedDate() const
+
+  Returns the date the task was completed.  If the task is not completed, the returned
+  date is undefined.
+
+  \sa isCompleted(), setCompletedDate()
+*/
+
+/*!
+  \fn void PimTask::setCompletedDate(const QDate &date)
+
+  Sets the tasks completed date.
+
+  \sa isCompleted(), completedDate()
+*/
+
+/*!
+  \fn virtual int PimTask::endFieldMarker() const
+
+  \internal
+*/
+
+/*!
+  \enum PimTask::TaskStatus
+
+  These enums describe the current \l status() of the Task.
+
+  The values are:
+
+  \value NotStarted
+  \value InProgress
+  \value Completed
+  \value Waiting
+  \value Deferred
+*/
+
+/*!
+  \enum PimTask::PriorityValue
+
+  These enums describe the current \l priority() of the Task.
+
+  The values are:
+
+  \value VeryHigh
+  \value High
+  \value Normal
+  \value Low
+  \value VeryLow
+*/
+
+/*!
   Creates a new, empty task.
 */
-PimTask::PimTask() : PimRecord(), mDue( FALSE ),
-mDueDate( QDate::currentDate() ),
-mCompleted( FALSE ), mPriority( 3 ), mDesc()
+PimTask::PimTask()
+    : PimRecord(), mDue( FALSE ), mDueDate( QDate::currentDate() ),
+      mCompleted( FALSE ), mPriority( Normal ), mStatus(NotStarted), mPercentCompleted(0)
 {
+}
+
+/*!
+    \internal
+*/
+void PimTask::fromMap ( const QMap<int,QString> & m)
+{
+    setFields( m );
 }
 
 /*!
@@ -137,7 +232,77 @@ PimTask::~PimTask()
 {
 }
 
-/*! 
+/*!
+  Returns the \l TaskStatus of the task.
+
+  \sa setStatus()
+*/
+PimTask::TaskStatus PimTask::status() const
+{
+    if ( isCompleted() )
+	return Completed;
+    return mStatus;
+}
+
+/*!
+  Sets the \l TaskStatus of the task.
+
+  \sa status()
+*/
+void PimTask::setStatus(TaskStatus s)
+{
+    if ( s == Completed )
+	setCompleted( TRUE );
+    else
+	mStatus = s;
+}
+
+void PimTask::setDueDate( const QDate &date )
+{
+    mDueDate = date;
+    mDue = !(date.isNull());
+}
+
+/*!
+  Returns an int indicating the percent completed of the task.
+  For completed tasks, this function will always return 100.
+
+  \sa setPercentCompleted(), status()
+*/
+uint PimTask::percentCompleted() const
+{
+    if ( isCompleted() )
+	return 100;
+    return mPercentCompleted;
+}
+
+/*!
+  Sets the tasks percent completed field.  Note that for values above 99 this
+  function will set the status to \l Completed.
+
+  \sa percentCompleted(), status()
+*/
+void PimTask::setPercentCompleted( uint u )
+{
+    if ( u > 99 ) {
+	setCompleted( TRUE );
+    } else {
+	mPercentCompleted = u;
+    }
+}
+
+/*!
+  Returns TRUE if the task has a started date.
+
+  \sa startedDate(), setStartedDate()
+*/
+
+bool PimTask::hasStartedDate() const
+{
+    return mStatus != NotStarted || hasDueDate();
+}
+
+/*!
   Returns TRUE if the part of task matches \a r. Otherwise returns FALSE.
 */
 bool PimTask::match ( const QRegExp &r ) const
@@ -226,7 +391,7 @@ static PimTask parseVObject( VObject *obj )
 		t.setCompleted( TRUE );
 	}
 	else if ( name == VCPriorityProp ) {
-	    t.setPriority( value.toInt() );
+	    t.setPriority( (PimTask::PriorityValue) value.toInt() );
 	}
 #if 0
 	else {
@@ -247,7 +412,7 @@ static PimTask parseVObject( VObject *obj )
 }
 
 /*!
-   Write the list of \a tasks as vCalendar objects to the file 
+   Write the list of \a tasks as vCalendar objects to the file
    specified by \a filename.
 
    \sa readVCalendar()
@@ -325,6 +490,160 @@ QValueList<PimTask> PimTask::readVCalendar( const QString &filename )
     return tasks;
 }
 
+/*!
+  Returns a rich text formatted QString of the PimTask.
+*/
+QString PimTask::toRichText() const
+{
+    QString text;
+
+    text = "<b><center>" + Qtopia::escapeString(mDesc) + "</b></center><br>";
+    if ( mDue )
+	text += "<b> Due: </b>" + mDueDate.toString() + "<br>";
+    if ( !mStartedDate.isNull() && mStatus != NotStarted)
+	text += "<b> Started: </b>" + mStartedDate.toString() + "<br>";
+    if ( !mCompletedDate.isNull() && isCompleted() )
+	text += "<b> Completed: </b>" + mCompletedDate.toString() + "<br>";
+
+    QString status;
+    if ( !isCompleted() ) { //We remember old status and treat completed separately
+	switch( mStatus ) {
+	    case NotStarted: status = "Not yet started"; break;
+	    case InProgress: status = "In progress"; break;
+	    case Waiting: status = "Waiting"; break;
+	    case Deferred: status = "Deferred"; break;
+	    default: status = "Completed"; break;
+	}
+    } else {
+	status = "Completed";
+    }
+
+    text += "<b>Status: </b> " + status + "<br>";
+    text +="<b>Priority: </b>" + QString::number( mPriority ) + "<br>";
+
+    if ( mPercentCompleted && (mStatus != NotStarted && !isCompleted() ) )
+	text += "<b>Completed: </b>" + QString::number(mPercentCompleted) + " percent <br>";
+
+    if ( !mNotes.isEmpty() )
+	text += "<br> <b> Notes </b> <br> " + Qtopia::escapeString(mNotes) + "<br>";
+
+    return text;
+}
+
+static int dueDateYear = -1;
+static int dueDateMonth = -1;
+static int dueDateDay = -1;
+
+/*!
+  \internal
+
+    // Reimplemenmted to handle post processing of reading a task
+*/
+void PimTask::setFields(const QMap<int,QString> &m)
+{
+    dueDateYear = -1;
+    dueDateMonth = -1;
+    dueDateDay = -1;
+
+    PimRecord::setFields( m );
+
+    if ( dueDateYear != -1 && dueDateMonth != -1 && dueDateDay != -1 ) {
+	mDueDate.setYMD(dueDateYear, dueDateMonth, dueDateDay);
+    }
+}
+
+/*!
+  \internal
+*/
+void PimTask::setField(int key,const QString &s)
+{
+    switch( key ) {
+	case HasDate: if ( s == "1" ) mDue = TRUE; break;
+	case Description: setDescription( s ); break;
+	case Priority: setPriority( (PriorityValue) (s).toInt() ); break;
+	case CompletedField: setCompleted( s == "1" ); break;
+	case PercentCompleted: setPercentCompleted( s.toInt() ); break;
+	case DueDateYear: dueDateYear = s.toInt(); break;
+	case DueDateMonth: dueDateMonth = s.toInt(); break;
+	case DueDateDay: dueDateDay = s.toInt(); break;
+	case Status: setStatus( xmlToStatus(s) ); break;
+	case StartedDate: setStartedDate( PimXmlIO::xmlToDate( s ) ); break;
+	case CompletedDate: setCompletedDate( PimXmlIO::xmlToDate(s) ); break;
+	case Notes: setNotes( s ); break;
+	default: PimRecord::setField(key, s);
+    }
+}
+
+/*!
+  \internal
+*/
+QString PimTask::field(int key) const
+{
+    switch( key ) {
+	case HasDate: return QString::number( mDue );
+	case Description: return mDesc;
+	case Priority:  return QString::number( mPriority );
+	case PercentCompleted: return QString::number( mPercentCompleted );
+	case CompletedField: return QString::number( mCompleted );
+	case DueDateYear: return QString::number( mDueDate.year() );
+	case DueDateMonth: return QString::number( mDueDate.month() );
+	case DueDateDay: return QString::number( mDueDate.day() );
+	case Status: return statusToXml( mStatus );
+	case StartedDate: return PimXmlIO::dateToXml( mStartedDate );
+	case CompletedDate:  return PimXmlIO::dateToXml( mCompletedDate );
+	case Notes: return mNotes;
+	default: return PimRecord::field(key);
+    }
+}
+
+static QMap<int, int> *uniquenessMapPtr = 0;
+static QMap<QCString, int> *identifierToKeyMapPtr = 0;
+static QMap<int, QCString> *keyToIdentifierMapPtr = 0;
+static QMap<int, QString> * trFieldsMapPtr = 0;
+
+QMap<int, QString> PimTask::fields() const
+{
+    QMap<int, QString> m = PimRecord::fields();
+
+    if (!keyToIdentifierMapPtr)
+	initMaps();
+    QMap<int, QCString>::Iterator it;
+    for (it = keyToIdentifierMapPtr->begin(); 
+	    it != keyToIdentifierMapPtr->end(); ++it) {
+	int i = it.key();
+	QString str = field(i);
+	if (!str.isEmpty())
+	    m.insert(i, str);
+    }
+
+    return m;
+}
+
+PimTask::TaskStatus PimTask::xmlToStatus(const QString &s)
+{
+    if ( s == "InProgress" )
+	return InProgress;
+    else if ( s == "Completed" )
+	return Completed;
+    else if ( s == "Waiting" )
+	return Waiting;
+    else if ( s == "Deferred" )
+	return Deferred;
+    else
+	return NotStarted;
+}
+
+QString PimTask::statusToXml(TaskStatus status)
+{
+    switch( status ) {
+	default: return "NotStarted";
+	case InProgress: return "InProgress";
+    	case Completed: return "Completed";
+	case Waiting: return "Waiting";
+	case Deferred: return "Deferred";
+    }
+}
+
 #ifndef QT_NO_DATASTREAM
 QDataStream &operator>>( QDataStream &s, PimTask &c )
 {
@@ -335,8 +654,18 @@ QDataStream &operator>>( QDataStream &s, PimTask &c )
     s >> c.mDueDate;
     s >> val;
     c.mCompleted = val == 0 ? FALSE : TRUE;
-    s >> c.mPriority;
+    int p;
+    s >> p;
+    c.mPriority = (PimTask::PriorityValue) p;
     s >> c.mDesc;
+    s >> c.mStartedDate;
+    s >> c.mCompletedDate;
+
+    int i;
+    s >> i;
+    c.mStatus = (PimTask::TaskStatus)i;
+
+    s >> c.mNotes;
     return s;
 }
 
@@ -348,6 +677,88 @@ QDataStream &operator<<( QDataStream &s, const PimTask &c )
     s << (c.mCompleted ? (uchar)1 : (uchar)0);
     s << c.mPriority;
     s << c.mDesc;
+    s << c.mStartedDate;
+    s << c.mCompletedDate;
+    int i = (int) c.mStatus;
+    s << i;
+    s << c.mNotes;
+
     return s;
 }
+
+static const QtopiaPimMapEntry todolistentries[] = {
+    { "HasDate", NULL, PimTask::HasDate, 0 },
+    { "Description", QT_TRANSLATE_NOOP("PimTask", "Description"), PimTask::Description, 50 },
+    { "Priority", QT_TRANSLATE_NOOP("PimTask", "Priority"), PimTask::Priority, 0 },
+    { "Completed", QT_TRANSLATE_NOOP("PimTask", "Completed"), PimTask::CompletedField, 0},
+    { "PercentCompleted", QT_TRANSLATE_NOOP("PimTask", "Percent Completed"), PimTask::PercentCompleted, 0},
+    { "DateYear", NULL, PimTask::DueDateYear, 0 },
+    { "DateMonth", NULL, PimTask::DueDateMonth, 0 },
+    { "DateDay", NULL, PimTask::DueDateDay, 0 },
+    { "Status", QT_TRANSLATE_NOOP("PimTask", "Status"), PimTask::Status, 0 },
+    { "StartedDate", QT_TRANSLATE_NOOP("PimTask", "Started Date"), PimTask::StartedDate, 50 },
+    { "CompletedDate", QT_TRANSLATE_NOOP("PimTask", "Completed Date"), PimTask::CompletedDate, 0 },
+    { "Notes", QT_TRANSLATE_NOOP("PimTask", "Notes"), PimTask::Notes, 0 },
+
+    { 0, 0, 0, 0 }
+};
+
+void PimTask::initMaps()
+{
+    delete keyToIdentifierMapPtr;
+    keyToIdentifierMapPtr = new QMap<int, QCString>;
+
+    delete identifierToKeyMapPtr;
+    identifierToKeyMapPtr = new QMap<QCString, int>;
+
+    delete trFieldsMapPtr;
+    trFieldsMapPtr = new QMap<int,QString>;
+
+    delete uniquenessMapPtr;
+    uniquenessMapPtr = new QMap<int, int>;
+
+    PimRecord::initMaps(todolistentries, *uniquenessMapPtr, *identifierToKeyMapPtr, *keyToIdentifierMapPtr,
+			*trFieldsMapPtr );
+}
+
+/*!
+  \internal
+*/
+const QMap<int, QCString> &PimTask::keyToIdentifierMap()
+{
+    if ( !keyToIdentifierMapPtr )
+	initMaps();
+    return *keyToIdentifierMapPtr;
+}
+
+/*!
+  \internal
+*/
+const QMap<QCString,int> &PimTask::identifierToKeyMap()
+{
+    if ( !identifierToKeyMapPtr )
+	initMaps();
+    return *identifierToKeyMapPtr;
+}
+
+/*!
+  \internal
+*/
+const QMap<int, QString> & PimTask::trFieldsMap()
+{
+    if ( !trFieldsMapPtr )
+	initMaps();
+    return *trFieldsMapPtr;
+}
+
+/*!
+  \internal
+*/
+const QMap<int,int> & PimTask::uniquenessMap()
+{
+    if ( !uniquenessMapPtr )
+	initMaps();
+    return *uniquenessMapPtr;
+}
+
 #endif

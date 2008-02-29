@@ -68,7 +68,7 @@ Occurrence DateBookTable::getNextAlarm( const QDateTime &from, bool *ok) const
 }
 
 Occurrence DateBookTable::find(const QRegExp &r, int category, const QDate &dt,
-	bool ascend, bool *resultFound) const
+	bool, bool *resultFound) const
 {
     //return dba->find(text, dt, cs, ascend, category);
     // for now, do this in the datebook, fix later
@@ -112,6 +112,27 @@ Occurrence DateBookTable::find(const QRegExp &r, int category, const QDate &dt,
     return Occurrence();
 }
 
+PimEvent DateBookTable::find(const QUuid &u, bool *ok) const
+{
+    const QList<PimEvent> &list = (QList<PimEvent> &)(dba->events());
+
+    QListIterator<PimEvent> it(list);
+
+    PimEvent *p;
+    for (; it.current(); ++it ) {
+	p = *it;
+	if (u == p->uid()) {
+	    if (ok)
+		*ok = TRUE;
+	    return *p;
+	}
+    }
+
+    if (ok)
+	*ok = FALSE;
+    return PimEvent();
+}
+
 Occurrence DateBookTable::find(const QUuid &u, const QDate &date, bool *ok) const
 {
     const QList<PimEvent> &list = (QList<PimEvent> &)(dba->events());
@@ -141,14 +162,44 @@ Occurrence DateBookTable::find(const QUuid &u, const QDate &date, bool *ok) cons
     return Occurrence();
 
 }
-void DateBookTable::addEvent(PimEvent &ev)
+void DateBookTable::addEvent(const PimEvent &ev)
 {
     dba->addEvent(ev);
+}
+
+void DateBookTable::addException(const QDate &d, const PimEvent &parent)
+{
+    dba->addException(d, parent);
+}
+
+void DateBookTable::addException(const QDate &d, const PimEvent &parent, const PimEvent &ev)
+{
+    dba->addException(d, parent, ev);
+}
+
+void DateBookTable::removeExceptions(const PimEvent &e)
+{
+    // and also e's children
+    const QValueList<QUuid> &list = ((PrEvent &)e).childUids();
+    QValueList<QUuid>::ConstIterator it = list.begin();
+    for (;it != list.end(); ++it) {
+	qDebug("remi %d", (*it).data1);
+	//PimEvent p = find(((PrEvent &)e).parentUid());
+	PimEvent p = find(*it);
+	dba->removeEvent(p);
+    }
 }
 
 void DateBookTable::removeEvent(const PimEvent &e)
 {
     dba->removeEvent(e);
+    if (e.isException()) {
+	PimEvent p = find(e.seriesUid());
+	p.removeException(e.uid());
+	dba->updateEvent(e);
+    } else if (e.hasExceptions()) {
+	removeExceptions(e);
+    }
 }
 
 // replace event &uid with ev (but keep the uid);

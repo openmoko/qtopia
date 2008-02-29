@@ -1,18 +1,17 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000 Trolltech AS.  All rights reserved.
 **
-** This file is part of the Qtopia Environment.
+** This file is part of Qtopia Environment.
 **
-** Licensees holding valid Qtopia Developer license may use this
-** file in accordance with the Qtopia Developer License Agreement
-** provided with the Software.
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING
-** THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-** PURPOSE.
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
-** email sales@trolltech.com for information about Qtopia License
-** Agreements.
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
@@ -23,9 +22,11 @@
 
 #include "instruction.h"
 #include "doubledata.h"
+#include "engine.h"
+
 
 // Double instruction base
-class BaseDoubleInstruction:public Instruction {
+class QTOPIA_EXPORT BaseDoubleInstruction:public Instruction {
 public:
     BaseDoubleInstruction():Instruction(){};
     ~BaseDoubleInstruction(){};
@@ -35,113 +36,126 @@ public:
 protected:
     DoubleData *doubleNum;
 };
-class BaseDoubleInstructionDescription:public InstructionDescription {
+class QTOPIA_EXPORT BaseDoubleInstructionDescription:public InstructionDescription {
 public:
     BaseDoubleInstructionDescription();
     ~BaseDoubleInstructionDescription(){};
 };
 
 // Conversions
-class iConvertDoubleDouble:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iDoubleFactory:public BaseDoubleInstruction {
 public:
-    iConvertDoubleDouble():BaseDoubleInstruction(){};
-    ~iConvertDoubleDouble(){};
+    iDoubleFactory():BaseDoubleInstruction(){};
+    ~iDoubleFactory(){};
     Data *eval(Data *);
 };
-class ConvertDoubleDouble:public BaseDoubleInstructionDescription {
-public:
-    ConvertDoubleDouble();
-    ~ConvertDoubleDouble(){};
-    Instruction *getInstruction(){return new iConvertDoubleDouble();};
+class QTOPIA_EXPORT DoubleFactory:public BaseDoubleInstructionDescription {
+public:DoubleFactory();
+    ~DoubleFactory(){};
+    Instruction *getInstruction(){return new iDoubleFactory();};
 };
 
-class iConvertIntDouble:public Instruction {
+// Copy
+class QTOPIA_EXPORT iDoubleCopy:public BaseDoubleInstruction {
+public:
+    iDoubleCopy():BaseDoubleInstruction(){};
+    ~iDoubleCopy(){};
+    Data *eval(Data *);
+};
+class QTOPIA_EXPORT DoubleCopy:public BaseDoubleInstructionDescription {
+public:
+    DoubleCopy();
+    ~DoubleCopy(){};
+    Instruction *getInstruction(){return new iDoubleCopy();};
+};
+
+#ifdef TYPE_CONVERSION
+class QTOPIA_EXPORT iConvertIntDouble:public Instruction {
 public:
     iConvertIntDouble():Instruction(){};
     ~iConvertIntDouble(){};
     Data *eval(Data *);
 };
-class ConvertIntDouble:public InstructionDescription {
+class QTOPIA_EXPORT ConvertIntDouble:public InstructionDescription {
 public:
     ConvertIntDouble();
     ~ConvertIntDouble(){};
     Instruction *getInstruction() {return new iConvertIntDouble();};
 };
 
-class iConvertFractionDouble:public Instruction {
+class QTOPIA_EXPORT iConvertFractionDouble:public Instruction {
 public:
     iConvertFractionDouble():Instruction(){};
     ~iConvertFractionDouble(){};
     Data *eval(Data *);
 };
-class ConvertFractionDouble:public InstructionDescription {
+class QTOPIA_EXPORT ConvertFractionDouble:public InstructionDescription {
 public:
     ConvertFractionDouble();
     ~ConvertFractionDouble(){};
     Instruction *getInstruction() {return new iConvertFractionDouble();};
 };
-
-
+#endif
 // Mathematical functions
-class iAddDoubleDouble:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iAddDoubleDouble:public BaseDoubleInstruction {
 public:
     iAddDoubleDouble():BaseDoubleInstruction(){};
     ~iAddDoubleDouble(){};
     Data *doEval(DoubleData *);
 };
-class AddDoubleDouble:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT AddDoubleDouble:public BaseDoubleInstructionDescription {
 public:
     AddDoubleDouble();
     ~AddDoubleDouble(){};
     Instruction *getInstruction() {return new iAddDoubleDouble();};
 };
 
-class iSubtractDoubleDouble:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iSubtractDoubleDouble:public BaseDoubleInstruction {
 public:
     iSubtractDoubleDouble():BaseDoubleInstruction(){};
     ~iSubtractDoubleDouble(){};
     Data *doEval(DoubleData *);
 };
-class SubtractDoubleDouble:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT SubtractDoubleDouble:public BaseDoubleInstructionDescription {
 public:
     SubtractDoubleDouble();
     ~SubtractDoubleDouble(){};
     Instruction *getInstruction() {return new iSubtractDoubleDouble();};
 };
 
-class iMultiplyDoubleDouble:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iMultiplyDoubleDouble:public BaseDoubleInstruction {
 public:
     iMultiplyDoubleDouble():BaseDoubleInstruction(){};
     ~iMultiplyDoubleDouble(){};
     Data *doEval(DoubleData *);
 };
-class MultiplyDoubleDouble:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT MultiplyDoubleDouble:public BaseDoubleInstructionDescription {
 public:
     MultiplyDoubleDouble();
     ~MultiplyDoubleDouble(){};
     Instruction *getInstruction() {return new iMultiplyDoubleDouble();};
 };
 
-class iDivideDoubleDouble:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iDivideDoubleDouble:public BaseDoubleInstruction {
 public:
     iDivideDoubleDouble():BaseDoubleInstruction(){};
     ~iDivideDoubleDouble(){};
 Data *doEval(DoubleData *);
 };
-class DivideDoubleDouble:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT DivideDoubleDouble:public BaseDoubleInstructionDescription {
 public:
     DivideDoubleDouble();
     ~DivideDoubleDouble(){};
     Instruction *getInstruction() {return new iDivideDoubleDouble();};
 };
 
-class iDoublePow:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iDoublePow:public BaseDoubleInstruction {
 public:
     iDoublePow():BaseDoubleInstruction(){};
     ~iDoublePow(){};
     Data *doEval(DoubleData *);
 };
-class DoublePow:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT DoublePow:public BaseDoubleInstructionDescription {
 public:
     DoublePow();
     ~DoublePow(){};
@@ -149,77 +163,77 @@ public:
 };
 
 // Immediate
-class iDoubleSin:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iDoubleSin:public BaseDoubleInstruction {
 public:
     iDoubleSin():BaseDoubleInstruction(){};
     ~iDoubleSin(){};
     Data *doEval(DoubleData *);
 };
-class DoubleSin:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT DoubleSin:public BaseDoubleInstructionDescription {
 public:
     DoubleSin();
     ~DoubleSin(){};
     Instruction *getInstruction() {return new iDoubleSin();};
 };
 
-class iDoubleCos:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iDoubleCos:public BaseDoubleInstruction {
 public:
     iDoubleCos():BaseDoubleInstruction(){};
     ~iDoubleCos(){};
     Data *doEval(DoubleData *);
 };
-class DoubleCos:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT DoubleCos:public BaseDoubleInstructionDescription {
 public:
     DoubleCos();
     ~DoubleCos(){};
     Instruction *getInstruction() {return new iDoubleCos();};
 };
 
-class iDoubleTan:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iDoubleTan:public BaseDoubleInstruction {
 public:
     iDoubleTan():BaseDoubleInstruction(){};
     ~iDoubleTan(){};
     Data *doEval(DoubleData *);
 };
-class DoubleTan:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT DoubleTan:public BaseDoubleInstructionDescription {
 public:
     DoubleTan();
     ~DoubleTan(){};
     Instruction *getInstruction() {return new iDoubleTan();};
 };
-class iDoubleASin:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iDoubleASin:public BaseDoubleInstruction {
 public:
     iDoubleASin():BaseDoubleInstruction(){};
     ~iDoubleASin(){};
     Data *doEval(DoubleData *);
 };
-class DoubleASin:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT DoubleASin:public BaseDoubleInstructionDescription {
 public:
     DoubleASin();
     ~DoubleASin(){};
     Instruction *getInstruction() {return new iDoubleASin();};
 };
 
-class iDoubleACos:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iDoubleACos:public BaseDoubleInstruction {
 public:
     iDoubleACos():BaseDoubleInstruction(){};
     ~iDoubleACos(){};
     Data *doEval(DoubleData *);
 };
-class DoubleACos:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT DoubleACos:public BaseDoubleInstructionDescription {
 public:
     DoubleACos();
     ~DoubleACos(){};
     Instruction *getInstruction() {return new iDoubleACos();};
 };
 
-class iDoubleATan:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iDoubleATan:public BaseDoubleInstruction {
 public:
     iDoubleATan():BaseDoubleInstruction(){};
     ~iDoubleATan(){};
     Data *doEval(DoubleData *);
 };
-class DoubleATan:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT DoubleATan:public BaseDoubleInstructionDescription {
 public:
     DoubleATan();
     ~DoubleATan(){};
@@ -227,130 +241,130 @@ public:
 };
 
 
-class iDoubleLog:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iDoubleLog:public BaseDoubleInstruction {
 public:
     iDoubleLog():BaseDoubleInstruction(){};
     ~iDoubleLog(){};
     Data *doEval(DoubleData *);
 };
-class DoubleLog:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT DoubleLog:public BaseDoubleInstructionDescription {
 public:
     DoubleLog();
     ~DoubleLog(){};
     Instruction *getInstruction() {return new iDoubleLog();};
 };
 
-class iDoubleLn:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iDoubleLn:public BaseDoubleInstruction {
 public:
     iDoubleLn():BaseDoubleInstruction(){};
     ~iDoubleLn(){};
     Data *doEval(DoubleData *);
 };
-class DoubleLn:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT DoubleLn:public BaseDoubleInstructionDescription {
 public:
     DoubleLn();
     ~DoubleLn(){};
     Instruction *getInstruction() {return new iDoubleLn();};
 };
 
-class iDoubleExp:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iDoubleExp:public BaseDoubleInstruction {
 public:
     iDoubleExp():BaseDoubleInstruction(){};
     ~iDoubleExp(){};
     Data *doEval(DoubleData *);
 };
-class DoubleExp:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT DoubleExp:public BaseDoubleInstructionDescription {
 public:
     DoubleExp();
     ~DoubleExp(){};
     Instruction *getInstruction() {return new iDoubleExp();};
 };
 
-class iDoubleOneOverX:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iDoubleOneOverX:public BaseDoubleInstruction {
 public:
     iDoubleOneOverX():BaseDoubleInstruction(){};
     ~iDoubleOneOverX(){};
     Data *doEval(DoubleData *);
 };
-class DoubleOneOverX:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT DoubleOneOverX:public BaseDoubleInstructionDescription {
 public:
     DoubleOneOverX();
     ~DoubleOneOverX(){};
     Instruction *getInstruction() {return new iDoubleOneOverX();};
 };
 
-class iDoubleFactorial:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iDoubleFactorial:public BaseDoubleInstruction {
 public:
     iDoubleFactorial():BaseDoubleInstruction(){};
     ~iDoubleFactorial(){};
     Data *doEval(DoubleData *);
 };
-class DoubleFactorial:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT DoubleFactorial:public BaseDoubleInstructionDescription {
 public:
     DoubleFactorial();
     ~DoubleFactorial(){};
     Instruction *getInstruction() {return new iDoubleFactorial();};
 };
 
-class iDoubleSquareRoot:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iDoubleSquareRoot:public BaseDoubleInstruction {
 public:
     iDoubleSquareRoot():BaseDoubleInstruction(){};
     ~iDoubleSquareRoot(){};
     Data *doEval(DoubleData *);
 };
-class DoubleSquareRoot:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT DoubleSquareRoot:public BaseDoubleInstructionDescription {
 public:
     DoubleSquareRoot();
     ~DoubleSquareRoot(){};
     Instruction *getInstruction() {return new iDoubleSquareRoot();};
 };
 
-class iDoubleCubeRoot:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iDoubleCubeRoot:public BaseDoubleInstruction {
 public:
     iDoubleCubeRoot():BaseDoubleInstruction(){};
     ~iDoubleCubeRoot(){};
     Data *doEval(DoubleData *);
 };
-class DoubleCubeRoot:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT DoubleCubeRoot:public BaseDoubleInstructionDescription {
 public:
     DoubleCubeRoot();
     ~DoubleCubeRoot(){};
     Instruction *getInstruction() {return new iDoubleCubeRoot();};
 };
 
-class iDoubleXRootY:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iDoubleXRootY:public BaseDoubleInstruction {
 public:
     iDoubleXRootY():BaseDoubleInstruction(){};
     ~iDoubleXRootY(){};
     Data *doEval(DoubleData *);
 };
-class DoubleXRootY:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT DoubleXRootY:public BaseDoubleInstructionDescription {
 public:
     DoubleXRootY();
     ~DoubleXRootY(){};
     Instruction *getInstruction() {return new iDoubleXRootY();};
 };
 
-class iDoubleSquare:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iDoubleSquare:public BaseDoubleInstruction {
 public:
     iDoubleSquare():BaseDoubleInstruction(){};
     ~iDoubleSquare(){};
     Data *doEval(DoubleData *);
 };
-class DoubleSquare:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT DoubleSquare:public BaseDoubleInstructionDescription {
 public:
     DoubleSquare();
     ~DoubleSquare(){};
     Instruction *getInstruction() {return new iDoubleSquare();};
 };
 
-class iDoubleNegate:public BaseDoubleInstruction {
+class QTOPIA_EXPORT iDoubleNegate:public BaseDoubleInstruction {
 public:
     iDoubleNegate():BaseDoubleInstruction(){};
     ~iDoubleNegate(){};
     Data *doEval(DoubleData *);
 };
-class DoubleNegate:public BaseDoubleInstructionDescription {
+class QTOPIA_EXPORT DoubleNegate:public BaseDoubleInstructionDescription {
 public:
     DoubleNegate();
     ~DoubleNegate(){};

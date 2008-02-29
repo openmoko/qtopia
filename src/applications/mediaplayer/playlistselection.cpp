@@ -17,12 +17,12 @@
 ** not clear to you.
 **
 **********************************************************************/
-#include <qpe/qpeapplication.h>
-#include <qpe/applnk.h>
-#include <qpe/resource.h>
-#include <qpe/global.h>
-#include <qpe/storage.h>
-#include <qpe/categoryselect.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/applnk.h>
+#include <qtopia/resource.h>
+#include <qtopia/global.h>
+#include <qtopia/storage.h>
+#include <qtopia/categoryselect.h>
 #include <qpainter.h>
 #include <qimage.h>
 #include <qcopchannel_qws.h>
@@ -46,10 +46,10 @@ public:
 	setFile( f );
     }
 
-    const DocLnk &file() const { return *fl; }
+    const DocLnk &file() const { return fl; }
 
     void setFile( const DocLnk& f ) {
-	fl = (DocLnk*)&f;
+	fl = f;
 
 	QFile file( f.file() );
 
@@ -62,7 +62,11 @@ public:
 
 	// Second Column
 	StorageInfo storage;
-	setText( 1, storage.fileSystemOf( f.file() )->name() );
+	const FileSystem *fileSystem = storage.fileSystemOf( f.file() );
+	if ( fileSystem )
+	    setText( 1, fileSystem->name() );
+	else
+	    setText( 1, "-" );
 
 	// Third Column
 	if ( file.exists() ) {
@@ -87,7 +91,7 @@ public:
     }
 
 private:
-    DocLnk *fl;
+    DocLnk fl;
 };
 
 
@@ -131,6 +135,8 @@ PlayListSelection::PlayListSelection( QWidget *parent, const char *name )
     connect( this, SIGNAL( rightButtonPressed( QListViewItem *, const QPoint &, int ) ), this, SLOT( showItemProperties( QListViewItem * ) ) );
 
     clear();
+
+    sbVis = FALSE;
 }
 
 
@@ -146,6 +152,8 @@ PlayListSelectionItem *PlayListSelection::newItem( const DocLnk& lnk )
     unsigned int randomPos = (unsigned int)((double)rand() * d->shuffledList.count() / RAND_MAX);
     randomPos = QMIN( randomPos, d->shuffledList.count() );
     d->shuffledList.insert( randomPos, item );
+    if ( verticalScrollBar()->isVisible() != sbVis )
+	viewportResizeEvent( 0 );
     return item;
 }
 
@@ -164,7 +172,8 @@ void PlayListSelection::deleteItem( PlayListSelectionItem *item )
 void PlayListSelection::viewportResizeEvent( QResizeEvent * )
 {
     QScrollBar *sb = verticalScrollBar();
-    int sbWidth = sb->isVisible() ? sb->width() : 0;
+    sbVis = sb->isVisible();
+    int sbWidth = sbVis ? sb->width() + 1 : 0;
     setColumnWidth( 0, width() - columnWidth( 1 ) - columnWidth( 2 ) - sbWidth - 2 * lineWidth() );
 }
 
@@ -273,7 +282,9 @@ const DocLnk *PlayListSelection::current()
 	return &(item->file());
     if ( firstChild() ) { // try harder
 	setSelected( firstChild(), TRUE );
-	return &( ( (PlayListSelectionItem *)firstChild() )->file() );
+	item = (PlayListSelectionItem *)firstChild();
+	if ( item )
+	    return &(item->file());
     }
     return NULL;
 }
@@ -281,7 +292,7 @@ const DocLnk *PlayListSelection::current()
 
 void PlayListSelection::addToSelection( const DocLnk &lnk )
 {
-    PlayListSelectionItem *item = newItem( DocLnk( lnk ) );
+    PlayListSelectionItem *item = newItem( lnk );
     QListViewItem *current = selectedItem();
     if ( current )
         item->moveItem( current );

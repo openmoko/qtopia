@@ -23,10 +23,11 @@
 
 #include <qvbox.h>
 #include <qarray.h>
+#include <qtopia/qpeglobal.h>
 
 class CategoryEdit;
 
-class CategoryWidget : public QVBox
+class QTOPIA_EXPORT CategoryWidget : public QVBox
 {
 public:
     CategoryWidget( QWidget *parent = 0, const char *name = 0 );

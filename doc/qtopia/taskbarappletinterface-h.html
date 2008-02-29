@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/include/qtopia/taskbarappletinterface.h:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/include/qtopia/taskbarappletinterface.h:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -51,7 +51,7 @@ body { background: #ffffff; color: black; }
 #ifndef TASKBARAPPLETINTERFACE_H
 #define TASKBARAPPLETINTERFACE_H
 
-#include &lt;qpe/qcom.h&gt;
+#include &lt;qtopia/qcom.h&gt;
 #include &lt;qpixmap.h&gt;
 
 #ifndef QT_NO_COMPONENT
@@ -63,7 +63,7 @@ body { background: #ffffff; color: black; }
 
 class QWidget;
 
-struct TaskbarAppletInterface : public QUnknownInterface
+struct QTOPIA_PLUGIN_EXPORT TaskbarAppletInterface : public QUnknownInterface
 {
     virtual QWidget *applet( QWidget *parent ) = 0;
     virtual int position() const = 0;
@@ -74,7 +74,7 @@ struct TaskbarAppletInterface : public QUnknownInterface
 #define IID_TaskbarNamedApplet QUuid( 0x7505e192, 0x4977, 0x465a, 0xb7, 0x2f, 0x0a, 0x8d, 0xd4, 0x91, 0xcf, 0x43)
 #endif
 
-struct TaskbarNamedAppletInterface : public TaskbarAppletInterface
+struct QTOPIA_PLUGIN_EXPORT TaskbarNamedAppletInterface : public TaskbarAppletInterface
 {
     virtual QString name() const = 0;
     virtual QPixmap icon() const = 0;

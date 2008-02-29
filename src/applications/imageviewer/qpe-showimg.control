@@ -3,8 +3,8 @@ Priority: optional
 Section: qpe/applications
 Maintainer: Trolltech (www.trolltech.com)
 Architecture: arm
-Version: $QPE_VERSION-7
-Depends: qpe-base ($QPE_VERSION)
+Version: $QPE_VERSION-12
+Depends: qpe-libqtopia
 Description: Image Viewer
  The image viewer for the Qtopia environment. Supports
  Whichever formats are compiled into Qt/Embedded (eg. PNG).

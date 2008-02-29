@@ -65,6 +65,14 @@ typedef uint32_t (*yuv2rgb_single_pixel_fun_t) (yuv2rgb_t *c_this, uint8_t y, ui
 #define	MODE_8_GRAY  11
 #define MODE_PALETTE 12
 
+
+#define FORMAT_YUV444	0
+#define FORMAT_YUV422	1
+#define FORMAT_YUV420	2
+#define FORMAT_YUV411	3
+#define FORMAT_YUV410	4
+
+
 struct yuv2rgb_s {
 
   /*
@@ -74,7 +82,7 @@ struct yuv2rgb_s {
 		    int source_width, int source_height,
 		    int y_stride, int uv_stride,
 		    int dest_width, int dest_height,
-		    int rgb_stride);
+		    int rgb_stride, int format);
 
   /*
    * c_this is the function to call for the yuv2rgb and scaling process
@@ -101,6 +109,9 @@ struct yuv2rgb_s {
   int               rgb_stride;
   int               step_dx, step_dy;
   int               do_scale;
+  int               uv_stretch_x;
+  int               uv_stretch_y;
+
 
   uint8_t          *y_buffer;
   uint8_t          *u_buffer;

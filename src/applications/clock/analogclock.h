@@ -27,8 +27,7 @@ class AnalogClock : public QFrame
 {
     Q_OBJECT
 public:
-    AnalogClock( QWidget *parent=0, const char *name=0 )
-	: QFrame( parent, name ), clear(false) {}
+    AnalogClock( QWidget *parent=0, const char *name=0 );
 
     QSizePolicy sizePolicy() const;
 

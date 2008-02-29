@@ -31,7 +31,7 @@ public:
     bool pressed;
 };
 
-ColorSelector::ColorSelector( QWidget *parent, const char *name, WFlags f=0 )
+ColorSelector::ColorSelector( QWidget *parent, const char *name, WFlags f )
     : QWidget( parent, name, f )
 {
     setBackgroundColor( white );
@@ -99,13 +99,41 @@ const QColor &ColorSelector::defaultColor() const
 void ColorSelector::setColor( const QColor &c )
 {
     col = c;
+    if ( QColor(d->defCol) == c ) {
+	d->highlighted = -1;
+	update();
+	return;
+    }
+
+    int r = c.red();
+    int g = c.green();
+    int b = c.blue();
+    int rd = (QColor(d->palette[0]).red() - r);
+    int gd = (QColor(d->palette[0]).green() - g);
+    int bd = (QColor(d->palette[0]).blue() - b);
+    int bestCol = 0;
+    int bestDiff = rd*rd + gd*gd + bd*bd;
     for ( int i = 0; i < 8*8; i++ ) {
 	if ( QColor(d->palette[i]) == c ) {
 	    d->highlighted = i;
 	    update();
-	    break;
+	    return;
+	} else {
+	    rd = (QColor(d->palette[i]).red() - r);
+	    gd = (QColor(d->palette[i]).green() - g);
+	    bd = (QColor(d->palette[i]).blue() - b);
+	    int diff = rd*rd + gd*gd + bd*bd;
+	    if ( diff < bestDiff ) {
+		bestDiff = diff;
+		bestCol = i;
+	    }
 	}
     }
+
+    // We don't have the exact color specified, so we'll pick the closest.
+    // Not really optimal, but better than settling for the default.
+    d->highlighted = bestCol;
+    update();
 }
 
 void ColorSelector::paintEvent( QPaintEvent * )
@@ -299,6 +327,7 @@ void ColorButton::setColor( const QColor &c )
 {
     col = c;
     d->picker->setColor( c );
+    update();
 }
 
 void ColorButton::setDefaultColor( const QColor &c )

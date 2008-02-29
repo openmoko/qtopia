@@ -22,9 +22,9 @@
 #define REPEATENTRY_H
 
 #include <qdialog.h>
-#include <qpe/pim/event.h>
+#include <qtopia/pim/event.h>
 
-class QTabBar;
+class QButtonGroup;
 class QSpinBox;
 class QCheckBox;
 class WeekGroup;
@@ -49,9 +49,6 @@ private slots:
     void setRepeatType(int);
     void setSubRepeatType(int);
     void setFrequency(int);
-    void setEndDate(const QDate &);
-    void setEndDate(int,int,int);
-    void setHasEndDate(bool);
 
     void setRepeatOnWeekDay(int, bool);
 
@@ -60,11 +57,8 @@ private:
 
     void refreshLabels();
 
-    QTabBar *typeSelector;
+    QButtonGroup *typeSelector;
     QSpinBox *freqSelector;
-
-    QCheckBox *hasEndCheck;
-    QPEDateButton *endSelect;
 
     WeekGroup *weekGroup;
     QVButtonGroup *monthGroup;

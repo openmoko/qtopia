@@ -25,7 +25,7 @@
 #include <qtopia/config.h>
 #include <qtopia/pim/todoaccess.h>
 #include <qtopia/qcopenvelope_qws.h>
-#include <qtopia/services/services.h>
+#include <qtopia/services.h>
 #include <qtopia/resource.h>
 
 #include <qtl.h>
@@ -163,27 +163,32 @@ QString TodoPlugin::html(uint charWidth, uint /* lineHeight */) const
 
     d->getTaskList( d->limit );
 
-    if (d->tasks.count() > 0) {
-	status = QString("You have %1 ").arg(d->tasks.count());
+    // We try to be logical with the substrings, to allow
+    // translation. If we have failed we will need to verbosify.
+    QString open,due;
+    if ( d->selection == 0 ) {
+	open = tr(" open","note space");
+	due = "";
     } else {
-	status = "You have no ";
-    }
-
-    if (d->selection == 0) {
-	status += "open tasks ";
-    } else if (d->selection == 1) {
-	status += QString("task%1 ").arg(d->tasks.count() != 1 ? "s" : "");
-
-	if (d->days == 1) {
-	    status += "due today";
+	open = "";
+	if ( d->days == 1 ) {
+	    due = tr(" due today");
 	} else {
-	    status += "due the next " + QString::number(d->days) + " days";
+	    due = tr(" due in the next %1 days").arg(d->days);
 	}
     }
 
+    status = d->tasks.count() == 0
+	    ? tr("You have no%1 tasks%2","eg. 1=\" open\", 2=\" due today\"").
+		arg(open).arg(due)
+	    : (d->tasks.count() == 1
+		? tr("You have %1%2 task%3","eg. 1 open")
+		: tr("You have %1%2 tasks%3","eg. 2 open"))
+		.arg(d->tasks.count()).arg(open).arg(due);
+
     QString str;
     str = "<table> <tr> <td> <a href=\"raise:todolist\"><img src=\"TodoList\" alt=\"Todo\"></a> </td>";
-    str += "<td> <b> " + tr(status) + " </b> </td> </tr> </table> ";
+    str += "<td> <b> " + status + " </b> </td> </tr> </table> ";
 
     
     if ( d->tasks.count() ) {
@@ -195,7 +200,7 @@ QString TodoPlugin::html(uint charWidth, uint /* lineHeight */) const
 	    if ( t.hasDueDate ) {
 		when = TimeString::longDateString( t.dueDate ); 
 	    } else {
-		when = QString("Priority %1").arg(t.priority);
+		when = tr("Priority %1").arg(t.priority);
 	    }
 	    
 	    QString desc = t.description;
@@ -211,9 +216,9 @@ QString TodoPlugin::html(uint charWidth, uint /* lineHeight */) const
 	    
 	    str += "<td> <a href=\"qcop:" + name() + QString(":%1\">").arg(i) + desc + "</a> </td>";
 	    if ( t.hasDueDate ) {
-		str += "<td> " + tr(when) + " </td>";
+		str += "<td> " + when + " </td>";
 	    } else {
-		str += "<td> " + tr(when) +" </td>";
+		str += "<td> " + when +" </td>";
 	    }
 
 	    str += " </tr> <tr> ";
@@ -237,7 +242,7 @@ void TodoPlugin::accepted(QWidget *w) const
 
 void TodoPlugin::itemSelected(const QString &index) const
 {
-    QCopEnvelope e( Service::channel("todolist"), "showTask(QUuid)");
+    QCopEnvelope e( Service::channel("Tasks"), "showTask(QUuid)");
     e << d->tasks[ index.toInt() ].uuid;
 }
 

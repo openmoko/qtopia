@@ -17,14 +17,14 @@
 ** not clear to you.
 **
 **********************************************************************/
-#include <qpe/qpemenubar.h>
-#include <qpe/qpetoolbar.h>
-#include <qpe/fileselector.h>
-#include <qpe/qpeapplication.h>
-#include <qpe/applnk.h>
-#include <qpe/config.h>
-#include <qpe/global.h>
-#include <qpe/resource.h>
+#include <qtopia/qpemenubar.h>
+#include <qtopia/qpetoolbar.h>
+#include <qtopia/fileselector.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/applnk.h>
+#include <qtopia/config.h>
+#include <qtopia/global.h>
+#include <qtopia/resource.h>
 #include <qaction.h>
 #include <qimage.h>
 #include <qdir.h>
@@ -43,6 +43,7 @@
 #include "tabbedselector.h"
 #include "action.h"
 #include "fileinfo.h"
+#include "maindocumentwidgetstack.h"
 
 #include <stdlib.h>
 
@@ -75,6 +76,7 @@ public:
     int optionsMenuId;
     QPopupMenu *skinMenu;
     int skinMenuId;
+    QStringList skinID;
     unsigned int skinCount;
 
     bool setDocumentActive;
@@ -88,8 +90,6 @@ PlayListWidget::PlayListWidget( QWidget* parent, const char* name, WFlags fl )
     d = new PlayListWidgetPrivate;
     d->setDocumentActive = FALSE;
 
-    setCaption( tr("MediaPlayer") );
-    setIcon( Resource::loadPixmap( "MPEGPlayer" ) );
     setToolBarsMovable( FALSE );
     setBackgroundMode( PaletteButton );
 
@@ -113,7 +113,7 @@ PlayListWidget::PlayListWidget( QWidget* parent, const char* name, WFlags fl )
 
     d->tbPlay   = new Action( this, tr( "Play" ),       "mediaplayer/play",    mediaPlayerState, SLOT(setPlaying(bool)), TRUE );
     d->tbPlay->addTo( bar );
-    d->tbInfo   = new Action( this, tr( "Infomation" ), "mediaplayer/info",    this, SLOT(showInfo()) );
+    d->tbInfo   = new Action( this, tr( "Information" ), "mediaplayer/info",    this, SLOT(showInfo()) );
     d->tbInfo->addTo( bar );
     d->tbAddRemove = new Action( this, tr( "Add/Remove" ),    "mediaplayer/add_to_playlist",  this, SLOT(addRemoveSelected()) );
     d->tbAddRemove->addTo( bar );
@@ -126,13 +126,13 @@ PlayListWidget::PlayListWidget( QWidget* parent, const char* name, WFlags fl )
 
     d->playlistMenu = new QPopupMenu( this );
     d->playlistMenuId = d->menu->insertItem( tr( "Playlist" ), d->playlistMenu );
-    Action *a = new Action( this, tr( "Clear" ),               "", d->ts,	       SLOT( clearList() ) );
+    Action *a = new Action( this, tr( "Clear" ),               "mediaplayer/remove_from_playlist", d->ts,	       SLOT( clearList() ) );
     a->addTo( d->playlistMenu );
-    a = new Action( this, tr( "Add all Music" ),       "", d->ts,            SLOT( addAllAudio() ) );
+    a = new Action( this, tr( "Add all Music" ),       "mediaplayer/add_to_playlist", d->ts,            SLOT( addAllAudio() ) );
     a->addTo( d->playlistMenu );
-    a = new Action( this, tr( "Add all Videos" ),      "", d->ts,            SLOT( addAllVideo() ) );
+    a = new Action( this, tr( "Add all Videos" ),      "mediaplayer/add_to_playlist", d->ts,            SLOT( addAllVideo() ) );
     a->addTo( d->playlistMenu );
-    a = new Action( this, tr( "Add all" ),             "", d->ts,            SLOT( addAll() ) );
+    a = new Action( this, tr( "Add all" ),             "mediaplayer/add_to_playlist", d->ts,            SLOT( addAll() ) );
     a->addTo( d->playlistMenu );
 #ifdef CAN_SAVE_LOAD_PLAYLISTS
     a = new Action( this, tr( "Save PlayList" ),       "", this,             SLOT( saveList() ) );
@@ -157,13 +157,17 @@ PlayListWidget::PlayListWidget( QWidget* parent, const char* name, WFlags fl )
     QString skinPath = QPEApplication::qpeDir() + "pics/mediaplayer/skins/"; 
     QDir skinDir( skinPath );
     d->skinCount = 0;
+    d->skinID.clear();
     for ( unsigned int i = 0; i < skinDir.count(); i++ ) {
 	if ( skinDir[i] != "." && skinDir[i] != ".." ) {
-	    QString skinTestPath = "mediaplayer/skins/" + skinDir[i] + "/audio_up";
-	    if ( !Resource::findPixmap( skinTestPath ).isNull() ) {
-	        d->skinMenu->insertItem( skinDir[i], this, SLOT( skinChanged(int) ), 0, d->skinCount );
+	    QString cfgfile = skinPath + skinDir[i] + "/config";
+	    Config cfg(cfgfile,Config::File);
+	    if ( cfg.isValid() ) {
+		cfg.setGroup("Skin");
+		d->skinMenu->insertItem( cfg.readEntry("Name"), this, SLOT( skinChanged(int) ), 0, d->skinCount );
 	        if ( skinDir[i] == mediaPlayerState->skin() ) 
 	            d->skinMenu->setItemChecked( d->skinCount, TRUE );
+		d->skinID.append(skinDir[i]);
 		d->skinCount++;
 	    }
 	}
@@ -174,7 +178,6 @@ PlayListWidget::PlayListWidget( QWidget* parent, const char* name, WFlags fl )
     connect( mediaPlayerState, SIGNAL( shuffledToggled( bool ) ),   d->tbShuffle, SLOT( setOn2( bool ) ) );
     connect( mediaPlayerState, SIGNAL( fullscreenToggled( bool ) ), d->tbFull,    SLOT( setOn2( bool ) ) );
     connect( mediaPlayerState, SIGNAL( scaledToggled( bool ) ),     d->tbScale,   SLOT( setOn2( bool ) ) );
-    connect( mediaPlayerState, SIGNAL( fullscreenToggled( bool ) ), d->tbScale,   SLOT( setEnabled( bool ) ) );
 
     connect( mediaPlayerState, SIGNAL( viewChanged(View) ),	    this,	  SLOT( setView(View) ) );
 
@@ -195,10 +198,15 @@ PlayListWidget::~PlayListWidget()
 void PlayListWidget::resizeEvent( QResizeEvent * )
 {
     // Remove it from any menu
-    d->menu->removeItem( d->skinMenuId );
-    d->menu->removeItem( d->playlistMenuId );
-    d->optionsMenu->removeItem( d->skinMenuId );
-    d->optionsMenu->removeItem( d->playlistMenuId );
+    if ( d->menu->findItem( d->skinMenuId ) )
+	d->menu->removeItem( d->skinMenuId );
+    else if ( d->optionsMenu->findItem( d->skinMenuId ) )
+	d->optionsMenu->removeItem( d->skinMenuId );
+
+    if ( d->menu->findItem( d->playlistMenuId ) )
+        d->menu->removeItem( d->playlistMenuId );
+    else if ( d->optionsMenu->findItem( d->playlistMenuId ) )
+        d->optionsMenu->removeItem( d->playlistMenuId );
 
     QFontMetrics fm( qApp->font() );
     int w = width() - fm.width( tr( "Options" ) + tr( "Playlist" ) + tr( "Skin" ) );
@@ -238,10 +246,10 @@ void PlayListWidget::skinChanged( int id )
     if ( d->skinMenu->isItemChecked( id ) )
 	return;
     // Update the checked menu item
-    for ( unsigned int i = 0; i < d->skinCount; i++ ) 
-        d->skinMenu->setItemChecked( i, ((int)i == id) );
+    for ( int i = 0; i < (int)d->skinCount; i++ ) 
+        d->skinMenu->setItemChecked( i, (i == id) );
     // Update the skin state
-    mediaPlayerState->setSkin( d->skinMenu->text( id ) );
+    mediaPlayerState->setSkin( d->skinID[id] );
 }
 
 
@@ -282,7 +290,6 @@ void PlayListWidget::initializeStates()
     d->tbShuffle->setOn( mediaPlayerState->shuffled() );
     d->tbFull->setOn( mediaPlayerState->fullscreen() );
     d->tbScale->setOn( mediaPlayerState->scaled() );
-    d->tbScale->setEnabled( mediaPlayerState->fullscreen() );
 }
 
 
@@ -419,10 +426,7 @@ void PlayListWidget::setDocument(const QString& fileref)
 
 void PlayListWidget::setActiveWindow()
 {
-    // When we get raised we need to ensure that it switches views
-    View origView = mediaPlayerState->view();
-    mediaPlayerState->setView( ListView ); // invalidate
-    mediaPlayerState->setView( origView ); // now switch back
+    mediaPlayerState->setView( mediaPlayerState->view() );
 }
 
 
@@ -546,9 +550,8 @@ void PlayListWidget::setView( View view )
     if ( view == ListView ) {
 	d->setDocumentActive = FALSE;
 	d->ts->resumeLoading();
-	showMaximized();
-    } else
-	hide();
+	mainDocumentWindow->raiseWidget( this );
+    }
 }
 
 

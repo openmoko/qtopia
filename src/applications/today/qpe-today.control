@@ -3,7 +3,7 @@ Priority: optional
 Section: qpe
 Maintainer: Trolltech (www.trolltech.com)
 Architecture: arm
-Version: $QPE_VERSION-14
-Depends: qpe-base ($QPE_VERSION) qpe-qcop
+Version: $QPE_VERSION-19
+Depends: qpe-libqtopia
 Description: Today Application
  The today application for the Qtopia environment.

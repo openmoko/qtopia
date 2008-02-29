@@ -20,18 +20,19 @@
 
 #include "mindbreaker.h"
 
-#include <qpe/resource.h>
-#include <qpe/config.h>
+#include <qtopia/resource.h>
+#include <qtopia/config.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/qpetoolbar.h>
 
 #include <qpainter.h>
 #include <qpixmap.h>
-#include <qpe/qpetoolbar.h>
 #include <qtoolbutton.h>
 #include <qpushbutton.h>
 #include <qmessagebox.h>
 #include <qlabel.h>
-#include <qstyle.h>
-#include <qpe/qpeapplication.h>
+#include <qlayout.h>
+#include <qtimer.h>
 
 #include <stdlib.h>
 #include <sys/time.h>
@@ -55,7 +56,8 @@ static int adjusted_peg_spacing;
 
 static int adjusted_answerpegx;
 static int adjusted_answerpegy;
-static int adjusted_answerpeg_diff;
+static int adjusted_answerpeg_xdiff;
+static int adjusted_answerpeg_ydiff;
 
 static int adjusted_board_height;
 static int adjusted_board_width;
@@ -70,7 +72,7 @@ static void setupBoardSize(int w, int h)
 
     adjusted_bin_margin = w * 10/240;
     adjusted_peg_size = adjusted_panel_height*3/4;
-    adjusted_answerpeg_size = w * 13/240;
+    adjusted_answerpeg_size = QMIN(adjusted_panel_width*15/180,adjusted_panel_height*15/25);
     
     // looks a bit dodgy on larger sizes
     if ( adjusted_peg_size > 40 )
@@ -79,17 +81,15 @@ static void setupBoardSize(int w, int h)
     adjusted_first_peg_x_diff = w * 31/240-adjusted_peg_size/2;
     adjusted_first_peg_y_diff = (adjusted_panel_height - adjusted_peg_size)/2;
     adjusted_peg_spacing = w * 30/240;
-    
-    adjusted_answerpegx = w * 152/240;
-    adjusted_answerpegy = h / 160;
-    adjusted_answerpeg_diff = w * 9/240;
 
     // looks a bit dodgy on larger sizes (still does though, but not as much...)
-    if ( adjusted_answerpeg_size > 22 ) {
-	adjusted_answerpegx += (adjusted_answerpeg_size - 24);
-	adjusted_answerpeg_diff -= 8;
+    if ( adjusted_answerpeg_size > 22 )
 	adjusted_answerpeg_size = 22;
-    }
+    
+    adjusted_answerpegx = adjusted_panel_width * 159/180 - adjusted_answerpeg_size/2;
+    adjusted_answerpegy = adjusted_panel_height/3 - adjusted_answerpeg_size/2;
+    adjusted_answerpeg_xdiff = adjusted_panel_width * 10/180;
+    adjusted_answerpeg_ydiff = adjusted_panel_height * 9/25;
     
     adjusted_board_height = adjusted_title_height + (adjusted_panel_height * 9);
     adjusted_board_width = adjusted_panel_width + (adjusted_bin_margin * 2) + adjusted_peg_size;
@@ -200,7 +200,7 @@ QImage Peg::imageForType(int t)
     return *normalPegs[t];
 }
 
-Peg::Peg(QCanvas *canvas , int t, int g = -1, int p = -1) 
+Peg::Peg(QCanvas *canvas , int t, int g, int p) 
         : QCanvasRectangle(canvas)
 {
     setSize(normalPegs[t]->width(), normalPegs[t]->height() );
@@ -272,21 +272,27 @@ inline int Peg::type() const
 /* Load the main image, copy from it the pegs, the board, and the answer image 
  * and use these to create the tray, answer and board
  */
-MindBreaker::MindBreaker( QWidget *parent=0, const char *name=0, int wFlags=0 )
+MindBreaker::MindBreaker( QWidget *parent, const char *name, int wFlags )
    : QMainWindow(parent, name, wFlags)
 {
-    MindBreakerBoard *m = new MindBreakerBoard(this);
+    QWidget *w = new QWidget( this );
+    w->setBackgroundColor( black );
+    QHBoxLayout *hb = new QHBoxLayout( w );
+    hb->addStretch();
+    board = new MindBreakerBoard(w);
+    hb->addWidget( board, 100 );
+    hb->addStretch();
 
-    setCentralWidget(m);
+    setCentralWidget(w);
     
     setToolBarsMovable( FALSE );
 
     QPEToolBar *tb = new QPEToolBar(this);
     tb->setHorizontalStretchable( TRUE );
 
-    QPixmap newicon = Resource::loadPixmap("new");
+    QIconSet newicon = Resource::loadIconSet("new");
     new QToolButton(newicon, tr("New Game"), 0, 
-                                       m, SLOT(clear()), tb, "NewGame");
+                                       board, SLOT(clear()), tb, "NewGame");
 
     score = new QToolButton(tb);
     score->setText("");
@@ -294,11 +300,11 @@ MindBreaker::MindBreaker( QWidget *parent=0, const char *name=0, int wFlags=0 )
     score->setUsesTextLabel(TRUE);
     tb->setStretchableWidget(score);
 
-    connect(m, SIGNAL(scoreChanged(int, int)), this, SLOT(setScore(int, int)));
-    connect(score, SIGNAL(clicked()), m, SLOT(resetScore()));
+    connect(board, SIGNAL(scoreChanged(int, int)), this, SLOT(setScore(int, int)));
+    connect(score, SIGNAL(clicked()), board, SLOT(resetScore()));
 
     int a, b;
-    m->getScore(&a, &b);
+    board->getScore(&a, &b);
     setScore(a,b);
 }
 
@@ -316,14 +322,22 @@ void MindBreaker::setScore(int turns, int games)
     score->setText(tr("win avg: %1 turns (%2 games)").arg(average).arg(games));
 }
 
+void MindBreaker::resizeEvent( QResizeEvent *e )
+{
+    board->fixSize();
+    QMainWindow::resizeEvent( e );
+}
 
-MindBreakerBoard::MindBreakerBoard( QWidget *parent=0, 
-                                    const char *name=0, int wFlags=0 )
+
+MindBreakerBoard::MindBreakerBoard( QWidget *parent, 
+                                    const char *name, int wFlags )
                      :  QCanvasView(0, parent, name, wFlags)
 {
+    setFrameStyle( NoFrame );
     setupBoardSize(qApp->desktop()->width(),qApp->desktop()->height());
     cnv.resize(100,100);
     setCanvas(&cnv);
+    setBackgroundColor( black );
     
     struct timeval tv;
 
@@ -333,6 +347,12 @@ MindBreakerBoard::MindBreakerBoard( QWidget *parent=0,
 
     canvas()->setAdvancePeriod(500);
     current_highlight = 0;
+
+    widthTimer = new QTimer( this );
+    connect(widthTimer, SIGNAL(timeout()), this, SLOT(doFixSize()) );
+
+    setMaximumWidth( QMIN(qApp->desktop()->height(),qApp->desktop()->width()) );
+    readConfig(); // first read... to ensure initial labels and side look right.
 }
 
 void MindBreakerBoard::readConfig()
@@ -428,6 +448,73 @@ void MindBreakerBoard::getScore(int *a, int *b)
     *a = total_turns;
     *b = total_games;
     return;
+}
+
+void MindBreakerBoard::fixSize()
+{
+    hide();
+    setMaximumWidth( parentWidget()->height() );
+    widthTimer->start( 20, TRUE );
+}
+
+void MindBreakerBoard::doFixSize()
+{
+    QSize s = size();
+    int fw = frameWidth();
+    s.setWidth(s.width() - fw);
+    s.setHeight(s.height() - fw);
+
+    /* min size is 200 x 260 */
+/*
+    if (s.width() < adjusted_board_width)
+        s.setWidth(adjusted_board_width);
+
+    if (s.height() < adjusted_board_height)
+        s.setHeight(adjusted_board_height);
+*/
+
+    if ( current_highlight ) // non-first resize
+	writeConfig();
+
+    setupBoardSize(s.width() - fw, s.height() - fw);
+    canvas()->resize(s.width() - fw, s.height() - fw);
+    Peg::buildImages();
+
+    QImage image = Resource::loadImage("mindbreaker/mindbreaker");
+
+    /* copy from master image to functional images */
+    int x = 0;
+    int y = 0;
+    panelImage = image.copy(x, y,  panel_width, panel_height).
+		smoothScale( adjusted_panel_width, adjusted_panel_height);
+    
+    y += panel_height;
+    y += panel_height;
+
+    titleImage = image.copy(x, y, title_width, title_height).
+		smoothScale( adjusted_title_width, adjusted_title_height);
+
+    Peg::buildImages(); // must be done BEFORE any pegs are made
+
+    show();
+
+    delete current_highlight;
+    current_highlight = new Peg(canvas(), 8);
+    current_highlight->setPlaced(TRUE);
+    current_highlight->setX(0);
+    current_highlight->setY(adjusted_board_height - ((current_go + 1) * adjusted_panel_height));
+    current_highlight->setZ(0);
+    current_highlight->show();
+
+    /* set up the game */
+    //readConfig();
+
+    /* draw initial screen */
+    //drawBackground();
+    //canvas()->update();
+    clear();
+
+    readConfig();
 }
 
 void MindBreakerBoard::placeGuessPeg(int pos, int pegId)
@@ -555,10 +642,10 @@ void MindBreakerBoard::checkGuess()
         num_black--;
         
         if (x == adjusted_answerpegx)
-            x = adjusted_answerpegx + adjusted_answerpeg_diff;
+            x = adjusted_answerpegx + adjusted_answerpeg_xdiff;
         else  {
             x = adjusted_answerpegx;
-            y += adjusted_answerpeg_diff;
+            y += adjusted_answerpeg_ydiff;
         }
     }
     while(num_white > 0){
@@ -571,10 +658,10 @@ void MindBreakerBoard::checkGuess()
         num_white--;
         
         if (x == adjusted_answerpegx)
-            x = adjusted_answerpegx + adjusted_answerpeg_diff;
+            x = adjusted_answerpegx + adjusted_answerpeg_xdiff;
         else  {
             x = adjusted_answerpegx;
-            y += adjusted_answerpeg_diff;
+            y += adjusted_answerpeg_ydiff;
         }
     }
     /* move to next go */
@@ -665,6 +752,13 @@ void MindBreakerBoard::resetScore()
 
 void MindBreakerBoard::contentsMousePressEvent(QMouseEvent *e)
 {
+    if (game_over) {
+	null_press = TRUE;
+	null_point = e->pos();
+	moving = 0;
+	return;
+    }
+
     copy_press = FALSE;
     null_press = FALSE;
     /* ok, first work out if it is one of the bins that
@@ -831,60 +925,8 @@ void MindBreakerBoard::contentsMouseReleaseEvent(QMouseEvent* e)
 
 void MindBreakerBoard::resizeEvent(QResizeEvent *e)
 {
-    QSize s = e->size();
-    int fw = style().defaultFrameWidth();
-    s.setWidth(s.width() - fw);
-    s.setHeight(s.height() - fw);
-
-    /* min size is 200 x 260 */
-/*
-    if (s.width() < adjusted_board_width)
-        s.setWidth(adjusted_board_width);
-
-    if (s.height() < adjusted_board_height)
-        s.setHeight(adjusted_board_height);
-*/
-
-    if ( current_highlight ) // non-first resize
-	writeConfig();
-
-    setupBoardSize(s.width() - fw, s.height() - fw);
-    canvas()->resize(s.width() - fw, s.height() - fw);
-    Peg::buildImages();
-
-    QImage image = Resource::loadImage("mindbreaker/mindbreaker");
-
-    /* copy from master image to functional images */
-    int x = 0;
-    int y = 0;
-    panelImage = image.copy(x, y,  panel_width, panel_height).
-		smoothScale( adjusted_panel_width, adjusted_panel_height);
-    
-    y += panel_height;
-    y += panel_height;
-
-    titleImage = image.copy(x, y, title_width, title_height).
-		smoothScale( adjusted_title_width, adjusted_title_height);
-
-    Peg::buildImages(); // must be done BEFORE any pegs are made
-
-    delete current_highlight;
-    current_highlight = new Peg(canvas(), 8);
-    current_highlight->setPlaced(TRUE);
-    current_highlight->setX(0);
-    current_highlight->setY(adjusted_board_height - ((current_go + 1) * adjusted_panel_height));
-    current_highlight->setZ(0);
-    current_highlight->show();
-
-    /* set up the game */
-    //readConfig();
-
-    /* draw initial screen */
-    //drawBackground();
-    //canvas()->update();
-    clear();
-
-    readConfig();
+    QCanvasView::resizeEvent(e);
+    fixSize();
 }
 
 

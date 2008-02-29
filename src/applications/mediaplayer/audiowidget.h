@@ -69,9 +69,9 @@ public slots:
     void setView( View );
 
 protected:
-    void internalPaint( QPaintEvent *pe );
-    void internalResize();
-    void updateSlider( long, long );
+    void virtualPaint( QPaintEvent *pe );
+    void virtualResize();
+    void virtualUpdateSlider();
 
 private:
     Ticker  songInfo;

@@ -31,12 +31,12 @@ PatienceCardGame::PatienceCardGame(QCanvas *c, bool snap, QWidget *parent) : Can
 
     int interCardSize = CardMetrics::width() + CardMetrics::interCardGap();
     int newXOff = CardMetrics::xOffset() - 6;
-
-    for (int i = 0; i < 4; i++) {
+    int i;
+    for ( i = 0; i < 4; i++) {
 	discardPiles[i] = new PatienceDiscardPile( newXOff + 10 + (i + 3) * interCardSize, 10, canvas() );
 	addCardPile(discardPiles[i]);
     }
-    for (int i = 0; i < 7; i++) {
+    for ( i = 0; i < 7; i++) {
 	workingPiles[i] = new PatienceWorkingPile( newXOff + 5 + i * interCardSize, CardMetrics::height() + 15, canvas() );
 	addCardPile(workingPiles[i]);
     }
@@ -119,14 +119,14 @@ void PatienceCardGame::readConfig( Config& cfg )
     beginDealing();
 
     highestZ = 1;
-
-    for (int k = 0; k < 7; k++) {
+    int k;
+    for ( k = 0; k < 7; k++) {
 	QString pile;
 	pile.sprintf( "WorkingPile%i", k );
 	readPile( cfg, workingPiles[k], pile, highestZ );
     }
 
-    for (int k = 0; k < 4; k++) {
+    for ( k = 0; k < 4; k++) {
 	QString pile;
 	pile.sprintf( "DiscardPile%i", k );
 	readPile( cfg, discardPiles[k], pile, highestZ );
@@ -145,13 +145,13 @@ void PatienceCardGame::writeConfig( Config& cfg )
 {
     cfg.setGroup("GameState");
     cfg.writeEntry("NumberOfTimesThroughDeck", numberOfTimesThroughDeck);
-
-    for ( int i = 0; i < 7; i++ ) {
+    int i;
+    for ( i = 0; i < 7; i++ ) {
 	QString pile;
 	pile.sprintf( "WorkingPile%i", i );
 	workingPiles[i]->writeConfig( cfg, pile );
     }
-    for ( int i = 0; i < 4; i++ ) {
+    for ( i = 0; i < 4; i++ ) {
 	QString pile;
 	pile.sprintf( "DiscardPile%i", i );
 	discardPiles[i]->writeConfig( cfg, pile );

@@ -22,8 +22,8 @@
 #include "qimpenprefbase.h"
 #include "qimpensetup.h"
 
-#include <qpe/qpeapplication.h>
-#include <qpe/config.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/config.h>
 
 #include <qcombobox.h>
 #include <qlistbox.h>
@@ -83,7 +83,7 @@ static const char * const right_xpm[] = {
 "                ",
 "                "};
 
-
+int QIMPenSetup::lastTab = 0;
 
 QIMPenSetup::QIMPenSetup( QIMPenProfile *p, QWidget *parent,
                 const char *name, bool modal, int WFlags )
@@ -108,11 +108,11 @@ QIMPenSetup::QIMPenSetup( QIMPenProfile *p, QWidget *parent,
     profileList.append( profile );
 #endif
     
-    QTabWidget *tw = new QTabWidget( this );
-    vb->addWidget( tw );
+    tabs = new QTabWidget( this );
+    vb->addWidget( tabs );
 
     pref = new QIMPenPrefBase( this );
-    tw->addTab( pref, tr("Preferences") );
+    tabs->addTab( pref, tr("Preferences") );
 
     pref->inputStyle->setExclusive( TRUE );
 
@@ -128,8 +128,15 @@ QIMPenSetup::QIMPenSetup( QIMPenProfile *p, QWidget *parent,
     connect( pref->multiStrokeSlider, SIGNAL(valueChanged(int)),
 	     this, SLOT(multiTimeoutChanged(int)) );
 
-    edit = new QIMPenEdit( p, tw );
-    tw->addTab( edit, tr("Customize") );
+    edit = new QIMPenEdit( p, tabs );
+    tabs->addTab( edit, tr("Customize") );
+
+    tabs->setCurrentPage( lastTab );
+}
+
+QIMPenSetup::~QIMPenSetup()
+{
+    lastTab = tabs->currentPageIndex();
 }
 
 void QIMPenSetup::loadProfiles()
@@ -295,6 +302,9 @@ protected:
     uint _code;
 };
 
+int QIMPenEdit::lastCs = 1; // usually lowercase
+int QIMPenEdit::lastCh = 0;
+
 /*!
   \class QIMPenEdit qimpensetup.h
   \brief The QIMPenEdit class allows character editing.
@@ -382,7 +392,21 @@ QIMPenEdit::QIMPenEdit( QIMPenProfile *p, QWidget *parent,
     connect( pb, SIGNAL(clicked()), SLOT(reject()) );
     hb->addWidget( pb );
 #endif
-    selectCharSet( 0 );
+
+    int ch = lastCh;
+
+    if ( lastCs > profile->charSets().count()-1 )
+	lastCs = 0;
+    charSetCombo->setCurrentItem( lastCs );
+    selectCharSet( lastCs );
+
+    if ( ch < charList->count() ) {
+	selectChar( ch );
+        charList->setSelected( ch, TRUE );
+    } else {
+	lastCh = 0;
+    }
+
     charList->setFocus();
 
     resize( minimumSize() );
@@ -540,6 +564,7 @@ void QIMPenEdit::selectChar( int i )
     if ( !it.current() )
 	setCurrentChar( 0 );
     inputChar->clear();
+    lastCh = i;
 }
 
 void QIMPenEdit::selectCharSet( int i )
@@ -554,6 +579,7 @@ void QIMPenEdit::selectCharSet( int i )
         charList->setSelected( 0, TRUE );
         selectChar(0);
     }
+    lastCs = i;
 }
 
 void QIMPenEdit::addChar()
@@ -581,6 +607,7 @@ void QIMPenEdit::addChar()
         currentSet->addChar( pc );
         setCurrentChar( pc );
         inputChar->clear();
+	enableButtons();
     }
 }
 

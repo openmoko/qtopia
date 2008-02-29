@@ -21,7 +21,7 @@
 #ifndef __WAIT_H__
 #define __WAIT_H__
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
 #include <qwidget.h>
 #include <qpixmap.h>

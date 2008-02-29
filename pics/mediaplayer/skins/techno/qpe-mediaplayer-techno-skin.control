@@ -3,7 +3,7 @@ Priority: optional
 Section: qpe/applications
 Maintainer: Trolltech (www.trolltech.com)
 Architecture: 
-Version: $QPE_VERSION-3
-Depends: qpe-base qpe-mediaplayer ($QPE_VERSION)
+Version: $QPE_VERSION-5
+Depends: qpe-mpegplayer ($QPE_VERSION)
 Description: Techno Media Player skin.
 

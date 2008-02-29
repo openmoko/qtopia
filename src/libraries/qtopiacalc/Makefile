@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,10 +118,10 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
-LIBS	=	$(SUBLIBS) $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
+LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
 UIC	=	$(SYSCONF_UIC)
 
@@ -130,7 +136,8 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 
 ####### Files
 
-HEADERS =	engine.h \
+HEADERS =	calculator.h \
+		engine.h \
 		data.h \
 		instruction.h \
 		stdinputwidgets.h \
@@ -140,7 +147,8 @@ HEADERS =	engine.h \
 		doubleinstruction.h \
 		integerinstruction.h \
 		fractioninstruction.h
-SOURCES =	engine.cpp \
+SOURCES =	calculator.cpp \
+		engine.cpp \
 		instruction.cpp \
 		stdinputwidgets.cpp \
 		doubledata.cpp \
@@ -149,20 +157,23 @@ SOURCES =	engine.cpp \
 		doubleinstruction.cpp \
 		integerinstruction.cpp \
 		fractioninstruction.cpp
-OBJECTS =	engine.o \
-		instruction.o \
-		stdinputwidgets.o \
-		doubledata.o \
-		integerdata.o \
-		fractiondata.o \
-		doubleinstruction.o \
-		integerinstruction.o \
-		fractioninstruction.o
+OBJECTS =	$(OBJECTS_DIR)/calculator.o \
+		$(OBJECTS_DIR)/engine.o \
+		$(OBJECTS_DIR)/instruction.o \
+		$(OBJECTS_DIR)/stdinputwidgets.o \
+		$(OBJECTS_DIR)/doubledata.o \
+		$(OBJECTS_DIR)/integerdata.o \
+		$(OBJECTS_DIR)/fractiondata.o \
+		$(OBJECTS_DIR)/doubleinstruction.o \
+		$(OBJECTS_DIR)/integerinstruction.o \
+		$(OBJECTS_DIR)/fractioninstruction.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
-SRCMOC	=	moc_stdinputwidgets.cpp
-OBJMOC	=	moc_stdinputwidgets.o
+SRCMOC	=	$(MOC_DIR)/moc_calculator.cpp \
+		$(MOC_DIR)/moc_stdinputwidgets.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_calculator.o \
+		$(OBJECTS_DIR)/moc_stdinputwidgets.o
 
 
 ####### Implicit rules
@@ -228,20 +239,25 @@ REQUIRES=
 
 ####### Compile
 
-engine.o: engine.cpp \
-		engine.h \
-		doubleinstruction.h \
+$(OBJECTS_DIR)/calculator.o: calculator.cpp \
+		../../plugins/calculator/simple/simple.h \
+		calculator.h \
+		plugininterface.h \
 		instruction.h \
 		data.h \
-		doubledata.h \
-		fractioninstruction.h \
-		fractiondata.h
+		engine.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/calculator.o calculator.cpp
 
-instruction.o: instruction.cpp \
+$(OBJECTS_DIR)/engine.o: engine.cpp \
+		engine.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/engine.o engine.cpp
+
+$(OBJECTS_DIR)/instruction.o: instruction.cpp \
 		instruction.h \
 		data.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/instruction.o instruction.cpp
 
-stdinputwidgets.o: stdinputwidgets.cpp \
+$(OBJECTS_DIR)/stdinputwidgets.o: stdinputwidgets.cpp \
 		stdinputwidgets.h \
 		engine.h \
 		doubleinstruction.h \
@@ -249,44 +265,62 @@ stdinputwidgets.o: stdinputwidgets.cpp \
 		data.h \
 		doubledata.h \
 		fractioninstruction.h \
-		fractiondata.h
+		fractiondata.h \
+		calculator.h \
+		plugininterface.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/stdinputwidgets.o stdinputwidgets.cpp
 
-doubledata.o: doubledata.cpp \
+$(OBJECTS_DIR)/doubledata.o: doubledata.cpp \
 		doubledata.h \
 		data.h \
 		engine.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/doubledata.o doubledata.cpp
 
-integerdata.o: integerdata.cpp \
+$(OBJECTS_DIR)/integerdata.o: integerdata.cpp \
 		integerdata.h \
 		data.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/integerdata.o integerdata.cpp
 
-fractiondata.o: fractiondata.cpp \
+$(OBJECTS_DIR)/fractiondata.o: fractiondata.cpp \
 		fractiondata.h \
 		data.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/fractiondata.o fractiondata.cpp
 
-doubleinstruction.o: doubleinstruction.cpp \
+$(OBJECTS_DIR)/doubleinstruction.o: doubleinstruction.cpp \
 		doubleinstruction.h \
 		instruction.h \
 		data.h \
 		doubledata.h \
+		engine.h \
 		integerdata.h \
-		fractiondata.h \
-		engine.h
+		fractiondata.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/doubleinstruction.o doubleinstruction.cpp
 
-integerinstruction.o: integerinstruction.cpp \
+$(OBJECTS_DIR)/integerinstruction.o: integerinstruction.cpp \
 		integerinstruction.h \
 		instruction.h \
 		data.h \
 		integerdata.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/integerinstruction.o integerinstruction.cpp
 
-fractioninstruction.o: fractioninstruction.cpp \
+$(OBJECTS_DIR)/fractioninstruction.o: fractioninstruction.cpp \
 		fractioninstruction.h \
 		instruction.h \
 		data.h \
 		fractiondata.h \
-		doubledata.h
+		doubledata.h \
+		engine.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/fractioninstruction.o fractioninstruction.cpp
 
-moc_stdinputwidgets.o: moc_stdinputwidgets.cpp \
+$(OBJECTS_DIR)/moc_calculator.o: $(MOC_DIR)/moc_calculator.cpp \
+		calculator.h \
+		plugininterface.h \
+		instruction.h \
+		data.h \
+		engine.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_calculator.o $(MOC_DIR)/moc_calculator.cpp
+
+$(OBJECTS_DIR)/moc_stdinputwidgets.o: $(MOC_DIR)/moc_stdinputwidgets.cpp \
 		stdinputwidgets.h \
 		engine.h \
 		doubleinstruction.h \
@@ -295,17 +329,22 @@ moc_stdinputwidgets.o: moc_stdinputwidgets.cpp \
 		doubledata.h \
 		fractioninstruction.h \
 		fractiondata.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_stdinputwidgets.o $(MOC_DIR)/moc_stdinputwidgets.cpp
 
-moc_stdinputwidgets.cpp: stdinputwidgets.h
-	$(MOC) stdinputwidgets.h -o moc_stdinputwidgets.cpp
+$(MOC_DIR)/moc_calculator.cpp: calculator.h
+	$(MOC) calculator.h -o $(MOC_DIR)/moc_calculator.cpp
+
+$(MOC_DIR)/moc_stdinputwidgets.cpp: stdinputwidgets.h
+	$(MOC) stdinputwidgets.h -o $(MOC_DIR)/moc_stdinputwidgets.cpp
 
 
 
 lupdate:
-	lupdate qtopiacalc.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <qtopiacalc.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease qtopiacalc.pro
+	$(QPEDIR)/bin/qtopia-linstall qtopiacalc.pro
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

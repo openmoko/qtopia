@@ -24,7 +24,7 @@
 #include <qstring.h>
 #include <qapplication.h>
 #include "flash.h"
-#include <qpe/mediaplayerplugininterface.h>
+#include <qtopia/mediaplayerplugininterface.h>
 
 
 class LibFlashPlugin : public MediaPlayerDecoder {

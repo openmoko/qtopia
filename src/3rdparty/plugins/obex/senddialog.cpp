@@ -30,7 +30,7 @@ SendDialog::SendDialog( QIrServer *irserver, const QString &desc, QWidget *paren
     server = irserver;
 
     setCaption( tr("Infrared send") );
-    QString str = tr("Sending %1").arg(desc);
+    QString str = tr("<p>Sending %1").arg(desc);
     infoLabel->setText( str );
     connect( cancelButton, SIGNAL( clicked() ), this, SLOT( canceled() ) );
 }

@@ -25,7 +25,7 @@
 
 // Internal stuff...
 
-class PickboardConfig;
+#include "pickboardcfg.h"
 
 class PickboardPicks : public QFrame {
     Q_OBJECT

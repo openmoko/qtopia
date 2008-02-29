@@ -19,6 +19,15 @@
 **********************************************************************/
 
 #define QTOPIA_INTERNAL_MIMEEXT
+
+#include <qtopia/qpeglobal.h>
+#include <qmap.h>
+#if defined(Q_TEMPLATEDLL)
+// MOC_SKIP_BEGIN
+Q_TEMPLATE_EXTERN template class Q_EXPORT QMap<QString, QString>;
+// MOC_SKIP_END
+#endif
+
 #include "mimetype.h"
 #include "applnk.h"
 #include "resource.h"
@@ -111,6 +120,7 @@ public:
 
     // ...
 };
+
 
 MimeType::Private* MimeType::d=0;
 static QMap<QString,QString> *typeFor = 0;

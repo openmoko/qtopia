@@ -18,9 +18,9 @@
 **
 **********************************************************************/
 
-#include <qpe/qpeapplication.h>
-#include <qpe/qlibrary.h>
-#include <qpe/config.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/qlibrary.h>
+#include <qtopia/config.h>
 
 #include <qlayout.h>
 #include <qdir.h>
@@ -32,8 +32,8 @@
 
 #include <stdlib.h>
 
-#ifdef SINGLE_APP
-#include "clockappletimpl.h"
+#ifdef QT_NO_COMPONENTS
+#include "../plugins/applets/clockapplet/clockappletimpl.h"
 #endif
 
 SysTray::SysTray( QWidget *parent ) : QFrame( parent ), layout(0)
@@ -66,7 +66,7 @@ void SysTray::loadApplets()
 
 void SysTray::clearApplets()
 {
-#ifndef SINGLE_APP
+#ifndef QT_NO_COMPONENTS
     QValueList<TaskbarApplet*>::Iterator mit;
     for ( mit = appletList.begin(); mit != appletList.end(); ++mit ) {
 	(*mit)->iface->release();
@@ -85,7 +85,7 @@ void SysTray::clearApplets()
 void SysTray::addApplets()
 {
     hide();
-#ifndef SINGLE_APP
+#ifndef QT_NO_COMPONENTS
     Config cfg( "Taskbar" );
     cfg.setGroup( "Applets" );
     bool safe = cfg.readBoolEntry("SafeMode",FALSE);
@@ -102,13 +102,18 @@ void SysTray::addApplets()
     QStringList exclude = cfg.readListEntry( "ExcludeApplets", ',' );
     QStringList faulty;
 
-    QString path = QPEApplication::qpeDir() + "/plugins/applets";
+    QString path = QPEApplication::qpeDir() + "plugins/applets";
+#ifndef Q_OS_WIN32    
     QDir dir( path, "lib*.so" );
+#else
+    QDir dir (path, "*.dll");
+#endif
     QStringList list = dir.entryList();
     QStringList::Iterator it;
     int napplets=0;
     TaskbarApplet **applets = new TaskbarApplet* [list.count()];
     for ( it = list.begin(); it != list.end(); ++it ) {
+        qDebug("Looking at loading dynamic library %s", (char*)(*it).latin1());
 	if ( exclude.find( *it ) != exclude.end() )
 	    continue;
 	TaskbarAppletInterface *iface = 0;
@@ -121,9 +126,14 @@ void SysTray::addApplets()
 	} else {
 	    exclude += *it;
 
+#ifndef Q_OS_WIN32
 	    // Same as Taskbar settings uses
 	    QString name = (*it).mid(3);
             int sep = name.find( ".so" );
+#else
+	    QString name = (*it);
+            int sep = name.find( ".dll" );
+#endif
             if ( sep > 0 )
                 name.truncate( sep );
             sep = name.find( "applet" );
@@ -145,11 +155,13 @@ void SysTray::addApplets()
     while (napplets--) {
 	TaskbarApplet *applet = applets[napplets];
 	applet->applet = applet->iface->applet( this );
+	if ( applet->applet->maximumSize().width() <= 1 )
+	    applet->applet->hide();
 	appletList.append(applet);
 	QString lang = getenv( "LANG" );
 	QTranslator * trans = new QTranslator(qApp);
 	QString type = (*it).left( (*it).find(".") );
-	QString tfn = QPEApplication::qpeDir()+"/i18n/"+lang+"/"+type+".qm";
+	QString tfn = QPEApplication::qpeDir()+"i18n/"+lang+"/"+type+".qm";
 	if ( trans->load( tfn ))
 	    qApp->installTranslator( trans );
 	else
@@ -157,10 +169,10 @@ void SysTray::addApplets()
     }
     delete [] applets;
 #else
-    TaskbarApplet applet;
-    applet.iface = new ClockAppletImpl();
-    applet.applet = applet.iface->applet( this );
-    appletList.append( a );
+    TaskbarApplet * const applet = new TaskbarApplet();
+    applet->iface = new ClockAppletImpl();
+    applet->applet = applet->iface->applet( this );
+    appletList.append( applet );
 #endif
     show();
 

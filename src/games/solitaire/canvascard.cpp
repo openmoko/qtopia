@@ -21,7 +21,7 @@
 #include "cardgame.h"
 #include "canvascard.h"
 #include "cardmetrics.h"
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 #include <qpainter.h>
 #include <qimage.h>
 #include <qpaintdevice.h>

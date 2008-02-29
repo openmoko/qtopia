@@ -3,7 +3,7 @@ Priority: optional
 Section: qpe/plugins
 Maintainer: Trolltech (www.trolltech.com)
 Architecture: arm
-Version: $QPE_VERSION-5
-Depends: qpe-base ($QPE_VERSION)
+Version: $QPE_VERSION-10
+Depends: qpe-libqtopia
 Description: Advanced plugin for Qtopia calculator
  An plugin providing trig, root and power functions for the Qtopia calculator

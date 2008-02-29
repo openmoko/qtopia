@@ -21,8 +21,12 @@
 
 #define QTOPIA_INTERNAL_PRELOADACCESS
 
+#include <qtopia/qpeglobal.h>
+
 // For "kill"
+#ifdef Q_OS_WIN32
 #include <sys/types.h>
+#endif
 #include <signal.h>
 
 #include <qtimer.h>
@@ -30,12 +34,14 @@
 #include <qmessagebox.h>
 #include <qpainter.h>
 #include "qprocess.h"
-#include <qpe/qpeapplication.h>
-#include <qpe/applnk.h>
-#include <qpe/qcopenvelope_qws.h>
-#include <qpe/global.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/applnk.h>
+#include <qtopia/qcopenvelope_qws.h>
+#include <qtopia/global.h>
 #include <qwindowsystem_qws.h>
 #include "runningappbar.h"
+
+static QStringList checkingApps;
 
 RunningAppBar::RunningAppBar(QWidget* parent) 
   : QFrame(parent), m_AppLnkSet(0L), m_SelectedAppIndex(-1)
@@ -141,24 +147,31 @@ void RunningAppBar::mousePressEvent(QMouseEvent *e)
 
 void RunningAppBar::mouseReleaseEvent(QMouseEvent *e)
 {
-  if (e->button() == QMouseEvent::RightButton) {
-    return;
-  }
-  if ( m_SelectedAppIndex >= 0 ) {
-    QString channel = QString("QPE/Application/") + m_AppList.at(m_SelectedAppIndex)->exec();
+    if (e->button() == QMouseEvent::RightButton) {
+	return;
+    }
+    if ( m_SelectedAppIndex >= 0 ) {
+    QString app = m_AppList.at(m_SelectedAppIndex)->exec(); 
+    QString channel = QString("QPE/Application/") + app;
+
     if (QCopChannel::isRegistered(channel.latin1())) {
-//       qDebug("%s is running!", m_AppList.at(m_SelectedAppIndex)->exec().latin1());
-      QCopEnvelope e(channel.latin1(), "raise()");
-      // This class will delete itself after hearing from the app or the timer expiring
-      (void)new AppMonitor(*m_AppList.at(m_SelectedAppIndex), *this);
+	// qDebug("%s is running!", m_AppList.at(m_SelectedAppIndex)->exec().latin1());
+	if ( checkingApps.find(app) == checkingApps.end() ) {
+	    checkingApps.append( app );
+	    QCopEnvelope e(channel.latin1(), "raise()");
+	    // This class will delete itself after hearing from the app or the timer expiring
+	    (void)new AppMonitor(*m_AppList.at(m_SelectedAppIndex), *this);
+	} else {
+	  //  qDebug("already quering %s", app.data() );
+	}
     }
     else {
       removeTask(*m_AppList.at(m_SelectedAppIndex));
     }
-    
+
     m_SelectedAppIndex = -1;
     update();
-  }
+    }
 }
 
 void RunningAppBar::paintEvent( QPaintEvent * )
@@ -202,11 +215,13 @@ AppMonitor::AppMonitor(const AppLnk& app, RunningAppBar& owner)
   m_Timer.start(RAISE_TIMEOUT_MS, TRUE);
 }
 
-AppMonitor::~AppMonitor() {
-  if (m_AppKillerBox) {
-    delete m_AppKillerBox;
-    m_AppKillerBox = 0L;
-  }
+AppMonitor::~AppMonitor() 
+{
+    if (m_AppKillerBox) {
+	delete m_AppKillerBox;
+	m_AppKillerBox = 0L;
+    }
+    checkingApps.remove( m_App.exec() );
 }
 
 void AppMonitor::received(const QCString& msg, const QByteArray& data) {
@@ -274,7 +289,11 @@ void AppMonitor::psProcFinished() {
     qDebug("AppMonitor: Tried to kill application %s but ps couldn't find it.", m_App.exec().latin1());
   }
   else {
+#ifndef Q_OS_WIN32
     int success = kill(pid.toUInt(), SIGKILL);
+#else
+    int success = 0;
+#endif
     if (success == 0) {
       m_Owner.removeTask(m_App);
     }

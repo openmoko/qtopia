@@ -21,7 +21,8 @@
 #ifndef STANDARDIMPL_H
 #define STANDARDIMPL_H
 
-#include <qpe/qmath.h>
+#include <qtopia/qpeglobal.h>
+#include <qtopia/qmath.h>
 #include <qpushbutton.h>
 
 #include <qtopia/calc/engine.h>
@@ -37,12 +38,6 @@ public:
 public slots:
     void showEvent ( QShowEvent * );
     
-private:
-    Engine sys;
-    Type1DecimalInputWidget *siw;
-    QPushButton *PBCE,*PBMR,*PBMC,*PBMPlus;
-    QGridLayout* SimpleLayout;
-
 private slots:
     void MPlusClicked();
     void MCClicked();

@@ -20,7 +20,8 @@
 
 #include <qtopia/categories.h>
 #include <qtopia/private/palmtoprecord.h>
-
+#include <qtopia/qpeapplication.h>
+#include <qdir.h>
 #include <qmessagebox.h>
 #include <qlayout.h>
 #include <qtoolbutton.h>
@@ -33,7 +34,11 @@
 
 static QString categoryEdittingFileName()
 {
-    QString str = getenv("HOME");
+QString str = QDir::homeDirPath(); 
+#ifdef QTOPIA_DESKTOP
+    str += "/.palmtopcenter/";
+#endif
+
     str +="/.cateditting";
     return str;
 }
@@ -58,13 +63,16 @@ public:
 	: mRec( cats ),
 	  usingAll( false )
     {
+	editMode = FALSE;
     }
     CategorySelectPrivate()
     {
+	editMode = FALSE;
     }
     QArray<int> mRec;
     bool usingAll;
     QString mVisibleName;
+    bool editMode;
 };
 
 CategoryCombo::CategoryCombo( QWidget *parent, const char *name , int width)
@@ -350,13 +358,36 @@ void CategorySelect::slotDialog()
     vb->addWidget( &ce );
     editDlg.showMaximized();
 
+    d->editMode = TRUE;
     if ( editDlg.exec() ) {
 	d->mRec = ce.newCategories();
 	cmbCat->initCombo( d->mRec, mStrAppName, d->mVisibleName );
     }
-
+    
     f.close();
     QFile::remove( categoryEdittingFileName() );
+}
+
+void CategorySelect::categoriesChanged()
+{
+    if ( d->editMode ) {
+	//only one can edit at a time, so if we're the one we can ignore this signal
+	// as it will be handled in slotDialog
+	d->editMode = FALSE;
+    } else {
+	int prevCat = cmbCat->currentCategory();
+	cmbCat->initComboWithRefind( d->mRec, mStrAppName );
+	if ( d->usingAll ) {
+	    cmbCat->insertItem( tr( "All" ), cmbCat->count() );
+	}
+	cmbCat->setCurrentCategory( prevCat );
+
+	// Test if category is still valid.  If it isn't we need to inform our parent about a selection change
+	if ( cmbCat->currentCategory() != prevCat ) {
+	    cmbCat->setCurrentCategory(-1);
+	    emit signalSelected( cmbCat->currentCategory() );
+	}
+    }
 }
 
 void CategorySelect::slotNewCat( int newUid )
@@ -364,7 +395,7 @@ void CategorySelect::slotNewCat( int newUid )
     if ( newUid != -1 ) {
 	bool alreadyIn = false;
 	for ( uint it = 0; it < d->mRec.count(); ++it ) {
-	    if ( d->mRec[it] == newUid ) {
+	    if ( d->mRec[(int)it] == newUid ) {
 		alreadyIn = true;
 		break;
 	    }
@@ -396,17 +427,22 @@ QString CategorySelect::setCategories( const QArray<int> &rec,
 
 void CategorySelect::init(int width)
 {
-    cmbCat = new CategoryCombo( this, 0, width);
+    cmbCat = new CategoryCombo( this, "category combo", width);
 
     QObject::connect( cmbCat, SIGNAL(sigCatChanged(int)),
 		      this, SLOT(slotNewCat(int)) );
-    cmdCat = new QToolButton( this );
+    
+#ifndef QTOPIA_DESKTOP    
+    cmdCat = new QToolButton( this, "category button" );
     QObject::connect( cmdCat, SIGNAL(clicked()), this, SLOT(slotDialog()) );
     cmdCat->setTextLabel( "...", FALSE );
     cmdCat->setUsesTextLabel( true );
     cmdCat->setMaximumSize( cmdCat->sizeHint() );
     cmdCat->setFocusPolicy( TabFocus );
     cmdCat->setFixedHeight( cmbCat->sizeHint().height() );
+#endif
+
+    connect(qApp, SIGNAL( categoriesChanged() ), this, SLOT( categoriesChanged() ) );
 }
 
 
@@ -428,6 +464,7 @@ const QArray<int> &CategorySelect::currentCategories() const
 
 void CategorySelect::setRemoveCategoryEdit( bool remove )
 {
+#ifndef QTOPIA_DESKTOP    
     if ( remove ) {
 	cmdCat->setEnabled( FALSE );
 	cmdCat->hide();
@@ -435,6 +472,7 @@ void CategorySelect::setRemoveCategoryEdit( bool remove )
 	cmdCat->setEnabled( TRUE );
 	cmdCat->show();
     }
+#endif
 }
 
 void CategorySelect::setAllCategories( bool add )
@@ -450,6 +488,8 @@ void CategorySelect::setAllCategories( bool add )
 // 01.12.21 added
 void CategorySelect::setFixedWidth(int width)
 {
+#ifndef QTOPIA_DESKTOP    
   width -= cmdCat->width();
+#endif
   cmbCat->setFixedWidth(width);
 }

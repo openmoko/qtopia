@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -134,17 +140,17 @@ HEADERS =	netmon.h \
 		netmonappletimpl.h
 SOURCES =	netmon.cpp \
 		netmonappletimpl.cpp
-OBJECTS =	netmon.o \
-		netmonappletimpl.o \
-		netpw.o
+OBJECTS =	$(OBJECTS_DIR)/netmon.o \
+		$(OBJECTS_DIR)/netmonappletimpl.o \
+		$(OBJECTS_DIR)/netpw.o
 INTERFACES =    netpw.ui
 UICDECLS =      netpw.h
 UICIMPLS =      netpw.cpp
-SRCMOC	=	moc_netmon.cpp \
-		netmon.moc \
-		moc_netpw.cpp
-OBJMOC	=	moc_netmon.o \
-		moc_netpw.o
+SRCMOC	=	$(MOC_DIR)/moc_netmon.cpp \
+		$(MOC_DIR)/moc_netpw.cpp \
+		$(MOC_DIR)/netmon.moc
+OBJMOC	=	$(OBJECTS_DIR)/moc_netmon.o \
+		$(OBJECTS_DIR)/moc_netpw.o
 
 
 ####### Implicit rules
@@ -210,22 +216,16 @@ REQUIRES=
 
 ####### Compile
 
-netmon.o: netmon.cpp \
-		netmon.moc \
+$(OBJECTS_DIR)/netmon.o: netmon.cpp \
+		$(MOC_DIR)/netmon.moc \
 		netmon.h \
-		netpw.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/network.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h
+		netpw.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/netmon.o netmon.cpp
 
-netmonappletimpl.o: netmonappletimpl.cpp \
+$(OBJECTS_DIR)/netmonappletimpl.o: netmonappletimpl.cpp \
 		netmon.h \
-		netmonappletimpl.h \
-		$(QPEDIR)/include/qpe/taskbarappletinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h
+		netmonappletimpl.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/netmonappletimpl.o netmonappletimpl.cpp
 
 netpw.h: netpw.ui
 	$(UIC) netpw.ui -o $(INTERFACE_DECL_PATH)/netpw.h
@@ -233,38 +233,36 @@ netpw.h: netpw.ui
 netpw.cpp: netpw.ui
 	$(UIC) netpw.ui -i netpw.h -o netpw.cpp
 
-netpw.o: netpw.cpp \
+$(OBJECTS_DIR)/netpw.o: netpw.cpp \
 		netpw.h \
 		netpw.ui
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/netpw.o netpw.cpp
 
-moc_netmon.o: moc_netmon.cpp \
+$(OBJECTS_DIR)/moc_netmon.o: $(MOC_DIR)/moc_netmon.cpp \
 		netmon.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_netmon.o $(MOC_DIR)/moc_netmon.cpp
 
-moc_netpw.o: netmon.moc \
-		netmon.cpp \
-		netmon.h \
-		netpw.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/network.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h
+$(OBJECTS_DIR)/moc_netpw.o: $(MOC_DIR)/moc_netpw.cpp \
+		netpw.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_netpw.o $(MOC_DIR)/moc_netpw.cpp
 
-moc_netmon.cpp: netmon.h
-	$(MOC) netmon.h -o moc_netmon.cpp
+$(MOC_DIR)/moc_netmon.cpp: netmon.h
+	$(MOC) netmon.h -o $(MOC_DIR)/moc_netmon.cpp
 
-netmon.moc: netmon.cpp
-	$(MOC) netmon.cpp -o netmon.moc
+$(MOC_DIR)/netmon.moc: netmon.cpp
+	$(MOC) netmon.cpp -o $(MOC_DIR)/netmon.moc
 
-moc_netpw.cpp: netpw.h
-	$(MOC) netpw.h -o moc_netpw.cpp
+$(MOC_DIR)/moc_netpw.cpp: netpw.h
+	$(MOC) netpw.h -o $(MOC_DIR)/moc_netpw.cpp
 
 
 
 lupdate:
-	lupdate netmonapplet.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <netmonapplet.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease netmonapplet.pro
+	$(QPEDIR)/bin/qtopia-linstall netmonapplet.pro
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

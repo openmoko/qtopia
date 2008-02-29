@@ -26,7 +26,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#if !defined (_OS_WIN32_)
 #include <sys/file.h>
+#else
+#define snprintf _snprintf
+#endif
 #include <string.h>
 
 #include "rsync.h"

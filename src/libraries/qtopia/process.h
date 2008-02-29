@@ -77,6 +77,9 @@ public:
 private:
     void init();
 
+private slots:
+    void timeout();
+
 private:
     ProcessPrivate *d;
     QStringList _arguments;

@@ -25,5 +25,6 @@ Data *Instruction::eval(Data *d){return d;}
 InstructionDescription::InstructionDescription() {
     precedence = 0;
     instructionName = typeOne = typeTwo = "NULL";
+    argCount = 2;
 }
 Instruction *InstructionDescription::getInstruction(){return new Instruction();}

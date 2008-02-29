@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/include/qtopia/fontdatabase.h:1 -->
+<!-- /home/ianw/dev/packages/qtopia/1.6/tmp31015/qtopia/include/qtopia/fontdatabase.h:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -50,14 +50,15 @@ body { background: #ffffff; color: black; }
 #ifndef FONTFACTORY_H
 #define FONTFACTORY_H
 
-#include &lt;qpe/fontfactoryinterface.h&gt;
+#include &lt;qtopia/qpeglobal.h&gt;
+#include &lt;qtopia/fontfactoryinterface.h&gt;
 
 #include &lt;qfontdatabase.h&gt;
 #include &lt;qvaluelist.h&gt;
 
 class QLibrary;
 
-struct FontFactory
+struct QTOPIA_EXPORT FontFactory
 {
 #ifndef QT_NO_COMPONENT
     QLibrary *library;
@@ -66,7 +67,7 @@ struct FontFactory
     QFontFactory *factory;
 };
 
-class FontDatabase
+class QTOPIA_EXPORT FontDatabase
 #ifndef QT_NO_FONTDATABASE
     : public QFontDatabase
 #endif

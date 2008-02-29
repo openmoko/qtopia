@@ -20,6 +20,9 @@
 #include <qcanvas.h>
 #include <qtimer.h>
 
+#ifndef SNAKE
+#define SNAKE
+
 class Snake : public QObject
 {
 	Q_OBJECT
@@ -62,3 +65,4 @@ private:
    Direction newdir;
 };
 
+#endif

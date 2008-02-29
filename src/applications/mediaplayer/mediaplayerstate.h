@@ -31,6 +31,13 @@ enum View {
 };
 
 
+enum DecoderVersion {
+    Decoder_Unknown,
+    Decoder_1_5,
+    Decoder_1_6
+};
+
+
 class MediaPlayerDecoder;
 class Config;
 class VideoWidget;
@@ -49,16 +56,18 @@ public:
     bool scaled()		 { return isScaled; }
     bool looping()		 { return isLooping; }
     bool shuffled()		 { return isShuffled; }
-    bool playlist()		 { return usePlaylist; }
     bool paused()		 { return isPaused; }
     bool playing()		 { return isPlaying; }
+    bool seekable()		 { return isSeekable; }
     long position()		 { return curPosition; }
     long length()		 { return curLength; }
+    bool hasLength()		 { return (curLength > 1); }
     View view()			 { return curView; }
     QString skin()		 { return curSkin; }
 
     MediaPlayerDecoder* decoder( const QString& file = QString::null );
-
+    MediaPlayerDecoder* streamingDecoder( const QString& url, const QString& mimetype );
+    DecoderVersion decoderVersion() { return curDecoderVersion; }
 public slots:
     AudioWidget* audioUI();
     VideoWidget* videoUI();
@@ -67,9 +76,9 @@ public slots:
     void setScaled( bool b )     { if ( isScaled     == b ) return; isScaled = b;     emit scaledToggled(b); }
     void setLooping( bool b )    { if ( isLooping    == b ) return; isLooping = b;    emit loopingToggled(b); }
     void setShuffled( bool b )   { if ( isShuffled   == b ) return; isShuffled = b;   emit shuffledToggled(b); }
-    void setPlaylist( bool b )   { if ( usePlaylist  == b ) return; usePlaylist = b;  emit playlistToggled(b); }
     void setPaused( bool b )	 { if ( isPaused     == b ) return; isPaused = b;     emit pausedToggled(b); }
     void setPlaying( bool b )	 { if ( isPlaying    == b ) return; isPlaying = b;    emit playingToggled(b); }
+    void setSeekable( bool b )	 { if ( isSeekable   == b ) return; isSeekable = b;   emit seekableToggled(b); }
     void setPosition( long p )   { if ( curPosition  == p ) return; curPosition = p;  emit positionChanged(p); }
     void updatePosition( long p ){ if ( curPosition  == p ) return; curPosition = p;  emit positionUpdated(p); }
     void setLength( long l )	 { if ( curLength    == l ) return; curLength = l;    emit lengthChanged(l); }
@@ -82,6 +91,7 @@ public slots:
     void setVideo()		 { setView( VideoView ); }
     void setAudio()		 { setView( AudioView ); }
     void setPlaying()		 { setPlaying( TRUE ); }
+    void setSeekable()		 { setSeekable( TRUE ); }
     void setPrevTab()		 { emit prevTab(); }
     void setNextTab()		 { emit nextTab(); }
 
@@ -89,9 +99,9 @@ public slots:
     void toggleScaled()		 { setScaled( !isScaled ); }
     void toggleLooping()	 { setLooping( !isLooping ); }
     void toggleShuffled()	 { setShuffled( !isShuffled ); }
-    void togglePlaylist()	 { setPlaylist( !usePlaylist ); }
     void togglePaused()		 { setPaused( !isPaused ); }
     void togglePlaying()	 { setPlaying( !isPlaying ); }
+    void toggleSeekable()	 { setSeekable( !isSeekable ); }
 
     void startTemporaryMute();
     void stopTemporaryMute();
@@ -115,6 +125,7 @@ signals:
     void playlistToggled( bool );
     void pausedToggled( bool );
     void playingToggled( bool );
+    void seekableToggled( bool );
     void positionChanged( long ); // When the slider is moved
     void positionUpdated( long ); // When the media file progresses
     void lengthChanged( long );
@@ -130,14 +141,15 @@ private:
     AudioWidget* aw;
     VideoWidget* vw;
     MediaPlayerDecoder *curDecoder;
+    DecoderVersion curDecoderVersion;
 
     bool isFullscreen;
     bool isScaled;
     bool isLooping;
     bool isShuffled;
-    bool usePlaylist;
     bool isPaused;
     bool isPlaying;
+    bool isSeekable;
     long curPosition;
     long curLength;
     View curView;

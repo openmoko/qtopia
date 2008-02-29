@@ -1,15 +1,16 @@
-TEMPLATE	= app
+multiprocess:TEMPLATE	= app
+multiprocess:DESTDIR	= $(QPEDIR)/bin
+#singleprocess:TEMPLATE	= lib
+#singleprocess:DESTDIR   = $(QPEDIR)/lib
+
 CONFIG		+= qtopia warn_on release
-DESTDIR		= $(QPEDIR)/bin
 
 HEADERS		= appearance.h
-SOURCES		= appearance.cpp main.cpp
+SOURCES		= appearance.cpp
 INTERFACES	= appearancesettingsbase.ui
 
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH	+= $(QPEDIR)/include
-LIBS            += -lqpe
+multiprocess:SOURCES+=main.cpp
 
 TARGET		= appearance
 
-TRANSLATIONS    = $(QPEDIR)/i18n/de/appearance.ts
+TRANSLATIONS = appearance-en_GB.ts appearance-de.ts appearance-ja.ts appearance-no.ts

@@ -23,16 +23,17 @@
 
 #include "todoentry.h"
 
-#include <qpe/pim/task.h>
+#include <qtopia/pim/task.h>
 
 #include <qdatetime.h>
 #include <qpalette.h>
+#include <qdialog.h>
 
 class QLabel;
 class QTimer;
 class DateBookMonth;
 
-class NewTaskDialog : public NewTaskDialogBase
+class NewTaskDialog : public QDialog
 {
     Q_OBJECT
 
@@ -44,18 +45,25 @@ public:
     ~NewTaskDialog();
 
     PimTask todoEntry();
+    void setCurrentCategory(int);
 
 protected slots:
-    void dateChanged( int y, int m, int d );
+    void dueDateChanged( const QDate& );
+    void startDateChanged( const QDate& );
+    void endDateChanged( const QDate& );
+    
+    void dueButtonToggled();
+    void statusChanged();
 
 protected:
     virtual void accept();
+    virtual void reject();
 
 private:
     void init();
     PimTask todo;
-    QDate date;
-    DateBookMonth *picker;
+
+    NewTaskDialogBase *s;
 };
 
 #endif // NEWTASKDIALOG_H

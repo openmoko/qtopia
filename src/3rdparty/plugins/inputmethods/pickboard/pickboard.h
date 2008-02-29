@@ -20,6 +20,7 @@
 #ifndef PICKBOARD_H
 #define PICKBOARD_H
 
+#include <qtopia/qpeglobal.h>
 #include <qframe.h>
 
 class PickboardPrivate;

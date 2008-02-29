@@ -21,10 +21,10 @@
 
 #include "dialup.h"
 
-#include <qpe/config.h>
-#include <qpe/global.h>
+#include <qtopia/config.h>
+#include <qtopia/global.h>
 #ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
 #include "../proxiespage.h"
 
@@ -245,30 +245,34 @@ bool DialupImpl::doProperties( QWidget *parent, Config& cfg )
     return FALSE;
 }
 
-static QString dev( const QString& ct )
+QString DialupImpl::dev( Config& cfg ) const
 {
-    if ( !ct.isEmpty() ) {
-	FILE* f = fopen("/var/run/stab", "r");
-	if (!f) f = fopen("/var/state/pcmcia/stab", "r");
-	if (!f) f = fopen("/var/lib/pcmcia/stab", "r");
-	if ( f ) {
-	    char line[1024];
-	    char devtype[80];
-	    char devname[80];
-	    while ( fgets( line, 1024, f ) ) {
-		// 0       serial  serial_cs       0       ttyS0   4       64
-		if ( sscanf(line,"%*d %s %*s %*s %s", devtype, devname )==2 )
-		{
-		    if ( ct == devtype ) {
-			fclose(f);
-			return devname;
+    QString d = cfg.readEntry("SerialDevice");
+    if ( d.isEmpty() ) {
+	QString ct = cardType(cfg);
+	if ( !ct.isEmpty() ) {
+	    FILE* f = fopen("/var/run/stab", "r");
+	    if (!f) f = fopen("/var/state/pcmcia/stab", "r");
+	    if (!f) f = fopen("/var/lib/pcmcia/stab", "r");
+	    if ( f ) {
+		char line[1024];
+		char devtype[80];
+		char devname[80];
+		while ( fgets( line, 1024, f ) ) {
+		    // 0       serial  serial_cs       0       ttyS0   4       64
+		    if ( sscanf(line,"%*d %s %*s %*s %s", devtype, devname )==2 )
+		    {
+			if ( ct == devtype ) {
+			    fclose(f);
+			    return QString("/dev/")+devname;
+			}
 		    }
 		}
+		fclose(f);
 	    }
-	    fclose(f);
 	}
     }
-    return QString::null;
+    return d;
 }
 
 bool DialupImpl::create( Config& )
@@ -291,6 +295,8 @@ bool DialupImpl::remove( Config&cfg )
 static const char* logfile="/tmp/qpe-pppd-log";
 
 class PppMon : public QObject {
+    Q_OBJECT
+
     enum { Initialize, Connect, Authenticate, Timing, Disappearing } state;
     int age;
     int start;
@@ -427,7 +433,7 @@ bool DialupImpl::start( Config& cfg, const QString& password )
 		}
 	    }
 	}
-	QString d = dev(cardType(cfg));
+	QString d = dev(cfg);
 	if ( d.isEmpty() ) {
 	    qWarning("No device for card type %s",cardType(cfg).latin1());
 	    return FALSE;
@@ -435,7 +441,7 @@ bool DialupImpl::start( Config& cfg, const QString& password )
 	cfg.setGroup("Info");
 	cmd = "/usr/sbin/pppd " + d + " debug call " + cfg.readEntry("Id"); // No tr
     } else {
-	cmd += " " + dev(cardType(cfg));
+	cmd += " " + dev(cfg);
     }
     if ( !password.isNull() )
 	cmd += " password " + Global::shellQuote(password); // No tr
@@ -465,7 +471,17 @@ bool DialupImpl::stop( Config& cfg )
     return FALSE;
 }
 
+bool DialupImpl::isAvailable( Config& cfg ) const
+{
+    QString d = dev(cfg);
+    if ( d.isEmpty() )
+	return FALSE;
+    return QFile::exists(d);
+}
+
 bool DialupImpl::needPassword( Config& cfg ) const
 {
     return cfg.readEntry("password").isEmpty();
 }
+
+#include "dialup.moc"

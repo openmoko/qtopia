@@ -24,6 +24,7 @@
 #include <qstring.h>
 #include <qwidget.h>
 #include <qobject.h>
+#include <qpixmap.h>
 
 #include <qtopia/todayplugininterface.h>
 #include <qtopia/pim/task.h>
@@ -32,7 +33,7 @@ class TodoAccess;
 class TodoPluginPrivate;
 class TodoPluginOptions;
 
-class TodoPlugin : public QObject, public TodayPluginInterface
+class QTOPIA_PLUGIN_EXPORT TodoPlugin : public QObject, public TodayPluginInterface
 {
     Q_OBJECT
 public:

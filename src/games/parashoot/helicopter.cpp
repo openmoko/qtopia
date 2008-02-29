@@ -22,7 +22,7 @@
 #include "man.h"
 #include "codes.h"
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
 #include <qregexp.h>
 

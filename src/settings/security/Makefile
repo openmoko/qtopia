@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -133,16 +139,16 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 HEADERS =	security.h
 SOURCES =	security.cpp \
 		main.cpp
-OBJECTS =	security.o \
-		main.o \
-		securitybase.o
+OBJECTS =	$(OBJECTS_DIR)/security.o \
+		$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/securitybase.o
 INTERFACES =    securitybase.ui
 UICDECLS =      securitybase.h
 UICIMPLS =      securitybase.cpp
-SRCMOC	=	moc_security.cpp \
-		moc_securitybase.cpp
-OBJMOC	=	moc_security.o \
-		moc_securitybase.o
+SRCMOC	=	$(MOC_DIR)/moc_security.cpp \
+		$(MOC_DIR)/moc_securitybase.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_security.o \
+		$(OBJECTS_DIR)/moc_securitybase.o
 
 
 ####### Implicit rules
@@ -208,20 +214,15 @@ REQUIRES=
 
 ####### Compile
 
-security.o: security.cpp \
-		security.h \
-		securitybase.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/password.h \
-		$(QPEDIR)/include/qpe/qpedialog.h
-
-main.o: main.cpp \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qpe/global.h \
+$(OBJECTS_DIR)/security.o: security.cpp \
 		security.h \
 		securitybase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/security.o security.cpp
+
+$(OBJECTS_DIR)/main.o: main.cpp \
+		security.h \
+		securitybase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
 securitybase.h: securitybase.ui
 	$(UIC) securitybase.ui -o $(INTERFACE_DECL_PATH)/securitybase.h
@@ -229,30 +230,34 @@ securitybase.h: securitybase.ui
 securitybase.cpp: securitybase.ui
 	$(UIC) securitybase.ui -i securitybase.h -o securitybase.cpp
 
-securitybase.o: securitybase.cpp \
+$(OBJECTS_DIR)/securitybase.o: securitybase.cpp \
 		securitybase.h \
 		securitybase.ui
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/securitybase.o securitybase.cpp
 
-moc_security.o: moc_security.cpp \
+$(OBJECTS_DIR)/moc_security.o: $(MOC_DIR)/moc_security.cpp \
 		security.h \
 		securitybase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_security.o $(MOC_DIR)/moc_security.cpp
 
-moc_securitybase.o: moc_securitybase.cpp \
+$(OBJECTS_DIR)/moc_securitybase.o: $(MOC_DIR)/moc_securitybase.cpp \
 		securitybase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_securitybase.o $(MOC_DIR)/moc_securitybase.cpp
 
-moc_security.cpp: security.h
-	$(MOC) security.h -o moc_security.cpp
+$(MOC_DIR)/moc_security.cpp: security.h
+	$(MOC) security.h -o $(MOC_DIR)/moc_security.cpp
 
-moc_securitybase.cpp: securitybase.h
-	$(MOC) securitybase.h -o moc_securitybase.cpp
+$(MOC_DIR)/moc_securitybase.cpp: securitybase.h
+	$(MOC) securitybase.h -o $(MOC_DIR)/moc_securitybase.cpp
 
 
 
 lupdate:
-	lupdate security.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <security.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease security.pro
+	$(QPEDIR)/bin/qtopia-linstall security.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

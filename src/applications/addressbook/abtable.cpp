@@ -20,102 +20,179 @@
 
 #define QTOPIA_INTERNAL_CONTACT_MRE
 
-#include <qpe/categoryselect.h>
-#include <qpe/config.h>
-#include <qpe/stringutil.h>
+#include <qtopia/categoryselect.h>
+#include <qtopia/config.h>
+#include <qtopia/stringutil.h>
+#include <qtopia/timestring.h>
 #ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
+#endif
+
+#ifdef QTOPIA_DESKTOP
+#include <qsettings.h>
 #endif
 
 #include <qasciidict.h>
+#include <qpainter.h>
+#include <qregexp.h>
 #include <qdatetime.h>
 #include <qfile.h>
 #include <qapplication.h>
+#include <qstyle.h>
 
 #include "abtable.h"
 
 #include <errno.h>
 #include <fcntl.h>
-#include <unistd.h>
+#ifndef Q_OS_WIN32
+ #include <unistd.h>
+#endif
 #include <stdlib.h>
+
 
 #include <ctype.h> //toupper() for key hack
 
+static int RowHeight = 18;
+
+const int AbTable::FREQ_CONTACT_FIELD = PimContact::ContactFieldsEnd;
+
+static Qt::ButtonState bState = Qt::NoButton;
+static int selectionBeginRow = -1;
+
+static QString applicationPath;
 /*!
   \class AbTable abtable.h
 
   \brief The AbTable class is a QTable for showing a list of entries.
 */
 
-AbTable::AbTable( const QValueList<int> *order, QWidget *parent, const char *name )
-// #ifdef QT_QTABLE_NOHEADER_CONSTRUCTOR
-//     : QTable( 0, 0, parent, name, TRUE ),
-// #else
-    : QTable( parent, name ),
-// #endif
-      lastSortCol( -1 ),
-      asc( TRUE ),
-      aba( ContactIO::ReadWrite ),
-      intFields( order ),
+AbTable::AbTable( const SortedContacts &c, QWidget *parent, const char *name, const char *appPath )
+    : QTable( 0, 0, parent, name ),
       currFindRow( -2 ),
-      mCat( 0 ),
       showCat(-2),
       prefField(-1)
 {
-    mCat.load( categoryFileName() );
-    setSelectionMode( NoSelection );
-    init();
+    applicationPath = appPath;
+    
+    QFont f = font();
+    QFontMetrics fm(f);
+    RowHeight = QMAX(18, fm.height() + 2);
+
+    contacts = c;
+    
+    mSel = NoSelection;
+    QTable::setSelectionMode( QTable::NoSelection );
+    
+    setLeftMargin( 0 );
+    verticalHeader()->hide();
     setSorting( TRUE );
     connect( this, SIGNAL(clicked(int,int,int,const QPoint &)),
              this, SLOT(itemClicked(int,int)) );
+    connect( this, SIGNAL( doubleClicked( int, int, int, const QPoint & ) ),
+	     this, SLOT( slotDoubleClicked( int, int, int, const QPoint & ) ) );
+    connect( this, SIGNAL( currentChanged( int, int ) ),
+             this, SLOT( slotCurrentChanged( int, int ) ) );
+    
+    mAscending = TRUE;
+    mSortColumn = 0;
+    readSettings();
 }
+
 
 AbTable::~AbTable()
 {
+    saveSettings();
 }
 
-void AbTable::init()
+void AbTable::setSelectionMode(SelectionMode m)
 {
-    setNumRows( 0 );
-    setNumCols( 2 );
+    if ( m == NoSelection && mSel != m ) {
+	mSelected.clear();
+	refresh();
+    }
 
-    horizontalHeader()->setLabel( 0, tr( "Full Name" ));
-    horizontalHeader()->setLabel( 1, tr( "Contact" ));
-    setLeftMargin( 0 );
-    verticalHeader()->hide();
+    mSel = m;
 }
 
-void AbTable::paintCell( QPainter *p, int row, int col, 
+// We clear the selection and loop through all the rows since currentChanged
+// will skip some rows if you move the pointing device fast enough
+void AbTable::setSelection(int fromRow, int toRow)
+{
+    // fromLow must be lower
+    if ( toRow < fromRow ) {
+	int t = toRow;
+	toRow = fromRow;
+	fromRow = t;
+    }
+    
+    int row = fromRow;
+    mSelected.clear();
+    while ( row <= toRow ) {
+	mSelected.append( contacts.at(row)->uid() );
+	row++;
+    }
+}
+
+void AbTable::paintCell( QPainter *p, int row, int col,
 	const QRect &cr, bool )
 {
 #if defined(Q_WS_WIN)
-    const QColorGroup &cg = ( !drawActiveSelection && style().styleHint( QStyle::SH_ItemView_ChangeHighlightOnFocus ) ? palette().inactive() : colorGroup() );
+    const QColorGroup &cg = ( style().styleHint( QStyle::SH_ItemView_ChangeHighlightOnFocus ) ? palette().inactive() : colorGroup() );
 #else
     const QColorGroup &cg = colorGroup();
 #endif
 
 
-    //PimContact c = aba.at(row);
-    PimContact c(*(aba.sortedContacts().at(row)));
+    PimContact c(*(contacts.at(row)));
+    
+    bool selected = FALSE;
+    if ( mSel != NoSelection  && mSelected.find(c.uid()) != mSelected.end() )
+	selected = TRUE;
+    
+    //PimContact c = contacts.at(row);
     QString text;
-    switch(col) {
-	case 0: 
-	    text = findContactName(c);
-	    break;
-	case 1:
-	    text = findContactContact(c);
+    int key = headerKeyFields[ col ];
+    switch(key) {
+    case PimContact::FileAs:
+	text = findContactName(c);
+	break;
+    case FREQ_CONTACT_FIELD:
+	text = findContactContact(c);
+	break;
+    case PimContact::Birthday:
+	{
+	    QDate d = c.birthday();
+	    if ( !d.isNull() )
+		text = TimeString::shortDate( d );
+	}
+	break;
+    case PimContact::Anniversary:
+	{
+	    QDate d = c.anniversary();
+	    if ( !d.isNull() )
+		text = TimeString::shortDate( d );
+	}
+	break;
+    default:
+	text = c.field( key );
     }
     p->save();
 
-    p->fillRect( 0, 0, cr.width(), cr.height(), cg.brush( QColorGroup::Base ) );
-
-    QPen op = p->pen();
-    p->setPen(cg.mid());
+    if ( !selected ) {
+	p->fillRect( 0, 0, cr.width(), cr.height(), cg.brush( QColorGroup::Base ) );
+	p->setPen(cg.text());
+    } else {
+	p->fillRect( 0, 0, cr.width(), cr.height(), cg.brush( QColorGroup::Highlight ) );
+	p->setPen(cg.highlightedText() );
+    }
+    
     p->drawLine( 0, cr.height() - 1, cr.width() - 1, cr.height() - 1 );
     p->drawLine( cr.width() - 1, 0, cr.width() - 1, cr.height() - 1 );
-    p->setPen(op);
 
     if (row == currentRow()) {
+	QPen op = p->pen();
+	p->setPen( QColor(black) );
+    
 	if (col == 0)
 	    p->drawLine( 0, 1, 0, cr.height() - 2);
 	if (col == numCols() - 1)
@@ -123,6 +200,8 @@ void AbTable::paintCell( QPainter *p, int row, int col,
 
 	p->drawLine( 0, cr.height() - 2, cr.width() - 1, cr.height() - 2 );
 	p->drawLine( 0, 0, cr.width() - 2, 0 );
+	
+	p->setPen(op);
     }
 
     QFont f = p->font();
@@ -144,87 +223,125 @@ void AbTable::setCurrentCell( int row, int col )
 
 void AbTable::columnClicked( int col )
 {
-    if ( !sorting() )
-	return;
-
-    if ( lastSortCol == -1 )
-	lastSortCol = col;
-
-    if ( col == lastSortCol ) {
-	asc = !asc;
+    if ( col != mSortColumn ) {
+	mSortColumn = col;
+	mAscending = TRUE;
     } else {
-	lastSortCol = col;
-	asc = TRUE;
+	mAscending = !mAscending;
     }
-    resort();
-}
 
-void AbTable::resort()
-{
-    if ( sorting() ) {
-	if ( lastSortCol == -1 )
-	    lastSortCol = 0;
-	sortColumn( lastSortCol, asc, TRUE );
-    }
+    reload( contacts );
 }
 
 PimContact AbTable::currentEntry()
 {
-    if (aba.sortedContacts().count() == 0)
+    if (contacts.count() == 0)
 	return PimContact();
-    if (currentRow() >= aba.sortedContacts().count()) {
-	setCurrentCell(aba.sortedContacts().count() - 1, currentColumn());
+    if (currentRow() >= (int)contacts.count()) {
+	setCurrentCell(contacts.count() - 1, currentColumn());
     } else if (currentRow() < 0) {
 	setCurrentCell(0, currentColumn());
     }
-    return *(aba.sortedContacts().at(currentRow()));
+    return *(contacts.at(currentRow()));
 }
 
-void AbTable::setCurrentEntry(QUuid &u)
+void AbTable::setCurrentEntry(const QUuid &u)
 {
     int rows, row;
     rows = numRows();
 
     for ( row = 0; row < rows; row++ ) {
-	if ( aba.sortedContacts().at(row)->uid() == u) {
+	if ( contacts.at(row)->uid() == u) {
 	    setCurrentCell(row, currentColumn());
 	    break;
 	}
     }
 }
 
-void AbTable::updateEntry( const PimContact &newContact )
+void AbTable::selectAll()
 {
-    aba.updateContact(newContact);
+    if ( mSel == NoSelection || mSel == Single )
+	return;
+
+    selectionBeginRow = -1;
+    mSelected.clear();
+    for ( uint u = 0; u < contacts.count(); u++ ) {
+	mSelected.append( contacts.at(u)->uid() );
+    }
     refresh();
 }
 
-void AbTable::deleteEntry( const PimContact &c )
+QValueList<QUuid> AbTable::selectedContacts()
 {
-    aba.removeContact(c);
-    refresh();
+    QValueList<QUuid> list;
+    if ( mSel == Single ) {
+    	if ( hasCurrentEntry() )
+	    list.append( currentEntry().uid() );
+    } else if ( mSel == Extended ) {
+	list = mSelected;
+	
+	// set current entry as selected when none is selected
+	if ( !list.count() && hasCurrentEntry() )
+	    list.append( currentEntry().uid() );
+    }
+
+    return list;
 }
 
-void AbTable::deleteCurrentEntry()
+QValueList<PimContact> AbTable::selected()
 {
-    aba.removeContact(currentEntry());
+    QValueList<PimContact> list;
+    if ( mSel == Single ) {
+    	if ( hasCurrentEntry() )
+	    list.append( currentEntry() );
+    } else if ( mSel == Extended ) {
+	for ( QValueList<QUuid>::Iterator it = mSelected.begin(); it != mSelected.end(); ++it) {
+	    list.append( pimForUid( *it ) ); 
+	}
+	
+	// set current entry as selected when none is selected
+	if ( !list.count() && hasCurrentEntry() )
+	    list.append( currentEntry() );
+    }
+
+    return list;
+}
+
+PimContact AbTable::pimForUid(const QUuid &id)
+{
+    for ( uint u = 0; u < contacts.count(); u++) {
+	if ( id == contacts.at(u)->uid() )
+	    return *contacts.at(u);
+    }
+    return PimContact();
+}
+
+bool AbTable::hasCurrentEntry()
+{
+    return contacts.count() != 0;
+}
+
+
+void AbTable::reload(const SortedContacts &c)
+{
+//    qDebug("reload callled with %d contacts and sortcol %d", c.count(), mSortColumn);
+    contacts = c;
+    mSelected.clear();
+    
+    if ( mSortColumn > -1 ) {
+	contacts.setSorting( headerKeyFields[mSortColumn], mAscending);
+	contacts.sort();
+	horizontalHeader()->setSortIndicator(mSortColumn, mAscending);
+    }
+    
     refresh();
+    emit currentChanged();
 }
 
 void AbTable::refresh()
 {
-    setNumRows(aba.sortedContacts().count());
-}
-
-void AbTable::flush()
-{
-    aba.saveData();
-}
-
-void AbTable::reload()
-{
-    aba.ensureDataCurrent(TRUE);
-    refresh();
+//    qDebug("AbTable::refresh %d contacts", contacts.count());
+    setNumRows(contacts.count());
 }
 
 void AbTable::keyPressEvent( QKeyEvent *e )
@@ -245,11 +362,31 @@ void AbTable::keyPressEvent( QKeyEvent *e )
 	case Qt::Key_Space:
 	case Qt::Key_Return:
 	case Qt::Key_Enter:
-	    emit details();
+	    emit clicked();
 	    break;
 	default:
 	    QTable::keyPressEvent( e );
     }
+}
+
+void AbTable::contentsMousePressEvent( QMouseEvent *e )
+{
+    if ( mSel == Extended ) {
+	mSelected.clear();
+	bState = e->button();
+    }
+
+    QTable::contentsMousePressEvent( e );
+}
+
+void AbTable::contentsMouseReleaseEvent( QMouseEvent *e )
+{
+    if ( mSel == Extended ) {
+	selectionBeginRow = -1;
+	bState = Qt::NoButton;
+    }
+
+    QTable::contentsMouseReleaseEvent( e );
 }
 
 void AbTable::moveTo( const QString &cl )
@@ -265,8 +402,8 @@ void AbTable::moveTo( const QString &cl )
     while (l < u)
     {
 	r = (l + u) / 2;
-	QString first = aba.sortedContacts().at(r)->bestLabel().lower();
-	//QString first = aba.at(r).bestLabel().lower();
+	QString first = contacts.at(r)->bestLabel().lower();
+	//QString first = contacts.at(r).bestLabel().lower();
 	comparison = Qtopia::compare(cl, first);
 	if (comparison < 0)
 	    u = r;
@@ -278,7 +415,7 @@ void AbTable::moveTo( const QString &cl )
 
     if ( comparison > 0) {
 	if ( l == rows )
-	    r = rows - 1;// last element... 
+	    r = rows - 1;// last element...
 	else
 	    r++;
     }
@@ -296,14 +433,14 @@ QString AbTable::findContactName( const PimContact &entry )
 QString AbTable::findContactContact( const PimContact &entry )
 {
     const int idList[] = {
-	Qtopia::Emails,
-	Qtopia::BusinessMobile,
-	Qtopia::BusinessPhone,
-	Qtopia::BusinessStreet,
-	Qtopia::Company,
-	Qtopia::HomeMobile,
-	Qtopia::HomePhone,
-	Qtopia::HomeStreet,
+	PimContact::DefaultEmail,
+	PimContact::BusinessMobile,
+	PimContact::BusinessPhone,
+	PimContact::BusinessStreet,
+	PimContact::Company,
+	PimContact::HomeMobile,
+	PimContact::HomePhone,
+	PimContact::HomeStreet,
 	-1
     };
 
@@ -337,81 +474,47 @@ QString AbTable::findContactContact( const PimContact &entry )
     }
 
     // Try to find anything
+    /* this code is not helpful - Luke
     if ( value.isEmpty() ) {
-	for ( QValueList<int>::ConstIterator it = intFields->begin();
-		it != intFields->end(); ++it ) {
-	    value = getField( entry, *it );
+	for ( int keyIt = PimContact::CommonFieldsEnd;
+		keyIt < PimContact::ContactFieldCount; ++keyIt ) {
+	    value = getField( entry, keyIt );
 	    if ( !value.isEmpty() )
 		break;
 	}
     }
+    */
 
     return value;
 }
 
-QString AbTable::getField( const PimContact &entry, int id )
+QString AbTable::getField( const PimContact &entry, int key )
 {
-    return entry.field(id);
-}
-
-void AbTable::addEntry( const PimContact &newCnt )
-{
-    aba.addContact(newCnt);
-    refresh();
-}
-
-// conservative on the yes vote.
-bool AbTable::hasEntry( const PimContact &c )
-{
-    QString regExp(c.fileAs());
-    QList<PimContact>& contacts = (QList<PimContact> &)aba.contacts();
-
-    QListIterator<PimContact> it(contacts);
-    for (; it.current(); ++it) {
-	if (it.current()->match(regExp)) {
-	    if ( c.toRichText() == (*it)->toRichText() ) {   //expensive compare
-		return TRUE;
-	    }
+    QString res = entry.field( key );
+    QString type;
+    if ( !res.isEmpty() )
+	switch ( key ) {
+	case PimContact::HomePhone:
+	    type = tr("H","Home phone");
+	    break;
+	case PimContact::BusinessPhone:
+	    type = tr("B","Business phone");
+	    break;
+	case PimContact::HomeMobile:
+	    type = tr("HM","Home mobile");
+	    break;
+	case PimContact::BusinessMobile:
+	    type = tr("BM","Business mobile");
+	    break;
 	}
-    }
-    return FALSE;
-}
-
-#if QT_VERSION <= 230
-#ifndef SINGLE_APP
-void QTable::paintEmptyArea( QPainter *p, int cx, int cy, int cw, int ch )
-{
-    // Region of the rect we should draw
-    QRegion reg( QRect( cx, cy, cw, ch ) );
-    // Subtract the table from it
-    reg = reg.subtract( QRect( QPoint( 0, 0 ), tableSize() ) );
-    // And draw the rectangles (transformed as needed)
-    QArray<QRect> r = reg.rects();
-    for (unsigned int i=0; i<r.count(); i++)
-        p->fillRect( r[i], colorGroup().brush( QColorGroup::Base ) );
-}
-#endif
-#endif
-
-
-int AbTable::rowHeight( int ) const
-{
-    return 18;
-}
-
-int AbTable::rowPos( int row ) const
-{
-    return 18*row;
-}
-
-int AbTable::rowAt( int pos ) const
-{
-    return QMIN( pos/18, numRows()-1 );
+    if ( !type.isEmpty() )
+	res = type + ": " + res;
+    return res;
 }
 
 static bool contactCompare( const PimContact &cnt, const QRegExp &r, int category );
 
-void AbTable::slotDoFind( const QString &findString, int category )
+void AbTable::findNext( const QString &findString, int category )
 {
     static bool wrapAround = false;
     if ( currFindString != findString ) {
@@ -429,7 +532,7 @@ void AbTable::slotDoFind( const QString &findString, int category )
     rows = numRows();
 
     for ( row = currFindRow + 1; row < rows; row++ ) {
-	if ( contactCompare( *(aba.sortedContacts().at(row)), r, category ) )
+	if ( contactCompare( *(contacts.at(row)), r, category ) )
 	    break;
 
     }
@@ -472,116 +575,92 @@ static bool contactCompare( const PimContact &cnt, const QRegExp &r, int categor
     return returnMe;
 }
 
-void AbTable::fitColumns()
+
+
+#if QT_VERSION <= 230
+#ifndef SINGLE_APP
+void QTable::paintEmptyArea( QPainter *p, int cx, int cy, int cw, int ch )
 {
-    int contentsWidth = visibleWidth();
-    int n = numCols();
-    int pw = n == 3 ? columnWidth(2) : 0;
-    setColumnWidth( 0, contentsWidth - contentsWidth / 2 );
-    setColumnWidth( 1, contentsWidth / 2 - pw );
+    // Region of the rect we should draw
+    QRegion reg( QRect( cx, cy, cw, ch ) );
+    // Subtract the table from it
+    reg = reg.subtract( QRect( QPoint( 0, 0 ), tableSize() ) );
+    // And draw the rectangles (transformed as needed)
+    QArray<QRect> r = reg.rects();
+    for (unsigned int i=0; i<r.count(); i++)
+        p->fillRect( r[i], colorGroup().brush( QColorGroup::Base ) );
+}
+#endif
+#endif
+
+void AbTable::fontChange( const QFont &oldFont )
+{
+    QFont f = font();
+    QFontMetrics fm(f);
+    RowHeight = QMAX(18, fm.height() + 2);
+
+    QTable::fontChange(oldFont);
+}
+
+int AbTable::rowHeight( int ) const
+{
+    return RowHeight;
+}
+
+int AbTable::rowPos( int row ) const
+{
+    return RowHeight*row;
+}
+
+int AbTable::rowAt( int pos ) const
+{
+    return QMIN( pos/RowHeight, numRows()-1 );
 }
 
 void AbTable::show()
 {
-    fitColumns();
     QTable::show();
 }
 
-void AbTable::setChoiceNames( const QStringList& list)
+void AbTable::itemClicked(int,int /* col */)
 {
-    choicenames = list;
-    if ( choicenames.isEmpty() ) {
-	// hide pick column
-	setNumCols( 2 );
-    } else {
-	// show pick column
-	setNumCols( 3 );
-	setColumnWidth( 2, fontMetrics().width(tr( "Pick" ))+8 );
-	horizontalHeader()->setLabel( 2, tr( "Pick" ));
+    emit clicked();
+}
+
+void AbTable::slotDoubleClicked(int, int, int, const QPoint &)
+{
+    emit doubleClicked();
+}
+
+void AbTable::slotCurrentChanged( int row, int )
+{
+    bool needRefresh = FALSE;
+
+    if ( mSel == Extended ) {
+	if ( (bState & Qt::LeftButton) ) {
+	    if ( selectionBeginRow == -1 )
+		selectionBeginRow = row;
+	    else 
+		setSelection( selectionBeginRow, row);
+
+	    needRefresh = TRUE;
+	} else {
+	    mSelected.clear();
+	    needRefresh = TRUE;
+	}
     }
-    fitColumns();
-}
-
-void AbTable::itemClicked(int,int col)
-{
-    if ( col == 2 ) {
-	return;
-    } else {
-	emit details();
+    
+    if ( needRefresh ) {
+	refresh();
     }
+
+    emit currentChanged();
 }
 
-QStringList AbTable::choiceNames() const
-{
-    return choicenames;
-}
-
-void AbTable::setChoiceSelection(int /*index*/, const QStringList& /*list*/)
-{
-    /* ######
-
-	QString selname = choicenames.at(index);
-	for (each row) {
-	    PimContact *c = contactForRow(row);
-	    if ( list.contains(c->email) ) {
-		list.remove(c->email);
-		setText(row, 2, selname);
-	    }
-	}
-	for (remaining list items) {
-	    PimContact *c = new contact(item);
-	    setText(newrow, 2, selname);
-	}
-
-    */
-}
-
-QStringList AbTable::choiceSelection(int /*index*/) const
-{
-    QStringList r;
-    /* ######
-
-	QString selname = choicenames.at(index);
-	for (each row) {
-	    PimContact *c = contactForRow(row);
-	    if ( text(row,2) == selname ) {
-		r.append(c->email);
-	    }
-	}
-
-    */
-    return r;
-}
 
 void AbTable::setPreferredField( int id )
 {
     prefField = id;
-}
-
-void AbTable::setShowCategory( int c )
-{
-    showCat = c;
-    aba.setFilter(c);
-}
-
-QString AbTable::categoryLabel( int id )
-{
-    // This is called seldom, so calling a load in here
-    // should be fine.
-    mCat.load( categoryFileName() );
-    if ( id == -1 )
-	return tr( "Unfiled" );
-    else if ( id == -2 )
-	return tr( "All" );
-    return mCat.label( "Address Book", id );
-}
-
-
-QStringList AbTable::categories()
-{
-    mCat.load( categoryFileName() );
-    QStringList categoryList = mCat.labels( "Address Book" );
-    return categoryList;
 }
 
 void AbTable::setPaintingEnabled( bool e )
@@ -602,3 +681,172 @@ void AbTable::rowHeightChanged( int row )
     if ( enablePainting )
 	QTable::rowHeightChanged( row );
 }
+
+void AbTable::setFields(QValueList<int> f)
+{
+    QHeader *header = horizontalHeader();
+    QStringList sizes;
+
+    if ( f.count() == 0 ) {
+	f = defaultFields();
+	headerKeyFields.clear();
+    }
+
+    // map old sizes to new pos in header list
+    for ( int i = 0; i < (int) f.count(); i++) {
+	int pos = headerKeyFields.findIndex( *f.at(i) );
+	if ( pos > -1 && pos < header->count() )
+	    sizes.append( QString::number( header->sectionSize(pos) ) );
+	else
+	    sizes.append( QString::number( defaultFieldSize( (PimContact::ContactFields) *f.at(i) ) ));
+    }
+    
+    setFields(f, sizes);
+}
+
+void AbTable::setFields(QValueList<int> f, QStringList sizes)
+{
+    QHeader *header = horizontalHeader();
+    int prevSortKey = -1;
+	
+    if ( mSortColumn > -1 && headerKeyFields.count() )
+	prevSortKey = headerKeyFields[mSortColumn];
+    
+    headerKeyFields = f;
+    
+    while ( header->count() )
+	header->removeLabel( header->count() - 1 );
+    
+    // We have to create the internal list before calling QTable::setNumCols as
+    // setnNumCols forces a repaint
+    QValueList<int>::Iterator iit;
+    int i = 0;
+    for (iit = f.begin(); iit != f.end(); ++iit) {
+	if ( *iit == prevSortKey ) {
+	    mSortColumn = i;
+	    break;
+	}
+	i++;
+    }
+    setNumCols( f.count() );
+    
+    QMap<int, QString> trFields = PimContact::trFieldsMap();
+    i = 0;
+    for (iit = f.begin(); iit != f.end(); ++iit) {
+	if ( *iit == FREQ_CONTACT_FIELD )
+	    header->setLabel(i, tr("Contact") );
+	else	    
+	    header->setLabel(i, trFields[*iit] );
+	i++;
+    }
+
+    i = 0;
+    for (QStringList::ConstIterator it = sizes.begin(); it != sizes.end(); ++it) {
+	if ( i < (int) f.count() )
+	    setColumnWidth(i, (*it).toInt() );
+	i++;
+    }
+    
+    if ( mSortColumn > -1 )
+	header->setSortIndicator(mSortColumn, mAscending);
+}
+
+QValueList<int> AbTable::fields()
+{
+    return headerKeyFields;
+}
+
+QValueList<int> AbTable::defaultFields()
+{
+    QValueList<int> l;
+
+    l.append( PimContact::FileAs );
+    l.append( FREQ_CONTACT_FIELD );
+
+    return l;
+}
+
+int AbTable::defaultFieldSize(PimContact::ContactFields f)
+{
+    switch( f ) {
+	case PimContact::FileAs: return 100;
+	case FREQ_CONTACT_FIELD: return 100;
+	default: return 80;
+    }
+}
+
+void AbTable::readSettings()
+{
+    QStringList selectedFields, sizeList;
+
+#ifdef QTOPIA_DESKTOP
+    QSettings settings;
+    settings.insertSearchPath( QSettings::Unix, applicationPath );
+    settings.insertSearchPath( QSettings::Windows, "/Trolltech" );
+
+    selectedFields = settings.readListEntry("/palmtopcenter/addressbook/fields" );
+    sizeList = settings.readListEntry("/palmtopcenter/addressbook/colwidths" );
+
+    mSortColumn = settings.readNumEntry("/palmtopcenter/addressbook/sortcolumn", 0);
+    mAscending = settings.readBoolEntry("/palmtopcenter/addressbook/ascending", TRUE);
+#else
+    Config config( "addressbook" );
+    config.setGroup( "View" );
+
+    selectedFields = config.readListEntry("fields", ',');
+    sizeList = config.readListEntry("colwidths",',');
+    mSortColumn = config.readNumEntry("sortcolumn", 0);
+    mAscending = config.readBoolEntry("ascending", TRUE );
+#endif
+
+    if ( !selectedFields.count() ) {
+	setFields( defaultFields() );
+    } else {
+	QMap<QCString, int> identifierToKey = PimContact::identifierToKeyMap();
+	for ( QStringList::Iterator it = selectedFields.begin(); it != selectedFields.end(); ++it) {
+	    if ( *it == "Contact" ) {
+		headerKeyFields.append( FREQ_CONTACT_FIELD );
+	    } else {
+		int field = identifierToKey[ (*it).data() ];
+		headerKeyFields.append( field );
+	    }
+	}
+
+	setFields( headerKeyFields, sizeList );
+    }
+}
+
+void AbTable::saveSettings()
+{
+    QMap<int,QCString> keyToIdentifier = PimContact::keyToIdentifierMap();
+    QHeader *header = horizontalHeader();
+    QStringList fieldList, sizeList;
+    for ( int i = 0; i < header->count(); i++) {
+	if ( headerKeyFields[i] != FREQ_CONTACT_FIELD )
+	    fieldList.append( keyToIdentifier[ headerKeyFields[i]  ]  );
+	else
+	    fieldList.append( "Contact" );
+
+	sizeList.append( QString::number(header->sectionSize(i)) );
+    }
+
+#ifdef QTOPIA_DESKTOP
+    QSettings settings;
+    settings.insertSearchPath( QSettings::Unix, applicationPath );
+    settings.insertSearchPath( QSettings::Windows, "/Trolltech" );
+
+    settings.writeEntry( "/palmtopcenter/addressbook/fields", fieldList );
+    settings.writeEntry( "/palmtopcenter/addressbook/colwidths", sizeList );
+    settings.writeEntry( "/palmtopcenter/addressbook/sortcolumn", mSortColumn );
+    settings.writeEntry( "/palmtopcenter/addressbook/ascending", mAscending );
+#else
+    Config config( "addressbook" );
+    config.setGroup( "View" );
+    config.writeEntry("fields", fieldList, ',' );
+    config.writeEntry("colwidths", sizeList, ',' );
+    config.writeEntry("sortcolumn", mSortColumn );
+    config.writeEntry("ascending", mAscending );
+#endif
+
+}
+

@@ -20,7 +20,7 @@
 #ifndef LAUNCHER_H
 #define LAUNCHER_H
 
-#include <qpe/config.h>
+#include <qtopia/config.h>
 #include <qmainwindow.h>
 #include <qtabbar.h>
 #include <qstringlist.h>
@@ -105,7 +105,6 @@ public:
 public slots:
     void viewSelected(const QString&);
     void select( const AppLnk * );
-    void externalSelected( const AppLnk *);
     void properties( AppLnk * );
     void nextView();
 

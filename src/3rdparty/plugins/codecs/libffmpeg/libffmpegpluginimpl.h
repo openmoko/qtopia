@@ -21,7 +21,7 @@
 #ifndef LIBFFMPEG_PLUGIN_IMPL_H 
 #define LIBFFMPEG_PLUGIN_IMPL_H
 
-#include <qpe/mediaplayerplugininterface.h>
+#include <qtopia/mediaplayerplugininterface.h>
 
 
 class LibFFMpegPlugin;

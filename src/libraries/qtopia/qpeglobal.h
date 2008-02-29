@@ -24,7 +24,18 @@
 
 #include <qglobal.h>
 
-#if ( defined(Q_OS_WIN32) || defined(Q_OS_WIN64) ) && defined(PALMTOPCENTER)
+#if defined(QWS) && defined(_WS_QWS_) && !defined(Q_WS_QWS)
+#   define Q_WS_QWS
+#endif
+
+#if defined(_OS_WIN32_) && !defined(Q_OS_WIN32)
+#   define Q_OS_WIN32
+#   ifndef Q_WS_WIN32
+#	define Q_WS_WIN32    
+#   endif    
+#endif
+
+#if ( defined(Q_OS_WIN32) || defined(Q_OS_WIN64) ) 
 // #  if defined(QT_NODLL)
 //#    undef QTOPIA_MAKEDLL
 //#    undef QTOPIA_DLL
@@ -33,22 +44,52 @@
 #      undef QTOPIA_DLL
 #    endif
 #    define QTOPIA_EXPORT  __declspec(dllexport)
-#    define QTOPIA_TEMPLATEEXTERN
+#    define QTOPIA_TEMPLATE_EXTERN
 #    define QTOPIA_TEMPLATEDLL
 #    undef  QTOPIA_DISABLE_COPY	/* avoid unresolved externals */
-#  elif defined(QTOPIA_DLL)		/* use a Qt DLL library */
+#  elif defined(QTOPIA_DLL) || defined (QT_DLL)		/* use a Qt DLL library */
 #    define QTOPIA_EXPORT  __declspec(dllimport)
-#    define QTOPIA_TEMPLATEEXTERN extern
+#    define QTOPIA_TEMPLATE_EXTERN /*extern*/
 #    define QTOPIA_TEMPLATEDLL
 #    undef  QTOPIA_DISABLE_COPY	/* avoid unresolved externals */
 #  endif
+
+#  if defined(QPC_MAKEDLL)	/* create a Qt DLL library for qtopia deskop*/
+#    if defined(QPC_DLL)
+#      undef QPC_DLL
+#    endif
+#    define QPC_EXPORT  __declspec(dllexport)
+#    define QPC_TEMPLATE_EXTERN
+#    define QPC_TEMPLATEDLL
+#    undef  QPC_DISABLE_COPY	/* avoid unresolved externals */
+#  elif defined (QPC_DLL) || defined(QT_DLL) 		/* use a Qt DLL library */
+#    define QPC_EXPORT  __declspec(dllimport)
+#    define QPC_TEMPLATE_EXTERN /*extern*/
+#    define QPC_TEMPLATEDLL
+#    undef  QPC_DISABLE_COPY	/* avoid unresolved externals */
+#  endif
+
+#   ifdef QWS
+#	ifndef Q_WS_QWS 
+#	    define Q_WS_QWS
+#	endif
+#	ifndef _WS_QWS
+#	    define _WS_QWS      
+#	endif
+#  endif
+
 #else
-#  undef QTOPIA_MAKEDLL		/* ignore these for other platforms */
-#  undef QTOPIA_DLL
+#   undef QTOPIA_MAKEDLL		// ignore these for other platforms
+#   undef QTOPIA_DLL
 #endif
+
 
 #ifndef QTOPIA_EXPORT
 #  define QTOPIA_EXPORT
+#endif
+
+#ifndef QPC_EXPORT
+#  define QPC_EXPORT
 #endif
 
 #endif

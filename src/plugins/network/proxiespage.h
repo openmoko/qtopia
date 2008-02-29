@@ -21,7 +21,7 @@
 #define PROXIESSETTINGS_H
 
 #include <qvbox.h>
-#include <qpe/config.h>
+#include <qtopia/config.h>
 
 class ProxiesPageBase;
 

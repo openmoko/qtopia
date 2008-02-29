@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
@@ -140,21 +146,21 @@ SOURCES =	snake.cpp \
 		target.cpp \
 		obstacle.cpp \
 		interface.cpp \
-		main.cpp \
-		border.cpp
-OBJECTS =	snake.o \
-		target.o \
-		obstacle.o \
-		interface.o \
-		main.o \
-		border.o
+		border.cpp \
+		main.cpp
+OBJECTS =	$(OBJECTS_DIR)/snake.o \
+		$(OBJECTS_DIR)/target.o \
+		$(OBJECTS_DIR)/obstacle.o \
+		$(OBJECTS_DIR)/interface.o \
+		$(OBJECTS_DIR)/border.o \
+		$(OBJECTS_DIR)/main.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
-SRCMOC	=	moc_snake.cpp \
-		moc_interface.cpp
-OBJMOC	=	moc_snake.o \
-		moc_interface.o
+SRCMOC	=	$(MOC_DIR)/moc_snake.cpp \
+		$(MOC_DIR)/moc_interface.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_snake.o \
+		$(OBJECTS_DIR)/moc_interface.o
 
 
 ####### Implicit rules
@@ -220,68 +226,69 @@ REQUIRES=
 
 ####### Compile
 
-snake.o: snake.cpp \
+$(OBJECTS_DIR)/snake.o: snake.cpp \
 		snake.h \
 		target.h \
-		codes.h \
-		$(QPEDIR)/include/qpe/resource.h
+		codes.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/snake.o snake.cpp
 
-target.o: target.cpp \
+$(OBJECTS_DIR)/target.o: target.cpp \
 		target.h \
-		codes.h \
-		$(QPEDIR)/include/qpe/resource.h
+		codes.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/target.o target.cpp
 
-obstacle.o: obstacle.cpp \
+$(OBJECTS_DIR)/obstacle.o: obstacle.cpp \
 		obstacle.h \
-		codes.h \
-		$(QPEDIR)/include/qpe/resource.h
+		codes.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/obstacle.o obstacle.cpp
 
-interface.o: interface.cpp \
-		interface.h \
-		snake.h \
-		target.h \
-		obstacle.h \
-		border.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h
-
-main.o: main.cpp \
-		interface.h \
-		snake.h \
-		target.h \
-		obstacle.h \
-		border.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
-
-border.o: border.cpp \
-		border.h \
-		codes.h \
-		$(QPEDIR)/include/qpe/resource.h
-
-moc_snake.o: moc_snake.cpp \
-		snake.h
-
-moc_interface.o: moc_interface.cpp \
+$(OBJECTS_DIR)/interface.o: interface.cpp \
 		interface.h \
 		snake.h \
 		target.h \
 		obstacle.h \
 		border.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/interface.o interface.cpp
 
-moc_snake.cpp: snake.h
-	$(MOC) snake.h -o moc_snake.cpp
+$(OBJECTS_DIR)/border.o: border.cpp \
+		border.h \
+		codes.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/border.o border.cpp
 
-moc_interface.cpp: interface.h
-	$(MOC) interface.h -o moc_interface.cpp
+$(OBJECTS_DIR)/main.o: main.cpp \
+		interface.h \
+		snake.h \
+		target.h \
+		obstacle.h \
+		border.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
+
+$(OBJECTS_DIR)/moc_snake.o: $(MOC_DIR)/moc_snake.cpp \
+		snake.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_snake.o $(MOC_DIR)/moc_snake.cpp
+
+$(OBJECTS_DIR)/moc_interface.o: $(MOC_DIR)/moc_interface.cpp \
+		interface.h \
+		snake.h \
+		target.h \
+		obstacle.h \
+		border.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_interface.o $(MOC_DIR)/moc_interface.cpp
+
+$(MOC_DIR)/moc_snake.cpp: snake.h
+	$(MOC) snake.h -o $(MOC_DIR)/moc_snake.cpp
+
+$(MOC_DIR)/moc_interface.cpp: interface.h
+	$(MOC) interface.h -o $(MOC_DIR)/moc_interface.cpp
 
 
 
 lupdate:
-	lupdate snake.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <snake.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease snake.pro
+	$(QPEDIR)/bin/qtopia-linstall snake.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

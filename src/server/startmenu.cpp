@@ -24,11 +24,11 @@
 #include "sidething.h"
 #include "mrulist.h"
 
-#include <qpe/qpeapplication.h>
-#include <qpe/config.h>
-#include <qpe/applnk.h>
-#include <qpe/global.h>
-#include <qpe/resource.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/config.h>
+#include <qtopia/applnk.h>
+#include <qtopia/global.h>
+#include <qtopia/resource.h>
 
 #include <qdict.h>
 
@@ -178,7 +178,9 @@ bool StartMenu::loadMenu( AppLnkSet *folder, QPopupMenu *menu )
 		f = FALSE;
 		QString t = app->type();
 		QPopupMenu* pmenu = typpop.find(t);
+		bool sort = FALSE;
 		if ( ltabs ) {
+		    sort = pmenu;
 		    if ( !pmenu && lot )
 			pmenu = menu;
 		} else {
@@ -190,7 +192,19 @@ bool StartMenu::loadMenu( AppLnkSet *folder, QPopupMenu *menu )
 		if ( pmenu ) {
 		    QString t = app->name();
 		    t.replace(QRegExp("&"),"&&"); // escape shortcut character
-		    pmenu->insertItem( app->pixmap(), t, app->id() );
+		    int idx=-1;
+		    if ( sort ) {
+			// Overall, sorting takes O(n^3), because of text() is O(n)
+			// Fortunately, 20^3 is still small. If it is a problem, this
+			// whole function needs a re-write.
+			for (idx=0; idx < (int)pmenu->count() && pmenu->text(pmenu->idAt(idx)) < t; ++idx)
+			    ;
+		    }
+		    QIconSet i = Resource::loadIconSet(app->icon());
+		    if (i.pixmap().isNull()) {
+			i = Resource::loadIconSet("UnknownDocument");
+		    }
+		    pmenu->insertItem( i, t, app->id(), idx );
 		}
 		result=TRUE;
 	    }

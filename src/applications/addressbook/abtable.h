@@ -21,10 +21,9 @@
 #ifndef ABTABLE_H
 #define ABTABLE_H
 
-#include <qpe/categories.h>
-#include <qpe/pim/contact.h>
-//#include <qpe/pim/addressbookaccess.h>
-#include <qpe/pim/private/contactxmlio_p.h>
+#include <qtopia/categories.h>
+#include <qtopia/pim/contact.h>
+#include <qtopia/pim/private/contactxmlio_p.h>
 
 #include <qmap.h>
 #include <qtable.h>
@@ -36,42 +35,90 @@ class AbTable : public QTable
     Q_OBJECT
 
 public:
-    AbTable( const QValueList<int> *ordered, QWidget *parent, const char *name=0 );
+    static const int FREQ_CONTACT_FIELD;
+
+    AbTable(const SortedContacts &tasks,  QWidget *parent, const char *name=0, const char *appPath=0 );
     ~AbTable();
 
-    void addEntry( const PimContact &newContact );
+    bool hasCurrentEntry();
     PimContact currentEntry();
-    void updateEntry( const PimContact &newContact );
-    void deleteEntry( const PimContact &newContact );
-    void deleteCurrentEntry();
+    void setCurrentEntry(const QUuid &u);
 
-    void setCurrentEntry(QUuid &u);
+    // sets the prefered field
+    void setPreferredField( int key );
 
-    bool hasEntry(const PimContact &c);
-    
-    void init();
-
-    void clear();
     void clearFindRow() { currFindRow = -2; }
-    void loadFields();
 
-    // addresspicker mode
-    void setChoiceNames( const QStringList& list);
-    QStringList choiceNames() const;
-    void setChoiceSelection(int index, const QStringList& list);
-    QStringList choiceSelection(int index) const;
-    void setShowCategory( int c );
-    int showCategory() const { return showCat; }
-    QString AbTable::categoryLabel( int id );
-    QStringList categories();
-    void setPreferredField( int id );
+    enum SelectionMode {
+	NoSelection,
+	Single,
+	Extended
+    };
+    
+    void setSelectionMode(SelectionMode m);
+    SelectionMode selectionMode() { return mSel; }
+    
+    QValueList<PimContact> selected();
+    QValueList<QUuid> selectedContacts();
+    void selectAll();
 
+    void setFields(QValueList<int> f);
+    QValueList<int> fields();
+
+public slots:
+    void reload(const SortedContacts &c);
+    void findNext( const QString &str, int category );
+
+signals:
+    void currentChanged();
+    void clicked();
+    void doubleClicked();
+    void findNotFound();
+    void findWrapAround();
+    void findFound();
+
+protected:
+    void setFields(QValueList<int> f, QStringList);
+    int defaultFieldSize(PimContact::ContactFields f);
+    QValueList<int> defaultFields();
+    
+    virtual void keyPressEvent( QKeyEvent *e );
+    void contentsMousePressEvent( QMouseEvent *e );
+    void contentsMouseReleaseEvent( QMouseEvent *e );
+
+    void fontChange(const QFont &);
+     int rowHeight( int ) const;
+     int rowPos( int row ) const;
+     virtual int rowAt( int pos ) const;
+
+protected slots:
+    void moveTo( const QString & );
+    virtual void columnClicked( int col );
+    void itemClicked(int,int col);
+    void slotDoubleClicked(int, int, int, const QPoint &);
+    void rowHeightChanged( int row );
+
+    void slotCurrentChanged(int row, int col );
+
+private:
+    void refresh();
+    
+    void setSelection(int fromRow, int toRow);
+    PimContact pimForUid(const QUuid &);
+    void readSettings();
+    void saveSettings();
+    
+    QString findContactName( const PimContact &entry );
+    QString findContactContact( const PimContact &entry );
+    QString getField( const PimContact &entry, int );
+
+    // paint related functions
     void show();
     void setPaintingEnabled( bool e );
 
     void paintFocus( QPainter *, const QRect & ) {}
 
-    void paintCell ( QPainter * p, int row, int col, 
+    void paintCell ( QPainter * p, int row, int col,
 	    const QRect & cr, bool selected );
 
     void setCurrentCell(int, int);
@@ -81,49 +128,21 @@ public:
     void setItem(int,int,QTableItem*) { }
     void clearCell(int,int) { }
     QWidget *createEditor(int,int,bool) const { return 0;}
-public slots:
-    void slotDoFind( const QString &str, int category );
-    void refresh();
-    void reload();
-    void flush();
 
-signals:
-    void empty( bool );
-    void details();
-    void findNotFound();
-    void findWrapAround();
-    void findFound();
 
-protected:
-    virtual void keyPressEvent( QKeyEvent *e );
-
-     int rowHeight( int ) const;
-     int rowPos( int row ) const;
-     virtual int rowAt( int pos ) const;
-
-protected slots:
-    void moveTo( const QString & );
-    virtual void columnClicked( int col );
-    void itemClicked(int,int col);
-    void rowHeightChanged( int row );
-
-private:
-    void fitColumns();
-    void resort();
-    QString findContactName( const PimContact &entry );
-    QString findContactContact( const PimContact &entry );
-    QString getField( const PimContact &entry, int );
-
-    int lastSortCol;
-    bool asc;
-    ContactXmlIO aba;
-    const QValueList<int> *intFields;
+    SortedContacts contacts;
     int currFindRow;
     QString currFindString;
     QStringList choicenames;
     bool enablePainting;
-    Categories mCat;
     int showCat;
     int prefField;
+
+    QValueList<int> headerKeyFields;
+    
+    SelectionMode mSel;
+    QValueList<QUuid> mSelected;
+    int mSortColumn;
+    bool mAscending;
 };
 #endif // ABTABLE_H

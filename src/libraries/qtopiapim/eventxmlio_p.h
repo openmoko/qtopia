@@ -28,7 +28,14 @@
 #include "eventio_p.h"
 #include "xmlio_p.h"
 
-class EventXmlIterator : public EventIteratorMachine
+#if defined (QTOPIA_TEMPLATEDLL)
+//MOC_SKIP_BEGIN
+QTOPIA_TEMPLATEDLL template class QTOPIAPIM_EXPORT QListIterator<PrEvent>;
+QTOPIA_TEMPLATEDLL template class QTOPIAPIM_EXPORT QList<PrEvent>;
+//MOC_SKIP_END
+#endif
+
+class QTOPIAPIM_EXPORT EventXmlIterator : public EventIteratorMachine
 {
 public:
     EventXmlIterator(const QList<PrEvent>&list) : it(list) {}
@@ -53,34 +60,15 @@ private:
     QListIterator<PrEvent>it;
 };
 
-class EventXmlIO : public EventIO, private PimXmlIO {
+class QTOPIAPIM_EXPORT EventXmlIO : public EventIO, public PimXmlIO {
 
     Q_OBJECT
 
  public:
-  EventXmlIO(AccessMode m);
+  EventXmlIO(AccessMode m,
+	    const QString &file = QString::null,
+	    const QString &journal = QString::null);
   ~EventXmlIO();
-
-  enum Attribute { 
-	FDescription = 0,
-	FLocation,
-	FCategories,
-	FUid,
-	FType,
-	FAlarm,
-	FSound,
-	FRType,
-	FRWeekdays,
-	FRPosition,
-	FRFreq,
-	FRHasEndDate,
-	FREndDate,
-	FRStart,
-	FREnd,
-	FNote,
-	FTimeZone,
-	FCreated,
-  };
 
   EventIteratorMachine *begin() const { return new EventXmlIterator(m_PrEvents); }
 
@@ -95,7 +83,9 @@ class EventXmlIO : public EventIO, private PimXmlIO {
 
   void updateEvent(const PimEvent& event);
   void removeEvent(const PimEvent& event);
-  void addEvent(const PimEvent& event);
+  void addEvent(const PimEvent& event, bool assignUid = TRUE );
+  void addException(const QDate &d, const PimEvent &p);
+  void addException(const QDate &d, const PimEvent &p, const PimEvent& event);
 
   // find next alarm and set;
   // later will want to be more efficient.
@@ -107,36 +97,28 @@ class EventXmlIO : public EventIO, private PimXmlIO {
   void ensureDataCurrent(bool forceReload = false);
 
 protected:
-  const QString dataFilename() const;
-  const QString journalFilename() const;
-
   const char *recordStart() const { return "<event "; }
-  const char *listStart() const 
+  const char *listStart() const
   { return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
   "<!DOCTYPE DATEBOOK>\n<events>\n"; }
   const char *listEnd() const { return "</events>"; }
 
   PimRecord *createRecord() const { return new PrEvent(); }
 
-  void finalizeRecord(PrEvent *);
   bool internalAddRecord(PimRecord *);
   bool internalUpdateRecord(PimRecord *);
   bool internalRemoveRecord(PimRecord *);
 
-  QString recordToXml(const PimRecord *);
-
-  void assignField(PimRecord *, const QCString &attr, const QString &value);
+  virtual QString recordToXml(const PimRecord *);
 
 private slots:
   void pimMessage(const QCString &, const QByteArray &);
 
 private:
-  //DateBookDB* m_DateBookDB;
   QDateTime cNextAlarm;
 
   QList<PrEvent> m_PrEvents;
 
-  QAsciiDict<int> dict;
   bool needsSave;
 };
 

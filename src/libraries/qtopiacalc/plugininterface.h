@@ -1,18 +1,17 @@
 /**********************************************************************
-** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+** Copyright (C) 2000 Trolltech AS.  All rights reserved.
 **
-** This file is part of the Qtopia Environment.
+** This file is part of Qtopia Environment.
 **
-** Licensees holding valid Qtopia Developer license may use this
-** file in accordance with the Qtopia Developer License Agreement
-** provided with the Software.
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING
-** THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-** PURPOSE.
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
-** email sales@trolltech.com for information about Qtopia License
-** Agreements.
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
@@ -26,7 +25,9 @@
 #include <qwidget.h>
 #endif
 
-#include <qpe/qcom.h>
+#include <qtopia/qcom.h>
+#include <qlist.h>
+#include "instruction.h"
 
 #ifndef QT_NO_COMPONENT
 // {3CE88B66-B3FD-4580-9D04-77338A31A667}
@@ -35,11 +36,27 @@
 #endif
 #endif
 
+/*
+struct Plugin {
+    QWidget *plugin;
+    QString pluginName;
+    QString libraryInputWidgetToUse;
+};
+*/
 
 // BASE CLASS FOR PLUGIN INTERFACE
-struct Q_EXPORT CalculatorInterface:public QUnknownInterface {
+struct QTOPIA_EXPORT CalculatorInterface:public QUnknownInterface {
+    // the ignoble past
     virtual QWidget * create (QWidget *) = 0;
-    virtual const char * pluginName() = 0;
+
+    // the glorious future!
+    virtual Instruction * createInstruction(QString /* name */,
+	QString /* type */)
+    {
+	return 0;
+    };
+
+//    virtual QList<Plugin> * getUIPlugins () { return 0; };
 };
 
 #endif

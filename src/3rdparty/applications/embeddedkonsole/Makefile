@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,8 +118,8 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) -DHAVE_OPENPTY
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS) -DHAVE_OPENPTY
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) -DHAVE_OPENPTY
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
 LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP) -lutil
 MOC	=	$(SYSCONF_MOC)
@@ -150,31 +156,31 @@ SOURCES =	TEScreen.cpp \
 		konsole.cpp \
 		main.cpp \
 		MyPty.cpp
-OBJECTS =	TEScreen.o \
-		TEWidget.o \
-		TEHistory.o \
-		TEmulation.o \
-		TEmuVt102.o \
-		session.o \
-		keytrans.o \
-		konsole.o \
-		main.o \
-		MyPty.o
+OBJECTS =	$(OBJECTS_DIR)/TEScreen.o \
+		$(OBJECTS_DIR)/TEWidget.o \
+		$(OBJECTS_DIR)/TEHistory.o \
+		$(OBJECTS_DIR)/TEmulation.o \
+		$(OBJECTS_DIR)/TEmuVt102.o \
+		$(OBJECTS_DIR)/session.o \
+		$(OBJECTS_DIR)/keytrans.o \
+		$(OBJECTS_DIR)/konsole.o \
+		$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/MyPty.o
 INTERFACES =    
 UICDECLS =      
 UICIMPLS =      
-SRCMOC	=	moc_TEWidget.cpp \
-		moc_TEmulation.cpp \
-		moc_TEmuVt102.cpp \
-		moc_session.cpp \
-		moc_konsole.cpp \
-		moc_MyPty.cpp
-OBJMOC	=	moc_TEWidget.o \
-		moc_TEmulation.o \
-		moc_TEmuVt102.o \
-		moc_session.o \
-		moc_konsole.o \
-		moc_MyPty.o
+SRCMOC	=	$(MOC_DIR)/moc_TEWidget.cpp \
+		$(MOC_DIR)/moc_TEmulation.cpp \
+		$(MOC_DIR)/moc_TEmuVt102.cpp \
+		$(MOC_DIR)/moc_session.cpp \
+		$(MOC_DIR)/moc_konsole.cpp \
+		$(MOC_DIR)/moc_MyPty.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_TEWidget.o \
+		$(OBJECTS_DIR)/moc_TEmulation.o \
+		$(OBJECTS_DIR)/moc_TEmuVt102.o \
+		$(OBJECTS_DIR)/moc_session.o \
+		$(OBJECTS_DIR)/moc_konsole.o \
+		$(OBJECTS_DIR)/moc_MyPty.o
 
 
 ####### Implicit rules
@@ -240,35 +246,40 @@ REQUIRES=embeddedkonsole
 
 ####### Compile
 
-TEScreen.o: TEScreen.cpp \
+$(OBJECTS_DIR)/TEScreen.o: TEScreen.cpp \
 		TEScreen.h \
 		TECommon.h \
 		TEHistory.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/TEScreen.o TEScreen.cpp
 
-TEWidget.o: TEWidget.cpp \
+$(OBJECTS_DIR)/TEWidget.o: TEWidget.cpp \
 		TEWidget.h \
 		TECommon.h \
 		session.h \
 		MyPty.h \
+		../../../server/qprocess.h \
 		TEmuVt102.h \
 		TEScreen.h \
 		TEHistory.h \
 		TEmulation.h \
 		keytrans.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/TEWidget.o TEWidget.cpp
 
-TEHistory.o: TEHistory.cpp \
+$(OBJECTS_DIR)/TEHistory.o: TEHistory.cpp \
 		TEHistory.h \
 		TECommon.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/TEHistory.o TEHistory.cpp
 
-TEmulation.o: TEmulation.cpp \
+$(OBJECTS_DIR)/TEmulation.o: TEmulation.cpp \
 		TEmulation.h \
 		TEWidget.h \
 		TECommon.h \
 		TEScreen.h \
 		TEHistory.h \
 		keytrans.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/TEmulation.o TEmulation.cpp
 
-TEmuVt102.o: TEmuVt102.cpp \
+$(OBJECTS_DIR)/TEmuVt102.o: TEmuVt102.cpp \
 		TEmuVt102.h \
 		TEWidget.h \
 		TECommon.h \
@@ -276,10 +287,12 @@ TEmuVt102.o: TEmuVt102.cpp \
 		TEHistory.h \
 		TEmulation.h \
 		keytrans.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/TEmuVt102.o TEmuVt102.cpp
 
-session.o: session.cpp \
+$(OBJECTS_DIR)/session.o: session.cpp \
 		session.h \
 		MyPty.h \
+		../../../server/qprocess.h \
 		TEWidget.h \
 		TECommon.h \
 		TEmuVt102.h \
@@ -287,20 +300,17 @@ session.o: session.cpp \
 		TEHistory.h \
 		TEmulation.h \
 		keytrans.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/session.o session.cpp
 
-keytrans.o: keytrans.cpp \
+$(OBJECTS_DIR)/keytrans.o: keytrans.cpp \
 		keytrans.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
 		default.keytab.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/keytrans.o keytrans.cpp
 
-konsole.o: konsole.cpp \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
-		$(QPEDIR)/include/qpe/config.h \
+$(OBJECTS_DIR)/konsole.o: konsole.cpp \
 		konsole.h \
 		MyPty.h \
+		../../../server/qprocess.h \
 		TEWidget.h \
 		TECommon.h \
 		TEmuVt102.h \
@@ -309,11 +319,12 @@ konsole.o: konsole.cpp \
 		TEmulation.h \
 		keytrans.h \
 		session.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/konsole.o konsole.cpp
 
-main.o: main.cpp \
+$(OBJECTS_DIR)/main.o: main.cpp \
 		konsole.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h \
 		MyPty.h \
+		../../../server/qprocess.h \
 		TEWidget.h \
 		TECommon.h \
 		TEmuVt102.h \
@@ -321,26 +332,29 @@ main.o: main.cpp \
 		TEHistory.h \
 		TEmulation.h \
 		keytrans.h \
-		session.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
+		session.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
-MyPty.o: MyPty.cpp \
-		MyPty.h
+$(OBJECTS_DIR)/MyPty.o: MyPty.cpp \
+		MyPty.h \
+		../../../server/qprocess.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/MyPty.o MyPty.cpp
 
-moc_TEWidget.o: moc_TEWidget.cpp \
+$(OBJECTS_DIR)/moc_TEWidget.o: $(MOC_DIR)/moc_TEWidget.cpp \
 		TEWidget.h \
 		TECommon.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_TEWidget.o $(MOC_DIR)/moc_TEWidget.cpp
 
-moc_TEmulation.o: moc_TEmulation.cpp \
+$(OBJECTS_DIR)/moc_TEmulation.o: $(MOC_DIR)/moc_TEmulation.cpp \
 		TEmulation.h \
 		TEWidget.h \
 		TECommon.h \
 		TEScreen.h \
 		TEHistory.h \
 		keytrans.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_TEmulation.o $(MOC_DIR)/moc_TEmulation.cpp
 
-moc_TEmuVt102.o: moc_TEmuVt102.cpp \
+$(OBJECTS_DIR)/moc_TEmuVt102.o: $(MOC_DIR)/moc_TEmuVt102.cpp \
 		TEmuVt102.h \
 		TEWidget.h \
 		TECommon.h \
@@ -348,10 +362,12 @@ moc_TEmuVt102.o: moc_TEmuVt102.cpp \
 		TEHistory.h \
 		TEmulation.h \
 		keytrans.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_TEmuVt102.o $(MOC_DIR)/moc_TEmuVt102.cpp
 
-moc_session.o: moc_session.cpp \
+$(OBJECTS_DIR)/moc_session.o: $(MOC_DIR)/moc_session.cpp \
 		session.h \
 		MyPty.h \
+		../../../server/qprocess.h \
 		TEWidget.h \
 		TECommon.h \
 		TEmuVt102.h \
@@ -359,11 +375,12 @@ moc_session.o: moc_session.cpp \
 		TEHistory.h \
 		TEmulation.h \
 		keytrans.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_session.o $(MOC_DIR)/moc_session.cpp
 
-moc_konsole.o: moc_konsole.cpp \
+$(OBJECTS_DIR)/moc_konsole.o: $(MOC_DIR)/moc_konsole.cpp \
 		konsole.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h \
 		MyPty.h \
+		../../../server/qprocess.h \
 		TEWidget.h \
 		TECommon.h \
 		TEmuVt102.h \
@@ -372,35 +389,39 @@ moc_konsole.o: moc_konsole.cpp \
 		TEmulation.h \
 		keytrans.h \
 		session.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_konsole.o $(MOC_DIR)/moc_konsole.cpp
 
-moc_MyPty.o: moc_MyPty.cpp \
-		MyPty.h
+$(OBJECTS_DIR)/moc_MyPty.o: $(MOC_DIR)/moc_MyPty.cpp \
+		MyPty.h \
+		../../../server/qprocess.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_MyPty.o $(MOC_DIR)/moc_MyPty.cpp
 
-moc_TEWidget.cpp: TEWidget.h
-	$(MOC) TEWidget.h -o moc_TEWidget.cpp
+$(MOC_DIR)/moc_TEWidget.cpp: TEWidget.h
+	$(MOC) TEWidget.h -o $(MOC_DIR)/moc_TEWidget.cpp
 
-moc_TEmulation.cpp: TEmulation.h
-	$(MOC) TEmulation.h -o moc_TEmulation.cpp
+$(MOC_DIR)/moc_TEmulation.cpp: TEmulation.h
+	$(MOC) TEmulation.h -o $(MOC_DIR)/moc_TEmulation.cpp
 
-moc_TEmuVt102.cpp: TEmuVt102.h
-	$(MOC) TEmuVt102.h -o moc_TEmuVt102.cpp
+$(MOC_DIR)/moc_TEmuVt102.cpp: TEmuVt102.h
+	$(MOC) TEmuVt102.h -o $(MOC_DIR)/moc_TEmuVt102.cpp
 
-moc_session.cpp: session.h
-	$(MOC) session.h -o moc_session.cpp
+$(MOC_DIR)/moc_session.cpp: session.h
+	$(MOC) session.h -o $(MOC_DIR)/moc_session.cpp
 
-moc_konsole.cpp: konsole.h
-	$(MOC) konsole.h -o moc_konsole.cpp
+$(MOC_DIR)/moc_konsole.cpp: konsole.h
+	$(MOC) konsole.h -o $(MOC_DIR)/moc_konsole.cpp
 
-moc_MyPty.cpp: MyPty.h
-	$(MOC) MyPty.h -o moc_MyPty.cpp
+$(MOC_DIR)/moc_MyPty.cpp: MyPty.h
+	$(MOC) MyPty.h -o $(MOC_DIR)/moc_MyPty.cpp
 
 
 
 lupdate:
-	lupdate embeddedkonsole.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <embeddedkonsole.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease embeddedkonsole.pro
+	$(QPEDIR)/bin/qtopia-linstall embeddedkonsole.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

@@ -21,6 +21,7 @@
 #define DATEBOOKMONTH
 
 #include <qtopia/qpeglobal.h>
+
 #include <qtopia/private/event.h>
 #include <qvbox.h>
 #include <qhbox.h>
@@ -38,6 +39,7 @@ class QSpinBox;
 class Event;
 class EffectiveEvent;
 class DateBookDB;
+
 
 class DateBookMonthHeaderPrivate;
 class QTOPIA_EXPORT DateBookMonthHeader : public QHBox

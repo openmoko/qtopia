@@ -24,7 +24,7 @@
 #include <qtopia/imagecodecinterface.h>
 #include <qlist.h>
 
-class NotePadImpl : public ImageCodecInterface
+class QTOPIA_PLUGIN_EXPORT NotePadImpl : public ImageCodecInterface
 {
 public:
     NotePadImpl();

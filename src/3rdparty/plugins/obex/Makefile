@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,10 +118,10 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
-INCPATH =	-I./openobex -I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+INCPATH =	-I$(MOC_DIR) -I./openobex
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
-LIBS	=	$(SUBLIBS) -lopenobex -lqtopiaservices -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
+LIBS	=	$(SUBLIBS) -lopenobex -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
 UIC	=	$(SYSCONF_UIC)
 
@@ -140,32 +146,32 @@ SOURCES =	qir.cpp \
 		qobex.cpp \
 		receivedialog.cpp \
 		senddialog.cpp
-OBJECTS =	qir.o \
-		qirserver.o \
-		qobex.o \
-		receivedialog.o \
-		senddialog.o \
-		receivedialogbase.o \
-		senddialogbase.o
+OBJECTS =	$(OBJECTS_DIR)/qir.o \
+		$(OBJECTS_DIR)/qirserver.o \
+		$(OBJECTS_DIR)/qobex.o \
+		$(OBJECTS_DIR)/receivedialog.o \
+		$(OBJECTS_DIR)/senddialog.o \
+		$(OBJECTS_DIR)/receivedialogbase.o \
+		$(OBJECTS_DIR)/senddialogbase.o
 INTERFACES =    receivedialogbase.ui \
 		senddialogbase.ui
 UICDECLS =      receivedialogbase.h \
 		senddialogbase.h
 UICIMPLS =      receivedialogbase.cpp \
 		senddialogbase.cpp
-SRCMOC	=	moc_qir.cpp \
-		moc_qirserver.cpp \
-		moc_receivedialog.cpp \
-		moc_senddialog.cpp \
-		qirserver.moc \
-		moc_receivedialogbase.cpp \
-		moc_senddialogbase.cpp
-OBJMOC	=	moc_qir.o \
-		moc_qirserver.o \
-		moc_receivedialog.o \
-		moc_senddialog.o \
-		moc_receivedialogbase.o \
-		moc_senddialogbase.o
+SRCMOC	=	$(MOC_DIR)/moc_qir.cpp \
+		$(MOC_DIR)/moc_qirserver.cpp \
+		$(MOC_DIR)/moc_receivedialog.cpp \
+		$(MOC_DIR)/moc_senddialog.cpp \
+		$(MOC_DIR)/moc_receivedialogbase.cpp \
+		$(MOC_DIR)/moc_senddialogbase.cpp \
+		$(MOC_DIR)/qirserver.moc
+OBJMOC	=	$(OBJECTS_DIR)/moc_qir.o \
+		$(OBJECTS_DIR)/moc_qirserver.o \
+		$(OBJECTS_DIR)/moc_receivedialog.o \
+		$(OBJECTS_DIR)/moc_senddialog.o \
+		$(OBJECTS_DIR)/moc_receivedialogbase.o \
+		$(OBJECTS_DIR)/moc_senddialogbase.o
 
 
 ####### Implicit rules
@@ -231,53 +237,38 @@ REQUIRES=
 
 ####### Compile
 
-qir.o: qir.cpp \
+$(OBJECTS_DIR)/qir.o: qir.cpp \
 		qir.h \
 		qirserver.h \
 		receivedialog.h \
 		receivedialogbase.h \
 		senddialog.h \
-		senddialogbase.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
+		senddialogbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qir.o qir.cpp
 
-qirserver.o: qirserver.cpp \
-		qirserver.moc \
+$(OBJECTS_DIR)/qirserver.o: qirserver.cpp \
+		$(MOC_DIR)/qirserver.moc \
 		qirserver.h \
-		$(QPEDIR)/include/qtopia/mimetype.h \
 		openobex/obex.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qirserver.o qirserver.cpp
 
-qobex.o: qobex.cpp \
+$(OBJECTS_DIR)/qobex.o: qobex.cpp \
 		qobex.h \
 		../../../server/obexinterface.h \
-		$(QPEDIR)/include/qpe/qcom.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
 		qir.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/qobex.o qobex.cpp
 
-receivedialog.o: receivedialog.cpp \
+$(OBJECTS_DIR)/receivedialog.o: receivedialog.cpp \
 		receivedialog.h \
 		receivedialogbase.h \
-		qirserver.h \
-		$(QPEDIR)/include/qtopia/applnk.h \
-		$(QPEDIR)/include/qtopia/mimetype.h \
-		$(QPEDIR)/include/qtopia/filemanager.h \
-		$(QPEDIR)/include/qtopia/global.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/qcopenvelope_qws.h \
-		$(QPEDIR)/include/qtopia/private/contact.h \
-		$(QPEDIR)/include/qtopia/private/palmtoprecord.h \
-		$(QPEDIR)/include/qtopia/private/recordfields.h \
-		$(QPEDIR)/include/qtopia/private/event.h \
-		$(QPEDIR)/include/qtopia/timeconversion.h \
-		$(QPEDIR)/include/qtopia/private/task.h \
-		$(QPEDIR)/include/qtopia/stringutil.h \
-		$(QPEDIR)/include/qtopia/services/services.h
+		qirserver.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/receivedialog.o receivedialog.cpp
 
-senddialog.o: senddialog.cpp \
+$(OBJECTS_DIR)/senddialog.o: senddialog.cpp \
 		senddialog.h \
 		senddialogbase.h \
 		qirserver.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/senddialog.o senddialog.cpp
 
 receivedialogbase.h: receivedialogbase.ui
 	$(UIC) receivedialogbase.ui -o $(INTERFACE_DECL_PATH)/receivedialogbase.h
@@ -291,61 +282,67 @@ senddialogbase.h: senddialogbase.ui
 senddialogbase.cpp: senddialogbase.ui
 	$(UIC) senddialogbase.ui -i senddialogbase.h -o senddialogbase.cpp
 
-receivedialogbase.o: receivedialogbase.cpp
+$(OBJECTS_DIR)/receivedialogbase.o: receivedialogbase.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/receivedialogbase.o receivedialogbase.cpp
 
-senddialogbase.o: senddialogbase.cpp
+$(OBJECTS_DIR)/senddialogbase.o: senddialogbase.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/senddialogbase.o senddialogbase.cpp
 
-moc_qir.o: moc_qir.cpp \
+$(OBJECTS_DIR)/moc_qir.o: $(MOC_DIR)/moc_qir.cpp \
 		qir.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qir.o $(MOC_DIR)/moc_qir.cpp
 
-moc_qirserver.o: moc_qirserver.cpp \
+$(OBJECTS_DIR)/moc_qirserver.o: $(MOC_DIR)/moc_qirserver.cpp \
 		qirserver.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_qirserver.o $(MOC_DIR)/moc_qirserver.cpp
 
-moc_receivedialog.o: moc_receivedialog.cpp \
+$(OBJECTS_DIR)/moc_receivedialog.o: $(MOC_DIR)/moc_receivedialog.cpp \
 		receivedialog.h \
 		receivedialogbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_receivedialog.o $(MOC_DIR)/moc_receivedialog.cpp
 
-moc_senddialog.o: moc_senddialog.cpp \
+$(OBJECTS_DIR)/moc_senddialog.o: $(MOC_DIR)/moc_senddialog.cpp \
 		senddialog.h \
 		senddialogbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_senddialog.o $(MOC_DIR)/moc_senddialog.cpp
 
-moc_receivedialogbase.o: qirserver.moc \
-		qirserver.cpp \
-		qirserver.h \
-		$(QPEDIR)/include/qtopia/mimetype.h \
-		openobex/obex.h
-
-moc_senddialogbase.o: moc_receivedialogbase.cpp \
+$(OBJECTS_DIR)/moc_receivedialogbase.o: $(MOC_DIR)/moc_receivedialogbase.cpp \
 		receivedialogbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_receivedialogbase.o $(MOC_DIR)/moc_receivedialogbase.cpp
 
-moc_qir.cpp: qir.h
-	$(MOC) qir.h -o moc_qir.cpp
+$(OBJECTS_DIR)/moc_senddialogbase.o: $(MOC_DIR)/moc_senddialogbase.cpp \
+		senddialogbase.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_senddialogbase.o $(MOC_DIR)/moc_senddialogbase.cpp
 
-moc_qirserver.cpp: qirserver.h
-	$(MOC) qirserver.h -o moc_qirserver.cpp
+$(MOC_DIR)/moc_qir.cpp: qir.h
+	$(MOC) qir.h -o $(MOC_DIR)/moc_qir.cpp
 
-moc_receivedialog.cpp: receivedialog.h
-	$(MOC) receivedialog.h -o moc_receivedialog.cpp
+$(MOC_DIR)/moc_qirserver.cpp: qirserver.h
+	$(MOC) qirserver.h -o $(MOC_DIR)/moc_qirserver.cpp
 
-moc_senddialog.cpp: senddialog.h
-	$(MOC) senddialog.h -o moc_senddialog.cpp
+$(MOC_DIR)/moc_receivedialog.cpp: receivedialog.h
+	$(MOC) receivedialog.h -o $(MOC_DIR)/moc_receivedialog.cpp
 
-qirserver.moc: qirserver.cpp
-	$(MOC) qirserver.cpp -o qirserver.moc
+$(MOC_DIR)/moc_senddialog.cpp: senddialog.h
+	$(MOC) senddialog.h -o $(MOC_DIR)/moc_senddialog.cpp
 
-moc_receivedialogbase.cpp: receivedialogbase.h
-	$(MOC) receivedialogbase.h -o moc_receivedialogbase.cpp
+$(MOC_DIR)/qirserver.moc: qirserver.cpp
+	$(MOC) qirserver.cpp -o $(MOC_DIR)/qirserver.moc
 
-moc_senddialogbase.cpp: senddialogbase.h
-	$(MOC) senddialogbase.h -o moc_senddialogbase.cpp
+$(MOC_DIR)/moc_receivedialogbase.cpp: receivedialogbase.h
+	$(MOC) receivedialogbase.h -o $(MOC_DIR)/moc_receivedialogbase.cpp
+
+$(MOC_DIR)/moc_senddialogbase.cpp: senddialogbase.h
+	$(MOC) senddialogbase.h -o $(MOC_DIR)/moc_senddialogbase.cpp
 
 
 
 lupdate:
-	lupdate obex.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <obex.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease obex.pro
+	$(QPEDIR)/bin/qtopia-linstall obex.pro
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

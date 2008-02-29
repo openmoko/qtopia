@@ -4,7 +4,7 @@
 #include "krfbdecoder.h"
 #include "krfbbuffer.h"
 
-#include <qpe/qpeapplication.h>
+#include <qtopia/qpeapplication.h>
 
 #include <qpixmap.h>
 #include <qsocket.h>
@@ -67,24 +67,36 @@ static CARD32 RreEncoding = Swap32IfLE( 2 );
 static CARD32 CorreEncoding = Swap32IfLE( 4 );
 static CARD32 HexTileEncoding = Swap32IfLE( 5 );
 
+//
+// Qt -> X11 keysym mappings, in Qt order.  Qt keycodes from <qnamespace.h>;
+// X11 keysyms from <X11/keysymdef.h>.
+//
 static struct {
     int keysym;
     int keycode;
 } keyMap[] = {
-    { 0xff08, Qt::Key_Backspace },
-    { 0xff09, Qt::Key_Tab       },
-    { 0xff0d, Qt::Key_Return    },
     { 0xff1b, Qt::Key_Escape    },
+    { 0xff09, Qt::Key_Tab       },
+    { 0xff08, Qt::Key_Backspace },
+    { 0xff0d, Qt::Key_Return    },
     { 0xff63, Qt::Key_Insert    },
     { 0xffff, Qt::Key_Delete    },
     { 0xff50, Qt::Key_Home      },
     { 0xff57, Qt::Key_End       },
-    { 0xff55, Qt::Key_Prior     },
-    { 0xff56, Qt::Key_Next      },
     { 0xff51, Qt::Key_Left      },
     { 0xff52, Qt::Key_Up        },
     { 0xff53, Qt::Key_Right     },
     { 0xff54, Qt::Key_Down      },
+    { 0xff55, Qt::Key_Prior     },
+    { 0xff56, Qt::Key_Next      },
+    { 0xffe1, Qt::Key_Shift     },
+    { 0xffe2, Qt::Key_Shift     },
+    { 0xffe3, Qt::Key_Control   },
+    { 0xffe4, Qt::Key_Control   },
+    { 0xffe7, Qt::Key_Meta      },
+    { 0xffe8, Qt::Key_Meta      },
+    { 0xffe9, Qt::Key_Alt       },
+    { 0xffea, Qt::Key_Alt       },
     { 0xffbe, Qt::Key_F1        },
     { 0xffbf, Qt::Key_F2        },
     { 0xffc0, Qt::Key_F3        },
@@ -97,14 +109,6 @@ static struct {
     { 0xffc7, Qt::Key_F10       },
     { 0xffc8, Qt::Key_F11       },
     { 0xffc9, Qt::Key_F12       },
-    { 0xffe1, Qt::Key_Shift     },
-    { 0xffe2, Qt::Key_Shift     },
-    { 0xffe3, Qt::Key_Control   },
-    { 0xffe4, Qt::Key_Control   },
-    { 0xffe7, Qt::Key_Meta      },
-    { 0xffe8, Qt::Key_Meta      },
-    { 0xffe9, Qt::Key_Alt       },
-    { 0xffea, Qt::Key_Alt       },
     { 0, 0 }
 };
 
@@ -278,8 +282,7 @@ void KRFBDecoder::decidePixelFormat()
   if ( chosenDepth == info->depth ) {
     // Use the servers native format
     format->bpp = info->bpp;
-    //    format->bigEndian = info->bigEndian;
-    format->bigEndian = true;
+    format->bigEndian = info->bigEndian;
     format->trueColor = info->trueColor;
     format->redMax = info->redMax;
     format->greenMax = info->greenMax;
@@ -299,6 +302,16 @@ void KRFBDecoder::decidePixelFormat()
       format->redShift = 0;
       format->greenShift = 3;
       format->blueShift = 6;
+    } else if (chosenDepth == 16) {
+      format->bpp = 16;
+      format->bigEndian = false;
+      format->trueColor = true;
+      format->redMax = 31;
+      format->greenMax = 63;
+      format->blueMax = 31;
+      format->redShift = 11;
+      format->greenShift = 5;
+      format->blueShift = 0;
     }
   }
 
@@ -335,7 +348,8 @@ void KRFBDecoder::sendAllowedEncodings()
   con->write( &SetEncodingsId, 1 );
   con->write( padding, 1 );
 
-  static CARD16 noEncodings = con->options()->encodings();
+  CARD16 noEncodings = con->options()->encodings();
+
   noEncodings = Swap16IfLE( noEncodings );
   con->write( &noEncodings, 2 );
 
@@ -980,44 +994,32 @@ void KRFBDecoder::sendKeyReleaseEvent( QKeyEvent *event )
   }
 }
 
+//
+// The RFB protocol spec says "For most ordinary keys, the 'keysym'
+// is the same as the corresponding ASCII value.", but doesn't
+// elaborate what the most ordinary keys are.  The spec also lists
+// a set (possibly subset, it's unspecified) of mappings for
+// "other common keys" (backspace, tab, return, escape, etc).
+//
 int KRFBDecoder::toKeySym( QKeyEvent *k )
 {
-  int ke = 0;
 
-  ke = k->ascii();
-  // Markus: Crappy hack. I dont know why lower case letters are
-  // not defined in qkeydefs.h. The key() for e.g. 'l' == 'L'. 
-  // This sucks. :-(
+    //
+    // Try and map these "other common keys" first.
+    //
+    if ((k->key() >= Qt::Key_Escape) && (k->key() <= Qt::Key_F12)) {
+	for(int i = 0; keyMap[i].keycode != 0; i++) {
+	    if (k->key() == keyMap[i].keycode) {
+		return keyMap[i].keysym;
+	    }
+	}
+    }
 
-  if ( (ke == 'a') || (ke == 'b') || (ke == 'c') || (ke == 'd') 
-       || (ke == 'e') || (ke == 'f') || (ke == 'g') || (ke == 'h')
-       || (ke == 'i') || (ke == 'j') || (ke == 'k') || (ke == 'l')
-       || (ke == 'm') || (ke == 'n') || (ke == 'o') || (ke == 'p')
-       || (ke == 'q') || (ke == 'r') || (ke == 's') || (ke == 't')
-       || (ke == 'u') || (ke == 'v') ||( ke == 'w') || (ke == 'x')
-       || (ke == 'y') || (ke == 'z') ) {
-    ke = k->key();
-    ke = ke + 0x20;
-    return ke;
-  }
-
-  // qkeydefs = xkeydefs! :-)
-  if ( ( k->key() >= 0x0a0 ) && k->key() <= 0x0ff )
-      return k->key();
-
-  if ( ( k->key() >= 0x20 ) && ( k->key() <= 0x7e ) )
-    return k->key();
-  
-  // qkeydefs != xkeydefs! :-(
-  // This is gonna suck :-(
-
-  int i = 0;
-  while ( keyMap[i].keycode ) {
-    if ( k->key() == keyMap[i].keycode )
-	return keyMap[i].keysym;
-    i++;
-  }
-
-  return 0;
+    //
+    // If these keys aren't matched, return the ascii code and let the
+    // server figure it out.  We don't return k->key(), as the data in
+    // key differs between input methods, and we don't want special cases.
+    //
+    return k->ascii();
 }
 

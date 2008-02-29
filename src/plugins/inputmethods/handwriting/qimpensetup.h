@@ -22,6 +22,7 @@
 #include <qlist.h>
 #include "qimpenprofile.h"
 
+class QTabWidget;
 class QListBox;
 class QPushButton;
 class QComboBox;
@@ -35,6 +36,7 @@ class QIMPenSetup : public QDialog
 public:
     QIMPenSetup( QIMPenProfile *p, QWidget *parent=0,
 		const char *name=0, bool modal=FALSE, int WFlags=0 );
+    ~QIMPenSetup();
 
     QIMPenEdit *editor() { return edit; }
 
@@ -48,6 +50,7 @@ private slots:
     void selectProfile( const QString &p );
 
 private:
+    QTabWidget *tabs;
     QComboBox *profileCombo;
     QIMPenEdit *edit;
     QIMPenPrefBase *pref;
@@ -55,6 +58,7 @@ private:
     int multiTimeout;
     QIMPenProfile *profile;
     QList<QIMPenProfile> profileList;
+    static int lastTab;
 };
 
 class QIMPenInputCharDlg : public QDialog
@@ -120,5 +124,7 @@ protected:
     QIMPenChar *inputChar;
     QIMPenCharSet *currentSet;
     QIMPenProfile *profile;
+    static int lastCs;
+    static int lastCh;
 };
 

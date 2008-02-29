@@ -20,47 +20,75 @@
 
 #include "brightness.h"
 
-#include <qpe/power.h>
-#include <qpe/resource.h>
-#include <qpe/qpeapplication.h>
-#include <qpe/config.h>
+#include <qtopia/power.h>
+#include <qtopia/resource.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/config.h>
 #if ( defined Q_WS_QWS || defined(_WS_QWS_) ) && !defined(QT_NO_COP)
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
 
 #include <qpainter.h>
 #include <qslider.h>
 #include <qlayout.h>
+#include <qlabel.h>
 #include <qframe.h>
 #include <qpixmap.h>
+
+#include <qtopia/applnk.h>
 
 //
 // Pinched from settings/light-and-power/light-on.xpm
 //
 /* XPM */
-static char * light_on_xpm[] = {
-"16 16 5 1",
+static const char * const light_on_xpm[] = {
+"9 16 5 1",
 "       c None",
 ".      c #FFFFFFFF0000",
 "X      c #000000000000",
 "o      c #FFFFFFFFFFFF",
 "O      c #FFFF6C6C0000",
-"                ",
-"       XXX      ",
-"      XoooX     ",
-"     Xoooo.X    ",
-"    Xoooooo.X   ",
-"    Xoooo...X   ",
-"    Xooo.o..X   ",
-"     Xooo..X    ",
-"     Xoo...X    ",
-"      Xoo.X     ",
-"      Xoo.XX    ",
-"      XOOOXX    ",
-"      XOOOXX    ",
-"       XOXX     ",
-"        XX      ",
-"                "};
+"         ",
+"   XXX   ",
+"  XoooX  ",
+" Xoooo.X ",
+"Xoooooo.X",
+"Xoooo...X",
+"Xooo.o..X",
+" Xooo..X ",
+" Xoo...X ",
+"  Xoo.X  ",
+"  Xoo.XX ",
+"  XOOOXX ",
+"  XOOOXX ",
+"   XOXX  ",
+"    XX   ",
+"         "};
+
+
+/* XPM */
+static const char * const light_off_xpm[] = {
+"9 16 4 1",
+" 	c None",
+".	c #000000000000",
+"X	c #6B6B6C6C6C6C",
+"o	c #FFFF6C6C0000",
+"         ",
+"         ",
+"   ...   ",
+"  .   .  ",
+" .    X. ",
+".      X.",
+".    XXX.",
+".   X XX.",
+" .   XX. ",
+" .  XXX. ",
+"  .  X.  ",
+"  .  X.. ",
+"  .ooo.. ",
+"  .ooo.. ",
+"   .o..  ",
+"    ..   "};
 
 extern int qpe_sysBrightnessSteps();
 
@@ -72,7 +100,8 @@ BrightnessControl::BrightnessControl(QWidget *parent, const char *name,
 {
     setFrameStyle(QFrame::PopupPanel | QFrame::Raised);
 
-    QVBoxLayout *vbox = new QVBoxLayout(this);
+    QGridLayout *gl = new QGridLayout( this, 3, 2, 6, 3 );
+    gl->setRowStretch( 1, 100 );
 
     int	maxbright = qpe_sysBrightnessSteps();
     slider = new QSlider(this);
@@ -82,10 +111,18 @@ BrightnessControl::BrightnessControl(QWidget *parent, const char *name,
     slider->setTickInterval(QMAX(1, maxbright / 16));
     slider->setLineStep(QMAX(1, maxbright / 16));
     slider->setPageStep(QMAX(1, maxbright / 16));
+    gl->addMultiCellWidget( slider, 0, 2, 0, 0 );
 
-    vbox->setMargin(6);
-    vbox->setSpacing(3);
-    vbox->addWidget(slider, 0, Qt::AlignVCenter | Qt::AlignHCenter);
+    QPixmap onPm( (const char **)light_on_xpm );
+    QLabel *l = new QLabel( this );
+    l->setPixmap( onPm );
+    gl->addWidget( l, 0, 1 );
+
+    QPixmap offPm( (const char **)light_off_xpm );
+    l = new QLabel( this );
+    l->setPixmap( offPm );
+    gl->addWidget( l, 2, 1 );
+
     setFixedHeight(100);
     setFixedWidth(sizeHint().width());
     setFocusPolicy(QWidget::NoFocus);
@@ -97,9 +134,13 @@ BrightnessControl::BrightnessControl(QWidget *parent, const char *name,
 BrightnessApplet::BrightnessApplet(QWidget *parent, const char *name)
     : QWidget(parent, name), bc(0)
 {
-    setFixedHeight(18);
-    setFixedWidth(14);
-    brightnessPixmap = new QPixmap((const char**)light_on_xpm);
+    QImage  img = Resource::loadImage("Light");
+    img = img.smoothScale(AppLnk::smallIconSize(), AppLnk::smallIconSize());
+    brightnessPixmap = new QPixmap();
+    brightnessPixmap->convertFromImage(img);
+
+    setFixedWidth(AppLnk::smallIconSize());
+    setFixedHeight(AppLnk::smallIconSize());
 }
 
 //
@@ -147,7 +188,10 @@ BrightnessApplet::mousePressEvent(QMouseEvent *)
 	this, SLOT(sliderMoved(int)));
 
     QPoint curPos = mapToGlobal(rect().topLeft());
-    bc->move(curPos.x() - (bc->sizeHint().width()-width())/2, curPos.y() - 100);
+    if ( curPos.x() + bc->sizeHint().width() > qApp->desktop()->width() )
+	bc->move( qApp->desktop()->width() - bc->sizeHint().width(), curPos.y() - 101 );
+    else 
+	bc->move(curPos.x() - (bc->sizeHint().width()-width())/2, curPos.y() - 101);
     bc->show();
 }
 
@@ -155,7 +199,7 @@ BrightnessApplet::mousePressEvent(QMouseEvent *)
 //
 //
 void
-BrightnessApplet::sliderMoved(int value)
+BrightnessApplet::sliderMoved(int /* value */)
 {
 #ifndef QT_NO_COP
     QCopEnvelope e("QPE/System", "setBacklight(int)");
@@ -215,5 +259,5 @@ BrightnessApplet::paintEvent(QPaintEvent*)
 {
     QPainter p(this);
 
-    p.drawPixmap(0, 1, *brightnessPixmap);
+    p.drawPixmap(0, 0, *brightnessPixmap);
 }

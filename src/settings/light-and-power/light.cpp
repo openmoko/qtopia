@@ -19,15 +19,15 @@
 **********************************************************************/
 #include "settings.h"
 
-#include <qpe/global.h>
-#include <qpe/fontmanager.h>
-#include <qpe/config.h>
-#include <qpe/applnk.h>
-#include <qpe/qpeapplication.h>
-#include <qpe/power.h>
+#include <qtopia/global.h>
+#include <qtopia/fontmanager.h>
+#include <qtopia/config.h>
+#include <qtopia/applnk.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/power.h>
 
 #if defined(Q_WS_QWS) && !defined(QT_NO_COP)
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
 
 #include <qlabel.h>

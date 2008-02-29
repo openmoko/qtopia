@@ -20,7 +20,7 @@
 #ifndef ABLABEL_H
 #define ABLABEL_H
 
-#include <qpe/pim/contact.h>
+#include <qtopia/pim/contact.h>
 #include <qtextview.h>
 
 class AbLabel : public QTextView

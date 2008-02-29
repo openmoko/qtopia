@@ -1,0 +1,9 @@
+Files: bin/mediarecorder apps/Applications/voicerecorder.desktop
+Priority: optional
+Section: qpe/applications
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-10
+Depends: qpe-libqtopia
+Description: Media Recorder
+ The multimedia recorder for the Qtopia environment.

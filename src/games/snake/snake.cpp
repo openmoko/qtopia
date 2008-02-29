@@ -22,7 +22,7 @@
 #include "target.h"
 #include "codes.h"
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
 #include <qregexp.h>
 
@@ -52,19 +52,19 @@ void Snake::createSnake()
    head->setFrame(7);
    snakelist.insert(0, head);
    head->show();
-   head->move(34, 16);
+   head->move(32, 16);
  
    QCanvasSprite* body = new QCanvasSprite(snakeparts, canvas );
    body->setFrame(6);
    snakelist.append( body );
    body->show();
-   body->move(18, 16);
+   body->move(16, 16);
  
    QCanvasSprite* end = new QCanvasSprite(snakeparts, canvas );
    end->setFrame(11);
    snakelist.append( end );
    end->show();
-   end->move(2, 16);
+   end->move(0, 16);
  
    currentdir = right; 
    speed = 250;

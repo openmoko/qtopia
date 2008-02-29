@@ -3,107 +3,172 @@
 **
 ** This file is part of the Qtopia Environment.
 **
-** Licensees holding valid Qtopia Developer license may use this
-** file in accordance with the Qtopia Developer License Agreement
-** provided with the Software.
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
 **
-** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING
-** THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-** PURPOSE.
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
-** email sales@trolltech.com for information about Qtopia License
-** Agreements.
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
 **
 ** Contact info@trolltech.com if any conditions of this licensing are
 ** not clear to you.
 **
 **********************************************************************/
 
-#ifndef __CONTACT_H__
-#define __CONTACT_H__
+#ifndef PIM_CONTACT_H
+#define PIM_CONTACT_H
 
 #include <qtopia/pim/pimrecord.h>
-#include <qtopia/private/recordfields.h>
 
 #include <qstringlist.h>
 #include <qmap.h>
 
-#if defined(QTOPIA_TEMPLATEDLL)
-// MOC_SKIP_BEGIN
-template class QTOPIA_EXPORT QMap<int, QString>;
-// MOC_SKIP_END
-#endif
-
 struct VObject;
 class AddressBookAccessPrivate;
 class PimContactPrivate;
-class QTOPIA_EXPORT PimContact : public PimRecord
+class QDate;
+class QTOPIAPIM_EXPORT PimContact : public PimRecord
 {
-    friend class DataSet;
     friend class AddressBookAccessPrivate;
+
 public:
+    /*!
+      \internal
+    */
+    enum ContactFields {
+	NameTitle = CommonFieldsEnd,
+	FirstName,
+	MiddleName,
+	LastName,
+	Suffix,
+	FileAs,
+
+	JobTitle,
+	Department,
+	Company,
+	BusinessPhone,
+	BusinessFax,
+	BusinessMobile,
+
+	// email
+	DefaultEmail,
+	Emails,
+
+	HomePhone,
+	HomeFax,
+	HomeMobile,
+
+	// business
+	BusinessStreet,
+	BusinessCity,
+	BusinessState,
+	BusinessZip,
+	BusinessCountry,
+	BusinessPager,
+	BusinessWebPage,
+
+	Office,
+	Profession,
+	Assistant,
+	Manager,
+
+	// home
+	HomeStreet,
+	HomeCity,
+	HomeState,
+	HomeZip,
+	HomeCountry,
+	HomeWebPage,
+
+	//personal
+	Spouse,
+	Gender,
+	Birthday,
+	Anniversary,
+	Nickname,
+	Children,
+
+	// other
+	Notes,
+
+	// maps to Furigana, or is at least intended to.
+	Pronunciation,
+
+	// DisplayFieldsCount should always be last and is not supposed to 
+	// be relied on.  If you need to iteratate, get a map.
+	ContactFieldsEnd = 100
+    };
+
     PimContact();
+
     virtual ~PimContact();
+    
+    void fromMap( const QMap<int, QString> &m );
 
     static void writeVCard( const QString &filename, const QValueList<PimContact> &contacts);
     static void writeVCard( const QString &filename, const PimContact &c );
     static QValueList<PimContact> readVCard( const QString &filename );
 
-    void setTitle( const QString &v ) { replace( Qtopia::Title, v ); }
-    void setFirstName( const QString &v ) { replace( Qtopia::FirstName, v ); }
-    void setMiddleName( const QString &v ) { replace( Qtopia::MiddleName, v ); }
-    void setLastName( const QString &v ) { replace( Qtopia::LastName, v ); }
-    void setSuffix( const QString &v ) { replace( Qtopia::Suffix, v ); }
-    void setFileAs( const QString &v ) { replace( Qtopia::FileAs, v ); }
+    void setNameTitle( const QString &v ) { replace( NameTitle, v ); }
+    void setFirstName( const QString &v ) { replace( FirstName, v ); }
+    void setMiddleName( const QString &v ) { replace( MiddleName, v ); }
+    void setLastName( const QString &v ) { replace( LastName, v ); }
+    void setSuffix( const QString &v ) { replace( Suffix, v ); }
+    void setFileAs( const QString &v ) { replace( FileAs, v ); }
     void setFileAs();
-    void setPronunciation( const QString &v ) { replace( Qtopia::Pronunciation, v ); }
+    void setPronunciation( const QString &v ) { replace( Pronunciation, v ); }
 
     // default email address
-    void setDefaultEmail( const QString &v ) { replace( Qtopia::DefaultEmail, v ); }
-    // the emails should be seperated by a semicolon
-    void setEmails( const QString &v );
-    void insertEmail(const QString &);
+    void setDefaultEmail( const QString &v );
+    // inserts email to list and ensure's doesn't already exist
+    void insertEmail( const QString &v );
+    void removeEmail( const QString &v );
+    void clearEmailList();
+    void setEmailList( const QStringList &v );
 
     // home
-    void setHomeStreet( const QString &v ) { replace( Qtopia::HomeStreet, v ); }
-    void setHomeCity( const QString &v ) { replace( Qtopia::HomeCity, v ); }
-    void setHomeState( const QString &v ) { replace( Qtopia::HomeState, v ); }
-    void setHomeZip( const QString &v ) { replace( Qtopia::HomeZip, v ); }
-    void setHomeCountry( const QString &v ) { replace( Qtopia::HomeCountry, v ); }
-    void setHomePhone( const QString &v ) { replace( Qtopia::HomePhone, v ); }
-    void setHomeFax( const QString &v ) { replace( Qtopia::HomeFax, v ); }
-    void setHomeMobile( const QString &v ) { replace( Qtopia::HomeMobile, v ); }
-    void setHomeWebpage( const QString &v ) { replace( Qtopia::HomeWebPage, v ); }
+    void setHomeStreet( const QString &v ) { replace( HomeStreet, v ); }
+    void setHomeCity( const QString &v ) { replace( HomeCity, v ); }
+    void setHomeState( const QString &v ) { replace( HomeState, v ); }
+    void setHomeZip( const QString &v ) { replace( HomeZip, v ); }
+    void setHomeCountry( const QString &v ) { replace( HomeCountry, v ); }
+    void setHomePhone( const QString &v ) { replace( HomePhone, v ); }
+    void setHomeFax( const QString &v ) { replace( HomeFax, v ); }
+    void setHomeMobile( const QString &v ) { replace( HomeMobile, v ); }
+    void setHomeWebpage( const QString &v ) { replace( HomeWebPage, v ); }
 
     // business
-    void setCompany( const QString &v ) { replace( Qtopia::Company, v ); }
-    void setBusinessStreet( const QString &v ) { replace( Qtopia::BusinessStreet, v ); }
-    void setBusinessCity( const QString &v ) { replace( Qtopia::BusinessCity, v ); }
-    void setBusinessState( const QString &v ) { replace( Qtopia::BusinessState, v ); }
-    void setBusinessZip( const QString &v ) { replace( Qtopia::BusinessZip, v ); }
-    void setBusinessCountry( const QString &v ) { replace( Qtopia::BusinessCountry, v ); }
-    void setBusinessWebpage( const QString &v ) { replace( Qtopia::BusinessWebPage, v ); }
-    void setJobTitle( const QString &v ) { replace( Qtopia::JobTitle, v ); }
-    void setDepartment( const QString &v ) { replace( Qtopia::Department, v ); }
-    void setOffice( const QString &v ) { replace( Qtopia::Office, v ); }
-    void setBusinessPhone( const QString &v ) { replace( Qtopia::BusinessPhone, v ); }
-    void setBusinessFax( const QString &v ) { replace( Qtopia::BusinessFax, v ); }
-    void setBusinessMobile( const QString &v ) { replace( Qtopia::BusinessMobile, v ); }
-    void setBusinessPager( const QString &v ) { replace( Qtopia::BusinessPager, v ); }
-    void setProfession( const QString &v ) { replace( Qtopia::Profession, v ); }
-    void setAssistant( const QString &v ) { replace( Qtopia::Assistant, v ); }
-    void setManager( const QString &v ) { replace( Qtopia::Manager, v ); }
+    void setCompany( const QString &v ) { replace( Company, v ); }
+    void setBusinessStreet( const QString &v ) { replace( BusinessStreet, v ); }
+    void setBusinessCity( const QString &v ) { replace( BusinessCity, v ); }
+    void setBusinessState( const QString &v ) { replace( BusinessState, v ); }
+    void setBusinessZip( const QString &v ) { replace( BusinessZip, v ); }
+    void setBusinessCountry( const QString &v ) { replace( BusinessCountry, v ); }
+    void setBusinessWebpage( const QString &v ) { replace( BusinessWebPage, v ); }
+    void setJobTitle( const QString &v ) { replace( JobTitle, v ); }
+    void setDepartment( const QString &v ) { replace( Department, v ); }
+    void setOffice( const QString &v ) { replace( Office, v ); }
+    void setBusinessPhone( const QString &v ) { replace( BusinessPhone, v ); }
+    void setBusinessFax( const QString &v ) { replace( BusinessFax, v ); }
+    void setBusinessMobile( const QString &v ) { replace( BusinessMobile, v ); }
+    void setBusinessPager( const QString &v ) { replace( BusinessPager, v ); }
+    void setProfession( const QString &v ) { replace( Profession, v ); }
+    void setAssistant( const QString &v ) { replace( Assistant, v ); }
+    void setManager( const QString &v ) { replace( Manager, v ); }
 
     // personal
-    void setSpouse( const QString &v ) { replace( Qtopia::Spouse, v ); }
-    void setGender( const QString &v ) { replace( Qtopia::Gender, v ); }
-    void setBirthday( const QString &v ) { replace( Qtopia::Birthday, v ); }
-    void setAnniversary( const QString &v ) { replace( Qtopia::Anniversary, v ); }
-    void setNickname( const QString &v ) { replace( Qtopia::Nickname, v ); }
+    void setSpouse( const QString &v ) { replace( Spouse, v ); }
+    void setGender( const QString &v ) { replace( Gender, v ); }
+    void setBirthday( const QDate &d );
+    void setAnniversary( const QDate &v );
+    void setNickname( const QString &v ) { replace( Nickname, v ); }
     void setChildren( const QString &v );
 
     // other
-    void setNotes( const QString &v ) { replace( Qtopia::Notes, v); }
+    void setNotes( const QString &v ) { replace( Notes, v); }
 
     bool match( const QString &regexp ) const;
 
@@ -114,33 +179,32 @@ public:
 
     // name
     QString fullName() const;
-    QString title() const { return find( Qtopia::Title ); }
-    QString firstName() const { return find( Qtopia::FirstName ); }
-    QString middleName() const { return find( Qtopia::MiddleName ); }
-    QString lastName() const { return find( Qtopia::LastName ); }
-    QString suffix() const { return find( Qtopia::Suffix ); }
-    QString fileAs() const { return find( Qtopia::FileAs ); }
-    QString pronunciation() const { return find( Qtopia::Pronunciation ); }
+    QString nameTitle() const { return find( NameTitle ); }
+    QString firstName() const { return find( FirstName ); }
+    QString middleName() const { return find( MiddleName ); }
+    QString lastName() const { return find( LastName ); }
+    QString suffix() const { return find( Suffix ); }
+    QString fileAs() const { return find( FileAs ); }
+    QString pronunciation() const { return find( Pronunciation ); }
 
     // helper function.  Attempts to find a string to use
     // as a one line representation for the contact.
     QString bestLabel() const;
 
     // email
-    QString defaultEmail() const { return find( Qtopia::DefaultEmail ); }
-    QString emails() const { return find( Qtopia::Emails ); }
+    QString defaultEmail() const { return find( DefaultEmail ); }
     QStringList emailList() const;
 
     // home
-    QString homeStreet() const { return find( Qtopia::HomeStreet ); }
-    QString homeCity() const { return find( Qtopia::HomeCity ); }
-    QString homeState() const { return find( Qtopia::HomeState ); }
-    QString homeZip() const { return find( Qtopia::HomeZip ); }
-    QString homeCountry() const { return find( Qtopia::HomeCountry ); }
-    QString homePhone() const { return find( Qtopia::HomePhone ); }
-    QString homeFax() const { return find( Qtopia::HomeFax ); }
-    QString homeMobile() const { return find( Qtopia::HomeMobile ); }
-    QString homeWebpage() const { return find( Qtopia::HomeWebPage ); }
+    QString homeStreet() const { return find( HomeStreet ); }
+    QString homeCity() const { return find( HomeCity ); }
+    QString homeState() const { return find( HomeState ); }
+    QString homeZip() const { return find( HomeZip ); }
+    QString homeCountry() const { return find( HomeCountry ); }
+    QString homePhone() const { return find( HomePhone ); }
+    QString homeFax() const { return find( HomeFax ); }
+    QString homeMobile() const { return find( HomeMobile ); }
+    QString homeWebpage() const { return find( HomeWebPage ); }
     /** Multi line string containing all non-empty address info in the form
     * Street
     * City, State Zip
@@ -149,23 +213,23 @@ public:
     QString displayHomeAddress() const;
 
     // business
-    QString company() const { return find( Qtopia::Company ); }
-    QString businessStreet() const { return find( Qtopia::BusinessStreet ); }
-    QString businessCity() const { return find( Qtopia::BusinessCity ); }
-    QString businessState() const { return find( Qtopia::BusinessState ); }
-    QString businessZip() const { return find( Qtopia::BusinessZip ); }
-    QString businessCountry() const { return find( Qtopia::BusinessCountry ); }
-    QString businessWebpage() const { return find( Qtopia::BusinessWebPage ); }
-    QString jobTitle() const { return find( Qtopia::JobTitle ); }
-    QString department() const { return find( Qtopia::Department ); }
-    QString office() const { return find( Qtopia::Office ); }
-    QString businessPhone() const { return find( Qtopia::BusinessPhone ); }
-    QString businessFax() const { return find( Qtopia::BusinessFax ); }
-    QString businessMobile() const { return find( Qtopia::BusinessMobile ); }
-    QString businessPager() const { return find( Qtopia::BusinessPager ); }
-    QString profession() const { return find( Qtopia::Profession ); }
-    QString assistant() const { return find( Qtopia::Assistant ); }
-    QString manager() const { return find( Qtopia::Manager ); }
+    QString company() const { return find( Company ); }
+    QString businessStreet() const { return find( BusinessStreet ); }
+    QString businessCity() const { return find( BusinessCity ); }
+    QString businessState() const { return find( BusinessState ); }
+    QString businessZip() const { return find( BusinessZip ); }
+    QString businessCountry() const { return find( BusinessCountry ); }
+    QString businessWebpage() const { return find( BusinessWebPage ); }
+    QString jobTitle() const { return find( JobTitle ); }
+    QString department() const { return find( Department ); }
+    QString office() const { return find( Office ); }
+    QString businessPhone() const { return find( BusinessPhone ); }
+    QString businessFax() const { return find( BusinessFax ); }
+    QString businessMobile() const { return find( BusinessMobile ); }
+    QString businessPager() const { return find( BusinessPager ); }
+    QString profession() const { return find( Profession ); }
+    QString assistant() const { return find( Assistant ); }
+    QString manager() const { return find( Manager ); }
      /** Multi line string containing all non-empty address info in the form
     * Street
     * City, State Zip
@@ -174,34 +238,42 @@ public:
     QString displayBusinessAddress() const;
 
     //personal
-    QString spouse() const { return find( Qtopia::Spouse ); }
-    QString gender() const { return find( Qtopia::Gender ); }
-    QString birthday() const { return find( Qtopia::Birthday ); }
-    QString anniversary() const { return find( Qtopia::Anniversary ); }
-    QString nickname() const { return find( Qtopia::Nickname ); }
-    QString children() const { return find( Qtopia::Children ); }
+    QString spouse() const { return find( Spouse ); }
+    QString gender() const { return find( Gender ); }
+    QDate birthday() const;
+    QDate anniversary() const;
+    QString nickname() const { return find( Nickname ); }
+    QString children() const { return find( Children ); }
     QStringList childrenList() const;
 
     // other
-    QString notes() const { return find( Qtopia::Notes ); }
-    //QString groups() const { return find( Qtopia::Groups ); }
+    QString notes() const { return find( Notes ); }
+    //QString groups() const { return find( Groups ); }
     //QStringList groupList() const;
 
-    static QStringList fields();
-    static QStringList trfields();
+    static const QMap<int, QCString> &keyToIdentifierMap();
+    static const QMap<QCString,int> &identifierToKeyMap();
+    static const QMap<int, QString> & trFieldsMap();
+    // needed for Qtopia Desktop synchronization
+    static const QMap<int,int> &uniquenessMap();
 
     QString toRichText() const;
-    QString field( int key ) const { return find( key ); }
+
+    virtual void setField(int,const QString &);
+    virtual QString field(int) const;
+    virtual QMap<int,QString> fields() const;
 
 #ifndef QT_NO_DATASTREAM
-    friend QTOPIA_EXPORT QDataStream &operator>>( QDataStream &, PimContact & );
-    friend QTOPIA_EXPORT QDataStream &operator<<( QDataStream &, const PimContact & );
+    friend QTOPIAPIM_EXPORT QDataStream &operator>>( QDataStream &, PimContact & );
+    friend QTOPIAPIM_EXPORT QDataStream &operator<<( QDataStream &, const PimContact & );
 #endif
 
 protected:
+    //virtual int endFieldMarker() const {return ContactFieldCount; }
+
     static VObject *createVObject( const PimContact &c );
     void p_setUid( QUuid i )
-{ PimRecord::p_setUid(i); replace( Qtopia::AddressUid , i.toString()); }
+{ PimRecord::p_setUid(i); replace( UID_ID , i.toString()); }
 
     void insert( int key, const QString &value );
     void replace( int key, const QString &value );
@@ -214,12 +286,20 @@ protected:
 			    const QString &country ) const;
 
     QMap<int, QString> mMap;
+
+private:
+    static void initMaps();
+
     PimContactPrivate *d;
 };
 
+#define QTOPIAPIM_DEFINE_CONTACT
+#include <qtopia/pim/qtopiapimwinexport.h>
+
+
 #ifndef QT_NO_DATASTREAM
-QTOPIA_EXPORT QDataStream &operator>>( QDataStream &, PimContact & );
-QTOPIA_EXPORT QDataStream &operator<<( QDataStream &, const PimContact & );
+QTOPIAPIM_EXPORT QDataStream &operator>>( QDataStream &, PimContact & );
+QTOPIAPIM_EXPORT QDataStream &operator<<( QDataStream &, const PimContact & );
 #endif
 
 #endif

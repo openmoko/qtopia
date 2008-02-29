@@ -19,11 +19,11 @@
 **********************************************************************/
 
 #include "taskbarsettings.h"
-#include <qpe/config.h>
-#include <qpe/qlibrary.h>
-#include <qpe/qpeapplication.h>
-#include <qpe/taskbarappletinterface.h>
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/config.h>
+#include <qtopia/qlibrary.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/taskbarappletinterface.h>
+#include <qtopia/qcopenvelope_qws.h>
 #include <qdir.h>
 #include <qlistview.h>
 #include <qcheckbox.h>
@@ -34,7 +34,8 @@ TaskbarSettings::TaskbarSettings( QWidget *parent, const char *name, bool modal,
     : TaskbarSettingsBase( parent, name, modal, f|WStyle_ContextHelp ), appletsChanged(FALSE)
 {
     appletListView->header()->hide();
-    connect( appletListView, SIGNAL(clicked(QListViewItem*)), this, SLOT(appletChanged()) );
+    connect( appletListView, SIGNAL(clicked(QListViewItem*,const QPoint &,int)), this, SLOT(itemClicked(QListViewItem *,const QPoint &,int)) );
+    appletListView->installEventFilter( this );
     init();
 }
 
@@ -44,8 +45,12 @@ void TaskbarSettings::init()
     cfg.setGroup( "Applets" );
     QStringList exclude = cfg.readListEntry( "ExcludeApplets", ',' );
 
-    QString path = QPEApplication::qpeDir() + "/plugins/applets";
+    QString path = QPEApplication::qpeDir() + "plugins/applets";
+#ifndef Q_OS_WIN32
     QDir dir( path, "lib*.so" );
+#else
+    QDir dir( path, "*.dll" );
+#endif
     QStringList list = dir.entryList();
     QStringList::Iterator it;
     for ( it = list.begin(); it != list.end(); ++it ) {
@@ -58,7 +63,7 @@ void TaskbarSettings::init()
 	    QString lang = getenv( "LANG" );
 	    QTranslator * trans = new QTranslator(qApp);
 	    QString type = (*it).left( (*it).find(".") );
-	    QString tfn = QPEApplication::qpeDir()+"/i18n/"+lang+"/"+type+".qm";
+	    QString tfn = QPEApplication::qpeDir()+"i18n/"+lang+"/"+type+".qm";
 	    if ( trans->load( tfn ))
 		qApp->installTranslator( trans );
 	    else
@@ -69,13 +74,26 @@ void TaskbarSettings::init()
 	    lib->unload();
 	} else {
 	    delete lib;
+#ifndef Q_OS_WIN32
 	    name = (*it).mid(3);
 	    int sep = name.find( ".so" );
+#else
+	    name = (*it);
+            int sep = name.find( ".dll" );
+#endif
 	    if ( sep > 0 )
 		name.truncate( sep );
 	    sep = name.find( "applet" );
+#ifndef Q_OS_WIN32
 	    if ( sep == (int)name.length() - 6 )
 		name.truncate( sep );
+#else
+	    if (sep >= 0){
+                name.truncate( sep );
+	    }else{
+		qDebug("No applet in %s", (char*)name.latin1());
+	    }
+#endif
 	    name[0] = name[0].upper();
 	}
 	QCheckListItem *item;
@@ -92,9 +110,25 @@ void TaskbarSettings::init()
     menu_launcher_tabs->setChecked(cfg.readBoolEntry("LauncherTabs",TRUE));
 }
 
-void TaskbarSettings::appletChanged()
+void TaskbarSettings::itemClicked( QListViewItem *i, const QPoint &p, int )
 {
-    appletsChanged = TRUE;
+    if ( i ) {
+	appletsChanged = TRUE;
+	if ( p.x() > 25 ) {
+	    QCheckListItem *ci = (QCheckListItem *)i;
+	    ci->setOn( !ci->isOn() );
+	}
+    }
+}
+
+bool TaskbarSettings::eventFilter( QObject *o, QEvent *e )
+{
+    if ( o == appletListView && e->type() == QEvent::KeyPress ) {
+	if ( ((QKeyEvent*)e)->key() == Key_Space )
+	    appletsChanged = TRUE;
+    }
+
+    return FALSE;
 }
 
 void TaskbarSettings::accept()

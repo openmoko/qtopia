@@ -20,6 +20,7 @@
 #ifndef FILESELECTOR_H
 #define FILESELECTOR_H
 
+#include <qtopia/qpeglobal.h>
 #include <qhbox.h>
 #include <qvbox.h>
 #include <qtoolbutton.h>
@@ -32,7 +33,7 @@ class QPopupMenu;
 class QPushButton;
 class FileSelectorView;
 
-class FileSelectorItem : public QListViewItem
+class QTOPIA_EXPORT FileSelectorItem : public QListViewItem
 {
 public:
     FileSelectorItem( QListView *parent, const DocLnk& f );
@@ -45,7 +46,7 @@ private:
 };
 
 class FileSelectorPrivate;
-class FileSelector : public QVBox
+class QTOPIA_EXPORT FileSelector : public QVBox
 {
     Q_OBJECT
 
@@ -54,39 +55,23 @@ public:
     ~FileSelector();
     void setNewVisible( bool b );
     void setCloseVisible( bool b );
-    void reread();
     int fileCount();
-    DocLnk selectedDocument() const
-    {
-	const DocLnk* rp = ((FileSelector*)this)->selected();
-	if (!rp) {
-	    DocLnk r;
-	    return r;
-	}
-	DocLnk r(*rp);
-	delete rp;
-	return r;
-    }
+    DocLnk selectedDocument() const;	    // libqtopia
+    QValueList<DocLnk> fileList() const;    // libqtopia
     const DocLnk *selected(); // use selectedDocument() instead
 
-    QValueList<DocLnk> fileList() const
-    {
-	((FileSelector*)this)->fileCount(); // ensure all loaded when this is extended
-
-	QValueList<DocLnk> list;
-	FileSelectorItem *item = (FileSelectorItem *)((QListView*)view)->firstChild();
-	while (item) {
-	    list.append(item->file());
-	    item = (FileSelectorItem *)item->nextSibling();
-	}
-
-	return list;
-    }
+public slots:
+    void reread();
 
 signals:
     void fileSelected( const DocLnk & );
     void newSelected( const DocLnk & );
     void closeMe();
+    void typeChanged(void);
+    void categoryChanged(void);
+
+protected:
+    void showEvent( QShowEvent * );
 
 private slots:
     void createNew();
@@ -97,6 +82,7 @@ private slots:
     void typeSelected( const QString &type );
     void catSelected( int );
     void cardChanged();
+    void linkChanged( const QString & );
 
 private:
     void updateView();

@@ -20,7 +20,7 @@
 #ifndef ABEDITOR_H
 #define ABEDITOR_H
 
-#include <qpe/pim/contact.h>
+#include <qtopia/pim/contact.h>
 
 #include <qdialog.h>
 #include <qlist.h>
@@ -32,49 +32,59 @@ class QMultiLineEdit;
 class QLineEdit;
 class QLabel;
 class QComboBox;
+class QHBox;
+class QTabWidget;
 class CategorySelect;
+class QPEDateButton;
 
+class FileAsCombo;
 class AbEditor : public QDialog
 {
     Q_OBJECT
+
+    friend class FileAsCombo;
 public:
-    AbEditor( const PimContact &entry, const QValueList<int> *newOrdedValues,
-	      QStringList *slNewOrdered,
-	      QWidget* parent = 0, const char* name = 0, WFlags fl = 0 );
+    AbEditor( QWidget* parent = 0, const char* name = 0,  WFlags fl = 0 );
     ~AbEditor();
-    void loadFields();
+
     void setNameFocus();
     PimContact entry() const { return ent; }
 
 public slots:
-    void slotNote();
     void setEntry( const PimContact &entry );
 
 protected slots:
     void accept();
+    void tabClicked( QWidget *tab );
+    void editEmails();
 
 private:
     void init();
-    void initMap();
-    void saveEntry();
+    QWidget *addScrollBars( QWidget *tab );
+    void addFields( QWidget *tabContainer, const QValueList<int> &keys );
+
+    void contactFromFields(PimContact &);
     bool isEmpty();
 
 private:
-    QDialog *dlgNote;
-    QLabel *lblNote;
-    QMultiLineEdit *txtNote;
     PimContact ent;
-    QScrollView *svPage;
-    QLineEdit *firstEdit;
-    QLineEdit *lastEdit;
-    QLineEdit *pronunciationEdit;
-    QLineEdit *middleEdit;
+    QMultiLineEdit *txtNote;
+    QTabWidget *tabs;
+    QWidget *personalTab;
+    QWidget *summaryTab;
+    QLabel *summary;
+    QMap<int, QLineEdit *> lineEdits;
+    QMap<int, QLabel *> labels;
     QComboBox *genderCombo;
-    QList<QLineEdit> listValue;
-    QList<QLabel> listName;
-    const QValueList<int> *orderedValues;
-    QStringList *slOrdered;
+    QComboBox *titleCombo;
+    QComboBox *suffixCombo;
+    FileAsCombo *fileAsCombo;
     CategorySelect *cmbCat;
+    QPEDateButton *bdayButton;
+    QPEDateButton *anniversaryButton;
+    QHBox *ehb;
+    QLineEdit *emailLE;
+    QPushButton *emailBtn;
 };
 
 #endif

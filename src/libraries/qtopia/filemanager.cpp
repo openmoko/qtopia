@@ -76,7 +76,11 @@ bool FileManager::saveFile( const DocLnk &f, const QByteArray &data )
 	return FALSE;
     }
     // else rename the file...
-    if ( ::rename( fn.latin1(), f.file().latin1() ) < 0 ) {
+    QDir dir;
+#ifdef Q_OS_WIN32
+    QFile::remove( f.file() );
+#endif
+    if (dir.rename( fn, f.file()) == FALSE ) {
 	qWarning( "problem renaming file %s to %s, errno: %d", fn.latin1(),
 		  f.file().latin1(), errno );
 	// remove the file...
@@ -111,7 +115,11 @@ bool FileManager::saveFile( const DocLnk &f, const QString &text )
 	return FALSE;
     }
     // okay now rename the file...
-    if ( ::rename( fn.latin1(), f.file().latin1() ) < 0 ) {
+    QDir dir;
+#ifdef Q_OS_WIN32
+    QFile::remove( f.file() );
+#endif
+    if ( dir.rename( fn, f.file() ) == FALSE) {
 	qWarning( "problem renaming file %s to %s, errno: %d", fn.latin1(),
 		  f.file().latin1(), errno );
 	// remove the tmp file, otherwise, it will just lay around...
@@ -206,7 +214,11 @@ bool FileManager::copyFile( const AppLnk &src, const AppLnk &dest )
 
     if ( ok ) {
 	// okay now rename the file...
-	if ( ::rename( fn.latin1(), dest.file().latin1() ) < 0 ) {
+        QDir dir;
+#ifdef Q_OS_WIN32
+    	QFile::remove( dest.file() );
+#endif
+	if ( dir.rename( fn, dest.file()) == FALSE) {
 	    qWarning( "problem renaming file %s to %s, errno: %d", fn.latin1(),
 		      dest.file().latin1(), errno );
 	    // remove the tmp file, otherwise, it will just lay around...
@@ -274,11 +286,20 @@ bool FileManager::exists( const DocLnk &f )
 */
 bool FileManager::ensurePathExists( const QString &fn )
 {
-    QFileInfo fi(fn);
-    fi.setFile( fi.dirPath(TRUE) );
-    if ( !fi.exists() ) {
-	if ( system(("mkdir -p "+fi.filePath())) )
+    QDir d(fn);
+    if (!d.exists()){
+	QFileInfo fi(fn);
+	fi.setFile( fi.dirPath(TRUE) );
+	QString dirPath = QDir::convertSeparators(fi.filePath());
+	QString param("");
+#ifndef Q_OS_WIN32
+	param = "-p ";
+#endif
+	QString cmdLine("mkdir " + param + dirPath.latin1());
+	if ( system(cmdLine.latin1()) ){
+	    qDebug("System failed to execute command %s", cmdLine.latin1());
 	    return FALSE;
+	}
     }
 
     return TRUE;

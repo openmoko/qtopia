@@ -20,11 +20,13 @@
 #ifndef XMLREADER_H
 #define XMLREADER_H
 
+#include <qtopia/qpeglobal.h>
+#include <qtopia/categories.h>
 #include <qstring.h>
 #include <qxml.h>
 #include <qmap.h>
 
-class Node
+class QTOPIA_EXPORT Node
 {
 public:
     Node();
@@ -58,7 +60,7 @@ private:
 };
 
 class XmlHandlerPrivate;
-class XmlHandler : public QXmlDefaultHandler
+class QTOPIA_EXPORT XmlHandler : public QXmlDefaultHandler
 {
 public:
     XmlHandler();

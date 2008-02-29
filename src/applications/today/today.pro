@@ -3,16 +3,15 @@ CONFIG += qtopia warn_on release
 DESTDIR = $(QPEDIR)/bin
 
 # Input
-HEADERS += today.h todayoptions.h 
+HEADERS += today.h todayoptions.h
 SOURCES += today.cpp todayoptions.cpp main.cpp
 
-INCLUDEPATH += $(QPEDIR)/include \
-		library
-DEPENDPATH += $(QPEDIR)/include \
-		library
+INCLUDEPATH += 	library
+DEPENDPATH += 	library
 
-LIBS += -lqpe -lqtopiaservices -Wl,-export-dynamic
+unix:LIBS += -lqtopia -Wl,-export-dynamic
 
 INTERFACES = todayoptionsbase.ui
 
 TARGET = today
+TRANSLATIONS = today-en_GB.ts today-de.ts today-ja.ts today-no.ts

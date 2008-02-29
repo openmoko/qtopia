@@ -1,0 +1,7 @@
+Files: services/Email.service
+Priority: optional
+Section: qpe/system
+Maintainer: Trolltech (www.trolltech.com)
+Version: $QPE_VERSION-9
+Description: The Email service definition
+ A Qtopia service.

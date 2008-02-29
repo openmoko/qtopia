@@ -21,12 +21,12 @@
 
 #include "wordgame.h"
 
-#include <qpe/applnk.h>
-#include <qpe/global.h>
-#include <qpe/filemanager.h>
-#include <qpe/resource.h>
-#include <qpe/config.h>
-#include <qpe/qpetoolbar.h>
+#include <qtopia/applnk.h>
+#include <qtopia/global.h>
+#include <qtopia/filemanager.h>
+#include <qtopia/resource.h>
+#include <qtopia/config.h>
+#include <qtopia/qpetoolbar.h>
 
 #include <qapplication.h>
 #include <qmessagebox.h>
@@ -131,6 +131,12 @@ WordGame::WordGame( QWidget* parent, const char* name, WFlags fl ) :
 	tile_smallw = 14;
 	tile_smallh = 12;
 	tile_stweak = -1;
+    } else if ( qApp->desktop()->height() > 420 ) {
+	int s = QMIN(qApp->desktop()->width()/18,
+		    qApp->desktop()->height()/18);
+	tile_smallw = s;
+	tile_smallh = s;
+	tile_stweak = 0;
     }
 
     setIcon( Resource::loadPixmap( "wordgame" ) );
@@ -145,11 +151,11 @@ WordGame::WordGame( QWidget* parent, const char* name, WFlags fl ) :
     if ( landscape )
 	toolbar->setFixedWidth(qApp->desktop()->width()-16*tile_smallw);
     addToolBar(toolbar, landscape ? Right : Bottom);
-    reset = new QToolButton(Resource::loadPixmap("back"), tr("Back"), "", this, SLOT(resetTurn()), toolbar);
-    done = new QToolButton(Resource::loadPixmap("done"), tr("Done"), "", this, SLOT(endTurn()), toolbar);
+    reset = new QToolButton(Resource::loadIconSet("back"), tr("Back"), "", this, SLOT(resetTurn()), toolbar);
+    done = new QToolButton(Resource::loadIconSet("done"), tr("Done"), "", this, SLOT(endTurn()), toolbar);
     scoreinfo = new ScoreInfo(toolbar);
     scoreinfo->setFont(QFont("Helvetica",10));
-    new QToolButton(Resource::loadPixmap("finish"), tr("Close"), "", this, SLOT(endGame()), toolbar);
+    new QToolButton(Resource::loadIconSet("finish"), tr("Close"), "", this, SLOT(endGame()), toolbar);
     toolbar->setStretchableWidget(scoreinfo);
 
     cpu = 0;
@@ -219,7 +225,7 @@ void WordGame::readConfig()
     openGameSelector(pnames);
 }
 
-void WordGame::openGameSelector(const QStringList& initnames)
+void WordGame::openGameSelector(const QStringList& /* initnames */)
 {
     toolbar->hide();
     gameover = FALSE;
@@ -756,7 +762,7 @@ void TileItem::drawShape(QPainter& p)
 	    small_font = new QFont("helvetica",8);
 	} else {
 	    big_font = new QFont("smoothtimes",17);
-	    small_font = new QFont("smoothtimes",10);
+	    small_font = new QFont("smoothtimes",TileItem::smallWidth()*10/16);
 	}
     }
 

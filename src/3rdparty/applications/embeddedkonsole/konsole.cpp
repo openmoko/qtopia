@@ -19,19 +19,19 @@
 //  some enhancements added by L.J. Potter <ljp@llornkcor.com>
 //
 
-#include <qpe/resource.h>
+#include <qtopia/resource.h>
 
 #include <qdir.h>
 #include <qevent.h>
 #include <qdragobject.h>
 #include <qobjectlist.h>
 #include <qtoolbutton.h>
-#include <qpe/qpetoolbar.h>
+#include <qtopia/qpetoolbar.h>
 #include <qpushbutton.h>
 #include <qfontdialog.h>
 #include <qglobal.h>
 #include <qpainter.h>
-#include <qpe/qpemenubar.h>
+#include <qtopia/qpemenubar.h>
 #include <qmessagebox.h>
 #include <qaction.h>
 #include <qapplication.h>
@@ -40,11 +40,13 @@
 #include <qevent.h>
 #include <qtabwidget.h>
 #include <qtabbar.h>
-#include <qpe/config.h>
+#include <qtopia/config.h>
 #include <qstringlist.h>
 #include <qpalette.h>
 
+#ifndef Q_OS_WIN32 
 #include <sys/wait.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -158,7 +160,7 @@ static const char *commonCmds[] =
     NULL
 };
 
-/*!
+/*
   \class Konsole konsole.h
   \brief The Konsole class is the top-level widget.
   \legalese
@@ -223,9 +225,9 @@ void Konsole::init(const char* _pgm, QStrList & _args)
   menuToolBar->setHorizontalStretchable( TRUE );
 
   QPEMenuBar *menuBar = new QPEMenuBar( menuToolBar );
-
+  uint i;
   fontList = new QPopupMenu( this );
-  for(uint i = 0; i < fonts.count(); i++) {
+  for(i = 0; i < fonts.count(); i++) {
     VTFont *fnt = fonts.at(i);
     fontList->insertItem(fnt->getName(), i);
   }
@@ -281,24 +283,24 @@ void Konsole::init(const char* _pgm, QStrList & _args)
   QAction *a;
 
   // Button Commands
-  a = new QAction( tr("New"), Resource::loadPixmap( "konsole" ), QString::null, 0, this, 0 );
+  a = new QAction( tr("New"), Resource::loadIconSet( "konsole" ), QString::null, 0, this, 0 );
   connect( a, SIGNAL( activated() ), this, SLOT( newSession() ) ); a->addTo( toolbar );
-  a = new QAction( tr("Enter"), Resource::loadPixmap( "konsole/enter" ), QString::null, 0, this, 0 );
+  a = new QAction( tr("Enter"), Resource::loadIconSet( "konsole/enter" ), QString::null, 0, this, 0 );
   connect( a, SIGNAL( activated() ), this, SLOT( hitEnter() ) ); a->addTo( toolbar );
-  a = new QAction( tr("Space"), Resource::loadPixmap( "konsole/space" ), QString::null, 0, this, 0 );
+  a = new QAction( tr("Space"), Resource::loadIconSet( "konsole/space" ), QString::null, 0, this, 0 );
   connect( a, SIGNAL( activated() ), this, SLOT( hitSpace() ) ); a->addTo( toolbar );
-  a = new QAction( tr("Tab"), Resource::loadPixmap( "konsole/tab" ), QString::null, 0, this, 0 );
+  a = new QAction( tr("Tab"), Resource::loadIconSet( "konsole/tab" ), QString::null, 0, this, 0 );
   connect( a, SIGNAL( activated() ), this, SLOT( hitTab() ) ); a->addTo( toolbar );
-  a = new QAction( tr("Up"), Resource::loadPixmap( "konsole/up" ), QString::null, 0, this, 0 );
+  a = new QAction( tr("Up"), Resource::loadIconSet( "konsole/up" ), QString::null, 0, this, 0 );
   connect( a, SIGNAL( activated() ), this, SLOT( hitUp() ) ); a->addTo( toolbar );
-  a = new QAction( tr("Down"), Resource::loadPixmap( "konsole/down" ), QString::null, 0, this, 0 );
+  a = new QAction( tr("Down"), Resource::loadIconSet( "konsole/down" ), QString::null, 0, this, 0 );
   connect( a, SIGNAL( activated() ), this, SLOT( hitDown() ) ); a->addTo( toolbar );
-  a = new QAction( tr("Paste"), Resource::loadPixmap( "paste" ), QString::null, 0, this, 0 );
+  a = new QAction( tr("Paste"), Resource::loadIconSet( "paste" ), QString::null, 0, this, 0 );
   connect( a, SIGNAL( activated() ), this, SLOT( hitPaste() ) ); a->addTo( toolbar );
 /*
-  a = new QAction( tr("Up"), Resource::loadPixmap( "up" ), QString::null, 0, this, 0 );
+  a = new QAction( tr("Up"), Resource::loadIconSet( "up" ), QString::null, 0, this, 0 );
   connect( a, SIGNAL( activated() ), this, SLOT( hitUp() ) ); a->addTo( toolbar );
-  a = new QAction( tr("Down"), Resource::loadPixmap( "down" ), QString::null, 0, this, 0 );
+  a = new QAction( tr("Down"), Resource::loadIconSet( "down" ), QString::null, 0, this, 0 );
   connect( a, SIGNAL( activated() ), this, SLOT( hitDown() ) ); a->addTo( toolbar );
 */
 
@@ -313,7 +315,7 @@ void Konsole::init(const char* _pgm, QStrList & _args)
   cfg.setGroup("Commands");
   commonCombo->setInsertionPolicy(QComboBox::AtCurrent);
 
-  for (int i = 0; commonCmds[i] != NULL; i++) {
+  for (i = 0; commonCmds[i] != NULL; i++) {
       commonCombo->insertItem( commonCmds[i], i );
       tmp = cfg.readEntry( QString::number(i),"");
       if(tmp != "")

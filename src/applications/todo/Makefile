@@ -17,6 +17,7 @@ DASHCROSS		=
 SYSCONF_CXXFLAGS_X11	= 
 SYSCONF_CXXFLAGS_QT	= -I$(QTDIR)/include
 SYSCONF_CXXFLAGS_QTOPIA	= -I$(QPEDIR)/include
+SYSCONF_CFLAGS_QTOPIA	= -I$(QPEDIR)/include
 SYSCONF_CXXFLAGS_OPENGL	= -I/usr/X11R6/include
 
 # Compiling YACC output
@@ -37,7 +38,7 @@ SYSCONF_LFLAGS_QT	= -L$(QTDIR)/lib
 SYSCONF_LFLAGS_QTOPIA	= -L$(QPEDIR)/lib
 SYSCONF_LIBS_QT		= -lqte$(QT_THREAD_SUFFIX)
 SYSCONF_LIBS_QT_OPENGL	= 
-SYSCONF_LIBS_QTOPIA	= -lqpe
+SYSCONF_LIBS_QTOPIA	= -lqtopia
 # OpenGL
 SYSCONF_LFLAGS_OPENGL	= -L/usr/X11R6/lib
 SYSCONF_LIBS_OPENGL	= 
@@ -105,6 +106,11 @@ SYSCONF_CFLAGS_SHOBJ	= -fPIC
 SYSCONF_LIBS_QTLIB	= $(SYSCONF_LFLAGS_X11) $(QT_LIBS_MT) $(QT_LIBS_OPT)
 # Linking Qt applications
 SYSCONF_LIBS_QTAPP	= 
+
+# Platform output directories
+MOC_DIR = .moc/linux-generic-g++/
+OBJECTS_DIR = .obj/linux-generic-g++/
+
 #############################################################################
 
 ####### Compiler, tools and options
@@ -112,10 +118,10 @@ SYSCONF_LIBS_QTAPP	=
 CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
 CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
 CC	=	$(SYSCONF_CC) $(QT_C_MT)
-CFLAGS	=	$(SYSCONF_CFLAGS)
-INCPATH =	-I$(QPEDIR)/include
+CFLAGS	=	$(SYSCONF_CFLAGS_QTOPIA) $(SYSCONF_CFLAGS)
+INCPATH =	-I$(MOC_DIR)
 LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
-LIBS	=	$(SUBLIBS) -lqpe -lqpepim $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
+LIBS	=	$(SUBLIBS) -lqpepim -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
 MOC	=	$(SYSCONF_MOC)
 UIC	=	$(SYSCONF_UIC)
 
@@ -133,26 +139,26 @@ TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 HEADERS =	mainwindow.h \
 		todotable.h \
 		todoentryimpl.h
-SOURCES =	main.cpp \
-		mainwindow.cpp \
+SOURCES =	mainwindow.cpp \
 		todotable.cpp \
-		todoentryimpl.cpp
-OBJECTS =	main.o \
-		mainwindow.o \
-		todotable.o \
-		todoentryimpl.o \
-		todoentry.o
+		todoentryimpl.cpp \
+		main.cpp
+OBJECTS =	$(OBJECTS_DIR)/mainwindow.o \
+		$(OBJECTS_DIR)/todotable.o \
+		$(OBJECTS_DIR)/todoentryimpl.o \
+		$(OBJECTS_DIR)/main.o \
+		$(OBJECTS_DIR)/todoentry.o
 INTERFACES =    todoentry.ui
 UICDECLS =      todoentry.h
 UICIMPLS =      todoentry.cpp
-SRCMOC	=	moc_mainwindow.cpp \
-		moc_todotable.cpp \
-		moc_todoentryimpl.cpp \
-		moc_todoentry.cpp
-OBJMOC	=	moc_mainwindow.o \
-		moc_todotable.o \
-		moc_todoentryimpl.o \
-		moc_todoentry.o
+SRCMOC	=	$(MOC_DIR)/moc_mainwindow.cpp \
+		$(MOC_DIR)/moc_todotable.cpp \
+		$(MOC_DIR)/moc_todoentryimpl.cpp \
+		$(MOC_DIR)/moc_todoentry.cpp
+OBJMOC	=	$(OBJECTS_DIR)/moc_mainwindow.o \
+		$(OBJECTS_DIR)/moc_todotable.o \
+		$(OBJECTS_DIR)/moc_todoentryimpl.o \
+		$(OBJECTS_DIR)/moc_todoentry.o
 
 
 ####### Implicit rules
@@ -218,70 +224,25 @@ REQUIRES=
 
 ####### Compile
 
-main.o: main.cpp \
-		mainwindow.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h
-
-mainwindow.o: mainwindow.cpp \
+$(OBJECTS_DIR)/mainwindow.o: mainwindow.cpp \
 		mainwindow.h \
 		todoentryimpl.h \
 		todoentry.h \
-		$(QPEDIR)/include/qpe/pim/task.h \
-		$(QPEDIR)/include/qtopia/stringutil.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/pim/pimrecord.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		todotable.h \
-		$(QPEDIR)/include/qpe/categories.h \
-		$(QPEDIR)/include/qtopia/private/palmtopuidgen.h \
-		$(QPEDIR)/include/qpe/stringutil.h \
-		$(QPEDIR)/include/qpe/pim/private/todoxmlio_p.h \
-		$(QPEDIR)/include/qtopia/pim/task.h \
-		$(QPEDIR)/include/qpe/applnk.h \
-		$(QPEDIR)/include/qpe/qpeapplication.h \
-		$(QPEDIR)/include/qpe/config.h \
-		$(QPEDIR)/include/qpe/finddialog.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qpe/ir.h \
-		$(QPEDIR)/include/qpe/qpemenubar.h \
-		$(QPEDIR)/include/qpe/qpemessagebox.h \
-		$(QPEDIR)/include/qpe/resource.h \
-		$(QPEDIR)/include/qpe/qpetoolbar.h \
-		$(QPEDIR)/include/qpe/categoryselect.h
+		todotable.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/mainwindow.o mainwindow.cpp
 
-todotable.o: todotable.cpp \
-		todotable.h \
-		$(QPEDIR)/include/qpe/categories.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/private/palmtopuidgen.h \
-		$(QPEDIR)/include/qpe/stringutil.h \
-		$(QPEDIR)/include/qpe/pim/task.h \
-		$(QPEDIR)/include/qtopia/stringutil.h \
-		$(QPEDIR)/include/qtopia/pim/pimrecord.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qpe/pim/private/todoxmlio_p.h \
-		$(QPEDIR)/include/qtopia/pim/task.h \
-		$(QPEDIR)/include/qtopia/categoryselect.h \
-		$(QPEDIR)/include/qtopia/xmlreader.h \
-		$(QPEDIR)/include/qtopia/resource.h
+$(OBJECTS_DIR)/todotable.o: todotable.cpp \
+		todotable.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/todotable.o todotable.cpp
 
-todoentryimpl.o: todoentryimpl.cpp \
+$(OBJECTS_DIR)/todoentryimpl.o: todoentryimpl.cpp \
 		todoentryimpl.h \
-		todoentry.h \
-		$(QPEDIR)/include/qpe/pim/task.h \
-		$(QPEDIR)/include/qtopia/stringutil.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/pim/pimrecord.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qpe/categoryselect.h \
-		$(QPEDIR)/include/qpe/datebookmonth.h \
-		$(QPEDIR)/include/qtopia/private/event.h \
-		$(QPEDIR)/include/qtopia/private/palmtoprecord.h \
-		$(QPEDIR)/include/qtopia/timeconversion.h \
-		$(QPEDIR)/include/qpe/global.h \
-		$(QPEDIR)/include/qpe/imageedit.h \
-		$(QPEDIR)/include/qpe/timestring.h
+		todoentry.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/todoentryimpl.o todoentryimpl.cpp
+
+$(OBJECTS_DIR)/main.o: main.cpp \
+		mainwindow.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
 todoentry.h: todoentry.ui
 	$(UIC) todoentry.ui -o $(INTERFACE_DECL_PATH)/todoentry.h
@@ -289,57 +250,48 @@ todoentry.h: todoentry.ui
 todoentry.cpp: todoentry.ui
 	$(UIC) todoentry.ui -i todoentry.h -o todoentry.cpp
 
-todoentry.o: todoentry.cpp \
+$(OBJECTS_DIR)/todoentry.o: todoentry.cpp \
 		todoentry.h \
 		todoentry.ui
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/todoentry.o todoentry.cpp
 
-moc_mainwindow.o: moc_mainwindow.cpp \
+$(OBJECTS_DIR)/moc_mainwindow.o: $(MOC_DIR)/moc_mainwindow.cpp \
 		mainwindow.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_mainwindow.o $(MOC_DIR)/moc_mainwindow.cpp
 
-moc_todotable.o: moc_todotable.cpp \
-		todotable.h \
-		$(QPEDIR)/include/qpe/categories.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/private/palmtopuidgen.h \
-		$(QPEDIR)/include/qpe/stringutil.h \
-		$(QPEDIR)/include/qpe/pim/task.h \
-		$(QPEDIR)/include/qtopia/stringutil.h \
-		$(QPEDIR)/include/qtopia/pim/pimrecord.h \
-		$(QPEDIR)/include/qtopia/quuid.h \
-		$(QPEDIR)/include/qpe/pim/private/todoxmlio_p.h \
-		$(QPEDIR)/include/qtopia/pim/task.h
+$(OBJECTS_DIR)/moc_todotable.o: $(MOC_DIR)/moc_todotable.cpp \
+		todotable.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_todotable.o $(MOC_DIR)/moc_todotable.cpp
 
-moc_todoentryimpl.o: moc_todoentryimpl.cpp \
+$(OBJECTS_DIR)/moc_todoentryimpl.o: $(MOC_DIR)/moc_todoentryimpl.cpp \
 		todoentryimpl.h \
-		todoentry.h \
-		$(QPEDIR)/include/qpe/pim/task.h \
-		$(QPEDIR)/include/qtopia/stringutil.h \
-		$(QPEDIR)/include/qtopia/qpeglobal.h \
-		$(QPEDIR)/include/qtopia/pim/pimrecord.h \
-		$(QPEDIR)/include/qtopia/quuid.h
-
-moc_todoentry.o: moc_todoentry.cpp \
 		todoentry.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_todoentryimpl.o $(MOC_DIR)/moc_todoentryimpl.cpp
 
-moc_mainwindow.cpp: mainwindow.h
-	$(MOC) mainwindow.h -o moc_mainwindow.cpp
+$(OBJECTS_DIR)/moc_todoentry.o: $(MOC_DIR)/moc_todoentry.cpp \
+		todoentry.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_todoentry.o $(MOC_DIR)/moc_todoentry.cpp
 
-moc_todotable.cpp: todotable.h
-	$(MOC) todotable.h -o moc_todotable.cpp
+$(MOC_DIR)/moc_mainwindow.cpp: mainwindow.h
+	$(MOC) mainwindow.h -o $(MOC_DIR)/moc_mainwindow.cpp
 
-moc_todoentryimpl.cpp: todoentryimpl.h
-	$(MOC) todoentryimpl.h -o moc_todoentryimpl.cpp
+$(MOC_DIR)/moc_todotable.cpp: todotable.h
+	$(MOC) todotable.h -o $(MOC_DIR)/moc_todotable.cpp
 
-moc_todoentry.cpp: todoentry.h
-	$(MOC) todoentry.h -o moc_todoentry.cpp
+$(MOC_DIR)/moc_todoentryimpl.cpp: todoentryimpl.h
+	$(MOC) todoentryimpl.h -o $(MOC_DIR)/moc_todoentryimpl.cpp
+
+$(MOC_DIR)/moc_todoentry.cpp: todoentry.h
+	$(MOC) todoentry.h -o $(MOC_DIR)/moc_todoentry.cpp
 
 
 
 lupdate:
-	lupdate todo.pro
+	sed -e 's/$$$$QTOPIA1DIR[^ ]*//' 	    -e 's/^static:.*//' 	    <todo.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
 
 lrelease:
 	lrelease todo.pro
+	$(QPEDIR)/bin/qtopia-linstall todo.pro
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks $(QPEDIR)/src/$$ctrl; done

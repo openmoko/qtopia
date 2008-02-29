@@ -1,0 +1,63 @@
+<html>
+<title>
+Buttons Settings Specification
+</title>
+
+<body>
+
+<h1>Buttons Settings Specification</h1>
+The Buttons Settings application allows customization of the device's
+hardware buttons.
+<p>
+The Buttons Settings application links applications, settings programs and
+games installed on the device to hardware buttons on the device.
+</p>
+
+<p>
+Status: RT
+</p>
+
+<a name=usecases>
+<h2>Use Cases</h2>
+</a>
+<ul>
+<li><b>Favorite Game</b>
+    <p>
+    A user plays SuperGame 2000 but does not use the email client.
+    By using the Button Settings, they can
+    change the operation associated with the "email" hardware button
+    to launch the game.
+<li><b>Quick Beam</b>
+    <p>
+    By default, pressing and holding the Contacts button will cause the
+    user's businesscard to be beamed. The user can change this to instead
+    create a new contact.
+</ul>
+
+<a name=features>
+<h2>Features</h2>
+</a>
+
+<ul>
+<li>Invoke program: Any application, game or setting can be mapped to any
+    available hardware button.
+<li>Invoke service action: Any service action which takes no parameters and
+    which has a Name is presented as an option for the hardware buttons.
+<li>Press-and-hold: the "press" action and the "press and hold" action can
+    be set independently.
+<li>Device-specific button images: the images used for buttons are defined
+    by device-specific image files.
+<li>Device-specific default buttons: the default service actions for each
+    button are defined by device-specific code.
+</ul>
+
+<a name=prerequisites>
+<h2>Prerequisites</h2>
+</a>
+
+<ul>
+<li>Hardware: Device must have hardware buttons.
+</ul>
+
+</body>
+</html>

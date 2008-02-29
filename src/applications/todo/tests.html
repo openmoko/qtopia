@@ -1,0 +1,225 @@
+<html>
+<title>
+Todo List Test List
+</title>
+
+<body>
+
+<h1>Todo List Test List</h1>
+
+<p>
+When testing, it is important to check that changes are
+recorded not just when the change is made, but also that it
+persists after stopping and restarting the application. Check
+that the application is not fast-loaded prior to testing.
+
+<p>
+Non-ASCII and non-Latin-1 characters should be tested.
+
+<hr>
+
+<h2>Reference input data</h2>
+
+<h3>Table 1</h3>
+<table border=1 cellspacing=0>
+<tr>
+ <th>ID
+ <th>Description
+ <th>Priority
+ <th>Due Date
+ <th>Categories
+<tr><td>1<td>Tax return<td>2<td>Apr. 14<td>Personal
+<tr><td>2<td>Fix car<td>1<td><td>Personal
+<tr><td>3<td>Buy new hat<td>3<td><td>Personal
+<tr><td>4<td>Ask boss for a raise<td>2<td><td>Business
+<tr><td>5<td>File progress reports<td>3<td><td>Business
+<tr><td>6<td>Submit budget<td>1<td>Dec. 10<td>Business
+<tr><td>7<td>Buy present for Greggy<td>1<td>Sep. 1<td>Kids, Personal
+</table>
+<p>
+</p>
+
+<hr>
+<a name=usecases>
+<h2>Use Case Tests</h2>
+<!-- use case tests correspond 1-to-1 with use cases.
+
+    Note: Titles are used as identifiers in bug reports.
+-->
+
+<h3>What do I do now</h3>
+<p>
+<ol>
+ <li> Using Button Editor, ensure that "Add new task" is bound to
+	the Hold action of an appropriate key (some devices have a Todo
+	key, otherwise take another key).
+ <li> Start with empty Todo list.
+ <li> While running other application,
+	for Table 1 data 1..6, activate the "Add new task" key, and:
+ <ol>
+  <li> Enter information, press OK.
+  <li> Use clock applet to advance time by some amount to fake waiting.
+ </ol>
+ <li> Run Todo List application.
+ <li> Observer that all tasks are in the order
+	of importance (budget, car, tax, raise, hat, reports).
+ <li> Check the left-hand checkbox for the Fix Car item; check it moves to
+	the end of the list.
+ <li> Click the priority field of File Progress Reports, change priority to 2;
+	check it moves to the fourth position.
+</ol>
+
+<h3>Different hats</h3>
+<p>
+<ol>
+ <li> Enter all Table 1 data.
+ <li> Select Person category from category filter combobox.
+ <li> Check that only items 1, 2, 3, 4, and 7 are shown.
+ <li> Select Kids category from category filter combobox.
+ <li> Check that only item 7 is shown.
+</ol>
+
+<h3>Progress report</h3>
+<p>
+<i>Incomplete</i>
+
+<h3>Delegator</h3>
+<p>
+<i>Incomplete</i>
+</p>
+
+<hr>
+
+<a name=features>
+<h2>Feature Tests</h2>
+</a>
+<!-- There are n tests per feature.
+
+    Note: Titles with " - blah" stripped off are feature identifiers.
+-->
+
+<h3>Add Task</h3>
+<ol>
+ <li>Click <img src=pics/new>.
+ <li>Enter details, non-empty description.
+ <li>Click OK.
+ <li>Check that item is added.
+</ol>
+
+<h3>Add Task - Empty</h3>
+<ol>
+ <li>Click <img src=pics/new>.
+ <li>Enter details, but no description.
+ <li>Click OK.
+ <li>Check that item is <i>not</i> added.
+</ol>
+
+
+<h3>Delete Task</h3>
+<ol>
+ <li>Click <img src=pics/trash>.
+ <li>Check that prompt is correct.
+ <li>Click OK.
+ <li>Check that item is gone.
+</ol>
+
+<h3>Completion</h3>
+<ol>
+ <li>Click on empty checkbox to left of item.
+ <li>Check that item is now recorded as completed.
+ <li>Click on checked checkbox to left of item.
+ <li>Check that item is now recorded as not completed.
+</ol>
+
+<h3>Priority</h3>
+<ol>
+ <li>Click on priority number towards left of item.
+ <li>Choose a priority.
+ <li>Check that item is now recorded as having chosen priority.
+</ol>
+
+<h3>Categories</h3>
+<ol>
+ <li>Optionally, click on a task.
+ <li>Click on <img src=pics/edit>.
+ <li>Choose a category from the combobox.
+ <li>Click OK.
+ <li>Check that item is now recorded as having chosen category.
+</ol>
+
+<h3>Categories - Multiple</h3>
+<ol>
+ <li>Optionally, click on a task.
+ <li>Click on <img src=pics/edit>.
+ <li>Choose "..." to right of category combobox.
+ <li>Choose multiple categories by clicking checkboxes.
+ <li>Click OK.
+ <li>Check that item is now recorded as having chosen categories,
+	showing "&lt;first category&gt; (Multi.)" in combobox.
+</ol>
+
+<h3>Due Date</h3>
+<ol>
+ <li>Check that for tasks with the same completedness and priority,
+	those with a Due Date precedes tasks without a Due Date,
+	and that of those with a due date, tasks with the earlier
+	due dates precedes tasks with later due dates.
+</ol>
+
+<h3>Today Plugin</h3>
+<ol>
+ <li>Check that changes are reflected immediately in the Today application.
+</ol>
+
+<h3>Beam</h3>
+<ol>
+ <li>Check beaming to other Qtopia device.
+</ol>
+
+<h3>Beam - Palm OS</h3>
+<ol>
+ <li>Check beaming from Palm OS device.
+ <li>Check beaming to Palm OS device.
+</ol>
+
+<h3>Beam - Pocket PC</h3>
+<ol>
+ <li>Check beaming from Pocket PC device.
+ <li>Check beaming to Pocket PC device.
+</ol>
+
+<h3>Find</h3>
+<ol>
+ <li>Click find
+ <li>Typing text should immediately select match,
+	or show "Find: not found" in status (tool) bar.
+</ol>
+
+<h3>Filter by category</h3>
+<ol>
+ <li>Check that filtering works for tasks in no category:
+	should only be visible in All and Unfiled categories.
+ <li>Check that filtering works for tasks in one category:
+	should only be visible in that one category, and All.
+ <li>Check that filtering works for tasks in more than one category:
+	should only be visible in those categories, and All.
+</ol>
+
+<h3>Filter by completion</h3>
+<ol>
+ <li>Only specified events should be visible.
+</ol>
+
+<h3>Maximum tasks</h3>
+<ol>
+ <li>Check memory and storage usage using System Info.
+ <li>Add all Table 1 tasks.
+ <li>Select all items, duplicate. (not implemented)
+ <li>Repeat previous step until failure message box occurs. (not implemented)
+ <li>Check memory and storage usage using System Info.
+     Compare number of tasks successfully entered with
+	memory and storage prerequisites.
+</ol>
+
+</body>
+</html>

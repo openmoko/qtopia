@@ -18,14 +18,14 @@
 **
 **********************************************************************/
 
-#include <qpe/qpeapplication.h>
-#include <qpe/config.h>
-#include <qpe/network.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/config.h>
+#include <qtopia/network.h>
 #ifdef QWS
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
-#include <qpe/global.h>
-#include <qpe/process.h>
+#include <qtopia/global.h>
+#include <qtopia/process.h>
 #include "../proxiespage.h"
 
 #include <qbuttongroup.h>
@@ -33,11 +33,14 @@
 #include <qradiobutton.h>
 #include <qlineedit.h>
 #include <qcombobox.h>
+#include <qcheckbox.h>
 #include <qlabel.h>
+#include <qvalidator.h>
 #include <qtextstream.h>
 #include <qfile.h>
 #include <qtabwidget.h>
 #include <qbuffer.h>
+#include <qspinbox.h>
 #include <qmessagebox.h>
 #include <qregexp.h>
 #include "lan.h"
@@ -102,7 +105,44 @@ public slots:
     void changeSchemeSlot(const QString& sc) { changeScheme(sc); }
 };
 
+class WepKeyValidator : public QValidator {
+public:
+    WepKeyValidator(QWidget* parent) :
+	QValidator(parent)
+    {
+    }
 
+    State validate( QString& key, int& curs ) const
+    {
+	QString k;
+	int hexes=0;
+	int ncurs=0;
+	for (int i=0; i<(int)key.length(); i++) {
+	    char c=key[i].lower().latin1();
+	    if ( c>='0' && c<='9' || c>='a' && c<='z' ) {
+		if ( hexes == 2 ) {
+		    hexes = 0;
+		    k += ':';
+		    if ( i<curs ) ncurs++;
+		}
+		k += c;
+		hexes++;
+		if ( i<curs ) ncurs++;
+	    } else if ( c == ':' && hexes==2 ) {
+		hexes = 0;
+		k += c;
+		if ( i<curs ) ncurs++;
+	    }
+	}
+	key = k;
+	curs = ncurs;
+	return Acceptable;
+    }
+
+    //void fixup( QString& key ) const
+    //{
+    //}
+};
 
 Lan::Lan(Config& cfg, QWidget* parent) :
     LanBase(parent,0,TRUE),
@@ -118,14 +158,44 @@ Lan::Lan(Config& cfg, QWidget* parent) :
     QBoxLayout *proxyLayout  = new QVBoxLayout( tab_2 ); 
     proxies = new ProxiesPage( tab_2 );
     proxyLayout->addWidget( proxies );
-    
+
+    connect(wep_passphrase, SIGNAL(textChanged(const QString&)), this, SLOT(chooseDefaultWepKey()));
+    connect(wep_key0, SIGNAL(textChanged(const QString&)), this, SLOT(chooseDefaultWepKey()));
+    connect(wep_key1, SIGNAL(textChanged(const QString&)), this, SLOT(chooseDefaultWepKey()));
+    connect(wep_key2, SIGNAL(textChanged(const QString&)), this, SLOT(chooseDefaultWepKey()));
+    connect(wep_key3, SIGNAL(textChanged(const QString&)), this, SLOT(chooseDefaultWepKey()));
+    connect(wep_type, SIGNAL(activated(int)), this, SLOT(chooseWepType(int)));
+    QValidator* key = new WepKeyValidator(this);
+    wep_key0->setValidator(key);
+    wep_key1->setValidator(key);
+    wep_key2->setValidator(key);
+    wep_key3->setValidator(key);
+
     readConfig();
+}
+
+void Lan::chooseWepType(int i)
+{
+    wep_choice->setEnabled(i>0);
+}
+
+void Lan::chooseDefaultWepKey()
+{
+    if ( sender() == wep_passphrase )
+	wep_passphrase_on->setChecked(TRUE);
+    else if ( sender() == wep_key0 )
+	wep_key0_on->setChecked(TRUE);
+    else if ( sender() == wep_key1 )
+	wep_key1_on->setChecked(TRUE);
+    else if ( sender() == wep_key2 )
+	wep_key2_on->setChecked(TRUE);
+    else if ( sender() == wep_key3 )
+	wep_key3_on->setChecked(TRUE);
 }
 
 void Lan::ipSelect( int id )
 {
     tabs->setTabEnabled( tcpip, id==0 );
-    tabs->setTabEnabled( dns, id==0 );
 }
 
 void Lan::readConfig()
@@ -144,6 +214,35 @@ void Lan::readConfig()
     gateway->setText( config.readEntry("GATEWAY") );
     dns1->setText( config.readEntry("DNS_1") );
     dns2->setText( config.readEntry("DNS_2") );
+
+    QString ssid = config.readEntry("SSID");
+    if ( !ssid.isEmpty() ) {
+	wlan_ssid->insertItem(ssid);
+	wlan_ssid->setCurrentItem(wlan_ssid->count()-1);
+    }
+    bool ah=config.readEntry("IS_ADHOC").lower()=="y";
+    (ah ? wlan_adhoc : wlan_infrastructure)->setChecked(TRUE);
+    wlan_channel->setValue(config.readNumEntry("CHANNEL"));
+    wep_passphrase->setText(config.readEntry("PRIV_GENSTR"));
+    wep_key0->setText(config.readEntry("dot11WEPDefaultKey0"));
+    wep_key1->setText(config.readEntry("dot11WEPDefaultKey1"));
+    wep_key2->setText(config.readEntry("dot11WEPDefaultKey2"));
+    wep_key3->setText(config.readEntry("dot11WEPDefaultKey3"));
+    int weptype = config.readEntry("PRIV_KEY128")=="true" ? 2 : 1;
+    QString wep = config.readEntry("WEP");
+    if ( wep == "PP" )
+	wep_passphrase_on->setChecked(TRUE);
+    else if ( wep == "K0" )
+	wep_key0_on->setChecked(TRUE);
+    else if ( wep == "K1" )
+	wep_key1_on->setChecked(TRUE);
+    else if ( wep == "K2" )
+	wep_key2_on->setChecked(TRUE);
+    else if ( wep == "K3" )
+	wep_key3_on->setChecked(TRUE);
+    else
+	weptype=0;
+    wep_type->setCurrentItem(weptype);
 
     config.setGroup("Proxy");
     proxies->readConfig( config );
@@ -190,6 +289,37 @@ bool Lan::writeConfig()
 	config.writeEntry("DNS_1",dns1->text());
 	config.writeEntry("DNS_2",dns2->text());
 
+	config.writeEntry("WLAN_ENABLE","y");
+	config.writeEntry("SSID",wlan_ssid->currentText());
+	config.writeEntry("IS_ADHOC",wlan_adhoc->isChecked() ? "y" : "n");
+	config.writeEntry("PRIV_KEY128",wep_type->currentItem()==2 ? "true" : "false");
+	config.writeEntry("CHANNEL",wlan_channel->value());
+	config.writeEntry("PRIV_GENSTR", wep_passphrase->text());
+	config.writeEntry("dot11PrivacyInvoked", wep_type->currentItem()==0 ? "false" : "true");
+	config.writeEntry("AuthType", wep_type->currentItem()==0 ? "opensystem" : "sharedkey");
+	int defkey = wep_choice->id(wep_choice->selected());
+	if ( defkey < 1 || defkey > 4 )
+	    defkey = 1;
+	config.writeEntry("dot11WEPDefaultKeyID",defkey-1);
+	config.writeEntry("dot11WEPDefaultKey0", wep_key0->text());
+	config.writeEntry("dot11WEPDefaultKey1", wep_key1->text());
+	config.writeEntry("dot11WEPDefaultKey2", wep_key2->text());
+	config.writeEntry("dot11WEPDefaultKey3", wep_key3->text());
+	QString wep;
+	if ( wep_passphrase_on->isChecked() )
+	    wep = "PP";
+	else if ( wep_key0_on->isChecked() )
+	    wep = "K0";
+	else if ( wep_key1_on->isChecked() )
+	    wep = "K1";
+	else if ( wep_key2_on->isChecked() )
+	    wep = "K2";
+	else if ( wep_key3_on->isChecked() )
+	    wep = "K3";
+	else
+	    wep = "NO";
+	config.writeEntry("WEP",wep);
+
 	config.setGroup("Proxy");
 	proxies->writeConfig( config );
     }
@@ -208,7 +338,7 @@ bool Lan::writeNetworkOpts( Config &config, QString scheme )
     if ( !prevFile.open( IO_ReadOnly ) )
 	return FALSE;
 
-    QString tmp = "/etc/pcmcia/network.opts-qpe-new";
+    QString tmp = prev + "-qpe-new";
     QFile tmpFile(tmp);
     if ( !tmpFile.open( IO_WriteOnly ) )
 	return FALSE;
@@ -222,6 +352,9 @@ bool Lan::writeNetworkOpts( Config &config, QString scheme )
     QString nm = config.readEntry( "Name" );
     
     config.setGroup("Properties");
+
+    //For DHCP to work, we have to remove the TCP/IP fields
+    bool dhcp = config.readEntry("DHCP","y") != "n";
     
     QString line;
     bool found=FALSE;
@@ -248,6 +381,8 @@ bool Lan::writeNetworkOpts( Config &config, QString scheme )
 		    }
 		    if ( !k.isNull() ) {
 			QString v = config.readEntry(k);
+			if ( dhcp && eq > 0 && k.left(4) != "DHCP" )
+			    v = "";
 			line = "    " + k + s + v;
 		    }
 		}
@@ -257,7 +392,7 @@ bool Lan::writeNetworkOpts( Config &config, QString scheme )
 		} else if ( wline == "esac" || wline == "*,*,*,*)" ) {
 		    // end - add new entry
 		    // Not all fields have a GUI, but all are supported
-		    // in the letwork configuration files.
+		    // in the network configuration files.
 		    static const char* txtfields[] = {
 			"IF_PORT", "DHCP_HOSTNAME", "NETWORK",
 			"DOMAIN", "SEARCH", "MOUNTS",
@@ -274,7 +409,9 @@ bool Lan::writeNetworkOpts( Config &config, QString scheme )
 			;
 		    const char** f = txtfields;
 		    while (*f) {
-			out << "    " << *f << "=" << config.readEntry(*f,"") << "\n";
+			out << "    " << *f << "=" 
+			    << (dhcp ? QString("") : config.readEntry(*f,""))
+			    << "\n";
 			++f;
 		    }
 		    out << "    ;;\n";
@@ -288,10 +425,83 @@ bool Lan::writeNetworkOpts( Config &config, QString scheme )
     prevFile.close();
     tmpFile.close();
 
+    QString prev2 = "/etc/pcmcia/wlan-ng.opts";
+    prevFile.setName(prev2);
+    if ( !prevFile.open( IO_ReadOnly ) )
+	return FALSE;
+
+    QString tmp2 = prev2 + "-qpe-new";
+    tmpFile.setName(tmp2);
+    if ( !tmpFile.open( IO_WriteOnly ) )
+	return FALSE;
+
+    QTextStream win( &prevFile );
+    QTextStream wout( &tmpFile );
+
+    found=FALSE;
+    done=FALSE;
+    QString wep = config.readEntry("WEP");
+    while ( !win.atEnd() ) {
+	QString line = win.readLine();
+	QString wline = line.simplifyWhiteSpace();
+	if ( !done ) {
+	    if ( found ) {
+		if ( wline == ";;" ) {
+		    done = TRUE;
+		} else {
+		    int eq=wline.find("=");
+		    QString k,s,v;
+		    if ( eq > 0 ) {
+			k = wline.left(eq);
+			s = "=";
+		    }
+		    if ( !k.isNull() ) {
+			QString v = config.readEntry(k);
+			line = "    " + k + s + "\"" + v + "\"";
+		    }
+		}
+	    } else {
+		if ( wline.left(scheme.length()+7) == scheme + ",*,*,*)" ) {
+		    found=TRUE;
+		} else if ( wline == "esac" || wline == "*,*,*,*)" ) {
+		    // end - add new entry
+		    // Not all fields have a GUI, but all are supported
+		    // in the wlan configuration files.
+		    static const char* txtfields[] = {
+			"WLAN_ENABLE",
+			"USER_MIBS", "dot11ExcludeUnencrypted", "PRIV_GENERATOR",
+			"PRIV_KEY128", "BCNINT", "BASICRATES", "OPRATES",
+			"SSID", "IS_ADHOC", "CHANNEL", "PRIV_GENSTR",
+			"dot11WEPDefaultKey0", "dot11WEPDefaultKey1",
+			"dot11WEPDefaultKey2", "dot11WEPDefaultKey3",
+			"AuthType", "dot11PrivacyInvoked", "dot11WEPDefaultKeyID",
+			0
+		    };
+		    wout << scheme << ",*,*,*)" << "\n";
+		    const char** f = txtfields;
+		    while (*f) {
+			wout << "    " << *f << "=" 
+			    << config.readEntry(*f,"")
+			    << "\n";
+			++f;
+		    }
+		    wout << "    ;;\n";
+		    done = TRUE;
+		}
+	    }
+	}
+	wout << line << "\n";
+    }
+
+    prevFile.close();
+    tmpFile.close();
+
     //system("cardctl suspend");
     system("cardctl eject");
 
     if ( system( "mv " + tmp + " " + prev ) )
+	retval = FALSE;
+    if ( system( "mv " + tmp2 + " " + prev2 ) )
 	retval = FALSE;
 #ifdef USE_SCHEMES
     if ( retval )
@@ -419,32 +629,67 @@ bool LanImpl::stop( Config& cfg )
     return !isActive(cfg);
 }
 
-QWidget* LanImpl::addStateWidget( QWidget* parent, Config& cfg ) const
-{
-    QStringList lans = findLans();
-    QString scheme = findScheme(lans);
-
-    if ( !isActive(cfg) )
-	return 0;
-
-    QString ipaddr;
-    Process p(QStringList() << "ifconfig" << "eth0");
-    if ( p.exec( "", ipaddr ) ) {
-	ipaddr.replace(QRegExp(".*inet addr:"),"");
-	ipaddr.replace(QRegExp(" .*"),"");
-	LanState* state = new LanState(parent);
+class LanStateImpl : public LanState {
+    Q_OBJECT
+public:
+    LanStateImpl(QWidget* parent) : LanState(parent)
+    {
+	QStringList lans = findLans();
+	QString scheme = findScheme(lans);
 	if ( lans.count() > 1 ) {
-	    state->services->insertStringList(lans);
-	    state->services->setCurrentItem(lans.findIndex(scheme));
-	    SchemeChanger* sc = new SchemeChanger(state);
-	    QObject::connect(state->services,SIGNAL(activated(const QString&)),
+	    services->insertStringList(lans);
+	    services->setCurrentItem(lans.findIndex(scheme));
+	    SchemeChanger* sc = new SchemeChanger(this);
+	    QObject::connect(services,SIGNAL(activated(const QString&)),
 		sc,SLOT(changeSchemeSlot(const QString&)));
 	} else {
-	    state->services->hide();
-	    state->services_label->hide();
+	    services->hide();
+	    services_label->hide();
 	}
-	state->ipaddress->setText(ipaddr);
-	return state;
+	tid = startTimer(1000);
+	updateDisplay();
+    }
+
+    void timerEvent(QTimerEvent*)
+    {
+	updateDisplay();
+	if ( ipaddress->text()[0] != 'e' ) {
+	    // slow down
+	    killTimer(tid);
+	    tid = startTimer(5000);
+	}
+    }
+
+    bool ok() const
+    {
+	return !ipaddress->text().isEmpty();
+    }
+
+private slots:
+    void updateDisplay()
+    {
+	QString ipaddr;
+	Process p(QStringList() << "ifconfig" << "eth0");
+	if ( p.exec( "", ipaddr ) ) {
+	    ipaddr.replace(QRegExp(".*inet addr:"),"");
+	    ipaddr.replace(QRegExp(" .*"),"");
+	    ipaddress->setText(ipaddr);
+	} else {
+	    ipaddress->setText("");
+	}
+    }
+
+private:
+    int tid;
+};
+
+QWidget* LanImpl::addStateWidget( QWidget* parent, Config& cfg ) const
+{
+    if ( isActive(cfg) ) {
+	LanStateImpl* state = new LanStateImpl(parent);
+	if ( state->ok() )
+	    return state;
+	delete state;
     }
     return 0;
 }

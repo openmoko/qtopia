@@ -23,31 +23,35 @@
 #include "stabmon.h"
 #include "launcher.h"
 
-#include <qpe/qpeapplication.h>
-#include <qpe/network.h>
-#include <qpe/config.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/network.h>
+#include <qtopia/config.h>
 #ifdef QT_QWS_CUSTOM
-#include <qpe/custom.h>
+#include <qtopia/custom.h>
 #endif
 
 #include <qfile.h>
 #ifdef QWS
 #include <qwindowsystem_qws.h>
-#include <qpe/qcopenvelope_qws.h>
+#include <qtopia/qcopenvelope_qws.h>
 #endif
-#include <qpe/alarmserver.h>
+#include <qtopia/alarmserver.h>
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
 #include <unistd.h>
 
-#if defined(QT_QWS_CASSIOPEIA) || defined(QT_QWS_IPAQ) || defined(QT_QWS_EBX)
+#if defined(QPE_NEED_CALIBRATION)
 #include "../calibrate/calibrate.h"
 #endif
 
 #ifdef QT_QWS_LOGIN
 #include "../login/qdmdialogimpl.h"
+#endif
+
+#ifdef Q_WS_QWS
+#include <qkeyboard_qws.h>
 #endif
 
 #ifdef QT_QWS_CASSIOPEIA
@@ -112,7 +116,7 @@ void initCassiopeia()
 #include <unistd.h>
 #include <errno.h>
 #include <linux/ioctl.h>
-#include <qpe/global.h>
+#include <qtopia/global.h>
 
 static void disableAPM() 
 {
@@ -160,7 +164,6 @@ void initFloppy()
 }
 #endif
 
-
 void initEnvironment()
 {
   Config config("locale");
@@ -207,7 +210,17 @@ static void initBacklight()
 #endif
 }
 
-
+static void initKeyboard()
+{
+    Config config("qpe");
+  
+    config.setGroup( "Keyboard" );
+  
+    int ard = config.readNumEntry( "RepeatDelay" );
+    int arp = config.readNumEntry( "RepeatPeriod" );
+    if ( ard > 0 && arp > 0 )
+	qwsSetKeyboardAutoRepeat( ard, arp );
+}
 
 int initApplication( int argc, char ** argv )
 {
@@ -224,10 +237,6 @@ int initApplication( int argc, char ** argv )
 #endif
 
     initEnvironment();
-
-#if !defined(QT_QWS_CASSIOPEIA) && !defined(QT_QWS_IPAQ) && !defined(QT_QWS_EBX)
-    setenv( "QWS_SIZE", "240x320", 0 );
-#endif
 
     //Don't flicker at startup:
 #ifdef QWS
@@ -247,6 +256,8 @@ int initApplication( int argc, char ** argv )
       }
 #endif
 
+    initKeyboard();
+    
     Desktop *d = new Desktop();
     a.setMainWidget(d->appLauncher());
 
@@ -265,7 +276,7 @@ int initApplication( int argc, char ** argv )
     Network::createServer(d);
 #endif
 
-#if defined(QT_QWS_CASSIOPEIA) || defined(QT_QWS_IPAQ) || defined(QT_QWS_EBX)
+#if defined(QPE_NEED_CALIBRATION)
     if ( !QFile::exists( "/etc/pointercal" ) ) {
 	// Make sure calibration widget starts on top.
 	Calibrate *cal = new Calibrate;
@@ -283,6 +294,7 @@ int initApplication( int argc, char ** argv )
     return rv;
 }
 
+#ifndef Q_OS_WIN32
 int main( int argc, char ** argv )
 {
 #ifndef SINGLE_APP
@@ -301,4 +313,13 @@ int main( int argc, char ** argv )
 
     return retVal;
 }
+#else
+
+int main( int argc, char ** argv )
+{
+    int retVal = initApplication( argc, argv );
+    return retVal;
+}
+
+#endif
 

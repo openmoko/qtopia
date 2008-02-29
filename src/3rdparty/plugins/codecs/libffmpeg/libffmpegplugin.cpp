@@ -17,32 +17,31 @@
 ** not clear to you.
 **
 **********************************************************************/
+#include <qfileinfo.h>
 #include "libffmpegplugin.h"
 
 
 LibFFMpegPlugin::LibFFMpegPlugin()
 {
+    scaleContextDepth = -1;
+    scaleContextInputWidth = -1;
+    scaleContextInputHeight = -1;
+    scaleContextPicture1Width = -1;
+    scaleContextPicture2Width = -1;
+    scaleContextOutputWidth = -1;
+    scaleContextOutputHeight = -1;
+    scaleContextLineStride = -1;
     openFlag = FALSE;
-    pluginMutex = 0;
-    audioCodec = 0;
-    videoCodec = 0;
-    audioCodecContext = 0;
-    videoCodecContext = 0;
-    avFormatContext = 0;
-    resampleContext = 0;
-    frame = 0;
-    videoStream = -1;
-    audioStream = -1;
-    avcodec_init();
-    avcodec_register_all();
-    av_register_all();
-    YUVFactory = yuv2rgb_factory_init( MODE_16_RGB, 0, 0 );
+    streamingFlag = FALSE;
+    needPluginInit = TRUE;
 }
 
 
 LibFFMpegPlugin::~LibFFMpegPlugin()
 {
     close();
+    flushAudioPackets();
+    flushVideoPackets();
 }
 
 
@@ -55,7 +54,7 @@ const char *LibFFMpegPlugin::pluginName()
 const char *LibFFMpegPlugin::pluginComment()
 {
     return "This plugin uses ffmpeg, libavcodec, libav libraries written by Fabrice Bellard and others. "
-	    "The Qtopia plugin interface adaptor is created by Trolltech.";
+	   "The Qtopia plugin interface adaptor is created by Trolltech.";
 }
 
 
@@ -68,243 +67,249 @@ double LibFFMpegPlugin::pluginVersion()
 bool LibFFMpegPlugin::isFileSupported( const QString& fileName )
 {
     qDebug("checking if file is supported %s", fileName.latin1() );
-    QString ext = fileName.right(4);
-    return (( ext == ".ogg" ) || ( ext == ".vob" ) || ( ext == ".mp3" ) || ( ext == ".avi" ) || ( ext == ".mpg" ) || ( ext == ".asf" ) || ( fileName.right(5) == ".mpeg" ));
+    QString ext2 = fileName.right(3).lower();
+    QString ext3 = fileName.right(4).lower();
+    QString ext4 = fileName.right(5).lower();
+    return  (
+		( ext3 == ".asf" ) ||
+		( ext3 == ".avi" ) ||
+		( ext3 == ".mov" ) ||
+		( ext3 == ".mp2" ) ||
+		( ext3 == ".mp3" ) ||
+		( ext4 == ".mpeg") ||
+		( ext3 == ".mpg" ) ||
+		//( ext3 == ".ogg" ) ||
+		( ext2 == ".rm" ) ||
+		//( ext3 == ".vob" ) || 
+		//( ext3 == ".wav" ) ||
+		( ext3 == ".wma" ) ||
+		( ext3 == ".wmf" ) ||
+		( ext3 == ".wmv" )
+	    );
+}
+
+
+void LibFFMpegPlugin::pluginInit()
+{
+    avcodec_init();
+    avcodec_register_all();
+    av_register_all();
+    needPluginInit = FALSE;
+}
+
+
+void LibFFMpegPlugin::fileInit()
+{
+    if ( needPluginInit )
+	pluginInit();
+    audioCodec = 0;
+    videoCodec = 0;
+    audioCodecContext = 0;
+    audioScaleContext = 0;
+    videoCodecContext = 0;
+    streamContext = 0;
+    frame = 0;
+    videoStream = -1;
+    audioStream = -1;
+    fileLength = 0;
+    skipNext = 0;
+    currentPacketTimeStamp = 0;
+    currentVideoTimeStamp = 0;
+    currentAudioTimeStamp = 0;
+    haveTotalTimeCache = FALSE;
+    totalTimeCache = TRUE;
+    droppedFrames = 0;
+    framesInLastPacket = 0;
+    streamingFlag = FALSE;
+    strInfo = "";
+    totalFrames = 0;
+    openFlag = TRUE;
 }
 
 
 bool LibFFMpegPlugin::open( const QString& fileName )
 {
-    if ( internalOpen( fileName ) ) {
-	openFlag = TRUE;
-
-//	return TRUE;
-	indexStream();
-	url_fseek( &avFormatContext->pb, 0, SEEK_SET );
-
-	frame = 0;
-	if ( videoCodecContext )
-	    videoCodecContext->frame_number = 0;
-	
-	return TRUE;
-
-/*
-	if ( avFormatContext->pb.seek ) {
-	    avFormatContext->pb.seek( avFormatContext, 0, SEEK_SET );
-	}
-	AVInputFormat *inputs = avFormatContext->iformat;
-	while ( inputs ) {
-	    if (inputs->read_seek)
-		inputs->read_seek( avFormatContext, 0 );
-	    inputs = inputs->next;
-	}
-*/
-/*
-	close();
-	return internalOpen( fileName );
-*/
-	
-    }
-    return FALSE;
-}
-
-
-bool LibFFMpegPlugin::internalOpen( const QString& fileName )
-{
     qDebug("opening file %s", fileName.latin1() );
 
-    audioCodecContext = 0;
-    videoCodecContext = 0;
-    videoStream = -1;
-    audioStream = -1;
-    frame = 0;
-    configured = FALSE;
-    skipNext = 0;
+    fileInit();
 
-    if ( !pluginMutex ) {
-	pluginMutex = new pthread_mutex_t;
-	pthread_mutexattr_t attr;
-	pthread_mutexattr_init( &attr );
-	pthread_mutex_init( pluginMutex, &attr );
+    if ( !fileLength ) {
+	QFileInfo fi( fileName );
+	fileLength = fi.size();
     }
 
     // open the input file with generic libav function
-    if (av_open_input_file(&avFormatContext, fileName.latin1(), NULL, 0, 0) < 0) {
-        strInfo = "Could not open file: " + fileName;
+    if ( av_open_input_file(&streamContext, fileName.latin1(), NULL, 0, 0) < 0 ) {
+	strInfo = qApp->translate( "LibFFMpegPlugin", "Error: Could not open file, File: " ) + fileName;
         qDebug( "%s", strInfo.latin1() );
 	return FALSE;
     }
-    
+
+    qDebug("opened file %s", fileName.latin1() );
+
     // Decode first frames to get stream parameters (for some stream types like mpeg)
-    if (av_find_stream_info(avFormatContext) < 0 ) {
+    if ( av_find_stream_info(streamContext) < 0 ) {
 	qDebug("Error getting parameters for file %s", fileName.latin1() );
 	return FALSE;
     }
 
+    qDebug("initing file %s", fileName.latin1() );
+ 
     // update the current parameters so that they match the one of the input stream
-    for ( int i = 0; i < avFormatContext->nb_streams; i++ ) {
-        AVCodecContext *enc = &avFormatContext->streams[i]->codec;
+    for ( int i = 0; i < streamContext->nb_streams; i++ ) {
+	//printf( "searching: %i\n", i );
+        AVCodecContext *enc = &streamContext->streams[i]->codec;
 	enc->codec = avcodec_find_decoder( enc->codec_id );
-	printf( "decoder found: %s\n", enc->codec->name );
+	//printf( "decoder found: %s\n", enc->codec->name );
 	if ( !enc->codec )
 	    qDebug("Unsupported codec for input stream");
         else if ( avcodec_open( enc, enc->codec ) < 0 )
             qDebug("Error while opening codec for input stream");
-        switch (enc->codec_type) {
-	    case CODEC_TYPE_AUDIO:
-		//qDebug("setting audio stream with id: %i", i);
-		audioStream = i;
-		audioCodecContext = enc;
-		break;
-	    case CODEC_TYPE_VIDEO:
-		//qDebug("setting video stream with id: %i", i);
-		videoStream = i;
-		videoCodecContext = enc;
-		break;
-	    default:
-		qDebug("unknown stream type");
-		break;
-        }
+	else {
+	    switch (enc->codec_type) {
+		case CODEC_TYPE_AUDIO:
+		    qDebug("setting audio stream with id: %i", i);
+		    audioStream = i;
+		    audioCodecContext = enc;
+		    break;
+		case CODEC_TYPE_VIDEO:
+		    qDebug("setting video stream with id: %i", i);
+		    videoStream = i;
+		    videoCodecContext = enc;
+		    break;
+		default:
+		    qDebug("unknown stream type");
+		    break;
+	    }
+	}
     }
 
     if ( audioCodecContext )
-        resampleContext = audio_resample_init( 2, audioCodecContext->channels, 44100, audioCodecContext->sample_rate );
+        audioScaleContext = audio_resample_init( 2, audioCodecContext->channels, 44100, audioCodecContext->sample_rate );
     
-    if ( audioCodecContext )
-    	printf("sample rate: %i\n",  audioCodecContext->sample_rate );
+    // Try to determine the total play time if possible
+    if ( !lengthAvailable() || !tellAvailable() )
+	haveTotalTimeCache = FALSE;
+    else {
+	// Jump to near the end of the file
+	url_fseek( &streamContext->pb, length() - 100000, SEEK_SET );
+	AVPacket pkt;
+	pkt.pts = 0;
+	totalTimeCache = 0;
+	// Read packets till we get to the end to try and get the last timestamp available
+	while ( av_read_packet(streamContext, &pkt) >= 0 ) {
+	    if ( pkt.pts > totalTimeCache )
+		totalTimeCache = pkt.pts / 100;
+	    pkt.pts = 0;
+	    av_free_packet(&pkt);
+	}
+	// Jump back to the beginning so we are ready to decode
+	url_fseek( &streamContext->pb, 0, SEEK_SET );
+	haveTotalTimeCache = totalTimeCache > 1;
 
-    strInfo = fileName;
+	if ( !haveTotalTimeCache ) {
+	    // Calculate the play time of constant bit rate files
+	    int totalBitRate = 0;
+	    if ( audioStream != -1 && audioCodecContext ) 
+		totalBitRate += audioCodecContext->bit_rate;
+	    if ( videoStream != -1 && videoCodecContext ) 
+		totalBitRate += videoCodecContext->bit_rate;
+	    if ( totalBitRate ) {
+		// The 8000 multiplier is because the rate is in bits per second and
+		// there are 8 bits to a byte and we want the time in milliseconds.
+		totalTimeCache = ((long long)length() * 8000) / totalBitRate;
+		haveTotalTimeCache = TRUE;
+	    }
+	}
+    }
+
+    if ( videoCodecContext )
+	videoCodecContext->hurry_up = 0;
+
+    if ( videoCodecContext && videoCodecContext->frame_rate )
+	msecPerFrame = (1000 * FRAME_RATE_BASE) / videoCodecContext->frame_rate;
+    else
+	msecPerFrame = 1000 / 25;
+
+    qDebug("finished opening %s", fileName.latin1() );
+
     return true;
 }
 
 
-//extern "C" offset_t url_ftell_real(ByteIOContext *s);
-void LibFFMpegPlugin::indexStream()
+const QString &LibFFMpegPlugin::fileInfo()
 {
-    totalFrames = 0;
-    totalKeyFrames = 0;
-
-    if ( !videoCodecContext ) 
-	return;
-
-    // Add key frame at 0
-    keyFramePosition[ totalKeyFrames ] = 0;
-    keyFrameNumber[ totalKeyFrames ] = 0;
-    totalKeyFrames++;
-
-//    int firstPos = avFormatContext->pb.pos; // url_ftell( &avFormatContext->pb );
-    int bufferSize = url_fget_max_packet_size( &avFormatContext->pb );
-
-    AVPicture picture;
-    while ( TRUE ) {
-	AVPacket pkt;
-//	int lastPos = avFormatContext->pb.pos;
-//	int lastPos = url_ftell_real( &avFormatContext->pb );
-	int lastPos = url_ftell( &avFormatContext->pb );
-
-#define IO_BUFFER_SIZE 32768
-	if ( lastPos > bufferSize )
-	    lastPos -= bufferSize;//IO_BUFFER_SIZE;
-	else
-	    lastPos = 0;
-
-	if (av_read_packet(avFormatContext, &pkt) < 0) 
-	    return; // EOF
-	if ( pkt.stream_index == videoStream ) {
-	    int len = pkt.size;
-	    unsigned char *ptr = pkt.data;
-	    while (len > 0) {
-		int got_picture;
-		videoCodecContext->hurry_up = 2;
-		videoCodecContext->parse_only = 1;
-		int ret = avcodec_decode_video(videoCodecContext, &picture, &got_picture, ptr, len);
-		videoCodecContext->parse_only = 0;
-		videoCodecContext->hurry_up = 0;
-		// Just parse (this appears to be in avcodec.h but isn't defined anywhere.)
-//		int ret = avcodec_parse_frame(videoCodecContext, &ptr, &len, ptr, len);
-		if ( got_picture ) {
-//		    framePosition[ totalFrames ] = lastPos;
-		    totalFrames++;
-		    if ( videoCodecContext->key_frame ) {
-			keyFramePosition[ totalKeyFrames ] = lastPos;
-			keyFrameNumber[ totalKeyFrames ] = videoCodecContext->frame_number;
-			totalKeyFrames++;
-			printf("adding KeyFrame index, frame: %i, pos: %i\n",
-			    videoCodecContext->frame_number, lastPos );
-		    }
-		}
-		ptr += ret;
-		len -= ret;
-		if ( ret < 0 ) {
-		    qDebug("Error while decoding stream");
-		    len = 0;
-		}
-	    }
+    if ( strInfo == "" ) {
+	if ( haveTotalTimeCache ) {
+	    int seconds = totalTimeCache / 1000;
+	    strInfo += qApp->translate( "LibFFMpegPlugin", "Play Time: " ) + QString::number( seconds / 60 ) + ":" +
+		 QString::number( (seconds % 60) / 10 ) + QString::number( (seconds % 60) % 10 ) + ",";
 	}
-	av_free_packet(&pkt);
+
+	if ( audioCodecContext ) {
+	    strInfo += qApp->translate( "LibFFMpegPlugin", "Audio Tracks: 1," );
+	    if ( audioCodecContext->codec )
+		strInfo += qApp->translate( "LibFFMpegPlugin", "Audio Format: " ) +  audioCodecContext->codec->name + ",";
+	    strInfo += qApp->translate( "LibFFMpegPlugin", "Audio Bit Rate: " ) + QString::number( audioCodecContext->bit_rate ) + ",";
+	    strInfo += qApp->translate( "LibFFMpegPlugin", "Audio Channels: " ) + QString::number( audioCodecContext->channels ) + ",";
+	    strInfo += qApp->translate( "LibFFMpegPlugin", "Audio Frequency: " ) + QString::number( audioCodecContext->sample_rate ) + ",";
+	}
+
+	if ( videoCodecContext ) {
+	    strInfo += qApp->translate( "LibFFMpegPlugin", "Video Tracks: 1," );
+	    if ( videoCodecContext->codec )
+		strInfo += qApp->translate( "LibFFMpegPlugin", "Video Format: " ) + videoCodecContext->codec->name + ",";
+	    strInfo += qApp->translate( "LibFFMpegPlugin", "Video Bit Rate: " ) + QString::number( videoCodecContext->bit_rate ) + ",";
+	    strInfo += qApp->translate( "LibFFMpegPlugin", "Video Width: " ) + QString::number( videoCodecContext->width ) + ",";
+	    strInfo += qApp->translate( "LibFFMpegPlugin", "Video Height: " ) + QString::number( videoCodecContext->height ) + ",";
+	}
     }
-    return;
+
+    return strInfo;
 }
+
+
+uchar bufferedSamples[AVCODEC_MAX_AUDIO_FRAME_SIZE * 16];
+int bufferedSamplesCount = 0;
 
 
 bool LibFFMpegPlugin::close()
 {
-    if ( pluginMutex ) {
-	pthread_mutex_lock( pluginMutex );
+    if ( openFlag ) {
+	flushAudioPackets();
+	flushVideoPackets();
 
-	while ( waitingVideoPackets.first() ) {
-	    AVPacket *pkt = waitingVideoPackets.take();
-	    if ( pkt ) {
-		av_free_packet(pkt);
-		delete pkt;
-	    }
-	}
+	AutoLockUnlockMutex lock( &pluginMutex );
 
-	while ( waitingAudioPackets.first() ) {
-	    AVPacket *pkt = waitingAudioPackets.take();
-	    if ( pkt ) {
-		av_free_packet(pkt);
-		delete pkt;
-	    }
-	}
+	qDebug("close");
 
-	if ( audioCodecContext )
-	    avcodec_flush_buffers( audioCodecContext );
-	if ( videoCodecContext )
-            avcodec_flush_buffers( videoCodecContext );
-	if ( resampleContext )
-	    audio_resample_close( resampleContext );
+	if ( audioScaleContext )
+	    audio_resample_close( audioScaleContext );
 	if ( audioCodecContext )
             avcodec_close( audioCodecContext );
 	if ( videoCodecContext )
             avcodec_close( videoCodecContext );
-	if ( avFormatContext )
-	    av_close_input_file( avFormatContext );
+	if ( streamContext )
+	    av_close_input_file( streamContext );
 
 	audioCodecContext = 0;
 	videoCodecContext = 0;
-	resampleContext = 0;
-	avFormatContext = 0;
+	audioScaleContext = 0;
+	streamContext = 0;
+	fileLength = 0;
+	bufferedSamplesCount = 0;
+	openFlag = FALSE;
 
-	pthread_mutex_unlock( pluginMutex );
-	pthread_mutex_destroy( pluginMutex );
-	delete pluginMutex;
-	pluginMutex = 0;
+	return TRUE;
     }
 
-    return TRUE;
+    return FALSE;
 }
 
 
 bool LibFFMpegPlugin::isOpen()
 {
     return openFlag;
-}
-
-
-const QString &LibFFMpegPlugin::fileInfo()
-{
-    return strInfo;
 }
 
 
@@ -328,7 +333,7 @@ int LibFFMpegPlugin::audioFrequency( int )
 
 int LibFFMpegPlugin::audioSamples( int )
 {
-    return 10000000;
+    return -1;
 }
 
 
@@ -344,75 +349,126 @@ long LibFFMpegPlugin::audioGetSample( int )
 }
 
 
-uchar bufferedSamples[AVCODEC_MAX_AUDIO_FRAME_SIZE * 4];
-int bufferedSamplesCount = 0;
-
-
 bool LibFFMpegPlugin::audioReadSamples( short *output, int channels, long samples, long& samplesRead, int )
 {
+    AutoLockUnlockMutex lock( &audioMutex );
+
     if ( !audioCodecContext || !audioCodecContext->codec ) {
 	qDebug("No audio decoder for stream");
-	samplesRead = -1;
+	samplesRead = 0;
 	return FALSE;
     }
 
     if ( samples > AVCODEC_MAX_AUDIO_FRAME_SIZE ) {
-	printf("this decoder can not buffer that much data!!!\n");
+	qDebug("Decoder can not buffer that much data at a time!!!");
+	samples = AVCODEC_MAX_AUDIO_FRAME_SIZE;
     }
 
-    while ( bufferedSamplesCount < samples ) {
-	AVPacket *pkt = getAnotherPacket( audioStream );
+    uchar tmpSamples[AVCODEC_MAX_AUDIO_FRAME_SIZE * 8];
+    long long tmpSamplesRead = 0;
+    long long fact = audioCodecContext->sample_rate * 2 * audioCodecContext->channels;
+    long long bufferedSamplesCount_fact = bufferedSamplesCount * fact;
+    long long samples_fact = samples * fact; // Buffer ahead
+    long long tmpBufCount = bufferedSamplesCount_fact;
+
+    bool haveBothTimeStamps = ( currentVideoTimeStamp && currentAudioTimeStamp );
+    if ( !haveBothTimeStamps )
+	samples_fact += 9200 * fact; // With DivX AVI streams I have tested against, libavcodec doesn't
+	// return any time stamps and the audio needs to be slightly behind the video so buffering longer achieves this.
+
+    while ( tmpBufCount < samples_fact ) {
+
+	MediaPacket *pkt = getAnotherPacket( audioStream );
 	if ( !pkt ) {
 	    samplesRead = -1;
-//	    qDebug("Audio EOF");
-	    return FALSE;
+	    return FALSE; // EOF
 	}
-	int len = pkt->size;
-	unsigned char *ptr = pkt->data;
-	short tmpSamples[AVCODEC_MAX_AUDIO_FRAME_SIZE * 4];
-	int tmpSamplesRead = 0;
-	int lastSamplesRead = 0;
+	int len = pkt->pkt.size;
+	unsigned char *ptr = pkt->pkt.data;
+	int bytesRead = 0;
 
 	while ( len ) {
-	    int ret = avcodec_decode_audio(audioCodecContext, tmpSamples + tmpSamplesRead * audioCodecContext->channels, &lastSamplesRead, ptr, len);
-	    if ( lastSamplesRead )
-		tmpSamplesRead += lastSamplesRead / 2 / audioCodecContext->channels;
+	    int ret = 0;
+
+	    if ( pkt ) {
+		if ( ptr <  pkt->pkt.data ) {
+		    qDebug("inconsistancy error");
+		    return FALSE;
+		}
+		if ( ptr && tmpSamplesRead < AVCODEC_MAX_AUDIO_FRAME_SIZE*4 ) {
+		    ret = avcodec_decode_audio(audioCodecContext, (short*)(tmpSamples + tmpSamplesRead), &bytesRead, ptr, len);
+		}
+	    }
+
+	    if ( bytesRead > 0 )
+		tmpSamplesRead += bytesRead;
+	    else if ( bytesRead < 0 )
+		qDebug("read count < 0, %i", bytesRead );
+
 	    if ( ret < 0 ) {
 		qDebug("Error while decoding audio stream");
-		av_free_packet(pkt);
-		delete pkt;
+		if ( pkt ) {
+		    av_free_packet(&pkt->pkt);
+		    delete pkt;
+		}
 		return FALSE;
 	    }
 	    ptr += ret;
 	    len -= ret;
 	}
-/*	
-	if ( tmpSamplesRead < 0 ) {
-	    printf("read count < 0, %i\n", tmpSamplesRead );
-	    tmpSamplesRead = 0;
+
+	if ( pkt ) {
+	    av_free_packet(&pkt->pkt);
+	    delete pkt;
 	}
-*/
 
-	audio_resample( resampleContext, (short*)(bufferedSamples + bufferedSamplesCount*2*channels), tmpSamples, tmpSamplesRead );
-
-	bufferedSamplesCount += tmpSamplesRead;
-	av_free_packet(pkt);
-	delete pkt;
+	tmpBufCount = bufferedSamplesCount_fact + tmpSamplesRead * 44100;
     }
 
+
+/*
+    // Attempt to reduce a memcpy by doing the audio_resample directly in to the output 
+    // buffer and then with any remaining output, resample it in to a buffer for later
+    tmpSamplesRead /= 2 * audioCodecContext->channels;
+    if ( bufferedSamplesCount ) {
+	if ( bufferedSamplesCount <= samples ) {
+	    memcpy( output, bufferedSamples, bufferedSamplesCount*2*channels );
+	    output += bufferedSamplesCount * channels;
+	    samples -= bufferedSamplesCount;
+	    bufferedSamplesCount = 0;
+	    int srcSampleCount = samples * audioCodecContext->sample_rate / 44100;
+	    audio_resample( audioScaleContext, (short*)output, (short*)tmpSamples, srcSampleCount );
+	    audio_resample( audioScaleContext, (short*)bufferedSamples, (short*)tmpSamples + srcSampleCount * 2, tmpSamplesRead - srcSampleCount );
+	    bufferedSamplesCount += (tmpSamplesRead - srcSampleCount) * 44100 / audioCodecContext->sample_rate;
+	} else {
+	    samplesRead = samples;
+	    memcpy( output, bufferedSamples, samples*2*channels );
+	    bufferedSamplesCount -= samples;
+	    int blength = bufferedSamplesCount*2*channels;
+	    memmove( bufferedSamples, bufferedSamples + samples*2*channels, blength );
+	    audio_resample( audioScaleContext, (short*)bufferedSamples + bufferedSamplesCount*channels, (short*)tmpSamples, tmpSamplesRead );
+	    bufferedSamplesCount += tmpSamplesRead * 44100 / audioCodecContext->sample_rate;
+	}
+    }
+*/
+
+    tmpSamplesRead /= 2 * audioCodecContext->channels;
+    bufferedSamplesCount += audio_resample( audioScaleContext, (short*)bufferedSamples + bufferedSamplesCount*channels, (short*)tmpSamples, tmpSamplesRead );
+
+    samplesRead = samples;
     int slength = samples*2*channels;
     memcpy( output, bufferedSamples, slength );
-    samplesRead = samples;
+    if ( currentAudioTimeStamp > 1 )
+	currentAudioTimeStamp += samples * 1000 / 44100;
 
-    int leftOver = bufferedSamplesCount - samples;
-    memmove( bufferedSamples, bufferedSamples + slength, leftOver*channels*2 );
-    bufferedSamplesCount = leftOver;
+    bufferedSamplesCount -= samples;
+    int blength = bufferedSamplesCount*2*channels;
+    memmove( bufferedSamples, bufferedSamples + slength, blength );
 
     return TRUE;
 }
 
 
-// If decoder doesn't support video then return 0 here
 int LibFFMpegPlugin::videoStreams()
 {
     return (videoCodecContext) ? 1 : 0;
@@ -439,160 +495,19 @@ double LibFFMpegPlugin::videoFrameRate( int )
 
 int LibFFMpegPlugin::videoFrames( int )
 {
-    return totalFrames;
+    return -1;
 }
 
 
-bool LibFFMpegPlugin::videoSetFrame( long fr, int )
+bool LibFFMpegPlugin::videoSetFrame( long, int )
 {
-    printf("seek %i -> %i, ", frame, fr );
-
-    if ( !videoCodecContext ) {
-	printf("no context\n");
-	return false;
-    }
-
-    if ( fr == frame + 1 || fr == frame ) {
-	printf("next frame (automatic)\n");
-	return TRUE;
-    }
-/*
-    if ( fr == frame - 1 ) {
-	skipNext = 1;
-	return TRUE;
-    }
-*/
-    if ( fr <= frame - 1 && fr >= frame - 5 ) {
-	printf("back a few (just wait it out)\n");
-	skipNext = frame - fr;
-	return TRUE;
-    }
-
-    bool setFrameNumber = FALSE;
-    int nextKeyFrame = 0;
-    bool flushAudio = FALSE;
-
-    if ( fr < frame || frame + 50 < fr ) {
-	printf("big jump, ");
-	for ( int i = 0; i < totalKeyFrames; i++ ) {
-	    if ( keyFrameNumber[i] >= fr ) {
-
-		if ( keyFrameNumber[i] != fr )
-		    i = ( i <= 0 ) ? 0 : i - 1;
-
-		// If we are already closer to the desired frame than the nearest
-		// previous keyframe, don't bother seeking back etc
-		if ( frame >= keyFrameNumber[i] && frame < fr )
-		    break;
-
-
-		pthread_mutex_lock( pluginMutex );
-
-		while ( waitingVideoPackets.first() ) {
-		    AVPacket *pkt = waitingVideoPackets.take();
-		    if ( pkt ) {
-			av_free_packet(pkt);
-			delete pkt;
-		    }
-		}
-		while ( waitingAudioPackets.first() ) {
-		    AVPacket *pkt = waitingAudioPackets.take();
-		    if ( pkt ) {
-			av_free_packet(pkt);
-			delete pkt;
-		    }
-		}
-
-		if ( audioCodecContext )
-		    avcodec_flush_buffers( audioCodecContext );
-		if ( videoCodecContext )
-		    avcodec_flush_buffers( videoCodecContext );
-
-		printf("previous key frame at: %i, ", keyFrameNumber[i] );
-		url_fseek( &avFormatContext->pb, keyFramePosition[ i ], SEEK_SET );
-		frame = keyFrameNumber[i] - 1;
-		setFrameNumber = TRUE;
-		flushAudio = TRUE;
-		nextKeyFrame = keyFrameNumber[i];
-
-		pthread_mutex_unlock( pluginMutex );
-		break;
-//		return TRUE;
-	    }
-	}
-    }
-    
-    // when set to 1 during decoding, b frames will be skiped when
-    // set to 2 idct/dequant will be skipped too
-    videoCodecContext->hurry_up = 2;
-
-    printf("quick decode, frames: ");
-    while ( (frame < (fr - 1)) || setFrameNumber ) {
-	AVPicture picture;
-	int got_picture = 0, dummy;
-	while ( !got_picture ) {
-	    AVPacket *pkt = getAnotherPacket( videoStream );
-
-	    if ( !pkt ) {
-		qDebug("Video EOF");
-		return 1;
-	    }
-
-	    int len = pkt->size;
-	    unsigned char *ptr = pkt->data;
-
-	    while (len > 0) {
-		int *got_pic_ptr = ( got_picture ) ? &dummy : &got_picture;
-		int ret = avcodec_decode_video(videoCodecContext, &picture, got_pic_ptr, ptr, len);
-
-		if ( *got_pic_ptr ) {
-		    if ( setFrameNumber && videoCodecContext->key_frame ) {
-			videoCodecContext->frame_number = nextKeyFrame;
-			setFrameNumber = FALSE;
-		    }
-		    printf("%i, ", videoCodecContext->frame_number);
-		}
-
-		if ( ret < 0 ) {
-		    qDebug("Error while decoding stream");
-		    av_free_packet(pkt);
-		    delete pkt;
-		    //return 1;
-		}
-		ptr += ret;
-		len -= ret;
-	    }
-
-	    av_free_packet(pkt);
-	    delete pkt;
-	}
-
-	frame = videoCodecContext->frame_number;
-    }
-    printf("%i\n", videoCodecContext->frame_number);
-
-    videoCodecContext->hurry_up = 0;
-
-    if ( flushAudio ) {
-	pthread_mutex_lock( pluginMutex );
-	while ( waitingAudioPackets.first() ) {
-	    AVPacket *pkt = waitingAudioPackets.take();
-	    if ( pkt ) {
-		av_free_packet(pkt);
-		delete pkt;
-	    }
-	}
-	if ( audioCodecContext )
-	    avcodec_flush_buffers( audioCodecContext );
-	pthread_mutex_unlock( pluginMutex );
-    }
-    return TRUE;
+    return FALSE;
 }
 
 
 long LibFFMpegPlugin::videoGetFrame( int )
 {
-    return frame;
+    return -1;
 }
 
 
@@ -602,8 +517,25 @@ bool LibFFMpegPlugin::videoReadFrame( unsigned char **, int, int, int, int, Colo
 }
 
 
-bool LibFFMpegPlugin::videoReadScaledFrame( unsigned char **output_rows, int, int, int in_w, int in_h, int out_w, int out_h, ColorFormat, int )
+bool LibFFMpegPlugin::videoReadScaledFrame( unsigned char **output_rows, int, int, int in_w, int in_h, int out_w, int out_h, ColorFormat fmt, int )
 {
+    AutoLockUnlockMutex lock( &videoMutex );
+
+    int colorMode = -1;
+    switch ( fmt ) {
+	case RGB565:   colorMode = MODE_16_RGB; break;
+	case BGR565:   colorMode = MODE_16_BGR; break;
+	case RGBA8888: colorMode = MODE_32_RGB; break;
+	case BGRA8888: colorMode = MODE_32_BGR; break;
+    };
+
+    if ( colorMode != scaleContextDepth ) {
+	scaleContextDepth = colorMode;
+	videoScaleContext = yuv2rgb_factory_init( colorMode, 0, 0 );
+    }
+
+    int lineStride = (uchar*)output_rows[1] - (uchar*)output_rows[0];
+
     if ( !videoCodecContext || !videoCodecContext->codec ) {
 	qDebug("No video decoder for stream");
 	return 1;
@@ -614,78 +546,79 @@ bool LibFFMpegPlugin::videoReadScaledFrame( unsigned char **output_rows, int, in
 	return 0;
     }
 
-    AVPicture picture;
-    int got_picture = 0, dummy;
+    int got_picture = 0;
     while ( !got_picture ) {
-	AVPacket *pkt = getAnotherPacket( videoStream );
+	MediaPacket *pkt = getAnotherPacket( videoStream );
 
 	if ( !pkt ) {
 	    qDebug("Video EOF");
-	    return 1;
+	    return 1; // EOF
 	}
 
-	if (pkt->flags & PKT_FLAG_DROPPED_FRAME) {
-	    printf("drop frame\n");
-	    frame++;
-	}
+	while (pkt->len > 0 && !got_picture) {
+	    int ret = avcodec_decode_video(videoCodecContext, &picture, &got_picture, pkt->ptr, pkt->len);
 
-	int len = pkt->size;
-	unsigned char *ptr = pkt->data;
-
-	while (len > 0) {
-	    int *got_pic_ptr = ( got_picture ) ? &dummy : &got_picture;
-	    int ret = avcodec_decode_video(videoCodecContext, &picture, got_pic_ptr, ptr, len);
-/*
-	    int ret = avcodec_decode_video(videoCodecContext, &picture, &got_picture, ptr, len);
-
-	    if (got_picture) {
-		if ( ret != len ) {
-		    lastPkt = pkt;
-		    lastPktLen = len;
-		    lastPktPtr = ptr;
-		    ret = len;
-		} else {
-		    lastPkt = 0;
-		    av_free_packet(pkt);
-		    delete pkt;
-		}
-	    }
-*/
-	    //if (got_picture) {
-	    if ( *got_pic_ptr ) {
+	    if ( got_picture ) {
+		pkt->frameInPacket++;
+		if ( currentVideoTimeStamp )
+		    currentVideoTimeStamp += msecPerFrame;
 		frame = videoCodecContext->frame_number;
+//		qDebug("got picture: %i", frame );
 
-//		printf("got picture: %i\n", frame );
+		// Check if any colour space conversion variables have changed
+		// since the last decoded frame which will require
+		// re-initialising the colour space tables 
+		if ( scaleContextInputWidth != in_w ||
+		    scaleContextInputHeight != in_h ||
+		    scaleContextPicture1Width != picture.linesize[0] ||
+		    scaleContextPicture2Width != picture.linesize[1] ||
+		    scaleContextOutputWidth != out_w ||
+		    scaleContextOutputHeight != out_h ||
+		    scaleContextLineStride != lineStride ||
+		    scaleContextFormat != videoCodecContext->pix_fmt ) {
 
+		    scaleContextInputWidth = in_w;
+		    scaleContextInputHeight = in_h;
+		    scaleContextPicture1Width = picture.linesize[0];
+		    scaleContextPicture2Width = picture.linesize[1];
+		    scaleContextOutputWidth = out_w;
+		    scaleContextOutputHeight = out_h;
+		    scaleContextLineStride = lineStride;
+		    scaleContextFormat = videoCodecContext->pix_fmt;
 
-/*
-		qDebug("details - frame size: %i, num: %i, real: %i, was_key: %i, type: %i", 
-		   videoCodecContext->frame_size,
-		   videoCodecContext->frame_number, 
-		   videoCodecContext->real_pict_num,
-		   videoCodecContext->key_frame, 
-		   videoCodecContext->pict_type );
-*/
-		if ( !configured ) {
-		    configured = TRUE;
-		    int lineStride = (uchar*)output_rows[1] - (uchar*)output_rows[0];
-		    YUVFactory->converter->configure( YUVFactory->converter,
-			in_w, in_h, picture.linesize[0], picture.linesize[1], out_w, out_h, lineStride );
+		    int format = 0;
+		    switch ( videoCodecContext->pix_fmt ) {
+			case PIX_FMT_YUV444P:
+			    format = FORMAT_YUV444;
+			    break;
+			case PIX_FMT_YUV422P:
+			    format = FORMAT_YUV422;
+			    break;
+			case PIX_FMT_YUV420P:
+			    format = FORMAT_YUV420;
+			    break;
+		    };
+
+		    qDebug("reconfiguring scale context");
+		    videoScaleContext->converter->configure( videoScaleContext->converter,
+			in_w, in_h, picture.linesize[0], picture.linesize[1], out_w, out_h, lineStride, format );
+//		    qDebug("configured yuv convert context with - input: %i x %i  pic lines: %i %i, output: %i x %i, linestride: %i", in_w, in_h, picture.linesize[0], picture.linesize[1], out_w, out_h, lineStride );
 		}
 
-		YUVFactory->converter->yuv2rgb_fun( YUVFactory->converter, (uint8_t*)output_rows[0], picture.data[0], picture.data[1], picture.data[2] ); 
+		videoScaleContext->converter->yuv2rgb_fun( videoScaleContext->converter, (uint8_t*)output_rows[0], picture.data[0], picture.data[1], picture.data[2] );
 	    }
 
 	    if ( ret < 0 ) {
 		qDebug("Error while decoding stream");
-		av_free_packet(pkt);
-		delete pkt;
+		removeCurrentVideoPacket();
 		return 1;
 	    }
 
-	    ptr += ret;
-	    len -= ret;
+	    pkt->ptr += ret;
+	    pkt->len -= ret;
 	}
+	if ( pkt->len == 0 ) 
+	    removeCurrentVideoPacket(); // Remove from list when done with it
     }
 
     return 0;
@@ -764,49 +697,506 @@ long LibFFMpegPlugin::getPlayTime()
 }
 
 
-AVPacket *LibFFMpegPlugin::getAnotherPacket( int stream )
+
+
+
+
+
+bool LibFFMpegPlugin::supportsStreaming()
 {
-    pthread_mutex_lock( pluginMutex );
+    return TRUE;
+}
+bool LibFFMpegPlugin::canStreamURL( const QUrl& url, const QString& mimetype )
+{
+    QString fileName = url.toString( false, false );
+    // Support file://
+    if ( fileName.left(7).lower() == "file://" )
+	return true;
+    // Support http://
+    if ( fileName.left(7).lower() == "http://" )
+	return true;
+    // Support rtsp://
+    if ( fileName.left(7).lower() == "rtsp://" )
+	return true;
+    // Does not support mms://
+    if ( fileName.left(6).lower() == "mms://" )
+	return false;
+    // All others assumed not supported
+    return false;
+}
+bool LibFFMpegPlugin::openURL( const QUrl& url, const QString& mimetype )
+{
+    fileInit();
+
+    streamingFlag = TRUE;
+    haveTotalTimeCache = FALSE;
+
+    QString fileName = url.toString( false, false );
+
+    qDebug("opening url %s", fileName.latin1() );
+
+    // open the input file with generic libav function
+    if ( av_open_input_file(&streamContext, fileName.latin1(), NULL, 0, 0) < 0 ) {
+	strInfo = qApp->translate( "LibFFMpegPlugin", "Error: Could not open url, URL: " ) + fileName;
+        qDebug( "%s", strInfo.latin1() );
+	return FALSE;
+    }
+
+    qDebug("opened url %s", fileName.latin1() );
+
+    // Decode first frames to get stream parameters (for some stream types like mpeg)
+    if ( av_find_stream_info(streamContext) < 0 ) {
+	qDebug("Error getting parameters for file %s", fileName.latin1() );
+	return FALSE;
+    }
+
+    qDebug("initing url %s", fileName.latin1() );
+ 
+    // update the current parameters so that they match the one of the input stream
+    for ( int i = 0; i < streamContext->nb_streams; i++ ) {
+	//printf( "searching: %i\n", i );
+        AVCodecContext *enc = &streamContext->streams[i]->codec;
+	enc->codec = avcodec_find_decoder( enc->codec_id );
+	//printf( "decoder found: %s\n", enc->codec->name );
+	if ( !enc->codec )
+	    qDebug("Unsupported codec for input stream");
+        else if ( avcodec_open( enc, enc->codec ) < 0 )
+            qDebug("Error while opening codec for input stream");
+	else {
+	    switch (enc->codec_type) {
+		case CODEC_TYPE_AUDIO:
+		    qDebug("setting audio stream with id: %i", i);
+		    audioStream = i;
+		    audioCodecContext = enc;
+		    break;
+		case CODEC_TYPE_VIDEO:
+		    qDebug("setting video stream with id: %i", i);
+		    videoStream = i;
+		    videoCodecContext = enc;
+		    break;
+		default:
+		    qDebug("unknown stream type");
+		    break;
+	    }
+	}
+    }
+
+    if ( audioCodecContext )
+        audioScaleContext = audio_resample_init( 2, audioCodecContext->channels, 44100, audioCodecContext->sample_rate );
+
+    if ( videoCodecContext )
+	videoCodecContext->hurry_up = 0;
+
+    if ( videoCodecContext && videoCodecContext->frame_rate )
+	msecPerFrame = (1000 * FRAME_RATE_BASE) / videoCodecContext->frame_rate;
+    else
+	msecPerFrame = 1000 / 25;
+
+    qDebug("finished opening %s", fileName.latin1() );
+
+    return true;
+}
+bool LibFFMpegPlugin::streamed()
+{
+    return streamingFlag;
+}
+
+bool LibFFMpegPlugin::syncAvailable()
+{
+    return TRUE;
+}
+bool LibFFMpegPlugin::sync()
+{
+    if ( !streamContext ) {
+	qDebug("No file open");
+	return FALSE;
+    }
+
+    if ( !videoCodecContext ) {
+	printf("no context\n");
+	return FALSE;
+    }
+
+    if ( !videoStreams() )
+	return TRUE;
+ 
+    AutoLockUnlockMutex lock( &videoMutex );
+
+    int packetCount = waitingVideoPackets.count();
+    if ( packetCount > 1000 ) {
+	// We are way too far behind, need to altogether drop packets we
+	// are behind and try to pick up from somewhere reasonable
+	for ( int i = 0; i < packetCount - 10; i++ )
+	    removeCurrentVideoPacket();
+
+	qDebug("got really far behind");
+    }
+
+    bool haveBothTimeStamps = ( currentVideoTimeStamp && currentAudioTimeStamp );
+    bool keepDecoding = TRUE;
+
+    if ( haveBothTimeStamps ) {
+//	qDebug("have both time stamps %li %li", (long)currentVideoTimeStamp, (long)currentAudioTimeStamp );
+	// Are we too far ahead with the video?
+	if ( currentVideoTimeStamp > currentAudioTimeStamp + 70 ) {
+	    printf("slow down video\n");
+	    skipNext++;
+	    // The w38.mpg example has a crazy video time stamp on the first video packet
+	    // which would cause the logic here to think we are 1000s of frames behind.
+	    // What is required is to decode more video packets till we get a sane video
+	    // time stamp but this doesn't happen if we think we are miles ahead with the
+	    // video because of a bad time stamp. The line below ensures if we do get too
+	    // ahead with the video we can't stall and stop decoding for more than a 
+	    // single frame at a time in case we get crazy time stamps.
+//	    currentVideoTimeStamp = currentAudioTimeStamp;
+	    return TRUE;
+	}
+	keepDecoding = ( currentAudioTimeStamp > currentVideoTimeStamp + 70 );
+	if ( keepDecoding ) {
+//	    qDebug("audio ahead, decode more video 1");
+	}
+    } else {
+//	qDebug("packets - video: %i audio: %i", waitingVideoPackets.count(), waitingAudioPackets.count() );
+	if ( waitingAudioPackets.count() >= 1 ) {
+	    printf("slow down video\n");
+	    skipNext++;
+	    return TRUE;
+	}
+	keepDecoding = ( waitingVideoPackets.count() > 1 );
+	if ( keepDecoding ) {
+//	    qDebug("audio ahead, decode more video 2");
+	}
+    }
+
+    // Quickly skip over packets if we are *really* far behind (ie one second behind)
+    if ( haveBothTimeStamps ) {
+       int maxPackets = 10;
+       while ( currentAudioTimeStamp > currentVideoTimeStamp + 1000 && maxPackets ) {
+           maxPackets--;
+           //qDebug("catching up another frame");
+           MediaPacket *pkt = getAnotherPacket( videoStream );
+           if ( !pkt ) {
+               qDebug("Video EOF");
+               return FALSE; // EOF
+           }
+           removeCurrentVideoPacket(); // Remove from list when done with it
+       }
+    }
+
+    int maxFrames = 10;
+
+    // Try to consume up the waiting video packets so we get back in sync with the audio
+    while ( keepDecoding ) {
+//	qDebug("catching up another packet");
+	MediaPacket *pkt = getAnotherPacket( videoStream );
+	if ( !pkt ) {
+	    qDebug("Video EOF");
+	    return FALSE;
+	}
+	while ( pkt->len > 0 && maxFrames && (!haveBothTimeStamps || ( currentAudioTimeStamp > currentVideoTimeStamp + 70 )) ) {
+	    int got_picture = 0;
+	    // when set to 1 during decoding, b frames will be skiped when
+	    // set to 2 idct/dequant will be skipped too
+	    int oldHurryUp = videoCodecContext->hurry_up;
+	    videoCodecContext->hurry_up = 1;
+	    int ret = avcodec_decode_video(videoCodecContext, &picture, &got_picture, pkt->ptr, pkt->len);
+	    if ( got_picture ) {
+		pkt->frameInPacket++;
+		if ( currentVideoTimeStamp )
+		    currentVideoTimeStamp += msecPerFrame;
+		droppedFrames++;
+		qDebug("frames dropped: %i", droppedFrames);
+		maxFrames--;
+	    }
+	    videoCodecContext->hurry_up = oldHurryUp;
+	    if ( ret < 0 ) {
+		qDebug("Error while decoding stream");
+		av_free_packet(&pkt->pkt);
+		delete pkt;
+	    }
+	    pkt->ptr += ret;
+	    pkt->len -= ret;
+	}
+	if ( pkt->len == 0 ) 
+	    removeCurrentVideoPacket(); // Remove from list when done with it
+
+	if ( haveBothTimeStamps ) {
+	    // Guard against crazy audio or video time stamps by limiting the frames to maxFrames
+	    // otherwise they could cause this code to want to catch up with an oasis timestamp way in the future
+	    if ( maxFrames <= 0 ) {
+		currentVideoTimeStamp = currentAudioTimeStamp;
+		keepDecoding = FALSE;
+	    } else
+		keepDecoding = ( currentAudioTimeStamp > currentVideoTimeStamp + 70 );
+
+	    if ( keepDecoding ) {
+//		qDebug("audio ahead, decode more video 3");
+	    }
+	} else {
+	    if ( maxFrames <= 0 ) {
+		keepDecoding = FALSE;
+	    } else
+		keepDecoding = ( waitingVideoPackets.count() > 1 );
+	}
+    }
+
+    return TRUE;
+}
+
+bool LibFFMpegPlugin::seekAvailable()
+{
+    return !streamingFlag;
+}
+bool LibFFMpegPlugin::seek( long pos )
+{
+    qDebug("LibFFMpegPlugin::seek");
+
+    if ( !streamContext ) {
+	qDebug("No file open");
+	return FALSE;
+    }
+
+    AutoLockUnlockMutex audioLock( &audioMutex );
+    AutoLockUnlockMutex videoLock( &videoMutex );
+
+    flushAudioPackets();
+    flushVideoPackets();
+
+    {
+	AutoLockUnlockMutex lock( &pluginMutex );
+
+	if ( audioCodecContext )
+	    avcodec_flush_buffers( audioCodecContext );
+	if ( videoCodecContext )
+	    avcodec_flush_buffers( videoCodecContext );
+
+	// Seek in to the file
+	if ( pos > 16000 )
+	    url_fseek( &streamContext->pb, pos - 16000, SEEK_SET );
+	else
+	    url_fseek( &streamContext->pb, 0, SEEK_SET );
+
+	// Reset these after seeking till we start to get new ones again
+	currentVideoTimeStamp = 0;
+	currentAudioTimeStamp = 0;
+	bufferedSamplesCount = 0;
+    }
+
+    if ( !videoStreams() )
+	return TRUE;
+
+    // Sync up the input with the packets so
+    // we are ready to get the next video frame
+    // We have to sync through a keyframe, but not
+    // all codecs have keyframes or some have keyframes
+    // which are far apart depending on the encoder which created the file.
+    // So instead of hoping to find a keyframe, we decode 25 frames so we
+    // are reasonably confident we have enough picture complete by then
+    // to resume decoding from.
+    int framesToDecode = 25;
+
+    while ( framesToDecode > 0 ) {
+	MediaPacket *pkt = getAnotherPacket( videoStream );
+
+	if ( !pkt ) {
+	    qDebug("Video EOF");
+	    return FALSE;
+	}
+
+	while (pkt->len > 0) {
+	    int got_pic;
+	    int ret = avcodec_decode_video(videoCodecContext, &picture, &got_pic, pkt->ptr, pkt->len);
+
+	    if ( got_pic ) {
+		pkt->frameInPacket++;
+		if ( currentVideoTimeStamp )
+		    currentVideoTimeStamp += msecPerFrame;
+		framesToDecode--;
+	    }
+
+	    if ( ret < 0 ) {
+		qDebug("Error while decoding stream");
+		av_free_packet(&pkt->pkt);
+		delete pkt;
+	    }
+	    pkt->ptr += ret;
+	    pkt->len -= ret;
+	}
+
+	if ( pkt->len == 0 ) 
+	    removeCurrentVideoPacket(); // Remove from list when done with it
+    }
+
+    bool haveBothTimeStamps = ( currentVideoTimeStamp && currentAudioTimeStamp );
+    if ( haveBothTimeStamps ) {
+	// ### Throw away audio packets till we are in time with the video packets
+        flushAudioPackets();
+	bufferedSamplesCount = 0;
+    } else {
+        flushAudioPackets();
+	bufferedSamplesCount = 0;
+    }
+
+    return TRUE;
+}
+
+bool LibFFMpegPlugin::tellAvailable()
+{
+    return !streamingFlag;
+}
+long LibFFMpegPlugin::tell()
+{
+    return url_ftell( &streamContext->pb );
+}
+
+bool LibFFMpegPlugin::lengthAvailable()
+{
+    return !streamingFlag;
+}
+long LibFFMpegPlugin::length()
+{
+    return fileLength;
+}
+
+bool LibFFMpegPlugin::totalTimeAvailable()
+{
+    return haveTotalTimeCache;
+}
+long LibFFMpegPlugin::totalTime()
+{
+    return totalTimeCache;
+}
+
+bool LibFFMpegPlugin::currentTimeAvailable()
+{
+    bool haveTimeStamp = (currentAudioTimeStamp != 0) || (currentVideoTimeStamp != 0);
+    bool canDerivePosition = lengthAvailable() && tellAvailable() && totalTimeAvailable();
+    return haveTimeStamp || canDerivePosition;
+}
+long LibFFMpegPlugin::currentTime()
+{
+    if (currentAudioTimeStamp != 0)
+       return currentAudioTimeStamp;
+    if (currentVideoTimeStamp != 0)
+       return currentVideoTimeStamp;
+    bool canDerivePosition = lengthAvailable() && tellAvailable() && totalTimeAvailable();
+    if ( canDerivePosition && fileLength )
+       return ((long long)totalTime() * tell()) / fileLength;
+    return -1;
+}
+
+
+// Remove from list when done with it
+void LibFFMpegPlugin::removeCurrentVideoPacket()
+{
+    AutoLockUnlockMutex lock( &pluginMutex );
+    MediaPacket *pkt = waitingVideoPackets.take(0);
+    framesInLastPacket = pkt->frameInPacket;
+    if ( pkt ) {
+	av_free_packet(&pkt->pkt);
+	delete pkt;
+    }
+}
+
+
+void LibFFMpegPlugin::flushVideoPackets()
+{
+    AutoLockUnlockMutex lock( &pluginMutex );
+    if ( videoCodecContext )
+	avcodec_flush_buffers( videoCodecContext );
+    while ( waitingVideoPackets.first() ) {
+	MediaPacket *pkt = waitingVideoPackets.take();
+	if ( pkt ) {
+	    av_free_packet(&pkt->pkt);
+	    delete pkt;
+	}
+    }
+}
+
+
+void LibFFMpegPlugin::flushAudioPackets()
+{
+    AutoLockUnlockMutex lock( &pluginMutex );
+    if ( audioCodecContext )
+	avcodec_flush_buffers( audioCodecContext );
+    while ( waitingAudioPackets.first() ) {
+	MediaPacket *pkt = waitingAudioPackets.take();
+	if ( pkt ) {
+	    av_free_packet(&pkt->pkt);
+	    delete pkt;
+	}
+    }
+}
+
+
+MediaPacket *LibFFMpegPlugin::getAnotherPacket( int stream )
+{
+    AutoLockUnlockMutex lock( &pluginMutex );
 
     if ( stream == videoStream ) 
 	if ( waitingVideoPackets.first() ) {
-	    AVPacket *pkt = waitingVideoPackets.take();
-	    pthread_mutex_unlock( pluginMutex );
+	    MediaPacket *pkt = waitingVideoPackets.first();
+	    if ( pkt->pkt.pts ) {
+		currentPacketTimeStamp = pkt->pkt.pts / 100;
+		currentVideoTimeStamp = currentPacketTimeStamp + (pkt->frameInPacket * msecPerFrame);
+//		qDebug("got time stamp: %li queued video (%i left)", currentPacketTimeStamp, waitingVideoPackets.count() );
+	    } else if ( currentVideoTimeStamp ) {
+		currentVideoTimeStamp = currentPacketTimeStamp + (framesInLastPacket * msecPerFrame);
+	    }
 	    return pkt;
 	}
     if ( stream == audioStream ) 
 	if ( waitingAudioPackets.first() ) {
-	    AVPacket *pkt = waitingAudioPackets.take();
-	    pthread_mutex_unlock( pluginMutex );
+	    MediaPacket *pkt = waitingAudioPackets.take();
+	    if ( pkt->pkt.pts ) {
+		currentPacketTimeStamp = pkt->pkt.pts / 100; // convert to milliseconds
+		currentAudioTimeStamp = currentPacketTimeStamp;
+//		qDebug("got time stamp: %li queued audio (%i left)", currentPacketTimeStamp, waitingAudioPackets.count() );
+	    }
 	    return pkt;
 	}
 
     // Buffer up some more packets
     for ( int i = 0; i < 100; i++ ) {
-	AVPacket *pkt = new AVPacket;
+	MediaPacket *pkt = new MediaPacket;
+	pkt->pkt.pts = 0;
+	pkt->frameInPacket = 0;
 
 	// read a packet from input
-	if (av_read_packet(avFormatContext, pkt) < 0) {
-//	    qDebug("EOF");
+	if (av_read_packet(streamContext, &pkt->pkt) < 0) {
 	    delete pkt;
-	    pthread_mutex_unlock( pluginMutex );
-	    return 0;
+	    return 0; // EOF
 	}
 
-	if ( pkt->stream_index == stream ) {
-	    pthread_mutex_unlock( pluginMutex );
+	pkt->len = pkt->pkt.size;
+	pkt->ptr = pkt->pkt.data;
+
+	if ( pkt->pkt.stream_index == stream && stream == audioStream ) {
+	    if ( pkt->pkt.pts ) {
+		currentPacketTimeStamp = pkt->pkt.pts / 100;
+		currentAudioTimeStamp = currentPacketTimeStamp;
+//		qDebug("got time stamp: %li audio", currentPacketTimeStamp );
+	    }
+	    return pkt;
+	} else if ( pkt->pkt.stream_index == stream && stream == videoStream ) {
+	    waitingVideoPackets.append( pkt );
+	    if ( pkt->pkt.pts ) {
+		currentPacketTimeStamp = pkt->pkt.pts / 100;
+		currentVideoTimeStamp = currentPacketTimeStamp;
+//		qDebug("got time stamp: %li video", currentPacketTimeStamp );
+	    }
 	    return pkt;
 	}
 
-	if ( pkt->stream_index == videoStream )
+	if ( pkt->pkt.stream_index == videoStream ) 
 	    waitingVideoPackets.append( pkt );
-	if ( pkt->stream_index == audioStream )
+	if ( pkt->pkt.stream_index == audioStream ) 
 	    waitingAudioPackets.append( pkt );
     }
 
-    pthread_mutex_unlock( pluginMutex );
     return 0;
 }
+
 
 
 

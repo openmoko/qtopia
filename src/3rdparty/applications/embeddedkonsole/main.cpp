@@ -21,7 +21,7 @@
 
 #include "konsole.h"
 
-#include <qpe/qpeapplication.h>
+#include <qtopia/qpeapplication.h>
 
 #include <qfile.h>
 
@@ -33,7 +33,9 @@
 /* --| main |------------------------------------------------------ */
 int main(int argc, char* argv[])
 {
+#if !defined (_OS_WIN32_)
   setuid(getuid()); setgid(getgid()); // drop privileges
+#endif
 
   QPEApplication a( argc, argv );
 
@@ -43,12 +45,19 @@ int main(int argc, char* argv[])
 
   QStrList tmp;
   const char* shell = getenv("SHELL");
-  if (shell == NULL || *shell == '\0')
-    shell = "/bin/sh";
+  if (shell == NULL || *shell == '\0'){
+#if !defined (_OS_WIN32_)
+      shell = "/bin/sh";
 
   // sh is completely broken on familiar. Let's try to get something better
   if ( qstrcmp( shell, "/bin/shell" ) == 0 && QFile::exists( "/bin/bash" ) )
       shell = "/bin/bash";
+#else
+      shell ="command";
+#endif
+  }
+
+
   
   putenv((char*)"COLORTERM="); // to trigger mc's color detection
 

@@ -6,10 +6,6 @@ HEADERS		= security.h
 SOURCES		= security.cpp main.cpp
 INTERFACES	= securitybase.ui
 
-INCLUDEPATH	+= $(QPEDIR)/include
-DEPENDPATH	+= $(QPEDIR)/include
-LIBS            += -lqpe
-
 TARGET		= security
 
-TRANSLATIONS   = $(QPEDIR)/i18n/de/security.ts 
+TRANSLATIONS = security-en_GB.ts security-de.ts security-ja.ts security-no.ts

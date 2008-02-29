@@ -23,10 +23,10 @@
 #include "qimpenmatch.h"
 #include "qimpenhelp.h"
 
-#include <qpe/qpeapplication.h>
-#include <qpe/global.h>
-#include <qpe/config.h>
-#include <qpe/stringutil.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/global.h>
+#include <qtopia/config.h>
+#include <qtopia/stringutil.h>
 
 #include <qtextview.h>
 #include <qlabel.h>

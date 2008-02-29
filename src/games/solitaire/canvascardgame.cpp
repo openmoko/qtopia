@@ -24,11 +24,11 @@
 #include "canvascardgame.h"
 #include "cardmetrics.h"
 
-#include <qpe/resource.h>
-#include <qpe/config.h>
+#include <qtopia/resource.h>
+#include <qtopia/config.h>
 
 #include <qmainwindow.h>
-#include <qpe/qpemenubar.h>
+#include <qtopia/qpemenubar.h>
 #include <qpainter.h>
 
 #include <stdlib.h>
@@ -143,7 +143,7 @@ void CanvasCardPile::advance(int stage)
 }
 
 
-void CanvasCardPile::animatedMove(int x2, int y2, int steps = 7 )
+void CanvasCardPile::animatedMove(int x2, int y2, int steps )
 {
     destX = x2;
     destY = y2;

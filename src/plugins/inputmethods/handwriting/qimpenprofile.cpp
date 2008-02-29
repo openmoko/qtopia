@@ -21,9 +21,9 @@
 #include "qimpencombining.h"
 #include "qimpenprofile.h"
 
-#include <qpe/qpeapplication.h>
-#include <qpe/config.h>
-#include <qpe/global.h>
+#include <qtopia/qpeapplication.h>
+#include <qtopia/config.h>
+#include <qtopia/global.h>
 
 
 QIMPenProfile::QIMPenProfile( const QString &fn )

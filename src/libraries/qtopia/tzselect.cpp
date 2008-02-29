@@ -26,11 +26,14 @@
 #include "config.h"
 #include <qtoolbutton.h>
 #include <qfile.h>
+#include <qregexp.h>
 #include <stdlib.h>
 
 #ifdef Q_WS_QWS
 #include <qcopchannel_qws.h>
 #endif
+
+QIconSet qtopia_internal_loadIconSet( const QString &pix );
 
 class TimeZoneSelectorPrivate 
 {
@@ -204,7 +207,7 @@ TimeZoneSelector::TimeZoneSelector(QWidget* p, const char* n) :
     cmbTz = new TZCombo( this, "timezone combo" );
 
     cmdTz = new QToolButton( this, "timezone button" );
-    cmdTz->setIconSet( Resource::loadIconSet( "citytime_icon" ) );
+    cmdTz->setIconSet( qtopia_internal_loadIconSet( "citytime_icon" ) );
     cmdTz->setMaximumSize( cmdTz->sizeHint() );
 
     // set up a connection to catch a newly selected item and throw our
@@ -249,8 +252,14 @@ void TimeZoneSelector::slotTzActive( int )
 
 void TimeZoneSelector::slotExecute( void )
 {
+#ifdef Q_WS_QWS
     // execute the city time application...
     Global::execute( "worldtime" );
+#else
+#ifdef __GNUG__
+#warning "Need to be able to select timezone on desktop"
+#endif
+#endif
 }
 
 QStringList timezoneDefaults( void )

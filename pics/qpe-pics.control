@@ -1,8 +1,8 @@
-Files: pics/Asteroids.png pics/BackupRestore.png pics/EMail.png pics/Fifteen.png pics/FirstUseBackground.png pics/Generic.png pics/LanConnect.png pics/MaximizeButton.png pics/Security.png pics/SoundPlayer.png pics/UnknownDocument-14.png pics/UnknownDocument.png pics/alarmbell.png pics/bigwait.png pics/capslock.xpm pics/chess.png pics/clipboard.png pics/down.png pics/grass.png pics/hasAlarm.png pics/hasRepeat.png pics/hasTZ.png pics/info.png pics/irreceive.png pics/logo32.png pics/numlock.xpm pics/pine.png pics/qpe-logo.png pics/qpe-pics.control pics/qtlogo.png pics/rotate90.png pics/screensize.png pics/sidebar.png pics/simple_grid_400.png pics/smallalarm.png pics/sound-off.xpm pics/sound-on.xpm pics/start_button.xpm pics/sync.png pics/task-completed.png pics/taskbar.png pics/title.png pics/today.png pics/tux-logo.png pics/tux.png pics/vnc.png pics/Button/0.png pics/Button/1.png pics/Button/2.png pics/Button/3.png
+Files: pics/Asteroids.png pics/BackupRestore.png pics/EMail.png pics/Fifteen.png pics/FirstUseBackground.png pics/Generic.png pics/LanConnect.png pics/MaximizeButton.png pics/Security.png pics/SoundPlayer.png pics/UnknownDocument-14.png pics/UnknownDocument.png pics/alarmbell.png pics/bigwait.png pics/capslock.xpm pics/chess.png pics/clipboard.png pics/down.png pics/grass.png pics/hasAlarm.png pics/hasRepeat.png pics/hasTZ.png pics/info.png pics/irreceive.png pics/logo32.png pics/numlock.xpm pics/pine.png pics/qpe-logo.png pics/qpe-pics.control pics/qtlogo.png pics/rotate90.png pics/screensize.png pics/sidebar.png pics/simple_grid_400.png pics/smallalarm.png pics/smallalarm_off.png pics/sound-off.xpm pics/sound-on.xpm pics/start_button.xpm pics/sync.png pics/task-completed.png pics/taskbar.png pics/title.png pics/today.png pics/tux-logo.png pics/tux.png pics/vnc.png pics/Button/0.png pics/Button/1.png pics/Button/2.png pics/Button/3.png
 Priority: required
 Section: qpe/system
 Maintainer: Trolltech (www.trolltech.com)
 Architecture: arm
-Version: $QPE_VERSION-7
+Version: $QPE_VERSION-9
 Description: Basic icons for Qtopia environment
  These icons are available to all QPE application.

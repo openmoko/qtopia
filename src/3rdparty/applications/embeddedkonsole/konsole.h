@@ -30,7 +30,7 @@
 #include <qintdict.h>
 #include <qptrdict.h>
 #include <qtabwidget.h>
-#include <qpe/qpetoolbar.h>
+#include <qtopia/qpetoolbar.h>
 #include <qcombobox.h>
 
 #include "MyPty.h"
