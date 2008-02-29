@@ -66,6 +66,8 @@ my $verbose = "true";
 my $errorOutput = "";
 my $errorOutputAppend = "";
 my @validPlatformList = qw();
+my $qconfig = ""; # What is the value to pass onto QCONFIG
+
 
 
 
@@ -552,7 +554,7 @@ sub initializePlatformSettings {
     if ( -e "$QPEDIR/etc/defaultbuttons-$opt_platform.conf" ) {
 	runCmd( "$COPY $QPEDIR/etc/defaultbuttons-$opt_platform.conf $QPEDIR/etc/defaultbuttons.conf" );
     } else {
-	print "Could not find a device button mappings file for platform $opt_platform\n";
+	print "Note: Could not find a device button mappings file for platform $opt_platform\n";
     }
     $mangledBaseOutDir = "\-$opt_host\-qt$qtVersion\-$opt_product$DIR_SEPARATOR$opt_platform\-$binType\-$releaseType$DIR_SEPARATOR";
 }
@@ -629,8 +631,9 @@ sub validateOptions {
 # Prints the usage of this script giving the list of switches, flags etc.
 #
 sub usage {
-    print "Usage configure  [-v] [-debug|-release] [-static|-shared] [-dsp] [-console]\n" .
-	"		    [-platform (sharp|ipaq|mips)]\n" . 
+    print "Usage configure  [-v] [-debug|-release] [-static|-shared] \n".
+	"                   [-qconfig <qconfig suffix>] [-dsp] [-console]\n" .
+	"                   [-platform (sharp|ipaq|mips)]\n" . 
 	"                   [-product (qtopiadesktop|sdk|qtopia)]\n" .
 	"                   [-kde3] [-host (win32|unix)] [-rpath <lib dir>]\n" .
 	"                   [-errorlog <errorfile>]\n" .
@@ -641,9 +644,17 @@ sub usage {
 	" c              Rebuild profile of specified path. eg libraries/qtopiacalc\n" .
 	" debug          Build a debug version of product\n" .
 	" release*       Build a release version of product\n" .
+	" qconfig        The value to pass onto compiler for QCONFIG. eg \n".
+	"			configure -qconfig qpe\n".
+	"		   Will result in DEFINES+=QCONFIG=\\\"qconfig-qpe.h\\\"  being \n".
+	"		   passed to tmake/qmake\n".
+	"		   The defaults will result in the use of qconfig-qpe.h,when \n".
+	"		   building Qtopia, and qconfig.h, when building QtopiaDesktop\n".
+	"		   Note: The *same* QCONFIG must be used for Qt embedded\n". 
+	"			as used for Qtopia/QtopiaDesktop\n". 	
 	" static         Build statically linked objects\n" .
-	" shared*	 Build shared objects\n" .
-	" dsp            Under windows create dsp files" .
+	" shared*        Build shared objects\n" .
+	" dsp            Under windows create dsp files\n" .
 	" console        Under windows build applications as console applications\n".
 	" platform       Type of cross compiled target; eg sharp, ipaq or mips.\n" .
 	"                There must be an associated file found at\n" .
@@ -652,7 +663,7 @@ sub usage {
 	"                If product is qtopiadesktop a build for qtopiadesktop will only\n" .
 	"                occur if source is available. This requires the QTDIR\n" . 
 	"                environment variable to be set to a QT 3.x branch.\n" .
-	" kde3	         Enable KDE 3.x integration. Currently only useful for\n" .
+	" kde3           Enable KDE 3.x integration. Currently only useful for\n" .
 	"                QtopiaDesktop under unix. This requires KDE 3.x headers and\n" .
 	"                libraries to be installed.\n" .
 	" host           Host platform that you are compiling on; either win32 or unix.\n" . 
@@ -676,8 +687,8 @@ sub usage {
 #
 sub parseOptions {
     # Read our options
-    @optl = ( "v", "c:s", "debug", "makefile:s", "qt3", "release","product:s", "host:s", 
-	    "platform:s", "static", "shared", "dsp", "console", "errorlog:s", "rpath:s", "kde" );
+    @optl = ( "v", "c:s", "debug", "release", "qconfig:s", "makefile:s", "qt3", "product:s", "host:s", 
+	    "platform:s", "static", "shared", "dsp", "console", "errorlog:s", "rpath:s", "kde");
 
     if ( !GetOptions @optl ) {
         usage();
@@ -699,6 +710,10 @@ sub parseOptions {
 
     if (!$opt_product) {
 	$opt_product = "qtopia";
+    }
+
+    if ($opt_qconfig){
+	$qconfig = '\\\\\"qconfig-' . $opt_qconfig.'.h\\\\\"';
     }
 
     if ($opt_errorlog) {
@@ -751,10 +766,16 @@ sub initializeQMakeSettings {
     }
 
     if ($opt_product eq "qtopiadesktop") {
+	if ( $qconfig eq "" ) {
+    	    $qconfig = '\\\\\"qconfig.h\\\\\"';
+	}
 	$QMAKE_DEFINES .= " QTOPIA_DESKTOP";
 	$QMAKE_CONFIG .= " qdesktop thread qt3";
     }elsif ($opt_product eq "sdk"){
-	$QMAKE_DEFINES .= " QWS";
+	if ( $qconfig eq "" ){
+	    $qconfig = '\\\\\"qconfig-qpe.h\\\\\"';
+	}
+	$QMAKE_DEFINES .= " QWS ";
 	$QMAKE_CONFIG .= " qt2";
     }else{
 		die "Unknown product type \"$opt_product\"";
@@ -823,10 +844,16 @@ sub initializeTMakeSettings {
     my $TMAKE_CONFIG = "qt$qtVersion qtopia multiprocess dynamic";
 
     if ($opt_product eq "qtopiadesktop") {
+	if ( $qconfig eq "" ) {
+	    $qconfig = '\\\\\"qconfig.h\\\\\"';
+	}
 	$TMAKE_DEFINES .= " QTOPIA_DESKTOP";
 	$TMAKE_CONFIG .= " qdesktop thread qt3";
     } else {
-	$TMAKE_DEFINES .= " QWS";
+	if ( $qconfig eq "" ) {
+	    $qconfig = '\\\\\"qconfig-qpe.h\\\\\"';
+	}
+	$TMAKE_DEFINES .= " QWS ";
 	$TMAKE_CONFIG .= " qt2 embedded";
     }
 
@@ -899,9 +926,9 @@ sub generateMakefile {
 	    my $dspFileName = $item;
 	    $dspFileName =~ s/\.pro//;
 	    $dspFileName = "$dspFileName" . ".dsp";
-	    runCmd( "$qtmake_cmd $dspArgs $qtmake_cmd_args -o \"$dspFileName\" \"$item\"" );
+	    runCmd( "$qtmake_cmd $dspArgs $qtmake_cmd_args \"DEFINES+=QCONFIG=$qconfig\" -o \"$dspFileName\" \"$item\"" );
 	}
-	runCmd( "$qtmake_cmd $qtmake_cmd_args -o \"$MAKEFILE\" \"$item\"" );
+	runCmd( "$qtmake_cmd $qtmake_cmd_args  \"DEFINES += QCONFIG=$qconfig\" -o \"$MAKEFILE\" \"$item\"" );
 	chdir $pwd;
     } else {
 	debugMsg("Missing .pro file: $item");

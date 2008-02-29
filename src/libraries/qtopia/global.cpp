@@ -591,7 +591,7 @@ QString Global::stringQuote(const QString& s)
 */
 void Global::findDocuments(DocLnkSet* folder, const QString &mimefilter)
 {
-    QString homedocs = QDir::homeDirPath() + "/Documents";
+    QString homedocs = QPEApplication::documentDir();
     DocLnkSet d(homedocs,mimefilter);
     folder->appendFrom(d);
     StorageInfo storage;
@@ -690,8 +690,63 @@ void Global::statusMessage(const QString& message)
 #endif
 }
 
-#ifdef Q_WS_QWS
 #ifdef QTOPIA_INTERNAL_FILEOPERATIONS
+
+#ifdef Q_OS_WIN32
+bool Global::truncateFile(QFile &f, int size)
+{
+    if (!f.isOpen())
+      return FALSE;
+
+    if (size == -1)
+	size = f.size();
+
+    if (::chsize(f.handle(), size) != -1)
+	return TRUE;
+    else
+	return FALSE;
+}
+#else	// Q_OS_WIN32
+/*!
+  \internal
+  Truncate file to size specified
+  \a f must be an open file
+  \a size must be a positive value
+ */
+bool Global::truncateFile(QFile &f, int size){
+    if (!f.isOpen())
+      return FALSE;
+
+    return ::ftruncate(f.handle(), size) != -1;
+}
+
+#endif	// Q_OS_WIN32
+
+
+/*!
+  /internal
+  Returns the default system path for storing temporary files.
+  Note: This does not it ensure that the provided directory exists
+*/
+QString Global::tempDir()
+{
+    QString result;
+#ifdef Q_OS_UNIX
+    result = "/tmp/";
+#else
+    if (getenv("TEMP"))
+	result = getenv("TEMP");
+    else
+	result = getenv("TMP");
+
+    if (result[(int)result.length() - 1] != QDir::separator())
+	result.append(QDir::separator());
+#endif
+
+    return result;
+}
+
+#ifdef Q_WS_QWS
   /*! \enum Global::Lockflags
     \internal
      This enum controls what type of locking is performed on file.
@@ -705,8 +760,6 @@ void Global::statusMessage(const QString& message)
                       access locked file. Reserved for future use.
 
    */
-#endif
-
 
 #ifndef Q_OS_WIN32
 /*!
@@ -811,18 +864,6 @@ bool Global::isFileLocked(QFile &f, int /* flags */)
   return fileLock.l_pid != 0;
 }
 
-/*!
-  \internal
-  Truncate file to size specified
-  \a f must be an open file
-  \a size must be a positive value
- */
-bool Global::truncateFile(QFile &f, int size){
-    if (!f.isOpen())
-      return FALSE;
-
-    return ::ftruncate(f.handle(), size) != -1;
-}
 
 #else
 
@@ -838,20 +879,6 @@ bool Global::unlockFile(QFile &f)
     return TRUE;
 }
 
-bool Global::truncateFile(QFile &f, int size)
-{
-    if (!f.isOpen())
-      return FALSE;
-
-    if (size == -1)
-	size = f.size();
-
-    if (::chsize(f.handle(), size) != -1)
-	return TRUE;
-    else
-	return FALSE;
-}
-
 bool Global::isFileLocked(QFile &f, int flags)
 {
     // if the file is open then we must have achieved a file lock
@@ -859,9 +886,8 @@ bool Global::isFileLocked(QFile &f, int flags)
 }
 
 #endif
-
 #include "global.moc"
+#endif
 
 #endif  //qws
-
 

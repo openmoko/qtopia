@@ -42,6 +42,7 @@ private:
 	Type1DecimalInputWidget *siw;
 	QPushButton *PBDel,*PBC;
 	QPushButton *PBMR,*PBMC,*PBMPlus;
+	QPushButton *PBPi;
 	QPushButton *PBSin,*PBCos,*PBTan,*PBOneOverX;
 	QPushButton *PBASin,*PBACos,*PBATan;
 	QPushButton *PBLog,*PBLn,*PBFactorial,*PBNegate;
@@ -49,7 +50,7 @@ private:
 	QGridLayout* AdvancedLayout;
 
 	QPixmap *PMPow,*PMLog,*PMSquare,*PMXRootY,*PMOneOverX,
-	*PMSquareRoot;
+	*PMSquareRoot, *PMPi;
 
 	void updatePictures();
 
@@ -74,6 +75,7 @@ private slots:
 	void PowClicked();
 	void SquareRootClicked();
 	void XRootYClicked();
+	void PiClicked();
 };
 
 #endif

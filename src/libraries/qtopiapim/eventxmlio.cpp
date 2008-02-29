@@ -214,7 +214,7 @@ bool EventXmlIO::internalUpdateRecord(PimRecord *rec)
 
 bool EventXmlIO::saveData()
 {
-    if ( !QFile::exists( dataFilename() ) )
+    if ( !QFile::exists( dataFilename() ) || QFile::exists( journalFilename() ) )
 	needsSave = TRUE;
 
     if (!needsSave)

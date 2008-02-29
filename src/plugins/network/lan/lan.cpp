@@ -346,7 +346,7 @@ bool Lan::writeNetworkOpts( Config &config, QString scheme )
     config.setGroup("Properties");
     QString cardType = config.readEntry("CardType");
 
-    if (cardType == "network")
+    if (cardType == "network") // No tr
 	return writePcmciaNetworkOpts(config, scheme);
     else
 	return writeBuiltinNetworkOpts(config, scheme);
@@ -423,7 +423,7 @@ bool Lan::writePcmciaNetworkOpts( Config &config, QString scheme )
 				v = Global::shellQuote(v);
 			} else {
 			    if ( v.isEmpty() )
-				v = "{ return; }";
+				v = "{ return; }"; // No tr
 			}
 			line = "    " + k + s + v;
 		    }
@@ -684,7 +684,7 @@ bool LanImpl::stop( Config& cfg )
 class LanStateImpl : public LanState {
     Q_OBJECT
 public:
-    LanStateImpl(QWidget* parent) : LanState(parent)
+    LanStateImpl(QWidget* parent, const QString &dev) : LanState(parent), device(dev)
     {
 	QStringList lans = findLans();
 	QString scheme = findScheme(lans);
@@ -698,6 +698,8 @@ public:
 	    services->hide();
 	    services_label->hide();
 	}
+	if ( !device[device.length()-1].isDigit() )
+	    device += "0";
 	tid = startTimer(1000);
 	updateDisplay();
     }
@@ -721,7 +723,7 @@ private slots:
     void updateDisplay()
     {
 	QString ipaddr;
-	Process p(QStringList() << "ifconfig" << "eth0");
+	Process p(QStringList() << "ifconfig" << device);
 	if ( p.exec( "", ipaddr ) ) {
 	    ipaddr.replace(QRegExp(".*inet addr:"),"");
 	    ipaddr.replace(QRegExp(" .*"),"");
@@ -733,12 +735,15 @@ private slots:
 
 private:
     int tid;
+    QString device;
 };
 
 QWidget* LanImpl::addStateWidget( QWidget* parent, Config& cfg ) const
 {
     if ( isActive(cfg) ) {
-	LanStateImpl* state = new LanStateImpl(parent);
+	cfg.setGroup( "Properties" );
+	QString dev = cfg.readEntry( "Device" );
+	LanStateImpl* state = new LanStateImpl(parent, dev);
 	if ( state->ok() )
 	    return state;
 	delete state;

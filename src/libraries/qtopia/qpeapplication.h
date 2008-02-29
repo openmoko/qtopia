@@ -117,6 +117,7 @@ protected:
 
 private:
     void mapToDefaultAction( QWSKeyEvent *ke, int defKey );
+    void processQCopFile();
 
 #if defined(Q_WS_QWS) && !defined(QT_NO_COP)
     QCopChannel *sysChannel;

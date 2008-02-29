@@ -210,7 +210,10 @@ void LocationCombo::updatePaths()
  */
 bool LocationCombo::isChanged() const
 {
-    return locations[currentItem()] != d->originalPath;
+    if ( const FileSystem *fs = storage->fileSystemOf(locations[currentItem()]) )
+	return fs->path() != d->originalPath;
+
+    return TRUE; 
 }
 
 /*!

@@ -146,16 +146,16 @@ void Load::paintEvent( QPaintEvent * )
     for ( int i = 1; i < points; i++ ) {
 	int x1 = (i - 1) * width() / points;
 	int x2 = i * width() / points;
-	p.drawLine( x1, h - systemLoad[i-1] * mult,
-		    x2, h - systemLoad[i] * mult );
+	p.drawLine( x1, h - int(systemLoad[i-1] * mult),
+		    x2, h - int(systemLoad[i] * mult) );
     }
 
     p.setPen( red );
     for ( int i = 1; i < points; i++ ) {
 	int x1 = (i - 1) * width() / points;
 	int x2 = i * width() / points;
-	p.drawLine( x1, h - userLoad[i-1] * mult,
-		    x2, h - userLoad[i] * mult );
+	p.drawLine( x1, h - int(userLoad[i-1] * mult),
+		    x2, h - int(userLoad[i] * mult) );
     }
 }
 

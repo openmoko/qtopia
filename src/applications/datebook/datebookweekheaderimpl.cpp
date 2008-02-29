@@ -63,20 +63,14 @@ void WeekViewHeader::yearChanged( int y )
  */
 void WeekViewHeader::nextWeek()
 {
-    if ( week < 52 )
-	week++;
-    setDate( year, week );
-    emit dateChanged( year, week );
+    weekChanged(week+1);
 }
 /*
  * public slot
  */
 void WeekViewHeader::prevWeek()
 {
-    if ( week > 1 )
-	week--;
-    setDate( year, week );
-    emit dateChanged( year, week );
+    weekChanged(week-1);
 }
 /*
  * public slot

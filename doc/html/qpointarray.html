@@ -82,6 +82,9 @@ QPointArrays.
 <a href="qpainter.html#3d49cd">QPainter::drawQuadBezier</a>(), among other things.
 <p>Note that since this class is a QArray, it is explicitly shared and
 works with shallow copies by default.
+<p>Transformations used in QPointArray are based on parelarc.c from
+Graphics Gems III
+VanAken / Simar, "A Parametric Elliptical Arc Algorithm"
 <p>See also  <a href="qpainter.html">QPainter</a>, <a href="qwmatrix.html">QWMatrix</a> and <a href="qarray.html">QArray</a>.
 <p>Examples:
  <a href="desktop-desktop-cpp.html#QPointArray">desktop/desktop.cpp</a>
@@ -90,7 +93,7 @@ works with shallow copies by default.
 <hr><h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="3d59ff"></a>QPointArray::QPointArray ()</h3>
 <p>Constructs a null point array.
-<p>See also  <a href="qarray.html#d68b01">isNull</a>().
+<p>See also  isNull().
 <h3 class="fn"><a name="38f647"></a>QPointArray::QPointArray ( const <a href="qrect.html">QRect</a> &amp; r, bool closed=FALSE )</h3>
 <p>Constructs a point array from the rectangle <em>r.</em>
 <p>If <em>closed</em> is FALSE, then the point array just contains the
@@ -107,7 +110,7 @@ r.topRight(), r.bottomRight() and r.bottomLeft().
 <h3 class="fn"><a name="809938"></a>QPointArray::QPointArray ( int size )</h3>
 <p>Constructs a point array with room for <em>size</em> points. Makes a null
 array if <em>size</em> == 0.
-<p>See also  <a href="qarray.html#bb1f76">resize</a>() and <a href="qarray.html#d68b01">isNull</a>().
+<p>See also  resize() and isNull().
 <h3 class="fn"><a name="43a8c0"></a>QPointArray::~QPointArray ()</h3>
 <p>Destructs the point array.
 <h3 class="fn"><a href="qrect.html">QRect</a> <a name="eeb5a4"></a>QPointArray::boundingRect () const</h3>
@@ -141,7 +144,7 @@ size <em>w</em> by <em>h</em> and position (<em>x, y</em> ).
 <h3 class="fn">QPointArray &amp; <a name="fded81"></a>QPointArray::operator= ( const QPointArray &amp; a )</h3>
 <p>Assigns a shallow copy of <em>a</em> to this point array and returns a
 reference to this point array.
-<p>Equivalent to <a href="qarray.html#2bb3f0">assign</a>( a ).
+<p>Equivalent to assign( a ).
 <p>See also  <a href="#651c2a">copy</a>().
 <h3 class="fn"><a href="qpoint.html">QPoint</a> <a name="7f3b06"></a>QPointArray::point ( uint index ) const</h3>
 <p>Returns the point at position <em>index</em> in the array.
@@ -162,7 +165,7 @@ and (5,6):
 </pre>
 <p>This function differs from <a href="#76de1d">setPoints</a>() in that it does not resize the
 array unless the array size is exceeded.
-<p>See also  <a href="qarray.html#bb1f76">resize</a>() and <a href="#76de1d">setPoints</a>().
+<p>See also  resize() and <a href="#76de1d">setPoints</a>().
 <h3 class="fn">bool <a name="fb573f"></a>QPointArray::putPoints ( int index, int nPoints, int firstx, int firsty, ... )</h3>
 <p>Copies <em>nPoints</em> points from the variable argument list into this point
 array. Will resize this point array if <code>index+nPoints</code> exceeds
@@ -176,7 +179,7 @@ resized (typically due to lack of memory).
 </pre>
 <p>This function differs from <a href="#76de1d">setPoints</a>() in that it does not resize the
 array unless the array size is exceeded.
-<p>See also  <a href="qarray.html#bb1f76">resize</a>() and <a href="#76de1d">setPoints</a>().
+<p>See also  resize() and <a href="#76de1d">setPoints</a>().
 <h3 class="fn">QPointArray <a name="591d23"></a>QPointArray::quadBezier () const</h3>
 <p>Returns the Bezier points for the four control points in this array.
 <h3 class="fn">void <a name="c65eff"></a>QPointArray::setPoint ( uint i, const <a href="qpoint.html">QPoint</a> &amp; p )</h3>
@@ -193,7 +196,7 @@ resized (normally due to lack of memory).
     <a href="qpointarray.html">QPointArray</a> a;
     a.<a href="#76de1d">setPoints</a>( 2, points );
 </pre>
-<p>See also  <a href="qarray.html#bb1f76">resize</a>() and <a href="#fb573f">putPoints</a>().
+<p>See also  resize() and <a href="#fb573f">putPoints</a>().
 <h3 class="fn">bool <a name="76de1d"></a>QPointArray::setPoints ( int nPoints, int firstx, int firsty, ... )</h3>
 <p>Resizes the array to <em>nPoints</em> and sets the points in the array to
 the values taken from the variable argument list.
@@ -203,7 +206,7 @@ resized (typically due to lack of memory).
 <p><pre>    <a href="qpointarray.html">QPointArray</a> a;
     a.<a href="#76de1d">setPoints</a>( 2, 1,2, 3,4 );
 </pre>
-<p>See also  <a href="qarray.html#bb1f76">resize</a>() and <a href="#fb573f">putPoints</a>().
+<p>See also  resize() and <a href="#fb573f">putPoints</a>().
 <h3 class="fn">void <a name="66e2e4"></a>QPointArray::translate ( int dx, int dy )</h3>
 <p>Translates all points in the array <em>(dx,dy).</em>
 <h3 class="fn">void <a name="b09af4"></a>QPointArray::cleanBuffers () <code>[static]</code></h3>
@@ -223,7 +226,7 @@ resized (typically due to lack of memory).
 Search the documentation, FAQ, qt-interest archive and more (uses
 <a href="http://www.trolltech.com">www.trolltech.com</a>):<br>
 <form method=post action="http://www.trolltech.com/search.cgi">
-<input type=hidden name="version" value="2.3.5"><nobr>
+<input type=hidden name="version" value="2.3.6"><nobr>
 <input size="50" name="search"><input type=submit value="Search">
 </nobr></form><hr><p>
 This file is part of the <a href="index.html">Qt toolkit</a>,
@@ -231,5 +234,5 @@ copyright &copy; 1995-2001
 <a href="http://www.trolltech.com">Trolltech</a>, all rights reserved.<p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.5</div>
+<td align="right"><div align="right">Qt version 2.3.6</div>
 </table></div></address></body></html>

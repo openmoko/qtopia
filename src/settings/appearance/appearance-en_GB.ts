@@ -22,10 +22,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Windows</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Select a window decoration style.  A window style determines the look of the window&apos;s title bar and borders.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -43,6 +39,10 @@
     </message>
     <message>
         <source>Select the default font family.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Frame</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

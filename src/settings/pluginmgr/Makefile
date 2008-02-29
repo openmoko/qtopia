@@ -271,12 +271,42 @@ $(MOC_DIR)/moc_pluginmanagerbase.cpp: pluginmanagerbase.h
 
 
 
+lupdate-check:
+	@sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' \
+	    -e '/$$(.*/ d' \
+	    -e 's/^static:.*//' \
+	    <pluginmgr.pro >t$$$$.pro && \
+	rm -rf t$$$$&& \
+	mkdir t$$$$ && \
+	cp -a *.ts t$$$$ && \
+	chmod +w *.ts && \
+	lupdate  t$$$$.pro && \
+	rm t$$$$.pro && \
+	for i in *.ts; \
+	do \
+	    if cmp -s $$i t$$$$/$$i; \
+	    then \
+		true; \
+	    else \
+		echo out-of-date $$i; \
+	    fi; \
+	    rm $$i; \
+	    mv t$$$$/$$i $$i; \
+	done && \
+	rmdir t$$$$
+
 lupdate:
-	sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' 	    -e '/$$(.*/ d' 	    -e 's/^static:.*//' 	    <pluginmgr.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
+	sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' \
+	    -e '/$$(.*/ d' \
+	    -e 's/^static:.*//' \
+	    <pluginmgr.pro >t$$$$.pro && \
+	lupdate  t$$$$.pro && \
+	rm t$$$$.pro
 
 lrelease:
 	lrelease pluginmgr.pro
 	$(QPEDIR)/bin/qtopia-linstall pluginmgr.pro
+
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done

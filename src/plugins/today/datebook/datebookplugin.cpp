@@ -91,7 +91,7 @@ public:
 	    // days in the future is requested (comes from setup).
 	    // Take special note of recurring events.
 	    //
-	    if ((event.end().date() >= date && event.start().date() < before) ||
+	    if ((event.endInCurrentTZ().date() >= date && event.startInCurrentTZ().date() < before) ||
 		    (event.hasRepeat() && event.nextOccurrence(date) < before)){
 		ShortDateEvent	e;
 

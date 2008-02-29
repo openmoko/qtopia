@@ -337,7 +337,7 @@ void DesktopApplication::psTimeout()
 
     if (  ps->batteryStatus() == PowerStatus::Critical ) {
 	pa->alert(  tr( "Battery level is critical!\n"
-			"Keep power off until power restored!" ), 1 );
+			"Please recharge the main battery!" ), 1 );
     }
 
     if (  ps->backupBatteryStatus() == PowerStatus::VeryLow ) {

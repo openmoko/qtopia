@@ -61,6 +61,7 @@ public:
     TypeCombo( QWidget *parent, const char *name=0 )
 	: QComboBox( parent, name )
     {
+	setSizePolicy( QSizePolicy( QSizePolicy::Preferred, QSizePolicy::Preferred) );
 	connect( this, SIGNAL(activated(int)), this, SLOT(selectType(int)) );
     }
 

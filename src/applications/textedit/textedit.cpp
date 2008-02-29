@@ -210,7 +210,7 @@ TextEdit::TextEdit( QWidget *parent, const char *name, WFlags f )
     a->addTo( edit );
 
     int defsize;
-    bool defb, defi, wrap;
+    bool defb, defi, wrap, fixedwidth;
     {
 	Config cfg("TextEdit");
 	cfg.setGroup("View");
@@ -218,6 +218,7 @@ TextEdit::TextEdit( QWidget *parent, const char *name, WFlags f )
 	defb = cfg.readBoolEntry("Bold",FALSE);
 	defi = cfg.readBoolEntry("Italic",FALSE);
 	wrap = cfg.readBoolEntry("Wrap",TRUE);
+	fixedwidth = cfg.readBoolEntry("Fixed-width", FALSE);
     }
 
     editorStack = new QWidgetStack( this );
@@ -270,11 +271,12 @@ TextEdit::TextEdit( QWidget *parent, const char *name, WFlags f )
     wa->setToggleAction(TRUE);
     wa->addTo( font );
 
-    QAction *fixed = new QAction( tr("Fixed-width"), QString::null,0,this,0);
-    connect( fixed, SIGNAL(toggled(bool) ), this, SLOT( setFixedWidth(bool)));
-    fixed->setWhatsThis( tr("Fixed-width fonts make some documents more readable.") );
-    fixed->setToggleAction(TRUE);
-    fixed->addTo( font );
+    fixedAction = new QAction( tr("Fixed-width"), QString::null,0,this,0);
+    connect( fixedAction, SIGNAL(toggled(bool) ),
+	this, SLOT( setFixedWidth(bool)));
+    fixedAction->setWhatsThis( tr("Fixed-width fonts make some documents more readable.") );
+    fixedAction->setToggleAction(TRUE);
+    fixedAction->addTo( font );
 
     searchBar = new QPEToolBar(this);
     addToolBar( searchBar,  tr("Search"), QMainWindow::Top, TRUE );
@@ -312,6 +314,9 @@ TextEdit::TextEdit( QWidget *parent, const char *name, WFlags f )
     zoomOutLast = TRUE;
     setFontSize(defsize,zoomOutLast);
     wa->setOn(wrap);
+
+    fixedAction->setOn(fixedwidth);
+    setFixedWidth(fixedAction->isOn());
 }
 
 TextEdit::~TextEdit()
@@ -328,6 +333,7 @@ TextEdit::~TextEdit()
     cfg.writeEntry("Bold",f.bold());
     cfg.writeEntry("Italic",f.italic());
     cfg.writeEntry("Wrap",editor->wordWrap() == QMultiLineEdit::WidgetWidth);
+    cfg.writeEntry("Fixed-width", fixedAction->isOn() ? "1" : "0");
 }
 
 //
@@ -392,8 +398,16 @@ void TextEdit::setFontSize(int sz, bool round_down_not_up)
     f.setPointSize(s);
     editor->setFont(f);
 
-    zin->setEnabled(s != fontsize[nfontsizes-1]);
-    zout->setEnabled(s != fontsize[0]);
+    //
+    // Zooming only makes sense if we have more than one font size.
+    //
+    if (nfontsizes > 1) {
+	zin->setEnabled(s != fontsize[nfontsizes-1]);
+	zout->setEnabled(s != fontsize[0]);
+
+	zinE = zin->isEnabled();
+	zoutE = zout->isEnabled();
+    }
 }
 
 void TextEdit::setBold(bool y)
@@ -562,6 +576,7 @@ void TextEdit::newFile( const DocLnk &f )
 
 void TextEdit::setDocument(const QString& f)
 {
+
     DocLnk nf(f);
     nf.setType("text/plain");
     openFile(nf);
@@ -713,10 +728,14 @@ void TextEdit::message(const QCString& msg, const QByteArray& data)
 	// file they refer to, rather than the .desktop file.
 	//
 	if (!filename.contains(".desktop")) {
-	    DocLnk dc;
-	    dc.setFile(filename);
-	    dc.setType("text/plain");
-	    openFile(dc);
+	    if (filename.stripWhiteSpace().isEmpty()){
+		newFile(DocLnk());
+	    }else{
+		DocLnk dc;
+		dc.setFile(filename);
+		dc.setType("text/plain");
+		openFile(dc);
+	    }
 	} else {
 	    openFile(DocLnk(filename));
 	}

@@ -56,27 +56,23 @@
     <name>StorageInfo</name>
     <message>
         <source>CF Card</source>
-        <translation>CF-Karte</translation>
+        <translation type="obsolete">CF-Karte</translation>
     </message>
     <message>
         <source>Hard Disk</source>
-        <translation>Festplatte</translation>
+        <translation type="obsolete">Festplatte</translation>
     </message>
     <message>
         <source>SD Card</source>
-        <translation>SD-Karte</translation>
+        <translation type="obsolete">SD-Karte</translation>
     </message>
     <message>
         <source>SCSI Hard Disk</source>
-        <translation>SCSI-Festplatte</translation>
+        <translation type="obsolete">SCSI-Festplatte</translation>
     </message>
     <message>
         <source>Internal Storage</source>
-        <translation>Interner Speicher</translation>
-    </message>
-    <message>
-        <source>RAM disk</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">Interner Speicher</translation>
     </message>
 </context>
 <context>
@@ -119,6 +115,11 @@
     <message>
         <source>Built on: </source>
         <translation>Datum: </translation>
+    </message>
+    <message>
+        <source>Copyright &amp;copy; %1 %2</source>
+        <comment>year, company</comment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 </TS>

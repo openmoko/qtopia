@@ -11,7 +11,7 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>250</width>
+            <width>242</width>
             <height>362</height>
         </rect>
     </property>
@@ -162,7 +162,7 @@
                     </property>
                     <property stdset="1">
                         <name>text</name>
-                        <string></string>
+                        <string>Dim light after</string>
                     </property>
                     <property stdset="1">
                         <name>checked</name>
@@ -181,67 +181,44 @@
                     </property>
                     <property stdset="1">
                         <name>text</name>
-                        <string></string>
+                        <string>Suspend after</string>
                     </property>
                     <property stdset="1">
                         <name>checked</name>
                         <bool>true</bool>
                     </property>
                 </widget>
-                <widget row="2"  column="1" >
-                    <class>QLabel</class>
+                <widget row="3"  column="0"  rowspan="1"  colspan="4" >
+                    <class>QCheckBox</class>
                     <property stdset="1">
                         <name>name</name>
-                        <cstring>suspend_phony</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>sizePolicy</name>
-                        <sizepolicy>
-                            <hsizetype>7</hsizetype>
-                            <vsizetype>1</vsizetype>
-                        </sizepolicy>
-                    </property>
-                    <property stdset="1">
-                        <name>margin</name>
-                        <number>1</number>
+                        <cstring>notnetworkedsuspend</cstring>
                     </property>
                     <property stdset="1">
                         <name>text</name>
-                        <string>Suspend after</string>
-                    </property>
-                    <property>
-                        <name>buddy</name>
-                        <cstring>screensaver_suspend</cstring>
+                        <string>Disable suspend while online</string>
                     </property>
                 </widget>
-                <widget row="0"  column="2" >
-                    <class>QSpinBox</class>
+                <widget row="1"  column="0" >
+                    <class>QCheckBox</class>
                     <property stdset="1">
                         <name>name</name>
-                        <cstring>interval_dim</cstring>
+                        <cstring>screensaver_lightoff</cstring>
                     </property>
                     <property stdset="1">
                         <name>sizePolicy</name>
                         <sizepolicy>
-                            <hsizetype>5</hsizetype>
+                            <hsizetype>1</hsizetype>
                             <vsizetype>0</vsizetype>
                         </sizepolicy>
                     </property>
                     <property stdset="1">
-                        <name>buttonSymbols</name>
-                        <enum>PlusMinus</enum>
+                        <name>text</name>
+                        <string>Light off after</string>
                     </property>
                     <property stdset="1">
-                        <name>maxValue</name>
-                        <number>3600</number>
-                    </property>
-                    <property stdset="1">
-                        <name>minValue</name>
-                        <number>10</number>
-                    </property>
-                    <property stdset="1">
-                        <name>lineStep</name>
-                        <number>15</number>
+                        <name>checked</name>
+                        <bool>true</bool>
                     </property>
                 </widget>
                 <widget row="1"  column="2" >
@@ -274,6 +251,17 @@
                         <number>15</number>
                     </property>
                 </widget>
+                <widget row="1"  column="3" >
+                    <class>QLabel</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>TextLabel2</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string>seconds</string>
+                    </property>
+                </widget>
                 <widget row="0"  column="3" >
                     <class>QLabel</class>
                     <property stdset="1">
@@ -285,15 +273,45 @@
                         <string>seconds</string>
                     </property>
                 </widget>
-                <widget row="1"  column="3" >
+                <widget row="2"  column="3" >
                     <class>QLabel</class>
                     <property stdset="1">
                         <name>name</name>
-                        <cstring>TextLabel2</cstring>
+                        <cstring>TextLabel3</cstring>
                     </property>
                     <property stdset="1">
                         <name>text</name>
                         <string>seconds</string>
+                    </property>
+                </widget>
+                <widget row="0"  column="2" >
+                    <class>QSpinBox</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>interval_dim</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>sizePolicy</name>
+                        <sizepolicy>
+                            <hsizetype>5</hsizetype>
+                            <vsizetype>0</vsizetype>
+                        </sizepolicy>
+                    </property>
+                    <property stdset="1">
+                        <name>buttonSymbols</name>
+                        <enum>PlusMinus</enum>
+                    </property>
+                    <property stdset="1">
+                        <name>maxValue</name>
+                        <number>3600</number>
+                    </property>
+                    <property stdset="1">
+                        <name>minValue</name>
+                        <number>10</number>
+                    </property>
+                    <property stdset="1">
+                        <name>lineStep</name>
+                        <number>15</number>
                     </property>
                 </widget>
                 <widget row="2"  column="2" >
@@ -326,102 +344,27 @@
                         <number>15</number>
                     </property>
                 </widget>
-                <widget row="2"  column="3" >
-                    <class>QLabel</class>
-                    <property stdset="1">
+                <spacer row="1"  column="1" >
+                    <property>
                         <name>name</name>
-                        <cstring>TextLabel3</cstring>
+                        <cstring>Spacer3_2</cstring>
                     </property>
                     <property stdset="1">
-                        <name>text</name>
-                        <string>seconds</string>
-                    </property>
-                </widget>
-                <widget row="3"  column="0"  rowspan="1"  colspan="4" >
-                    <class>QCheckBox</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>notnetworkedsuspend</cstring>
+                        <name>orientation</name>
+                        <enum>Horizontal</enum>
                     </property>
                     <property stdset="1">
-                        <name>text</name>
-                        <string>Disable suspend while online</string>
-                    </property>
-                </widget>
-                <widget row="1"  column="0" >
-                    <class>QCheckBox</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>screensaver_lightoff</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>sizePolicy</name>
-                        <sizepolicy>
-                            <hsizetype>1</hsizetype>
-                            <vsizetype>0</vsizetype>
-                        </sizepolicy>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string></string>
-                    </property>
-                    <property stdset="1">
-                        <name>checked</name>
-                        <bool>true</bool>
-                    </property>
-                </widget>
-                <widget row="0"  column="1" >
-                    <class>QLabel</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>suspend_phony_2</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>sizePolicy</name>
-                        <sizepolicy>
-                            <hsizetype>7</hsizetype>
-                            <vsizetype>1</vsizetype>
-                        </sizepolicy>
-                    </property>
-                    <property stdset="1">
-                        <name>margin</name>
-                        <number>1</number>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Dim light after</string>
+                        <name>sizeType</name>
+                        <enum>Expanding</enum>
                     </property>
                     <property>
-                        <name>buddy</name>
-                        <cstring>screensaver_suspend</cstring>
+                        <name>sizeHint</name>
+                        <size>
+                            <width>20</width>
+                            <height>20</height>
+                        </size>
                     </property>
-                </widget>
-                <widget row="1"  column="1" >
-                    <class>QLabel</class>
-                    <property stdset="1">
-                        <name>name</name>
-                        <cstring>suspend_phony_3</cstring>
-                    </property>
-                    <property stdset="1">
-                        <name>sizePolicy</name>
-                        <sizepolicy>
-                            <hsizetype>7</hsizetype>
-                            <vsizetype>1</vsizetype>
-                        </sizepolicy>
-                    </property>
-                    <property stdset="1">
-                        <name>margin</name>
-                        <number>1</number>
-                    </property>
-                    <property stdset="1">
-                        <name>text</name>
-                        <string>Light off after</string>
-                    </property>
-                    <property>
-                        <name>buddy</name>
-                        <cstring>screensaver_suspend</cstring>
-                    </property>
-                </widget>
+                </spacer>
             </grid>
         </widget>
         <widget>

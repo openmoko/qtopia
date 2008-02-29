@@ -18,13 +18,21 @@
 **
 **********************************************************************/
 
+#ifndef QTOPIA_INTERNAL_PRELOADACCESS
 #define QTOPIA_INTERNAL_PRELOADACCESS
+#endif
+#ifndef QTOPIA_INTERNAL_FILEOPERATIONS
+#define QTOPIA_INTERNAL_FILEOPERATIONS
+#endif
+#ifndef QTOPIA_PROGRAM_MONITOR
 #define QTOPIA_PROGRAM_MONITOR
+#endif
 #include <qtopia/qpeglobal.h>
 
 #ifndef Q_OS_WIN32
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <sys/file.h>
 #include <unistd.h>
 #include <errno.h>
 #else
@@ -41,6 +49,7 @@
 #include <qwindowsystem_qws.h>
 #include <qmessagebox.h>
 #include <qfile.h>
+#include <qfileinfo.h>
 
 #include <qtopia/qcopenvelope_qws.h>
 #include <qtopia/applnk.h>
@@ -80,7 +89,12 @@ AppLauncher::AppLauncher(const AppLnkSet *as, QObject *parent, const char *name)
 #else
     runningAppsProc.setAutoDelete( TRUE );
 #endif
-
+    QString tmp = qApp->argv()[0];
+    int pos = tmp.findRev('/');
+    if ( pos > -1 )
+	tmp = tmp.mid(++pos);
+    runningApps[::getpid()] = tmp;
+    
     appLauncherPtr = this;
 }
 
@@ -118,13 +132,18 @@ void AppLauncher::received(const QCString& msg, const QByteArray& data)
     if ( msg == "execute(QString)" ) {
 	QString t;
 	stream >> t;
-	if ( !executeBuiltin( t, "" ) )
-	    execute(t, "");
+	if ( !executeBuiltin( t, QString::null ) )
+	    execute(t, QString::null);
     } else if ( msg == "execute(QString,QString)" ) {
 	QString t,d;
 	stream >> t >> d;
 	if ( !executeBuiltin( t, d ) )
 	    execute( t, d );
+    } else if ( msg == "processQCop(QString)" ) {
+	QString t;
+	stream >> t;
+	if ( !executeBuiltin( t, QString::null ) )
+	    execute( t, QString::null, TRUE);
     } else if ( msg == "sendRunningApps()" ) {
 	QStringList apps;
 	QMap<int,QString>::Iterator it;
@@ -187,10 +206,6 @@ void AppLauncher::sigStopped(int sigPid, int sigStatus)
     QString appName = *it;
     runningApps.remove(it);
 
-    // Remove any unprocessed QCop input, as that would otherwise
-    // prevernt QCopEnvelope from starting the app.
-    QFile::remove("/tmp/qcop-msg-" + appName);
-
     /* we must disable preload for an app that crashes as the system logic relies on preloaded apps
        actually being loaded.  If eg. the crash happened in the constructor, we can't automatically reload
        the app (withouth some timeout value for eg. 3 tries (which I think is a bad solution)
@@ -247,8 +262,13 @@ void AppLauncher::sigStopped(int sigPid, int sigStatus)
     } else {
 	if ( exitStatus == 255 ) {  //could not find app (because global returns -1)
 	    QMessageBox::information(0, tr("Application not found"), tr("<qt>Could not locate application <b>%1</b></qt>").arg( app->exec() ) );
-	} else if ( exitStatus > 0 ) {
-	    qDebug("interrupted signal for closed process %s (pid %d) with exit status %d", app->exec().data(), sigPid, exitStatus);
+	} else  {
+	    QFileInfo fi(Global::tempDir() + "qcop-msg-" + appName);
+	    if ( fi.exists() && fi.size() ) {
+		emit terminated(sigPid, appName);
+		execute( appName, QString::null );
+		return;
+	    }
 	}
     }
 
@@ -321,23 +341,44 @@ bool AppLauncher::executeBuiltin(const QString &c, const QString &document)
     return FALSE;
 }
 
-void AppLauncher::execute(const QString &c, const QString &docParam)
+void AppLauncher::execute(const QString &c, const QString &docParam, bool noRaise)
 {
     // Convert the command line in to a list of arguments
     QStringList list = QStringList::split(QRegExp("  *"),c);
     if ( !docParam.isEmpty() )
 	list.append( docParam );
 
-    QString ap=list[0];
-    
-    if ( isRunning(ap) ) {
-#ifndef QT_NO_COP
-	{ QCopEnvelope env( ("QPE/Application/" + ap).latin1(), "raise()" ); }
-	if ( !docParam.isEmpty() ) {
-	    QCopEnvelope env( ("QPE/Application/" + ap).latin1(), "setDocument(QString)" );
-	    env << docParam;
-	} 
+    QString appName = list[0];
+    if ( isRunning(appName) ) {
+	QCString channel = "QPE/Application/";
+	channel += appName.latin1();
+	
+	// Need to lock it to avoid race conditions with QPEApplication::processQCopFile
+	QFile f(Global::tempDir() + "qcop-msg-" + appName);
+	if ( !noRaise && f.open(IO_WriteOnly | IO_Append) ) {
+#ifndef Q_OS_WIN32
+	    flock(f.handle(), LOCK_EX);
 #endif
+	    
+	    QDataStream ds(&f);
+	    QByteArray b;
+	    QDataStream bstream(b, IO_WriteOnly);
+	    if ( !f.size() )
+		ds << channel << QCString("raise()") << b;
+	    if ( !docParam.isEmpty() ) {
+		bstream << docParam;
+		ds << channel << QCString("setDocument(QString)") << b;
+	    }
+
+	    f.flush();
+#ifndef Q_OS_WIN32
+	    flock(f.handle(), LOCK_UN);
+#endif
+	    f.close();
+	}
+	if ( QCopChannel::isRegistered(channel) ) // avoid unnecessary warnings
+	    QCopChannel::send(channel,"QPEProcessQCop()");
+	
 	return;
     }
 
@@ -383,8 +424,8 @@ void AppLauncher::execute(const QString &c, const QString &docParam)
 #else
     QProcess *proc = new QProcess(this);
     if (proc){
-	proc->addArgument(args[0]);
-	proc->addArgument(args[1]);
+	for (int i=0; i < slist.count(); i++)
+	    proc->addArgument(args[i]);
 	connect(proc, SIGNAL(processExited()), this, SLOT(processExited()));
 	if (!proc->start()){
 	    qDebug("Unable to start application %s", args[0]);

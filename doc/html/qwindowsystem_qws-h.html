@@ -30,7 +30,7 @@ remains with Trolltech.
 <hr>
 <pre>
 /****************************************************************************
-** &#36;Id&#58; qt/src/kernel/qwindowsystem_qws.h   2.3.5   edited 2003-03-28 $
+** &#36;Id&#58; qt/src/kernel/qwindowsystem_qws.h   2.3.6   edited 2003-05-16 $
 **
 ** Definition of Qt/FB central server classes
 **
@@ -314,6 +314,11 @@ public:
     static void beginDisplayReconfigure();
     static void endDisplayReconfigure();
 
+#ifndef QT_NO_QWS_CURSOR
+    static void setCursorVisible( bool );
+    static bool isCursorVisible();
+#endif
+
     enum WindowEvent { Create=0x01, Destroy=0x02, Hide=0x04, Show=0x08,
                        Raise=0x10, Lower=0x20, Geometry=0x40, Active=0x80 };
 
@@ -338,6 +343,7 @@ private:
     void request_region( int, QRegion );
     void destroy_region( const QWSRegionDestroyCommand * );
     void name_region( const QWSRegionNameCommand * );
+    void set_identity( const QWSIdentifyCommand * );
 #ifndef QT_NO_QWS_IM
     void set_im_info( const QWSSetIMInfoCommand * );
     void reset_im( const QWSResetIMCommand * );
@@ -357,7 +363,7 @@ private:
 #ifndef QT_NO_QWS_MULTIPROCESS
     void newConnection( int socket );
 #endif
-    void invokeIdentify( QWSIdentifyCommand *cmd, QWSClient *client );
+    void invokeIdentify( const QWSIdentifyCommand *cmd, QWSClient *client );
     void invokeCreate( QWSCreateCommand *cmd, QWSClient *client );
     void invokeRegionName( const QWSRegionNameCommand *cmd, QWSClient *client );
     void invokeRegion( QWSRegionCommand *cmd, QWSClient *client );
@@ -596,5 +602,5 @@ private:
 <p><address><hr><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr>
 <td>Copyright © 2001 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align="right"><div align="right">Qt version 2.3.5</div>
+<td align="right"><div align="right">Qt version 2.3.6</div>
 </table></div></address></body></html>

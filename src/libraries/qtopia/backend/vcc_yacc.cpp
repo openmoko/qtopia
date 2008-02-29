@@ -461,7 +461,7 @@ static void enterProps(const char *s)
 
 static void enterAttr(const char *s1, const char *s2)
     {
-    const char *p1, *p2;
+    const char *p1, *p2=0;
     p1 = lookupProp_(s1);
     if (s2) {
 	VObject *a;
@@ -1082,12 +1082,14 @@ static int yylex() {
 		case ':': {
 		    /* consume all line separator(s) adjacent to each other */
 		    /* ignoring linesep immediately after colon. */
+		    /* I don't see this in the spec, and it breaks null values -- WA
 		    c = lexLookahead();
 		    while (strchr("\n",c)) {
 			lexSkipLookahead();
 			c = lexLookahead();
 			++mime_lineNum;
 			}
+		    */
 		    DBG_(("db: COLON\n"));
 		    return COLON;
 		    }
@@ -1234,7 +1236,7 @@ void mime_error_(char *s)
 	}
     }
 
-#line 1238 "y.tab.c"
+#line 1240 "y.tab.c"
 #define YYABORT goto yyabort
 #define YYREJECT goto yyabort
 #define YYACCEPT goto yyaccept
@@ -1534,7 +1536,7 @@ case 45:
 	popVObject();
 	}
 break;
-#line 1538 "y.tab.c"
+#line 1540 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

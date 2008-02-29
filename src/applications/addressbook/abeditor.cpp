@@ -50,20 +50,37 @@
 
 // Make QScrollView in AutoOneFit mode use the minimum horizontal size
 // instead of the sizeHint() so that the widgets fit horizontally.
-class VScrollBox : public QVBox
+class VScrollBox : public QWidget
 {
 public:
     VScrollBox( QWidget *parent, const char *name=0 )
-	: QVBox( parent, name ) {}
+	: QWidget( parent, name ) {}
     QSize sizeHint() const {
-	int width = QVBox::sizeHint().width();
-	if ( width > qApp->desktop()->width()-style().scrollBarExtent().width() )
-	    width = qApp->desktop()->width()-style().scrollBarExtent().width();
-	width = QMAX(width, QVBox::minimumSize().width());
-	return QSize( width, QVBox::sizeHint().height());
+	int width = QMIN(QWidget::sizeHint().width(), qApp->desktop()->width()-style().scrollBarExtent().width() );
+	width = QMAX(width, QWidget::minimumSize().width());
+	return QSize( width, QWidget::sizeHint().height());
     }
 };
 
+class VScrollView : public QScrollView
+{
+public:
+    VScrollView(QWidget *parent, const char *name = 0)
+	: QScrollView(parent, name)
+    {
+	setHScrollBarMode( QScrollView::AlwaysOff );
+	setResizePolicy( QScrollView::AutoOneFit );
+	setFrameStyle( QFrame::NoFrame );
+	
+	w = new VScrollBox( viewport() );
+	addChild(w);
+    }
+
+    QWidget *widget() { return w; }
+
+private:
+    QWidget *w;
+};
 
 // helper functions, convert our comma delimited list to proper
 // file format...
@@ -116,6 +133,7 @@ FileAsCombo::FileAsCombo( AbEditor *editor, QWidget *parent ) :
     options(), indexedOptions(), curIndex( -1 ), curGroup( LastFirst ),
     curNumGroupChoices(-1), lastNumGroupChoices(-1), bestChoiceIndex()
 {
+    setSizePolicy( QSizePolicy( QSizePolicy::Preferred, QSizePolicy::Fixed) );
     setInsertionPolicy( QComboBox::AtTop );
     setAutoCompletion( TRUE );
     setEditable( TRUE );
@@ -136,7 +154,7 @@ void FileAsCombo::userChanged( const QString &newText )
     //qDebug( "FileAsCombo::userChanged newText = %s curIndex = %d found = %d",
     //    newText.latin1(), curIndex, *found );
 
-    if ( found == indexLookup.end() ) {
+    if ( found == indexLookup.end() && !newText.isEmpty() ) {
 	lineEdit()->blockSignals(TRUE);
 	lineEdit()->setText(newText);
 	lineEdit()->blockSignals(FALSE);
@@ -146,7 +164,10 @@ void FileAsCombo::userChanged( const QString &newText )
     }
     else {
 	userOverride = FALSE;
-	curIndex = *found;
+	if (newText.isEmpty())
+	    curIndex = 0;
+	else
+	    curIndex = *found;
 	//qDebug( " userChanged indexedGroups.contains(curIndex) == %d",
 //		indexedGroups.contains(curIndex) );
 	if ( curGroup != indexedGroups[curIndex] ) {
@@ -309,18 +330,22 @@ void FileAsCombo::autoUpdate()
     // make an intelligent choice of what should be shown in the
     // combo box
     //qDebug("\t before new index; last = %d current = %d", lastNumGroupChoices, curNumGroupChoices );
-    if ( !userOverride && options.count() ) {
-	if (  lastNumGroupChoices != curNumGroupChoices
-	     || curIndex == -1 || !indexedOptions.contains( curIndex ) ) {
-	    if ( bestChoiceIndex.contains( curGroup ) )
-		curIndex = bestChoiceIndex[ curGroup ];
-	    else curIndex = indexedOptions.begin().key();
-	    curGroup = indexedGroups[curIndex];
+    if ( !userOverride ) {
+	if (options.count()) {
+	    if (  lastNumGroupChoices != curNumGroupChoices
+		 || curIndex == -1 || !indexedOptions.contains( curIndex ) ) {
+		if ( bestChoiceIndex.contains( curGroup ) )
+		    curIndex = bestChoiceIndex[ curGroup ];
+		else curIndex = indexedOptions.begin().key();
+		curGroup = indexedGroups[curIndex];
 
-	    //qDebug("\tpicking smart choice for index; new index = %d group = %d", curIndex, curGroup);
+		//qDebug("\tpicking smart choice for index; new index = %d group = %d", curIndex, curGroup);
+	    }
+	    curText = *(indexedOptions[curIndex]);
+	} else {
+	    curText = "";   // No options available.
 	}
 
-	curText = *(indexedOptions[curIndex]);
 	//qDebug( "setting curText = %s using index = %d", curText.latin1(), curIndex);
     }
 
@@ -438,10 +463,9 @@ void AbEditor::init()
     tabs = new QTabWidget( this );
     vb->addWidget( tabs );
 
-    personalTab = new QWidget( tabs );
-    QWidget *businessTab = new QWidget( tabs );
-    QWidget *homeTab = new QWidget( tabs );
-    QWidget *notesTab = new QWidget( tabs );
+    personalTab = new VScrollView( tabs );
+    VScrollView *businessTab = new VScrollView( tabs );
+    VScrollView *homeTab = new VScrollView( tabs );
 
 #ifdef QTOPIA_DESKTOP
     // ### Should use summary tab if has room, not
@@ -462,18 +486,17 @@ void AbEditor::init()
     tabs->addTab( personalTab, tr("Personal") );
     tabs->addTab( businessTab, tr("Business") );
     tabs->addTab( homeTab, tr("Home") );
-    tabs->addTab( notesTab, tr("Notes") );
 
     // add the key fields to the personal tab
-    addFields( addScrollBars( personalTab ), personalTabKeys );
-    addFields( addScrollBars( businessTab ), businessTabKeys );
-    addFields( addScrollBars( homeTab ), homeTabKeys );
+    addFields( personalTab->widget(), personalTabKeys );
+    addFields( businessTab->widget(), businessTabKeys );
+    addFields( homeTab->widget() , homeTabKeys );
 
-    QWidget *notesContainer = addScrollBars( notesTab );
-    QVBoxLayout *vbNote = new QVBoxLayout( notesContainer );
-    txtNote = new QMultiLineEdit( notesContainer );
+    setTabOrders();
+
+    txtNote = new QMultiLineEdit( tabs );
     txtNote->setWordWrap(QMultiLineEdit::WidgetWidth);
-    vbNote->addWidget( txtNote );
+    tabs->addTab( txtNote, tr("Notes") );
 
 #ifdef QTOPIA_DESKTOP
     QHBoxLayout *bottomBox = new QHBoxLayout( vb );
@@ -498,6 +521,15 @@ void AbEditor::init()
 	tr("Occupation or job description."));
 
     new QPEDialogListener(this);
+}
+
+void AbEditor::setTabOrders(void)
+{
+    setTabOrder(fileAsCombo, cmbCat);
+    setTabOrder(cmbCat, emailLE);
+    setTabOrder(emailLE, emailBtn);
+    setTabOrder(emailBtn, bdayButton);
+    setTabOrder(bdayButton, genderCombo);
 }
 
 void AbEditor::tabClicked( QWidget *tab )
@@ -544,22 +576,6 @@ void AbEditor::editEmails()
     delete ed;
 }
 
-QWidget *AbEditor::addScrollBars( QWidget *tab )
-{
-    QScrollView *svPage = new QScrollView( tab );
-    QVBoxLayout *vb = new QVBoxLayout( tab );
-    vb->addWidget( svPage );
-    svPage->setHScrollBarMode( QScrollView::AlwaysOff );
-    svPage->setResizePolicy( QScrollView::AutoOneFit );
-    svPage->setFrameStyle( QFrame::NoFrame );
-
-    VScrollBox *vsb = new VScrollBox( svPage->viewport() );
-    svPage->addChild( vsb );
-
-    QWidget *container = new QWidget ( vsb );
-    return container;
-}
-
 void AbEditor::addFields( QWidget *container, const QValueList<int> &keys )
 {
 
@@ -596,6 +612,9 @@ void AbEditor::addFields( QWidget *container, const QValueList<int> &keys )
 	    suffixCombo->insertItem( tr( "III" )  );
 	    suffixCombo->insertItem( tr( "IV" )  );
 	    suffixCombo->insertItem( tr( "V" )  );
+
+	    connect(suffixCombo, SIGNAL(textChanged(const QString&)),
+		fileAsCombo, SLOT(autoUpdate()));
 
 	    editor = suffixCombo;
 	    break;

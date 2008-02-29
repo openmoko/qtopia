@@ -250,12 +250,15 @@ $(OBJECTS_DIR)/qsjiscodec.o: qsjiscodec.cpp \
 
 
 
+lupdate-check:
+	@true
+
 lupdate:
-	sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' 	    -e '/$$(.*/ d' 	    -e 's/^static:.*//' 	    <jp.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
+	@true
 
 lrelease:
-	lrelease jp.pro
-	$(QPEDIR)/bin/qtopia-linstall jp.pro
+	@echo "No TRANSLATIONS"
+
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done

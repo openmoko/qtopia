@@ -23,7 +23,7 @@
     </message>
     <message>
         <source>Click &lt;a href=&quot;TodayPluginEdit&quot;&gt;here&lt;/a&gt; to configure display.</source>
-        <translation>&lt;a href=&quot;TodayPluginEdit&quot;&gt;ここ&lt;/a&gt;をクリックして表示の設定をします。</translation>
+        <translation>&lt;a href=&quot;TodayPluginEdit&quot;&gt;ここ&lt;/a&gt;をクリックして表示を設定します。</translation>
     </message>
     <message>
         <source>%1 settings</source>
@@ -35,11 +35,11 @@
     <name>TodayOptions</name>
     <message>
         <source>Lists the plugins and in which order they will be displayed in the today view.</source>
-        <translation>プラグインの一覧と今日のビューで表示する順序をリストアップします。</translation>
+        <translation>プラグインとそのプラグインを今日のビューで表示する順序を一覧表示します。</translation>
     </message>
     <message>
         <source>Move the selected plugin one step up.</source>
-        <translation>選択したプラグインを一段上へ移動します。</translation>
+        <translation>選択したプラグインを１つ上へ移動します。</translation>
     </message>
     <message>
         <source>Disable the selected plugin (Do not show in today view).</source>
@@ -47,11 +47,11 @@
     </message>
     <message>
         <source>Move the selected plugin one step down.</source>
-        <translation>選択したプラグインを一段下へ移動します。</translation>
+        <translation>選択したプラグインを１つ下へ移動します。</translation>
     </message>
     <message>
         <source>Lists the plugins which are available but not enabled.  Tap a plugin to enable it.</source>
-        <translation>利用可能なプラグインで無効]なっているものをリストアップします。プラグインをタップして有効にします。</translation>
+        <translation>利用可能だが無効になっているプラグインを一覧表示します。プラグインをタップして有効にします。</translation>
     </message>
 </context>
 <context>
@@ -62,11 +62,15 @@
     </message>
     <message>
         <source>Active Plugins</source>
-        <translation>アクティブなプラグイン</translation>
+        <translation>使用しているプラグイン</translation>
     </message>
     <message>
         <source>Inactive Plugins</source>
-        <translation>非アクティブなプラグイン</translation>
+        <translation>使用していないプラグイン</translation>
+    </message>
+    <message>
+        <source>Start automatically every day.</source>
+        <translation>自動的に毎日スタートします。</translation>
     </message>
 </context>
 </TS>

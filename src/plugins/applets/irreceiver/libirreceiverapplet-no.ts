@@ -2,23 +2,23 @@
 <context>
     <name>IRReceiverApplet</name>
     <message>
-        <source>Off</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>On</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>On for 5 minutes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>IR Receiver</source>
+        <source>On for 1 item</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>On for 1 item</source>
+        <source>Receiver off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Receiver on</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Beaming</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

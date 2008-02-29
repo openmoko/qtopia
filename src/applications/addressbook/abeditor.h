@@ -39,6 +39,8 @@ class QPEDateEdit;
 class QTextEdit;
 
 class FileAsCombo;
+class VScrollView;
+
 class AbEditor : public QDialog
 {
     Q_OBJECT
@@ -75,17 +77,17 @@ protected:
 
 private:
     void init();
-    QWidget *addScrollBars( QWidget *tab );
     void addFields( QWidget *tabContainer, const QValueList<int> &keys );
 
     void contactFromFields(PimContact &);
     bool isEmpty();
+    void setTabOrders(void);
 
 private:
     PimContact ent;
     QMultiLineEdit *txtNote, *homeStreetEdit, *businessStreetEdit;
     QTabWidget *tabs;
-    QWidget *personalTab;
+    VScrollView *personalTab;
     QWidget *summaryTab;
     QTextEdit *summary;
     QMap<int, QLineEdit *> lineEdits;

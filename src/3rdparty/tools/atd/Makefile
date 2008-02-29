@@ -214,12 +214,15 @@ $(OBJECTS_DIR)/atd.o: atd.c
 
 
 
+lupdate-check:
+	@true
+
 lupdate:
-	sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' 	    -e '/$$(.*/ d' 	    -e 's/^static:.*//' 	    <atd.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
+	@true
 
 lrelease:
-	lrelease atd.pro
-	$(QPEDIR)/bin/qtopia-linstall atd.pro
+	@echo "No TRANSLATIONS"
+
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done

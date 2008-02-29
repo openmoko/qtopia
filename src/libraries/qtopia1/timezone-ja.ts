@@ -2,6 +2,10 @@
 <context>
     <name>TimeZone</name>
     <message>
+        <source>Brisbane</source>
+        <translation>ブリスベン</translation>
+    </message>
+    <message>
         <source>Rio Branco</source>
         <translation>リオブランコ</translation>
     </message>

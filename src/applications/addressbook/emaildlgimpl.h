@@ -43,6 +43,9 @@ protected slots:
     void removeCurrent();
     void moveCurrentUp();
     void moveCurrentDown();
+
+private:
+    void updateButtons(void);
 };
 
 #endif // EMAILDIALOG_H

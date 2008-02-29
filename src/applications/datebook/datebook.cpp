@@ -29,6 +29,7 @@
 #include "finddialog.h"
 
 #include <qtopia/qpeapplication.h>
+#include <qtopia/global.h>
 #include <qtopia/config.h>
 #include <qtopia/qpedebug.h>
 #include <qtopia/pim/event.h>
@@ -859,9 +860,7 @@ void DateBook::appMessage(const QCString& msg, const QByteArray& data)
 		//QMessageBox mb(tr("ALRARM"), msg, QMessageBox::NoIcon, QMessageBox::OkButton, 
 		switch (QMessageBox::information(this, tr("Alarm"), msg, tr("OK"), 
 			    (lastcall.addSecs(1) >= current && lastcall.addSecs(-1) <= current) 
-			    ? tr("Skip Remaining", 
-				"Skip dialogs for other alarms that are going off for current (or ealier) time")
-			    : QString::null))
+				? tr("OK to all") : QString::null))
 		{
 		    default:
 		    case -1:

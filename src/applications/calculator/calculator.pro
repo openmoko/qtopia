@@ -19,3 +19,5 @@ win32:LIBS  += $(QPEDIR)/lib/qtopiacalc.lib
 #export-dynamic costs around 3.5kb
 
 TARGET = calculator
+
+TRANSLATIONS = calculator-en_GB.ts calculator-de.ts calculator-ja.ts calculator-no.ts

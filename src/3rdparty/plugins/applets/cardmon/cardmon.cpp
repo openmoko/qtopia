@@ -34,8 +34,11 @@
   \brief The CardMonitor class provides a widget to monitor CF cards.
 
   \legalese
-  The CardMonitor applet monitors PCMCIA and CF card insertion and removal.
-  The author and primary copyright holder of the CardMonitor applet is Devin Butterfield \<dbutter@wireless.net\>.
+  The CardMonitor applet is distributed under the terms of the GNU
+  General Public License, Version 2.  The CardMonitor applet monitors
+  PCMCIA and CF card insertion and removal.  The author and primary
+  copyright holder of the CardMonitor applet is Devin Butterfield
+  \<dbutter@wireless.net\>.
 */
 
 CardMonitor::CardMonitor( QWidget *parent ) : QWidget( parent ),
@@ -63,12 +66,12 @@ void CardMonitor::mousePressEvent( QMouseEvent * )
     int err=0;
     menu->insertItem( tr("Eject card"), 0 );
     QPoint p = mapToGlobal( QPoint(1, -menu->sizeHint().height()-1) );
-    
+
     if ( menu->exec( p, 1 ) == 0 ) {
         cmd = "/sbin/cardctl eject"; // No tr
 	err = system( (const char *) cmd );
 	if ( ( err == 127 ) || ( err < 0 ) ) {
-	    qDebug("Could not execute `/sbin/cardctl eject'! err=%d", err); 
+	    qDebug("Could not execute `/sbin/cardctl eject'! err=%d", err);
 	    QMessageBox::warning( this, tr("CardMonitor"), tr("Card eject failed!"),
 	    			  tr("&OK") );
 	}
@@ -92,7 +95,7 @@ bool CardMonitor::getStatus( void )
     int	socknum;
     char id[80];
     bool cardWas=cardIn; // remember last state
-	
+
     fd = fopen("/var/run/stab", "r");
     if (fd == NULL)
 	fd = fopen("/var/state/pcmcia/stab", "r");
@@ -116,14 +119,14 @@ bool CardMonitor::getStatus( void )
 		    }
 		}
 	    }
-	    fgets(line, 80, fd);    
+	    fgets(line, 80, fd);
 	}
     } else {
 	// stab is missing
 	cardIn = FALSE;
 	hide();
 	return FALSE;
-    }    	
+    }
     fclose(fd);
     return ((cardWas == cardIn) ? FALSE : TRUE);
 }
@@ -131,7 +134,7 @@ bool CardMonitor::getStatus( void )
 void CardMonitor::paintEvent( QPaintEvent * )
 {
     QPainter p( this );
-    
+
     if ( cardIn ) {
 	p.drawPixmap( 0, 0, pm );
     }

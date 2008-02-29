@@ -376,6 +376,10 @@ VCards already in your addressbook</source>
         <source>View Contact details.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>&lt;qt&gt;Set &quot;%1&quot; as your Business Card?&lt;/qt&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>EmailDialogBase</name>

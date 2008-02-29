@@ -14,6 +14,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <linux/rtc.h>
 /*#include "rtc.h"*/
 #include <sys/ioctl.h>

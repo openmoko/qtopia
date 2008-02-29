@@ -164,9 +164,9 @@ void MediaRecorder::initializeContents()
 
     // Load the initial quality settings.
     config = new ConfigureRecorder( qualities, recorderPlugins, this );
-    contents->qualityGroup->setButton( config->currentQuality() );
+    contents->qualityCombo->setCurrentItem(config->currentQuality());
     setQualityDisplay( qualities[config->currentQuality()] );
-    connect( contents->qualityGroup, SIGNAL( clicked(int) ),
+    connect( contents->qualityCombo, SIGNAL( activated(int) ),
 	     this, SLOT( qualityChanged(int) ) );
 
     connect( contents->storageLocation, SIGNAL(newPath()), 
@@ -408,11 +408,12 @@ void MediaRecorder::startRecording()
 					audioInput->channels() );
 
     configureAction->setEnabled( FALSE );
-    contents->qualityGroup->setEnabled( FALSE );
+    contents->qualityCombo->setEnabled( FALSE );
     contents->storageLocation->setEnabled( FALSE );
     recordTime = 0;
     contents->progress->setTotalSteps( 120 );
     contents->progress->setProgress( 0 );
+    contents->progress->setRecording();
     recording = TRUE;
     contents->recordButton->setText( tr("Stop") );
     contents->recordButton->setEnabled( TRUE );
@@ -435,7 +436,7 @@ void MediaRecorder::stopRecording()
     audioInput->stop();
     contents->waveform->reset();
     configureAction->setEnabled( TRUE );
-    contents->qualityGroup->setEnabled( TRUE );
+    contents->qualityCombo->setEnabled( TRUE );
     contents->storageLocation->setEnabled( TRUE );
     contents->recordButton->setEnabled( FALSE );
     recording = FALSE;
@@ -480,7 +481,7 @@ void MediaRecorder::startPlaying()
 
     // Reconfigure the UI to reflect the current mode.
     configureAction->setEnabled( FALSE );
-    contents->qualityGroup->setEnabled( FALSE );
+    contents->qualityCombo->setEnabled( FALSE );
     contents->storageLocation->setEnabled( FALSE );
     recordTime = 0;
     samplesPlayed = 0;
@@ -489,6 +490,7 @@ void MediaRecorder::startPlaying()
     samples = (samples + freq - 1) / freq;
     contents->progress->setTotalSteps( samples );
     contents->progress->setProgress( 0 );
+    contents->progress->setPlaying();
     playing = TRUE;
     contents->recordButton->setEnabled( FALSE );
     contents->replayButton->setText( tr("Stop") );
@@ -530,7 +532,7 @@ void MediaRecorder::stopPlaying()
     // Return the UI to the default state.
     contents->waveform->reset();
     configureAction->setEnabled( TRUE );
-    contents->qualityGroup->setEnabled( TRUE );
+    contents->qualityCombo->setEnabled( TRUE );
     contents->storageLocation->setEnabled( TRUE );
     contents->recordButton->setEnabled( TRUE );
     playing = FALSE;
@@ -632,7 +634,7 @@ void MediaRecorder::processAudioData()
 void MediaRecorder::configure()
 {
     config->processPopup();
-    contents->qualityGroup->setButton( config->currentQuality() );
+    contents->qualityCombo->setCurrentItem( config->currentQuality() );
     qualityChanged( config->currentQuality() );
 }
 

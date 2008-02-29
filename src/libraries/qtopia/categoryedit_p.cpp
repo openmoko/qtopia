@@ -504,8 +504,8 @@ int CategoryEdit::tryRename(const QString &newName, bool global)
 
     if ( contains(d->mCategories, newName) && !d->mCategories.globalGroup().contains(newName)
 	    && !d->mCategories.appGroupMap()[d->mStrApp].contains(newName) ) {
-	switch( QMessageBox::warning( d->w, qApp->translate("Qtopia", "Duplicate categories"),
-			      qApp->translate("Qtopia", "<qt>There already exists a local category named"
+	switch( QMessageBox::warning( d->w, tr("Duplicate categories"),
+				  tr("<qt>There already exists a local category named"
 				  " <b>%1</b> in another application.<p>"
 				  "Make that category a global group?</qt>").arg(newName),
 				  QMessageBox::Yes, QMessageBox::No) ) {
@@ -524,8 +524,8 @@ int CategoryEdit::tryRename(const QString &newName, bool global)
 	success = d->mCategories.renameCategory( d->mStrApp, d->orgName, newName );
     }
     if ( !success ) {
-	QMessageBox::warning( d->w, qApp->translate("Qtopia", "Duplicate categories"),
-			      qApp->translate("Qtopia", "There is already a category named\n"
+	QMessageBox::warning( d->w, tr("Duplicate categories"),
+			      tr("There is already a category named\n"
 				  "%1.\n"
 				  "Please choose another name, or delete\n"
 				  "the duplicate.").arg(newName) );

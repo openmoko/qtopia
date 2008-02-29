@@ -127,7 +127,7 @@ void ButtonEditorDialog::initAppList()
     const QList<AppLnk>& apps = lnkSet.children();
     m_AppList.setAutoDelete(TRUE);
     for (QListIterator<AppLnk> it(apps); it.current() ; ++it)
-        if (it.current()->type() != "Separator") // No tr
+        if (it.current()->type() != "Separator" && it.current()->property("Builtin") != "1") // No tr
             m_AppList.append(new AppLnk(*it.current())); 
 
     // Get the list of parameterless actions for all services

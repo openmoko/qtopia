@@ -418,7 +418,7 @@ DateBookDB::~DateBookDB()
 //#### Why is this code duplicated in getEffectiveEvents ?????
 //#### Addendum.  Don't use this function, lets faze it out if we can.
 
-/*! \obsolete */
+/* obsolete */
 QValueList<Event> DateBookDB::getEvents( const QDate &from, const QDate &to )
 {
     QValueList<Event> tmpList;

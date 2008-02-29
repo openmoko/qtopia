@@ -833,7 +833,7 @@ int DayViewContents::posOfHour(int h) const {
     switch (typ) {
 	case ScrollingDay:
 	    // all hours, regardless of height.
-	    return h*time_height;
+	    return h < 0 ? 0 : h*time_height;
 	case CompressedDay:
 	    // all hours, in height.
 	    break;
@@ -922,7 +922,12 @@ void DayView::selectedDates( QDateTime &start, QDateTime &end )
 
     if (sh >= 0) {
 	start.setTime( QTime( sh, 0, 0 ) );
-	end.setTime( QTime( eh, 0, 0 ) );
+	if (eh == 24) {
+	    end.setDate(cDate.addDays(1));
+	    end.setTime( QTime(0,0,0) );
+	} else {
+	    end.setTime( QTime( eh, 0, 0 ) );
+	}
     }
 }
 

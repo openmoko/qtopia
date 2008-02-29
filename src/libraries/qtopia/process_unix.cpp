@@ -470,8 +470,9 @@ bool Process::exec( const QByteArray& in, QByteArray& out, QStringList *env )
 		    break;
 	    }
 	    if ( FD_ISSET( sStderr[0], &r ) ) {
+		// discard
 		char buf[bufsize];
-		int n = read( sStderr[0], buf, bufsize );
+		(void)read( sStderr[0], buf, bufsize );
 	    }
 	    if ( FD_ISSET( sStdin[1], &w ) ) {
 		int n = write( sStdin[1], in.data()+written, in.size()-written );

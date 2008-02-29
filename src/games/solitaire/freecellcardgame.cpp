@@ -88,7 +88,10 @@ bool FreecellCardGame::mousePressCard( Card *c, QPoint p )
 void FreecellCardGame::readConfig( Config& cfg )
 {
     cfg.setGroup("GameState");
-
+    if ( cfg.readBoolEntry("Won", FALSE) ) {
+	newGame();
+	return;
+    }
     // Create Cards, but don't shuffle or deal them yet
     createDeck();
 
@@ -124,6 +127,7 @@ void FreecellCardGame::readConfig( Config& cfg )
 void FreecellCardGame::writeConfig( Config& cfg )
 {
     cfg.setGroup("GameState");
+    cfg.writeEntry("Won", haveWeWon() );
     int i;
     for ( i = 0; i < 4; i++ ) {
 	QString pile;

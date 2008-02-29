@@ -21,10 +21,34 @@
 #include "timeprogressbar.h"
 
 
+#include <qapplication.h>
+
+
 TimeProgressBar::TimeProgressBar( QWidget *parent, const char *name, WFlags fl )
     : QProgressBar( parent, name, fl ), prevValue( -1 )
 {
     setCenterIndicator( TRUE );
+    recording = TRUE;
+    refreshPalettes();
+}
+
+
+TimeProgressBar::~TimeProgressBar()
+{
+}
+
+
+void TimeProgressBar::setRecording()
+{
+    recording = TRUE;
+    setPalette( adjustedPalette );
+}
+
+
+void TimeProgressBar::setPlaying()
+{
+    recording = FALSE;
+    setPalette( origPalette );
 }
 
 
@@ -51,5 +75,31 @@ bool TimeProgressBar::setIndicator( QString& progress_str, int progress, int tot
     } else {
 	return FALSE;
     }
+}
+
+
+bool TimeProgressBar::event( QEvent *e )
+{
+    if ( e->type() == QEvent::ApplicationPaletteChange ) {
+	refreshPalettes();
+    }
+    return QProgressBar::event( e );
+}
+
+
+void TimeProgressBar::refreshPalettes()
+{
+    origPalette = QApplication::palette( this );
+    adjustedPalette = origPalette;
+    adjustedPalette.setColor( QPalette::Active,
+			      QColorGroup::Highlight,
+			      origPalette.active().base() );
+    adjustedPalette.setColor( QPalette::Active,
+			      QColorGroup::HighlightedText,
+			      origPalette.active().text() );
+    if ( recording )
+	setPalette( adjustedPalette );
+    else
+	setPalette( origPalette );
 }
 

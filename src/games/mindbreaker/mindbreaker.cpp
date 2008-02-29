@@ -223,9 +223,9 @@ void Peg::advance(int phase) {
 void Peg::drawShape(QPainter &p )
 {
     if ((pegtype == 5) && eggLevel > 5) {
-        p.drawImage(x(), y(), *normalPegs[aniStep]);
+        p.drawImage(int(x()), int(y()), *normalPegs[aniStep]);
     } else 
-        p.drawImage(x(), y(), imageForType(pegtype));
+        p.drawImage(int(x()), int(y()), imageForType(pegtype));
 }
 
 bool Peg::hit( const QPoint &p ) const
@@ -274,6 +274,8 @@ inline int Peg::type() const
 MindBreaker::MindBreaker( QWidget *parent, const char *name, int wFlags )
    : QMainWindow(parent, name, wFlags)
 {
+    setMinimumSize(160,210);
+
     QWidget *w = new QWidget( this );
     w->setBackgroundColor( black );
     QHBoxLayout *hb = new QHBoxLayout( w );
@@ -305,6 +307,8 @@ MindBreaker::MindBreaker( QWidget *parent, const char *name, int wFlags )
     int a, b;
     board->getScore(&a, &b);
     setScore(a,b);
+    
+    layout()->setResizeMode(QLayout::FreeResize);
 }
 
 void MindBreaker::setScore(int turns, int games)
@@ -330,7 +334,8 @@ void MindBreaker::resizeEvent( QResizeEvent *e )
 
 MindBreakerBoard::MindBreakerBoard( QWidget *parent, 
                                     const char *name, int wFlags )
-                     :  QCanvasView(0, parent, name, wFlags)
+           : QCanvasView(0, parent, name, wFlags), 
+	    moving(0), game_over(FALSE), total_turns(0), total_games(0)
 {
     setFrameStyle( NoFrame );
     setupBoardSize(qApp->desktop()->width(),qApp->desktop()->height());

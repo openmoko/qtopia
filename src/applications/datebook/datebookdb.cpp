@@ -89,7 +89,7 @@ void DateBookTable::updateAlarms()
 }
 
 Occurrence DateBookTable::find(const QRegExp &r, int category, const QDate &dt,
-	bool, bool *resultFound) const
+	bool, bool *success) const
 {
     //return dba->find(text, dt, cs, ascend, category);
     // for now, do this in the datebook, fix later
@@ -99,6 +99,8 @@ Occurrence DateBookTable::find(const QRegExp &r, int category, const QDate &dt,
     QListIterator<PimEvent> it(list);
 
     PimEvent p;
+    Occurrence bestMatch;
+    bool resultFound = FALSE;
     for (; it.current(); ++it ) {
 	if (category == -1) {
 	    if (it.current()->categories().count() != 0)
@@ -117,9 +119,11 @@ Occurrence DateBookTable::find(const QRegExp &r, int category, const QDate &dt,
 	while (ok) {
 	    Occurrence o(next, *(it.current()));
 	    if (o.startInCurrentTZ().date() >= dt) {
-		if (resultFound)
-		    *resultFound = TRUE;
-		return o;
+		if (!resultFound || o.startInCurrentTZ() < bestMatch.startInCurrentTZ())  {
+		    resultFound = TRUE;
+		    bestMatch = o;
+		}
+		break;
 	    }
 	    next = it.current()->nextOccurrence(
 		    next.addDays(it.current()->start().daysTo(it.current()->end()) + 1), &ok);
@@ -127,10 +131,12 @@ Occurrence DateBookTable::find(const QRegExp &r, int category, const QDate &dt,
 	// didn't return, no valid occurence after dt.
 	// descend not yet implemented.
     }
-    // nothing found...
+    if (success)
+	*success = resultFound;
     if (resultFound)
-	*resultFound = FALSE;
-    return Occurrence();
+	return bestMatch;
+    else
+	return Occurrence();
 }
 
 PimEvent DateBookTable::find(const QUuid &u, bool *ok) const

@@ -19,11 +19,11 @@
     </message>
     <message>
         <source>Suffix</source>
-        <translation>接尾語</translation>
+        <translation>Suffix</translation>
     </message>
     <message>
         <source>File As</source>
-        <translation>ファイル名</translation>
+        <translation>ファイル</translation>
     </message>
     <message>
         <source>Default Email</source>
@@ -55,15 +55,15 @@
     </message>
     <message>
         <source>Home Phone</source>
-        <translation>自宅 電話番号</translation>
+        <translation>自宅 電話</translation>
     </message>
     <message>
         <source>Home Fax</source>
-        <translation>自宅 ファックス番号</translation>
+        <translation>自宅 ファックス</translation>
     </message>
     <message>
         <source>Home Mobile</source>
-        <translation>個人用 携帯番号</translation>
+        <translation>個人用 携帯電話</translation>
     </message>
     <message>
         <source>Home Web Page</source>
@@ -111,19 +111,19 @@
     </message>
     <message>
         <source>Business Phone</source>
-        <translation>勤務先 電話番号</translation>
+        <translation>勤務先 電話</translation>
     </message>
     <message>
         <source>Business Fax</source>
-        <translation>勤務先 ファックス番号</translation>
+        <translation>勤務先 ファックス</translation>
     </message>
     <message>
         <source>Business Mobile</source>
-        <translation>ビジネス用携帯番号</translation>
+        <translation>ビジネス用携帯電話</translation>
     </message>
     <message>
         <source>Business Pager</source>
-        <translation>ビジネス用ポケットベル</translation>
+        <translation>ビジネス用ポケベル</translation>
     </message>
     <message>
         <source>Profession</source>
@@ -167,15 +167,19 @@
     </message>
     <message>
         <source>Pronunciation</source>
-        <translation>ふりがな</translation>
+        <translation type="obsolete">ふりがな</translation>
     </message>
     <message>
         <source>Last Name Pronunciation</source>
-        <translation>姓のふりがな</translation>
+        <translation type="obsolete">姓のふりがな</translation>
     </message>
     <message>
         <source>Company Pronunciation</source>
-        <translation>社名のふりがな</translation>
+        <translation type="obsolete">社名のふりがな</translation>
+    </message>
+    <message>
+        <source>  Pronunciation</source>
+        <translation>ふりがな</translation>
     </message>
 </context>
 <context>
@@ -350,11 +354,11 @@
     </message>
     <message>
         <source>Started: </source>
-        <translation>開始日:</translation>
+        <translation>開始:</translation>
     </message>
     <message>
         <source>Completed: </source>
-        <translation>完了日:</translation>
+        <translation>完了:</translation>
     </message>
     <message>
         <source>Not yet started</source>
@@ -407,15 +411,15 @@
     </message>
     <message>
         <source>Home Phone: </source>
-        <translation>自宅電話番号:</translation>
+        <translation>自宅電話:</translation>
     </message>
     <message>
         <source>Home Fax: </source>
-        <translation>自宅ファクス番号:</translation>
+        <translation>自宅ファクス:</translation>
     </message>
     <message>
         <source>Home Mobile: </source>
-        <translation>個人用携帯番号:</translation>
+        <translation>個人用携帯電話:</translation>
     </message>
     <message>
         <source>Home Web Page: </source>
@@ -431,15 +435,15 @@
     </message>
     <message>
         <source>Business Phone: </source>
-        <translation>勤務先電話番号:</translation>
+        <translation>勤務先電話:</translation>
     </message>
     <message>
         <source>Business Fax: </source>
-        <translation>勤務先ファックス番号:</translation>
+        <translation>勤務先ファックス:</translation>
     </message>
     <message>
         <source>Business Mobile: </source>
-        <translation>ビジネス携帯番号:</translation>
+        <translation>ビジネス携帯電話:</translation>
     </message>
     <message>
         <source>Business Pager: </source>

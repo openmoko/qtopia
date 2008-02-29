@@ -250,6 +250,7 @@ TodoWindow::TodoWindow( QWidget *parent, const char *name, WFlags f) :
     QComboBox *cb = new QComboBox( listView );
     cb->insertItem( tr("Pending Tasks") );
     cb->insertItem( tr("All Tasks") );
+    cb->setSizePolicy( QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred) );
     cb->setCurrentItem( tasks.completedFilter() ? 0 : 1 );
     connect( cb, SIGNAL(activated(int)), this, SLOT(setShowCompleted(int)) );
     QWhatsThis::add( cb, tr("Show tasks with this completion status.") );

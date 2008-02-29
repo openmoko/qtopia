@@ -160,6 +160,18 @@ Quit anyway?</source>
         <comment>day, not date</comment>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Time zone: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Alarm</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>OK to all</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DateBookDayHeaderBase</name>
@@ -269,10 +281,6 @@ Quit anyway?</source>
 <context>
     <name>DateBookSettingsBase</name>
     <message>
-        <source>Preferences</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Start viewing events</source>
         <translation type="unfinished"></translation>
     </message>
@@ -294,6 +302,10 @@ Quit anyway?</source>
     </message>
     <message>
         <source> minutes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Settings</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -807,17 +819,6 @@ Quit anyway?</source>
     <message>
         <source>%1-%2</source>
         <comment>2 dates</comment>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>WorldTimeDialog</name>
-    <message>
-        <source>OK</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

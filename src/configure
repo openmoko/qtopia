@@ -13,7 +13,10 @@ QDESKTOP=
 X11=
 QCONFIGARG=
 ECONFIG="CONFIG+=embedded"
-QMAKE_LFLAGS="QMAKE_LFLAGS=-Wl,-rpath,$QPEDIR/lib"
+if [ `uname -s` != Darwin ]
+then
+	QMAKE_LFLAGS="QMAKE_LFLAGS=-Wl,-rpath,$QPEDIR/lib"
+fi
 SINGLE="CONFIG+=multiprocess"
 SINGLESINGLE="CONFIG+=singleprocess DEFINES+=SINGLE_APP"
 STATIC="CONFIG+=dynamic"
@@ -127,10 +130,10 @@ while [ -n "$1" ]; do
 	lupdateargs="$lupdateargs -noobsolete"
 	;;
    -qtopiadesktop)
-	# can only do this with both qmake and tmake
-	if [[ -z "$QMAKE_VERSION" || -z "$TMAKE_VERSION" ]]
+	# requires qmake
+	if [[ -z "$QMAKE_VERSION" ]]
 	then	
-	    echo "Both qmake and tmake are required to configure Qtopia Desktop."
+	    echo "qmake is required to configure Qtopia Desktop."
 	    exit -1;
 	fi
 	QDESKTOP="/qdesktop"
@@ -333,10 +336,13 @@ then
     echo "Makefiles will be regenerated."
 elif [ ! -f server/Makefile.in ]
 then
-    echo >&2 "You do not have \$TMAKEPATH/tmake.conf,
-	and you do not have pregenerated Makefile.in files.
-	Install tmake, or reinstall package to recover Makefile.in files."
-    exit 1
+    if [ -z "$QDESKTOP" ]
+    then
+        echo >&2 "You do not have \$TMAKEPATH/tmake.conf,
+	    and you do not have pregenerated Makefile.in files.
+	    Install tmake, or reinstall package to recover Makefile.in files."
+        exit 1
+    fi
 fi
 
 for a in $TOMAKE server; do
@@ -344,6 +350,7 @@ for a in $TOMAKE server; do
     M=$a/Makefile.in
     O=$a/Makefile.add
     f=`basename $a`
+    HAD_TO_USE_QMAKE=
 
     if [ -f $TMAKEPATH/tmake.conf ]
     then
@@ -418,29 +425,42 @@ for a in $TOMAKE server; do
 	    echo -n "."
 	    appname=`grep '^TARGET' $a/$f.pro | sed 's/^TARGET.*=//' | sed 's/ //g'`
 	fi
+    elif [ -n "$QDESKTOP" ]
+    then
+	( cd $a;
+		qmake DEFINES+=QTOPIA_DESKTOP \
+			INCLUDEPATH+='$(QPEDIR)/include' \
+			QMAKE_LFLAGS+='-L$(QPEDIR)/lib' \
+			CONFIG+=no_include_pwd \
+			CONFIG+=qdesktop;
+	)
+        echo -n "."
+        HAD_TO_USE_QMAKE=1
     fi
 
-    if [ -f $a/$f.pro ]
+    if [ -z "$HAD_TO_USE_QMAKE" ]
     then
-       DEFAULTTARGET=all
-    fi 
-
-
-    CONTROL=`ls $a/*.control 2> /dev/null`
-    if [ $? -eq 0 ]
-    then
-	MKPKG_Y="package"
-	CONTROL=`echo $CONTROL`
-    else
-	MKPKG_Y=""
-	CONTROL=""
-	if [ ! -f $a/$f.pro ]
+	if [ -f $a/$f.pro ]
 	then
-	    echo "Warning: $a/$f.pro not found, and no control file either."
-	fi
-    fi
+	   DEFAULTTARGET=all
+	fi 
 
-    cat > $N <<EOF
+
+	CONTROL=`ls $a/*.control 2> /dev/null`
+	if [ $? -eq 0 ]
+	then
+	    MKPKG_Y="package"
+	    CONTROL=`echo $CONTROL`
+	else
+	    MKPKG_Y=""
+	    CONTROL=""
+	    if [ ! -f $a/$f.pro ]
+	    then
+		echo "Warning: $a/$f.pro not found, and no control file either."
+	    fi
+	fi
+
+	cat > $N <<EOF
 #############################################################################
 # Automatically generated from $M
 # Build options from $1
@@ -452,220 +472,268 @@ CONTROL = $CONTROL
 
 EOF
 
-    SED=
-    PLATFORM_CFLAGS=
-    OBJECTS_DIR=".obj\\/$PLATFORM$QDESKTOP"
+	SED=
+	PLATFORM_CFLAGS=
+	OBJECTS_DIR=".obj\\/$PLATFORM$QDESKTOP"
 
-    if [ "$f" = "embeddedkonsole" ]
-    then
-	case $PLATFORM in
-	    *x86*|*generic*|*ipaq*)
-		SED="$SED /^LIBS.*=/s/\$/ -lutil/;"
-		PLATFORM_CFLAGS="-DHAVE_OPENPTY"
-	    ;; *)
-		SED=
-	esac
-    elif [ "$f" = "libffmpeg" ]
-    then
-	PLATFORM_CFLAGS="-w -O5"
-	# Patch our Makefile.in file with the platform specifics for the libffmpeg plugin library
-	case $PLATFORM
-	in
-	      *arm*|*ipaq*|*sharp*)
-		#SED="$SED /SOURCES.*=/s/=/= yuv2rgb_arm4l.S /;"
-		#SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/yuv2rgb_arm4l.o /;"
-		#echo -e "\n.obj/$PLATFORM$QDESKTOP/yuv2rgb_arm4l.o: yuv2rgb_arm4l.S\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-	    ;; *)
-	esac
-    elif [ "$f" = "libavformat" ]
-    then
-	# Patch our Makefile.in file with the platform specifics for the libavformat library
-	case $PLATFORM
-	in
-	      *x86*|*mmx*)
-		PLATFORM_CFLAGS="-w -O5 -DARCH_X86=1"
-	    ;;*arm*|*ipaq*|*sharp*)
-		PLATFORM_CFLAGS="-w -O5 -DARCH_ARMV4L=1"
-	    ;;*alpha*)
-		PLATFORM_CFLAGS="-w -O5 -DARCH_ALPHA=1"
-	    ;;*powerpc*|*ppc*|*altivec*)
-		PLATFORM_CFLAGS="-w -O5 -DARCH_POWERPC=1 -DWORDS_BIGENDIAN=1"
-	    ;;*ps2*|*mmi*)
-		PLATFORM_CFLAGS="-w -O5 -DARCH_MIPS=1 -DWORDS_BIGENDIAN=1"
-	    ;;*cassiopeia*|*mips*)
-		PLATFORM_CFLAGS="-w -O5 -DARCH_MIPS=1"
-	    ;; *)
-		PLATFORM_CFLAGS="-w -O5"
-	esac
-    elif [ "$f" = "libavcodec" ]
-    then
-	# Patch our Makefile.in file with the platform specifics for the libavcodec library
-	case $PLATFORM
-	in
-	      *x86*|*mmx*)
-		# For x86 try to compile the MMX optimized code (some alternative 3DNow and SSE optimization also appear to exist in libavcodec).
-		PLATFORM_CFLAGS="-w -O5 -DARCH_X86=1 -DHAVE_MMX=1"
-		SED="$SED /SOURCES.*=/s/=/= i386\\/fdct_mmx.c i386\\/cputest.c i386\\/dsputil_mmx.c i386\\/mpegvideo_mmx.c i386\\/idct_mmx.c i386\\/motion_est_mmx.c i386\\/simple_idct_mmx.c \ /;"
-		SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/fdct_mmx.o $OBJECTS_DIR\\/cputest.o $OBJECTS_DIR\\/dsputil_mmx.o $OBJECTS_DIR\\/mpegvideo_mmx.o $OBJECTS_DIR\\/idct_mmx.o $OBJECTS_DIR\\/motion_est_mmx.o $OBJECTS_DIR\\/simple_idct_mmx.o \ /;"
-		echo -e "\n.obj/$PLATFORM$QDESKTOP/fdct_mmx.o: i386/fdct_mmx.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-		echo -e "\n.obj/$PLATFORM$QDESKTOP/cputest.o: i386/cputest.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-		echo -e "\n.obj/$PLATFORM$QDESKTOP/dsputil_mmx.o: i386/dsputil_mmx.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-		echo -e "\n.obj/$PLATFORM$QDESKTOP/mpegvideo_mmx.o: i386/mpegvideo_mmx.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-		echo -e "\n.obj/$PLATFORM$QDESKTOP/idct_mmx.o: i386/idct_mmx.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-		echo -e "\n.obj/$PLATFORM$QDESKTOP/motion_est_mmx.o: i386/motion_est_mmx.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-		echo -e "\n.obj/$PLATFORM$QDESKTOP/simple_idct_mmx.o: i386/simple_idct_mmx.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-		#    %_sse.o : %_sse.c
-		#	    $(CC) $(CFLAGS) -msse -c -o $@ $< 
-		#    %_3dnow.o : %_3dnow.c
-		#	    $(CC) $(CFLAGS) -m3dnow -c -o $@ $< 
-	    ;;*arm*|*ipaq*|*sharp*)
-		# For StrongARM processors, compile these extra optimized source code files.
-		PLATFORM_CFLAGS="-w -O5 -DARCH_ARMV4L=1"
-		SED="$SED /SOURCES.*=/s/=/= armv4l\\/dsputil_arm.c armv4l\\/jrevdct_arm.S armv4l\\/mpegvideo_arm.c \ /;"
-		SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/dsputil_arm.o $OBJECTS_DIR\\/jrevdct_arm.o $OBJECTS_DIR\\/mpegvideo_arm.o \ /;"
-		echo -e "\n.obj/$PLATFORM$QDESKTOP/dsputil_arm.o: armv4l/dsputil_arm.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-		echo -e "\n.obj/$PLATFORM$QDESKTOP/jrevdct_arm.o: armv4l/jrevdct_arm.S\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-		echo -e "\n.obj/$PLATFORM$QDESKTOP/mpegvideo_arm.o: armv4l/mpegvideo_arm.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-	    ;;*alpha*)
-		# Ignore for now. Some alpha optimizations exist, but we have no hardware to test against :(
-		PLATFORM_CFLAGS="-w -O5 -DARCH_ALPHA=1"
-		echo There are alpha optimizations for libffmpeg, but they have not been configured.
-	    ;;*powerpc*|*ppc*)
-		# For PowerPC without AltiVec optimizations
-		PLATFORM_CFLAGS="-w -O5 -DARCH_POWERPC=1 -DWORDS_BIGENDIAN=1 -DHAVE_ALTIVEC=0"
-		SED="$SED /SOURCES.*=/s/=/= ppc\\/dsputil_ppc.c ppc\\/mpegvideo_ppc.c \ /;"
-		SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/dsputil_ppc.o $OBJECTS_DIR\\/mpegvideo_ppc.o \ /;"
-		echo -e "\n.obj/$PLATFORM$QDESKTOP/dsputil_ppc.o: ppc/dsputil_ppc.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-		echo -e "\n.obj/$PLATFORM$QDESKTOP/mpegvideo_ppc.o: ppc/mpegvideo_ppc.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-	    ;;*altivec*)
-		# For PowerPC try to compile the AltiVec optimizations
-		PLATFORM_CFLAGS="-w -O5 -DARCH_POWERPC=1 -DWORDS_BIGENDIAN=1 -faltivec -DHAVE_ALTIVEC=1"
-		SED="$SED /SOURCES.*=/s/=/= ppc\\/dsputil_altivec.c ppc\\/dsputil_ppc.c ppc\\/idct_altivec.c ppc\\/mpegvideo_altivec.c ppc\\/mpegvideo_ppc.c \ /;"
-		SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/dsputil_altivec.o $OBJECTS_DIR\\/dsputil_ppc.o $OBJECTS_DIR\\/idct_altivec.o $OBJECTS_DIR\\/mpegvideo_altivec.o $OBJECTS_DIR\\/mpegvideo_ppc.o \ /;"
-		echo -e "\n.obj/$PLATFORM$QDESKTOP/dsputil_altivec.o: ppc/dsputil_altivec.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-		echo -e "\n.obj/$PLATFORM$QDESKTOP/dsputil_ppc.o: ppc/dsputil_ppc.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-		echo -e "\n.obj/$PLATFORM$QDESKTOP/idct_altivec.o: ppc/idct_altivec.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-		echo -e "\n.obj/$PLATFORM$QDESKTOP/mpegvideo_altivec.o: ppc/mpegvideo_altivec.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-		echo -e "\n.obj/$PLATFORM$QDESKTOP/mpegvideo_ppc.o: ppc/mpegvideo_ppc.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-		echo Configuring AltiVec optimizations for PowerPC for the libffmpeg plugin.
-	    ;;*ps2*|*mmi*)
-		# For MMI optimizations
-		PLATFORM_CFLAGS="-w -O5 -DARCH_MIPS=1 -DWORDS_BIGENDIAN=1 -DHAVE_MMI=1"
-		SED="$SED /SOURCES.*=/s/=/= ps2\\/dsputil_mmi.c ps2\\/idct_mmi.c ps2\\/mpegvideo_mmi.c \ /;"
-		SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/dsputil_mmi.o $OBJECTS_DIR\\/idct_mmi.o $OBJECTS_DIR\\/mpegvideo_mmi.o \ /;"
-		echo -e "\n.obj/$PLATFORM$QDESKTOP/dsputil_mmi.o: ps2/dsputil_mmi.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-		echo -e "\n.obj/$PLATFORM$QDESKTOP/idct_mmi.o: ps2/idct_mmi.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-		echo -e "\n.obj/$PLATFORM$QDESKTOP/mpegvideo_mmi.o: ps2/mpegvideo_mmi.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
-		echo Configuring MMI optimizations for the libffmpeg plugin.
-	    ;;*cassiopeia*|*mips*)
-		# For MIPS set optimizations to O5
-		PLATFORM_CFLAGS="-w -O5 -DARCH_MIPS=1"
-		echo Configuring MIPS settings for the libffmpeg plugin.
-	    ;; *)
-		# For everything else:
-		PLATFORM_CFLAGS="-w -O5"
-	esac
-    elif [ "$f" = "libmpeg3" ]
-    then
-	# Patch our Makefile.in file with the platform specifics for the libmpeg3 library
-	# Use the C++ compiler to compile the .c files (because the fixed-point classes are C++ code)
-	SED='s/\$(CC)/\$(CXX)/;'
-	case $PLATFORM
-	in
-	    # For x86 turn on using floating point, compile mmx and css code
-	    *x86*)
-		# "-funroll-loops -fomit-frame-pointer -malign-loops=2 -malign-jumps=2 -malign-functions=2 -march=i486"
-		PLATFORM_CFLAGS="-DHAVE_MMX -DHAVE_CSS"
-		SED="$SED /SOURCES.*=/s/=/= video\\/mmxidct.S video\\/reconmmx.s\ /;"
-		SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/mmxidct.o $OBJECTS_DIR\\/reconmmx.o\ /;"
-	    # For generic turn on using floating point
-	    ;; *generic*)
-		PLATFORM_CFLAGS=""
-	    # For the ipaq use fixed point maths, don't compile the mmx or css code
-	    ;; *ipaq*)
-		PLATFORM_CFLAGS="-DUSE_FIXED_POINT"
-	    ;; *)
-		# For 'other platforms', turn off optimizations and use fixed point
-		PLATFORM_CFLAGS="-O -DUSE_FIXED_POINT"
-	esac
-    elif [ "$f" = "libmad" ]
-    then
-	# Patch our Makefile.in file with the platform specifics for the libmad library
-	case $PLATFORM
-	in
-	    # For x86 use intel optimizations
-	    *x86*)
-		PLATFORM_CFLAGS="-DFPM_INTEL"
-	    # For the ipaq use ARM asm optimizations
-	    ;; *ipaq*)
-		PLATFORM_CFLAGS="-DFPM_ARM"
-		SED="$SED /SOURCES.*=/s/=/= idmt_arm.S /;"
-		SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/idmt_arm.o /;"
-	    # For generic and other platforms use the C 64-bit implementation
-	    ;; *generic*)
-	    ;; *)
-		PLATFORM_CFLAGS="-DFPM_64BIT"
-	esac
-    elif [ "$X11" = x11 -a "$f" = library ]
-    then
-	        SED='s/\$(MOC) qpedecoration_qws.h -o/touch/'
-    elif [ "$X11" = x11 -a "$f" = taskbar ]
-    then
-	        SED='s/\$(MOC) ..\/calibrate\/calibrate.h -o/touch/'
-    fi
-    if [ -n "$PLATFORM_CFLAGS" ]
-    then
-	# Append the addition c-flags we have defined
-	SED="$SED /CFLAGS.*=.*/s/\$/ $PLATFORM_CFLAGS/;"
-	SED="$SED /CXXFLAGS.*=.*/s/\$/ $PLATFORM_CFLAGS/;"
-    fi
-    cat $TARGET >> $N
-
-    echo >> $N
-    echo "# Platform output directories" >> $N
-    echo MOC_DIR = .moc/$PLATFORM$QDESKTOP/ >> $N
-    echo OBJECTS_DIR = .obj/$PLATFORM$QDESKTOP/ >> $N
-    echo >> $N
-
-    mkdir -p $a/.moc/$PLATFORM$QDESKTOP >/dev/null 2>&1
-    mkdir -p $a/.obj/$PLATFORM$QDESKTOP >/dev/null 2>&1
-
-    if [ -n "$SED" ]
-    then
-	sed -e "$SED" $M >> $N
-    else
-	cat $M >> $N
-    fi
-
-    if [ -f $a/$f.pro ]
-    then
-	template=`grep '^TEMPLATE' $a/$f.pro | sed 's/^TEMPLATE.*=//' | sed 's/ //g'`
-
-	IPKGDEP="\$(DESTDIR)\$(TARGET)"
-	if [ "$template" = "lib" ]
+	if [ "$f" = "embeddedkonsole" ]
 	then
-	    IPKGDEP="\$(DESTDIR)\$(SYSCONF_LINK_TARGET)"
+	    case $PLATFORM in
+		*x86*|*generic*|*ipaq*)
+		    SED="$SED /^LIBS.*=/s/\$/ -lutil/;"
+		    PLATFORM_CFLAGS="-DHAVE_OPENPTY"
+		;; *)
+		    SED=
+	    esac
+	elif [ "$f" = "libffmpeg" ]
+	then
+	    PLATFORM_CFLAGS="-w -O5"
+	    # Patch our Makefile.in file with the platform specifics for the libffmpeg plugin library
+	    case $PLATFORM
+	    in
+		  *arm*|*ipaq*|*sharp*)
+		    #SED="$SED /SOURCES.*=/s/=/= yuv2rgb_arm4l.S /;"
+		    #SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/yuv2rgb_arm4l.o /;"
+		    #echo -e "\n.obj/$PLATFORM$QDESKTOP/yuv2rgb_arm4l.o: yuv2rgb_arm4l.S\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		;; *)
+	    esac
+	elif [ "$f" = "libavformat" ]
+	then
+	    # Patch our Makefile.in file with the platform specifics for the libavformat library
+	    case $PLATFORM
+	    in
+		  *x86*|*mmx*)
+		    PLATFORM_CFLAGS="-w -O5 -DARCH_X86=1"
+		;;*arm*|*ipaq*|*sharp*)
+		    PLATFORM_CFLAGS="-w -O5 -DARCH_ARMV4L=1"
+		;;*alpha*)
+		    PLATFORM_CFLAGS="-w -O5 -DARCH_ALPHA=1"
+		;;*powerpc*|*ppc*|*altivec*)
+		    PLATFORM_CFLAGS="-w -O5 -DARCH_POWERPC=1 -DWORDS_BIGENDIAN=1"
+		;;*ps2*|*mmi*)
+		    PLATFORM_CFLAGS="-w -O5 -DARCH_MIPS=1 -DWORDS_BIGENDIAN=1"
+		;;*cassiopeia*|*mips*)
+		    PLATFORM_CFLAGS="-w -O5 -DARCH_MIPS=1"
+		;; *)
+		    PLATFORM_CFLAGS="-w -O5"
+	    esac
+	elif [ "$f" = "libavcodec" ]
+	then
+	    # Patch our Makefile.in file with the platform specifics for the libavcodec library
+	    case $PLATFORM
+	    in
+		  *x86*|*mmx*)
+		    # For x86 try to compile the MMX optimized code (some alternative 3DNow and SSE optimization also appear to exist in libavcodec).
+		    PLATFORM_CFLAGS="-w -O5 -DARCH_X86=1 -DHAVE_MMX=1"
+		    SED="$SED /SOURCES.*=/s/=/= i386\\/fdct_mmx.c i386\\/cputest.c i386\\/dsputil_mmx.c i386\\/mpegvideo_mmx.c i386\\/idct_mmx.c i386\\/motion_est_mmx.c i386\\/simple_idct_mmx.c \ /;"
+		    SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/fdct_mmx.o $OBJECTS_DIR\\/cputest.o $OBJECTS_DIR\\/dsputil_mmx.o $OBJECTS_DIR\\/mpegvideo_mmx.o $OBJECTS_DIR\\/idct_mmx.o $OBJECTS_DIR\\/motion_est_mmx.o $OBJECTS_DIR\\/simple_idct_mmx.o \ /;"
+		    echo -e "\n.obj/$PLATFORM$QDESKTOP/fdct_mmx.o: i386/fdct_mmx.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		    echo -e "\n.obj/$PLATFORM$QDESKTOP/cputest.o: i386/cputest.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		    echo -e "\n.obj/$PLATFORM$QDESKTOP/dsputil_mmx.o: i386/dsputil_mmx.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		    echo -e "\n.obj/$PLATFORM$QDESKTOP/mpegvideo_mmx.o: i386/mpegvideo_mmx.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		    echo -e "\n.obj/$PLATFORM$QDESKTOP/idct_mmx.o: i386/idct_mmx.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		    echo -e "\n.obj/$PLATFORM$QDESKTOP/motion_est_mmx.o: i386/motion_est_mmx.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		    echo -e "\n.obj/$PLATFORM$QDESKTOP/simple_idct_mmx.o: i386/simple_idct_mmx.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		    #    %_sse.o : %_sse.c
+		    #	    $(CC) $(CFLAGS) -msse -c -o $@ $< 
+		    #    %_3dnow.o : %_3dnow.c
+		    #	    $(CC) $(CFLAGS) -m3dnow -c -o $@ $< 
+		;;*arm*|*ipaq*|*sharp*)
+		    # For StrongARM processors, compile these extra optimized source code files.
+		    PLATFORM_CFLAGS="-w -O5 -DARCH_ARMV4L=1"
+		    SED="$SED /SOURCES.*=/s/=/= armv4l\\/dsputil_arm.c armv4l\\/jrevdct_arm.S armv4l\\/mpegvideo_arm.c \ /;"
+		    SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/dsputil_arm.o $OBJECTS_DIR\\/jrevdct_arm.o $OBJECTS_DIR\\/mpegvideo_arm.o \ /;"
+		    echo -e "\n.obj/$PLATFORM$QDESKTOP/dsputil_arm.o: armv4l/dsputil_arm.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		    echo -e "\n.obj/$PLATFORM$QDESKTOP/jrevdct_arm.o: armv4l/jrevdct_arm.S\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		    echo -e "\n.obj/$PLATFORM$QDESKTOP/mpegvideo_arm.o: armv4l/mpegvideo_arm.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		;;*alpha*)
+		    # Ignore for now. Some alpha optimizations exist, but we have no hardware to test against :(
+		    PLATFORM_CFLAGS="-w -O5 -DARCH_ALPHA=1"
+		    echo There are alpha optimizations for libffmpeg, but they have not been configured.
+		;;*powerpc*|*ppc*)
+		    # For PowerPC without AltiVec optimizations
+		    PLATFORM_CFLAGS="-w -O5 -DARCH_POWERPC=1 -DWORDS_BIGENDIAN=1 -DHAVE_ALTIVEC=0"
+		    SED="$SED /SOURCES.*=/s/=/= ppc\\/dsputil_ppc.c ppc\\/mpegvideo_ppc.c \ /;"
+		    SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/dsputil_ppc.o $OBJECTS_DIR\\/mpegvideo_ppc.o \ /;"
+		    echo -e "\n.obj/$PLATFORM$QDESKTOP/dsputil_ppc.o: ppc/dsputil_ppc.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		    echo -e "\n.obj/$PLATFORM$QDESKTOP/mpegvideo_ppc.o: ppc/mpegvideo_ppc.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		;;*altivec*)
+		    # For PowerPC try to compile the AltiVec optimizations
+		    PLATFORM_CFLAGS="-w -O5 -DARCH_POWERPC=1 -DWORDS_BIGENDIAN=1 -faltivec -DHAVE_ALTIVEC=1"
+		    SED="$SED /SOURCES.*=/s/=/= ppc\\/dsputil_altivec.c ppc\\/dsputil_ppc.c ppc\\/idct_altivec.c ppc\\/mpegvideo_altivec.c ppc\\/mpegvideo_ppc.c \ /;"
+		    SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/dsputil_altivec.o $OBJECTS_DIR\\/dsputil_ppc.o $OBJECTS_DIR\\/idct_altivec.o $OBJECTS_DIR\\/mpegvideo_altivec.o $OBJECTS_DIR\\/mpegvideo_ppc.o \ /;"
+		    echo -e "\n.obj/$PLATFORM$QDESKTOP/dsputil_altivec.o: ppc/dsputil_altivec.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		    echo -e "\n.obj/$PLATFORM$QDESKTOP/dsputil_ppc.o: ppc/dsputil_ppc.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		    echo -e "\n.obj/$PLATFORM$QDESKTOP/idct_altivec.o: ppc/idct_altivec.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		    echo -e "\n.obj/$PLATFORM$QDESKTOP/mpegvideo_altivec.o: ppc/mpegvideo_altivec.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		    echo -e "\n.obj/$PLATFORM$QDESKTOP/mpegvideo_ppc.o: ppc/mpegvideo_ppc.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		    echo Configuring AltiVec optimizations for PowerPC for the libffmpeg plugin.
+		;;*ps2*|*mmi*)
+		    # For MMI optimizations
+		    PLATFORM_CFLAGS="-w -O5 -DARCH_MIPS=1 -DWORDS_BIGENDIAN=1 -DHAVE_MMI=1"
+		    SED="$SED /SOURCES.*=/s/=/= ps2\\/dsputil_mmi.c ps2\\/idct_mmi.c ps2\\/mpegvideo_mmi.c \ /;"
+		    SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/dsputil_mmi.o $OBJECTS_DIR\\/idct_mmi.o $OBJECTS_DIR\\/mpegvideo_mmi.o \ /;"
+		    echo -e "\n.obj/$PLATFORM$QDESKTOP/dsputil_mmi.o: ps2/dsputil_mmi.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		    echo -e "\n.obj/$PLATFORM$QDESKTOP/idct_mmi.o: ps2/idct_mmi.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		    echo -e "\n.obj/$PLATFORM$QDESKTOP/mpegvideo_mmi.o: ps2/mpegvideo_mmi.c\n\t\$(CC) -c \$(CFLAGS) \$(INCPATH) -o \$@ \$<\n" >> $N
+		    echo Configuring MMI optimizations for the libffmpeg plugin.
+		;;*cassiopeia*|*mips*)
+		    # For MIPS set optimizations to O5
+		    PLATFORM_CFLAGS="-w -O5 -DARCH_MIPS=1"
+		    echo Configuring MIPS settings for the libffmpeg plugin.
+		;; *)
+		    # For everything else:
+		    PLATFORM_CFLAGS="-w -O5"
+	    esac
+	elif [ "$f" = "libmpeg3" ]
+	then
+	    # Patch our Makefile.in file with the platform specifics for the libmpeg3 library
+	    # Use the C++ compiler to compile the .c files (because the fixed-point classes are C++ code)
+	    SED='s/\$(CC)/\$(CXX)/;'
+	    case $PLATFORM
+	    in
+		# For x86 turn on using floating point, compile mmx and css code
+		*x86*)
+		    # "-funroll-loops -fomit-frame-pointer -malign-loops=2 -malign-jumps=2 -malign-functions=2 -march=i486"
+		    PLATFORM_CFLAGS="-DHAVE_MMX -DHAVE_CSS"
+		    SED="$SED /SOURCES.*=/s/=/= video\\/mmxidct.S video\\/reconmmx.s\ /;"
+		    SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/mmxidct.o $OBJECTS_DIR\\/reconmmx.o\ /;"
+		# For generic turn on using floating point
+		;; *generic*)
+		    PLATFORM_CFLAGS=""
+		# For the ipaq use fixed point maths, don't compile the mmx or css code
+		;; *ipaq*)
+		    PLATFORM_CFLAGS="-DUSE_FIXED_POINT"
+		;; *)
+		    # For 'other platforms', turn off optimizations and use fixed point
+		    PLATFORM_CFLAGS="-O -DUSE_FIXED_POINT"
+	    esac
+	elif [ "$f" = "libmad" ]
+	then
+	    # Patch our Makefile.in file with the platform specifics for the libmad library
+	    case $PLATFORM
+	    in
+		# For x86 use intel optimizations
+		*x86*)
+		    PLATFORM_CFLAGS="-DFPM_INTEL"
+		# For the ipaq use ARM asm optimizations
+		;; *ipaq*)
+		    PLATFORM_CFLAGS="-DFPM_ARM"
+		    SED="$SED /SOURCES.*=/s/=/= idmt_arm.S /;"
+		    SED="$SED /OBJECTS.*=/s/=/= $OBJECTS_DIR\\/idmt_arm.o /;"
+		# For generic and other platforms use the C 64-bit implementation
+		;; *generic*)
+		;; *)
+		    PLATFORM_CFLAGS="-DFPM_64BIT"
+	    esac
+	elif [ "$X11" = x11 -a "$f" = library ]
+	then
+		    SED='s/\$(MOC) qpedecoration_qws.h -o/touch/'
+	elif [ "$X11" = x11 -a "$f" = taskbar ]
+	then
+		    SED='s/\$(MOC) ..\/calibrate\/calibrate.h -o/touch/'
 	fi
-    else
-	IPKGDEP=
-    fi
+	if [ -n "$PLATFORM_CFLAGS" ]
+	then
+	    # Append the addition c-flags we have defined
+	    SED="$SED /CFLAGS.*=.*/s/\$/ $PLATFORM_CFLAGS/;"
+	    SED="$SED /CXXFLAGS.*=.*/s/\$/ $PLATFORM_CFLAGS/;"
+	fi
+	cat $TARGET >> $N
 
-    cat >> $N <<EOF
+	echo >> $N
+	echo "# Platform output directories" >> $N
+	echo MOC_DIR = .moc/$PLATFORM$QDESKTOP/ >> $N
+	echo OBJECTS_DIR = .obj/$PLATFORM$QDESKTOP/ >> $N
+	echo >> $N
+
+	mkdir -p $a/.moc/$PLATFORM$QDESKTOP >/dev/null 2>&1
+	mkdir -p $a/.obj/$PLATFORM$QDESKTOP >/dev/null 2>&1
+
+	if [ -n "$SED" ]
+	then
+	    sed -e "$SED" $M >> $N
+	else
+	    cat $M >> $N
+	fi
+
+	TR=
+	if [ -f $a/$f.pro ]
+	then
+	    template=`grep '^TEMPLATE' $a/$f.pro | sed 's/^TEMPLATE.*=//' | sed 's/ //g'`
+
+	    IPKGDEP="\$(DESTDIR)\$(TARGET)"
+	    if [ "$template" = "lib" ]
+	    then
+		IPKGDEP="\$(DESTDIR)\$(SYSCONF_LINK_TARGET)"
+	    fi
+
+	    if grep -q 'TRANSLATION.*\.ts' $a/$f.pro
+	    then
+		TR=y
+	    fi
+	else
+	    IPKGDEP=
+	fi
+
+	if [ -n "$TR" ]
+	then
+	# Fun escaping...
+	    cat >> $N <<EOF
+
+lupdate-check:
+	@sed -e '/\$\$\$\$QTOPIA1DIR[^ ]*/ d' \\
+	    -e '/\$\$(.*/ d' \\
+	    -e 's/^static:.*//' \\
+	    <$f.pro >t\$\$\$\$.pro && \\
+	rm -rf t\$\$\$\$&& \\
+	mkdir t\$\$\$\$ && \\
+	cp -a *.ts t\$\$\$\$ && \\
+	chmod +w *.ts && \\
+	lupdate $lupdateargs t\$\$\$\$.pro && \\
+	rm t\$\$\$\$.pro && \\
+	for i in *.ts; \\
+	do \\
+	    if cmp -s \$\$i t\$\$\$\$/\$\$i; \\
+	    then \\
+		true; \\
+	    else \\
+		echo out-of-date \$\$i; \\
+	    fi; \\
+	    rm $\$i; \\
+	    mv t\$\$\$\$/\$\$i \$\$i; \\
+	done && \\
+	rmdir t\$\$\$\$
 
 lupdate:
-	sed -e '/\$\$\$\$QTOPIA1DIR[^ ]*/ d' \
-	    -e '/\$\$(.*/ d' \
-	    -e 's/^static:.*//' \
-	    <$f.pro >t\$\$\$\$.pro ;\
-	lupdate $lupdateargs t\$\$\$\$.pro ;\
+	sed -e '/\$\$\$\$QTOPIA1DIR[^ ]*/ d' \\
+	    -e '/\$\$(.*/ d' \\
+	    -e 's/^static:.*//' \\
+	    <$f.pro >t\$\$\$\$.pro && \\
+	lupdate $lupdateargs t\$\$\$\$.pro && \\
 	rm t\$\$\$\$.pro
-EOF
-
-    cat >> $N <<EOF
 
 lrelease:
 	lrelease $f.pro
 	\$(QPEDIR)/bin/qtopia-linstall $f.pro
+
+EOF
+	else
+	    cat >> $N <<EOF
+
+lupdate-check:
+	@true
+
+lupdate:
+	@true
+
+lrelease:
+	@echo "No TRANSLATIONS"
+
+EOF
+	fi
+
+	cat >> $N <<EOF
 
 ipkg: $IPKGDEP # among other things...
 	CTL="\$(CONTROL)"; for ctrl in \$\$CTL; do cd \$(QPEDIR)/ipkg; ../bin/mkipks -platform $DEVICE_ARCH \$(QPEDIR)/src/\$\$ctrl ; done
@@ -676,20 +744,20 @@ package: ipkg
 
 EOF
 
-    if [ -f $a/$f.pro ]
-    then
-	cat >> $N <<EOF
+	if [ -f $a/$f.pro ]
+	then
+	    cat >> $N <<EOF
 Makefile: $f.pro
 	cd \$(QPEDIR)/src; \
 	./configure $RECONF -make $a
 EOF
+	fi
     fi
 
     if [ -f "$O" ]
     then
 	cat >> $N $O
     fi
-
 done
 
 if [ -n "$QDESKTOP" ]

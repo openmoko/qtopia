@@ -13,7 +13,7 @@ SOURCES		= mainwindow.cpp \
 
 multiprocess:SOURCES+=main.cpp
 
-INTERFACES	= todoentry.ui
+INTERFACES	= taskdetail.ui
 
 TARGET		= todolist
 

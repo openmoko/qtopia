@@ -98,7 +98,20 @@
 #define QT_NO_COMPLEXTEXT
 
 // Features included directly in Qtopia
-#ifndef _WS_WIN32_
+#if !(defined (_OS_WIN32_) || defined (_WS_WIN32_))
 #define QT_NO_WIZARD_IMPL
+#endif
+
+// Features for Qtopia under Win32 SDK
+#if defined (_OS_WIN32_) || defined (_WS_WIN32_)
+#define QT_NO_PRINTER
+#define QT_NO_QWS_LINUXFB
+#define QT_NO_QWS_MACH64
+#define QT_NO_QWS_VOODOO3
+#define QT_NO_QWS_MATROX
+#define QT_NO_QWS_VNC
+#define QT_NO_QWS_TRANSFORMED
+#define QT_NO_QWS_VGA_16
+#define QT_NO_QWS_SVGALIB
 #endif
 #define QT_NO_QMEMORYFILE

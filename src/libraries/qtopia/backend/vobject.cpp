@@ -42,9 +42,7 @@ DFARS 252.227-7013 or 48 CFR 52.227-19, as applicable.
  * vobject, and convert a vobject into its textual representation.
  */
 
-#ifndef	 MWERKS
-#include <malloc.h>
-#endif
+#include <stdlib.h>
 
 #include <qtopia/config.h>
 #include "vobject_p.h"

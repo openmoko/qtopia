@@ -61,7 +61,7 @@ static const char  collationHack[] = {
 (char) 0x19, //C-Y
 (char) 0x1a, //C-Z
 (char) 0x1b, //C-[
-(char) 0x1c, //C-\ 
+(char) 0x1c, //C-backslash
 (char) 0x1d, //C-]
 (char) 0x1e, //C-^
 (char) 0x1f, //C-_
@@ -125,7 +125,7 @@ static const char  collationHack[] = {
 'Y', //Y
 'Z', //Z
 '[', //[
-'\\', //\ 
+'\\', //backslash
 ']', //]
 '^', //^
 '_', //_
@@ -189,7 +189,7 @@ static const char  collationHack[] = {
 (char) 0x99, //C-M-Y
 (char) 0x9a, //C-M-Z
 (char) 0x9b, //C-M-[
-(char) 0x9c, //C-M-\ 
+(char) 0x9c, //C-M-backslash
 (char) 0x9d, //C-M-]
 (char) 0x9e, //C-M-^
 (char) 0x9f, //C-M-_

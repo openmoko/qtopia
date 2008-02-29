@@ -370,6 +370,7 @@ PackageWizard::PackageWizard( QWidget* parent,  const char* name, WFlags fl )
     packagelist->setSelectionMode( QListView::Multi );
     packagelist->setVScrollBarMode(QScrollView::AlwaysOn);
     packagelist->installEventFilter(this);
+    packagelist->setShowSortIndicator(TRUE);
 
     ipkg_old = 0;
     readSettings();
@@ -378,7 +379,7 @@ PackageWizard::PackageWizard( QWidget* parent,  const char* name, WFlags fl )
     progress_confirm->hide();
     QPEApplication::setStylusOperation(packagelist->viewport(),QPEApplication::RightOnHold);
     //package_description = new DetailsPopup(this);
-    mode_share->hide(); // ### Not implemented yet
+    delete mode_share; // ### Not implemented yet
 
     setHelpEnabled(page_mode,FALSE);
     setHelpEnabled(page_servers,FALSE);
@@ -418,12 +419,14 @@ void PackageWizard::setAppropriates()
     setAppropriate( page_servers, !committed && mode_net->isChecked() );
     setAppropriate( page_packages, !committed && qcopDocument.isEmpty() );
     bool need_loc = !mode_rm->isChecked();
+    /*
     if ( mode_share->isChecked() ) {
 	// If sharing to a Document, need location
 	// ...
     }
+    */
     setAppropriate( page_location, !committed && need_loc );
-    setAppropriate( page_share, !committed && mode_share->isChecked() );
+    setAppropriate( page_share, FALSE ); // ( !committed && mode_share->isChecked() );
 }
 
 void PackageWizard::updatePackageNext()
@@ -435,6 +438,8 @@ void PackageWizard::updatePackageNext()
 	    any = TRUE;
     }
     setNextEnabled( page_packages, any );
+    PackageItem* cur = (PackageItem*)packagelist->currentItem();
+    details->setEnabled(!!cur);
 }
 
 void PackageWizard::showDetails()
@@ -449,6 +454,7 @@ void PackageWizard::showDetails()
 	det.description->setText(d);
 	det.showMaximized();
 	cur->setSelected(det.exec());
+	updatePackageNext();
     }
 }
 

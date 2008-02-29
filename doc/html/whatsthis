@@ -51,6 +51,7 @@ An internal class for implementing QDictIterator and QIntDictIterator. | QGDictI
 Application-global cache for pixmaps. | QPixmapCache
 Application-wide global functions. | Global
 Array of bits. | QBitArray
+Array of points. | QPointArray
 Assists with AppLnk input/output. | FileManager
 Asynchronous DNS lookups. | QDns
 Asynchronous consumer of data. | QDataSink
@@ -81,6 +82,7 @@ Controls for modifying an AppLnks properties. | DocPropertiesWidget
 Conversion to and from EUC-JP character sets. | QEucJpCodec
 Conversion to and from JIS character sets. | QJisCodec
 Conversion to and from Shift-JIS. | QSjisCodec
+Conversion to and from the Tamil TSCII encoding. | QTsciiCodec
 Corner-grip for resizing a top level window. | QSizeGrip
 Creates well-compressed PNG animations. | QPNGImagePacker
 Database that groups categories and maps ids to names. | Categories
@@ -252,6 +254,7 @@ Popup menu widget. | QPopupMenu
 Programmers with an easy to calculate and get information about dates, months and years. | Calendar
 Provide means to map a file info memory or refere to a block or memory by name. | QMemoryFile
 Provides conversion between text encodings. | QTextCodec
+Provides conversion to and from EUC-KR character sets. | QEucKrCodec
 Provides feedback on the progress of a slow operation. | QProgressDialog
 Provides for drag-and-drop of a list of URI references. | QUriDrag
 Provides information about available fonts. | QFontDatabase
@@ -330,6 +333,7 @@ There is one and only one QFontManager per Qt/Embedded application (qt_fontmanag
 This class is the base class of the QGfxRaster<depth> template and contains the non-depth-dependent code. The QGfxRaster class is used for drawing in software on raw framebuffers of varying depths and is subclassed by hardware drivers. It handles clipping and a movable origin in order to support subwindows. It is available <em>only</em> in Qt/Embedded. QWidget and QPixmap both return a QGfxRaster via their respective graphicsContext() methods, already initialised with the appropriate origin, framebuffer and clip region. QGfxRasterBase and its template subclasses should effectively be considered as one class; a raw QGfxRasterBase is never used, it's simply a handy place to put some of the functionality. | QGfxRasterBase
 This class is used to define operations for network protocols and return the state, arguments, etc. | QNetworkOperation
 This class provides communication capabilities between several clients. | QCopChannel
+This class provides conversion to and from the Chinese GBK encoding. | QGbkCodec
 This is an abstract base class for implementing tables. | QTableView
 This is the base class for network protocols which provides a common API for network protocols. | QNetworkProtocol
 This is the base class of all list box items. | QListBoxItem

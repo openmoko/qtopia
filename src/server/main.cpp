@@ -18,6 +18,9 @@
 **
 **********************************************************************/
 
+#ifndef QTOPIA_INTERNAL_FILEOPERATIONS
+#define QTOPIA_INTERNAL_FILEOPERATIONS
+#endif
 #include "desktop.h"
 #include "taskbar.h"
 #include "stabmon.h"
@@ -172,7 +175,7 @@ void initFloppy()
 
 static void cleanup()
 {
-    QDir dir( "/tmp", "qcop-msg-*" );
+    QDir dir( Global::tempDir(), "qcop-msg-*" );
 
     QStringList stale = dir.entryList();
     QStringList::Iterator it;
@@ -356,7 +359,10 @@ int initApplication( int argc, char ** argv )
 
     initKeyboard();
 
+    // Don't use first use under Windows
+#ifdef Q_OS_UNIX
     firstUse();
+#endif
 
     AlarmServer::initialize();
 

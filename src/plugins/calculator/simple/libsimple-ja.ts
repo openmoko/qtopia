@@ -1,0 +1,28 @@
+<!DOCTYPE TS><TS>
+<context>
+    <name>FormSimple</name>
+    <message>
+        <source>M+</source>
+        <translation>M+</translation>
+    </message>
+    <message>
+        <source>MC</source>
+        <translation>MC</translation>
+    </message>
+    <message>
+        <source>MR</source>
+        <translation>MR</translation>
+    </message>
+    <message>
+        <source>CE/C</source>
+        <translation>CE/C</translation>
+    </message>
+</context>
+<context>
+    <name>Simple</name>
+    <message>
+        <source>Simple</source>
+        <translation>普通の電卓</translation>
+    </message>
+</context>
+</TS>

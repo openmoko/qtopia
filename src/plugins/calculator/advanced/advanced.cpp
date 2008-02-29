@@ -346,6 +346,9 @@ void FormAdvanced::SquareClicked() {
 void FormAdvanced::PowClicked() {
     systemEngine->pushInstruction(new DoublePow());
 }
+void FormAdvanced::PiClicked() {
+    systemEngine->push(QString("3.14159265358979323846"));
+}
 void FormAdvanced::SquareRootClicked() {
     systemEngine->pushInstruction(new DoubleSquareRoot());
 }

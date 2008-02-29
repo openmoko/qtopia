@@ -342,7 +342,11 @@ AppearanceSettings::AppearanceSettings( QWidget* parent,  const char* name, WFla
     styleLoader = new PluginLoader( "styles" );
     wdIsPlugin = FALSE;
 
+#ifdef DEBUG
+    maxFontSize = 24;
+#else
     maxFontSize = qApp->desktop()->width() >= 640 ? 14 : 12;
+#endif
 
     populateStyleList();
     populateColorList();

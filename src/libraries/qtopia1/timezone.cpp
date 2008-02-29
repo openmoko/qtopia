@@ -20,6 +20,7 @@
 
 #include "timezone.h"
 #include <qfile.h>
+#include <qfileinfo.h>
 #include <qcstring.h>
 #include <qdatastream.h>
 #include <qasciidict.h>
@@ -86,7 +87,8 @@ public:
 	    setenv( "TZ", "GMT", TRUE );
 	    tzset();
 	    int secsSince1Jan1970UTC = (int) mktime( &brokenDown );
-	    setenv( "TZ", origTz, TRUE );
+	    if ( !origTz.isEmpty() )
+	        setenv( "TZ", origTz, TRUE );
 
 	    if ( secsSince1Jan1970UTC < -1 )
 		secsSince1Jan1970UTC = -1;
@@ -104,7 +106,11 @@ QCString TimeZonePrivate::zonePath()
 {
     if ( sZonePath.isNull() ) {
 #ifdef Q_OS_UNIX
+# ifdef Q_OS_MAC
+	sZonePath = QPEApplication::qpeDir() + "etc/zoneinfo/";
+# else
 	sZonePath = "/usr/share/zoneinfo/";
+# endif
 #else
 	sZonePath = QPEApplication::qpeDir() + "etc\\zoneinfo\\";
 	QDir zoneDir(sZonePath);
@@ -124,7 +130,11 @@ QCString TimeZonePrivate::zoneFile()
 {
     if ( sZoneFile.isNull() ) {
 #ifdef Q_OS_UNIX
+# ifdef Q_OS_MAC
+	sZoneFile = QPEApplication::qpeDir() + "etc/zoneinfo/zone.tab";
+# else
 	sZoneFile = "/usr/share/zoneinfo/zone.tab";
+# endif
 #else
 	sZoneFile = zonePath() + "zone.tab";
 #endif
@@ -335,6 +345,7 @@ TimeZoneData::TimeZoneData( const QCString & loc ) : mId( loc ), mDstRule( FALSE
 
     QByteArray data = f.readAll();
     f.close();
+    //qDebug("data size = %d; value='%s'", data.size(),data.data());
     if ( !data.size() ) {
 	qDebug("invalid data size = %d", data.size());
 	return;
@@ -346,14 +357,13 @@ TimeZoneData::TimeZoneData( const QCString & loc ) : mId( loc ), mDstRule( FALSE
     uint nbytes=4;
     rawMagic[4] = 0;
     ds.readRawBytes( rawMagic, nbytes );
-    if ( nbytes != 4 ) {
-	qDebug("magic failed");
-	return;
-    }
-
     QCString magic( rawMagic, nbytes+1 );
-    if ( magic != "TZif" ) {
-	qDebug("magic match failed");
+    if ( magic != "TZif"
+#ifdef Q_OS_MAC
+	&& ( magic[0] || magic[1] || magic[2] || magic[3] )
+#endif
+    ) {
+	//qDebug("magic match failed: '%s'",rawMagic);
 	return;
     }
 
@@ -698,6 +708,8 @@ void TimeZoneLocation::load( QAsciiDict< TimeZoneLocation > &store )
     QFile file( TimeZonePrivate::zoneFile() );
     if ( !file.open( IO_ReadOnly ) ) {
 	qWarning( "Unable to open %s", file.name().latin1() );
+	qWarning( "Timezone data must be installed at %s", TimeZonePrivate::zonePath().data() );
+	qApp->exit(1);
 	return;
     }
 
@@ -977,7 +989,28 @@ QCString lastLocRead;
 */
 TimeZone TimeZone::current()
 {
-    QCString cZone = getenv("TZ");
+    QCString cZone;
+    cZone = getenv("TZ");
+#ifdef Q_WS_MAC
+    TimeZone env(cZone);
+    if ( env.isValid() )
+	return env;
+
+    time_t now = time(0);
+    cZone = localtime(&now)->tm_zone;
+    TimeZone lt(cZone);
+    if ( lt.isValid() )
+	return lt;
+
+    QFileInfo el("/etc/localtime");
+    QString zone = el.readLink();
+    int z = zone.find("/zoneinfo/");
+    if ( z >= 0 ) {
+	TimeZone zi(zone.mid(z+10));
+	if ( zi.isValid() )
+	    return zi;
+    }
+#else
     QString currentLoc;
     if (lastLocRead.isEmpty() || lastZoneRead != cZone) {
 	Config lconfig("locale");
@@ -1020,6 +1053,7 @@ TimeZone TimeZone::current()
 	lconfig.writeEntry( "Timezone", currentLoc.data() );
 	return TimeZone (currentLoc);
     }
+#endif
 
     return TimeZone();
 }

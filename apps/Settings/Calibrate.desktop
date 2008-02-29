@@ -8,3 +8,4 @@ Name[de]=Kalibrieren
 Name[no]=Kalibrer
 Name[hu]=Kalibráció
 CanFastload=0
+Builtin=1

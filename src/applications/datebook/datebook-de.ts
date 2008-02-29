@@ -169,6 +169,18 @@ Trotzdem beenden?</translation>
         <comment>day, not date</comment>
         <translation type="unfinished">Tag</translation>
     </message>
+    <message>
+        <source>Time zone: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Alarm</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>OK to all</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>DateBookDayHeaderBase</name>
@@ -279,7 +291,7 @@ Trotzdem beenden?</translation>
     <name>DateBookSettingsBase</name>
     <message>
         <source>Preferences</source>
-        <translation>Einstellungen</translation>
+        <translation type="obsolete">Einstellungen</translation>
     </message>
     <message>
         <source>Start viewing events</source>
@@ -303,6 +315,10 @@ Trotzdem beenden?</translation>
     </message>
     <message>
         <source>Preset</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Settings</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -863,11 +879,7 @@ Trotzdem beenden?</translation>
     <name>WorldTimeDialog</name>
     <message>
         <source>OK</source>
-        <translation type="unfinished">OK</translation>
-    </message>
-    <message>
-        <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">OK</translation>
     </message>
 </context>
 </TS>

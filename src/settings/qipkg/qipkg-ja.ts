@@ -125,7 +125,7 @@
     </message>
     <message>
         <source>%1 more packages</source>
-        <translation>%1パッケージ</translation>
+        <translation>あと%1パッケージあります</translation>
     </message>
     <message>
         <source>Install</source>
@@ -158,6 +158,10 @@
     <message>
         <source>Error</source>
         <translation>エラー</translation>
+    </message>
+    <message>
+        <source>Trolltech Qtopia</source>
+        <translation>Trolltech Qtopia</translation>
     </message>
 </context>
 <context>

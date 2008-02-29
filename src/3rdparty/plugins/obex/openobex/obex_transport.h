@@ -69,7 +69,7 @@ gint obex_transport_write(obex_t *self, GNetBuf *msg);
 gint obex_transport_read(obex_t *self, gint count, guint8 *buf, gint buflen);
 
 
-#endif OBEX_TRANSPORT_H
+#endif /* OBEX_TRANSPORT_H */
 
 
 

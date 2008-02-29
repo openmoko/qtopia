@@ -14,3 +14,5 @@ unix:LIBS	+=-lqtopiacalc
 win32:LIBS	+=$(QPEDIR)/lib/qtopiacalc.lib
 
 DESTDIR = $(QPEDIR)/plugins/calculator
+
+TRANSLATIONS = libsimple-en_GB.ts libsimple-de.ts libsimple-ja.ts libsimple-no.ts

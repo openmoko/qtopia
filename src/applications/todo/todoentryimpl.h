@@ -21,9 +21,13 @@
 #ifndef NEWTASKDIALOG_H
 #define NEWTASKDIALOG_H
 
-#include "todoentry.h"
+#include "taskdetail.h"
 
 #include <qtopia/pim/task.h>
+
+#ifdef QTOPIA_DESKTOP
+#include <qtopia/categoryselect.h>
+#endif // QTOPIA_DESKTOP
 
 #include <qdatetime.h>
 #include <qpalette.h>
@@ -32,6 +36,40 @@
 class QLabel;
 class QTimer;
 class DateBookMonth;
+class QMultiLineEdit;
+
+
+#include <qvariant.h>
+#include <qwidget.h>
+class QVBoxLayout; 
+class QHBoxLayout; 
+class QGridLayout; 
+class QPushButton;
+class QTabWidget;
+
+class NewTaskDialogBase : public QWidget
+{ 
+    Q_OBJECT
+
+public:
+    NewTaskDialogBase( QWidget* parent = 0, const char* name = 0, WFlags fl = 0 );
+    ~NewTaskDialogBase();
+
+    QTabWidget* TabWidget;
+    QWidget* tab;
+#ifdef QTOPIA_DESKTOP
+    QPushButton* buttonCancel;
+    QPushButton* buttonOk;
+#endif // QTOPIA_DESKTOP
+
+protected slots:
+    virtual void dateChanged( const QString & );
+    virtual void dateChanged( int, int, int );
+
+protected:
+    QGridLayout* NewTaskDialogBaseLayout;
+    QGridLayout* tabLayout;
+};
 
 class NewTaskDialog : public QDialog
 {
@@ -76,6 +114,8 @@ private:
     bool buttonclose;
 
     NewTaskDialogBase *s;
+    NewTaskDetail *taskdetail;
+    QMultiLineEdit *inputNotes;
 };
 
 #endif // NEWTASKDIALOG_H

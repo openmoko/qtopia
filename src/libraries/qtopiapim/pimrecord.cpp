@@ -33,10 +33,12 @@
 #define INITGUID
 #include <objbase.h>
 #else
+#ifndef Q_WS_MAC
 extern "C" {
 #include <uuid/uuid.h>
 #define UUID_H_INCLUDED
 }
+#endif
 #endif
 
 static QMap<QString, int> *cidToKeyMapPtr = 0;
@@ -127,7 +129,7 @@ void PimRecord::setCategories( int id )
 
 void PimRecord::reassignCategoryId( int oldId, int newId )
 {
-    // workaround for qt bug which gives qWarnings on calling find on an empty array 
+    // workaround for qt bug which gives qWarnings on calling find on an empty array
     if ( !mCategories.count() )
 	return;
 
@@ -332,8 +334,10 @@ QMap<int,QString> PimRecord::fields() const
 
     // now need to do the keys for custom fields.
     QMap<int,QString>::Iterator it;
-    for( it = keyToCidMapPtr->begin(); it != keyToCidMapPtr->end(); ++it )
-	m.insert(it.key(), customField(it.data()));
+    for( it = keyToCidMapPtr->begin(); it != keyToCidMapPtr->end(); ++it ) {
+	if ( customMap.contains(it.data()) )
+	    m.insert(it.key(), customMap[ it.data() ] );
+    }
 
     return m;
 }

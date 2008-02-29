@@ -63,17 +63,6 @@ versuchen Sie es erneut.</translation>
         <translation>Neue Kategorie</translation>
     </message>
     <message>
-        <source>Duplicate categories</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>There is already a category named
-%1.
-Please choose another name, or delete
-the duplicate.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Removing Category</source>
         <translation type="unfinished"></translation>
     </message>
@@ -87,6 +76,21 @@ the duplicate.</source>
     </message>
     <message>
         <source>Deleting a global category will delete it from all applications. Any items in this category will become unfiled. Are you sure you want to do this?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Duplicate categories</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;qt&gt;There already exists a local category named &lt;b&gt;%1&lt;/b&gt; in another application.&lt;p&gt;Make that category a global group?&lt;/qt&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>There is already a category named
+%1.
+Please choose another name, or delete
+the duplicate.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -484,6 +488,13 @@ bevor Sie Daten eingeben.</translation>
     <message>
         <source>Show December in the selected year</source>
         <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>EditDlg</name>
+    <message>
+        <source>Edit Categories</source>
+        <translation type="unfinished">Kategorien bearbeiten</translation>
     </message>
 </context>
 <context>
@@ -1049,6 +1060,10 @@ versuchen Sie es erneut.</translation>
         <source>Internal Storage</source>
         <translation>Interner Speicher</translation>
     </message>
+    <message>
+        <source>RAM disk</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>TZCombo</name>
@@ -1059,7 +1074,6 @@ versuchen Sie es erneut.</translation>
 </context>
 <context>
     <name>TimeStringFormat</name>
-    <comment>month-date separator</comment>
     <message>
         <source>D</source>
         <translation type="obsolete">T</translation>
@@ -1126,6 +1140,16 @@ versuchen Sie es erneut.</translation>
         <source>day</source>
         <comment>in month</comment>
         <translation type="unfinished">Tag</translation>
+    </message>
+    <message>
+        <source></source>
+        <comment>day-date separator</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source></source>
+        <comment>month-date separator</comment>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source> </source>

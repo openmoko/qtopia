@@ -398,12 +398,15 @@ $(OBJECTS_DIR)/obex_transport.o: obex_transport.c \
 
 
 
+lupdate-check:
+	@true
+
 lupdate:
-	sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' 	    -e '/$$(.*/ d' 	    -e 's/^static:.*//' 	    <openobex.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
+	@true
 
 lrelease:
-	lrelease openobex.pro
-	$(QPEDIR)/bin/qtopia-linstall openobex.pro
+	@echo "No TRANSLATIONS"
+
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done

@@ -43,14 +43,14 @@ notqdesktop:CONFIG-=win32qdesktop
 
 win32qdesktop:LIBS += $(QPEDIR)/lib/qd-qpe.lib
 unixdesktop:LIBS += -lqd-qpe
-
+mac:LIBS += -lqd-qtopia
 
 TARGET		    = qpepim
 qdesktop:TARGET	    = qd-qpepim
 DESTDIR		    = $(QPEDIR)/lib$(PROJMAK)
 win32:DLLDESTDIR = $(QPEDIR)/bin
 # This is set by configure$(QPEDIR).
-VERSION         = 1.6.1
+VERSION         = 1.6.2
 
 win32:DEFINES += QTOPIAPIM_MAKEDLL QTOPIA_DLL
 

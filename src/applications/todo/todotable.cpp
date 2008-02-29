@@ -609,6 +609,7 @@ void TodoTable::fitHeadersToWidth()
 	w -= (style().scrollBarExtent().width());
     
     calcFieldSizes( 0, w );
+    refresh();
 }
 
 void TodoTable::calcFieldSizes(int oldSize, int size)

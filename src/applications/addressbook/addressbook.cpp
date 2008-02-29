@@ -281,6 +281,7 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, const char *name,
     contactMap[3]=PimContact::HomePhone;
     contactCombo->insertItem( PimContact::trFieldsMap()[PimContact::DefaultEmail] );
     contactMap[4]=PimContact::DefaultEmail;
+    contactCombo->setSizePolicy( QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred) );
     contactCombo->setCurrentItem(0);
     contactFilterSelected( 0 );
     QWhatsThis::add( contactCombo, tr("Show this contact information in the Contact column, if available.") );
@@ -405,6 +406,7 @@ void AddressbookWindow::reload()
     abList->reload();
     if ( centralWidget() == mView )
 	slotDetailView();
+    updateIcons();
 }
 
 void AddressbookWindow::resizeEvent( QResizeEvent *e )
@@ -799,24 +801,24 @@ void AddressbookWindow::appMessage(const QCString &msg, const QByteArray &data)
 	slotListView();
 #ifdef Q_WS_QWS
     } else if ( msg == "beamBusinessCard()" ) {
-
-
-	QString filename, description;
-	unlink( beamfile ); // delete if exists
+	if (contacts.hasPersonal()) {
+	    QString filename, description;
+	    unlink( beamfile ); // delete if exists
 #ifndef Q_OS_WIN32
-	mkdir("/tmp/obex/", 0755);
+	    mkdir("/tmp/obex/", 0755);
 #else
-	QDir d;
-	d.mkdir("/tmp/obex");
+	    QDir d;
+	    d.mkdir("/tmp/obex");
 #endif
-	filename = beamfile;
+	    filename = beamfile;
 
-	PimContact c((const PimContact &)contacts.personal());
-	PimContact::writeVCard( beamfile, c );
-	description = c.fullName();
-	Ir *ir = new Ir( this );
-	connect( ir, SIGNAL( done( Ir * ) ), this, SLOT( beamDone( Ir * ) ) );
-	ir->send( filename, description, "text/x-vCard" );
+	    PimContact c((const PimContact &)contacts.personal());
+	    PimContact::writeVCard( beamfile, c );
+	    description = c.fullName();
+	    Ir *ir = new Ir( this );
+	    connect( ir, SIGNAL( done( Ir * ) ), this, SLOT( beamDone( Ir * ) ) );
+	    ir->send( filename, description, "text/x-vCard" );
+	}
 #endif
     }
 }
@@ -878,9 +880,13 @@ void AddressbookWindow::markCurrentAsPersonal()
 
     if ( abList->selectedContacts().count() == 1 ) {
 	PimContact c = abList->currentEntry();
-	contacts.setAsPersonal(c.uid());
-	abList->reload();
-	updateIcons();
+	if (QMessageBox::warning(this, tr("Contacts"),
+		tr("<qt>Set \"%1\" as your Business Card?</qt>").arg( c.fileAs() ),
+		tr("Yes"), tr("No"), 0, 0, 1) == 0) {
+	    contacts.setAsPersonal(c.uid());
+	    abList->reload();
+	    updateIcons();
+	}
     }
 }
 

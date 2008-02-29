@@ -199,5 +199,9 @@ record in the selected format.</source>
         <source>Delete</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Storage Location</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>

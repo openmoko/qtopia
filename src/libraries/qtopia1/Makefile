@@ -130,7 +130,7 @@ UIC	=	$(SYSCONF_UIC)
 DESTDIR = $(QPEDIR)/lib$(PROJMAK)/
 VER_MAJ = 1
 VER_MIN = 6
-VER_PATCH = 1
+VER_PATCH = 2
 TARGET	= qtopia
 TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 
@@ -480,12 +480,42 @@ $(MOC_DIR)/qprocess_unix.moc: qprocess_unix.cpp
 
 
 
+lupdate-check:
+	@sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' \
+	    -e '/$$(.*/ d' \
+	    -e 's/^static:.*//' \
+	    <qtopia1.pro >t$$$$.pro && \
+	rm -rf t$$$$&& \
+	mkdir t$$$$ && \
+	cp -a *.ts t$$$$ && \
+	chmod +w *.ts && \
+	lupdate  t$$$$.pro && \
+	rm t$$$$.pro && \
+	for i in *.ts; \
+	do \
+	    if cmp -s $$i t$$$$/$$i; \
+	    then \
+		true; \
+	    else \
+		echo out-of-date $$i; \
+	    fi; \
+	    rm $$i; \
+	    mv t$$$$/$$i $$i; \
+	done && \
+	rmdir t$$$$
+
 lupdate:
-	sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' 	    -e '/$$(.*/ d' 	    -e 's/^static:.*//' 	    <qtopia1.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
+	sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' \
+	    -e '/$$(.*/ d' \
+	    -e 's/^static:.*//' \
+	    <qtopia1.pro >t$$$$.pro && \
+	lupdate  t$$$$.pro && \
+	rm t$$$$.pro
 
 lrelease:
 	lrelease qtopia1.pro
 	$(QPEDIR)/bin/qtopia-linstall qtopia1.pro
+
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done

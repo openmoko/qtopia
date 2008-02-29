@@ -112,15 +112,15 @@ void BatteryMeter::timerEvent( QTimerEvent * )
 	} else if ( charging && ps->batteryStatus() != PowerStatus::Charging ) {
 	    charging = false;
 	    chargeTimer->stop();
-	    if ( batteryView )
-		batteryView->updatePercent( percent );
 	}
 	repaint(FALSE);
 	if ( batteryView ) {
-	    if ( updateBatteryViewGeometry() )
+	    if ( updateBatteryViewGeometry() ) {
+		batteryView->updatePercent( percent, FALSE );
 		batteryView->update();
-	    else
-		batteryView->repaint();
+	    } else {
+		batteryView->updatePercent( percent );
+	    }
 	}
     }
 }

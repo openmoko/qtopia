@@ -280,7 +280,7 @@ void CanvasCard::updatePosition( double percent )
 	scaleY = 1.0;
     }
 
-    move( x, y );
+    move( int(x), int(y) );
     redraw();
 }
 

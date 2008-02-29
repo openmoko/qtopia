@@ -257,7 +257,7 @@ PrContact ContactXmlIO::contactForId( const QUuid &u, bool *ok ) const
  */
 bool ContactXmlIO::saveData()
 {
-    if ( !QFile::exists( dataFilename() ) )
+    if ( !QFile::exists( dataFilename() ) || QFile::exists( journalFilename() ) )
 	needsSave = TRUE;
 
     if (!needsSave)

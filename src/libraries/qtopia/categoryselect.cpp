@@ -67,17 +67,6 @@
   \ingroup qtopiaemb
 */
 
-static QString categoryEdittingFileName()
-{
-QString str = QDir::homeDirPath();
-#ifdef QTOPIA_DESKTOP
-    str += "/.palmtopcenter/";
-#endif
-
-    str +="/.cateditting";
-    return str;
-}
-
 class CategoryComboPrivate
 {
 public:
@@ -459,6 +448,7 @@ CategorySelect::~CategorySelect()
 
 class EditDlg : public QDialog
 {
+    Q_OBJECT
 public:
     EditDlg(QWidget *parent, const char *name, bool modal,
 	    const QArray<int> &vlRecs, const QString &appName, const QString &visibleName)
@@ -501,6 +491,8 @@ void CategorySelect::slotDialog()
     if ( editDlg.exec() ) {
 	d->mRec = editDlg.newCategories();
 	cmbCat->initCombo( d->mRec, mStrAppName, d->mVisibleName );
+	if ( d->usingAll )
+	    cmbCat->insertItem( tr( "All" ), cmbCat->count() );
     }
 }
 

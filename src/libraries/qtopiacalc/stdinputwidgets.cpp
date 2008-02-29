@@ -42,24 +42,28 @@ Type1BaseInputWidget::Type1BaseInputWidget( QWidget* parent,  const char* name, 
     PB7->setSizePolicy(mySizePolicy);
     PB7->setFont(big);
     PB7->setText( tr( "7" ) );
+    PB7->setFocusPolicy(TabFocus);
     Type1BaseInputWidgetLayout->addWidget( PB7, 0, 0 );
 
     PB4 = new QToolButton( this, "PB4" );
     PB4->setSizePolicy(mySizePolicy);
     PB4->setFont(big);
     PB4->setText( tr( "4" ) );
+    PB4->setFocusPolicy(TabFocus);
     Type1BaseInputWidgetLayout->addWidget( PB4, 1, 0 );
 
     PB1 = new QToolButton( this, "PB1" );
     PB1->setSizePolicy(mySizePolicy);
     PB1->setFont(big);
     PB1->setText( tr( "1" ) );
+    PB1->setFocusPolicy(TabFocus);
     Type1BaseInputWidgetLayout->addWidget( PB1, 2, 0 );
 
     PB0 = new QToolButton( this, "PB0" );
     PB0->setSizePolicy(mySizePolicy);
     PB0->setFont(big);
     PB0->setText( tr( "0" ) );
+    PB0->setFocusPolicy(TabFocus);
     Type1BaseInputWidgetLayout->addWidget( PB0, 3, 0 );
 
 
@@ -68,18 +72,21 @@ Type1BaseInputWidget::Type1BaseInputWidget( QWidget* parent,  const char* name, 
     PB8->setSizePolicy(mySizePolicy);
     PB8->setFont(big);
     PB8->setText( tr( "8" ) );
+    PB8->setFocusPolicy(TabFocus);
     Type1BaseInputWidgetLayout->addWidget( PB8, 0, 1 );
 
     PB5 = new QToolButton( this, "PB5" );
     PB5->setSizePolicy(mySizePolicy);
     PB5->setFont(big);
     PB5->setText( tr( "5" ) );
+    PB5->setFocusPolicy(TabFocus);
     Type1BaseInputWidgetLayout->addWidget( PB5, 1, 1 );
 
     PB2 = new QToolButton( this, "PB2" );
     PB2->setSizePolicy(mySizePolicy);
     PB2->setFont(big);
     PB2->setText( tr( "2" ) );
+    PB2->setFocusPolicy(TabFocus);
     Type1BaseInputWidgetLayout->addWidget( PB2, 2, 1 );
 
 
@@ -88,24 +95,28 @@ Type1BaseInputWidget::Type1BaseInputWidget( QWidget* parent,  const char* name, 
     PB9->setSizePolicy(mySizePolicy);
     PB9->setFont(big);
     PB9->setText( tr( "9" ) );
+    PB9->setFocusPolicy(TabFocus);
     Type1BaseInputWidgetLayout->addWidget( PB9, 0, 2 );
 
     PB6 = new QToolButton( this, "PB6" );
     PB6->setSizePolicy(mySizePolicy);
     PB6->setFont(big);
     PB6->setText( tr( "6" ) );
+    PB6->setFocusPolicy(TabFocus);
     Type1BaseInputWidgetLayout->addWidget( PB6, 1, 2 );
 
     PB3 = new QToolButton( this, "PB3" );
     PB3->setSizePolicy(mySizePolicy);
     PB3->setFont(big);
     PB3->setText( tr( "3" ) );
+    PB3->setFocusPolicy(TabFocus);
     Type1BaseInputWidgetLayout->addWidget( PB3, 2, 2 );
 
     PBEval = new QToolButton( this, "PBEval" );
     PBEval->setSizePolicy(mySizePolicy);
     PBEval->setFont(big);
     PBEval->setText( tr( "=" ) );
+    PBEval->setFocusPolicy(TabFocus);
     Type1BaseInputWidgetLayout->addWidget( PBEval, 3, 2 );
 
 
@@ -114,24 +125,28 @@ Type1BaseInputWidget::Type1BaseInputWidget( QWidget* parent,  const char* name, 
     PBPlus->setSizePolicy(mySizePolicy);
     PBPlus->setFont(big);
     PBPlus->setText( tr( "+" ) );
+    PBPlus->setFocusPolicy(TabFocus);
     Type1BaseInputWidgetLayout->addWidget( PBPlus, 0, 3 );
 
     PBMinus = new QToolButton( this, "PBMinus" );
     PBMinus->setSizePolicy(mySizePolicy);
     PBMinus->setFont(big);
     PBMinus->setText( tr( "-" ) );
+    PBMinus->setFocusPolicy(TabFocus);
     Type1BaseInputWidgetLayout->addWidget( PBMinus, 1, 3 );
 
     PBTimes = new QToolButton( this, "PBTimes" );
     PBTimes->setSizePolicy(mySizePolicy);
     PBTimes->setFont(big);
     PBTimes->setText( tr( "x" ) );
+    PBTimes->setFocusPolicy(TabFocus);
     Type1BaseInputWidgetLayout->addWidget( PBTimes, 2, 3 );
 
     PBDiv = new QToolButton( this, "PBDiv" );
     PBDiv->setSizePolicy(mySizePolicy);
     PBDiv->setFont(big);
     PBDiv->setText( tr( "/" ) );
+    PBDiv->setFocusPolicy(TabFocus);
     Type1BaseInputWidgetLayout->addWidget( PBDiv, 3, 3 );
 
     // Connect
@@ -213,14 +228,30 @@ Type1DecimalInputWidget::Type1DecimalInputWidget( QWidget* parent,  const char* 
 
     PBDecimal = new QToolButton( this, "PBDecimal" );
     PBDecimal->setSizePolicy(mySizePolicy);
-    PBDecimal->setFont(big);
     PBDecimal->setText( tr( "." ) );
+    PBDecimal->setFocusPolicy(TabFocus);
     Type1BaseInputWidgetLayout->addWidget( PBDecimal, 3, 1);
     connect (PBDecimal, SIGNAL(clicked()), this, SLOT(decimalClicked()));
     connect (PBPlus, SIGNAL(clicked()), this, SLOT(addClicked()));
     connect (PBMinus, SIGNAL(clicked()), this, SLOT(subClicked()));
     connect (PBTimes, SIGNAL(clicked()), this, SLOT(mulClicked()));
     connect (PBDiv, SIGNAL(clicked()), this, SLOT(divClicked()));
+
+    setTabOrder(PB7,PB8);
+    setTabOrder(PB8,PB9);
+    setTabOrder(PB9,PBPlus);
+    setTabOrder(PBPlus,PB4);
+    setTabOrder(PB4,PB5);
+    setTabOrder(PB5,PB6);
+    setTabOrder(PB6,PBMinus);
+    setTabOrder(PBMinus,PB1);
+    setTabOrder(PB1,PB2);
+    setTabOrder(PB2,PB3);
+    setTabOrder(PB3,PBTimes);
+    setTabOrder(PBTimes,PB0);
+    setTabOrder(PB0,PBDecimal);
+    setTabOrder(PBDecimal,PBEval);
+    setTabOrder(PBEval,PBDiv);
 }
 
 void Type1DecimalInputWidget::decimalClicked () {
@@ -247,6 +278,7 @@ Type1FractionInputWidget::Type1FractionInputWidget( QWidget* parent,  const char
     QSizePolicy mySizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred,FALSE);
     PBFraction = new QToolButton( this, "PBFraction" );
     PBFraction->setSizePolicy(mySizePolicy);
+    PBFraction->setFocusPolicy(TabFocus);
     QFont big(font());
     big.setPointSize(big.pointSize()*2);
     PBFraction->setFont(big);
@@ -257,6 +289,22 @@ Type1FractionInputWidget::Type1FractionInputWidget( QWidget* parent,  const char
     connect (PBMinus, SIGNAL(clicked()), this, SLOT(subClicked()));
     connect (PBTimes, SIGNAL(clicked()), this, SLOT(mulClicked()));
     connect (PBDiv, SIGNAL(clicked()), this, SLOT(divClicked()));
+
+    setTabOrder(PB7,PB8);
+    setTabOrder(PB8,PB9);
+    setTabOrder(PB9,PBPlus);
+    setTabOrder(PBPlus,PB4);
+    setTabOrder(PB4,PB5);
+    setTabOrder(PB5,PB6);
+    setTabOrder(PB6,PBMinus);
+    setTabOrder(PBMinus,PB1);
+    setTabOrder(PB1,PB2);
+    setTabOrder(PB2,PB3);
+    setTabOrder(PB3,PBTimes);
+    setTabOrder(PBTimes,PB0);
+    setTabOrder(PB0,PBFraction);
+    setTabOrder(PBFraction,PBEval);
+    setTabOrder(PBEval,PBDiv);
 }
 
 void Type1FractionInputWidget::fractionClicked () {
@@ -383,10 +431,12 @@ Type2InputWidget::Type2InputWidget( QWidget* parent,  const char* name, WFlags f
     PBDecimal = new QToolButton( this, "PBDecimal" );
     PBDecimal->setSizePolicy(mySizePolicy);
     PBDecimal->setText( tr( "." ) );
+    PBDecimal->setFocusPolicy(TabFocus);
 
     Type2InputWidgetLayout->addMultiCellWidget( PBDecimal, 4, 4, 1, 2 );
 
     PBDiv->setText(QChar(0xF7));
+
     connect (PBDecimal, SIGNAL(clicked()), this, SLOT(decimalClicked()));
     connect (PB0, SIGNAL(clicked()), this, SLOT(val0Clicked()));
     connect (PB1, SIGNAL(clicked()), this, SLOT(val1Clicked()));

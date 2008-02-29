@@ -315,7 +315,9 @@ int QIMPenEdit::lastCh = 0;
 
 QIMPenEdit::QIMPenEdit( QIMPenProfile *p, QWidget *parent,
                 const char *name )
-    : QWidget( parent, name ), profile(p), currentSet(0)
+    : QWidget( parent, name ),
+	    currentSet(0),
+	    profile(p)
 {
     currentChar = 0;
     currentCode = 0;

@@ -73,6 +73,7 @@ extern "C" {
 #define QT_SIGNAL_IGNORE        SIG_IGN
 
   QT_SIGNAL_RETTYPE qt_C_sigchldHnd(QT_SIGNAL_ARGS);
+  QT_SIGNAL_RETTYPE qt_C_sigpipeHnd(QT_SIGNAL_ARGS);
 
 #ifdef Q_C_CALLBACKS
 }
@@ -237,7 +238,13 @@ QProcessManager::QProcessManager()
 #if defined(QT_QPROCESS_DEBUG)
     qDebug( "QProcessManager: install a SIGPIPE handler (SIG_IGN)" );
 #endif
-    act.sa_handler = QT_SIGNAL_IGNORE;
+    /*
+	Using qt_C_sigpipeHnd rather than SIG_IGN is a workaround
+	for a strange problem where GNU tar (called by backuprestore)
+	would hang on filesystem-full. Strangely, the qt_C_sigpipeHnd
+	is never even called, yet this avoids the hang.
+    */
+    act.sa_handler = qt_C_sigpipeHnd;
     sigemptyset( &(act.sa_mask) );
     sigaddset( &(act.sa_mask), SIGPIPE );
     act.sa_flags = 0;
@@ -315,6 +322,7 @@ void QProcessManager::sigchldHnd( int fd )
     while ( proc != 0 ) {
 	removeProc = FALSE;
 	process = proc->process;
+	QProcess *process_exit_notify=0;
 	if ( process != 0 ) {
 	    if ( !process->isRunning() ) {
 #if defined(QT_QPROCESS_DEBUG)
@@ -337,7 +345,7 @@ void QProcessManager::sigchldHnd( int fd )
 		}
 
 		if ( process->notifyOnExit )
-		    emit process->processExited();
+		    process_exit_notify = process;
 
 		removeProc = TRUE;
 	    }
@@ -357,6 +365,8 @@ void QProcessManager::sigchldHnd( int fd )
 	} else {
 	    proc = procList->next();
 	}
+	if ( process_exit_notify )
+	    emit process_exit_notify->processExited();
     }
 }
 
@@ -457,6 +467,10 @@ QT_SIGNAL_RETTYPE qt_C_sigchldHnd( QT_SIGNAL_ARGS )
 
     char a = 1;
     ::write( QProcessPrivate::procManager->sigchldFd[0], &a, sizeof(a) );
+}
+QT_SIGNAL_RETTYPE qt_C_sigpipeHnd( QT_SIGNAL_ARGS )
+{
+    // Ignore (but in a way somehow different to SIG_IGN).
 }
 
 

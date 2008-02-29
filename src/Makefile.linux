@@ -239,7 +239,7 @@ showcomponents:
 	@echo $(APPS) $(COMPONENTS) $(LIBS)
 
 showdesktopcomponents:
-	@echo libraries/qtopia libraries/qtopia1 libraries/qtopiapim
+	@echo libraries/qtopia libraries/qtopia1 libraries/qtopiapim settings/worldtime
 
 showwin32desktopcomponents:
 	@echo libraries/qtopia libraries/qtopiapim
@@ -264,6 +264,17 @@ showlinksource:
 
 clean:
 	for dir in $(APPS) $(LIBS) $(COMPONENTS); do $(MAKE) -C $$dir $@ || exit 1; done
+
+# quiet, except for out-of-date files
+lupdate-check:
+	@for dir in $(APPS) $(LIBS) $(COMPONENTS); \
+	do \
+	    O=$$( $(MAKE) 2>&1 -C $$dir $@ | grep -v '^make.*directory'; ); \
+	    if [ -n "$$O" ]; \
+	    then \
+		$(MAKE) -C $$dir $@; \
+	    fi; \
+	done
 
 lupdate:
 	for dir in $(APPS) $(LIBS) $(COMPONENTS); do $(MAKE) -C $$dir $@ || exit 1; done

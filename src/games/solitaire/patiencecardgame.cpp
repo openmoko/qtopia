@@ -144,6 +144,11 @@ void PatienceCardGame::readConfig( Config& cfg )
 void PatienceCardGame::writeConfig( Config& cfg )
 {
     cfg.setGroup("GameState");
+    if ( haveWeWon() ) {
+	cfg.clearGroup();
+	return;
+    }
+    
     cfg.writeEntry("NumberOfTimesThroughDeck", numberOfTimesThroughDeck);
     int i;
     for ( i = 0; i < 7; i++ ) {

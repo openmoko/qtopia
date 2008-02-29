@@ -15,7 +15,7 @@
     </message>
     <message>
         <source>Security</source>
-        <translation>セキュリティ</translation>
+        <translation type="obsolete">セキュリティ</translation>
     </message>
 </context>
 <context>
@@ -65,7 +65,7 @@
     </message>
     <message>
         <source>&lt;p&gt;Would you like to force the application to exit?&lt;/p&gt;</source>
-        <translation>&lt;p&gt;アプリケーションを強制的に終了しますか?&lt;/p&gt;</translation>
+        <translation>&lt;p&gt;アプリケーションを強制終了しますか?&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
@@ -113,7 +113,7 @@ immediately.</source>
     <message>
         <source>Battery level is critical!
 Keep power off until power restored!</source>
-        <translation>バッテリー残量がありません!
+        <translation type="obsolete">バッテリー残量がありません!
 電力が回復するまで電源を切っておいてください!</translation>
     </message>
     <message>
@@ -137,6 +137,12 @@ Please charge the back-up battery.</source>
     <message>
         <source>Plugin Manager...</source>
         <translation>プラグインマネージャ...</translation>
+    </message>
+    <message>
+        <source>Battery level is critical!
+Please recharge the main battery!</source>
+        <translation type="unfinished">バッテリー残量がありません!
+電力が回復するまで電源を切っておいてください!</translation>
     </message>
 </context>
 <context>
@@ -313,15 +319,23 @@ These termination options are provided primarily for use while developing and te
     <name>SyncDialog</name>
     <message>
         <source>Syncing</source>
-        <translation>同期中</translation>
+        <translation type="obsolete">同期中</translation>
     </message>
     <message>
         <source>&lt;b&gt;Contacts&lt;/b&gt;</source>
-        <translation>&lt;b&gt;連絡先&lt;/b&gt;</translation>
+        <translation type="obsolete">&lt;b&gt;連絡先&lt;/b&gt;</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
-        <translation>(&amp;C)取り消し</translation>
+        <translation type="obsolete">(&amp;C)取り消し</translation>
+    </message>
+    <message>
+        <source>Abort</source>
+        <translation>中断</translation>
+    </message>
+    <message>
+        <source>Syncing:</source>
+        <translation>同期中:</translation>
     </message>
 </context>
 <context>

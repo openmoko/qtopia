@@ -214,12 +214,15 @@ $(OBJECTS_DIR)/main.o: main.cpp
 
 
 
+lupdate-check:
+	@true
+
 lupdate:
-	sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' 	    -e '/$$(.*/ d' 	    -e 's/^static:.*//' 	    <qcop.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
+	@true
 
 lrelease:
-	lrelease qcop.pro
-	$(QPEDIR)/bin/qtopia-linstall qcop.pro
+	@echo "No TRANSLATIONS"
+
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done

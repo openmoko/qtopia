@@ -105,14 +105,6 @@
                 <string>W: </string>
             </property>
             <property stdset="1">
-                <name>maxValue</name>
-                <number>52</number>
-            </property>
-            <property stdset="1">
-                <name>minValue</name>
-                <number>1</number>
-            </property>
-            <property stdset="1">
                 <name>value</name>
                 <number>1</number>
             </property>

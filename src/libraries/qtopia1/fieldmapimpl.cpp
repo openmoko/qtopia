@@ -110,7 +110,6 @@ void FieldMap::init()
 
     moveUpButton = new QPushButton( this, "moveUpButton" );
     moveUpButton->setText( tr( "Move up" ) );
-    QWhatsThis::add(  moveUpButton, tr( "" ) );
     Layout6->addWidget( moveUpButton );
 
     moveDownButton = new QPushButton( this, "moveDownButton" );

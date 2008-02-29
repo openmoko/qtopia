@@ -139,7 +139,7 @@ bool NetworkInterface::isActive( Config& cfg ) const
     f = fopen("/proc/net/dev", "r");
     if ( f ) {
 	char line[1024];
-	char devname[80];
+	char devname[1024];
 	while ( fgets( line, 1024, f ) ) {
 	    if ( sscanf(line," %[^:]:", devname)==1 )
 	    {
@@ -186,7 +186,7 @@ bool NetworkInterface::isAvailable( Config& cfg ) const
 
     if ( f ) {
 	char line[1024];
-	char devtype[80];
+	char devtype[1024];
 	while ( fgets( line, 1024, f ) ) {
 	    if ( sscanf(line,"%*d %s %*s", devtype )==1 )
 	    {

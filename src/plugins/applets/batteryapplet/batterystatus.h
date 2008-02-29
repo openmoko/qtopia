@@ -31,7 +31,7 @@ public:
     BatteryStatus( const PowerStatus *s, bool pop, QWidget *parent=0, WFlags f=0 );
     ~BatteryStatus();
 
-    void updatePercent( int );
+    void updatePercent( int, bool doRepaint = TRUE );
     QSize sizeHint() const;
 
 protected:

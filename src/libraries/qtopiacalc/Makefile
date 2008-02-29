@@ -130,7 +130,7 @@ UIC	=	$(SYSCONF_UIC)
 DESTDIR = $(QPEDIR)/lib$(PROJMAK)/
 VER_MAJ = 1
 VER_MIN = 6
-VER_PATCH = 1
+VER_PATCH = 2
 TARGET	= qtopiacalc
 TARGET1 = lib$(TARGET).so.$(VER_MAJ)
 
@@ -309,12 +309,15 @@ $(MOC_DIR)/moc_stdinputwidgets.cpp: stdinputwidgets.h
 
 
 
+lupdate-check:
+	@true
+
 lupdate:
-	sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' 	    -e '/$$(.*/ d' 	    -e 's/^static:.*//' 	    <qtopiacalc.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
+	@true
 
 lrelease:
-	lrelease qtopiacalc.pro
-	$(QPEDIR)/bin/qtopia-linstall qtopiacalc.pro
+	@echo "No TRANSLATIONS"
+
 
 ipkg: $(DESTDIR)$(SYSCONF_LINK_TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done

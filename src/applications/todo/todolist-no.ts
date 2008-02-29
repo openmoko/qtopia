@@ -1,27 +1,12 @@
 <!DOCTYPE TS><TS>
 <context>
-    <name>NewTaskDialog</name>
+    <name>NewTaskDetail</name>
     <message>
-        <source>Todo List</source>
+        <source>Form1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Discard changes?</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>NewTaskDialogBase</name>
-    <message>
-        <source>New Task</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Task</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Description</source>
+        <source>Completed Date</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -45,11 +30,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Priority</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Status</source>
+        <source>Due</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -73,11 +54,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source> %</source>
+        <source>Priority</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Completed Date</source>
+        <source>Status</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -89,11 +70,41 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Due</source>
+        <source>Description</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source> %</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>NewTaskDialog</name>
+    <message>
+        <source>Todo List</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Discard changes?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Task</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Notes</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>NewTaskDialogBase</name>
+    <message>
+        <source>New Task</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Task</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

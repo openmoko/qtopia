@@ -1,30 +1,13 @@
 <!DOCTYPE TS><TS>
 <context>
-    <name>NewTaskDialog</name>
+    <name>NewTaskDetail</name>
     <message>
-        <source>Todo List</source>
-        <translation>チェックリスト</translation>
+        <source>Form1</source>
+        <translation></translation>
     </message>
     <message>
-        <source>Qtopia Desktop ToDo List</source>
-        <translation type="obsolete">Qtopia Desktopのチェックリスト</translation>
-    </message>
-    <message>
-        <source>The start date must occur before the tasks due date.
-Please change the due date first.</source>
-        <translation type="obsolete">仕事の開始日は終了期限より前にしてください。
-終了期限を先に変更してください。</translation>
-    </message>
-    <message>
-        <source>Discard changes?</source>
-        <translation>変更を破棄しますか?</translation>
-    </message>
-</context>
-<context>
-    <name>NewTaskDialogBase</name>
-    <message>
-        <source>New Task</source>
-        <translation>新規の仕事</translation>
+        <source>Completed Date</source>
+        <translation>終了した日</translation>
     </message>
     <message>
         <source>1 - Very High</source>
@@ -47,20 +30,8 @@ Please change the due date first.</source>
         <translation>5 - 非常に低い</translation>
     </message>
     <message>
-        <source>Task</source>
-        <translation>仕事</translation>
-    </message>
-    <message>
-        <source>Description</source>
-        <translation>詳細</translation>
-    </message>
-    <message>
-        <source>Priority</source>
-        <translation>優先度</translation>
-    </message>
-    <message>
-        <source>Status</source>
-        <translation>状態</translation>
+        <source>Due</source>
+        <translation>期限</translation>
     </message>
     <message>
         <source>Not Started</source>
@@ -72,7 +43,7 @@ Please change the due date first.</source>
     </message>
     <message>
         <source>Completed</source>
-        <translation>終了</translation>
+        <translation></translation>
     </message>
     <message>
         <source>Waiting</source>
@@ -83,12 +54,12 @@ Please change the due date first.</source>
         <translation>延期</translation>
     </message>
     <message>
-        <source> %</source>
-        <translation>%</translation>
+        <source>Priority</source>
+        <translation>優先度</translation>
     </message>
     <message>
-        <source>Completed Date</source>
-        <translation>終了した日</translation>
+        <source>Status</source>
+        <translation>状態</translation>
     </message>
     <message>
         <source>Category</source>
@@ -99,12 +70,128 @@ Please change the due date first.</source>
         <translation>開始した日</translation>
     </message>
     <message>
-        <source>Due</source>
-        <translation>期限</translation>
+        <source>Description</source>
+        <translation>詳細</translation>
+    </message>
+    <message>
+        <source> %</source>
+        <translation>%</translation>
+    </message>
+</context>
+<context>
+    <name>NewTaskDialog</name>
+    <message>
+        <source>Todo List</source>
+        <translation>チェックリスト</translation>
+    </message>
+    <message>
+        <source>Qtopia Desktop ToDo List</source>
+        <translation type="obsolete">Qtopia Desktopのチェックリスト</translation>
+    </message>
+    <message>
+        <source>The start date must occur before the tasks due date.
+Please change the due date first.</source>
+        <translation type="obsolete">仕事の開始日は終了期限より前にしてください。
+終了期限を先に変更してください。</translation>
+    </message>
+    <message>
+        <source>Discard changes?</source>
+        <translation>変更を破棄しますか?</translation>
+    </message>
+    <message>
+        <source>Task</source>
+        <translation>仕事</translation>
     </message>
     <message>
         <source>Notes</source>
         <translation>メモ</translation>
+    </message>
+</context>
+<context>
+    <name>NewTaskDialogBase</name>
+    <message>
+        <source>New Task</source>
+        <translation>新規の仕事</translation>
+    </message>
+    <message>
+        <source>1 - Very High</source>
+        <translation type="obsolete">1 - 緊急</translation>
+    </message>
+    <message>
+        <source>2 - High</source>
+        <translation type="obsolete">2 - 高</translation>
+    </message>
+    <message>
+        <source>3 - Normal</source>
+        <translation type="obsolete">3 - 標準</translation>
+    </message>
+    <message>
+        <source>4 - Low</source>
+        <translation type="obsolete">4 - 低</translation>
+    </message>
+    <message>
+        <source>5 - Very Low</source>
+        <translation type="obsolete">5 - 非常に低い</translation>
+    </message>
+    <message>
+        <source>Task</source>
+        <translation>仕事</translation>
+    </message>
+    <message>
+        <source>Description</source>
+        <translation type="obsolete">詳細</translation>
+    </message>
+    <message>
+        <source>Priority</source>
+        <translation type="obsolete">優先度</translation>
+    </message>
+    <message>
+        <source>Status</source>
+        <translation type="obsolete">状態</translation>
+    </message>
+    <message>
+        <source>Not Started</source>
+        <translation type="obsolete">未開始</translation>
+    </message>
+    <message>
+        <source>In Progress</source>
+        <translation type="obsolete">作業中</translation>
+    </message>
+    <message>
+        <source>Completed</source>
+        <translation type="obsolete">終了</translation>
+    </message>
+    <message>
+        <source>Waiting</source>
+        <translation type="obsolete">待機中</translation>
+    </message>
+    <message>
+        <source>Deferred</source>
+        <translation type="obsolete">延期</translation>
+    </message>
+    <message>
+        <source> %</source>
+        <translation type="obsolete">%</translation>
+    </message>
+    <message>
+        <source>Completed Date</source>
+        <translation type="obsolete">終了した日</translation>
+    </message>
+    <message>
+        <source>Category</source>
+        <translation type="obsolete">カテゴリ</translation>
+    </message>
+    <message>
+        <source>Started Date</source>
+        <translation type="obsolete">開始した日</translation>
+    </message>
+    <message>
+        <source>Due</source>
+        <translation type="obsolete">期限</translation>
+    </message>
+    <message>
+        <source>Notes</source>
+        <translation type="obsolete">メモ</translation>
     </message>
     <message>
         <source>Cancel</source>

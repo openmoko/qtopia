@@ -68,5 +68,9 @@
         <source>Inactive Plugins</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Start automatically every day.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 </TS>

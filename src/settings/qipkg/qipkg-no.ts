@@ -62,6 +62,10 @@
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Trolltech Qtopia</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>PackageWizardBase</name>

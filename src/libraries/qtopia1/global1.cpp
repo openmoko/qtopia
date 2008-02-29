@@ -32,6 +32,8 @@
 
 #if defined(Q_WS_WIN32)
 #include <objbase.h>
+#elif defined(Q_WS_MAC)
+#include <CoreFoundation/CoreFoundation.h>
 #else
 extern "C" {
 #include <uuid/uuid.h>
@@ -167,18 +169,27 @@ QString Global::journalFileName(const QString &filename)
 
 QUuid Global::generateUuid()
 {
+#ifdef Q_OS_WIN32
     uuid_t uuid;
-#ifndef Q_OS_WIN32
+    if (UuidCreate(&uuid) == RPC_S_OK)
+	return QUuid(uuid);
+    else
+	return QUuid();
+#elif defined(Q_WS_MAC)
+    CFUUIDRef uuidr;
+    uuidr = CFUUIDCreate(NULL);
+    CFUUIDBytes uuid = CFUUIDGetUUIDBytes(uuidr);
+    QUuid id;
+    memcpy(&id, &uuid, sizeof(QUuid) );
+    free((char*)uuidr);
+    return id;
+#else
+    uuid_t uuid;
     ::uuid_generate( uuid );
 
     QUuid id;
     memcpy(&id, &uuid, sizeof(QUuid) );
     return id;
-#else
-    if (UuidCreate(&uuid) == RPC_S_OK)
-	return QUuid(uuid);
-    else
-	return QUuid();
 #endif
 }
 

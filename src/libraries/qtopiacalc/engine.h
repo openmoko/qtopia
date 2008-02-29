@@ -34,7 +34,7 @@
 class iBraceOpen;
 enum State { sStart, sAppend, sError };
 enum Error { eError, eOutOfRange, eDivZero, eNotSolvable, eNonPositive,
-    eNonInteger,eNotANumber,eInf,eNoDataFactory };
+    eNonInteger,eNotANumber,eInf,eNoDataFactory,eNegInf };
 
 class QTOPIA_EXPORT Engine {
 public:
@@ -54,6 +54,7 @@ public:
     void softReset(bool = true);
     void hardReset();
     void pushChar(char);
+    void push(QString);
     void delChar();
     void memoryRecall();
     void memorySave();

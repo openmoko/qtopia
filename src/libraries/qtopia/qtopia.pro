@@ -138,6 +138,7 @@ INCLUDEPATH += $(QPEDIR)/include
 win32:INCLUDEPATH += $(QPEDIR)/src/server
 dynamic:unix:LIBS	+= -ldl
 unix:LIBS	+= -lcrypt -lm
+mac:LIBS	-= -lcrypt
 win32:LIBS	+= rpcrt4.lib
 
 INTERFACES += passwordbase_p.ui \

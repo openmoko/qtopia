@@ -3,55 +3,55 @@
     <name>LibFFMpegPlugin</name>
     <message>
         <source>Error: Could not open file, File: </source>
-        <translation type="unfinished"></translation>
+        <translation>エラー: ファイルを開けません、ファイル:</translation>
     </message>
     <message>
         <source>Play Time: </source>
-        <translation type="unfinished"></translation>
+        <translation>再生時間:</translation>
     </message>
     <message>
         <source>Audio Tracks: 1,</source>
-        <translation type="unfinished"></translation>
+        <translation>オーディオトラック: 1、</translation>
     </message>
     <message>
         <source>Audio Format: </source>
-        <translation type="unfinished"></translation>
+        <translation>オーディオ形式:</translation>
     </message>
     <message>
         <source>Audio Bit Rate: </source>
-        <translation type="unfinished"></translation>
+        <translation>オーディオビットレート:</translation>
     </message>
     <message>
         <source>Audio Channels: </source>
-        <translation type="unfinished"></translation>
+        <translation>オーディオチャンネル:</translation>
     </message>
     <message>
         <source>Audio Frequency: </source>
-        <translation type="unfinished"></translation>
+        <translation>オーディオ周波数:</translation>
     </message>
     <message>
         <source>Video Tracks: 1,</source>
-        <translation type="unfinished"></translation>
+        <translation>ビデオトラック: 1、</translation>
     </message>
     <message>
         <source>Video Format: </source>
-        <translation type="unfinished"></translation>
+        <translation>ビデオ形式:</translation>
     </message>
     <message>
         <source>Video Bit Rate: </source>
-        <translation type="unfinished"></translation>
+        <translation>ビデオビットレート:</translation>
     </message>
     <message>
         <source>Video Width: </source>
-        <translation type="unfinished"></translation>
+        <translation>ビデオ幅:</translation>
     </message>
     <message>
         <source>Video Height: </source>
-        <translation type="unfinished"></translation>
+        <translation>ビデオ高さ:</translation>
     </message>
     <message>
         <source>Error: Could not open url, URL: </source>
-        <translation type="unfinished"></translation>
+        <translation>エラー: urlを開けません、URL:</translation>
     </message>
 </context>
 </TS>

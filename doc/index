@@ -1,3 +1,4 @@
+"3rd Party Licenses used in Qt" 3rdparty.html
 "Accessory" accessory.html
 "Accessory::Accessory" accessory.html#Accessory
 "Accessory::activated" accessory.html#activated
@@ -181,19 +182,6 @@
 "Config::writeEntry" config.html#writeEntry
 "Config::writeEntryCrypt" config.html#writeEntryCrypt
 "Config::~Config" config.html#~Config
-"Database::Database" database.html#Database
-"Database::defaultView" database.html#defaultView
-"Database::insert" database.html#insert
-"Database::name" database.html#name
-"Database::remove" database.html#remove
-"Database::~Database" database.html#~Database
-"DatabaseDefaultView::DatabaseDefaultView" databasedefaultview.html#DatabaseDefaultView
-"DatabaseView::DatabaseView" databaseview.html#DatabaseView
-"DatabaseView::count" databaseview.html#count
-"DatabaseView::countAll" databaseview.html#countAll
-"DatabaseView::find" databaseview.html#find
-"DatabaseView::insert" databaseview.html#insert
-"DatabaseView::remove" databaseview.html#remove
 "DateBookAccess" datebookaccess.html
 "DateBookAccess::DateBookAccess" datebookaccess.html#DateBookAccess
 "DateBookAccess::addEvent" datebookaccess.html#addEvent
@@ -1040,11 +1028,14 @@
 "" pluginintro.html
 "" qcop.html
 "" qtopiaporting.html
+"" release-1.6.0.html
 "" release-1.6.1.html
+"" release-1.6.2.html
 "" release-1.6beta2.html
 "" release-1.6beta3.html
 "" release-1.6beta4.html
 "" release-1.6beta5.html
+"" release-index.html
 "" services.html
 "" servicesapi.html
 "" start.html

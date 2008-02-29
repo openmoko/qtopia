@@ -56,27 +56,27 @@
     <name>StorageInfo</name>
     <message>
         <source>CF Card</source>
-        <translation>CFカード</translation>
+        <translation type="obsolete">CFカード</translation>
     </message>
     <message>
         <source>Hard Disk</source>
-        <translation>ハードディスク</translation>
+        <translation type="obsolete">ハードディスク</translation>
     </message>
     <message>
         <source>SD Card</source>
-        <translation> SDカード</translation>
+        <translation type="obsolete"> SDカード</translation>
     </message>
     <message>
         <source>SCSI Hard Disk</source>
-        <translation>SCSIハードディスク</translation>
+        <translation type="obsolete">SCSIハードディスク</translation>
     </message>
     <message>
         <source>Internal Storage</source>
-        <translation>内蔵ストレージ</translation>
+        <translation type="obsolete">内蔵ストレージ</translation>
     </message>
     <message>
         <source>RAM disk</source>
-        <translation>RAMディスク</translation>
+        <translation type="obsolete">RAMディスク</translation>
     </message>
 </context>
 <context>
@@ -119,6 +119,11 @@
     <message>
         <source>Built on: </source>
         <translation>構築日:</translation>
+    </message>
+    <message>
+        <source>Copyright &amp;copy; %1 %2</source>
+        <comment>year, company</comment>
+        <translation>著作権 &amp;copy; %1 %2</translation>
     </message>
 </context>
 </TS>

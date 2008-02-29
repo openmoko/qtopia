@@ -44,6 +44,68 @@
 #include <qscrollview.h>
 #include <qlayout.h>
 
+/* 
+ *  Constructs a NewTaskDialogBase which is a child of 'parent', with the 
+ *  name 'name' and widget flags set to 'f' 
+ */
+NewTaskDialogBase::NewTaskDialogBase( QWidget* parent,  const char* name, WFlags fl )
+    : QWidget( parent, name, fl )
+{
+    if ( !name )
+	setName( "NewTaskDialogBase" );
+    resize( 273, 300 ); 
+    setCaption( tr( "New Task" ) );
+    NewTaskDialogBaseLayout = new QGridLayout( this ); 
+    NewTaskDialogBaseLayout->setSpacing( 3 );
+    NewTaskDialogBaseLayout->setMargin( 0 );
+
+    TabWidget = new QTabWidget( this, "TabWidget" );
+
+    tab = new QWidget( TabWidget, "tab" );
+    tabLayout = new QGridLayout( tab ); 
+    tabLayout->setSpacing( 3 );
+    tabLayout->setMargin( 3 );
+    TabWidget->insertTab( tab, tr( "Task" ) );
+
+    NewTaskDialogBaseLayout->addMultiCellWidget( TabWidget, 0, 0, 0, 2 );
+
+    //
+    // QtopiaDesktop uses cancel and ok buttons for this dialog.
+    //
+#ifdef QTOPIA_DESKTOP
+    buttonCancel = new QPushButton( this, "buttonCancel" );
+    buttonCancel->setText( tr( "Cancel" ) );
+
+    NewTaskDialogBaseLayout->addWidget( buttonCancel, 1, 2 );
+
+    buttonOk = new QPushButton( this, "buttonOk" );
+    buttonOk->setText( tr( "OK" ) );
+
+    NewTaskDialogBaseLayout->addWidget( buttonOk, 1, 1 );
+    QSpacerItem* spacer = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
+    NewTaskDialogBaseLayout->addItem( spacer, 1, 0 );
+#endif // QTOPIA_DESKTOP
+
+    // signals and slots connections
+}
+
+/*  
+ *  Destroys the object and frees any allocated resources
+ */
+NewTaskDialogBase::~NewTaskDialogBase()
+{
+    // no need to delete child widgets, Qt does it all for us
+}
+
+void NewTaskDialogBase::dateChanged( const QString & )
+{
+    qWarning( "NewTaskDialogBase::dateChanged( const QString & ): Not implemented yet!" );
+}
+
+void NewTaskDialogBase::dateChanged( int, int, int )
+{
+    qWarning( "NewTaskDialogBase::dateChanged( int, int, int ): Not implemented yet!" );
+}
 
 NewTaskDialog::NewTaskDialog( const PimTask& task, QWidget *parent,
 			      const char *name, bool modal, WFlags fl )
@@ -54,29 +116,29 @@ NewTaskDialog::NewTaskDialog( const PimTask& task, QWidget *parent,
 
     todo.setCategories( task.categories() );
 
-    s->inputDescription->setText( task.description() );
-    s->comboPriority->setCurrentItem( task.priority() - 1 );
+    taskdetail->inputDescription->setText( task.description() );
+    taskdetail->comboPriority->setCurrentItem( task.priority() - 1 );
     if ( task.isCompleted() )
-	s->comboStatus->setCurrentItem( 2 );
+	taskdetail->comboStatus->setCurrentItem( 2 );
     else
-	s->comboStatus->setCurrentItem( task.status() );
+	taskdetail->comboStatus->setCurrentItem( task.status() );
 
-    s->spinComplete->setValue( task.percentCompleted() );
+    taskdetail->spinComplete->setValue( task.percentCompleted() );
 
-    s->checkDue->setChecked( task.hasDueDate() );
+    taskdetail->checkDue->setChecked( task.hasDueDate() );
     QDate date = task.dueDate();
     if ( task.hasDueDate() )
-	s->buttonDue->setDate( date );
+	taskdetail->buttonDue->setDate( date );
 
     date = task.startedDate();
     if ( !date.isNull() )
-	s->buttonStart->setDate( date );
+	taskdetail->buttonStart->setDate( date );
 
     date = task.completedDate();
     if ( !date.isNull() )
-	s->buttonEnd->setDate( date );
+	taskdetail->buttonEnd->setDate( date );
 
-    s->inputNotes->setText( task.notes() );
+    inputNotes->setText( task.notes() );
 
     // set up enabled/disabled logic
     dueButtonToggled();
@@ -110,85 +172,96 @@ NewTaskDialog::NewTaskDialog( int id, QWidget* parent,  const char* name, bool m
 void NewTaskDialog::init()
 {
     buttonclose = FALSE;
+
+    s = new NewTaskDialogBase(this);
+
+    s->TabWidget->setCurrentPage(s->TabWidget->currentPageIndex());
+    while (s->TabWidget->currentPage()) {
+	s->TabWidget->removePage(s->TabWidget->currentPage());
+    }
+
+    taskdetail = new NewTaskDetail(this);
+    inputNotes = new QMultiLineEdit(this);
+
     QScrollView *sv = new QScrollView(this);
+    sv->setHScrollBarMode(QScrollView::AlwaysOff);
     sv->setResizePolicy(QScrollView::AutoOneFit);
+    sv->setFrameStyle(QFrame::NoFrame);
+    sv->addChild(taskdetail);
 
-    QGridLayout *grid = new QGridLayout(this);
-    grid->addWidget(sv, 0, 0);
+    s->TabWidget->addTab(sv, tr("Task"));
+    s->TabWidget->addTab(inputNotes, tr("Notes"));
 
-    s = new NewTaskDialogBase( sv->viewport() );
-    sv->addChild( s );
+    QVBoxLayout *lay = new QVBoxLayout(this);
+    lay->addWidget(s);
 
-    setTabOrder(s->inputDescription, s->comboPriority);
-    setTabOrder(s->comboPriority, s->comboStatus);
-    setTabOrder(s->comboStatus, s->spinComplete);
-    setTabOrder(s->spinComplete, s->checkDue);
-    setTabOrder(s->checkDue, s->buttonDue);
-    setTabOrder(s->buttonDue, s->buttonStart);
-    setTabOrder(s->buttonStart, s->buttonEnd);
-    setTabOrder(s->buttonEnd, s->comboCategory);
+    setTabOrder(taskdetail->inputDescription, taskdetail->comboPriority);
+    setTabOrder(taskdetail->comboPriority, taskdetail->comboStatus);
+    setTabOrder(taskdetail->comboStatus, taskdetail->spinComplete);
+    setTabOrder(taskdetail->spinComplete, taskdetail->checkDue);
+    setTabOrder(taskdetail->checkDue, taskdetail->buttonDue);
+    setTabOrder(taskdetail->buttonDue, taskdetail->buttonStart);
+    setTabOrder(taskdetail->buttonStart, taskdetail->buttonEnd);
+    setTabOrder(taskdetail->buttonEnd, taskdetail->comboCategory);
 
-#ifdef Q_WS_QWS
-    s->buttonCancel->hide();
-    s->buttonOk->hide();
-#else
-    setTabOrder(s->comboCategory, s->buttonOk);
+#ifdef QTOPIA_DESKTOP
+    setTabOrder(taskdetail->comboCategory, s->buttonOk);
     setTabOrder(s->buttonOk, s->buttonCancel);
     s->buttonOk->setDefault(TRUE);
 
     connect( s->buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
     connect( s->buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
-#endif
+#endif // QTOPIA_DESKTOP
 
-    connect( s->buttonDue, SIGNAL( valueChanged( const QDate& ) ),
+    connect( taskdetail->buttonDue, SIGNAL( valueChanged( const QDate& ) ),
              this, SLOT( dueDateChanged( const QDate& ) ) );
-    connect( s->buttonStart, SIGNAL( valueChanged( const QDate& ) ),
+    connect( taskdetail->buttonStart, SIGNAL( valueChanged( const QDate& ) ),
              this, SLOT( startDateChanged( const QDate& ) ) );
-    connect( s->buttonEnd, SIGNAL( valueChanged( const QDate& ) ),
+    connect( taskdetail->buttonEnd, SIGNAL( valueChanged( const QDate& ) ),
              this, SLOT( endDateChanged( const QDate& ) ) );
 
     QDate current = QDate::currentDate();
 
-    s->buttonDue->setDate( current );
-    s->buttonStart->setDate( QDate() );
-    s->buttonEnd->setDate( current );
+    taskdetail->buttonDue->setDate( current );
+    taskdetail->buttonStart->setDate( QDate() );
+    taskdetail->buttonEnd->setDate( current );
 
-    s->comboCategory->setCategories( todo.categories(), "Todo List", // No tr
+    taskdetail->comboCategory->setCategories( todo.categories(), "Todo List", // No tr
 	tr("Todo List") );
 
-    connect( s->checkDue, SIGNAL( clicked() ), this, SLOT( dueButtonToggled() ) );
-    connect( s->comboStatus, SIGNAL( activated(int) ), this, SLOT( statusChanged() ) );
-    s->inputDescription->setFocus();
+    connect( taskdetail->checkDue, SIGNAL( clicked() ), this, SLOT( dueButtonToggled() ) );
+    connect( taskdetail->comboStatus, SIGNAL( activated(int) ), this, SLOT( statusChanged() ) );
+    taskdetail->inputDescription->setFocus();
 
     resize( 300, 300 );
 }
 
 void NewTaskDialog::dueButtonToggled()
 {
-    s->buttonDue->setEnabled( s->checkDue->isChecked() );
+    taskdetail->buttonDue->setEnabled( taskdetail->checkDue->isChecked() );
 }
 
 void NewTaskDialog::statusChanged()
 {
-    PimTask::TaskStatus t = (PimTask::TaskStatus)s->comboStatus->currentItem();
+    PimTask::TaskStatus t = (PimTask::TaskStatus)taskdetail->comboStatus->currentItem();
 
-    s->buttonStart->setEnabled( t != PimTask::NotStarted );
-    s->buttonEnd->setEnabled( t == PimTask::Completed );
+    taskdetail->buttonStart->setEnabled( t != PimTask::NotStarted );
+    taskdetail->buttonEnd->setEnabled( t == PimTask::Completed );
 
     // status change may lead to percent complete change. Work it out.
-    s->spinComplete->blockSignals(TRUE);
+    taskdetail->spinComplete->blockSignals(TRUE);
     if (t == PimTask::NotStarted) {
-	s->spinComplete->setValue(0);
-	s->spinComplete->setEnabled( FALSE );
+	taskdetail->spinComplete->setValue(0);
+	taskdetail->spinComplete->setEnabled( FALSE );
     } else if (t == PimTask::Completed) {
-	s->spinComplete->setValue(100);
-	s->spinComplete->setEnabled( FALSE );
+	taskdetail->spinComplete->setValue(100);
+	taskdetail->spinComplete->setEnabled( FALSE );
     } else  {
-	if (s->spinComplete->value() >= 100)
-	    s->spinComplete->setValue(99);
-	s->spinComplete->setEnabled( TRUE );
+	if (taskdetail->spinComplete->value() >= 100)
+	    taskdetail->spinComplete->setValue(99);
+	taskdetail->spinComplete->setEnabled( TRUE );
     }
-    s->spinComplete->blockSignals(FALSE);
+    taskdetail->spinComplete->blockSignals(FALSE);
 }
 
 /*
@@ -204,14 +277,14 @@ void NewTaskDialog::dueDateChanged( const QDate& /* date */ )
 
 void NewTaskDialog::startDateChanged( const QDate& date )
 {
-    if ( date > s->buttonEnd->date() )
-	s->buttonEnd->setDate( date );
+    if ( date > taskdetail->buttonEnd->date() )
+	taskdetail->buttonEnd->setDate( date );
 }
 
 void NewTaskDialog::endDateChanged( const QDate& date )
 {
-    if ( date < s->buttonStart->date() )
-	s->buttonStart->setDate( date );
+    if ( date < taskdetail->buttonStart->date() )
+	taskdetail->buttonStart->setDate( date );
 }
 
 /*!
@@ -219,38 +292,38 @@ void NewTaskDialog::endDateChanged( const QDate& date )
 
 void NewTaskDialog::setCurrentCategory(int i)
 {
-    s->comboCategory->setCurrentCategory(i);
+    taskdetail->comboCategory->setCurrentCategory(i);
 }
 
 PimTask NewTaskDialog::todoEntry()
 {
-    todo.setDescription( s->inputDescription->text() );
-    todo.setPriority( (PimTask::PriorityValue) (s->comboPriority->currentItem() + 1) );
-    if ( s->comboStatus->currentItem() == 2 ) {
+    todo.setDescription( taskdetail->inputDescription->text() );
+    todo.setPriority( (PimTask::PriorityValue) (taskdetail->comboPriority->currentItem() + 1) );
+    if ( taskdetail->comboStatus->currentItem() == 2 ) {
 	todo.setCompleted( TRUE );
 	todo.setPercentCompleted( 0 );
     } else {
 	todo.setCompleted( FALSE );
-	int percent = s->spinComplete->value();
+	int percent = taskdetail->spinComplete->value();
 	if ( percent >= 100 ) {
 	    todo.setStatus( PimTask::Completed );
 	} else  {
-	    todo.setStatus( (PimTask::TaskStatus) s->comboStatus->currentItem() );
+	    todo.setStatus( (PimTask::TaskStatus) taskdetail->comboStatus->currentItem() );
 	}
 	todo.setPercentCompleted( percent );
     }
 
-    if (s->checkDue->isChecked())
-	todo.setDueDate( s->buttonDue->date() );
+    if (taskdetail->checkDue->isChecked())
+	todo.setDueDate( taskdetail->buttonDue->date() );
     else
 	todo.clearDueDate();
 
-    todo.setStartedDate( s->buttonStart->date() );
-    todo.setCompletedDate( s->buttonEnd->date() );
+    todo.setStartedDate( taskdetail->buttonStart->date() );
+    todo.setCompletedDate( taskdetail->buttonEnd->date() );
 
-    todo.setCategories( s->comboCategory->currentCategories() );
+    todo.setCategories( taskdetail->comboCategory->currentCategories() );
 
-    todo.setNotes( s->inputNotes->text() );
+    todo.setNotes( inputNotes->text() );
 
     return todo;
 }
@@ -305,18 +378,18 @@ void NewTaskDialog::accept()
 
 CategorySelect *NewTaskDialog::categorySelect()
 {
-    return s->comboCategory;
+    return taskdetail->comboCategory;
 }
 
 void NewTaskDialog::updateCategories()
 {
-    if ( !s->comboCategory )
+    if ( !taskdetail->comboCategory )
 	return;
 
     connect( this, SIGNAL( categoriesChanged() ),
-	     s->comboCategory, SLOT( categoriesChanged() ) );
+	     taskdetail->comboCategory, SLOT( categoriesChanged() ) );
     emit categoriesChanged();
     disconnect( this, SIGNAL( categoriesChanged() ),
-		s->comboCategory, SLOT( categoriesChanged() ) );
+		taskdetail->comboCategory, SLOT( categoriesChanged() ) );
 }
 #endif

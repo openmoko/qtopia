@@ -166,15 +166,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Pronunciation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Last Name Pronunciation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Company Pronunciation</source>
+        <source>  Pronunciation</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

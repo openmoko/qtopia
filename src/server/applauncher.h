@@ -59,7 +59,7 @@ protected:
 private:
     static void signalHandler(int sig);
     bool executeBuiltin(const QString &c, const QString &document);
-    void execute(const QString &c, const QString &document);
+    void execute(const QString &c, const QString &document, bool noRaise = FALSE);
     
 private:    
     QMap<int,QString> runningApps;

@@ -19,11 +19,11 @@
 **********************************************************************/
 
 #define QTOPIA_INTERNAL_LANGLIST
+#ifndef QTOPIA_INTERNAL_FILEOPERATIONS
+#define QTOPIA_INTERNAL_FILEOPERATIONS
+#endif
 #include "custom.h"
 #include <stdlib.h>
-#if defined Q_OS_WIN32 && defined Q_WS_QWS
-#include <unistd.h>
-#endif
 #include <qfile.h>
 
 #ifdef QTOPIA_DESKTOP
@@ -93,13 +93,21 @@
 #include "pluginloader_p.h"
 
 #include <stdlib.h>
-#ifndef Q_OS_WIN32
+
+#ifdef Q_OS_UNIX
 #include <unistd.h>
 #include <sys/file.h>
+#endif
+
+#ifdef Q_OS_WIN32
+#include <windows.h>
+#endif
+
+#ifndef QTOPIA_DESKTOP
+#ifndef Q_OS_WIN32
 #include <sys/ioctl.h>
 #include <sys/soundcard.h>
 #else
-#include <windows.h>
 #include <winbase.h>
 #include <mmsystem.h>
 #include <io.h>
@@ -107,8 +115,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #endif
-
-#include <stdlib.h>
+#endif
 
 #include "../qtopia1/qpe_show_dialog.cpp"
 
@@ -131,7 +138,7 @@ public:
     QPEApplicationData() : presstimer(0), presswidget(0), rightpressed(FALSE),
 	kbgrabber(0), kbregrab(FALSE), notbusysent(FALSE), preloaded(FALSE),
 	forceshow(FALSE), nomaximize(FALSE), qpe_main_widget(0),
-	keep_running(TRUE), skiptimechanged(FALSE)
+	keep_running(TRUE), skiptimechanged(FALSE), execCalled(FALSE)
 #ifdef Q_WS_QWS
 	,styleLoader("styles"), styleIface(0), textPluginLoader("textcodecs"), // No tr
 	imagePluginLoader("imagecodecs")
@@ -169,6 +176,7 @@ public:
     QWidget* qpe_main_widget;
     bool keep_running;
     int skiptimechanged;
+    bool execCalled;
     QList<QCopRec> qcopq;
 
     void enqueueQCop(const QCString &ch, const QCString &msg,
@@ -178,12 +186,14 @@ public:
     }
     void sendQCopQ()
     {
+	if ( execCalled ) {
 #ifndef QT_NO_COP
-	QCopRec* r;
-	for (QListIterator<QCopRec> it(qcopq); (r=it.current()); ++it)
-	    QCopChannel::sendLocally(r->channel,r->message,r->data);
+	    QCopRec* r;
+	    for (QListIterator<QCopRec> it(qcopq); (r=it.current()); ++it)
+		QCopChannel::sendLocally(r->channel,r->message,r->data);
 #endif
-	qcopq.clear();
+	    qcopq.clear();
+	}
     }
 
     static void show_mx(QWidget* mw, bool nomaximize, QString &strName)
@@ -454,13 +464,14 @@ private:
 
 int qtopia_muted=0;
 
+#ifndef QTOPIA_DESKTOP
 static void setVolume(int t=0, int percent=-1)
 {
     switch (t) {
 	case 0: {
 	    Config cfg("Sound");
 	    cfg.setGroup("System");
-	    if ( percent < 0 ) 
+	    if ( percent < 0 )
 		percent = cfg.readNumEntry("Volume",50);
 	    int fd = 0;
 #ifndef Q_OS_WIN32
@@ -491,6 +502,7 @@ static void setVolume(int t=0, int percent=-1)
 	} break;
     }
 }
+#endif
 
 
 static int& hack(int& i)
@@ -826,6 +838,41 @@ static void setScreenSaverInterval(int interval)
    and emitted as signals, such as flush() and reload().
 */
 
+void QPEApplication::processQCopFile()
+{
+#ifndef QTOPIA_DESKTOP
+#ifdef Q_OS_UNIX
+    QString qcopfn(Global::tempDir()+ "qcop-msg-");
+    qcopfn += d->appName; // append command name
+#else
+    QString qcopfn(Global::tempDir() + "qcop-msg-");
+    if (QApplication::winVersion() != Qt::WV_98)
+	qcopfn += d->appName; // append command name
+    else
+	qcopfn += d->appName.lower(); // append command name
+#endif
+
+    QFile f(qcopfn);
+    if ( f.open(IO_ReadWrite) ) {
+#ifndef Q_OS_WIN32
+	flock(f.handle(), LOCK_EX);
+#endif
+	QDataStream ds(&f);
+	QCString channel, message;
+	QByteArray data;
+	while(!ds.atEnd()) {
+	    ds >> channel >> message >> data;
+	    d->enqueueQCop(channel,message,data);
+	}
+	Global::truncateFile(f, 0);
+#ifndef Q_OS_WIN32
+	f.flush();
+	flock(f.handle(), LOCK_UN);
+#endif
+    }
+#endif
+}
+
 /*!
   Constructs a QPEApplication just as you would construct
   a QApplication, passing \a argc, \a argv, and \a t.
@@ -869,25 +916,6 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
     connect(this, SIGNAL(lastWindowClosed()), this, SLOT(hideOrQuit()));
 #if defined(Q_WS_QWS) && !defined(QT_NO_COP)
 
-#ifdef Q_OS_UNIX
-    QString qcopfn("/tmp/qcop-msg-");
-    qcopfn += QString(argv[0]); // append command name
-#else
-    QString qcopfn(QString(getenv("TEMP")) + "/qcop-msg-");
-    if (QApplication::winVersion() != Qt::WV_98)
-	qcopfn += QString(argv[0]); // append command name
-    else
-	qcopfn += QString(argv[0]).lower(); // append command name
-#endif
-
-    QFile f(qcopfn);
-    if ( f.open(IO_ReadOnly) ) {
-#ifndef Q_OS_WIN32
-	//##### revise
-	flock(f.handle(), LOCK_EX);
-#endif
-    }
-
     sysChannel = new QCopChannel( "QPE/System", this );
     connect( sysChannel, SIGNAL(received(const QCString &, const QByteArray &)),
 	     this, SLOT(systemMessage( const QCString &, const QByteArray &)) );
@@ -908,22 +936,8 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
     connect( pidChannel, SIGNAL(received(const QCString &, const QByteArray &)),
 	    this, SLOT(pidMessage(const QCString &, const QByteArray &)));
 
-    if ( f.isOpen() ) {
-	d->keep_running = FALSE;
-	QDataStream ds(&f);
-	QCString channel, message;
-	QByteArray data;
-	while(!ds.atEnd()) {
-	    ds >> channel >> message >> data;
-	    d->enqueueQCop(channel,message,data);
-	}
-#ifndef Q_OS_WIN32
-	//#### revise
-	flock(f.handle(), LOCK_UN);
-#endif
-	f.close();
-	f.remove();
-    }
+    processQCopFile();
+    d->keep_running = d->qcopq.isEmpty();
 
     for (int a=0; a<argc; a++) {
 	if ( qstrcmp(argv[a],"-preload")==0 ) {
@@ -983,6 +997,7 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
 
     applyStyle();
 
+#ifndef QTOPIA_DESKTOP
     if ( type() == GuiServer ) {
 	setScreenSaverInterval(-1);
 	setVolume();
@@ -990,6 +1005,8 @@ QPEApplication::QPEApplication( int& argc, char **argv, Type t )
 	QWSServer::setScreenSaver(new QPEScreenSaver);
 #endif
     }
+#endif
+
     installEventFilter( this );
 
 #ifdef Q_WS_QWS
@@ -1227,15 +1244,15 @@ QString QPEApplication::qpeDir()
 #ifdef Q_OS_WIN32
 	QString temp(base);
 	if (temp[(int)temp.length()-1] != QDir::separator())
-	    temp.append(QDir::separator());    
+	    temp.append(QDir::separator());
 	dir = temp;
 #else
 	dir = QString( base ) + "/";
 #endif
-    }else{ 
+    }else{
 	dir = QString( ".." ) + QDir::separator();
     }
-    
+
     return dir;
 #elif defined(QTOPIA_DESKTOP)
 
@@ -1662,6 +1679,9 @@ void QPEApplication::pidMessage( const QCString &msg, const QByteArray & data)
 	    // emit the signal so everyone else knows...
 	    emit timeChanged();
 	}
+    } else if ( msg == "QPEProcessQCop()") {
+	processQCopFile();
+	d->sendQCopQ();
     } else {
 	bool p = d->keep_running;
 	d->keep_running = FALSE;
@@ -2050,6 +2070,7 @@ void QPEApplication::grabKeyboard()
 */
 int QPEApplication::exec()
 {
+    d->execCalled = TRUE;
 #ifndef QT_NO_COP
     d->sendQCopQ();
     processEvents(); // we may have received QCop messages in the meantime.

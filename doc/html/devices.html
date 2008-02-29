@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12684/qtopia/doc/devices.doc:1 -->
+<!-- /home/period/dev/qtopia/1.6/tmp10050/qtopia/doc/devices.doc:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -29,6 +29,7 @@ device which must be considered.
 <p> <ul>
 <li> If the device has a touch screen, Qtopia will need to enable calibration.
 <li> If the device runs off batteries, Qtopia may be required to call APM functions for power saving.
+See the Power Management section below for more details.
 <li> If the device has special hardware buttons, they may need to be mapped to
 applications and have associated images displayed in the user interface.
 <li> If the device has a buzzer for alarms and other beeps, Qtopia will need to know how to use this hardware
@@ -80,16 +81,16 @@ by the etc/defaultbuttons-&lt;platform-spec&gt;.conf files.
 <p> The format of the file is as follows:
 <p> <pre>
 [Button]
-Count=\&lt;number of button records below\&gt;
-[Button\&lt;button number counting from 0\&gt;]
-Name=\&lt;name of the button (in english)\&gt;
-Name[ja]=\&lt;japanese translations of the button name\&gt;
-Name[\&lt;lang\&gt;]=\&lt;other lang translations of the button name etc\&gt;
-Key=\&lt;associated key code emitted by the button eg. F9\&gt;
-PressedActionService=\&lt;name of default service associated with press\&gt;
-PressedActionMessage=\&lt;message to send to service (refer to \a services for details)\&gt;
-HeldActionService=\&lt;name of default service associated with press\&gt;
-HeldActionMessage=\&lt;message to send to service (refer to \a services for details)\&gt;
+Count=&lt;number of button records below&gt;
+[Button&lt;button number counting from 0&gt;]
+Name=&lt;name of the button (in english)&gt;
+Name[ja]=&lt;japanese translations of the button name&gt;
+Name[&lt;lang&gt;]=&lt;other lang translations of the button name etc&gt;
+Key=&lt;associated key code emitted by the button eg. F9&gt;
+PressedActionService=&lt;name of default service associated with press&gt;
+PressedActionMessage=&lt;message to send to service (refer to services for details)&gt;
+HeldActionService=&lt;name of default service associated with press&gt;
+HeldActionMessage=&lt;message to send to service (refer to services for details)&gt;
 </pre>
  
 <p> An example of what this may look like in a real example is:
@@ -155,7 +156,6 @@ files and settings.
 <a name="1-4"></a><p> The following applications are unsupported 3rd party applications/ports
 intended purely to demonstrate the flexibility of Qtopia:
 <p> <ul>
-<li> Go
 <li> VNC Viewer
 </ul>
 <p> <h3> Required Plugins
@@ -174,11 +174,30 @@ Required=simple8
 Apply=QPE/System restart()
 </pre>
  
-
+<p> <h3> Power Management
+</h3>
+<a name="1-6"></a><p> A number of points should be considered when integrating Qtopia with a
+device that has power management.
+<p> <ul>
+<li> Qtopia controls the power state (using pen and key
+input to restart timeouts), not the kernel.
+<li> The system's "Power" key just sends a key to Qtopia, which
+then does the actual suspend.
+<li> Qtopia supports multiple shutdown levels. By default these
+are On, Light Dim, LightOff, and Suspend. Additional levels
+can be added with a small amount of coding.
+<li> Qtopia calls platform-specific functions to set lighting level
+for 'dimming' and turning off the light.
+<li> Qtopia runs the 'apm' command to suspend.
+<li> The system's <tt>at</tt> daemon is used to unsuspend upon RTC alarms.
+<li> The system's <tt>at</tt> daemon is used to write the RTC clock
+(because on some systems only one process can manipulate the RTC).
+</ul>
+<p> 
 <!-- eof -->
 <p><address><hr><div align=center>
 <table width=100% cellspacing=0 border=0><tr>
 <td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.6.1</div>
+<td align=right><div align=right>Qtopia version 1.6.2</div>
 </table></div></address></body>
 </html>

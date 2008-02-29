@@ -431,9 +431,13 @@ void MineField::setCellSize( int cellsize )
     
     int w = QMIN( availableRect.width(), w2+b );
     int h = QMIN( availableRect.height(), h2+b );
-    
-    if ( cellsize != cellSize )
-	resizeContents( w2, h2 );
+
+    //
+    // Don't rely on the change in cellsize to force a resize,
+    // as it's possible to have the same size cells when going
+    // from a large play area to a small one.
+    //
+    resizeContents(w2, h2);
 
     if ( availableRect.height() < h2 &&
 	 availableRect.width() - w > style().scrollBarExtent().width() ) {

@@ -205,7 +205,20 @@ void CategoryTabWidget::initializeCategories(AppLnkSet* rootFolder,
     QStringList types = rootFolder->types();
     for ( QStringList::Iterator ittypes=types.begin(); ittypes!=types.end(); ++ittypes) {
 	if ( !(*ittypes).isEmpty() ) {
-	    (void)newView(*ittypes,rootFolder->typePixmap(*ittypes),rootFolder->typeName(*ittypes));
+	    //
+	    // Use some "defaults" if we don't know anything
+	    // about the new view.
+	    //
+	    QString name = rootFolder->typeName(*ittypes);
+	    QPixmap pm = rootFolder->typePixmap(*ittypes);
+
+	    if (pm.isNull()) {
+		QImage img( Resource::loadImage( "UnknownDocument" ) );
+		pm = img.smoothScale( AppLnk::smallIconSize(),
+		    AppLnk::smallIconSize() );
+	    }
+
+	    (void)newView(*ittypes, pm, name.isNull() ? (*ittypes) : name);
 	    setTabAppearance( *ittypes, cfg );
 	}
     }
@@ -242,11 +255,11 @@ void CategoryTabWidget::initializeCategories(AppLnkSet* rootFolder,
     pm = img.smoothScale( AppLnk::smallIconSize(), AppLnk::smallIconSize() );
     docview = newView( "Documents", // No tr
 	pm, tr("Documents"));
+    setTabAppearance( "Documents", cfg ); // No tr
     docview->populate( docFolder, QString::null );
     docFolder->detachChildren();
     docview->setFileSystems(fs);
     docview->setToolsEnabled(TRUE);
-    setTabAppearance( "Documents", cfg ); // No tr
 
     connect( categoryBar, SIGNAL(selected(int)), stack, SLOT(raiseWidget(int)) );
 
@@ -1067,6 +1080,8 @@ void Launcher::systemMessage( const QCString &msg, const QByteArray &data)
 #ifndef QT_NO_COP
     } else if (msg == "applyStyle()") {
 	tabs->currentView()->relayout();
+    } else if (msg == "restoreDone(QString)") {
+	updateDocs();
 #endif /* QT_NO_COP */
     }
 }

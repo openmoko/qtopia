@@ -147,18 +147,18 @@ OBJECTS =	$(OBJECTS_DIR)/mainwindow.o \
 		$(OBJECTS_DIR)/todotable.o \
 		$(OBJECTS_DIR)/todoentryimpl.o \
 		$(OBJECTS_DIR)/main.o \
-		$(OBJECTS_DIR)/todoentry.o
-INTERFACES =    todoentry.ui
-UICDECLS =      todoentry.h
-UICIMPLS =      todoentry.cpp
+		$(OBJECTS_DIR)/taskdetail.o
+INTERFACES =    taskdetail.ui
+UICDECLS =      taskdetail.h
+UICIMPLS =      taskdetail.cpp
 SRCMOC	=	$(MOC_DIR)/moc_mainwindow.cpp \
 		$(MOC_DIR)/moc_todotable.cpp \
 		$(MOC_DIR)/moc_todoentryimpl.cpp \
-		$(MOC_DIR)/moc_todoentry.cpp
+		$(MOC_DIR)/moc_taskdetail.cpp
 OBJMOC	=	$(OBJECTS_DIR)/moc_mainwindow.o \
 		$(OBJECTS_DIR)/moc_todotable.o \
 		$(OBJECTS_DIR)/moc_todoentryimpl.o \
-		$(OBJECTS_DIR)/moc_todoentry.o
+		$(OBJECTS_DIR)/moc_taskdetail.o
 
 
 ####### Implicit rules
@@ -227,7 +227,7 @@ REQUIRES=
 $(OBJECTS_DIR)/mainwindow.o: mainwindow.cpp \
 		mainwindow.h \
 		todoentryimpl.h \
-		todoentry.h \
+		taskdetail.h \
 		todotable.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/mainwindow.o mainwindow.cpp
 
@@ -237,7 +237,7 @@ $(OBJECTS_DIR)/todotable.o: todotable.cpp \
 
 $(OBJECTS_DIR)/todoentryimpl.o: todoentryimpl.cpp \
 		todoentryimpl.h \
-		todoentry.h \
+		taskdetail.h \
 		nulldb.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/todoentryimpl.o todoentryimpl.cpp
 
@@ -245,16 +245,16 @@ $(OBJECTS_DIR)/main.o: main.cpp \
 		mainwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/main.o main.cpp
 
-todoentry.h: todoentry.ui
-	$(UIC) todoentry.ui -o $(INTERFACE_DECL_PATH)/todoentry.h
+taskdetail.h: taskdetail.ui
+	$(UIC) taskdetail.ui -o $(INTERFACE_DECL_PATH)/taskdetail.h
 
-todoentry.cpp: todoentry.ui
-	$(UIC) todoentry.ui -i todoentry.h -o todoentry.cpp
+taskdetail.cpp: taskdetail.ui
+	$(UIC) taskdetail.ui -i taskdetail.h -o taskdetail.cpp
 
-$(OBJECTS_DIR)/todoentry.o: todoentry.cpp \
-		todoentry.h \
-		todoentry.ui
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/todoentry.o todoentry.cpp
+$(OBJECTS_DIR)/taskdetail.o: taskdetail.cpp \
+		taskdetail.h \
+		taskdetail.ui
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/taskdetail.o taskdetail.cpp
 
 $(OBJECTS_DIR)/moc_mainwindow.o: $(MOC_DIR)/moc_mainwindow.cpp \
 		mainwindow.h
@@ -266,12 +266,12 @@ $(OBJECTS_DIR)/moc_todotable.o: $(MOC_DIR)/moc_todotable.cpp \
 
 $(OBJECTS_DIR)/moc_todoentryimpl.o: $(MOC_DIR)/moc_todoentryimpl.cpp \
 		todoentryimpl.h \
-		todoentry.h
+		taskdetail.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_todoentryimpl.o $(MOC_DIR)/moc_todoentryimpl.cpp
 
-$(OBJECTS_DIR)/moc_todoentry.o: $(MOC_DIR)/moc_todoentry.cpp \
-		todoentry.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_todoentry.o $(MOC_DIR)/moc_todoentry.cpp
+$(OBJECTS_DIR)/moc_taskdetail.o: $(MOC_DIR)/moc_taskdetail.cpp \
+		taskdetail.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/moc_taskdetail.o $(MOC_DIR)/moc_taskdetail.cpp
 
 $(MOC_DIR)/moc_mainwindow.cpp: mainwindow.h
 	$(MOC) mainwindow.h -o $(MOC_DIR)/moc_mainwindow.cpp
@@ -282,17 +282,47 @@ $(MOC_DIR)/moc_todotable.cpp: todotable.h
 $(MOC_DIR)/moc_todoentryimpl.cpp: todoentryimpl.h
 	$(MOC) todoentryimpl.h -o $(MOC_DIR)/moc_todoentryimpl.cpp
 
-$(MOC_DIR)/moc_todoentry.cpp: todoentry.h
-	$(MOC) todoentry.h -o $(MOC_DIR)/moc_todoentry.cpp
+$(MOC_DIR)/moc_taskdetail.cpp: taskdetail.h
+	$(MOC) taskdetail.h -o $(MOC_DIR)/moc_taskdetail.cpp
 
 
+
+lupdate-check:
+	@sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' \
+	    -e '/$$(.*/ d' \
+	    -e 's/^static:.*//' \
+	    <todo.pro >t$$$$.pro && \
+	rm -rf t$$$$&& \
+	mkdir t$$$$ && \
+	cp -a *.ts t$$$$ && \
+	chmod +w *.ts && \
+	lupdate  t$$$$.pro && \
+	rm t$$$$.pro && \
+	for i in *.ts; \
+	do \
+	    if cmp -s $$i t$$$$/$$i; \
+	    then \
+		true; \
+	    else \
+		echo out-of-date $$i; \
+	    fi; \
+	    rm $$i; \
+	    mv t$$$$/$$i $$i; \
+	done && \
+	rmdir t$$$$
 
 lupdate:
-	sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' 	    -e '/$$(.*/ d' 	    -e 's/^static:.*//' 	    <todo.pro >t$$$$.pro ;	lupdate  t$$$$.pro ;	rm t$$$$.pro
+	sed -e '/$$$$QTOPIA1DIR[^ ]*/ d' \
+	    -e '/$$(.*/ d' \
+	    -e 's/^static:.*//' \
+	    <todo.pro >t$$$$.pro && \
+	lupdate  t$$$$.pro && \
+	rm t$$$$.pro
 
 lrelease:
 	lrelease todo.pro
 	$(QPEDIR)/bin/qtopia-linstall todo.pro
+
 
 ipkg: $(DESTDIR)$(TARGET) # among other things...
 	CTL="$(CONTROL)"; for ctrl in $$CTL; do cd $(QPEDIR)/ipkg; ../bin/mkipks -platform generic $(QPEDIR)/src/$$ctrl ; done

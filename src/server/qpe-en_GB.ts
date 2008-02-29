@@ -13,10 +13,6 @@
         <source>Personal Information</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Security</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>AppLauncher</name>
@@ -108,11 +104,6 @@ immediately.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Battery level is critical!
-Keep power off until power restored!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>The Back-up battery is very low.
 Please charge the back-up battery.</source>
         <translation type="unfinished"></translation>
@@ -131,6 +122,11 @@ Please charge the back-up battery.</source>
     </message>
     <message>
         <source>Plugin Manager...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Battery level is critical!
+Please recharge the main battery!</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -306,15 +302,11 @@ These termination options are provided primarily for use while developing and te
 <context>
     <name>SyncDialog</name>
     <message>
-        <source>Syncing</source>
+        <source>Abort</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&lt;b&gt;Contacts&lt;/b&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&amp;Cancel</source>
+        <source>Syncing:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

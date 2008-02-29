@@ -53,33 +53,6 @@
     </message>
 </context>
 <context>
-    <name>StorageInfo</name>
-    <message>
-        <source>CF Card</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Hard Disk</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>SD Card</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>SCSI Hard Disk</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Internal Storage</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>RAM disk</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>SystemInfo</name>
     <message>
         <source>System Info</source>
@@ -118,6 +91,11 @@
     </message>
     <message>
         <source>Built on: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copyright &amp;copy; %1 %2</source>
+        <comment>year, company</comment>
         <translation type="unfinished"></translation>
     </message>
 </context>

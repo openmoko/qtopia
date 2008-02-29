@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<!-- /home/ianw/dev/packages/qtopia/1.6/tmp12684/qtopia/doc/qcop.doc:1 -->
+<!-- /home/period/dev/qtopia/1.6/tmp10050/qtopia/doc/qcop.doc:1 -->
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
@@ -69,17 +69,9 @@ below.
 <li> setScreenSaverInterval(int) -- Internal.
 <li> language(QString) -- Internal.
 </ul>
-<p> <h4> QPE/Sync
-</h4>
-<a name="1-1-2"></a><p> <ul>
-<li> flush() -- Sent at the start of synchronization. Syncable
-applications should save any syncable data to disk. <em>Note: this message is currently asynchronous, but it may become synchronous in the future; this will require a slight modification of your code. We recommend responding fairly quickly to this message since the sync server does not wait long.</em>
-<li> reload() -- Sent at the end of synchronization. Syncable
-applications should reload any syncable data from disk.
-</ul>
 <p> <h4> QPE/TaskBar
 </h4>
-<a name="1-1-3"></a><p> <ul>
+<a name="1-1-2"></a><p> <ul>
 <li> message(QString) -- Internal. See <a href="global.html#statusMessage">Global::statusMessage</a>()
 <li> showInputMethod() -- Internal.
 <li> hideInputMethod() -- Internal.
@@ -88,15 +80,22 @@ applications should reload any syncable data from disk.
 </ul>
 <p> <h4> QPE/Card
 </h4>
-<a name="1-1-4"></a><p> <ul>
+<a name="1-1-3"></a><p> <ul>
+<li> mtabChanged() -- Sent when <tt>/etc/mtab</tt> may have changed.
 <li> stabChanged() -- Sent when <tt>/var/run/stab</tt>,
 <tt>/var/state/pcmcia/stab</tt>, or <tt>/var/lib/pcmcia/stab</tt> may have
 changed.
-<li> netUp() -- Sent when a network connection is running.
-<li> netDown() -- Sent when a network connection is available, but not
-running.
-<li> netUnavailable() -- Sent when a network connection is not
-available.
+</ul>
+<p> <h4> QPE/Network
+</h4>
+<a name="1-1-4"></a><p> <ul>
+<li> up() -- Sent when a network connection is running.
+<li> down() -- Sent when a running network connection is closed.
+<li> failed() -- Sent when a network connection failed to start.
+<li> available(<a href="qstringlist.html">QStringList</a>) -- Sent whenever the available network connections
+may have changed, or in a response to an announceChoices() message.
+<li> announceChoices() -- Forces the network monitor to send a list of
+available connections.
 </ul>
 <p> <h4> <a href="qt.html">Qt</a>/Tray
 </h4>
@@ -105,12 +104,12 @@ show system-tray status in a cross-platform manner, but it is not
 currently supported. See <a href="taskbarappletinterface.html">TaskbarAppletInterface</a> for a more powerful
 alternative for system tray applications.
 <ul>
-<li> popup(int,QPoint)
+<li> popup(int,QPoint) - Sent 
+<li> doubleClicked(int,QPoint)
+<li> clicked(int,QPoint)
 <li> remove(int)
 <li> setIcon(int,QPixmap)
 <li> setToolTip(int,QString)
-<li> doubleClicked(int,QPoint)
-<li> clicked(int,QPoint)
 </ul>
 <p> <h4> The Application Channel
 </h4>
@@ -135,27 +134,11 @@ not shown.
 property: when messages are sent to these channels via <a href="qcopenvelope.html">QCopEnvelope</a>,
 the message is delivered even if the application is not yet running
 (the application is run and the message is then sent).
-<p> <h4> Application-specific Channels
-</h4>
-<a name="1-1-7"></a><p> Applications also respond to messages specific to the application.
-Such messages in the base Qtopia applications are:
-<p> <b>QPE/Application/helpbrowser</b>
-<p> <ul>
-<li> showFile(<a href="qstring.html">QString</a> <em>file</em>) -- Send this message to have the Help
-Browser show a file. The <em>file</em> may be an absolute filename or
-relative to the system HTML documentation directory
-(<tt>$QPEDIR/help/html</tt>).
-</ul>
-<p> <b>QPE/Application/datebook</b>
-<p> <ul>
-<li> alarm(<a href="qdatetime.html">QDateTime</a>,int) -- Internal. Causes the <a href="calendar.html">Calendar</a> application
-to sound alarms.
-</ul>
 <p> 
 <!-- eof -->
 <p><address><hr><div align=center>
 <table width=100% cellspacing=0 border=0><tr>
 <td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
-<td align=right><div align=right>Qtopia version 1.6.1</div>
+<td align=right><div align=right>Qtopia version 1.6.2</div>
 </table></div></address></body>
 </html>

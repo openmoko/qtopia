@@ -41,11 +41,15 @@ static QString unicodeFontDirPath()
     QString fontDir, qtDir;
     if ( getenv("QTDIR") )
 	qtDir = QString(getenv("QTDIR")).stripWhiteSpace();
-    if ( qtDir.isNull() || qtDir.isEmpty() )
+    if ( qtDir.isEmpty() )
 	fontDir = QPEApplication::qpeDir();
     else
 	fontDir = qtDir + QDir::separator();
-    fontDir.append("lib/font/");
+    QDir d(fontDir + "lib/fonts/");
+    if (d.exists())
+	fontDir.append("lib/fonts/");
+    else
+	fontDir.append("dist/embedded/lib/fonts/"); // internal development
 #endif
     return fontDir;
 }

@@ -1,55 +1,36 @@
 <!DOCTYPE TS><TS>
 <context>
-    <name>NewTaskDialog</name>
+    <name>NewTaskDetail</name>
     <message>
-        <source>Todo List</source>
-        <translation type="unfinished">Aufgabenliste</translation>
-    </message>
-    <message>
-        <source>Discard changes?</source>
+        <source>Form1</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>NewTaskDialogBase</name>
     <message>
-        <source>2 - High</source>
-        <translation>2 - hoch</translation>
-    </message>
-    <message>
-        <source>3 - Normal</source>
-        <translation>3 - normal</translation>
-    </message>
-    <message>
-        <source>4 - Low</source>
-        <translation>4 - niedrig</translation>
+        <source>Completed Date</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>1 - Very High</source>
-        <translation>1 - sehr hoch</translation>
+        <translation type="unfinished">1 - sehr hoch</translation>
     </message>
     <message>
-        <source>New Task</source>
-        <translation>Neue Aufgabe</translation>
+        <source>2 - High</source>
+        <translation type="unfinished">2 - hoch</translation>
+    </message>
+    <message>
+        <source>3 - Normal</source>
+        <translation type="unfinished">3 - normal</translation>
+    </message>
+    <message>
+        <source>4 - Low</source>
+        <translation type="unfinished">4 - niedrig</translation>
     </message>
     <message>
         <source>5 - Very Low</source>
-        <translation>5 - sehr niedrig</translation>
+        <translation type="unfinished">5 - sehr niedrig</translation>
     </message>
     <message>
-        <source>Task</source>
-        <translation type="unfinished">Aufgabe</translation>
-    </message>
-    <message>
-        <source>Description</source>
-        <translation type="unfinished">Beschreibung</translation>
-    </message>
-    <message>
-        <source>Priority</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Status</source>
+        <source>Due</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -73,11 +54,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source> %</source>
+        <source>Priority</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Completed Date</source>
+        <source>Status</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -89,12 +70,66 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Due</source>
+        <source>Description</source>
+        <translation type="unfinished">Beschreibung</translation>
+    </message>
+    <message>
+        <source> %</source>
         <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>NewTaskDialog</name>
+    <message>
+        <source>Todo List</source>
+        <translation type="unfinished">Aufgabenliste</translation>
+    </message>
+    <message>
+        <source>Discard changes?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Task</source>
+        <translation type="unfinished">Aufgabe</translation>
     </message>
     <message>
         <source>Notes</source>
         <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>NewTaskDialogBase</name>
+    <message>
+        <source>2 - High</source>
+        <translation type="obsolete">2 - hoch</translation>
+    </message>
+    <message>
+        <source>3 - Normal</source>
+        <translation type="obsolete">3 - normal</translation>
+    </message>
+    <message>
+        <source>4 - Low</source>
+        <translation type="obsolete">4 - niedrig</translation>
+    </message>
+    <message>
+        <source>1 - Very High</source>
+        <translation type="obsolete">1 - sehr hoch</translation>
+    </message>
+    <message>
+        <source>New Task</source>
+        <translation>Neue Aufgabe</translation>
+    </message>
+    <message>
+        <source>5 - Very Low</source>
+        <translation type="obsolete">5 - sehr niedrig</translation>
+    </message>
+    <message>
+        <source>Task</source>
+        <translation type="unfinished">Aufgabe</translation>
+    </message>
+    <message>
+        <source>Description</source>
+        <translation type="obsolete">Beschreibung</translation>
     </message>
     <message>
         <source>Cancel</source>

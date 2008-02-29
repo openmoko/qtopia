@@ -100,6 +100,7 @@ private:
     QToolBar *menu, *editBar, *searchBar;
     QLineEdit *searchEdit;
     QAction *pasteAction;
+    QAction *fixedAction;
     DocLnk *doc;
     bool searchVisible;
     QAction *zin, *zout;

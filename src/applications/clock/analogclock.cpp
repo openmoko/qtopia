@@ -190,5 +190,5 @@ QPoint AnalogClock::rotate( QPoint c, QPoint p, int a )
 		( p.y() - c.y() ) * sin( angle );
     double ny = c.y() - ( p.y() - c.y() ) * cos( angle ) +
 		( p.x() - c.x() ) * sin( angle );
-    return QPoint( nx, ny );
+    return QPoint( int(nx), int(ny) );
 }

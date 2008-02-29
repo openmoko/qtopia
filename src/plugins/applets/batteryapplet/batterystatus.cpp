@@ -46,10 +46,11 @@ QSize BatteryStatus::sizeHint() const
     return QSize(QMAX(200,2*marg+r.width()),2*marg+60+r.height());
 }
 
-void BatteryStatus::updatePercent( int pc )
+void BatteryStatus::updatePercent( int pc, bool doRepaint )
 {
     percent = pc;
-    repaint(FALSE);
+    if ( doRepaint )
+	repaint(FALSE);
 }
 
 void BatteryStatus::drawSegment( QPainter *p, const QRect &r, const QColor &topgrad, const QColor &botgrad, const QColor &highlight, int hightlight_height )

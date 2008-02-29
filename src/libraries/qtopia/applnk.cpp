@@ -100,6 +100,10 @@ bool mkdirRecursive( QString path )
 
 static bool prepareDirectories(const QString& lf)
 {
+
+    if (lf.isNull() || lf.isEmpty())
+	return TRUE;
+
     QFileInfo fi(lf);
     if (!fi.isDir()){
       fi = QFileInfo(fi.dirPath(TRUE));

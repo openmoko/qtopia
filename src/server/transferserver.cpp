@@ -1089,7 +1089,7 @@ void ServerDTP::extractTarDone()
 {
     qDebug("extract done");
 #ifndef QT_NO_COP
-    QCopEnvelope e( "QPE/Desktop", "restoreDone(QString)" );
+    QCopEnvelope e( "QPE/System", "restoreDone(QString)" );
     e << file.name();
 #endif
 }

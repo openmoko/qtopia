@@ -24,6 +24,7 @@
 #include <qlineedit.h>
 #include <qvalidator.h>
 #include <qpushbutton.h>
+#include <qtoolbutton.h>
 
 class SimpleEmailValidator : public QValidator
 {
@@ -68,6 +69,7 @@ void EmailDialog::setEmails(const QString &def, const QStringList &em)
 	emailEdit->setText(emailList->currentText());
     else
 	addEmail();
+    updateButtons();
 }
 
 QString EmailDialog::defaultEmail() const
@@ -92,6 +94,7 @@ void EmailDialog::editCurrent( const QString &s )
 	emailList->changeItem(s, emailList->currentItem());
 	emailList->blockSignals(FALSE);
     }
+    updateButtons();
 }
 
 void EmailDialog::addEmail( )
@@ -100,12 +103,15 @@ void EmailDialog::addEmail( )
     emailList->setCurrentItem(emailList->numRows() - 1);
     emailEdit->selectAll();
     emailEdit->setFocus();
+    updateButtons();
 }
 
 void EmailDialog::removeCurrent()
 {
-    if (emailList->currentItem() != -1)
+    if (emailList->currentItem() != -1) {
 	emailList->removeItem(emailList->currentItem());
+	updateButtons();
+    }
 }
 
 void EmailDialog::moveCurrentUp()
@@ -118,6 +124,7 @@ void EmailDialog::moveCurrentUp()
 	emailList->changeItem(old, cur);
 	emailList->setCurrentItem(cur - 1);
 	emailEdit->blockSignals(FALSE);
+	updateButtons();
     }
 }
 
@@ -131,5 +138,24 @@ void EmailDialog::moveCurrentDown()
 	emailList->changeItem(old, cur);
 	emailList->setCurrentItem(cur + 1);
 	emailEdit->blockSignals(FALSE);
+	updateButtons();
+    }
+}
+
+void
+EmailDialog::updateButtons(void)
+{
+    if (emailList->count() == 0) {
+	removeEmailBtn->setEnabled(FALSE);
+	emailUpBtn->setEnabled(FALSE);
+	emailDownBtn->setEnabled(FALSE);
+    } else {
+	removeEmailBtn->setEnabled(TRUE);
+
+	emailUpBtn->setEnabled(
+	    emailList->currentItem() != emailList->topItem());
+
+	emailDownBtn->setEnabled(
+	    emailList->currentItem() < emailList->numRows() - 1);
     }
 }

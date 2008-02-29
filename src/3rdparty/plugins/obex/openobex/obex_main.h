@@ -59,6 +59,9 @@ unsigned int obex_debug;
 
 #ifndef _WIN32
 
+#ifdef DEBUG
+#undef DEBUG
+#endif
 #ifdef OBEX_DEBUG
 #define DEBUG(n, args...) if (obex_debug >= (n)) g_print(args)
 #else

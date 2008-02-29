@@ -39,7 +39,7 @@ packages above.
  <li><i> Install Qt/Embedded...</i>
 <pre>
 
-   tar xfz qt-embedded-2.3.x-free.tar.gz
+   tar xfz qt-embedded-2.3.x.tar.gz
    cd qt-2.3.x
    export QTDIR=$PWD
    export QTEDIR=$QTDIR
@@ -55,6 +55,8 @@ packages above.
 You may also want to use the configure options<tt> -system-jpeg </tt>and<tt> -gif</tt> for jpeg and gif support.<br><br>
 
  <li><i> Install Qt/X11 2.3.2...</i>
+Note that you must use 2.3.x, not 3.x, as this step is done to provide
+Qt 2 tools.
 <pre>
 
    tar xfz qt-x11-2.3.2-free.tar.gz
@@ -71,7 +73,9 @@ You may also want to use the configure options<tt> -system-jpeg </tt>and<tt> -gi
 
 </pre>
 
-You may also pass other configure options such as <tt>-no-opengl</tt> or <tt>-no-xft</tt> as suitable to your environment.  Use <tt>./configure -help</tt> for more information.<br><br>
+You may also pass other configure options such as <tt>-no-opengl</tt> or <tt>-no-xft</tt> as suitable to your environment.  Use <tt>./configure -help</tt> for more information.
+You may also want to build Qt Designer (in <tt>tools/designer/</tt>).
+<br><br>
 
  <li><i> Build Qtopia...</i>
 <pre>
@@ -125,7 +129,7 @@ Virtual Framebuffer.
 <td>
 <big>Welcome to Qtopia!</big>
 <td align=center>
-info@trolltech.com<br>
+<a href="mailto:info@trolltech.com">info@trolltech.com</a> <br>
 the Qtopia team
 <td align=right>
 &copy; 2001-2002 Trolltech AS

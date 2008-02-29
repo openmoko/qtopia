@@ -47,6 +47,11 @@ public:
     static bool isDocumentFileName(const QString& file); // libqtopia
     static bool isAppLnkFileName(const QString& file); // libqtopia
 
+#ifdef QTOPIA_INTERNAL_FILEOPERATIONS
+    static bool truncateFile(QFile &f, int size);
+    static QString tempDir( );
+#endif
+
 #ifdef QTOPIA_INTERNAL_LANGLIST
     static QStringList languageList();
     static QStringList helpPath();
@@ -109,8 +114,6 @@ public:
     static void writeHWClock();
 
 #ifdef QTOPIA_INTERNAL_FILEOPERATIONS
-    static bool truncateFile(QFile &f, int size);
-
     enum Lockflags {LockShare = 1, LockWrite = 2, LockBlock = 4};
     static bool lockFile(QFile &f, int flags = -1);
     static bool unlockFile(QFile &f);

@@ -45,7 +45,11 @@ static QString fontDir()
 	fontDir = QPEApplication::qpeDir();
     else
 	fontDir = qtDir + QDir::separator();
-    fontDir.append("lib/fonts/");
+    QDir d (fontDir + "lib/fonts/");
+    if (d.exists())
+	fontDir.append("lib/fonts/");
+    else
+	fontDir.append("dist/embedded/lib/fonts/"); // internal development	    
     return fontDir;
 #endif
 }

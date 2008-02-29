@@ -43,6 +43,7 @@
 #include <qtopia/config.h>
 #include <qstringlist.h>
 #include <qpalette.h>
+#include <qlayout.h>
 
 #ifndef Q_OS_WIN32 
 #include <sys/wait.h>
@@ -190,6 +191,8 @@ Konsole::Konsole(const char* name, const char* _pgm, QStrList & _args, int)
 
 void Konsole::init(const char* _pgm, QStrList & _args)
 {
+  setMinimumSize(200, 200);
+
   b_scroll = TRUE; // histon;
   n_keytab = 0;
   n_render = 0;
@@ -355,6 +358,8 @@ void Konsole::init(const char* _pgm, QStrList & _args)
       commonCombo->setEditable( FALSE );
   }
   configMenu->setItemEnabled(-20,!secondToolBar->isHidden());
+
+  layout()->setResizeMode(QLayout::FreeResize);
 }
 
 void Konsole::show()

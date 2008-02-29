@@ -30,23 +30,28 @@ void DoubleData::set(double d) {
     formattedOutput.setNum(dbl,'g',15);
     if (!strcmp(formattedOutput.latin1(),"nan")) { // No tr
 	systemEngine->setError(eNotANumber);
-	return;
     } else if (!strcmp(formattedOutput.latin1(),"inf")) { // No tr
 	systemEngine->setError(eInf);
-	return;
+    } else if (!strcmp(formattedOutput.latin1(),"-inf")) { // No tr
+	systemEngine->setError(eNegInf);
     }
 }
 bool DoubleData::push(char c, bool commit) {
-    if (formattedOutput.length() > 15 || 
-	    (formattedOutput == "0" && c == '0'))
+    if (formattedOutput.length() > 15)
 	return FALSE;
+    // Allow zero to be input as a value, but only once
+    if (formattedOutput == "0" && c == '0')
+	return !edited;
+
     QString tmpString = formattedOutput;
     if (!edited) {
 	if (c == '.') 
 	    tmpString = QString("0");
 	else
 	    tmpString.truncate(0);
-	edited = TRUE;
+	// Dont change the value of edited on the test run
+	if (commit)
+	    edited = TRUE;
     }
     tmpString.append(c);
     bool ok;

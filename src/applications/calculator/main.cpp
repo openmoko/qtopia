@@ -27,7 +27,7 @@ int main (int argc, char **argv)
 
   Calculator mw;
   QPEApplication::setInputMethodHint (&mw, QPEApplication::AlwaysOff);
-  mw.setCaption(mw.tr("Calculator"));
+  mw.setCaption(Calculator::tr("Calculator"));
   a.showMainWidget (&mw);
 
   return a.exec ();

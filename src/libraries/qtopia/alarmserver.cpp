@@ -164,10 +164,12 @@ static bool triggerAtd( bool writeHWClock = FALSE )
     if ( trigger.open(IO_WriteOnly|IO_Raw) ) {
 
 	const char* data =
-#ifdef QT_QWS_CUSTOM
+// ### removed this define as there's no way of updating the hardware clock if our atdaemon doesn't do it.
+// Should probably revise this into a more general solution though.
+//#ifdef QT_QWS_CUSTOM
 	//custom atd only writes HW Clock if we write a 'W'
 	    ( writeHWClock ) ? "W\n" :
-#endif
+//#endif
 	    data = "\n";
 	int len = strlen(data);
 	int total_written = trigger.writeBlock(data,len);

@@ -42,6 +42,8 @@ private:
     int cellsize;
     QFont smallFont;
     int xoff;
+    int selRow;
+    int selCol;
 };
 
 

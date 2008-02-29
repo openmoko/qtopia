@@ -519,7 +519,8 @@ void Engine::pushInstruction(QString name) {
 	executeInstructionOnStack(name,dStack);
 	updateDisplay();
 	delete id;
-	state = sStart;
+	if (state != sError)
+	    state = sStart;
 	return;
     }
     if (!iStack.isEmpty()
@@ -556,7 +557,8 @@ void Engine::pushInstruction(InstructionDescription *i) {
 	if (!i->precedence) {
 	    executeInstructionOnStack(i->instructionName,stack);
 	    updateDisplay();
-	    state = sStart;
+	    if (state != sError)
+		state = sStart;
 	} else {
 	    if (!stack.isEmpty()
 		    && state == sStart
@@ -652,6 +654,11 @@ void Engine::pushChar(char c) {
     updateDisplay();
 }
 #endif
+void Engine::push(QString s) {
+    softReset();
+    for (uint i=0;i < s.length();i++)
+	pushChar(s[(int)i].latin1());
+}
 void Engine::delChar() {
     if (!checkState())
 	return;
@@ -718,7 +725,8 @@ void Engine::memorySave() {
     tmp.push(mem);
     executeInstructionOnStack("Add",tmp); // No tr
 
-    state = sStart;
+    if (state != sError)
+	state = sStart;
 }
 #else
 void Engine::memorySave() {
@@ -757,7 +765,8 @@ qDebug("adding the new memory data to the old at %p, value = %s" ,mem,mem->getFo
 	}
 	delete factory;
     }
-    state = sStart;
+    if (state != sError)
+	state = sStart;
     qApp->processEvents();
 }
 #endif
@@ -776,7 +785,8 @@ qDebug("contents of memory at memoryRecall() = %s", mem->getFormattedOutput().la
     acc = copy->eval(mem);
     delete copy;
     updateDisplay();
-    state = sStart;
+    if (state != sError)
+	state = sStart;
 }
 void Engine::memoryReset() {
     if (mem) {
@@ -794,6 +804,7 @@ void Engine::setError(Error e){
 	    s = qApp->translate("Engine",
 		    "Not a number");
 	    break;
+	case eNegInf: // For the translations sake
 	case eInf:
 	    s = qApp->translate("Engine",
 		    "Infinity");
@@ -960,7 +971,8 @@ void Engine::setAccType(QString type) {
     currentType = type;
     if (dStack.isEmpty()) {
 	executeInstructionOnStack("Factory",dStack); // No tr
-	state = sStart;
+	if (state != sError)
+	    state = sStart;
     } else {
 	executeInstructionOnStack("Convert",dStack); // No tr
     }
@@ -973,7 +985,8 @@ void Engine::setAccType(QString type) {
     currentType = type;
     if (!acc) {
 	executeInstructionOnStack("Factory",stack); // No tr
-	state = sStart;
+	if (state != sError)
+	    state = sStart;
     } else {
 	executeInstructionOnStack("Convert",stack); // No tr
     }
@@ -984,6 +997,8 @@ QString Engine::getDisplay() {
     return acc->getFormattedOutput();
 }
 void Engine::openBrace () {
+    if (state == sError)
+	return;
     stack.push(new BraceOpen());
     state = sStart;
 }

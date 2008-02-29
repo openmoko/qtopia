@@ -132,7 +132,7 @@ static const BlockMap blockMap[] =
 
 
 UniScrollview::UniScrollview(QWidget* parent, const char* name, int f) :
-    QScrollView(parent, name, f)
+    QScrollView(parent, name, f), selRow(-1), selCol(-1)
 {
     //    smallFont.setRawName( "-adobe-courier-medium-r-normal--10-100-75-75-m-60-iso8859-1" ); //######
     smallFont = QFont( "Helvetica", 8 );
@@ -166,11 +166,19 @@ void UniScrollview::contentsMousePressEvent(QMouseEvent* e)
     emit key( u, code, 0, true, false );
     emit key( u, code, 0, false, false );
 #endif
+    selRow = row;
+    selCol = col;
+    updateContents( xoff+col*cellsize, row*cellsize, cellsize, cellsize );
 }
 
 
 void UniScrollview::contentsMouseReleaseEvent(QMouseEvent*)
 {
+    int row = selRow;
+    int col = selCol;
+    selRow = -1;
+    selCol = -1;
+    updateContents( xoff+col*cellsize, row*cellsize, cellsize, cellsize );
 }
 
 void UniScrollview::scrollTo( int unicode )
@@ -197,6 +205,13 @@ void UniScrollview::drawContents( QPainter *p, int /*cx*/, int cy, int /*cw*/, i
 	for ( int i = 0; i < nw; i++ ) {
 	    p->drawLine( xoff+i*cellsize, y, xoff+i*cellsize, y+cellsize );
 	    QChar u = row*nw + i;
+	    if ( row == selRow && i == selCol ) {
+		p->setPen( white );
+		p->fillRect( xoff+i*cellsize+1, y+1, cellsize-1, cellsize-1, black );
+	    } else {
+		p->setPen( colorGroup().text() );
+		p->fillRect( xoff+i*cellsize+1, y+1, cellsize-1, cellsize-1, colorGroup().base() );
+	    }
 	    if ( fm.inFont( u ) )
 		p->drawText( xoff+i*cellsize, y, cellsize, cellsize, AlignCenter,
 			     u );

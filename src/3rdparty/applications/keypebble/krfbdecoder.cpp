@@ -17,9 +17,8 @@
 //
 // Endian stuff
 //
-#ifndef KDE_USE_FINAL
+
 const int endianTest = 1;
-#endif
 
 #define Swap16IfLE(s) \
     (*(char *)&endianTest ? ((((s) & 0xff) << 8) | (((s) >> 8) & 0xff)) : (s))
@@ -282,7 +281,7 @@ void KRFBDecoder::decidePixelFormat()
   if ( chosenDepth == info->depth ) {
     // Use the servers native format
     format->bpp = info->bpp;
-    format->bigEndian = info->bigEndian;
+    format->bigEndian = (*(char *)&endianTest) ? FALSE : TRUE;
     format->trueColor = info->trueColor;
     format->redMax = info->redMax;
     format->greenMax = info->greenMax;
@@ -304,7 +303,7 @@ void KRFBDecoder::decidePixelFormat()
       format->blueShift = 6;
     } else if (chosenDepth == 16) {
       format->bpp = 16;
-      format->bigEndian = false;
+      format->bigEndian = (*(char *)&endianTest) ? FALSE : TRUE;
       format->trueColor = true;
       format->redMax = 31;
       format->greenMax = 63;
@@ -460,6 +459,9 @@ void KRFBDecoder::gotRectHeader()
 //  qWarning( "Rect: x=%d, y= %d, w=%d, h=%d, encoding=%ld", 
 //  	   x, y, w, h, encodingLocal );
 
+  if ( !w || !h )
+    return;
+
   //
   // Each encoding needs to be handled differently. Some require
   // waiting for more data, but others like a copyrect do not.
@@ -488,6 +490,8 @@ void KRFBDecoder::gotRectHeader()
   }
   else if ( encoding == HexTileEncoding ) {
     currentState = AwaitingHexEncoding;
+    subX = 0;
+    subY = 0;
     connect( con, SIGNAL(gotEnoughData()), SLOT(handleHexTileRect()) );
     con->waitForData( 1 );
   }
@@ -512,7 +516,7 @@ ulong KRFBDecoder::readPixel()
     } else if ( format->bpp == 16 ) {
 	ushort data;
 	con->read( &data, 2 );
-	pixel = data; // Swap16IfLE( data );
+	pixel = data;
     } else if ( format->bpp == 32 ) {
 	ulong data;
 	con->read( &data, 4 );
@@ -659,14 +663,7 @@ void KRFBDecoder::handleRRERect()
 	int bytesNeeded = (rreMode == RRE?8:4)+format->bpp/8;
 	while ( rreRects && con->bytesAvailable() >= bytesNeeded ) {
 	    ulong pixel;
-	    if ( format->bpp == 8 ) {
-		uchar data;
-		con->read( &data, 1 );
-		pixel = data;
-	    } else if ( format->bpp == 32 ) {
-		con->read( &pixel, 4 );
-		pixel = Swap32IfLE( pixel );
-	    }
+	    pixel = readPixel();
 	    int rx, ry, rw, rh;
 	    if ( rreMode == RRE ) {
 		CARD16 tmp16;
@@ -715,8 +712,6 @@ void KRFBDecoder::handleHexTileRect()
     int dataNeeded = 0;
     do {
 	if ( currentState == AwaitingHexEncoding ) {
-	    subX = 0;
-	    subY = 0;
 	    hexRects = 0;
 	    uchar enc;
 	    con->read( &enc, 1 );
@@ -726,12 +721,14 @@ void KRFBDecoder::handleHexTileRect()
 		int rw = QMIN(16,w);
 		int rh = QMIN(16,h);
 		dataNeeded = rw * rh * format->bpp/8;
-	    } else if ( hexEncoding & BGSpecified )
-		dataNeeded += format->bpp/8;
-	    else if ( hexEncoding & FGSpecified )
-		dataNeeded += format->bpp/8;
-	    else if ( hexEncoding & AnySubrects )
-		dataNeeded += 1;
+	    } else {
+		if ( hexEncoding & BGSpecified )
+		    dataNeeded += format->bpp/8;
+		if ( hexEncoding & FGSpecified )
+		    dataNeeded += format->bpp/8;
+		if ( hexEncoding & AnySubrects )
+		    dataNeeded += 1;
+	    }
 	    currentState = AwaitingHexData;
 	} else if ( currentState == AwaitingHexData ) {
 	    int rw = QMIN(16,w-subX);
@@ -757,8 +754,10 @@ void KRFBDecoder::handleHexTileRect()
 		currentState = AwaitingHexSubRect;
 		dataNeeded = 2;
 		if ( hexEncoding & SubrectsColoured )
-		    dataNeeded++;
+		    dataNeeded += format->bpp/8;
 		dataNeeded *= hexRects;
+		buf->fillRect( x+subX, y+subY, rw, rh, hexBG );
+		buf->updateDone( x+subX, y+subY, rw, rh );
 	    } else {
 		if ( !(hexEncoding & Raw) ) {
 		    buf->fillRect( x+subX, y+subY, rw, rh, hexBG );
@@ -770,8 +769,10 @@ void KRFBDecoder::handleHexTileRect()
 		if ( subX >= w ) {
 		    subX = 0;
 		    subY += 16;
-		    if ( subY >= h )
+		    if ( subY >= h ) {
 			dataNeeded = 0;
+			break;
+		    }
 		}
 	    }
 	} else if ( currentState == AwaitingHexSubRect ) {
@@ -787,8 +788,8 @@ void KRFBDecoder::handleHexTileRect()
 		con->read( &tmp8, 1 );
 		int rw = tmp8 >> 4;
 		int rh = tmp8 & 0x0f;
-		buf->fillRect( x+subX+rx, x+subY+ry, rw+1, rh+1, pixel );
-		buf->updateDone( x+subX+rx, x+subY+ry, rw+1, rh+1 );
+		buf->fillRect( x+subX+rx, y+subY+ry, rw+1, rh+1, pixel );
+		buf->updateDone( x+subX+rx, y+subY+ry, rw+1, rh+1 );
 	    }
 	    dataNeeded = 1;
 	    currentState = AwaitingHexEncoding;
@@ -796,11 +797,13 @@ void KRFBDecoder::handleHexTileRect()
 	    if ( subX >= w ) {
 		subX = 0;
 		subY += 16;
-		if ( subY >= h )
+		if ( subY >= h ) {
 		    dataNeeded = 0;
+		    break;
+		}
 	    }
 	}
-    } while ( dataNeeded && con->bytesAvailable() >= dataNeeded );
+    } while ( (dataNeeded || !hexEncoding) && con->bytesAvailable() >= dataNeeded );
 
     if ( !dataNeeded ) {
 	disconnect( con, SIGNAL(gotEnoughData()), this, SLOT(handleHexTileRect()) );

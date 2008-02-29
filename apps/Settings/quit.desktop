@@ -8,3 +8,4 @@ Name[no]=Skru av
 Name[de]=Beenden
 Name[hu]=Leállítás
 CanFastload=0
+Builtin=1

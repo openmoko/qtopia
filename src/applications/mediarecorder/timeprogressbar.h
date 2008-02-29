@@ -28,13 +28,22 @@ class TimeProgressBar : public QProgressBar
     Q_OBJECT
 public:
     TimeProgressBar( QWidget *parent=0, const char *name=0, WFlags fl=0 );
-    ~TimeProgressBar() { }
+    ~TimeProgressBar();
+
+    void setRecording();
+    void setPlaying();
 
 protected:
     bool setIndicator( QString& progress_str, int progress, int totalSteps );
+    bool event( QEvent * );
 
 private:
     int prevValue;
+    QPalette origPalette;
+    QPalette adjustedPalette;
+    bool recording;
+
+    void refreshPalettes();
 };
 
 #endif

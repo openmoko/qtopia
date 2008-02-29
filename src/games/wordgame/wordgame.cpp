@@ -792,7 +792,7 @@ void TileItem::drawShape(QPainter& p)
 	}
     }
 
-    QRect area(x(),y(),width(),height());
+    QRect area((int)(x()),int(y()),width(),height());
     p.setBrush(s == Floating ? yellow/*lightGray*/ : white);
     p.drawRect(area);
     if ( big ) {
@@ -801,13 +801,13 @@ void TileItem::drawShape(QPainter& p)
 	int w = p.fontMetrics().width('1');
 	int h = p.fontMetrics().height();
 	w *= n.length();
-	QRect valuearea(x()+width()-w-1,y()+height()-h,w,h);
+	QRect valuearea((int)(x())+width()-w-1,int(y())+height()-h,w,h);
 	p.drawText(valuearea,AlignCenter,n);
 	p.setFont(*big_font);
-	area = QRect(x(),y()+tile_btweak,width()-4,height()-1);
+	area = QRect(int(x()),int(y())+tile_btweak,width()-4,height()-1);
     } else {
 	p.setFont(*small_font);
-	area = QRect(x()+1+tile_stweak,y()+1,width(),height()-3);
+	area = QRect(int(x())+1+tile_stweak,int(y())+1,width(),height()-3);
     }
     if ( t.value() == 0 )
 	p.setPen(darkGray);

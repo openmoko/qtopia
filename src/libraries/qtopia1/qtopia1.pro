@@ -57,12 +57,14 @@ qt2:SOURCES += quuid1.cpp
 INCLUDEPATH += $(QPEDIR)/src/server
 
 unix:LIBS   += -luuid
+mac:LIBS   -= -luuid
+mac:LIBS   += -L$(QPEDIR)/lib -framework CoreFoundation -lqd-qpe
 win32:LIBS += rpcrt4.lib
 
 TARGET		= qtopia
 qdesktop:TARGET = qd-qtopia
 DESTDIR		= $(QPEDIR)/lib$(PROJMAK)
-VERSION		= 1.6.1
+VERSION		= 1.6.2
 
 TRANSLATIONS = libqtopia-en_GB.ts libqtopia-de.ts libqtopia-ja.ts libqtopia-no.ts
 

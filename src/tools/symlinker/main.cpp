@@ -96,7 +96,7 @@ static void removeSymlinks( const QString &package )
 static void updateSymlinks()
 {
     QDir lists( listDir );
-    QStringList knownPackages = lists.entryList( "*.list" );
+    QStringList knownPackages = lists.entryList( "*.list" ); // No tr
     
     struct mntent *me;
     FILE *mntfp = setmntent( "/etc/mtab", "r" );
@@ -111,7 +111,7 @@ static void updateSymlinks()
 	    QDir infoDir( info );
 	    //qDebug( "looking at %s", info.ascii() );
 	    if ( infoDir.isReadable() ) {
-		const QFileInfoList *packages = infoDir.entryInfoList( "*.list" );
+		const QFileInfoList *packages = infoDir.entryInfoList( "*.list" ); // No tr
 		QFileInfoListIterator it( *packages );
 		QFileInfo *fi;
 		while (( fi = *it )) {
@@ -143,13 +143,13 @@ static void updateSymlinks()
 
 int main( int argc, char *argv[] )
 {
-    QString command = argc > 1 ? argv[1] : "update";
+    QString command = argc > 1 ? argv[1] : "update"; // No tr
     
-    if ( command == "update" )
+    if ( command == "update" ) // No tr
 	updateSymlinks();
-    else if ( command == "create" && argc > 3 )
+    else if ( command == "create" && argc > 3 ) // No tr
 	createSymlinks( argv[2], argv[3] );
-    else if ( command == "remove"  && argc > 2 )
+    else if ( command == "remove"  && argc > 2 ) // No tr
 	removeSymlinks( argv[2] );
     else
 	qWarning( "Argument error" );

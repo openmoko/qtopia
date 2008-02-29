@@ -138,7 +138,7 @@ Quit anyway?</source>
     </message>
     <message>
         <source>Edit all events in this series or just this single event.</source>
-        <translation>一連のすべての行事、またはこの行事のみを編集します。</translation>
+        <translation>一連のすべての行事を編集、またはこの行事のみを編集します。</translation>
     </message>
     <message>
         <source>All</source>
@@ -158,7 +158,7 @@ Quit anyway?</source>
     </message>
     <message>
         <source>Delete all events in this series or just this single event:&lt;br&gt;%1</source>
-        <translation>このシリーズの行事すべて、またはこの行事のみを削除：&lt;br&gt;%1</translation>
+        <translation>このシリーズの行事をすべて削除、またはこの行事のみを削除します：&lt;br&gt;%1</translation>
     </message>
     <message>
         <source>(in %1 minutes)</source>
@@ -167,7 +167,7 @@ Quit anyway?</source>
     <message>
         <source>Single</source>
         <comment>1 event, not all</comment>
-        <translation>一行事</translation>
+        <translation>この行事のみ</translation>
     </message>
     <message>
         <source>Show selected month&apos;s events</source>
@@ -177,6 +177,18 @@ Quit anyway?</source>
         <source>Day</source>
         <comment>day, not date</comment>
         <translation>曜日</translation>
+    </message>
+    <message>
+        <source>Time zone: </source>
+        <translation>タイムゾーン:</translation>
+    </message>
+    <message>
+        <source>Alarm</source>
+        <translation>アラーム</translation>
+    </message>
+    <message>
+        <source>OK to all</source>
+        <translation>すべてOK</translation>
     </message>
 </context>
 <context>
@@ -289,7 +301,7 @@ Quit anyway?</source>
     <name>DateBookSettingsBase</name>
     <message>
         <source>Preferences</source>
-        <translation>環境設定</translation>
+        <translation type="obsolete">環境設定</translation>
     </message>
     <message>
         <source>Start viewing events</source>
@@ -314,6 +326,10 @@ Quit anyway?</source>
     <message>
         <source> minutes</source>
         <translation>分</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>設定</translation>
     </message>
 </context>
 <context>
@@ -916,11 +932,11 @@ Quit anyway?</source>
     <name>WorldTimeDialog</name>
     <message>
         <source>OK</source>
-        <translation>OK</translation>
+        <translation type="obsolete">OK</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation>取り消し</translation>
+        <translation type="obsolete">取り消し</translation>
     </message>
 </context>
 </TS>

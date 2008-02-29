@@ -9,7 +9,7 @@
         <source>Unable to schedule alarm.
 Free some memory and try again.</source>
         <translation>アラームを設定できません。
-空き容量を確保してやり直してください。</translation>
+メモリを確保してやり直してください。</translation>
     </message>
 </context>
 <context>
@@ -63,7 +63,7 @@ Free some memory and try again.</source>
     </message>
     <message>
         <source>Duplicate categories</source>
-        <translation>カテゴリの重複</translation>
+        <translation>重複カテゴリ</translation>
     </message>
     <message>
         <source>There is already a category named
@@ -90,12 +90,16 @@ the duplicate.</source>
         <source>Deleting a global category will delete it from all applications. Any items in this category will become unfiled. Are you sure you want to do this?</source>
         <translation>グローバルカテゴリの削除をすると、すべてのアプリケーションからそのカテゴリを削除することになります。このカテゴリにあるすべてのアイテムは未整理になります。本当に削除しますか?</translation>
     </message>
+    <message>
+        <source>&lt;qt&gt;There already exists a local category named &lt;b&gt;%1&lt;/b&gt; in another application.&lt;p&gt;Make that category a global group?&lt;/qt&gt;</source>
+        <translation>&lt;qt&gt;そこには別のアプリケーションで&lt;b&gt;%1&lt;/b&gt;という名前のローカルカテゴリがすでに存在します。&lt;p&gt;そのカテゴリをグローバルグループにしますか?&lt;/qt&gt;</translation>
+    </message>
 </context>
 <context>
     <name>CategoryEditBase</name>
     <message>
         <source>Category Edit</source>
-        <translation>カテゴリの編集</translation>
+        <translation>カテゴリ編集</translation>
     </message>
     <message>
         <source>Categories</source>
@@ -215,11 +219,11 @@ try again.</source>
     </message>
     <message>
         <source>Home Phone: </source>
-        <translation>自宅 電話番号:</translation>
+        <translation>自宅 電話:</translation>
     </message>
     <message>
         <source>Home Fax: </source>
-        <translation>自宅ファックス番号:</translation>
+        <translation>自宅 ファックス:</translation>
     </message>
     <message>
         <source>Home Mobile: </source>
@@ -239,11 +243,11 @@ try again.</source>
     </message>
     <message>
         <source>Business Phone: </source>
-        <translation>勤務先 電話番号:</translation>
+        <translation>勤務先 電話:</translation>
     </message>
     <message>
         <source>Business Fax: </source>
-        <translation>勤務先 ファックス番号:</translation>
+        <translation>勤務先 ファックス:</translation>
     </message>
     <message>
         <source>Business Mobile: </source>
@@ -311,11 +315,11 @@ try again.</source>
     </message>
     <message>
         <source>Suffix</source>
-        <translation>接尾語</translation>
+        <translation>Suffix</translation>
     </message>
     <message>
         <source>File As</source>
-        <translation>ファイル名</translation>
+        <translation>ファイル</translation>
     </message>
     <message>
         <source>Job Title</source>
@@ -331,15 +335,15 @@ try again.</source>
     </message>
     <message>
         <source>Business Phone</source>
-        <translation>勤務先 電話番号</translation>
+        <translation>勤務先 電話</translation>
     </message>
     <message>
         <source>Business Fax</source>
-        <translation>勤務先 ファックス番号</translation>
+        <translation>勤務先 ファックス</translation>
     </message>
     <message>
         <source>Business Mobile</source>
-        <translation>ビジネス用 携帯番号</translation>
+        <translation>ビジネス用 携帯電話</translation>
     </message>
     <message>
         <source>Default Email</source>
@@ -351,15 +355,15 @@ try again.</source>
     </message>
     <message>
         <source>Home Phone</source>
-        <translation>自宅 電話番号</translation>
+        <translation>自宅 電話</translation>
     </message>
     <message>
         <source>Home Fax</source>
-        <translation>自宅ファックス番号</translation>
+        <translation>自宅ファックス</translation>
     </message>
     <message>
         <source>Home Mobile</source>
-        <translation>個人用携帯番号</translation>
+        <translation>個人用携帯電話</translation>
     </message>
     <message>
         <source>Business Street</source>
@@ -497,6 +501,13 @@ before entering data</source>
     </message>
 </context>
 <context>
+    <name>EditDlg</name>
+    <message>
+        <source>Edit Categories</source>
+        <translation>カテゴリの編集</translation>
+    </message>
+</context>
+<context>
     <name>FileSelector</name>
     <message>
         <source>Close the File Selector</source>
@@ -585,7 +596,7 @@ before entering data</source>
     </message>
     <message>
         <source>9</source>
-        <translation></translation>
+        <translation>9</translation>
     </message>
     <message>
         <source>0</source>
@@ -1061,7 +1072,7 @@ Free some memory and try again.</source>
     <name>QPEMessageBox</name>
     <message>
         <source>Are you sure you want to delete: %1?</source>
-        <translation>本当に削除してもよろしいですか:%1?</translation>
+        <translation>本当に削除しますか:%1?</translation>
     </message>
 </context>
 <context>
@@ -1086,6 +1097,10 @@ Free some memory and try again.</source>
         <source>Internal Storage</source>
         <translation>内蔵ストレージ</translation>
     </message>
+    <message>
+        <source>RAM disk</source>
+        <translation>RAMディスク</translation>
+    </message>
 </context>
 <context>
     <name>TZCombo</name>
@@ -1096,7 +1111,6 @@ Free some memory and try again.</source>
 </context>
 <context>
     <name>TimeStringFormat</name>
-    <comment>month-date separator</comment>
     <message>
         <source>D</source>
         <translation type="obsolete">日付</translation>
@@ -1163,6 +1177,26 @@ Free some memory and try again.</source>
         <source>day</source>
         <comment>in month</comment>
         <translation>日</translation>
+    </message>
+    <message>
+        <source></source>
+        <comment>day-date separator</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source></source>
+        <comment>month-date separator</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source> </source>
+        <comment>day-date separator</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source> </source>
+        <comment>month-date separator</comment>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

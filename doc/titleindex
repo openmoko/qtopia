@@ -1,3 +1,4 @@
+3rd Party Licenses used in Qt | 3rdparty.html
 Accessory Class | accessory.html
 Accessory Member List | accessory-members.html
 AddressBookAccess Class | addressbookaccess.html
@@ -262,11 +263,14 @@ xmlreader.h Include File | xmlreader-h.html
  | pluginintro.html
  | qcop.html
  | qtopiaporting.html
+ | release-1.6.0.html
  | release-1.6.1.html
+ | release-1.6.2.html
  | release-1.6beta2.html
  | release-1.6beta3.html
  | release-1.6beta4.html
  | release-1.6beta5.html
+ | release-index.html
  | services.html
  | servicesapi.html
  | start.html

@@ -37,7 +37,12 @@ extern "C" {
 
 #ifndef Q_OS_WIN32
 // Win32 has a different name for the same function
-#define strncasecmp strncmp	
+# define strncasecmp strncmp	
+
+# include <endian.h>
+# if __BYTE_ORDER == __BIG_ENDIAN
+#  define IS_BIG_ENDIAN
+# endif
 #endif
 
 struct RiffChunk {
@@ -61,6 +66,64 @@ struct GsmExtHeader {
     Q_INT16 wExtSize;
     Q_INT16 samplesPerBlock;
 };
+
+
+#ifdef IS_BIG_ENDIAN
+Q_INT32 swap32( Q_INT32 w )
+{
+    unsigned char *c = (unsigned char *)&w;
+
+    // Swap byte 1 and 4
+    unsigned char t = *c;
+    *c = *(c+3);
+    *(c+3) = t;
+
+    // Swap byte 2 and 3
+    c++;
+    t = *c;
+    *c = *(c+1);
+    *(c+1) = t;
+
+    return w;
+}
+
+inline Q_INT16 swap16( Q_INT16 s )
+{
+    unsigned char *c = (unsigned char *)&s;
+    unsigned char t = *c;
+    *c = *(c+1);
+    *(c+1) = t;
+    
+    return s;
+}
+
+void swapRiffChunk( RiffChunk *r )
+{
+    r->size = swap32(r->size);
+}
+
+void swapChunkData( ChunkData *d )
+{
+    d->formatTag = swap16(d->formatTag);
+    d->channels = swap16(d->channels);
+    d->samplesPerSec = swap32(d->samplesPerSec);
+    d->avgBytesPerSec = swap32(d->avgBytesPerSec);
+    d->blockAlign = swap16(d->blockAlign);
+    d->wBitsPerSample = swap16(d->wBitsPerSample);
+}
+
+void swapGsmExtHeader( GsmExtHeader *h )
+{
+    h->wExtSize = swap16(h->wExtSize);
+    h->samplesPerBlock = swap16(h->samplesPerBlock);
+}
+#else
+inline Q_INT32 swap32( Q_INT32 w ) { return w; }
+inline Q_INT16 swap16( Q_INT16 s ) { return s; }
+inline void swapRiffChunk( RiffChunk * ) {}
+inline void swapChunkData( ChunkData * ) {}
+inline void swapGsmExtHeader( GsmExtHeader * ) {}
+#endif
 
 
 const int sound_buffer_size = 4096;
@@ -178,6 +241,7 @@ public:
 		    return FALSE;
 		return TRUE;
 	    }
+	    swapRiffChunk(&chunk);
 	    if ( qstrncmp(chunk.id,"data",4) == 0 ) { // No tr
 		wavedata_remaining = chunk.size;
 		// approx. number of 44.1KHz samples
@@ -206,6 +270,7 @@ public:
 		if ( input->readBlock((char*)&chunkdata,sizeof(chunkdata)) != sizeof(chunkdata) ) {
 		    return FALSE;
 		}
+		swapChunkData(&chunkdata);
 		if ( chunkdata.formatTag == WAVE_FORMAT_GSM610 ) {
 		    // validate the GSM header details.
 		    if ( chunk.size < (sizeof(chunkdata) + 4) ) {
@@ -216,6 +281,7 @@ public:
 			qDebug( "WAV file: TRUNCATED GSM HEADER" );
 			return FALSE;
 		    }
+		    swapGsmExtHeader(&gsmext);
 		    if ( gsmext.wExtSize != 2 ||
 		         gsmext.samplesPerBlock != 320 ||
 			 chunkdata.blockAlign != 65 ) {
@@ -276,7 +342,11 @@ public:
 	if ( chunkdata.wBitsPerSample == 8 ) {
 	    l = (data[out++] - 128) * 128;
 	} else {
+#ifdef IS_BIG_ENDIAN
+	    l = swap16(((short*)data)[out/2]);
+#else
 	    l = ((short*)data)[out/2];
+#endif
 	    out += 2;
 	}
 	if ( chunkdata.channels == 1 ) {
@@ -285,7 +355,11 @@ public:
 	    if ( chunkdata.wBitsPerSample == 8 ) {
 		r = (data[out++] - 128) * 128;
 	    } else {
+#ifdef IS_BIG_ENDIAN
+		r = swap16(((short*)data)[out/2]);
+#else
 		r = ((short*)data)[out/2];
+#endif
 		out += 2;
 	    }
 	}

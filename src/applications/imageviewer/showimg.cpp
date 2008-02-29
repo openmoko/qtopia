@@ -524,9 +524,9 @@ void ImageViewer::loadFilename( const QString &file ) {
 	    if (rotateOnLoad && portraitImage != portraitDisplay ) {
 		rotated90 = TRUE;
 		if ( rotateClockwise )
-		    matrix.rotate( -90.0 );
-		else
 		    matrix.rotate( 90.0 );
+		else
+		    matrix.rotate( -90.0 );
 	    }
 	}
 	scale( TRUE );
@@ -923,7 +923,11 @@ ImageViewer::handleKeypress(int keycode)
 	break;
 
     case Qt::Key_Space:
-	open();
+	if (isFullScreen) {
+	    normalView();
+	} else {
+	    open();
+	}
 	break;
     }
 }

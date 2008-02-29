@@ -105,11 +105,7 @@ QCopEnvelope::~QCopEnvelope()
     QByteArray data = ((QBuffer*)device())->buffer();
     const int pref=16;
     if ( qstrncmp(ch.data(),"QPE/Application/",pref)==0 ) {
-#if defined(_OS_LINUX_) || defined(Q_OS_LINUX)
-	QString qcopfn("/tmp/qcop-msg-");
-#else
-	QString qcopfn(QString(getenv("TEMP")) + "/qcop-msg-");
-#endif
+	QString qcopfn(Global::tempDir() + "qcop-msg-");
 	qcopfn += ch.mid(pref);
 	QFile qcopfile(qcopfn);
 
@@ -121,61 +117,24 @@ QCopEnvelope::~QCopEnvelope()
 			.arg(qcopfn).arg( errno ));
 	    }
 #endif
-	    /* file locked, but might be stale (e.g. program for whatever
-	       reason did not start).  I modified more than 1 minute ago,
-	       truncate the file */
-	    struct stat buf;
-	    time_t t;
-	    if (!fstat(qcopfile.handle(), &buf) &&  (time(&t) != (time_t)-1) ) {
-		// success on fstat, lets compare times
-		if (buf.st_ctime + 60 < t) {
-		    qWarning("stale file " + qcopfn + " found.  Truncating");
-		    //		    ftruncate(qcopfile.handle(), 0);
-#ifdef Q_OS_WIN32
-		    Global::truncateFile(qcopfile, 0);
+	    {
+		QDataStream ds(&qcopfile);
+		ds << ch << msg << data;
+		qcopfile.flush();
+#ifndef Q_OS_WIN32
+		flock(qcopfile.handle(), LOCK_UN);
 #endif
-		    qcopfile.reset();
-		}
+		qcopfile.close();
 	    }
 
-	    if ( !QCopChannel::isRegistered(ch) ) {
-		int fsize = qcopfile.size();
-		{
-		    QDataStream ds(&qcopfile);
-		    ds << ch << msg << data;
-#ifndef Q_OS_WIN32
-		    flock(qcopfile.handle(), LOCK_UN);
-#endif
-		    qcopfile.close();
-		}
-
-		if (fsize == 0) {
-		    QString cmd = ch.mid(pref);
-		    Global::execute(cmd);
-		}
-
-		if ( !msg.isEmpty() ) {
-		    char c;
-		    for (int i=0; (c=msg[i]); i++) {
-			if ( c == ' ' ) {
-			    // Return-value required
-			    // ###### wait for it
-			    break;
-			} else if ( c == '(' ) {
-			    // No return value
-			    break;
-			}
-		    }
-		}
-		goto end;
-	    } // endif isRegisterd
-#ifndef Q_OS_WIN32
-	    flock(qcopfile.handle(), LOCK_UN);
-#endif
-	    qcopfile.close();
-	    qcopfile.remove();
+	    QByteArray b;
+	    QDataStream stream(b, IO_WriteOnly);
+	    stream << QString(ch.mid(pref));
+	    QCopChannel::send("QPE/System", "processQCop(QString)", b);
+	    delete device();
+	    return;
 	} else {
-	    qWarning(QString("Failed to obtain file lock on %1")
+	    qWarning(QString("Failed to open file %1")
 			.arg(qcopfn));
 	} // endif open
     }
@@ -188,8 +147,8 @@ QCopEnvelope::~QCopEnvelope()
       // Since byte arrays are explicitly shared, this is appended to the data variable..
       *this << endpoint;
     }
+
     QCopChannel::send(ch,msg,data);
-end:
     delete device();
 }
 

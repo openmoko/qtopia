@@ -35,6 +35,9 @@
 **
 **********************************************************************/
 
+#ifndef QTOPIA_INTERNAL_FILEOPERATIONS
+#define QTOPIA_INTERNAL_FILEOPERATIONS
+#endif
 #include "qmemoryfile_p.h"
 #include "qfile.h"
 #include <unistd.h>
@@ -46,6 +49,7 @@
 #include <sys/shm.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <qtopia/global.h>
 
 class QMemoryFileData
 { 
@@ -126,13 +130,12 @@ QMemoryFileData * QMemoryFile::openData (const QString &fileName, int flags,
     uint protFlags;
     uint memFlags;
     int shmId = -1, shmAtFlag, shmGetFlag;
-    bool shmCreator;
     key_t shmKey = 0;
 
     if (fileName[0] == '\\'){
 	// We have a named memory map
 	QString memoryName = fileName.mid(1);
-	QString tmpFile("/tmp/");
+	QString tmpFile(Global::tempDir());
 	tmpFile.append(memoryName).append(".txt");
 	int f = ::open(tmpFile.latin1(), O_WRONLY);
 
@@ -166,6 +169,7 @@ QMemoryFileData * QMemoryFile::openData (const QString &fileName, int flags,
 		shmAtFlag = SHM_RDONLY;
 	    }
 
+	    bool shmCreator = FALSE;
 	    shmId =  shmget(shmKey, size, shmGetFlag);
 	    if (shmId == -1){
 		if (flags & QMemoryFile::Create){
@@ -182,7 +186,6 @@ QMemoryFileData * QMemoryFile::openData (const QString &fileName, int flags,
 	    }else{
 		// attach to previously created shared memory
 		block = (char*)shmat(shmId, NULL, shmAtFlag );
-		shmCreator = FALSE;
 		if (block == (void*)-1)
 		  qWarning(QString("QMemoryFile : ") + strerror(errno));
 	    }
