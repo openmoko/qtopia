@@ -1,0 +1,9 @@
+Files: plugins/calculator/libadvanced*
+Priority: optional
+Section: qpe/plugins
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-5
+Depends: qpe-base ($QPE_VERSION)
+Description: Advanced plugin for Qtopia calculator
+ An plugin providing trig, root and power functions for the Qtopia calculator

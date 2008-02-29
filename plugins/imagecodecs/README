@@ -1,0 +1,4 @@
+Image Codecs go here.
+
+Note that Qtopia Image Codecs are not the same as Qt 3 image format codecs,
+although the interface is very similar so porting should be easy.

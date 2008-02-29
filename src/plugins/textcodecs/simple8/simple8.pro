@@ -1,0 +1,10 @@
+TEMPLATE	= lib
+CONFIG		+= qtopia warn_on release
+HEADERS		= simple8impl.h
+SOURCES		= simple8impl.cpp
+TARGET		= simple8
+DESTDIR		= $(QPEDIR)/plugins/textcodecs
+INCLUDEPATH	+= $(QPEDIR)/include
+DEPENDPATH      += $(QPEDIR)/include
+LIBS            += -lqpe
+VERSION		= 1.0.0

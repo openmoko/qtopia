@@ -1,0 +1,8 @@
+Files: bin/at bin/atd
+Priority: required
+Section: qpe
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-5
+Depends: qt-embedded (>=$QTE_VERSION)
+Description: atd daemon for SHARP

@@ -1,0 +1,144 @@
+#############################################################################
+
+####### Compiler, tools and options
+
+CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
+CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
+CC	=	$(SYSCONF_CC) $(QT_C_MT)
+CFLAGS	=	$(SYSCONF_CFLAGS)
+INCPATH =	-I$(QPEDIR)/include
+LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
+LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
+MOC	=	$(SYSCONF_MOC)
+UIC	=	$(SYSCONF_UIC)
+
+####### Target
+
+DESTDIR = $(QPEDIR)/bin/
+VER_MAJ = 1
+VER_MIN = 0
+VER_PATCH = 0
+TARGET	= rotation
+TARGET1 = lib$(TARGET).so.$(VER_MAJ)
+
+####### Files
+
+HEADERS =	settings.h
+SOURCES =	rotation.cpp \
+		main.cpp
+OBJECTS =	rotation.o \
+		main.o \
+		rotationsettingsbase.o
+INTERFACES =    rotationsettingsbase.ui
+UICDECLS =      rotationsettingsbase.h
+UICIMPLS =      rotationsettingsbase.cpp
+SRCMOC	=	moc_settings.cpp \
+		moc_rotationsettingsbase.cpp
+OBJMOC	=	moc_settings.o \
+		moc_rotationsettingsbase.o
+
+
+####### Implicit rules
+
+.SUFFIXES: .cpp .cxx .cc .C .c
+
+.cpp.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.cxx.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.cc.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.C.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.c.o:
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $@ $<
+
+####### Build rules
+
+
+all: $(DESTDIR)$(TARGET)
+
+$(DESTDIR)$(TARGET): $(UICDECLS) $(OBJECTS) $(OBJMOC) $(SUBLIBS)
+	$(SYSCONF_LINK) $(LFLAGS) -o $(DESTDIR)$(TARGET) $(OBJECTS) $(OBJMOC) $(LIBS)
+
+moc: $(SRCMOC)
+
+tmake:
+	tmake rotation.pro
+
+clean:
+	-rm -f $(OBJECTS) $(OBJMOC) $(SRCMOC) $(UICIMPLS) $(UICDECLS)
+	-rm -f *~ core
+	-rm -f allmoc.cpp
+
+####### Extension Modules
+
+listpromodules:
+	@echo 
+
+listallmodules:
+	@echo 
+
+listaddonpromodules:
+	@echo 
+
+listaddonentmodules:
+	@echo 
+
+
+REQUIRES=
+
+####### Sub-libraries
+
+
+###### Combined headers
+
+
+
+####### Compile
+
+rotation.o: rotation.cpp \
+		settings.h \
+		rotationsettingsbase.h \
+		$(QPEDIR)/include/qpe/global.h \
+		$(QPEDIR)/include/qtopia/qpeglobal.h \
+		$(QPEDIR)/include/qpe/fontmanager.h \
+		$(QPEDIR)/include/qpe/config.h \
+		$(QPEDIR)/include/qpe/applnk.h \
+		$(QPEDIR)/include/qpe/qpeapplication.h \
+		$(QPEDIR)/include/qpe/qcopenvelope_qws.h
+
+main.o: main.cpp \
+		settings.h \
+		rotationsettingsbase.h \
+		$(QPEDIR)/include/qpe/qpeapplication.h \
+		$(QPEDIR)/include/qtopia/qpeglobal.h
+
+rotationsettingsbase.h: rotationsettingsbase.ui
+	$(UIC) rotationsettingsbase.ui -o $(INTERFACE_DECL_PATH)/rotationsettingsbase.h
+
+rotationsettingsbase.cpp: rotationsettingsbase.ui
+	$(UIC) rotationsettingsbase.ui -i rotationsettingsbase.h -o rotationsettingsbase.cpp
+
+rotationsettingsbase.o: rotationsettingsbase.cpp \
+		rotationsettingsbase.h \
+		rotationsettingsbase.ui
+
+moc_settings.o: moc_settings.cpp \
+		settings.h \
+		rotationsettingsbase.h
+
+moc_rotationsettingsbase.o: moc_rotationsettingsbase.cpp \
+		rotationsettingsbase.h
+
+moc_settings.cpp: settings.h
+	$(MOC) settings.h -o moc_settings.cpp
+
+moc_rotationsettingsbase.cpp: rotationsettingsbase.h
+	$(MOC) rotationsettingsbase.h -o moc_rotationsettingsbase.cpp
+
+

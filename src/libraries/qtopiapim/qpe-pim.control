@@ -1,0 +1,10 @@
+Files: lib/libqpepim.so.$VERSION_MAJ lib/libqpepim.so.$VERSION_MAJ.$VERSION_MIN lib/libqpepim.so.$VERSION_MAJ.$VERSION_MIN.$VERSION_PAT 
+Priority: optional
+Section: qpe/system
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-5
+License: GPL
+Depends: qpe-base, qt-embedded (>=$QTE_VERSION), qpe-qcop
+Description: PIM Data access library
+ PIM Data access library for QPE applications.

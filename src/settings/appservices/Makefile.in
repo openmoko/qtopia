@@ -1,0 +1,146 @@
+#############################################################################
+
+####### Compiler, tools and options
+
+CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
+CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
+CC	=	$(SYSCONF_CC) $(QT_C_MT)
+CFLAGS	=	$(SYSCONF_CFLAGS)
+INCPATH =	-I$(QPEDIR)/include
+LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
+LIBS	=	$(SUBLIBS) -lqpe -lqtopiaservices $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
+MOC	=	$(SYSCONF_MOC)
+UIC	=	$(SYSCONF_UIC)
+
+####### Target
+
+DESTDIR = $(QPEDIR)/bin/
+VER_MAJ = 1
+VER_MIN = 0
+VER_PATCH = 0
+TARGET	= appservices
+TARGET1 = lib$(TARGET).so.$(VER_MAJ)
+
+####### Files
+
+HEADERS =	appservices.h
+SOURCES =	appservices.cpp \
+		main.cpp
+OBJECTS =	appservices.o \
+		main.o \
+		appservicesbase.o
+INTERFACES =    appservicesbase.ui
+UICDECLS =      appservicesbase.h
+UICIMPLS =      appservicesbase.cpp
+SRCMOC	=	moc_appservices.cpp \
+		moc_appservicesbase.cpp
+OBJMOC	=	moc_appservices.o \
+		moc_appservicesbase.o
+
+
+####### Implicit rules
+
+.SUFFIXES: .cpp .cxx .cc .C .c
+
+.cpp.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.cxx.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.cc.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.C.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.c.o:
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $@ $<
+
+####### Build rules
+
+
+all: $(DESTDIR)$(TARGET)
+
+$(DESTDIR)$(TARGET): $(UICDECLS) $(OBJECTS) $(OBJMOC) $(SUBLIBS)
+	$(SYSCONF_LINK) $(LFLAGS) -o $(DESTDIR)$(TARGET) $(OBJECTS) $(OBJMOC) $(LIBS)
+
+moc: $(SRCMOC)
+
+tmake:
+	tmake appservices.pro
+
+clean:
+	-rm -f $(OBJECTS) $(OBJMOC) $(SRCMOC) $(UICIMPLS) $(UICDECLS)
+	-rm -f *~ core
+	-rm -f allmoc.cpp
+
+####### Extension Modules
+
+listpromodules:
+	@echo 
+
+listallmodules:
+	@echo 
+
+listaddonpromodules:
+	@echo 
+
+listaddonentmodules:
+	@echo 
+
+
+REQUIRES=
+
+####### Sub-libraries
+
+
+###### Combined headers
+
+
+
+####### Compile
+
+appservices.o: appservices.cpp \
+		appservices.h \
+		appservicesbase.h \
+		$(QPEDIR)/include/qtopia/applnk.h \
+		$(QPEDIR)/include/qtopia/resource.h \
+		$(QPEDIR)/include/qtopia/mimetype.h \
+		$(QPEDIR)/include/qtopia/qpeapplication.h \
+		$(QPEDIR)/include/qtopia/qpeglobal.h \
+		$(QPEDIR)/include/qtopia/config.h \
+		$(QPEDIR)/include/qtopia/services/services.h
+
+main.o: main.cpp \
+		appservices.h \
+		appservicesbase.h \
+		$(QPEDIR)/include/qtopia/applnk.h \
+		$(QPEDIR)/include/qpe/qpeapplication.h \
+		$(QPEDIR)/include/qtopia/qpeglobal.h
+
+appservicesbase.h: appservicesbase.ui
+	$(UIC) appservicesbase.ui -o $(INTERFACE_DECL_PATH)/appservicesbase.h
+
+appservicesbase.cpp: appservicesbase.ui
+	$(UIC) appservicesbase.ui -i appservicesbase.h -o appservicesbase.cpp
+
+appservicesbase.o: appservicesbase.cpp \
+		appservicesbase.h \
+		appservicesbase.ui
+
+moc_appservices.o: moc_appservices.cpp \
+		appservices.h \
+		appservicesbase.h \
+		$(QPEDIR)/include/qtopia/applnk.h
+
+moc_appservicesbase.o: moc_appservicesbase.cpp \
+		appservicesbase.h
+
+moc_appservices.cpp: appservices.h
+	$(MOC) appservices.h -o moc_appservices.cpp
+
+moc_appservicesbase.cpp: appservicesbase.h
+	$(MOC) appservicesbase.h -o moc_appservicesbase.cpp
+
+

@@ -1,0 +1,166 @@
+#############################################################################
+
+####### Compiler, tools and options
+
+CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
+CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
+CC	=	$(SYSCONF_CC) $(QT_C_MT)
+CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+INCPATH =	-I$(QPEDIR)/include
+LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
+LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
+MOC	=	$(SYSCONF_MOC)
+UIC	=	$(SYSCONF_UIC)
+
+####### Target
+
+DESTDIR = $(QPEDIR)/plugins/network/
+VER_MAJ = 1
+VER_MIN = 0
+VER_PATCH = 0
+TARGET	= dialup
+TARGET1 = lib$(TARGET).so.$(VER_MAJ)
+
+####### Files
+
+HEADERS =	dialup.h \
+		../proxiespage.h
+SOURCES =	dialup.cpp \
+		../proxiespage.cpp
+OBJECTS =	dialup.o \
+		../proxiespage.o \
+		dialupbase.o \
+		../proxiespagebase_p.o
+INTERFACES =    dialupbase.ui \
+		../proxiespagebase_p.ui
+UICDECLS =      dialupbase.h \
+		../proxiespagebase_p.h
+UICIMPLS =      dialupbase.cpp \
+		../proxiespagebase_p.cpp
+SRCMOC	=	../moc_proxiespage.cpp \
+		moc_dialupbase.cpp \
+		../moc_proxiespagebase_p.cpp
+OBJMOC	=	../moc_proxiespage.o \
+		moc_dialupbase.o \
+		../moc_proxiespagebase_p.o
+
+
+####### Implicit rules
+
+.SUFFIXES: .cpp .cxx .cc .C .c
+
+.cpp.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.cxx.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.cc.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.C.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.c.o:
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $@ $<
+
+####### Build rules
+
+
+all: $(DESTDIR)$(SYSCONF_LINK_TARGET)
+
+$(DESTDIR)$(SYSCONF_LINK_TARGET): $(UICDECLS) $(OBJECTS) $(OBJMOC) $(SUBLIBS)
+	$(SYSCONF_LINK_LIB)
+
+moc: $(SRCMOC)
+
+tmake:
+	tmake dialup.pro
+
+clean:
+	-rm -f $(OBJECTS) $(OBJMOC) $(SRCMOC) $(UICIMPLS) $(UICDECLS)
+	-rm -f *~ core
+	-rm -f allmoc.cpp
+
+####### Extension Modules
+
+listpromodules:
+	@echo 
+
+listallmodules:
+	@echo 
+
+listaddonpromodules:
+	@echo 
+
+listaddonentmodules:
+	@echo 
+
+
+REQUIRES=
+
+####### Sub-libraries
+
+
+###### Combined headers
+
+
+
+####### Compile
+
+dialup.o: dialup.cpp \
+		dialup.h \
+		$(QPEDIR)/include/qpe/networkinterface.h \
+		$(QPEDIR)/include/qpe/qcom.h \
+		$(QPEDIR)/include/qtopia/qpeglobal.h \
+		$(QPEDIR)/include/qtopia/quuid.h \
+		dialupbase.h \
+		$(QPEDIR)/include/qpe/config.h \
+		$(QPEDIR)/include/qpe/global.h \
+		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
+		../proxiespage.h
+
+../proxiespage.o: ../proxiespage.cpp \
+		../proxiespage.h \
+		$(QPEDIR)/include/qpe/config.h \
+		proxiespagebase_p.h
+
+dialupbase.h: dialupbase.ui
+	$(UIC) dialupbase.ui -o $(INTERFACE_DECL_PATH)/dialupbase.h
+
+dialupbase.cpp: dialupbase.ui
+	$(UIC) dialupbase.ui -i dialupbase.h -o dialupbase.cpp
+
+../proxiespagebase_p.h: ../proxiespagebase_p.ui
+	$(UIC) ../proxiespagebase_p.ui -o $(INTERFACE_DECL_PATH)/../proxiespagebase_p.h
+
+proxiespagebase_p.h: ../proxiespagebase_p.ui
+	$(UIC) ../proxiespagebase_p.ui -o proxiespagebase_p.h
+
+../proxiespagebase_p.cpp: ../proxiespagebase_p.ui
+	$(UIC) ../proxiespagebase_p.ui -i proxiespagebase_p.h -o ../proxiespagebase_p.cpp
+
+dialupbase.o: dialupbase.cpp
+
+../proxiespagebase_p.o: ../proxiespagebase_p.cpp
+
+../moc_proxiespage.o: ../moc_proxiespage.cpp \
+		../proxiespage.h \
+		$(QPEDIR)/include/qpe/config.h
+
+moc_dialupbase.o: moc_dialupbase.cpp \
+		dialupbase.h
+
+../moc_proxiespagebase_p.o: ../moc_proxiespagebase_p.cpp \
+		../proxiespagebase_p.h
+
+../moc_proxiespage.cpp: ../proxiespage.h
+	$(MOC) ../proxiespage.h -o ../moc_proxiespage.cpp
+
+moc_dialupbase.cpp: dialupbase.h
+	$(MOC) dialupbase.h -o moc_dialupbase.cpp
+
+../moc_proxiespagebase_p.cpp: ../proxiespagebase_p.h
+	$(MOC) ../proxiespagebase_p.h -o ../moc_proxiespagebase_p.cpp
+
+

@@ -1,0 +1,9 @@
+Files: bin/appservices apps/Settings/AppServices.desktop pics/AppServices.png
+Priority: optional
+Section: qpe/settings
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-7
+Depends: qpe-base ($QPE_VERSION)
+Description: Application Services settings
+ Allows you to choose which application provides which service.

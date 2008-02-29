@@ -1,0 +1,6 @@
+
+class atd
+{
+public:
+    atd();
+}

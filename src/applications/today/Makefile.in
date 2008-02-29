@@ -1,0 +1,190 @@
+#############################################################################
+
+####### Compiler, tools and options
+
+CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
+CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
+CC	=	$(SYSCONF_CC) $(QT_C_MT)
+CFLAGS	=	$(SYSCONF_CFLAGS)
+INCPATH =	-I$(QPEDIR)/include -Ilibrary
+LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
+LIBS	=	$(SUBLIBS) -lqpe -lqtopiaservices -Wl,-export-dynamic $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
+MOC	=	$(SYSCONF_MOC)
+UIC	=	$(SYSCONF_UIC)
+
+####### Target
+
+DESTDIR = $(QPEDIR)/bin/
+VER_MAJ = 1
+VER_MIN = 0
+VER_PATCH = 0
+TARGET	= today
+TARGET1 = lib$(TARGET).so.$(VER_MAJ)
+
+####### Files
+
+HEADERS =	today.h \
+		todayoptions.h
+SOURCES =	today.cpp \
+		todayoptions.cpp \
+		main.cpp
+OBJECTS =	today.o \
+		todayoptions.o \
+		main.o \
+		todayoptionsbase.o
+INTERFACES =    todayoptionsbase.ui
+UICDECLS =      todayoptionsbase.h
+UICIMPLS =      todayoptionsbase.cpp
+SRCMOC	=	moc_today.cpp \
+		moc_todayoptions.cpp \
+		moc_todayoptionsbase.cpp
+OBJMOC	=	moc_today.o \
+		moc_todayoptions.o \
+		moc_todayoptionsbase.o
+
+
+####### Implicit rules
+
+.SUFFIXES: .cpp .cxx .cc .C .c
+
+.cpp.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.cxx.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.cc.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.C.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.c.o:
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $@ $<
+
+####### Build rules
+
+
+all: $(DESTDIR)$(TARGET)
+
+$(DESTDIR)$(TARGET): $(UICDECLS) $(OBJECTS) $(OBJMOC) $(SUBLIBS)
+	$(SYSCONF_LINK) $(LFLAGS) -o $(DESTDIR)$(TARGET) $(OBJECTS) $(OBJMOC) $(LIBS)
+
+moc: $(SRCMOC)
+
+tmake:
+	tmake today.pro
+
+clean:
+	-rm -f $(OBJECTS) $(OBJMOC) $(SRCMOC) $(UICIMPLS) $(UICDECLS)
+	-rm -f *~ core
+	-rm -f allmoc.cpp
+
+####### Extension Modules
+
+listpromodules:
+	@echo 
+
+listallmodules:
+	@echo 
+
+listaddonpromodules:
+	@echo 
+
+listaddonentmodules:
+	@echo 
+
+
+REQUIRES=
+
+####### Sub-libraries
+
+
+###### Combined headers
+
+
+
+####### Compile
+
+today.o: today.cpp \
+		today.h \
+		$(QPEDIR)/include/qtopia/qlibrary.h \
+		$(QPEDIR)/include/qtopia/qpeglobal.h \
+		$(QPEDIR)/include/qtopia/qcom.h \
+		$(QPEDIR)/include/qtopia/quuid.h \
+		$(QPEDIR)/include/qtopia/todayplugininterface.h \
+		todayoptions.h \
+		todayoptionsbase.h \
+		$(QPEDIR)/include/qtopia/qpeapplication.h \
+		$(QPEDIR)/include/qtopia/config.h \
+		$(QPEDIR)/include/qtopia/global.h \
+		$(QPEDIR)/include/qtopia/qcopenvelope_qws.h \
+		$(QPEDIR)/include/qtopia/services/services.h \
+		$(QPEDIR)/include/qtopia/applnk.h \
+		$(QPEDIR)/include/qtopia/datebookmonth.h \
+		$(QPEDIR)/include/qtopia/private/event.h \
+		$(QPEDIR)/include/qtopia/private/palmtoprecord.h \
+		$(QPEDIR)/include/qtopia/timeconversion.h
+
+todayoptions.o: todayoptions.cpp \
+		todayoptions.h \
+		todayoptionsbase.h \
+		today.h \
+		$(QPEDIR)/include/qtopia/qlibrary.h \
+		$(QPEDIR)/include/qtopia/qpeglobal.h \
+		$(QPEDIR)/include/qtopia/qcom.h \
+		$(QPEDIR)/include/qtopia/quuid.h \
+		$(QPEDIR)/include/qtopia/todayplugininterface.h \
+		$(QPEDIR)/include/qtopia/resource.h \
+		$(QPEDIR)/include/qtopia/config.h
+
+main.o: main.cpp \
+		today.h \
+		$(QPEDIR)/include/qtopia/qlibrary.h \
+		$(QPEDIR)/include/qtopia/qpeglobal.h \
+		$(QPEDIR)/include/qtopia/qcom.h \
+		$(QPEDIR)/include/qtopia/quuid.h \
+		$(QPEDIR)/include/qtopia/todayplugininterface.h \
+		$(QPEDIR)/include/qpe/qpeapplication.h
+
+todayoptionsbase.h: todayoptionsbase.ui
+	$(UIC) todayoptionsbase.ui -o $(INTERFACE_DECL_PATH)/todayoptionsbase.h
+
+todayoptionsbase.cpp: todayoptionsbase.ui
+	$(UIC) todayoptionsbase.ui -i todayoptionsbase.h -o todayoptionsbase.cpp
+
+todayoptionsbase.o: todayoptionsbase.cpp \
+		todayoptionsbase.h \
+		todayoptionsbase.ui
+
+moc_today.o: moc_today.cpp \
+		today.h \
+		$(QPEDIR)/include/qtopia/qlibrary.h \
+		$(QPEDIR)/include/qtopia/qpeglobal.h \
+		$(QPEDIR)/include/qtopia/qcom.h \
+		$(QPEDIR)/include/qtopia/quuid.h \
+		$(QPEDIR)/include/qtopia/todayplugininterface.h
+
+moc_todayoptions.o: moc_todayoptions.cpp \
+		todayoptions.h \
+		todayoptionsbase.h \
+		today.h \
+		$(QPEDIR)/include/qtopia/qlibrary.h \
+		$(QPEDIR)/include/qtopia/qpeglobal.h \
+		$(QPEDIR)/include/qtopia/qcom.h \
+		$(QPEDIR)/include/qtopia/quuid.h \
+		$(QPEDIR)/include/qtopia/todayplugininterface.h
+
+moc_todayoptionsbase.o: moc_todayoptionsbase.cpp \
+		todayoptionsbase.h
+
+moc_today.cpp: today.h
+	$(MOC) today.h -o moc_today.cpp
+
+moc_todayoptions.cpp: todayoptions.h
+	$(MOC) todayoptions.h -o moc_todayoptions.cpp
+
+moc_todayoptionsbase.cpp: todayoptionsbase.h
+	$(MOC) todayoptionsbase.h -o moc_todayoptionsbase.cpp
+
+

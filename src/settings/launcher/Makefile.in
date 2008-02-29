@@ -1,0 +1,204 @@
+#############################################################################
+
+####### Compiler, tools and options
+
+CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
+CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
+CC	=	$(SYSCONF_CC) $(QT_C_MT)
+CFLAGS	=	$(SYSCONF_CFLAGS)
+INCPATH =	-I$(QPEDIR)/include
+LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
+LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
+MOC	=	$(SYSCONF_MOC)
+UIC	=	$(SYSCONF_UIC)
+
+####### Target
+
+DESTDIR = $(QPEDIR)/bin/
+VER_MAJ = 1
+VER_MIN = 0
+VER_PATCH = 0
+TARGET	= launchersettings
+TARGET1 = lib$(TARGET).so.$(VER_MAJ)
+
+####### Files
+
+HEADERS =	launchersettings.h \
+		wallpaperselector.h \
+		colorselector.h
+SOURCES =	main.cpp \
+		launchersettings.cpp \
+		wallpaperselector.cpp \
+		colorselector.cpp
+OBJECTS =	main.o \
+		launchersettings.o \
+		wallpaperselector.o \
+		colorselector.o \
+		launchersettingsbase.o \
+		wallpaperselectorbase.o
+INTERFACES =    launchersettingsbase.ui \
+		wallpaperselectorbase.ui
+UICDECLS =      launchersettingsbase.h \
+		wallpaperselectorbase.h
+UICIMPLS =      launchersettingsbase.cpp \
+		wallpaperselectorbase.cpp
+SRCMOC	=	moc_launchersettings.cpp \
+		moc_wallpaperselector.cpp \
+		moc_colorselector.cpp \
+		moc_launchersettingsbase.cpp \
+		moc_wallpaperselectorbase.cpp
+OBJMOC	=	moc_launchersettings.o \
+		moc_wallpaperselector.o \
+		moc_colorselector.o \
+		moc_launchersettingsbase.o \
+		moc_wallpaperselectorbase.o
+
+
+####### Implicit rules
+
+.SUFFIXES: .cpp .cxx .cc .C .c
+
+.cpp.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.cxx.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.cc.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.C.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.c.o:
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $@ $<
+
+####### Build rules
+
+
+all: $(DESTDIR)$(TARGET)
+
+$(DESTDIR)$(TARGET): $(UICDECLS) $(OBJECTS) $(OBJMOC) $(SUBLIBS)
+	$(SYSCONF_LINK) $(LFLAGS) -o $(DESTDIR)$(TARGET) $(OBJECTS) $(OBJMOC) $(LIBS)
+
+moc: $(SRCMOC)
+
+tmake:
+	tmake launcher.pro
+
+clean:
+	-rm -f $(OBJECTS) $(OBJMOC) $(SRCMOC) $(UICIMPLS) $(UICDECLS)
+	-rm -f *~ core
+	-rm -f allmoc.cpp
+
+####### Extension Modules
+
+listpromodules:
+	@echo 
+
+listallmodules:
+	@echo 
+
+listaddonpromodules:
+	@echo 
+
+listaddonentmodules:
+	@echo 
+
+
+REQUIRES=
+
+####### Sub-libraries
+
+
+###### Combined headers
+
+
+
+####### Compile
+
+main.o: main.cpp \
+		launchersettings.h \
+		launchersettingsbase.h \
+		$(QPEDIR)/include/qpe/qpeapplication.h \
+		$(QPEDIR)/include/qtopia/qpeglobal.h
+
+launchersettings.o: launchersettings.cpp \
+		launchersettings.h \
+		launchersettingsbase.h \
+		wallpaperselector.h \
+		wallpaperselectorbase.h \
+		colorselector.h \
+		$(QPEDIR)/include/qpe/qpeapplication.h \
+		$(QPEDIR)/include/qtopia/qpeglobal.h \
+		$(QPEDIR)/include/qpe/resource.h \
+		$(QPEDIR)/include/qpe/applnk.h \
+		$(QPEDIR)/include/qpe/mimetype.h \
+		$(QPEDIR)/include/qpe/config.h \
+		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
+		$(QPEDIR)/include/qpe/fontdatabase.h \
+		$(QPEDIR)/include/qpe/fontfactoryinterface.h \
+		$(QPEDIR)/include/qpe/qcom.h \
+		$(QPEDIR)/include/qtopia/quuid.h
+
+wallpaperselector.o: wallpaperselector.cpp \
+		wallpaperselector.h \
+		wallpaperselectorbase.h \
+		$(QPEDIR)/include/qpe/qpeapplication.h \
+		$(QPEDIR)/include/qtopia/qpeglobal.h \
+		$(QPEDIR)/include/qpe/resource.h \
+		$(QPEDIR)/include/qpe/global.h \
+		$(QPEDIR)/include/qpe/applnk.h
+
+colorselector.o: colorselector.cpp \
+		colorselector.h
+
+launchersettingsbase.h: launchersettingsbase.ui
+	$(UIC) launchersettingsbase.ui -o $(INTERFACE_DECL_PATH)/launchersettingsbase.h
+
+launchersettingsbase.cpp: launchersettingsbase.ui
+	$(UIC) launchersettingsbase.ui -i launchersettingsbase.h -o launchersettingsbase.cpp
+
+wallpaperselectorbase.h: wallpaperselectorbase.ui
+	$(UIC) wallpaperselectorbase.ui -o $(INTERFACE_DECL_PATH)/wallpaperselectorbase.h
+
+wallpaperselectorbase.cpp: wallpaperselectorbase.ui
+	$(UIC) wallpaperselectorbase.ui -i wallpaperselectorbase.h -o wallpaperselectorbase.cpp
+
+launchersettingsbase.o: launchersettingsbase.cpp
+
+wallpaperselectorbase.o: wallpaperselectorbase.cpp
+
+moc_launchersettings.o: moc_launchersettings.cpp \
+		launchersettings.h \
+		launchersettingsbase.h
+
+moc_wallpaperselector.o: moc_wallpaperselector.cpp \
+		wallpaperselector.h \
+		wallpaperselectorbase.h
+
+moc_colorselector.o: moc_colorselector.cpp \
+		colorselector.h
+
+moc_launchersettingsbase.o: moc_launchersettingsbase.cpp \
+		launchersettingsbase.h
+
+moc_wallpaperselectorbase.o: moc_wallpaperselectorbase.cpp \
+		wallpaperselectorbase.h
+
+moc_launchersettings.cpp: launchersettings.h
+	$(MOC) launchersettings.h -o moc_launchersettings.cpp
+
+moc_wallpaperselector.cpp: wallpaperselector.h
+	$(MOC) wallpaperselector.h -o moc_wallpaperselector.cpp
+
+moc_colorselector.cpp: colorselector.h
+	$(MOC) colorselector.h -o moc_colorselector.cpp
+
+moc_launchersettingsbase.cpp: launchersettingsbase.h
+	$(MOC) launchersettingsbase.h -o moc_launchersettingsbase.cpp
+
+moc_wallpaperselectorbase.cpp: wallpaperselectorbase.h
+	$(MOC) wallpaperselectorbase.h -o moc_wallpaperselectorbase.cpp
+
+

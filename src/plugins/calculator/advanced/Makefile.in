@@ -1,0 +1,130 @@
+#############################################################################
+
+####### Compiler, tools and options
+
+CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
+CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
+CC	=	$(SYSCONF_CC) $(QT_C_MT)
+CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+INCPATH =	-I$(QPEDIR)/include
+LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
+LIBS	=	$(SUBLIBS) -lqtopiacalc $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
+MOC	=	$(SYSCONF_MOC)
+UIC	=	$(SYSCONF_UIC)
+
+####### Target
+
+DESTDIR = $(QPEDIR)/plugins/calculator/
+VER_MAJ = 1
+VER_MIN = 0
+VER_PATCH = 0
+TARGET	= advanced
+TARGET1 = lib$(TARGET).so.$(VER_MAJ)
+
+####### Files
+
+HEADERS =	advanced.h \
+		advancedfactory.h
+SOURCES =	advanced.cpp \
+		advancedfactory.cpp
+OBJECTS =	advanced.o \
+		advancedfactory.o
+INTERFACES =    
+UICDECLS =      
+UICIMPLS =      
+SRCMOC	=	moc_advanced.cpp
+OBJMOC	=	moc_advanced.o
+
+
+####### Implicit rules
+
+.SUFFIXES: .cpp .cxx .cc .C .c
+
+.cpp.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.cxx.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.cc.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.C.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.c.o:
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $@ $<
+
+####### Build rules
+
+
+all: $(DESTDIR)$(SYSCONF_LINK_TARGET)
+
+$(DESTDIR)$(SYSCONF_LINK_TARGET): $(UICDECLS) $(OBJECTS) $(OBJMOC) $(SUBLIBS)
+	$(SYSCONF_LINK_LIB)
+
+moc: $(SRCMOC)
+
+tmake:
+	tmake advanced.pro
+
+clean:
+	-rm -f $(OBJECTS) $(OBJMOC) $(SRCMOC) $(UICIMPLS) $(UICDECLS)
+	-rm -f *~ core
+	-rm -f allmoc.cpp
+
+####### Extension Modules
+
+listpromodules:
+	@echo 
+
+listallmodules:
+	@echo 
+
+listaddonpromodules:
+	@echo 
+
+listaddonentmodules:
+	@echo 
+
+
+REQUIRES=
+
+####### Sub-libraries
+
+
+###### Combined headers
+
+
+
+####### Compile
+
+advanced.o: advanced.cpp \
+		advanced.h \
+		$(QPEDIR)/include/qtopia/calc/engine.h \
+		$(QPEDIR)/include/qtopia/calc/instruction.h \
+		$(QPEDIR)/include/qtopia/calc/stdinputwidgets.h \
+		$(QPEDIR)/include/qtopia/calc/doubleinstruction.h \
+		$(QPEDIR)/include/qpe/resource.h
+
+advancedfactory.o: advancedfactory.cpp \
+		advancedfactory.h \
+		advanced.h \
+		$(QPEDIR)/include/qtopia/calc/engine.h \
+		$(QPEDIR)/include/qtopia/calc/instruction.h \
+		$(QPEDIR)/include/qtopia/calc/stdinputwidgets.h \
+		$(QPEDIR)/include/qtopia/calc/plugininterface.h \
+		$(QPEDIR)/include/qpe/qcom.h \
+		$(QPEDIR)/include/qtopia/qpeglobal.h \
+		$(QPEDIR)/include/qtopia/quuid.h
+
+moc_advanced.o: moc_advanced.cpp \
+		advanced.h \
+		$(QPEDIR)/include/qtopia/calc/engine.h \
+		$(QPEDIR)/include/qtopia/calc/instruction.h \
+		$(QPEDIR)/include/qtopia/calc/stdinputwidgets.h
+
+moc_advanced.cpp: advanced.h
+	$(MOC) advanced.h -o moc_advanced.cpp
+
+

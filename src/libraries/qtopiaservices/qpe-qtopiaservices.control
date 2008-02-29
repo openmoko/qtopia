@@ -1,0 +1,9 @@
+Files: lib/libqtopiaservices.so*
+Priority: required
+Section: qpe/system
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-4
+Depends: qpe-base
+Description: Application Services library forQtopia environment
+ Necessary.

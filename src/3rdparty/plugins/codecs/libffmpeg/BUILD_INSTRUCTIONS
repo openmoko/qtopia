@@ -1,0 +1,38 @@
+
+
+IMPORTANT NOTE:
+---------------
+Compile this with the skiff compiler and not the embedix one.
+(toolchain in /skiff/... instead of /opt/Embedix/...)
+The embedix compiler sucks eggs at optimizaing the libraries code for speed.
+To do this set TEAMBUILDER_CC_VERSION=2.95.2 and when working on optimizing anything
+you will be certain that a different random compiler chosen by teambuilder isn't screwing
+up your benchmarking.
+
+While this is still in development, I don't want to check in all of ffmpeg yet.
+Additionally ffmpeg haven't made an official release yet but one is expected soon.
+
+If you would like to work on or test this plugin out as it is at the moment,
+you simply need to run "cvs up" to grab the latest ffmpeg code from cvs, and then
+run ./configure (for arm use './configure --cpu=armv4l --cross-prefix=arm-linux-')
+and then run make in the libavcodec and libav directories.
+
+I'll check it in when they make an official release. For now the snapshot they have on their
+web site (ffmpeg.org) may be better than using their cvs code as at the moment it is broken.
+Otherwise you'll need to to a reverse diff back to 2002/08/31 using:
+cvs diff -D "2002/08/31" > d.diff ; patch -R -p0 < d.diff
+
+Then in Qtopia's top level Makefile add to COMPONENTS "3rdparty/plugins/codecs/libffmpeg"
+and reconfigure Qtopia and run make. The libffmpegplugin should be built and linked together
+with libavcodec and libav and ready to run.
+
+Currently there are some issues with the audio decoding which I am working on, but
+it appears that the library is capable of decoding mpeg streams very efficently such
+that it won't ever need to skip frames which will be quite an improvement over libmpeg3.
+There are also issues with controlling the decoding to seek forwards and backwards in
+a movie, but that should be resolvable.
+
+
+John
+
+

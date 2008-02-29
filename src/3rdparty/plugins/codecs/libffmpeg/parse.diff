@@ -1,0 +1,39 @@
+Index: mpeg12.c
+===================================================================
+RCS file: /cvsroot/ffmpeg/ffmpeg/libavcodec/mpeg12.c,v
+retrieving revision 1.51
+diff -u -3 -p -d -u -r1.51 mpeg12.c
+--- mpeg12.c	6 Sep 2002 22:30:16 -0000	1.51
++++ mpeg12.c	17 Sep 2002 06:45:57 -0000
+@@ -1271,6 +1271,7 @@ static int mpeg_decode_init(AVCodecConte
+     s->repeat_field = 0;
+     s->mpeg_enc_ctx.codec_id= avctx->codec->id;
+     avctx->mbskip_table= s->mpeg_enc_ctx.mbskip_table;
++    avctx->parse_only = 0;
+     return 0;
+ }
+ 
+@@ -1738,6 +1739,14 @@ static int mpeg_decode_frame(AVCodecCont
+                     /* we have a complete image : we try to decompress it */
+                     mpeg1_decode_picture(avctx, 
+                                          s->buffer, input_size);
++		    if ( avctx->parse_only ) {
++			MpegEncContext *s2 = &s->mpeg_enc_ctx;
++			avctx->key_frame = (s2->pict_type == I_TYPE);
++			avctx->pict_type = s2->pict_type;
++			s2->last_pict_type = s2->pict_type;
++			// Mark that we've found the start of a picture
++			*data_size = sizeof(AVPicture);
++		    }
+                     break;
+                 case EXT_START_CODE:
+                     mpeg_decode_extension(avctx,
+@@ -1746,6 +1755,8 @@ static int mpeg_decode_frame(AVCodecCont
+                 default:
+                     if (start_code >= SLICE_MIN_START_CODE &&
+                         start_code <= SLICE_MAX_START_CODE) {
++			if ( avctx->parse_only ) 
++			    goto the_end;
+                         ret = mpeg_decode_slice(avctx, picture,
+                                                 start_code, s->buffer, input_size);
+                         if (ret == 1) {

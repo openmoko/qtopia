@@ -1,0 +1,9 @@
+Images here are converted to "inlinepics_p.h" and included in the libqpe, so they
+load much faster, and can be shared by multiple applications. Since the inlined pics are rarely
+changed, the file is checked into p4.
+
+To create a new inlinepics header file, you must run the qembed application from the qt/3.x tree. 
+Assuming qembed is in your path, the following command should work:
+
+p4 edit $QPEDIR/src/libraries/qtopia/inlinepics_p.h
+qembed --images $QPEDIR/pics/inline/*.* > $QPEDIR/src/libraries/qtopia/inlinepics_p.h

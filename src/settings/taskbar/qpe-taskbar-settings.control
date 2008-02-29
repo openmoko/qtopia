@@ -1,0 +1,9 @@
+Files: bin/taskbarsettings apps/Settings/Taskbar.desktop
+Priority: optional
+Section: qpe/settings
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-7
+Depends: qpe-base ($QPE_VERSION)
+Description: Taskbar settings dialog
+ For the Qtopia environment.

@@ -1,0 +1,9 @@
+Files: plugins/applets/libbatteryapplet.so*
+Priority: optional
+Section: qpe/taskbar
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-7
+Depends: qpe-base ($QPE_VERSION)
+Description: Battery Monitor applet
+ Battery Monitor applet for the Qtopia environment taskbar.

@@ -1,0 +1,40 @@
+
+./configure \
+    --cpu=armv4l \
+    --cross-prefix=arm-linux- \
+    --disable-mmx \
+    --disable-altivec \
+    --disable-simple_idct \
+    --disable-mpegaudio-hp \
+    --disable-mpeg1video_encoder \
+    --disable-h263_encoder \
+    --disable-rv10_encoder \
+    --disable-mp2_encoder \
+    --disable-ac3_encoder \
+    --disable-mjpeg_encoder \
+    --disable-mpeg4_encoder \
+    --disable-rawvideo_encoder \
+    --disable-msmpeg4v1_encoder \
+    --disable-msmpeg4v2_encoder \
+    --disable-msmpeg4v3_encoder \
+    --disable-wmv1_encoder \
+    --disable-wmv2_encoder \
+    --disable-h263p_encoder \
+    --disable-h263i_encoder \
+    --disable-svq1_encoder
+
+# --disable-audio-oss --disable-v4l --disable-a52
+
+cd libavcodec
+make clean
+rm *.a
+make
+cd ../libav
+make clean
+rm *.a
+make
+cd ..
+touch libffmpegplugin.cpp
+make
+
+

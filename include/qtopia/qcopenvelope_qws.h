@@ -1,0 +1,1 @@
+../../src/libraries/qtopia/qcopenvelope_qws.h

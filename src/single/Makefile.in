@@ -1,0 +1,1334 @@
+#############################################################################
+
+####### Compiler, tools and options
+
+CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
+CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) -DSINGLE_APP -DQT_NO_COMPONENT -DQT_HAS_OK_IN_TITLEBAR -DUSE_MULTILINEEDIT -DFPM_64BIT
+CC	=	$(SYSCONF_CC) $(QT_C_MT)
+CFLAGS	=	$(SYSCONF_CFLAGS) -DSINGLE_APP -DQT_NO_COMPONENT -DQT_HAS_OK_IN_TITLEBAR -DUSE_MULTILINEEDIT -DFPM_64BIT
+INCPATH =	-I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include -I$(QPEDIR)/include
+LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
+LIBS	=	$(SUBLIBS) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
+MOC	=	$(SYSCONF_MOC)
+UIC	=	$(SYSCONF_UIC)
+
+####### Target
+
+DESTDIR = ./
+VER_MAJ = 1
+VER_MIN = 0
+VER_PATCH = 0
+TARGET	= qpe
+TARGET1 = lib$(TARGET).so.$(VER_MAJ)
+
+####### Files
+
+HEADERS =	$(QPEDIR)/wordgame/wordgame.h \
+		$(QPEDIR)/todo/mainwindow.h \
+		$(QPEDIR)/todo/todoentryimpl.h \
+		$(QPEDIR)/todo/todotable.h \
+		$(QPEDIR)/textedit/textedit.h \
+		$(QPEDIR)/tetrix/gtetrix.h \
+		$(QPEDIR)/tetrix/qtetrix.h \
+		$(QPEDIR)/tetrix/qtetrixb.h \
+		$(QPEDIR)/tetrix/tpiece.h \
+		$(QPEDIR)/taskbar/appicons.h \
+		$(QPEDIR)/taskbar/apps.h \
+		$(QPEDIR)/taskbar/background.h \
+		$(QPEDIR)/taskbar/desktop.h \
+		$(QPEDIR)/taskbar/info.h \
+		$(QPEDIR)/taskbar/inputmethodinterface.h \
+		$(QPEDIR)/taskbar/inputmethods.h \
+		$(QPEDIR)/taskbar/mrulist.h \
+		$(QPEDIR)/taskbar/quicklauncher.h \
+		$(QPEDIR)/taskbar/shutdownimpl.h \
+		$(QPEDIR)/taskbar/sidething.h \
+		$(QPEDIR)/taskbar/stabmon.h \
+		$(QPEDIR)/taskbar/startmenu.h \
+		$(QPEDIR)/taskbar/systray.h \
+		$(QPEDIR)/taskbar/taskbar.h \
+		$(QPEDIR)/taskbar/taskbarappletinterface.h \
+		$(QPEDIR)/taskbar/transferserver.h \
+		$(QPEDIR)/taskbar/wait.h \
+		$(QPEDIR)/taskbar/clockapplet/clock.h \
+		$(QPEDIR)/taskbar/clockapplet/clockappletimpl.h \
+		$(QPEDIR)/sysinfo/graph.h \
+		$(QPEDIR)/sysinfo/load.h \
+		$(QPEDIR)/sysinfo/memory.h \
+		$(QPEDIR)/sysinfo/storage.h \
+		$(QPEDIR)/sysinfo/sysinfo.h \
+		$(QPEDIR)/sysinfo/versioninfo.h \
+		$(QPEDIR)/solitaire/canvascard.h \
+		$(QPEDIR)/solitaire/canvascardgame.h \
+		$(QPEDIR)/solitaire/canvascardwindow.h \
+		$(QPEDIR)/solitaire/canvasshapes.h \
+		$(QPEDIR)/solitaire/card.h \
+		$(QPEDIR)/solitaire/carddeck.h \
+		$(QPEDIR)/solitaire/cardgame.h \
+		$(QPEDIR)/solitaire/cardgamelayout.h \
+		$(QPEDIR)/solitaire/cardpile.h \
+		$(QPEDIR)/solitaire/freecellcardgame.h \
+		$(QPEDIR)/solitaire/patiencecardgame.h \
+		$(QPEDIR)/snake/codes.h \
+		$(QPEDIR)/snake/interface.h \
+		$(QPEDIR)/snake/obstacle.h \
+		$(QPEDIR)/snake/snake.h \
+		$(QPEDIR)/snake/target.h \
+		$(QPEDIR)/settings/systemtime/settime.h \
+		$(QPEDIR)/settings/appearance/settings.h \
+		$(QPEDIR)/parashoot/base.h \
+		$(QPEDIR)/parashoot/bullet.h \
+		$(QPEDIR)/parashoot/cannon.h \
+		$(QPEDIR)/parashoot/codes.h \
+		$(QPEDIR)/parashoot/helicopter.h \
+		$(QPEDIR)/parashoot/interface.h \
+		$(QPEDIR)/parashoot/man.h \
+		$(QPEDIR)/mpegplayer/audiodevice.h \
+		$(QPEDIR)/mpegplayer/audiowidget.h \
+		$(QPEDIR)/mpegplayer/mediaplayer.h \
+		$(QPEDIR)/mpegplayer/mediaplayerplugininterface.h \
+		$(QPEDIR)/mpegplayer/mpegcontrol.h \
+		$(QPEDIR)/mpegplayer/mpegview.h \
+		$(QPEDIR)/mpegplayer/playlistwidget.h \
+		$(QPEDIR)/mpegplayer/wavplugin/wavplugin.h \
+		$(QPEDIR)/mpegplayer/wavplugin/wavpluginimpl.h \
+		$(QPEDIR)/mpegplayer/libmad/bit.h \
+		$(QPEDIR)/mpegplayer/libmad/decoder.h \
+		$(QPEDIR)/mpegplayer/libmad/fixed.h \
+		$(QPEDIR)/mpegplayer/libmad/frame.h \
+		$(QPEDIR)/mpegplayer/libmad/huffman.h \
+		$(QPEDIR)/mpegplayer/libmad/layer12.h \
+		$(QPEDIR)/mpegplayer/libmad/layer3.h \
+		$(QPEDIR)/mpegplayer/libmad/libmad_global.h \
+		$(QPEDIR)/mpegplayer/libmad/libmad_version.h \
+		$(QPEDIR)/mpegplayer/libmad/libmadplugin.h \
+		$(QPEDIR)/mpegplayer/libmad/libmadpluginimpl.h \
+		$(QPEDIR)/mpegplayer/libmad/mad.h \
+		$(QPEDIR)/mpegplayer/libmad/stream.h \
+		$(QPEDIR)/mpegplayer/libmad/synth.h \
+		$(QPEDIR)/mpegplayer/libmad/timer.h \
+		$(QPEDIR)/minesweep/minefield.h \
+		$(QPEDIR)/minesweep/minesweep.h \
+		$(QPEDIR)/include/alarmserver.h \
+		$(QPEDIR)/include/applnk.h \
+		$(QPEDIR)/include/calendar.h \
+		$(QPEDIR)/include/config.h \
+		$(QPEDIR)/include/datebookdb.h \
+		$(QPEDIR)/include/datebookmonth.h \
+		$(QPEDIR)/include/filemanager.h \
+		$(QPEDIR)/include/fileselector.h \
+		$(QPEDIR)/include/fontdatabase.h \
+		$(QPEDIR)/include/fontfactoryinterface.h \
+		$(QPEDIR)/include/fontmanager.h \
+		$(QPEDIR)/include/global.h \
+		$(QPEDIR)/include/imageedit.h \
+		$(QPEDIR)/include/inlinepics.h \
+		$(QPEDIR)/include/lightstyle.h \
+		$(QPEDIR)/include/menubutton.h \
+		$(QPEDIR)/include/mimetype.h \
+		$(QPEDIR)/include/network.h \
+		$(QPEDIR)/include/networkinterface.h \
+		$(QPEDIR)/include/organizer.h \
+		$(QPEDIR)/include/power.h \
+		$(QPEDIR)/include/process.h \
+		$(QPEDIR)/include/qcom.h \
+		$(QPEDIR)/include/qcopenvelope_qws.h \
+		$(QPEDIR)/include/qdawg.h \
+		$(QPEDIR)/include/qmath.h \
+		$(QPEDIR)/include/qpeapplication.h \
+		$(QPEDIR)/include/qpedebug.h \
+		$(QPEDIR)/include/qpedecoration_qws.h \
+		$(QPEDIR)/include/qpestyle.h \
+		$(QPEDIR)/include/quuid.h \
+		$(QPEDIR)/include/resource.h \
+		$(QPEDIR)/include/sound.h \
+		$(QPEDIR)/include/timestring.h \
+		$(QPEDIR)/include/tzselect.h \
+		$(QPEDIR)/include/version.h \
+		$(QPEDIR)/include/xmlreader.h \
+		$(QPEDIR)/launcher/categorylist.h \
+		$(QPEDIR)/launcher/launcher.h \
+		$(QPEDIR)/launcher/launcherview.h \
+		$(QPEDIR)/launcher/lnkproperties.h \
+		$(QPEDIR)/inputmethods/pickboard/pickboard.h \
+		$(QPEDIR)/inputmethods/pickboard/pickboardcfg.h \
+		$(QPEDIR)/inputmethods/pickboard/pickboardimpl.h \
+		$(QPEDIR)/inputmethods/pickboard/pickboardpicks.h \
+		$(QPEDIR)/inputmethods/keyboard/keyboard.h \
+		$(QPEDIR)/inputmethods/keyboard/keyboardimpl.h \
+		$(QPEDIR)/inputmethods/handwriting/handwritingimpl.h \
+		$(QPEDIR)/inputmethods/handwriting/qimpenchar.h \
+		$(QPEDIR)/inputmethods/handwriting/qimpencombining.h \
+		$(QPEDIR)/inputmethods/handwriting/qimpenhelp.h \
+		$(QPEDIR)/inputmethods/handwriting/qimpeninput.h \
+		$(QPEDIR)/inputmethods/handwriting/qimpenmatch.h \
+		$(QPEDIR)/inputmethods/handwriting/qimpenprofile.h \
+		$(QPEDIR)/inputmethods/handwriting/qimpensetup.h \
+		$(QPEDIR)/inputmethods/handwriting/qimpenstroke.h \
+		$(QPEDIR)/inputmethods/handwriting/qimpenwidget.h \
+		$(QPEDIR)/inputmethods/handwriting/qimpenwordpick.h \
+		$(QPEDIR)/helpbrowser/helpbrowser.h \
+		$(QPEDIR)/filebrowser/filebrowser.h \
+		$(QPEDIR)/filebrowser/inlineedit.h \
+		$(QPEDIR)/embeddedkonsole/MyPty.h \
+		$(QPEDIR)/embeddedkonsole/TECommon.h \
+		$(QPEDIR)/embeddedkonsole/TEHistory.h \
+		$(QPEDIR)/embeddedkonsole/TEScreen.h \
+		$(QPEDIR)/embeddedkonsole/TEWidget.h \
+		$(QPEDIR)/embeddedkonsole/TEmuVt102.h \
+		$(QPEDIR)/embeddedkonsole/TEmulation.h \
+		$(QPEDIR)/embeddedkonsole/default.keytab.h \
+		$(QPEDIR)/embeddedkonsole/keytrans.h \
+		$(QPEDIR)/embeddedkonsole/konsole.h \
+		$(QPEDIR)/embeddedkonsole/session.h \
+		$(QPEDIR)/datebook/datebook.h \
+		$(QPEDIR)/datebook/datebookday.h \
+		$(QPEDIR)/datebook/datebookdayheaderimpl.h \
+		$(QPEDIR)/datebook/datebooksettings.h \
+		$(QPEDIR)/datebook/datebookweek.h \
+		$(QPEDIR)/datebook/datebookweekheaderimpl.h \
+		$(QPEDIR)/datebook/dateentryimpl.h \
+		$(QPEDIR)/datebook/repeatentry.h \
+		$(QPEDIR)/clock/clock.h \
+		$(QPEDIR)/citytime/citytime.h \
+		$(QPEDIR)/citytime/stylusnormalizer.h \
+		$(QPEDIR)/citytime/sun.h \
+		$(QPEDIR)/citytime/zonemap.h \
+		$(QPEDIR)/calibrate/calibrate.h \
+		$(QPEDIR)/calculator/calculatorimpl.h \
+		$(QPEDIR)/addressbook/abeditor.h \
+		$(QPEDIR)/addressbook/abeditorpage2.h \
+		$(QPEDIR)/addressbook/abentry.h \
+		$(QPEDIR)/addressbook/ablabel.h \
+		$(QPEDIR)/addressbook/abtable.h \
+		$(QPEDIR)/addressbook/addressbook.h \
+		$(QPEDIR)/addressbook/addresssettings.h
+SOURCES =	$(QPEDIR)/taskbar/main.cpp \
+		$(QPEDIR)/wordgame/wordgame.cpp \
+		$(QPEDIR)/todo/mainwindow.cpp \
+		$(QPEDIR)/todo/todoentryimpl.cpp \
+		$(QPEDIR)/todo/todotable.cpp \
+		$(QPEDIR)/textedit/textedit.cpp \
+		$(QPEDIR)/tetrix/gtetrix.cpp \
+		$(QPEDIR)/tetrix/qtetrix.cpp \
+		$(QPEDIR)/tetrix/qtetrixb.cpp \
+		$(QPEDIR)/tetrix/tpiece.cpp \
+		$(QPEDIR)/taskbar/appicons.cpp \
+		$(QPEDIR)/taskbar/background.cpp \
+		$(QPEDIR)/taskbar/desktop.cpp \
+		$(QPEDIR)/taskbar/info.cpp \
+		$(QPEDIR)/taskbar/inputmethods.cpp \
+		$(QPEDIR)/taskbar/mrulist.cpp \
+		$(QPEDIR)/taskbar/quicklauncher.cpp \
+		$(QPEDIR)/taskbar/shutdownimpl.cpp \
+		$(QPEDIR)/taskbar/sidething.cpp \
+		$(QPEDIR)/taskbar/stabmon.cpp \
+		$(QPEDIR)/taskbar/startmenu.cpp \
+		$(QPEDIR)/taskbar/systray.cpp \
+		$(QPEDIR)/taskbar/taskbar.cpp \
+		$(QPEDIR)/taskbar/transferserver.cpp \
+		$(QPEDIR)/taskbar/wait.cpp \
+		$(QPEDIR)/taskbar/clockapplet/clock.cpp \
+		$(QPEDIR)/taskbar/clockapplet/clockappletimpl.cpp \
+		$(QPEDIR)/sysinfo/graph.cpp \
+		$(QPEDIR)/sysinfo/load.cpp \
+		$(QPEDIR)/sysinfo/memory.cpp \
+		$(QPEDIR)/sysinfo/storage.cpp \
+		$(QPEDIR)/sysinfo/sysinfo.cpp \
+		$(QPEDIR)/sysinfo/versioninfo.cpp \
+		$(QPEDIR)/solitaire/canvascard.cpp \
+		$(QPEDIR)/solitaire/canvascardgame.cpp \
+		$(QPEDIR)/solitaire/canvascardwindow.cpp \
+		$(QPEDIR)/solitaire/canvasshapes.cpp \
+		$(QPEDIR)/solitaire/card.cpp \
+		$(QPEDIR)/solitaire/carddeck.cpp \
+		$(QPEDIR)/solitaire/cardgame.cpp \
+		$(QPEDIR)/solitaire/cardgamelayout.cpp \
+		$(QPEDIR)/solitaire/cardpile.cpp \
+		$(QPEDIR)/solitaire/freecellcardgame.cpp \
+		$(QPEDIR)/solitaire/patiencecardgame.cpp \
+		$(QPEDIR)/snake/interface.cpp \
+		$(QPEDIR)/snake/obstacle.cpp \
+		$(QPEDIR)/snake/snake.cpp \
+		$(QPEDIR)/snake/target.cpp \
+		$(QPEDIR)/settings/systemtime/settime.cpp \
+		$(QPEDIR)/settings/appearance/appearance.cpp \
+		$(QPEDIR)/parashoot/base.cpp \
+		$(QPEDIR)/parashoot/bullet.cpp \
+		$(QPEDIR)/parashoot/cannon.cpp \
+		$(QPEDIR)/parashoot/helicopter.cpp \
+		$(QPEDIR)/parashoot/interface.cpp \
+		$(QPEDIR)/parashoot/man.cpp \
+		$(QPEDIR)/mpegplayer/audiodevice.cpp \
+		$(QPEDIR)/mpegplayer/audiowidget.cpp \
+		$(QPEDIR)/mpegplayer/mediaplayer.cpp \
+		$(QPEDIR)/mpegplayer/mpegcontrol.cpp \
+		$(QPEDIR)/mpegplayer/mpegview.cpp \
+		$(QPEDIR)/mpegplayer/playlistwidget.cpp \
+		$(QPEDIR)/mpegplayer/wavplugin/wavplugin.cpp \
+		$(QPEDIR)/mpegplayer/wavplugin/wavpluginimpl.cpp \
+		$(QPEDIR)/mpegplayer/libmad/bit.c \
+		$(QPEDIR)/mpegplayer/libmad/decoder.c \
+		$(QPEDIR)/mpegplayer/libmad/fixed.c \
+		$(QPEDIR)/mpegplayer/libmad/frame.c \
+		$(QPEDIR)/mpegplayer/libmad/huffman.c \
+		$(QPEDIR)/mpegplayer/libmad/layer12.c \
+		$(QPEDIR)/mpegplayer/libmad/layer3.c \
+		$(QPEDIR)/mpegplayer/libmad/libmadplugin.cpp \
+		$(QPEDIR)/mpegplayer/libmad/libmadpluginimpl.cpp \
+		$(QPEDIR)/mpegplayer/libmad/stream.c \
+		$(QPEDIR)/mpegplayer/libmad/synth.c \
+		$(QPEDIR)/mpegplayer/libmad/timer.c \
+		$(QPEDIR)/mpegplayer/libmad/version.c \
+		$(QPEDIR)/minesweep/minefield.cpp \
+		$(QPEDIR)/minesweep/minesweep.cpp \
+		$(QPEDIR)/include/alarmserver.cpp \
+		$(QPEDIR)/include/applnk.cpp \
+		$(QPEDIR)/include/calendar.cpp \
+		$(QPEDIR)/include/config.cpp \
+		$(QPEDIR)/include/datebookdb.cpp \
+		$(QPEDIR)/include/datebookmonth.cpp \
+		$(QPEDIR)/include/filemanager.cpp \
+		$(QPEDIR)/include/fileselector.cpp \
+		$(QPEDIR)/include/fontdatabase.cpp \
+		$(QPEDIR)/include/fontmanager.cpp \
+		$(QPEDIR)/include/global.cpp \
+		$(QPEDIR)/include/imageedit.cpp \
+		$(QPEDIR)/include/lightstyle.cpp \
+		$(QPEDIR)/include/menubutton.cpp \
+		$(QPEDIR)/include/mimetype.cpp \
+		$(QPEDIR)/include/network.cpp \
+		$(QPEDIR)/include/networkinterface.cpp \
+		$(QPEDIR)/include/organizer.cpp \
+		$(QPEDIR)/include/power.cpp \
+		$(QPEDIR)/include/process.cpp \
+		$(QPEDIR)/include/process_unix.cpp \
+		$(QPEDIR)/include/qcopenvelope_qws.cpp \
+		$(QPEDIR)/include/qdawg.cpp \
+		$(QPEDIR)/include/qmath.c \
+		$(QPEDIR)/include/qpeapplication.cpp \
+		$(QPEDIR)/include/qpedebug.cpp \
+		$(QPEDIR)/include/qpedecoration_qws.cpp \
+		$(QPEDIR)/include/qpestyle.cpp \
+		$(QPEDIR)/include/quuid.cpp \
+		$(QPEDIR)/include/resource.cpp \
+		$(QPEDIR)/include/sound.cpp \
+		$(QPEDIR)/include/timestring.cpp \
+		$(QPEDIR)/include/tzselect.cpp \
+		$(QPEDIR)/include/xmlreader.cpp \
+		$(QPEDIR)/launcher/categorylist.cpp \
+		$(QPEDIR)/launcher/launcher.cpp \
+		$(QPEDIR)/launcher/launcherview.cpp \
+		$(QPEDIR)/launcher/lnkproperties.cpp \
+		$(QPEDIR)/inputmethods/pickboard/pickboard.cpp \
+		$(QPEDIR)/inputmethods/pickboard/pickboardcfg.cpp \
+		$(QPEDIR)/inputmethods/pickboard/pickboardimpl.cpp \
+		$(QPEDIR)/inputmethods/pickboard/pickboardpicks.cpp \
+		$(QPEDIR)/inputmethods/keyboard/keyboard.cpp \
+		$(QPEDIR)/inputmethods/keyboard/keyboardimpl.cpp \
+		$(QPEDIR)/inputmethods/handwriting/handwritingimpl.cpp \
+		$(QPEDIR)/inputmethods/handwriting/qimpenchar.cpp \
+		$(QPEDIR)/inputmethods/handwriting/qimpencombining.cpp \
+		$(QPEDIR)/inputmethods/handwriting/qimpenhelp.cpp \
+		$(QPEDIR)/inputmethods/handwriting/qimpeninput.cpp \
+		$(QPEDIR)/inputmethods/handwriting/qimpenmatch.cpp \
+		$(QPEDIR)/inputmethods/handwriting/qimpenprofile.cpp \
+		$(QPEDIR)/inputmethods/handwriting/qimpensetup.cpp \
+		$(QPEDIR)/inputmethods/handwriting/qimpenstroke.cpp \
+		$(QPEDIR)/inputmethods/handwriting/qimpenwidget.cpp \
+		$(QPEDIR)/inputmethods/handwriting/qimpenwordpick.cpp \
+		$(QPEDIR)/helpbrowser/helpbrowser.cpp \
+		$(QPEDIR)/filebrowser/filebrowser.cpp \
+		$(QPEDIR)/filebrowser/inlineedit.cpp \
+		$(QPEDIR)/embeddedkonsole/MyPty.cpp \
+		$(QPEDIR)/embeddedkonsole/TEHistory.cpp \
+		$(QPEDIR)/embeddedkonsole/TEScreen.cpp \
+		$(QPEDIR)/embeddedkonsole/TEWidget.cpp \
+		$(QPEDIR)/embeddedkonsole/TEmuVt102.cpp \
+		$(QPEDIR)/embeddedkonsole/TEmulation.cpp \
+		$(QPEDIR)/embeddedkonsole/keytrans.cpp \
+		$(QPEDIR)/embeddedkonsole/konsole.cpp \
+		$(QPEDIR)/embeddedkonsole/session.cpp \
+		$(QPEDIR)/datebook/datebook.cpp \
+		$(QPEDIR)/datebook/datebookday.cpp \
+		$(QPEDIR)/datebook/datebookdayheaderimpl.cpp \
+		$(QPEDIR)/datebook/datebooksettings.cpp \
+		$(QPEDIR)/datebook/datebookweek.cpp \
+		$(QPEDIR)/datebook/datebookweekheaderimpl.cpp \
+		$(QPEDIR)/datebook/dateentryimpl.cpp \
+		$(QPEDIR)/datebook/repeatentry.cpp \
+		$(QPEDIR)/clock/clock.cpp \
+		$(QPEDIR)/citytime/citytime.cpp \
+		$(QPEDIR)/citytime/stylusnormalizer.cpp \
+		$(QPEDIR)/citytime/sun.c \
+		$(QPEDIR)/citytime/zonemap.cpp \
+		$(QPEDIR)/calibrate/calibrate.cpp \
+		$(QPEDIR)/calculator/calculatorimpl.cpp \
+		$(QPEDIR)/addressbook/abeditor.cpp \
+		$(QPEDIR)/addressbook/abeditorpage2.cpp \
+		$(QPEDIR)/addressbook/abentry.cpp \
+		$(QPEDIR)/addressbook/ablabel.cpp \
+		$(QPEDIR)/addressbook/abtable.cpp \
+		$(QPEDIR)/addressbook/addressbook.cpp \
+		$(QPEDIR)/addressbook/addresssettings.cpp
+OBJECTS =	$(QPEDIR)/taskbar/main.o \
+		$(QPEDIR)/wordgame/wordgame.o \
+		$(QPEDIR)/todo/mainwindow.o \
+		$(QPEDIR)/todo/todoentryimpl.o \
+		$(QPEDIR)/todo/todotable.o \
+		$(QPEDIR)/textedit/textedit.o \
+		$(QPEDIR)/tetrix/gtetrix.o \
+		$(QPEDIR)/tetrix/qtetrix.o \
+		$(QPEDIR)/tetrix/qtetrixb.o \
+		$(QPEDIR)/tetrix/tpiece.o \
+		$(QPEDIR)/taskbar/appicons.o \
+		$(QPEDIR)/taskbar/background.o \
+		$(QPEDIR)/taskbar/desktop.o \
+		$(QPEDIR)/taskbar/info.o \
+		$(QPEDIR)/taskbar/inputmethods.o \
+		$(QPEDIR)/taskbar/mrulist.o \
+		$(QPEDIR)/taskbar/quicklauncher.o \
+		$(QPEDIR)/taskbar/shutdownimpl.o \
+		$(QPEDIR)/taskbar/sidething.o \
+		$(QPEDIR)/taskbar/stabmon.o \
+		$(QPEDIR)/taskbar/startmenu.o \
+		$(QPEDIR)/taskbar/systray.o \
+		$(QPEDIR)/taskbar/taskbar.o \
+		$(QPEDIR)/taskbar/transferserver.o \
+		$(QPEDIR)/taskbar/wait.o \
+		$(QPEDIR)/taskbar/clockapplet/clock.o \
+		$(QPEDIR)/taskbar/clockapplet/clockappletimpl.o \
+		$(QPEDIR)/sysinfo/graph.o \
+		$(QPEDIR)/sysinfo/load.o \
+		$(QPEDIR)/sysinfo/memory.o \
+		$(QPEDIR)/sysinfo/storage.o \
+		$(QPEDIR)/sysinfo/sysinfo.o \
+		$(QPEDIR)/sysinfo/versioninfo.o \
+		$(QPEDIR)/solitaire/canvascard.o \
+		$(QPEDIR)/solitaire/canvascardgame.o \
+		$(QPEDIR)/solitaire/canvascardwindow.o \
+		$(QPEDIR)/solitaire/canvasshapes.o \
+		$(QPEDIR)/solitaire/card.o \
+		$(QPEDIR)/solitaire/carddeck.o \
+		$(QPEDIR)/solitaire/cardgame.o \
+		$(QPEDIR)/solitaire/cardgamelayout.o \
+		$(QPEDIR)/solitaire/cardpile.o \
+		$(QPEDIR)/solitaire/freecellcardgame.o \
+		$(QPEDIR)/solitaire/patiencecardgame.o \
+		$(QPEDIR)/snake/interface.o \
+		$(QPEDIR)/snake/obstacle.o \
+		$(QPEDIR)/snake/snake.o \
+		$(QPEDIR)/snake/target.o \
+		$(QPEDIR)/settings/systemtime/settime.o \
+		$(QPEDIR)/settings/appearance/appearance.o \
+		$(QPEDIR)/parashoot/base.o \
+		$(QPEDIR)/parashoot/bullet.o \
+		$(QPEDIR)/parashoot/cannon.o \
+		$(QPEDIR)/parashoot/helicopter.o \
+		$(QPEDIR)/parashoot/interface.o \
+		$(QPEDIR)/parashoot/man.o \
+		$(QPEDIR)/mpegplayer/audiodevice.o \
+		$(QPEDIR)/mpegplayer/audiowidget.o \
+		$(QPEDIR)/mpegplayer/mediaplayer.o \
+		$(QPEDIR)/mpegplayer/mpegcontrol.o \
+		$(QPEDIR)/mpegplayer/mpegview.o \
+		$(QPEDIR)/mpegplayer/playlistwidget.o \
+		$(QPEDIR)/mpegplayer/wavplugin/wavplugin.o \
+		$(QPEDIR)/mpegplayer/wavplugin/wavpluginimpl.o \
+		$(QPEDIR)/mpegplayer/libmad/bit.o \
+		$(QPEDIR)/mpegplayer/libmad/decoder.o \
+		$(QPEDIR)/mpegplayer/libmad/fixed.o \
+		$(QPEDIR)/mpegplayer/libmad/frame.o \
+		$(QPEDIR)/mpegplayer/libmad/huffman.o \
+		$(QPEDIR)/mpegplayer/libmad/layer12.o \
+		$(QPEDIR)/mpegplayer/libmad/layer3.o \
+		$(QPEDIR)/mpegplayer/libmad/libmadplugin.o \
+		$(QPEDIR)/mpegplayer/libmad/libmadpluginimpl.o \
+		$(QPEDIR)/mpegplayer/libmad/stream.o \
+		$(QPEDIR)/mpegplayer/libmad/synth.o \
+		$(QPEDIR)/mpegplayer/libmad/timer.o \
+		$(QPEDIR)/mpegplayer/libmad/version.o \
+		$(QPEDIR)/minesweep/minefield.o \
+		$(QPEDIR)/minesweep/minesweep.o \
+		$(QPEDIR)/include/alarmserver.o \
+		$(QPEDIR)/include/applnk.o \
+		$(QPEDIR)/include/calendar.o \
+		$(QPEDIR)/include/config.o \
+		$(QPEDIR)/include/datebookdb.o \
+		$(QPEDIR)/include/datebookmonth.o \
+		$(QPEDIR)/include/filemanager.o \
+		$(QPEDIR)/include/fileselector.o \
+		$(QPEDIR)/include/fontdatabase.o \
+		$(QPEDIR)/include/fontmanager.o \
+		$(QPEDIR)/include/global.o \
+		$(QPEDIR)/include/imageedit.o \
+		$(QPEDIR)/include/lightstyle.o \
+		$(QPEDIR)/include/menubutton.o \
+		$(QPEDIR)/include/mimetype.o \
+		$(QPEDIR)/include/network.o \
+		$(QPEDIR)/include/networkinterface.o \
+		$(QPEDIR)/include/organizer.o \
+		$(QPEDIR)/include/power.o \
+		$(QPEDIR)/include/process.o \
+		$(QPEDIR)/include/process_unix.o \
+		$(QPEDIR)/include/qcopenvelope_qws.o \
+		$(QPEDIR)/include/qdawg.o \
+		$(QPEDIR)/include/qmath.o \
+		$(QPEDIR)/include/qpeapplication.o \
+		$(QPEDIR)/include/qpedebug.o \
+		$(QPEDIR)/include/qpedecoration_qws.o \
+		$(QPEDIR)/include/qpestyle.o \
+		$(QPEDIR)/include/quuid.o \
+		$(QPEDIR)/include/resource.o \
+		$(QPEDIR)/include/sound.o \
+		$(QPEDIR)/include/timestring.o \
+		$(QPEDIR)/include/tzselect.o \
+		$(QPEDIR)/include/xmlreader.o \
+		$(QPEDIR)/launcher/categorylist.o \
+		$(QPEDIR)/launcher/launcher.o \
+		$(QPEDIR)/launcher/launcherview.o \
+		$(QPEDIR)/launcher/lnkproperties.o \
+		$(QPEDIR)/inputmethods/pickboard/pickboard.o \
+		$(QPEDIR)/inputmethods/pickboard/pickboardcfg.o \
+		$(QPEDIR)/inputmethods/pickboard/pickboardimpl.o \
+		$(QPEDIR)/inputmethods/pickboard/pickboardpicks.o \
+		$(QPEDIR)/inputmethods/keyboard/keyboard.o \
+		$(QPEDIR)/inputmethods/keyboard/keyboardimpl.o \
+		$(QPEDIR)/inputmethods/handwriting/handwritingimpl.o \
+		$(QPEDIR)/inputmethods/handwriting/qimpenchar.o \
+		$(QPEDIR)/inputmethods/handwriting/qimpencombining.o \
+		$(QPEDIR)/inputmethods/handwriting/qimpenhelp.o \
+		$(QPEDIR)/inputmethods/handwriting/qimpeninput.o \
+		$(QPEDIR)/inputmethods/handwriting/qimpenmatch.o \
+		$(QPEDIR)/inputmethods/handwriting/qimpenprofile.o \
+		$(QPEDIR)/inputmethods/handwriting/qimpensetup.o \
+		$(QPEDIR)/inputmethods/handwriting/qimpenstroke.o \
+		$(QPEDIR)/inputmethods/handwriting/qimpenwidget.o \
+		$(QPEDIR)/inputmethods/handwriting/qimpenwordpick.o \
+		$(QPEDIR)/helpbrowser/helpbrowser.o \
+		$(QPEDIR)/filebrowser/filebrowser.o \
+		$(QPEDIR)/filebrowser/inlineedit.o \
+		$(QPEDIR)/embeddedkonsole/MyPty.o \
+		$(QPEDIR)/embeddedkonsole/TEHistory.o \
+		$(QPEDIR)/embeddedkonsole/TEScreen.o \
+		$(QPEDIR)/embeddedkonsole/TEWidget.o \
+		$(QPEDIR)/embeddedkonsole/TEmuVt102.o \
+		$(QPEDIR)/embeddedkonsole/TEmulation.o \
+		$(QPEDIR)/embeddedkonsole/keytrans.o \
+		$(QPEDIR)/embeddedkonsole/konsole.o \
+		$(QPEDIR)/embeddedkonsole/session.o \
+		$(QPEDIR)/datebook/datebook.o \
+		$(QPEDIR)/datebook/datebookday.o \
+		$(QPEDIR)/datebook/datebookdayheaderimpl.o \
+		$(QPEDIR)/datebook/datebooksettings.o \
+		$(QPEDIR)/datebook/datebookweek.o \
+		$(QPEDIR)/datebook/datebookweekheaderimpl.o \
+		$(QPEDIR)/datebook/dateentryimpl.o \
+		$(QPEDIR)/datebook/repeatentry.o \
+		$(QPEDIR)/clock/clock.o \
+		$(QPEDIR)/citytime/citytime.o \
+		$(QPEDIR)/citytime/stylusnormalizer.o \
+		$(QPEDIR)/citytime/sun.o \
+		$(QPEDIR)/citytime/zonemap.o \
+		$(QPEDIR)/calibrate/calibrate.o \
+		$(QPEDIR)/calculator/calculatorimpl.o \
+		$(QPEDIR)/addressbook/abeditor.o \
+		$(QPEDIR)/addressbook/abeditorpage2.o \
+		$(QPEDIR)/addressbook/abentry.o \
+		$(QPEDIR)/addressbook/ablabel.o \
+		$(QPEDIR)/addressbook/abtable.o \
+		$(QPEDIR)/addressbook/addressbook.o \
+		$(QPEDIR)/addressbook/addresssettings.o \
+		$(QPEDIR)/wordgame/newgamebase.o \
+		$(QPEDIR)/wordgame/rulesbase.o \
+		$(QPEDIR)/todo/todoentry.o \
+		$(QPEDIR)/taskbar/shutdown.o \
+		$(QPEDIR)/settings/appearance/appearancesettingsbase.o \
+		$(QPEDIR)/launcher/lnkpropertiesbase.o \
+		$(QPEDIR)/inputmethods/handwriting/qimpenprefbase.o \
+		$(QPEDIR)/datebook/datebookdayheader.o \
+		$(QPEDIR)/datebook/datebooksettingsbase.o \
+		$(QPEDIR)/datebook/datebookweekheader.o \
+		$(QPEDIR)/datebook/dateentry.o \
+		$(QPEDIR)/datebook/repeatentrybase.o \
+		$(QPEDIR)/citytime/citytimebase.o \
+		$(QPEDIR)/calculator/calculator.o \
+		$(QPEDIR)/addressbook/abeditorbase.o \
+		$(QPEDIR)/addressbook/abeditorpage2base.o \
+		$(QPEDIR)/addressbook/addresssettingsbase.o
+INTERFACES =    $(QPEDIR)/wordgame/newgamebase.ui \
+		$(QPEDIR)/wordgame/rulesbase.ui \
+		$(QPEDIR)/todo/todoentry.ui \
+		$(QPEDIR)/taskbar/shutdown.ui \
+		$(QPEDIR)/settings/appearance/appearancesettingsbase.ui \
+		$(QPEDIR)/launcher/lnkpropertiesbase.ui \
+		$(QPEDIR)/inputmethods/handwriting/qimpenprefbase.ui \
+		$(QPEDIR)/datebook/datebookdayheader.ui \
+		$(QPEDIR)/datebook/datebooksettingsbase.ui \
+		$(QPEDIR)/datebook/datebookweekheader.ui \
+		$(QPEDIR)/datebook/dateentry.ui \
+		$(QPEDIR)/datebook/repeatentrybase.ui \
+		$(QPEDIR)/citytime/citytimebase.ui \
+		$(QPEDIR)/calculator/calculator.ui \
+		$(QPEDIR)/addressbook/abeditorbase.ui \
+		$(QPEDIR)/addressbook/abeditorpage2base.ui \
+		$(QPEDIR)/addressbook/addresssettingsbase.ui
+UICDECLS =      $(QPEDIR)/wordgame/newgamebase.h \
+		$(QPEDIR)/wordgame/rulesbase.h \
+		$(QPEDIR)/todo/todoentry.h \
+		$(QPEDIR)/taskbar/shutdown.h \
+		$(QPEDIR)/settings/appearance/appearancesettingsbase.h \
+		$(QPEDIR)/launcher/lnkpropertiesbase.h \
+		$(QPEDIR)/inputmethods/handwriting/qimpenprefbase.h \
+		$(QPEDIR)/datebook/datebookdayheader.h \
+		$(QPEDIR)/datebook/datebooksettingsbase.h \
+		$(QPEDIR)/datebook/datebookweekheader.h \
+		$(QPEDIR)/datebook/dateentry.h \
+		$(QPEDIR)/datebook/repeatentrybase.h \
+		$(QPEDIR)/citytime/citytimebase.h \
+		$(QPEDIR)/calculator/calculator.h \
+		$(QPEDIR)/addressbook/abeditorbase.h \
+		$(QPEDIR)/addressbook/abeditorpage2base.h \
+		$(QPEDIR)/addressbook/addresssettingsbase.h
+UICIMPLS =      $(QPEDIR)/wordgame/newgamebase.cpp \
+		$(QPEDIR)/wordgame/rulesbase.cpp \
+		$(QPEDIR)/todo/todoentry.cpp \
+		$(QPEDIR)/taskbar/shutdown.cpp \
+		$(QPEDIR)/settings/appearance/appearancesettingsbase.cpp \
+		$(QPEDIR)/launcher/lnkpropertiesbase.cpp \
+		$(QPEDIR)/inputmethods/handwriting/qimpenprefbase.cpp \
+		$(QPEDIR)/datebook/datebookdayheader.cpp \
+		$(QPEDIR)/datebook/datebooksettingsbase.cpp \
+		$(QPEDIR)/datebook/datebookweekheader.cpp \
+		$(QPEDIR)/datebook/dateentry.cpp \
+		$(QPEDIR)/datebook/repeatentrybase.cpp \
+		$(QPEDIR)/citytime/citytimebase.cpp \
+		$(QPEDIR)/calculator/calculator.cpp \
+		$(QPEDIR)/addressbook/abeditorbase.cpp \
+		$(QPEDIR)/addressbook/abeditorpage2base.cpp \
+		$(QPEDIR)/addressbook/addresssettingsbase.cpp
+SRCMOC	=	$(QPEDIR)/wordgame/moc_newgamebase.cpp \
+		$(QPEDIR)/wordgame/moc_rulesbase.cpp \
+		$(QPEDIR)/todo/moc_todoentry.cpp \
+		$(QPEDIR)/taskbar/moc_shutdown.cpp \
+		$(QPEDIR)/settings/appearance/moc_appearancesettingsbase.cpp \
+		$(QPEDIR)/launcher/moc_lnkpropertiesbase.cpp \
+		$(QPEDIR)/inputmethods/handwriting/moc_qimpenprefbase.cpp \
+		$(QPEDIR)/datebook/moc_datebookdayheader.cpp \
+		$(QPEDIR)/datebook/moc_datebooksettingsbase.cpp \
+		$(QPEDIR)/datebook/moc_datebookweekheader.cpp \
+		$(QPEDIR)/datebook/moc_dateentry.cpp \
+		$(QPEDIR)/datebook/moc_repeatentrybase.cpp \
+		$(QPEDIR)/citytime/moc_citytimebase.cpp \
+		$(QPEDIR)/calculator/moc_calculator.cpp \
+		$(QPEDIR)/addressbook/moc_abeditorbase.cpp \
+		$(QPEDIR)/addressbook/moc_abeditorpage2base.cpp \
+		$(QPEDIR)/addressbook/moc_addresssettingsbase.cpp
+OBJMOC	=	$(QPEDIR)/wordgame/moc_newgamebase.o \
+		$(QPEDIR)/wordgame/moc_rulesbase.o \
+		$(QPEDIR)/todo/moc_todoentry.o \
+		$(QPEDIR)/taskbar/moc_shutdown.o \
+		$(QPEDIR)/settings/appearance/moc_appearancesettingsbase.o \
+		$(QPEDIR)/launcher/moc_lnkpropertiesbase.o \
+		$(QPEDIR)/inputmethods/handwriting/moc_qimpenprefbase.o \
+		$(QPEDIR)/datebook/moc_datebookdayheader.o \
+		$(QPEDIR)/datebook/moc_datebooksettingsbase.o \
+		$(QPEDIR)/datebook/moc_datebookweekheader.o \
+		$(QPEDIR)/datebook/moc_dateentry.o \
+		$(QPEDIR)/datebook/moc_repeatentrybase.o \
+		$(QPEDIR)/citytime/moc_citytimebase.o \
+		$(QPEDIR)/calculator/moc_calculator.o \
+		$(QPEDIR)/addressbook/moc_abeditorbase.o \
+		$(QPEDIR)/addressbook/moc_abeditorpage2base.o \
+		$(QPEDIR)/addressbook/moc_addresssettingsbase.o
+
+
+####### Implicit rules
+
+.SUFFIXES: .cpp .cxx .cc .C .c
+
+.cpp.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.cxx.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.cc.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.C.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.c.o:
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $@ $<
+
+####### Build rules
+
+
+all: $(DESTDIR)$(TARGET)
+
+$(DESTDIR)$(TARGET): $(UICDECLS) $(OBJECTS) $(OBJMOC) $(SUBLIBS)
+	$(SYSCONF_LINK) $(LFLAGS) -o $(DESTDIR)$(TARGET) $(OBJECTS) $(OBJMOC) $(LIBS)
+
+moc: $(SRCMOC)
+
+tmake:
+	tmake single.pro
+
+clean:
+	-rm -f $(OBJECTS) $(OBJMOC) $(SRCMOC) $(UICIMPLS) $(UICDECLS)
+	-rm -f *~ core
+	-rm -f allmoc.cpp
+
+####### Extension Modules
+
+listpromodules:
+	@echo 
+
+listallmodules:
+	@echo 
+
+listaddonpromodules:
+	@echo 
+
+listaddonentmodules:
+	@echo 
+
+
+REQUIRES=
+
+####### Sub-libraries
+
+
+###### Combined headers
+
+
+
+####### Compile
+
+$(QPEDIR)/taskbar/main.o: $(QPEDIR)/taskbar/main.cpp
+
+$(QPEDIR)/wordgame/wordgame.o: $(QPEDIR)/wordgame/wordgame.cpp
+
+$(QPEDIR)/todo/mainwindow.o: $(QPEDIR)/todo/mainwindow.cpp
+
+$(QPEDIR)/todo/todoentryimpl.o: $(QPEDIR)/todo/todoentryimpl.cpp
+
+$(QPEDIR)/todo/todotable.o: $(QPEDIR)/todo/todotable.cpp
+
+$(QPEDIR)/textedit/textedit.o: $(QPEDIR)/textedit/textedit.cpp
+
+$(QPEDIR)/tetrix/gtetrix.o: $(QPEDIR)/tetrix/gtetrix.cpp
+
+$(QPEDIR)/tetrix/qtetrix.o: $(QPEDIR)/tetrix/qtetrix.cpp
+
+$(QPEDIR)/tetrix/qtetrixb.o: $(QPEDIR)/tetrix/qtetrixb.cpp
+
+$(QPEDIR)/tetrix/tpiece.o: $(QPEDIR)/tetrix/tpiece.cpp
+
+$(QPEDIR)/taskbar/appicons.o: $(QPEDIR)/taskbar/appicons.cpp
+
+$(QPEDIR)/taskbar/background.o: $(QPEDIR)/taskbar/background.cpp
+
+$(QPEDIR)/taskbar/desktop.o: $(QPEDIR)/taskbar/desktop.cpp
+
+$(QPEDIR)/taskbar/info.o: $(QPEDIR)/taskbar/info.cpp
+
+$(QPEDIR)/taskbar/inputmethods.o: $(QPEDIR)/taskbar/inputmethods.cpp
+
+$(QPEDIR)/taskbar/mrulist.o: $(QPEDIR)/taskbar/mrulist.cpp
+
+$(QPEDIR)/taskbar/quicklauncher.o: $(QPEDIR)/taskbar/quicklauncher.cpp
+
+$(QPEDIR)/taskbar/shutdownimpl.o: $(QPEDIR)/taskbar/shutdownimpl.cpp
+
+$(QPEDIR)/taskbar/sidething.o: $(QPEDIR)/taskbar/sidething.cpp
+
+$(QPEDIR)/taskbar/stabmon.o: $(QPEDIR)/taskbar/stabmon.cpp
+
+$(QPEDIR)/taskbar/startmenu.o: $(QPEDIR)/taskbar/startmenu.cpp
+
+$(QPEDIR)/taskbar/systray.o: $(QPEDIR)/taskbar/systray.cpp
+
+$(QPEDIR)/taskbar/taskbar.o: $(QPEDIR)/taskbar/taskbar.cpp
+
+$(QPEDIR)/taskbar/transferserver.o: $(QPEDIR)/taskbar/transferserver.cpp
+
+$(QPEDIR)/taskbar/wait.o: $(QPEDIR)/taskbar/wait.cpp
+
+$(QPEDIR)/taskbar/clockapplet/clock.o: $(QPEDIR)/taskbar/clockapplet/clock.cpp
+
+$(QPEDIR)/taskbar/clockapplet/clockappletimpl.o: $(QPEDIR)/taskbar/clockapplet/clockappletimpl.cpp
+
+$(QPEDIR)/sysinfo/graph.o: $(QPEDIR)/sysinfo/graph.cpp
+
+$(QPEDIR)/sysinfo/load.o: $(QPEDIR)/sysinfo/load.cpp
+
+$(QPEDIR)/sysinfo/memory.o: $(QPEDIR)/sysinfo/memory.cpp
+
+$(QPEDIR)/sysinfo/storage.o: $(QPEDIR)/sysinfo/storage.cpp
+
+$(QPEDIR)/sysinfo/sysinfo.o: $(QPEDIR)/sysinfo/sysinfo.cpp
+
+$(QPEDIR)/sysinfo/versioninfo.o: $(QPEDIR)/sysinfo/versioninfo.cpp
+
+$(QPEDIR)/solitaire/canvascard.o: $(QPEDIR)/solitaire/canvascard.cpp
+
+$(QPEDIR)/solitaire/canvascardgame.o: $(QPEDIR)/solitaire/canvascardgame.cpp
+
+$(QPEDIR)/solitaire/canvascardwindow.o: $(QPEDIR)/solitaire/canvascardwindow.cpp
+
+$(QPEDIR)/solitaire/canvasshapes.o: $(QPEDIR)/solitaire/canvasshapes.cpp
+
+$(QPEDIR)/solitaire/card.o: $(QPEDIR)/solitaire/card.cpp
+
+$(QPEDIR)/solitaire/carddeck.o: $(QPEDIR)/solitaire/carddeck.cpp
+
+$(QPEDIR)/solitaire/cardgame.o: $(QPEDIR)/solitaire/cardgame.cpp
+
+$(QPEDIR)/solitaire/cardgamelayout.o: $(QPEDIR)/solitaire/cardgamelayout.cpp
+
+$(QPEDIR)/solitaire/cardpile.o: $(QPEDIR)/solitaire/cardpile.cpp
+
+$(QPEDIR)/solitaire/freecellcardgame.o: $(QPEDIR)/solitaire/freecellcardgame.cpp
+
+$(QPEDIR)/solitaire/patiencecardgame.o: $(QPEDIR)/solitaire/patiencecardgame.cpp
+
+$(QPEDIR)/snake/interface.o: $(QPEDIR)/snake/interface.cpp
+
+$(QPEDIR)/snake/obstacle.o: $(QPEDIR)/snake/obstacle.cpp
+
+$(QPEDIR)/snake/snake.o: $(QPEDIR)/snake/snake.cpp
+
+$(QPEDIR)/snake/target.o: $(QPEDIR)/snake/target.cpp
+
+$(QPEDIR)/settings/systemtime/settime.o: $(QPEDIR)/settings/systemtime/settime.cpp
+
+$(QPEDIR)/settings/appearance/appearance.o: $(QPEDIR)/settings/appearance/appearance.cpp
+
+$(QPEDIR)/parashoot/base.o: $(QPEDIR)/parashoot/base.cpp
+
+$(QPEDIR)/parashoot/bullet.o: $(QPEDIR)/parashoot/bullet.cpp
+
+$(QPEDIR)/parashoot/cannon.o: $(QPEDIR)/parashoot/cannon.cpp
+
+$(QPEDIR)/parashoot/helicopter.o: $(QPEDIR)/parashoot/helicopter.cpp
+
+$(QPEDIR)/parashoot/interface.o: $(QPEDIR)/parashoot/interface.cpp
+
+$(QPEDIR)/parashoot/man.o: $(QPEDIR)/parashoot/man.cpp
+
+$(QPEDIR)/mpegplayer/audiodevice.o: $(QPEDIR)/mpegplayer/audiodevice.cpp
+
+$(QPEDIR)/mpegplayer/audiowidget.o: $(QPEDIR)/mpegplayer/audiowidget.cpp
+
+$(QPEDIR)/mpegplayer/mediaplayer.o: $(QPEDIR)/mpegplayer/mediaplayer.cpp
+
+$(QPEDIR)/mpegplayer/mpegcontrol.o: $(QPEDIR)/mpegplayer/mpegcontrol.cpp
+
+$(QPEDIR)/mpegplayer/mpegview.o: $(QPEDIR)/mpegplayer/mpegview.cpp
+
+$(QPEDIR)/mpegplayer/playlistwidget.o: $(QPEDIR)/mpegplayer/playlistwidget.cpp
+
+$(QPEDIR)/mpegplayer/wavplugin/wavplugin.o: $(QPEDIR)/mpegplayer/wavplugin/wavplugin.cpp
+
+$(QPEDIR)/mpegplayer/wavplugin/wavpluginimpl.o: $(QPEDIR)/mpegplayer/wavplugin/wavpluginimpl.cpp
+
+$(QPEDIR)/mpegplayer/libmad/bit.o: $(QPEDIR)/mpegplayer/libmad/bit.c
+
+$(QPEDIR)/mpegplayer/libmad/decoder.o: $(QPEDIR)/mpegplayer/libmad/decoder.c
+
+$(QPEDIR)/mpegplayer/libmad/fixed.o: $(QPEDIR)/mpegplayer/libmad/fixed.c
+
+$(QPEDIR)/mpegplayer/libmad/frame.o: $(QPEDIR)/mpegplayer/libmad/frame.c
+
+$(QPEDIR)/mpegplayer/libmad/huffman.o: $(QPEDIR)/mpegplayer/libmad/huffman.c
+
+$(QPEDIR)/mpegplayer/libmad/layer12.o: $(QPEDIR)/mpegplayer/libmad/layer12.c
+
+$(QPEDIR)/mpegplayer/libmad/layer3.o: $(QPEDIR)/mpegplayer/libmad/layer3.c
+
+$(QPEDIR)/mpegplayer/libmad/libmadplugin.o: $(QPEDIR)/mpegplayer/libmad/libmadplugin.cpp
+
+$(QPEDIR)/mpegplayer/libmad/libmadpluginimpl.o: $(QPEDIR)/mpegplayer/libmad/libmadpluginimpl.cpp
+
+$(QPEDIR)/mpegplayer/libmad/stream.o: $(QPEDIR)/mpegplayer/libmad/stream.c
+
+$(QPEDIR)/mpegplayer/libmad/synth.o: $(QPEDIR)/mpegplayer/libmad/synth.c
+
+$(QPEDIR)/mpegplayer/libmad/timer.o: $(QPEDIR)/mpegplayer/libmad/timer.c
+
+$(QPEDIR)/mpegplayer/libmad/version.o: $(QPEDIR)/mpegplayer/libmad/version.c
+
+$(QPEDIR)/minesweep/minefield.o: $(QPEDIR)/minesweep/minefield.cpp
+
+$(QPEDIR)/minesweep/minesweep.o: $(QPEDIR)/minesweep/minesweep.cpp
+
+$(QPEDIR)/include/alarmserver.o: $(QPEDIR)/include/alarmserver.cpp
+
+$(QPEDIR)/include/applnk.o: $(QPEDIR)/include/applnk.cpp
+
+$(QPEDIR)/include/calendar.o: $(QPEDIR)/include/calendar.cpp
+
+$(QPEDIR)/include/config.o: $(QPEDIR)/include/config.cpp
+
+$(QPEDIR)/include/datebookdb.o: $(QPEDIR)/include/datebookdb.cpp
+
+$(QPEDIR)/include/datebookmonth.o: $(QPEDIR)/include/datebookmonth.cpp
+
+$(QPEDIR)/include/filemanager.o: $(QPEDIR)/include/filemanager.cpp
+
+$(QPEDIR)/include/fileselector.o: $(QPEDIR)/include/fileselector.cpp
+
+$(QPEDIR)/include/fontdatabase.o: $(QPEDIR)/include/fontdatabase.cpp
+
+$(QPEDIR)/include/fontmanager.o: $(QPEDIR)/include/fontmanager.cpp
+
+$(QPEDIR)/include/global.o: $(QPEDIR)/include/global.cpp
+
+$(QPEDIR)/include/imageedit.o: $(QPEDIR)/include/imageedit.cpp
+
+$(QPEDIR)/include/lightstyle.o: $(QPEDIR)/include/lightstyle.cpp
+
+$(QPEDIR)/include/menubutton.o: $(QPEDIR)/include/menubutton.cpp
+
+$(QPEDIR)/include/mimetype.o: $(QPEDIR)/include/mimetype.cpp
+
+$(QPEDIR)/include/network.o: $(QPEDIR)/include/network.cpp
+
+$(QPEDIR)/include/networkinterface.o: $(QPEDIR)/include/networkinterface.cpp
+
+$(QPEDIR)/include/organizer.o: $(QPEDIR)/include/organizer.cpp
+
+$(QPEDIR)/include/power.o: $(QPEDIR)/include/power.cpp
+
+$(QPEDIR)/include/process.o: $(QPEDIR)/include/process.cpp
+
+$(QPEDIR)/include/process_unix.o: $(QPEDIR)/include/process_unix.cpp
+
+$(QPEDIR)/include/qcopenvelope_qws.o: $(QPEDIR)/include/qcopenvelope_qws.cpp
+
+$(QPEDIR)/include/qdawg.o: $(QPEDIR)/include/qdawg.cpp
+
+$(QPEDIR)/include/qmath.o: $(QPEDIR)/include/qmath.c
+
+$(QPEDIR)/include/qpeapplication.o: $(QPEDIR)/include/qpeapplication.cpp
+
+$(QPEDIR)/include/qpedebug.o: $(QPEDIR)/include/qpedebug.cpp
+
+$(QPEDIR)/include/qpedecoration_qws.o: $(QPEDIR)/include/qpedecoration_qws.cpp
+
+$(QPEDIR)/include/qpestyle.o: $(QPEDIR)/include/qpestyle.cpp
+
+$(QPEDIR)/include/quuid.o: $(QPEDIR)/include/quuid.cpp
+
+$(QPEDIR)/include/resource.o: $(QPEDIR)/include/resource.cpp
+
+$(QPEDIR)/include/sound.o: $(QPEDIR)/include/sound.cpp
+
+$(QPEDIR)/include/timestring.o: $(QPEDIR)/include/timestring.cpp
+
+$(QPEDIR)/include/tzselect.o: $(QPEDIR)/include/tzselect.cpp
+
+$(QPEDIR)/include/xmlreader.o: $(QPEDIR)/include/xmlreader.cpp
+
+$(QPEDIR)/launcher/categorylist.o: $(QPEDIR)/launcher/categorylist.cpp
+
+$(QPEDIR)/launcher/launcher.o: $(QPEDIR)/launcher/launcher.cpp
+
+$(QPEDIR)/launcher/launcherview.o: $(QPEDIR)/launcher/launcherview.cpp
+
+$(QPEDIR)/launcher/lnkproperties.o: $(QPEDIR)/launcher/lnkproperties.cpp
+
+$(QPEDIR)/inputmethods/pickboard/pickboard.o: $(QPEDIR)/inputmethods/pickboard/pickboard.cpp
+
+$(QPEDIR)/inputmethods/pickboard/pickboardcfg.o: $(QPEDIR)/inputmethods/pickboard/pickboardcfg.cpp
+
+$(QPEDIR)/inputmethods/pickboard/pickboardimpl.o: $(QPEDIR)/inputmethods/pickboard/pickboardimpl.cpp
+
+$(QPEDIR)/inputmethods/pickboard/pickboardpicks.o: $(QPEDIR)/inputmethods/pickboard/pickboardpicks.cpp
+
+$(QPEDIR)/inputmethods/keyboard/keyboard.o: $(QPEDIR)/inputmethods/keyboard/keyboard.cpp
+
+$(QPEDIR)/inputmethods/keyboard/keyboardimpl.o: $(QPEDIR)/inputmethods/keyboard/keyboardimpl.cpp
+
+$(QPEDIR)/inputmethods/handwriting/handwritingimpl.o: $(QPEDIR)/inputmethods/handwriting/handwritingimpl.cpp
+
+$(QPEDIR)/inputmethods/handwriting/qimpenchar.o: $(QPEDIR)/inputmethods/handwriting/qimpenchar.cpp
+
+$(QPEDIR)/inputmethods/handwriting/qimpencombining.o: $(QPEDIR)/inputmethods/handwriting/qimpencombining.cpp
+
+$(QPEDIR)/inputmethods/handwriting/qimpenhelp.o: $(QPEDIR)/inputmethods/handwriting/qimpenhelp.cpp
+
+$(QPEDIR)/inputmethods/handwriting/qimpeninput.o: $(QPEDIR)/inputmethods/handwriting/qimpeninput.cpp
+
+$(QPEDIR)/inputmethods/handwriting/qimpenmatch.o: $(QPEDIR)/inputmethods/handwriting/qimpenmatch.cpp
+
+$(QPEDIR)/inputmethods/handwriting/qimpenprofile.o: $(QPEDIR)/inputmethods/handwriting/qimpenprofile.cpp
+
+$(QPEDIR)/inputmethods/handwriting/qimpensetup.o: $(QPEDIR)/inputmethods/handwriting/qimpensetup.cpp
+
+$(QPEDIR)/inputmethods/handwriting/qimpenstroke.o: $(QPEDIR)/inputmethods/handwriting/qimpenstroke.cpp
+
+$(QPEDIR)/inputmethods/handwriting/qimpenwidget.o: $(QPEDIR)/inputmethods/handwriting/qimpenwidget.cpp
+
+$(QPEDIR)/inputmethods/handwriting/qimpenwordpick.o: $(QPEDIR)/inputmethods/handwriting/qimpenwordpick.cpp
+
+$(QPEDIR)/helpbrowser/helpbrowser.o: $(QPEDIR)/helpbrowser/helpbrowser.cpp
+
+$(QPEDIR)/filebrowser/filebrowser.o: $(QPEDIR)/filebrowser/filebrowser.cpp
+
+$(QPEDIR)/filebrowser/inlineedit.o: $(QPEDIR)/filebrowser/inlineedit.cpp
+
+$(QPEDIR)/embeddedkonsole/MyPty.o: $(QPEDIR)/embeddedkonsole/MyPty.cpp
+
+$(QPEDIR)/embeddedkonsole/TEHistory.o: $(QPEDIR)/embeddedkonsole/TEHistory.cpp
+
+$(QPEDIR)/embeddedkonsole/TEScreen.o: $(QPEDIR)/embeddedkonsole/TEScreen.cpp
+
+$(QPEDIR)/embeddedkonsole/TEWidget.o: $(QPEDIR)/embeddedkonsole/TEWidget.cpp
+
+$(QPEDIR)/embeddedkonsole/TEmuVt102.o: $(QPEDIR)/embeddedkonsole/TEmuVt102.cpp
+
+$(QPEDIR)/embeddedkonsole/TEmulation.o: $(QPEDIR)/embeddedkonsole/TEmulation.cpp
+
+$(QPEDIR)/embeddedkonsole/keytrans.o: $(QPEDIR)/embeddedkonsole/keytrans.cpp
+
+$(QPEDIR)/embeddedkonsole/konsole.o: $(QPEDIR)/embeddedkonsole/konsole.cpp
+
+$(QPEDIR)/embeddedkonsole/session.o: $(QPEDIR)/embeddedkonsole/session.cpp
+
+$(QPEDIR)/datebook/datebook.o: $(QPEDIR)/datebook/datebook.cpp
+
+$(QPEDIR)/datebook/datebookday.o: $(QPEDIR)/datebook/datebookday.cpp
+
+$(QPEDIR)/datebook/datebookdayheaderimpl.o: $(QPEDIR)/datebook/datebookdayheaderimpl.cpp
+
+$(QPEDIR)/datebook/datebooksettings.o: $(QPEDIR)/datebook/datebooksettings.cpp
+
+$(QPEDIR)/datebook/datebookweek.o: $(QPEDIR)/datebook/datebookweek.cpp
+
+$(QPEDIR)/datebook/datebookweekheaderimpl.o: $(QPEDIR)/datebook/datebookweekheaderimpl.cpp
+
+$(QPEDIR)/datebook/dateentryimpl.o: $(QPEDIR)/datebook/dateentryimpl.cpp
+
+$(QPEDIR)/datebook/repeatentry.o: $(QPEDIR)/datebook/repeatentry.cpp
+
+$(QPEDIR)/clock/clock.o: $(QPEDIR)/clock/clock.cpp
+
+$(QPEDIR)/citytime/citytime.o: $(QPEDIR)/citytime/citytime.cpp
+
+$(QPEDIR)/citytime/stylusnormalizer.o: $(QPEDIR)/citytime/stylusnormalizer.cpp
+
+$(QPEDIR)/citytime/sun.o: $(QPEDIR)/citytime/sun.c
+
+$(QPEDIR)/citytime/zonemap.o: $(QPEDIR)/citytime/zonemap.cpp
+
+$(QPEDIR)/calibrate/calibrate.o: $(QPEDIR)/calibrate/calibrate.cpp
+
+$(QPEDIR)/calculator/calculatorimpl.o: $(QPEDIR)/calculator/calculatorimpl.cpp
+
+$(QPEDIR)/addressbook/abeditor.o: $(QPEDIR)/addressbook/abeditor.cpp
+
+$(QPEDIR)/addressbook/abeditorpage2.o: $(QPEDIR)/addressbook/abeditorpage2.cpp
+
+$(QPEDIR)/addressbook/abentry.o: $(QPEDIR)/addressbook/abentry.cpp
+
+$(QPEDIR)/addressbook/ablabel.o: $(QPEDIR)/addressbook/ablabel.cpp
+
+$(QPEDIR)/addressbook/abtable.o: $(QPEDIR)/addressbook/abtable.cpp
+
+$(QPEDIR)/addressbook/addressbook.o: $(QPEDIR)/addressbook/addressbook.cpp
+
+$(QPEDIR)/addressbook/addresssettings.o: $(QPEDIR)/addressbook/addresssettings.cpp
+
+$(QPEDIR)/wordgame/newgamebase.h: $(QPEDIR)/wordgame/newgamebase.ui
+	$(UIC) $(QPEDIR)/wordgame/newgamebase.ui -o $(INTERFACE_DECL_PATH)/$(QPEDIR)/wordgame/newgamebase.h
+
+newgamebase.h: $(QPEDIR)/wordgame/newgamebase.ui
+	$(UIC) $(QPEDIR)/wordgame/newgamebase.ui -o newgamebase.h
+
+$(QPEDIR)/wordgame/newgamebase.cpp: $(QPEDIR)/wordgame/newgamebase.ui
+	$(UIC) $(QPEDIR)/wordgame/newgamebase.ui -i newgamebase.h -o $(QPEDIR)/wordgame/newgamebase.cpp
+
+$(QPEDIR)/wordgame/rulesbase.h: $(QPEDIR)/wordgame/rulesbase.ui
+	$(UIC) $(QPEDIR)/wordgame/rulesbase.ui -o $(INTERFACE_DECL_PATH)/$(QPEDIR)/wordgame/rulesbase.h
+
+rulesbase.h: $(QPEDIR)/wordgame/rulesbase.ui
+	$(UIC) $(QPEDIR)/wordgame/rulesbase.ui -o rulesbase.h
+
+$(QPEDIR)/wordgame/rulesbase.cpp: $(QPEDIR)/wordgame/rulesbase.ui
+	$(UIC) $(QPEDIR)/wordgame/rulesbase.ui -i rulesbase.h -o $(QPEDIR)/wordgame/rulesbase.cpp
+
+$(QPEDIR)/todo/todoentry.h: $(QPEDIR)/todo/todoentry.ui
+	$(UIC) $(QPEDIR)/todo/todoentry.ui -o $(INTERFACE_DECL_PATH)/$(QPEDIR)/todo/todoentry.h
+
+todoentry.h: $(QPEDIR)/todo/todoentry.ui
+	$(UIC) $(QPEDIR)/todo/todoentry.ui -o todoentry.h
+
+$(QPEDIR)/todo/todoentry.cpp: $(QPEDIR)/todo/todoentry.ui
+	$(UIC) $(QPEDIR)/todo/todoentry.ui -i todoentry.h -o $(QPEDIR)/todo/todoentry.cpp
+
+$(QPEDIR)/taskbar/shutdown.h: $(QPEDIR)/taskbar/shutdown.ui
+	$(UIC) $(QPEDIR)/taskbar/shutdown.ui -o $(INTERFACE_DECL_PATH)/$(QPEDIR)/taskbar/shutdown.h
+
+shutdown.h: $(QPEDIR)/taskbar/shutdown.ui
+	$(UIC) $(QPEDIR)/taskbar/shutdown.ui -o shutdown.h
+
+$(QPEDIR)/taskbar/shutdown.cpp: $(QPEDIR)/taskbar/shutdown.ui
+	$(UIC) $(QPEDIR)/taskbar/shutdown.ui -i shutdown.h -o $(QPEDIR)/taskbar/shutdown.cpp
+
+$(QPEDIR)/settings/appearance/appearancesettingsbase.h: $(QPEDIR)/settings/appearance/appearancesettingsbase.ui
+	$(UIC) $(QPEDIR)/settings/appearance/appearancesettingsbase.ui -o $(INTERFACE_DECL_PATH)/$(QPEDIR)/settings/appearance/appearancesettingsbase.h
+
+appearancesettingsbase.h: $(QPEDIR)/settings/appearance/appearancesettingsbase.ui
+	$(UIC) $(QPEDIR)/settings/appearance/appearancesettingsbase.ui -o appearancesettingsbase.h
+
+$(QPEDIR)/settings/appearance/appearancesettingsbase.cpp: $(QPEDIR)/settings/appearance/appearancesettingsbase.ui
+	$(UIC) $(QPEDIR)/settings/appearance/appearancesettingsbase.ui -i appearancesettingsbase.h -o $(QPEDIR)/settings/appearance/appearancesettingsbase.cpp
+
+$(QPEDIR)/launcher/lnkpropertiesbase.h: $(QPEDIR)/launcher/lnkpropertiesbase.ui
+	$(UIC) $(QPEDIR)/launcher/lnkpropertiesbase.ui -o $(INTERFACE_DECL_PATH)/$(QPEDIR)/launcher/lnkpropertiesbase.h
+
+lnkpropertiesbase.h: $(QPEDIR)/launcher/lnkpropertiesbase.ui
+	$(UIC) $(QPEDIR)/launcher/lnkpropertiesbase.ui -o lnkpropertiesbase.h
+
+$(QPEDIR)/launcher/lnkpropertiesbase.cpp: $(QPEDIR)/launcher/lnkpropertiesbase.ui
+	$(UIC) $(QPEDIR)/launcher/lnkpropertiesbase.ui -i lnkpropertiesbase.h -o $(QPEDIR)/launcher/lnkpropertiesbase.cpp
+
+$(QPEDIR)/inputmethods/handwriting/qimpenprefbase.h: $(QPEDIR)/inputmethods/handwriting/qimpenprefbase.ui
+	$(UIC) $(QPEDIR)/inputmethods/handwriting/qimpenprefbase.ui -o $(INTERFACE_DECL_PATH)/$(QPEDIR)/inputmethods/handwriting/qimpenprefbase.h
+
+qimpenprefbase.h: $(QPEDIR)/inputmethods/handwriting/qimpenprefbase.ui
+	$(UIC) $(QPEDIR)/inputmethods/handwriting/qimpenprefbase.ui -o qimpenprefbase.h
+
+$(QPEDIR)/inputmethods/handwriting/qimpenprefbase.cpp: $(QPEDIR)/inputmethods/handwriting/qimpenprefbase.ui
+	$(UIC) $(QPEDIR)/inputmethods/handwriting/qimpenprefbase.ui -i qimpenprefbase.h -o $(QPEDIR)/inputmethods/handwriting/qimpenprefbase.cpp
+
+$(QPEDIR)/datebook/datebookdayheader.h: $(QPEDIR)/datebook/datebookdayheader.ui
+	$(UIC) $(QPEDIR)/datebook/datebookdayheader.ui -o $(INTERFACE_DECL_PATH)/$(QPEDIR)/datebook/datebookdayheader.h
+
+datebookdayheader.h: $(QPEDIR)/datebook/datebookdayheader.ui
+	$(UIC) $(QPEDIR)/datebook/datebookdayheader.ui -o datebookdayheader.h
+
+$(QPEDIR)/datebook/datebookdayheader.cpp: $(QPEDIR)/datebook/datebookdayheader.ui
+	$(UIC) $(QPEDIR)/datebook/datebookdayheader.ui -i datebookdayheader.h -o $(QPEDIR)/datebook/datebookdayheader.cpp
+
+$(QPEDIR)/datebook/datebooksettingsbase.h: $(QPEDIR)/datebook/datebooksettingsbase.ui
+	$(UIC) $(QPEDIR)/datebook/datebooksettingsbase.ui -o $(INTERFACE_DECL_PATH)/$(QPEDIR)/datebook/datebooksettingsbase.h
+
+datebooksettingsbase.h: $(QPEDIR)/datebook/datebooksettingsbase.ui
+	$(UIC) $(QPEDIR)/datebook/datebooksettingsbase.ui -o datebooksettingsbase.h
+
+$(QPEDIR)/datebook/datebooksettingsbase.cpp: $(QPEDIR)/datebook/datebooksettingsbase.ui
+	$(UIC) $(QPEDIR)/datebook/datebooksettingsbase.ui -i datebooksettingsbase.h -o $(QPEDIR)/datebook/datebooksettingsbase.cpp
+
+$(QPEDIR)/datebook/datebookweekheader.h: $(QPEDIR)/datebook/datebookweekheader.ui
+	$(UIC) $(QPEDIR)/datebook/datebookweekheader.ui -o $(INTERFACE_DECL_PATH)/$(QPEDIR)/datebook/datebookweekheader.h
+
+datebookweekheader.h: $(QPEDIR)/datebook/datebookweekheader.ui
+	$(UIC) $(QPEDIR)/datebook/datebookweekheader.ui -o datebookweekheader.h
+
+$(QPEDIR)/datebook/datebookweekheader.cpp: $(QPEDIR)/datebook/datebookweekheader.ui
+	$(UIC) $(QPEDIR)/datebook/datebookweekheader.ui -i datebookweekheader.h -o $(QPEDIR)/datebook/datebookweekheader.cpp
+
+$(QPEDIR)/datebook/dateentry.h: $(QPEDIR)/datebook/dateentry.ui
+	$(UIC) $(QPEDIR)/datebook/dateentry.ui -o $(INTERFACE_DECL_PATH)/$(QPEDIR)/datebook/dateentry.h
+
+dateentry.h: $(QPEDIR)/datebook/dateentry.ui
+	$(UIC) $(QPEDIR)/datebook/dateentry.ui -o dateentry.h
+
+$(QPEDIR)/datebook/dateentry.cpp: $(QPEDIR)/datebook/dateentry.ui
+	$(UIC) $(QPEDIR)/datebook/dateentry.ui -i dateentry.h -o $(QPEDIR)/datebook/dateentry.cpp
+
+$(QPEDIR)/datebook/repeatentrybase.h: $(QPEDIR)/datebook/repeatentrybase.ui
+	$(UIC) $(QPEDIR)/datebook/repeatentrybase.ui -o $(INTERFACE_DECL_PATH)/$(QPEDIR)/datebook/repeatentrybase.h
+
+repeatentrybase.h: $(QPEDIR)/datebook/repeatentrybase.ui
+	$(UIC) $(QPEDIR)/datebook/repeatentrybase.ui -o repeatentrybase.h
+
+$(QPEDIR)/datebook/repeatentrybase.cpp: $(QPEDIR)/datebook/repeatentrybase.ui
+	$(UIC) $(QPEDIR)/datebook/repeatentrybase.ui -i repeatentrybase.h -o $(QPEDIR)/datebook/repeatentrybase.cpp
+
+$(QPEDIR)/citytime/citytimebase.h: $(QPEDIR)/citytime/citytimebase.ui
+	$(UIC) $(QPEDIR)/citytime/citytimebase.ui -o $(INTERFACE_DECL_PATH)/$(QPEDIR)/citytime/citytimebase.h
+
+citytimebase.h: $(QPEDIR)/citytime/citytimebase.ui
+	$(UIC) $(QPEDIR)/citytime/citytimebase.ui -o citytimebase.h
+
+$(QPEDIR)/citytime/citytimebase.cpp: $(QPEDIR)/citytime/citytimebase.ui
+	$(UIC) $(QPEDIR)/citytime/citytimebase.ui -i citytimebase.h -o $(QPEDIR)/citytime/citytimebase.cpp
+
+$(QPEDIR)/calculator/calculator.h: $(QPEDIR)/calculator/calculator.ui
+	$(UIC) $(QPEDIR)/calculator/calculator.ui -o $(INTERFACE_DECL_PATH)/$(QPEDIR)/calculator/calculator.h
+
+calculator.h: $(QPEDIR)/calculator/calculator.ui
+	$(UIC) $(QPEDIR)/calculator/calculator.ui -o calculator.h
+
+$(QPEDIR)/calculator/calculator.cpp: $(QPEDIR)/calculator/calculator.ui
+	$(UIC) $(QPEDIR)/calculator/calculator.ui -i calculator.h -o $(QPEDIR)/calculator/calculator.cpp
+
+$(QPEDIR)/addressbook/abeditorbase.h: $(QPEDIR)/addressbook/abeditorbase.ui
+	$(UIC) $(QPEDIR)/addressbook/abeditorbase.ui -o $(INTERFACE_DECL_PATH)/$(QPEDIR)/addressbook/abeditorbase.h
+
+abeditorbase.h: $(QPEDIR)/addressbook/abeditorbase.ui
+	$(UIC) $(QPEDIR)/addressbook/abeditorbase.ui -o abeditorbase.h
+
+$(QPEDIR)/addressbook/abeditorbase.cpp: $(QPEDIR)/addressbook/abeditorbase.ui
+	$(UIC) $(QPEDIR)/addressbook/abeditorbase.ui -i abeditorbase.h -o $(QPEDIR)/addressbook/abeditorbase.cpp
+
+$(QPEDIR)/addressbook/abeditorpage2base.h: $(QPEDIR)/addressbook/abeditorpage2base.ui
+	$(UIC) $(QPEDIR)/addressbook/abeditorpage2base.ui -o $(INTERFACE_DECL_PATH)/$(QPEDIR)/addressbook/abeditorpage2base.h
+
+abeditorpage2base.h: $(QPEDIR)/addressbook/abeditorpage2base.ui
+	$(UIC) $(QPEDIR)/addressbook/abeditorpage2base.ui -o abeditorpage2base.h
+
+$(QPEDIR)/addressbook/abeditorpage2base.cpp: $(QPEDIR)/addressbook/abeditorpage2base.ui
+	$(UIC) $(QPEDIR)/addressbook/abeditorpage2base.ui -i abeditorpage2base.h -o $(QPEDIR)/addressbook/abeditorpage2base.cpp
+
+$(QPEDIR)/addressbook/addresssettingsbase.h: $(QPEDIR)/addressbook/addresssettingsbase.ui
+	$(UIC) $(QPEDIR)/addressbook/addresssettingsbase.ui -o $(INTERFACE_DECL_PATH)/$(QPEDIR)/addressbook/addresssettingsbase.h
+
+addresssettingsbase.h: $(QPEDIR)/addressbook/addresssettingsbase.ui
+	$(UIC) $(QPEDIR)/addressbook/addresssettingsbase.ui -o addresssettingsbase.h
+
+$(QPEDIR)/addressbook/addresssettingsbase.cpp: $(QPEDIR)/addressbook/addresssettingsbase.ui
+	$(UIC) $(QPEDIR)/addressbook/addresssettingsbase.ui -i addresssettingsbase.h -o $(QPEDIR)/addressbook/addresssettingsbase.cpp
+
+$(QPEDIR)/wordgame/newgamebase.o: $(QPEDIR)/wordgame/newgamebase.cpp
+
+$(QPEDIR)/wordgame/rulesbase.o: $(QPEDIR)/wordgame/rulesbase.cpp
+
+$(QPEDIR)/todo/todoentry.o: $(QPEDIR)/todo/todoentry.cpp
+
+$(QPEDIR)/taskbar/shutdown.o: $(QPEDIR)/taskbar/shutdown.cpp
+
+$(QPEDIR)/settings/appearance/appearancesettingsbase.o: $(QPEDIR)/settings/appearance/appearancesettingsbase.cpp
+
+$(QPEDIR)/launcher/lnkpropertiesbase.o: $(QPEDIR)/launcher/lnkpropertiesbase.cpp
+
+$(QPEDIR)/inputmethods/handwriting/qimpenprefbase.o: $(QPEDIR)/inputmethods/handwriting/qimpenprefbase.cpp
+
+$(QPEDIR)/datebook/datebookdayheader.o: $(QPEDIR)/datebook/datebookdayheader.cpp
+
+$(QPEDIR)/datebook/datebooksettingsbase.o: $(QPEDIR)/datebook/datebooksettingsbase.cpp
+
+$(QPEDIR)/datebook/datebookweekheader.o: $(QPEDIR)/datebook/datebookweekheader.cpp
+
+$(QPEDIR)/datebook/dateentry.o: $(QPEDIR)/datebook/dateentry.cpp
+
+$(QPEDIR)/datebook/repeatentrybase.o: $(QPEDIR)/datebook/repeatentrybase.cpp
+
+$(QPEDIR)/citytime/citytimebase.o: $(QPEDIR)/citytime/citytimebase.cpp
+
+$(QPEDIR)/calculator/calculator.o: $(QPEDIR)/calculator/calculator.cpp
+
+$(QPEDIR)/addressbook/abeditorbase.o: $(QPEDIR)/addressbook/abeditorbase.cpp
+
+$(QPEDIR)/addressbook/abeditorpage2base.o: $(QPEDIR)/addressbook/abeditorpage2base.cpp
+
+$(QPEDIR)/addressbook/addresssettingsbase.o: $(QPEDIR)/addressbook/addresssettingsbase.cpp
+
+$(QPEDIR)/wordgame/moc_newgamebase.o: $(QPEDIR)/wordgame/moc_newgamebase.cpp \
+		$(QPEDIR)/wordgame/newgamebase.h
+
+$(QPEDIR)/wordgame/moc_rulesbase.o: $(QPEDIR)/wordgame/moc_rulesbase.cpp \
+		$(QPEDIR)/wordgame/rulesbase.h
+
+$(QPEDIR)/todo/moc_todoentry.o: $(QPEDIR)/todo/moc_todoentry.cpp \
+		$(QPEDIR)/todo/todoentry.h
+
+$(QPEDIR)/taskbar/moc_shutdown.o: $(QPEDIR)/taskbar/moc_shutdown.cpp \
+		$(QPEDIR)/taskbar/shutdown.h
+
+$(QPEDIR)/settings/appearance/moc_appearancesettingsbase.o: $(QPEDIR)/settings/appearance/moc_appearancesettingsbase.cpp \
+		$(QPEDIR)/settings/appearance/appearancesettingsbase.h
+
+$(QPEDIR)/launcher/moc_lnkpropertiesbase.o: $(QPEDIR)/launcher/moc_lnkpropertiesbase.cpp \
+		$(QPEDIR)/launcher/lnkpropertiesbase.h
+
+$(QPEDIR)/inputmethods/handwriting/moc_qimpenprefbase.o: $(QPEDIR)/inputmethods/handwriting/moc_qimpenprefbase.cpp \
+		$(QPEDIR)/inputmethods/handwriting/qimpenprefbase.h
+
+$(QPEDIR)/datebook/moc_datebookdayheader.o: $(QPEDIR)/datebook/moc_datebookdayheader.cpp \
+		$(QPEDIR)/datebook/datebookdayheader.h
+
+$(QPEDIR)/datebook/moc_datebooksettingsbase.o: $(QPEDIR)/datebook/moc_datebooksettingsbase.cpp \
+		$(QPEDIR)/datebook/datebooksettingsbase.h
+
+$(QPEDIR)/datebook/moc_datebookweekheader.o: $(QPEDIR)/datebook/moc_datebookweekheader.cpp \
+		$(QPEDIR)/datebook/datebookweekheader.h
+
+$(QPEDIR)/datebook/moc_dateentry.o: $(QPEDIR)/datebook/moc_dateentry.cpp \
+		$(QPEDIR)/datebook/dateentry.h
+
+$(QPEDIR)/datebook/moc_repeatentrybase.o: $(QPEDIR)/datebook/moc_repeatentrybase.cpp \
+		$(QPEDIR)/datebook/repeatentrybase.h
+
+$(QPEDIR)/citytime/moc_citytimebase.o: $(QPEDIR)/citytime/moc_citytimebase.cpp \
+		$(QPEDIR)/citytime/citytimebase.h
+
+$(QPEDIR)/calculator/moc_calculator.o: $(QPEDIR)/calculator/moc_calculator.cpp \
+		$(QPEDIR)/calculator/calculator.h
+
+$(QPEDIR)/addressbook/moc_abeditorbase.o: $(QPEDIR)/addressbook/moc_abeditorbase.cpp \
+		$(QPEDIR)/addressbook/abeditorbase.h
+
+$(QPEDIR)/addressbook/moc_abeditorpage2base.o: $(QPEDIR)/addressbook/moc_abeditorpage2base.cpp \
+		$(QPEDIR)/addressbook/abeditorpage2base.h
+
+$(QPEDIR)/addressbook/moc_addresssettingsbase.o: $(QPEDIR)/addressbook/moc_addresssettingsbase.cpp \
+		$(QPEDIR)/addressbook/addresssettingsbase.h
+
+$(QPEDIR)/wordgame/moc_newgamebase.cpp: $(QPEDIR)/wordgame/newgamebase.h
+	$(MOC) $(QPEDIR)/wordgame/newgamebase.h -o $(QPEDIR)/wordgame/moc_newgamebase.cpp
+
+$(QPEDIR)/wordgame/moc_rulesbase.cpp: $(QPEDIR)/wordgame/rulesbase.h
+	$(MOC) $(QPEDIR)/wordgame/rulesbase.h -o $(QPEDIR)/wordgame/moc_rulesbase.cpp
+
+$(QPEDIR)/todo/moc_todoentry.cpp: $(QPEDIR)/todo/todoentry.h
+	$(MOC) $(QPEDIR)/todo/todoentry.h -o $(QPEDIR)/todo/moc_todoentry.cpp
+
+$(QPEDIR)/taskbar/moc_shutdown.cpp: $(QPEDIR)/taskbar/shutdown.h
+	$(MOC) $(QPEDIR)/taskbar/shutdown.h -o $(QPEDIR)/taskbar/moc_shutdown.cpp
+
+$(QPEDIR)/settings/appearance/moc_appearancesettingsbase.cpp: $(QPEDIR)/settings/appearance/appearancesettingsbase.h
+	$(MOC) $(QPEDIR)/settings/appearance/appearancesettingsbase.h -o $(QPEDIR)/settings/appearance/moc_appearancesettingsbase.cpp
+
+$(QPEDIR)/launcher/moc_lnkpropertiesbase.cpp: $(QPEDIR)/launcher/lnkpropertiesbase.h
+	$(MOC) $(QPEDIR)/launcher/lnkpropertiesbase.h -o $(QPEDIR)/launcher/moc_lnkpropertiesbase.cpp
+
+$(QPEDIR)/inputmethods/handwriting/moc_qimpenprefbase.cpp: $(QPEDIR)/inputmethods/handwriting/qimpenprefbase.h
+	$(MOC) $(QPEDIR)/inputmethods/handwriting/qimpenprefbase.h -o $(QPEDIR)/inputmethods/handwriting/moc_qimpenprefbase.cpp
+
+$(QPEDIR)/datebook/moc_datebookdayheader.cpp: $(QPEDIR)/datebook/datebookdayheader.h
+	$(MOC) $(QPEDIR)/datebook/datebookdayheader.h -o $(QPEDIR)/datebook/moc_datebookdayheader.cpp
+
+$(QPEDIR)/datebook/moc_datebooksettingsbase.cpp: $(QPEDIR)/datebook/datebooksettingsbase.h
+	$(MOC) $(QPEDIR)/datebook/datebooksettingsbase.h -o $(QPEDIR)/datebook/moc_datebooksettingsbase.cpp
+
+$(QPEDIR)/datebook/moc_datebookweekheader.cpp: $(QPEDIR)/datebook/datebookweekheader.h
+	$(MOC) $(QPEDIR)/datebook/datebookweekheader.h -o $(QPEDIR)/datebook/moc_datebookweekheader.cpp
+
+$(QPEDIR)/datebook/moc_dateentry.cpp: $(QPEDIR)/datebook/dateentry.h
+	$(MOC) $(QPEDIR)/datebook/dateentry.h -o $(QPEDIR)/datebook/moc_dateentry.cpp
+
+$(QPEDIR)/datebook/moc_repeatentrybase.cpp: $(QPEDIR)/datebook/repeatentrybase.h
+	$(MOC) $(QPEDIR)/datebook/repeatentrybase.h -o $(QPEDIR)/datebook/moc_repeatentrybase.cpp
+
+$(QPEDIR)/citytime/moc_citytimebase.cpp: $(QPEDIR)/citytime/citytimebase.h
+	$(MOC) $(QPEDIR)/citytime/citytimebase.h -o $(QPEDIR)/citytime/moc_citytimebase.cpp
+
+$(QPEDIR)/calculator/moc_calculator.cpp: $(QPEDIR)/calculator/calculator.h
+	$(MOC) $(QPEDIR)/calculator/calculator.h -o $(QPEDIR)/calculator/moc_calculator.cpp
+
+$(QPEDIR)/addressbook/moc_abeditorbase.cpp: $(QPEDIR)/addressbook/abeditorbase.h
+	$(MOC) $(QPEDIR)/addressbook/abeditorbase.h -o $(QPEDIR)/addressbook/moc_abeditorbase.cpp
+
+$(QPEDIR)/addressbook/moc_abeditorpage2base.cpp: $(QPEDIR)/addressbook/abeditorpage2base.h
+	$(MOC) $(QPEDIR)/addressbook/abeditorpage2base.h -o $(QPEDIR)/addressbook/moc_abeditorpage2base.cpp
+
+$(QPEDIR)/addressbook/moc_addresssettingsbase.cpp: $(QPEDIR)/addressbook/addresssettingsbase.h
+	$(MOC) $(QPEDIR)/addressbook/addresssettingsbase.h -o $(QPEDIR)/addressbook/moc_addresssettingsbase.cpp
+
+

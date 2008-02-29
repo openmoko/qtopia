@@ -1,0 +1,127 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/doc/distrib.doc:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+|<a href="classes.html">
+<font color="white">Classes</font></a>
+<font color="white">|</font>
+<a href="functions.html"><font color="white">Functions</font></a>
+<font color="white">|</font>
+<a href="../qt/index.html"><font color="white">Qt API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table>
+<p> 
+<p> <h2> Qtopia - Distribution Packaging
+</h2>
+<a name="1"></a><p> Packages for Qtopia devices should be distributed in IPKG format.
+<p> Packages for Linux/X11 desktop systems (i.e. development systems)
+should be distributed in RPM format.
+<p> Both of these formats are supported by the <tt>mkipks</tt> program which is
+part of the Qtopia SDK. This program takes a control file and produces
+either an IPKG file or an RPM file. Sample control files are included
+in the Qtopia SDK, such as <a href="file:/opt/Qtopia/example/example.control">example.control</a>.
+<p> The control file has the following form:
+<p> <pre>
+Files: bin/foo apps/Applications/foo.desktop etc/foo.dat
+Priority: optional
+Section: qpe/applications
+Maintainer: Your Name &lt;you@yourdomain.com&gt;
+Version: 1.2.3-1
+Depends: qpe-base
+Description: Very brief description.
+ A much longer
+ multi-line
+ description.
+</pre>
+ 
+<p> The following fields are supported:
+<p> <ul>
+<li> <tt>Files</tt>
+- List of files relative to $QPEDIR, wildcards are permitted.
+<li> <tt>Priority</tt>
+- The priority (normally "optional").
+<li> <tt>Section</tt>
+- The classification of the package. The categories recognized by Qtopia Desktop are:
+<ul>
+<li> qpe/applications
+<li> qpe/games
+<li> qpe/settings
+<li> qpe/system
+<li> kernel
+<li> base
+<li> libs
+<li> qpe/taskbar
+<li> qpe/styles
+<li> qpe/inputmethods
+<li> qpe/decorations
+<li> qpe/plugins
+</ul> 
+<li> <tt>Maintainer</tt>
+- The contact person for the package.
+<li> <tt>Version</tt>
+- The version number should be suffixed by -n, the package number
+which allows the package builder to rebuild in cases of error.
+<li> <tt>Depends</tt>
+- comma-seperated list of packages which this package requires.
+<li> <tt>Description</tt>
+- one line description, then multiple lines, with a leading space,
+to the end of the control file.
+</ul>
+<p> Other IPKG fields are passed through unchanged to the the control file within
+the resulting .ipk file. See the documentation of the ipkg program for more
+information.
+<p> For IPKG format, you may also have files with the same name as the
+control file, but with the <b>.control</b> suffix replaced by one of
+the following:
+<p> <center><table cellpadding="4" cellspacing="2" border="0">
+<tr bgcolor="#a2c511"> <th valign="top">Suffix <th valign="top">Notes
+<tr bgcolor="#f0f0f0">
+<td valign="top">.preinst
+<td valign="top">This script will execute before files are moved into place at installation.
+<tr bgcolor="#d0d0d0">
+<td valign="top">.postinst
+<td valign="top">This script will execute after files are moved into place at
+installation. Common uses of this script are:
+<ul>
+<li> <tt>qtopia-addmimetype type/subtype extension</tt> -- add a MIME type
+for your application.
+<li> <tt>/opt/Qtopia/bin/qcop QPE/TaskBar "reloadInputMethods()"</tt> --
+reload input methods if your software is an input method plugin.
+<li> <tt>/opt/Qtopia/bin/qcop QPE/TaskBar "reloadApplets()"</tt> -- reload
+applets if your software is a taskbar applet.
+</ul>
+<tr bgcolor="#f0f0f0">
+<td valign="top">.prerm
+<td valign="top">This script will execute before files are removed at de-installation.
+<tr bgcolor="#d0d0d0">
+<td valign="top">.postrm
+<td valign="top">This script will execute after files are removed at
+de-installation. Common uses of this script are:
+<ul>
+<li> <tt>/opt/Qtopia/bin/qcop QPE/TaskBar "reloadInputMethods()"</tt> --
+reload input methods if your software was an input method plugin.
+<li> <tt>/opt/Qtopia/bin/qcop QPE/TaskBar "reloadApplets()"</tt> -- reload
+applets if your software was a taskbar applet.
+</ul>
+</table></center>
+<p> 
+<!-- eof -->
+<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

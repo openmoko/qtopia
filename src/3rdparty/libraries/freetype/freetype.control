@@ -1,0 +1,8 @@
+Files: lib/libfreetype*
+Priority: optional
+Section: qpe/system
+Maintainer: Martin Jones <mjones@trolltech.com>
+Architecture: arm
+Version: $QPE_VERSION-4
+Description: Freetype library for Qtopia
+ Freetype library (www.freetype.org) for Qtopia freetype font factory plugin.

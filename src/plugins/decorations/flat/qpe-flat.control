@@ -1,0 +1,9 @@
+Files: plugins/decorations/libflat.so*
+Priority: optional
+Section: qpe/decorations
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-5
+Depends: qpe-base ($QPE_VERSION)
+Description: Qtopia window decoration style
+ Basic window decoration style for the Qtopia environment.

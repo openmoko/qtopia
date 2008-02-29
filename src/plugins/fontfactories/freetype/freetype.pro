@@ -1,0 +1,11 @@
+TEMPLATE	= lib
+CONFIG		+= qtopia warn_on release
+HEADERS		= fontfactoryttf_qws.h freetypefactoryimpl.h
+SOURCES		= fontfactoryttf_qws.cpp freetypefactoryimpl.cpp
+qt2:HEADERS	+= qfontdata_p.h
+TARGET		= freetypefactory
+DESTDIR		= $(QPEDIR)/plugins/fontfactories
+INCLUDEPATH	+= $(QTDIR)/src/3rdparty/freetype/include $(QTDIR)/src/3rdparty/freetype/include/freetype/config $(QPEDIR)/include
+DEPENDPATH      += $(QPEDIR)/include
+LIBS            += -lqpe -lfreetype
+VERSION		= 1.0.0

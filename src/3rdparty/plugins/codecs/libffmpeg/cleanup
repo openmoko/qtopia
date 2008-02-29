@@ -1,0 +1,10 @@
+#!/bin/bash
+
+make clean
+rm -rf libavcodec
+rm -rf libav
+rm -rf doc
+rm -rf tests 
+rm Changelog COPYING README INSTALL VERSION berrno.h config.h config.mak configure cygwin_inttypes.h 
+rm ffserver.h ffserver.c ffmpeg.c
+

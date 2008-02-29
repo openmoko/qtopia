@@ -1,0 +1,1 @@
+../../../src/libraries/qtopiaaccessory/accessory.h

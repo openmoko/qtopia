@@ -1,0 +1,5 @@
+netsetup reads its template from $QPEDIR/etc/network.opts.qpe
+If you need to modify the /etc/network.opts script beyond what netsetup will
+allow you should modify the template above instead so that your changes are
+not lost when the network config dialog is used.
+

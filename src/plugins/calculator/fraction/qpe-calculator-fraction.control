@@ -1,0 +1,9 @@
+Files: plugins/calculator/libfraction.so*
+Priority: optional
+Section: qpe/plugins
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-6
+Depends: qpe-base ($QPE_VERSION)
+Description: Fractional calculator plugin
+  A plugin for the calculator that provides fraction operations

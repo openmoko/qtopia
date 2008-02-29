@@ -1,0 +1,1 @@
+../../../src/libraries/qtopia/findwidget_p.h

@@ -1,0 +1,157 @@
+<!DOCTYPE UI><UI>
+<class>TodayOptionsBase</class>
+<widget>
+    <class>QDialog</class>
+    <property stdset="1">
+        <name>name</name>
+        <cstring>todayoptionsbase</cstring>
+    </property>
+    <property stdset="1">
+        <name>geometry</name>
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>288</width>
+            <height>285</height>
+        </rect>
+    </property>
+    <property stdset="1">
+        <name>caption</name>
+        <string>Edit Today View</string>
+    </property>
+    <property>
+        <name>layoutMargin</name>
+    </property>
+    <property>
+        <name>layoutSpacing</name>
+    </property>
+    <vbox>
+        <property stdset="1">
+            <name>margin</name>
+            <number>6</number>
+        </property>
+        <property stdset="1">
+            <name>spacing</name>
+            <number>4</number>
+        </property>
+        <widget>
+            <class>QLayoutWidget</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>Layout1</cstring>
+            </property>
+            <grid>
+                <property stdset="1">
+                    <name>margin</name>
+                    <number>0</number>
+                </property>
+                <property stdset="1">
+                    <name>spacing</name>
+                    <number>0</number>
+                </property>
+                <widget row="2"  column="1" >
+                    <class>QToolButton</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>moveDown</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string></string>
+                    </property>
+                    <property stdset="1">
+                        <name>pixmap</name>
+                        <pixmap>image0</pixmap>
+                    </property>
+                </widget>
+                <widget row="0"  column="0"  rowspan="3"  colspan="1" >
+                    <class>QListView</class>
+                    <column>
+                        <property>
+                            <name>text</name>
+                            <string>Active Plugins</string>
+                        </property>
+                        <property>
+                            <name>clickable</name>
+                            <bool>true</bool>
+                        </property>
+                        <property>
+                            <name>resizeable</name>
+                            <bool>true</bool>
+                        </property>
+                    </column>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>displayView</cstring>
+                    </property>
+                </widget>
+                <widget row="0"  column="1" >
+                    <class>QToolButton</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>moveUp</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string></string>
+                    </property>
+                    <property stdset="1">
+                        <name>pixmap</name>
+                        <pixmap>image1</pixmap>
+                    </property>
+                </widget>
+                <widget row="1"  column="1" >
+                    <class>QToolButton</class>
+                    <property stdset="1">
+                        <name>name</name>
+                        <cstring>cut</cstring>
+                    </property>
+                    <property stdset="1">
+                        <name>text</name>
+                        <string></string>
+                    </property>
+                    <property stdset="1">
+                        <name>pixmap</name>
+                        <pixmap>image2</pixmap>
+                    </property>
+                </widget>
+            </grid>
+        </widget>
+        <widget>
+            <class>QListView</class>
+            <column>
+                <property>
+                    <name>text</name>
+                    <string>Inactive Plugins</string>
+                </property>
+                <property>
+                    <name>clickable</name>
+                    <bool>true</bool>
+                </property>
+                <property>
+                    <name>resizeable</name>
+                    <bool>true</bool>
+                </property>
+            </column>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>inactiveView</cstring>
+            </property>
+        </widget>
+    </vbox>
+</widget>
+<images>
+    <image>
+        <name>image0</name>
+        <data format="XPM.GZ" length="642">789c7dcfbd6e83301007f09da7b0f086aa24808d12557d84561d2b551dccd90e2418123e86aaeabb973b3b290cedc1e0df9fb3f16d13f6f6facc926d348c6aac8141a57a96e8c9b9cff78fa7af284e059bdf2c6769fc10c51b06eca56b0daef9bce63b2ae4804c77a94889fd9d7b641bb8f79c90f9210741c75e914209100ae96e941972444a257541d4c85297a6d4488504091948e429b0f03c12f54c6a2e038d678dd4128ca6e6b3a72e3c3ba431a63034ef2550799a40e359216d810f128876a6453681cad3065acfcdaafe4938e7eb8453ad1355c222c1efda586afa4d8e95a58d21a9d5e90cb669ec2d716d7701bc5e7b3ff9da57cd1c0c8b7fb9d6772c6ee87aea584e314e7fcef5fd18fd005d9190df</data>
+    </image>
+    <image>
+        <name>image1</name>
+        <data format="XPM.GZ" length="612">789c7dcfc14e84301080e13b4fd1c08d187641a807e323683c9a180f65660a940576613d18e3bbdb692b82070b09fd7e26a41c52f1f2fc28d243b45cd5b50301ad9a458aefc3f0f1faf6f019c57929ec5de4228f6fa23813209ea691786fec3e39bac5246671e48b5907969e09b35425948aa99995aa50164cf494b9a7624a25f1ee96393301410132c740f21c98580161c55c3cb1f09c1c0925ba339f98644192d9391229726fdb40f2bc30b5d48576c3e740e9d9386a4bcdec039527046acf6cb77e4ba2fe941a6adc150200d29b52db004dadd7422eb41d4fb962007ae84fc338999f62179c077eacdfb1e532ef4a669a65666f8af113db338790fdf75f6bf9ba8fbe018f29914c</data>
+    </image>
+    <image>
+        <name>image2</name>
+        <data format="XPM.GZ" length="1122">789c3dd3596fe2301007f0773e45046f68e526c10e8956fb40b94a29470f5adad53e38b6038423341c295ded77dfcc8c5b4f1efcfbdb3352a4e4aaeecca723a77e55391ce571a51cb594b953d7a7edf6f2fbcfafbf95aac79df211c2f1aa3f2a55e628679ced0cecefca7dcdc5057cb1e4c4153284024e809e0b053c5b7262810ca180ca5211b740dff5948f97532214d05872e227322a190133cb90985b2ae23bb0e1f9aa816fa7890d97d8b2e4c413322a89bd0bcb90e85a2ae205c83dee72ecfdb0e4c425529694c0b565483c5a2ae21e287cae840fbc260a97282d05f106294524b0b7060c7ca1033cdd10038f98580ae20e298328c0de03b0d90874b301ec109b1eb16f29886d645c3206c69611f10d18c6a10e910360c4232fe2c007a0e49196c81e52492915f019187369623c1d12639f38b60c8853a48e65ac814f968638032a111b2580af44e513e748ad02859747402db4aff1f411688c91063ffe5b6012247e1200ef2d03621799243249f0af6135c968c58c61a2b4310a8264b1a46495ae3766cbd84e678b0c93fdfa3d3f98fdf174668b82e66c8efae39217f967eb9aee9451a6d787d676d7ee309b30a63add5eb6ebb3ef44b56f06b7c33bf69da4bd513f1d76c793af24eddd0e0b964def87134a8a87c7a7bc602c9f759f5f2819cf521c9fcf5f29d9bee5f6bddcc199e64cd8d72ae7fcfb59f90f327af908</data>
+    </image>
+</images>
+</UI>

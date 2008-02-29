@@ -1,0 +1,391 @@
+#!/bin/sh
+#
+# Configures to build the Qtopia Environment
+#
+# Copyright 1999-2000 Trolltech AS.  All rights reserved.
+#
+
+PLATFORM=generic
+SHARING=shared
+DEBUG=
+X11=
+QCONFIGARG=
+
+touch .test.qtopia.
+if [ '!' -f ${QPEDIR}/src/.test.qtopia. ];
+then
+    rm .test.qtopia.
+    cd ..
+    echo
+    echo
+    echo '   The environment variable $QPEDIR is not set correctly. It is currently'
+    echo '   set to "'$QPEDIR'", but it should be set to above root qtopia directory,'
+    echo '   which is "'`pwd`'".'
+    echo
+    echo '   Please read the INSTALL file for instructions on how to set $QPEDIR'
+    echo '   correctly. If you have set $QPEDIR in your .profile or .login, you '
+    echo '   will need to log out and log in again to make the setting effective.'
+    echo
+    echo
+    exit 1
+fi
+rm .test.qtopia.
+
+VERSION_MAJ=$(sed -n -e 's/.*QPE_VERSION "\([0-9]*\)\.[0-9]*\.[0-9]*.*".*/\1/p' <libraries/qtopia/version.h)
+VERSION_MIN=$(sed -n -e 's/.*QPE_VERSION "[0-9]*\.\([0-9]\)\.[0-9]*.*".*/\1/p' <libraries/qtopia/version.h)
+VERSION_PAT=$(sed -n -e 's/.*QPE_VERSION "[0-9]*\.[0-9]*\.\([0-9]*\).*".*/\1/p' <libraries/qtopia/version.h)
+
+TOMAKE=
+EXTRALIBS=
+
+if grep -q 'VERSION_STR.*"3' $QTDIR/include/qglobal.h
+then
+    QT3=yes
+else
+    QT3=no
+fi
+
+# Parse the arguments, setting things to "yes" or "no".
+
+while [ -n "$1" ]; do
+   A=$1
+   case $1 in
+   -platform|-xplatform) # No difference since we don't need to build moc, etc.
+        shift; PLATFORM=$1
+	A="$A $1"
+	;;
+   -release)
+       DEBUG=
+	;;
+   -debug)
+       DEBUG=-debug
+	;;
+   -shared)
+       SHARING=shared
+	;;
+   -x11)
+       X11=x11
+	;;
+   -static)
+       SHARING=static
+	;;
+   -qconfig)
+	# optional way to specify the qconfig-qtopia.h is to pass -qconfig qtopia
+	shift;
+	A="$A $1"
+	case "$1" in
+	 qconfig*.h)
+	    QCONFIGARG=DEFINES+=QCONFIG='\"'$1'\"' # Don't quote me on that.
+	;; *)
+	    QCONFIGARG=DEFINES+=QCONFIG='\"'qconfig-$1.h'\"'
+	esac
+	;;
+   -make)
+	shift; TOMAKE="$TOMAKE $1"
+	A=""
+	;;
+   -lib)
+	shift; EXTRALIBS="$EXTRALIBS $1"
+	A="$A $1"
+	;;
+   -qt3)
+       QT3=yes
+       ;;
+    *)
+	HELP=yes;;
+   esac
+   RECONF="$RECONF $A"
+   shift
+done
+
+TARGET=configs/$PLATFORM-$SHARING$X11$DEBUG
+
+if [ '!' -f $TARGET ]
+then
+    if [ -f configs/linux-$PLATFORM-g++-$SHARING$X11$DEBUG ]
+    then
+	PLATFORM=linux-$PLATFORM-g++
+	TARGET=configs/$PLATFORM-$SHARING$X11$DEBUG
+    else
+	echo
+	echo '    The specified platform/compiler not supported: ' $TARGET
+	echo
+	exit 2
+    fi
+fi
+
+# Next, emit a usage message if something failed.
+
+if [ "$HELP" = "yes" ]; then
+    cat <<EOF
+Usage: $0 [-debug] [-release] [-shared] [-static] [-qt3] [-platform ...]
+
+The defaults (*) are usually acceptable.  Here is a short explanation of
+each option:
+
+ *  -release ........... Compile and link Qt with debugging turned off.
+    -debug ............. Compile and link Qt with debugging turned on.
+
+ *  -shared ............ Create and use a shared Qt library (libqt.so)
+    -static ............ Create and use a static Qt library (libqt.a)
+
+    -qt3 ............... Configure for use with Qt 3.x
+
+    -platform target ... The platform you are building on ($PLATFORM)
+EOF
+   exit 0;
+fi
+
+rm -f libraries/qtopia/custom.h
+if [ -f libraries/qtopia/custom-$PLATFORM.h ]
+then
+    ln -s custom-$PLATFORM.h libraries/qtopia/custom.h
+else
+    touch libraries/qtopia/custom.h
+fi
+
+mkdir -p ../include/qtopia
+rm -rf ../include/qpe
+ln -s qtopia ../include/qpe
+mkdir -p ../include/qtopia/private
+
+for LIBRARY in $(make showlibraries | grep -v '^make[^ ]*:')
+do
+    case $LIBRARY in
+     libraries/qtopia*)
+	B=${LIBRARY#libraries/qtopia}
+	if [ -z "$B" ]
+	then
+	    SRCDIR=../../src
+	else
+	    SRCDIR=../../../src
+	fi
+	mkdir -p ../include/qtopia/$B
+	( cd ../include/qtopia/$B && rm -f *.h; ln -s $SRCDIR/$LIBRARY/*.h .; rm -f *_p.h; )
+    ;; *)
+	( cd ../include/qtopia; ln -s $SRCDIR/$LIBRARY/*.h .; )
+    esac
+done
+( cd ../include/qtopia/private && rm -f *.h; ln -s ../../../src/libraries/qtopia/*_p.h .; ln -s ../../../src/libraries/qtopia/backend/*.h .;)
+if [ -d ../include/qtopia/pim ]
+then
+    mkdir -p ../include/qtopia/pim/private
+    ( cd ../include/qtopia/pim/private && rm -f *.h; ln -s ../../../../src/libraries/qtopiapim/*_p.h .;)
+fi
+
+
+echo Creating makefiles...
+
+
+if [ "$QT3" = yes ]
+then
+    VCONFIG="CONFIG+=qt3"
+else
+    VCONFIG="CONFIG+=qt2"
+fi
+
+H=`pwd`
+if [ -z "$TOMAKE" ]
+then
+    TOMAKE=`make showcomponents | grep -v '^make[^ ]*:'`
+fi
+
+if [ -f $TMAKEPATH/tmake.conf ]
+then
+    # You have tmake. We'll regenerate the file for you...
+    echo "Makefiles will be regenerated."
+elif [ ! -f server/Makefile.in ]
+then
+    echo >&2 "You do not have \$TMAKEPATH/tmake.conf,
+	and you do not have pregenerated Makefile.in files.
+	Install tmake, or reinstall package to recover Makefile.in files."
+    exit 1
+fi
+
+for a in $TOMAKE ; do
+    N=$a/Makefile
+    M=$a/Makefile.in
+    O=$a/Makefile.add
+    f=`basename $a`
+
+    if [ -f $TMAKEPATH/tmake.conf ]
+    then
+	if [ -f $a/$f.pro ]
+	then
+	    (   cd $a;
+		tmake $QCONFIGARG CONFIG+=embedded $VCONFIG LIBS+="$EXTRALIBS" \
+		    -t $H/qt/tmake/propagate.t $f.pro |
+		    sed -e "s|$QTDIR|\$(QTDIR)|g" -e "s|$QPEDIR|\$(QPEDIR)|g" >Makefile.in;
+	    )
+	    echo -n "."
+	    appname=`grep '^TARGET' $a/$f.pro | sed 's/^TARGET.*=//' | sed 's/ //g'`
+	    translation=`grep '^TRANSLATION' $a/$f.pro | sed 's,^TRANSL.*=.*i18n\/.*\/,,' | sed 's/ //g' | sed 's,\.ts.*,,' | sed 's,^lib,,' `
+	    if [ -n "$translation" -a -n "$appname" ]
+	    then
+		if [ $appname != $translation ]
+		then 
+		    echo
+		    echo "Warning: translation and appname disagree in $a/$f.pro"
+		fi
+	    fi
+	fi
+    fi
+
+    if [ -f $a/$f.pro ]
+    then
+       DEFAULTTARGET=all
+    fi 
+	
+
+    CONTROL=`ls $a/*.control 2> /dev/null`
+    if [ $? -eq 0 ]
+    then
+	MKPKG_Y="package"
+	CONTROL=`echo $CONTROL`
+    else
+	MKPKG_Y=""
+	CONTROL=""
+	if [ ! -f $a/$f.pro ]
+	then
+	    echo "Warning: $a/$f.pro not found, and no control file either."
+	fi
+    fi
+
+    cat > $N <<EOF
+#############################################################################
+# Automatically generated from $M
+# Build options from $1
+#############################################################################
+
+default: $DEFAULTTARGET # $MKPKG_Y
+
+CONTROL = $CONTROL
+
+EOF
+
+    SED=
+    PLATFORM_CFLAGS=
+
+    if [ "$f" = "embeddedkonsole" ]
+    then
+	case $PLATFORM in
+	    *x86*|*generic*|*ipaq*)
+		SED="$SED /^LIBS.*=/s/\$/ -lutil/;"
+		PLATFORM_CFLAGS="-DHAVE_OPENPTY"
+	    ;; *)
+		SED=
+	esac
+    elif [ "$f" = "libmpeg3" ]
+    then
+	# Patch our Makefile.in file with the platform specifics for the libmpeg3 library
+	# Use the C++ compiler to compile the .c files (because the fixed-point classes are C++ code)
+	SED='s/\$(CC)/\$(CXX)/;'
+	case $PLATFORM
+	in
+	    # For x86 turn on using floating point, compile mmx and css code
+	    *x86*)
+		# "-funroll-loops -fomit-frame-pointer -malign-loops=2 -malign-jumps=2 -malign-functions=2 -march=i486"
+		PLATFORM_CFLAGS="-DHAVE_MMX -DHAVE_CSS"
+		SED="$SED /SOURCES.*=/s/=/= video\\/mmxidct.S video\\/reconmmx.s\ /;"
+	    # For generic turn on using floating point
+	    ;; *generic*)
+		PLATFORM_CFLAGS=""
+	    # For the ipaq use fixed point maths, don't compile the mmx or css code
+	    ;; *ipaq*)
+		PLATFORM_CFLAGS="-DUSE_FIXED_POINT"
+	    ;; *)
+		# For 'other platforms', turn off optimizations and use fixed point
+		PLATFORM_CFLAGS="-O -DUSE_FIXED_POINT"
+	esac
+    elif [ "$f" = "libmad" ]
+    then
+	# Patch our Makefile.in file with the platform specifics for the libmad library
+	case $PLATFORM
+	in
+	    # For x86 use intel optimizations
+	    *x86*)
+		PLATFORM_CFLAGS="-DFPM_INTEL"
+	    # For the ipaq use ARM asm optimizations
+	    ;; *ipaq*)
+		PLATFORM_CFLAGS="-DFPM_ARM"
+		SED="$SED /SOURCES.*=/s/=/= idmt_arm.S /;"
+	    # For generic platforms use the C 64-bit implementation
+	    ;; *generic*)
+		PLATFORM_CFLAGS="-DFPM_64BIT"
+	    # For 'other platforms' use the ARM code
+	    ;; *)
+		PLATFORM_CFLAGS="-DFPM_ARM"
+		SED="$SED /SOURCES.*=/s/=/= idmt_arm.S /;"
+	esac
+    elif [ "$X11" = x11 -a "$f" = library ]
+    then
+	        SED='s/\$(MOC) qpedecoration_qws.h -o/touch/'
+    elif [ "$X11" = x11 -a "$f" = taskbar ]
+    then
+	        SED='s/\$(MOC) ..\/calibrate\/calibrate.h -o/touch/'
+    fi
+    if [ -n "$PLATFORM_CFLAGS" ]
+    then
+	# Append the addition c-flags we have defined
+	SED="$SED /CFLAGS.*=.*/s/\$/ $PLATFORM_CFLAGS/;"
+	SED="$SED /CXXFLAGS.*=.*/s/\$/ $PLATFORM_CFLAGS/;"
+    fi
+    cat $TARGET >> $N
+    if [ -n "$SED" ]
+    then
+	sed -e "$SED" $M >> $N
+    else
+	cat $M >> $N
+    fi
+
+    if [ -f $a/$f.pro ]
+    then
+	template=`grep '^TEMPLATE' $a/$f.pro | sed 's/^TEMPLATE.*=//' | sed 's/ //g'`
+
+	IPKGDEP="\$(DESTDIR)\$(TARGET)"
+	if [ "$template" = "lib" ]
+	then
+	    IPKGDEP="\$(DESTDIR)\$(SYSCONF_LINK_TARGET)"
+	fi
+    else
+	IPKGDEP=
+    fi
+
+    cat >> $N <<EOF
+
+lupdate:
+	lupdate $f.pro
+
+lrelease:
+	lrelease $f.pro
+
+ipkg: $IPKGDEP # among other things...
+	CTL="\$(CONTROL)"; for ctrl in \$\$CTL; do cd \$(QPEDIR)/ipkg; ../bin/mkipks \$(QPEDIR)/src/\$\$ctrl; done
+
+package: ipkg
+	cd \$(QPEDIR)/ipkg; \
+	../scripts/mkPackages
+
+EOF
+
+    if [ -f $a/$f.pro ]
+    then
+	cat >> $N <<EOF
+Makefile: $f.pro
+	cd \$(QPEDIR)/src; \
+	./configure $RECONF -make $a
+EOF
+    fi
+
+    if [ -f "$O" ]
+    then
+	cat >> $N $O
+    fi
+
+done
+
+MAKE=make
+echo
+echo "QPE is now configured for building. Just run $MAKE (or $MAKE single)."
+echo "To reconfigure, run $MAKE clean and configure."
+echo

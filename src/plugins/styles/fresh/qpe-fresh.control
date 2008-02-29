@@ -1,0 +1,9 @@
+Files: plugins/styles/libfreshstyle.so*
+Priority: optional
+Section: qpe/styles
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-5
+Depends: qpe-base ($QPE_VERSION)
+Description: Qtopia widget style
+ Simple widget style for the Qtopia environment.

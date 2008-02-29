@@ -1,0 +1,1 @@
+../../../src/libraries/qtopia/quickexec_p.h

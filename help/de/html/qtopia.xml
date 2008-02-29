@@ -1,0 +1,140 @@
+<!DOCTYPE DCF>
+<DCF ref="qtopia.html" category="qt/qtopia" title="Qtopia">
+<section ref="qtopia-1.html" title="Verwenden von Qtopia">
+    <section ref="qtopia-2.html" title="Hilfe zu Qtopia verwenden">
+        <section ref="qtopia-2-1.html" title="Anwendungen suchen"/>
+        <section ref="qtopia-2-2.html" title="Mit den Anwendungen arbeiten"/>
+        <section ref="qtopia-2-3.html" title="Kategorien"/>
+        <section ref="qtopia-2-3-1.html" title="Die Funktion von Kategorien"/>
+        <section ref="qtopia-2-3-2.html" title="Beispiele für Kategorien"/>
+        <section ref="qtopia-2-3-3.html" title="Dialogfeld &quot;Kategorien bearbeiten&quot;"/>
+        <section ref="qtopia-2-3-4.html" title="Dialogfeld &quot;Kategorien bearbeiten&quot; - Kategorien umbenennen und löschen"/>
+        <section ref="qtopia-2-4.html" title="Senden"/>
+        <section ref="qtopia-2-5.html" title="Suchen"/>
+        <section ref="qtopia-2-5-1.html" title="Erweiterte Suche"/>
+        <section ref="qtopia-2-6.html" title="Den Kalender einblenden"/>
+        <section ref="qtopia-2-7.html" title="Text eingeben"/>
+        <section ref="qtopia-2-7-1.html" title="Eingabemethoden"/>
+        <section ref="qtopia-2-7-2.html" title="Text markieren"/>
+        <section ref="qtopia-2-7-3.html" title="Der Handschriftmodus"/>
+        <section ref="qtopia-2-7-4.html" title="Handschriftgesten"/>
+        <section ref="qtopia-2-7-5.html" title="Handschrifterkennung"/>
+        <section ref="qtopia-2-7-6.html" title="Der Pickboard-Modus"/>
+        <section ref="qtopia-2-7-7.html" title="Die untere Pickboard-Zeile"/>
+        <section ref="qtopia-2-7-8.html" title="Die obere Pickboard-Zeile"/>
+        <section ref="qtopia-2-7-9.html" title="Das Pickboard-Menü"/>
+        <section ref="qtopia-2-7-10.html" title="Der Tastaturmodus"/>
+        <section ref="qtopia-2-7-11.html" title="Der Unicode-Modus"/>
+        <section ref="qtopia-2-8.html" title="Mit der Taskleiste arbeiten"/>
+        <section ref="qtopia-2-8-1.html" title="Der linke Bereich der Taskleiste"/>
+        <section ref="qtopia-2-8-2.html" title="Der Mittelbereich der Taskleiste"/>
+        <section ref="qtopia-2-8-3.html" title="Der rechte Bereich der Taskleiste"/>
+        <section ref="qtopia-3.html" title="Anwendungen"/>
+        <section ref="qtopia-3-1.html" title="Das Adressbuch"/>
+        <section ref="qtopia-3-1-1.html" title="Adressen anzeigen, senden und suchen"/>
+        <section ref="qtopia-3-1-2.html" title="Adressen hinzufügen und bearbeiten"/>
+        <section ref="qtopia-3-1-3.html" title="Dialogfeld &quot;Adresse ändern&quot;"/>
+        <section ref="qtopia-3-1-4.html" title="Kategorien und Notizen"/>
+        <section ref="qtopia-3-2.html" title="Einstellungen für das Adressbuch"/>
+        <section ref="qtopia-3-2-1.html" title="Dialogfeld &quot;Einstellungen&quot;"/>
+        <section ref="qtopia-3-3.html" title="Der Taschenrechner"/>
+        <section ref="qtopia-3-3-1.html" title="Die Funktionstasten"/>
+        <section ref="qtopia-3-3-2.html" title="Der Modus &quot;Standard&quot;"/>
+        <section ref="qtopia-3-3-3.html" title="Der Modus &quot;Gewicht&quot;"/>
+        <section ref="qtopia-3-3-4.html" title="Der Modus &quot;Distanz&quot;"/>
+        <section ref="qtopia-3-3-5.html" title="Der Modus &quot;Fläche&quot;"/>
+        <section ref="qtopia-3-3-6.html" title="Der Modus &quot;Volumen&quot;"/>
+        <section ref="qtopia-3-4.html" title="Der Kalender"/>
+        <section ref="qtopia-3-4-1.html" title="Die Kalenderansichten"/>
+        <section ref="qtopia-3-4-2.html" title="Termine hinzufügen"/>
+        <section ref="qtopia-3-4-3.html" title="Neuer Termin"/>
+        <section ref="qtopia-3-4-4.html" title="Beginn und Ende von Terminen festlegen"/>
+        <section ref="qtopia-3-4-5.html" title="Alarm einstellen"/>
+        <section ref="qtopia-3-4-6.html" title="Mehrfaches Ereignis"/>
+        <section ref="qtopia-3-4-7.html" title="Täglich stattfindende Ereignisse"/>
+        <section ref="qtopia-3-4-8.html" title="Wöchentlich stattfindende Ereignisse"/>
+        <section ref="qtopia-3-4-9.html" title="Monatlich stattfindende Ereignisse"/>
+        <section ref="qtopia-3-4-10.html" title="Jährlich stattfindende Ereignisse"/>
+        <section ref="qtopia-3-4-11.html" title="Einstellungen für den Kalender"/>
+        <section ref="qtopia-3-4-12.html" title="Alarmeinstellungen für den Kalender"/>
+        <section ref="qtopia-3-5.html" title="Die Weltzeituhr"/>
+        <section ref="qtopia-3-5-1.html" title="Die Weltkarte"/>
+        <section ref="qtopia-3-5-2.html" title="Voreinstellungen ändern"/>
+        <section ref="qtopia-3-6.html" title="Die Uhr"/>
+        <section ref="qtopia-3-6-1.html" title="Die Stoppuhr"/>
+        <section ref="qtopia-3-7.html" title="E-Mails"/>
+        <section ref="qtopia-3-7-1.html" title="E-Mail-Einstellungen"/>
+        <section ref="qtopia-3-7-2.html" title="E-Mails lesen"/>
+        <section ref="qtopia-3-7-3.html" title="E-Mail prüfen"/>
+        <section ref="qtopia-3-7-4.html" title="E-Mail schreiben"/>
+        <section ref="qtopia-3-7-5.html" title="E-Mail-Adressen eingeben"/>
+        <section ref="qtopia-3-7-6.html" title="Das E-Mail-Adressbuch"/>
+        <section ref="qtopia-3-7-7.html" title="Neues Account erstellen"/>
+        <section ref="qtopia-3-7-8.html" title="Ausgehendes Account"/>
+        <section ref="qtopia-3-7-9.html" title="Eingehendes Account"/>
+        <section ref="qtopia-3-7-10.html" title="Servereinstellungen"/>
+        <section ref="qtopia-3-8.html" title="Die Hilfe"/>
+        <section ref="qtopia-3-8-1.html" title="Navigation durch Dateien"/>
+        <section ref="qtopia-3-8-2.html" title="Navigation durch Seiten"/>
+        <section ref="qtopia-3-8-3.html" title="Lesezeichen"/>
+        <section ref="qtopia-3-9.html" title="Die Bildanzeige"/>
+        <section ref="qtopia-3-10.html" title="Die Medienwiedergabe"/>
+        <section ref="qtopia-3-10-1.html" title="Mediendateien hinzufügen"/>
+        <section ref="qtopia-3-10-2.html" title="Filme abspielen"/>
+        <section ref="qtopia-3-10-3.html" title="Musik abspielen"/>
+        <section ref="qtopia-3-10-4.html" title="Die Playlist"/>
+        <section ref="qtopia-3-11.html" title="Systeminformationen"/>
+        <section ref="qtopia-3-12.html" title="Der Texteditor"/>
+        <section ref="qtopia-3-12-1.html" title="Text bearbeiten"/>
+        <section ref="qtopia-3-13.html" title="Die Aufgabenliste"/>
+        <section ref="qtopia-3-13-1.html" title="Aufgaben hinzufügen und bearbeiten"/>
+        <section ref="qtopia-3-13-2.html" title="Attribute für Aufgaben festlegen"/>
+        <section ref="qtopia-3-13-3.html" title="Aufgaben anzeigen, senden und löschen"/>
+        <section ref="qtopia-4.html" title="Spiele"/>
+        <section ref="qtopia-4-1.html" title="Asteroiden"/>
+        <section ref="qtopia-4-2.html" title="Go"/>
+        <section ref="qtopia-4-3.html" title="Mindbreaker"/>
+        <section ref="qtopia-4-4.html" title="Minenjagd"/>
+        <section ref="qtopia-4-5.html" title="Fallschirmjäger"/>
+        <section ref="qtopia-4-6.html" title="Patience"/>
+        <section ref="qtopia-4-7.html" title="Schlange"/>
+        <section ref="qtopia-4-8.html" title="Wortspiel"/>
+        <section ref="qtopia-5.html" title="Synchronisation mit einem PC"/>
+        <section ref="qtopia-6.html" title="Einstellungen"/>
+        <section ref="qtopia-6-1.html" title="Installieren/Deinstallieren"/>
+        <section ref="qtopia-6-1-1.html" title="Paket-Server"/>
+        <section ref="qtopia-6-1-2.html" title="Paketeigenschaften"/>
+        <section ref="qtopia-6-2.html" title="Erscheinungsbild"/>
+        <section ref="qtopia-6-3.html" title="Datum/Zeit"/>
+        <section ref="qtopia-6-3-1.html" title="Die Zeitzone einstellen"/>
+        <section ref="qtopia-6-3-2.html" title="Die Uhrzeit einstellen"/>
+        <section ref="qtopia-6-3-3.html" title="Das Datum einstellen"/>
+        <section ref="qtopia-6-4.html" title="Die Sprache auswählen"/>
+        <section ref="qtopia-6-5.html" title="Helligkeit und Energieverbrauch"/>
+        <section ref="qtopia-6-5-1.html" title="Energieverbrauch"/>
+        <section ref="qtopia-6-5-2.html" title="Helligkeit"/>
+        <section ref="qtopia-6-6.html" title="Netzwerkeinstellungen"/>
+        <section ref="qtopia-6-6-1.html" title="Die Registerkarte &quot;Aktuell&quot; der Netzwerkeinstellungen"/>
+        <section ref="qtopia-6-6-2.html" title="Die Registerkarte &quot;Verbindungen&quot; der Netzwerkeinstellungen"/>
+        <section ref="qtopia-6-6-3.html" title="Netzwerkverbindung hinzufügen"/>
+        <section ref="qtopia-6-6-4.html" title="Modemverbindung"/>
+        <section ref="qtopia-6-6-5.html" title="Account"/>
+        <section ref="qtopia-6-6-6.html" title="Modem"/>
+        <section ref="qtopia-6-6-7.html" title="Netzwerk"/>
+        <section ref="qtopia-6-6-8.html" title="Proxies"/>
+        <section ref="qtopia-6-6-9.html" title="LAN"/>
+        <section ref="qtopia-6-6-10.html" title="LAN-Account"/>
+        <section ref="qtopia-6-6-11.html" title="TCP/IP"/>
+        <section ref="qtopia-6-6-12.html" title="DNS"/>
+        <section ref="qtopia-6-6-13.html" title="LAN-Proxies"/>
+        <section ref="qtopia-6-7.html" title="Neu kalibrieren"/>
+        <section ref="qtopia-6-8.html" title="Sicherheit"/>
+        <section ref="qtopia-7.html" title="Dokumente"/>
+        <section ref="qtopia-7-1.html" title="Dokumenteigenschaften"/>
+        <section ref="qtopia-7-2.html" title="Dokumentverzeichnis"/>
+        <section ref="qtopia-7-3.html" title="Dokumente suchen"/>
+        <section ref="qtopia-7-3-1.html" title="Dokumente nach Typ anzeigen"/>
+        <section ref="qtopia-7-3-2.html" title="Dokumente nach Kategorie anzeigen"/>
+    </section>
+</section>
+</DCF>

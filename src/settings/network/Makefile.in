@@ -1,0 +1,192 @@
+#############################################################################
+
+####### Compiler, tools and options
+
+CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
+CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS)
+CC	=	$(SYSCONF_CC) $(QT_C_MT)
+CFLAGS	=	$(SYSCONF_CFLAGS)
+INCPATH =	-I$(QPEDIR)/include
+LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
+LIBS	=	$(SUBLIBS) -lqpe $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS) $(SYSCONF_LIBS_QTAPP)
+MOC	=	$(SYSCONF_MOC)
+UIC	=	$(SYSCONF_UIC)
+
+####### Target
+
+DESTDIR = $(QPEDIR)/bin/
+VER_MAJ = 1
+VER_MIN = 0
+VER_PATCH = 0
+TARGET	= netsetup
+TARGET1 = lib$(TARGET).so.$(VER_MAJ)
+
+####### Files
+
+HEADERS =	networksettings.h \
+		addnetworksetting.h
+SOURCES =	main.cpp \
+		networksettings.cpp \
+		addnetworksetting.cpp
+OBJECTS =	main.o \
+		networksettings.o \
+		addnetworksetting.o \
+		addnetworksettingbase.o \
+		networksettingsbase.o
+INTERFACES =    addnetworksettingbase.ui \
+		networksettingsbase.ui
+UICDECLS =      addnetworksettingbase.h \
+		networksettingsbase.h
+UICIMPLS =      addnetworksettingbase.cpp \
+		networksettingsbase.cpp
+SRCMOC	=	moc_networksettings.cpp \
+		moc_addnetworksetting.cpp \
+		moc_addnetworksettingbase.cpp \
+		moc_networksettingsbase.cpp
+OBJMOC	=	moc_networksettings.o \
+		moc_addnetworksetting.o \
+		moc_addnetworksettingbase.o \
+		moc_networksettingsbase.o
+
+
+####### Implicit rules
+
+.SUFFIXES: .cpp .cxx .cc .C .c
+
+.cpp.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.cxx.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.cc.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.C.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.c.o:
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $@ $<
+
+####### Build rules
+
+
+all: $(DESTDIR)$(TARGET)
+
+$(DESTDIR)$(TARGET): $(UICDECLS) $(OBJECTS) $(OBJMOC) $(SUBLIBS)
+	$(SYSCONF_LINK) $(LFLAGS) -o $(DESTDIR)$(TARGET) $(OBJECTS) $(OBJMOC) $(LIBS)
+
+moc: $(SRCMOC)
+
+tmake:
+	tmake network.pro
+
+clean:
+	-rm -f $(OBJECTS) $(OBJMOC) $(SRCMOC) $(UICIMPLS) $(UICDECLS)
+	-rm -f *~ core
+	-rm -f allmoc.cpp
+
+####### Extension Modules
+
+listpromodules:
+	@echo 
+
+listallmodules:
+	@echo 
+
+listaddonpromodules:
+	@echo 
+
+listaddonentmodules:
+	@echo 
+
+
+REQUIRES=
+
+####### Sub-libraries
+
+
+###### Combined headers
+
+
+
+####### Compile
+
+main.o: main.cpp \
+		networksettings.h \
+		networksettingsbase.h \
+		$(QPEDIR)/include/qpe/qpeapplication.h \
+		$(QPEDIR)/include/qtopia/qpeglobal.h
+
+networksettings.o: networksettings.cpp \
+		networksettings.h \
+		networksettingsbase.h \
+		addnetworksetting.h \
+		addnetworksettingbase.h \
+		$(QPEDIR)/include/qpe/networkinterface.h \
+		$(QPEDIR)/include/qpe/qcom.h \
+		$(QPEDIR)/include/qtopia/qpeglobal.h \
+		$(QPEDIR)/include/qtopia/quuid.h \
+		$(QPEDIR)/include/qpe/network.h \
+		$(QPEDIR)/include/qpe/global.h \
+		$(QPEDIR)/include/qpe/config.h \
+		$(QPEDIR)/include/qpe/resource.h \
+		$(QPEDIR)/include/qpe/qpeapplication.h \
+		$(QPEDIR)/include/qpe/qcopenvelope_qws.h \
+		$(QPEDIR)/include/qpe/qlibrary.h \
+		$(QPEDIR)/include/qtopia/qcom.h \
+		$(QPEDIR)/include/qpe/qpemessagebox.h
+
+addnetworksetting.o: addnetworksetting.cpp \
+		addnetworksetting.h \
+		addnetworksettingbase.h \
+		networksettings.h \
+		networksettingsbase.h \
+		$(QPEDIR)/include/qpe/qpeapplication.h \
+		$(QPEDIR)/include/qtopia/qpeglobal.h \
+		$(QPEDIR)/include/qpe/config.h \
+		$(QPEDIR)/include/qpe/network.h
+
+addnetworksettingbase.h: addnetworksettingbase.ui
+	$(UIC) addnetworksettingbase.ui -o $(INTERFACE_DECL_PATH)/addnetworksettingbase.h
+
+addnetworksettingbase.cpp: addnetworksettingbase.ui
+	$(UIC) addnetworksettingbase.ui -i addnetworksettingbase.h -o addnetworksettingbase.cpp
+
+networksettingsbase.h: networksettingsbase.ui
+	$(UIC) networksettingsbase.ui -o $(INTERFACE_DECL_PATH)/networksettingsbase.h
+
+networksettingsbase.cpp: networksettingsbase.ui
+	$(UIC) networksettingsbase.ui -i networksettingsbase.h -o networksettingsbase.cpp
+
+addnetworksettingbase.o: addnetworksettingbase.cpp
+
+networksettingsbase.o: networksettingsbase.cpp
+
+moc_networksettings.o: moc_networksettings.cpp \
+		networksettings.h \
+		networksettingsbase.h
+
+moc_addnetworksetting.o: moc_addnetworksetting.cpp \
+		addnetworksetting.h \
+		addnetworksettingbase.h
+
+moc_addnetworksettingbase.o: moc_addnetworksettingbase.cpp \
+		addnetworksettingbase.h
+
+moc_networksettingsbase.o: moc_networksettingsbase.cpp \
+		networksettingsbase.h
+
+moc_networksettings.cpp: networksettings.h
+	$(MOC) networksettings.h -o moc_networksettings.cpp
+
+moc_addnetworksetting.cpp: addnetworksetting.h
+	$(MOC) addnetworksetting.h -o moc_addnetworksetting.cpp
+
+moc_addnetworksettingbase.cpp: addnetworksettingbase.h
+	$(MOC) addnetworksettingbase.h -o moc_addnetworksettingbase.cpp
+
+moc_networksettingsbase.cpp: networksettingsbase.h
+	$(MOC) networksettingsbase.h -o moc_networksettingsbase.cpp
+
+

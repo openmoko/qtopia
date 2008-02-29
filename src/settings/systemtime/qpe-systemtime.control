@@ -1,0 +1,9 @@
+Files: bin/systemtime apps/Settings/datetime.desktop
+Priority: optional
+Section: qpe/settings
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-8
+Depends: qpe-base ($QPE_VERSION)
+Description: Date/Time setting dialog
+ For the Qtopia environment.

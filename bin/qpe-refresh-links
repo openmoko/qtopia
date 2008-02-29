@@ -1,0 +1,4 @@
+#/bin/sh
+# Simple script to refresh launcher tabs in case you modify the filesystem
+# from outside Qtopia.
+$QPEDIR/bin/qcop QPE/System 'linkChanged(QString)' ''

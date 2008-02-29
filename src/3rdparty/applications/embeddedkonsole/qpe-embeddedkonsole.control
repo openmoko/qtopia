@@ -1,0 +1,9 @@
+Files: bin/embeddedkonsole apps/Applications/embeddedkonsole.desktop pics/konsole etc/keytabs/*
+Priority: optional
+Section: qpe/applications
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-8
+Depends: qpe-base ($QPE_VERSION), ptydevs
+Description: KDE's konsole (shell terminal)
+ Ported to the Qtopia environment.

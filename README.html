@@ -1,0 +1,128 @@
+<html>
+<title>Qtopia Free Developer Kit</title>
+<body>
+<h1><img src=pics/logo32.png align=center> Qtopia Free Developer Kit</h1>
+
+<hr>
+<p>
+This is a development version for Qtopia. See the
+<a href=LICENSE>LICENSE</a> file for
+information on LICENSE of this software.  
+
+<p>
+You will need the software listed below to be able to compile and use
+Qtopia. This software is included in this package.  
+
+<ul>
+  <li> Qtopia 1.6.x
+  <li> Qt/Embedded 2.3.x (upon which Qtopia is built)
+  <li> Qt 2.3.2 for X11 (for emulated desktop development)
+</ul>
+
+<h2>How to compile</h2>
+
+<p>
+Below is a description of how to get everything built quickly without
+having to read the detailed instructions provided with each of the
+packages above.
+
+<ol>
+ <li><i> Unpack Qtopia...</i>
+<pre>
+
+   tar xfz qtopia-free-1.6.x.tar.gz
+   cd qtopia-1.6.x
+   export QPEDIR=$PWD
+   cd ..
+
+</pre>
+ <li><i> Install Qt/Embedded...</i>
+<pre>
+
+   tar xfz qt-embedded-2.3.x-free.tar.gz
+   cd qt-2.3.x
+   export QTDIR=$PWD
+   export QTEDIR=$QTDIR
+   export PATH=$QTDIR/bin:$PATH
+   export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+   cp $QPEDIR/src/qt/qconfig-qpe.h src/tools/
+   ./configure -qconfig qpe -qvfb -depths 4,8,16,32
+   make sub-src
+   cd ..
+
+</pre>
+
+ <li><i> Install Qt/X11 2.3.2...</i>
+<pre>
+
+   tar xfz qt-x11-2.3.2-free.tar.gz
+   cd qt-2.3.2
+   export QTDIR=$PWD
+   export PATH=$QTDIR/bin:$PATH
+   export LD_LIBRARY_PATH=$QTDIR/lib:$LD_LIBRARY_PATH
+   ./configure
+   make
+   make -C tools/qvfb
+   mv tools/qvfb/qvfb bin
+   cp bin/uic $QTEDIR/bin
+   cd ..
+
+</pre>
+
+ <li><i> Build Qtopia...</i>
+<pre>
+
+   export QTDIR=$QTEDIR
+   export QPEDIR=$PWD
+   export PATH=$QPEDIR/bin:$PATH
+   cd src
+   ./configure
+   make
+   cd ../..
+
+</pre>
+</ol>
+
+
+
+<h2>How to run</h2>
+
+<ol>
+ <li><i>Run the Qt Virtual Framebuffer (an X11 application)...</i>
+<pre>
+
+   qvfb &amp;
+
+</pre>
+
+ <li><i>Run Qtopia (a Qt/Embedded application, will show in QVFb)...</i>
+<pre>
+
+   export QTDIR=$QTEDIR
+   qpe &amp;
+
+</pre>
+
+</ol>
+
+
+
+<h2>How to use</h2>
+
+<p>
+With the above procedure, the Qtopia environment will be running the Qt
+Virtual Framebuffer.
+
+<hr>
+
+<table width=100%>
+<tr>
+<td>
+<big>Welcome to Qtopia!</big>
+<td align=center>
+info@trolltech.com<br>
+the Qtopia team
+<td align=right>
+&copy; 2001-2002 Trolltech AS
+</tr>
+</table>

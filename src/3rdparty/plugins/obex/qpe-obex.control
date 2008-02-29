@@ -1,0 +1,8 @@
+Files: plugins/obex/* lib/libopenobex.so.*
+Priority: optional
+Section: qpe/infrared
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-4
+Depends: qpe-base ($QPE_VERSION)
+Description: Support for infrared object exchange

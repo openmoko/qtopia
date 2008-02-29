@@ -1,0 +1,1 @@
+../../src/libraries/qtopia/taskbarappletinterface.h

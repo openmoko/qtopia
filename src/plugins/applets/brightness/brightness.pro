@@ -1,0 +1,10 @@
+TEMPLATE	= lib
+CONFIG		+= qtopia warn_on release
+HEADERS		= brightness.h brightnessappletimpl.h
+SOURCES		= brightness.cpp brightnessappletimpl.cpp
+TARGET		= brightnessapplet
+DESTDIR		= $(QPEDIR)/plugins/applets
+INCLUDEPATH	+= $(QPEDIR)/include
+DEPENDPATH      += $(QPEDIR)/include
+LIBS            += -lqpe
+VERSION		= 1.0.0

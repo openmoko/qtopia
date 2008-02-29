@@ -1,0 +1,90 @@
+<!DOCTYPE UI><UI>
+<class>TaskbarSettingsBase</class>
+<widget>
+    <class>QDialog</class>
+    <property stdset="1">
+        <name>name</name>
+        <cstring>TaskbarSettingsBase</cstring>
+    </property>
+    <property stdset="1">
+        <name>geometry</name>
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>244</width>
+            <height>286</height>
+        </rect>
+    </property>
+    <property stdset="1">
+        <name>caption</name>
+        <string>Taskbar Settings</string>
+    </property>
+    <property>
+        <name>layoutMargin</name>
+    </property>
+    <property>
+        <name>layoutSpacing</name>
+    </property>
+    <vbox>
+        <property stdset="1">
+            <name>margin</name>
+            <number>6</number>
+        </property>
+        <property stdset="1">
+            <name>spacing</name>
+            <number>4</number>
+        </property>
+        <widget>
+            <class>QLabel</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>TextLabel1</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string>Load applets:</string>
+            </property>
+        </widget>
+        <widget>
+            <class>QListView</class>
+            <column>
+                <property>
+                    <name>text</name>
+                    <string>Column 1</string>
+                </property>
+                <property>
+                    <name>clickable</name>
+                    <bool>false</bool>
+                </property>
+                <property>
+                    <name>resizeable</name>
+                    <bool>false</bool>
+                </property>
+            </column>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>appletListView</cstring>
+            </property>
+            <property>
+                <name>whatsThis</name>
+                <string>Check the applets that you want displayed in the Taskbar/Q-Menu.</string>
+            </property>
+        </widget>
+        <widget>
+            <class>QCheckBox</class>
+            <property stdset="1">
+                <name>name</name>
+                <cstring>menu_launcher_tabs</cstring>
+            </property>
+            <property stdset="1">
+                <name>text</name>
+                <string>Show Launcher tabs in Q-Menu</string>
+            </property>
+            <property>
+                <name>whatsThis</name>
+                <string>Adds the contents of the Launcher as menus in the Q-Menu.</string>
+            </property>
+        </widget>
+    </vbox>
+</widget>
+</UI>

@@ -1,0 +1,9 @@
+Files: plugins/applets/libirreceiverapplet.so*
+Priority: optional
+Section: qpe/taskbar
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-7
+Depends: qpe-base ($QPE_VERSION) qpe-qtopiaaccessory
+Description: IR Receiver applet
+ Allows the Infrared receiver to be turned on and off.

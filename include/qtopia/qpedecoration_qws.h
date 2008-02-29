@@ -1,0 +1,1 @@
+../../src/libraries/qtopia/qpedecoration_qws.h

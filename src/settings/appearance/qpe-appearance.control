@@ -1,0 +1,9 @@
+Files: bin/appearance apps/Settings/Appearance.desktop
+Priority: optional
+Section: qpe/settings
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-7
+Depends: qpe-base ($QPE_VERSION)
+Description: Appearance settings dialog
+ For the Qtopia environment.

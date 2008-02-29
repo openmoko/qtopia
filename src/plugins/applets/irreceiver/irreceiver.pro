@@ -1,0 +1,10 @@
+TEMPLATE	= lib
+CONFIG		+= qtopia warn_on release
+HEADERS		= irreceiver.h irreceiverappletimpl.h
+SOURCES		= irreceiver.cpp irreceiverappletimpl.cpp
+TARGET		= irreceiverapplet
+DESTDIR		= $(QPEDIR)/plugins/applets
+INCLUDEPATH	+= $(QPEDIR)/include
+DEPENDPATH      += $(QPEDIR)/include
+LIBS            += -lqpe -lqtopiaaccessory
+VERSION		= 1.0.0

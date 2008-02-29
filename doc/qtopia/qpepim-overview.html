@@ -1,0 +1,73 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/doc/qpepim.doc:49 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>QPEPIM Library Overview</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+|<a href="classes.html">
+<font color="white">Classes</font></a>
+<font color="white">|</font>
+<a href="functions.html"><font color="white">Functions</font></a>
+<font color="white">|</font>
+<a href="../qt/index.html"><font color="white">Qt API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>QPEPIM Library Overview</h1>
+
+
+
+<!-- toc -->
+<ul>
+<li><a href="#1"> Introduction
+</a>
+<li><a href="#2"> PIM Change signals
+</a>
+<li><a href="#3"> Data Refresh
+</a>
+</ul>
+<!-- endtoc -->
+
+<p> <h2> Introduction
+</h2>
+<a name="1"></a><p> The QPEPIM Access library provides a set of safe APIs for accessing
+Qtopia PIM data and provides a smooth transition to the next major
+revision of Qtopia.  Specifically, classes are provided to retrieve,
+edit, and save Contacts, Tasks, and Events.  The access classes
+attempt to keep themselves in sync with Qtopia's AddressBook, Todo, 
+and Datebook applications, and any other applications.
+<p> <h2> PIM Change signals
+</h2>
+<a name="2"></a><p> The access class listen for various QCop calls to keep in sync with 
+the main pim applications.  When an access class detects an update it 
+will emit a signal indicating it has been udpated.
+<p> <h2> Data Refresh
+</h2>
+<a name="3"></a><p> QPEPIM will always try to return the most current data to the user.
+This is done by monitoring the time stamp on the actual data file as
+well as listening for QPE/PIM messages that are relavent to the data
+files used by the specific accessor.  If a QPE/PIM message is
+received that indicates the data has been updated the accessor will
+emit a signal indicating the event and during the next data query
+QPEPIM will refresh its internal caches.  Note that since QPEPIM
+does not employ a polling mechanism simply touching the data file
+will not trigger the event to be emitted, however it will be
+detected the next time data is requested.  
+
+<!-- eof -->
+<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

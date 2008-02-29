@@ -1,0 +1,9 @@
+Files: bin/qasteroids apps/Games/qasteroids.desktop pics/qasteroids/bits/*.png pics/qasteroids/exhaust/*.png pics/qasteroids/missile/*.png pics/qasteroids/powerups/*.png pics/qasteroids/rock2/*.png pics/qasteroids/rock3/*.png pics/qasteroids/shield/*.png pics/qasteroids/ship/*.png pics/qasteroids/bg.png
+Priority: optional
+Section: qpe/games
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-7
+Depends: qpe-base ($QPE_VERSION)
+Description: Game: shoot the asteroids
+ A game for the Qtopia environment.

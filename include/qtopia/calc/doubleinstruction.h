@@ -1,0 +1,1 @@
+../../../src/libraries/qtopiacalc/doubleinstruction.h

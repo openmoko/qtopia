@@ -1,0 +1,9 @@
+Files: bin/netsetup apps/Settings/netsetup.desktop pics/Network etc/network/* plugins/network/*
+Priority: optional
+Section: qpe/settings
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-7
+Depends: qpe-base ($QPE_VERSION)
+Description: Network setup
+ For the Qtopia environment.

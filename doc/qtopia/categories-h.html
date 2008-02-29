@@ -1,0 +1,236 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<!-- /home/warwick/qtopia/1.6/tmp24407/qtopia/include/qtopia/categories.h:1 -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>categories.h Include File</title>
+<style type="text/css"><!--
+h3.fn,span.fn { margin-left: 1cm; text-indent: -1cm; }
+a:link { color: #004faf; text-decoration: none }
+a:visited { color: #672967; text-decoration: none }
+body { background: #ffffff; color: black; }
+--></style>
+</head>
+<body>
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr bgcolor="black"><td>
+|<a href="classes.html">
+<font color="white">Classes</font></a>
+<font color="white">|</font>
+<a href="functions.html"><font color="white">Functions</font></a>
+<font color="white">|</font>
+<a href="../qt/index.html"><font color="white">Qt API</font></a>
+</td>
+<td align="right"><a href="../index.html"><font color="white"><i>Qtopia Documentation</i></font></a></td>
+<td align="right" valign="center"><img src="logo32.png" align="right" width="64" height="32" border="0"></td></tr></table><h1 align=center>categories.h</h1>
+
+<p>This is the verbatim text of the categories.h include file. It is provided only for illustration; the copyright remains with Trolltech.
+<hr>
+<pre>
+/**********************************************************************
+** Copyright (C) 2000-2002 Trolltech AS.  All rights reserved.
+**
+** This file is part of the Qtopia Environment.
+**
+** Licensees holding valid Qtopia Developer license may use this
+** file in accordance with the Qtopia Developer License Agreement
+** provided with the Software.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING
+** THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+** PURPOSE.
+**
+** email sales@trolltech.com for information about Qtopia License
+** Agreements.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+
+#ifndef QTPALMTOP_CATEGORIES_H
+#define QTPALMTOP_CATEGORIES_H
+
+#include &lt;qtopia/qpeglobal.h&gt;
+#include &lt;qstring.h&gt;
+#include &lt;qstringlist.h&gt;
+#include &lt;qmap.h&gt;
+#include &lt;qlistview.h&gt;
+#include &lt;qarray.h&gt;
+#include &lt;qtopia/private/palmtopuidgen.h&gt;
+
+class CategoryGroup;
+
+#if defined(QTOPIA_TEMPLATEDLL)
+// MOC_SKIP_BEGIN
+QTOPIA_TEMPLATEEXTERN template class QTOPIA_EXPORT QMap&lt;int, QString&gt;;
+QTOPIA_TEMPLATEEXTERN template class QTOPIA_EXPORT QMap&lt;QString, int&gt;;
+QTOPIA_TEMPLATEEXTERN template class QTOPIA_EXPORT QMap&lt; QString, CategoryGroup &gt;;
+// MOC_SKIP_END
+#endif
+
+class QTOPIA_EXPORT CategoryGroup
+{
+    friend class Categories;
+public:
+    CategoryGroup(): mIdLabelMap(), mLabelIdMap() { }
+    CategoryGroup( const CategoryGroup &amp;c ) :
+	mIdLabelMap( c.mIdLabelMap), mLabelIdMap( c.mLabelIdMap ) { }
+
+    void clear() { mIdLabelMap.clear(); mLabelIdMap.clear(); }
+
+    int add( const QString &amp;label );
+    bool add( int uid, const QString &amp;label );
+
+    bool remove( const QString &amp;label );
+    bool remove( int uid );
+
+    bool rename( int uid, const QString &amp;newLabel );
+    bool rename( const QString &amp;oldLabel, const QString &amp;newLabel );
+
+    bool contains(int id) const;
+    bool contains(const QString &amp;label) const;
+
+    /** Returns label associated with the uid or QString::null if
+    *   not found
+    */
+    const QString &amp;label(int id) const;
+    /** Returns the uid associated with label or 0 if not found */
+    int id(const QString &amp;label) const;
+
+    /** Returns a sorted list of labels */
+    QStringList labels() const;
+
+    QStringList labels( const QArray&lt;int&gt; &amp;catids ) const;
+
+    const QMap&lt;int, QString&gt; &amp;idMap() const { return mIdLabelMap; }
+
+private:
+    void insert( int uid, const QString &amp;label );
+    QMap&lt;int, QString&gt; mIdLabelMap;
+    QMap&lt;QString, int&gt; mLabelIdMap;
+
+    static Qtopia::UidGen &amp;uidGen() { return sUidGen; }
+    static Qtopia::UidGen sUidGen;
+};
+
+class QTOPIA_EXPORT Categories : public QObject
+{
+    Q_OBJECT
+public:
+    Categories( QObject *parent=0, const char *name = 0 )
+	: QObject( parent, name ),  mGlobalCats(), mAppCats() { }
+    Categories( const Categories &amp;copyFrom ) : QObject( copyFrom.parent() ),
+	mGlobalCats( copyFrom.mGlobalCats ),
+    mAppCats( copyFrom.mAppCats ) { }
+    virtual ~Categories() { }
+
+    Categories &amp;operator= ( const Categories &amp;c )
+{ mAppCats = c.mAppCats; mGlobalCats = c.mGlobalCats; return *this; }
+
+    void clear();
+
+    int addCategory( const QString &amp;appname, const QString &amp;catname);
+    int addCategory( const QString &amp;appname, const QString &amp;catname, int uid);
+    int addGlobalCategory( const QString &amp;catname );
+    int addGlobalCategory( const QString &amp;catname, int uid );
+    bool removeCategory( const QString &amp;appName, const QString &amp;catName,
+			 bool checkGlobal = TRUE);
+    bool removeCategory( const QString &amp;appName, int uid );
+    bool removeGlobalCategory( const QString &amp;catName );
+    bool removeGlobalCategory( int uid );
+
+    QArray&lt;int&gt; ids( const QString &amp;app, const QStringList &amp;labels) const;
+
+    int id( const QString &amp;app, const QString &amp;cat ) const;
+    QString label( const QString &amp;app, int id ) const;
+
+    enum ExtraLabels { NoExtra, AllUnfiled, AllLabel, UnfiledLabel };
+    QStringList labels( const QString &amp;app,
+			bool includeGlobal = TRUE,
+			ExtraLabels extra = NoExtra ) const;
+
+    // inlined to keep 1.5.0 binary compatibility
+    QStringList labels( const QString &amp; app,
+			const QArray&lt;int&gt; &amp;catids ) const {
+	QStringList strs = mGlobalCats.labels( catids );
+	strs += mAppCats[app].labels( catids );
+	return strs;
+    }
+
+    enum DisplaySingle { ShowMulti, ShowAll, ShowFirst };
+
+    QString displaySingle( const QString &amp;app,
+			   const QArray&lt;int&gt; &amp;catids,
+			   DisplaySingle display ) const;
+
+    QStringList globalCategories() const { return mGlobalCats.labels();}
+
+    bool renameCategory( const QString &amp;appname,
+			 const QString &amp;oldName,
+			 const QString &amp;newName );
+    bool renameGlobalCategory( const QString &amp;oldName,
+			       const QString &amp;newName );
+
+    void setGlobal( const QString &amp;appname, const QString &amp;catname,
+		    bool value );
+    bool isGlobal( const QString &amp;catname ) const;
+
+
+    /** Returns true if the catname is associated with any application
+    */
+    bool exists( const QString &amp;catname ) const;
+    bool exists( const QString &amp;appname, const QString &amp;catname) const;
+
+    bool save( const QString &amp;fname ) const;
+    bool load( const QString &amp;fname );
+
+    // for debugging
+    void dump() const;
+
+    const QMap&lt;QString, CategoryGroup&gt; &amp;appGroupMap() const{ return mAppCats; }
+    const CategoryGroup &amp;globalGroup() const { return mGlobalCats; }
+
+signals:
+    /** emitted if added a category;
+    *  the second param is the application the category was added to
+    *  or null if global
+    *  the third param is the uid of the newly added category
+    */
+    void categoryAdded( const Categories &amp;cats,
+			const QString &amp;appname, int uid);
+    /** emitted if removed a category
+    *  the second param is the application the category was removed from
+    *  or null if global
+    *  the third param is the uid of the removed category
+    */
+    void categoryRemoved( const Categories &amp;cats, const QString &amp;appname,
+			  int uid);
+    /** emitted if a category is renamed; the second param is the uid of
+    *   the removed category */
+    void categoryRenamed( const Categories &amp;cats, const QString &amp;appname,
+			  int uid);
+
+private:
+    CategoryGroup mGlobalCats;
+    QMap&lt; QString, CategoryGroup &gt; mAppCats;
+};
+
+class QTOPIA_EXPORT CheckedListView : public QListView
+{
+public:
+    void addCheckableList( const QStringList &amp;options );
+    void setChecked( const QStringList &amp;checked );
+    QStringList checked() const;
+};
+
+#endif
+</pre>
+<!-- eof -->
+<p><address><hr><div align=center>
+<table width=100% cellspacing=0 border=0><tr>
+<td>Copyright &copy; 2001-2002 Trolltech<td><a href="http://www.trolltech.com/trademarks.html">Trademarks</a>
+<td align=right><div align=right>Qtopia version 1.6.0</div>
+</table></div></address></body>
+</html>

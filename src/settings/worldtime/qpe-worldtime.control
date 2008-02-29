@@ -1,0 +1,9 @@
+Files: bin/worldtime apps/Applications/worldtime.desktop
+Priority: optional
+Section: qpe/applications
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-7
+Depends: qpe-base ($QPE_VERSION), timezones
+Description: Time-zone / world clock settings
+ The time-zone manager for the Qtopia environment.

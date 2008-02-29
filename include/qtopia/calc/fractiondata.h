@@ -1,0 +1,1 @@
+../../../src/libraries/qtopiacalc/fractiondata.h

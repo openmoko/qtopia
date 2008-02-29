@@ -1,0 +1,195 @@
+#############################################################################
+
+####### Compiler, tools and options
+
+CXX	=	$(SYSCONF_CXX) $(QT_CXX_MT)
+CXXFLAGS=	$(SYSCONF_CXXFLAGS_QTOPIA) $(SYSCONF_CXXFLAGS_QT) $(SYSCONF_CXXFLAGS) $(SYSCONF_CXXFLAGS_LIB)
+CC	=	$(SYSCONF_CC) $(QT_C_MT)
+CFLAGS	=	$(SYSCONF_CFLAGS) $(SYSCONF_CFLAGS_LIB)
+INCPATH =	-I$(QPEDIR)/include
+LFLAGS	=	$(SYSCONF_LFLAGS_QTOPIA) $(SYSCONF_RPATH_QTOPIA) $(SYSCONF_LFLAGS_QT) $(SYSCONF_RPATH_QT) $(SYSCONF_LFLAGS) $(QT_LFLAGS_MT)
+LIBS	=	$(SUBLIBS) $(SYSCONF_LIBS_QTOPIA) $(SYSCONF_LIBS_QT) $(SYSCONF_LIBS_QTAPP)
+MOC	=	$(SYSCONF_MOC)
+UIC	=	$(SYSCONF_UIC)
+
+####### Target
+
+DESTDIR = $(QPEDIR)/lib$(PROJMAK)/
+VER_MAJ = 1
+VER_MIN = 6
+VER_PATCH = 0
+TARGET	= qtopiacalc
+TARGET1 = lib$(TARGET).so.$(VER_MAJ)
+
+####### Files
+
+HEADERS =	engine.h \
+		data.h \
+		instruction.h \
+		stdinputwidgets.h \
+		doubledata.h \
+		integerdata.h \
+		fractiondata.h \
+		doubleinstruction.h \
+		integerinstruction.h \
+		fractioninstruction.h
+SOURCES =	engine.cpp \
+		instruction.cpp \
+		stdinputwidgets.cpp \
+		doubledata.cpp \
+		integerdata.cpp \
+		fractiondata.cpp \
+		doubleinstruction.cpp \
+		integerinstruction.cpp \
+		fractioninstruction.cpp
+OBJECTS =	engine.o \
+		instruction.o \
+		stdinputwidgets.o \
+		doubledata.o \
+		integerdata.o \
+		fractiondata.o \
+		doubleinstruction.o \
+		integerinstruction.o \
+		fractioninstruction.o
+INTERFACES =    
+UICDECLS =      
+UICIMPLS =      
+SRCMOC	=	moc_stdinputwidgets.cpp
+OBJMOC	=	moc_stdinputwidgets.o
+
+
+####### Implicit rules
+
+.SUFFIXES: .cpp .cxx .cc .C .c
+
+.cpp.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.cxx.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.cc.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.C.o:
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $@ $<
+
+.c.o:
+	$(CC) -c $(CFLAGS) $(INCPATH) -o $@ $<
+
+####### Build rules
+
+
+all: $(DESTDIR)$(SYSCONF_LINK_TARGET)
+
+$(DESTDIR)$(SYSCONF_LINK_TARGET): $(UICDECLS) $(OBJECTS) $(OBJMOC) $(SUBLIBS)
+	$(SYSCONF_LINK_LIB)
+
+moc: $(SRCMOC)
+
+tmake:
+	tmake qtopiacalc.pro
+
+clean:
+	-rm -f $(OBJECTS) $(OBJMOC) $(SRCMOC) $(UICIMPLS) $(UICDECLS)
+	-rm -f *~ core
+	-rm -f allmoc.cpp
+
+####### Extension Modules
+
+listpromodules:
+	@echo 
+
+listallmodules:
+	@echo 
+
+listaddonpromodules:
+	@echo 
+
+listaddonentmodules:
+	@echo 
+
+
+REQUIRES=
+
+####### Sub-libraries
+
+
+###### Combined headers
+
+
+
+####### Compile
+
+engine.o: engine.cpp \
+		engine.h \
+		doubleinstruction.h \
+		instruction.h \
+		data.h \
+		doubledata.h \
+		fractioninstruction.h \
+		fractiondata.h
+
+instruction.o: instruction.cpp \
+		instruction.h \
+		data.h
+
+stdinputwidgets.o: stdinputwidgets.cpp \
+		stdinputwidgets.h \
+		engine.h \
+		doubleinstruction.h \
+		instruction.h \
+		data.h \
+		doubledata.h \
+		fractioninstruction.h \
+		fractiondata.h
+
+doubledata.o: doubledata.cpp \
+		doubledata.h \
+		data.h \
+		engine.h
+
+integerdata.o: integerdata.cpp \
+		integerdata.h \
+		data.h
+
+fractiondata.o: fractiondata.cpp \
+		fractiondata.h \
+		data.h
+
+doubleinstruction.o: doubleinstruction.cpp \
+		doubleinstruction.h \
+		instruction.h \
+		data.h \
+		doubledata.h \
+		integerdata.h \
+		fractiondata.h \
+		engine.h
+
+integerinstruction.o: integerinstruction.cpp \
+		integerinstruction.h \
+		instruction.h \
+		data.h \
+		integerdata.h
+
+fractioninstruction.o: fractioninstruction.cpp \
+		fractioninstruction.h \
+		instruction.h \
+		data.h \
+		fractiondata.h \
+		doubledata.h
+
+moc_stdinputwidgets.o: moc_stdinputwidgets.cpp \
+		stdinputwidgets.h \
+		engine.h \
+		doubleinstruction.h \
+		instruction.h \
+		data.h \
+		doubledata.h \
+		fractioninstruction.h \
+		fractiondata.h
+
+moc_stdinputwidgets.cpp: stdinputwidgets.h
+	$(MOC) stdinputwidgets.h -o moc_stdinputwidgets.cpp
+
+

@@ -1,0 +1,1 @@
+../../../src/libraries/qtopia/inlinepics_p.h

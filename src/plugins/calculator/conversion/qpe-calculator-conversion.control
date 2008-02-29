@@ -1,0 +1,9 @@
+Files: plugins/calculator/libconversion.so* etc/unit_conversion.dat
+Priority: optional
+Section: qpe/inputmethods
+Maintainer: Trolltech (www.trolltech.com)
+Architecture: arm
+Version: $QPE_VERSION-6
+Depends: qpe-base ($QPE_VERSION)
+Description: Conversion calculator plugin
+  A plugin for the calculator that provides conversion between different measures

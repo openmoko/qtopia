@@ -1,0 +1,56 @@
+Abstract base class for Qtopia MediaPlayer decoder plugins. | MediaPlayerDecoder
+Access to named resources. | Resource
+Aids in filtering records or files by Category. | CategoryMenu
+Allows alarms to be scheduled and unscheduled. | AlarmServer
+Allows applet plugins to add themselves to the Q menu. | Accessory
+Allows for pluggable image formats. | ImageCodecInterface
+Allows plugin network services. | NetworkInterface
+Allows the user to select DocLnk objects. | FileSelector
+Application-wide global functions. | Global
+Assists with AppLnk input/output. | FileManager
+Database that groups categories and maps ids to names. | Categories
+Defines a Universally Unique Identifier (UUID). | QUuid
+Defines the interface for text codec plugins. | TextCodecInterface
+Describes a single mount point. | FileSystem
+Describes the disks mounted on the file system. | StorageInfo
+Dummy class. The atd program is based on Russ Nelson's lightweight At daemon. It is distributed under the terms of the GNU General Public License. | atd
+Encapsulates and sends QCop messages over QCopChannels. | QCopEnvelope
+For saving application configuration state. | Config
+Group of categories. | CategoryGroup
+Holds the data of a calendar event. | PimEvent
+Holds the data of a todo entry. | PimTask
+Holds the data of an address book entry. | PimContact
+Implementation of a Directed Acyclic Word Graph. | QDawg
+Implements basic support for sending objects over an infrared communication link. | Ir
+Implements various system services that are available to all Qtopia applications. | QPEApplication
+Information about available fonts. | FontDatabase
+Interface for Qtopia input methods. | InputMethodInterface
+Interface for Qtopia taskbar applet plugins. | TaskbarAppletInterface
+Interface for Qtopia taskbar applet plugins, including a name and icon. | TaskbarNamedAppletInterface
+Interface for Qtopia widget styles. | StyleInterface
+Interface for Qtopia window decoration styles. | WindowDecorationInterface
+Interface for adding font renderers to Qtopia. | FontFactoryInterface
+Interface for the Qtopia Today application. | TodayPluginInterface
+Interface to OpenOBEX. | QObex
+Iterators of AddressBookAccess. | AddressBookIterator
+Iterators of DateBookAccess. | DateBookIterator
+Iterators of TodoAccess. | TodoIterator
+MIME type information. | MimeType
+Plays WAVE sound files and can invoke the audible alarm. | Sound
+Pushbutton with a menu. | MenuButton
+Represents an application available on the system. | AppLnk
+Represents loaded document references. | DocLnk
+Safe API for accessing PimEvents. | DateBookAccess
+Safe API for accessing PimTasks. | TodoAccess
+Safe API for accessing address book data. | AddressBookAccess
+Set of AppLnk objects. | AppLnkSet
+Set of DocLnk objects. | DocLnkSet
+Single element in an XML structure defined by XmlHandler. | Node
+The base class for PIM data recorded in the Qtopia database. | PimRecord
+The top-level widget. | Konsole
+Used to access MediaPlayerDecoder objects. | MediaPlayerPluginInterface
+VNC client. | KVNC
+Wrapper for handling shared libraries. | QLibrary
+Wrapper for the libflash library. | LibFlashPlugin
+Wrapper for the libmpeg3 library. | LibMpeg3Plugin
+XML document structure holder. | XmlHandler

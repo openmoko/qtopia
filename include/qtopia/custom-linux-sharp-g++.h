@@ -1,0 +1,1 @@
+../../src/libraries/qtopia/custom-linux-sharp-g++.h

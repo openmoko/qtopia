@@ -1,0 +1,83 @@
+/**********************************************************************
+** Copyright (C) 2000 Trolltech AS.  All rights reserved.
+**
+** This file is part of Qtopia Environment.
+**
+** This file may be distributed and/or modified under the terms of the
+** GNU General Public License version 2 as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL included in the
+** packaging of this file.
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**********************************************************************/
+#include "doubledata.h"
+#include "engine.h"
+#include <qstring.h>
+
+// Data type functions
+void DoubleData::set(double d) {
+    dbl = d;
+    edited = FALSE;
+    formattedOutput.setNum(dbl,'g',16);
+
+    if (!strcmp(formattedOutput.latin1(),"nan")) {
+	Engine e;
+	e.setError(eNotANumber);
+	return;
+    } else if (!strcmp(formattedOutput.latin1(),"inf")) {
+	Engine e;
+	e.setError(eInf);
+	return;
+    }
+}
+void DoubleData::push(char c) {
+    if (formattedOutput.length() > 15)
+	return;
+    QString tmpString = formattedOutput;
+    if (!edited) {
+	if (c == '.') 
+	    tmpString = QString("0");
+	else
+	    tmpString.truncate(0);
+	edited = TRUE;
+    }
+    tmpString.append(c);
+    bool ok;
+    double tmp = tmpString.toDouble(&ok);
+    if (ok) {
+	formattedOutput = tmpString;
+	dbl = tmp;
+    } else
+	qDebug("Wrong character pushed");
+}
+void DoubleData::del() {
+    if (!edited)
+	return;
+    if (formattedOutput.length() == 1) {
+	formattedOutput.truncate(0);
+	formattedOutput.append("0");
+	edited = FALSE;
+	dbl = 0;
+    } else {
+	QString tmpString = formattedOutput;
+	tmpString.truncate(formattedOutput.length()-1);
+	bool ok;
+	double tmp = tmpString.toDouble(&ok);
+	if (ok) {
+	    formattedOutput = tmpString;
+	    dbl = tmp;
+	}
+    }
+}
+void DoubleData::clear() {
+    dbl = 0;
+    Data::clear();
+    edited = FALSE;
+}

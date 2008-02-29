@@ -1,0 +1,826 @@
+Index: configure
+===================================================================
+RCS file: /cvsroot/ffmpeg/ffmpeg/configure,v
+retrieving revision 1.41
+diff -u -3 -p -d -u -r1.41 configure
+--- configure	2 Sep 2002 16:48:40 -0000	1.41
++++ configure	16 Sep 2002 08:12:34 -0000
+@@ -49,8 +49,24 @@ v4l="yes"
+ audio_oss="yes"
+ network="yes"
+ zlib="yes"
+-mp3lame="no"
+-vorbis="no"
++mp3lame_encoder="no"
++vorbis_encoder="no"
++mpeg1video_encoder="yes"
++h263_encoder="yes"
++rv10_encoder="yes"
++mp2_encoder="yes"
++ac3_encoder="yes"
++mjpeg_encoder="yes"
++mpeg4_encoder="yes"
++rawvideo_encoder="yes"
++msmpeg4v1_encoder="yes"
++msmpeg4v2_encoder="yes"
++msmpeg4v3_encoder="yes"
++wmv1_encoder="yes"
++wmv2_encoder="yes"
++h263p_encoder="yes"
++h263i_encoder="yes"
++svq1_encoder="yes"
+ a52="yes"
+ a52bin="no"
+ win32="no"
+@@ -177,11 +193,47 @@ for opt do
+   ;;
+   --disable-a52) a52="no"
+   ;;
++  --disable-mpeg1video_encoder) mpeg1video_encoder="no"
++  ;;
++  --disable-h263_encoder) h263_encoder="no"
++  ;;
++  --disable-rv10_encoder) rv10_encoder="no"
++  ;;
++  --disable-mp2_encoder) mp2_encoder="no"
++  ;;
++  --disable-mp3lame_encoder) mp3lame_encoder="no"
++  ;;
++  --disable-vorbis_encoder) vorbis_encoder="no"
++  ;;
++  --disable-ac3_encoder) ac3_encoder="no"
++  ;;
++  --disable-mjpeg_encoder) mjpeg_encoder="no"
++  ;;
++  --disable-mpeg4_encoder) mpeg4_encoder="no"
++  ;;
++  --disable-rawvideo_encoder) rawvideo_encoder="no"
++  ;;
++  --disable-msmpeg4v1_encoder) msmpeg4v1_encoder="no"
++  ;;
++  --disable-msmpeg4v2_encoder) msmpeg4v2_encoder="no"
++  ;;
++  --disable-msmpeg4v3_encoder) msmpeg4v3_encoder="no"
++  ;;
++  --disable-wmv1_encoder) wmv1_encoder="no"
++  ;;
++  --disable-wmv2_encoder) wmv2_encoder="no"
++  ;;
++  --disable-h263p_encoder) h263p_encoder="no"
++  ;;
++  --disable-h263i_encoder) h263i_encoder="no"
++  ;;
++  --disable-svq1_encoder) svq1_encoder="no"
++  ;;
+   --enable-a52bin) a52bin="yes" ; extralibs="-ldl $extralibs"
+   ;;
+-  --enable-mp3lame) mp3lame="yes"
++  --enable-mp3lame) mp3lame_encoder="yes"
+   ;;
+-  --enable-vorbis) vorbis="yes"
++  --enable-vorbis) vorbis_encoder="yes"
+   ;;
+   --disable-vhook) vhook="no"
+   ;;
+@@ -360,6 +412,24 @@ echo "  --disable-simple_idct    disable
+ echo "  --enable-gprof           enable profiling with gprof [$gprof]"
+ echo "  --disable-mpegaudio-hp   faster (but less accurate)"
+ echo "                           mpegaudio decoding [default=no]"
++echo "  --disable-mpeg1video_encoder  disable mpeg1 encoder [default enabled]"
++echo "  --disable-h263_encoder        disable h263 encoder [default enabled]"
++echo "  --disable-rv10_encoder        disable rv10 encoder [default enabled]"
++echo "  --disable-mp2_encoder         disable mp2 encoder [default enabled]"
++# echo "  --disable-mp3lame_encoder     disable mp3lame encoder [default is disabled]"
++# echo "  --disable-vorbis_encoder      disable vorbis_encoder [default is disabled]"
++echo "  --disable-ac3_encoder         disable ac3 encoder [default enabled]"
++echo "  --disable-mjpeg_encoder       disable mjpeg encoder [default enabled]"
++echo "  --disable-mpeg4_encoder       disable mpeg4 encoder [default enabled]"
++echo "  --disable-rawvideo_encoder    disable rawvideo encoder [default enabled]"
++echo "  --disable-msmpeg4v1_encoder   disable msmpeg4v1 encoder [default enabled]"
++echo "  --disable-msmpeg4v2_encoder   disable msmpeg4v2 encoder [default enabled]"
++echo "  --disable-msmpeg4v3_encoder   disable msmpeg4v3 encoder [default enabled]"
++echo "  --disable-wmv1_encoder        disable wmv1 encoder [default enabled]"
++echo "  --disable-wmv2_encoder        disable wmv2 encoder [default enabled]"
++echo "  --disable-h263p_encoder       disable h263p encoder [default enabled]"
++echo "  --disable-h263i_encoder       disable h263i encoder [default enabled]"
++echo "  --disable-svq1_encoder        disable svq1 encoder [default enabled]"
+ echo ""
+ echo "NOTE: The object files are build at the place where configure is launched"
+ exit 1
+@@ -375,8 +445,8 @@ echo "MMX enabled      $mmx"
+ echo "AltiVec enabled  $altivec"
+ echo "gprof enabled    $gprof"
+ echo "zlib enabled     $zlib"
+-echo "mp3lame enabled  $mp3lame"
+-echo "vorbis enabled   $vorbis"
++echo "mp3lame enabled  $mp3lame_encoder"
++echo "vorbis enabled   $vorbis_encoder"
+ echo "a52 support      $a52"
+ echo "a52 dlopened     $a52bin"
+ # echo "Video hooking    $vhook"
+@@ -493,14 +563,94 @@ if test "$zlib" = "yes" ; then
+   echo "CONFIG_ZLIB=yes" >> config.mak
+ fi
+ 
+-if test "$mp3lame" = "yes" ; then
+-  echo "#define CONFIG_MP3LAME 1" >> $TMPH
+-  echo "CONFIG_MP3LAME=yes" >> config.mak
++if test "$mpeg1video_encoder" = "yes" ; then
++  echo "#define CONFIG_MPEG1VIDEO_ENCODER 1" >> $TMPH
++  echo "CONFIG_MPEG1VIDEO_ENCODER=yes" >> config.mak
+ fi
+ 
+-if test "$vorbis" = "yes" ; then
+-  echo "#define CONFIG_VORBIS 1" >> $TMPH
+-  echo "CONFIG_VORBIS=yes" >> config.mak
++if test "$h263_encoder" = "yes" ; then
++  echo "#define CONFIG_H263_ENCODER 1" >> $TMPH
++  echo "CONFIG_H263_ENCODER=yes" >> config.mak
++fi
++
++if test "$rv10_encoder" = "yes" ; then
++  echo "#define CONFIG_RV10_ENCODER 1" >> $TMPH
++  echo "CONFIG_RV10_ENCODER=yes" >> config.mak
++fi
++
++if test "$mp2_encoder" = "yes" ; then
++  echo "#define CONFIG_MP2_ENCODER 1" >> $TMPH
++  echo "CONFIG_MP2_ENCODER=yes" >> config.mak
++fi
++
++if test "$mp3lame_encoder" = "yes" ; then
++  echo "#define CONFIG_MP3LAME_ENCODER 1" >> $TMPH
++  echo "CONFIG_MP3LAME_ENCODER=yes" >> config.mak
++fi
++
++if test "$vorbis_encoder" = "yes" ; then
++  echo "#define CONFIG_VORBIS_ENCODER 1" >> $TMPH
++  echo "CONFIG_VORBIS_ENCODER=yes" >> config.mak
++fi
++
++if test "$ac3_encoder" = "yes" ; then
++  echo "#define CONFIG_AC3_ENCODER 1" >> $TMPH
++  echo "CONFIG_AC3_ENCODER=yes" >> config.mak
++fi
++
++if test "$mjpeg_encoder" = "yes" ; then
++  echo "#define CONFIG_MJPEG_ENCODER 1" >> $TMPH
++  echo "CONFIG_MJPEG_ENCODER=yes" >> config.mak
++fi
++
++if test "$mpeg4_encoder" = "yes" ; then
++  echo "#define CONFIG_MPEG4_ENCODER 1" >> $TMPH
++  echo "CONFIG_MPEG4_ENCODER=yes" >> config.mak
++fi
++
++if test "$rawvideo_encoder" = "yes" ; then
++  echo "#define CONFIG_RAWVIDEO_ENCODER 1" >> $TMPH
++  echo "CONFIG_RAWVIDEO_ENCODER=yes" >> config.mak
++fi
++
++if test "$msmpeg4v1_encoder" = "yes" ; then
++  echo "#define CONFIG_MSMPEG4V1_ENCODER 1" >> $TMPH
++  echo "CONFIG_MSMPEG4V1_ENCODER=yes" >> config.mak
++fi
++
++if test "$msmpeg4v2_encoder" = "yes" ; then
++  echo "#define CONFIG_MSMPEG4V2_ENCODER 1" >> $TMPH
++  echo "CONFIG_MSMPEG4V2_ENCODER=yes" >> config.mak
++fi
++
++if test "$msmpeg4v3_encoder" = "yes" ; then
++  echo "#define CONFIG_MSMPEG4V3_ENCODER 1" >> $TMPH
++  echo "CONFIG_MSMPEG4V3_ENCODER=yes" >> config.mak
++fi
++
++if test "$wmv1_encoder" = "yes" ; then
++  echo "#define CONFIG_WMV1_ENCODER 1" >> $TMPH
++  echo "CONFIG_WMV1_ENCODER=yes" >> config.mak
++fi
++
++if test "$wmv2_encoder" = "yes" ; then
++  echo "#define CONFIG_WMV2_ENCODER 1" >> $TMPH
++  echo "CONFIG_WMV2_ENCODER=yes" >> config.mak
++fi
++
++if test "$h263p_encoder" = "yes" ; then
++  echo "#define CONFIG_H263P_ENCODER 1" >> $TMPH
++  echo "CONFIG_H263P_ENCODER=yes" >> config.mak
++fi
++
++if test "$h263i_encoder" = "yes" ; then
++  echo "#define CONFIG_H263I_ENCODER 1" >> $TMPH
++  echo "CONFIG_H263I_ENCODER=yes" >> config.mak
++fi
++
++if test "$svq1_encoder" = "yes" ; then
++  echo "#define CONFIG_SVQ1_ENCODER 1" >> $TMPH
++  echo "CONFIG_SVQ1_ENCODER=yes" >> config.mak
+ fi
+ 
+ if test "$win32" = "yes" ; then
+Index: libavcodec/ac3enc.c
+===================================================================
+RCS file: /cvsroot/ffmpeg/ffmpeg/libavcodec/ac3enc.c,v
+retrieving revision 1.9
+diff -u -3 -p -d -u -r1.9 ac3enc.c
+--- libavcodec/ac3enc.c	25 May 2002 22:45:33 -0000	1.9
++++ libavcodec/ac3enc.c	16 Sep 2002 08:12:35 -0000
+@@ -20,6 +20,8 @@
+ //#define DEBUG_BITALLOC
+ #include "avcodec.h"
+ 
++#ifdef CONFIG_AC3_ENCODER
++
+ #include "ac3enc.h"
+ #include "ac3tab.h"
+ 
+@@ -1488,3 +1490,6 @@ AVCodec ac3_encoder = {
+     AC3_encode_frame,
+     NULL,
+ };
++
++#endif // CONFIG_AC3_ENCODER
++
+Index: libavcodec/allcodecs.c
+===================================================================
+RCS file: /cvsroot/ffmpeg/ffmpeg/libavcodec/allcodecs.c,v
+retrieving revision 1.5
+diff -u -3 -p -d -u -r1.5 allcodecs.c
+--- libavcodec/allcodecs.c	1 Sep 2002 18:07:56 -0000	1.5
++++ libavcodec/allcodecs.c	16 Sep 2002 08:12:35 -0000
+@@ -31,30 +31,57 @@ void avcodec_register_all(void)
+     if (inited != 0)
+ 	return;
+     inited = 1;
+-
+     /* encoders */
+ #ifdef CONFIG_ENCODERS
++#ifdef CONFIG_AC3_ENCODER
+     register_avcodec(&ac3_encoder);
++#endif
++#ifdef CONFIG_MP2_ENCODER
+     register_avcodec(&mp2_encoder);
+-#ifdef CONFIG_MP3LAME
++#endif
++#ifdef CONFIG_MP3LAME_ENCODER
+     register_avcodec(&mp3lame_encoder);
+ #endif
+-#ifdef CONFIG_VORBIS
++#ifdef CONFIG_OGGVORBIS_ENCODER
+     register_avcodec(&oggvorbis_encoder);
+ #endif
++#ifdef CONFIG_MPEG1VIDEO_ENCODER
+     register_avcodec(&mpeg1video_encoder);
++#endif
++#ifdef CONFIG_H263_ENCODER
+     register_avcodec(&h263_encoder);
++#endif
++#ifdef CONFIG_H263P_ENCODER
+     register_avcodec(&h263p_encoder);
++#endif
++#ifdef CONFIG_RV10_ENCODER
+     register_avcodec(&rv10_encoder);
++#endif
++#ifdef CONFIG_MJPEG_ENCODER
+     register_avcodec(&mjpeg_encoder);
++#endif
++#ifdef CONFIG_MPEG4_ENCODER
+     register_avcodec(&mpeg4_encoder);
++#endif
++#ifdef CONFIG_MSMPEG4V1_ENCODER
+     register_avcodec(&msmpeg4v1_encoder);
++#endif
++#ifdef CONFIG_MSMPEG4V2_ENCODER
+     register_avcodec(&msmpeg4v2_encoder);
++#endif
++#ifdef CONFIG_MSMPEG4V3_ENCODER
+     register_avcodec(&msmpeg4v3_encoder);
++#endif
++#ifdef CONFIG_WMV1_ENCODER
+     register_avcodec(&wmv1_encoder);
++#endif
++#ifdef CONFIG_WMV2_ENCODER
+     register_avcodec(&wmv2_encoder);
++#endif
+ #endif /* CONFIG_ENCODERS */
++#ifdef CONFIG_RAWVIDEO_ENCODER
+     register_avcodec(&rawvideo_codec);
++#endif
+ 
+     /* decoders */
+ #ifdef CONFIG_DECODERS
+Index: libavcodec/h263.c
+===================================================================
+RCS file: /cvsroot/ffmpeg/ffmpeg/libavcodec/h263.c,v
+retrieving revision 1.100
+diff -u -3 -p -d -u -r1.100 h263.c
+--- libavcodec/h263.c	14 Sep 2002 22:07:35 -0000	1.100
++++ libavcodec/h263.c	16 Sep 2002 08:12:36 -0000
+@@ -1199,6 +1199,7 @@ static void init_uni_mpeg4_rl_tab(RLTabl
+     }
+ }
+ 
++#ifdef CONFIG_H263_ENCODER
+ void h263_encode_init(MpegEncContext *s)
+ {
+     static int done = 0;
+@@ -1247,6 +1248,7 @@ void h263_encode_init(MpegEncContext *s)
+         s->inter_quant_bias=-(1<<(QUANT_BIAS_SHIFT-2)); //(a - x/4)/x
+     }
+ }
++#endif // CONFIG_H263_ENCODER
+ 
+ static void h263_encode_block(MpegEncContext * s, DCTELEM * block, int n)
+ {
+Index: libavcodec/mjpeg.c
+===================================================================
+RCS file: /cvsroot/ffmpeg/ffmpeg/libavcodec/mjpeg.c,v
+retrieving revision 1.32
+diff -u -3 -p -d -u -r1.32 mjpeg.c
+--- libavcodec/mjpeg.c	14 Sep 2002 22:07:34 -0000	1.32
++++ libavcodec/mjpeg.c	16 Sep 2002 08:12:37 -0000
+@@ -278,6 +278,8 @@ void mjpeg_close(MpegEncContext *s)
+     av_free(s->mjpeg_ctx);
+ }
+ 
++#ifdef CONFIG_MJPEG_ENCODER
++
+ static inline void put_marker(PutBitContext *p, int code)
+ {
+     put_bits(p, 8, 0xff);
+@@ -578,6 +580,8 @@ void mjpeg_encode_mb(MpegEncContext *s, 
+         encode_block(s, block[i], i);
+     }
+ }
++
++#endif // CONFIG_MJPEG_ENCODER
+ 
+ /******************************************/
+ /* decoding */
+Index: libavcodec/mp3lameaudio.c
+===================================================================
+RCS file: /cvsroot/ffmpeg/ffmpeg/libavcodec/mp3lameaudio.c,v
+retrieving revision 1.6
+diff -u -3 -p -d -u -r1.6 mp3lameaudio.c
+--- libavcodec/mp3lameaudio.c	1 Sep 2002 07:40:31 -0000	1.6
++++ libavcodec/mp3lameaudio.c	16 Sep 2002 08:12:37 -0000
+@@ -21,6 +21,8 @@
+ #include "mpegaudio.h"
+ #include <lame/lame.h>
+ 
++#ifdef CONFIG_MP3LAME_ENCODER
++
+ typedef struct Mp3AudioContext {
+ 	lame_global_flags *gfp;
+ 	int stereo;
+@@ -96,3 +98,5 @@ AVCodec mp3lame_encoder = {
+     MP3lame_encode_frame,
+     MP3lame_encode_close
+ };
++
++#endif // CONFIG_MP3LAME_ENCODER
+Index: libavcodec/mpeg12.c
+===================================================================
+RCS file: /cvsroot/ffmpeg/ffmpeg/libavcodec/mpeg12.c,v
+retrieving revision 1.51
+diff -u -3 -p -d -u -r1.51 mpeg12.c
+--- libavcodec/mpeg12.c	6 Sep 2002 22:30:16 -0000	1.51
++++ libavcodec/mpeg12.c	16 Sep 2002 08:12:37 -0000
+@@ -41,11 +41,13 @@
+ #define MB_BTYPE_VLC_BITS 6
+ #define TEX_VLC_BITS 9
+ 
++#ifdef CONFIG_MPEG1VIDEO_ENCODER
+ static void mpeg1_encode_block(MpegEncContext *s, 
+                          DCTELEM *block, 
+                          int component);
+ static void mpeg1_encode_motion(MpegEncContext *s, int val);
+ static void mpeg1_skip_picture(MpegEncContext *s, int pict_num);
++#endif // CONFIG_MPEG1VIDEO_ENCODER
+ static int mpeg1_decode_block(MpegEncContext *s, 
+                               DCTELEM *block, 
+                               int n);
+@@ -100,6 +102,7 @@ static void init_2d_vlc_rl(RLTable *rl)
+ }
+ 
+ 
++#ifdef CONFIG_MPEG1VIDEO_ENCODER
+ static void put_header(MpegEncContext *s, int header)
+ {
+     align_put_bits(&s->pb);
+@@ -234,6 +237,7 @@ static void mpeg1_skip_picture(MpegEncCo
+     put_bits(&s->pb, 1, 1); 
+     put_bits(&s->pb, 1, 1); 
+ }
++#endif // CONFIG_MPEG1VIDEO_ENCODER
+ 
+ static void common_init(MpegEncContext *s)
+ {
+@@ -241,6 +245,7 @@ static void common_init(MpegEncContext *
+     s->c_dc_scale_table= ff_mpeg1_dc_scale_table;
+ }
+ 
++#ifdef CONFIG_MPEG1VIDEO_ENCODER
+ void mpeg1_encode_picture_header(MpegEncContext *s, int picture_number)
+ {
+     mpeg1_encode_sequence_header(s);
+@@ -572,6 +577,7 @@ static void mpeg1_encode_block(MpegEncCo
+     /* end of block */
+     put_bits(&s->pb, 2, 0x2);
+ }
++#endif // CONFIG_MPEG1VIDEO_ENCODER
+ 
+ /******************************************/
+ /* decoding */
+Index: libavcodec/mpegaudio.c
+===================================================================
+RCS file: /cvsroot/ffmpeg/ffmpeg/libavcodec/mpegaudio.c,v
+retrieving revision 1.10
+diff -u -3 -p -d -u -r1.10 mpegaudio.c
+--- libavcodec/mpegaudio.c	12 Sep 2002 02:34:56 -0000	1.10
++++ libavcodec/mpegaudio.c	16 Sep 2002 08:12:37 -0000
+@@ -19,6 +19,8 @@
+ #include "avcodec.h"
+ #include "mpegaudio.h"
+ 
++#ifdef CONFIG_MP2_ENCODER
++
+ /* currently, cannot change these constants (need to modify
+    quantization stage) */
+ #define FRAC_BITS 15
+@@ -775,5 +777,7 @@ AVCodec mp2_encoder = {
+     MPA_encode_frame,
+     NULL,
+ };
++
++#endif // CONFIG_MP2_ENCODER
+ 
+ #undef FIX
+Index: libavcodec/mpegvideo.c
+===================================================================
+RCS file: /cvsroot/ffmpeg/ffmpeg/libavcodec/mpegvideo.c,v
+retrieving revision 1.141
+diff -u -3 -p -d -u -r1.141 mpegvideo.c
+--- libavcodec/mpegvideo.c	14 Sep 2002 12:36:54 -0000	1.141
++++ libavcodec/mpegvideo.c	16 Sep 2002 08:12:38 -0000
+@@ -26,7 +26,9 @@
+ #include "fastmemcpy.h"
+ #endif
+ 
++#ifdef CONFIG_MPEG4_ENCODER
+ static void encode_picture(MpegEncContext *s, int picture_number);
++#endif
+ static void dct_unquantize_mpeg1_c(MpegEncContext *s, 
+                                    DCTELEM *block, int n, int qscale);
+ static void dct_unquantize_mpeg2_c(MpegEncContext *s,
+@@ -443,10 +445,13 @@ int MPV_encode_init(AVCodecContext *avct
+     s->fixed_qscale = (avctx->flags & CODEC_FLAG_QSCALE);
+     
+     switch(avctx->codec->id) {
++#ifdef CONFIG_MPEG1VIDEO_ENCODER
+     case CODEC_ID_MPEG1VIDEO:
+         s->out_format = FMT_MPEG1;
+         avctx->delay=0; //FIXME not sure, should check the spec
+         break;
++#endif // CONFIG_MPEG1VIDEO_ENCODER
++#ifdef CONFIG_MJPEG_ENCODER
+     case CODEC_ID_MJPEG:
+         s->out_format = FMT_MJPEG;
+         s->intra_only = 1; /* force intra only for jpeg */
+@@ -462,6 +467,8 @@ int MPV_encode_init(AVCodecContext *avct
+             return -1;
+         avctx->delay=0;
+         break;
++#endif // CONFIG_MJPEG_ENCODER
++#ifdef CONFIG_H263_ENCODER
+     case CODEC_ID_H263:
+         if (h263_get_picture_format(s->width, s->height) == 7) {
+             printf("Input picture size isn't suitable for h263 codec! try h263+\n");
+@@ -470,6 +477,8 @@ int MPV_encode_init(AVCodecContext *avct
+         s->out_format = FMT_H263;
+         avctx->delay=0;
+         break;
++#endif // CONFIG_H263_ENCODER
++#ifdef CONFIG_H263P_ENCODER
+     case CODEC_ID_H263P:
+         s->out_format = FMT_H263;
+         s->rtp_mode = 1;
+@@ -483,11 +492,15 @@ int MPV_encode_init(AVCodecContext *avct
+         s->umvplus_dec = 0;
+         avctx->delay=0;
+         break;
++#endif // CONFIG_H263P_ENCODER
++#ifdef CONFIG_RV10_ENCODER
+     case CODEC_ID_RV10:
+         s->out_format = FMT_H263;
+         s->h263_rv10 = 1;
+         avctx->delay=0;
+         break;
++#endif // CONFIG_RV10_ENCODER
++#ifdef CONFIG_MPEG4_ENCODER
+     case CODEC_ID_MPEG4:
+         s->out_format = FMT_H263;
+         s->h263_pred = 1;
+@@ -496,6 +509,8 @@ int MPV_encode_init(AVCodecContext *avct
+         s->low_delay=0;
+         avctx->delay= s->low_delay ? 0 : (s->max_b_frames + 1); 
+         break;
++#endif // CONFIG_MPEG4_ENCODER
++#ifdef CONFIG_MSMPEG4V1_ENCODER
+     case CODEC_ID_MSMPEG4V1:
+         s->out_format = FMT_H263;
+         s->h263_msmpeg4 = 1;
+@@ -504,6 +519,8 @@ int MPV_encode_init(AVCodecContext *avct
+         s->msmpeg4_version= 1;
+         avctx->delay=0;
+         break;
++#endif // CONFIG_MSMPEG4V1_ENCODER
++#ifdef CONFIG_MSMPEG4V2_ENCODER
+     case CODEC_ID_MSMPEG4V2:
+         s->out_format = FMT_H263;
+         s->h263_msmpeg4 = 1;
+@@ -512,6 +529,8 @@ int MPV_encode_init(AVCodecContext *avct
+         s->msmpeg4_version= 2;
+         avctx->delay=0;
+         break;
++#endif // CONFIG_MSMPEG4V2_ENCODER
++#ifdef CONFIG_MSMPEG4V3_ENCODER
+     case CODEC_ID_MSMPEG4V3:
+         s->out_format = FMT_H263;
+         s->h263_msmpeg4 = 1;
+@@ -520,6 +539,8 @@ int MPV_encode_init(AVCodecContext *avct
+         s->msmpeg4_version= 3;
+         avctx->delay=0;
+         break;
++#endif // CONFIG_MSMPEG4V3_ENCODER
++#ifdef CONFIG_WMV1_ENCODER
+     case CODEC_ID_WMV1:
+         s->out_format = FMT_H263;
+         s->h263_msmpeg4 = 1;
+@@ -528,6 +549,8 @@ int MPV_encode_init(AVCodecContext *avct
+         s->msmpeg4_version= 4;
+         avctx->delay=0;
+         break;
++#endif // CONFIG_WMV1_ENCODER
++#ifdef CONFIG_WMV2_ENCODER
+     case CODEC_ID_WMV2:
+         s->out_format = FMT_H263;
+         s->h263_msmpeg4 = 1;
+@@ -536,6 +559,7 @@ int MPV_encode_init(AVCodecContext *avct
+         s->msmpeg4_version= 5;
+         avctx->delay=0;
+         break;
++#endif // CONFIG_WMV2_ENCODER
+     default:
+         return -1;
+     }
+@@ -558,10 +582,15 @@ int MPV_encode_init(AVCodecContext *avct
+     s->y_dc_scale_table=
+     s->c_dc_scale_table= ff_mpeg1_dc_scale_table;
+  
++#ifdef CONFIG_H263_ENCODER
+     if (s->out_format == FMT_H263)
+         h263_encode_init(s);
+-    else if (s->out_format == FMT_MPEG1)
++    else
++#endif // CONFIG_H263_ENCODER
++#ifdef CONFIG_MPEG1VIDEO_ENCODER
++    if (s->out_format == FMT_MPEG1)
+         ff_mpeg1_encode_init(s);
++#endif // CONFIG_MPEG1VIDEO_ENCODER
+     if(s->msmpeg4_version)
+         ff_msmpeg4_encode_init(s);
+ 
+@@ -621,8 +650,10 @@ int MPV_encode_end(AVCodecContext *avctx
+     ff_rate_control_uninit(s);
+ 
+     MPV_common_end(s);
++#ifdef CONFIG_MJPEG_ENCODER
+     if (s->out_format == FMT_MJPEG)
+         mjpeg_close(s);
++#endif // CONFIG_MJPEG_ENCODER
+       
+     return 0;
+ }
+@@ -890,8 +921,10 @@ int MPV_encode_picture(AVCodecContext *a
+ 
+         MPV_frame_end(s);
+ 
++#ifdef CONFIG_MJPEG_ENCODER
+         if (s->out_format == FMT_MJPEG)
+             mjpeg_picture_trailer(s);
++#endif // CONFIG_MJPEG_ENCODER
+ 
+         avctx->quality = s->qscale;
+         
+@@ -1926,9 +1959,12 @@ static void encode_mb(MpegEncContext *s,
+ 
+     /* huffman encode */
+     switch(s->out_format) {
++#ifdef CONFIG_MPEG1VIDEO_ENCODER
+     case FMT_MPEG1:
+         mpeg1_encode_mb(s, s->block, motion_x, motion_y);
+         break;
++#endif // CONFIG_MPEG1VIDEO_ENCODER
++#ifdef CONFIG_H263_ENCODER
+     case FMT_H263:
+         if (s->h263_msmpeg4)
+             msmpeg4_encode_mb(s, s->block, motion_x, motion_y);
+@@ -1937,9 +1973,12 @@ static void encode_mb(MpegEncContext *s,
+         else
+             h263_encode_mb(s, s->block, motion_x, motion_y);
+         break;
++#endif // CONFIG_H263_ENCODER
++#ifdef CONFIG_MJPEG_ENCODER
+     case FMT_MJPEG:
+         mjpeg_encode_mb(s, s->block);
+         break;
++#endif // CONFIG_MJPEG_ENCODER
+     }
+ }
+ 
+@@ -2171,9 +2210,12 @@ static void encode_picture(MpegEncContex
+ 
+     s->last_bits= get_bit_count(&s->pb);
+     switch(s->out_format) {
++#ifdef CONFIG_MJPEG_ENCODER
+     case FMT_MJPEG:
+         mjpeg_picture_header(s);
+         break;
++#endif // CONFIG_MJPEG_ENCODER
++#ifdef CONFIG_H263_ENCODER
+     case FMT_H263:
+         if (s->h263_msmpeg4) 
+             msmpeg4_encode_picture_header(s, picture_number);
+@@ -2184,9 +2226,12 @@ static void encode_picture(MpegEncContex
+         else
+             h263_encode_picture_header(s, picture_number);
+         break;
++#endif // CONFIG_H263_ENCODER
++#ifdef CONFIG_MPEG1VIDEO_ENCODER
+     case FMT_MPEG1:
+         mpeg1_encode_picture_header(s, picture_number);
+         break;
++#endif // CONFIG_MPEG1VIDEO_ENCODER
+     }
+     bits= get_bit_count(&s->pb);
+     s->header_bits= bits - s->last_bits;
+@@ -2872,6 +2917,7 @@ void ff_conceal_past_errors(MpegEncConte
+     }
+ }
+ 
++#ifdef CONFIG_MPEG1VIDEO_ENCODER
+ AVCodec mpeg1video_encoder = {
+     "mpeg1video",
+     CODEC_TYPE_VIDEO,
+@@ -2881,7 +2927,9 @@ AVCodec mpeg1video_encoder = {
+     MPV_encode_picture,
+     MPV_encode_end,
+ };
++#endif // CONFIG_MPEG1VIDEO_ENCODER
+ 
++#ifdef CONFIG_H263_ENCODER
+ AVCodec h263_encoder = {
+     "h263",
+     CODEC_TYPE_VIDEO,
+@@ -2891,7 +2939,9 @@ AVCodec h263_encoder = {
+     MPV_encode_picture,
+     MPV_encode_end,
+ };
++#endif // CONFIG_H263_ENCODER
+ 
++#ifdef CONFIG_H263P_ENCODER
+ AVCodec h263p_encoder = {
+     "h263p",
+     CODEC_TYPE_VIDEO,
+@@ -2901,7 +2951,9 @@ AVCodec h263p_encoder = {
+     MPV_encode_picture,
+     MPV_encode_end,
+ };
++#endif // CONFIG_H263P_ENCODER
+ 
++#ifdef CONFIG_RV10_ENCODER
+ AVCodec rv10_encoder = {
+     "rv10",
+     CODEC_TYPE_VIDEO,
+@@ -2911,7 +2963,9 @@ AVCodec rv10_encoder = {
+     MPV_encode_picture,
+     MPV_encode_end,
+ };
++#endif // CONFIG_RV10_ENCODER
+ 
++#ifdef CONFIG_MJPEG_ENCODER
+ AVCodec mjpeg_encoder = {
+     "mjpeg",
+     CODEC_TYPE_VIDEO,
+@@ -2921,7 +2975,9 @@ AVCodec mjpeg_encoder = {
+     MPV_encode_picture,
+     MPV_encode_end,
+ };
++#endif // CONFIG_MJPEG_ENCODER
+ 
++#ifdef CONFIG_MPEG4_ENCODER
+ AVCodec mpeg4_encoder = {
+     "mpeg4",
+     CODEC_TYPE_VIDEO,
+@@ -2931,7 +2987,9 @@ AVCodec mpeg4_encoder = {
+     MPV_encode_picture,
+     MPV_encode_end,
+ };
++#endif // CONFIG_MPEG4_ENCODER
+ 
++#ifdef CONFIG_MSMPEG4V1_ENCODER
+ AVCodec msmpeg4v1_encoder = {
+     "msmpeg4v1",
+     CODEC_TYPE_VIDEO,
+@@ -2941,7 +2999,9 @@ AVCodec msmpeg4v1_encoder = {
+     MPV_encode_picture,
+     MPV_encode_end,
+ };
++#endif // CONFIG_MSMPEG4V1_ENCODER
+ 
++#ifdef CONFIG_MSMPEG4V2_ENCODER
+ AVCodec msmpeg4v2_encoder = {
+     "msmpeg4v2",
+     CODEC_TYPE_VIDEO,
+@@ -2951,7 +3011,9 @@ AVCodec msmpeg4v2_encoder = {
+     MPV_encode_picture,
+     MPV_encode_end,
+ };
++#endif // CONFIG_MSMPEG4V2_ENCODER
+ 
++#ifdef CONFIG_MSMPEG4V3_ENCODER
+ AVCodec msmpeg4v3_encoder = {
+     "msmpeg4",
+     CODEC_TYPE_VIDEO,
+@@ -2961,7 +3023,9 @@ AVCodec msmpeg4v3_encoder = {
+     MPV_encode_picture,
+     MPV_encode_end,
+ };
++#endif // CONFIG_MSMPEG4V3_ENCODER
+ 
++#ifdef CONFIG_WMV1_ENCODER
+ AVCodec wmv1_encoder = {
+     "wmv1",
+     CODEC_TYPE_VIDEO,
+@@ -2971,7 +3035,9 @@ AVCodec wmv1_encoder = {
+     MPV_encode_picture,
+     MPV_encode_end,
+ };
++#endif // CONFIG_WMV1_ENCODER
+ 
++#ifdef CONFIG_WMV2_ENCODER
+ AVCodec wmv2_encoder = {
+     "wmv2",
+     CODEC_TYPE_VIDEO,
+@@ -2981,3 +3047,5 @@ AVCodec wmv2_encoder = {
+     MPV_encode_picture,
+     MPV_encode_end,
+ };
++#endif // CONFIG_WMV2_ENCODER
++
+Index: libavcodec/oggvorbis.c
+===================================================================
+RCS file: /cvsroot/ffmpeg/ffmpeg/libavcodec/oggvorbis.c,v
+retrieving revision 1.1
+diff -u -3 -p -d -u -r1.1 oggvorbis.c
+--- libavcodec/oggvorbis.c	1 Sep 2002 18:07:56 -0000	1.1
++++ libavcodec/oggvorbis.c	16 Sep 2002 08:12:38 -0000
+@@ -10,6 +10,8 @@
+ #include "avcodec.h"
+ #include "oggvorbis.h"
+ 
++#ifdef CONFIG_VORBIS_ENCODER
++
+ #define OGGVORBIS_FRAME_SIZE 1024
+ 
+ 
+@@ -138,3 +140,4 @@ AVCodec oggvorbis_encoder = {
+ };
+ 
+ 
++#endif // CONFIG_VORBIS_ENCODER
+Index: libavcodec/rv10.c
+===================================================================
+RCS file: /cvsroot/ffmpeg/ffmpeg/libavcodec/rv10.c,v
+retrieving revision 1.16
+diff -u -3 -p -d -u -r1.16 rv10.c
+--- libavcodec/rv10.c	5 Sep 2002 13:23:11 -0000	1.16
++++ libavcodec/rv10.c	16 Sep 2002 08:12:38 -0000
+@@ -220,6 +220,7 @@ int rv_decode_dc(MpegEncContext *s, int 
+     return -code;
+ }
+ 
++#ifdef CONFIG_RV10_ENCODER
+ /* write RV 1.0 compatible frame header */
+ void rv10_encode_picture_header(MpegEncContext *s, int picture_number)
+ {
+@@ -256,6 +257,7 @@ void rv10_encode_picture_header(MpegEncC
+ 
+     put_bits(&s->pb, 3, 0);	/* ignored */
+ }
++#endif // CONFIG_RV10_ENCODER
+ 
+ static int get_num(GetBitContext *gb)
+ {
