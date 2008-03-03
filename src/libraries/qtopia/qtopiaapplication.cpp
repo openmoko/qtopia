@@ -2902,6 +2902,19 @@ bool QtopiaApplication::x11EventFilter(XEvent *e)
                 return true;
         }
     }
+
+    
+    /*
+     * Setting: Missed calls, starting qpe, window manager
+     * Issue: placing/showing the dialog too late/wrong and not
+     * updating the context menu afterwards.
+     * Solve: qapplication_x11 is calling setActiveWindow
+     *
+     */
+    QWidget *widget = QWidget::find((WId)e->xany.window);
+    if (widget && e->type == XFocusIn)
+        ContextKeyManager::instance()->updateContextLabels();
+
     return false;
 }
 
