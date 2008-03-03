@@ -1020,6 +1020,9 @@ devices/n800/mkspecs/qws
 devices/n800/mkspecs/qws/linux-nokia-g++
 devices/n800/mkspecs/qws/linux-nokia-g++/qmake.conf
 devices/n800/mkspecs/qws/linux-nokia-g++/qplatformdefs.h
+devices/n800/patches
+devices/n800/patches/n800-pkgconfig.patch
+devices/n800/patches/n800-so.patch
 devices/n800/projects.pri
 devices/n800/qt
 devices/n800/qt/src
@@ -8393,6 +8396,7 @@ examples/asterisk/speex/vq.c
 examples/asterisk/speex/vq.h
 examples/asterisk/speex/vq_arm4.h
 examples/bluetooth
+examples/bluetooth/bluetooth.pro
 examples/bluetooth/bluetoothservice
 examples/bluetooth/bluetoothservice/SerialPortSDPRecord.xml
 examples/bluetooth/bluetoothservice/bluetoothservice.cpp
@@ -8400,6 +8404,18 @@ examples/bluetooth/bluetoothservice/bluetoothservice.desktop
 examples/bluetooth/bluetoothservice/bluetoothservice.h
 examples/bluetooth/bluetoothservice/bluetoothservice.pro
 examples/bluetooth/bluetoothservice/main.cpp
+examples/bluetooth/devinfo
+examples/bluetooth/devinfo/devinfo.cpp
+examples/bluetooth/devinfo/devinfo.desktop
+examples/bluetooth/devinfo/devinfo.h
+examples/bluetooth/devinfo/devinfo.pro
+examples/bluetooth/devinfo/main.cpp
+examples/bluetooth/scanner
+examples/bluetooth/scanner/main.cpp
+examples/bluetooth/scanner/scanner.cpp
+examples/bluetooth/scanner/scanner.desktop
+examples/bluetooth/scanner/scanner.h
+examples/bluetooth/scanner/scanner.pro
 examples/content
 examples/content/changelistener
 examples/content/changelistener/changelistener.cpp
@@ -8865,7 +8881,6 @@ help/html/qpe-screens.html
 help/html/qpe-settings.html
 help/html/qpe-shutdowndialog.html
 help/html/qpe-symbolpicker.html
-help/html/qpe-sync-pc.html
 help/html/qpe-taskmanager.html
 help/html/qpe.html
 help/html/qtmail-attachments.html
@@ -8889,7 +8904,6 @@ help/html/qtmail-template-text.html
 help/html/qtmail-write-mail.html
 help/html/qtmail.html
 help/html/security-locks.html
-help/html/security-sync.html
 help/html/security.html
 help/html/simapp.html
 help/html/sipsettings.html
@@ -13901,8 +13915,10 @@ src/server/phone/callhistory.cpp
 src/server/phone/callhistory.h
 src/server/phone/callscreen.cpp
 src/server/phone/callscreen.h
-src/server/phone/contextlabel.cpp
-src/server/phone/contextlabel.h
+src/server/phone/contextlabel
+src/server/phone/contextlabel/base
+src/server/phone/contextlabel/base/contextlabel.cpp
+src/server/phone/contextlabel/base/contextlabel.h
 src/server/phone/dialer.cpp
 src/server/phone/dialer.h
 src/server/phone/dialerservice.cpp

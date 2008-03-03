@@ -359,6 +359,16 @@ set_optvar( "xplatform", +{
 set_optvar( "arch", +{
     "set" => [ "%=s", "The CPU family you are building for." ],
     "arg" => "architecture",
+    "default_tested" => 1,
+    "available" => sub {
+        my @avail;
+        for ( glob("$qt_depot_path/src/corelib/arch/*") ) {
+            if ( -d $_ ) {
+                push(@avail, basename($_));
+            }
+        }
+        @avail;
+    },
     "visible" => $qtopia_visref,
     "autodep" => $qtopia_autoref,
     "config_pri" => "arch=%",
@@ -454,6 +464,7 @@ set_optvar( "setproc_method", +{
     "arg" => "method",
     "available" => [ "prctl", "argv0", "none" ],
     "default" => sub { opt("xplatform")?"prctl":"argv0" },
+    "force_default" => 1,
     "default_tested" => 1,
     "visible" => $qtopia_visref,
     "autodep" => $qtopia_autoref,

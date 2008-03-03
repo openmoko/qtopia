@@ -236,8 +236,8 @@ static void enterProps(const char *s);
 static void enterAttr(const char *s1, const char *s2);
 static void enterValues(const char *value);
 #define mime_error yyerror
-void mime_error(char *s);
-void mime_error_(char *s);
+void mime_error(const char *s);
+void mime_error_(const char *s);
 
 #line 191 "vcc.y"
 typedef union {
@@ -1266,7 +1266,7 @@ DLLEXPORT(void) registerMimeErrorHandler(MimeErrorHandler me)
     mimeErrorHandler = me;
     }
 
-void mime_error(char *s)
+void mime_error(const char *s)
     {
     char msg[256];
     if (mimeErrorHandler) {
@@ -1275,7 +1275,7 @@ void mime_error(char *s)
         }
     }
 
-void mime_error_(char *s)
+void mime_error_(const char *s)
     {
     if (mimeErrorHandler) {
         mimeErrorHandler(s);

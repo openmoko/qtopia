@@ -1317,7 +1317,7 @@ void SimSetupCall::callStateChanged( const QPhoneCall& call )
 {
     // send the response to a setup call
     bool done = false;
-    QSimTerminalResponse::Result result;
+    QSimTerminalResponse::Result result = QSimTerminalResponse::Success;
 
     if (call.state() == QPhoneCall::Connected) {
         // send sub address, DTMF tones

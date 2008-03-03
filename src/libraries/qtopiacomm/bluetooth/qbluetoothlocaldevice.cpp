@@ -1290,8 +1290,8 @@ bool QBluetoothLocalDevice::cancelDiscovery()
     QList<QVariant> args;
 
     return m_data->iface()->callWithCallback("CancelDiscovery", args, m_data,
-                                             SLOT(cancelScanReply(QDBusMessage)),
-                                             SLOT(cancelScanReply(QDBusMessage)));
+                                                SLOT(cancelScanReply(QDBusMessage)),
+                                                SLOT(asyncErrorReply(QDBusError,QDBusMessage)));
 }
 
 /*!

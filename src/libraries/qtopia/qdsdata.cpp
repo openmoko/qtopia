@@ -65,7 +65,7 @@ bool QDSDataStore::add( const QUniqueId& id,
         return false;
     }
 
-    if ( !infoFile.open( QIODevice::WriteOnly ) ) {
+    if ( !infoFile.openLocked( QIODevice::WriteOnly ) ) {
         qLog(DataSharing) << "QDSDataStore::add - "
                           << "info file can't be written to";
         return false;
@@ -77,7 +77,7 @@ bool QDSDataStore::add( const QUniqueId& id,
         return false;
     }
 
-    if ( !dataFile.open( QIODevice::WriteOnly ) ) {
+    if ( !dataFile.openLocked( QIODevice::WriteOnly ) ) {
         qLog(DataSharing) << "QDSDataStore::add - "
                           << "data file can't be written to";
         return false;
@@ -105,7 +105,7 @@ bool QDSDataStore::add( const QUniqueId& id,
         return false;
     }
 
-    if ( !infoFile.open( QIODevice::WriteOnly ) ) {
+    if ( !infoFile.openLocked( QIODevice::WriteOnly ) ) {
         qLog(DataSharing) << "QDSDataStore::add - "
                           << "info file can't be written to";
         return false;
@@ -136,7 +136,7 @@ bool QDSDataStore::add( const QUniqueId& id )
     int refCount = 0;
     int transCount = 0;
     QString type;
-    if ( infoFile.open( QIODevice::ReadWrite ) ) {
+    if ( infoFile.openLocked( QIODevice::ReadWrite ) ) {
         QDataStream ds(&infoFile);
         ds >> refCount;
         ds >> transCount;
@@ -163,7 +163,7 @@ bool QDSDataStore::set( const QUniqueId& id, const QByteArray& data )
         return false;
     }
 
-    if ( !dataFile.open( QIODevice::WriteOnly ) ) {
+    if ( !dataFile.openLocked( QIODevice::WriteOnly ) ) {
         qLog(DataSharing) << "QDSDataStore::set - "
                           << "data file can't be written to";
         return false;
@@ -180,7 +180,7 @@ bool QDSDataStore::set( const QUniqueId& id, QFile& data )
 {
     // Overwrite old data file with new data file
     QDSLockedFile dataFile( dataFileName( id ) );
-    if ( !dataFile.open( QIODevice::WriteOnly ) ) {
+    if ( !dataFile.openLocked( QIODevice::WriteOnly ) ) {
         qLog(DataSharing) << "QDSDataStore::set - "
                           << "data file can't be written to";
         return false;
@@ -219,7 +219,7 @@ bool QDSDataStore::set( const QUniqueId& id,
         return false;
     }
 
-    if ( !infoFile.open( QIODevice::WriteOnly ) ) {
+    if ( !infoFile.openLocked( QIODevice::WriteOnly ) ) {
         qLog(DataSharing) << "QDSDataStore::set - "
                           << "info file can't be written to";
         return false;
@@ -231,7 +231,7 @@ bool QDSDataStore::set( const QUniqueId& id,
         return false;
     }
 
-    if ( !dataFile.open( QIODevice::WriteOnly ) ) {
+    if ( !dataFile.openLocked( QIODevice::WriteOnly ) ) {
         qLog(DataSharing) << "QDSDataStore::set - "
                           << "data file can't be written to";
         return false;
@@ -265,7 +265,7 @@ bool QDSDataStore::set( const QUniqueId& id,
         return false;
     }
 
-    if ( !infoFile.open( QIODevice::WriteOnly ) ) {
+    if ( !infoFile.openLocked( QIODevice::WriteOnly ) ) {
         qLog(DataSharing) << "QDSDataStore::set - "
                           << "info file can't be written to";
         return false;
@@ -273,7 +273,7 @@ bool QDSDataStore::set( const QUniqueId& id,
 
     // Overwrite old data file with new data file
     QDSLockedFile dataFile( dataFileName( id ) );
-    if ( !dataFile.open( QIODevice::WriteOnly ) ) {
+    if ( !dataFile.openLocked( QIODevice::WriteOnly ) ) {
         qLog(DataSharing) << "QDSDataStore::set - "
                           << "data file can't be written to";
         return false;
@@ -346,7 +346,7 @@ bool QDSDataStore::transmit( const QUniqueId& id )
     int refCount = 0;
     int transCount = 0;
     QString type;
-    if ( infoFile.open( QIODevice::ReadWrite ) ) {
+    if ( infoFile.openLocked( QIODevice::ReadWrite ) ) {
         QDataStream ds(&infoFile);
         ds >> refCount;
         ds >> transCount;
@@ -390,7 +390,7 @@ bool QDSDataStore::received( const QUniqueId& id )
 QMimeType QDSDataStore::type( const QUniqueId &id )
 {
     QDSLockedFile infoFile( infoFileName( id ) );
-    if ( infoFile.exists() && infoFile.open( QIODevice::ReadOnly ) ) {
+    if ( infoFile.exists() && infoFile.openLocked( QIODevice::ReadOnly ) ) {
         QDataStream ds( &infoFile );
         QString type;
         int refCount;
@@ -408,7 +408,7 @@ QMimeType QDSDataStore::type( const QUniqueId &id )
 QByteArray QDSDataStore::data( const QUniqueId &id )
 {
     QDSLockedFile dataFile( dataFileName( id ) );
-    if ( dataFile.exists() && dataFile.open( QIODevice::ReadOnly ) ) {
+    if ( dataFile.exists() && dataFile.openLocked( QIODevice::ReadOnly ) ) {
         return dataFile.readAll();
     } else {
         qLog(DataSharing) << "QDSDataStore::data - couldn't access data file";
@@ -432,7 +432,7 @@ QString QDSDataStore::dataFileName( const QUniqueId& id )
 int QDSDataStore::referenceCount( const QUniqueId &id )
 {
     QDSLockedFile infoFile( infoFileName( id ) );
-    if ( infoFile.exists() && infoFile.open( QIODevice::ReadOnly ) ) {
+    if ( infoFile.exists() && infoFile.openLocked( QIODevice::ReadOnly ) ) {
         QDataStream ds( &infoFile );
         int refCount = 0;
         ds >> refCount;
@@ -447,7 +447,7 @@ int QDSDataStore::referenceCount( const QUniqueId &id )
 bool QDSDataStore::removeReference( const QUniqueId& id )
 {
     QDSLockedFile infoFile( infoFileName( id ) );
-    if ( infoFile.exists() && infoFile.open( QIODevice::ReadWrite ) ) {
+    if ( infoFile.exists() && infoFile.openLocked( QIODevice::ReadWrite ) ) {
         QDataStream ds(&infoFile);
 
         // Get the current reference count and mime type
@@ -479,7 +479,7 @@ bool QDSDataStore::removeReference( const QUniqueId& id )
 int QDSDataStore::transmitCount( const QUniqueId& id )
 {
     QDSLockedFile infoFile( infoFileName( id ) );
-    if ( infoFile.exists() && infoFile.open( QIODevice::ReadOnly ) ) {
+    if ( infoFile.exists() && infoFile.openLocked( QIODevice::ReadOnly ) ) {
         QDataStream ds( &infoFile );
         int refCount;
         int transCount;
@@ -496,7 +496,7 @@ int QDSDataStore::transmitCount( const QUniqueId& id )
 bool QDSDataStore::removeTransmit( const QUniqueId& id )
 {
     QDSLockedFile infoFile( infoFileName( id ) );
-    if ( infoFile.exists() && infoFile.open( QIODevice::ReadWrite ) ) {
+    if ( infoFile.exists() && infoFile.openLocked( QIODevice::ReadWrite ) ) {
         QDataStream ds(&infoFile);
 
         // Get the current transmit count and mime type
@@ -575,7 +575,7 @@ QDSLockedFile::~QDSLockedFile()
     unlock();
 }
 
-bool QDSLockedFile::open( QIODevice::OpenMode mode, bool acquireLock )
+bool QDSLockedFile::openLocked( QIODevice::OpenMode mode, bool acquireLock )
 {
     if ( !QFile::open( mode ) )
         return false;

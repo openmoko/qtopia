@@ -44,6 +44,7 @@ INCLUDEPATH+= core_server \
               bluetooth/scomisc \
               pim/savetocontacts \
               pim/servercontactmodel \
+              phone/contextlabel/base \
               phone/secondarydisplay/abstract \
               phone/telephony/callpolicymanager/abstract \
               phone/telephony/callpolicymanager/cell \
@@ -296,7 +297,7 @@ UNPORTED_HEADERS=firstuse.h
 UNPORTED_SOURCES=firstuse.cpp
 
 PHONE_HEADERS=\
-    phone/contextlabel.h \
+    phone/contextlabel/base/contextlabel.h \
     phone/themecontrol/themecontrol.h \
     ui/launcherviews/documentview/documentview.h \
     phone/phonebrowser.h \
@@ -347,7 +348,7 @@ TELEPHONY_HEADERS=\
     phone/telephony/videoringtone/videoringtone.h
 
 PHONE_SOURCES=\
-    phone/contextlabel.cpp \
+    phone/contextlabel/base/contextlabel.cpp \
     phone/phonelauncher.cpp \
     phone/themecontrol/themecontrol.cpp \
     ui/launcherviews/documentview/documentview.cpp \

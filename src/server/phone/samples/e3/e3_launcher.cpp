@@ -23,7 +23,7 @@
 #include "e3_clock.h"
 #include "e3_navipane.h"
 #include "phone/phoneheader.h"
-#include "phone/contextlabel.h"
+#include "contextlabel.h"
 #include "windowmanagement.h"
 #include "themecontrol.h"
 #include <QApplication>

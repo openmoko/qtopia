@@ -52,7 +52,7 @@ cd include
 cp -a tslib.h alsa dbus-1.0 bluetooth /scratchbox/compilers/cs2005q3.2-glibc2.5-arm/arm-none-linux-gnueabi/sys-include
 
 cd ../lib
-mkdir /scratchbox/compilers/cs2005q3.2-glibc2.5-arm/arm-none-linux-gnueabi/pkgconfig
+mkdir /scratchbox/compilers/cs2005q3.2-glibc2.5-arm/arm-none-linux-gnueabi/lib/pkgconfig
 cp -a pkgconfig/alsa.pc pkgconfig/bluez.pc pkgconfig/dbus-1.pc
 /scratchbox/compilers/cs2005q3.2-glibc2.5-arm/arm-none-linux-gnueabi
 
