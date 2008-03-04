@@ -243,6 +243,11 @@ struct QMetaTypeRegister
 #define Q_REGISTER_USER_METATYPE(TYPE)  \
     QMetaTypeRegister< TYPE >::registerType()
 
+#if defined(QTOPIA_DBUS_IPC)
+QDBusArgument& operator<<(QDBusArgument&, const QUuid&);
+const QDBusArgument& operator>>(const QDBusArgument&, QUuid&);
+#endif
+
 Q_DECLARE_USER_METATYPE_NO_OPERATORS(QUuid)
 
 // Special variant class that can perform QDataStream operations

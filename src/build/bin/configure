@@ -373,6 +373,15 @@ set_optvar( "qws", +{
     "config_pri" => [ "(!)CONFIG+=x11", "CONFIG+=qws" ],
     "force_default" => 0,
 });
+
+set_optvar( "dbusipc", +{
+    "set" => [ "dbusipc", "Use DBUS IPC" ],
+    "default" => 0,
+    "visible" => $qtopia_visref,
+    "autodep" => $qtopia_autoref,
+    "config_pri" => "CONFIG+=enable_dbusipc",
+    "force_default" => 0,
+});
 # not visible for now because this doesn't come close to working
 set_optvar( "keypad_navigation", +{
     "set" => [ "%", "Use QT_KEYPAD_NAVIGATION (required for phone edition)." ],

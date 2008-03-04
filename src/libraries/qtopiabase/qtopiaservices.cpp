@@ -324,7 +324,7 @@ bool QtopiaServiceRequest::send() const
         return false;
 
 #if defined(QTOPIA_DBUS_IPC)
-    QDBusConnection dbc = QDBus::sessionBus();
+    QDBusConnection dbc = QDBusConnection::sessionBus();
     QString service = dbusInterface;
     service.append(".");
     service.append(m_Service);
@@ -347,8 +347,8 @@ bool QtopiaServiceRequest::send() const
 
     qLog(DBUS) << "Calling method" << dbusMethod;
 
-    QDBusMessage msg = QDBusMessage::methodCall(service,
-            path, dbusInterface, dbusMethod, dbc);
+    QDBusMessage msg = QDBusMessage::createMethodCall(service,
+            path, dbusInterface, dbusMethod);
     msg.setArguments(m_arguments);
     dbc.call(msg, QDBus::NoBlock);
 
