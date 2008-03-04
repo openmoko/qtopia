@@ -189,7 +189,7 @@ QtopiaAbstractService::QtopiaAbstractService( const QString& service, QObject *p
 QtopiaAbstractService::~QtopiaAbstractService()
 {
 #if defined(QTOPIA_DBUS_IPC)
-    QDBusConnection dbc = QDBus::sessionBus();
+    QDBusConnection dbc = QDBusConnection::sessionBus();
     if (!dbc.isConnected()) {
         qWarning() << "Unable to connect to D-BUS:" << dbc.lastError();
         return;
@@ -220,7 +220,7 @@ QtopiaAbstractService::~QtopiaAbstractService()
 void QtopiaAbstractService::publishAll()
 {
 #if defined(QTOPIA_DBUS_IPC)
-    QDBusConnection dbc = QDBus::sessionBus();
+    QDBusConnection dbc = QDBusConnection::sessionBus();
     if (!dbc.isConnected()) {
         qWarning() << "Unable to connect to D-BUS:" << dbc.lastError();
         return;

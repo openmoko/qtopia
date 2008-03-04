@@ -227,6 +227,11 @@ typedef QList<QContent> QContentList;
 Q_DECLARE_METATYPE(QContentIdList);
 Q_DECLARE_METATYPE(QContentList);
 
+#if defined(QTOPIA_DBUS_IPC)
+const QDBusArgument& operator>>(const QDBusArgument&, QContentId&);
+QDBusArgument& operator<<(QDBusArgument&, const QContentId&);
+#endif
+
 Q_DECLARE_USER_METATYPE(QContent);
 Q_DECLARE_USER_METATYPE_NO_OPERATORS(QContentId);
 Q_DECLARE_USER_METATYPE_TYPEDEF(QContentId,QContentId);

@@ -33,6 +33,7 @@
 #endif
 
 #if defined(QTOPIA_DBUS_IPC)
+#include <qapplication.h>
 #include <qtdbus/qdbusconnection.h>
 #include <qtdbus/qdbusmessage.h>
 #elif defined(QTOPIA_REGULAR_QCOP)
@@ -104,7 +105,7 @@ QtopiaChannel_Private::QtopiaChannel_Private(const QString &channel, QtopiaChann
 #if defined(QTOPIA_DBUS_IPC)
     m_channelName = channel;
 
-    QDBusConnection dbc = QDBus::sessionBus();
+    QDBusConnection dbc = QDBusConnection::sessionBus();
 
     if (!dbc.isConnected())
         qFatal("Application: %s Connection to DBUS Daemon lost!!",
@@ -154,7 +155,7 @@ bool QtopiaChannel_Private::dbusSend(const QString &channel,
                                      const QString &msg,
                                      const QByteArray &data)
 {
-    QDBusConnection dbc = QDBus::sessionBus();
+    QDBusConnection dbc = QDBusConnection::sessionBus();
     QString dbusPath;
 
     QDBusMessage message;
@@ -170,15 +171,15 @@ bool QtopiaChannel_Private::dbusSend(const QString &channel,
         QString dbusService("com.trolltech.qtopia.QPE.Application.");
         dbusService += app;
 
-        message = QDBusMessage::methodCall(dbusService, dbusPath, dbusInterface,
-                                           "appMessage", dbc);
+        message = QDBusMessage::createMethodCall(dbusService, dbusPath, dbusInterface,
+                                           "appMessage");
         message << msg;
     }
     else {
         QString dbusMsg;
         convert_qcop_message_name_to_dbus(msg, dbusMsg);
         convert_qcop_channel_to_dbus_path(channel, dbusPath);
-        message = QDBusMessage::signal(dbusPath, dbusInterface, dbusMsg, dbc);
+        message = QDBusMessage::createSignal(dbusPath, dbusInterface, dbusMsg);
     }
 
     if (!data.isNull()) {
@@ -290,7 +291,7 @@ bool QtopiaChannel::isRegistered(const QString &channel)
     //TODO: There's no registration framework in DBUS for signals
     //      will need to add this later on
     //      For now just return whether we're connected
-    QDBusConnection dbc = QDBus::sessionBus();
+    QDBusConnection dbc = QDBusConnection::sessionBus();
     return dbc.isConnected();
 #elif defined(QTOPIA_REGULAR_QCOP)
     return QCopChannel::isRegistered(channel);
