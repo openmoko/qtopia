@@ -126,6 +126,9 @@ private:
     bool dialNumbers(const QString & numbers);
     void setGsmMenuItem();
     void setItemActive(const QString &name, bool active);
+#ifdef QT_ILLUME_LAUNCHER
+    void informScreenSaver(CallItemEntry*, const QString& name);
+#endif
 
 private:
     QString dtmfActiveCall;
@@ -164,6 +167,10 @@ private:
     bool showWaitDlg;
     QTimer *symbolTimer;
     MouseControlDialog *m_mouseCtrlDlg;
+
+#ifdef QT_ILLUME_LAUNCHER
+    QString m_screenSaverCommand;
+#endif
 };
 
 #endif
