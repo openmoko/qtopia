@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# show the xmessage on the main screen, obvious assumption about what mainscreen is
+export DISPLAY=:0
+
+xmessage number:"$1" name:"$2" state:"$3" photo:"$4"
