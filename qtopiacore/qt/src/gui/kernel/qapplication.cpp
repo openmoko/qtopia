@@ -1058,10 +1058,6 @@ QWidget *QApplication::widgetAt(const QPoint &p)
     if there is no Qt widget there.
 */
 
-/*!
-    \fn void QApplication::setArgs(int argc, char **argv)
-    \internal
-*/
 
 
 
@@ -4357,6 +4353,17 @@ Qt::LayoutDirection QApplication::keyboardInputDirection()
     if (!QApplicationPrivate::checkInstance("keyboardInputDirection"))
         return Qt::LeftToRight;
     return qt_keymapper_private()->keyboardInputDirection;
+}
+
+/*!
+    \fn void QApplication::setArgs(int argc, char **argv)
+    \internal
+*/
+void QApplication::setArgs(int c, char **v)
+{
+    Q_D(QApplication);
+    d->argc = c;
+    d->argv = v;
 }
 
 #include "moc_qapplication.cpp"

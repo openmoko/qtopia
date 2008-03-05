@@ -3728,9 +3728,3 @@ bool QApplication::isEffectEnabled(Qt::UIEffect effect)
     }
 }
 
-void QApplication::setArgs(int c, char **v)
-{
-    Q_D(QApplication);
-    d->argc = c;
-    d->argv = v;
-}

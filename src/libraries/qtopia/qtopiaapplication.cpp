@@ -2463,10 +2463,8 @@ void QtopiaApplication::initApp( int argc, char **argv )
         }
     }
 
-#ifdef Q_WS_QWS
     /* overide stored arguments */
     setArgs(argc, argv);
-#endif
 }
 
 /*!
