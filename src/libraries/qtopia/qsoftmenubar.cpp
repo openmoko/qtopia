@@ -746,7 +746,12 @@ bool MenuManager::eventFilter(QObject *o, QEvent *e)
     if (e->type() == QEvent::Resize) {
         QMenu *menu = qobject_cast<QMenu*>(o);
         if (menu && menu->isVisible()) {    //menu needs to be moved when resized (since it is bottom-anchored)
-            menu->move(positionForMenu(menu));
+            QResizeEvent* resizeEvent = static_cast<QResizeEvent*>(e);
+            int widthDelta = resizeEvent->oldSize().width() - resizeEvent->size().width();
+            int heightDelta = resizeEvent->oldSize().height() - resizeEvent->size().height();
+            int x = QApplication::layoutDirection() == Qt::LeftToRight ? menu->pos().x() : menu->pos().x() + widthDelta;
+            int y = menu->pos().y() + heightDelta;
+            menu->move(x, y);
         }
     }
 
@@ -1002,11 +1007,7 @@ void MenuManager::popup(QWidget *w, QMenu *menu)
 
     if (menu->actions().count()) {
 #ifndef GREENPHONE_EFFECTS
-        QDesktopWidget *desktop = QApplication::desktop();
-        QRect r = desktop->availableGeometry(desktop->primaryScreen());
-        bool rtl = !( QApplication::layoutDirection() == Qt::LeftToRight );
-        int x = rtl ? r.right() - menu->sizeHint().width()+1 : r.left();
-        menu->popup(QPoint(x, r.bottom()), menu->actions().last());  //last item at bottom of screen
+        menu->popup(positionForMenu(menu), menu->actions().last());  //last item at bottom of screen
 #endif
         if (!Qtopia::mousePreferred()) {
             //select first action by default
@@ -1028,11 +1029,7 @@ void MenuManager::popup(QWidget *w, QMenu *menu)
             }
         }
 #ifdef GREENPHONE_EFFECTS
-        QDesktopWidget *desktop = QApplication::desktop();
-        QRect r = desktop->availableGeometry(desktop->primaryScreen());
-        bool rtl = !( QApplication::layoutDirection() == Qt::LeftToRight );
-        int x = rtl ? r.right() - menu->sizeHint().width()+1 : r.left();
-        menu->popup(QPoint(x, r.bottom()), menu->actions().last());  //last item at bottom of screen
+        menu->popup(positionForMenu(menu), menu->actions().last());  //last item at bottom of screen
 #endif
     }
 }
@@ -1120,11 +1117,11 @@ QPoint MenuManager::positionForMenu(const QMenu *menu)
     QRect r = desktop->availableGeometry(desktop->primaryScreen());
     QPoint pos;
     if ( QApplication::layoutDirection() == Qt::LeftToRight )
-        pos = QPoint(r.left(), r.bottom() - menu->sizeHint().height() + 1);
+        pos = QPoint(r.left(), r.bottom());
     else {
         int x = r.right() - menu->sizeHint().width()+1;
         if ( x < 0 ) x=1;
-        pos = QPoint(x, r.bottom() - menu->sizeHint().height() + 1);
+        pos = QPoint(x, r.bottom());
     }
     return pos;
 }
