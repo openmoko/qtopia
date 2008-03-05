@@ -1,0 +1,7 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Name=Task Manager
+Exec=qcop service send Launcher execute\(QString\) taskmanager
+Icon=qpe/AppsIcon
+Categories=Settings

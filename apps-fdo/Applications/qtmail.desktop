@@ -1,0 +1,7 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Name=Messages
+Exec=qcop service send Launcher execute\(QString\) qtmail
+Icon=qtmail/EMail
+Categories=Office;PIM;Phone;Internet

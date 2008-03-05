@@ -1,0 +1,8 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Name=Help
+Comment=A HTML Help Browser Program
+Exec=qcop service send Launcher execute\(QString\) helpbrowser
+Icon=helpbrowser/HelpBrowser
+Categories=Office;PIM;Phone

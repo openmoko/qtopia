@@ -1,0 +1,9 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Name=Licenses
+Comment=Digital Rights Management Information
+Exec=qcop-x11-launch drmbrowser %f
+Icon=drm/Drm
+Categories=Settings
+MimeType=application/vnd.oma.drm.message;application/vnd.oma.drm.rights+xml;application/vnd.oma.drm.rights+wbxml;application/vnd.oma.drm.roap-trigger+xml;application/vnd.oma.drm.roap-pdu+xml;application/vnd.oma.drm.ro+xml

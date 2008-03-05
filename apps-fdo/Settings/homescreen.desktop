@@ -1,0 +1,7 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Name=Homescreen
+Exec=qcop service send Launcher execute\(QString\) homescreen
+Icon=homescreen/homescreen
+Categories=Settings

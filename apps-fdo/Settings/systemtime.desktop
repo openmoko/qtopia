@@ -1,0 +1,8 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Name=Datetime
+Exec=systemtime
+Exec=qcop service send Launcher execute\(QString\) systemtime
+Icon=systemtime/DateTime
+Categories=Settings

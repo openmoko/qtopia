@@ -1,0 +1,8 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Name=Profiles
+Comment=Phone profile application
+Exec=qcop service send Launcher execute\(QString\) profileedit
+Icon=profileedit/Note
+Categories=Settings

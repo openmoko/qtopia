@@ -1,0 +1,7 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Name=Speed Dial
+Exec=qcop service send Launcher execute\(QString\) speeddial
+Icon=speeddial/speeddial
+Categories=Settings

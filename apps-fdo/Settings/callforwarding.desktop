@@ -1,0 +1,7 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Name=Call Forwarding
+Exec=qcop service send Launcher execute\(QString\) callforwarding
+Icon=callforwarding/CallForwarding
+Categories=Settings

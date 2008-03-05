@@ -1,0 +1,9 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Name=Archives
+Comment=Archive viewer
+Exec=qcop-x11-launch archives %f
+Icon=archives/Archives
+MimeType=application/vnd.oma.drm.dcf
+Categories=Office;PIM;Phone
