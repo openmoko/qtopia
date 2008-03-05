@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Dialer
+Comment=Make phone calls
+Exec=qcop service send Launcher execute\(QString\) dialer
+Icon=clock/Clock
+Categories=Office;PIM;Phone;

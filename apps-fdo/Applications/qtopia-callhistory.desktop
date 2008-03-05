@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Call History
+Comment=Call History Application
+Exec=qcop service send Launcher execute\(QString\) callhistory
+Icon=callhistory/CallHistory
+Categories=Office;PIM;Phone;

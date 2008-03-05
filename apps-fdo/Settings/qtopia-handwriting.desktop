@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Handwriting
+Exec=qcop service send Launcher execute\(QString\) hwsettings
+Icon=hwsettings/recognition_settings
+Categories=Settings;
+X-Qtopia-Requires=Touchscreen

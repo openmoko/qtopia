@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Notes
+Comment=A Text Editing Program
+Exec=qcop-x11-launch textedit %f
+Icon=textedit/TextEditor
+MimeType=text/*
+Categories=Office;PIM;Phone;

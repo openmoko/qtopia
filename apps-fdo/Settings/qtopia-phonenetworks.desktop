@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Call Networks
+Exec=qcop service send Launcher execute\(QString\) phonenetworks
+Icon=phonenetworks/PhoneNetworks
+Categories=Settings;

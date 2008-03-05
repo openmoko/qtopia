@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Snake
+Comment=A Snake Game
+Exec=qcop service send Launcher execute\(QString\) snake
+Icon=snake/Snake
+Categories=Game;

@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Security
+Exec=qcop service send Launcher execute\(QString\) security
+Icon=security/Security
+Categories=Settings;

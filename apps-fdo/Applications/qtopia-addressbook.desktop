@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Contacts
+Comment=An Address Book Program
+Exec=qcop-x11-launch addressbook %f
+Icon=addressbook/AddressBook
+MimeType=text/x-vcard
+Categories=Office;PIM;Phone;

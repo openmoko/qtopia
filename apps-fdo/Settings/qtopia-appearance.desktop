@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Appearance
+Exec=qcop service send Launcher execute\(QString\) appearance
+Icon=appearance/Appearance
+Categories=Settings;

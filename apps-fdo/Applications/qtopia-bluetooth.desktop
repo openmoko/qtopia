@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Bluetooth FTP
+Comment=Bluetooth Applications Suite
+Exec=qcop service send Launcher execute\(QString\) bluetooth
+Icon=btsettings/BTSettings
+Categories=Office;PIM;Phone:Network

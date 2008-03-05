@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Recalibrate
+Exec=qcop service send Launcher execute\(QString\) calibrate
+Icon=calibrate/Calibrate
+Categories=Settings;
+X-Qtopia-Requires=Calibrate

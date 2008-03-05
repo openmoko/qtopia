@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=System Info
+Comment=System Information
+Exec=qcop service send Launcher execute\(QString\) sysinfo
+Icon=sysinfo/SystemInfo
+Categories=Office;PIM;Phone;

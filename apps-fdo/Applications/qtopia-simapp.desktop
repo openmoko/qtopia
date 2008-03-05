@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=SIM Applications
+Exec=qcop service send Launcher execute\(QString\) simapp
+Icon=simapp/simapp
+Categories=Office;PIM;Phone;

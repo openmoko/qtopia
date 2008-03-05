@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Power Management
+Exec=qcop service send Launcher execute\(QString\) light-and-power
+Icon=light-and-power/Light
+Categories=Settings;
