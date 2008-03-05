@@ -276,9 +276,7 @@ public Q_SLOTS:
     static void aboutQt();
 
 protected:
-#if defined(Q_WS_QWS)
     void setArgs(int, char **);
-#endif
     bool event(QEvent *);
     bool compressEvent(QEvent *, QObject *receiver, QPostEventList *);
 
