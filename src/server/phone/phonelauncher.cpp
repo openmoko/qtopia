@@ -112,6 +112,10 @@
 #include "gsmkeyactions.h"
 #endif
 
+#include <QX11Info>
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+
 static const int NotificationVisualTimeout = 0;  // e.g. New message arrived, 0 == No timeout
 static const int WarningTimeout = 5000;  // e.g. Cannot call
 
@@ -1054,6 +1058,10 @@ void PhoneLauncher::createContext()
     WindowManagement::protectWindow(m_context);
     m_context->setAttribute(Qt::WA_GroupLeader);
     ThemeControl::instance()->registerThemedView(m_context, "Context");
+
+    Atom atom = XInternAtom(QX11Info::display(), "_QTOPIA_SOFT_MENU", False);
+    unsigned long flag = 1;
+    XChangeProperty(QX11Info::display(), m_context->winId(), atom, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&flag, 1);
 }
 
 /*!
