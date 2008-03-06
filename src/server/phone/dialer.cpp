@@ -205,7 +205,6 @@ Dialer::Dialer( QWidget *parent, Qt::WFlags f )
     : PhoneThemedView( parent, f ), display(0), m_actions( 0 ), charMenu( 0 ), addContactMsg( 0 )
 {
     setObjectName("Dialer");
-    setWindowTitle( tr("Dialer") );
     connect( this, SIGNAL(itemClicked(ThemeItem*)), this,
                                         SLOT(dialerItemClicked(ThemeItem*)) );
     ThemeControl::instance()->registerThemedView(this, "Dialer");
@@ -509,6 +508,7 @@ QMenu *Dialer::characterMenu()
 PhoneTouchDialerScreen::PhoneTouchDialerScreen(QWidget *parent, Qt::WFlags flags)
 : QAbstractDialerScreen(parent, flags)
 {
+    setWindowTitle( tr("Dialer") );
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setSpacing(0);
     layout->setMargin(0);
