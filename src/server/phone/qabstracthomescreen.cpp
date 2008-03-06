@@ -764,6 +764,17 @@ void QAbstractHomeScreen::showCallHistory(bool missed, const QString &/*hint*/)
 /*!
   \internal
   */
+void QAbstractHomeScreen::showDialer()
+{
+    if (!DialerControl::instance()->hasIncomingCall() &&
+        !DialerControl::instance()->isDialing()) {
+        emit dialNumber(QString());
+    }
+}
+
+/*!
+  \internal
+  */
 void QAbstractHomeScreen::phoneStateChanged()
 {
     if (DialerControl::instance()->allCalls().count()) {

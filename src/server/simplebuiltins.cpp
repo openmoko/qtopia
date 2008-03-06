@@ -42,6 +42,14 @@ static QWidget *callhistory()
     return 0;
 }
 QTOPIA_SIMPLE_BUILTIN(callhistory, callhistory);
+
+static QWidget *dialer()
+{
+    if (HomeScreenControl::instance()->homeScreen())
+        HomeScreenControl::instance()->homeScreen()->showDialer();
+    return 0;
+}
+QTOPIA_SIMPLE_BUILTIN(dialer, dialer);
 #endif
 
 // "shutdown" builtin

@@ -63,6 +63,7 @@ public:
     void setSmsMemoryFull(bool);
     void setMissedCalls(int);
     void showCallHistory(bool missed, const QString &hint);
+    void showDialer();
 #endif
 
 Q_SIGNALS:
