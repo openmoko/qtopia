@@ -186,9 +186,12 @@ enable_vpn {
         core_server/windowmanagement.cpp \
         core_server/qtopiainputevents.cpp
 } else {
+    SERVER_HEADERS+=\
+        phone/simpindialog.h
     SERVER_SOURCES+=\
         core_server/windowmanagement_x11.cpp \
-        core_server/qtopiainputevents_x11.cpp
+        core_server/qtopiainputevents_x11.cpp \
+        phone/simpindialog.cpp
 
     LIBS += -lXtst
 }
