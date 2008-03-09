@@ -35,6 +35,19 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
+inline static void safeXFree(unsigned char* value)
+{
+    if (value)
+        XFree(value);
+}
+
+inline static void safeXFree(char* value)
+{
+    if (value)
+        XFree(value);
+}
+
+
 class WindowManagementPrivate : public QObject, QtopiaApplication::X11EventFilter
 {
     Q_OBJECT
@@ -126,7 +139,7 @@ bool WindowManagementPrivate::x11EventFilter(XEvent *event)
         int actualFormat;
         unsigned long size;
         unsigned long bytesAfterReturn;
-        unsigned char *value;
+        unsigned char *value = 0;
         activeId = 0;
         if (XGetWindowProperty
                 (QX11Info::display(), QX11Info::appRootWindow(),
@@ -134,7 +147,7 @@ bool WindowManagementPrivate::x11EventFilter(XEvent *event)
                  &actualType, &actualFormat, &size, &bytesAfterReturn,
                  &value ) == Success ) {
             activeId = (WId)(*((unsigned long *)value));
-            XFree(value);
+            safeXFree(value);
         }
         activeChanged(activeId);
     }
@@ -181,17 +194,16 @@ static QString readUtf8Property(Display *dpy, WId w, Atom property, Atom type)
     int actualFormat;
     unsigned long size;
     unsigned long bytesAfterReturn;
-    unsigned char *value;
+    unsigned char *value = 0;
     if (XGetWindowProperty
             (dpy, (Window)w, property, 0, 1024, False, type,
              &actualType, &actualFormat, &size, &bytesAfterReturn,
              &value ) != Success || !value) {
-        if (value)
-            XFree(value);
+        safeXFree(value);
         return QString();
     }
     QString result = QString::fromUtf8((char *)value, (int)size);
-    XFree(value);
+    safeXFree(value);
     return result;
 }
 
@@ -201,17 +213,16 @@ static Atom readAtomProperty(Display *dpy, WId w, Atom property)
     int actualFormat;
     unsigned long size;
     unsigned long bytesAfterReturn;
-    unsigned char *value;
+    unsigned char *value = 0;
     if (XGetWindowProperty
             (dpy, (Window)w, property, 0, 1, False, XA_ATOM,
              &actualType, &actualFormat, &size, &bytesAfterReturn,
              &value ) != Success || !value) {
-        if (value)
-            XFree(value);
+        safeXFree(value);
         return 0;
     }
     Atom result = *((Atom *)value);
-    XFree(value);
+    safeXFree(value);
     return result;
 }
 
@@ -221,23 +232,22 @@ static bool checkForAtomProperty(Display *dpy, WId w, Atom property, Atom expect
     int actualFormat;
     unsigned long size;
     unsigned long bytesAfterReturn;
-    unsigned char *value;
+    unsigned char *value = 0;
     if (XGetWindowProperty
             (dpy, (Window)w, property, 0, 32, False, XA_ATOM,
              &actualType, &actualFormat, &size, &bytesAfterReturn,
              &value ) != Success || !value) {
-        if (value)
-            XFree(value);
+        safeXFree(value);
         return 0;
     }
     while (size > 0) {
         --size;
         if (((Atom *)value)[size] == expected) {
-            XFree(value);
+            safeXFree(value);
             return true;
         }
     }
-    XFree(value);
+    safeXFree(value);
     return false;
 }
 
@@ -314,8 +324,8 @@ void WindowManagementPrivate::activeChanged(WId w)
         XClassHint classHint;
         if (XGetClassHint(dpy, (Window)w, &classHint)) {
             appName = QString::fromLatin1(classHint.res_name);
-            XFree(classHint.res_name);
-            XFree(classHint.res_class);
+            safeXFree(classHint.res_name);
+            safeXFree(classHint.res_class);
         }
 
         // Monitor the window for property changes and destroy notifications.
@@ -530,7 +540,7 @@ bool WindowManagement::supportsSoftMenus(WId winId)
     int actualFormat;
     unsigned long size;
     unsigned long bytesAfterReturn;
-    unsigned char *value;
+    unsigned char *value = 0;
     bool usesSoftMenus = false;
     if (XGetWindowProperty
             (dpy, (Window)winId, property, 0, 1, False, XA_CARDINAL,
@@ -538,8 +548,7 @@ bool WindowManagement::supportsSoftMenus(WId winId)
              &value ) == Success && value) {
         usesSoftMenus = (*((unsigned long *)value) != 0);
     }
-    if (value)
-        XFree(value);
+    safeXFree(value);
 
     // Sync again to flush errors and restore the original error handler.
     XSync(dpy, False);
