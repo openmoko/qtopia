@@ -112,6 +112,8 @@
 #include "gsmkeyactions.h"
 #endif
 
+#include "simpindialog.h"
+
 #include <QX11Info>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
@@ -417,6 +419,10 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
 
 #ifdef QTOPIA_PHONEUI
     registrationChanged();
+#endif
+
+#ifdef QT_ILLUME_LAUNCHER
+    (void)new SimPinDialog(this);
 #endif
 
     loadTheme();
