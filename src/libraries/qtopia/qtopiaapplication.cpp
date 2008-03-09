@@ -1555,16 +1555,16 @@ public:
             cg = d->geometry();
             int lb = cg.left()-fg.left()+desktopRect.left();
             int bb = fg.bottom() - cg.bottom();
+#ifdef Q_WS_X11
+            d->setMinimumSize(desktopRect.width() - frameWidth, h);
+#else
             d->setFixedSize(desktopRect.width() - frameWidth, h);
+#endif
             QRect geom(lb, desktopRect.bottom() - h - bb + 1,
-                       desktopRect.width() - frameWidth, h);
+                       d->width(), d->height());
             d->setGeometry(geom);
             d->show();
         }
-
-#ifdef Q_WS_X11
-        raiseAndActivateWindow(d);
-#endif
     }
 
     static bool read_widget_rect(const QString &app, bool &maximized, QPoint &p, QSize &s)
@@ -3880,11 +3880,13 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
         QMessageBox *mb = 0;
         if (((QWidget*)o)->testAttribute(Qt::WA_ShowModal)) {
             mb = qobject_cast<QMessageBox*>(o);
+#ifdef Q_WS_QWS
             if (mb) {
                 // Avoid QDialog::showEvent() moving messagebox.
                 // We'll do it soon anyway.
                 mb->setAttribute(Qt::WA_Moved, true);
             }
+#endif
 #ifdef QTOPIA_USE_TEST_SLAVE
             if (testSlave() && mb) {
                 QVariantMap map;
