@@ -3429,11 +3429,6 @@ static void markQtopiaWindow(QWidget *w)
     }
 }
 
-static void markQtopiaMainWindow(QWidget *w)
-{
-    w->setWindowFlags(Qt::FramelessWindowHint|w->windowFlags());
-}
-
 // Emulate a pager here. Qtopia 'knows' when to do these things...
 static void raiseAndActivateWindow(QWidget *w)
 {
