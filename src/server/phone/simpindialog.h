@@ -38,6 +38,8 @@ public:
 
     SimPinDialog(QWidget*);
 
+    void checkStatus();
+
 protected:
     void accept();
     void reject();

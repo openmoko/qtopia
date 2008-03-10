@@ -50,6 +50,11 @@ SimPinDialog::SimPinDialog(QWidget* parent)
             SLOT(stateChanged(CellModemManager::State, CellModemManager::State)));
 
     // Be safe and call stateChanged at least once
+    checkStatus();
+}
+
+void SimPinDialog::checkStatus()
+{
     stateChanged(m_cellModem->state(), CellModemManager::NoCellModem);
 }
 
