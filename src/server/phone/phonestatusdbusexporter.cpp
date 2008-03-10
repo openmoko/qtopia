@@ -41,6 +41,8 @@ PhoneStatusDBusExporter::PhoneStatusDBusExporter(SimPinDialog* dialog, QObject* 
             SLOT(_q_stateChanged(CellModemManager::State, CellModemManager::State)));
     connect(m_cellModem, SIGNAL(planeModeEnabledChanged(bool)),
             SLOT(_q_planeModeEnabledChanged(bool)));
+    connect(m_cellModem, SIGNAL(networkOperatorChanged(const QString&)),
+            SIGNAL(networkOperatorChanged(QString)));
 
     connect(m_defaultSignal, SIGNAL(signalStrengthChanged(int)),
             SIGNAL(signalStrengthChanged(int)));
@@ -59,6 +61,11 @@ bool PhoneStatusDBusExporter::planeModeEnabled() const
 int PhoneStatusDBusExporter::signalStrength() const
 {
     return m_defaultSignal->signalStrength();
+}
+
+QString PhoneStatusDBusExporter::networkOperator() const
+{
+    return m_cellModem->networkOperator();
 }
 
 void PhoneStatusDBusExporter::setPlaneModeEnabled(bool enable)
