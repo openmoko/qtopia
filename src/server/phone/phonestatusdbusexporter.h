@@ -25,7 +25,6 @@ class DefaultSignal;
 class PhoneStatusDBusExporter : public QObject {
     Q_OBJECT
     Q_CLASSINFO("D-Bus Interface", "org.openmoko.qtopia.Phonestatus")
-    Q_ENUMS(ModemState PlaneMode)
     Q_PROPERTY(QString phoneState READ phoneState)
     Q_PROPERTY(bool planeModeEnabled READ planeModeEnabled WRITE setPlaneModeEnabled)
     Q_PROPERTY(int signalStrength READ signalStrength)
