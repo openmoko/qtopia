@@ -28,6 +28,26 @@ QString PhoneStatusDBusExporter::cellModemStateToString(CellModemManager::State 
     return str;
 }
 
+QString PhoneStatusDBusExporter::registrationStateToString(QTelephony::RegistrationState state)
+{
+    switch(state) {
+    case QTelephony::RegistrationNone:
+        return QLatin1String("RegistrationNone");
+    case QTelephony::RegistrationHome:
+        return QLatin1String("RegistrationHome");
+    case QTelephony::RegistrationSearching:
+        return QLatin1String("RegistrationSearching");
+    case QTelephony::RegistrationDenied:
+        return QLatin1String("RegistrationDenied");
+    case QTelephony::RegistrationUnknown:
+        return QLatin1String("RegistrationUnknown");
+    case QTelephony::RegistrationRoaming:
+        return QLatin1String("RegistrationRoaming");
+    }
+
+    return QString();
+}
+
 PhoneStatusDBusExporter::PhoneStatusDBusExporter(SimPinDialog* dialog, QObject* parent)
     : QObject(parent)
     , m_pinDialog(dialog)
@@ -41,6 +61,8 @@ PhoneStatusDBusExporter::PhoneStatusDBusExporter(SimPinDialog* dialog, QObject* 
             SLOT(_q_stateChanged(CellModemManager::State, CellModemManager::State)));
     connect(m_cellModem, SIGNAL(planeModeEnabledChanged(bool)),
             SLOT(_q_planeModeEnabledChanged(bool)));
+    connect(m_cellModem, SIGNAL(registrationStateChanged(QTelephony::RegistrationState)),
+            SLOT(_q_registrationStateChanged(QTelephony::RegistrationState)));
     connect(m_cellModem, SIGNAL(networkOperatorChanged(const QString&)),
             SIGNAL(networkOperatorChanged(QString)));
 
@@ -68,6 +90,11 @@ QString PhoneStatusDBusExporter::networkOperator() const
     return m_cellModem->networkOperator();
 }
 
+QString PhoneStatusDBusExporter::registrationState() const
+{
+    return registrationStateToString(m_cellModem->registrationState());
+}
+
 void PhoneStatusDBusExporter::setPlaneModeEnabled(bool enable)
 {
     m_cellModem->setPlaneModeEnabled(enable);
@@ -86,6 +113,11 @@ void PhoneStatusDBusExporter::_q_stateChanged(CellModemManager::State state, Cel
 void PhoneStatusDBusExporter::_q_planeModeEnabledChanged(bool enabled)
 {
     emit planeModeChanged(enabled);
+}
+
+void PhoneStatusDBusExporter::_q_registrationStateChanged(QTelephony::RegistrationState state)
+{
+    emit registrationStateChanged(registrationStateToString(state));
 }
 
 

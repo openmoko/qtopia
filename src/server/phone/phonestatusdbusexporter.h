@@ -29,6 +29,7 @@ class PhoneStatusDBusExporter : public QObject {
     Q_PROPERTY(bool planeModeEnabled READ planeModeEnabled WRITE setPlaneModeEnabled)
     Q_PROPERTY(int signalStrength READ signalStrength)
     Q_PROPERTY(QString networkOperator READ networkOperator)
+    Q_PROPERTY(QString registrationState READ registrationState)
 
 public:
     PhoneStatusDBusExporter(SimPinDialog* dialog, QObject* parent);
@@ -38,22 +39,26 @@ Q_SIGNALS:
     Q_SCRIPTABLE void planeModeChanged(bool);
     Q_SCRIPTABLE void signalStrengthChanged(int percent);
     Q_SCRIPTABLE void networkOperatorChanged(QString);
+    Q_SCRIPTABLE void registrationStateChanged(QString);
 
 public Q_SLOTS:
     Q_SCRIPTABLE QString phoneState() const;
     Q_SCRIPTABLE bool planeModeEnabled() const;
     Q_SCRIPTABLE int signalStrength() const;
     Q_SCRIPTABLE QString networkOperator() const;
+    Q_SCRIPTABLE QString registrationState() const;
 
     Q_SCRIPTABLE Q_NOREPLY void setPlaneModeEnabled(bool);
     Q_SCRIPTABLE Q_NOREPLY void triggerPinDialog();
 
 private Q_SLOTS:
     void _q_stateChanged(CellModemManager::State, CellModemManager::State);
+    void _q_registrationStateChanged(QTelephony::RegistrationState);
     void _q_planeModeEnabledChanged(bool);
 
 private:
     static QString cellModemStateToString(CellModemManager::State);
+    static QString registrationStateToString(QTelephony::RegistrationState);
 
 private:
     SimPinDialog *m_pinDialog;
