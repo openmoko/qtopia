@@ -19,39 +19,13 @@
 
 
 // No direct mapping due Initializing2 which we don't want to expose. Where is the difference between 1 and 2?
-// Maybe make this an array..
 QString PhoneStatusDBusExporter::cellStatusToModemState(CellModemManager::State state)
 {
-    switch (state) {
-    case CellModemManager::NoCellModem:
-        return QLatin1String("NoModem");
-    case CellModemManager::Initializing:
+    QString str = CellModemManager::stateToString(state);
+    if (str == QLatin1String("Initializing2"))
         return QLatin1String("Initializing");
-    case CellModemManager::Initializing2:
-        return QLatin1String("Initializing");
-    case CellModemManager::Ready:
-        return QLatin1String("Ready");
-    case CellModemManager::WaitingSIMPin:
-        return QLatin1String("WaitingForSIMPin");
-    case CellModemManager::VerifyingSIMPin:
-        return QLatin1String("VerifyingSIMPin");
-    case CellModemManager::WaitingSIMPuk:
-        return QLatin1String("WaitingForSIMPuk");
-    case CellModemManager::VerifyingSIMPuk:
-        return QLatin1String("VerifyingSIMPuk");
-    case CellModemManager::SIMDead:
-        return QLatin1String("SIMIsDead");
-    case CellModemManager::SIMMissing:
-        return QLatin1String("SIMIsMissing");
-    case CellModemManager::AerialOff:
-        return QLatin1String("AerialOff");
-    case CellModemManager::FailureReset:
-        return QLatin1String("FailureReset");
-    case CellModemManager::UnrecoverableFailure:
-        return QLatin1String("UnrecoverableFailure");
-    }
 
-    return QLatin1String("NoStatus");
+    return str;
 }
 
 PhoneStatusDBusExporter::PhoneStatusDBusExporter(SimPinDialog* dialog, QObject* parent)
