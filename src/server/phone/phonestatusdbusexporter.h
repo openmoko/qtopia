@@ -53,7 +53,7 @@ private Q_SLOTS:
     void _q_planeModeEnabledChanged(bool);
 
 private:
-    static QString cellStatusToModemState(CellModemManager::State);
+    static QString cellModemStateToString(CellModemManager::State);
 
 private:
     SimPinDialog *m_pinDialog;

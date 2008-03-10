@@ -19,7 +19,7 @@
 
 
 // No direct mapping due Initializing2 which we don't want to expose. Where is the difference between 1 and 2?
-QString PhoneStatusDBusExporter::cellStatusToModemState(CellModemManager::State state)
+QString PhoneStatusDBusExporter::cellModemStateToString(CellModemManager::State state)
 {
     QString str = CellModemManager::stateToString(state);
     if (str == QLatin1String("Initializing2"))
@@ -50,7 +50,7 @@ PhoneStatusDBusExporter::PhoneStatusDBusExporter(SimPinDialog* dialog, QObject* 
 
 QString PhoneStatusDBusExporter::phoneState() const
 {
-    return cellStatusToModemState(m_cellModem->state());
+    return cellModemStateToString(m_cellModem->state());
 }
 
 bool PhoneStatusDBusExporter::planeModeEnabled() const
@@ -80,7 +80,7 @@ void PhoneStatusDBusExporter::triggerPinDialog()
 
 void PhoneStatusDBusExporter::_q_stateChanged(CellModemManager::State state, CellModemManager::State)
 {
-    emit stateChanged(cellStatusToModemState(state));
+    emit stateChanged(cellModemStateToString(state));
 }
 
 void PhoneStatusDBusExporter::_q_planeModeEnabledChanged(bool enabled)
