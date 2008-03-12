@@ -4,4 +4,4 @@ Name=Startup Flags
 Comment=A Development tool for modifying startup flags
 Exec=qcop service send Launcher execute\(QString\) startupflags
 Icon=icons/flag
-Categories=Settings
+Categories=Settings;

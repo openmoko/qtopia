@@ -3,4 +3,4 @@ Type=Application
 Name=Server Widgets
 Exec=qcop service send Launcher execute\(QString\) serverwidgets
 Icon=serverwidgets/ServerWidgets
-Categories=Settings
+Categories=Settings;

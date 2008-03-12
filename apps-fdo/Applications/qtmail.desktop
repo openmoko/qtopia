@@ -3,4 +3,4 @@ Type=Application
 Name=Messages
 Exec=qcop service send Launcher execute\(QString\) qtmail
 Icon=qtmail/EMail
-Categories=Office;PIM;Phone;Internet
+Categories=Office;PIM;Phone;Internet;

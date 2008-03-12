@@ -4,4 +4,4 @@ Name=Software Packages
 Exec=qcop-x11-launcher packagemanager %f
 Icon=packagemanager/PackageManager
 MimeType=application/qpkg
-Categories=Settings
+Categories=Settings;

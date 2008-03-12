@@ -4,4 +4,4 @@ Name=Fifteen
 Comment=Fifteen Pieces Strategy Game
 Exec=qcop service send Launcher execute\(QString\) fifteen
 Icon=fifteen/Fifteen
-Categories=Game
+Categories=Game;

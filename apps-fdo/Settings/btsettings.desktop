@@ -3,4 +3,4 @@ Type=Application
 Name=Bluetooth
 Exec=qcop service send Launcher execute\(QString\) btsettings
 Icon=btsettings/BTSettings
-Categories=Settings
+Categories=Settings;

@@ -5,4 +5,4 @@ Comment=A Calendar and Scheduling Program
 Exec=qcop-x11-launch datebook %f
 Icon=datebook/DateBook
 MimeType=text/x-vcalendar
-Categories=Office;PIM;Phone
+Categories=Office;PIM;Phone;

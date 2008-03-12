@@ -3,4 +3,4 @@ Type=Application
 Name=Task Manager
 Exec=qcop service send Launcher execute\(QString\) taskmanager
 Icon=qpe/AppsIcon
-Categories=Settings
+Categories=Settings;

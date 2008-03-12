@@ -3,4 +3,4 @@ Type=Application
 Name=Shutdown
 Exec=qcop service send Launcher execute\(QString\) shutdown
 Icon=shutdown/Shutdown
-Categories=Settings
+Categories=Settings;

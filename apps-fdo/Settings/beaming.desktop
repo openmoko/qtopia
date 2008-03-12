@@ -3,4 +3,4 @@ Type=Application
 Name=Beaming
 Exec=qcop service send Launcher execute\(QString\) beaming
 Icon=beaming/Infrared
-Categories=Settings
+Categories=Settings;

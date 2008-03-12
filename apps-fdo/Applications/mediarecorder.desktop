@@ -4,4 +4,4 @@ Name=Voice Notes
 Comment=A Voice Recording Program
 Exec=qcop service send Launcher execute\(QString\) mediarecorder
 Icon=mediarecorder/SoundRecorder
-Categories=Office;PIM;Phone;AudioVideo
+Categories=Office;PIM;Phone;AudioVideo;

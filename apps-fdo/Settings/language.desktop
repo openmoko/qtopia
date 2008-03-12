@@ -3,4 +3,4 @@ Type=Application
 Name=Language
 Exec=qcop service send Launcher execute\(QString\) language
 Icon=language/Language
-Categories=Settings
+Categories=Settings;
