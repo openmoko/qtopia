@@ -1,5 +1,4 @@
 [Desktop Entry]
-Encoding=UTF-8
 Type=Application
 Name=Beaming
 Exec=qcop service send Launcher execute\(QString\) beaming

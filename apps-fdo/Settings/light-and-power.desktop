@@ -1,5 +1,4 @@
 [Desktop Entry]
-Encoding=UTF-8
 Type=Application
 Name=Power Management
 Exec=qcop service send Launcher execute\(QString\) light-and-power
