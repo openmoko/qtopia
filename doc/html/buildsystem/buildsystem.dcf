@@ -191,8 +191,8 @@
     <section ref="fn-idep-1.html" title="idep()">
         <keyword ref="fn-idep-1.html">idep()</keyword>
     </section>
-    <section ref="over-image--prefix-and-sdk-location-1.html" title="Image, prefix and SDK location">
-        <keyword ref="over-image--prefix-and-sdk-location-1.html">Image, prefix and SDK location</keyword>
+    <section ref="over-image-prefix-and-sdk-location-1.html" title="Image, prefix and SDK location">
+        <keyword ref="over-image-prefix-and-sdk-location-1.html">Image, prefix and SDK location</keyword>
     </section>
     <section ref="var-includepath-1.html" title="INCLUDEPATH">
         <keyword ref="var-includepath-1.html">INCLUDEPATH</keyword>
@@ -392,8 +392,8 @@
     <section ref="var-vpath-1.html" title="VPATH">
         <keyword ref="var-vpath-1.html">VPATH</keyword>
     </section>
-    <section ref="bas-what-is-the-build-system--1.html" title="What is the build system?">
-        <keyword ref="bas-what-is-the-build-system--1.html">What is the build system?</keyword>
+    <section ref="bas-what-is-the-build-system-1.html" title="What is the build system?">
+        <keyword ref="bas-what-is-the-build-system-1.html">What is the build system?</keyword>
     </section>
     <section ref="changes.html" title="What's new?">
         <keyword ref="changes.html">What's new?</keyword>

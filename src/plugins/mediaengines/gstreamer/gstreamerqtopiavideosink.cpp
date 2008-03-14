@@ -45,10 +45,7 @@ GstCaps* QtopiaVideoSink::get_caps(GstBaseSink* sink)
     GstCaps* caps = gst_caps_copy(gst_pad_get_pad_template_caps(sink->sinkpad));
     if (GST_CAPS_IS_SIMPLE(caps)) {
         GstStructure*   data = gst_caps_get_structure(caps, 0);
-        int             bpp = QScreen::instance()->depth();
-
-        if (bpp != 16 && bpp != 32)
-            bpp = 32;
+        int             bpp = QScreen::instance()->depth() <= 16 ? 16 : 32;
 
         gst_structure_set(data, "bpp", G_TYPE_INT, bpp, NULL);
     }

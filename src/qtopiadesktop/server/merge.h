@@ -144,4 +144,8 @@ private:
     QSyncMergeData *d;
 };
 
+#include <desktopsettings.h>
+#define SyncLog() if ( !DesktopSettings::debugMode() ); else _SyncLog()
+QDebug _SyncLog();
+
 #endif // __PIMSYNC_MERGE_H__

@@ -29,12 +29,12 @@
 #include <QDateTimeEdit>
 
 /*
- *  Constructs a DateBookDayHeader which is a child of 'parent', with the
- *  name 'name' and widget flags set to 'f'
- *
- *  The dialog will by default be modeless, unless you set 'modal' to
- *  true to construct a modal dialog.
- */
+    Constructs a DateBookDayHeader which is a child of 'parent', with the
+    name 'name' and widget flags set to 'f'
+
+    The dialog will by default be modeless, unless you set 'modal' to
+    true to construct a modal dialog.
+*/
 DayViewHeader::DayViewHeader( bool useMonday, QWidget* parent )
     : QWidget( parent ),
     bUseMonday( useMonday )
@@ -49,8 +49,8 @@ DayViewHeader::DayViewHeader( bool useMonday, QWidget* parent )
 }
 
 /*
- *  Destroys the object and frees any allocated resources
- */
+    Destroys the object and frees any allocated resources
+*/
 DayViewHeader::~DayViewHeader()
 {
     // no need to delete child widgets, Qt does it all for us
@@ -58,7 +58,6 @@ DayViewHeader::~DayViewHeader()
 
 void DayViewHeader::init()
 {
-
     back = new QToolButton(this);
     back->setIcon(QIcon(":icon/i18n/previous"));
     back->setAutoRepeat( true );
@@ -134,16 +133,16 @@ void DayViewHeader::setupNames()
 }
 
 /*
- * public slot
- */
+    public slot
+*/
 void DayViewHeader::goBack()
 {
     currDate = currDate.addDays( -7 );
     setDate( currDate.year(), currDate.month(), currDate.day() );
 }
 /*
- * public slot
- */
+    public slot
+*/
 void DayViewHeader::goForward()
 {
     currDate = currDate.addDays( 7 );
@@ -152,8 +151,8 @@ void DayViewHeader::goForward()
 
 
 /*
- * public slot
- */
+    public slot
+*/
 void DayViewHeader::setDate( int y, int m, int d )
 {
     currDate.setYMD( y, m, d );
@@ -174,8 +173,8 @@ void DayViewHeader::setDate( int y, int m, int d )
 }
 
 /*
- * public slot
- */
+    public slot
+*/
 void DayViewHeader::setDay( int day )
 {
     int realDay;

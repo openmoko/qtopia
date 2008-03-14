@@ -93,8 +93,8 @@ static bool constructorDone = false;
 typedef enum SpeedDialType {Call = QListWidgetItem::UserType, Text, Email, View};
 
 /***************************
-  * NameLearner
-  ***********************/
+* NameLearner
+***********************/
 
 class NameLearner {
     // Utility class for efficiently putting names from contacts into word lists.
@@ -190,8 +190,8 @@ private:
 
 
 /***************************
-  * LoadIndicator
-  ***********************/
+* LoadIndicator
+***********************/
 
 class BashfulProgressBar : public QProgressBar
 {
@@ -274,8 +274,8 @@ void LoadIndicator::paintEvent( QPaintEvent *e )
 }
 
 /***************************
-  * AddressbookWindow
-  ***********************/
+* AddressbookWindow
+***********************/
 
 AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
     : QMainWindow( parent, f ),
@@ -2549,8 +2549,8 @@ void AddressbookWindow::removeContactQDLLink( const QContact& c )
 }
 
 /***************************
-  * AbSourcesDialog
-  ***********************/
+* AbSourcesDialog
+***********************/
 
 //  FIXME: This dialog is designed for phones to select between SIM
 //          and PHONE contacts. If there are more sources to be added later,
@@ -2645,8 +2645,8 @@ void AbSourcesDialog::keyPressEvent(QKeyEvent* e)
 }
 
 /***************************
-  * AbDisplaySettings
-  ***********************/
+* AbDisplaySettings
+***********************/
 
 AbDisplaySettings::AbDisplaySettings(QWidget *parent)
     : QDialog(parent)

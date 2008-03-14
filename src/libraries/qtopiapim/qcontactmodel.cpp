@@ -335,7 +335,7 @@ QIcon QContactModel::fieldIcon(Field field)
   \value LabelRole
     A short formatted text label of the contacts name.
   \value SubLabelRole
-    An alternative formatted text label of the contacts name.
+    A short formatted text label with supplementary contact information, like phone number, email address or company.
   \value PortraitRole
     A pixmap of the contacts image, or a default image if
     none is specifically set.
@@ -1703,7 +1703,7 @@ QContact QContactModel::matchEmailAddress(const QString &text)
   and contact type information specified \a flags.  By default flags
   is 0 which means filtering will only occur based on label text.
 
-  \sa filterFlags(), filterText()
+  \sa FilterFlags, filterFlags(), filterText()
 */
 void QContactModel::setFilter(const QString &text, int flags)
 {

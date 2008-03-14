@@ -37,6 +37,13 @@ public:
 
     Outlook::OlDefaultFolders folderEnum() { return Outlook::olFolderTasks; }
     Outlook::OlItemType itemEnum() { return Outlook::olTaskItem; }
+    bool isValidObject( IDispatchPtr dispatch )
+    {
+        TRACE(OutlookSyncPlugin) << "OutlookTodoSync::isValidObject";
+        Outlook::_TaskItemPtr item( dispatch );
+        return ( item->GetClass() == Outlook::olTask );
+    }
+
     void getProperties( IDispatchPtr dispatch, QString &entryid, QDateTime &lastModified )
     {
         TRACE(OutlookSyncPlugin) << "OutlookTodoSync::getProperties";
@@ -50,7 +57,7 @@ public:
         TRACE(OutlookSyncPlugin) << "OutlookTodoSync::dump_item";
         Q_ASSERT( dispatch );
         Outlook::_TaskItemPtr item( dispatch );
-        
+
         PREPARE_CUSTOM_MAP(qtopiaUserProps);
         PREPARE_MAPI(Task);
 
@@ -93,7 +100,7 @@ public:
 #ifdef HANDLE_EXTRAS
         qtopiaUserProps["Outlook Complete"] = item->GetComplete();
 #endif
-        DUMP_CUSTOM_MAP(qtopiaUserProps);
+        //DUMP_CUSTOM_MAP(qtopiaUserProps);
         stream << "</Task>\n";
     }
 

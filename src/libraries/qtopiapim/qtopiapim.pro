@@ -9,6 +9,7 @@ RESOURCES = qtopiapim.qrc
 enable_cell:depends(libraries/qtopiaphone)
 depends(libraries/qtopiacomm)
 depends(3rdparty/libraries/inputmatch)
+depends(3rdparty/libraries/sqlite)
 
 QTOPIAPIM_HEADERS+=\
     qpimrecord.h\

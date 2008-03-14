@@ -83,7 +83,7 @@
 <p>On the server side of an IPC protocol, the <tt>changeValue(int)</tt> message can be connected to the slot <tt>setValue()</tt> on <tt>dest</tt>:</p>
 <pre>    QtopiaIpcAdaptor *adaptor = new QtopiaIpcAdaptor(&quot;QPE/Foo&quot;);
     QtopiaIpcAdaptor::connect
-        (adaptor, MESSAGE(changeValue(int)), dest, SIGNAL(setValue(int)));</pre>
+        (adaptor, MESSAGE(changeValue(int)), dest, SLOT(setValue(int)));</pre>
 <p>Now, whenever the client emits the <tt>valueChanged(int)</tt> signal, the <tt>setValue(int)</tt> slot will be automatically invoked on the server side, with the <tt>int</tt> parameter passed as its argument.</p>
 <p>Only certain parameter types can be passed across an IPC boundary in this fashion. The type must be visible to <a href="./qvariant.html">QVariant</a> as a meta-type. Many simple built-in types are already visible; for user-defined types, use Q_DECLARE_USER_METATYPE().</p>
 <p>See also <a href="qtopiaabstractservice.html">QtopiaAbstractService</a> and <a href="qtopiaipcenvelope.html">QtopiaIpcEnvelope</a>.</p>

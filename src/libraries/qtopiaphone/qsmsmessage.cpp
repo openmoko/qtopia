@@ -107,10 +107,10 @@ public:
     }
 
     /*  Convert from minutes to GSM 03.40 specification (section 9.2.3.12).
-         * 0-143   = 0 to 12 hours in 5 minute increments (0 = 5 minutes).
-         * 144-167 = 12hrs30min to 24hrs in 30 minute increments.
-         * 168-196 = 2days to 30days in 1 day increments.
-         * 197-255 = 5weeks to 63weeks in 1 week increments.
+         - 0-143   = 0 to 12 hours in 5 minute increments (0 = 5 minutes).
+         - 144-167 = 12hrs30min to 24hrs in 30 minute increments.
+         - 168-196 = 2days to 30days in 1 day increments.
+         - 197-255 = 5weeks to 63weeks in 1 week increments.
     */
     uint gsmValidityPeriod()
     {
@@ -1871,10 +1871,13 @@ QString QPDUMessage::address(bool SCAddress)
             str += "+";
 
         skipOctet();
-        if ( !SCAddress )
-            len = len / 2 + (len % 2);
-        else
+        if ( !SCAddress ) {
+            if ( at != SMS_Address_AlphaNumeric ) {
+                len = len / 2 + (len % 2);
+            }
+        } else {
             len--;
+        }
 
         if ( at != SMS_Address_AlphaNumeric ) {
             unsigned char c;

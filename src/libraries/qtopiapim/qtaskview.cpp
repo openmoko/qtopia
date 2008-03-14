@@ -439,10 +439,8 @@ QTaskSelector::QTaskSelector(bool allowNew, QWidget *parent)
 #endif
     }
 
-#ifndef QTOPIA_DESKTOP
 #ifdef QTOPIA_PHONE
     QtopiaApplication::setMenuLike( this, true );
-#endif
 #endif
 }
 

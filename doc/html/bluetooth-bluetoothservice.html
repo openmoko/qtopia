@@ -171,7 +171,7 @@
 <p>Note the path <tt>/etc/bluetooth/sdp/</tt> is used when referencing <tt>SerialPortSDPRecord.xml</tt>. This is because that is the path specified by <tt>bluetoothservice.pro</tt> for the installation of the XML file:</p>
 <pre>    # include the SDP record XML file
     # /etc/bluetooth/sdp is where other Qtopia SDP record XML files are located
-    sdprecord.files=$$QTOPIA_DEPOT_PATH/examples/bluetooth/bluetoothservice/SerialPortSDPRecord.xml
+    sdprecord.files=SerialPortSDPRecord.xml
     sdprecord.path=/etc/bluetooth/sdp
     INSTALLS+=sdprecord</pre>
 <a name="implementing-stop"></a>

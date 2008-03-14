@@ -184,7 +184,7 @@
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QContactModel::LabelRole</tt></td><td align="center" valign="top"><tt>Qt::UserRole</tt></td><td valign="top">A short formatted text label of the contacts name.</td></tr>
-<tr><td valign="top"><tt>QContactModel::SubLabelRole</tt></td><td align="center" valign="top"><tt>Qt::UserRole + 1</tt></td><td valign="top">An alternative formatted text label of the contacts name.</td></tr>
+<tr><td valign="top"><tt>QContactModel::SubLabelRole</tt></td><td align="center" valign="top"><tt>Qt::UserRole + 1</tt></td><td valign="top">A short formatted text label with supplementary contact information, like phone number, email address or company.</td></tr>
 <tr><td valign="top"><tt>QContactModel::PortraitRole</tt></td><td align="center" valign="top"><tt>Qt::UserRole + 2</tt></td><td valign="top">A pixmap of the contacts image, or a default image if none is specifically set.</td></tr>
 <tr><td valign="top"><tt>QContactModel::StatusIconRole</tt></td><td align="center" valign="top"><tt>Qt::UserRole + 3</tt></td><td valign="top">An icon providing additional information about the contact. For instance marking as a business contact or marking the contact as recently called.</td></tr>
 </table></p>
@@ -322,7 +322,7 @@
 <p>See also <a href="qcontactmodel.html#data">data</a>() and <a href="qcontactmodel.html#setContactField">setContactField</a>().</p>
 <h3 class="fn"><a name="setFilter"></a>void QContactModel::setFilter ( const <a href="./qstring.html">QString</a> &amp; <i>text</i>, int <i>flags</i> = 0 )</h3>
 <p>Sets the model to filter contacts by labels that start with <i>text</i> and contact type information specified <i>flags</i>. By default flags is 0 which means filtering will only occur based on label text.</p>
-<p>See also <a href="qcontactmodel.html#filterFlags">filterFlags</a>() and <a href="qcontactmodel.html#filterText">filterText</a>().</p>
+<p>See also <a href="qcontactmodel.html#FilterFlags-enum">FilterFlags</a>, <a href="qcontactmodel.html#filterFlags">filterFlags</a>(), and <a href="qcontactmodel.html#filterText">filterText</a>().</p>
 <h3 class="fn"><a name="setPersonalDetails"></a>void QContactModel::setPersonalDetails ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>identifier</i> )</h3>
 <p>Sets the personal details of the device owner to the contact with the given <i>identifier</i>. If there is no contact with the specified identifier in the contact model this will clear the personal details.</p>
 <p>See also <a href="qcontactmodel.html#personalDetails">personalDetails</a>() and <a href="qcontactmodel.html#clearPersonalDetails">clearPersonalDetails</a>().</p>

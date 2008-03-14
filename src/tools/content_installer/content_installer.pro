@@ -113,7 +113,10 @@ RESOURCES += pimmigrate.qrc
 INCLUDEPATH+=$$QTOPIA_DEPOT_PATH/src/3rdparty/libraries/sqlite
 backup.TARGET=$$TARGET
 VPATH+=$$QTOPIA_DEPOT_PATH/src/3rdparty/libraries/sqlite
+!build_qtopia_sqlite:CONFIG+=set_build_qtopia_sqlite
+set_build_qtopia_sqlite:CONFIG+=build_qtopia_sqlite
 include($$QTOPIA_DEPOT_PATH/src/3rdparty/libraries/sqlite/sqlite.pro)
+set_build_qtopia_sqlite:CONFIG-=build_qtopia_sqlite
 CONFIG-=syncqtopia
 TARGET=$$backup.TARGET
 

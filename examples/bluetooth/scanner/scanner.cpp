@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -78,7 +78,7 @@ RemoteInfoDialog::RemoteInfoDialog(const QBluetoothRemoteDevice &dev, QWidget *p
 
     top->addLayout(attributes);
 
-    QLabel *label = new QLabel("Service Classes:", this);
+    QLabel *label = new QLabel(tr("Service Classes:"), this);
     top->addWidget(label);
 
     QListWidget *list = new QListWidget(this);

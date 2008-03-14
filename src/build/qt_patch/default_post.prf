@@ -82,14 +82,16 @@ unix:contains(QTOPIACORE_CONFIG,rpath) {
     }
 }
 
-# Remove this from everywhere
-LIBS-=sqlite3
-# Now add it back in for Qtopia Core libs (including plugins)
-# That's more than we'd really like but for now it'll have to do
-SQLITE_TARGETS=QtSql qsqlite
-contains(QTOPIACORE_CONFIG,target):equals(TEMPLATE,lib):contains(SQLITE_TARGETS,$$TARGET) {
-    INCLUDEPATH+=$$(QPEDIR)/include/sqlite
-    LIBS+=-L$$(QPEDIR)/lib -lqtopia-sqlite
+contains(QPE_CONFIG,build_qtopia_sqlite) {
+    # Remove this from everywhere
+    LIBS-=sqlite3
+    # Now add it back in for Qtopia Core libs (including plugins)
+    # That's more than we'd really like but for now it'll have to do
+    SQLITE_TARGETS=QtSql qsqlite
+    contains(QTOPIACORE_CONFIG,target):equals(TEMPLATE,lib):contains(SQLITE_TARGETS,$$TARGET) {
+        INCLUDEPATH+=$$(QPEDIR)/include/sqlite
+        LIBS+=-L$$(QPEDIR)/lib -lqtopia-sqlite
+    }
 }
 
 # If these libs are disabled, don't actually build them
@@ -174,6 +176,10 @@ QMAKE_CXXFLAGS+=$$ADD_CFLAGS
 
 # Disable the ActiveQt designer plugin
 contains(SUBDIRS,activeqt):SUBDIRS-=activeqt
+
+# Prevent dynamic_cast from being used in embedded builds (we disable rtti so it will
+# always fail or worse, succeed without checking)
+contains(QTOPIACORE_CONFIG,embedded):DEFINES+=dynamic_cast=dynamic_cast_not_allowed
 
 # Get Qt's version of this file
 load(default_post)

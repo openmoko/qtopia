@@ -33,7 +33,7 @@
 #endif
 #include <QTimerEvent>
 #include <QDebug>
-#include "phone/dialerservice.h"
+#include "dialerservice.h"
 #include <QString>
 
 class E1DialerServiceProxy : public DialerService

@@ -79,7 +79,7 @@ Qtopia4SyncPluginFactory::~Qtopia4SyncPluginFactory()
   Qtopia4Sync, which remotes the API over QCop messages.
 
   Here is a message flow diagram showing how the class is used.
-  
+
   \image qtopia4syncplugin.png Qtopia4SyncPlugin message flow.
 
   \sa Qtopia4SyncPluginFactory, {Add a new device plugin}
@@ -414,7 +414,7 @@ void Qtopia4Sync::requestTwoWaySync()
     Q_ASSERT(d->state == SyncType);
     d->state = Diff;
 
-    d->currentPlugin->fetchChangesSince(d->lastSync);
+    d->currentPlugin->fetchChangesSince(d->lastSync.addSecs(1)); // don't re-sync items matching last time-stamp
 }
 
 void Qtopia4Sync::requestSlowSync()

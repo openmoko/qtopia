@@ -63,7 +63,8 @@ private:
             intervalDim = 20;
             intervalLightOff = 30;
             intervalSuspend = 60;
-            initbright = 255;
+            brightness = 255;
+            initBrightness = 255;
 
             dim = true;
             lightoff = true;
@@ -78,7 +79,8 @@ private:
         int intervalDim;
         int intervalLightOff;
         int intervalSuspend;
-        int initbright;
+        int initBrightness;
+        int brightness;
         bool canSuspend;
     };
 
@@ -98,8 +100,6 @@ private:
     void writeMode(QSettings &config, PowerMode *mode);
 
 private:
-    int initbright;
-
     PowerMode batteryMode;
     PowerMode externalMode;
     PowerMode *currentMode;

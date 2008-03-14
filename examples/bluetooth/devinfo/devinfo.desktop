@@ -5,6 +5,6 @@ Context=devinfo
 [Desktop Entry]
 Comment[]=An example Bluetooth Device Information app
 Exec=devinfo
-Icon=devinfo/devinfo
+Icon=bluetooth/bluetooth-online
 Type=Application
-Name[]=Bluetooth Device Info
+Name[]=BT Device Info

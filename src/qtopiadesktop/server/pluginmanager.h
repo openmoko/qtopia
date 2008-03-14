@@ -40,7 +40,7 @@ public:
     ~PluginManager();
 
     void setupPlugins( bool safeMode );
-    void setupPlugin( QDPlugin *plugin, bool safeMode );
+    void setupPlugin( QDPlugin *plugin );
 
     QDAppPluginList activePlugins();
     QDAppPlugin *currentPlugin();
@@ -49,15 +49,17 @@ public:
 
     QDPluginList plugins( QDPluginFilter *filter = 0 );
     QDAppPluginList appPlugins( QDAppPluginFilter *filter = 0 );
-    QDConPluginList conPlugins( /*QDPluginFilter *filter = 0*/ );
-    QDDevPluginList devPlugins( /*QDPluginFilter *filter = 0*/ );
-    QDLinkPluginList linkPlugins( /*QDPluginFilter *filter = 0*/ );
-    QDSyncPluginList syncPlugins( /*QDSyncPluginFilter *filter = 0*/ );
+    QDConPluginList conPlugins();
+    QDDevPluginList devPlugins();
+    QDLinkPluginList linkPlugins();
+    QDSyncPluginList syncPlugins();
 
     QStringList detectedPluginFiles();
     QMap<QString,QString> detectedPluginIds();
 
 private:
+    void internal_setupPlugin( QDPlugin *plugin, bool safeMode, bool addToLists );
+
     PluginManagerPrivate *d;
 };
 
@@ -85,9 +87,6 @@ public:
     PluginType pluginType;
 };
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(QDPluginFilter::PluginType)
-
-
 class QDAppPluginFilter : public QDPluginFilter
 {
 public:
@@ -99,5 +98,7 @@ public:
     FilterOption appWidget;
     FilterOption settingsWidget;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(QDPluginFilter::PluginType)
 
 #endif

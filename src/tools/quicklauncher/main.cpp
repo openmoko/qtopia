@@ -62,8 +62,8 @@ int MAIN_FUNC( int argc, char** argv )
     // could possibly change argv or envp or argv_lth will be very wrong.
     int i;
     char **envp = environ;
-    /* Move the environment so we can reuse the memory.
-     * (Code borrowed from sendmail.) */
+    // Move the environment so we can reuse the memory.
+    // (Code borrowed from sendmail.)
     for (i = 0; envp[i] != NULL; i++)
         continue;
     environ = (char **) malloc(sizeof(char *) * (i + 1));

@@ -24,12 +24,32 @@
         <keyword ref="desktopsettings.html#systemLanguage">systemLanguage</keyword>
         <section ref="desktopsettings-members.html" title="List of all members"/>
     </section>
+    <section ref="pluginmanager.html" title="PluginManager Class Reference">
+        <keyword ref="pluginmanager.html">PluginManager</keyword>
+        <keyword ref="pluginmanager.html#activePlugins">activePlugins</keyword>
+        <keyword ref="pluginmanager.html#appPlugins">appPlugins</keyword>
+        <keyword ref="pluginmanager.html#conPlugins">conPlugins</keyword>
+        <keyword ref="pluginmanager.html#currentPlugin">currentPlugin</keyword>
+        <keyword ref="pluginmanager.html#detectedPluginFiles">detectedPluginFiles</keyword>
+        <keyword ref="pluginmanager.html#detectedPluginIds">detectedPluginIds</keyword>
+        <keyword ref="pluginmanager.html#devPlugins">devPlugins</keyword>
+        <keyword ref="pluginmanager.html#linkPlugins">linkPlugins</keyword>
+        <keyword ref="pluginmanager.html#pluginData">pluginData</keyword>
+        <keyword ref="pluginmanager.html#plugins">plugins</keyword>
+        <keyword ref="pluginmanager.html#setupPlugin">setupPlugin</keyword>
+        <keyword ref="pluginmanager.html#syncPlugins">syncPlugins</keyword>
+        <section ref="pluginmanager-members.html" title="List of all members"/>
+    </section>
     <section ref="qdappplugin.html" title="QDAppPlugin Class Reference">
         <keyword ref="qdappplugin.html">QDAppPlugin</keyword>
         <keyword ref="qdappplugin.html#icon">icon</keyword>
         <keyword ref="qdappplugin.html#initApp">initApp</keyword>
         <keyword ref="qdappplugin.html#initSettings">initSettings</keyword>
         <section ref="qdappplugin-members.html" title="List of all members"/>
+    </section>
+    <section ref="qdapppluginfilter.html" title="QDAppPluginFilter Class Reference">
+        <keyword ref="qdapppluginfilter.html">QDAppPluginFilter</keyword>
+        <section ref="qdapppluginfilter-members.html" title="List of all members"/>
     </section>
     <section ref="qdclientsyncplugin.html" title="QDClientSyncPlugin Class Reference">
         <keyword ref="qdclientsyncplugin.html">QDClientSyncPlugin</keyword>
@@ -121,6 +141,22 @@
         <keyword ref="qdpluginfactory.html#executableName">executableName</keyword>
         <keyword ref="qdpluginfactory.html#keys">keys</keyword>
         <section ref="qdpluginfactory-members.html" title="List of all members"/>
+    </section>
+    <section ref="qdpluginfilter.html" title="QDPluginFilter Class Reference">
+        <keyword ref="qdpluginfilter.html">QDPluginFilter</keyword>
+        <keyword ref="qdpluginfilter.html#FilterOption-enum">FilterOption</keyword>
+        <keyword ref="qdpluginfilter.html#FilterOption-enum">QDPluginFilter::Either</keyword>
+        <keyword ref="qdpluginfilter.html#FilterOption-enum">QDPluginFilter::Set</keyword>
+        <keyword ref="qdpluginfilter.html#FilterOption-enum">QDPluginFilter::NotSet</keyword>
+        <keyword ref="qdpluginfilter.html#PluginTypeFlags-enum">PluginTypeFlags</keyword>
+        <keyword ref="qdpluginfilter.html#PluginTypeFlags-enum">PluginType</keyword>
+        <keyword ref="qdpluginfilter.html#PluginTypeFlags-enum">QDPluginFilter::Dev</keyword>
+        <keyword ref="qdpluginfilter.html#PluginTypeFlags-enum">QDPluginFilter::Link</keyword>
+        <keyword ref="qdpluginfilter.html#PluginTypeFlags-enum">QDPluginFilter::Sync</keyword>
+        <keyword ref="qdpluginfilter.html#PluginTypeFlags-enum">QDPluginFilter::App</keyword>
+        <keyword ref="qdpluginfilter.html#PluginTypeFlags-enum">QDPluginFilter::Con</keyword>
+        <keyword ref="qdpluginfilter.html#filter">filter</keyword>
+        <section ref="qdpluginfilter-members.html" title="List of all members"/>
     </section>
     <section ref="qdserversyncplugin.html" title="QDServerSyncPlugin Class Reference">
         <keyword ref="qdserversyncplugin.html">QDServerSyncPlugin</keyword>

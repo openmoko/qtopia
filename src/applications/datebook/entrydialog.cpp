@@ -63,8 +63,8 @@ EntryDialog::EntryDialog( bool startOnMonday, const QAppointment &appointment, c
 }
 
 /*
- *  Destroys the object and frees any allocated resources
- */
+    Destroys the object and frees any allocated resources
+*/
 EntryDialog::~EntryDialog()
 {
 }
@@ -273,8 +273,8 @@ void EntryDialog::setDates( const QDateTime& s, const QDateTime& e )
 }
 
 /*
- * public slot
- */
+    public slot
+*/
 void EntryDialog::updateEndTime()
 {
     // Filter time edits, only process the time when we are not in edit mode
@@ -284,8 +284,8 @@ void EntryDialog::updateEndTime()
 }
 
 /*
- * public slot
- */
+    public slot
+*/
 void EntryDialog::updateEndDateTime()
 {
     startDate->blockSignals(true);
@@ -316,8 +316,8 @@ void EntryDialog::updateEndDateTime()
 }
 
 /*
- * public slot
- */
+    public slot
+*/
 void EntryDialog::updateStartTime()
 {
     // Filter time edits, only process the time when we are not in edit mode
@@ -327,8 +327,8 @@ void EntryDialog::updateStartTime()
 }
 
 /*
- * public slot
- */
+    public slot
+*/
 void EntryDialog::updateStartDateTime()
 {
     startDate->blockSignals(true);

@@ -50,7 +50,7 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QSimControlEvent class specifies the contents of a <tt>CALL CONTROL</tt> or <tt>MO SHORT MESSAGE CONTROL</tt> result event.</p>
-<p>When the user initiates phone calls or sends SMS messages on a SIM-equippened mobile phone, the SIM can make modifications to the request before it is sent to the network, or deny the request outright. This process is described in section 9 of 3GPP TS 11.14.</p>
+<p>When the user initiates phone calls or sends SMS messages on a SIM-equipped mobile phone, the SIM can make modifications to the request before it is sent to the network, or deny the request outright. This process is described in section 9 of 3GPP TS 11.14.</p>
 <p>Once the SIM has determined whether it will allow the operation to proceed or not, an event is sent to the modem indicating the result. This event may include a <a href="qsimcontrolevent.html#text">text</a>() string to be displayed to the user.</p>
 <p>The particular type of SIM control event is specified by the <a href="qsimcontrolevent.html#type">type</a>() function. Other functions, such as <a href="qsimcontrolevent.html#result">result</a>(), <a href="qsimcontrolevent.html#text">text</a>(), etc, are used to specify type-specific parameters for the event.</p>
 <p>Events are delivered to client applications via the <a href="qsimtoolkit.html#controlEvent">QSimToolkit::controlEvent</a>() signal.</p>

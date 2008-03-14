@@ -5,6 +5,6 @@ Context=scanner
 [Desktop Entry]
 Comment[]=An example Bluetooth Device Discovery app
 Exec=scanner
-Icon=scanner/scanner
+Icon=bluetooth/bluetooth-online
 Type=Application
-Name[]=Bluetooth Device Discovery
+Name[]=BT Device Discovery

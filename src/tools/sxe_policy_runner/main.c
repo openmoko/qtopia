@@ -298,9 +298,9 @@ void clear_run( struct domain_run *dr )
 
 /*
    Pre-req's:
-   * ids_count & prog_ids zero'ed out
-   * run->dom set to desired domain string
-   * Opened stream on the policy file in run->streams[POLICY_IX]
+   - ids_count & prog_ids zero'ed out
+   - run->dom set to desired domain string
+   - Opened stream on the policy file in run->streams[POLICY_IX]
 
    Find all program ids which have the domain run->dom;
    (this function is deprecated)
@@ -340,10 +340,10 @@ void get_prog_ids_for_domain( struct domain_run *run )
 
 /*
    pre-reqs:
-   * run->prog_ids array contains prog_ids to search for
-   * fds[MANIFEST_IX] contains valid file descriptor for manifest file
-   * streams[INSTALLS_IX] contains valid stream for installs file
-   * binaries and bin_count zero'ed out
+   - run->prog_ids array contains prog_ids to search for
+   - fds[MANIFEST_IX] contains valid file descriptor for manifest file
+   - streams[INSTALLS_IX] contains valid stream for installs file
+   - binaries and bin_count zero'ed out
 
    Search for prog_ids in the manifest file and find corresponding
    install ids.  Look up install ids in installs file to find binaries
@@ -447,8 +447,8 @@ int __check_error( int rc, off_t pos )
 
 /*
    pre-reqs:
-   * fds[MANIFEST_IX] contains valid file descriptor for manifest file
-   * streams[INSTALLS_IX] contains valid stream for installs file
+   - fds[MANIFEST_IX] contains valid file descriptor for manifest file
+   - streams[INSTALLS_IX] contains valid stream for installs file
 
    Iterate over all binaries in the installs list, and update their device
    and inode numbers in the manifest file.

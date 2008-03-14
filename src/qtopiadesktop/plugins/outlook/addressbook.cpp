@@ -37,6 +37,13 @@ public:
 
     Outlook::OlDefaultFolders folderEnum() { return Outlook::olFolderContacts; }
     Outlook::OlItemType itemEnum() { return Outlook::olContactItem; }
+    bool isValidObject( IDispatchPtr dispatch )
+    {
+        TRACE(OutlookSyncPlugin) << "OutlookAddressbookSync::isValidObject";
+        Outlook::_ContactItemPtr item( dispatch );
+        return ( item->GetClass() == Outlook::olContact );
+    }
+
     void getProperties( IDispatchPtr dispatch, QString &entryid, QDateTime &lastModified )
     {
         TRACE(OutlookSyncPlugin) << "OutlookAddressbookSync::getProperties";
@@ -50,7 +57,7 @@ public:
         TRACE(OutlookSyncPlugin) << "OutlookAddressbookSync::dump_item";
         Q_ASSERT( dispatch );
         Outlook::_ContactItemPtr item( dispatch );
-        
+
         PREPARE_CUSTOM_MAP(qtopiaUserProps);
         PREPARE_MAPI(Contact);
 
@@ -119,7 +126,7 @@ public:
 #ifdef HANDLE_EXTRAS
         qtopiaUserProps["Outlook FileAs"] = item->FileAs();
 #endif
-        DUMP_CUSTOM_MAP(qtopiaUserProps);
+        //DUMP_CUSTOM_MAP(qtopiaUserProps);
         stream << "</Contact>\n";
     }
 

@@ -15,6 +15,7 @@ This page describes changes to Qtopia Sync Agent 4.3.1.
    of the connection.
 \o Documentation has been significantly updated.
 \o Corrected issues that impacted building Qtopia Sync Agent from source code.
+\o The connection timeout code was removed due to problems it was causing with the Greenphone.
 \endlist
 
 \section1 Known issues
@@ -23,6 +24,13 @@ This page describes changes to Qtopia Sync Agent 4.3.1.
 \o Appointments starting and ending at midnight are mis-reported as all day events.
 \o An obvious crash bug somehow made it through our QA process. Contact
    support-embedded@trolltech.com if you require the patch to correct this.
+\o Records are being duplicated when synchronizing multiple times.
+\o Tasks does not sync due to an error handling the low-level protocol.
+\o Objects of an unexpected type returned from Outlook can cause problems. For example,
+   a distribution list in the Contacts folder is not ignored and is accessed like a
+   Contact, potentially causing problems.
+\o Synchronization reports on items that were created in the previous sync transaction.
+   This causes items created in Outlook to be duplicated at every sync.
 \endlist
 
 */

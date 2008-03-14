@@ -350,8 +350,10 @@ void Dialer::themeLoaded( const QString & )
 void Dialer::updateIcons( const QString &text )
 {
 
-    if( m_actions )
+    if( m_actions ) {
         m_actions->setEnabled( !text.trimmed().isEmpty() );
+        m_actions->setVisible( !text.trimmed().isEmpty() );
+    }
 }
 
 void Dialer::saveToContact()
@@ -413,8 +415,10 @@ void Dialer::generatePressEvent( int key, const QString &txt )
 
 void Dialer::clear()
 {
-    if( display )
+    if( display ) {
         display->setText( QString() );
+        updateIcons( QString() );
+    }
 }
 
 QString Dialer::digits() const
@@ -425,15 +429,19 @@ QString Dialer::digits() const
 
 void Dialer::setDigits( const QString& digits )
 {
-    if( display )
+    if( display ) {
         display->setText( digits );
+        updateIcons( digits );
+    }
 }
 
 
 void Dialer::appendDigits( const QString& digits )
 {
-    if( display )
+    if( display ) {
         display->setText( display->text()+digits );
+        updateIcons( display->text() );
+    }
 }
 
 void Dialer::star()

@@ -1,3 +1,4 @@
+THEMES=finxi
 PROJECTS-=\
     settings/beaming
 PROJECTS*=\

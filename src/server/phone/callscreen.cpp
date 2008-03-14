@@ -1755,7 +1755,7 @@ bool CallScreen::eventFilter(QObject *o, QEvent *e)
                     if ( incoming ) {
                         if(control->incomingCall().startTime().secsTo(QDateTime::currentDateTime()) >= 1)
                             emit acceptIncoming();
-                    } else {
+                    } else if (!ke->isAutoRepeat()) {
                         if (holdCount) {
                             control->unhold();
                         } else {

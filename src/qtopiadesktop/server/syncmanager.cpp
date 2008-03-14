@@ -22,6 +22,7 @@
 #include "pluginmanager.h"
 #ifndef NO_SYNC
 #include "qsyncprotocol.h"
+#include "merge.h"
 #endif
 #include "qtopiadesktopapplication.h"
 
@@ -41,7 +42,11 @@ SyncManager::SyncManager( QWidget *parent )
     : QProgressDialog( parent ), protocol( 0 ), mError( 0 ), mSyncObject( 0 ),
     canAbort( true ), abortLater( false )
 {
-    TRACE(QDSync) << "SyncManager::SyncManager";
+}
+
+void SyncManager::init()
+{
+    TRACE(QDSync) << "SyncManager::init";
     setWindowTitle( tr("Sync All") );
     setModal( true );
     //setAutoClose( false );
@@ -57,8 +62,9 @@ SyncManager::SyncManager( QWidget *parent )
             serverPlugins << server;
         else if ( QDClientSyncPluginFactory *factory = qobject_cast<QDClientSyncPluginFactory*>(plugin) )
             foreach ( const QString &dataset, factory->datasets() ) {
+                LOG() << "Creating dynamic QDClientSyncPlugin for dataset" << dataset;
                 QDClientSyncPlugin *p = factory->pluginForDataset( dataset );
-                qdPluginManager()->setupPlugin( p, false );
+                qdPluginManager()->setupPlugin( p );
                 ((QtopiaDesktopApplication*)qApp)->initializePlugin( p );
                 clientPlugins << p;
             }
@@ -70,8 +76,8 @@ SyncManager::SyncManager( QWidget *parent )
         LOG() << "server" << server->id() << server->dataset();
         foreach ( client, clientPlugins ) {
             if ( client->dataset() == server->dataset() ) {
-                Q_ASSERT(!pending.contains(server));
                 LOG() << "matched to" << client->id();
+                Q_ASSERT(!pending.contains(server));
                 pending[server] = client;
             }
         }
@@ -79,12 +85,24 @@ SyncManager::SyncManager( QWidget *parent )
 
     setMinimum( 0 );
     setMaximum( pending.count() * SYNC_STEPS );
-    QCopEnvelope e("QPE/QDSync", "syncSteps(int)");
-    e << pending.count() * SYNC_STEPS;
+    {
+        QCopEnvelope e("QPE/QDSync", "syncSteps(int)");
+        e << pending.count() * SYNC_STEPS;
+    }
     setValue( 0 );
+    {
+        QCopEnvelope e("QPE/QDSync", "syncProgress(int)");
+        e << value()+1;
+    }
     completed = 0;
     client = 0;
     server = 0;
+
+    SyncLog() << endl
+              << "******************************************************************************" << endl
+              << "Synchronization started at" << QDateTime::currentDateTime() << endl
+              << "******************************************************************************" << endl
+              << endl;
 }
 
 SyncManager::~SyncManager()
@@ -94,6 +112,11 @@ SyncManager::~SyncManager()
     if ( protocol )
         delete protocol;
 #endif
+
+    SyncLog() << "******************************************************************************" << endl
+              << "Synchronization ended at" << QDateTime::currentDateTime() << endl
+              << "******************************************************************************" << endl
+              << endl;
 }
 
 void SyncManager::showEvent( QShowEvent * /*e*/ )
@@ -116,6 +139,8 @@ void SyncManager::next()
     canAbort = false; // Don't process the abort until after the plugins are ready
     abortLater = false;
     qApp->processEvents();
+
+    SyncLog() << "Synchronization between" << server->displayName() << "and" << client->displayName() << endl;
 
     clientStatus = Waiting;
     serverStatus = Waiting;
@@ -151,12 +176,14 @@ void SyncManager::readyForSync()
     canAbort = true;
     if ( abortLater ) {
         LOG() << "Processing delayed abort()";
+        SyncLog() << "Synchronization aborted" << endl;
         abort();
         return;
     }
     bool clientOk = ( clientStatus == Ready );
     bool serverOk = ( serverStatus == Ready );
     LOG() << "client is" << (clientOk?"ok":"not ok") << "server is" << (serverOk?"ok":"not ok");
+    SyncLog() << "client is" << (clientOk?"ok":"not ok") << "server is" << (serverOk?"ok":"not ok") << endl;
     complete = false;
     if ( clientOk && serverOk ) {
 #ifndef NO_SYNC
@@ -217,6 +244,7 @@ void SyncManager::finishedSync()
     client = 0;
     server = 0;
 
+    SyncLog() << "Synchronization finished" << endl << endl;
     if ( protocol )
         protocol->deleteLater();
 
@@ -270,8 +298,8 @@ void SyncManager::progress()
 {
     TRACE(QDSync) << "SyncManager::progress";
     QCopEnvelope e("QPE/QDSync", "syncProgress(int)");
-    e << value()+1;
     setValue( value()+1 );
+    e << value()+1;
 }
 
 void SyncManager::closeEvent( QCloseEvent *e )

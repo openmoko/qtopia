@@ -131,10 +131,9 @@ QString HardwareManipulator::constructCBMessage(const QString &messageCode, int 
 void HardwareManipulator::constructSMSMessage( const QString &sender, const QString &serviceCenter, const QString &text )
 {
     QSMSMessage m;
-    if ( sender.contains(QRegExp("\\D")) ) {
+    if ( sender.isEmpty() ) {
         warning(tr("Invalid Sender"),
-                tr("Sender must not be empty and contain "
-                   "only digits"));
+                tr("Sender must not be empty"));
         return;
     }
     m.setSender(sender);

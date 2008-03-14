@@ -38,6 +38,13 @@ public:
 
     Outlook::OlDefaultFolders folderEnum() { return Outlook::olFolderCalendar; }
     Outlook::OlItemType itemEnum() { return Outlook::olAppointmentItem; }
+    bool isValidObject( IDispatchPtr dispatch )
+    {
+        TRACE(OutlookSyncPlugin) << "OutlookDatebookSync::isValidObject";
+        Outlook::_AppointmentItemPtr item( dispatch );
+        return ( item->GetClass() == Outlook::olAppointment );
+    }
+
     void getProperties( IDispatchPtr dispatch, QString &entryid, QDateTime &lastModified )
     {
         TRACE(OutlookSyncPlugin) << "OutlookDatebookSync::getProperties";
@@ -56,7 +63,7 @@ public:
     void dump_item( const Outlook::_AppointmentItemPtr &item, QTextStream &stream, bool dump_exception )
     {
         TRACE(OutlookSyncPlugin) << "OutlookDatebookSync::dump_item";
-        
+
         Outlook::OlRecurrenceState recstate = item->GetRecurrenceState();
         if ( recstate == Outlook::olApptOccurrence ) {
             WARNING() << "Cannot sync occurrences!";
@@ -207,7 +214,7 @@ public:
         foreach ( const QString &category, bstr_to_qstring(item->GetCategories()).split(", ", QString::SkipEmptyParts) )
             DUMP_EXPR(Category,category);
         stream << "</Categories>\n";
-        DUMP_CUSTOM_MAP(qtopiaUserProps);
+        //DUMP_CUSTOM_MAP(qtopiaUserProps);
         stream << "</Appointment>\n";
     }
 

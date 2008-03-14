@@ -641,6 +641,7 @@ void QtopiaDesktopApplication::syncall()
     }
     { QCopEnvelope e("QPE/QDSync", "syncStart()"); }
     syncManager = new SyncManager;
+    syncManager->init();
     bool ok = syncManager->exec();
     LOG() << "Sync" << (ok?"completed":"aborted") << "with" << syncManager->errors() << (syncManager->errors()==1?"error":"errors");
     delete syncManager;

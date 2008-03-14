@@ -478,7 +478,7 @@ class ProgressView : public QWidget
 public:
     ProgressView( RepeatState* repeatstate, QWidget* parent = 0 );
 
-    void setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist ) { if (m_playlistlabel) m_playlistlabel->setPlaylist( playlist ); }
+    void setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist );
 
     QWidget* keyEventHandler() const { return m_progress; }
 
@@ -510,6 +510,8 @@ ProgressView::ProgressView( RepeatState* repeatstate, QWidget* parent )
 
 void ProgressView::repeatStateChanged( RepeatState::State state )
 {
+    if(!m_context)
+        init();
     switch( state )
     {
     case RepeatState::RepeatOne:
@@ -532,6 +534,13 @@ void ProgressView::setMediaContent( QMediaContent* content )
     if(!m_context)
         init();
     m_context->setMediaContent( content );
+}
+
+void ProgressView::setPlaylist( QExplicitlySharedDataPointer<Playlist> playlist )
+{
+    if(!m_context)
+        init();
+    m_playlistlabel->setPlaylist( playlist );
 }
 
 void ProgressView::init()

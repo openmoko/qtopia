@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -49,43 +49,43 @@ DevInfo::DevInfo(QWidget *parent, Qt::WFlags flags)
 
         QListWidget *list = new QListWidget;
 
-        list->addItem("[General]");
-        list->addItem("Name:");
+        list->addItem(QString("[%1]").arg(tr("General")));
+        list->addItem(tr("Name:"));
         list->addItem(dev.deviceName());
-        list->addItem("Address:");
+        list->addItem(tr("Address:"));
         list->addItem(dev.address().toString());
-        list->addItem("Manufacturer:");
+        list->addItem(tr("Manufacturer:"));
         list->addItem(dev.manufacturer());
-        list->addItem("Version:");
+        list->addItem(tr("Version:"));
         list->addItem(dev.version());
-        list->addItem("Company:");
+        list->addItem(tr("Company:"));
         list->addItem(dev.company());
-        list->addItem("Revision:");
+        list->addItem(tr("Revision:"));
         list->addItem(dev.revision());
 
         list->addItem("");
 
-        list->addItem("[State]");
+        list->addItem(QString("[%1]").arg(tr("State")));
         if (dev.connectable()) {
-            list->addItem("Connectable:");
-            list->addItem("true");
+            list->addItem(tr("Connectable:"));
+            list->addItem(tr("true"));
         } else {
-            list->addItem("Connectable:");
-            list->addItem("false");
+            list->addItem(tr("Connectable:"));
+            list->addItem(tr("false"));
         }
 
-        list->addItem("Discoverable:");
+        list->addItem(tr("Discoverable:"));
         if (dev.discoverable()) {
-            list->addItem("true");
-            list->addItem("Timeout:");
+            list->addItem(tr("true"));
+            list->addItem(tr("Timeout:"));
             list->addItem(QString::number(dev.discoverableTimeout() / 60));
         } else {
-            list->addItem("false");
+            list->addItem(tr("false"));
         }
 
         list->addItem("");
 
-        list->addItem("[Connections]");
+        list->addItem(QString("[%1]").arg(tr("Connections")));
         QList<QBluetoothAddress> connections = dev.connections();
         foreach (QBluetoothAddress addr, connections) {
             list->addItem(addr.toString());
@@ -93,7 +93,7 @@ DevInfo::DevInfo(QWidget *parent, Qt::WFlags flags)
 
         list->addItem("");
 
-        list->addItem("[PairedDevices]");
+        list->addItem(QString("[%1]").arg(tr("Paired Devices")));
         QList<QBluetoothAddress> paired = dev.pairedDevices();
         foreach (QBluetoothAddress addr, paired) {
             list->addItem(addr.toString());
@@ -107,6 +107,7 @@ DevInfo::DevInfo(QWidget *parent, Qt::WFlags flags)
     }
 
     setCentralWidget(tab);
+    setWindowTitle(tr("Local Device Info"));
 }
 
 DevInfo::~DevInfo()

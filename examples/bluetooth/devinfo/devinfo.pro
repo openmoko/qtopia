@@ -10,7 +10,7 @@ LANGUAGES=$$AVAILABLE_LANGUAGES
 HEADERS=devinfo.h
 SOURCES=devinfo.cpp main.cpp
 
-desktop.files=$$QTOPIA_DEPOT_PATH/examples/bluetooth/devinfo/devinfo.desktop
+desktop.files=devinfo.desktop
 desktop.path=/apps/Applications
 desktop.hint=desktop
 INSTALLS+=desktop

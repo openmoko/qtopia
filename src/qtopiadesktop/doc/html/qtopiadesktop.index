@@ -14,6 +14,58 @@
             <function access="public" threadsafety="unspecified" status="commendable" name="sync" fullname="TrayIcon::sync" href="trayicon.html#sync" location="trayicon.h" virtual="non" meta="signal" const="false" static="false" overload="false" type="void" signature="sync()"></function>
             <function access="public" threadsafety="unspecified" status="commendable" name="quit" fullname="TrayIcon::quit" href="trayicon.html#quit" location="trayicon.h" virtual="non" meta="signal" const="false" static="false" overload="false" type="void" signature="quit()"></function>
         </class>
+        <class access="public" threadsafety="unspecified" status="commendable" name="PluginManager" href="pluginmanager.html" location="pluginmanager.h" bases="QObject" module="">
+            <function access="public" threadsafety="unspecified" status="commendable" name="setupPlugin" fullname="PluginManager::setupPlugin" href="pluginmanager.html#setupPlugin" location="pluginmanager.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="void" signature="setupPlugin(QDPlugin * plugin)">
+                <parameter left="QDPlugin *" right="" name="plugin" default=""></parameter>
+            </function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="activePlugins" fullname="PluginManager::activePlugins" href="pluginmanager.html#activePlugins" location="pluginmanager.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="QDAppPluginList" signature="activePlugins()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="currentPlugin" fullname="PluginManager::currentPlugin" href="pluginmanager.html#currentPlugin" location="pluginmanager.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="QDAppPlugin *" signature="currentPlugin()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="pluginData" fullname="PluginManager::pluginData" href="pluginmanager.html#pluginData" location="pluginmanager.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="QDPluginData *" signature="pluginData(QDPlugin * plugin)">
+                <parameter left="QDPlugin *" right="" name="plugin" default=""></parameter>
+            </function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="pluginData" fullname="PluginManager::pluginData" href="pluginmanager.html#pluginData-2" location="pluginmanager.h" virtual="non" meta="plain" const="false" static="false" overload="true" overload-number="2" type="QDAppPluginData *" signature="pluginData(QDAppPlugin * plugin)">
+                <parameter left="QDAppPlugin *" right="" name="plugin" default=""></parameter>
+            </function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="plugins" fullname="PluginManager::plugins" href="pluginmanager.html#plugins" location="pluginmanager.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="QDPluginList" signature="plugins(QDPluginFilter * filter)">
+                <parameter left="QDPluginFilter *" right="" name="filter" default="0"></parameter>
+            </function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="appPlugins" fullname="PluginManager::appPlugins" href="pluginmanager.html#appPlugins" location="pluginmanager.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="QDAppPluginList" signature="appPlugins(QDAppPluginFilter * filter)">
+                <parameter left="QDAppPluginFilter *" right="" name="filter" default="0"></parameter>
+            </function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="conPlugins" fullname="PluginManager::conPlugins" href="pluginmanager.html#conPlugins" location="pluginmanager.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="QDConPluginList" signature="conPlugins()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="devPlugins" fullname="PluginManager::devPlugins" href="pluginmanager.html#devPlugins" location="pluginmanager.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="QDDevPluginList" signature="devPlugins()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="linkPlugins" fullname="PluginManager::linkPlugins" href="pluginmanager.html#linkPlugins" location="pluginmanager.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="QDLinkPluginList" signature="linkPlugins()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="syncPlugins" fullname="PluginManager::syncPlugins" href="pluginmanager.html#syncPlugins" location="pluginmanager.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="QDSyncPluginList" signature="syncPlugins()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="detectedPluginFiles" fullname="PluginManager::detectedPluginFiles" href="pluginmanager.html#detectedPluginFiles" location="pluginmanager.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="QStringList" signature="detectedPluginFiles()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="detectedPluginIds" fullname="PluginManager::detectedPluginIds" href="pluginmanager.html#detectedPluginIds" location="pluginmanager.h" virtual="non" meta="plain" const="false" static="false" overload="false" type="QMap&lt;QString, QString&gt;" signature="detectedPluginIds()"></function>
+        </class>
+        <class access="public" threadsafety="unspecified" status="commendable" name="QDPluginFilter" href="qdpluginfilter.html" location="pluginmanager.h" bases="" module="">
+            <function access="public" threadsafety="unspecified" status="commendable" name="QDPluginFilter" fullname="QDPluginFilter::QDPluginFilter" href="qdpluginfilter.html#QDPluginFilter" location="pluginmanager.h" virtual="non" meta="constructor" const="false" static="false" overload="false" type="" signature="QDPluginFilter()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="~QDPluginFilter" fullname="QDPluginFilter::~QDPluginFilter" href="qdpluginfilter.html#dtor.QDPluginFilter" location="pluginmanager.h" virtual="impure" meta="destructor" const="false" static="false" overload="false" type="" signature="~QDPluginFilter()"></function>
+            <enum access="public" threadsafety="unspecified" status="commendable" name="PluginTypeFlags" fullname="QDPluginFilter::PluginTypeFlags" href="qdpluginfilter.html#PluginTypeFlags-enum" location="pluginmanager.h" typedef="QDPluginFilter::PluginType">
+                <value name="App" value="0x01"></value>
+                <value name="Link" value="0x02"></value>
+                <value name="Con" value="0x04"></value>
+                <value name="Dev" value="0x08"></value>
+                <value name="Sync" value="0x10"></value>
+            </enum>
+            <typedef access="public" threadsafety="unspecified" status="commendable" name="PluginType" fullname="QDPluginFilter::PluginType" href="qdpluginfilter.html#PluginType-typedef" location="pluginmanager.h" enum="QDPluginFilter::PluginTypeFlags"></typedef>
+            <enum access="public" threadsafety="unspecified" status="commendable" name="FilterOption" fullname="QDPluginFilter::FilterOption" href="qdpluginfilter.html#FilterOption-enum" location="pluginmanager.h">
+                <value name="Either" value="0"></value>
+                <value name="Set" value="1"></value>
+                <value name="NotSet" value="2"></value>
+            </enum>
+            <function access="public" threadsafety="unspecified" status="commendable" name="filter" fullname="QDPluginFilter::filter" href="qdpluginfilter.html#filter" location="pluginmanager.h" virtual="impure" meta="plain" const="false" static="false" overload="false" type="bool" signature="filter(QDPlugin * plugin)">
+                <parameter left="QDPlugin *" right="" name="plugin" default=""></parameter>
+            </function>
+            <variable access="public" threadsafety="unspecified" status="commendable" name="pluginType" fullname="QDPluginFilter::pluginType" href="qdpluginfilter.html#pluginType-var" location="pluginmanager.h" type="PluginType" static="false"></variable>
+        </class>
+        <class access="public" threadsafety="unspecified" status="commendable" name="QDAppPluginFilter" href="qdapppluginfilter.html" location="pluginmanager.h" bases="QDPluginFilter" module="">
+            <function access="public" threadsafety="unspecified" status="commendable" name="QDAppPluginFilter" fullname="QDAppPluginFilter::QDAppPluginFilter" href="qdapppluginfilter.html#QDAppPluginFilter" location="pluginmanager.h" virtual="non" meta="constructor" const="false" static="false" overload="false" type="" signature="QDAppPluginFilter()"></function>
+            <function access="public" threadsafety="unspecified" status="commendable" name="~QDAppPluginFilter" fullname="QDAppPluginFilter::~QDAppPluginFilter" href="qdapppluginfilter.html#dtor.QDAppPluginFilter" location="pluginmanager.h" virtual="impure" meta="destructor" const="false" static="false" overload="false" type="" signature="~QDAppPluginFilter()"></function>
+            <variable access="public" threadsafety="unspecified" status="commendable" name="appWidget" fullname="QDAppPluginFilter::appWidget" href="qdapppluginfilter.html#appWidget-var" location="pluginmanager.h" type="FilterOption" static="false"></variable>
+            <variable access="public" threadsafety="unspecified" status="commendable" name="settingsWidget" fullname="QDAppPluginFilter::settingsWidget" href="qdapppluginfilter.html#settingsWidget-var" location="pluginmanager.h" type="FilterOption" static="false"></variable>
+        </class>
         <class access="public" threadsafety="unspecified" status="commendable" name="QtSingleApplication" href="qtsingleapplication.html" location="qtsingleapplication.h" bases="QApplication" module="">
             <function access="public" threadsafety="unspecified" status="commendable" name="QtSingleApplication" fullname="QtSingleApplication::QtSingleApplication" href="qtsingleapplication.html#QtSingleApplication" location="qtsingleapplication.h" virtual="non" meta="constructor" const="false" static="false" overload="false" type="" signature="QtSingleApplication(const QString &amp; id, int &amp; argc, char ** argv, Type type)">
                 <parameter left="const QString &amp;" right="" name="id" default=""></parameter>

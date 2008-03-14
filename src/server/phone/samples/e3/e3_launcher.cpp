@@ -62,7 +62,7 @@
 #include "phone/callhistory.h"
 #include "qabstractthemewidgetfactory.h"
 #include "e3_today.h"
-#include "phone/dialerservice.h"
+#include "dialerservice.h"
 #include <QLabel>
 #include <QPalette>
 #include <QTimeString>

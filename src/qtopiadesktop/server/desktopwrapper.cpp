@@ -67,8 +67,10 @@ QDPlugin *DesktopWrapper::getPlugin( const QString &id )
 
 QObject *DesktopWrapper::syncObject()
 {
-    if ( qobject_cast<QDSyncPlugin*>(plugin) )
+    if ( qobject_cast<QDSyncPlugin*>(plugin) || qobject_cast<QDClientSyncPluginFactory*>(plugin) ) {
+        Q_ASSERT(q->syncManager);
         return q->syncManager->syncObject();
+    }
     return 0;
 }
 

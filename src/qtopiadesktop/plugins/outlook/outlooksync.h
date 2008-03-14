@@ -73,6 +73,7 @@ public:
 
     virtual Outlook::OlDefaultFolders folderEnum() = 0;
     virtual Outlook::OlItemType itemEnum() = 0;
+    virtual bool isValidObject( IDispatchPtr dispatch ) = 0;
     virtual void getProperties( IDispatchPtr dispatch, QString &entryid, QDateTime &lastModified ) = 0;
     virtual void dump_item( IDispatchPtr dispatch, QTextStream &stream ) = 0;
     virtual QString read_item( IDispatchPtr dispatch, const QByteArray &record ) = 0;
@@ -81,7 +82,8 @@ public:
 
 signals:
     void t_fetchChangesSince(const QDateTime &timestamp);
-    void t_updateClientRecord(const QByteArray &record);
+    void t_createClientRecord(const QByteArray &record);
+    void t_replaceClientRecord(const QByteArray &record);
     void t_removeClientRecord(const QString &identifier);
 
 private slots:
@@ -115,9 +117,14 @@ signals:
 public slots:
     void logon();
     void fetchChangesSince( const QDateTime &timestamp );
-    void updateClientRecord(const QByteArray &record);
+    void createClientRecord(const QByteArray &record);
+    void replaceClientRecord(const QByteArray &record);
     void removeClientRecord(const QString &identifier);
     void waitForAbort();
+
+private:
+    QByteArray previousBuffer(const QString &id);
+    void setPreviousBuffer(const QString &id, const QByteArray &data);
 
 public:
     OutlookSyncPlugin *q;

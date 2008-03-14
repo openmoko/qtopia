@@ -37,7 +37,8 @@ public:
     ~GenericVideoWidget();
 
     // Observer
-    void paintNotification();
+    void setVideoSize(QSize const& size);
+    void paint(QImage const& frame);
 
 protected:
     // QWidget

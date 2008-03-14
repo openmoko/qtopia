@@ -28,8 +28,8 @@ namespace camera
 {
 
 /*
- * convert something to RGB32
- */
+    convert something to RGB32
+*/
 
 class FormatConverter
 {

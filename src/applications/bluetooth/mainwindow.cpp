@@ -1098,11 +1098,7 @@ void BtFtpPrivate::putFile()
 {
     QDocumentSelectorDialog dialog;
     dialog.setFilter(QContentFilter(QContent::Document));
-#ifdef QTOPIA_DESKTOP
-    if (dialog.exec() == QDialog::Accepted) {
-#else
     if (QtopiaApplication::execDialog(&dialog) == QDialog::Accepted) {
-#endif
         QContent content = dialog.selectedDocument();
         QIODevice *io = content.open(QIODevice::ReadOnly);
 

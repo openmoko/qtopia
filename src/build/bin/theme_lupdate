@@ -16,7 +16,7 @@ if ( $isWindows ) {
 }
 
 
-use constant DEBUG => 1;
+use constant DEBUG => 0;
 
 my $DQTDIR = shift(@ARGV);
 my @LANGS = split(/\s+/,shift(@ARGV));
@@ -67,23 +67,26 @@ for my $entry ( keys %trMapping ) {
 }
 close CPP;
 
-#run lupdate on cpp file
 my $tsfile = "Theme-$themename";
+open CPP, ">$tmp.pro" or die "Can't write $tmp.pro";
+print CPP "SOURCES += $tmp\n";
 for my $lang ( @LANGS ) {
-    my $filename;
-    $filename = $tsfile."-".$lang.".ts";
-    my $cmd = "$DQTDIR/bin/lupdate $tmp -ts $filename";
-    DEBUG and print "$cmd\n";
-    system($cmd);
+    my $filename = $tsfile."-".$lang.".ts";
+    print CPP "TRANSLATIONS += $filename\n";
 }
+close CPP;
+my $cmd = "$DQTDIR/bin/lupdate $tmp.pro";
+DEBUG and print "$cmd\n";
+system($cmd);
 unlink $tmp;
+unlink "$tmp.pro";
 
 my $pageName = undef;
 sub parseFile
 {
     (my $filename) = $_[0];
     $pageName = undef;
-    DEBUG and print qq(Parsing $filename\n);
+    DEBUG and print "Parsing $filename\n";
     my $parser = new XML::Parser(ErrorContext => 2);
     $parser->setHandlers( Start => \&start_handler,
                             Char => \&char_handler );

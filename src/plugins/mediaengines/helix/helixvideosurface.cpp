@@ -61,7 +61,7 @@ GenericVideoSurface::GenericVideoSurface():
 {
     m_library = load_color_library();
 
-    if (m_library.InitColorConverter) 
+    if (m_library.InitColorConverter)
     {
         m_library.InitColorConverter();
     }
@@ -97,8 +97,11 @@ STDMETHODIMP GenericVideoSurface::Blt( UCHAR* pImageBits, HXBitmapInfoHeader* pB
         // Assume rDestRect does not change
         m_bufferWidth = rDestRect.right - rDestRect.left;
         m_bufferHeight = rDestRect.bottom - rDestRect.top;
+        m_videoSize = QSize(m_bufferWidth, m_bufferHeight);
+        m_buffer = QImage(m_videoSize, is16Bit() ? QImage::Format_RGB16 : QImage::Format_RGB32);
 
-        m_buffer = QImage(m_bufferWidth, m_bufferHeight, is16Bit() ? QImage::Format_RGB16 : QImage::Format_RGB32);
+        if (m_paintObserver != 0)
+            m_paintObserver->setVideoSize(m_videoSize);
     }
 
     // Obtain color converter
@@ -157,7 +160,7 @@ STDMETHODIMP GenericVideoSurface::Blt( UCHAR* pImageBits, HXBitmapInfoHeader* pB
 
     // Notify observer
     if (m_paintObserver != 0)
-        m_paintObserver->paintNotification();
+        m_paintObserver->paint(m_buffer);
 
     return HXR_OK;
 }
@@ -227,9 +230,11 @@ STDMETHODIMP GenericVideoSurface::QueryInterface(REFIID riid, void** object)
     return HXR_NOINTERFACE;
 }
 
-void GenericVideoSurface::addPaintObserver(PaintObserver* paintObserver)
+void GenericVideoSurface::setPaintObserver(PaintObserver* paintObserver)
 {
     m_paintObserver = paintObserver;
+    if (m_paintObserver != 0 && !m_videoSize.isNull())
+        m_paintObserver->setVideoSize(m_videoSize);
 }
 
 

@@ -42,16 +42,18 @@ PROJECTS*=\
     plugins/qtopiacore/iconengines/qtopiapiciconengine \
     plugins/qtopiacore/imageformats/picture \
     3rdparty/applications/micro_httpd \
-    3rdparty/applications/sqlite \
     3rdparty/libraries/alsa \
     3rdparty/libraries/crypt \
     3rdparty/libraries/inputmatch \
     3rdparty/libraries/md5 \
     3rdparty/libraries/openobex \
     3rdparty/libraries/pthread \
-    3rdparty/libraries/sqlite \
     3rdparty/libraries/tar \
-    3rdparty/libraries/zlib
+    3rdparty/libraries/zlib\
+    3rdparty/libraries/sqlite
+
+build_qtopia_sqlite:PROJECTS*=\
+    3rdparty/applications/sqlite
 
 # Dummy entries (finegrained dependencies, retained in case libqtopiacomm is ever split up)
 PROJECTS*=\
@@ -150,10 +152,7 @@ phone {
     # Qtopiatest core and plugin interfaces
     PROJECTS*=\
         libraries/qtopiacore/qtestlib\
-        libraries/qtopiatest\
-        # Ugh. Why did these get moved out of the source tree?
-        ../tests/shared/qtopiaunittest\
-        ../tests/shared/qtopiadbunittest
+        libraries/qtopiatest
 
     # Qtopiatest reference implementation (plugins)
     PROJECTS*=\

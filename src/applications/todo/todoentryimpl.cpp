@@ -86,16 +86,16 @@ TaskDialog::TaskDialog( const QTask& task, QWidget *parent,
 }
 
 /*
- *  Constructs a TaskDialog to create a new task.  The dialog
- *  will be a child of 'parent', with the widget flags set to 'f'.
- *  The initial task categories are set from 'categories'.
- *
- *  The default reminder settings will be obtained from the
- *  datebook settings.
- *
- *  The dialog will by default be modeless, unless you set 'modal' to
- *  true to construct a modal dialog.
- */
+    Constructs a TaskDialog to create a new task.  The dialog
+    will be a child of 'parent', with the widget flags set to 'f'.
+    The initial task categories are set from 'categories'.
+
+    The default reminder settings will be obtained from the
+    datebook settings.
+
+    The dialog will by default be modeless, unless you set 'modal' to
+    true to construct a modal dialog.
+*/
 TaskDialog::TaskDialog(QList<QString> categories, QWidget* parent,  Qt::WFlags fl )
     : QDialog( parent, fl),
     inputNotes(0), inputNotesQC(0),
@@ -458,8 +458,8 @@ void TaskDialog::updateFromTask()
 }
 
 /*
- *  Destroys the object and frees any allocated resources
- */
+    Destroys the object and frees any allocated resources
+*/
 TaskDialog::~TaskDialog()
 {
 }
@@ -489,9 +489,6 @@ void TaskDialog::dueDateChanged( const QDate& date )
 
     updateFromTask();
 }
-
-/*!
-*/
 
 const QTask &TaskDialog::todoEntry() const
 {

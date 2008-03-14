@@ -43,8 +43,8 @@ Q_GLOBAL_STATIC_WITH_ARGS(QPluginManager, pluginManager, (QLatin1String("drmagen
 */
 
 /*!
- * Creates a new drm browser object defined by flags \a f and attachs it to \a parent.
- */
+    Creates a new drm browser object defined by flags \a f and attachs it to \a parent.
+*/
 DrmBrowser::DrmBrowser( QWidget *parent, Qt::WFlags f )
     : QWidget( parent, f )
 {
@@ -70,7 +70,7 @@ DrmBrowser::DrmBrowser( QWidget *parent, Qt::WFlags f )
 /*!
     \internal
     Destroys a DrmBrowser object.
- */
+*/
 DrmBrowser::~DrmBrowser()
 {
 }
@@ -78,7 +78,7 @@ DrmBrowser::~DrmBrowser()
 /*!
     \internal
     Initializes the DrmBrowser layout and fills a list of DRM protected content.
- */
+*/
 void DrmBrowser::initView()
 {
     setWindowTitle( tr( "Licenses" ) );
@@ -109,10 +109,10 @@ void DrmBrowser::initView()
 
 
 /*!
- * Processes a DRM message or rights file at \a fileName.
- * Message files (.dm) are converted to .dcf files and deleted from the file system.
- * Rights files are installed if there is a corresponding content file and then deleted from the file system.
- */
+    Processes a DRM message or rights file at \a fileName.
+    Message files (.dm) are converted to .dcf files and deleted from the file system.
+    Rights files are installed if there is a corresponding content file and then deleted from the file system.
+*/
 void DrmBrowser::setDocument( const QString &fileName )
 {
     QContent content( QContent::execToContent( fileName ) );

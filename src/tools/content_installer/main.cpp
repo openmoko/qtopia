@@ -237,6 +237,18 @@ QString QSystemSemaphore::mungePath(const QString& in)
     return mungedpath;
 }
 
+void sendQcop(const QString prefixPath, const QString dbPath, uint cId, int type)
+{
+    QFileInfo fi(prefixPath + "/bin/qcop");
+    if (!fi.exists())
+        return;
+
+    QStringList args;
+    args << "enum" << "QContent::ChangeType" << "--"
+         << "send" << "QPE/DocAPI" << "contentChanged(QContentIdList,QContent::ChangeType)"
+         << QString::number(qHash(dbPath)) + ':' + QString::number(cId) << QString::number(type);
+    QProcess::execute(prefixPath + "/bin/qcop", args);
+}
 
 int main( int argc, char** argv )
 {
@@ -246,8 +258,13 @@ int main( int argc, char** argv )
     QStringList args = app.arguments();
     QString appName = args.takeFirst();
     bool removeFlag = false;
+    bool qcopFlag = false;
     if ( args.count() && args.at(0) == "-remove" ) {
         removeFlag = true;
+        args.removeFirst();
+    }
+    if (args.count() && args.at(0) == "-qcop") {
+        qcopFlag = true;
         args.removeFirst();
     }
     if ( args.count() >= 2 && args.at(0) == "-clearlocks" ) {
@@ -257,7 +274,7 @@ int main( int argc, char** argv )
     if ( args.count() < 5  ) {
         qWarning() << endl
                    << "Usage: " << QFileInfo(appName).baseName().toLocal8Bit().constData()
-                                << "[-remove]"
+                                << "[-remove] [-qcop]"
                                 << "database prefix destpath \"categories\" file/s" << endl
                    << "Usage: " << QFileInfo(appName).baseName().toLocal8Bit().constData()
                                 << "-clearlocks database" << endl
@@ -272,6 +289,8 @@ int main( int argc, char** argv )
                    << "to apps but not visible in the Documents tab." << endl
                    << endl
                    << "Pass -remove to remove an existing content item from the database." << endl
+                   << endl
+                   << "Pass -qcop to inform running qtopia instances that the content item has changed." << endl
                    << endl
                    << "Pass -clearlocks to remove the system wide semaphore for a database" << endl
                    << "     (useful if content_installer is interrupted or crashes)." << endl;
@@ -317,8 +336,11 @@ int main( int argc, char** argv )
             QString id = QFileInfo(destPath).baseName();
             destFile = QLatin1String( "Folder/" ) + id;
             QContentId oldId = QContent::execToContent( destFile );
-            if(oldId != QContent::InvalidId)
+            if (oldId != QContent::InvalidId) {
                 QContent::uninstall(oldId);
+                if (qcopFlag)
+                    sendQcop(prefixPath, dbPath, oldId.second, 1);
+            }
             if( removeFlag ) {
                 catMan.remove( id );
                 continue;
@@ -338,11 +360,16 @@ int main( int argc, char** argv )
             content.setProperty( QLatin1String( "File" ), translationFile, QLatin1String( "Translation" ) );
             content.setProperty( QLatin1String( "Context" ), translationContext, QLatin1String( "Translation" ) );
             content.commit();
+            if (qcopFlag)
+                sendQcop(prefixPath, dbPath, content.id().second, 0);
         } else {
             // Remove the existing entry (we don't want duplication)
             QContent content(destFile, false);
-            if(content.id() != QContent::InvalidId)
+            if (content.id() != QContent::InvalidId) {
                 QContent::uninstall(content.id());
+                if (qcopFlag)
+                    sendQcop(prefixPath, dbPath, content.id().second, 1);
+            }
             if ( removeFlag )
                 continue;
             // Create a new entry
@@ -363,6 +390,8 @@ int main( int argc, char** argv )
             if ( categories.count() != 0 )
                 content.setCategories( categories );
             content.commit();
+            if (qcopFlag)
+                sendQcop(prefixPath, dbPath, content.id().second, 0);
         }
     }
     semaphore.release();

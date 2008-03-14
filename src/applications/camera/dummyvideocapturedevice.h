@@ -29,9 +29,8 @@ namespace camera
 
 
 /*!
- * \class DummyVideoCaptureDevice
- *
- */
+    \class DummyVideoCaptureDevice
+*/
 
 class DummyVideoCaptureDevice : public VideoCaptureDevice
 {

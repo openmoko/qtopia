@@ -22,7 +22,7 @@
 <p>You must have Outlook installed to build a fully-functional Qtopia Sync Agent. If you would like to target a different version of Outlook to the one you have installed you can place the files <tt>MSO.DLL</tt> and <tt>MSOUTL.OLB</tt> from the other version of Outlook into <tt>src/qtopiadesktop/dist</tt>.</p>
 <a name="setup"></a>
 <h3>Setup</h3>
-<p>Ensure that the prerequisites are met and any required environment variables are set.</p>
+<p>Ensure that the prerequisites are met and any required environment variables are set. For each compiler a script will setup the environment. For example, VC8 installed to the default location has the script <tt>C:\Program Files\Microsoft Visual Studio 8\VC\bin\vcvars32.bat</tt>.</p>
 <p>You should set QMAKESPEC to a suitable value.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Compiler</th><th>QMAKESPEC</th></tr></thead>
@@ -38,7 +38,7 @@
 <a name="execute-unit-tests"></a>
 <h3>Execute Unit Tests</h3>
 <p>There is only minimal test coverage at this time, mostly aimed at the Outlook interface.</p>
-<pre>    cd tests\src\qtopiadesktop
+<pre>    cd src\qtopiadesktop
     nmake
     nmake test</pre>
 <a name="running"></a>

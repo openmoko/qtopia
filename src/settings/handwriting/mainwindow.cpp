@@ -55,8 +55,8 @@ public:
         return (ProfileItem*)QTreeWidgetItem::parent();
     }
 
-    /*  Is this really needed as well as the clicked and returnPressed signals
-     *  from the listview itself?
+    /* Is this really needed as well as the clicked and returnPressed signals
+       from the listview itself?
     void setOpen(bool)
     {
         emit selected(this);

@@ -1066,8 +1066,6 @@ PhoneHeader *PhoneLauncher::header()
         m_header = new PhoneHeader(0);
         WindowManagement::protectWindow(m_header);
         ThemeControl::instance()->registerThemedView(m_header, "Title");
-        // Dock now to avoid relayout later.
-        WindowManagement::dockWindow(m_header, WindowManagement::Top, m_header->reservedSize());
     }
 
     return m_header;
@@ -1088,8 +1086,6 @@ void PhoneLauncher::createContext()
     WindowManagement::protectWindow(m_context);
     m_context->setAttribute(Qt::WA_GroupLeader);
     ThemeControl::instance()->registerThemedView(m_context, "Context");
-    // Dock now to avoid relayout later.
-    WindowManagement::dockWindow(context(), WindowManagement::Bottom, context()->reservedSize());
 }
 
 /*!
@@ -1163,6 +1159,9 @@ void PhoneLauncher::showCallHistory(bool missed, const QString &hint)
     {
         callHistory()->showMaximized();
     }
+#else
+    Q_UNUSED(missed);
+    Q_UNUSED(hint);
 #endif
 }
 
@@ -1643,22 +1642,29 @@ void PhoneLauncher::requestDial(const QString &n, const QUniqueId &c)
             // Only one call policy manager is active, so use that.
             chosenManager = candidates[0];
         } else {
+            // Clear queued call information while the dialog is up
+            // to prevent the call from being automatically dialed
+            // if we get to PhoneLauncher::stateChanged() while
+            // the dialog is on-screen.
+            queuedCall = QString();
+            queuedCallType = QString();
+            queuedCallContact = QUniqueId();
+
             // More than one is active, so we have to ask the user.
             CallTypeSelector selector( candidates );
             if (QtopiaApplication::execDialog(&selector) != QAbstractMessageBox::Yes) {
-                queuedCall = QString();
-                queuedCallType = QString();
-                queuedCallContact = QUniqueId();
                 return;
             }
             chosenManager = selector.selectedPolicyManager();
             if ( !chosenManager ) {
                 // Shouldn't happen, but recover gracefully anyway.
-                queuedCall = QString();
-                queuedCallType = QString();
-                queuedCallContact = QUniqueId();
                 return;
             }
+
+            // Re-instate the queued call information.
+            queuedCall = n;
+            queuedCallType = QString();
+            queuedCallContact = c;
         }
     }
 

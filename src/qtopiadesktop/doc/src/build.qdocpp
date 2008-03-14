@@ -29,6 +29,8 @@ a different version of Outlook to the one you have installed you can place the f
 \section1 Setup
 
 Ensure that the prerequisites are met and any required environment variables are set.
+For each compiler a script will setup the environment. For example, VC8 installed to
+the default location has the script \c{C:\Program Files\Microsoft Visual Studio 8\VC\bin\vcvars32.bat}.
 
 You should set QMAKESPEC to a suitable value.
 
@@ -52,7 +54,7 @@ nmake install
 There is only minimal test coverage at this time, mostly aimed at the Outlook interface.
 
 \code
-cd tests\src\qtopiadesktop
+cd src\qtopiadesktop
 nmake
 nmake test
 \endcode

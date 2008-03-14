@@ -96,7 +96,8 @@ LightSettings::LightSettings( QWidget* parent,  Qt::WFlags fl )
     batteryMode.intervalDim = config.value( "Interval_Dim", 20 ).toInt();
     batteryMode.intervalLightOff = config.value("Interval_LightOff", 30).toInt();
     batteryMode.intervalSuspend = config.value("Interval", 60).toInt();
-    batteryMode.initbright = config.value("Brightness",  qpe_sysBrightnessSteps()).toInt();
+    batteryMode.brightness = config.value("Brightness", qpe_sysBrightnessSteps()).toInt();
+    batteryMode.initBrightness = batteryMode.brightness;
     batteryMode.dim = config.value("Dim", true).toBool();
     batteryMode.lightoff = config.value("LightOff", false).toBool();
     batteryMode.suspend = config.value("Suspend", true).toBool();
@@ -107,7 +108,8 @@ LightSettings::LightSettings( QWidget* parent,  Qt::WFlags fl )
     externalMode.intervalDim = config.value( "Interval_Dim", 20 ).toInt();
     externalMode.intervalLightOff = config.value("Interval_LightOff", 30).toInt();
     externalMode.intervalSuspend = config.value("Interval", 240).toInt();
-    externalMode.initbright = config.value("Brightness",  qpe_sysBrightnessSteps()).toInt();
+    externalMode.brightness = config.value("Brightness", qpe_sysBrightnessSteps()).toInt();
+    externalMode.initBrightness = externalMode.brightness;
     externalMode.dim = config.value("Dim", true).toBool();
     externalMode.lightoff = config.value("LightOff", false).toBool();   //default to leave on
     externalMode.suspend = config.value("Suspend", true).toBool();
@@ -121,7 +123,7 @@ LightSettings::LightSettings( QWidget* parent,  Qt::WFlags fl )
     b->brightness->setTickInterval( qMax(1,maxbright/16) );
     b->brightness->setSingleStep( qMax(1,maxbright/16) );
     b->brightness->setPageStep( qMax(1,maxbright/16) );
-    
+
     currentMode = &batteryMode;
     applyMode();
 
@@ -135,13 +137,11 @@ LightSettings::LightSettings( QWidget* parent,  Qt::WFlags fl )
         b->powerSource->setCurrentIndex(1);
     }
 
-    initbright = currentMode->initbright;
-
     connect(b->brightness, SIGNAL(valueChanged(int)), this, SLOT(applyBrightness()));
 
     QtopiaChannel *channel = new QtopiaChannel("Qtopia/PowerStatus", this);
     connect(channel, SIGNAL(received(QString,QByteArray)),
-            this, SLOT(sysMessage(QString,QByteArray)));    
+            this, SLOT(sysMessage(QString,QByteArray)));
 }
 
 LightSettings::~LightSettings()
@@ -157,9 +157,24 @@ static void set_fl(int bright)
 
 void LightSettings::reject()
 {
-    set_fl(initbright);
+    // Set settings for current power source
+    if ( powerStatus.wallStatus() == QPowerStatus::Available )
+        currentMode = &externalMode;
+    else
+        currentMode = &batteryMode;
+
+    set_fl(currentMode->initBrightness);
+
+    // Restore brightness settings
+    QSettings config("Trolltech", "qpe");
+    config.beginGroup("BatteryPower");
+    config.setValue("Brightness", batteryMode.initBrightness);
+    config.endGroup();
+    config.beginGroup("ExternalPower");
+    config.setValue("Brightness", externalMode.initBrightness);
+    config.endGroup();
+
     QDialog::reject();
-    close();
 }
 
 void LightSettings::accept()
@@ -211,7 +226,7 @@ void LightSettings::saveConfig()
     int i_lightoff = (currentMode->lightoff ? currentMode->intervalLightOff : 0);
     int i_suspend =  (currentMode->suspend ? currentMode->intervalSuspend : 0);
 
-    set_fl(currentMode->initbright);
+    set_fl(currentMode->brightness);
 
     QtopiaServiceRequest e("QtopiaPowerManager", "setIntervals(int,int,int)" );
     e << i_dim << i_lightoff << i_suspend;
@@ -224,7 +239,7 @@ void LightSettings::writeMode(QSettings &config, PowerMode *mode)
     config.setValue( "LightOff", mode->lightoff );
     config.setValue( "Interval_Dim", mode->intervalDim );
     config.setValue( "Interval_LightOff", mode->intervalLightOff );
-    config.setValue( "Brightness", mode->initbright );
+    config.setValue( "Brightness", mode->brightness );
     if (mode->canSuspend) {
         config.setValue( "Interval", mode->intervalSuspend );
         config.setValue( "Suspend", mode->suspend );
@@ -246,7 +261,7 @@ void LightSettings::applyMode()
     if ( !currentMode->suspend || !currentMode->canSuspend )
         b->interval_suspend->setMinimum( currentMode->intervalSuspend );
 
-    b->brightness->setValue( currentMode->initbright);
+    b->brightness->setValue(currentMode->brightness);
     b->interval_suspend->setEnabled( currentMode->canSuspend );
     b->notnetworkedsuspend->setChecked( !currentMode->networkedsuspend );
 }
@@ -254,14 +269,16 @@ void LightSettings::applyMode()
 void LightSettings::applyBrightness()
 {
     // slot called, but we haven't changed the powerMode values yet
-    currentMode->initbright = (  b->brightness->value() );
-    set_fl(currentMode->initbright);
+    currentMode->brightness = b->brightness->value();
+    set_fl(currentMode->brightness);
 
-    QSettings cfg("Trolltech","qpe");
-    cfg.beginGroup("BatteryPower");
-    cfg.setValue("Brightness", b->brightness->value());
+    QSettings config("Trolltech", "qpe");
+    if (currentMode == &batteryMode)
+        config.beginGroup("BatteryPower");
+    else
+        config.beginGroup("ExternalPower");
 
-    
+    config.setValue("Brightness", currentMode->brightness);
 }
 
 void LightSettings::powerTypeChanged(int index)
@@ -275,7 +292,7 @@ void LightSettings::powerTypeChanged(int index)
     currentMode->intervalDim = b->interval_dim->value();
     currentMode->intervalLightOff = b->interval_lightoff->value();
     currentMode->intervalSuspend = b->interval_suspend->value();
-    currentMode->initbright = ( b->brightness->value() );
+    currentMode->brightness = b->brightness->value();
     currentMode->dim = (b->interval_dim->value() != b->interval_dim->minimum());
     currentMode->lightoff = (b->interval_lightoff->value() != b->interval_lightoff->minimum());
     currentMode->suspend = (b->interval_suspend->value() != b->interval_suspend->minimum());
@@ -294,10 +311,10 @@ void LightSettings::sysMessage(const QString& msg, const QByteArray& data)
     if (msg == "brightnessChanged(int)" ) {
         int bright;
         s >> bright;
-        currentMode->initbright = bright;
+        currentMode->brightness = bright;
 
         b->brightness->disconnect();
-        b->brightness->setValue( bright);
+        b->brightness->setValue(bright);
         connect(b->brightness, SIGNAL(valueChanged(int)), this, SLOT(applyBrightness()));
     }
 }
@@ -337,7 +354,7 @@ void LightSettings::setStatus( QString details )
     currentMode->intervalDim = sl.at( 1 ).toInt();
     currentMode->lightoff = sl.at( 2 ).toInt();
     currentMode->intervalLightOff = sl.at( 3 ).toInt();
-    currentMode->initbright = sl.at( 4 ).toInt();
+    currentMode->brightness = sl.at( 4 ).toInt();
     applyMode();
 }
 

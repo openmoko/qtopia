@@ -637,12 +637,16 @@ QValidator::State SimWidgetsDigitValidator::validate(QString &input, int &) cons
 
 //===========================================================================
 
-SimInput::SimInput(const QSimCommand &simCmd, QWidget *parent)
-    : SimCommandView(simCmd, parent), lineEdit(0), multiEdit(0), focusWidget(0)
+SimInput::SimInput(const QSimCommand &simCmd, QSimIconReader *reader, QWidget *parent)
+    : SimCommandView(simCmd, reader, parent), iconLabel(0), lineEdit(0), multiEdit(0), focusWidget(0)
 {
     setFocusPolicy(Qt::StrongFocus);
 
     QVBoxLayout *vb = new QVBoxLayout(this);
+    if ( (int)simCmd.iconId() ) {
+        iconLabel = new QLabel( this );
+        vb->addWidget( iconLabel );
+    }
     if (!simCmd.text().isEmpty()) {
         text = new QLabel( Qt::escape( simCmd.text() ), this);
         text->setTextFormat(Qt::RichText);
@@ -650,6 +654,8 @@ SimInput::SimInput(const QSimCommand &simCmd, QWidget *parent)
     }
     echo = simCmd.echo();
     digitsOnly = simCmd.wantDigits();
+
+    vb->addStretch();
 
     if (echo && !digitsOnly) {
         multiEdit = new QTextEdit(this);
@@ -700,6 +706,23 @@ SimInput::SimInput(const QSimCommand &simCmd, QWidget *parent)
     }
 
     validateInput();
+
+    // need to make request here
+    // to make suer subclass iconsReady slot to be used
+    if ( icons )
+        icons->requestIcons();
+}
+
+void SimInput::iconsReady()
+{
+    if ( m_command.iconSelfExplanatory() ) {
+        text->clear();
+    }
+
+    if ( iconLabel ) {
+        QIcon icon = icons->icon( m_command.iconId() );
+        iconLabel->setPixmap( icon.pixmap( QApplication::style()->pixelMetric(QStyle::PM_LargeIconSize) ) );
+    }
 }
 
 void SimInput::setInput(const QString &input)

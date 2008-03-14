@@ -28,7 +28,7 @@
 #include <qcopchannel_qws.h>
 #include <QTimerEvent>
 #include <QDebug>
-#include "phone/dialerservice.h"
+#include "dialerservice.h"
 #include <QString>
 #ifdef Q_WS_X11
 #include <qcopchannel_x11.h>

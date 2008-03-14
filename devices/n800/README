@@ -32,7 +32,14 @@ compiling outside of scratchbox (CHINOOK)
 
 
 (login to scratchbox, make sure CHINOOK_ARMEL target is setup)
-### log out of scratchbox and do the rest of this outside of scratch environment
+### log out of scratchbox and do the rest of this outside of scratchbox
+ environment
+
+
+Since scratchbox is broken in regards to compiling outside of the scratchbox
+environment, we have to fix some symlinks and patch a few files to make it
+work like a normal toolchain.
+
 
 ----------------- 8< ------------------------------------ start script
 #!/bin/sh
