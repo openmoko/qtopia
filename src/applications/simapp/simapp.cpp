@@ -431,7 +431,7 @@ void SimApp::cmdInKey(const QSimCommand &cmd)
 
 void SimApp::cmdInput(const QSimCommand &cmd)
 {
-    SimInput *input = new SimInput(cmd, stack);
+    SimInput *input = new SimInput(cmd, iconReader, stack);
     connect(input, SIGNAL(sendResponse(QSimTerminalResponse)),
             this, SLOT(sendResponse(QSimTerminalResponse)) );
     setView(input);

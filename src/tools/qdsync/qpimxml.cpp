@@ -35,8 +35,7 @@
 
 #include "qpimxml_p.h"
 
-namespace PIMXML_NAMESPACE 
-{
+namespace PIMXML_NAMESPACE {
 
 // have a static set of pre-declared QLatin1Strings.  re-constructiong QStrings for each element will be expensive.
 // in order of appearance in schema definitions, duplicates obviously excluded.
@@ -311,8 +310,13 @@ void QPimXmlStreamReader::readEndElement()
         return;
     }
     uint unknownDepth = 0;
+    bool first = true;
     while (!atEnd()) {
-        readNext();
+        TokenType t = tokenType();
+        // Don't assume there's going to be whitespace before an element we're interested in
+        if (!first || (t != StartElement && t != EndElement))
+            readNext();
+        first = false;
         if (isStartElement()) {
             unknownDepth++;
         } else if (isEndElement()) {
@@ -333,6 +337,7 @@ QString QPimXmlStreamReader::readTextElement(const QString &qualifiedName)
     QString t;
     if (readStartElement(qualifiedName)) {
         t = readElementText();
+        Q_ASSERT(tokenType() == EndElement);
         readNext(); // Skip over the EndElement
     }
     return t;

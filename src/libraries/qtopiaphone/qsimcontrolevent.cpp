@@ -28,7 +28,7 @@
     \brief The QSimControlEvent class specifies the contents of a \c{CALL CONTROL} or \c{MO SHORT MESSAGE CONTROL} result event.
 
     When the user initiates phone calls or sends SMS messages on a
-    SIM-equippened mobile phone, the SIM can make modifications to
+    SIM-equipped mobile phone, the SIM can make modifications to
     the request before it is sent to the network, or deny the request
     outright.  This process is described in section 9 of 3GPP TS 11.14.
 

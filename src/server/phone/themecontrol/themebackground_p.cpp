@@ -191,7 +191,7 @@ void ThemeBackgroundImagePlugin::resize(int w, int h)
             height = qMin(availableRect.height(), height);
             width = qMin(availableRect.width(), width);
 
-            Qt::AspectRatioMode mode;
+            Qt::AspectRatioMode mode = Qt::IgnoreAspectRatio;
             if (dpMode == ScaleAndCrop) mode = Qt::KeepAspectRatioByExpanding;
             else if (dpMode == Stretch) mode = Qt::IgnoreAspectRatio;
             else if (dpMode == Scale) mode = Qt::KeepAspectRatio;
@@ -214,6 +214,7 @@ void ThemeBackgroundImagePlugin::resize(int w, int h)
 
 void ThemeBackgroundImagePlugin::paint(QPainter *p, const QRect &r)
 {
+    Q_UNUSED(r);
     if (!bg.isNull()) {
         QRect cr = QtopiaApplication::desktop()->availableGeometry(screen);
 

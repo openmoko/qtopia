@@ -20,7 +20,7 @@
 ****************************************************************************/
 
 #include "qpreparedquery_p.h"
-#include <sqlite/sqlite3.h>
+#include <sqlite3.h>
 #include <qpimsqlio_p.h> // for db handle
 #include <QSqlDriver>
 #include <QDebug>

@@ -20,8 +20,7 @@
 <li><a href="#using-the-resource-system">Using the Resource System</a></li>
 <li><a href="#using-the-help-system">Using the Help System</a></li>
 <li><a href="#internationalization">Internationalization</a></li>
-<ul><li><a href="#settings-files">Settings Files</a></li>
-</ul>
+<li><a href="#settings-files">Settings Files</a></li>
 <li><a href="#troubleshooting-package-installation">Troubleshooting package installation</a></li>
 <li><a href="#faq">FAQ</a></li>
 </ul>
@@ -47,7 +46,7 @@
 </ul>
 <p>The project file describes the contents and configuration of a project. It typically specifies such things as where the source and headers come from, dependencies and the output file name, amongst a host of other options that the build system uses to build an application. Details on these options can be found at <a href="buildsystem/index.html">Qtopia Build System Documentation</a>. A project file may be generated using</p>
 <pre>    $QPEDIR/bin/qtopiamake -project</pre>
-<p>and a there is a project file that can be found in the <a href="application.html">example application</a>.</p>
+<p>A sample project file that can be found in the <a href="application.html">example application</a>.</p>
 <p>A package for an sxe-enabled phone will need a couple of <a href="sxe-app-checklist.html">special requirements</a> to the source code and the project file.</p>
 <p>The <a href="desktopfiles.html">.desktop file</a> is used to create an entry in the launcher for the application. The icon and user-visible name of the program is specified here. Note the <tt>Exec</tt> field of the .desktop file is assumed to refer to a binary in the <tt>bin</tt> directory of the package.</p>
 <p>The structure of the package's directories in the final qpk file is generally automatically handled by the build system. There are various <a href="buildsystem/installhints.html">install hints</a> that tell the build system what to do. Other sections of this documentation details how to make use of these install hints to make use of various resources and help files.</p>
@@ -116,7 +115,7 @@
 <p>The .ts files can then be used in conjunction with linguist to generate the translations. Running <tt>make packages</tt>, will create a qpk file with the .qm files appropriately placed in the qpk's package directory structure.</p>
 <p>See Also <a href="syscust-internat.html">Internationalization</a></p>
 <a name="qpk-settings"></a><a name="settings-files"></a>
-<h3>Settings Files</h3>
+<h2>Settings Files</h2>
 <p>Any settings files used by the package should not correspond with any organizations listed under the RestrictedOrganizations parameter in the <a href="sxe-pkgmgr.html#packagemanager-conf">PackageManager.conf</a> file. On an SXE configured Qtopia, packages won't have write access to these settings files and so should use other organizations to avoid any problems. For similar reasons, packages should use <a href="./qsettings.html">QSettings</a> objects at user scope.</p>
 <p>Creating a settings file using <a href="./qsettings.html">QSettings</a> will automatically (on both SXE and non-SXE enabled devices) place the settings files in the package sandbox directory.</p>
 <p>Pre-generated settings files that should be placed in the Settings directory in a similar manner to that shown below:</p>

@@ -9137,9 +9137,6 @@
     <section ref="annotated.html" title="Annotated Class List">
         <keyword ref="annotated.html">Annotated Class List</keyword>
     </section>
-    <section ref="application.html" title="Application Classes">
-        <keyword ref="application.html">Application Classes</keyword>
-    </section>
     <section ref="qtopiaserver--applaunch.html" title="Application Control Subsystem">
         <keyword ref="qtopiaserver--applaunch.html">Application Control Subsystem</keyword>
     </section>

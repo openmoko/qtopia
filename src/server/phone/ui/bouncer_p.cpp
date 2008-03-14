@@ -87,7 +87,7 @@ void Bouncer::initFromGridItem(GridItem *item)
         return;
 
     int imageSize = item->selectedImageSize();
-    imageSize +=  imageSize * maxVariation;
+    imageSize +=  static_cast<int>(imageSize * maxVariation);
     Renderer *renderer = item->renderer();
     if ( renderer ) {
         bigpixmap = QPixmap(imageSize,imageSize);

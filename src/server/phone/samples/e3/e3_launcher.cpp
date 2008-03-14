@@ -23,7 +23,7 @@
 #include "e3_clock.h"
 #include "e3_navipane.h"
 #include "phone/phoneheader.h"
-#include "phone/contextlabel.h"
+#include "contextlabel.h"
 #include "windowmanagement.h"
 #include "themecontrol.h"
 #include <QApplication>
@@ -62,7 +62,7 @@
 #include "phone/callhistory.h"
 #include "qabstractthemewidgetfactory.h"
 #include "e3_today.h"
-#include "phone/dialerservice.h"
+#include "dialerservice.h"
 #include <QLabel>
 #include <QPalette>
 #include <QTimeString>

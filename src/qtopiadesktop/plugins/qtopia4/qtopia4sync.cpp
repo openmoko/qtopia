@@ -26,6 +26,7 @@
 #include <QApplication>
 #include <trace.h>
 QD_LOG_OPTION(Qtopia4Sync)
+#include <QTimer>
 
 #define SEND_CHANNEL "QPE/Qtopia4Sync"
 #define RECEIVE_CHANNEL "QD/Qtopia4Sync"
@@ -63,6 +64,7 @@ private:
         bool needFinished;
         bool needEnd;
     } finishState;
+    bool in_progress;
 };
 
 void Qtopia4Sync::init()
@@ -70,10 +72,12 @@ void Qtopia4Sync::init()
     QCopChannel *channel = new QCopChannel(RECEIVE_CHANNEL, this);
     connect(channel, SIGNAL(received(QString,QByteArray)),
             this, SLOT(handleMessage(QString,QByteArray)));
+    in_progress = false;
 }
 
 void Qtopia4Sync::prepareForSync()
 {
+    TRACE(Qtopia4Sync) << "Qtopia4Sync::prepareForSync";
     bool ret = false;
     if ( centerInterface()->currentDevice() && QCopChannel::isRegistered("QPE/*") ) {
         QCopEnvelope e( "QD/Connection", "setBusy()" );
@@ -81,19 +85,25 @@ void Qtopia4Sync::prepareForSync()
     }
     finishState.needFinished = false;
     finishState.needEnd = false;
+    in_progress = true;
     emit readyForSync( ret );
 }
 
 void Qtopia4Sync::finishSync()
 {
+    TRACE(Qtopia4Sync) << "Qtopia4Sync::finishSync";
     // If we haven't received a clientEnd() message wait for it before sending the finishedSync() message.
     if ( finishState.needEnd ) {
+        LOG() << "We haven't got the clientEnd() message yet...";
         finishState.needFinished = true;
         return;
     }
 
+    LOG() << "clear the busy flag and let the sync complete";
+    finishState.needFinished = false;
     QCopEnvelope e( "QD/Connection", "clearBusy()" );
-    emit finishedSync();
+    QTimer::singleShot( 0, this, SIGNAL(finishedSync()) );
+    in_progress = false;
 }
 
 void Qtopia4Sync::serverSyncRequest(const QString &source)
@@ -163,6 +173,8 @@ void Qtopia4Sync::serverEnd()
 
 void Qtopia4Sync::handleMessage(const QString &message, const QByteArray &data)
 {
+    // There are multiple listeners on this channel... Only 1 is in_progress.
+    if ( !in_progress ) return;
     QDataStream stream(data);
     QString s1, s2;
     int i1, i2, i3;
@@ -266,6 +278,7 @@ void Qtopia4MultiSync::checkForDatasets()
     QDConPlugin *con = dev->connection();
     if ( !con ) return;
     mDatasets = con->conProperty("datasets").split(" ");
+    LOG() << "The datasets that the device supports are" << mDatasets;
 }
 
 QStringList Qtopia4MultiSync::datasets()

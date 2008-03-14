@@ -5,11 +5,10 @@
    <h2>Viewing Contacts</h2>
 <!--#endif -->
 <p>
-<!--#if expr="$TOUCH"-->
-Select the contact you want to view by pressing on it in the list.
-<!--#endif-->
 <!--#if expr="$KEYPAD"-->
 Highlight the contact you want to view in the list and press <img src=":icon/view"><b>View</b>.
+<!--#else-->
+Select the contact you want to view by pressing on it in the list.
 <!--#endif-->
 
 <p>
@@ -23,22 +22,21 @@ tabs are available for showing different information relating to the contact.</p
 <p>
 <!--#if expr="$KEYPAD"-->
 Use <img src=":icon/left">/<img src=":icon/right"> </img> buttons
-<!--#endif-->
-<!--#if expr="$TOUCH"-->
+<!--#else-->
 Press tabs
 <!--#endif-->
 to select Overview, Details
 <!--#if expr="$TELEPHONY"-->
 , Calls
 <!--#endif-->
- or Messages pages.
+or Messages pages.
 </p>
 
 <p>Use the <img src=":icon/options"> menu
 to delete the contact or access other options.</p>
 
 <p><img src=":icon/addressbook/contactdetails"> </img> <b>Overview:</b>
-displays the name and portrait of the contact, along with related actions are likely to be applied to the contact.</p>
+displays the name and portrait of the contact, along with related actions that are likely to be applied to the contact.</p>
 
 <p><img src=":icon/details"> </img> <b>Details:</b>
 displays the detailed contact and allows activating relavant contact information for the contact.</p>

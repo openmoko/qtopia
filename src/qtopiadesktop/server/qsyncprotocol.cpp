@@ -28,7 +28,7 @@ QD_LOG_OPTION(QDSyncProtocol)
 
 QSyncProtocol::QSyncProtocol(QObject *parent)
     : QObject(parent), pendingServerChanges(false), pendingClientChanges(false)
-{ 
+{
     TRACE(QDSyncProtocol) << "QSyncProtocol::QSyncProtocol";
     state = None;
     merge = new QSyncMerge(this);
@@ -134,16 +134,6 @@ void QSyncProtocol::serverEnd()
    Client initiated sync.  Essentially prepends to normal network flow
    and results in the server requesting a sync right back at the client
 */
-void QSyncProtocol::clientSyncRequest(const QString &source)
-{
-    TRACE(QDSyncProtocol) << "QSyncProtocol::clientSyncRequest" << "source" << source;
-    if (state != None) {
-        abort(tr("Protocol error - unexpected response from client"));
-        return;
-    }
-    //startSync(source);
-}
-
 void QSyncProtocol::startSync(QDClientSyncPlugin *_client, QDServerSyncPlugin *_server)
 {
     client = _client;
@@ -154,14 +144,13 @@ void QSyncProtocol::startSync(QDClientSyncPlugin *_client, QDServerSyncPlugin *_
     merge->setServerReferenceSchema(server->referenceSchema());
     // assert state == None
 
-    connect( client, SIGNAL(clientSyncRequest(QString)), this, SLOT(clientSyncRequest(QString)) );
     connect( client, SIGNAL(clientIdentity(QString)), this, SLOT(clientIdentity(QString)) );
     connect( client, SIGNAL(clientVersion(int,int,int)), this, SLOT(clientVersion(int,int,int)) );
     connect( client, SIGNAL(clientSyncAnchors(QDateTime,QDateTime)), this, SLOT(clientSyncAnchors(QDateTime,QDateTime)) );
     connect( client, SIGNAL(createClientRecord(QByteArray)), this, SLOT(createClientRecord(QByteArray)) );
     connect( client, SIGNAL(replaceClientRecord(QByteArray)), this, SLOT(replaceClientRecord(QByteArray)) );
     connect( client, SIGNAL(removeClientRecord(QString)), this, SLOT(removeClientRecord(QString)) );
-    connect( client, SIGNAL(mapId(QString,QString)), this, SLOT(mapId(QString,QString)) );
+    connect( client, SIGNAL(mappedId(QString,QString)), this, SLOT(clientMappedId(QString,QString)) );
     connect( client, SIGNAL(clientError()), this, SLOT(clientError()) );
     connect( client, SIGNAL(clientEnd()), this, SLOT(clientEnd()) );
 
@@ -175,10 +164,10 @@ void QSyncProtocol::startSync(QDClientSyncPlugin *_client, QDServerSyncPlugin *_
     datasource.clear();
     clientid.clear();
     datasource = source;
+    state = Header;
     serverSyncRequest(datasource);
     serverIdentity(DesktopSettings::deviceId());
     serverVersion(4, 3, 0);
-    state = Header;
     emit progress();
 }
 
@@ -223,17 +212,22 @@ void QSyncProtocol::clientSyncAnchors(const QDateTime &clientLastSync, const QDa
     pendingServerChanges = true;
     pendingClientChanges = true;
     LOG() << "compare last sync" << lastSync << clientLastSync;
-    if (lastSync.isNull() || lastSync != clientLastSync) {
+    nextSync = clientNextSync; // so last sync when stored will match client
+    if (lastSync.isNull()
+            // We need to use a reduced resolution for comparrison because QDateTime
+            // cannot be saved and restored to a database without losing resolution.
+            || lastSync.toString("yyyy.MM.dd hh:mm:ss") != clientLastSync.toString("yyyy.MM.dd hh:mm:ss")) {
+        SyncLog() << "Performing slow sync" << endl;
         // clear id mapping for this sync.
         // TODO merge should have specific mappings for specific plugins
         merge->clearIdentifierMap();
         requestSlowSync();
         server->fetchChangesSince(QDateTime());
     } else {
+        SyncLog() << "Performing fast sync" << endl;
         requestTwoWaySync();
         server->fetchChangesSince(lastSync.addSecs(1)); // don't re-sync items matching last time-stamp
     }
-    nextSync = clientNextSync; // so last sync when stored will match client
 }
 
 void QSyncProtocol::createClientRecord(const QByteArray &record)
@@ -268,9 +262,9 @@ void QSyncProtocol::removeClientRecord(const QString &clientId)
     merge->removeClientRecord(clientId);
 }
 
-void QSyncProtocol::mapId(const QString &serverId, const QString &clientId)
+void QSyncProtocol::clientMappedId(const QString &serverId, const QString &clientId)
 {
-    TRACE(QDSyncProtocol) << "QSyncProtocol::mapId" << "serverId" << serverId << "clientId" << clientId;
+    TRACE(QDSyncProtocol) << "QSyncProtocol::clientMappedId" << "serverId" << serverId << "clientId" << clientId;
     if (state != IdMapping) {
         abort(tr("Protocol error - unexpected response from client"));
         return;
@@ -281,8 +275,8 @@ void QSyncProtocol::mapId(const QString &serverId, const QString &clientId)
 void QSyncProtocol::clientError()
 {
     TRACE(QDSyncProtocol) << "QSyncProtocol::clientError";
-    emit syncError(tr("Client indicated synchronization failure"));
     state = None;
+    emit syncError(tr("Client indicated synchronization failure"));
     merge->clearChanges();
     datasource.clear();
     clientid.clear();
@@ -324,6 +318,7 @@ void QSyncProtocol::mergeAndApply()
     serverChanges = merge->serverDiff();
     clientChanges = merge->clientDiff();
 
+    SyncLog() << "There are" << serverChanges.count() << "server changes and" << clientChanges.count() << "client changes to resolve" << endl;
     LOG() << "pre-resolve: sc" << serverChanges.count() << "cc" << clientChanges.count();
 
     // bias client... later based from config.
@@ -333,6 +328,7 @@ void QSyncProtocol::mergeAndApply()
     serverChanges = merge->serverDiff();
     clientChanges = merge->clientDiff();
 
+    SyncLog() << "After resolving there are" << serverChanges.count() << "server changes and" << clientChanges.count() << "client changes to apply" << endl;
     LOG() << "post-resolve: sc" << serverChanges.count() << "cc" << clientChanges.count();
 
     state = IdMapping;

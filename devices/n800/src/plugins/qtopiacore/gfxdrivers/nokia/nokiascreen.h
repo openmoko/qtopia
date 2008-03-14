@@ -24,33 +24,21 @@
 
 #include <QLinuxFbScreen>
 
-//class NokiaScreenPrivate;
 class NokiaScreen : public QLinuxFbScreen
 {
 public:
     NokiaScreen(int displayId);
     ~NokiaScreen();
-
     void exposeRegion(QRegion region, int windowIndex);
 
-/*      bool useOffscreen() { return false; } */
-/*      bool initDevice(); */
-/*      bool connect(const QString &displaySpec); */
-/*      void disconnect(); */
-/*      void shutdownDevice(); */
-/*      void setMode(int,int,int); */
-
-/*      void save(); */
-/*      void restore(); */
-/*      void blank(bool on); */
-/*      void set(unsigned int,unsigned int,unsigned int,unsigned int); */
-/*      uchar * cache(int); */
-/*      void uncache(uchar *); */
-/*      int sharedRamSize(void *); */
-    
 private:
-      //   NokiaScreenPrivate *d;
-        QScreen * screen;    
+    QScreen * screen;
+    int infd;
+    bool okToUpdate;
+    
+private slots:
+    void readBrightness(const QString &);
+    
 };
 
 #endif // NOKIASCREEN_H

@@ -138,7 +138,7 @@ QSize Board::size() const
 
 bool Board::isAlphabet() const
 {
-    return m_isAlphabet == KeyboardWidget::UpperCase || 
+    return m_isAlphabet == KeyboardWidget::UpperCase ||
            m_isAlphabet == KeyboardWidget::LowerCase;
 }
 
@@ -388,7 +388,7 @@ static void colorizeImage( QImage& img, const QColor& col, int alpha, bool blend
 }
 OptionsWindow::OptionsWindow(int wordSpacing)
 : QWidget(0, (Qt::WindowFlags)(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)), m_specialDelete(false), m_ignore(false),
-  m_selectedWord(0), m_slideTimeline(300), m_backgroundTimeline(300),   
+  m_selectedWord(0), m_slideTimeline(300), m_backgroundTimeline(300),
   m_background(":image/predictivekeyboard/softbar"),
   m_wordSpacing(wordSpacing), m_clearTimer(0)
 {
@@ -493,8 +493,8 @@ void OptionsWindow::layoutWords(const QStringList &words)
 
 void OptionsWindow::finished()
 {
-    if(m_backgroundTimeline.direction() == QTimeLine::Backward && 
-       m_backgroundTimeline.state() == QTimeLine::NotRunning && 
+    if(m_backgroundTimeline.direction() == QTimeLine::Backward &&
+       m_backgroundTimeline.state() == QTimeLine::NotRunning &&
        m_clearTimeline.state() == QTimeLine::NotRunning) {
         hide();
     }
@@ -818,8 +818,8 @@ private:
 };
 
 PopupWindow::PopupWindow(int raise, QWidget *parent)
-: QWidget(parent, (Qt::WindowFlags)(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)), 
-  m_ignore(false), m_timeline(300), m_showtimeline(300), m_board(0), 
+: QWidget(parent, (Qt::WindowFlags)(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)),
+  m_ignore(false), m_timeline(300), m_showtimeline(300), m_board(0),
   m_offset(raise), m_dismissing(false)
 {
     setAttribute(Qt::WA_DeleteOnClose);
@@ -1428,8 +1428,8 @@ QChar KeyboardWidget::closestCharacter(const QPoint &p, Board *board) const
 }
 
 /*
- * Returns the rect in widget co-ordinates where \a c is visible, or QRect().
- */
+    Returns the rect in widget co-ordinates where \a c is visible, or QRect().
+*/
 QRect KeyboardWidget::rectForCharacter(const QChar &c) const
 {
     QRect ret;
@@ -1443,8 +1443,8 @@ QRect KeyboardWidget::rectForCharacter(const QChar &c) const
 }
 
 /*
- * Returns the rect in widget co-ordinates where \a word is visible, or QRect().
- */
+    Returns the rect in widget co-ordinates where \a word is visible, or QRect().
+*/
 QRect KeyboardWidget::rectForWord(const QString &word)
 {
     QRect ret;
@@ -1462,8 +1462,8 @@ QRect KeyboardWidget::rectForWord(const QString &word)
 }
 
 /*
- * Returns the words currently shown to the user.
- */
+    Returns the words currently shown to the user.
+*/
 QStringList KeyboardWidget::words() const
 {
     return m_words;
@@ -1482,13 +1482,13 @@ void KeyboardWidget::mouseClick(const QPoint &p)
     if(m_preeditSpace) {
         m_preeditSpace = false;
 
-        if(m_boards.at(m_currentBoard)->isAlphabet() || 
+        if(m_boards.at(m_currentBoard)->isAlphabet() ||
            m_boards.at(m_currentBoard)->isNumeric()) {
             emit commit(QString(" "));
         } else {
             emit commit(QString());
         }
-    } 
+    }
 
     if(m_boards.at(m_currentBoard)->type() == Numeric) {
         pressAndHoldChar(closestCharacter(p, m_boards.at(m_currentBoard)));
@@ -1518,19 +1518,19 @@ void KeyboardWidget::pressAndHoldChar(const QChar &c)
 {
     bool wasNotWord = m_notWord;
 
-    if(!m_boards.at(m_currentBoard)->isAlphabet() && c != '\'') 
+    if(!m_boards.at(m_currentBoard)->isAlphabet() && c != '\'')
         m_notWord = true;
 
     if(m_preeditSpace) {
         m_preeditSpace = false;
 
-        if(m_boards.at(m_currentBoard)->isAlphabet() || 
+        if(m_boards.at(m_currentBoard)->isAlphabet() ||
            m_boards.at(m_currentBoard)->isNumeric()) {
             emit commit(QString(" "));
         } else {
             emit commit(QString());
         }
-    } 
+    }
 
     if(c == QChar(0x21b5)) {// Magic number - return key
         //m_preeditSpace = false;
@@ -1545,7 +1545,7 @@ void KeyboardWidget::pressAndHoldChar(const QChar &c)
         // Special-case carriage returns
         occurance.board = m_currentBoard;
         occurance.explicitChar = c;
-        if(!wasNotWord && m_notWord) 
+        if(!wasNotWord && m_notWord)
             occurance.freezeWord = m_options->selectedWord();
 
         m_occuranceHistory << occurance;
@@ -1569,16 +1569,16 @@ void KeyboardWidget::updateWords()
 {
     m_words = QStringList();
 
-    if(!m_notWord) 
+    if(!m_notWord)
         m_words = m_predict->words();
-    
-    if(m_words.isEmpty()) 
+
+    if(m_words.isEmpty())
         m_words << closestWord();
 
     m_words = fixupCase(m_words);
     m_options->setWords(m_words);
 
-    // Change to lowercase if appropriate for autocapitalisation - 
+    // Change to lowercase if appropriate for autocapitalisation -
     // i.e. if this is the first letter of the word, autocapitalisation is on,
     // and the current board is still uppercase.
     // Changing back to uppercase is handled in KeyboardWidget::acceptWord()
@@ -1605,7 +1605,7 @@ void KeyboardWidget::updateWords()
 /*
   We change case if the user has any explicit characters or if the user does not
   stay on a lowercase board.
- */
+*/
 QStringList KeyboardWidget::fixupCase(const QStringList &list) const
 {
     bool needFixupCase = false;
@@ -1660,13 +1660,13 @@ void KeyboardWidget::setBoardByType(BoardType newBoardType)
         qLog(Input) << "KeyboardWidget::setBoardByType - Failed to find board of type "<<newBoardType;
         return;
     };
-    
+
     if( newBoard == m_currentBoard ) {
         qLog(Input) << "KeyboardWidget::setBoardByType - already at board of type "<<newBoardType;
         return;
     }
 
-    if(isVisible()) { 
+    if(isVisible()) {
         // animate
         m_oldBoard = m_currentBoard;
         m_currentBoard = newBoard;
@@ -1751,10 +1751,10 @@ void KeyboardWidget::pressAndHold()
     emit pressedAndHeld();
 }
 
-/* 
+/*
    If the last character was an explicit character, we will remove just it.
    Otherwise we remove the entire word.
- */
+*/
 void KeyboardWidget::doBackspace()
 {
     bool wasEmpty = m_words.isEmpty();
@@ -1850,12 +1850,12 @@ void KeyboardWidget::positionOptionsWindow()
 void KeyboardWidget::positionTimeOut()
 {
     int oheight = m_config.optionsWindowHeight;
-    
+
     if(oheight == -1) {
         int bottom = QApplication::desktop()->availableGeometry().bottom();
         oheight = pos().y() - bottom - 1;
         if(oheight <= 0)
-            oheight = 50; 
+            oheight = 50;
     }
 
     m_options->setFixedSize(width(), oheight);
@@ -1878,7 +1878,7 @@ void KeyboardWidget::resetToHistory()
     for(int ii = 0; ii < m_occuranceHistory.count(); ++ii ) {
         const KeyOccurance &o = m_occuranceHistory.at(ii);
 
-        if(!m_boards.at(o.board)->isAlphabet()) 
+        if(!m_boards.at(o.board)->isAlphabet())
             localNotWord = true;
 
         if(!localNotWord) {
@@ -1995,7 +1995,7 @@ void KeyboardWidget::setHint(const QString& hint)
 
     // update microfocus
     //qwsServer->sendIMQuery ( Qt::ImMicroFocus );
-    
+ 
     if (h.contains("propernouns")) // no tr
     {
         qLog(Input) << "PredictiveKeyboard::setHint(" << h << ") - setting autocapitalisation";
@@ -2032,7 +2032,7 @@ void KeyboardWidget::setHint(const QString& hint)
 };
 
 /*!
-    Filter key events.  
+    Filter key events.
     On Qt::Key_Select, the input method discards any preedit space, and commits any other preedit text.  The predictive keyboard never consumes Qt::Key_Select, it is always passed back to the system after processing.
     On Qt::Key_Back, the input method will consume the key press and release only if it has preedit text. If the key event is consumed, the KeyboardWidget will \l{doBackspace()}
     \sa acceptWord(), doBackspace()

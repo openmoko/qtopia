@@ -400,7 +400,7 @@ extern DLLEXPORT(void) writeVObject(FILE *fp, VObject *o);
 extern DLLEXPORT(void) writeVObject(QIODevice *device, VObject *o);
 
 
-typedef void (*MimeErrorHandler)(char *);
+typedef void (*MimeErrorHandler)(const char *);
 
 extern DLLEXPORT(void) registerMimeErrorHandler(MimeErrorHandler);
 

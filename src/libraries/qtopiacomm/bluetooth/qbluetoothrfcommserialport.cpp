@@ -129,7 +129,7 @@ public:
     ~QBluetoothRfcommSerialPortPrivate();
 
     // Max of 31 rfcomm devices
-    char m_id;
+    int m_id;
     int m_fd;
     QString m_devName;
     QBluetoothRfcommSerialPort::Flags m_flags;

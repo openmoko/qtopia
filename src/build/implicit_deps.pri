@@ -26,5 +26,10 @@ qtopiadesktop:!contains(PROJECT_TYPE,core) {
 }
 
 systemtest:depends(tools/qtopiatestrunner/lib)
-unittest:!contains(PROJECT_TYPE,desktop):depends(tests/shared/qtopiaunittest)
-
+unittest|integrationtest {
+    contains(PROJECT_type,desktop) {
+        depends(libraries/qt/qtestlib)
+    } else {
+        depends(libraries/qtopiacore/qtestlib)
+    }
+}

@@ -44,6 +44,7 @@ INCLUDEPATH+= core_server \
               bluetooth/scomisc \
               pim/savetocontacts \
               pim/servercontactmodel \
+              phone/contextlabel/base \
               phone/secondarydisplay/abstract \
               phone/telephony/callpolicymanager/abstract \
               phone/telephony/callpolicymanager/cell \
@@ -51,11 +52,13 @@ INCLUDEPATH+= core_server \
               phone/telephony/cell/cellbroadcast \
               phone/telephony/dialercontrol \
               phone/telephony/dialfilter/gsm  \
+              phone/telephony/dialproxy \
               phone/telephony/msgcontrol \
               phone/telephony/phoneserver/dummyservice \
               phone/telephony/ringcontrol \
               phone/telephony/videoringtone \
               phone/themecontrol \
+              phone/ui/callcontactmodelview \
               phone 
 
 
@@ -301,7 +304,7 @@ UNPORTED_HEADERS=firstuse.h
 UNPORTED_SOURCES=firstuse.cpp
 
 PHONE_HEADERS=\
-    phone/contextlabel.h \
+    phone/contextlabel/base/contextlabel.h \
     phone/themecontrol/themecontrol.h \
     ui/launcherviews/documentview/documentview.h \
     phone/phonebrowser.h \
@@ -335,14 +338,14 @@ PHONE_HEADERS=\
 TELEPHONY_HEADERS=\
     phone/telephony/atemulator/externalaccess.h \
     phone/telephony/msgcontrol/messagecontrol.h \
-    phone/callcontactlist.h \
+    phone/ui/callcontactmodelview/callcontactlist.h \
     phone/callscreen.h \
     phone/telephony/dialercontrol/dialercontrol.h \
     pim/savetocontacts/savetocontacts.h \
     phone/quickdial.h \
     phone/numberdisplay.h \
     phone/dialer.h \
-    phone/dialerservice.h \
+    phone/telephony/dialproxy/dialerservice.h \
     phone/qabstractdialerscreen.h\
     phone/telephony/phoneserver/base/phoneserver.h \
     phone/telephony/ringcontrol/ringcontrol.h\
@@ -352,7 +355,7 @@ TELEPHONY_HEADERS=\
     phone/telephony/videoringtone/videoringtone.h
 
 PHONE_SOURCES=\
-    phone/contextlabel.cpp \
+    phone/contextlabel/base/contextlabel.cpp \
     phone/phonelauncher.cpp \
     phone/themecontrol/themecontrol.cpp \
     ui/launcherviews/documentview/documentview.cpp \
@@ -383,14 +386,14 @@ PHONE_SOURCES=\
 TELEPHONY_SOURCES=\
     phone/telephony/atemulator/externalaccess.cpp \
     phone/telephony/msgcontrol/messagecontrol.cpp \
-    phone/callcontactlist.cpp\
+    phone/ui/callcontactmodelview/callcontactlist.cpp\
     phone/callscreen.cpp \
     phone/telephony/dialercontrol/dialercontrol.cpp \
     pim/savetocontacts/savetocontacts.cpp \
     phone/quickdial.cpp \
     phone/numberdisplay.cpp \
     phone/dialer.cpp \
-    phone/dialerservice.cpp \
+    phone/telephony/dialproxy/dialerservice.cpp \
     phone/telephony/ringcontrol/ringcontrol.cpp\
     phone/telephony/ringcontrol/ringtoneservice.cpp\
     phone/telephony/phoneserver/base/phoneserver.cpp \
@@ -1001,37 +1004,40 @@ INSTALLS+=dicts
 EXTRA_TS_FILES=\
     QtopiaApplications QtopiaGames QtopiaSettings QtopiaI18N QtopiaServices\
     QtopiaNetworkServices QtopiaBeaming QtopiaColorSchemes QtopiaDefaults\
-    QtopiaPlugins QtopiaRingTones \
-    QtopiaThemes Categories-Qtopia
+    QtopiaRingTones QtopiaThemes Categories-Qtopia
+
+ALL_TRANSLATIONS=$$AVAILABLE_LANGUAGES
+ALL_TRANSLATIONS-=$$STRING_LANGUAGE
 
 # lupdate for "global" stuff
 nct_lupdate.commands=$$COMMAND_HEADER\
     cd $$PWD;\
+    find $$QTOPIA_DEPOT_PATH\
+        # apps, plugins and i18n
+        $${LITERAL_BACKSLASH}( $${LITERAL_BACKSLASH}( -path $${LITERAL_SQUOTE}$$QTOPIA_DEPOT_PATH/apps/*$${LITERAL_SQUOTE} -o\
+              -path $${LITERAL_SQUOTE}$$QTOPIA_DEPOT_PATH/plugins/*$${LITERAL_SQUOTE} -o\
+              -path $${LITERAL_SQUOTE}$$QTOPIA_DEPOT_PATH/i18n/*$${LITERAL_SQUOTE} $${LITERAL_BACKSLASH}) -a\
+           # .directory and .desktop files
+           $${LITERAL_BACKSLASH}( -name $${LITERAL_SQUOTE}.directory$${LITERAL_SQUOTE} -o -name $${LITERAL_SQUOTE}*.desktop$${LITERAL_SQUOTE} $${LITERAL_BACKSLASH}) $${LITERAL_BACKSLASH}) -o\
+        # etc
+        $${LITERAL_BACKSLASH}( $${LITERAL_BACKSLASH}( -path $${LITERAL_SQUOTE}$$QTOPIA_DEPOT_PATH/etc/*$${LITERAL_SQUOTE} $${LITERAL_BACKSLASH}) -a\
+           # .conf and .scheme files
+           $${LITERAL_BACKSLASH}( -name $${LITERAL_SQUOTE}*.conf$${LITERAL_SQUOTE} -o -name $${LITERAL_SQUOTE}*.scheme$${LITERAL_SQUOTE} -o -name $${LITERAL_SQUOTE}*.desktop$${LITERAL_SQUOTE} $${LITERAL_BACKSLASH}) $${LITERAL_BACKSLASH}) -o\
+        # qds
+        $${LITERAL_BACKSLASH}( -path $${LITERAL_SQUOTE}$$QTOPIA_DEPOT_PATH/etc/qds/*$${LITERAL_SQUOTE} $${LITERAL_BACKSLASH}) -o\
+        # pics
+        $${LITERAL_BACKSLASH}( $${LITERAL_BACKSLASH}( -path $${LITERAL_SQUOTE}$$QTOPIA_DEPOT_PATH/pics/*$${LITERAL_SQUOTE} $${LITERAL_BACKSLASH}) -a\
+           # config files (media player skins)
+           $${LITERAL_BACKSLASH}( -name $${LITERAL_SQUOTE}config$${LITERAL_SQUOTE} $${LITERAL_BACKSLASH}) $${LITERAL_BACKSLASH}) -o\
+        # services (all files)
+        $${LITERAL_BACKSLASH}( -path $${LITERAL_SQUOTE}$$QTOPIA_DEPOT_PATH/services/*$${LITERAL_SQUOTE} $${LITERAL_BACKSLASH}) |\
     $$QBS_BIN/nct_lupdate\
         -nowarn\
         -depot\
         $$LITERAL_QUOTE$$QTOPIA_DEPOT_PATH$$LITERAL_QUOTE\
         $$LITERAL_QUOTE$$DQTDIR$$LITERAL_QUOTE\
-        $$LITERAL_QUOTE$$TRANSLATIONS$$LITERAL_QUOTE\
-	`find $$QTOPIA_DEPOT_PATH\
-	    # apps, plugins and i18n
-	    $${LITERAL_BACKSLASH}( $${LITERAL_BACKSLASH}( -path $${LITERAL_SQUOTE}$$QTOPIA_DEPOT_PATH/apps/*$${LITERAL_SQUOTE} -o\
-	          -path $${LITERAL_SQUOTE}$$QTOPIA_DEPOT_PATH/plugins/*$${LITERAL_SQUOTE} -o\
-	          -path $${LITERAL_SQUOTE}$$QTOPIA_DEPOT_PATH/i18n/*$${LITERAL_SQUOTE} $${LITERAL_BACKSLASH}) -a\
-	       # .directory and .desktop files
-	       $${LITERAL_BACKSLASH}( -name $${LITERAL_SQUOTE}.directory$${LITERAL_SQUOTE} -o -name $${LITERAL_SQUOTE}*.desktop$${LITERAL_SQUOTE} $${LITERAL_BACKSLASH}) $${LITERAL_BACKSLASH}) -o\
-	    # etc
-	    $${LITERAL_BACKSLASH}( $${LITERAL_BACKSLASH}( -path $${LITERAL_SQUOTE}$$QTOPIA_DEPOT_PATH/etc/*$${LITERAL_SQUOTE} $${LITERAL_BACKSLASH}) -a\
-	       # .conf and .scheme files
-	       $${LITERAL_BACKSLASH}( -name $${LITERAL_SQUOTE}*.conf$${LITERAL_SQUOTE} -o -name $${LITERAL_SQUOTE}*.scheme$${LITERAL_SQUOTE} -o -name $${LITERAL_SQUOTE}*.desktop$${LITERAL_SQUOTE} $${LITERAL_BACKSLASH}) $${LITERAL_BACKSLASH}) -o\
-            # qds
-	    $${LITERAL_BACKSLASH}( -path $${LITERAL_SQUOTE}$$QTOPIA_DEPOT_PATH/etc/qds/*$${LITERAL_SQUOTE} $${LITERAL_BACKSLASH}) -o\
-	    # pics
-	    $${LITERAL_BACKSLASH}( $${LITERAL_BACKSLASH}( -path $${LITERAL_SQUOTE}$$QTOPIA_DEPOT_PATH/pics/*$${LITERAL_SQUOTE} $${LITERAL_BACKSLASH}) -a\
-	       # config files (media player skins)
-	       $${LITERAL_BACKSLASH}( -name $${LITERAL_SQUOTE}config$${LITERAL_SQUOTE} $${LITERAL_BACKSLASH}) $${LITERAL_BACKSLASH}) -o\
-	    # services (all files)
-	    $${LITERAL_BACKSLASH}( -path $${LITERAL_SQUOTE}$$QTOPIA_DEPOT_PATH/services/*$${LITERAL_SQUOTE} $${LITERAL_BACKSLASH})`
+        $$LITERAL_QUOTE$$ALL_TRANSLATIONS$$LITERAL_QUOTE\
+        -
 lupdate.depends+=nct_lupdate
 QMAKE_EXTRA_TARGETS+=nct_lupdate
 

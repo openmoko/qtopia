@@ -45,7 +45,7 @@
         else if ( call.dropped() )
             status-&gt;setText(&quot;Call &quot; + call.number() + &quot; has ended&quot;);
     }</pre>
-<p>The <a href="qphonecall.html">QPhoneCall</a> class is a reference-counted pointer to a QPhoneCallPrivate instance. The QPhoneCallPrivate instance will be deleted once the call ends and all outstanding <a href="qphonecall.html">QPhoneCall</a> references to it are removed.</p>
+<p>The <a href="qphonecall.html">QPhoneCall</a> class is a reference-counted pointer to a <tt>QPhoneCallPrivate</tt> instance. The <tt>QPhoneCallPrivate</tt> instance will be deleted once the call ends and all outstanding <a href="qphonecall.html">QPhoneCall</a> references to it are removed.</p>
 <a name="making-a-data-call"></a>
 <h2>Making a Data Call</h2>
 <p>The procedure for making a data call is very similar to that for voice calls:</p>
@@ -127,8 +127,8 @@
 <p>If more than one service were to support a call type, then <a href="qphonecallmanager.html#services">QPhoneCallManager::services</a>() will return the first that it finds. The caller can explicitly request a particular service in the call to <a href="qphonecallmanager.html#create">QPhoneCallManager::create</a>():</p>
 <pre>    QPhoneCallManager mgr;
     QPhoneCall call = mgr.create( &quot;Voice&quot;, &quot;modem&quot; );</pre>
-<p>Once the service has been located, <a href="qphonecallmanager.html#create">QPhoneCallManager::create</a>() calls <a href="qphonecallmanagerprivate.html#create">QPhoneCallManagerPrivate::create</a>() in <tt>qphonecallmanager.cpp</tt>. This method constructs a QPhoneCallPrivate instance, wraps it with a <a href="qphonecall.html">QPhoneCall</a> reference, and returns it to the caller.</p>
-<p>The constructor for QPhoneCallPrivate in <tt>qphonecall.cpp</tt> attaches to two <a href="qtopiaipc.html">Qtopia IPC</a> channels:</p>
+<p>Once the service has been located, <a href="qphonecallmanager.html#create">QPhoneCallManager::create</a>() calls <tt>QPhoneCallManagerPrivate::create()</tt> in <tt>qphonecallmanager.cpp</tt>. This method constructs a <tt>QPhoneCallPrivate</tt> instance, wraps it with a <a href="qphonecall.html">QPhoneCall</a> reference, and returns it to the caller.</p>
+<p>The constructor for <tt>QPhoneCallPrivate</tt> in <tt>qphonecall.cpp</tt> attaches to two <a href="qtopiaipc.html">Qtopia IPC</a> channels:</p>
 <pre>    QPE/Communications/QPhoneCallProvider/Request
     QPE/Communications/QPhoneCallProvider/Response</pre>
 <p>The first Qtopia IPC channel is used to send requests to the telephony service to perform call operations. The second Qtopia IPC channel is used to receive state information about the call back from the telephony service.</p>
@@ -144,12 +144,12 @@
 
         call.connectStateChanged(this, SLOT(stateChanged(QPhoneCall)));
     }</pre>
-<p>After initializing the local state of QPhoneCallPrivate, <a href="qphonecall.html#dial">QPhoneCall::dial</a>() sends the Qtopia IPC message <tt>dial(QString,QString,QString,QDialOptions)</tt> to the <tt>Request</tt> channel.</p>
+<p>After initializing the local state of <tt>QPhoneCallPrivate</tt>, <a href="qphonecall.html#dial">QPhoneCall::dial</a>() sends the Qtopia IPC message <tt>dial(QString,QString,QString,QDialOptions)</tt> to the <tt>Request</tt> channel.</p>
 <p>In the telephony service, the Qtopia IPC message is received by QPhoneCallProvider::dial() in <tt>qphonecallprovider.cpp</tt>. It filters the message to check that it is intended for that service (all call providers listen on the same channel), and then calls <a href="qphonecallprovider.html#create">QPhoneCallProvider::create</a>() to create a <a href="qphonecallimpl.html">QPhoneCallImpl</a> object to represent the server-side instance of the phone call.</p>
 <p>The <a href="qphonecallprovider.html#create">QPhoneCallProvider::create</a>() method is implemented differently for each telephony service. For AT-based modems, it is overridden by <a href="qphonecallprovider.html#create">QModemCallProvider::create</a>() in <tt>qmodemcallprovider.cpp</tt>, which then creates a <a href="qmodemcall.html">QModemCall</a> object.</p>
 <p>Once the server-side instance has been created, QPhoneCallProvider::dial() calls <a href="qphonecallimpl.html#dial">QPhoneCallImpl::dial</a>(), which in our case is overridden by <a href="qphonecallimpl.html#dial">QModemCall::dial</a>() in <tt>qmodemcall.cpp</tt>. <a href="qphonecallimpl.html#dial">QModemCall::dial</a>() issues the <tt>ATD</tt> command to the modem and the dial starts.</p>
 <p>As the call progresses, the <a href="qmodemcall.html">QModemCall</a> class will advertise state changes by calling the <a href="qphonecallimpl.html#setState">QPhoneCallImpl::setState</a>() method. This will cause the QPhoneCallProvider::stateChanged() slot to be invoked, which in turn calls QPhoneCallProvider::sendState().</p>
-<p>The QPhoneCallProvider::sendState() method in <tt>qphonecallprovider.cpp</tt> sends a Qtopia IPC message on the <tt>Response</tt> channel, which will return back to the client application in the QPhoneCallPrivate::callStateChanged() method in <tt>qphonecall.cpp</tt>. This will cause the <tt>stateChanged()</tt> signal to be emitted on <a href="qphonecall.html">QPhoneCall</a>, notifying the client application.</p>
+<p>The QPhoneCallProvider::sendState() method in <tt>qphonecallprovider.cpp</tt> sends a Qtopia IPC message on the <tt>Response</tt> channel, which will return back to the client application in the <tt>QPhoneCallPrivate::callStateChanged()</tt> method in <tt>qphonecall.cpp</tt>. This will cause the <tt>stateChanged()</tt> signal to be emitted on <a href="qphonecall.html">QPhoneCall</a>, notifying the client application.</p>
 <p>See also <a href="qphonecall.html">QPhoneCall</a>, <a href="qphonecallmanager.html">QPhoneCallManager</a>, <a href="qdialoptions.html">QDialOptions</a>, <a href="qphonecallprovider.html">QPhoneCallProvider</a>, <a href="qmodemservice.html">QModemService</a>, <a href="qmodemcallprovider.html">QModemCallProvider</a>, and <a href="qmodemcall.html">QModemCall</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

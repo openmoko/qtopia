@@ -40,6 +40,8 @@ public:
     QRect mapToDevice(const QRect &, const QSize &) const;
     QRect mapFromDevice(const QRect &, const QSize &) const;
 
+    using QScreen::mapToDevice;
+    using QScreen::mapFromDevice;
     QRegion mapToDevice(const QRegion &, const QSize &) const;
     QRegion mapFromDevice(const QRegion &, const QSize &) const;
 

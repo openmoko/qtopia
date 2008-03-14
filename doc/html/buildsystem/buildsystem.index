@@ -9,7 +9,7 @@
             <contents name="overview" title="Overview" level="1"></contents>
             <contents name="changes" title="Changes" level="1"></contents>
         </page>
-        <page access="public" status="commendable" name="over_Project Files_1.html" href="over-project-files-1.html" subtype="page" title="Project Files" fulltitle="Project Files" subtitle="" location="projectfiles.qdocpp">
+        <page access="public" status="commendable" name="over_Project_Files_1.html" href="over-project-files-1.html" subtype="page" title="Project Files" fulltitle="Project Files" subtitle="" location="projectfiles.qdocpp">
             <contents name="introduction" title="Introduction" level="1"></contents>
             <contents name="project-type" title="Project Type" level="1"></contents>
             <contents name="target" title="TARGET" level="1"></contents>
@@ -21,14 +21,14 @@
             <contents name="help-files" title="Help files" level="1"></contents>
             <contents name="package-meta-data" title="Package meta-data" level="1"></contents>
         </page>
-        <page access="public" status="commendable" name="task_Create a new project file_1.html" href="task-create-a-new-project-file-1.html" subtype="page" title="Create a new project file" fulltitle="Create a new project file" subtitle="" location="projectfiles.qdocpp"></page>
-        <page access="public" status="commendable" name="atask_Use install rules at other times_1.html" href="atask-use-install-rules-at-other-times-1.html" subtype="page" title="Use install rules at other times" fulltitle="Use install rules at other times" subtitle="" location="useinstallrulesatothertimes.qdocpp"></page>
+        <page access="public" status="commendable" name="task_Create_a_new_project_file_1.html" href="task-create-a-new-project-file-1.html" subtype="page" title="Create a new project file" fulltitle="Create a new project file" subtitle="" location="projectfiles.qdocpp"></page>
+        <page access="public" status="commendable" name="atask_Use_install_rules_at_other_times_1.html" href="atask-use-install-rules-at-other-times-1.html" subtype="page" title="Use install rules at other times" fulltitle="Use install rules at other times" subtitle="" location="useinstallrulesatothertimes.qdocpp"></page>
         <page access="public" status="commendable" name="over_Applications_1.html" href="over-applications-1.html" subtype="page" title="Applications" fulltitle="Applications" subtitle="" location="applications.qdocpp"></page>
-        <page access="public" status="commendable" name="over_Internationalization build system_1.html" href="over-internationalization-build-system-1.html" subtype="page" title="Internationalization (build system)" fulltitle="Internationalization (build system)" subtitle="" location="internationalization.qdocpp"></page>
+        <page access="public" status="commendable" name="over_Internationalization_build_system_1.html" href="over-internationalization-build-system-1.html" subtype="page" title="Internationalization (build system)" fulltitle="Internationalization (build system)" subtitle="" location="internationalization.qdocpp"></page>
         <page access="public" status="commendable" name="chlog_4.2.1_1.html" href="chlog-4-2-1-1.html" subtype="page" title="Build system changes for 4.2.1" fulltitle="Build system changes for 4.2.1" subtitle="" location="changes_421.qdocpp">
             <contents name="overview" title="Overview" level="1"></contents>
         </page>
-        <page access="public" status="commendable" name="task_Register a service provider_1.html" href="task-register-a-service-provider-1.html" subtype="page" title="Register a service provider" fulltitle="Register a service provider" subtitle="" location="registeraserviceprovider.qdocpp">
+        <page access="public" status="commendable" name="task_Register_a_service_provider_1.html" href="task-register-a-service-provider-1.html" subtype="page" title="Register a service provider" fulltitle="Register a service provider" subtitle="" location="registeraserviceprovider.qdocpp">
             <contents name="myapp-implements-telephony" title="myapp implements Telephony" level="1"></contents>
         </page>
         <page access="public" status="commendable" name="chlog_4.2.3_1.html" href="chlog-4-2-3-1.html" subtype="page" title="Build system changes for 4.2.3" fulltitle="Build system changes for 4.2.3" subtitle="" location="changes_423.qdocpp">
@@ -53,8 +53,9 @@
         </page>
         <page access="public" status="commendable" name="chlog_4.3.1_1.html" href="chlog-4-3-1-1.html" subtype="page" title="Build system changes for 4.3.1" fulltitle="Build system changes for 4.3.1" subtitle="" location="changes_431.qdocpp">
             <contents name="overview" title="Overview" level="1"></contents>
+            <contents name="known-issues" title="Known issues" level="1"></contents>
         </page>
-        <page access="public" status="commendable" name="over_Image, prefix and SDK location_1.html" href="over-image-prefix-and-sdk-location-1.html" subtype="page" title="Image, prefix and SDK location" fulltitle="Image, prefix and SDK location" subtitle="" location="imageprefixsdklocation.qdocpp">
+        <page access="public" status="commendable" name="over_Image_prefix_and_SDK_location_1.html" href="over-image-prefix-and-sdk-location-1.html" subtype="page" title="Image, prefix and SDK location" fulltitle="Image, prefix and SDK location" subtitle="" location="imageprefixsdklocation.qdocpp">
             <contents name="history" title="History" level="1"></contents>
             <contents name="the-qtopia-4-2-0-solution" title="The Qtopia 4.2.0 solution" level="1"></contents>
             <contents name="qtopia-4-2-5-relocating-the-sdk" title="Qtopia 4.2.5, relocating the SDK" level="1"></contents>
@@ -63,14 +64,14 @@
         <page access="public" status="commendable" name="over_Plugins_1.html" href="over-plugins-1.html" subtype="page" title="Plugins" fulltitle="Plugins" subtitle="" location="plugins.qdocpp"></page>
         <page access="public" status="commendable" name="internals.html" href="internals.html" subtype="page" title="Qtopia Build System Internals" fulltitle="Qtopia Build System Internals" subtitle="" location="internals.qdocpp"></page>
         <page access="public" status="commendable" name="advancedtasks" href="advancedtasks.html" subtype="group" title="Advanced Tasks" fulltitle="Advanced Tasks" subtitle="" location="internals.qdocpp"></page>
-        <page access="public" status="commendable" name="bas_What is the build system?_1.html" href="bas-what-is-the-build-system-1.html" subtype="page" title="What is the build system?" fulltitle="What is the build system?" subtitle="" location="whatisthebuildsystem.qdocpp"></page>
-        <page access="public" status="commendable" name="task_Create a launcher folder_1.html" href="task-create-a-launcher-folder-1.html" subtype="page" title="Create a launcher folder" fulltitle="Create a launcher folder" subtitle="" location="createalauncherfolder.qdocpp">
+        <page access="public" status="commendable" name="bas_What_is_the_build_system_1.html" href="bas-what-is-the-build-system-1.html" subtype="page" title="What is the build system?" fulltitle="What is the build system?" subtitle="" location="whatisthebuildsystem.qdocpp"></page>
+        <page access="public" status="commendable" name="task_Create_a_launcher_folder_1.html" href="task-create-a-launcher-folder-1.html" subtype="page" title="Create a launcher folder" fulltitle="Create a launcher folder" subtitle="" location="createalauncherfolder.qdocpp">
             <contents name="a-note-on-packages" title="A note on packages" level="1"></contents>
         </page>
-        <page access="public" status="commendable" name="over_Export Macros_1.html" href="over-export-macros-1.html" subtype="page" title="Export Macros" fulltitle="Export Macros" subtitle="" location="exportmacros.qdocpp"></page>
-        <page access="public" status="commendable" name="task_Create a new service_1.html" href="task-create-a-new-service-1.html" subtype="page" title="Create a new service" fulltitle="Create a new service" subtitle="" location="createanewservice.qdocpp"></page>
-        <page access="public" status="commendable" name="over_installpic Algorithm_1.html" href="over-installpic-algorithm-1.html" subtype="page" title="installpic Algorithm" fulltitle="installpic Algorithm" subtitle="" location="installpicalgorithm.qdocpp"></page>
-        <page access="public" status="commendable" name="over_Depot Hopping_1.html" href="over-depot-hopping-1.html" subtype="page" title="Depot Hopping" fulltitle="Depot Hopping" subtitle="" location="depothopping.qdocpp"></page>
+        <page access="public" status="commendable" name="over_Export_Macros_1.html" href="over-export-macros-1.html" subtype="page" title="Export Macros" fulltitle="Export Macros" subtitle="" location="exportmacros.qdocpp"></page>
+        <page access="public" status="commendable" name="task_Create_a_new_service_1.html" href="task-create-a-new-service-1.html" subtype="page" title="Create a new service" fulltitle="Create a new service" subtitle="" location="createanewservice.qdocpp"></page>
+        <page access="public" status="commendable" name="over_installpic_Algorithm_1.html" href="over-installpic-algorithm-1.html" subtype="page" title="installpic Algorithm" fulltitle="installpic Algorithm" subtitle="" location="installpicalgorithm.qdocpp"></page>
+        <page access="public" status="commendable" name="over_Depot_Hopping_1.html" href="over-depot-hopping-1.html" subtype="page" title="Depot Hopping" fulltitle="Depot Hopping" subtitle="" location="depothopping.qdocpp"></page>
         <page access="public" status="commendable" name="conf_qtopia_main_1.html" href="conf-qtopia-main-1.html" subtype="page" title="qtopia_main" fulltitle="qtopia_main" subtitle="" location="config.qdocpp">
             <contents name="usage" title="Usage" level="1"></contents>
             <contents name="description" title="Description" level="1"></contents>
@@ -139,32 +140,32 @@
             <contents name="usage" title="Usage" level="1"></contents>
             <contents name="description" title="Description" level="1"></contents>
         </page>
-        <page access="public" status="commendable" name="task_Translating Categories_1.html" href="task-translating-categories-1.html" subtype="page" title="Translating Categories" fulltitle="Translating Categories" subtitle="" location="translatingcategories.qdocpp"></page>
-        <page access="public" status="commendable" name="task_Add a global option_1.html" href="task-add-a-global-option-1.html" subtype="page" title="Add a global option" fulltitle="Add a global option" subtitle="" location="addaglobaloption.qdocpp"></page>
+        <page access="public" status="commendable" name="task_Translating_Categories_1.html" href="task-translating-categories-1.html" subtype="page" title="Translating Categories" fulltitle="Translating Categories" subtitle="" location="translatingcategories.qdocpp"></page>
+        <page access="public" status="commendable" name="task_Add_a_global_option_1.html" href="task-add-a-global-option-1.html" subtype="page" title="Add a global option" fulltitle="Add a global option" subtitle="" location="addaglobaloption.qdocpp"></page>
         <page access="public" status="commendable" name="chlog_4.1.7_1.html" href="chlog-4-1-7-1.html" subtype="page" title="Build system changes for 4.1.7" fulltitle="Build system changes for 4.1.7" subtitle="" location="changes_417.qdocpp">
             <contents name="overview" title="Overview" level="1"></contents>
             <contents name="changes" title="Changes" level="1"></contents>
         </page>
-        <page access="public" status="commendable" name="over_configure Options_1.html" href="over-configure-options-1.html" subtype="page" title="configure Options" fulltitle="configure Options" subtitle="" location="configureoptions.qdocpp">
+        <page access="public" status="commendable" name="over_configure_Options_1.html" href="over-configure-options-1.html" subtype="page" title="configure Options" fulltitle="configure Options" subtitle="" location="configureoptions.qdocpp">
             <contents name="configure-help" title="configure -help" level="1"></contents>
         </page>
-        <page access="public" status="commendable" name="over_configure Options Qt_1.html" href="over-configure-options-qt-1.html" subtype="page" title="configure Options (Qt)" fulltitle="configure Options (Qt)" subtitle="" location="configureoptions.qdocpp">
+        <page access="public" status="commendable" name="over_configure_Options_Qt_1.html" href="over-configure-options-qt-1.html" subtype="page" title="configure Options (Qt)" fulltitle="configure Options (Qt)" subtitle="" location="configureoptions.qdocpp">
             <contents name="qtopiacore-qt-configure-help" title="qtopiacore/qt/configure -help" level="1"></contents>
         </page>
-        <page access="public" status="commendable" name="over_configure Options Qtopia Core_1.html" href="over-configure-options-qtopia-core-1.html" subtype="page" title="configure Options (Qtopia Core)" fulltitle="configure Options (Qtopia Core)" subtitle="" location="configureoptions.qdocpp">
+        <page access="public" status="commendable" name="over_configure_Options_Qtopia_Core_1.html" href="over-configure-options-qtopia-core-1.html" subtype="page" title="configure Options (Qtopia Core)" fulltitle="configure Options (Qtopia Core)" subtitle="" location="configureoptions.qdocpp">
             <contents name="qtopiacore-qt-configure-embedded-help" title="qtopiacore/qt/configure -embedded -help" level="1"></contents>
         </page>
-        <page access="public" status="commendable" name="over_runqtopia Options_1.html" href="over-runqtopia-options-1.html" subtype="page" title="runqtopia Options" fulltitle="runqtopia Options" subtitle="" location="configureoptions.qdocpp">
+        <page access="public" status="commendable" name="over_runqtopia_Options_1.html" href="over-runqtopia-options-1.html" subtype="page" title="runqtopia Options" fulltitle="runqtopia Options" subtitle="" location="configureoptions.qdocpp">
             <contents name="runqtopia-help" title="runqtopia -help" level="1"></contents>
         </page>
-        <page access="public" status="commendable" name="over_qtopiamake Options_1.html" href="over-qtopiamake-options-1.html" subtype="page" title="qtopiamake Options" fulltitle="qtopiamake Options" subtitle="" location="configureoptions.qdocpp">
+        <page access="public" status="commendable" name="over_qtopiamake_Options_1.html" href="over-qtopiamake-options-1.html" subtype="page" title="qtopiamake Options" fulltitle="qtopiamake Options" subtitle="" location="configureoptions.qdocpp">
             <contents name="qtopiamake-help" title="qtopiamake -help" level="1"></contents>
         </page>
         <page access="public" status="commendable" name="processingorder.html" href="processingorder.html" subtype="page" title="Processing Order" fulltitle="Processing Order" subtitle="" location="processingorder.qdocpp"></page>
         <page access="public" status="commendable" name="index.html" href="index.html" subtype="page" title="Qtopia Build System Documentation" fulltitle="Qtopia Build System Documentation" subtitle="" location="index.qdocpp"></page>
         <page access="public" status="commendable" name="classes.html" href="classes.html" subtype="page" title="Classes" fulltitle="Classes" subtitle="" location="index.qdocpp"></page>
         <page access="public" status="commendable" name="examples.html" href="examples.html" subtype="page" title="Examples" fulltitle="Examples" subtitle="" location="index.qdocpp"></page>
-        <page access="public" status="commendable" name="over_Device Profiles_1.html" href="over-device-profiles-1.html" subtype="page" title="Device Profiles" fulltitle="Device Profiles" subtitle="" location="deviceprofiles.qdocpp">
+        <page access="public" status="commendable" name="over_Device_Profiles_1.html" href="over-device-profiles-1.html" subtype="page" title="Device Profiles" fulltitle="Device Profiles" subtitle="" location="deviceprofiles.qdocpp">
             <contents name="configure" title="configure" level="1"></contents>
             <contents name="environment" title="environment" level="1"></contents>
             <contents name="toolchain" title="toolchain" level="2"></contents>
@@ -212,9 +213,9 @@
             <contents name="usage" title="Usage" level="1"></contents>
             <contents name="description" title="Description" level="1"></contents>
         </page>
-        <page access="public" status="commendable" name="task_Translating Themes_1.html" href="task-translating-themes-1.html" subtype="page" title="Translating Themes" fulltitle="Translating Themes" subtitle="" location="translatingthemes.qdocpp"></page>
+        <page access="public" status="commendable" name="task_Translating_Themes_1.html" href="task-translating-themes-1.html" subtype="page" title="Translating Themes" fulltitle="Translating Themes" subtitle="" location="translatingthemes.qdocpp"></page>
         <page access="public" status="commendable" name="over_Dependencies_1.html" href="over-dependencies-1.html" subtype="page" title="Dependencies" fulltitle="Dependencies" subtitle="" location="dependencies.qdocpp"></page>
-        <page access="public" status="commendable" name="atask_Run commands after the TARGET is built_1.html" href="atask-run-commands-after-the-target-is-built-1.html" subtype="page" title="Run commands after the TARGET is built" fulltitle="Run commands after the TARGET is built" subtitle="" location="runcommandsafterthetarget.qdocpp"></page>
+        <page access="public" status="commendable" name="atask_Run_commands_after_the_TARGET_is_built_1.html" href="atask-run-commands-after-the-target-is-built-1.html" subtype="page" title="Run commands after the TARGET is built" fulltitle="Run commands after the TARGET is built" subtitle="" location="runcommandsafterthetarget.qdocpp"></page>
         <page access="public" status="commendable" name="chlog_4.2.2_1.html" href="chlog-4-2-2-1.html" subtype="page" title="Build system changes for 4.2.2" fulltitle="Build system changes for 4.2.2" subtitle="" location="changes_422.qdocpp">
             <contents name="overview" title="Overview" level="1"></contents>
         </page>
@@ -242,11 +243,11 @@
             <contents name="overview" title="Overview" level="1"></contents>
             <contents name="defines" title="DEFINES" level="1"></contents>
         </page>
-        <page access="public" status="commendable" name="task_Setting up Headers_1.html" href="task-setting-up-headers-1.html" subtype="page" title="Setting up Headers" fulltitle="Setting up Headers" subtitle="" location="settingupheaders.qdocpp"></page>
+        <page access="public" status="commendable" name="task_Setting_up_Headers_1.html" href="task-setting-up-headers-1.html" subtype="page" title="Setting up Headers" fulltitle="Setting up Headers" subtitle="" location="settingupheaders.qdocpp"></page>
         <page access="public" status="commendable" name="chlog_4.3.2_1.html" href="chlog-4-3-2-1.html" subtype="page" title="Build system changes for 4.3.2" fulltitle="Build system changes for 4.3.2" subtitle="" location="changes_432.qdocpp">
             <contents name="overview" title="Overview" level="1"></contents>
         </page>
-        <page access="public" status="commendable" name="atask_Generate sources_1.html" href="atask-generate-sources-1.html" subtype="page" title="Generate sources" fulltitle="Generate sources" subtitle="" location="generatesources.qdocpp"></page>
+        <page access="public" status="commendable" name="atask_Generate_sources_1.html" href="atask-generate-sources-1.html" subtype="page" title="Generate sources" fulltitle="Generate sources" subtitle="" location="generatesources.qdocpp"></page>
         <page access="public" status="commendable" name="optsystem.html" href="optsystem.html" subtype="page" title="Opt System" fulltitle="Opt System" subtitle="" location="optsystem.qdocpp">
             <contents name="defining-a-new-opt-variable" title="Defining a new opt variable" level="1"></contents>
             <contents name="set-unset" title="set/unset" level="1"></contents>
@@ -262,7 +263,7 @@
         <page access="public" status="commendable" name="chlog_4.2.0_1.html" href="chlog-4-2-0-1.html" subtype="page" title="Build system changes for 4.2.0" fulltitle="Build system changes for 4.2.0" subtitle="" location="changes_420.qdocpp">
             <contents name="overview" title="Overview" level="1"></contents>
         </page>
-        <page access="public" status="commendable" name="atask_Override Commands_1.html" href="atask-override-commands-1.html" subtype="page" title="Override Commands" fulltitle="Override Commands" subtitle="" location="overridecommands.qdocpp"></page>
+        <page access="public" status="commendable" name="atask_Override_Commands_1.html" href="atask-override-commands-1.html" subtype="page" title="Override Commands" fulltitle="Override Commands" subtitle="" location="overridecommands.qdocpp"></page>
         <page access="public" status="commendable" name="var_PREFIX_1.html" href="var-prefix-1.html" subtype="page" title="PREFIX" fulltitle="PREFIX" subtitle="" location="varibles.qdocpp">
             <contents name="usage" title="Usage" level="1"></contents>
             <contents name="description" title="Description" level="1"></contents>
@@ -367,7 +368,7 @@
         <page access="public" status="commendable" name="chlog_4.3.0_1.html" href="chlog-4-3-0-1.html" subtype="page" title="Build system changes for 4.3.0" fulltitle="Build system changes for 4.3.0" subtitle="" location="changes_430.qdocpp">
             <contents name="overview" title="Overview" level="1"></contents>
         </page>
-        <page access="public" status="commendable" name="over_Packages overview_1.html" href="over-packages-overview-1.html" subtype="page" title="Packages (overview)" fulltitle="Packages (overview)" subtitle="" location="packages.qdocpp">
+        <page access="public" status="commendable" name="over_Packages_overview_1.html" href="over-packages-overview-1.html" subtype="page" title="Packages (overview)" fulltitle="Packages (overview)" subtitle="" location="packages.qdocpp">
             <contents name="package-limitations" title="Package Limitations" level="1"></contents>
             <contents name="alternate-package-formats" title="Alternate package formats" level="1"></contents>
         </page>
@@ -428,7 +429,7 @@
             <contents name="usage" title="Usage" level="1"></contents>
             <contents name="description" title="Description" level="1"></contents>
         </page>
-        <page access="public" status="commendable" name="over_Non-code Translatables_1.html" href="over-non-code-translatables-1.html" subtype="page" title="Non-code Translatables" fulltitle="Non-code Translatables" subtitle="" location="noncodetranslatables.qdocpp"></page>
+        <page access="public" status="commendable" name="over_Non-code_Translatables_1.html" href="over-non-code-translatables-1.html" subtype="page" title="Non-code Translatables" fulltitle="Non-code Translatables" subtitle="" location="noncodetranslatables.qdocpp"></page>
         <page access="public" status="commendable" name="bas_Terms_1.html" href="bas-terms-1.html" subtype="page" title="Terms" fulltitle="Terms" subtitle="" location="terms.qdocpp">
             <contents name="qt" title="Qt" level="1"></contents>
             <contents name="qtopia-core" title="Qtopia Core" level="1"></contents>
@@ -442,14 +443,14 @@
             <contents name="prefix" title="prefix" level="1"></contents>
             <contents name="sdk" title="SDK" level="1"></contents>
         </page>
-        <page access="public" status="commendable" name="over_Creating and using binary SDKs_1.html" href="over-creating-and-using-binary-sdks-1.html" subtype="page" title="Creating and using binary SDKs" fulltitle="Creating and using binary SDKs" subtitle="" location="creatingandusingbinarysdks.qdocpp">
+        <page access="public" status="commendable" name="over_Creating_and_using_binary_SDKs_1.html" href="over-creating-and-using-binary-sdks-1.html" subtype="page" title="Creating and using binary SDKs" fulltitle="Creating and using binary SDKs" subtitle="" location="creatingandusingbinarysdks.qdocpp">
             <contents name="creating-a-binary-sdk" title="Creating a binary SDK" level="1"></contents>
             <contents name="installing-into-a-sandbox" title="Installing into a sandbox" level="2"></contents>
             <contents name="using-a-binary-sdk" title="Using a binary SDK" level="1"></contents>
             <contents name="advanced-binary-sdk-creation" title="Advanced binary SDK creation" level="1"></contents>
             <contents name="using-multiple-sdks" title="Using multiple SDKs" level="1"></contents>
         </page>
-        <page access="public" status="commendable" name="over_Project Trees_1.html" href="over-project-trees-1.html" subtype="page" title="Project Trees" fulltitle="Project Trees" subtitle="" location="projecttrees.qdocpp">
+        <page access="public" status="commendable" name="over_Project_Trees_1.html" href="over-project-trees-1.html" subtype="page" title="Project Trees" fulltitle="Project Trees" subtitle="" location="projecttrees.qdocpp">
             <contents name="files" title="Files" level="1"></contents>
             <contents name="tree-config-pri" title="tree_config.pri" level="2"></contents>
             <contents name="projects-pri" title="projects.pri" level="2"></contents>
@@ -460,8 +461,8 @@
             <contents name="libraries" title="Libraries" level="2"></contents>
             <contents name="headers" title="Headers" level="2"></contents>
         </page>
-        <page access="public" status="commendable" name="atask_Create a new project tree_1.html" href="atask-create-a-new-project-tree-1.html" subtype="page" title="Create a new project tree" fulltitle="Create a new project tree" subtitle="" location="projecttrees.qdocpp"></page>
-        <page access="public" status="commendable" name="task_Deciding what to build_1.html" href="task-deciding-what-to-build-1.html" subtype="page" title="Deciding what to build" fulltitle="Deciding what to build" subtitle="" location="decidingwhattobuild.qdocpp"></page>
-        <page access="public" status="commendable" name="atask_Add a custom compiler_1.html" href="atask-add-a-custom-compiler-1.html" subtype="page" title="Add a custom compiler" fulltitle="Add a custom compiler" subtitle="" location="addacustomcompiler.qdocpp"></page>
+        <page access="public" status="commendable" name="atask_Create_a_new_project_tree_1.html" href="atask-create-a-new-project-tree-1.html" subtype="page" title="Create a new project tree" fulltitle="Create a new project tree" subtitle="" location="projecttrees.qdocpp"></page>
+        <page access="public" status="commendable" name="task_Deciding_what_to_build_1.html" href="task-deciding-what-to-build-1.html" subtype="page" title="Deciding what to build" fulltitle="Deciding what to build" subtitle="" location="decidingwhattobuild.qdocpp"></page>
+        <page access="public" status="commendable" name="atask_Add_a_custom_compiler_1.html" href="atask-add-a-custom-compiler-1.html" subtype="page" title="Add a custom compiler" fulltitle="Add a custom compiler" subtitle="" location="addacustomcompiler.qdocpp"></page>
     </namespace>
 </INDEX>

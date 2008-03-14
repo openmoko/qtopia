@@ -39,26 +39,25 @@ public:
     ~DirectPainterVideoWidget();
 
     // Observer
-    void paintNotification();
+    void setVideoSize(QSize const& size);
+    void paint(QImage const& frame);
 
     static int isSupported();
 
 private:
     void regionChanged(const QRegion &exposedRegion);
-    void calc(QRegion const& region);
-    void paint();
 
     GenericVideoSurface *m_surface;
 
     bool        m_isVisible;
-    bool        m_firstPaintCalc;
     bool        m_painting;
     int         m_black;
+    QSize       m_videoSize;
+    QRect       m_geometry;
     QRect       m_destRect;
-    QRegion     m_savedRegion;
     QRegion     m_blackRegion;
 #ifndef QTOPIA_NO_MEDIAVIDEOSCALING
-    QImage*     m_frameBufferImage;
+    QImage      m_frameBufferImage;
     QRect       m_windowRect;
     QRect       m_viewPort;
     QTransform  m_transform;

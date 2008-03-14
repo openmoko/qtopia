@@ -446,14 +446,11 @@ void QDLinkHelper::init( QIODevice *device )
     LOG() << "Using ping_interval" << ping_interval << "send_ack" << send_ack;
     {
         QTextStream stream( rawDevice );
-        // Pinging is currently disabled. It should really have been dropped from the protocol altogether.
-        /*
-        // the device waits twice as long as our timeout
+        // the device waits 5 times as long as our timeout
         // this should help to avoid dropouts due to OS paging, etc.
         int interval = ping_interval;
-        if ( interval ) interval *= 2; // don't do this if the timeout is 0 (disabled)
-        */
-        stream << "HELPER_INIT" << " " << 0 << " " << (send_ack?"1":"0") << " 0" << endl;
+        if ( interval ) interval *= 5; // don't do this if the timeout is 0 (disabled)
+        stream << "HELPER_INIT" << " " << interval << " " << (send_ack?"1":"0") << " 0" << endl;
     }
 #endif
 

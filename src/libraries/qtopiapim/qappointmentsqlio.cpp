@@ -258,7 +258,7 @@ QUniqueId QAppointmentSqlIO::replaceOccurrence(const QUniqueId &original,
     QPreparedSqlQuery q(database());
     q.prepare("INSERT INTO " + exceptionTable + " (recid, edate, alternateid)"
             " VALUES (:i, :ed, :aid)");
-    q.bindValue(":i", u.toUInt());
+    q.bindValue(":i", original.toUInt());
     q.bindValue(":ed", date);
     q.bindValue(":aid", u.toUInt());
 

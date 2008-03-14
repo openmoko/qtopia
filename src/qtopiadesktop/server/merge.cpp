@@ -31,21 +31,24 @@
 #include <QVariant>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
+#include <QFile>
+
+#define SANITIZE(array) QString(array).replace("\n","").replace(QRegExp("> +<"), "><").trimmed()
 
 Conflict::Conflict(const Change &c, const Change &s)
     : client(c), server(s)
 {
     if (client.type == Change::Replace) {
-        if (server.type == Change::Replace) 
+        if (server.type == Change::Replace)
             type = ReplaceReplace;
-        else if (server.type == Change::Remove) 
+        else if (server.type == Change::Remove)
             type = ReplaceRemove;
         else
             type = NoConflict;
     } else if (client.type == Change::Remove) {
-        if (server.type == Change::Replace) 
+        if (server.type == Change::Replace)
             type = RemoveReplace;
-        else if (server.type == Change::Remove) 
+        else if (server.type == Change::Remove)
             type = RemoveRemove;
         else
             type = NoConflict;
@@ -76,12 +79,12 @@ QSyncMerge::QSyncMerge(QObject *parent)
     : QObject(parent)
 {
     TRACE(QDSync) << "QSyncMerge::QSyncMerge";
+
     d = new QSyncMergeData;
-    // what database? temporary, will it need a name?
-    d->database = QSqlDatabase::addDatabase("QSQLITE");
+    d->database = QSqlDatabase::addDatabase("QSQLITE", "merge");
     d->database.setDatabaseName(DesktopSettings::homePath() + "/qtopia.sqlite");
     if (!d->database.open())
-        WARNING() << "Could not open database";
+        WARNING() << "Could not open database" << (DesktopSettings::homePath() + "/qtopia.sqlite");
 
     QSqlQuery q = d->query();
 
@@ -105,8 +108,8 @@ QSyncMerge::~QSyncMerge()
 {
     TRACE(QDSync) << "QSyncMerge::~QSyncMerge";
     d->database.close();
-    QSqlDatabase::removeDatabase("QSQLITE");
     delete d;
+    QSqlDatabase::removeDatabase("merge");
 }
 
 void QSyncMerge::setServerReferenceSchema(const QByteArray &data)
@@ -151,6 +154,7 @@ MergeItem *QSyncMerge::referenceItem()
 void QSyncMerge::mapIdentifier(const QString &serverId, const QString &clientId)
 {
     TRACE(QDSync) << "QSyncMerge::mapIdentifier" << "serverId" << serverId << "clientId" << clientId;
+    SyncLog() << "Mapping server identifier" << serverId << "to client identifier" << clientId << endl;
     QSqlQuery q = d->query();
     if (!q.prepare("INSERT INTO identifiermap (serverid, clientid) VALUES (:s, :c)"))
         WARNING() << "failed to prepare" << q.lastError().text() << __LINE__;
@@ -175,7 +179,7 @@ QString QSyncMerge::map(const QString &ident, ChangeSource source) const
     TRACE(QDSync) << "QSyncMerge::map" << "ident" << ident << "source" << (source==Server?"Server":"Client");
     QSqlQuery q = d->query();
     if (source == Server) {
-        if (!q.prepare("SELECT clientid FROM identifiermap WHERE serverid = :s")) 
+        if (!q.prepare("SELECT clientid FROM identifiermap WHERE serverid = :s"))
             WARNING() << "error in prepare" << __LINE__ << q.lastError().text();
         q.bindValue(":s", ident);
     } else {
@@ -240,6 +244,7 @@ void QSyncMerge::createServerRecord(const QByteArray &array)
 {
     TRACE(QDSync) << "QSyncMerge::createServerRecord";
     LOG() << "array" << array;
+    SyncLog() << "Create server record" << SANITIZE(array) << endl;
     MergeItem item(this);
     item.read(array, MergeItem::Server);
     if (referenceItem())
@@ -251,6 +256,7 @@ void QSyncMerge::replaceServerRecord(const QByteArray &array)
 {
     TRACE(QDSync) << "QSyncMerge::replaceServerRecord";
     LOG() << "array" << array;
+    SyncLog() << "Replace server record" << SANITIZE(array) << endl;
     MergeItem item(this);
     item.read(array, MergeItem::Server);
     if (referenceItem())
@@ -261,6 +267,7 @@ void QSyncMerge::replaceServerRecord(const QByteArray &array)
 void QSyncMerge::removeServerRecord(const QString &id)
 {
     TRACE(QDSync) << "QSyncMerge::removeServerRecord" << "id" << id;
+    SyncLog() << "Remove server record" << id << endl;
     if (!canMap(id, Server))
         return;
 
@@ -279,6 +286,7 @@ void QSyncMerge::createClientRecord(const QByteArray &array)
 {
     TRACE(QDSync) << "QSyncMerge::createClientRecord";
     LOG() << "array" << array;
+    SyncLog() << "Create client record" << SANITIZE(array) << endl;
     MergeItem item(this);
     item.read(array, MergeItem::Client);
     if (referenceItem())
@@ -290,6 +298,7 @@ void QSyncMerge::replaceClientRecord(const QByteArray &array)
 {
     TRACE(QDSync) << "QSyncMerge::replaceClientRecord";
     LOG() << "array" << array;
+    SyncLog() << "Replace client record" << SANITIZE(array) << endl;
     MergeItem item(this);
     item.read(array, MergeItem::Client);
     if (referenceItem())
@@ -300,6 +309,7 @@ void QSyncMerge::replaceClientRecord(const QByteArray &array)
 void QSyncMerge::removeClientRecord(const QString &id)
 {
     TRACE(QDSync) << "QSyncMerge::removeClientRecord" << "id" << id;
+    SyncLog() << "Remove client record" << id << endl;
     if (!canMap(id, Client))
         return;
 
@@ -329,8 +339,8 @@ void QSyncMerge::addServerChange(Change::Type type, const MergeItem &item)
     q.bindValue(":i", item.write(MergeItem::IdentifierOnly));
     q.bindValue(":d", item.write(MergeItem::DataOnly));
 
-    qDebug() << "Add server change";
-    qDebug() << QString::fromUtf8(item.write(MergeItem::DataOnly));
+    //qDebug() << "Add server change";
+    //qDebug() << QString::fromUtf8(item.write(MergeItem::DataOnly));
     if (!q.exec())
         WARNING() << "exec failed" << q.lastError().text() << __LINE__;
 }
@@ -349,8 +359,8 @@ void QSyncMerge::addClientChange(Change::Type type, const MergeItem &item)
     q.bindValue(":i", item.write(MergeItem::IdentifierOnly));
     q.bindValue(":d", item.write(MergeItem::DataOnly));
 
-    qDebug() << "Add client change";
-    qDebug() << QString::fromUtf8(item.write(MergeItem::DataOnly));
+    //qDebug() << "Add client change";
+    //qDebug() << QString::fromUtf8(item.write(MergeItem::DataOnly));
     if (!q.exec())
         WARNING() << "exec failed" << q.lastError().text() << __LINE__;
 }
@@ -380,7 +390,7 @@ QList<Conflict> QSyncMerge::conflicts() const
     QList<Conflict> list;
 
     QSqlQuery q = d->query();
-    // add/add conflicts. These are important for slow-sync recovery 
+    // add/add conflicts. These are important for slow-sync recovery
     q.prepare("SELECT client.clientid, client.changetype, client.mappedchangedata, client.changedata, server.clientid, server.changetype, server.mappedchangedata, server.changedata FROM clientchanges AS client JOIN serverchanges AS server ON client.changedata = server.changedata WHERE server.changetype = 0 AND client.changetype = 0 ORDER BY client.clientid, server.clientid");
     q.exec();
     while(q.next()) {
@@ -443,7 +453,7 @@ bool QSyncMerge::resolveBiased(const Conflict &conflict, bool biasServer)
     QSqlQuery q = d->query();
     switch(conflict.type) {
         case Conflict::CreateCreate:
-            qDebug() << "resolve Create/Create conflict";
+            //qDebug() << "resolve Create/Create conflict";
             // one becomes an edit, the other is removed.
             if (!q.prepare("DELETE FROM " + disfavoured + " WHERE clientid = :cid AND changetype = 0"))
                 WARNING() << "failed prepare" << q.lastError().text() << __LINE__;
@@ -469,14 +479,19 @@ bool QSyncMerge::resolveBiased(const Conflict &conflict, bool biasServer)
             q.exec();
             return true;
         case Conflict::ReplaceReplace:
-        case Conflict::ReplaceRemove:
             // server change remains, client change removed
             q.prepare("DELETE FROM " + disfavoured + " WHERE clientid = :cid AND changetype = 1");
             q.bindValue(":cid", disfavouredId);
             q.exec();
             return true;
+        case Conflict::ReplaceRemove:
+            return false; // resolve this the other way
         case Conflict::RemoveReplace:
-            return false;
+            // delete wins
+            q.prepare("DELETE FROM " + disfavoured + " WHERE clientid = :cid AND changetype = 1");
+            q.bindValue(":cid", disfavouredId);
+            q.exec();
+            return true;
         case Conflict::NoConflict:
             return true;
     }
@@ -551,7 +566,7 @@ bool QSyncMerge::resolveMerged(const Conflict &conflict, const QByteArray &repla
 {
     /* TODO when moving data between tables, need to be careful of
        the mapped id's in the xml structures.
-    */ 
+    */
     QSqlQuery q = d->query();
     switch(conflict.type) {
         case Conflict::ReplaceReplace:
@@ -580,7 +595,7 @@ bool QSyncMerge::resolveAllClient()
     TRACE(QDSync) << "QSyncMerge::resolveAllClient";
     bool result = true;
     QList<Conflict> list = conflicts();
-    qDebug() << "attempt to resolve" << list.count() << "conflicts, biasing to the client";
+    //qDebug() << "attempt to resolve" << list.count() << "conflicts, biasing to the client";
     foreach(const Conflict &c, list) {
         if (!resolveClient(c))
             result = false; // continue processing.
@@ -593,7 +608,7 @@ bool QSyncMerge::resolveAllServer()
     TRACE(QDSync) << "QSyncMerge::resolveAllServer";
     bool result = true;
     QList<Conflict> list = conflicts();
-    qDebug() << "attempt to resolve" << list.count() << "conflicts, biasing to the server";
+    //qDebug() << "attempt to resolve" << list.count() << "conflicts, biasing to the server";
     foreach(const Conflict &c, list) {
         if (!resolveServer(c))
             result = false; // continue processing.
@@ -664,7 +679,7 @@ QList<Change> QSyncMerge::clientDiff() const
   </Task>
   \endcode
 
-  All Identifier tags found will be mapped to the opposing source type.  Hence server identifiers will be mapped to client identifiers, and vice-versa.  In the cases where no mapping is available, the original identifier is sent and the localIdentifier attribute is set to false.  
+  All Identifier tags found will be mapped to the opposing source type.  Hence server identifiers will be mapped to client identifiers, and vice-versa.  In the cases where no mapping is available, the original identifier is sent and the localIdentifier attribute is set to false.
 
   The specified \a source is used to identify which way to map the identifiers.
 */
@@ -765,7 +780,7 @@ QString QSyncMerge::parseIdentifiers(QByteArray &array, ChangeSource source, boo
             case QXmlStreamReader::DTD:
                 writer.writeDTD(reader.text().toString());
                 break;
-        } 
+        }
     }
     array = result;
     return clientId;
@@ -831,3 +846,20 @@ void QSyncMerge::revertIdentifierMapping(const Conflict &conflict)
     q.bindValue(":c", conflict.client.id);
     q.exec();
 }
+
+// =====================================================================
+
+QDebug _SyncLog()
+{
+    TRACE(TRACE) << "SyncLog";
+    static QFile *file = 0;
+    if ( !file ) {
+        file = new QFile( DesktopSettings::homePath()+"/synclog.log" );
+        LOG() << "Writing to" << DesktopSettings::homePath()+"/synclog.log";
+        file->remove();
+        bool ok = file->open( QIODevice::Append );
+        Q_ASSERT(ok);
+    }
+    return QDebug( file );
+}
+

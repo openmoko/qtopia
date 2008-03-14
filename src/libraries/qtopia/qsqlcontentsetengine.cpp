@@ -191,11 +191,10 @@ void QSqlContentSetEngine::insertContent( const QContent &content )
 
         index = expectedIndexOf( sort, content );
 
-        emit contentAboutToBeInserted( index, index );
         m_primaryIds.insert( index, id );
         insertRange( index, 1 );
         m_count++;
-        emit contentInserted();
+        emit reset();
     }
     else
     {
@@ -239,11 +238,10 @@ void QSqlContentSetEngine::removeContent( const QContent &content )
 
         if( index != -1 )
         {
-            emit contentAboutToBeRemoved( index, index );
             m_primaryIds.removeAt( index );
             removeRange( index, 1 );
             m_count--;
-            emit contentRemoved();
+            emit reset();
         }
     }
     else

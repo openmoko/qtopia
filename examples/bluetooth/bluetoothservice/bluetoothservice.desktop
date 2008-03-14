@@ -5,6 +5,6 @@ Context=bluetoothservice
 [Desktop Entry]
 Comment[]=An example Bluetooth service
 Exec=bluetoothservice
-Icon=bluetoothservice/bluetoothservice
+Icon=bluetooth/bluetooth-online
 Type=Application
-Name[]=Bluetooth Service
+Name[]=BT Service

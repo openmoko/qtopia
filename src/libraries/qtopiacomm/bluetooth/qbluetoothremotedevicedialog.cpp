@@ -429,6 +429,8 @@ void QBluetoothRemoteDeviceDialogPrivate::deviceActivatedOk()
             }
         }
     }
+
+    m_validationWaitWidget->hide();
     // close the dialog
     m_parent->accept();
 }

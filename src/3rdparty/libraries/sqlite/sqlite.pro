@@ -1,3 +1,4 @@
+build_qtopia_sqlite {
 qtopia_project(external lib)
 license(FREEWARE)
 TARGET=qtopia-sqlite
@@ -24,4 +25,8 @@ sdk_headers.hint=non_qt_headers
 INSTALLS+=sdk_headers
 
 idep(LIBS+=-l$$TARGET)
-idep(INCLUDEPATH+=$$sourcedir)
+qt_inc(sqlite)
+} else {
+qtopia_project(stub)
+idep(LIBS+=-lsqlite3)
+}

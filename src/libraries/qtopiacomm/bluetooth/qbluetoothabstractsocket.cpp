@@ -118,9 +118,12 @@ void QBluetoothAbstractSocketPrivate::resetNotifiers()
 
 void QBluetoothAbstractSocketPrivate::abortConnectionAttempt()
 {
-    if (m_writeNotifier)
+    if (m_writeNotifier) {
         disconnect(m_writeNotifier, SIGNAL(activated(int)),
                    this, SLOT(testConnected()));
+        delete m_writeNotifier;
+        m_writeNotifier = 0;
+    }
     m_engine->close(m_fd);
     m_fd = -1;
     m_state = QBluetoothAbstractSocket::UnconnectedState;
@@ -152,6 +155,9 @@ void QBluetoothAbstractSocketPrivate::testConnected()
         emit m_parent->error(m_error);
         if (that)
             emit m_parent->stateChanged(m_state);
+
+        delete m_writeNotifier;
+        m_writeNotifier = 0;
         return;
     }
 

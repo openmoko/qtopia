@@ -37,6 +37,8 @@ public:
     SyncManager( QWidget *parent = 0 );
     ~SyncManager();
 
+    void init();
+
     int errors();
     QObject *syncObject();
 

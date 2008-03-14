@@ -97,7 +97,10 @@
         -xplatform target ......  The target platform that you are compiling for. If
                                   not specified, configure will attempt to
                                   autodetect the target based on the host.
-        -arch architecture .....  The CPU family you are building for.
+      + -arch architecture .....  The CPU family you are building for.
+                                  Available: alpha, arm, boundschecker, generic,
+                                  i386, ia64, macosx, mips, parisc, powerpc, s390,
+                                  sparc, windows, x86_64
         -defaultbuttons arg ....  Use &lt;arg&gt; (if you pass a complete path) or
                                   $QTOPIA_DEPOT_PATH/etc/defaultbuttons-&lt;arg&gt;.conf
                                   (if you do not pass a complete path).
@@ -330,8 +333,12 @@
       * -gif ...................  Enable GIF support.
         -no-gif ................  Disable GIF support.
 
-        -glib ..................  Enable Glib support in Qtopia Core.
+        -glib ..................  Enable Glib support in Qtopia Core (uses glib-2.0
+                                  from pkg-config).
       * -no-glib ...............  Disable Glib support in Qtopia Core.
+
+      * -qtopia-sqlite .........  Use sqlite3 from Qtopia.
+        -system-sqlite .........  Use sqlite3 from the system.
 
         -extra-qtopiacore-config  Add something to the Qtopia Core configure
          &quot;-option arg&quot;            commandline.

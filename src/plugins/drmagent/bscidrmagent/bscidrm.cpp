@@ -131,7 +131,7 @@ void BSciDrm::releaseAgent()
 /*!
     Converts the Qtopia QDrmRights::Permission \a permissionType to the equivalent beep science
     EPermission value
- */
+*/
 EPermission BSciDrm::transformPermission( QDrmRights::Permission permissionType )
 {
     switch( permissionType )
@@ -147,7 +147,7 @@ EPermission BSciDrm::transformPermission( QDrmRights::Permission permissionType 
 
 /*!
     Formats a string with interval data
- */
+*/
 QString BSciDrm::formatInterval( const SBSciDuration &duration )
 {
     QString date;
@@ -176,7 +176,7 @@ QString BSciDrm::formatInterval( const SBSciDuration &duration )
 
 /*!
     Adds the constraints from \a constraints to \a rights.
- */
+*/
 QDrmRights BSciDrm::constraints( QDrmRights::Permission permission, ERightsStatus status, SBSciConstraints *constraints )
 {
     QDrmRights::Status stat = QDrmRights::Invalid;
@@ -300,9 +300,9 @@ bool BSciDrm::isStateful( const SBSciConstraints &constraints )
 }
 
 /*!
- * Maps the drm agent error codes to their string equivalents for debug
- * output.
- */
+    Maps the drm agent error codes to their string equivalents for debug
+    output.
+*/
 const char *BSciDrm::getError( int error )
 {
     switch( error )
@@ -434,8 +434,8 @@ const char *BSciDrm::getError( int error )
 }
 
 /*!
- * Outputs a drm agent error message on qWarning.
- */
+    Outputs a drm agent error message on qWarning.
+*/
 void BSciDrm::printError( int error, const QString &method, const QString &filePath )
 {
     qWarning() << "Error in method " << method << " on file " << filePath;
@@ -443,8 +443,8 @@ void BSciDrm::printError( int error, const QString &method, const QString &fileP
 }
 
 /*!
- * Outputs a drm agent error message on qWarning.
- */
+    Outputs a drm agent error message on qWarning.
+*/
 void BSciDrm::printError( int error, const QString &method )
 {
     qWarning() << "Error in method " << method;
@@ -453,7 +453,7 @@ void BSciDrm::printError( int error, const QString &method )
 
 /*!
     Returns true if the dcf file at \a dcfFilePath has current valid rights of type \a permission.
- */
+*/
 bool BSciDrm::hasRights( const QString &dcfFilePath, QDrmRights::Permission permission )
 {
     EPermission  mode = transformPermission( permission );
@@ -468,7 +468,7 @@ bool BSciDrm::hasRights( const QString &dcfFilePath, QDrmRights::Permission perm
 /*
     Gets the meta information string of type \a item from the drm protected file
     at \a filePath.
- */
+*/
 QString BSciDrm::getMetaData( const QString &filePath, enum EMetaData item )
 {
     const QByteArray localPath = formatPath( filePath );
@@ -496,7 +496,7 @@ QString BSciDrm::getMetaData( const QString &filePath, enum EMetaData item )
 
 /*!
     Returns the size in bytes of the plaintext content of the dcf file located at \a dcfFilePath.
- */
+*/
 qint64 BSciDrm::getContentSize( const QString &dcfFilePath )
 {
     qint64 size = -1;

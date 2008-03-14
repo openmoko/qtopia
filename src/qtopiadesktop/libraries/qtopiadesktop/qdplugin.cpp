@@ -349,7 +349,7 @@ void QDLinkPlugin::setupSocket( QIODevice *device )
 */
 int QDLinkPlugin::ping_interval()
 {
-    return 5000;
+    return 0;
 }
 
 /*!

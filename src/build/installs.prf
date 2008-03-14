@@ -150,6 +150,22 @@ for(it,INSTALLS) {
         command=\
             $$fixpath($$QPEDIR/bin/content_installer) $$fixpath($(INSTALL_ROOT)/qtopia_db.sqlite)\
                 $$QTOPIA_PREFIX $$fixpath($$path) $$LITERAL_QUOTE$$categories$$LITERAL_QUOTE $$fixpath($$files)
+        command+=$$LINE_SEP_VERBOSE
+        # find running qpe processes that are using the target database
+        command+=\
+            for qtopia in $$fixpath(/tmp/qtopia-*); do\
+                if [ -f \$$qtopia/$(INSTALL_ROOT)/qtopia_db.sqlite ]; then\
+                    for pid in `fuser \$$qtopia/$(INSTALL_ROOT)/qtopia_db.sqlite 2>/dev/null`; do\
+                        qpe_binary=`ls -l /proc/\$$pid/exe 2>/dev/null | awk $$LITERAL_QUOTE{print \\\\\$$NF}$$LITERAL_QUOTE`;\
+                        if [ $$LITERAL_QUOTE\$$qpe_binary$$LITERAL_QUOTE = $$LITERAL_QUOTE$$fixpath($(INSTALL_ROOT)/bin/qpe)$$LITERAL_QUOTE ]; then\
+                            QWS_DISPLAY=QVFb:\$${qtopia$$LITERAL_HASH$$LITERAL_HASH*-} $$fixpath($$QPEDIR/bin/content_installer) -qcop \
+                                \$$qtopia$$fixpath($(INSTALL_ROOT)/qtopia_db.sqlite)\
+                                $$QTOPIA_PREFIX $$fixpath($$path)\
+                                $$LITERAL_QUOTE$$categories$$LITERAL_QUOTE $$fixpath($$files);\
+                        fi;\
+                    done;\
+                fi;\
+            done
         eval(docapi_$${it}.commands=\$$command)
         eval(docapi_$${it}.CONFIG=no_path)
         !isEmpty(files) {

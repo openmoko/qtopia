@@ -196,6 +196,10 @@ void QDSync::showEvent( QShowEvent * /*e*/ )
     if ( !created ) {
         created = true;
         setWindowTitle("Synchronization");
+        QTextCursor cursor = textCursor();
+        cursor.movePosition( QTextCursor::End, QTextCursor::MoveAnchor );
+        setTextCursor(cursor);
+        ensureCursorVisible();
     }
 }
 

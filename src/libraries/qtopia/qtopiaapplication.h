@@ -205,21 +205,21 @@ private:
 };
 
 /*
- * Macros for simplifying the support of multiple launch modes in dynamic and singleexec builds.
- *
- * The options are:
- *   - singleexec/quicklaunch
- *   - singleexec/manual (user-supplied main function)
- *   - dynamic/quicklaunch
- *   - dynamic/normal
- *
- * There's no need to support dynamic/manual because any old main function will do. It's required
- * for singleexec because of the extra registration required to associate the main function with
- * the application's name. singleexec/normal is not supported because there's no point (size/load
- * penalties of quicklaunch don't exist).
- *
- * First up is the helpers. The primary macros (QTOPIA_ADD_APPLICATION, QTOPIA_MAIN) are below.
- */
+    Macros for simplifying the support of multiple launch modes in dynamic and singleexec builds.
+
+    The options are:
+      - singleexec/quicklaunch
+      - singleexec/manual (user-supplied main function)
+      - dynamic/quicklaunch
+      - dynamic/normal
+
+    There's no need to support dynamic/manual because any old main function will do. It's required
+    for singleexec because of the extra registration required to associate the main function with
+    the application's name. singleexec/normal is not supported because there's no point (size/load
+    penalties of quicklaunch don't exist).
+
+    First up is the helpers. The primary macros (QTOPIA_ADD_APPLICATION, QTOPIA_MAIN) are below.
+*/
 #include <qmap.h>
 #include <qapplicationplugin.h>
 #include <qmetaobject.h>
@@ -347,8 +347,8 @@ extern void qtopia_registerMain(const char *name, qpeMainFunc mainFunc);
     }
 
 /*
- * Definitions of the primary macros.
- */
+    Definitions of the primary macros.
+*/
 #if defined(SINGLE_EXEC)
 
 // The QTOPIA_MAIN macro is useless in single-exec mode

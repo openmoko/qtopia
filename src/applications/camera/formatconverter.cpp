@@ -40,8 +40,8 @@ namespace camera
 {
 
 /*
- * convert something to RGB32
- */
+    convert something to RGB32
+*/
 
 FormatConverter* FormatConverter::createFormatConverter(unsigned int type, int width, int height)
 {

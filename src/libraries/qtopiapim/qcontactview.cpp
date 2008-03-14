@@ -478,8 +478,8 @@ void QContactListView::setFilterText()
 }
 
 /***************************
-  * QContactSelector
-  ***********************/
+* QContactSelector
+***********************/
 class QContactSelectorPrivate
 {
 public:
@@ -596,10 +596,8 @@ void QContactSelector::init()
 
     connect(this, SIGNAL(accepted()), this, SLOT(completed()));
 
-#ifndef QTOPIA_DESKTOP
 #ifdef QTOPIA_PHONE
     QtopiaApplication::setMenuLike( this, true );
-#endif
 #endif
 }
 
@@ -823,8 +821,8 @@ public:
 };
 
 /***************************
-  * Phone type Selector
-  ***********************/
+* Phone type Selector
+***********************/
 
 class QPhoneTypeSelectorPrivate
 {

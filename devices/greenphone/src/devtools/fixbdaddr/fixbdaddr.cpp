@@ -1173,6 +1173,8 @@ void FixBdaddr::accept()
 
             char tmp[5];
             snprintf(tmp, 5, "%04X", offset+position);
+            buf[9] = '0';
+            buf[10] = '4';
             buf[12] = tmp[0];
             buf[13] = tmp[1];
             buf[15] = tmp[2];

@@ -18,6 +18,11 @@
 <p>This page describes changes to the 4.3&#x2e;2 build system.</p>
 <ul>
 <li>Tests are now located in the directory they belong to. This means that external projects can have test cases run with <tt>make test</tt>. See <a href="over-project-trees-1.html">Project Trees</a> for details.</li>
+<li>make lupdate was failing to create most files in <tt>i18n/&lt;lang&gt;</tt>.</li>
+<li>lupdate input is now written into a file. This prevents errors from long command lines and means that lupdate runs once or all languages, not once per language.</li>
+<li>Only some translation rules updated all available .ts files.</li>
+<li>External projects get an RPATH now (previously only projects that used Qtopia or Qtopia Core would get an RPATH).</li>
+<li><a href="../qt4-intro.html">dynamic_cast</a> is now a compile error (due to macro magic). Qtopia builds without rtti so use of <a href="../qt4-intro.html">dynamic_cast</a> can lead to hard-to-debug errors at runtime.</li>
 </ul>
 <p>See also <a href="changes.html">What's New?</a>.</p>
 <p /><address><hr /><div align="center">

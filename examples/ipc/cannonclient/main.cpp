@@ -65,8 +65,8 @@ int main( int argc, char **argv)
 
     CannonResultListener *listener = new CannonResultListener;
     QtopiaIpcAdaptor *adaptor = new QtopiaIpcAdaptor("QPE/CannonExample");
-    QtopiaIpcAdaptor::connect(adaptor, SIGNAL(missed()), listener, SLOT(missed()));
-    QtopiaIpcAdaptor::connect(adaptor, SIGNAL(hit()), listener, SLOT(hit()));
+    QtopiaIpcAdaptor::connect(adaptor, MESSAGE(missed()), listener, SLOT(missed()));
+    QtopiaIpcAdaptor::connect(adaptor, MESSAGE(hit()), listener, SLOT(hit()));
 
     app.registerRunningTask("CannonResultListener", listener);
 

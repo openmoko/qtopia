@@ -63,6 +63,10 @@ END
     }
 } else {
     @files = @ARGV;
+    if ( @files && $files[0] eq "-" ) {
+        @files = <STDIN>;
+        chomp(@files);
+    }
 }
 
 for my $file ( @files ) {
@@ -174,19 +178,21 @@ for my $tsfile ( keys %contextinfo ) {
     DEBUG and print "File $tsfile\n";
     my $info = $contextinfo{$tsfile};
     open CPP, ">$tmp" or die "Can't write $tmp";
-	for my $context ( keys %$info ) {
-	    DEBUG and print "Context $context\n";
-	    my $list = $$info{$context};
-	    for my $value ( keys %$list ) {
-		DEBUG and print "Message $value\n";
-                #Desktop files have encoding format that is not quite UTF8 conform
-                #Add escape character (\xc2) for soft hyphens
-                my $replacement = $value;
-                $replacement =~ s/\\xad/\\xc2\\xad/g;
-		print CPP "translate(\"$context\",\"$replacement\", \"$$list{$value}\", UnicodeUTF8);\n"
-	    }
-	}
+    for my $context ( keys %$info ) {
+        DEBUG and print "Context $context\n";
+        my $list = $$info{$context};
+        for my $value ( keys %$list ) {
+            DEBUG and print "Message $value\n";
+            #Desktop files have encoding format that is not quite UTF8 conform
+            #Add escape character (\xc2) for soft hyphens
+            my $replacement = $value;
+            $replacement =~ s/\\xad/\\xc2\\xad/g;
+            print CPP "translate(\"$context\",\"$replacement\", \"$$list{$value}\", UnicodeUTF8);\n"
+        }
+    }
     close CPP;
+    open CPP, ">$tmp.pro" or die "Can't write $tmp.pro";
+    print CPP "SOURCES += $tmp\n";
     for my $lang ( @LANGS ) {
 	my $filename;
 	if ( $global ) {
@@ -198,11 +204,14 @@ for my $tsfile ( keys %contextinfo ) {
 	} else {
 	    $filename = $tsfile."-".$lang.".ts";
 	}
-	my $cmd = "$DQTDIR/bin/lupdate $tmp -ts $filename";
-	DEBUG and print "$cmd\n";
-	system($cmd);
+        print CPP "TRANSLATIONS += $filename\n";
     }
+    close CPP;
+    my $cmd = "$DQTDIR/bin/lupdate $tmp.pro";
+    DEBUG and print "$cmd\n";
+    system($cmd);
     unlink $tmp;
+    unlink "$tmp.pro";
 }
 
 if ( $content ) {

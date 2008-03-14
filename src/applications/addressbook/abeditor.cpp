@@ -2572,6 +2572,8 @@ void AbFullEditor::toneSelected( const QContent &tone )
         editVideoTonePB->setTone( QContent() );
     else if ( sender() == editVideoTonePB && tone.isValid() )
         editTonePB->setTone( QContent() );
+#else
+    Q_UNUSED(tone);
 #endif
 }
 

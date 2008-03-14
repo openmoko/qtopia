@@ -255,11 +255,7 @@ DirDeleterDialog::deleteDirectory(const QString &dir, QObexFtpClient *client, QW
 {
     DirDeleterDialog *dialog = new DirDeleterDialog(dir, client, parent);
 
-#ifdef QTOPIA_DESKTOP
-    dialog->exec();
-#else
     QtopiaApplication::execDialog(dialog);
-#endif
 
     DirDeleterDialog::Result result = dialog->m_deleter->result();
     delete dialog;

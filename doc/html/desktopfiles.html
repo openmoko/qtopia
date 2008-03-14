@@ -16,9 +16,9 @@
 <a name="desktop"></a><p>A .desktop file provides the information required by the the <a href="docsys-overview.html">Qtopia Document System</a> to include an application in a launcher folder.</p>
 <ul><li><a href="#installation">Installation</a></li>
 <li><a href="#file-format">File Format</a></li>
-<ul><li><a href="#"><tt>[Desktop Entry]</tt></a></li>
-<li><a href="#"><tt>[Translation]</tt></a></li>
-<li><a href="#"><tt>[DRM]</tt></a></li>
+<ul><li><a href="#desktop-entry">Desktop Entry</a></li>
+<li><a href="#translation">Translation</a></li>
+<li><a href="#drm">DRM</a></li>
 <li><a href="#other-groups">Other groups</a></li>
 </ul>
 <li><a href="#example-application-desktop-file">Example Application .desktop file</a></li>
@@ -39,8 +39,8 @@
 <p>The whole file has to be encoded using the <a href="./qsettings.html">QSettings</a> INI file format and encoded in <tt>UTF-8</tt>, see also <a href="syscust-internat.html#desktop-configuration-file-internationalization">Desktop &amp; Configuration File Internationalization</a>.</p>
 <p>The file structure is similar to that used by the Unix desktops KDE and Gnome.</p>
 <p>A .desktop file is composed of the following settings groups:</p>
-<a name=""></a>
-<h3><tt>[Desktop Entry]</tt></h3>
+<a name="desktop-entry"></a>
+<h3>Desktop Entry</h3>
 <p>The <tt>[Desktop Entry]</tt> group contains all the mandatory information for .desktop file.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Parameter</th><th>Description</th><th>Required</th></tr></thead>
@@ -64,8 +64,8 @@
 <tr valign="top" class="odd"><td><tt>CanFastLoad</tt></td><td>Indicates whether the application can be fast loaded.</td><td>No</td></tr>
 <tr valign="top" class="even"><td><tt>Builtin</tt></td><td>Indicates the application is a built-in application.</td><td>No</td></tr>
 </table></p>
-<a name=""></a>
-<h3><tt>[Translation]</tt></h3>
+<a name="translation"></a>
+<h3>Translation</h3>
 <p>The <tt>[Translation]</tt> group identifies where translation data for the .desktop file can be loaded from.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Parameter</th><th>Description</th></tr></thead>
@@ -73,8 +73,8 @@
 <tr valign="top" class="even"><td><tt>Context</tt></td><td>The translation context within the file.</td></tr>
 </table></p>
 <p>See also <a href="syscust-internat.html#desktop-configuration-file-internationalization">Desktop &amp; Configuration File Internationalization</a>.</p>
-<a name=""></a>
-<h3><tt>[DRM]</tt></h3>
+<a name="drm"></a>
+<h3>DRM</h3>
 <p>The <tt>[DRM]</tt> group contains additional information required for DRM enabled applications.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Parameter</th><th>Description</th></tr></thead>

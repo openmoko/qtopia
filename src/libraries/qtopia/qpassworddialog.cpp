@@ -137,15 +137,15 @@ QPasswordWidget::QPasswordWidget( QWidget* parent, Qt::WFlags fl )
 }
 
 /*
- *  Destroys the object and frees any allocated resources
- */
+    Destroys the object and frees any allocated resources
+*/
 QPasswordWidget::~QPasswordWidget()
 {
     // no need to delete child widgets, Qt does it all for us
 }
 
 /*!
-  \reimp
+    \reimp
 */
 
 void QPasswordWidget::key()
@@ -158,7 +158,7 @@ void QPasswordWidget::key()
 }
 
 /*!
-  \reimp
+    \reimp
 */
 
 void QPasswordWidget::keyPressEvent( QKeyEvent *e )
@@ -241,9 +241,9 @@ void QPasswordWidget::resetLabels( bool useOkLabel )
     is used to specify how the password is returned (encrypted or plain text),
     as well as other UI differences if the dialog is shown using \l {QPasswordDialog::}{getPassword()}.
 
-    \value Crypted  Password will be returned one-way encrypted (using MD5). If the dialog is shown 
+    \value Crypted  Password will be returned one-way encrypted (using MD5). If the dialog is shown
                     using \l {QPasswordDialog::}{getPassword()}, it will be maximized.
-    \value Plain  Password will be returned as plain text. If the dialog is shown 
+    \value Plain  Password will be returned as plain text. If the dialog is shown
                     using \l {QPasswordDialog::}{getPassword()}, it will \bold not be maximized.
     \value Pin  Same as Plain, but '#' can also be used to accept the dialog.
 */
@@ -329,16 +329,16 @@ QString QPasswordDialog::password() const
 
 
 /*!
-  Creates and displays a password dialog with the given \a parent and \a prompt; returns the entered password.
-  
-  \a mode specifies whether the returned password is one-way encrypted (using MD5) or
-  plain text. It also determines whether or not the dialog will be maximized. 
-  If the operation is required to accept more than one password -- for example,
-  if accepting an old password and a new password -- set \a last to false to set the context label to 'Next'.
+    Creates and displays a password dialog with the given \a parent and \a prompt; returns the entered password.
 
-  The returned value is a null string if the user cancels the operation,
-  or an empty string if the user enters no password (but confirms the
-  dialog).
+    \a mode specifies whether the returned password is one-way encrypted (using MD5) or
+    plain text. It also determines whether or not the dialog will be maximized.
+    If the operation is required to accept more than one password -- for example,
+    if accepting an old password and a new password -- set \a last to false to set the context label to 'Next'.
+
+    The returned value is a null string if the user cancels the operation,
+    or an empty string if the user enters no password (but confirms the
+    dialog).
 */
 QString QPasswordDialog::getPassword( QWidget* parent,
                                       const QString& prompt,
@@ -369,11 +369,11 @@ QString QPasswordDialog::getPassword( QWidget* parent,
 
 
 /*!
-  \obsolete
-  Prompt, fullscreen, for the user's passcode until they get it right.
+    \obsolete
+    Prompt, fullscreen, for the user's passcode until they get it right.
 
-  If \a atPowerOn is true, the dialog is only used if the user's
-  preference request it at poweron.
+    If \a atPowerOn is true, the dialog is only used if the user's
+    preference request it at poweron.
 */
 void QPasswordDialog::authenticateUser( QWidget* parent, bool atPowerOn )
 {

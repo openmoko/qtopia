@@ -35,6 +35,10 @@
 
 extern QList<qdPluginCreateFunc_t> *qdInternalPlugins();
 
+/*!
+    \relates PluginManager
+    Returns the singleton PluginManager instance.
+*/
 PluginManager *qdPluginManager()
 {
     static PluginManager *pm = 0;
@@ -72,6 +76,14 @@ public:
 
 // ==========================================================================
 
+/*!
+    \class PluginManager
+    \brief The PluginManager class manages plugin loading.
+*/
+
+/*!
+    \internal
+*/
 PluginManager::PluginManager( QObject *parent )
     : QObject( parent )
 {
@@ -84,6 +96,9 @@ PluginManager::PluginManager( QObject *parent )
     d->disabledPluginIds.removeAll("com.trolltech.plugin.app.infopage");
 }
 
+/*!
+    \internal
+*/
 PluginManager::~PluginManager()
 {
     TRACE(PM) << "PluginManager::~PluginManager";
@@ -107,26 +122,42 @@ PluginManager::~PluginManager()
     delete d;
 }
 
+/*!
+    Returns the active application plugins.
+*/
 QDAppPluginList PluginManager::activePlugins()
 {
     return QDAppPluginList();
 }
 
+/*!
+    Returns the current application plugin.
+    Note that this is currently hard-coded to return 0!
+*/
 QDAppPlugin *PluginManager::currentPlugin()
 {
     return 0;
 }
 
+/*!
+    Returns the plugin data for \a plugin.
+*/
 QDPluginData *PluginManager::pluginData( QDPlugin *plugin )
 {
     return d->pluginData[plugin];
 }
 
+/*!
+    Returns the plugin data for \a plugin.
+*/
 QDAppPluginData *PluginManager::pluginData( QDAppPlugin *plugin )
 {
     return (QDAppPluginData*)d->pluginData[plugin];
 }
 
+/*!
+    \internal
+*/
 void PluginManager::setupPlugins( bool safeMode )
 {
     TRACE(PM) << "PluginManager::setupPlugins" << "safeMode" << safeMode;
@@ -168,12 +199,12 @@ void PluginManager::setupPlugins( bool safeMode )
                 LOG() << "Constructing" << key;
                 QDPlugin *plugin = pf->create( key );
                 if ( plugin )
-                    setupPlugin( plugin, safeMode );
+                    internal_setupPlugin( plugin, safeMode, true );
                 else
                     WARNING() << "plugin factory" << instance << "did not create advertised plugin" << key;
             }
         } else if ( QDPlugin *plugin = qobject_cast<QDPlugin*>(instance) ) {
-            setupPlugin( plugin, safeMode );
+            internal_setupPlugin( plugin, safeMode, true );
         } else {
             WARNING() << instance->objectName() << "is not a plug-in type that Qtopia Sync Agent recognizes";
             delete instance;
@@ -201,7 +232,20 @@ void PluginManager::setupPlugins( bool safeMode )
     settings.setValue("loadedPluginFiles", loadedPluginFiles);
 }
 
-void PluginManager::setupPlugin( QDPlugin *plugin, bool safeMode )
+/*!
+    Initialize a \a plugin that has been manually constructed.
+    For example, this is used to initialize dynamically created QDClientSyncPlugin instances.
+    After calling this method you should call QtopiaDesktopApplication::initializePlugin().
+*/
+void PluginManager::setupPlugin( QDPlugin *plugin )
+{
+    internal_setupPlugin( plugin, false, false );
+}
+
+/*!
+    \internal
+*/
+void PluginManager::internal_setupPlugin( QDPlugin *plugin, bool safeMode, bool addToLists )
 {
     TRACE(PM) << "PluginManager::setupPlugin" << "plugin" << plugin << "safeMode" << safeMode;
     d->detectedPluginIds[plugin->id()] = plugin->displayName();
@@ -214,26 +258,26 @@ void PluginManager::setupPlugin( QDPlugin *plugin, bool safeMode )
 
     LOG() << "Setting up plugin" << plugin->id();
     QDPluginData *dta = 0;
-    d->allPlugins.append( plugin );
+    if ( addToLists ) d->allPlugins.append( plugin );
     if ( QDAppPlugin *p = qobject_cast<QDAppPlugin*>(plugin) ) {
         // Application plugins
-        d->appPlugins.append(p);
+        if ( addToLists ) d->appPlugins.append(p);
         dta = new QDAppPluginData;
     } else if ( QDConPlugin *p = qobject_cast<QDConPlugin*>(plugin) ) {
         // Connection plugins
-        d->conPlugins.append(p);
+        if ( addToLists ) d->conPlugins.append(p);
         dta = new QDPluginData;
     } else if ( QDDevPlugin *p = qobject_cast<QDDevPlugin*>(plugin) ) {
         // Device plugins
-        d->devPlugins.append(p);
+        if ( addToLists ) d->devPlugins.append(p);
         dta = new QDPluginData;
     } else if ( QDLinkPlugin *p = qobject_cast<QDLinkPlugin*>(plugin) ) {
         // Link plugins (eg. USB, Serial, LAN, QVfb)
-        d->linkPlugins.append(p);
+        if ( addToLists ) d->linkPlugins.append(p);
         dta = new QDLinkPluginData;
     } else if ( QDSyncPlugin *p = qobject_cast<QDSyncPlugin*>(plugin) ) {
         // Sync plugins (eg. Outlook, Qtopia)
-        d->syncPlugins.append(p);
+        if ( addToLists ) d->syncPlugins.append(p);
         dta = new QDPluginData;
     } else {
         // Any other plugins
@@ -243,6 +287,9 @@ void PluginManager::setupPlugin( QDPlugin *plugin, bool safeMode )
     plugin->d = dta;
 }
 
+/*!
+    Returns the plugins that match \a filter.
+*/
 QDPluginList PluginManager::plugins( QDPluginFilter *filter )
 {
     if ( filter ) {
@@ -256,6 +303,9 @@ QDPluginList PluginManager::plugins( QDPluginFilter *filter )
     }
 }
 
+/*!
+    Returns the application plugins that match \a filter.
+*/
 QDAppPluginList PluginManager::appPlugins( QDAppPluginFilter *filter )
 {
     if ( filter ) {
@@ -269,31 +319,49 @@ QDAppPluginList PluginManager::appPlugins( QDAppPluginFilter *filter )
     }
 }
 
-QDConPluginList PluginManager::conPlugins( /*QDConPluginFilter *filter*/ )
+/*!
+    Returns the connection plugins.
+*/
+QDConPluginList PluginManager::conPlugins()
 {
     return d->conPlugins;
 }
 
-QDDevPluginList PluginManager::devPlugins( /*QDDevPluginFilter *filter*/ )
+/*!
+    Returns the device plugins.
+*/
+QDDevPluginList PluginManager::devPlugins()
 {
     return d->devPlugins;
 }
 
-QDLinkPluginList PluginManager::linkPlugins( /*QDLinkPluginFilter *filter*/ )
+/*!
+    Returns the link plugins.
+*/
+QDLinkPluginList PluginManager::linkPlugins()
 {
     return d->linkPlugins;
 }
 
-QDSyncPluginList PluginManager::syncPlugins( /*QDSyncPluginFilter *filter*/ )
+/*!
+    Returns the sync plugins.
+*/
+QDSyncPluginList PluginManager::syncPlugins()
 {
     return d->syncPlugins;
 }
 
+/*!
+    Returns the plugin files that were detected on the system.
+*/
 QStringList PluginManager::detectedPluginFiles()
 {
     return d->detectedPluginFiles;
 }
 
+/*!
+    Returns the plugin identifiers that were detected on the system.
+*/
 QMap<QString,QString> PluginManager::detectedPluginIds()
 {
     return d->detectedPluginIds;
@@ -301,15 +369,30 @@ QMap<QString,QString> PluginManager::detectedPluginIds()
 
 // ==========================================================================
 
+/*!
+    \class QDPluginFilter
+    \brief The QDPluginFilter class is used to filter the plugins returned by PluginManager::plugins().
+*/
+
+/*!
+    Construct a QDPluginFilter.
+*/
 QDPluginFilter::QDPluginFilter()
     : pluginType(0)
 {
 }
 
+/*!
+    Destructor.
+*/
 QDPluginFilter::~QDPluginFilter()
 {
 }
 
+/*!
+    Filter \a plugin based on the criteria.
+    Returns true if the plugin matches, false otherwise.
+*/
 bool QDPluginFilter::filter( QDPlugin *plugin )
 {
     if ( (pluginType & QDPluginFilter::App) && qobject_cast<QDAppPlugin*>(plugin) == 0 )
@@ -325,18 +408,52 @@ bool QDPluginFilter::filter( QDPlugin *plugin )
     return true;
 }
 
+/*!
+    \enum QDPluginFilter::PluginTypeFlags
+    \value App
+    \value Con
+    \value Dev
+    \value Link
+    \value Sync
+*/
+
+/*!
+    \enum QDPluginFilter::FilterOption
+    \value Set
+    \value NotSet
+    \value Either
+*/
+
+/*
+    \variable QDPluginFilter::pluginType;
+*/
+
 // ==========================================================================
 
+/*!
+    \class QDAppPluginFilter
+    \brief The QDPluginFilter class is used to filter the plugins returned by PluginManager::appPlugins().
+*/
+
+/*!
+    Construct a QDAppPluginFilter.
+*/
 QDAppPluginFilter::QDAppPluginFilter()
     : appWidget(Either), settingsWidget(Either)
 {
     pluginType = QDPluginFilter::App;
 }
 
+/*!
+    Destructor.
+*/
 QDAppPluginFilter::~QDAppPluginFilter()
 {
 }
 
+/*!
+    \reimp
+*/
 bool QDAppPluginFilter::filter( QDPlugin *plugin )
 {
     if ( ! QDPluginFilter::filter(plugin) )
