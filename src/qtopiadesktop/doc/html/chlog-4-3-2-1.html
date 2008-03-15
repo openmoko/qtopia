@@ -18,7 +18,11 @@
 <h3>Overview</h3>
 <p>This page describes changes to Qtopia Sync Agent 4.3&#x2e;2&#x2e;</p>
 <ul>
-<li>Fixed an obvious crash bug that somehow made it through our QA process.</li>
+<li>Fixed numerous crash bugs.</li>
+<li>Correct the progress reporting on the device. It's still a bogus indicator but it now goes from 1 to n instead of stopping at n-1.</li>
+<li>The connection timeout code was restored but it defaults to off. The Greenphone requires this code to be in operation due to it's inability to detect a disconnect event. The device timeout is now 3x the value the desktop uses.</li>
+<li>Objects of an unexpected type returned from Outlook are ignored.</li>
+<li>A bug causing items created in Outlook to be duplicated at every sync has been fixed.</li>
 </ul>
 <a name="known-issues"></a>
 <h3>Known issues</h3>

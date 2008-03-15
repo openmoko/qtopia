@@ -48,18 +48,12 @@ void QTMailWindow::init()
 {
     self = this;
 
-#ifdef THIS_BUG_HAS_BEEN_FIXED
-    // Passing the correct parent for EmailClient does NOT work
-    // doing so causes a blank screen to be shown
-    emailClient = new EmailClient(views, "client"); // No tr
-#else
     // Pass in an incorrect parent, a warning
     // "QLayout::addChildWidget: EmailClient "client" in wrong parent; "
     // "moved to correct parent" will be shown, but this is necessary
     // to make the emailClient QMainWindow display.
     // This seems to be a QMainWindow in a QStackedWidget bug
     emailClient = new EmailClient(this, "client"); // No tr
-#endif
 
     status = new StatusDisplay;
 

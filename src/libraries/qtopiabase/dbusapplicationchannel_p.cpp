@@ -113,7 +113,7 @@ DBUSQtopiaApplicationChannel::~DBUSQtopiaApplicationChannel()
 */
 void DBUSQtopiaApplicationChannel::appMessage(const QString &msg, const QByteArray &data)
 {
-    QFile f("/home/dkenzior/foobar");
+    QFile f("/tmp/foobar");
     f.open(QIODevice::WriteOnly);
     QDataStream stream(&f);
     stream << "DBUSQtopiaApplicationChannel Received message:" << msg;

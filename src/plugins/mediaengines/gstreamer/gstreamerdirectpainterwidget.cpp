@@ -43,17 +43,18 @@ namespace gstreamer
 DirectPainterWidget::DirectPainterWidget(QWidget* parent):
     QDirectPainter(parent, QDirectPainter::NonReserved),
     m_isVisible(false),
-    m_firstPaintCalc(true),
     m_painting(false),
     m_black(0)
 {
+    m_frameBufferImage = QImage(frameBuffer(),
+                                screenWidth(),
+                                screenHeight(),
+                                screenDepth() == 16 ? QImage::Format_RGB16 :
+                                QImage::Format_RGB32);
 }
 
 DirectPainterWidget::~DirectPainterWidget()
 {
-#ifndef QTOPIA_NO_MEDIAVIDEOSCALING
-    delete m_frameBufferImage;
-#endif
     g_object_unref(m_sink);
 }
 
@@ -61,8 +62,7 @@ GstElement* DirectPainterWidget::element()
 {
     m_sink = GST_ELEMENT(g_object_new(QtopiaVideoSinkClass::get_type(), NULL));
 
-    if (m_sink != 0)
-    {
+    if (m_sink != 0) {
         QtopiaVideoSink*  sink = reinterpret_cast<QtopiaVideoSink*>(m_sink);
 
         sink->widget = this;
@@ -79,18 +79,18 @@ int DirectPainterWidget::displayDepth() const
 void DirectPainterWidget::setVideoSize(int w, int h)
 {
     m_videoSize = QSize(w, h);
+
+    regionChanged(allocatedRegion());
 }
 
 void DirectPainterWidget::paint(QImage const& frame)
 {
-    if (m_painting)
+    if (!m_isVisible || m_painting)
         return;
 
     m_painting = true;
 
-    if (!frame.isNull() && !m_firstPaintCalc)
-    {
-        startPainting();
+    startPainting(); {
 
         QRegion paintRegion = allocatedRegion();
 
@@ -100,7 +100,7 @@ void DirectPainterWidget::paint(QImage const& frame)
         }
 
 #ifndef QTOPIA_NO_MEDIAVIDEOSCALING
-        QPainter    p(m_frameBufferImage);
+        QPainter    p(&m_frameBufferImage);
         p.setClipRegion(paintRegion);
         p.setWindow(m_windowRect);
         p.setViewport(m_viewPort);
@@ -114,79 +114,69 @@ void DirectPainterWidget::paint(QImage const& frame)
         qt_screen->setDirty(paintRegion.boundingRect());
     }
 
+    m_savedFrame = frame;
+
     m_painting = false;
 }
 
 // private
 void DirectPainterWidget::regionChanged(const QRegion &exposedRegion)
 {
-    calc(exposedRegion);
-}
-
-void DirectPainterWidget::calc(QRegion const& region)
-{
-    m_isVisible = false;
-
-    if (!region.isEmpty() && m_videoSize.isValid()) {
-        if (m_firstPaintCalc) {
+    if (exposedRegion.isEmpty())
+        m_isVisible = false;
+    else {
+        if (m_videoSize.isValid()) {
             QRect bounds = geometry();
-            m_destRect = QRect(QPoint(0, 0), m_videoSize);
+
+            if (m_geometry != bounds) {
+                m_geometry = bounds;
+
+                m_destRect = QRect(QPoint(0, 0), m_videoSize);
 
 #ifndef QTOPIA_NO_MEDIAVIDEOSCALING
-            m_frameBufferImage = new QImage(frameBuffer(),
-                                            screenWidth(),
-                                            screenHeight(),
-                                            screenDepth() == 16 ? QImage::Format_RGB16 :
-                                                                  QImage::Format_RGB32);
-
-            const double fourfifths = double(4) / 5;
-            if ((m_destRect.width() < fourfifths * bounds.width() &&
-                 m_destRect.height() < fourfifths * bounds.height()) ||
-                (m_destRect.width() > bounds.width() ||
-                 m_destRect.height() > bounds.height()))
-            {
-                QSize scaled = m_videoSize;
-                scaled.scale(bounds.size(), Qt::KeepAspectRatio);
-                m_destRect.setSize(scaled);
-            }
-
-            m_destRect.moveCenter(bounds.center());
-
-            if (qt_screen->isTransformed()) {
-                m_windowRect = QRect(QPoint(0, 0), qt_screen->mapToDevice(m_videoSize));
-                m_viewPort = qt_screen->mapToDevice(m_destRect, QSize(qt_screen->width(), qt_screen->height()));
-                switch (qt_screen->transformOrientation()) {
-                    case 1: m_transform.translate(0, m_windowRect.height()); break;
-                    case 2: m_transform.translate(m_windowRect.width(), m_windowRect.height()); break;
-                    case 3: m_transform.translate(m_windowRect.width(), 0); break;
+                const double fourfifths = double(4) / 5;
+                if ((m_destRect.width() < fourfifths * m_geometry.width() &&
+                            m_destRect.height() < fourfifths * m_geometry.height()) ||
+                        (m_destRect.width() > m_geometry.width() ||
+                         m_destRect.height() > m_geometry.height()))
+                {
+                    QSize scaled = m_videoSize;
+                    scaled.scale(m_geometry.size(), Qt::KeepAspectRatio);
+                    m_destRect.setSize(scaled);
                 }
-                m_transform.rotate(360 - qt_screen->transformOrientation() * 90);
-            }
-            else {
-                m_windowRect = QRect(QPoint(0, 0), m_videoSize);
-                m_viewPort = m_destRect;
-            }
+
+                m_destRect.moveCenter(m_geometry.center());
+
+                if (qt_screen->isTransformed()) {
+                    m_windowRect = QRect(QPoint(0, 0), qt_screen->mapToDevice(m_videoSize));
+                    m_viewPort = qt_screen->mapToDevice(m_destRect, QSize(qt_screen->width(), qt_screen->height()));
+
+                    m_transform.reset();
+                    switch (qt_screen->transformOrientation()) {
+                        case 1: m_transform.translate(0, m_windowRect.height()); break;
+                        case 2: m_transform.translate(m_windowRect.width(), m_windowRect.height()); break;
+                        case 3: m_transform.translate(m_windowRect.width(), 0); break;
+                    }
+                    m_transform.rotate(360 - qt_screen->transformOrientation() * 90);
+                }
+                else {
+                    m_windowRect = QRect(QPoint(0, 0), m_videoSize);
+                    m_viewPort = m_destRect;
+                }
 #else
-            m_destRect.moveCenter(bounds.center());
-            m_destTopLeft = m_destRect.topLeft();
+                m_destRect.moveCenter(m_geometry.center());
+                m_destTopLeft = m_destRect.topLeft();
 #endif
-            m_blackRegion = requestedRegion() ^ QRegion(m_destRect);
+                m_blackRegion = requestedRegion() ^ QRegion(m_destRect);
+            }
+            else
+                paint(m_savedFrame);
 
-            m_firstPaintCalc = false;
+            m_black = m_blackRegion.isEmpty() ? 0 : 2;
+
+            m_isVisible = true;
         }
-        else
-        {
-            // Fill if paused, this is not the best. But the image data may
-            // not be retrievable at this time. TODO:
-            qt_screen->solidFill(Qt::black, region);
-        }
-
-        m_black = m_blackRegion.isEmpty() ? 0 : 2;
-
-        m_isVisible = true;
     }
-
-    m_savedRegion = region;
 }
 
 }   // ns gstreamer

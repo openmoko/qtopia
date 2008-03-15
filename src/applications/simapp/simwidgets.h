@@ -167,7 +167,7 @@ class SimInput : public SimCommandView
 {
     Q_OBJECT
 public:
-    SimInput(const QSimCommand &simCmd, QWidget *parent);
+    SimInput(const QSimCommand &simCmd, QSimIconReader *reader, QWidget *parent);
     virtual ~SimInput() {}
 
     void setInput(const QString &input);
@@ -181,9 +181,10 @@ protected:
 private slots:
     void validateInput();
     void sendHelpRequest();
+    void iconsReady();
 
 private:
-    QLabel *text;
+    QLabel *text, *iconLabel;
     QLineEdit *lineEdit;
     QTextEdit *multiEdit;
     QWidget *focusWidget;

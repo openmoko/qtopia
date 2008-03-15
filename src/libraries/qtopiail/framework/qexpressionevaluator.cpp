@@ -1591,7 +1591,7 @@ void ExpressionCodeGenerator::generateDataCode( ExpressionParserNode* data ) {
     Q_ASSERT(data != 0);
     Q_ASSERT(isNodeDataType(data) == true);
     Q_ASSERT(data->leftChild == 0 && data->rightChild == 0);
-    ExpressionMachineOperand::Type runtimeType;
+    ExpressionMachineOperand::Type runtimeType = /* Silence compiler warning */ ExpressionMachineOperand::Bool;
     if( data->token.type == ExpressionToken::Term ) {
 #ifdef QTOPIAIL
         // do runtime conversion

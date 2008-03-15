@@ -28,7 +28,7 @@ GenericVideoWidget::GenericVideoWidget(GenericVideoSurface* surface, QWidget* pa
 {
     HX_ADDREF( m_surface );
 
-    m_surface->addPaintObserver(this);
+    m_surface->setPaintObserver(this);
 
     // Optimize paint event
     setAttribute(Qt::WA_NoSystemBackground);
@@ -42,10 +42,16 @@ GenericVideoWidget::GenericVideoWidget(GenericVideoSurface* surface, QWidget* pa
 
 GenericVideoWidget::~GenericVideoWidget()
 {
+    m_surface->setPaintObserver(0);
     HX_RELEASE(m_surface);
 }
 
-void GenericVideoWidget::paintNotification()
+void GenericVideoWidget::setVideoSize(QSize const& size)
+{
+    Q_UNUSED(size);
+}
+
+void GenericVideoWidget::paint(QImage const& frame)
 {
     QWidget::update();
 }

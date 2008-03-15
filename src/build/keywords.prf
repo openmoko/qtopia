@@ -98,6 +98,11 @@ keyword.unittest.commands=\
     "CONFIG-=enable_singleexec"
 PROJECT_KEYWORDS+=unittest
 
+keyword.integrationtest.equiv=unittest
+keyword.integrationtest.commands=\
+    "CONFIG+=integrationtest"
+PROJECT_KEYWORDS+=integrationtest
+
 # A GUI testcase
 keyword.systemtest.equiv=desktop app
 keyword.systemtest.commands=\

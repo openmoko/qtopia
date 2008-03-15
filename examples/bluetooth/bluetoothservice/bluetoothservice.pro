@@ -10,7 +10,7 @@ LANGUAGES=$$AVAILABLE_LANGUAGES
 HEADERS=bluetoothservice.h
 SOURCES=main.cpp bluetoothservice.cpp
 
-desktop.files=$$QTOPIA_DEPOT_PATH/examples/bluetooth/bluetoothservice/bluetoothservice.desktop
+desktop.files=bluetoothservice.desktop
 desktop.path=/apps/Applications
 desktop.hint=desktop
 INSTALLS+=desktop
@@ -22,7 +22,7 @@ pkg.domain=trusted
 
 # include the SDP record XML file
 # /etc/bluetooth/sdp is where other Qtopia SDP record XML files are located
-sdprecord.files=$$QTOPIA_DEPOT_PATH/examples/bluetooth/bluetoothservice/SerialPortSDPRecord.xml
+sdprecord.files=SerialPortSDPRecord.xml
 sdprecord.path=/etc/bluetooth/sdp
 INSTALLS+=sdprecord
 

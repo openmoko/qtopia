@@ -301,7 +301,7 @@ void QCopConnection::process( const QString &message )
             QString version = message2.left(argIndex);
             LOG() << "connected to a version" << version << "device";
             properties["version"] = version;
-            QStringList nvl = message2.mid(argIndex + 1).split( ';', QString::SkipEmptyParts );
+            QStringList nvl = message2.mid(argIndex + 1).trimmed().split( ';', QString::SkipEmptyParts );
             foreach ( const QString &arg, nvl ) {
                 int eq = arg.indexOf('=');
                 if ( eq > 0 ) {

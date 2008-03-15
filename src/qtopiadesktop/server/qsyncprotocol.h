@@ -64,14 +64,13 @@ private slots:
     void serverEnd();
 
     // receive
-    void clientSyncRequest(const QString &datasource);
     void clientIdentity(const QString &);
     void clientVersion(int, int, int);
     void clientSyncAnchors(const QDateTime &, const QDateTime &);
     void createClientRecord(const QByteArray &);
     void replaceClientRecord(const QByteArray &);
     void removeClientRecord(const QString &);
-    void mapId(const QString &, const QString &);
+    void clientMappedId(const QString &, const QString &);
     void clientError();
     void clientEnd();
 

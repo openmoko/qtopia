@@ -47,7 +47,8 @@ class PaintObserver
 {
 public:
     virtual ~PaintObserver() {}
-    virtual void paintNotification() = 0;
+    virtual void setVideoSize(QSize const& size) = 0;
+    virtual void paint(QImage const& frame) = 0;
 };
 
 
@@ -55,7 +56,7 @@ class GenericVideoSurface : public IHXVideoSurface
 {
 public:
     GenericVideoSurface();
-
+    virtual  ~GenericVideoSurface() {}
     QImage const& buffer() const { return m_buffer; }
 
     // IHXVideoSurface
@@ -80,13 +81,14 @@ public:
     STDMETHOD_(UINT32, AddRef) (THIS);
     STDMETHOD_(UINT32, Release) (THIS);
 
-    void addPaintObserver(PaintObserver* paintObserver);
+    void setPaintObserver(PaintObserver* paintObserver);
 
 private:
     INT32 m_refCount;
 
     HelixColorLibrary m_library;
 
+    QSize               m_videoSize;
     QImage              m_buffer;
     LPHXCOLORCONVERTER  Converter;
     int                 m_bufferPitch;

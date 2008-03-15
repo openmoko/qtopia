@@ -132,8 +132,11 @@ QMAKE_LIBDIR_QT = $$QTDIR/lib
     first_syncqtopia.depends=syncqtopia
 
     # Add the implicit RPATH to embedded targets
-    contains(PROJECT_TYPE,embedded)|qtopia {
-        enable_rpath:qt:!isEmpty(EMBEDDED_RPATH):LIBS+=$$EMBEDDED_RPATH
+    enable_rpath:!desktop:!isEmpty(EMBEDDED_RPATH) {
+        rpath=0
+        contains(PROJECT_TYPE,external):!desktop:rpath=1
+        contains(PROJECT_TYPE,embedded)|qtopia:rpath=1
+        equals(rpath,1):LIBS+=$$EMBEDDED_RPATH
     }
 
     qtopia_depot:!win32 {
@@ -171,6 +174,19 @@ QMAKE_LIBDIR_QT = $$QTDIR/lib
         QMAKE_EXTRA_TARGETS+=sxe_test
         ALL_DEPS+=sxe_test
     }
+
+    win32:CONFIG(debug,debug|release):lib {
+        isEmpty(DESTDIR):pdb=$${TARGET}.pdb
+        else:pdb=$$DESTDIR/$${TARGET}.pdb
+        pdb.commands=$$QMAKE_COPY $$fixpath($$pdb) $(INSTALL_ROOT)
+        pdb.CONFIG=no_path
+        pdb.depends=install_target
+        INSTALLS+=pdb
+    }
+
+    # Prevent dynamic_cast from being used in embedded builds (we disable rtti so it will
+    # always fail or worse, succeed without checking)
+    embedded:DEFINES+=dynamic_cast=dynamic_cast_not_allowed
 }
 
 # Print out the "make sdk" warning everywhere, not just the top of the tree

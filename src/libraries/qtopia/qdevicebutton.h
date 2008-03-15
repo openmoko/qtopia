@@ -25,12 +25,12 @@
 #include <qstring.h>
 #include <qtopiaservices.h>
 
-/**
- * This class represents a physical button on a Qtopia device.  A device may
- * have n "user programmable" buttons, which are number 1..n.  The location
- * and number of buttons will vary from device to device.  userText() and pixmap()
- * may be used to describe this button to the user in help documentation.
- */
+/*
+    This class represents a physical button on a Qtopia device.  A device may
+    have n "user programmable" buttons, which are numbered 1..n.  The location
+    and number of buttons will vary from device to device.  userText() and pixmap()
+    may be used to describe this button to the user in help documentation.
+*/
 class QTOPIA_EXPORT QDeviceButton {
 public:
     QDeviceButton();

@@ -35,20 +35,28 @@ linstall_template=$$COMMAND_HEADER\
     INSTALLS+=linstall
 
     # Update .ts files
-    translatables.CONFIG=no_link no_dependencies explicit_dependencies combine ignore_no_exist no_clean
-    commands=$$COMMAND_HEADER
-    for(lang,ALL_TRANSLATIONS) {
-        !equals(commands,$$COMMAND_HEADER):commands+=$$LINE_SEP
-        commands+=\
-            cd $$SRCDIR $$COMMAND_SEP\
-            $$fixpath($$DQTDIR/bin/lupdate) ${QMAKE_FILE_IN} -ts $$TRTARGET-$${lang}.ts
+    real_translatables=$$TRANSLATABLES
+    resolveRelativeFiles(real_translatables,1)
+    commands=@
+    win32:commands+=if exist translatables.pro del translatables.pro
+    else:commands+=rm -f translatables.pro
+    for(t,real_translatables) {
+        s=
+        containsre($$t,\.h$):s=HEADERS
+        isEmpty(s):containsre($$t,\.ui$):s=FORMS
+        isEmpty(s):s=SOURCES
+        commands+=$$LINE_SEP_VERBOSE@\
+            "echo \"$$s += $$t\" >>translatables.pro"
     }
+    for(lang,ALL_TRANSLATIONS) {
+        commands+=$$LINE_SEP_VERBOSE@\
+            "echo \"TRANSLATIONS += $$SRCDIR/$$TRTARGET-$${lang}.ts\" >>translatables.pro"
+    }
+    commands+=$$LINE_SEP\
+        $$fixpath($$DQTDIR/bin/lupdate) translatables.pro
     translatables.commands=$$commands
-    translatables.input=TRANSLATABLES
-    translatables.output=dummy_translatables
-    translatables.name=lupdate
-    QMAKE_EXTRA_COMPILERS+=translatables
-    lupdate.depends+=compiler_translatables_make_all
+    QMAKE_EXTRA_TARGETS+=translatables
+    lupdate.depends+=translatables
 }
 
 # Non-code translatables
@@ -74,9 +82,9 @@ for(it,INSTALLS) {
 
         # Update the non-code .ts file
         eval(nct_lupdate_$${it}.CONFIG=no_link no_dependencies explicit_dependencies combine ignore_no_exist no_clean)
-        commands=$$COMMAND_HEADER\
-            cd $$outdir $$COMMAND_SEP\
-            $$fixpath($$QBS_BIN/nct_lupdate)
+        commands=$$COMMAND_HEADER
+        !isEmpty(outdir):commands+=cd $$outdir $$COMMAND_SEP
+        commands+=$$fixpath($$QBS_BIN/nct_lupdate)
         contains(hint,content) {
             containsre($$trtarget,^Qtopia):commands+=\
                 -depot $$fixpath($$QTOPIA_DEPOT_PATH)
@@ -85,7 +93,7 @@ for(it,INSTALLS) {
         }
         commands+=\
                 $$DQTDIR\
-                $$LITERAL_QUOTE$$TRANSLATIONS$$LITERAL_QUOTE\
+                $$LITERAL_QUOTE$$ALL_TRANSLATIONS$$LITERAL_QUOTE\
                 ${QMAKE_FILE_IN}
         eval(nct_lupdate_$${it}.commands=\$$commands)
         eval(nct_lupdate_$${it}.input=$${it}.files)
@@ -111,11 +119,12 @@ for(it,INSTALLS) {
 
         # Update the theme .ts file
         eval(theme_lupdate_$${it}.CONFIG=no_link no_dependencies explicit_dependencies ignore_no_exist no_clean)
-        commands=$$COMMAND_HEADER\
-            cd $$outdir $$COMMAND_SEP\
+        commands=$$COMMAND_HEADER
+        !isEmpty(outdir):commands+=cd $$outdir $$COMMAND_SEP
+        commands+=\
             $$fixpath($$QBS_BIN/theme_lupdate)\
                 $$DQTDIR\
-                $$LITERAL_QUOTE$$TRANSLATIONS$$LITERAL_QUOTE\
+                $$LITERAL_QUOTE$$ALL_TRANSLATIONS$$LITERAL_QUOTE\
                 ${QMAKE_FILE_IN}
         eval(theme_lupdate_$${it}.commands=\$$commands)
         eval(theme_lupdate_$${it}.input=$${it}.files)

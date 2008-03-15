@@ -25,6 +25,8 @@
 
 #include "merge.h"
 
+//#define DEBUG_MERGE
+
 class MergeElement
 {
 public:
@@ -66,9 +68,28 @@ public:
     int matchingItemCount;
 };
 
+#ifdef DEBUG_MERGE
+QString dumpItems(const QList<MergeElement*> &items)
+{
+    QString ret = "\n";
+    QTextStream stream(&ret);
+    foreach (const MergeElement *item, items) {
+        stream << "<" << item->name << ">";
+        if (item->items.count())
+            stream << dumpItems(item->items).toLocal8Bit().constData();
+        else
+            stream << item->text;
+        stream << "</" << item->name << ">" << endl;
+    }
+    return ret;
+}
+#define RETURN_REASON(ret,reason) {qDebug() << "returning" << ret << "because:" << #reason << "(" << left->reason << "vs" << right->reason << ")"; return ret;}
+#else
+#define RETURN_REASON(ret,reason) return ret;
+#endif
+
 bool mergeElementLessThan(const MergeElement *left, const MergeElement *right)
 {
-    
     if (!left || !right) {
         if (right)
             return true;
@@ -76,34 +97,42 @@ bool mergeElementLessThan(const MergeElement *left, const MergeElement *right)
     }
 
     if (left->namespaceUri < right->namespaceUri)
-        return true;
+        RETURN_REASON(true,namespaceUri);
     if (left->name < right->name)
-        return true;
+        RETURN_REASON(true,name);
+    if (left->text != right->text) {
+        if (left->text.isEmpty())
+            RETURN_REASON(false,text);
+        if (right->text.isEmpty())
+            RETURN_REASON(true,text);
+    }
     if (left->text < right->text)
-        return true;
+        RETURN_REASON(true,text);
     if (left->attributes.count() < right->attributes.count())
-        return true;
+        RETURN_REASON(true,attributes.count());
     if (left->attributes.count() > right->attributes.count())
-        return false;
-    int i;
-    for (i = 0; i < left->attributes.count(); ++i) {
+        RETURN_REASON(false,attributes.count());
+    if (left->items.count() < right->items.count())
+        RETURN_REASON(true,items.count());
+    if (left->items.count() > right->items.count())
+        RETURN_REASON(false,items.count());
+    for (int i = 0; i < left->items.count(); ++i) {
+        if (mergeElementLessThan(left->items[i], right->items[i]))
+            RETURN_REASON(true,items[i]);
+    }
+    for (int i = 0; i < left->attributes.count(); ++i) {
         QXmlStreamAttribute attr = left->attributes[i];
         QXmlStreamAttribute attrOther = right->attributes[i];
         if (attr.namespaceUri() < attrOther.namespaceUri())
-            return true;
+            RETURN_REASON(true,attributes[i].namespaceUri().toString());
         if (attr.name() < attrOther.name())
-            return true;
+            RETURN_REASON(true,attributes[i].name().toString());
         if (attr.value() < attrOther.value())
-            return true;
+            RETURN_REASON(true,attributes[i].value().toString());
     }
-    if (left->items.count() < right->items.count())
-        return true;
-    if (left->items.count() > right->items.count())
-        return false;
-    for (i = 0; i < left->items.count(); ++i) {
-        if (mergeElementLessThan(left->items[i], right->items[i]))
-            return true;
-    }
+#ifdef DEBUG_MERGE
+    qDebug() << "returning false because: default case";
+#endif
     return false;
 }
 
@@ -122,7 +151,16 @@ void MergeElement::addChild(MergeElement *child)
         if (item->name == child->name && item->namespaceUri == child->namespaceUri) {
             matchingItemCount++;
         } else {
+#ifdef DEBUG_MERGE
+            QString before = dumpItems(items);
+            qDebug() << "Sorting...";
+#endif
             qSort(items.end()-matchingItemCount, items.end(), mergeElementLessThan);
+#ifdef DEBUG_MERGE
+            QString after = dumpItems(items);
+            if ( before != after )
+                qDebug() << "addChild: Sorting changed items from" << before << "to" << after;
+#endif
             matchingItemCount = 1;
         }
     } else {
@@ -134,8 +172,18 @@ void MergeElement::addChild(MergeElement *child)
 
 void MergeElement::finalize()
 {
-    if (matchingItemCount > 1)
+    if (matchingItemCount > 1) {
+#ifdef DEBUG_MERGE
+        QString before = dumpItems(items);
+        qDebug() << "Sorting...";
+#endif
         qSort(items.end()-matchingItemCount, items.end(), mergeElementLessThan);
+#ifdef DEBUG_MERGE
+        QString after = dumpItems(items);
+        if ( before != after )
+            qDebug() << "finalize: Sorting changed items from" << before << "to" << after;
+#endif
+    }
 }
 
 MergeItem::MergeItem(const QSyncMerge *parent)
@@ -200,8 +248,8 @@ void MergeItem::writeElement(QXmlStreamWriter &writer, MergeElement *item, Chang
                     case Server:
                         if (!ident->serverid.isEmpty()) {
                             writer.writeCharacters(ident->serverid);
-                        } else if (!ident->clientid.isEmpty() && mMerge->canMap(ident->clientid, QSyncMerge::Server)) {
-                            writer.writeCharacters(mMerge->map(ident->clientid, QSyncMerge::Server));
+                        } else if (!ident->clientid.isEmpty() && mMerge->canMap(ident->clientid, QSyncMerge::Client)) {
+                            writer.writeCharacters(mMerge->map(ident->clientid, QSyncMerge::Client));
                         } else {
                             writer.writeAttribute("localIdentifier", "false");
                             writer.writeCharacters(ident->clientid);
@@ -295,7 +343,7 @@ void MergeItem::read(const QByteArray &data, ChangeSource source)
                 if (!reader.isWhitespace())
                     currentElement->text = reader.text().toString();
                 break;
-        } 
+        }
     }
 }
 

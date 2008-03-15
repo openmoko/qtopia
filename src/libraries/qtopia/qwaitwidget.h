@@ -29,10 +29,10 @@
 class QWaitWidgetPrivate;
 class QHideEvent;
 
-/**
- * A label that obscures the parent display and puts an image of an wait cursor
- * in the middle of the argument rect, to indicate the display is being built.
- */
+/*
+    A label that obscures the parent display and puts an image of a wait cursor
+    in the middle of the argument rect, to indicate the display is being built.
+*/
 class QTOPIA_EXPORT QWaitWidget : public QDialog
 {
     Q_OBJECT

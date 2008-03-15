@@ -165,5 +165,13 @@ equals(dolibs,1) {
     eval($${var}.commands=\$$commands)
     echo(installing $$var)
     INSTALLS+=$$var
+
+    win32:CONFIG(debug,debug|release) {
+        pdb=$$QTDIR/lib/$${libqt}$${QT_MAJOR_VERSION}.pdb
+        pdb.commands=$$QMAKE_COPY $$fixpath($$pdb) $(INSTALL_ROOT)
+        pdb.CONFIG=no_path
+        pdb.depends=install_$$var
+        INSTALLS+=pdb
+    }
 }
 

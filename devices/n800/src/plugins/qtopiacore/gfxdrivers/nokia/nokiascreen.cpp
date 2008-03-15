@@ -26,8 +26,15 @@
 #include <QtGui/qscreen_qws.h>
 #include <QWSServer>
 #include <QDebug>
+#include <QFile>
+#include <QFileInfo>
+#include <QTextStream>
+#include <QDebug>
+#include <QStringList>
 
-//#include <asm/arch/omapfb.h>
+#include <QFileSystemWatcher>
+
+//#include <asm/arch-omap/omapfb.h>
 
 #include <sys/types.h>
 #include <sys/ioctl.h>
@@ -39,17 +46,23 @@
 #include <fcntl.h>
 #include <linux/fb.h>
 
-#define OMAP_IOW(num, dtype)    _IOW('O', num, dtype)
-#define OMAPFB_UPDATE_WINDOW    OMAP_IOW(47, struct omapfb_update_window)
-#define OMAPFB_UPDATE_WINDOW_OLD    OMAP_IOW(41, struct omapfb_update_window_old)
+#define DEVICE "/dev/fb0"
 
+#define OMAP_IOW(num, dtype)   _IOW('O', num, dtype)
+#define OMAPFB_UPDATE_WINDOW   OMAP_IOW(47, struct omapfb_update_window)
 #define OMAPFB_SET_UPDATE_MODE OMAP_IOW(40, enum  omapfb_update_mode)
 
-struct omapfb_update_window_old {
-       __u32 x, y;
-       __u32 width, height;
-//       __u32 format;
+/*
+  enum omapfb_color_format {
+   OMAPFB_COLOR_RGB565 = 0,
+   OMAPFB_COLOR_YUV422,
+   OMAPFB_COLOR_YUV420,
+   OMAPFB_COLOR_CLUT_8BPP,
+   OMAPFB_COLOR_CLUT_4BPP,
+   OMAPFB_COLOR_CLUT_2BPP,
+   OMAPFB_COLOR_CLUT_1BPP,
 };
+*/
 
 struct omapfb_update_window {
   __u32 x, y;
@@ -63,58 +76,78 @@ enum omapfb_update_mode {
     OMAPFB_MANUAL_UPDATE
 };
 
-
 NokiaScreen::NokiaScreen(int displayId)
 : QLinuxFbScreen(displayId)
 {
-    qWarning()<<"NokiaScreen";
+//    qWarning()<<"NokiaScreen";
+    int updatemode = OMAPFB_MANUAL_UPDATE;
 
-    QString dev="/dev/fb0";
-    int updatemode =  OMAPFB_AUTO_UPDATE;
-    int infd = open( dev.toLatin1().constData(), O_RDWR);
+    infd = open( DEVICE, O_RDWR | O_NONBLOCK | O_NDELAY);
     if (infd > 0) {
 
         if (ioctl( infd, OMAPFB_SET_UPDATE_MODE, &updatemode) < 0) {
             perror("ioctl( OMAPFB_SET_UPDATE_MODE)");
-            qWarning()<<"ioctl( OMAPFB_SET_UPDATE_MODE)";
+            //           qWarning()<<"ioctl( OMAPFB_SET_UPDATE_MODE)";
         }
-        close(infd);
-    } else {
-        qWarning("NOPT!@");
     }
+
+    readBrightness("/sys/devices/platform/omapfb/panel/backlight_level");
 }
 
 NokiaScreen::~NokiaScreen()
 {
+    close(infd);
 }
 
 void NokiaScreen::exposeRegion(QRegion r, int changing)
 {
-
     r &= region();
     if (r.isEmpty())
         return;
 
     QScreen::exposeRegion(r, changing);
-    struct omapfb_update_window_old update;
+//    readBrightness("/sys/devices/platform/omapfb/panel/backlight_level");
 
-    update.x = r.boundingRect().x();
-    update.y = r.boundingRect().y();
-    update.width = r.boundingRect().width();
-    update.height = r.boundingRect().height();
-//  update.format = 0/*OMAPFB_COLOR_RGB565*/;
+    //   if (okToUpdate) {
+        struct omapfb_update_window update;
 
-    QString dev="/dev/fb0";
+        update.x = r.boundingRect().x();
+        update.y = r.boundingRect().y();
+        update.width = r.boundingRect().width();
+        update.height = r.boundingRect().height();
+        update.format = 0;// OMAPFB_COLOR_RGB565;
 
-    int infd = open( dev.toLatin1().constData(), O_RDWR);
-    if (infd > 0) {
-        if (ioctl( infd, OMAPFB_UPDATE_WINDOW_OLD, &update) < 0) {
-            perror("ioctl(OMAPFB_UPDATE_WINDOW)");
-            qWarning()<<"ioctl(OMAPFB_UPDATE_WINDOW)";
+        if (infd > 0) {
+            if (ioctl( infd, OMAPFB_UPDATE_WINDOW, &update) < 0) {
+                perror("ioctl(OMAPFB_UPDATE_WINDOW)");
+                qWarning()<<"ioctl(OMAPFB_UPDATE_WINDOW)";
+            }
         }
-        close(infd);
-    } else {
-        qWarning("NOPT!@");
-    }
+//    }
 }
 
+void NokiaScreen::readBrightness(const QString & path)
+{
+
+    QString strvalue;
+    int value;
+
+    QFile brightness;
+    if (QFileInfo(path).exists() ) {
+        brightness.setFileName(path);
+    }
+
+    if( !brightness.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qWarning()<<"brightness File not opened";
+    } else {
+        QTextStream in(&brightness);
+        in >> strvalue;
+        brightness.close();
+
+    }
+
+    if (strvalue.toInt() > 1 )
+        okToUpdate = true;
+        else
+        okToUpdate = false;
+}

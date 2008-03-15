@@ -31,6 +31,7 @@
 #include <qset.h>
 #include <qtimer.h>
 #include <qmetaobject.h>
+#include <qdatastream.h>
 #include <QDebug>
 #if !defined(QTOPIA_HOST) && !defined(QTOPIA_DBUS_IPC)
 #if defined(Q_WS_QWS)
@@ -72,7 +73,7 @@
     \code
     QtopiaIpcAdaptor *adaptor = new QtopiaIpcAdaptor("QPE/Foo");
     QtopiaIpcAdaptor::connect
-        (adaptor, MESSAGE(changeValue(int)), dest, SIGNAL(setValue(int)));
+        (adaptor, MESSAGE(changeValue(int)), dest, SLOT(setValue(int)));
     \endcode
 
     Now, whenever the client emits the \c{valueChanged(int)} signal, the
@@ -105,21 +106,120 @@
 
 class QtopiaIpcAdaptorChannel : public QCopChannel
 {
-    // Don't need Q_OBJECT here.
+    Q_OBJECT
 public:
-    QtopiaIpcAdaptorChannel( const QString& channel, QtopiaIpcAdaptor *adaptor )
-        : QCopChannel( channel, adaptor ) { this->adaptor = adaptor; }
-    ~QtopiaIpcAdaptorChannel() {}
+    QtopiaIpcAdaptorChannel( const QString& channel, QtopiaIpcAdaptor *adaptor );
+    ~QtopiaIpcAdaptorChannel();
 
     void receive( const QString& msg, const QByteArray &data );
 
+private slots:
+    void cleanup();
+
 private:
-    QtopiaIpcAdaptor *adaptor;
+    QtopiaIpcAdaptor *m_adaptor;
+    QTimer *m_cleanupTimer;
+
+    struct Fragment
+    {
+        QString uuid;
+        QByteArray data;
+        Fragment *next;
+    };
+
+    Fragment *m_fragments;
 };
+
+QtopiaIpcAdaptorChannel::QtopiaIpcAdaptorChannel
+                ( const QString& channel, QtopiaIpcAdaptor *adaptor )
+        : QCopChannel( channel, adaptor )
+{
+    m_adaptor = adaptor;
+    m_fragments = 0;
+    m_cleanupTimer = new QTimer();
+    m_cleanupTimer->setSingleShot(true);
+    connect(m_cleanupTimer, SIGNAL(timeout()), this, SLOT(cleanup()) );
+}
+
+QtopiaIpcAdaptorChannel::~QtopiaIpcAdaptorChannel()
+{
+    if (m_cleanupTimer)
+        delete m_cleanupTimer;
+    cleanup();
+}
 
 void QtopiaIpcAdaptorChannel::receive( const QString& msg, const QByteArray &data )
 {
-    adaptor->received( msg, data );
+    // If this is not a fragmented message, then pass it on as-is.
+    if ( !msg.endsWith( "_fragment_" ) ) {
+        m_adaptor->received( msg, data );
+        return;
+    }
+
+    // The following code must match the equivalent code in qtopiachannel.cpp.
+
+    // Pull apart the fragment into its components.
+    QDataStream stream( data );
+    QString uuid;
+    int posn, size;
+    QByteArray fragData;
+    stream >> uuid;
+    stream >> posn;
+    stream >> size;
+    stream >> fragData;
+
+    // Find the existing fragment information.  For now, we assume that
+    // the fragments arrive in the same order in which they were sent.
+    Fragment *frag;
+    Fragment *prev;
+    if ( !posn ) {
+        // First fragment in a new message.
+        frag = new Fragment();
+        frag->uuid = uuid;
+        frag->data = fragData;
+        frag->next = m_fragments;
+        m_fragments = frag;
+        prev = 0;
+    } else {
+        frag = m_fragments;
+        prev = 0;
+        while ( frag != 0 && frag->uuid != uuid ) {
+            prev = frag;
+            frag = frag->next;
+        }
+        if ( !frag || frag->data.size() != posn ) {
+            return;
+        }
+        frag->data += fragData;
+    }
+
+    // Determine if we have collected up everything.
+    if ( frag->data.size() >= size ) {
+        if ( prev ) {
+            prev->next = frag->next;
+        } else {
+            m_fragments = frag->next;
+            if ( !m_fragments )
+                m_cleanupTimer->stop();
+        }
+        m_adaptor->received( msg.left( msg.length() - 10 ), frag->data );
+        delete frag;
+    } else {
+        // Delete fragments that are still hanging around after 20 seconds.
+        m_cleanupTimer->start( 20000 );
+    }
+}
+
+void QtopiaIpcAdaptorChannel::cleanup()
+{
+    Fragment *frag = m_fragments;
+    Fragment *next;
+    while ( frag != 0 ) {
+        next = frag->next;
+        delete frag;
+        frag = next;
+    }
+    m_fragments = 0;
 }
 
 #endif
@@ -728,3 +828,5 @@ void QtopiaIpcSendEnvelope::addArgument( const QVariant& value )
 {
     d->arguments.append( value );
 }
+
+#include "qtopiaipcadaptor.moc"

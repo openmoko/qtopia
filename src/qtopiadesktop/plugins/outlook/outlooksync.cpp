@@ -31,6 +31,21 @@
 #include <QXmlStreamReader>
 #include <QTimer>
 
+class CacheSettings : public QSettings
+{
+public:
+    CacheSettings( const QString &id )
+        : QSettings(DesktopSettings::homePath()+"outlooksync.cache", QSettings::IniFormat)
+    {
+        beginGroup(id);
+    }
+    ~CacheSettings()
+    {
+    }
+};
+
+// =====================================================================
+
 OutlookSyncPlugin::OutlookSyncPlugin( QObject *parent )
     : QDServerSyncPlugin( parent ), thread( 0 )
 {
@@ -61,7 +76,8 @@ void OutlookSyncPlugin::prepareForSync()
 
     // connect up the sync messages to the thread
     connect( this, SIGNAL(t_fetchChangesSince(QDateTime)), so, SLOT(fetchChangesSince(QDateTime)) );
-    connect( this, SIGNAL(t_updateClientRecord(QByteArray)), so, SLOT(updateClientRecord(QByteArray)), Qt::BlockingQueuedConnection );
+    connect( this, SIGNAL(t_createClientRecord(QByteArray)), so, SLOT(createClientRecord(QByteArray)), Qt::BlockingQueuedConnection );
+    connect( this, SIGNAL(t_replaceClientRecord(QByteArray)), so, SLOT(replaceClientRecord(QByteArray)), Qt::BlockingQueuedConnection );
     connect( this, SIGNAL(t_removeClientRecord(QString)), so, SLOT(removeClientRecord(QString)), Qt::BlockingQueuedConnection );
     // connect up the thread's signals to ours
     connect( so, SIGNAL(mappedId(QString,QString)), this, SIGNAL(mappedId(QString,QString)) );
@@ -100,14 +116,14 @@ void OutlookSyncPlugin::createClientRecord(const QByteArray &record)
 {
     TRACE(OutlookSyncPlugin) << "OutlookSyncPlugin::createClientRecord";
     // blocks until complete
-    emit t_updateClientRecord( record );
+    emit t_createClientRecord( record );
 }
 
 void OutlookSyncPlugin::replaceClientRecord(const QByteArray &record)
 {
     TRACE(OutlookSyncPlugin) << "OutlookSyncPlugin::replaceClientRecord";
     // blocks until complete
-    emit t_updateClientRecord( record );
+    emit t_replaceClientRecord( record );
 }
 
 void OutlookSyncPlugin::removeClientRecord(const QString &identifier)
@@ -207,6 +223,19 @@ void OutlookSyncPlugin::init_item( IDispatchPtr dispatch )
     TRACE(OutlookSyncPlugin) << "OutlookSyncPlugin::init_item";
 }
 
+// Transaction support is not implemented
+void OutlookSyncPlugin::beginTransaction(const QDateTime & /*timestamp*/)
+{
+}
+
+void OutlookSyncPlugin::abortTransaction()
+{
+}
+
+void OutlookSyncPlugin::commitTransaction()
+{
+}
+
 // =====================================================================
 
 OTSyncObject::OTSyncObject()
@@ -223,9 +252,14 @@ OTSyncObject::~OTSyncObject()
         mapi = 0;
     }
 
-    DesktopSettings settings(q->id());
+    CacheSettings settings(q->id());
     LOG() << "SAVING rememberedIds" << rememberedIds;
     settings.setValue( "rememberedIds", rememberedIds );
+    // Clean out stale cache entries
+    settings.beginGroup("cache");
+    foreach (const QString &key, settings.allKeys())
+        if (!rememberedIds.contains(key))
+            settings.remove(key);
 }
 
 void OTSyncObject::logon()
@@ -240,8 +274,8 @@ void OTSyncObject::logon()
 
     LOG() << "q" << q;
     LOG() << "q->id()" << q->id();
-    LOG() << "DesktopSettings settings(q->id())";
-    DesktopSettings settings(q->id());
+    LOG() << "CacheSettings settings(q->id())";
+    CacheSettings settings(q->id());
     LOG() << "settings.value(\"rememberedIds\")";
     rememberedIds = settings.value( "rememberedIds" ).toStringList();
     LOG() << rememberedIds;
@@ -287,6 +321,10 @@ void OTSyncObject::fetchChangesSince( const QDateTime &timestamp )
         q->getProperties( items->Item(item_to_get), id, lm );
         LOG() << "I've seen id" << id << "last modified" << lm;
         seenIds << id;
+        if ( rememberedIds.contains(id) )
+            leftover.removeAt( leftover.indexOf(id) );
+        // Skip items that are of the wrong class
+        if ( !q->isValidObject(items->Item(item_to_get)) ) continue;
         if ( lm >= timestamp ) {
             QBuffer buffer;
             buffer.open( QIODevice::WriteOnly );
@@ -297,17 +335,22 @@ void OTSyncObject::fetchChangesSince( const QDateTime &timestamp )
             }
             LOG() << "remembered?" << (bool)rememberedIds.contains(id);
             if ( timestamp.isNull() || !rememberedIds.contains(id) ) {
+                setPreviousBuffer(id, buffer.buffer());
                 emit createServerRecord( buffer.buffer() );
             } else {
-                emit replaceServerRecord( buffer.buffer() );
+                if (buffer.buffer() != previousBuffer(id)) {
+                    setPreviousBuffer(id, buffer.buffer());
+                    emit replaceServerRecord( buffer.buffer() );
+                } else {
+                    LOG() << "not changed, suppress";
+                }
             }
-            if ( rememberedIds.contains(id) )
-                leftover.removeAt( leftover.indexOf(id) );
         }
         if ( abort ) return;
     }
     if ( !timestamp.isNull() ) {
         foreach ( const QString &id, leftover ) {
+            setPreviousBuffer(id, QByteArray());
             emit removeServerRecord( id );
             if ( abort ) return;
         }
@@ -317,9 +360,45 @@ void OTSyncObject::fetchChangesSince( const QDateTime &timestamp )
     emit serverChangesCompleted();
 }
 
-void OTSyncObject::updateClientRecord(const QByteArray &record)
+void OTSyncObject::createClientRecord(const QByteArray &record)
 {
-    TRACE(OutlookSyncPlugin) << "OTSyncObject::updateClientRecord";
+    TRACE(OutlookSyncPlugin) << "OTSyncObject::createClientRecord";
+    LOG() << "record" << record;
+
+    QString clientid;
+    bool local;
+    bool ok = q->getIdentifier( record, clientid, local );
+    LOG() << "getIdentifier() returned" << "clientid" << clientid << "local" << local;
+    Q_ASSERT( ok );
+
+    QString entryid;
+
+    if ( local ) {
+        entryid = clientid;
+        LOG() << "This is a known record with entryid" << entryid;
+        WARNING() << "BUG: Got a create with a known identifier!";
+        return;
+    } else {
+        LOG() << "This is an unknown record with clientid" << clientid;
+    }
+
+    IDispatchPtr dispatch = findItem( entryid );
+
+    entryid = q->read_item( dispatch, record );
+    LOG() << "read_item() returned entryid" << entryid;
+    if ( entryid.isEmpty() ) {
+        WARNING() << "BUG: Could not add/update item!!!";
+        return;
+    }
+
+    rememberedIds << entryid;
+    LOG() << "rememberedIds" << rememberedIds;
+    emit mappedId( entryid, clientid );
+}
+
+void OTSyncObject::replaceClientRecord(const QByteArray &record)
+{
+    TRACE(OutlookSyncPlugin) << "OTSyncObject::replaceClientRecord";
     LOG() << "record" << record;
 
     QString clientid;
@@ -335,6 +414,8 @@ void OTSyncObject::updateClientRecord(const QByteArray &record)
         LOG() << "This is a known record with entryid" << entryid;
     } else {
         LOG() << "This is an unknown record with clientid" << clientid;
+        WARNING() << "BUG: Got a replace with an unknown identifier!";
+        return;
     }
 
     IDispatchPtr dispatch = findItem( entryid );
@@ -344,12 +425,6 @@ void OTSyncObject::updateClientRecord(const QByteArray &record)
     if ( entryid.isEmpty() ) {
         WARNING() << "BUG: Could not add/update item!!!";
         return;
-    }
-
-    if ( !local ) {
-        rememberedIds << entryid;
-        LOG() << "rememberedIds" << rememberedIds;
-        emit mappedId( entryid, clientid );
     }
 }
 
@@ -364,6 +439,8 @@ void OTSyncObject::removeClientRecord(const QString &identifier)
         QString id;
         QDateTime lm;
         long item_to_get = i+1;
+        // Skip items that are of the wrong class
+        if ( !q->isValidObject(items->Item(item_to_get)) ) continue;
         q->getProperties( items->Item(item_to_get), id, lm );
         if ( id == identifier ) {
             found = true;
@@ -391,6 +468,8 @@ IDispatchPtr OTSyncObject::findItem( const QString &entryid )
             QString id;
             QDateTime lm;
             long item_to_get = i+1;
+            // Skip items that are of the wrong class
+            if ( !q->isValidObject(items->Item(item_to_get)) ) continue;
             q->getProperties( items->Item(item_to_get), id, lm );
             if ( entryid == id ) {
                 disp = items->Item(item_to_get);
@@ -410,17 +489,21 @@ IDispatchPtr OTSyncObject::findItem( const QString &entryid )
     return disp;
 }
 
-// Transaction support is not implemented
-void OutlookSyncPlugin::beginTransaction(const QDateTime & /*timestamp*/)
+QByteArray OTSyncObject::previousBuffer( const QString &id )
 {
+    CacheSettings settings(q->id());
+    settings.beginGroup("cache");
+    return settings.value(id).toString().toLocal8Bit();
 }
 
-void OutlookSyncPlugin::abortTransaction()
+void OTSyncObject::setPreviousBuffer( const QString &id, const QByteArray &data )
 {
+    CacheSettings settings(q->id());
+    settings.beginGroup("cache");
+    if (data.count()) {
+        qDebug() << "saving previous buffer";
+        settings.setValue(id, QString(data));
+    } else
+        settings.remove(id);
 }
-
-void OutlookSyncPlugin::commitTransaction()
-{
-}
-
 

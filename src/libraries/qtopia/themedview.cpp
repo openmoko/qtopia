@@ -2769,8 +2769,7 @@ void ThemeTextItem::drawOutline(QPainter *painter, const QRect &rect, int flags,
     ppm.begin(&img);
     ppm.setFont(painter->font());
     ppm.setPen(getColor(outlineColor, outlineRole));
-    ppm.translate(rect.topLeft()-br.topLeft());
-    ppm.drawText(rect, flags, text);
+    ppm.drawText(QRect(QPoint(0,0), br.size()), flags, text);
 
     QPoint pos(br.topLeft());
     pos += QPoint(-1,0);
@@ -2784,7 +2783,7 @@ void ThemeTextItem::drawOutline(QPainter *painter, const QRect &rect, int flags,
 
     img.fill(qRgba(0,0,0,0));
     ppm.setPen(painter->pen());
-    ppm.drawText(rect, flags, text);
+    ppm.drawText(QRect(QPoint(0,0), br.size()), flags, text);
 
     pos += QPoint(0,-1);
     painter->drawImage(pos, img);

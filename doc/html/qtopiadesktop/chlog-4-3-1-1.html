@@ -20,12 +20,17 @@
 <li>Fixed some data corruption bugs and implemented test cases for the Qtopia side of the connection.</li>
 <li>Documentation has been significantly updated.</li>
 <li>Corrected issues that impacted building Qtopia Sync Agent from source code.</li>
+<li>The connection timeout code was removed due to problems it was causing with the Greenphone.</li>
 </ul>
 <a name="known-issues"></a>
 <h3>Known issues</h3>
 <ul>
 <li>Appointments starting and ending at midnight are mis-reported as all day events.</li>
 <li>An obvious crash bug somehow made it through our QA process. Contact support-<a href="mailto:embedded@trolltech">embedded@trolltech</a>.com if you require the patch to correct this.</li>
+<li>Records are being duplicated when synchronizing multiple times.</li>
+<li>Tasks does not sync due to an error handling the low-level protocol.</li>
+<li>Objects of an unexpected type returned from Outlook can cause problems. For example, a distribution list in the Contacts folder is not ignored and is accessed like a Contact, potentially causing problems.</li>
+<li>Synchronization reports on items that were created in the previous sync transaction. This causes items created in Outlook to be duplicated at every sync.</li>
 </ul>
 <p>See also <a href="changes.html">What's New?</a>.</p>
 <p /><address><hr /><div align="center">

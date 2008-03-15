@@ -193,8 +193,8 @@ QString SxeLogEntry::stampFormat()
     static QString stampFmt;
     if ( stampFmt.isEmpty() )
     {
-        /* For unit tests, use the settings set in user scope, so the
-         * unit test can modify it. */
+        // For unit tests, use the settings set in user scope, so the
+        // unit test can modify it.
         QSettings sxeMonitorConf(
 #ifndef QTOPIA_TEST
                Qtopia::qtopiaDir() + "etc/default/Trolltech/Sxe.conf",
@@ -297,8 +297,8 @@ SxeMonitor::~SxeMonitor()
 */
 void SxeMonitor::init()
 {
-   /* For unit tests, use the settings set in user scope, so the
-    * unit test can modify it. */
+   // For unit tests, use the settings set in user scope, so the
+   // unit test can modify it.
     QSettings sxeMonitorConf(
 #ifndef QTOPIA_TEST
             Qtopia::qtopiaDir() + "etc/default/Trolltech/Sxe.conf",
@@ -312,9 +312,13 @@ void SxeMonitor::init()
 
 
     logPath = sxeMonitorConf.value( "Path" ).toString();
-    
+
     if ( logPath.isEmpty() )
-            qWarning() << "Sxe.Conf file does not have specify a value for Log/Path";
+    {
+        qWarning() << "Sxe.Conf file does not have specify a path to the security log file "
+                    "under the Log/Path key.  The SxeMonitor will not respond to security breaches";
+        return;
+    }
 
     qLog( SxeMonitor ) << SxeMonQLog::getQLogString( SxeMonQLog::LogPathSet, QStringList( logPath ) );
     logFile.setFileName( logPath );
@@ -333,14 +337,20 @@ void SxeMonitor::init()
 
     lidsStampFormat = sxeMonitorConf.value("LidsStampFormat").toString();
     if ( lidsStampFormat.isEmpty() )
-        qWarning( "Sxe.conf does not specify a a value for Log/LidsStampFormat");
+    {
+        qWarning( "Sxe.conf does not specify a stamp format for lids messages under the "
+                "Log/LidsStampFormat key.  The SxeMonitor will not respond to security breaches");
+        return;
+    }
 
 #endif
 
     if( !logFile.open(QFile::ReadOnly) )
     {
         qWarning( "SxeMonitor could not open security log file: %s, it may not have sufficent permissions "
-                  "or file does not exist", qPrintable(SxeMonitor::logPath) );
+                "or file does not exist.  The SxeMonitor will not respond to security breaches",
+                qPrintable(SxeMonitor::logPath) );
+        return;
     }
 
     logFile.seek( logFile.size() );

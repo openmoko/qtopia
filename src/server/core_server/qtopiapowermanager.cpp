@@ -153,11 +153,13 @@ void QtopiaPowerManager::powerStatusChanged()
     power saving levels.
 
     This function needs to be reimplemented by subclasses. However any overriding
-    function should call QtopiaPowerManager::setIntervals() as part of its 
+    function should call QtopiaPowerManager::setIntervals() as part of its
     implementation.
 */
 void QtopiaPowerManager::setIntervals(int *v, int size)
 {
+    Q_UNUSED(v);
+
     QSettings cfg( QLatin1String("Trolltech"), QLatin1String("qpe"));
     if (powerstatus.wallStatus() == QPowerStatus::Available) {
         cfg.beginGroup("ExternalPower");
@@ -175,10 +177,10 @@ void QtopiaPowerManager::setIntervals(int *v, int size)
             m_vso->setAttribute( QLatin1String("ScreenSaver/Timeout/Suspend"),
                     cfg.value(QLatin1String("Interval"), 60 ) );
         case 2:
-            m_vso->setAttribute( "ScreenSaver/Timeout/LightOff", 
+            m_vso->setAttribute( "ScreenSaver/Timeout/LightOff",
                     cfg.value(QLatin1String("Interval_LightOff"), 30)  );
         case 1:
-            m_vso->setAttribute( "ScreenSaver/Timeout/Dim", 
+            m_vso->setAttribute( "ScreenSaver/Timeout/Dim",
                     cfg.value(QLatin1String("Interval_Dim"), 20 ) );
         case 0:
            break;

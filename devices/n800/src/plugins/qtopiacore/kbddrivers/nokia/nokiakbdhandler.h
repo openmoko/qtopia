@@ -26,11 +26,19 @@
 
 #include <QObject>
 #include <QWSKeyboardHandler>
-
-#include <termios.h>
-#include <linux/kd.h>
+#include <QTimer>
 
 class QSocketNotifier;
+
+struct NokiaKeys {
+    uint code;
+    uint keyCode;
+    uint FnKeyCode;
+    ushort unicode;
+    ushort shiftUnicode;
+    ushort fnUnicode;
+    
+};
 
 class NokiaKbdHandler : public QObject, public QWSKeyboardHandler
 {
@@ -38,17 +46,28 @@ class NokiaKbdHandler : public QObject, public QWSKeyboardHandler
 public:
     NokiaKbdHandler();
     ~NokiaKbdHandler();
+    virtual const NokiaKeys *keyMap() const;
 
 private:
     QSocketNotifier *m_notify;
-    int  kbdFD;
-    struct termios origTermData;
-    bool shift;
-int numKeyPress;
-private Q_SLOTS:
-    void readKbdData();
+    QSocketNotifier *powerNotify;
+    QTimer *keytimer;
 
-    void handleTtySwitch(int sig);
+    int  kbdFD;
+    int powerFd;
+    bool shift;
+    int numKeyPress;
+    bool keyFunction;
+    bool controlButton;
+
+    int getKeyCode(int code, bool isFunc);
+    int getUnicode(int code);
+    
+private Q_SLOTS:
+
+    void readKbdData();
+    void readPowerKbdData();
+    void timerUpdate();
 };
 
 #endif // QT_QWS_NOKIA

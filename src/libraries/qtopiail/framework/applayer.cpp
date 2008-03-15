@@ -239,7 +239,7 @@ struct Node {
     unsigned int size()
     {
         unsigned int rv = sizeof(Node);
-        rv += nameLen;
+        rv += ALIGN4b(nameLen);
         if(watchCount == 1) {
             rv += sizeof(NodeWatch);
         } else if(watchCount >= 2) {
@@ -248,7 +248,7 @@ struct Node {
 
         if(dataCount == 1) {
             NodeDatum * datum = (NodeDatum *)dataBegin();
-            rv += sizeof(NodeDatum) + datum->len;
+            rv += sizeof(NodeDatum) + ALIGN4b(datum->len);
         } else if(dataCount >= 2) {
             rv += sizeof(unsigned int);
         }
@@ -260,15 +260,16 @@ struct Node {
     {
         return (void *)(name + ALIGN4b(nameLen));
     }
+
     void * watchBegin()
     {
         if(0 == dataCount) {
             return dataBegin();
         } else if(1 == dataCount) {
             NodeDatum * datum = (NodeDatum *)dataBegin();
-            return datum->data + datum->len;
+            return datum->data + ALIGN4b(datum->len);
         } else {
-            return name + nameLen + sizeof(unsigned int);
+            return name + ALIGN4b(nameLen) + sizeof(unsigned int);
         }
     }
 };
@@ -1233,27 +1234,38 @@ bool FixedMemoryTree::setData(unsigned short node,
 
         if(dataLen <= allocatedDataLen) {
             // Sweet, reuse existing
+            NodeDatum * datum = (NodeDatum *)me->dataBegin();
+            datum->owner = owner;
+            datum->type = type;
+            if(me->watchBlockSize())
+                ::memcpy(datum->data + ALIGN4b(dataLen), me->watchBegin(),
+                        me->watchBlockSize());
+            datum->len = dataLen;
+            ::memcpy(datum->data, data, dataLen);
+            me->dataCount = 1;
+
         } else {
             // Need new node
             Node * newNode =
                 (Node *)pool->malloc(sizeof(Node) + ALIGN4b(me->nameLen) +
-                                     sizeof(NodeDatum) + dataLen);
-            ::memcpy(newNode, me, sizeof(Node) + me->nameLen);
+                                     sizeof(NodeDatum) + ALIGN4b(dataLen) +
+                                     me->watchBlockSize());
+            ::memcpy(newNode, me, sizeof(Node) + ALIGN4b(me->nameLen));
             versionTable()->entries[node].nodePtr = ptr(newNode);
+
+            NodeDatum * datum = (NodeDatum *)newNode->dataBegin();
+            datum->owner = owner;
+            datum->type = type;
+            if(me->watchBlockSize())
+                ::memcpy(datum->data + ALIGN4b(dataLen), me->watchBegin(),
+                        me->watchBlockSize());
+            datum->len = dataLen;
+            ::memcpy(datum->data, data, dataLen);
+            me->dataCount = 1;
             pool->free(me);
             me = newNode;
         }
 
-        NodeDatum * datum = (NodeDatum *)me->dataBegin();
-        datum->owner = owner;
-        datum->type = type;
-        if(me->watchBlockSize())
-            ::memcpy(datum->data + dataLen, me->watchBegin(),
-                     me->watchBlockSize());
-
-        datum->len = dataLen;
-        ::memcpy(datum->data, data, dataLen);
-        me->dataCount = 1;
         bump(node);
 
         return true;
@@ -1602,7 +1614,7 @@ unsigned short FixedMemoryTree::newNode(const char * name, unsigned int len,
     // Reset the next free blk
     versionTable()->nxtFreeBlk = versionTable()->entries[node].nxtFreeBlk;
 
-    int nodeSize = sizeof(Node) + len + sizeof(NodeWatch);
+    int nodeSize = sizeof(Node) + ALIGN4b(len) + sizeof(NodeWatch);
 
     // Allocate a new node
     Node * nodePtr = (Node *)pool->malloc(nodeSize);
@@ -1616,7 +1628,7 @@ unsigned short FixedMemoryTree::newNode(const char * name, unsigned int len,
 
     // Setup watch
     nodePtr->watchCount = 1;
-    *(NodeWatch *)(nodePtr->name + len) = owner;
+    *(NodeWatch *)(nodePtr->name + ALIGN4b(len)) = owner;
 
     // Enter node
     versionTable()->entries[node] = VersionTable::Entry(1, ptr(nodePtr));
@@ -1646,7 +1658,7 @@ unsigned short FixedMemoryTree::newNode(const char * name, unsigned int len,
 
     int nodeSize = sizeof(Node) + ALIGN4b(len);
     if(INVALID_OWNER != owner)
-        nodeSize += sizeof(NodeDatum) + dataLen;
+        nodeSize += sizeof(NodeDatum) + ALIGN4b(dataLen);
 
     // Allocate a new node
     Node * nodePtr = (Node *)pool->malloc(nodeSize);

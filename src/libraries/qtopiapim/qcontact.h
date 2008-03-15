@@ -244,11 +244,10 @@ public:
     QString homeVOIP() const { return phoneNumber(HomeVOIP); }
 
     QString homeWebpage() const { return find( HomeWebPage ); }
-    /** Multi line string containing all non-empty address info in the form
-    * Street
-    * City, State Zip
-    * Country
-    */
+    // Multi line string containing all non-empty address info in the form
+    // Street
+    // City, State Zip
+    // Country
     QString displayHomeAddress() const { return displayAddress(Home); }
     QString displayAddress(Location) const;
 
@@ -275,11 +274,10 @@ public:
     QString profession() const { return find( Profession ); }
     QString assistant() const { return find( Assistant ); }
     QString manager() const { return find( Manager ); }
-     /** Multi line string containing all non-empty address info in the form
-    * Street
-    * City, State Zip
-    * Country
-    */
+    // Multi line string containing all non-empty address info in the form
+    // Street
+    // City, State Zip
+    // Country
     QString displayBusinessAddress() const { return displayAddress(Business); }
 
     QMap<PhoneType, QString> phoneNumbers() const;

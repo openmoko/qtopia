@@ -22,12 +22,11 @@
 #define SP_H
 
 /*
- * Smart Pointer class.
- *
- * This is a rather primitive class. Really, it's just something created
- * to manage deleting pointers at the end of the scope they're obtained in.
- *
- */
+    Smart Pointer class.
+
+    This is a rather primitive class. Really, it's just something created
+    to manage deleting pointers at the end of the scope they're obtained in.
+*/
 template <class T>
 class SP
 {

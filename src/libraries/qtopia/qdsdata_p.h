@@ -79,7 +79,7 @@ public:
 
     enum LockMode { ReadLock, WriteLock, NoLock };
 
-    bool open ( QIODevice::OpenMode mode, bool acquireLock = true );
+    bool openLocked ( QIODevice::OpenMode mode, bool acquireLock = true );
     void close();
 
     bool isLocked() const;

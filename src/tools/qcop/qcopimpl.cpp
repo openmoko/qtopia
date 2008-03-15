@@ -23,6 +23,7 @@
 #include <qtopiaservices.h>
 #include <quuid.h>
 #include <quniqueid.h>
+#include <QContent>
 
 #include <QDateTime>
 #include <QApplication>
@@ -191,6 +192,16 @@ void convertFromString( QDataStream& stream, const QString& type,
         stream << uuid;
     } else if ( enumTypes.contains( type ) ) {
         stream << value.toInt();
+    } else if ( type == "QContentIdList" ) {
+        QContentIdList ids;
+        if (!value.isEmpty()) {
+            foreach (QString pair, value.split(",")) {
+                QStringList p = pair.split(":");
+                QContentId id(p.at(0).toUInt(), p.at(1).toULongLong());
+                ids << id;
+            }
+        }
+        stream << ids;
     } else {
         doqcopsyntax( "parameter type", type );
     }
@@ -308,6 +319,16 @@ QString convertToString
         int v;
         stream >> v;
         return QString::number( v );
+    } else if ( type == "QContentIdList" ) {
+        QContentIdList ids;
+        stream >> ids;
+        QString s;
+        foreach (QContentId id, ids) {
+            s += QString::number(id.first) + ':' + QString::number(id.second) + ',';
+        }
+        s.chop(1);
+
+        return s;
     } else {
         if ( reportErrors )
             doqcopsyntax( "parameter type", type );

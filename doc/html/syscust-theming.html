@@ -96,7 +96,6 @@
 <h2>Installing an Updated Theme</h2>
 <p>To install a modified theme run :</p>
 <pre>    cd $QPEDIR
-    rm $HOME/.qtopia_theme_cache*
     make;make cleaninstall</pre>
 <a name="installing-a-new-theme"></a>
 <h2>Installing a New Theme</h2>
@@ -104,7 +103,6 @@
 <ol type="1">
 <li>modify <tt>$QPEDIR/src/custom.pri</tt> to have an additional <tt>THEME_PROJECT</tt> entry that states the theme directory.</li>
 <li>create the <tt>.pro</tt>, <tt>.conf</tt>, <tt>.xml</tt> and image files that define the theme</li>
-<li>remove the <tt>$HOME/.qtopia_theme_cache*</tt> files</li>
 <li>run <tt>make;make cleaninstall</tt> to install the theme.</li>
 </ol>
 <p>Installing a new theme also requires the following files:</p>

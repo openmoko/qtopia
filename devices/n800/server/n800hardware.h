@@ -64,16 +64,8 @@ private:
     void setLeds(int charge);
 
 private slots:
-    void readDetectData(quint32 devices = 0);
-
-    void delayedRead();
 
     void shutdownRequested();
-
-    void mountSD();
-    void unmountSD();
-    void fsckFinished(int, QProcess::ExitStatus);
-    void mountFinished(int, QProcess::ExitStatus);
 
     void chargingChanged(bool charging);
     void chargeChanged(int charge);

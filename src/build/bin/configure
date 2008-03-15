@@ -359,6 +359,16 @@ set_optvar( "xplatform", +{
 set_optvar( "arch", +{
     "set" => [ "%=s", "The CPU family you are building for." ],
     "arg" => "architecture",
+    "default_tested" => 1,
+    "available" => sub {
+        my @avail;
+        for ( glob("$qt_depot_path/src/corelib/arch/*") ) {
+            if ( -d $_ ) {
+                push(@avail, basename($_));
+            }
+        }
+        @avail;
+    },
     "visible" => $qtopia_visref,
     "autodep" => $qtopia_autoref,
     "config_pri" => "arch=%",
@@ -463,6 +473,7 @@ set_optvar( "setproc_method", +{
     "arg" => "method",
     "available" => [ "prctl", "argv0", "none" ],
     "default" => sub { opt("xplatform")?"prctl":"argv0" },
+    "force_default" => 1,
     "default_tested" => 1,
     "visible" => $qtopia_visref,
     "autodep" => $qtopia_autoref,
@@ -1046,11 +1057,20 @@ set_optvar( "gif", +{
     "default" => 1,
 });
 set_optvar( "glib", +{
-    "set" => [ "%", "Enable Glib support in Qtopia Core."],
+    "set" => [ "%", "Enable Glib support in Qtopia Core (uses glib-2.0 from pkg-config)."],
     "unset" => ["no-%", "Disable Glib support in Qtopia Core." ],
     "default" => 0,
     "visible" => $qtopia_visref,
     "autodep" => $qtopia_autoref,
+});
+set_optvar( "qtopia_sqlite", +{
+    "set" => ["%", "Use sqlite3 from Qtopia." ],
+    "unset" => ["system-sqlite", "Use sqlite3 from the system." ],
+    "default" => 1,
+    "force_default" => 1,
+    "visible" => $qtopia_visref,
+    "autodep" => $qtopia_autoref,
+    "config_pri" => "CONFIG+=build_qtopia_sqlite",
 });
 set_optvar( "qte_config", +{
     "set" => [ "qtopiacore-config=s", "hidden" ],
@@ -1559,7 +1579,7 @@ if ( !opt("platform") ) {
 	    opt("platform") = "linux-g++";
 	} elsif ( $isMac ) {
 	    opt("platform") = "macx-g++";
-	} else { 
+	} else {
             die <<END;
 ERROR: Can't autodetect the host platform. Host = $^O.
 Please explicitly set a -platform parameter.
@@ -1627,9 +1647,10 @@ if ( opt("edition") ) {
     }
     if ( !opt("defaultbuttons") ) {
         opt("defaultbuttons", "auto") = 1;
-        opt("defaultbuttons") = "phone";
-        # Use the proper path
-        opt("defaultbuttons") = "$depotpath/etc/defaultbuttons-".opt("defaultbuttons").".conf";
+        opt("defaultbuttons") = "$depotpath/etc/defaultbuttons-".opt("edition").".conf";
+        if ( ! -f opt("defaultbuttons") ) {
+            die "ERROR: Missing $depotpath/etc/defaultbuttons-".opt("edition").".conf!";
+        }
     }
 
     # Check for Storage.conf in the device configuration
@@ -2394,7 +2415,7 @@ if ( opt("qtopiamedia") ) {
                 $ok = configtest("$engine", "outvar", $out);
                 if ($ok) {
                     open OUT, ">$QPEDIR/config.tests/mediaengines/$engine.pri" or die "Can't write $QPEDIR/config.tests/mediaengines/$engine.pri";
-                    print OUT $out;              
+                    print OUT $out;
                     close OUT;
                 }
                 else {
@@ -2404,7 +2425,7 @@ if ( opt("qtopiamedia") ) {
 
             if ($ok) {
                 push(@engines, $engine);
-            }         
+            }
         }
     }
     opt("mediaengines") = join(" ", @engines);
@@ -2458,6 +2479,44 @@ if ( opt("ssl") ) {
         die_if_not_auto("ssl");
         opt("ssl", "auto") = 1;
         opt("ssl") = 0;
+    }
+}
+
+if ( opt("glib") ) {
+    print "Testing for glib-2.0: ";
+    print "\n" if ( opt("verbose") );
+    my $out;
+    my $ok = configtest("glib", "outvar", $out);
+    if ( $ok ) {
+        print "OK\n";
+        my $Iref = opt("extraIncPaths");
+        my $Lref = opt("extraLibPaths");
+        my $lref = opt("extraLibs");
+        my @lines = split(/\n/, $out);
+        for my $line ( @lines ) {
+            if ( $line =~ s/GLIB_CFLAGS=// ) {
+                my @inc = split(/\s+/, $line);
+                for ( @inc ) {
+                    if ( s/-I// ) {
+                        push(@$Iref, $_);
+                    }
+                }
+            } elsif ( $line =~ s/GLIB_LIBS=// ) {
+                my @inc = split(/\s+/, $line);
+                for ( @inc ) {
+                    if ( s/-L// ) {
+                        push(@$Lref, $_);
+                    } elsif ( s/-l// ) {
+                        push(@$lref, $_);
+                    }
+                }
+            }
+        }
+    } else {
+        print "FAIL\n";
+        die_if_not_auto("glib");
+        opt("glib", "auto") = 1;
+        opt("glib") = 0;
     }
 }
 
@@ -2545,6 +2604,9 @@ if ( opt("edition") && !opt("qte_config") ) {
     }
     if ( opt("glib") ) {
         $args .= " -glib";
+    }
+    if ( !opt("qtopia_sqlite") ) {
+        $args .= " -system-sqlite";
     }
     my @data = (
         "extraIncPaths" => "-I",
@@ -2690,7 +2752,7 @@ if ( opt("edition") && opt("drm") ) {
                 last if ( $ok );
             }
         }
-    } 
+    }
     if ( $ok ) {
         print "OK\n";
     } else {
@@ -2905,6 +2967,34 @@ if ( opt("setproc_method") eq "prctl" ) {
     }
 }
 
+if ( opt("glib") ) {
+    print "Testing for Qtopia Core Glib support: ";
+    print "\n" if ( opt("verbose") );
+    my $ok = configtest("qtopiacore_glib", "env", "QTEDIR=$QTEDIR", "qmake_only");
+    if ( $ok ) {
+        print "OK\n";
+    } else {
+        print "FAIL\n";
+        die_if_not_auto("glib");
+        opt("glib", "auto") = 1;
+        opt("glib") = 0;
+    }
+}
+
+if ( !opt("qtopia_sqlite") ) {
+    print "Testing for Qtopia Core system-sqlite support: ";
+    print "\n" if ( opt("verbose") );
+    my $ok = configtest("qtopiacore_sqlite", "env", "QTEDIR=$QTEDIR", "qmake_only");
+    if ( $ok ) {
+        print "OK\n";
+    } else {
+        print "FAIL\n";
+        die_if_not_auto("qtopia_sqlite");
+        opt("qtopia_sqlite", "auto") = 1;
+        opt("qtopia_sqlite") = 0;
+    }
+}
+
 print_configure_line("Qtopia Platform", "configure $command_line");
 
 opt_print_autodetect();
@@ -3115,7 +3205,7 @@ END
 sub configure_qt
 {
     my ( $QTDIR, $qt, $qt_config ) = @_;
-    
+
     # configure sets the output directory to $PWD
     chdir($QTDIR) or die "Can't enter $QTDIR";
 
@@ -3461,10 +3551,10 @@ sub get_system_id_flags
             my $od = $1;
             if ( opt("release") && $od =~ /rel$/ ) {
                 $$outdir = $od;
-            } 
+            }
             if ( !opt("release") && $od =~ /dbg$/ ) {
                 $$outdir = $od;
-            } 
+            }
         }
     }
 }

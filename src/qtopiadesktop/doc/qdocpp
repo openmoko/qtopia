@@ -165,7 +165,7 @@ sub get_page_name
 {
     my ( $pagename ) = @_;
     $pagename =~ s/[\(\)]//g;
-    $pagename =~ s/ /_/g;
+    $pagename =~ s/[ ,?]/_/g;
     if ( $pagenames{$pagename})  {
         $pagenames{$pagename}++;
     } else {
@@ -173,5 +173,7 @@ sub get_page_name
     }
     my $num = $pagenames{$pagename};
     $pagename .= "_$num.html";
+    $pagename =~ s/_+/_/g;
+    $pagename;
 }
 

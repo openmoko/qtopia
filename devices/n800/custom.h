@@ -33,7 +33,10 @@
 // Disable media player visualization
 #define NO_VISUALIZATION
 #define QPE_NEED_CALIBRATION
+
+#ifndef QT_QWS_N810
 #define V4L_RADIO_DEVICE "/dev/radio0"
+#endif
 #define V4L_VIDEO_DEVICE "/dev/video0"
 
 

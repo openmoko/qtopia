@@ -18,7 +18,7 @@
 <li><a href="ipc-cannonclient-main-cpp.html">ipc/cannonclient/main.cpp</a></li>
 <li><a href="ipc-cannonclient-cannonclient-pro.html">ipc/cannonclient/cannonclient.pro</a></li>
 </ul>
-<p>The Qtopia IPC Tutorial demonstrates the use of <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a>, which is the fundamental class of the Qtopia IPC system. This example demonstrates the basics of sending and receiving messages between different applications. For the other part of this tutorial, see {Tutorial: Qtopia IPC Server}</p>
+<p>The Qtopia IPC Tutorial demonstrates the use of <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a>, which is the fundamental class of the Qtopia IPC system. This example demonstrates the basics of sending and receiving messages between different applications. For the other part of this tutorial, see <a href="ipc-cannonserver.html">Tutorial: Qtopia IPC Server</a>.</p>
 <p>The cannonclient application issues a shoot order request to any listening cannonserver applications, and once it receives a result broadcast, exits.</p>
 <a name="cannonresultlistener-class-definition"></a>
 <h2>CannonResultListener Class Definition</h2>
@@ -53,8 +53,8 @@
 <p>We then create a new <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a> that will operate on the <tt>QPE/CannonExample</tt> channel.</p>
 <pre>        QtopiaIpcAdaptor *adaptor = new QtopiaIpcAdaptor(&quot;QPE/CannonExample&quot;);</pre>
 <p>Next we connect the two messages that we can get back from the Cannon Server application to the slots defined in the CannonResultListener.</p>
-<pre>        QtopiaIpcAdaptor::connect(adaptor, SIGNAL(missed()), listener, SLOT(missed()));
-        QtopiaIpcAdaptor::connect(adaptor, SIGNAL(hit()), listener, SLOT(hit()));</pre>
+<pre>        QtopiaIpcAdaptor::connect(adaptor, MESSAGE(missed()), listener, SLOT(missed()));
+        QtopiaIpcAdaptor::connect(adaptor, MESSAGE(hit()), listener, SLOT(hit()));</pre>
 <a name="building-the-cannon-client-application"></a>
 <h2>Building the Cannon Client application.</h2>
 <p>To install and run the Cannon Client application, carry out the following steps.</p>
