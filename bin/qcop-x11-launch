@@ -6,6 +6,9 @@
 # qcop-x11-launch APPNAME filename
 # filename is just a single as we advertise with %f in the Exec line
 #
+export QPEDIR=/opt/Qtopia
+export PATH=$PATH:$QPEDIR/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$QPEDIR/lib
 
 if [ -n "$2" ]; then
     qcop service send Launcher "execute(QString,QString)" $1 $2  
