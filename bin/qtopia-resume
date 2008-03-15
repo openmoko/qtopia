@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# Called on wakeup
+qcop send QPE/Card "mtabChanged()"
+qcop send QPE/NetworkState "updateNetwork()"
