@@ -8,6 +8,10 @@ Qtopia on X11. Most of it was done by Trolltech already:
  make
  make install
 
+== Cross Compiling ==
+ qtopia-source-dir/configure -prefix /opt/Qtopia -build-examples  -no-drm -no-sxe -displaysize 480x640 -dbus -device ficgta01 -xplatform linux-ficgta01eabi-g++ -little-endian -arch arm -debug -extra-qtopiacore-config "-qt-libjpeg -qt-zlib -qt-libpng -no-iconv -no-sm -fontconfig -xrender -xrandr"
+
+
 === Running ===
  ./bin/phonesim -p 12345 qtopia-source-dir/src/tools/phonesim/troll.xml
  export QTOPIA_PHONE_DEVICE=sim:localhost
