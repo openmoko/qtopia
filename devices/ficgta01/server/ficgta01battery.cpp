@@ -19,6 +19,8 @@
 **
 ****************************************************************************/
 
+#ifndef QT_ILLUME_LAUNCHER
+
 #include "ficgta01battery.h"
 #include "qtopiaserverapplication.h"
 
@@ -264,3 +266,5 @@ bool Ficgta01Battery::batteryIsFull()
 }
 
 QTOPIA_TASK(Ficgta01Battery, Ficgta01Battery);
+
+#endif

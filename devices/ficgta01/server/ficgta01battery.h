@@ -22,6 +22,8 @@
 #ifndef _FICGTA01BATTERY_H_
 #define _FICGTA01BATTERY_H_
 
+#ifndef QT_ILLUME_LAUNCHER
+
 #include <QObject>
 #include <QSocketNotifier>
 
@@ -58,5 +60,7 @@ private Q_SLOTS:
     void readPowerKbdData();
     
 };
+
+#endif
 
 #endif // _FICGTA01BATTERY_H_

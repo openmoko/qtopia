@@ -52,6 +52,23 @@ NeoSuspend::NeoSuspend()
 {
 }
 
+#ifdef QT_ILLUME_LAUNCHER
+bool NeoSuspend::canSuspend() const
+{
+    return false;
+}
+
+bool NeoSuspend::suspend()
+{
+    return false;
+}
+
+bool NeoSuspend::wake()
+{
+    return false;
+}
+
+#else
 bool NeoSuspend::canSuspend() const
 {
 /*    QPowerSource src( QLatin1String("DefaultBattery") );
@@ -111,4 +128,5 @@ bool NeoSuspend::wake()
 
     return true;
 }
+#endif
 
