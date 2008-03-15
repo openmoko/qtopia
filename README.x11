@@ -11,28 +11,29 @@ Qtopia on X11. Most of it was done by Trolltech already:
 === Running ===
  ./bin/phonesim -p 12345 qtopia-source-dir/src/tools/phonesim/troll.xml
  export QTOPIA_PHONE_DEVICE=sim:localhost
+ export DISPLAY=:1
  Xephyr -screen 480x640 -dpi 300 -ac :1 &
- DISPLAY=:1 metacity|kwin|matchbox|foo &
- DISPLAY=:1 xmodmap -e "keycode 223 = 0x11000601"
- DISPLAY=:1 xmodmap -e "keycode 224 = 0x11000602"
- DISPLAY=:1 xmodmap -e "keycode 225 = 0x11000603"
- DISPLAY=:1 xmodmap -e "keycode 226 = 0x11000604"
- DISPLAY=:1 xmodmap -e "keycode 227 = 0x11000605"
- DISPLAY=:1 xmodmap -e "keycode 228 = 0x11000606"
- DISPLAY=:1 xmodmap -e "keycode 229 = 0x11000607"
- DISPLAY=:1 xmodmap -e "keycode 230 = 0x11000608"
- DISPLAY=:1 xmodmap -e "keycode 231 = 0x11000609"
- DISPLAY=:1 xmodmap -e "keycode 232 = 0x1100060A"
- DISPLAY=:1 xmodmap -e "keycode 232 = 0x1100060B"
- DISPLAY=:1 xmodmap -e "keycode 233 = 0x1100060B"
- DISPLAY=:1 xmodmap -e "keycode 232 = 0x1100060A"
- DISPLAY=:1 xmodmap -e "keycode 234 = 0x1100060C"
- DISPLAY=:1 xmodmap -e "keycode 235 = 0x1100060D"
- DISPLAY=:1 xmodmap -e "keycode 236 = 0x1100060E"
- DISPLAY=:1 xmodmap -e "keycode 237 = 0x1100060F"
- DISPLAY=:1 xmodmap -e "keycode 238 = 0x11000610"
- DISPLAY=:1 xmodmap -e "keycode 239 = 0x1008ff26"
- DISPLAY=:1 ./image/bin/qpe
+ metacity|kwin|matchbox|foo &
+ xmodmap -e "keycode 180 = 0x11000601"
+ xmodmap -e "keycode 181 = 0x11000602"
+ xmodmap -e "keycode 182 = 0x11000603"
+ xmodmap -e "keycode 183 = 0x11000604"
+ xmodmap -e "keycode 184 = 0x11000605"
+ xmodmap -e "keycode 185 = 0x11000606"
+ xmodmap -e "keycode 186 = 0x11000607"
+ xmodmap -e "keycode 187 = 0x11000608"
+ xmodmap -e "keycode 188 = 0x11000609"
+ xmodmap -e "keycode 189 = 0x1100060A"
+ xmodmap -e "keycode 190 = 0x1100060B"
+ xmodmap -e "keycode 191 = 0x1100060B"
+ xmodmap -e "keycode 192 = 0x1100060A"
+ xmodmap -e "keycode 193 = 0x1100060C"
+ xmodmap -e "keycode 194 = 0x1100060D"
+ xmodmap -e "keycode 195 = 0x1100060E"
+ xmodmap -e "keycode 196 = 0x1100060F"
+ xmodmap -e "keycode 197 = 0x11000610"
+ xmodmap -e "keycode 198 = 0x1008ff26"
+ ./image/bin/qpe
 
 === Issues ===
  -XRender complains on the console
