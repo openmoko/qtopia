@@ -59,8 +59,7 @@ Ficgta01MultiplexerPlugin::~Ficgta01MultiplexerPlugin()
 
 bool Ficgta01MultiplexerPlugin::detect( QSerialIODevice *device )
 {
-// make sure modem is powered up
-
+    // make sure modem is powered up
     QFile powerFile("/sys/devices/platform/neo1973-pm-gsm.0/power_on");
     if( !powerFile.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
         qWarning()<<"File not opened";
@@ -76,24 +75,23 @@ bool Ficgta01MultiplexerPlugin::detect( QSerialIODevice *device )
     }
 
 
-// The FIC needs a special line discipline set on the device.
+    // The FIC needs a special line discipline set on the device.
     QSerialPort *port = qobject_cast<QSerialPort *>( device );
     if (port) {
         int discipline = N_TIHTC;
         ::ioctl(port->fd(), TIOCSETD, &discipline);
     }
     device->discard();
-	int rc;
-	struct termios t;
-	rc = tcgetattr(port->fd(), &t);
-  t.c_cflag |= CRTSCTS;
-	rc = tcsetattr(port->fd(), TCSANOW, &t);
+    int rc;
+    struct termios t;
+    rc = tcgetattr(port->fd(), &t);
+    t.c_cflag |= CRTSCTS;
+    rc = tcsetattr(port->fd(), TCSANOW, &t);
 
 
     // Issue an innocuous command to wake up the device.
     // It will respond with either "OK" or "AT-Command Interpreter ready".
-
-  QSerialIODeviceMultiplexer::chat( device, "ATZ");
+    QSerialIODeviceMultiplexer::chat( device, "ATZ");
 
     // Issue the AT+CMUX command to determine if this device
     // uses GSM 07.10-style multiplexing.
