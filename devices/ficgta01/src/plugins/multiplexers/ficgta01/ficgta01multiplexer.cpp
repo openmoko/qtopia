@@ -60,7 +60,7 @@ Ficgta01MultiplexerPlugin::~Ficgta01MultiplexerPlugin()
 bool Ficgta01MultiplexerPlugin::detect( QSerialIODevice *device )
 {
     // make sure modem is powered up
-    QFile powerFile("/sys/bus/platform/devices/gta01-pm-gsm.0/power_on");
+    QFile powerFile("/sys/devices/platform/neo1973-pm-gsm.0/power_on");
     if( !powerFile.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
         qWarning()<<"File not opened";
     } else {
