@@ -679,6 +679,12 @@ void CellModemManager::pinStatus(const QString& type,
             doStateChanged(Initializing);
     }
 
+    // Redundant information on the FIC/TI Calypso.
+    if (type == QLatin1String("SIM PIN") && state() == WaitingSIMPin)
+        return;
+    else if (type == QLatin1String("SIM PUK") && state() == WaitingSIMPuk)
+        return;
+
     // We only expect SIM PIN in Initializing and Verifying states.
     // Can also see it in the Ready state when the user changes the pin
     // after entering a PUK.
