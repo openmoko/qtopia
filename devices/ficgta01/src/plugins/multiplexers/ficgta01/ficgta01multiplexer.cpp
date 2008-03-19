@@ -89,9 +89,12 @@ bool Ficgta01MultiplexerPlugin::detect( QSerialIODevice *device )
     rc = tcsetattr(port->fd(), TCSANOW, &t);
 
 
-    // Issue an innocuous command to wake up the device.
+    // Issue an innocuous command to wake up the device. And send some more to make sure it is listening
     // It will respond with either "OK" or "AT-Command Interpreter ready".
     // We will do this up to 10 times as the modem is losing the first at commands (due waking up)
+    for (int i = 0; i < 5; ++i)
+        QSerialIODeviceMultiplexer::chat( device, "ATZ");
+        
     int attempts = 10;
     while (--attempts >= 0 && !QSerialIODeviceMultiplexer::chat( device, "ATZ"));
 
