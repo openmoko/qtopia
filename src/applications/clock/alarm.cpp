@@ -40,15 +40,6 @@
 #endif
 
 static const int magic_daily = 2292922;
-static const int magic_countdown = 2292923;
-
-
-#if 0
-static void toggleScreenSaver( bool on )
-{
-    QtopiaApplication::setTemporaryScreenSaverMode(on ? QtopiaApplication::Enable : QtopiaApplication::DisableSuspend);
-}
-#endif
 
 void Alarm::setRingPriority(bool v)
 {
@@ -158,11 +149,6 @@ void Alarm::triggerAlarm(const QDateTime &when, int type)
             alarmt->stop();
             setRingPriority(false);
         }
-    } else if ( type == magic_countdown ) {
-        // countdown
-        setRingPriority(true);
-        Qtopia::soundAlarm();
-        setRingPriority(false);
     }
 }
 
