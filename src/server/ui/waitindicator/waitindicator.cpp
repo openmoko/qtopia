@@ -23,6 +23,7 @@
 #include "qtopiaserverapplication.h"
 
 #include <QValueSpaceItem>
+#include <QBitmap>
 #include <QPainter>
 #include <QTimer>
 #include <QDesktopWidget>
@@ -65,6 +66,7 @@ WaitIndicator::WaitIndicator()
     QImageReader imgReader(":image/clock");
     imgReader.setScaledSize(QSize(size, size));
     waitIcon = QPixmap::fromImage(imgReader.read());
+    setMask(waitIcon.mask());
 }
 
 /*! \internal */
