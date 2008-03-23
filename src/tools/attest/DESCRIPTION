@@ -1,0 +1,6 @@
+Test a modem that sleeps and is swallowing commands and needs some dummy
+commands to wakeup.
+
+The TI/Calypso/FIC/Openmoko stops echoing after a while and then a dummy
+AT command should be issued. The AtChat class allows this and this application
+is testing this behaviour.
