@@ -68,7 +68,7 @@ Flashing the Neo requires the dfu-tool utility. More information about this tool
 found under http://wiki.openmoko.org/wiki/Dfu-util.
 
 
-Detailed instructions on how to flash the device can be found on the OpenMoko Wiki 
+Detailed instructions on how to flash the device can be found on the Openmoko Wiki 
 (http://wiki.openmoko.org/wiki/Flashing_openmoko#Actually_flashing_things_into_the_device).
 
 

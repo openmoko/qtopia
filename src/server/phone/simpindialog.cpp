@@ -1,6 +1,6 @@
 /***************************************************************************
 **
-** Copyright (C) 2008 OpenMoko Inc.
+** Copyright (C) 2008 Openmoko Inc.
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License (GPL) version 2 or at your option any later version.
