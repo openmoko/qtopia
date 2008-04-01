@@ -17,6 +17,7 @@
 
 #include <QDBusConnection>
 
+#include "cellbroadcastcontrol.h"
 #include "cellmodemmanager.h"
 
 class SimPinDialog;
@@ -40,6 +41,7 @@ Q_SIGNALS:
     Q_SCRIPTABLE void signalStrengthChanged(int percent);
     Q_SCRIPTABLE void networkOperatorChanged(QString);
     Q_SCRIPTABLE void registrationStateChanged(QString);
+    Q_SCRIPTABLE void cellBroadcast(QString, QString, QString);
 
 public Q_SLOTS:
     Q_SCRIPTABLE QString phoneState() const;
@@ -55,6 +57,7 @@ private Q_SLOTS:
     void _q_stateChanged(CellModemManager::State, CellModemManager::State);
     void _q_registrationStateChanged(QTelephony::RegistrationState);
     void _q_planeModeEnabledChanged(bool);
+    void _q_cellBroadcast(CellBroadcastControl::Type, const QString& chan, const QString& text);
 
 private:
     static QString cellModemStateToString(CellModemManager::State);

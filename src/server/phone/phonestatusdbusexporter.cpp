@@ -68,6 +68,9 @@ PhoneStatusDBusExporter::PhoneStatusDBusExporter(SimPinDialog* dialog, QObject* 
 
     connect(m_defaultSignal, SIGNAL(signalStrengthChanged(int)),
             SIGNAL(signalStrengthChanged(int)));
+
+    connect(CellBroadcastControl::instance(), SIGNAL(broadcast(CellBroadcastControl::Type,QString,QString)),
+            SLOT(_q_cellBroadcast(CellBroadcastControl::Type,QString,QString)));
 }
 
 QString PhoneStatusDBusExporter::phoneState() const
@@ -118,6 +121,12 @@ void PhoneStatusDBusExporter::_q_planeModeEnabledChanged(bool enabled)
 void PhoneStatusDBusExporter::_q_registrationStateChanged(QTelephony::RegistrationState state)
 {
     emit registrationStateChanged(registrationStateToString(state));
+}
+
+void PhoneStatusDBusExporter::_q_cellBroadcast(CellBroadcastControl::Type type, const QString& channel, const QString& text)
+{
+    emit cellBroadcast(type == CellBroadcastControl::Popup ? QLatin1String("popup") : QLatin1String("background"),
+                       channel, text);
 }
 
 
