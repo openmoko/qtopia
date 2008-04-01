@@ -561,7 +561,7 @@ void Ficgta01ModemService::initialize()
         addInterface( new Ficgta01BandSelection( this ) );
 
     if ( !supports<QSimInfo>() )
-        addInterface( new Ficgta01SimInfo( this ) );
+        addInterface( new QModemSimInfo( this ) );
 
     if ( !callProvider() )
         setCallProvider( new Ficgta01CallProvider( this ) );
@@ -825,100 +825,6 @@ void Ficgta01CallVolume::setMicVolumeRange(int min,int max)
     setValue( "MaximumMicrophoneVolume", max );
 }
 
-
-// Number of milliseconds between polling attempts on AT+CIMI command.
-#ifndef CIMI_TIMEOUT
-#define CIMI_TIMEOUT    2000
-#endif
-
-class Ficgta01SimInfoPrivate
-{
-public:
-    Ficgta01ModemService *service;
-    QTimer *checkTimer;
-    int count;
-};
-
-Ficgta01SimInfo::Ficgta01SimInfo( Ficgta01ModemService *service )
-    : QSimInfo( service->service(), service, QCommInterface::Server )
-{
-    d = new Ficgta01SimInfoPrivate();
-    d->service = service;
-    d->checkTimer = new QTimer( this );
-    d->checkTimer->setSingleShot( true );
-    connect( d->checkTimer, SIGNAL(timeout()), this, SLOT(requestIdentity()) );
-    d->count = 0;
-
-
-    // Perform an initial AT+CIMI request to get the SIM identity.
-    QTimer::singleShot( 0, this, SLOT(requestIdentity()) );
-}
-
-Ficgta01SimInfo::~Ficgta01SimInfo()
-{
-    delete d;
-}
-
-void Ficgta01SimInfo::simInserted()
-{
-    if ( !d->checkTimer->isActive() )
-        requestIdentity();
-}
-
-void Ficgta01SimInfo::simRemoved()
-{
-    setIdentity( QString() );
-}
-
-void Ficgta01SimInfo::requestIdentity()
-{
-    d->service->primaryAtChat()->chat
-        ( "AT+CIMI", this, SLOT(cimi(bool,QAtResult)) );
-}
-
-void Ficgta01SimInfo::cimi( bool ok, const QAtResult& result )
-{
-    QString id = extractIdentity( result.content().trimmed() );
-    if ( ok && !id.isEmpty() ) {
-        // We have a valid SIM identity.
-        setIdentity( id );
-    } else {
-        // No SIM identity, so poll again in a few seconds for the first two minutes.
-        setIdentity( QString() );
-
-        if ( d->count < 120000/CIMI_TIMEOUT ) {
-            d->checkTimer->start( CIMI_TIMEOUT );
-            d->count++;
-        } else {
-            d->count = 0;
-            // post a message to modem service to stop SIM PIN polling
-            d->service->post( "simnotinserted" );
-            emit notInserted();
-        }
-        // If we got a definite "not inserted" or "sim failure" error,
-        // then emit notInserted().
-        if ( result.resultCode() == QAtResult::SimNotInserted
-          || result.resultCode() == QAtResult::SimFailure)
-            emit notInserted();
-    }
-}
-
-// Extract the identity information from the content of an AT+CIMI response.
-// It is possible that we got multiple lines, including some unsolicited
-// notifications from the modem that are not yet recognised.  Skip over
-// such garbage and find the actual identity.
-QString Ficgta01SimInfo::extractIdentity( const QString& content )
-{
-    QStringList lines = content.split( QChar('\n') );
-    foreach ( QString line, lines ) {
-        if ( line.length() > 0 ) {
-            uint ch = line[0].unicode();
-            if ( ch >= '0' && ch <= '9' )
-                return line;
-        }
-    }
-    return QString();
-}
 
 Ficgta01PreferredNetworkOperators::Ficgta01PreferredNetworkOperators( QModemService *service )
     : QModemPreferredNetworkOperators( service )

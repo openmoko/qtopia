@@ -188,29 +188,6 @@ private:
 
 };
 
-class Ficgta01SimInfoPrivate;
-
-class Ficgta01SimInfo : public QSimInfo
-{
-    Q_OBJECT
-public:
-    Ficgta01SimInfo(Ficgta01ModemService *service );
-    ~Ficgta01SimInfo();
-    
-protected slots:
-    void simInserted();
-    void simRemoved();
-
-private slots:
-    void requestIdentity();
-    void cimi( bool ok, const QAtResult& result );
-
-private:
-    Ficgta01SimInfoPrivate *d;
-
-    static QString extractIdentity( const QString& content );
-};
-
 class Ficgta01PreferredNetworkOperators : public QModemPreferredNetworkOperators
 {
     Q_OBJECT
