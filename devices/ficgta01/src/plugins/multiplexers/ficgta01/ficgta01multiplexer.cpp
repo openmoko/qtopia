@@ -67,10 +67,9 @@ bool Ficgta01MultiplexerPlugin::detect( QSerialIODevice *device )
         QTextStream in(&powerFile);
         QString pFileString;
         in >> pFileString;
-        if( pFileString == "0") {
-            QTextStream out(&powerFile);
-            out << "1";
-            powerFile.close();
+        if(pFileString == QLatin1String("0")) {
+            qWarning() << "The modem must be started before the device gets opened";
+            return false;
         }
     }
 
