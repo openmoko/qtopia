@@ -33,7 +33,6 @@
 
 #ifdef Q_WS_QWS
 #include <qwindowsystem_qws.h>
-#endif
 
 class NeoSuspend : public SystemSuspendHandler
 {
@@ -52,23 +51,6 @@ NeoSuspend::NeoSuspend()
 {
 }
 
-#ifdef QT_ILLUME_LAUNCHER
-bool NeoSuspend::canSuspend() const
-{
-    return false;
-}
-
-bool NeoSuspend::suspend()
-{
-    return false;
-}
-
-bool NeoSuspend::wake()
-{
-    return false;
-}
-
-#else
 bool NeoSuspend::canSuspend() const
 {
 /*    QPowerSource src( QLatin1String("DefaultBattery") );
