@@ -51,6 +51,7 @@ public:
     QTimer *checkTimer;
     int count;
     bool simPinRequired;
+    unsigned reasons : 1;
 };
 
 /*!
@@ -66,6 +67,7 @@ QModemSimInfo::QModemSimInfo( QModemService *service )
     connect( d->checkTimer, SIGNAL(timeout()), this, SLOT(requestIdentity()) );
     d->count = 0;
     d->simPinRequired = false;
+    d->reasons = 0;
 
     // Perform an initial AT+CIMI request to get the SIM identity.
     QTimer::singleShot( 0, this, SLOT(requestIdentity()) );
@@ -140,7 +142,8 @@ void QModemSimInfo::cimi( bool ok, const QAtResult& result )
             }
         }
         // If we got a definite "not inserted" error, then emit notInserted().
-        if ( result.resultCode() == QAtResult::SimNotInserted )
+        if ( result.resultCode() == QAtResult::SimNotInserted 
+            || (d->reasons & Reason_SimFailure && result.resultCode() == QAtResult::SimFailure))
             emit notInserted();
     }
 }
@@ -151,6 +154,11 @@ void QModemSimInfo::serviceItemPosted( const QString &item )
         d->simPinRequired = true;
     else if ( item == "simpinentered" )
         d->simPinRequired = false;
+}
+
+void QModemSimInfo::setSimNotInsertedReason(enum SimNotInsertedReasons reason)
+{
+    d->reasons |= reason;
 }
 
 // Extract the identity information from the content of an AT+CIMI response.

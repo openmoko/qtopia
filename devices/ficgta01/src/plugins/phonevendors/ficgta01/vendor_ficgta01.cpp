@@ -560,8 +560,11 @@ void Ficgta01ModemService::initialize()
     if ( !supports<QBandSelection>() )
         addInterface( new Ficgta01BandSelection( this ) );
 
-    if ( !supports<QSimInfo>() )
-        addInterface( new QModemSimInfo( this ) );
+    if ( !supports<QSimInfo>() ) {
+        QModemSimInfo* simInfo = new QModemSimInfo( this );
+        simInfo->setSimNotInsertedReason( QModemSimInfo::Reason_SimFailure );
+        addInterface( simInfo );
+    }
 
     if ( !callProvider() )
         setCallProvider( new Ficgta01CallProvider( this ) );

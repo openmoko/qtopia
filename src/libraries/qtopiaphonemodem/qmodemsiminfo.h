@@ -32,8 +32,14 @@ class QTOPIAPHONEMODEM_EXPORT QModemSimInfo : public QSimInfo
 {
     Q_OBJECT
 public:
+    enum SimNotInsertedReasons {
+        Reason_SimFailure = 0x1
+    };
+
     explicit QModemSimInfo( QModemService *service );
     ~QModemSimInfo();
+
+    void setSimNotInsertedReason(enum SimNotInsertedReasons);
 
 protected slots:
     void simInserted();
