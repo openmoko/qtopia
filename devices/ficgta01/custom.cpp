@@ -37,90 +37,58 @@
 #include <QDebug>
 
 
+static QString neo1973BacklightClassFile() {
+    QString maxBrightness;
+
+    // If the gta01-bl/max_brightness exists we know it is gta01 otherwise a gta02 is assumed
+    if (QFileInfo("/sys/class/backlight/gta01-bl/max_brightness").exists())
+        maxBrightness = QLatin1String("/sys/class/backlight/gta01-bl/max_brightness");
+    else
+        maxBrightness = QLatin1String("/sys/class/backlight/pcf50633-bl/max_brightness");
+
+    return maxBrightness;
+}
+
+
 QTOPIABASE_EXPORT int qpe_sysBrightnessSteps()
 {
 
-    QFile maxBrightness;
-    if (QFileInfo("/sys/class/backlight/gta01-bl/max_brightness").exists() ) {
-        //ficgta01
-            maxBrightness.setFileName("/sys/class/backlight/gta01-bl/max_brightness");
-        } else {
-        //ficgta02
-            maxBrightness.setFileName("/sys/class/backlight/pcf50633-bl/max_brightness");
-        }
+    QFile maxBrightness(neo1973BacklightClassFile());
 
     QString strvalue;
-    int value;
-    if( !maxBrightness.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning()<<"File not opened";
+    if(!maxBrightness.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qWarning() << "File not opened";
     } else {
         QTextStream in(&maxBrightness);
         in >> strvalue;
         maxBrightness.close();
     }
 
-//     if(strvalue.isEmpty())
-//         value = 3957;
-//     else
-        value = strvalue.toInt();
-
-    return value;
+    return strvalue.toInt();
 }
 
 
 QTOPIABASE_EXPORT void qpe_setBrightness(int b)
 {
-    char cmd[80];
+    qWarning() << "setBrightness" << b <<  qpe_sysBrightnessSteps();
 
-    qWarning() <<"setBrightness"<<b <<  qpe_sysBrightnessSteps();
-
+    // dim(1) or bright (-1) or blank (0)? 
     if(b == 1) {
-        // dim
         b = 519;
-    }
-    else if (b == -1) {
-        //bright
+    } else if (b == -1) {
         b = qpe_sysBrightnessSteps();
-//         QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService","setAmpMode(bool)");
-//         e << true;
-//         qWarning()<<"amp mode on";
-
-    }
-
-    else if( b == 0) {
-     //blanking screen
-//         QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService","setAmpMode(bool)");
-//         e << false;
-//       qWarning()<<"amp mode off";
-
-    } else if( b ==  qpe_sysBrightnessSteps() ) {
-//         QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService","setAmpMode(bool)");
-//         e << true;
-//         qWarning()<<"amp mode on";
-
-    }
-    else {
-//         QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService","setAmpMode(bool)");
-//         e << true;
-//         qWarning()<<"amp mode on";
-
-    }
-
-    QFile brightness;
-    if (QFileInfo("/sys/class/backlight/gta01-bl/brightness").exists() ) {
-        brightness.setFileName("/sys/class/backlight/gta01-bl/brightness");
-        //ficgta01
+    } else if(b == 0) {
+    } else if(b == qpe_sysBrightnessSteps()) {
     } else {
-        brightness.setFileName("/sys/class/backlight/pcf50633-bl/brightness");
-        //ficgta02
     }
 
-    if( !brightness.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-        qWarning()<<"File not opened";
+    QFile brightness(neo1973BacklightClassFile());
+
+    if(!brightness.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        qWarning() << "File not opened";
     } else {
         QTextStream out(&brightness);
         out << QString::number(b);
-        //ficgta01
         brightness.close();
     }
 }
