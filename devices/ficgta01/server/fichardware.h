@@ -45,14 +45,11 @@ public:
     ~Ficgta01Hardware();
 
 private:
+    QValueSpaceObject m_vsoPortableHandsfree;
 
-
-    QValueSpaceObject vsoPortableHandsfree;
-
-    QSocketNotifier *auxNotify;
-    int detectFd;
+    QSocketNotifier *m_auxNotify;
+    int m_detectFd;
     
-
 private slots:
     void readAuxKbdData();
     void shutdownRequested();

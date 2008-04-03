@@ -47,6 +47,8 @@
 
 #include <sys/ioctl.h>
 
+#include <linux/input.h>
+
 struct Ficgta01Input {
     unsigned int   dummy1;
     unsigned int   dummy2;
@@ -58,18 +60,16 @@ struct Ficgta01Input {
 QTOPIA_TASK(Ficgta01Hardware, Ficgta01Hardware);
 
 Ficgta01Hardware::Ficgta01Hardware()
-      :vsoPortableHandsfree("/Hardware/Accessories/PortableHandsfree")
+    : m_vsoPortableHandsfree("/Hardware/Accessories/PortableHandsfree")
 {
+    qWarning() << "ficgta01hardware plugin";
 
-    qWarning()<<"ficgta01hardware plugin";
+    m_vsoPortableHandsfree.setAttribute("Present", false);
 
-    vsoPortableHandsfree.setAttribute("Present", false);
-
-
-    detectFd = ::open("/dev/input/event0", O_RDONLY|O_NDELAY, 0);
-     if (detectFd >= 0) {
-      auxNotify = new QSocketNotifier( detectFd, QSocketNotifier::Read, this );
-      connect( auxNotify, SIGNAL(activated(int)), this, SLOT(readAuxKbdData()));
+    m_detectFd = ::open("/dev/input/event0", O_RDONLY|O_NDELAY, 0);
+    if (m_detectFd >= 0) {
+      m_auxNotify = new QSocketNotifier(m_detectFd, QSocketNotifier::Read, this);
+      connect(m_auxNotify, SIGNAL(activated(int)), this, SLOT(readAuxKbdData()));
     } else {
       qWarning("Cannot open /dev/input/event0 for keypad (%s)", strerror(errno));
     }
@@ -81,42 +81,30 @@ Ficgta01Hardware::~Ficgta01Hardware()
 
 void Ficgta01Hardware::readAuxKbdData()
 {
-
     Ficgta01Input event;
 
-    int n = read(detectFd, &event, sizeof(Ficgta01Input));
-    if(n != (int)sizeof(Ficgta01Input)) {
-        return;
-    }
-
-    if(event.type != 5)
+    int n = read(m_detectFd, &event, sizeof(Ficgta01Input));
+    if(n != (int)sizeof(Ficgta01Input) || event.type != EV_SW)
         return;
 
     qWarning("keypressed: type=%03d, code=%03d, value=%03d (%s)",
               event.type, event.code,event.value,((event.value)!=0) ? "Down":"Up");
 
+    // Only handle the headphone insert. value=0 (Up,Insert), value=1 (Down,Remove)
     switch(event.code) {
-    case 0x02: //headphone insert
-    {
-        //  type=005, code=002, value=000 (Up) //insert
-        //  type=005, code=002, value=001 (Down) //out
-
-        if(event.value != 0x01) {
-            vsoPortableHandsfree.setAttribute("Present", true);
-            vsoPortableHandsfree.sync();
-        } else {
-            vsoPortableHandsfree.setAttribute("Present", false);
-            vsoPortableHandsfree.sync();
-        }
-    }
-    break;
+    case SW_HEADPHONE_INSERT:
+        m_vsoPortableHandsfree.setAttribute("Present", event.value != 0x01);
+        m_vsoPortableHandsfree.sync();
+        break;
+    default:
+        break;
     };
 }
 
 
 void Ficgta01Hardware::shutdownRequested()
 {
-    qLog(PowerManagement)<<" Ficgta01Hardware::shutdownRequested";
+    qLog(PowerManagement) << __PRETTY_FUNCTION__;
 
     QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService", "setAmpMode(bool)");
     e << false;
@@ -124,32 +112,30 @@ void Ficgta01Hardware::shutdownRequested()
     QFile powerFile;
     QFile btPower;
 
-    if ( QFileInfo("/sys/bus/platform/devices/gta01-pm-gsm.0/power_on").exists()) {
-//ficgta01
+    // Detect if we have a gta01 or gta02.
+    if (QFileInfo("/sys/bus/platform/devices/gta01-pm-gsm.0/power_on").exists()) {
         powerFile.setFileName("/sys/bus/platform/devices/gta01-pm-gsm.0/power_on");
         btPower.setFileName("/sys/bus/platform/devices/gta01-pm-bt.0/power_on");
     } else {
-//ficgta02
         powerFile.setFileName("/sys/bus/platform/devices/neo1973-pm-gsm.0/power_on");
         btPower.setFileName("/sys/bus/platform/devices/neo1973-pm-bt.0/power_on");
     }
 
-    if( !powerFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-        qWarning()<<"File not opened";
+    if(!powerFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        qWarning() << "File not opened";
     } else {
         QTextStream out(&powerFile);
         out << "0";
         powerFile.close();
     }
 
-        if( !btPower.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-        qWarning()<<"File not opened";
+    if(!btPower.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        qWarning() << "File not opened";
     } else {
         QTextStream out(&btPower);
         out <<  "0";
         powerFile.close();
     }
-
 
     QtopiaServerApplication::instance()->shutdown(QtopiaServerApplication::ShutdownSystem);
 }
