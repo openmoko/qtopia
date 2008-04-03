@@ -101,44 +101,5 @@ void Ficgta01Hardware::readAuxKbdData()
     };
 }
 
-
-void Ficgta01Hardware::shutdownRequested()
-{
-    qLog(PowerManagement) << __PRETTY_FUNCTION__;
-
-    QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService", "setAmpMode(bool)");
-    e << false;
-
-    QFile powerFile;
-    QFile btPower;
-
-    // Detect if we have a gta01 or gta02.
-    if (QFileInfo("/sys/bus/platform/devices/gta01-pm-gsm.0/power_on").exists()) {
-        powerFile.setFileName("/sys/bus/platform/devices/gta01-pm-gsm.0/power_on");
-        btPower.setFileName("/sys/bus/platform/devices/gta01-pm-bt.0/power_on");
-    } else {
-        powerFile.setFileName("/sys/bus/platform/devices/neo1973-pm-gsm.0/power_on");
-        btPower.setFileName("/sys/bus/platform/devices/neo1973-pm-bt.0/power_on");
-    }
-
-    if(!powerFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-        qWarning() << "File not opened";
-    } else {
-        QTextStream out(&powerFile);
-        out << "0";
-        powerFile.close();
-    }
-
-    if(!btPower.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
-        qWarning() << "File not opened";
-    } else {
-        QTextStream out(&btPower);
-        out <<  "0";
-        powerFile.close();
-    }
-
-    QtopiaServerApplication::instance()->shutdown(QtopiaServerApplication::ShutdownSystem);
-}
-
 #endif // QT_QWS_Ficgta01
 

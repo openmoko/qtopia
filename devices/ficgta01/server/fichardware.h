@@ -52,7 +52,6 @@ private:
     
 private slots:
     void readAuxKbdData();
-    void shutdownRequested();
 };
 
 #endif // QT_QWS_FICGTA01
