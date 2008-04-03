@@ -70,6 +70,7 @@ QTOPIABASE_EXPORT int qpe_sysBrightnessSteps()
 
 QTOPIABASE_EXPORT void qpe_setBrightness(int b)
 {
+#ifndef QT_ILLUME_LAUNCHER
     qWarning() << "setBrightness" << b <<  qpe_sysBrightnessSteps();
 
     // dim(1) or bright (-1) or blank (0)? 
@@ -91,5 +92,8 @@ QTOPIABASE_EXPORT void qpe_setBrightness(int b)
         out << QString::number(b);
         brightness.close();
     }
+#else
+    Q_UNUSED(b)
+#endif
 }
 
