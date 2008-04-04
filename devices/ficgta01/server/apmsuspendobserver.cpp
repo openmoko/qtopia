@@ -123,9 +123,6 @@ void APMSuspendObserver::modemSuspendDone()
 
 void APMSuspendObserver::handleSuspendEvent()
 {
-    QtopiaIpcEnvelope amp("QPE/AudioVolumeManager/Ficgta01VolumeService", "setAmpMode(bool)");
-    amp << false;
-
     qLog(PowerManagement) << "Asking the modem to suspend, waiting for ack";
     QtopiaIpcEnvelope modemSuspend("QPE/ModemSuspend", "suspend()");
 }
@@ -133,9 +130,6 @@ void APMSuspendObserver::handleSuspendEvent()
 void APMSuspendObserver::handleResumeEvent()
 {
     QtopiaIpcEnvelope modemWake("QPE/ModemSuspend", "wake()");
-
-    QtopiaIpcEnvelope amp("QPE/AudioVolumeManager/Ficgta01VolumeService", "setAmpMode(bool)");
-    amp << true;
 
     // The state of media and networking might have changed
     QtopiaIpcEnvelope("QPE/Card", "mtabChanged()" );
