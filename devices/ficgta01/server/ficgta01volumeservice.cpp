@@ -95,12 +95,13 @@ void Ficgta01VolumeService::initVolumes()
 {
     qLog(AudioState) << __PRETTY_FUNCTION__;
 
-    initMixer();
-    snd_mixer_elem_t *element;
+#ifndef QT_ILLUME_LAUNCHER
     long minPVolume;
     long maxPVolume;
     long volume;
+    snd_mixer_elem_t *element;
 
+    initMixer();
     for (element = snd_mixer_first_elem(m_mixerFd); element; element = snd_mixer_elem_next(element)) {
         if (snd_mixer_elem_get_type(element) == SND_MIXER_ELEM_SIMPLE
             && snd_mixer_selem_is_active(element)) {
@@ -127,8 +128,8 @@ void Ficgta01VolumeService::initVolumes()
             }
         }
     }
-
     closeMixer();
+#endif
 }
 
 void Ficgta01VolumeService::adjustVolume(int leftChannel, int rightChannel, AdjustType adjust)
@@ -160,9 +161,10 @@ void Ficgta01VolumeService::adjustVolume(int leftChannel, int rightChannel, Adju
 
 void Ficgta01VolumeService::adjustSpeakerVolume(int left, int right)
 {
-    initMixer();
-
+#ifndef QT_ILLUME_LAUNCHER
     snd_mixer_elem_t *element;
+
+    initMixer();
     for (element = snd_mixer_first_elem(m_mixerFd); element; element = snd_mixer_elem_next(element)) {
         if (snd_mixer_elem_get_type(element) == SND_MIXER_ELEM_SIMPLE
             && snd_mixer_selem_is_active(element)) {
@@ -181,13 +183,18 @@ void Ficgta01VolumeService::adjustSpeakerVolume(int left, int right)
 
     closeMixer();
     saveState();
+#else
+    Q_UNUSED(left)
+    Q_UNUSED(right)
+#endif
 }
 
 void Ficgta01VolumeService::adjustMicrophoneVolume( int volume )
 {
-    initMixer();
-
+#ifndef QT_ILLUME_LAUNCHER
     snd_mixer_elem_t *element;
+
+    initMixer();
     for (element = snd_mixer_first_elem(m_mixerFd); element; element = snd_mixer_elem_next(element)) {
         if (snd_mixer_elem_get_type(element) == SND_MIXER_ELEM_SIMPLE
             && snd_mixer_selem_is_active(element)) {
@@ -204,6 +211,9 @@ void Ficgta01VolumeService::adjustMicrophoneVolume( int volume )
 
     closeMixer();
     saveState();
+#else
+    Q_UNUSED(volume)
+#endif
 }
 
 int Ficgta01VolumeService::initMixer()
@@ -292,8 +302,6 @@ int Ficgta01VolumeService::saveState()
  */
 void Ficgta01VolumeService::setAmpMode(bool mode)
 {
-    char itemname[40];
-    unsigned int item = 0;
     QString currentMode;
     QValueSpaceItem ampVS("/Hardware/Audio/CurrentAmpMode");
     QString ampMode = ampVS.value().toString();
@@ -307,10 +315,14 @@ void Ficgta01VolumeService::setAmpMode(bool mode)
     if (ampMode.isEmpty() || !mode)
         ampMode = "Off";
 
+
+#ifndef QT_ILLUME_LAUNCHER
+    snd_mixer_elem_t *element;
+    char itemname[40];
+    unsigned int item = 0;
+
     initMixer();
 
-
-    snd_mixer_elem_t *element;
     for (element = snd_mixer_first_elem(m_mixerFd); element; element = snd_mixer_elem_next(element) ) {
         if (snd_mixer_elem_get_type(element) == SND_MIXER_ELEM_SIMPLE
             && snd_mixer_selem_is_enumerated(element)
@@ -353,11 +365,12 @@ void Ficgta01VolumeService::setAmpMode(bool mode)
 
     }
 
+    closeMixer();
+#endif
+
     if (currentMode != "Off")
         ampMode = currentMode;
     m_vsoVolumeObject->setAttribute("CurrentAmpMode", ampMode);
-
-    closeMixer();
 }
 
 /*
@@ -365,11 +378,12 @@ void Ficgta01VolumeService::setAmpMode(bool mode)
  */
 void Ficgta01VolumeService::changeAmpModeVS()
 {
+#ifndef QT_ILLUME_LAUNCHER
     char itemname[40];
     unsigned int item = 0;
-    initMixer();
     snd_mixer_elem_t *element;
 
+    initMixer();
     for (element = snd_mixer_first_elem(m_mixerFd); element; element = snd_mixer_elem_next(element)) {
         if (snd_mixer_elem_get_type(element) == SND_MIXER_ELEM_SIMPLE
             && snd_mixer_selem_is_enumerated(element)
@@ -387,6 +401,7 @@ void Ficgta01VolumeService::changeAmpModeVS()
         }
       }
       closeMixer();
+#endif
 }
 
 /*
@@ -397,11 +412,11 @@ void Ficgta01VolumeService::setAmp(QString amode)
     QValueSpaceItem ampVS("/Hardware/Audio/Amp");
     QString ok = ampVS.value().toString();
 
-    initMixer();
+#ifndef QT_ILLUME_LAUNCHER
     char itemname[40];
     unsigned int item = 0;
-
     snd_mixer_elem_t *element;
+    initMixer();
     for (element = snd_mixer_first_elem(m_mixerFd); element; element = snd_mixer_elem_next(element)) {
         if (snd_mixer_elem_get_type(element) == SND_MIXER_ELEM_SIMPLE
             && snd_mixer_selem_is_enumerated(element)
@@ -433,7 +448,9 @@ void Ficgta01VolumeService::setAmp(QString amode)
         }
     }
     closeMixer();
-
+#else
+    Q_UNUSED(amode)
+#endif
 }
 
 void Ficgta01VolumeService::toggleAmpMode()
