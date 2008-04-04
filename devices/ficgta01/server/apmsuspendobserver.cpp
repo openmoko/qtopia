@@ -51,7 +51,7 @@
 #include <unistd.h>
 
 
-QTOPIA_DEMAND_TASK(NeoSuspend, APMSuspendObserver);
+QTOPIA_TASK(NeoSuspend, APMSuspendObserver);
 
 APMSuspendObserver::APMSuspendObserver()
     : m_apmBiosNotifier(0)
