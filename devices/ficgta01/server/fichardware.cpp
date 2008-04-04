@@ -49,6 +49,15 @@
 
 QTOPIA_TASK(Ficgta01Hardware, Ficgta01Hardware);
 
+bool operator==(const input_id& left, const input_id& right)
+{
+    return
+        left.bustype == right.bustype &&
+        left.vendor  == right.vendor  &&
+        left.product == right.product &&
+        left.version == right.version;
+}
+
 FicLinuxInputEventHandler::FicLinuxInputEventHandler(QObject* parent)
     : QObject(parent)
     , m_fd(-1)
@@ -66,7 +75,12 @@ bool FicLinuxInputEventHandler::openByName(const QByteArray& name)
     return internalOpen(EVIOCGNAME(4096), 4096, name);
 }
 
-bool FicLinuxInputEventHandler::internalOpen(int request, int length, const QByteArray& match)
+bool FicLinuxInputEventHandler::openById(const struct input_id& id)
+{
+    return internalOpen(EVIOCGID, 0, QByteArray(), &id);
+}
+
+bool FicLinuxInputEventHandler::internalOpen(unsigned request, int length, const QByteArray& match, struct input_id const *matchId)
 {
     if (m_fd >= 0) {
         ::close(m_fd);
@@ -75,7 +89,9 @@ bool FicLinuxInputEventHandler::internalOpen(int request, int length, const QByt
         m_fd = -1;
     }
 
+    const bool cgidRequest = request == EVIOCGID;
     QByteArray deviceData(length, 0);
+    struct input_id deviceId;
 
     // Find a suitable device, might want to add caching
     QDir dir(QLatin1String("/dev/input/"), QLatin1String("event*"));
@@ -84,12 +100,17 @@ bool FicLinuxInputEventHandler::internalOpen(int request, int length, const QByt
         if (m_fd < 0)
             continue;
 
-        int ret = ioctl(m_fd, request, deviceData.data());
+        int ret = cgidRequest ?
+                    ioctl(m_fd, request, &deviceId) :
+                    ioctl(m_fd, request, deviceData.data());
+
         if (ret < 0)
             continue;
 
         // match the string we got with what we wanted
-        if (strcmp(deviceData.constData(), match.constData()) == 0) {
+        if (cgidRequest && *matchId == deviceId) {
+            break;
+        } else if (!cgidRequest && strcmp(deviceData.constData(), match.constData()) == 0) {
             break;
         } else {
             close(m_fd);

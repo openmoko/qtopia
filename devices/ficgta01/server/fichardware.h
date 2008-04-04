@@ -51,6 +51,7 @@ public:
     FicLinuxInputEventHandler(QObject* parent);
     bool openByPhysicalBus(const QByteArray&);
     bool openByName(const QByteArray&);
+    bool openById(const struct input_id&);
 
 Q_SIGNALS:
     void inputEvent(struct input_event&);
@@ -59,7 +60,7 @@ private Q_SLOTS:
     void readData();
 
 private:
-    bool internalOpen(int request, int length, const QByteArray&);
+    bool internalOpen(unsigned request, int length, const QByteArray&, struct input_id const * = 0);
 
 private:
     int m_fd;
