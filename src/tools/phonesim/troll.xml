@@ -1483,12 +1483,6 @@
 </chat>
 
 <chat>
-    <!-- Change password (not supported here) -->
-    <command>AT+CPWD*</command>
-    <response>ERROR</response>
-</chat>
-
-<chat>
     <!-- Query calling line identifier presentation mode -->
     <command>AT+CLIP?</command>
     <response>+CLIP: ${LIP},1\nOK</response>
@@ -1974,6 +1968,13 @@
     <command>AT+CPIN="${PINVALUE}"</command>
     <response>+CPIN: READY\nOK</response>
     <set name="PINNAME" value="READY"/>
+</chat>
+
+<chat>
+  <!-- Change PIN2 (success) -->
+  <command>AT+CPWD="P2","${PIN2VALUE}","*"</command>
+  <response>OK</response>
+  <set name="PIN2VALUE" value="${*}"/>
 </chat>
 
 <chat>

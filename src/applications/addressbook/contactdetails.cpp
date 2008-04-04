@@ -62,6 +62,9 @@ ContactDetails::~ContactDetails()
 
 void ContactDetails::init( const QContact &entry )
 {
+    // If we redisplay the same entry, don't shift our view around too much
+    bool sameEntry = (entry.uid() == ent.uid());
+
     ent = entry;
     mLink.clear();
 
@@ -112,7 +115,8 @@ void ContactDetails::init( const QContact &entry )
 
     modelChanged();
 
-    mTabs->setCurrentIndex(0);
+    if (!sameEntry)
+        mTabs->setCurrentIndex(0);
     mTabs->currentWidget()->setFocus();
 }
 

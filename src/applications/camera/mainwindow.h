@@ -35,6 +35,7 @@ class QAction;
 class QTimer;
 class QValueSpaceItem;
 class QWaitWidget;
+class QSlider;
 
 class CameraMainWindow : public QMainWindow
 {
@@ -65,7 +66,8 @@ private slots:
     void contextMenuAboutToHide();
     void loadThumbs( bool resized = false );
     void delayedInit();
-
+    void zoomChanged(int);
+    void showZoom();
 private:
     bool event(QEvent* e);
     void updateActions();
@@ -79,7 +81,7 @@ private:
     QToolButton* thumb[nthumb];
     QContent picturefile[nthumb];
     int cur_thumb;
-    void delThumb(int th);
+    bool delThumb(int th);
 
     // Settings
     void confirmSettings();
@@ -94,7 +96,8 @@ private:
     int pquality;
     int vquality;
     int vframerate;
-
+    int m_currzoom;
+    QSlider* m_zoom;
     // Snap
     QSize snap_max;
     void setSnapMode( bool snapMode );
@@ -105,6 +108,7 @@ private:
     QAction *a_pview, *a_vview, *a_timer, *a_settings;
     QAction *a_th_edit, *a_th_del, *a_th_add;
     QAction *a_send;
+    QAction *a_zoom;
     QList<QSize> photo_size;
     QList<QSize> video_size;
 

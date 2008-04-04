@@ -1122,12 +1122,13 @@ void AddressbookWindow::showListView(bool saveState)
     if (actionSendCat)
         actionSendCat->setText(tr("Send All..."));
 
-
     if ( centralView->currentWidget() != mListView) {
         centralView->setCurrentWidget(mListView);
         setWindowTitle( tr("Contacts") );
         updateContextMenu();
     }
+
+    setObjectName("");
 }
 
 /* show details view.. */
@@ -1138,6 +1139,7 @@ void AddressbookWindow::showDetailsView(bool saveState)
 
     if ( centralView->currentWidget() != mDetailsView) {
         createDetailedView();
+
         mDetailsView->init( currentContact() );
         centralView->setCurrentWidget(mDetailsView);
         setWindowTitle( tr("Contact Details") );
@@ -1145,6 +1147,8 @@ void AddressbookWindow::showDetailsView(bool saveState)
         mDetailsView->init( currentContact() );
 
     updateContextMenu();
+
+    setObjectName("viewing");
 }
 
 void AddressbookWindow::showGroupListView(bool saveState)
@@ -1160,6 +1164,8 @@ void AddressbookWindow::showGroupListView(bool saveState)
         setWindowTitle( tr("Contact Groups") );
         updateContextMenu();
     }
+
+    setObjectName("view-category");
 }
 
 void AddressbookWindow::showGroupMemberView(bool saveState)
@@ -1182,6 +1188,8 @@ void AddressbookWindow::showGroupMemberView(bool saveState)
     mGroupMemberView->setCurrentContact(currentContact());
 
     updateContextMenu();
+
+    setObjectName("");
 }
 
 void AddressbookWindow::createGroupListView()
@@ -2070,6 +2078,10 @@ void AddressbookWindow::markCurrentAsPersonal()
             updateContextMenu();
         }
     }
+
+    // Update the details view
+    if( mDetailsView && centralView->currentWidget() == mDetailsView)
+        mDetailsView->init(mDetailsView->entry());
 }
 
 void AddressbookWindow::newEntry()

@@ -54,12 +54,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-
-static QString pretty_print_size(qint64 fsize)
+static QString receivewindow_prettyPrintSize(qint64 fsize)
 {
-    static int threshold = 1024*1024; // 1 MB, user's don't care about fractions up to this point
     static const char *size_suffix[] = {
-        "",
+        QT_TRANSLATE_NOOP("CustomPushService", "B"),
         QT_TRANSLATE_NOOP("CustomPushService", "KB"),
         QT_TRANSLATE_NOOP("CustomPushService", "MB"),
         QT_TRANSLATE_NOOP("CustomPushService", "GB"),
@@ -81,15 +79,12 @@ static QString pretty_print_size(qint64 fsize)
     if (i == 4)
         i = 0;
 
-    QString size;
-    if (fsize >= threshold) {
-        size = QString::number(max, 'f', 2);
+    if (fsize < 1024) {
+        return QString::number(fsize) + qApp->translate("CustomPushService", size_suffix[i]);
     } else {
-        size = QString::number( static_cast<qint64>(max) );
+        return QString::number(max, 'f', 2)
+                + qApp->translate("CustomPushService", size_suffix[i]);
     }
-    size += qApp->translate( "CustomPushService", size_suffix[i] );
-
-    return size;
 }
 
 static void vcalInfo( const QString &fileName, bool *todo, bool *cal )
@@ -412,12 +407,12 @@ void ReceiveWindowItemDelegate::drawProgressBar(QPainter *painter, const QStyleO
 
     if (progress > max || max == 0) {
         progressOption.progress = 0;
-        progressOption.text = QString("%1/?").arg(pretty_print_size(progress));
+        progressOption.text = QString("%1/?").arg(receivewindow_prettyPrintSize(progress));
     } else {
         progressOption.progress = progress;
         progressOption.text = QString("%1/%2").
-                arg(pretty_print_size(progress)).
-                arg(pretty_print_size(max));
+                arg(receivewindow_prettyPrintSize(progress)).
+                arg(receivewindow_prettyPrintSize(max));
     }
 
     // draw the progress bar
@@ -442,7 +437,7 @@ void ReceiveWindowItemDelegate::paint(QPainter *painter, const QStyleOptionViewI
                     tr("Transfer error."));
         } else {
             painter->drawText(progressRect, Qt::AlignLeft,
-                    QString("%1").arg(pretty_print_size(file.completed())));
+                    QString("%1").arg(receivewindow_prettyPrintSize(file.completed())));
         }
     } else {
         drawProgressBar(painter, option, progressRect, file.completed(),

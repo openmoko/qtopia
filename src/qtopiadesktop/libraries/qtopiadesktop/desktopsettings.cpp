@@ -263,7 +263,7 @@ void DesktopSettings::loadTranslations( const QString &file, QObject *parent )
     foreach ( const QString &lang, DesktopSettings::languages() ) {
         QString tfn = QString("%1i18n/%2/%3.qm").arg(DesktopSettings::installedDir()).arg(lang).arg(file);
         if ( !QFile::exists(tfn) ) {
-            WARNING() << "Translation file" << QString("%1.qm").arg(file) << "for language" << lang << "is missing." << QDir::toNativeSeparators(QDir::cleanPath(tfn));
+            LOG() << "Translation file" << QString("%1.qm").arg(file) << "for language" << lang << "is missing." << QDir::toNativeSeparators(QDir::cleanPath(tfn));
             continue;
         }
         QTranslator *trans = new QTranslator( parent );

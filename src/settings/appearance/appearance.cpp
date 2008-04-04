@@ -22,6 +22,7 @@
 #include "appearance.h"
 #include "themedview.h"
 
+#include <private/contextkeymanager_p.h>
 #include <QtopiaApplication>
 #include <qtopiaservices.h>
 #include <QMenu>
@@ -40,9 +41,7 @@
 
 ThemePreview::ThemePreview(const QString &name, int width, int height)
     : QObject(0), m_name(name), themedView(0),
-      m_button0Icon(true),
-      m_button1Icon(true),
-      m_button2Icon(true),
+      m_buttonIcons(true),
       m_width(width),
       m_height(height)
 {
@@ -61,13 +60,17 @@ void ThemePreview::setXmlFilename(const QString &filename)
     reload();
 }
 
-void ThemePreview::setButton(bool icon, ThemeTextItem *textItem, ThemeImageItem *imageItem,
-                             const QString &text, const QString &image)
+void ThemePreview::setButton(bool icon, int buttonIndex, QSoftMenuBar::StandardLabel label)
 {
+    QString buttonName = "button" + QString::number(buttonIndex);
+    ThemeTextItem *textItem = (ThemeTextItem *)themedView->findItem(buttonName , ThemedView::Text);
+    ThemeImageItem *imageItem = (ThemeImageItem *)themedView->findItem(buttonName, ThemedView::Image);
+
+    ContextKeyManager *mgr = ContextKeyManager::instance();
     if (!icon) {
         if (textItem) {
            textItem->setVisible(true);
-           textItem->setText(text);
+           textItem->setText(mgr->standardText(label));
         }
         if (imageItem) {
             imageItem->setVisible(false);
@@ -78,7 +81,7 @@ void ThemePreview::setButton(bool icon, ThemeTextItem *textItem, ThemeImageItem 
         }
         if (imageItem) {
             imageItem->setVisible(true);
-            imageItem->setImage(QPixmap(image));
+            imageItem->setImage(QPixmap(":icon/" + mgr->standardPixmap(label)));
         }
     }
 }
@@ -94,15 +97,13 @@ void ThemePreview::reload()
     themedView->resize(m_width, m_height);
 
     if (m_name == "contextbar") {
-        ThemeTextItem *tbutton0 = (ThemeTextItem *)themedView->findItem("button0", ThemedView::Text);
-        ThemeImageItem *ibutton0 = (ThemeImageItem *)themedView->findItem("button0", ThemedView::Image);
-        setButton(m_button0Icon, tbutton0, ibutton0, "Options", ":icon/options");
-        ThemeTextItem *tbutton1 = (ThemeTextItem *)themedView->findItem("button1", ThemedView::Text);
-        ThemeImageItem *ibutton1 = (ThemeImageItem *)themedView->findItem("button1", ThemedView::Image);
-        setButton(m_button1Icon, tbutton1, ibutton1, "Select", ":icon/select");
-        ThemeTextItem *tbutton2 = (ThemeTextItem *)themedView->findItem("button2", ThemedView::Text);
-        ThemeImageItem *ibutton2 = (ThemeImageItem *)themedView->findItem("button2", ThemedView::Image);
-        setButton(m_button2Icon, tbutton2, ibutton2, "Back", ":icon/cancel");
+        QList<QSoftMenuBar::StandardLabel> labels;
+        if (QApplication::isLeftToRight())
+            labels << QSoftMenuBar::Options << QSoftMenuBar::Select << QSoftMenuBar::Back;
+        else
+            labels << QSoftMenuBar::Back << QSoftMenuBar::Select << QSoftMenuBar::Options;
+        for (int i=0; i<labels.size(); i++)
+            setButton(m_buttonIcons, i, labels[i]);
     }
 }
 
@@ -138,9 +139,7 @@ void ThemePreview::doPreview()
 
 void ThemePreview::setIconLabel(bool enable)
 {
-    m_button0Icon = enable;
-    m_button1Icon = enable;
-    m_button2Icon = enable;
+    m_buttonIcons = enable;
 
     if (!themedView)
         return;

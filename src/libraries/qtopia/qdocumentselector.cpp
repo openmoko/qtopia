@@ -40,6 +40,7 @@
 #include <QPainter>
 #include <QScrollBar>
 #include <QLabel>
+#include <QDesktopWidget>
 
 class NewDocumentProxyModel : public QAbstractProxyModel
 {
@@ -444,6 +445,7 @@ private slots:
     void selectCategoryFilter();
     void showProperties();
     void deleteCurrent();
+    void itemPressed(const QModelIndex &index);
 
 private:
     void setCombinedFilter();
@@ -477,6 +479,7 @@ private:
     bool m_defaultCategoriesDirty;
 
     QMenu *m_softMenu;
+    QMenu *m_itemMenu;
 
     QAction *m_newAction;
     QAction *m_deleteAction;
@@ -541,6 +544,15 @@ DocumentView::DocumentView( QWidget *parent )
     m_proxyModel->setSourceModel( m_contentModel );
 
     setModel( m_proxyModel );
+
+    QtopiaApplication::setStylusOperation(viewport(), QtopiaApplication::RightOnHold);
+
+    m_itemMenu = new QMenu(this);
+    m_itemMenu->addAction(m_deleteAction);
+    m_itemMenu->addAction(m_propertiesAction);
+
+    connect(this, SIGNAL(pressed(const QModelIndex&)),
+            this, SLOT(itemPressed(const QModelIndex&)));
 }
 
 DocumentView::~DocumentView()
@@ -621,6 +633,8 @@ void DocumentView::setOptions( QDocumentSelector::Options options )
 {
     QDocumentSelector::Options changes = m_options ^ options;
 
+    m_options = options;
+
     if( m_typeDialog && changes & QDocumentSelector::NestTypes )
     {
         if( options & QDocumentSelector::NestTypes )
@@ -654,8 +668,6 @@ void DocumentView::setOptions( QDocumentSelector::Options options )
         else
             QSoftMenuBar::removeMenuFrom( this, m_softMenu );
     }
-
-    m_options = options;
 }
 
 void DocumentView::setDefaultCategories( const QStringList &categories )
@@ -805,6 +817,7 @@ void DocumentView::selectTypeFilter()
 
         m_typeDialog->setWindowTitle( tr("View Type") );
         m_typeDialog->setFilter( m_baseFilter );
+        m_typeDialog->setObjectName( QLatin1String( "documents-type" ) );
     }
 
     QtopiaApplication::execDialog( m_typeDialog );
@@ -850,6 +863,8 @@ void DocumentView::selectCategoryFilter()
 
         m_categoryDialog->setWindowTitle( tr("View Category") );
         m_categoryDialog->setFilter( m_baseFilter );
+        m_categoryDialog->setObjectName( QLatin1String( "documents-category" ) );
+
     }
 
     QtopiaApplication::execDialog( m_categoryDialog );
@@ -928,6 +943,14 @@ void DocumentView::filterDefaultCategories()
 
     foreach( QString category, m_filteredDefaultCategories )
         m_categoryFilter |= QContentFilter( QContentFilter::Category, category );
+}
+
+void DocumentView::itemPressed(const QModelIndex &index)
+{
+    if (QApplication::mouseButtons() & Qt::RightButton && index.row() != 0) {
+        setCurrentIndex(index);
+        m_itemMenu->popup(QCursor::pos());
+    }
 }
 
 QContentFilterModel::Template DocumentView::typeTemplate()
@@ -1793,6 +1816,16 @@ bool QDocumentSelectorDialog::newSelected() const
 const QContentSet &QDocumentSelectorDialog::documents() const
 {
     return d->documents();
+}
+
+/*!
+    \reimp
+*/
+QSize QDocumentSelectorDialog::sizeHint() const
+{
+    QDesktopWidget *desktop = QApplication::desktop();
+
+    return desktop->screenGeometry(desktop->primaryScreen()).size();
 }
 
 #include "qdocumentselector.moc"

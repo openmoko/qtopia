@@ -146,6 +146,15 @@ void QAnalogClock::setFace( const QPixmap& face )
 /*!
     \internal
 */
+void QAnalogClock::resizeEvent( QResizeEvent *event )
+{
+    d->scaledFace = QPixmap();
+    QFrame::resizeEvent(event);
+}
+
+/*!
+    \internal
+*/
 void QAnalogClock::paintEvent( QPaintEvent *event )
 {
     QPainter paint(this);

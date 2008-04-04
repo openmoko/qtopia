@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -56,7 +56,7 @@
 // CallHistoryModel
 
 CallHistoryModel::CallHistoryModel( QCallList & callList, QObject* parent )
-    : CallContactModel(callList, parent)
+    : CallContactModel(callList, parent), mDirty(true)
 {
     //alt method would be to listen to QPE/PIM for addedContact
     connect(ServerContactModel::instance(), SIGNAL(modelReset()), 
@@ -69,6 +69,8 @@ CallHistoryModel::~CallHistoryModel()
 
 void CallHistoryModel::setType( QCallList::ListType type )
 {
+    if (mType != type)
+        mDirty = true;
     mType = type;
 }
 
@@ -77,15 +79,31 @@ QCallList::ListType CallHistoryModel::type() const
     return mType;
 }
 
+int CallHistoryModel::rowCount(const QModelIndex& index) const
+{
+    if (mDirty)
+        const_cast<CallHistoryModel*>(this)->refresh();
+    return CallContactModel::rowCount(index);
+}
+
 void CallHistoryModel::updateContacts()
 {
+    if (!mDirty) {
+        mDirty = true;
+        QTimer::singleShot(0, this, SLOT(reallyUpdateContacts()));
+    }
+}
+
+void CallHistoryModel::reallyUpdateContacts()
+{
     emit contactsAboutToBeUpdated();
-    refresh();  //TODO: optimize (do we need to refresh if not visible, etc?)
+    refresh();
     emit contactsUpdated();
 }
 
 void CallHistoryModel::refresh()
 {
+    mDirty = false;
     CallContactModel::resetModel(); //delete existing items
     CallContactModel::refresh(); //reread CallListItems
 

@@ -146,6 +146,8 @@ public:
 
     const QContentSet &documents() const;
 
+    QSize sizeHint() const;
+
 private:
     QDocumentSelectorDialogPrivate *d;
 };

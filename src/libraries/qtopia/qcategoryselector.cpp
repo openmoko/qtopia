@@ -558,6 +558,21 @@ public:
         opt.decorationPosition = QStyleOptionViewItem::Right;
         QtopiaItemDelegate::paint(painter, opt, index);
     }
+
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+    {
+        QVariant value = index.data(Qt::SizeHintRole);
+        if (value.isValid())
+            return qvariant_cast<QSize>(value);
+        QRect decorationRect = QRect(QPoint(0, 0), option.decorationSize);
+        QRect displayRect = rect(option, index, Qt::DisplayRole);
+        QRect checkRect = rect(option, index, Qt::CheckStateRole);
+        QRect addDecorationRect = rect(option, index, Qtopia::AdditionalDecorationRole);
+
+        doLayout(option, &checkRect, &decorationRect, &displayRect, &addDecorationRect, true);
+
+        return (decorationRect|displayRect|checkRect|addDecorationRect).size();
+    }
 };
 
 class QCategorySelectData : public QObject
@@ -669,16 +684,12 @@ QCategorySelectData::QCategorySelectData( const QString &s,
         vb->setSpacing( 0 );
 
         listView = new QCategoryListView();
-        int sz = listView->style()->pixelMetric(QStyle::PM_SmallIconSize);
-        listView->setIconSize(QSize(sz,sz));
         listView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         listView->setItemDelegate(new QCategoryListDelegate());
         listView->setModel(model);
         listView->setSelectionMode(QListView::SingleSelection);
         listView->selectionModel()->select(
                 model->index(0, 0), QItemSelectionModel::Select);
-        if (sz > listView->fontMetrics().height())
-            listView->setSpacing((sz-listView->fontMetrics().height())/2);
         listView->setUniformItemSizes(true);
         vb->addWidget(listView);
 

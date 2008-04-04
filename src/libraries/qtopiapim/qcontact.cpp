@@ -1198,7 +1198,7 @@ VObject *QContact::createVObject() const
 
     safeAddPropValue( vcard, VCNoteProp, notes() );
 
-    safeAddPropValue( vcard, VCBirthDateProp, birthday().toString("YYYYMMdd"));
+    safeAddPropValue( vcard, VCBirthDateProp, birthday().toString("yyyyMMdd"));
 
 
     if ( !company().isEmpty() || !department().isEmpty() || !office().isEmpty() ) {
@@ -1250,7 +1250,7 @@ VObject *QContact::createVObject() const
     safeAddPropValue( vcard, "X-Qtopia-Spouse", spouse() );
     if ( gender() != QContact::UnspecifiedGender )
         safeAddPropValue( vcard, "X-Qtopia-Gender", QString::number( (int)gender() ) );
-    safeAddPropValue( vcard, "X-Qtopia-Anniversary", anniversary().toString("YYYYMMdd"));
+    safeAddPropValue( vcard, "X-Qtopia-Anniversary", anniversary().toString("yyyyMMdd"));
     safeAddPropValue( vcard, "X-Qtopia-Nickname", nickname() );
     safeAddPropValue( vcard, "X-Qtopia-Children", children() );
 
@@ -1516,7 +1516,7 @@ static QContact parseVObject( VObject *obj )
             c.setNotes( value );
         }
         else if (name == VCBirthDateProp ) {
-            c.setBirthday( QDate::fromString(value, "YYYYMMdd") );
+            c.setBirthday( QDate::fromString(value, "yyyyMMdd") );
         }
         else if ( name == "X-Qtopia-Profession" ) {
             c.setProfession( value );
@@ -1534,7 +1534,7 @@ static QContact parseVObject( VObject *obj )
             c.setGender( (QContact::GenderType) value.toInt() );
         }
         else if ( name == "X-Qtopia-Anniversary" ) {
-            c.setAnniversary( QDate::fromString(value, "YYYYMMdd") );
+            c.setAnniversary( QDate::fromString(value, "yyyyMMdd") );
         }
         else if ( name == "X-Qtopia-Nickname" ) {
             c.setNickname( value );
@@ -1944,7 +1944,7 @@ void QContact::saveScaledPortrait(const QImage &scaled)
     QString extension;
     const char *format;
     if (scaled.format() == QImage::Format_ARGB32_Premultiplied
-            || scaled.format() == QImage::Format_ARGB32)
+            || scaled.format() == QImage::Format_ARGB32 || scaled.format() == QImage::Format_RGB16)
     {
         extension = QLatin1String(".png");
         format = "PNG";

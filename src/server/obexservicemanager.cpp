@@ -25,6 +25,7 @@
 #include <qobexpushclient.h>
 #include <qcommdevicesession.h>
 #include <qcommdevicecontroller.h>
+#include <qtopiaapplication.h>
 
 #ifdef QTOPIA_BLUETOOTH
 #include <qbluetoothsdprecord.h>
@@ -66,6 +67,39 @@
 #include <unistd.h>
 #include <sys/vfs.h>
 
+static QString obexservicemanager_prettyPrintSize(qint64 fsize)
+{
+    static const char *size_suffix[] = {
+        QT_TRANSLATE_NOOP("CustomPushService", "B"),
+        QT_TRANSLATE_NOOP("CustomPushService", "KB"),
+        QT_TRANSLATE_NOOP("CustomPushService", "MB"),
+        QT_TRANSLATE_NOOP("CustomPushService", "GB"),
+    };
+
+    double max = fsize;
+
+    int i = 0;
+    for (; i < 4; i++) {
+        if (max > 1024.0) {
+            max /= 1024.0;
+        }
+        else {
+            break;
+        }
+    }
+
+    // REALLY big file?
+    if (i == 4)
+        i = 0;
+
+    if (fsize < 1024) {
+        return QString::number(fsize) + qApp->translate("CustomPushService", size_suffix[i]);
+    } else {
+        return QString::number(max, 'f', 2)
+                + qApp->translate("CustomPushService", size_suffix[i]);
+    }
+}
+
 
 class CustomPushService : public QObexPushService
 {
@@ -106,43 +140,6 @@ CustomPushService::CustomPushService(QIODevice *device, QObject *parent)
 CustomPushService::~CustomPushService()
 {
     delete m_msgBox;
-}
-
-static QString pretty_print_size(qint64 fsize)
-{
-    static int threshold = 1024*1024; // 1 MB, user's don't care about fractions up to this point
-    static const char *size_suffix[] = {
-        "",
-        QT_TRANSLATE_NOOP("CustomPushService", "KB"),
-        QT_TRANSLATE_NOOP("CustomPushService", "MB"),
-        QT_TRANSLATE_NOOP("CustomPushService", "GB"),
-    };
-
-    double max = fsize;
-
-    int i = 0;
-    for (; i < 4; i++) {
-        if (max > 1024.0) {
-            max /= 1024.0;
-        }
-        else {
-            break;
-        }
-    }
-
-    // REALLY big file?
-    if (i == 4)
-        i = 0;
-
-    QString size;
-    if (fsize >= threshold) {
-        size = QString::number(max, 'f', 2);
-    } else {
-        size = QString::number( static_cast<qint64>(max) );
-    }
-    size += qApp->translate( "CustomPushService", size_suffix[i] );
-
-    return size;
 }
 
 QString CustomPushService::incomingDirectory()
@@ -195,12 +192,18 @@ QIODevice *CustomPushService::acceptFile(const QString &name,
     e1 << -1; // read brightness setting from config
     e1.send();
 
-    // sound a message tone
-    QtopiaServiceRequest e2("Ringtone", "startMessageRingtone()");
+    // wake up (otherwise the next keypress is swallowed even though the
+    // screen has been brightened)
+    QtopiaServiceRequest e2("QtopiaPowerManager", "setActive(bool)");
+    e2 << false;
     e2.send();
+
+    // sound a message tone
+    QtopiaServiceRequest e3("Ringtone", "startMessageRingtone()");
+    e3.send();
     QPhoneProfileManager manager;
     QPhoneProfile profile = manager.activeProfile();
-    QTimer::singleShot(profile.msgAlertDuration(), this, 
+    QTimer::singleShot(profile.msgAlertDuration(), this,
             SLOT(stopMessageRingtone()));
 
 
@@ -235,17 +238,17 @@ QIODevice *CustomPushService::acceptFile(const QString &name,
         m_msgBox->setText( tr("<qt>Accept incoming file <b>%1</b> of size %2? "
                     "You have %3 of storage remaining.</qt>", "%1=name %2=3Kb %3=3MB"
                             ).arg(desc).
-                              arg(pretty_print_size(size)).
-                              arg(pretty_print_size(availableStorage)) );
+                              arg(obexservicemanager_prettyPrintSize(size)).
+                              arg(obexservicemanager_prettyPrintSize(availableStorage)) );
     } else {
         m_msgBox->setText( tr("<qt>Accept incoming file <b>%1</b>? "
                     "You have %2 of storage remaining.</qt>", "%1=name %2=3MB"
                             ).arg(desc).
-                              arg(pretty_print_size(availableStorage)) );
+                              arg(obexservicemanager_prettyPrintSize(availableStorage)) );
     }
 
     // stop ringtone if msg box has been accepted/rejected
-    int result = m_msgBox->exec();
+    int result = QtopiaApplication::execDialog(m_msgBox);
     stopMessageRingtone();
 
     if (result == QMessageBox::Yes) {
@@ -346,6 +349,7 @@ void InfraredBeamingService::sessionFailed()
     else {
         QMessageBox::critical( 0, tr( "Beam File" ),
                               tr( "<P>Error while trying to use the infrared device." ));
+        m_waitWidget->hide();
     }
 
     m_busy = false;
@@ -360,8 +364,8 @@ void InfraredBeamingService::sessionOpen()
 
     // This should never happen in practice if we havean open session
     if (!ret) {
-        sessionFailed();
         m_session->endSession();
+        sessionFailed();
     }
 }
 
@@ -441,7 +445,7 @@ void InfraredBeamingService::pushCommandFinished(int /*id*/, bool error)
     QObexPushClient *pushClient = qobject_cast<QObexPushClient *>(sender());
     if (!pushClient)
         return;
-    
+
     // don't worry about disconnect errors
     if (error && pushClient->currentCommand() != QObexPushClient::Disconnect)
         m_pushFailed = true;
@@ -579,6 +583,14 @@ void InfraredBeamingService::doneBeamingFile(bool error)
 }
 
 /*!
+    \internal
+ */
+void InfraredBeamingService::showBusyMessage()
+{
+    QMessageBox::information(0, tr("Transmission error"), tr("A transfer operation is in progress."));
+}
+
+/*!
     Asks the service to beam the currently set personal business card to a remote
     device.  If no business card is set, the user will be notified appropriately.
 
@@ -586,8 +598,10 @@ void InfraredBeamingService::doneBeamingFile(bool error)
 */
 void InfraredBeamingService::beamPersonalBusinessCard()
 {
-    if (m_busy)
+    if (m_busy) {
+        showBusyMessage();
         return;
+    }
 
     QContactModel model(this);
 
@@ -612,8 +626,10 @@ void InfraredBeamingService::beamPersonalBusinessCard()
 */
 void InfraredBeamingService::beamBusinessCard(const QContact &contact)
 {
-    if (m_busy)
+    if (m_busy) {
+        showBusyMessage();
         return;
+    }
 
     QByteArray arr;
     QDataStream stream(&arr, QIODevice::WriteOnly);
@@ -668,8 +684,10 @@ void InfraredBeamingService::beamFile(const QString &fileName,
                                       const QString &description,
                                       bool autodelete)
 {
-    if (m_busy)
+    if (m_busy) {
+        showBusyMessage();
         return;
+    }
 
     QString display = fileName;
     int pos = fileName.lastIndexOf("/");
@@ -686,8 +704,10 @@ void InfraredBeamingService::beamFile(const QString &fileName,
  */
 void InfraredBeamingService::beamFile(const QContentId &id)
 {
-    if (m_busy)
+    if (m_busy) {
+        showBusyMessage();
         return;
+    }
 
     QContent content(id);
     QMimeType mime(content);
@@ -937,7 +957,7 @@ void BluetoothPushingService::pushCommandFinished(int id, bool error)
     QObexPushClient *pushClient = qobject_cast<QObexPushClient *>(sender());
     if (!pushClient)
         return;
-    
+
     qLog(Bluetooth) << "BT Push client finished request" << id << "with error:" << pushClient->error()
         << "and response:" << pushClient->lastCommandResponse();
 
@@ -1052,6 +1072,14 @@ void BluetoothPushingService::donePushingFile(bool error)
 /*!
     \internal
  */
+void BluetoothPushingService::showBusyMessage()
+{
+    QMessageBox::information(0, tr("Transmission error"), tr("A transfer operation is in progress."));
+}
+
+/*!
+    \internal
+ */
 bool BluetoothPushingService::getPersonalVCard(QByteArray &arr)
 {
     QContactModel model(this);
@@ -1079,8 +1107,10 @@ void BluetoothPushingService::pushPersonalBusinessCard()
 {
     qLog(Bluetooth) << "BluetoothPushingService::pushPersonalBusinessCard()" << m_busy;
 
-    if (m_busy)
+    if (m_busy) {
+        showBusyMessage();
         return;
+    }
 
     QByteArray arr;
     if (!getPersonalVCard(arr))
@@ -1109,8 +1139,10 @@ void BluetoothPushingService::pushPersonalBusinessCard(const QBluetoothAddress &
 {
     qLog(Bluetooth) << "BluetoothPushingService::pushPersonalBusinessCard(addr)" << m_busy;
 
-    if (m_busy)
+    if (m_busy) {
+        showBusyMessage();
         return;
+    }
 
     QByteArray arr;
     if (!getPersonalVCard(arr))
@@ -1139,8 +1171,10 @@ void BluetoothPushingService::pushBusinessCard(const QContact &contact)
 {
     qLog(Bluetooth) << "BluetoothPushingService::pushBusinessCard" << m_busy;
 
-    if (m_busy)
+    if (m_busy) {
+        showBusyMessage();
         return;
+    }
 
     QByteArray arr;
     QDataStream stream(&arr, QIODevice::WriteOnly);
@@ -1166,8 +1200,10 @@ void BluetoothPushingService::pushBusinessCard(const QDSActionRequest &request)
 {
     qLog(Bluetooth) << "BluetoothPushingService::pushBusinessCard" << m_busy;
 
-    if (m_busy)
+    if (m_busy) {
+        showBusyMessage();
         return;
+    }
 
     QByteArray arr = request.requestData().data();
 
@@ -1191,8 +1227,10 @@ void BluetoothPushingService::pushBusinessCard(const QDSActionRequest &request)
  */
 void BluetoothPushingService::pushCalendar(const QDSActionRequest &request)
 {
-    if (m_busy)
+    if (m_busy) {
+        showBusyMessage();
         return;
+    }
 
     qLog(Bluetooth) << "BluetoothPushingService::pushCalendar()";
 
@@ -1222,8 +1260,10 @@ void BluetoothPushingService::pushFile(const QString &fileName,
                                        const QString &description,
                                        bool autodelete)
 {
-    if (m_busy)
+    if (m_busy) {
+        showBusyMessage();
         return;
+    }
 
     qLog(Bluetooth) << "BluetoothPushingService::pushFile()" << fileName
             << mimeType << description << autodelete;
@@ -1252,8 +1292,10 @@ void BluetoothPushingService::pushFile(const QString &fileName,
  */
 void BluetoothPushingService::pushFile(const QContentId &id)
 {
-    if (m_busy)
+    if (m_busy) {
+        showBusyMessage();
         return;
+    }
 
     qLog(Bluetooth) << "BluetoothPushingService::pushFile() (QContent)" << id;
 
@@ -1285,8 +1327,10 @@ void BluetoothPushingService::pushFile(const QContentId &id)
  */
 void BluetoothPushingService::pushFile(const QBluetoothAddress &addr, const QContentId &id)
 {
-    if (m_busy)
+    if (m_busy) {
+        showBusyMessage();
         return;
+    }
 
     qLog(Bluetooth) << "BluetoothPushingService::pushFile() (QBluetoothAddress,QContent)"
             << addr.toString() << id;
@@ -1546,7 +1590,7 @@ void ObexPushServiceProvider::setSecurityOptions(QBluetooth::SecurityOptions opt
     service and the Infrared IrXfer server.  It also provides a common
     infrastructure for these services, including user notification of
     files transferred and received.
-    
+
     This class is part of the Qtopia server and cannot be used by other Qtopia applications.
   */
 
@@ -1660,7 +1704,7 @@ void ObexServiceManager::abortTransfer(int id)
     while (i.hasNext()) {
         if (i.next().value() == id) {
             // use QTimer to force disconnection if other side doesn't respond
-            qLog(Obex) << "Trying to abort request" << id 
+            qLog(Obex) << "Trying to abort request" << id
                 << ", will force transport disconnection regardless";
             if (QObexPushClient *c = qobject_cast<QObexPushClient*>(i.key())) {
                 c->abort();
@@ -1721,7 +1765,7 @@ void ObexServiceManager::irXferPushServiceDone()
     if (!opush)
         return;
 
-    QIrSocket *irSocket = 
+    QIrSocket *irSocket =
             qobject_cast<QIrSocket*>(opush->sessionDevice());
     if (irSocket) {
         qLog(Infrared) << "Disconnecting IR socket for Obex Push session...";
@@ -1952,5 +1996,6 @@ int ObexServiceManager::nextId()
 */
 
 #include "obexservicemanager.moc"
+
 
 

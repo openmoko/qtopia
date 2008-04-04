@@ -51,7 +51,7 @@ foreach my $d ( @install_root_possibles )
 }
 
 # if the first argument was an install root, shift it off
-if ( $install_root eq $verbose_report_progs[0] )
+if ( (@verbose_report_progs > 0) && ($install_root eq $verbose_report_progs[0]) )
 {
     shift @verbose_report_progs;
 }

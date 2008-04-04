@@ -50,7 +50,6 @@ class MouseControlDialog;
 
 class CallScreen : public PhoneThemedView
 {
-    friend class CallItemDelegate;
     friend class CallItemListView;
     friend class CallItemEntry;
 

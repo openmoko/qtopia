@@ -74,10 +74,12 @@ public:
                 QSizePolicy::Minimum, QSizePolicy::Expanding );
         vb->addItem( spacer );
 
-        if ( wapAccount->name().isEmpty() )
+        if ( wapAccount->name().isEmpty() ) {
+            wapAccount->setName("WAP account");
             account->setText( tr("WAP account", "name of default wap account") );
-        else
+        } else {
             account->setText( wapAccount->name() );
+        }
 
         dataInterfaces = QtopiaNetwork::availableNetworkConfigs( QtopiaNetwork::GPRS );
 

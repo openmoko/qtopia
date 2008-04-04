@@ -317,26 +317,30 @@ void OmegaCamera::getCameraImage( QImage& img, bool copy )
         return;
     }
 
-    currentFrame = ++currentFrame % mbuf.frames;
-    
-    unsigned char*  buf = frames + mbuf.offsets[currentFrame];
-    quint16 *dest;
-    for (int x = height  - 1; x >= 0; --x)
-    { 
-        dest = m_imageBuf + x;
-        
-        for (int y = 0; y < width; y+=2)
+    static int _lastFrame = 1;
+
+    int currentFrame = (_lastFrame - 1) % mbuf.frames;
+    unsigned char *buf_orig = frames + mbuf.offsets[currentFrame];
+    for(int yy_base = 0; yy_base < width; yy_base += 64)
+    {
+        for(int x = 0; x < height && x < width; ++x)
         {
-            int u = buf[0];
-            int v = buf[2];
-            yuv2rgb(buf[1], u, v, dest);
-            dest += height;
-            yuv2rgb(buf[3], u, v, dest);
-            dest += height;
-            buf += 4;
+            for (int y = yy_base; y < width && y < yy_base + 64; y++)
+            {
+                unsigned short *dest = (unsigned short*)m_imageBuf + x + y * height;
+                unsigned char *buf = buf_orig + ((height - 1) - x) * 2 * width + (y & 0xFFFFFFFE) * 2;
+                int u = buf[0];
+                int v = buf[2];
+                yuv2rgb(buf[1 + (y & 0x1) * 2], u, v, dest);
+            }
         }
-        
-     }
+    }
+
+    int cap = 0;
+    ioctl(fd, 228, &cap);
+    if(cap != _lastFrame)
+        _lastFrame = cap;
+
     img = QImage((uchar*) m_imageBuf, height, width, QImage::Format_RGB16);
 
 }

@@ -139,7 +139,6 @@ class QWaitWidgetPrivate
 public:
     QLabel *textLabel;
     ClockLabel *imageLabel;
-    QPixmap busyPixmap;
     bool cancelEnabled;
     bool wasCancelled;
     int expiryTime;

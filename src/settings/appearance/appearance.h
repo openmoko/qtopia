@@ -44,7 +44,7 @@ class ThemePreview : public QObject
     ThemePreview(const QString &name, int width, int height);
     ~ThemePreview();
     void setXmlFilename(const QString &filename);
-    void setButton(bool icon, ThemeTextItem *textItem, ThemeImageItem *imageItem, const QString &text, const QString &image);
+    void setButton(bool icon, int buttonIndex, QSoftMenuBar::StandardLabel label);
     void reload();
     void setColor(const QString &color);
     void setIconLabel(bool enable);
@@ -59,9 +59,7 @@ class ThemePreview : public QObject
   private:
     QString     m_name;
     ThemedView  *themedView;
-    bool        m_button0Icon;
-    bool        m_button1Icon;
-    bool        m_button2Icon;
+    bool        m_buttonIcons;
     int         m_width;
     int         m_height;
     QString     m_filename;

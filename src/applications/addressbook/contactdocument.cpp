@@ -90,9 +90,10 @@ ContactDocument::~ContactDocument()
 #endif
 }
 
-void ContactDocument::init( QWidget *widget, const QContact& contact, ContactDocumentType docType)
+void ContactDocument::init( QWidget *widget, QContactModel *model, const QContact& contact, ContactDocumentType docType)
 {
     mContact = contact;
+    mModel = model;
 
     QPalette thisPalette = qApp->palette(widget);
     QFont defaultFont = QApplication::font(widget);
@@ -148,20 +149,33 @@ void ContactDocument::createContactDetailsDocument()
 
     /* check if we need to have a thumbnail */
     QPixmap thumb = mContact.thumbnail();
-    QString name = nameFragment();
-    if( !thumb.isNull() )
-    {
+
+    QString nameHtml = "<table border=0 padding=4 spacing=0 align=center><tr>%1<td valign=middle>" + nameFragment() + "</td>%2</table>";
+    QString thumbHtml;
+    QString meHtml;
+
+    if( !thumb.isNull() ) {
         QVariant thumbV = thumb;
         QTextImageFormat img;
         mDocument->addResource(QTextDocument::ImageResource, QUrl("addressbookdetailthumbnail"), thumbV);
         img.setName("addressbookdetailthumbnail"); // No tr
 
-        if (mRtl)
-            curs.insertHtml("<table border=0 padding=4 spacing=0 align=center><tr><td valign=middle>" + name + "<td><img src='addressbookdetailthumbnail'></table>");
-        else
-            curs.insertHtml("<table border=0 padding=4 spacing=0 align=center><tr><td><img src='addressbookdetailthumbnail'><td valign=middle>"+ name +"</table>");
-    } else
-        curs.insertHtml(name);
+        thumbHtml = "<td><img src='addressbookdetailthumbnail'></td>";
+    }
+
+    if (mModel && mModel->isPersonalDetails(mContact.uid())) {
+        QVariant detailsV = QIcon(":icon/addressbook/personaldetails").pixmap(QContact::thumbnailSize());
+        QTextImageFormat img;
+        mDocument->addResource(QTextDocument::ImageResource, QUrl("addressbookpersonaldetails"), detailsV);
+        img.setName("addressbookpersonaldetails"); // No tr
+
+        meHtml = "<td><img src='addressbookpersonaldetails'></td>";
+    }
+
+    if (mRtl)
+        curs.insertHtml(nameHtml.arg(meHtml, thumbHtml));
+    else
+        curs.insertHtml(nameHtml.arg(thumbHtml, meHtml));
 
     //  Job (if this is a business contact)
     bool isBus = mContact.categories().contains( "Business" ); // no tr
@@ -213,12 +227,31 @@ void ContactDocument::createContactDetailsDocument()
         addBusinessFragment( curs );
     }
 
+    // Add groups
+    QStringList cats = mContact.categories();
+
+    if (cats.count() > 0) {
+        addTextBreak(curs);
+        curs.insertBlock(bfCenter);
+        curs.insertText(qApp->translate("AbFullEditor", "Groups"), cfBoldUnderline);
+        addTextBreak(curs);
+        QStringList catLabels;
+        QCategoryManager cm("Address Book"); // no tr
+        foreach (QString cat, cats) {
+            catLabels << Qt::escape(cm.label(cat));
+        }
+        curs.insertHtml(catLabels.join(", ")); // ### tr needed?
+    }
+
+    // Notes
     value = mContact.notes();
     if ( !value.isEmpty() )
     {
-        // XXX add a Notes: header
+        // add a Notes: header
         addTextBreak(curs);
-        curs.insertBlock();
+        curs.insertBlock(bfCenter);
+        curs.insertText(qApp->translate("AbFullEditor", "Notes"), cfBoldUnderline);
+        curs.insertBlock(bfNormal);
         curs.insertHtml(value);
         curs.movePosition(QTextCursor::NextBlock);
     }

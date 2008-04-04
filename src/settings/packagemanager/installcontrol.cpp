@@ -62,11 +62,12 @@ SimpleErrorReporter::SimpleErrorReporter( ReporterType type, const QString &pkgN
         case ( Uninstall ):
             subject = QObject::tr( "Uninstall Error" );
             prefix = QObject::tr("%1:", "%1 = package name")
-                 .arg( packageName ) + QLatin1String(" "); 
+                .arg( packageName ) + QLatin1String(" ");
             break;
         case ( Other ):
-            subject = QObject::tr( "Warning" );  
+            subject = QObject::tr( "Warning" );
             prefix = "";
+            break;
         default:
             qWarning() << "SimpleErrorReporter constructor invalid ReporterType parameter";
     }

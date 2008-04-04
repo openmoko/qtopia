@@ -36,6 +36,7 @@
 #include <QVariantMap>
 class QString;
 class QWSEvent;
+class QWidget;
 
 class TestSlaveInterface {
 public:
@@ -44,6 +45,7 @@ public:
     virtual void postMessage(QString const &name, QVariantMap const &data) = 0;
     virtual bool isConnected() const = 0;
     virtual void qwsEventFilter(QWSEvent *event) = 0;
+    virtual void showMessageBox(QWidget*,QString const&,QString const&) = 0;
 };
 
 Q_DECLARE_INTERFACE(TestSlaveInterface,"com.trolltech.Qtopia.TestSlaveInterface")

@@ -99,7 +99,6 @@ void QImageDocumentSelectorPrivate::init()
     connect( thumbnail_view, SIGNAL(selected()), this, SLOT(emitSelected()) );
     thumbnail_view->setViewMode( QListView::IconMode );
     thumbnail_view->setIconSize( QSize( iconSize, iconSize ) );
-    thumbnail_view->setSpacing( 2 );
     thumbnail_view->setUniformItemSizes( true );
 
     // Construct thumbnail delegate
@@ -355,6 +354,7 @@ void QImageDocumentSelectorPrivate::launchCategoryDialog()
 
         category_dialog->setWindowTitle( tr( "View Category" ) );
         category_dialog->setFilter( content_filter );
+        category_dialog->setObjectName( QLatin1String( "documents-category" ) );
     }
 
     QtopiaApplication::execDialog( category_dialog );

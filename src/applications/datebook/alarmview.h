@@ -55,6 +55,7 @@ private slots:
     void currentAlarmChanged(const QModelIndex& idx);
     void alarmSelected(const QModelIndex &idx);
     void snoozeClicked();
+    bool updateAlarms();
 
 private:
     void init();

@@ -283,9 +283,9 @@ QContentSortCriteria QContentSetEngine::convertSortOrder( const QStringList &sor
 */
 void QContentSetEngine::startUpdate()
 {
-    emit updateStarted();
-
     m_updateInProgress = true;
+
+    emit updateStarted();
 }
 
 /*!

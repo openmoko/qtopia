@@ -25,26 +25,6 @@
 #include <QFileSystem>
 #include <qtopia/private/qcontentstore_p.h>
 
-static const char *qFileErrors[] =
-{
-    "QFile::NoError ",
-    "QFile::ReadError ",
-    "QFile::WriteError ",
-    "QFile::FatalError ",
-    "QFile::ResourceError ",
-    "QFile::OpenError ",
-    "QFile::AbortError ",
-    "QFile::TimeOutError ",
-    "QFile::UnspecifiedError ",
-    "QFile::RemoveError ",
-    "QFile::RenameError ",
-    "QFile::PositionError ",
-    "QFile::ResizeError ",
-    "QFile::PermissionsError ",
-    "QFile::CopyError "
-};
-
-
 /*!
     \class QFSContentEngine
     \mainclass
@@ -101,7 +81,7 @@ QContentEngine *QFSContentEngine::copyTo( const QString &newPath )
         return copy;
     }
 
-    setError( qFileErrors[ source.error() ] + source.errorString() );
+    setError( source.errorString() );
 
     return 0;
 }
@@ -134,7 +114,7 @@ bool QFSContentEngine::moveTo( const QString &newPath )
         QFile::remove( newPath );
     }
 
-    setError( qFileErrors[ source.error() ] + source.errorString() );
+    setError( source.errorString() );
 
     return false;
 }
@@ -213,7 +193,7 @@ QIODevice *QFSContentEngine::open( QIODevice::OpenMode mode )
 
     if( !file->open( mode ) )
     {
-        setError( qFileErrors[ file->error() ] + file->errorString() );
+        setError( file->errorString() );
 
         delete file;
 
@@ -329,7 +309,7 @@ bool QFSContentEngine::remove()
 
     if( !file.remove() )
     {
-        setError( qFileErrors[ file.error() ] + file.errorString() );
+        setError( file.errorString() );
 
         return false;
     }

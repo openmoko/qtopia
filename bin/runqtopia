@@ -347,22 +347,22 @@ opt_print_autodetect();
 my $script = "/tmp/runqtopia.$$";
 my $skin = "$QPEDIR/src/tools/qt/qvfb/".opt("skin").".skin";
 
-=pod
-This doesn't seem to actually do anything?!?!
-
-# Cleanly handle the INT (Ctrl+C) and TERM (kill) signals
-sub kill_children {
-    warn "runqtopia got SIGINT!\n";
-    $SIG{INT} = "DEFAULT";
-    $SIG{TERM} = "DEFAULT";
-    unlink($script);
-    my $GID=getpgrp 0;
-    kill "TERM", -$GID;
-    exit(0);
+if ( opt("runmode") eq "systemtesthelper" ) {
+    # Cleanly handle the INT (Ctrl+C) and TERM (kill) signals
+    sub kill_children {
+        $SIG{INT} = "DEFAULT";
+        $SIG{TERM} = "DEFAULT";
+        unlink($script);
+        my $GID=getpgrp;
+        kill "TERM", -$GID;
+        exit(0);
+    }
+    $SIG{INT} = \&kill_children;
+    $SIG{TERM} = $SIG{INT};
+    # Run in a separate process group so we can later kill all processes
+    # in that group.
+    setpgrp;
 }
-$SIG{INT} = \&kill_children;
-$SIG{TERM} = $SIG{INT};
-=cut
 
 # QWS_DISPLAY is used by the Qtopia Core windowing system
 my $QWS_DISPLAY;

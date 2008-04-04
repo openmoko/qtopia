@@ -69,7 +69,6 @@ class QuickDial;
 class CallHistory;
 class QExportedBackground;
 class QAbstractDialerScreen;
-class TouchscreenDialer;
 class QAbstractBrowserScreen;
 class QAbstractSecondaryDisplay;
 class QtopiaServiceDescription;
