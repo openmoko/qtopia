@@ -37,6 +37,7 @@ class QTextEdit;
 class QAction;
 class QShowEvent;
 class QWaitWidget;
+class QTabWidget;
 
 #include "ui_packagedetails.h"
 class PackageDetails : public QDialog, public Ui::PackageDetails
@@ -74,10 +75,10 @@ private:
 };
 Q_DECLARE_OPERATORS_FOR_FLAGS(PackageDetails::Options);
 
-class DownloadViewDelegate: public QtopiaItemDelegate
+class ViewDelegate: public QtopiaItemDelegate
 {
     public:
-        DownloadViewDelegate( QObject *parent = 0 );
+        ViewDelegate( QObject *parent = 0 );
         virtual void paint( QPainter *painter,
                         const QStyleOptionViewItem &option,
                         const QModelIndex &index ) const;
@@ -133,6 +134,18 @@ private:
 
     static const int InstalledIndex;
     static const int DownloadIndex;
+};
+
+class KeyFilter:public QObject
+{
+    Q_OBJECT
+
+    public:
+        KeyFilter(QTabWidget * tab, QObject *parent=0);
+
+    protected:
+        bool eventFilter(QObject *obj, QEvent *event);
+        QTabWidget *m_tab;
 };
 
 #endif

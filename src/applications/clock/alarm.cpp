@@ -39,16 +39,8 @@
 #include <qcopchannel_qws.h>
 #endif
 
-static const int magic_daily = 2292922;
-static const int magic_countdown = 2292923;
-
-
-#if 0
-static void toggleScreenSaver( bool on )
-{
-    QtopiaApplication::setTemporaryScreenSaverMode(on ? QtopiaApplication::Enable : QtopiaApplication::DisableSuspend);
-}
-#endif
+static const int magic_daily = 2292922;     //type for daily alarm
+static const int magic_countdown = 2292923; //type for countdown/timer alarm (currently no UI to set this type of alarm)
 
 void Alarm::setRingPriority(bool v)
 {

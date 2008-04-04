@@ -241,8 +241,6 @@ SimChat::SimChat( SimState *state, SimXmlNode& e )
     responseDelay = 0;
     wildcard = false;
     eol = true;
-    peerConnect = false;
-    peerHangup = false;
 
     listSMS = false;
     deleteSMS = false;
@@ -275,12 +273,6 @@ SimChat::SimChat( SimState *state, SimXmlNode& e )
         } else if ( n->tag == "set" ) {
 	    variables += n->getAttribute( "name" );
 	    values += n->getAttribute( "value" );
-        } else if ( n->tag == "peer" ) {
-            peer = n->contents;
-            QString hangupstr = n->getAttribute( "hangup" );
-            peerHangup = (hangupstr == "true");
-        } else if ( n->tag == "peerconnect" ) {
-            peerConnect = true;
         } else if ( n->tag == "newcall" ) {
             newCallVar = n->getAttribute( "name" );
         } else if ( n->tag == "forgetcall" ) {
@@ -361,27 +353,6 @@ bool SimChat::command( const QString& cmd )
     // Switch to the new state.
     if ( switchTo != QString() ) {
         state()->rules()->switchTo( switchTo );
-    }
-
-    // Send a command to the peer.
-    if ( peer.length() > 0 ) {
-        state()->rules()->peerCommand( peer );
-    }
-
-    // Attempt to connect to a peer if this was a peer dial command.
-    if ( peerConnect ) {
-        QString number = cmd.mid( 3 );
-        if ( number.length() > 0 && number[number.length() - 1] == ';' )
-            number = number.left( number.length() - 1 );
-        if ( state()->rules()->peerConnect( number ) ) {
-            // Disable the automatic "move to connected state" indication.
-            state()->rules()->switchTo( "dialing-peer" );
-        }
-    }
-
-    // Hangup the peer connection if necessary.
-    if ( peerHangup ) {
-        state()->rules()->peerHangup();
     }
 
     // Allocate a new call identifier or forget this call identifier.
@@ -614,15 +585,6 @@ SimRules::SimRules( int fd, QObject *p,  const QString& filename, HardwareManipu
             QString value = n->getAttribute( "value" );
             if ( name != QString() && value != QString() ) {
                 setVariable(name, value);
-            }
-
-        } else if ( n->tag == "peerinfo" ) {
-
-            // Add a phone simulator peer entry.
-            QString number = n->getAttribute( "number" );
-            QString host = n->getAttribute( "host" );
-            if ( number != QString() && host != QString() ) {
-                peers[number] = host;
             }
 
         } else if ( n->tag == "filesystem" ) {
@@ -921,42 +883,6 @@ void SimRules::setSimApplication( SimApplication *app )
     toolkitApp->setSimRules( this );
     toolkitApp->start();
 }
-
-void SimRules::loadPeers( const QString& filename )
-{
-    // Load the peer rules into memory as a DOM-like tree.
-    SimXmlHandler *handler = new SimXmlHandler();
-    QXmlSimpleReader *reader = new QXmlSimpleReader();
-    reader->setContentHandler( handler );
-    QFile f( filename );
-    QXmlInputSource inputSource(&f);
-    if ( !reader->parse( inputSource ) ) {
-        qWarning() << filename << ": could not parse peer rule file";
-        return;
-    }
-    f.close();
-
-    // Load the "peerinfo" tags.
-    SimXmlNode *n = handler->documentElement()->children;
-    while ( n != 0 ) {
-        if ( n->tag == "peerinfo" ) {
-
-            // Add a phone simulator peer entry.
-            QString number = n->getAttribute( "number" );
-            QString host = n->getAttribute( "host" );
-            if ( number != QString() && host != QString() ) {
-                peers[number] = host;
-            }
-
-        }
-        n = n->next;
-    }
-
-    // Clean up the XML reader objects.
-    delete reader;
-    delete handler;
-}
-
 
 void SimRules::switchTo(const QString& name)
 {
@@ -1537,46 +1463,3 @@ QString SimRules::variable( const QString& name )
     return variables[name];
 
 }
-
-void SimRules::peerCommand( const QString& )
-{
-}
-
-
-bool SimRules::peerConnect( const QString& )
-{
-    return false;
-}
-
-
-void SimRules::peerHangup()
-{
-}
-
-
-QString SimRules::phoneNumber()
-{
-    char hostname[1024];
-    ::gethostname( hostname, sizeof(hostname) );
-
-    QMap<QString,QString>::Iterator iter;
-    for ( iter = peers.begin(); iter != peers.end(); ++iter ) {
-        if ( iter.value().startsWith( hostname ) ) {
-            return iter.key();
-        }
-    }
-
-    return QString();
-}
-
-
-void SimRules::printPeerNumber()
-{
-#ifdef AT_CHAT_DEBUG
-    QString number = phoneNumber();
-    if ( number != QString() ) {
-        qDebug() << "Your phone number is " << number;
-    }
-#endif
-}
-

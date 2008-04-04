@@ -484,8 +484,7 @@ bool QSyncMerge::resolveBiased(const Conflict &conflict, bool biasServer)
             q.bindValue(":cid", disfavouredId);
             q.exec();
             return true;
-        case Conflict::ReplaceRemove:
-            return false; // resolve this the other way
+        case Conflict::ReplaceRemove: // same as RemoveReplace
         case Conflict::RemoveReplace:
             // delete wins
             q.prepare("DELETE FROM " + disfavoured + " WHERE clientid = :cid AND changetype = 1");

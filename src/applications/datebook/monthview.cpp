@@ -92,7 +92,7 @@ void MonthView::resetFormats() const
 {
     if (dirtyModel) {
         dirtyModel = false;
-        const_cast<MonthView*>(this)->setDateTextFormat(QDate(),QTextCharFormat()); // clear formats
+        const_cast<MonthView*>(this)->setDateTextFormat(QDate(),QTextFormat().toCharFormat()); // clear formats
         for (int i = 0; i < model->rowCount(); ++i) {
             // get just the data needed for drawing.
             QDateTime f = model->data(model->index(i, QAppointmentModel::Start), Qt::EditRole).toDateTime();

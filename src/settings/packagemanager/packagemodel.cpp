@@ -269,9 +269,9 @@ void PackageModel::controllerUpdate()
 
 void PackageModel::packageInstalled( const InstallControl::PackageInfo &pkg )
 {
-    // the row of member variable installed is 0, hence index(0, ...); start searching from first child  
+    // the row of member variable installed is 0, hence index(0, ...); start searching from first child
     QModelIndexList matchList = match( this->index(0, 0).child(0,0),AbstractPackageController::Md5Sum ,QVariant(pkg.md5Sum), 1);
-    if ( matchList.size() > 0  ) 
+    if ( matchList.size() > 0  )
         emit newlyInstalled( matchList[0] );
 }
 
@@ -404,5 +404,5 @@ int PackageModel::columnCount( const QModelIndex &parent ) const
 
 void PackageModel::serverStatusUpdated(const QString &status)
 {
-    emit serverStatus( activeServer + ": " + status ); 
+    emit serverStatus( activeServer + ": " + status );
 }

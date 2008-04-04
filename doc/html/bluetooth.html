@@ -14,7 +14,8 @@
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Bluetooth Support<br /><span class="subtitle"></span>
 </h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
-<ul><li><a href="#hardware-requirements">Hardware Requirements</a></li>
+<ul><li><a href="#troubleshooting">Troubleshooting</a></li>
+<li><a href="#hardware-requirements">Hardware Requirements</a></li>
 <li><a href="#software-requirements">Software Requirements</a></li>
 <li><a href="#qtopia-configuration">Qtopia Configuration</a></li>
 </ul>
@@ -34,14 +35,32 @@
 <a name="introduction"></a>
 <h2>Introduction</h2>
 <p>Qtopia supports Bluetooth communications hardware and software profiles by relying on BlueZ, the official Linux Bluetooth stack. Qtopia provides implementations of Bluetooth profiles; settings applications for device and profile configuration; and advanced framework classes that enable implementation of custom profiles.</p>
+<a name="troubleshooting"></a>
+<h3>Troubleshooting</h3>
+<p>It is important to note that Qtopia make use of a PCM SCO connection since that connection type uses the least amount of power. This means that Qtopia does not process any audio data related to the Bluetooth connection.</p>
+<p>Before using Qtopia's Bluetooth support it is highly recommended that the BlueZ tools be used to test the Bluetooth connection. As a minimum the follow should be run to check the device adaptor :</p>
+<pre>    dbus-send --system --dest=org.bluez --type=method_call \
+        --print-reply '/org/bluez' org.bluez.Manager.DefaultAdapter'</pre>
+<p>The result should be something like: string &quot;/org/bluez/hci0&quot;</p>
+<p>A Bluetooth connection requires a process called 'pairing' to be completed. This process typically involves</p>
+<ul>
+<li>the user pressing a button on the Bluetooth device to activate it</li>
+<li>the user providing the PIN required by the remote device</li>
+</ul>
 <a name="hardware-requirements"></a>
 <h3>Hardware Requirements</h3>
 <p>Qtopia does not directly support any hardware, instead it relies on the BlueZ Bluetooth stack. Thus for any hardware to be supported by Qtopia, it must be supported by BlueZ. For more information, please visit the BlueZ website at http://www.bluez.org.</p>
 <a name="software-requirements"></a>
 <h3>Software Requirements</h3>
-<p>Qtopia 4.2&#x2e;2 requires BlueZ Bluetooth framework Version 3.9&#x2e; This means both the bluez-libs-3.9 and bluez-utils-3.9 must be installed on your system. For more information about installing BlueZ, please refer to the BlueZ website at http://www.bluez.org.</p>
+<p>Qtopia 4.3 requires BlueZ Bluetooth framework Version 3.19. This means both the bluez-libs-3.19 and bluez-utils-3.19 must be installed on your system. For more information about installing BlueZ, please refer to the BlueZ website at http://www.bluez.org.</p>
 <p>BlueZ uses the DBUS communications protocol to expose a rich and complex API. Qtopia uses this API to manage Bluetooth devices. Thus Qtopia requires DBUS to be configured and running in order to successfully communicate with hcid. Qtopia does not link to the BlueZ libraries, however correct version of the bluez-lib package must be installed as it is used by bluez-utils.</p>
-<p>Qtopia requires the BlueZ hcid daemon to be running. In addition, depending on your BlueZ configuration, the sdpd daemon should be running as well.</p>
+<p>Qtopia requires</p>
+<ul>
+<li>the BlueZ hcid daemon to be running. In addition, depending on your BlueZ configuration, the sdpd daemon should be running as well.</li>
+<li>the Headset and Audio services to be disabled in Bluez. This can be done via configuring Bluez with with<pre>    --disable-audio</pre>
+<p>or via setting AutoStart=false in the audio.service file used by Bluez.</p>
+</li>
+</ul>
 <a name="qtopia-configuration"></a>
 <h3>Qtopia Configuration</h3>
 <p>Qtopia has several configure options which relate to Bluetoth support. These options are documented in the table below:</p>

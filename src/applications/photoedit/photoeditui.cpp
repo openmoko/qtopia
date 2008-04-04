@@ -116,6 +116,19 @@ PhotoEditUI::~PhotoEditUI()
     currEditImageRequest = 0;
 }
 
+bool PhotoEditUI::eventFilter(QObject *object, QEvent *event)
+{
+    Q_UNUSED(object);
+
+    if (event->type() == QEvent::MouseButtonPress) {
+        exitCurrentEditorState();
+
+        return true;
+    }
+
+    return false;
+}
+
 
 ImageViewer *PhotoEditUI::imageViewer()
 {
@@ -323,6 +336,7 @@ ImageUI *PhotoEditUI::imageEditor()
         brightness_widget = new QWidget;
         brightness_widget->setLayout( brightness_layout );
         brightness_widget->setObjectName( QLatin1String( "brightness" ) );
+        brightness_widget->installEventFilter(this);
 
         editor_stack->addWidget( brightness_widget );
 
@@ -341,6 +355,7 @@ ImageUI *PhotoEditUI::imageEditor()
 
         zoom_widget = new QWidget;
         zoom_widget->setLayout( zoom_layout );
+        zoom_widget->installEventFilter(this);
 
         editor_stack->addWidget( zoom_widget );
 
@@ -639,9 +654,18 @@ void PhotoEditUI::enterEditor()
     }
 
     switch( status ) {
-        case ImageIO::REDUCED_SIZE:
-            QMessageBox::information( 0, tr( "Scaled Image" ), tr( "<qt>Unable to load complete image.  A scaled copy has been opened instead.</qt>" ) );
-        case ImageIO::NORMAL:
+    case ImageIO::REDUCED_SIZE:
+        {
+            QMessageBox mb(
+                    QMessageBox::Information,
+                    tr("Scaled Image"),
+                    tr("<qt>Unable to load complete image.  A scaled copy has been opened instead.</qt>"),
+                    QMessageBox::Ok);
+
+            mb.setEscapeButton(QMessageBox::Ok);
+            mb.exec();
+        }
+    case ImageIO::NORMAL:
         {
             // Initialize editor controls
             brightness_slider->setValue( 0 );
@@ -669,9 +693,17 @@ void PhotoEditUI::enterEditor()
         }
         break;
 
-        case ImageIO::SIZE_ERROR:
-        case ImageIO::LOAD_ERROR:
-            QMessageBox::warning( 0, tr( "Load Error" ), tr( "<qt>Unable to load image.</qt>" ) );
+    case ImageIO::SIZE_ERROR:
+    case ImageIO::LOAD_ERROR:
+        {
+            QMessageBox mb(
+                    QMessageBox::Warning,
+                    tr("Load Error"),
+                    tr("<qt>Unable to load image.</qt>"),
+                    QMessageBox::Ok);
+            mb.setEscapeButton(QMessageBox::Ok);
+            mb.exec();
+
             navigation_stack.removeLast();
             if( !navigation_stack.isEmpty() )
             {
@@ -682,10 +714,18 @@ void PhotoEditUI::enterEditor()
             }
             else
                 close();
-        break;
+            break;
+        }
+    case ImageIO::DEPTH_ERROR:
+        {
+            QMessageBox mb(
+                    QMessageBox::Warning,
+                    tr("Depth Error"),
+                    tr("<qt>Image depth is not supported.</qt>"),
+                    QMessageBox::Ok);
+            mb.setEscapeButton(QMessageBox::Ok);
+            mb.exec();
 
-        case ImageIO::DEPTH_ERROR:
-            QMessageBox::warning( 0, tr( "Depth Error" ), tr( "<qt>Image depth is not supported.</qt>" ) );
             navigation_stack.removeLast();
             if( !navigation_stack.isEmpty() )
             {
@@ -696,7 +736,8 @@ void PhotoEditUI::enterEditor()
             }
             else
                 close();
-        break;
+            break;
+        }
     }
 }
 
@@ -968,9 +1009,15 @@ void PhotoEditUI::deleteImage()
 
     // Launch confirmation dialog
     // If deletion confirmed, delete image
-    if( QMessageBox::information( this, tr( "Delete" ), tr( "<qt>Are you sure "
-        "you want to delete %1?</qt>"," %1 = file name" ).arg(image.name()),
-        QMessageBox::Yes, QMessageBox::No ) == QMessageBox::Yes ) {
+    QMessageBox mb(
+            QMessageBox::Warning,
+            tr("Delete"),
+            tr("<qt>Are you sure you want to delete %1?</qt>"," %1 = file name").arg(image.name()),
+            QMessageBox::Yes | QMessageBox::No);
+
+    mb.setEscapeButton(QMessageBox::No);
+
+    if( mb.exec() == QMessageBox::Yes ) {
         image.removeFiles();
 
         if ( widget_stack->currentWidget() == image_viewer && exitCurrentUIState() ) {
@@ -1087,22 +1134,42 @@ void PhotoEditUI::saveChanges()
         bool overwrite = false;
         if( image_io->isSaveSupported() ) {
             if ( image_io->isReadOnly() ) {
-                QMessageBox::warning( this,
-                    tr( "Read-Only File" ),
-                    tr( "<qt>Saving a copy of the read-only file.</qt>" ) );
+                QMessageBox mb(
+                        QMessageBox::Information,
+                        tr("Read-Only File"),
+                        tr("<qt>Saving a copy of the read-only file.</qt>"),
+                        QMessageBox::Ok);
+                mb.setEscapeButton(QMessageBox::Ok);
+
+                mb.exec();
             } else {
-                if( QMessageBox::information( this, tr( "Save Changes " ),
-                    tr( "<qt>Do you want to overwrite the original?</qt>" ),
-                    QMessageBox::Yes, QMessageBox::No ) == QMessageBox::Yes )
+                QMessageBox mb(
+                    QMessageBox::Question,
+                        tr("Save Changes "),
+                        tr("<qt>Do you want to overwrite the original?</qt>"),
+                        QMessageBox::Yes | QMessageBox::No | QMessageBox::Discard);
+
+                mb.setEscapeButton(QMessageBox::Discard);
+
+                switch(mb.exec()) {
+                case QMessageBox::Yes:
                     overwrite = true;
+                    break;
+                case QMessageBox::Discard:
+                    return;
+                }
             }
         } else {
             QByteArray format = image_io->format();
-            QMessageBox::warning( this,
-                tr( "Saving %1" ).arg( format.constData() ),
-                tr( "<qt>Saving as %1 is not supported. "
-                    "Using the default format instead.</qt>" )
-                    .arg( format.constData() ) );
+
+            QMessageBox mb(
+                    QMessageBox::Warning,
+                    tr( "Saving %1" ).arg(format.constData()),
+                    tr("<qt>Saving as %1 is not supported. Using the default format instead.</qt>"),
+                    QMessageBox::Ok);
+
+            mb.setEscapeButton(QMessageBox::Ok);
+            mb.exec();
         }
 
         QImage image = image_processor->image();
@@ -1111,10 +1178,14 @@ void PhotoEditUI::saveChanges()
         QContent content = image_io->save( image, overwrite );
 
         if ( content.isNull() ) {
-             QMessageBox::warning(
-                this,
-                tr( "Save failed" ),
-                tr( "<qt>Your edits were not saved.</qt>" ) );
+            QMessageBox mb(
+                    QMessageBox::Warning,
+                    tr("Save failed"),
+                    tr("<qt>Your edits were not saved.</qt>"),
+                    QMessageBox::Ok);
+
+            mb.setEscapeButton(QMessageBox::Ok);
+            mb.exec();
         } else {
             current_image = content;
 

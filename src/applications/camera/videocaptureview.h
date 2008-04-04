@@ -34,15 +34,10 @@ namespace camera
 class VideoCaptureDevice;
 }
 
-
+class QSlider;
 class VideoCaptureView : public QWidget
 {
     Q_OBJECT
-
-#ifdef QT_QWS_GREENPHONE
-public slots:
-    void imageReady(int);
-#endif
 
 public:
     VideoCaptureView(QWidget *parent = 0, Qt::WFlags fl = 0);
@@ -70,6 +65,9 @@ public:
     void zoomOut();
     void doZoom();
 
+    int maxZoom() const;
+    int minZoom() const;
+
 protected:
     void moveEvent(QMoveEvent* moveEvent);
     void resizeEvent(QResizeEvent* resizeEvent);
@@ -86,13 +84,13 @@ private:
     int m_maxZoom;
     int m_minZoom;
     int m_zoomlevel;
-    double m_zoomfactor;
+    float m_zoomfactor;
 
     bool m_force;
-#ifdef QT_QWS_GREENPHONE
-    QSocketNotifier* syncNotifier;
-    bool m_still;
-#endif
+
+    QSlider *m_zoomWidget;
+    void showZoom();
+    void hideZoom();
 };
 
 #endif

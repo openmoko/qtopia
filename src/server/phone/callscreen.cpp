@@ -100,6 +100,7 @@ public:
                 havePhoto = false;
             } else {
                 photo = Qtopia::applicationFileName( "addressbook", "contactimages/" ) + cnt.portraitFile();
+                havePhoto = QFile::exists(photo);
             }
         }
     }

@@ -16,8 +16,15 @@ export QWS_MOUSE_PROTO="tslib:/dev/input/event3"
 export QWS_KEYBOARD="nokiakbdhandler"
 export QWS_SIZE="800x480"
 
-
-export QWS_DISPLAY=nokia:mmWidth90:mmHeight55
+if [ -e /sys/devices/platform/gpio-switch/slide/state ]; then
+# n810
+		export QWS_DISPLAY=Transformed:nokia:mmWidth70:mmHeight40:Rot270:0
+		export QWS_KEYBOARD="nokiakbdhandler"
+else
+#n800
+		export QWS_DISPLAY=Transformed:nokia:mmWidth70:mmHeight40:Rot0:0
+		export QWS_KEYBOARD="n800kbdhandler"
+fi
 
 killproc() {
         pid=`/bin/ps -e | /bin/sed -n -e '/\<'$1'\>/ s/^ *\([0-9][0-9]*\).*/\1/p'`

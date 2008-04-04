@@ -157,39 +157,41 @@ void ContactMessageHistoryModel::refresh()
 {
     clear();
 
-    // We do two queries - one for from, one for to.
-    QMailMessageKey msgsTo;
-    QMailMessageKey msgsFrom;
-
-    // Phone numbers
     QMap<QContact::PhoneType, QString> contactNumbers = mContact.phoneNumbers();
-    QList<QString> entries = contactNumbers.values();
-    foreach(QString num, entries) {
-        QMailMessageKey to(QMailMessageKey::Recipients, num, QMailMessageKey::Contains);
-        QMailMessageKey from(QMailMessageKey::Sender, num, QMailMessageKey::Equal);
-        msgsTo |= to;
-        msgsFrom |= from;
-    }
+    QList<QString> emailAddresses = mContact.emailList();
 
-    // Email addresses
-    entries = mContact.emailList();
-    foreach(QString email, entries) {
-        QMailMessageKey to(QMailMessageKey::Recipients,email,QMailMessageKey::Contains);
-        QMailMessageKey from(QMailMessageKey::Sender,email,QMailMessageKey::Equal);
-        msgsTo |= to;
-        msgsFrom |= from;
-    }
+    if (!contactNumbers.isEmpty() || !emailAddresses.isEmpty()) {
+        // We do two queries - one for from, one for to.
+        QMailMessageKey msgsTo;
+        QMailMessageKey msgsFrom;
 
-    // Now get the messages sent to this contact
-    QMailIdList ml = QMailStore::instance()->queryMessages(msgsTo);
-    foreach (QMailId id, ml) {
-        addRecord(true, QMailMessage(id,QMailMessage::Header));
-    }
+        // Phone numbers
+        foreach(const QString &num, contactNumbers.values()) {
+            QMailMessageKey to(QMailMessageKey::Recipients, num, QMailMessageKey::Contains);
+            QMailMessageKey from(QMailMessageKey::Sender, num, QMailMessageKey::Equal);
+            msgsTo |= to;
+            msgsFrom |= from;
+        }
 
-    // And messages from
-    ml = QMailStore::instance()->queryMessages(msgsFrom);
-    foreach (QMailId id, ml) {
-        addRecord(false, QMailMessage(id,QMailMessage::Header));
+        // Email addresses
+        foreach(const QString &email, emailAddresses) {
+            QMailMessageKey to(QMailMessageKey::Recipients,email,QMailMessageKey::Contains);
+            QMailMessageKey from(QMailMessageKey::Sender,email,QMailMessageKey::Equal);
+            msgsTo |= to;
+            msgsFrom |= from;
+        }
+
+        // Now get the messages sent to this contact
+        QMailIdList ml = QMailStore::instance()->queryMessages(msgsTo);
+        foreach (QMailId id, ml) {
+            addRecord(true, QMailMessage(id,QMailMessage::Header));
+        }
+
+        // And messages from
+        ml = QMailStore::instance()->queryMessages(msgsFrom);
+        foreach (QMailId id, ml) {
+            addRecord(false, QMailMessage(id,QMailMessage::Header));
+        }
     }
 
     // Make sure we sort on the right role

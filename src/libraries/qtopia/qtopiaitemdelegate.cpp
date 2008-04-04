@@ -656,20 +656,22 @@ void QtopiaItemDelegate::drawBackground(QPainter *painter,
     if (option.rect.width() <= 0 || option.rect.height() <= 0)
         return;
 
-    if (option.showDecorationSelected && (option.state & QStyle::State_Selected)) {
+    if (option.state & QStyle::State_Selected) {
         QPalette::ColorGroup cg = option.state & QStyle::State_Enabled
                                   ? QPalette::Normal : QPalette::Disabled;
         if (cg == QPalette::Normal && !(option.state & QStyle::State_Active))
             cg = QPalette::Inactive;
 
+        QRect rect(option.rect);
+
         QString key = QLatin1String("_QID_");
-        key += QString::number(option.rect.width());
-        key += QString::number(option.rect.height());
+        key += QString::number(rect.width());
+        key += QString::number(rect.height());
         key += QString::number(int(option.palette.color(cg, QPalette::Highlight).rgba()));
 
         QPixmap pm;
         if (!QPixmapCache::find(key, pm)) {
-            QSize size = option.rect.size();
+            QSize size = rect.size();
             QImage img(size, QImage::Format_ARGB32_Premultiplied);
             img.fill(0x00000000);
             QPainter p(&img);
@@ -685,7 +687,7 @@ void QtopiaItemDelegate::drawBackground(QPainter *painter,
             pm = QPixmap::fromImage(img);
             QPixmapCache::insert(key, pm);
         }
-        painter->drawPixmap(option.rect.topLeft(), pm);
+        painter->drawPixmap(rect.topLeft(), pm);
     } else {
         QVariant value = index.data(Qt::BackgroundRole);
         if (qVariantCanConvert<QBrush>(value)) {

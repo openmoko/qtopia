@@ -144,6 +144,7 @@ HomescreenSettings::HomescreenSettings(QWidget* parent, Qt::WFlags fl)
     homeScreen->addItem(tr("On display off"));
     homeScreen->addItem(tr("On suspend"));
     homeScreen->addItem(tr("Never"));
+    label->setBuddy(homeScreen);
     connect(homeScreen, SIGNAL(activated(int)), this, SLOT(homeScreenActivated(int)));
 
     QString showHomeScreen = config.value("ShowHomeScreen", "Never").toString();

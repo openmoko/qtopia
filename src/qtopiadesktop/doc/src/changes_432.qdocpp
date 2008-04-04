@@ -19,6 +19,8 @@ This page describes changes to Qtopia Sync Agent 4.3.2.
    device timeout is now 3x the value the desktop uses.
 \o Objects of an unexpected type returned from Outlook are ignored.
 \o A bug causing items created in Outlook to be duplicated at every sync has been fixed.
+\o Tasks modified in the server are now changed on the device.
+\o The \l{Sync Manager} page documents the merge algorithm used by Qtopia Sync Agent.
 \endlist
 
 \section1 Known issues

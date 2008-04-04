@@ -145,7 +145,8 @@
 <p>Connect Qtopia Phone to the simulator using the following command:</p>
 <pre>         export QTOPIA_PHONE_DEVICE=sim:localhost</pre>
 <p>This must be set before either Qtopia or the simulator are started. If the <tt>runqtopia</tt> script is used, the default value for the environment variable <tt>QTOPIA_PHONE_DEVICE</tt> is <tt>sim:localhost</tt>. It is possible to run Qtopia Phone on one machine (embedded device) and the phone simulator on another machine. To do this replace <i>localhost</i> with the name of the machine on which the <tt>phonesim</tt> is running.</p>
-<p>Further phone simulator information is available in the <a href="tools-list.html">Tools section</a> of the reference documentation. To call to peers in the same network the <tt>peers.xml</tt> file must be modified by entering valid machine names within your network environment.</p>
+<p><b>Note:</b> The phone simulator can be build for either the development host or the target.</p>
+<p>Further phone simulator information is available in the <a href="tools-list.html">Tools section</a> of the reference documentation.</p>
 <a name="using-a-phone-device"></a>
 <h3>Using a Phone Device</h3>
 <p>Qtopia Phone can be connected to a real phone device using a serial connection. Please be advised that the phone device must support the standard AT commands. To connect use the following command:</p>

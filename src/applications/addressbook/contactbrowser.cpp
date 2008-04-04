@@ -108,7 +108,7 @@ void ContactBrowser::init( const QContact& contact, ContactDocument::ContactDocu
     if (!mDocument)
         mDocument = new ContactDocument(this);
     mDocument->textDocument()->setTextWidth(width() - 10);
-    mDocument->init(this, contact, docType);
+    mDocument->init(this, mModel, contact, docType);
     setDocument(mDocument->textDocument());
     loadLinks(contact.customField(QDL::CLIENT_DATA_KEY));
     verifyLinks();

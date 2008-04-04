@@ -1075,6 +1075,10 @@ void PreferredOperatorsDialog::networkSelected( QListWidgetItem *item )
     spinBox.setValue( m_currentOpers.count() + 1 );
     layout.addWidget( &label );
     layout.addWidget( &spinBox );
+    
+    // make window bigger so it won't be auto-resized and re-positioned (looks
+    // bad) when the predictive keyboard appears for the spinbox
+    layout.addStretch();
 
     QPreferredNetworkOperators::Info oper;
 

@@ -171,8 +171,10 @@ void E2ServerInterface::wallpaperChanged()
     m_wallpaper = m_background->wallpaper();
     QDesktopWidget *desktop = QApplication::desktop();
     QRect desktopRect = desktop->screenGeometry(desktop->primaryScreen());
-    m_wallpaper = m_wallpaper.scaled(desktopRect.size());
-    QExportedBackground::setExportedBackground(m_wallpaper, false);
+    if (m_wallpaper.size() != desktopRect.size()) {
+        m_wallpaper = m_wallpaper.scaled(desktopRect.size());
+        QExportedBackground::setExportedBackground(m_wallpaper);
+    }
 #endif
 }
 

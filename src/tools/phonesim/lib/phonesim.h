@@ -162,9 +162,6 @@ private:
     bool eol;
     QStringList variables;
     QStringList values;
-    QString peer;
-    bool peerConnect;
-    bool peerHangup;
     QString newCallVar;
     QString forgetCallId;
     bool listSMS;
@@ -230,9 +227,6 @@ public:
     // get the variable value for.
     QString variable(const QString &name);
 
-    // Load the peer information from a separate XML file.
-    void loadPeers( const QString& filename );
-
     // Get the current simulator state.
     SimState *current() const { return currentState; }
 
@@ -244,22 +238,6 @@ public:
 
     // Expand variable references in a string.
     QString expand( const QString& s );
-
-    // Send a command to the connected peer, if any.
-    void peerCommand( const QString& cmd );
-
-    // Connect to a phone simulator peer if the number is recognised as a peer.
-    // Returns false if not using a peer.
-    bool peerConnect( const QString& number );
-
-    // Hangup the connected peer, if any.
-    void peerHangup();
-
-    // Get the phone number for this peer.
-    QString phoneNumber();
-
-    // Print the phone number for this peer.
-    void printPeerNumber();
 
     // force the next returned reply to be 'error'
     void setReturnError( const QString &error, uint repeat = 0 );
@@ -320,7 +298,6 @@ private:
     SimState *defState;
     QList<SimState *> states;
     QMap<QString,QString> variables;
-    QMap<QString,QString> peers;
     int usedCallIds;
     bool useGsm0710;
     int currentChannel;

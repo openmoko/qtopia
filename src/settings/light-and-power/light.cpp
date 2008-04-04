@@ -62,7 +62,7 @@ LightSettings::LightSettings( QWidget* parent,  Qt::WFlags fl )
 
     // add context menu to push its status to Profiles
     contextMenu = QSoftMenuBar::menuFor( this );
-    QAction* actionCapture = new QAction( QIcon( ":icon/Note" ), tr( "Add to profile" ), this );
+    QAction* actionCapture = new QAction( QIcon( ":icon/Note" ), tr( "Add to current profile" ), this );
     contextMenu->addAction( actionCapture );
     connect( actionCapture, SIGNAL(triggered()), this, SLOT(pushSettingStatus()) );
     connect( qApp, SIGNAL(appMessage(QString,QByteArray)),

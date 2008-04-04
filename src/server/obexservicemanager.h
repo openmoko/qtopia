@@ -102,10 +102,9 @@ private:
     void startPushingVObj(const QBluetoothAddress &addr,
                           const QString &mimetype);
     bool getPersonalVCard(QByteArray &arr);
-
     void startPushingFile();
-
     void startSession();
+    void showBusyMessage();
 
     ObexServiceManager *m_parent;
     bool m_busy;
@@ -168,6 +167,7 @@ private slots:
 private:
     void startBeamingFile(const QString &fileName, const QString &mimeType, const QString &displayName, const QString &description, bool autodelete);
     void startBeamingVObj(const QByteArray &data, const QString &mimeType);
+    void showBusyMessage();
 
     bool m_busy;
     ObexServiceManager *m_parent;

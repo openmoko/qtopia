@@ -1217,6 +1217,7 @@ void DateBook::initAppointmentDetails()
 {
     if (!appointmentDetails) {
         appointmentDetails = new AppointmentDetails(viewStack);
+        appointmentDetails->setObjectName("eventview");
         viewStack->addWidget(appointmentDetails);
 
         connect(appointmentDetails, SIGNAL(done()), this, SLOT(closeView()));
@@ -1599,6 +1600,10 @@ void DateBook::showAlarms(const QDateTime &when, int warn)
                 closeAfterView = alarmView;
             raiseView(alarmView);
             showMaximized();
+            // Make sure the screen comes on
+            QtopiaApplication::setPowerConstraint(QtopiaApplication::DisableLightOff);
+            // but goes off again in the right number of seconds
+            QtopiaApplication::setPowerConstraint(QtopiaApplication::Enable);
         }
 
         // repeating events will have to have their alarms reset.

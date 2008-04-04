@@ -3845,10 +3845,7 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
             }
 #ifdef QTOPIA_USE_TEST_SLAVE
             if (testSlave() && mb) {
-                QVariantMap map;
-                map["title"] = mb->windowTitle();
-                map["text"] = mb->text();
-                testSlave()->postMessage("show_messagebox", map);
+                testSlave()->showMessageBox(mb, mb->windowTitle(), mb->text());
             }
 #endif
         }
@@ -4353,7 +4350,15 @@ void QtopiaApplication::hideOrQuit()
         e << d->appName;
         d->qpe_main_widget->hide();
     } else if(d->qpe_main_widget) {
-        foreach(QWidget *wid, static_cast<QApplication *>(QCoreApplication::instance())->topLevelWidgets())
+        // First attempt to close modal dialogs.
+        // If we fail on any of them, don't try to close any other windows.
+        QWidget *wid = activeModalWidget();
+        while (wid) {
+            if (!wid->close())
+                return;
+            wid = activeModalWidget();
+        }
+        foreach(wid, static_cast<QApplication *>(QCoreApplication::instance())->topLevelWidgets())
             wid->close();
     }
 }

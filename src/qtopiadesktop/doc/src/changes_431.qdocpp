@@ -29,8 +29,8 @@ This page describes changes to Qtopia Sync Agent 4.3.1.
 \o Objects of an unexpected type returned from Outlook can cause problems. For example,
    a distribution list in the Contacts folder is not ignored and is accessed like a
    Contact, potentially causing problems.
-\o Synchronization reports on items that were created in the previous sync transaction.
-   This causes items created in Outlook to be duplicated at every sync.
+\o Items created in Outlook are duplicated at every sync.
+\o Tasks modified on the server are not changed on the device.
 \endlist
 
 */

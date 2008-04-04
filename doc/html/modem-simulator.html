@@ -15,6 +15,7 @@
 </h1>
 <a name="top"></a><ul><li><a href="#introduction">Introduction</a></li>
 <li><a href="#using-the-modem-simulator">Using the Modem Simulator</a></li>
+<li><a href="#using-the-modem-simulator-on-the-target-device">Using the Modem Simulator on the target device</a></li>
 <li><a href="#special-phone-numbers">Special Phone Numbers</a></li>
 <li><a href="#gsm-07-10-multiplexing">GSM 07.10 Multiplexing</a></li>
 <li><a href="#xml-response-file-format">XML Response File Format</a></li>
@@ -32,6 +33,11 @@
 <p>where the default <i>port</i> number is 12345 and <i>filename</i> indicates the <a href="#xml-response-file">XML Response File</a> to be used (usually <tt>troll.xml</tt> from the <tt>src/tools/phonesim</tt> source directory).</p>
 <p>To use the Qtopia dialer with the modem simulator, the <tt>QTOPIA_PHONE_DEVICE</tt> environment variable must be set to <tt>sim:</tt><i>hostname</i>, where <i>hostname</i> is the name of the host where the simulator resides. For most implementations this is set to <tt>localhost</tt>.</p>
 <p>The <tt>-gui</tt> option tells <tt>phonesim</tt> to display its control GUI when Qtopia connects to it. This control GUI provides options to simulate calls, send SMS messages, adjust operator registration, etc.</p>
+<a name="using-the-modem-simulator-on-the-target-device"></a>
+<h2>Using the Modem Simulator on the target device</h2>
+<p>The command used to run the Modem Simulator is:</p>
+<pre>    phonesim_target [-p port] filename</pre>
+<p>where filename has the same meaning as stated in the previous paragraph.</p>
 <a name="special-phone-numbers"></a>
 <h2>Special Phone Numbers</h2>
 <p>The Modem Simulator utilizes the following special phone numbers to simulate events:</p>

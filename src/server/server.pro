@@ -44,7 +44,10 @@ INCLUDEPATH+= core_server \
               bluetooth/scomisc \
               pim/savetocontacts \
               pim/servercontactmodel \
+              phone/callhistory/default \
               phone/contextlabel/base \
+              phone/dialer/abstract \
+              phone/header/themed \
               phone/secondarydisplay/abstract \
               phone/telephony/callpolicymanager/abstract \
               phone/telephony/callpolicymanager/cell \
@@ -314,7 +317,7 @@ PHONE_HEADERS=\
     phone/themecontrol/themebackground_p.h \
     phone/profileprovider/qphoneprofileprovider.h \
     ui/abstractinterfaces/stdmessagebox/messagebox.h \
-    phone/phoneheader.h\
+    phone/header/themed/phoneheader.h\
     phone/phonelock.h\
     ui/taskmanager/taskmanagerservice.h\
     core_server/qabstractmessagebox.h\
@@ -337,11 +340,11 @@ TELEPHONY_HEADERS=\
     phone/callscreen.h \
     phone/telephony/dialercontrol/dialercontrol.h \
     pim/savetocontacts/savetocontacts.h \
-    phone/quickdial.h \
-    phone/numberdisplay.h \
-    phone/dialer.h \
+    phone/dialer/keypad/quickdial.h \
+    phone/dialer/keypad/numberdisplay.h \
+    phone/dialer/touch/dialer.h \
     phone/telephony/dialproxy/dialerservice.h \
-    phone/qabstractdialerscreen.h\
+    phone/dialer/abstract/qabstractdialerscreen.h\
     phone/telephony/phoneserver/base/phoneserver.h \
     phone/telephony/ringcontrol/ringcontrol.h\
     phone/telephony/ringcontrol/ringtoneservice.h\
@@ -365,7 +368,7 @@ PHONE_SOURCES=\
     phone/themecontrol/themebackground_p.cpp \
     phone/profileprovider/qphoneprofileprovider.cpp \
     ui/abstractinterfaces/stdmessagebox/messagebox.cpp \
-    phone/phoneheader.cpp\
+    phone/header/themed/phoneheader.cpp\
     phone/phonelock.cpp\
     core_server/qabstractmessagebox.cpp\
     ui/taskmanager/taskmanagerservice.cpp\
@@ -385,9 +388,9 @@ TELEPHONY_SOURCES=\
     phone/callscreen.cpp \
     phone/telephony/dialercontrol/dialercontrol.cpp \
     pim/savetocontacts/savetocontacts.cpp \
-    phone/quickdial.cpp \
-    phone/numberdisplay.cpp \
-    phone/dialer.cpp \
+    phone/dialer/keypad/quickdial.cpp \
+    phone/dialer/keypad/numberdisplay.cpp \
+    phone/dialer/touch/dialer.cpp \
     phone/telephony/dialproxy/dialerservice.cpp \
     phone/telephony/ringcontrol/ringcontrol.cpp\
     phone/telephony/ringcontrol/ringtoneservice.cpp\
@@ -397,8 +400,8 @@ TELEPHONY_SOURCES=\
     phone/telephony/videoringtone/videoringtone.cpp
 
 enable_telephony {
-    TELEPHONY_HEADERS+=phone/callhistory.h
-    TELEPHONY_SOURCES+=phone/callhistory.cpp
+    TELEPHONY_HEADERS+=phone/callhistory/default/callhistory.h
+    TELEPHONY_SOURCES+=phone/callhistory/default/callhistory.cpp
 }
 
 enable_cell {

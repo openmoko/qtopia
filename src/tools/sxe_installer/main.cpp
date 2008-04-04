@@ -57,6 +57,8 @@ public:
     void setDomainString( const QString &s ) { progInfo.domain = s; }
     void setRunDir();
     void usage( const QString & );
+    QString domainString() { return progInfo.domain; }
+    QString fileName(){ return progInfo.fileName; }
 private:
     SxeProgramInfo progInfo;
     QString callName;
@@ -175,6 +177,17 @@ int main( int argc, char** argv )
     se.setInstallRoot( argv[1] );
     se.setTarget( argv[2] );
     se.setDomainString( argv[3] );
+
+    if  ( se.fileName() != "qpe" && se.domainString() != "trusted" )
+        qFatal( "ERROR: %s does not declare the domain: trusted\n"
+                "All pre-installed programs must declare the trusted domain "
+                "in their project(.pro) file", argv[0] );
+    else if ( se.fileName() == "qpe" && se.domainString() != "qpe" )
+        qFatal( "ERROR: qpe must declare the domain: qpe\n"
+                "inside it's project(.pro) file" );
+        //Note: qpe is a special case it must declare the qpe domain
+        //all other pre-installed programs must declare trusted domain
+
     se.setRunDir();
     return se.runScan();
 }

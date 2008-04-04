@@ -1054,9 +1054,10 @@ QString MenuManager::findHelp(const QWidget* w)
             }
         }
     }
-    for (int qualified=1; qualified>=0; --qualified) {
-        const QObject *widget=w;
-        while(widget) {
+
+    const QObject *widget=w;
+    while(widget) {
+        for (int qualified=1; qualified>=0; --qualified) {
             qLog(Help) << "checking object with widget->metaObject()->className():" << widget->metaObject()->className() << "widget->objectName():" << widget->objectName().toLower();
             if ( qualified ) {
                 hf = fi.baseName() + "-";
@@ -1072,8 +1073,8 @@ QString MenuManager::findHelp(const QWidget* w)
                     break;
                 }
             }
-            widget=widget->parent();
         }
+        widget=widget->parent();
     }
 
     if ( qLogEnabled(Help) ) {

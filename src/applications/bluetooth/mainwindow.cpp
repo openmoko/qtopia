@@ -35,6 +35,8 @@
 #include <QListView>
 #include <QModelIndex>
 #include <QIODevice>
+#include <QLineEdit>
+#include <QLabel>
 
 #include <QBluetoothRemoteDeviceDialog>
 #include <QBluetoothSdpQuery>
@@ -43,6 +45,7 @@
 
 #include <QObexFtpClient>
 
+#include <QtopiaItemDelegate>
 #include <QWaitWidget>
 #include <QMimeType>
 #include <QSoftMenuBar>
@@ -53,32 +56,6 @@
 #include <QCommDeviceSession>
 
 #include <QObexFolderListingEntryInfo>
-
-class BtFtpListView : public QListView
-{
-    Q_OBJECT
-
-public:
-    BtFtpListView(QWidget *parent = 0);
-
-protected:
-    void currentChanged(const QModelIndex &current, const QModelIndex &previous);
-
-signals:
-    void currentChanged();
-};
-
-BtFtpListView::BtFtpListView(QWidget *parent) : QListView(parent)
-{
-    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-}
-
-void BtFtpListView::currentChanged(const QModelIndex &from,
-                                   const QModelIndex &to)
-{
-    QListView::currentChanged(from, to);
-    emit currentChanged();
-}
 
 class ObexFtpModel : public QAbstractItemModel
 {
@@ -385,7 +362,6 @@ public slots:
     void commandFinished(int id, bool error);
 
     void createFolder();
-    void commitCreateFolder();
 
     void putFile();
     void deleteFileOrFolder();
@@ -423,7 +399,7 @@ public:
 
     QWaitWidget *m_waitWidget;
 
-    BtFtpListView *m_files;
+    QListView *m_files;
     ObexFtpModel *m_model;
 
     BtFtpProgressBar *m_progress;
@@ -445,8 +421,6 @@ public:
 
     QBluetoothRfcommSocket *m_rfcommSock;
     QCommDeviceSession *m_session;
-
-    int m_folderBeingCreated;
 
     QContent m_fileBeingObtained;
 
@@ -515,10 +489,9 @@ BtFtp::BtFtp(QWidget *parent, Qt::WFlags fl) : QMainWindow(parent, fl)
     setCentralWidget(m_data->m_central);
 
     m_data->m_model = new ObexFtpModel(this);
-    connect(m_data->m_model, SIGNAL(dataChanged(QModelIndex,QModelIndex)),
-            m_data, SLOT(commitCreateFolder()));
-
-    m_data->m_files = new BtFtpListView(m_data->m_central);
+    m_data->m_files = new QListView(m_data->m_central);
+    m_data->m_files->setItemDelegate(new QtopiaItemDelegate);
+    m_data->m_files->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_data->m_files->installEventFilter(m_data);
     m_data->m_files->setFocusPolicy(Qt::StrongFocus);
     m_data->m_files->setFocus();
@@ -527,7 +500,7 @@ BtFtp::BtFtp(QWidget *parent, Qt::WFlags fl) : QMainWindow(parent, fl)
 
     connect(m_data->m_files, SIGNAL(activated(QModelIndex)),
             m_data, SLOT(itemActivated(QModelIndex)));
-    connect(m_data->m_files, SIGNAL(currentChanged()),
+    connect(m_data->m_files->selectionModel(), SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)),
             m_data, SLOT(updateActions()));
 
     m_data->m_progress = new BtFtpProgressBar(m_data->m_central);
@@ -899,7 +872,7 @@ void BtFtpPrivate::commandFinished(int, bool error)
                                  "<qt>" + message + "</qt>",
                                  QMessageBox::Ok, QMessageBox::NoButton, QMessageBox::NoButton);
 
-        if (command == QObexFtpClient::Mkdir) {
+        if (command == QObexFtpClient::Mkdir && error) {
             QTimer::singleShot(0, this, SLOT(refresh()));
         }
 
@@ -1068,30 +1041,26 @@ void BtFtpPrivate::deleteFileOrFolder()
 
 void BtFtpPrivate::createFolder()
 {
-    QModelIndex index = m_model->mkdir(tr("New Folder"));
+    QDialog dlg;
+    dlg.setWindowTitle(tr("New Folder"));
+    QLabel label(tr("Name:"));
+    QLineEdit lineEdit;
+    QHBoxLayout layout;
+    layout.addWidget(&label);
+    layout.addWidget(&lineEdit);
+    dlg.setLayout(&layout);
+    connect(&lineEdit, SIGNAL(editingFinished()), &dlg, SLOT(accept()));
+    if (QtopiaApplication::execDialog(&dlg) != QDialog::Accepted
+        || lineEdit.text().trimmed().isEmpty()) {
+        return;
+    }
+
+    QModelIndex index = m_model->mkdir(lineEdit.text());
 
     if (index.isValid()) {
         m_files->setCurrentIndex(index);
-        m_files->edit(index);
-        if (QApplication::focusWidget()) {
-            QApplication::postEvent(QApplication::focusWidget(),
-                                    new QKeyEvent(QEvent::KeyPress, Qt::Key_Select,
-                                    Qt::NoModifier));
-        }
-
-        m_folderBeingCreated = index.row();
-        m_createAction->setVisible(false);
-        m_deleteAction->setVisible(false);
-        m_putAction->setVisible(false);
-        m_disconnectAction->setVisible(false);
+        m_client->mkdir(lineEdit.text());
     }
-}
-
-void BtFtpPrivate::commitCreateFolder()
-{
-    enableActions();
-    QString name = m_model->info(m_folderBeingCreated).name();
-    m_client->mkdir(name);
 }
 
 void BtFtpPrivate::putFile()

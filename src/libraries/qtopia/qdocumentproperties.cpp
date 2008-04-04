@@ -47,6 +47,7 @@
 #include <QDir>
 #include <QPushButton>
 #include <QDebug>
+#include <QFormLayout>
 
 #include <stdlib.h>
 
@@ -55,9 +56,17 @@ class QDocumentPropertiesWidgetPrivate
 {
 public:
     QDocumentPropertiesWidgetPrivate()
+        : locationCombo(0)
+        , categoryEdit(0)
+        , docname(0)
+        , comment(0)
+        , fileSize(0)
+        , fastLoad(0)
+        , doc(0)
+        , licensesDialog(0)
     {
-        categoryEdit = 0;
     }
+
     QString humanReadable(quint64 size);
 
     QStorageDeviceSelector *locationCombo;
@@ -68,6 +77,7 @@ public:
     QLabel *fileSize;
     QCheckBox *fastLoad;
     const QContent *doc;
+    QDialog *licensesDialog;
 };
 
 QString QDocumentPropertiesWidgetPrivate::humanReadable(quint64 size)
@@ -133,118 +143,71 @@ QDocumentPropertiesWidget::QDocumentPropertiesWidget( const QContent &doc, QWidg
     d = new QDocumentPropertiesWidgetPrivate;
 
     d->doc = &doc;
-    QVBoxLayout *tll = new QVBoxLayout( this );
-    tll->setMargin(0);
 
-    QWidget * main = new QWidget( this );
-    tll->addWidget( main );
-    tll->addStretch();
+    QFormLayout *layout = new QFormLayout;
 
-    QGridLayout *grid = new QGridLayout( main );
-    grid->setMargin( 6 );
-    grid->setSpacing( 6 );
-    grid->setColumnStretch( 1, 1 );
+    layout->addRow(tr("Name"), d->docname = new QLineEdit);
 
-    int row = 0;
-
-    QLabel *label = new QLabel( tr("Name"), main );
-    grid->addWidget( label, row, 0, Qt::AlignLeft | Qt::AlignTop );
-    d->docname = new QLineEdit( main );
-    label->setBuddy(d->docname);
-    grid->addWidget( d->docname, row, 1 );
     if ( isDocument ) {
         d->docname->setText(lnk.name());
     } else {
         d->docname->setText(Qtopia::dehyphenate(lnk.name()));
         d->docname->setEnabled( false );
     }
-    row++;
-
-    QDesktopWidget *desktop = QApplication::desktop();
-    QRect desktopRect(desktop->availableGeometry(desktop->screenNumber(this)));
 
     if ( isDocument ) {
-        if (desktopRect.width() < 240)
-            label = new QLabel( tr("Loc"), main );
-        else
-            label = new QLabel( tr("Location"), main );
-        grid->addWidget( label, row, 0, Qt::AlignLeft | Qt::AlignTop );
-        d->locationCombo = new QStorageDeviceSelector( lnk, main );
-        label->setBuddy(d->locationCombo);
+        layout->addRow(tr("Location"), d->locationCombo = new QStorageDeviceSelector(lnk));
+
         QFileSystemFilter *fsf = new QFileSystemFilter;
         fsf->documents = QFileSystemFilter::Set;
-        if( !(doc.permissions() & QDrmRights::Distribute) && !QFileSystem::fromFileName( doc.fileName() ).isRemovable() )
+        if (!(doc.permissions() & QDrmRights::Distribute)
+            && !QFileSystem::fromFileName(doc.fileName()).isRemovable()) {
             fsf->removable = QFileSystemFilter::NotSet;
+        }
         d->locationCombo->setFilter( fsf );
-        grid->addWidget( d->locationCombo, row, 1 );
-        row++;
-    } else {
-        d->locationCombo = 0;
+
+        layout->addRow(tr("Category"), d->categoryEdit = new QCategorySelector(
+                "Documents", QCategorySelector::Editor | QCategorySelector::DialogView));
+
+        d->categoryEdit->selectCategories(lnk.categories());
     }
 
-    if ( isDocument ) {
-        QString cl;
-        if (desktopRect.width() < 240)
-            cl = tr("Cat", "short for category");
-        else
-            cl = tr("Category");
-        label = new QLabel( cl, main );
-        grid->addWidget( label, row, 0, Qt::AlignLeft | Qt::AlignTop );
-        d->categoryEdit = new QCategorySelector("Documents", QCategorySelector::Editor | QCategorySelector::DialogView);
-        label->setBuddy(d->categoryEdit);
-        grid->addWidget( d->categoryEdit, row, 1 );
-        d->categoryEdit->selectCategories( lnk.categories() );
-        row++;
+    if (!lnk.type().isEmpty()) {
+        layout->addRow(tr("Type"), d->doctype = new QLabel);
+
+        d->doctype->setText(lnk.type() == "application/octet-stream"
+                ? tr("Unknown", "Unknown document type")
+                : lnk.type().replace("/", " / "));
+        d->doctype->setWordWrap(true);
     }
 
-    if ( !lnk.type().isEmpty() ) {
-        grid->addWidget( new QLabel( tr("Type"), main ), row, 0, Qt::AlignLeft | Qt::AlignTop );
-        d->doctype = new QLabel( main );
-        grid->addWidget( d->doctype, row, 1 );
-        if(lnk.type() == "application/octet-stream")
-            d->doctype->setText( tr("Unknown", "Unknown document type") );
-        else
-            d->doctype->setText( lnk.type().replace("/", " / ") );
-        d->doctype->setWordWrap( true );
-        row++;
+    if (!lnk.comment().isEmpty()) {
+        layout->addRow(tr("Comment"), d->comment = new QLabel("<qt>" + lnk.comment() + "</qt>"));
+
+        d->comment->setWordWrap(true);
+        d->comment->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Minimum);
     }
 
-    if ( !lnk.comment().isEmpty() ) {
-        grid->addWidget( new QLabel( tr("Comment"), main ), row, 0, Qt::AlignLeft | Qt::AlignTop );
-        d->comment = new QLabel( main );
-        d->comment->setWordWrap( true );
-        grid->addWidget( d->comment, row, 1 );
-        d->comment->setText( "<qt>" + lnk.comment() + "</qt>" );
-        d->comment->setSizePolicy( QSizePolicy::Ignored, QSizePolicy::Minimum );
-        row++;
-    }
+    layout->addRow(tr("File Size"), new QLabel("<qt>" + d->humanReadable(lnk.size()) + "</qt>"));
 
-    grid->addWidget( new QLabel( tr("File Size"), main ), row, 0, Qt::AlignLeft | Qt::AlignTop );
-    d->fileSize = new QLabel( main );
-    grid->addWidget( d->fileSize, row, 1 );
-    d->fileSize->setText( "<qt>" + d->humanReadable(lnk.size()) + "</qt>" );
-    row++;
-
-    if ( !isDocument
-         && lnk.property("CanFastload") != "0" )  {
-        d->fastLoad = new QCheckBox( tr( "Fast load (consumes memory)" ), main );
-        grid->addWidget( d->fastLoad, row, 0, 1, 2 );
+    if (!isDocument && lnk.property("CanFastload") != "0")  {
+        layout->addRow(d->fastLoad = new QCheckBox(tr("Fast load (consumes memory)")));
 
         QSettings cfg("Trolltech","Launcher");
         cfg.beginGroup("AppLoading");
         QStringList apps = cfg.value("PreloadApps").toString().split(',');
-        d->fastLoad->setChecked( apps.contains(lnk.executableName()) );
-        row++;
-    } else {
-        d->fastLoad = 0;
+        d->fastLoad->setChecked(apps.contains(lnk.executableName()));
     }
 
-    if( doc.drmState() == QContent::Protected )
-    {
-        QPushButton *licensesButton = new QPushButton(tr("Show Licenses"), main);
-        grid->addWidget(licensesButton, row, 0, 1, 2);
+    if (doc.drmState() == QContent::Protected) {
+        QPushButton *licensesButton = new QPushButton(tr("Show Licenses"));
+
         connect(licensesButton, SIGNAL(clicked()), this, SLOT(showLicenses()));
+
+        layout->addRow(licensesButton);
     }
+
+    setLayout(layout);
 }
 
 /*!
@@ -335,9 +298,9 @@ QString QDocumentPropertiesWidget::safePath( const QString &name, const QString 
     QByteArray ascii = name.toAscii();
     for ( int i = 0; i < ascii.length(); i++ ){
         QChar c = ascii.at(i);
-        if ( c.isLetterOrNumber() )
+        if ( c.isLetterOrNumber() || c == QLatin1Char('.') )
             safename += c;
-        else if ( c.isSpace() )
+        else
             safename += SAFE_SPACE;
     }
     if ( safename.isEmpty() )
@@ -417,89 +380,70 @@ void QDocumentPropertiesWidget::unlinkLnk()
 */
 void QDocumentPropertiesWidget::showLicenses()
 {
-    QDialog *licensesDialog = new QDialog(this);
-    licensesDialog->setWindowTitle(tr("Licenses"));
-    licensesDialog->setModal(true);
-    licensesDialog->showMaximized();
+    if (!d->licensesDialog) {
+        QFormLayout *layout = new QFormLayout;
+        layout->setRowWrapPolicy(QFormLayout::WrapAllRows);
 
-    QVBoxLayout *layout = new QVBoxLayout(licensesDialog);
+        if (d->doc->permissions() & QDrmRights::Play)
+            addRights(d->doc->rights(QDrmRights::Play), layout);
 
-    QWidget *main = new QWidget;
+        if (d->doc->permissions() & QDrmRights::Display)
+            addRights(d->doc->rights(QDrmRights::Display ), layout);
 
-    QScrollArea *sa = new QScrollArea(licensesDialog);
-    sa->setFrameStyle(QFrame::NoFrame);
-    sa->setWidget(main);
-    sa->setWidgetResizable(true);
-    layout->addWidget(sa);
+        if (d->doc->permissions() & QDrmRights::Execute)
+            addRights(d->doc->rights(QDrmRights::Execute), layout);
 
-    QGridLayout *grid = new QGridLayout(main);
-    main->setLayout(grid);
-    grid->setMargin(6);
-    grid->setSpacing(6);
-    grid->setColumnStretch(1, 1);
+        if (d->doc->permissions() & QDrmRights::Print)
+            addRights(d->doc->rights(QDrmRights::Print), layout);
 
-    int row = 0;
-    bool hasLicense = false;
+        if (d->doc->permissions() & QDrmRights::Export)
+            addRights(d->doc->rights(QDrmRights::Export), layout);
 
-    if( d->doc->permissions() & QDrmRights::Play )
-    {
-        addRights( d->doc->rights( QDrmRights::Play ), grid, main, &row );
-        hasLicense = true;
-    }
-    if( d->doc->permissions() & QDrmRights::Display )
-    {
-        addRights( d->doc->rights( QDrmRights::Display ), grid, main, &row );
-        hasLicense = true;
-    }
-    if( d->doc->permissions() & QDrmRights::Execute )
-    {
-        addRights( d->doc->rights( QDrmRights::Execute ), grid, main, &row );
-        hasLicense = true;
-    }
+        if (layout->rowCount() == 0)
+            layout->addRow(new QLabel( tr( "<qt><u>No licenses</u></qt>" )));
 
-    if( d->doc->permissions() & QDrmRights::Print )
-    {
-        addRights( d->doc->rights( QDrmRights::Print ), grid, main, &row );
-        hasLicense = true;
+        QWidget *main = new QWidget;
+        main->setLayout(layout);
+
+        QScrollArea *sa = new QScrollArea;
+        sa->setFrameStyle(QFrame::NoFrame);
+        sa->setWidget(main);
+        sa->setWidgetResizable(true);
+
+        QBoxLayout *scrollLayout = new QVBoxLayout;
+        scrollLayout->addWidget(sa);
+
+        d->licensesDialog = new QDialog(this);
+        d->licensesDialog->setWindowTitle(tr("Licenses"));
+        d->licensesDialog->setModal(true);
+        d->licensesDialog->setLayout(scrollLayout);
     }
 
-    if( d->doc->permissions() & QDrmRights::Export )
-    {
-        addRights( d->doc->rights( QDrmRights::Export ), grid, main, &row );
-        hasLicense = true;
-    }
-    if( !hasLicense )
-    {
-        QLabel *licenses = new QLabel( tr( "<qt><u>No licenses</u></qt>" ), main );
-        grid->addWidget( licenses, row++, 0, Qt::AlignLeft | Qt::AlignTop );
-    }
+    d->licensesDialog->showMaximized();
 }
 
-void QDocumentPropertiesWidget::addRights( const QDrmRights &rights, QGridLayout *layout, QWidget *parent, int *row )
+void QDocumentPropertiesWidget::addRights(const QDrmRights &rights, QFormLayout *layout)
 {
-    QLabel *permission = new QLabel( QString( "<qt><u>%1</u></qt>" )
-            .arg( QDrmRights::toString( rights.permission(), rights.status() ) ), parent );
+    QFormLayout *constraintsLayout = new QFormLayout;
 
-    layout->addWidget( permission,
-            (*row)++, 0, 1, 2, Qt::AlignLeft | Qt::AlignTop );
+    foreach (QDrmRights::Constraint c, rights.constraints()) {
+        if (c.attributeCount() > 0) {
+            QFormLayout *attributesLayout = new QFormLayout;
 
-    foreach( QDrmRights::Constraint c, rights.constraints() )
-    {
-        layout->addWidget( new QLabel( c.name(), parent ), *row, 0, Qt::AlignLeft | Qt::AlignTop );
+            for( int i = 0; i < c.attributeCount(); i++ )
+                attributesLayout->addRow(QString("<qt><em>%1</em></qt>").arg(c.attributeName(i)),
+                                        new QLabel(c.attributeValue( i ).toString()));
 
-        QLabel *constraint = new QLabel( c.value().toString(), parent );
-        constraint->setWordWrap(false);
-        layout->addWidget( constraint, (*row)++, 1, Qt::AlignLeft | Qt::AlignTop );
-
-        for( int i = 0; i < c.attributeCount(); i++ )
-        {
-            layout->addWidget( new QLabel( QString( "<qt><em>%1</em></qt>" ).arg( c.attributeName( i ) ), parent ),
-                               *row, 0, Qt::AlignLeft | Qt::AlignTop );
-            QLabel *attribute = new QLabel( c.attributeValue( i ).toString(), parent );
-            attribute->setWordWrap( true );
-            layout->addWidget( attribute, (*row)++, 1, Qt::AlignLeft | Qt::AlignTop );
+            constraintsLayout->addRow(c.name(), attributesLayout);
+        } else {
+            constraintsLayout->addRow(c.name(), new QLabel(c.value().toString()));
         }
     }
+
+    QString rightsString = QString("<qt><u>%1</u></qt>")
+            .arg(QDrmRights::toString(rights.permission(), rights.status()));
+
+    layout->addRow(rightsString, constraintsLayout);
 }
 
 /*!
@@ -519,7 +463,7 @@ void QDocumentPropertiesWidget::addRights( const QDrmRights &rights, QGridLayout
   The QDocumentPropertiesDialog is a convenience class which is built around 
   a \l QDocumentPropertiesWidget, which provides controls for modifying properties 
   associated with a document via it's associated \l QContent.
-  
+
   \sa QDocumentPropertiesWidget
 */
 
@@ -533,7 +477,6 @@ void QDocumentPropertiesWidget::addRights( const QDrmRights &rights, QGridLayout
 QDocumentPropertiesDialog::QDocumentPropertiesDialog( const QContent &doc, QWidget* parent )
     : QDialog( parent )
 {
-    setModal(true);
     setWindowTitle( tr("Properties") );
     setObjectName("properties");
 
