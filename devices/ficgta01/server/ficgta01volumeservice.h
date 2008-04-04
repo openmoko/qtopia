@@ -24,16 +24,15 @@
 
 #include <QtopiaIpcAdaptor>
 
-
-#include <alsa/asoundlib.h>
 #include <QtopiaIpcAdaptor>
 #include <QValueSpaceObject>
+
+#include <alsa/asoundlib.h>
 
 
 class Ficgta01VolumeService : public QtopiaIpcAdaptor
 {
     Q_OBJECT
-    enum AdjustType { Relative, Absolute };
 
 public:
     Ficgta01VolumeService();
@@ -49,43 +48,38 @@ public slots:
     void adjustMicrophoneVolume(int volume);
 
     void setAmpMode(bool);
-
-   void changeAmpModeVS();
-
+    void changeAmpModeVS();
     void setAmp(QString);
-
     void toggleAmpMode();
 
-private slots:
+private Q_SLOTS:
     void registerService();
-    void setCallDomain();
     void initVolumes();
+
+
 private:
+    int initMixer();
+    int closeMixer();
+    int saveState();
+    void adjustSpeakerVolume(int left, int right);
+
+private:
+    enum AdjustType { Relative, Absolute };
     void adjustVolume(int leftChannel, int rightChannel, AdjustType);
 
     int m_leftChannelVolume;
     int m_rightChannelVolume;
 
-    QtopiaIpcAdaptor *adaptor;
-    QValueSpaceObject *vsoVolumeObject;
+    QtopiaIpcAdaptor *m_adaptor;
+    QValueSpaceObject *m_vsoVolumeObject;
 
+    snd_mixer_t *m_mixerFd;
 
-protected:
-    snd_mixer_t *mixerFd;
-    snd_mixer_elem_t *elem;
-    QString elemName;
+    int m_minOutputVolume;
+    int m_maxOutputVolume;
 
-    int minOutputVolume;
-    int maxOutputVolume;
-
-    int minInputVolume;
-    int maxInputVolume;
-
-    int initMixer();
-    int closeMixer();
-    int saveState();
-    void adjustSpeakerVolume(int left, int right);
+    int m_minInputVolume;
+    int m_maxInputVolume;
 };
-
 
 #endif  // __QTOPIA_MEDIA_DEFAULTVOLUMEPROVIDER_H
