@@ -56,7 +56,17 @@ FicLinuxInputEventHandler::FicLinuxInputEventHandler(QObject* parent)
 {
 }
 
-bool FicLinuxInputEventHandler::open(const QByteArray& physical)
+bool FicLinuxInputEventHandler::openByPhysicalBus(const QByteArray& physical)
+{
+    return internalOpen(EVIOCGPHYS(4096), 4096, physical);
+}
+
+bool FicLinuxInputEventHandler::openByName(const QByteArray& name)
+{
+    return internalOpen(EVIOCGNAME(4096), 4096, name);
+}
+
+bool FicLinuxInputEventHandler::internalOpen(int request, int length, const QByteArray& match)
 {
     if (m_fd >= 0) {
         ::close(m_fd);
@@ -65,7 +75,7 @@ bool FicLinuxInputEventHandler::open(const QByteArray& physical)
         m_fd = -1;
     }
 
-    QByteArray deviceData(4096, 0);
+    QByteArray deviceData(length, 0);
 
     // Find a suitable device, might want to add caching
     QDir dir(QLatin1String("/dev/input/"), QLatin1String("event*"));
@@ -74,12 +84,12 @@ bool FicLinuxInputEventHandler::open(const QByteArray& physical)
         if (m_fd < 0)
             continue;
 
-        int ret = ioctl(m_fd, EVIOCGPHYS(deviceData.length()), deviceData.data());
+        int ret = ioctl(m_fd, request, deviceData.data());
         if (ret < 0)
             continue;
 
         // match the string we got with what we wanted
-        if (strcmp(deviceData.constData(), physical.constData()) == 0) {
+        if (strcmp(deviceData.constData(), match.constData()) == 0) {
             break;
         } else {
             close(m_fd);
@@ -114,7 +124,7 @@ Ficgta01Hardware::Ficgta01Hardware()
     m_vsoPortableHandsfree.setAttribute("Present", false);
 
     m_handler = new FicLinuxInputEventHandler(this);
-    if (m_handler->open("neo1973kbd/input0")) {
+    if (m_handler->openByPhysicalBus("neo1973kbd/input0")) {
         connect(m_handler, SIGNAL(inputEvent(struct input_event&)),
                 SLOT(inputEvent(struct input_event&)));
     } else {

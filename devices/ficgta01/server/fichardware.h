@@ -49,13 +49,17 @@ class FicLinuxInputEventHandler : public QObject {
 
 public:
     FicLinuxInputEventHandler(QObject* parent);
-    bool open(const QByteArray&);
+    bool openByPhysicalBus(const QByteArray&);
+    bool openByName(const QByteArray&);
 
 Q_SIGNALS:
     void inputEvent(struct input_event&);
 
 private Q_SLOTS:
     void readData();
+
+private:
+    bool internalOpen(int request, int length, const QByteArray&);
 
 private:
     int m_fd;
