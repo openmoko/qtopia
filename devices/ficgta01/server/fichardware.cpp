@@ -47,17 +47,64 @@
 
 #include <sys/ioctl.h>
 
-#include <linux/input.h>
-
-struct Ficgta01Input {
-    unsigned int   dummy1;
-    unsigned int   dummy2;
-    unsigned short type;
-    unsigned short code;
-    unsigned int   value;
-};
-
 QTOPIA_TASK(Ficgta01Hardware, Ficgta01Hardware);
+
+FicLinuxInputEventHandler::FicLinuxInputEventHandler(QObject* parent)
+    : QObject(parent)
+    , m_fd(-1)
+    , m_notifier(0)
+{
+}
+
+bool FicLinuxInputEventHandler::open(const QByteArray& physical)
+{
+    if (m_fd >= 0) {
+        ::close(m_fd);
+        delete m_notifier;
+        m_notifier = 0;
+        m_fd = -1;
+    }
+
+    QByteArray deviceData(4096, 0);
+
+    // Find a suitable device, might want to add caching
+    QDir dir(QLatin1String("/dev/input/"), QLatin1String("event*"));
+    foreach(QFileInfo fileInfo, dir.entryInfoList(QDir::Files|QDir::System)) {
+        m_fd = ::open(QFile::encodeName(fileInfo.filePath()), O_RDONLY|O_NDELAY);
+        if (m_fd < 0)
+            continue;
+
+        int ret = ioctl(m_fd, EVIOCGPHYS(deviceData.length()), deviceData.data());
+        if (ret < 0)
+            continue;
+
+        // match the string we got with what we wanted
+        if (strcmp(deviceData.constData(), physical.constData()) == 0) {
+            break;
+        } else {
+            close(m_fd);
+            m_fd = -1;
+        }
+    }
+
+    if (m_fd >= 0) {
+        m_notifier = new QSocketNotifier(m_fd, QSocketNotifier::Read, this);
+        connect(m_notifier, SIGNAL(activated(int)), this, SLOT(readData()));
+    }
+
+    return m_fd >= 0;
+}
+
+void FicLinuxInputEventHandler::readData()
+{
+    struct input_event event;
+
+    int n = read(m_fd, &event, sizeof(struct input_event));
+    if(n != (int)sizeof(struct input_event))
+        return;
+
+    emit inputEvent(event);
+}
 
 Ficgta01Hardware::Ficgta01Hardware()
     : m_vsoPortableHandsfree("/Hardware/Accessories/PortableHandsfree")
@@ -66,12 +113,14 @@ Ficgta01Hardware::Ficgta01Hardware()
 
     m_vsoPortableHandsfree.setAttribute("Present", false);
 
-    m_detectFd = ::open("/dev/input/event0", O_RDONLY|O_NDELAY, 0);
-    if (m_detectFd >= 0) {
-      m_auxNotify = new QSocketNotifier(m_detectFd, QSocketNotifier::Read, this);
-      connect(m_auxNotify, SIGNAL(activated(int)), this, SLOT(readAuxKbdData()));
+    m_handler = new FicLinuxInputEventHandler(this);
+    if (m_handler->open("neo1973kbd/input0")) {
+        connect(m_handler, SIGNAL(inputEvent(struct input_event&)),
+                SLOT(inputEvent(struct input_event&)));
     } else {
-      qWarning("Cannot open /dev/input/event0 for keypad (%s)", strerror(errno));
+        qWarning("Cannot open a device for the neo1973kbd");
+        delete m_handler;
+        m_handler = 0;
     }
 }
 
@@ -79,12 +128,9 @@ Ficgta01Hardware::~Ficgta01Hardware()
 {
 }
 
-void Ficgta01Hardware::readAuxKbdData()
+void Ficgta01Hardware::inputEvent(struct input_event& event)
 {
-    Ficgta01Input event;
-
-    int n = read(m_detectFd, &event, sizeof(Ficgta01Input));
-    if(n != (int)sizeof(Ficgta01Input) || event.type != EV_SW)
+    if(event.type != EV_SW)
         return;
 
     qWarning("keypressed: type=%03d, code=%03d, value=%03d (%s)",

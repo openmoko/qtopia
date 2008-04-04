@@ -29,12 +29,39 @@
 
 #include <qvaluespace.h>
 
+#include <linux/input.h>
+
 class QBootSourceAccessoryProvider;
 class QPowerSourceProvider;
 
 class QSocketNotifier;
 class QtopiaIpcAdaptor;
 class QSpeakerPhoneAccessoryProvider;
+
+
+/**
+ * Start of a generic implementation to deal with the linux input event
+ * handling. Open devices by physical address and later by name, product id
+ * and vendor id
+ */
+class FicLinuxInputEventHandler : public QObject {
+    Q_OBJECT
+
+public:
+    FicLinuxInputEventHandler(QObject* parent);
+    bool open(const QByteArray&);
+
+Q_SIGNALS:
+    void inputEvent(struct input_event&);
+
+private Q_SLOTS:
+    void readData();
+
+private:
+    int m_fd;
+    QSocketNotifier* m_notifier;
+};
+
 
 class Ficgta01Hardware : public QObject
 {
@@ -44,14 +71,12 @@ public:
     Ficgta01Hardware();
     ~Ficgta01Hardware();
 
+private Q_SLOTS:
+    void inputEvent(struct input_event&);
+
 private:
     QValueSpaceObject m_vsoPortableHandsfree;
-
-    QSocketNotifier *m_auxNotify;
-    int m_detectFd;
-    
-private slots:
-    void readAuxKbdData();
+    FicLinuxInputEventHandler *m_handler;
 };
 
 #endif // QT_QWS_FICGTA01
