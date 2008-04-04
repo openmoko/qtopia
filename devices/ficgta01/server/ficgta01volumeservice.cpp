@@ -141,6 +141,7 @@ void Ficgta01VolumeService::adjustVolume(int leftChannel, int rightChannel, Adju
     int right;
 
     if (adjust == Relative) {
+        // BROKEN, FIXME, FIXME, FIXME, lefright is not initialized.. this is not relative
         left = (leftright & 0xff00) >> 8;
         right = (leftright & 0x00ff);
 
