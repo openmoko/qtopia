@@ -19,8 +19,13 @@
 **
 ****************************************************************************/
 
-#include <QScreen>
 #include <QDebug>
+
+#if defined(Q_WS_QWS)
+#include <QScreen>
+#elif defined(Q_WS_X11)
+#include <QX11Info>
+#endif
 
 #include "gstreamersinkwidget.h"
 
@@ -45,7 +50,11 @@ GstCaps* QtopiaVideoSink::get_caps(GstBaseSink* sink)
     GstCaps* caps = gst_caps_copy(gst_pad_get_pad_template_caps(sink->sinkpad));
     if (GST_CAPS_IS_SIMPLE(caps)) {
         GstStructure*   data = gst_caps_get_structure(caps, 0);
+#if defined(Q_WS_QWS)
         int             bpp = QScreen::instance()->depth() <= 16 ? 16 : 32;
+#elif defined(Q_WS_X11)
+        int             bpp = QX11Info::appDepth() <= 16 ? 16 : 32;
+#endif
 
         gst_structure_set(data, "bpp", G_TYPE_INT, bpp, NULL);
     }

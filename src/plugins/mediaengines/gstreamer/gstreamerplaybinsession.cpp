@@ -28,7 +28,12 @@
 
 #include "gstreamerbushelper.h"
 #include "gstreamermessage.h"
+
+#if defined(Q_WS_X11)
+#include "gstreamerx11painterwidget.h"
+#elif defined(Q_WS_QWS)
 #include "gstreamerdirectpainterwidget.h"
+#endif
 
 #include "gstreamerplaybinsession.h"
 
@@ -53,7 +58,11 @@ public:
     Engine*                 engine;
     GstElement*             playbin;
     GstBus*                 bus;
+#if defined(Q_WS_QWS)
     DirectPainterWidget*    sinkWidget;
+#elif defined(Q_WS_X11)
+    X11PainterWidget*       sinkWidget;
+#endif
     QStringList             interfaces;
 
     QMediaVideoControlServer*   videoControlServer;
@@ -391,7 +400,11 @@ void PlaybinSession::readySession()
         g_object_set(G_OBJECT(d->playbin), "uri", d->url.toString().toLocal8Bit().constData(), NULL);
 
         // Pre-set video element, even if no video
+#if defined(Q_WS_QWS)
         d->sinkWidget = new DirectPainterWidget;
+#elif defined(Q_WS_X11)
+        d->sinkWidget = new X11PainterWidget;
+#endif
         g_object_set(G_OBJECT(d->playbin), "video-sink", d->sinkWidget->element(), NULL);
 
         // Sort out messages

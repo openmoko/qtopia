@@ -10,7 +10,6 @@ HEADERS	= \
         gstreamerenginefactory.h \
         gstreamerurisessionbuilder.h \
         gstreamerplaybinsession.h \
-        gstreamerdirectpainterwidget.h \
         gstreamerqtopiavideosink.h \
         gstreamerbushelper.h \
         gstreamermessage.h \
@@ -22,11 +21,18 @@ SOURCES	= \
         gstreamerenginefactory.cpp \
         gstreamerurisessionbuilder.cpp \
         gstreamerplaybinsession.cpp \
-        gstreamerdirectpainterwidget.cpp \
         gstreamerqtopiavideosink.cpp \
         gstreamerbushelper.cpp \
         gstreamermessage.cpp \
         gstreamersinkwidget.cpp
+
+x11 {
+    HEADERS += gstreamerx11painterwidget.h
+    SOURCES += gstreamerx11painterwidget.cpp
+} else {
+    HEADERS += gstreamerdirectpainterwidget.h
+    SOURCES += gstreamerdirectpainterwidget.cpp
+}
 
 LIBS += -lgstvideo-0.10
 depends(libraries/qtopiamedia)
