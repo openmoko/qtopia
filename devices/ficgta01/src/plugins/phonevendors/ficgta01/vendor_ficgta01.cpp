@@ -31,8 +31,6 @@
 #include <QTextStream>
 #include <QSettings>
 
-#include <alsa/asoundlib.h>
-
 #include <qmodemcallvolume.h>
 #include <qmodemsiminfo.h>
 
