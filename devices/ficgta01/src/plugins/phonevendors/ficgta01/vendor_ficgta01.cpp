@@ -720,13 +720,13 @@ Ficgta01VibrateAccessory::~Ficgta01VibrateAccessory()
 
 void Ficgta01VibrateAccessory::setVibrateOnRing( const bool value )
 {
-    qLog(AtChat)<<"setVibrateOnRing";
+    qLog(AtChat) << __FUNCTION__ << value;
     setVibrateNow(value);
 }
 
 void Ficgta01VibrateAccessory::setVibrateNow( const bool value )
 {
-    qLog(AtChat)<<"setVibrateNow";
+    qLog(AtChat) << __FUNCTION__ << value;
     int result;
     QString cmd;
     if ( value ) { //turn on
