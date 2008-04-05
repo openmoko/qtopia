@@ -730,26 +730,26 @@ void Ficgta01VibrateAccessory::setVibrateNow( const bool value )
     int result;
     QString cmd;
     if ( value ) { //turn on
-        QFile trigger( "/sys/class/leds/gta01:vibrator/trigger");
+        QFile trigger( "/sys/class/leds/neo1973:vibrator/trigger");
         trigger.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
         QTextStream out(&trigger);
         out<<"timer";
         trigger.close();
 
-        QFile delayOn( "/sys/class/leds/gta01:vibrator/delay_on");
+        QFile delayOn( "/sys/class/leds/neo1973:vibrator/delay_on");
         delayOn.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
         QTextStream out1(&delayOn);
         out1<<"500";
         delayOn.close();
 
-        QFile delayOff("/sys/class/leds/gta01:vibrator/delay_off");
+        QFile delayOff("/sys/class/leds/neo1973:vibrator/delay_off");
         delayOff.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
         QTextStream out2(&delayOff);
         out2<<"1000";
         delayOff.close();
 
     } else { //turn off
-        QFile trigger( "/sys/class/leds/gta01:vibrator/trigger");
+        QFile trigger( "/sys/class/leds/neo1973:vibrator/trigger");
         trigger.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
         QTextStream out(&trigger);
         out<<"none";
