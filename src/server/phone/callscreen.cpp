@@ -1818,6 +1818,7 @@ bool CallScreen::eventFilter(QObject *o, QEvent *e)
                 waitDlg->show();
                 waitDlg->setFocus();
                 showWaitDlg = false;
+                QTimer::singleShot( 1000, this, SLOT(interactionDelayTimeout()) );
             }
         }
     }
@@ -1999,15 +2000,15 @@ void CallScreen::callIncoming(const QPhoneCall &)
     waitDlg->setText( tr( "Incoming Call..." ) );
     waitDlg->setDelay( 0 );
     QtopiaInputEvents::addKeyboardFilter( new CallScreenKeyboardFilter );
-    QTimer::singleShot( 1000, this, SLOT(interactionDelayTimeout()) );
 
     QSoftMenuBar::setLabel(waitDlg, Qt::Key_Context1, QSoftMenuBar::NoLabel);
     QSoftMenuBar::setLabel(waitDlg, Qt::Key_Select, QSoftMenuBar::NoLabel);
     QSoftMenuBar::setLabel(waitDlg, Qt::Key_Back, QSoftMenuBar::NoLabel);
 
-    if ( isVisible() )
+    if ( isVisible() ) {
+        QTimer::singleShot( 1000, this, SLOT(interactionDelayTimeout()) );
         waitDlg->show();
-    else
+    } else
         showWaitDlg = true;
 
     setItemActive("menu-box", true);
@@ -2057,6 +2058,7 @@ void CallScreen::interactionDelayTimeout()
     if ( !waitDlg )
         return;
     waitDlg->hide();
+    showWaitDlg = false;
     QtopiaInputEvents::removeKeyboardFilter();
 
     stateChanged();
