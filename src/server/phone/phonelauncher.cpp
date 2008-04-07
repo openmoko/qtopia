@@ -37,7 +37,6 @@
 #include <qtopianamespace.h>
 #include <custom.h>
 #include <themedview.h>
-//#include <qtopiabase/private/qsharedmemorycache_p.h>
 #include <qdrmcontent.h>
 #include <qwaitwidget.h>
 #include <QPhoneProfile>
@@ -47,7 +46,6 @@
 #else
 #include <QGlobalPixmapCache>
 #endif
-//#include <QtopiaServiceHistoryModel>
 #include <qpainter.h>
 #include <qdir.h>
 #include <qlabel.h>
@@ -85,7 +83,6 @@
 #include "qabstractsecondarydisplay.h"
 #include "contentsetlauncherview.h"
 #include "themebackground_p.h"
-//#include "servercontactmodel.h"
 #include "lowmemorytask.h"
 #include "qtopiainputevents.h"
 #include "qabstractcallpolicymanager.h"
@@ -96,8 +93,7 @@
 
 #ifdef QTOPIA_PHONEUI
 #include "ringcontrol.h"
-#include "dialer.h"
-#include "quickdial.h"
+#include "qabstractdialerscreen.h"
 #include "dialercontrol.h"
 #include "dialerservice.h"
 #include "callscreen.h"

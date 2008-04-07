@@ -46,7 +46,6 @@ protected:
 
 private:
     QString filename;
-    QString peerFile;
 
     HardwareManipulatorFactory *fact;
     QPointer<SimRules> currentRules;

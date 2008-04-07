@@ -39,7 +39,7 @@
 #include <qcopchannel_qws.h>
 #endif
 
-static const int magic_daily = 2292922;
+static const int magic_daily = 2292922;     //type for daily alarm
 
 void Alarm::setRingPriority(bool v)
 {

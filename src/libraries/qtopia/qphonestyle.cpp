@@ -1900,8 +1900,8 @@ void QPhoneStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt,
             points.append(QPoint(r.center().x(),r.bottom()));
             QPolygon check(points);
 
-            p->setPen(opt->palette.color((focus && !Qtopia::mousePreferred()) ? QPalette::HighlightedText : QPalette::Text));
-            p->setBrush(opt->palette.brush((focus && !Qtopia::mousePreferred()) ? QPalette::HighlightedText : QPalette::Text));
+            p->setPen(opt->palette.color((focus && !Qtopia::mousePreferred()) ? QPalette::HighlightedText : QPalette::ButtonText));
+            p->setBrush(opt->palette.brush((focus && !Qtopia::mousePreferred()) ? QPalette::HighlightedText : QPalette::ButtonText));
             p->setRenderHint(QPainter::Antialiasing);
             p->drawPolygon(check);
         } else if (opt->state & State_NoChange) {
@@ -1962,8 +1962,8 @@ void QPhoneStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt,
         if (on) {
             //p->setBrush(c.darker(200));
             //p->setPen(c.darker(200));
-            p->setPen(opt->palette.color((focus && !Qtopia::mousePreferred()) ? QPalette::HighlightedText : QPalette::Text));
-            p->setBrush(opt->palette.brush((focus && !Qtopia::mousePreferred()) ? QPalette::HighlightedText : QPalette::Text));
+            p->setPen(opt->palette.color((focus && !Qtopia::mousePreferred()) ? QPalette::HighlightedText : QPalette::ButtonText));
+            p->setBrush(opt->palette.brush((focus && !Qtopia::mousePreferred()) ? QPalette::HighlightedText : QPalette::ButtonText));
             r.adjust(3,3,-3,-3);
             p->drawEllipse(r);
         }
@@ -2009,7 +2009,7 @@ void QPhoneStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt,
             for (pnt = 0; pnt < a.size(); ++pnt)
                 a[pnt].translate(offset.x(), offset.y());
         }
-        p->setPen((opt->state & State_On) ? opt->palette.highlightedText().color() : opt->palette.text().color());
+        p->setPen((opt->state & State_On) ? opt->palette.highlightedText().color() : opt->palette.buttonText().color());
         p->drawLines(a);
         break; }
     case PE_FrameGroupBox: {
@@ -2106,7 +2106,7 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
                 p->setPen(menuitem->palette.button().color());
                 p->drawLine(x, y, x + w, y);
                 p->drawLine(x, y + 2, x + w, y + 2);
-                QColor color = menuitem->palette.color(QPalette::Active, QPalette::Text);
+                QColor color = menuitem->palette.color(QPalette::Active, QPalette::ButtonText);
                 color.setAlpha(125);
                 p->setPen(color);
                 p->drawLine(x, y + 1, x + w, y + 1);
@@ -2169,7 +2169,22 @@ void QPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPaint
                 p->restore();
             }
 
-            if (checked) {  //draw check
+            if (menuitem->checkType == QStyleOptionMenuItem::Exclusive) {   //draw exclusive indicators
+                QRect vCheckRect = visualRect(opt->direction, menuitem->rect, QRect(x+w-checkcol, y, checkcol, h));
+                //size calculations same as those in PE_IndicatorMenuCheckMark
+                int maxwidth = phoneCheckMarkWidth > 10 ? phoneCheckMarkWidth - 4 : 7; 
+                const int markW = vCheckRect.width() > maxwidth ? maxwidth : vCheckRect.width();
+                const int markH = markW;
+                int posX = vCheckRect.x() + (vCheckRect.width() - markW)/2 + 1;
+                int posY = vCheckRect.y() + (vCheckRect.height() - markH)/2;
+                QRect radioRect(posX, posY, markH, markH);
+                p->setPen(act ? opt->palette.highlightedText().color() : opt->palette.buttonText().color());
+                p->drawEllipse(radioRect);
+                if (checked) {
+                    p->setBrush(act ? opt->palette.highlightedText() : opt->palette.buttonText());
+                    p->drawEllipse(radioRect.adjusted(2,2,-2,-2));
+                }
+            } else if (checked) {  //draw check
                 QRect vCheckRect = visualRect(opt->direction, menuitem->rect, QRect(x+w-checkcol, y, checkcol, h));
                 QStyleOptionMenuItem newMi = *menuitem;
                 newMi.state = State_None;
@@ -2780,7 +2795,7 @@ void QPhoneStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComple
                     QPen oldPen = p->pen();
                     QPen pen;
                     QColor c = opt->palette.color((cmb->state & State_HasFocus && extendedFocus && !cmb->editable && !Qtopia::mousePreferred())
-                                                  ? QPalette::HighlightedText : QPalette::Text);
+                                                  ? QPalette::HighlightedText : QPalette::WindowText);
                     c.setAlpha(48);
                     pen.setColor(c);
                     p->setPen(pen);
@@ -2875,7 +2890,7 @@ void QPhoneStyle::drawComplexControl(ComplexControl cc, const QStyleOptionComple
                 } else if (!(sb->state & State_HasEditFocus)) {
                     QPen oldPen = p->pen();
                     QPen pen;
-                    QColor c = opt->palette.color(QPalette::Text);
+                    QColor c = opt->palette.color(QPalette::WindowText);
                     c.setAlpha(48);
                     pen.setColor(c);
                     p->setPen(pen);

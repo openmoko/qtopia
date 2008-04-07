@@ -56,19 +56,21 @@ VideoCaptureView::VideoCaptureView(QWidget *parent, Qt::WFlags fl):
     m_maxZoom = 2;
 
     m_force = false;
-#ifdef QT_QWS_GREENPHONE
-    m_still = false;
-    syncNotifier = new QSocketNotifier(m_capture->getFD(), QSocketNotifier::Read, parent);
-    connect(syncNotifier, SIGNAL(activated(int)), this, SLOT(imageReady(int)));  
-#endif    
+
 }
 
 VideoCaptureView::~VideoCaptureView()
 {
     delete m_capture;
-#ifdef QT_QWS_GREENPHONE    
-    delete syncNotifier;
-#endif    
+}
+
+int VideoCaptureView::minZoom() const
+{
+    return m_minZoom;
+}
+int VideoCaptureView::maxZoom() const
+{
+    return m_maxZoom;
 }
 
 void VideoCaptureView::setLive(int period)
@@ -77,21 +79,12 @@ void VideoCaptureView::setLive(int period)
         killTimer(m_tidUpdate);
     if (period == 0) {
         m_tidUpdate = startTimer(m_capture->minimumFramePeriod());
-#ifdef QT_QWS_GREENPHONE        
-        m_still = false;
-#endif        
-    }    
+    }
     else if ( period > 0 ) {
         m_tidUpdate = startTimer(period);
-#ifdef QT_QWS_GREENPHONE        
-        m_still =false;
-#endif        
-    }    
+    }
     else {
         m_tidUpdate = 0;
-#ifdef QT_QWS_GREENPHONE        
-        m_still = true;
-#endif        
      }
 }
 
@@ -186,30 +179,9 @@ void VideoCaptureView::paintEvent(QPaintEvent* paintEvent)
 
         if (m_tidUpdate > 0 || m_force)
         {
-#ifdef QT_QWS_GREENPHONE
-        if(!m_still)
-#endif        
-                m_capture->getCameraImage(m_image);
-            if (m_doZoom)
-            {
-                //Crop
-                int i;
-                float dw = 0.0,dh = 0.0;
-                QRect r = m_image.rect();
-                int w = (int)(r.width() * m_zoomfactor);
-                int h = (int)(r.height() * m_zoomfactor);
-                //center image
-                for(i = m_zoomlevel; i > 0; i--) {
-                    dw += w/(i<<1);
-                    dh += h/(i<<1);
-                }    
-                QRect d (r.x() + (unsigned int)dw*m_zoomlevel, r.y() + (unsigned int)dh*m_zoomlevel , w, h); 
-                QImage img2 = m_image.copy(d);
-                m_image = img2; 
-            }
-
+            m_capture->getCameraImage(m_image);
+            doZoom();
         }
-        
         int w = m_image.width();
         int h = m_image.height();
 
@@ -228,7 +200,8 @@ void VideoCaptureView::paintEvent(QPaintEvent* paintEvent)
                                      m_image,
                                      QRect(0, 0, m_image.width(), m_image.height()));
         }
-    }
+
+     }
 }
 
 void VideoCaptureView::timerEvent(QTimerEvent*)
@@ -238,51 +211,43 @@ void VideoCaptureView::timerEvent(QTimerEvent*)
     m_cleared = false;
 }
 
+
 void VideoCaptureView::zoomIn()
 {
-
     m_zoomlevel = (m_zoomlevel+1<=m_maxZoom)?++m_zoomlevel:m_zoomlevel;
-    m_zoomfactor = 1.0 / ::pow(2,m_zoomlevel);
-    doZoom();
-}    
+    if(m_zoomlevel != 0)
+        m_doZoom = true;
+    else
+        m_doZoom = false;
+    m_zoomfactor = 1.0/pow(2,m_zoomlevel);
+}
 
 void VideoCaptureView::zoomOut()
 {
     m_zoomlevel = (m_zoomlevel-1>=m_minZoom)?--m_zoomlevel:m_zoomlevel;
-    m_zoomfactor = 1.0 / ::pow(2,m_zoomlevel);
-    doZoom();
-}
-
-void VideoCaptureView::doZoom(void)
-{
-    if (m_zoomlevel == m_minZoom) 
-    {
-        // reset
-        //m_capture->doZoom(m_zoomlevel);
-        m_doZoom = false;
-    }    
+    if(m_zoomlevel != 0)
+        m_doZoom = true;
     else
-    {
-        
-        //bool ret = m_capture->doZoom(m_zoomlevel);
-       // if (ret)
-        //    m_doZoom = false;
-        //else
-            m_doZoom = true;
-    }    
-
-    repaint();
+        m_doZoom = false;
+    m_zoomfactor = 1.0 / pow(2,m_zoomlevel);
 }
 
-#ifdef QT_QWS_GREENPHONE
-void VideoCaptureView::imageReady(int fd)
+void VideoCaptureView::doZoom()
 {
-    //NOTE: update() does not repaint immediatly, use repaint() instead
-    Q_UNUSED(fd);
-    m_force = true;
-    repaint();
-    m_force = false;
+    if(!m_doZoom)
+        return;
+    float dw = 0.0,dh = 0.0;
+    QRect r = m_image.rect();
+    int w = (int)(r.width() * m_zoomfactor);
+    int h = (int)(r.height() * m_zoomfactor);
+    for(int i = m_zoomlevel; i > 0; i--) {
+        dw += w/2*i;
+        dh += h/2*i;
+    }
+    QRect d ((int)dw,(int)dh , w, h);
+    QImage img2 = m_image.copy(d);
+    m_image = img2;
 }
-#endif
+
 
 

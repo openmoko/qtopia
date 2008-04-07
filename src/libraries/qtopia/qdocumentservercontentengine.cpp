@@ -110,6 +110,8 @@ QIODevice *QDocumentServerContentEngine::open( QIODevice::OpenMode mode )
     }
     else
     {
+        setError( file->errorString() );
+
         delete file;
 
         return 0;

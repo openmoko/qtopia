@@ -653,7 +653,7 @@ void CallForwarding::init()
 
     actionDeactivateAll = new QAction( tr( "Deactivate all" ), this );
     actionCheckStatus = new QAction( tr( "Check status", "ask the network for the current forwarding status") , this );
-    actionCapture = new QAction( QIcon( ":icon/Note" ), tr( "Add to profile" ), this );
+    actionCapture = new QAction( QIcon( ":icon/Note" ), tr( "Add to current profile" ), this );
     contextMenu = QSoftMenuBar::menuFor( this );
     contextMenu->addAction( actionDeactivateAll );
     contextMenu->addAction( actionCheckStatus );

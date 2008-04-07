@@ -35,11 +35,6 @@
 #include "alertservicetask.h"
 #include <QDebug>
 
-#ifndef Q_WS_X11
-#include <qtopia/private/testslaveinterface_p.h>
-#define QTOPIA_USE_TEST_SLAVE 1
-#endif
-
 static bool shutdownDialog = true;
 static bool defaultCrashDialog = true;
 static bool preloadCrashDialog = true;
@@ -203,15 +198,6 @@ void StandardDialogsImpl::applicationTerminated(
 
         QString error_title = tr("Application terminated");
 
-#ifdef QTOPIA_USE_TEST_SLAVE
-        if (QtopiaApplication::instance()->testSlave()) {
-            QVariantMap map;
-            map["title"] = error_title;
-            map["text"] = text;
-            QtopiaApplication::instance()->testSlave()->postMessage("application_terminated", map);
-        }
-#endif
-
         QMessageBox* box = new QMessageBox(error_title, text, QMessageBox::Critical, QMessageBox::Ok | QMessageBox::Default, ba ? QMessageBox::No : QMessageBox::NoButton, QMessageBox::NoButton);
 
         if(ba)
@@ -304,15 +290,6 @@ void StandardDialogsImpl::applicationTerminated(const QString &name,
         error_details = tr("<qt><b>%1</b> were terminated due to application errors.</qt>").arg(l);
     }
 
-#ifdef QTOPIA_USE_TEST_SLAVE
-    if (QtopiaApplication::instance()->testSlave()) {
-        QVariantMap map;
-        map["title"] = error_title;
-        map["text"] = error_details;
-        QtopiaApplication::instance()->testSlave()->postMessage("application_terminated", map);
-    }
-#endif
-
     ata->setWindowTitle(error_title);
     ata->setText(error_details);
     ata->show();
@@ -328,15 +305,6 @@ void StandardDialogsImpl::preloadTerminated(const QString &name)
 
     QString error_title = tr("Application terminated");
     QString error_details = tr("<qt><b>%1</b> was terminated due to application error.  (Fast loading has been disabled for this application. Tap and hold the application icon to reenable it.)</qt>").arg(appname);
-
-#ifdef QTOPIA_USE_TEST_SLAVE
-    if (QtopiaApplication::instance()->testSlave()) {
-        QVariantMap map;
-        map["title"] = error_title;
-        map["text"] = error_details;
-        QtopiaApplication::instance()->testSlave()->postMessage("application_terminated", map);
-    }
-#endif
 
     QMessageBox::information(0, error_title, error_details);
 }

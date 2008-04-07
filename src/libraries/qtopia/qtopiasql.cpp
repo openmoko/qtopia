@@ -685,7 +685,7 @@ QtopiaDatabaseId QtopiaSql::databaseIdForPath(const QString& path)
     }
 
     if ( bestMatch ) {
-        return d()->dbPaths.key( bestMatch->isConnected() ? bestMatch->path() : bestMatch->prevPath(), -1 );
+        return d()->dbPaths.key( bestMatch->isConnected() ? bestMatch->path() : bestMatch->prevPath(), QtopiaDatabaseId(-1) );
     } else {
         return 0;
     }

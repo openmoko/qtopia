@@ -397,6 +397,9 @@
     <section ref="src-tools-qdsync-task-xsd.html" title="src/tools/qdsync/task.xsd">
         <keyword ref="src-tools-qdsync-task-xsd.html">src/tools/qdsync/task.xsd</keyword>
     </section>
+    <section ref="over-sync-manager-1.html" title="Sync Manager">
+        <keyword ref="over-sync-manager-1.html">Sync Manager</keyword>
+    </section>
     <section ref="dataset-tasks-1.html" title="tasks Dataset">
         <keyword ref="dataset-tasks-1.html">tasks Dataset</keyword>
     </section>

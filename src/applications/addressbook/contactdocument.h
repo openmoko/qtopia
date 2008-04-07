@@ -52,7 +52,7 @@ public:
     typedef enum {Details} ContactDocumentType;
     typedef enum {None, DialLink, EmailLink, QdlLink} ContactAnchorType;
 
-    void init(QWidget *widget, const QContact& contact, ContactDocumentType docType);
+    void init(QWidget *widget, QContactModel* model, const QContact& contact, ContactDocumentType docType);
 
     QTextDocument* textDocument() const { return mDocument; }
     QContact contact() const { return mContact; }
@@ -124,6 +124,8 @@ protected:
     QHash<QString, QPixmap> mCachedPixmaps;
 
     QtopiaServiceRequest anchorService(ContactAnchorData *cfd) const;
+
+    QContactModel *mModel;
 
     private slots:
 #ifdef QTOPIA_VOIP

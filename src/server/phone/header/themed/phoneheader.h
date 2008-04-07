@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -19,35 +19,29 @@
 **
 ****************************************************************************/
 
-#ifndef DIALER_H
-#define DIALER_H
+#ifndef _PHONEHEADER_H_
+#define _PHONEHEADER_H_
 
 #include <themedview.h>
-#include <quniqueid.h>
-
-#include <QDialog>
-#include <QKeyEvent>
-#include <QLineEdit>
+#include <QString>
 #include "serverthemeview.h"
-#include "qabstractdialerscreen.h"
-
-class Dialer;
-class PhoneTouchDialerScreen : public QAbstractDialerScreen
+class InputMethods;
+class QRect;
+class PhoneHeader : public PhoneThemedView
 {
-Q_OBJECT
+    Q_OBJECT
 public:
-    PhoneTouchDialerScreen(QWidget *parent = 0, Qt::WFlags f = 0);
+    PhoneHeader(QWidget *parent = 0);
 
-    virtual QString digits() const;
-    virtual void reset();
-    virtual void appendDigits(const QString &digits);
-    virtual void setDigits(const QString &digits);
+    QSize reservedSize() const;
 
-protected slots:
-    void keyEntered(const QString &key);
+private slots:
+    void updateIM();
 
 private:
-    Dialer *m_dialer;
+    virtual void themeLoaded(const QString &theme);
+    InputMethods *inputMethods;
+    QString title;
 };
 
 #endif

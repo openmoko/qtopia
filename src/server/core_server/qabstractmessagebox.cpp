@@ -343,10 +343,7 @@ void QAbstractMessageBox::showEvent(QShowEvent *e)
 
 #ifdef QTOPIA_USE_TEST_SLAVE
     if (QtopiaApplication::instance()->testSlave()) {
-        QVariantMap map;
-        map["title"] = windowTitle();
-        map["text"] = text();
-        QtopiaApplication::instance()->testSlave()->postMessage("show_messagebox", map);
+        QtopiaApplication::instance()->testSlave()->showMessageBox(this, windowTitle(), text());
     }
 #endif
 

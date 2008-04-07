@@ -53,6 +53,8 @@ public:
     PhotoEditUI( QWidget* parent, Qt::WFlags f );
     ~PhotoEditUI();
 
+    bool eventFilter(QObject *parent, QEvent *event);
+
 public slots:
     // Open image for editing
     void setDocument( const QString& lnk );

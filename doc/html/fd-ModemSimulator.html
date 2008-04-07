@@ -17,7 +17,6 @@
 <h2>Features</h2>
 <ul><li><a href="#Call_Handling">Call Handling</a>
 <li><a href="#Modem_Simulator_GUI">Modem Simulator GUI</a>
-<li><a href="#Peer_Connect_Mode">Peer Connect Mode</a>
 <li><a href="#SIM_Addressbook">SIM Addressbook</a>
 <li><a href="#Simulate_Signal_Strength_and_Battery_Level">Simulate Signal Strength and Battery Level</a>
 <li><a href="#Simulated_SIM_Card">Simulated SIM Card</a>
@@ -26,8 +25,6 @@
 <p>The Modem Simulator simulates basic sending and receiving of phone calls without audio. Dialing 199 causes the simulator to hangup and then call back.  Dialing 177 causes the simulator to hangup and then call back and hangup 5 seconds later.  Dialing 166 causes the simulator to answer then hangup 5 second later.  Dialing any other number causes the simulator to answer the call and remain connected until the user hangs up.
 <h3><a name="Modem_Simulator_GUI">Modem Simulator GUI</a></h3>
 <p>The Modem Simulator provides a graphical interface for changing a subset of the configuration items on-the-fly.
-<h3><a name="Peer_Connect_Mode">Peer Connect Mode</a></h3>
-<p>Two Modem Simulators running on two different workstations can be connected by dialing the phone number configured for the second machine in the peers.xml file.
 <h3><a name="SIM_Addressbook">SIM Addressbook</a></h3>
 <p>The Modem Simulator presents a number of SIM-stored contacts, as configured in troll.xml.
 <h3><a name="Simulate_Signal_Strength_and_Battery_Level">Simulate Signal Strength and Battery Level</a></h3>
@@ -41,7 +38,7 @@
 </ul>
 
 <h3><a name="XML_Configuration">XML Configuration</a></h3>
-<p>Much of the Modem Simulator's behavior is configurable by modifying the troll.xml and peers.xml files. These files are found in $QTOPIA_DEPOT_PATH/src/tools/phonesim/.
+<p>Much of the Modem Simulator's behavior is configurable by modifying the troll.xml file. This file can be found in $QTOPIA_DEPOT_PATH/src/tools/phonesim/.
 <hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>

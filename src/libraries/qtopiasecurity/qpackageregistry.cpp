@@ -823,6 +823,8 @@ void QPackageRegistry::initProgramInfo( SxeProgramInfo &pi )
     // this prog's id is the next one in the sequence
     ar.auth.progId = currentId + 1;
     pi.id = ar.auth.progId;
+    if ( pi.id > maxProgId )
+        qFatal( "QPackageRegistry::initProgramInfo(): maxProgId exceeded" );
 
     // write the key and program id for this prog into the file
     ::memcpy( ar.auth.key, pi.key, QSXE_KEY_LEN );

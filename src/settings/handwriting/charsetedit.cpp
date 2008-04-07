@@ -670,16 +670,18 @@ void CharSetEdit::removeChar()
 {
     addFlag = false; // if was adding, just removed the char... can't add now
     pw->setReadOnly(true);
-    QIMPenCharIterator it = currentSet->characters().begin();
+
+    int idx = 0;
     CharListItem *ch = (CharListItem *)charList->currentItem();
-    while ( it != currentSet->characters().end() ) {
-        QIMPenChar *pc = *it++;
-        if ( ch->testChar(*pc) ) {
-            if ( !pc->testFlag( QIMPenChar::System ) ) {
-                currentSet->removeChar( pc );
-            }
-        }
+    // Can't use the normal iterator, since the list is const
+    while ( idx < currentSet->characters().count() ) {
+        QIMPenChar *pc = currentSet->characters()[idx];
+        if ( ch->testChar(*pc) && !pc->testFlag( QIMPenChar::System ) )
+            currentSet->removeChar( pc );
+        else
+            ++idx;
     }
+
     for (int i = 0; i < charList->count();++i) {
         if (((CharListItem *)charList->item(i))->testEquivalent(ch)) {
             delete charList->takeItem(i);
@@ -737,20 +739,21 @@ void CharSetEdit::resetMatches()
             }
         }
         if ( haveSystem ) {
-            it = currentSet->characters().begin();
-            while ( it != currentSet->characters().end() ) {
-                QIMPenChar *pc = (*it);
+            // Can't use an iterator since the list is const
+            int idx = 0;
+            while ( idx < currentSet->characters().count() ) {
+                QIMPenChar *pc = currentSet->characters()[idx];
                 if ( ch->testChar(*pc) ) {
                     if ( pc->testFlag( QIMPenChar::System ) ) {
                         pc->clearFlag( QIMPenChar::Deleted );
                         if ( !currentChar )
                             currentChar = pc;
-                        ++it;
+                        ++idx;
                     } else {
                         currentSet->removeChar( pc );
                     }
                 } else {
-                    ++it;
+                    ++idx;
                 }
             }
             setCurrentChar( currentChar );

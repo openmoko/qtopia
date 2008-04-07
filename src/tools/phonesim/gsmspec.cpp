@@ -148,7 +148,6 @@ void GSMSpec::setupDictionary(const QString& filePath)
                 specData = specData->next;
 
             }
-            // Add a phone simulator peer entry.
             commandMap.insert( command, GSMItem(command, profile, format.split(";"), response.split(";"), description) );
         }
         specNode = specNode->next;

@@ -95,7 +95,8 @@ PROJECT_KEYWORDS+=theme
 keyword.unittest.equiv=qtopia core app
 keyword.unittest.commands=\
     "CONFIG+=no_tr no_quicklaunch unittest"\
-    "CONFIG-=enable_singleexec"
+    "CONFIG-=enable_singleexec"\
+    "CONFIG+=no_target_sxe"
 PROJECT_KEYWORDS+=unittest
 
 keyword.integrationtest.equiv=unittest

@@ -185,7 +185,7 @@ void QSqlContentSetEngine::insertContent( const QContent &content )
 
         for( index = 0; index < m_explicit.count() && sort.greaterThan( content, m_explicit.at( index ).second ); index++ );
 
-        QContentId id(-1, m_explicitIdSource++);
+        QContentId id(QtopiaDatabaseId(-1), m_explicitIdSource++);
 
         m_explicit.insert( index, QPair< quint64, QContent >( id.second, content ) );
 
@@ -230,7 +230,7 @@ void QSqlContentSetEngine::removeContent( const QContent &content )
         if( index == m_explicit.count() )
             return;
 
-        QContentId contentId( -1, m_explicit.at( index ).first );
+        QContentId contentId( QtopiaDatabaseId(-1), m_explicit.at( index ).first );
 
         m_explicit.removeAt( index );
 
@@ -332,7 +332,7 @@ void QSqlContentSetEngine::performReset()
         QPair< quint64, QContent > e;
 
         foreach( e, m_explicit )
-            explicitIds.append( QContentId( -1, e.first ) );
+            explicitIds.append( QContentId( QtopiaDatabaseId(-1), e.first ) );
 
         if( !explicitIds.isEmpty() )
         {
@@ -599,7 +599,7 @@ void QSqlContentSetEngine::synchronizeSets( const QContentFilter &criteria, cons
     QPair< quint64, QContent > e;
 
     foreach( e, explicits )
-        explicitIds.append( QContentId( -1, e.first ) );
+        explicitIds.append( QContentId( QtopiaDatabaseId(-1), e.first ) );
 
     if( !explicitIds.isEmpty() )
         contentIdLists.append( explicitIds );

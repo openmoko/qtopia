@@ -601,5 +601,12 @@
         <function access="public" threadsafety="unspecified" status="commendable" name="QDLOG_OPTION" href="qtopiadesktoplog-h.html#QDLOG_OPTION" location="" virtual="non" meta="macrowithparams" const="false" static="false" overload="false" relates="&lt;qtopiadesktoplog.h&gt;" type="" signature="QDLOG_OPTION( CATEGORY)">
             <parameter left="" right="" name="CATEGORY" default=""></parameter>
         </function>
+        <page access="public" status="commendable" name="over_Sync_Manager_1.html" href="over-sync-manager-1.html" subtype="page" title="Sync Manager" fulltitle="Sync Manager" subtitle="" location="syncmanager.qdocpp">
+            <contents name="overview" title="Overview" level="1"></contents>
+            <contents name="create-create" title="Create/Create" level="2"></contents>
+            <contents name="remove-remove" title="Remove/Remove" level="2"></contents>
+            <contents name="replace-replace" title="Replace/Replace" level="2"></contents>
+            <contents name="replace-remove" title="Replace/Remove" level="2"></contents>
+        </page>
     </namespace>
 </INDEX>

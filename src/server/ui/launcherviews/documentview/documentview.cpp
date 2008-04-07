@@ -336,6 +336,7 @@ void DocumentLauncherView::selectDocsType()
 
         typeDlg->setWindowTitle( tr( "View Type" ) );
         typeDlg->setFilter( mainFilter );
+        typeDlg->setObjectName( QLatin1String( "documents-type" ) );
     }
 
     QtopiaApplication::execDialog( typeDlg );
@@ -366,9 +367,9 @@ void DocumentLauncherView::selectDocsCategory()
 
         categoryDlg = new QContentFilterDialog( categoryPage, this );
 
-
         categoryDlg->setWindowTitle( tr( "View Category" ) );
         categoryDlg->setFilter( mainFilter );
+        categoryDlg->setObjectName( QLatin1String( "documents-category" ) );
     }
 
     QtopiaApplication::execDialog( categoryDlg );

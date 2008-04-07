@@ -147,6 +147,7 @@ CameraMainWindow::CameraMainWindow(QWidget *parent, Qt::WFlags f):
     m_wait = new QWaitWidget(camera->videocaptureview);
     m_iswaiting = false;
     QTimer::singleShot(1, this, SLOT(delayedInit()));
+    m_currzoom = 0;
 }
 
 CameraMainWindow::~CameraMainWindow()
@@ -238,6 +239,19 @@ void CameraMainWindow::delayedInit()
     a_send = new QAction( QIcon( ":icon/beam" ), tr("Send to Contact..."), this );
     connect( a_send, SIGNAL(triggered()), this, SLOT(sendFile()) );
 
+    a_zoom = new QAction( QIcon( ), tr("Zoom"), this);
+    connect(a_zoom, SIGNAL(triggered()), this, SLOT(showZoom()));
+    m_zoom = new QSlider(this);
+    m_zoom->setSliderPosition(50);
+    m_zoom->setOrientation(Qt::Horizontal);
+
+    m_zoom->setRange(camera->videocaptureview->minZoom(),camera->videocaptureview->maxZoom());
+    m_zoom->setValue(0);
+    m_zoom->setGeometry(width()*1/5, height()*2/3, 60*width()/100, 40*height()/100);
+    m_zoom->hide();
+
+    connect(m_zoom, SIGNAL(valueChanged(int)), this, SLOT(zoomChanged(int)));
+
     QMenu *contextMenu = QSoftMenuBar::menuFor(this);
     if(camera->videocaptureview->available())
     {
@@ -250,6 +264,7 @@ void CameraMainWindow::delayedInit()
         contextMenu->addAction( a_timer );
         contextMenu->addAction( a_send );
         contextMenu->addAction( a_settings );
+        contextMenu->addAction( a_zoom );
     }
 
     connect(contextMenu, SIGNAL(aboutToHide()),
@@ -283,6 +298,15 @@ void CameraMainWindow::resizeEvent(QResizeEvent*)
     loadThumbs( true );
 }
 
+void CameraMainWindow::zoomChanged(int val)
+{
+    if( val > m_currzoom)
+        camera->videocaptureview->zoomIn();
+    else if(val < m_currzoom)
+        camera->videocaptureview->zoomOut();
+    m_currzoom = val;
+}
+
 bool CameraMainWindow::event(QEvent* e)
 {
     if ( e->type() == QEvent::WindowActivate ) {
@@ -294,6 +318,11 @@ bool CameraMainWindow::event(QEvent* e)
     return QMainWindow::event(e);
 }
 
+void CameraMainWindow::showZoom()
+{
+    m_zoom->show();
+    QTimer::singleShot(7000,m_zoom,SLOT(hide()));
+}
 
 bool CameraMainWindow::eventFilter(QObject* o, QEvent* e)
 {
@@ -311,11 +340,23 @@ bool CameraMainWindow::eventFilter(QObject* o, QEvent* e)
         }
         if (ke->key() == Qt::Key_4)
         {
-           camera->videocaptureview->zoomOut();
+            if(camera->videocaptureview->minZoom() < m_currzoom)
+            {
+                m_currzoom--;
+                m_zoom->setValue(m_currzoom);
+            }
+            camera->videocaptureview->zoomOut();
+
         }
         if (ke->key() == Qt::Key_6)
         {
-           camera->videocaptureview->zoomIn();
+            if(camera->videocaptureview->maxZoom() > m_currzoom)
+            {
+                m_currzoom++;
+                m_zoom->setValue(m_currzoom);
+            }
+            camera->videocaptureview->zoomIn();
+
         }
         if ( ke->key() == Qt::Key_Up ) {
             camera->photo->setFocus();
@@ -519,7 +560,7 @@ void CameraMainWindow::loadThumbs( bool resized )
     hideWaitScreen();
 }
 
-void CameraMainWindow::delThumb(int th)
+bool CameraMainWindow::delThumb(int th)
 {
     switch(QMessageBox::warning(0, tr("Confirmation"),
             tr("<qt>Delete '%1'?</qt>", "%1 = file name").arg(picturefile[th].name()),
@@ -553,11 +594,13 @@ void CameraMainWindow::delThumb(int th)
                  !(thumb[0]->isEnabled()) ) {
                 close();
             }
+            return true;
             break;
         default:
             //nothing
             break;
     }
+    return false;
 }
 
 void CameraMainWindow::pushThumb(const QContent& f, const QImage& img)
@@ -758,6 +801,7 @@ void CameraMainWindow::selectThumb(int i)
     a_th_del->setVisible(i>=0);
     a_th_add->setVisible(i>=0);
     a_send->setVisible(i>=0);
+    a_zoom->setVisible(i<0);
 }
 
 void CameraMainWindow::moveToContact()
@@ -794,9 +838,9 @@ void CameraMainWindow::delThumb()
 {
     if ( cur_thumb >= 0 ) {
         int d = cur_thumb;
-        if ( cur_thumb > 0 )
+        bool ret = delThumb(d);
+        if ( cur_thumb > 0 && ret )
             selectThumb(cur_thumb-1);
-        delThumb(d);
     }
 }
 

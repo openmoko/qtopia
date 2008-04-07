@@ -34,11 +34,6 @@
 #include <qmessagebox.h>
 #include <qmenu.h>
 
-static void toggleScreenSaver( bool on )
-{
-    QtopiaApplication::setPowerConstraint(on ? QtopiaApplication::Enable : QtopiaApplication::DisableSuspend);
-}
-
 ClockMain::ClockMain(QWidget *parent, Qt::WFlags f)
     : QWidget(parent, f)
     , clockIndex(-1)
@@ -76,7 +71,6 @@ ClockMain::ClockMain(QWidget *parent, Qt::WFlags f)
 
 ClockMain::~ClockMain()
 {
-    toggleScreenSaver( true );
 }
 
 void ClockMain::showClock()

@@ -29,9 +29,15 @@ stub {
     QMAKE_EXTRA_TARGETS+=runner
     ALL_DEPS+=runner
     create_raw_dependency(.PHONY,runner)
+
+    # Syntax check for the test.
+    syntax_check.commands=$$COMMAND_HEADER\
+        $$QPEDIR/bin/qtopiatestrunner -c -auto $$LITERAL_SQUOTE$$JS_SOURCES$$LITERAL_SQUOTE
+    QMAKE_EXTRA_TARGETS+=syntax_check
+    ALL_DEPS+=syntax_check
 }
 
 # Run the test (ignore errors so that all the tests can run)
-test.commands=$$OUT_PWD/$$TARGET -aut $$QPEDIR/bin/runqtopia $(ARGS)
+test.commands=$$OUT_PWD/$$TARGET $(ARGS)
 test.depends+=all
 QMAKE_EXTRA_TARGETS+=test

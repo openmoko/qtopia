@@ -30,7 +30,6 @@
 #include <QSqlError>
 #include <QtopiaSql>
 #include <qtopialog.h>
-QTOPIA_LOG_OPTION(QPimSync)
 
 #include "qpimsyncstorage.h"
 
@@ -130,6 +129,7 @@ void QAppointmentSyncStorage::commitTransaction()
 
 void QAppointmentSyncStorage::createServerRecord(const QByteArray &record)
 {
+    qLog(Synchronization) << "QAppointmentSyncStorage::createServerRecord" << record;
     QAppointment appointment;
     // exceptions need to be applied after the appointment is added.
     QList<QPimXmlException> exceptions;
@@ -182,6 +182,7 @@ static bool exists(const QList<QPimXmlException> &list, const QAppointment::Exce
 
 void QAppointmentSyncStorage::replaceServerRecord(const QByteArray &record)
 {
+    qLog(Synchronization) << "QAppointmentSyncStorage::replaceServerRecord" << record;
     QAppointment appointment;
     // exceptions need to be applied after the appointment is added.
     QList<QPimXmlException> exceptions;
@@ -220,6 +221,7 @@ void QAppointmentSyncStorage::replaceServerRecord(const QByteArray &record)
 
 void QAppointmentSyncStorage::removeServerRecord(const QString &localId)
 {
+    qLog(Synchronization) << "QAppointmentSyncStorage::removeServerRecord" << localId;
     QUniqueId id(localId);
     model->removeAppointment(id);
 }
@@ -332,12 +334,12 @@ QContactSyncStorage::~QContactSyncStorage()
 
 void QContactSyncStorage::commitTransaction()
 {
-    qLog(QPimSync) << "task sync transaction.";
+    qLog(Synchronization) << "task sync transaction.";
     QPimSyncStorage::commitTransaction();
     QCategoryManager c("Address Book");
     foreach(const QString &category, unmappedCategories()) {
         QString id = c.add(category);
-        qLog(QPimSync) << "add category" << category << "with id" << id;
+        qLog(Synchronization) << "add category" << category << "with id" << id;
         if (id != category) {
             QSqlQuery q(QtopiaSql::instance()->systemDatabase());
             if (!q.prepare("UPDATE contactcategories SET categoryid = :i WHERE categoryid = :c"))
@@ -353,6 +355,7 @@ void QContactSyncStorage::commitTransaction()
 
 void QContactSyncStorage::createServerRecord(const QByteArray &record)
 {
+    qLog(Synchronization) << "QContactSyncStorage::createServerRecord" << record;
     QPimXmlStreamReader h(record);
     QString serverId;
     QContact c = h.readContact(serverId, model);
@@ -362,12 +365,13 @@ void QContactSyncStorage::createServerRecord(const QByteArray &record)
         //qDebug() << "QContactSyncStorage::createServerRecord" << "mappedId" << serverId << c.uid().toString();
         emit mappedId(serverId, c.uid().toString());
     } else {
-        qLog(QPimSync) << "failed to parse:" << int(h.error()) << h.errorString();
+        qLog(Synchronization) << "failed to parse:" << int(h.error()) << h.errorString();
     }
 }
 
 void QContactSyncStorage::replaceServerRecord(const QByteArray &record)
 {
+    qLog(Synchronization) << "QContactSyncStorage::replaceServerRecord" << record;
     QPimXmlStreamReader h(record);
     QString serverId;
     QContact c = h.readContact(serverId, model);
@@ -375,19 +379,20 @@ void QContactSyncStorage::replaceServerRecord(const QByteArray &record)
         model->updateContact(c);
         mergeUnmappedCategories(h.missedLabels());
     } else {
-        qLog(QPimSync) << "failed to parse:" << int(h.error()) << h.errorString();
+        qLog(Synchronization) << "failed to parse:" << int(h.error()) << h.errorString();
     }
 }
 
 void QContactSyncStorage::removeServerRecord(const QString &localId)
 {
+    qLog(Synchronization) << "QContactSyncStorage::removeServerRecord" << localId;
     model->removeContact(QUniqueId(localId));
 }
 
 void QContactSyncStorage::fetchChangesSince(const QDateTime &since)
 {
     QList<QUniqueId> changes = model->added(since);
-    qLog(QPimSync) << "added" << changes.count();
+    qLog(Synchronization) << "added" << changes.count();
 
     foreach(const QUniqueId &id, changes) {
         QContact c = model->contact(id);
@@ -404,7 +409,7 @@ void QContactSyncStorage::fetchChangesSince(const QDateTime &since)
 
     changes = model->removed(since);
 
-    qLog(QPimSync) << "removed" << changes.count();
+    qLog(Synchronization) << "removed" << changes.count();
 
     foreach(const QUniqueId &id, changes) {
         emit removeClientRecord(id.toString());
@@ -412,7 +417,7 @@ void QContactSyncStorage::fetchChangesSince(const QDateTime &since)
 
     changes = model->modified(since);
 
-    qLog(QPimSync) << "modified" << changes.count();
+    qLog(Synchronization) << "modified" << changes.count();
 
     foreach(const QUniqueId &id, changes) {
         QContact c = model->contact(id);
@@ -456,6 +461,7 @@ void QTaskSyncStorage::commitTransaction()
 
 void QTaskSyncStorage::createServerRecord(const QByteArray &record)
 {
+    qLog(Synchronization) << "QTaskSyncStorage::createServerRecord" << record;
     QPimXmlStreamReader h(record);
     QString serverId;
     QTask t = h.readTask(serverId, model);
@@ -463,22 +469,28 @@ void QTaskSyncStorage::createServerRecord(const QByteArray &record)
         t.setUid(model->addTask(t));
         mergeUnmappedCategories(h.missedLabels());
         emit mappedId(serverId, t.uid().toString());
+    } else {
+        qLog(Synchronization) << "failed to parse:" << int(h.error()) << h.errorString();
     }
 }
 
 void QTaskSyncStorage::replaceServerRecord(const QByteArray &record)
 {
+    qLog(Synchronization) << "QTaskSyncStorage::replaceServerRecord" << record;
     QString serverId;
     QPimXmlStreamReader h(record);
     QTask t = h.readTask(serverId, model);
-    if (h.hasError()) {
+    if (!h.hasError()) {
         model->updateTask(t);
         mergeUnmappedCategories(h.missedLabels());
+    } else {
+        qLog(Synchronization) << "failed to parse:" << int(h.error()) << h.errorString();
     }
 }
 
 void QTaskSyncStorage::removeServerRecord(const QString &localId)
 {
+    qLog(Synchronization) << "QTaskSyncStorage::removeServerRecord" << localId;
     model->removeTask(QUniqueId(localId));
 }
 

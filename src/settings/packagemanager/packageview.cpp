@@ -40,6 +40,36 @@
 #endif
 
 #include "packagemanagerservice.h"
+
+/*\internal
+The purpose of the keyfilter class is a workaround for the issue
+where pressing the right and left key selects the first item in the
+installed and download treeviews, rather than navigating
+between tabs.
+
+To avoid this we intercept the left and right key presses and let the
+tabWidget handle the event to correctly handle tab navigation.
+*/
+KeyFilter::KeyFilter(QTabWidget *tab, QObject *parent)
+    :QObject(parent),m_tab(tab)
+{
+}
+
+bool KeyFilter::eventFilter(QObject *obj, QEvent *event)
+{
+    Q_UNUSED(obj);
+    if ( event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        if (keyEvent->key() == Qt::Key_Right || keyEvent->key() == Qt::Key_Left )
+        {
+            QCoreApplication::sendEvent( m_tab, event);
+            return true;
+        }
+    }
+    return false;
+}
+
 /*! \internal
     Case sensitive less than operation for two QActions.
     Intended to be used with qSort on a list of QActions.
@@ -171,19 +201,20 @@ void PackageDetails::init()
     }
 }
 
-
 /*
-   \internal
-   This delgate is used to display items in the downloads
-   list.  Specifically it is used to display packages
-   that have been already been downloaded as faded.
+    \internal
+    The View delgate enables us to show already
+    installed applications as faded/semi-transparent.
+
+    It also lets us ensure an item is correctly
+    highlighted when it has focus.
    */
-DownloadViewDelegate::DownloadViewDelegate( QObject *parent ):
+ViewDelegate::ViewDelegate( QObject *parent ):
     QtopiaItemDelegate( parent )
 {
 }
 
-void DownloadViewDelegate::paint( QPainter *painter,
+void ViewDelegate::paint( QPainter *painter,
                                     const QStyleOptionViewItem &option,
                                     const QModelIndex &index ) const
 {
@@ -192,6 +223,11 @@ void DownloadViewDelegate::paint( QPainter *painter,
         return;
 
     QStyleOptionViewItem options = option;
+
+    //for the downloaded view, filtered out packages are those
+    //that have been installed, we want to make these semi-transparent
+    //to show they have been installed.
+    //(for the installs view, there are never any filtered packages)
     bool isFiltered = index.model()->data( index, AbstractPackageController::Filtered ).toBool();
     if ( isFiltered )
     {
@@ -200,7 +236,17 @@ void DownloadViewDelegate::paint( QPainter *painter,
         options.palette.setColor( QPalette::Text, c );
         options.palette.setColor( QPalette::HighlightedText, c );
     }
-    QItemDelegate::paint( painter, options, index );
+
+    //if a package has focus, ensure that it's state is selected
+    //so that it will always show with a filled in background highlight
+    //(as opposed to a border/box)
+    if (options.state & QStyle::State_HasFocus)
+    {
+        options.showDecorationSelected = true;
+        options.state = options.state | QStyle::State_Selected;
+    }
+
+    QtopiaItemDelegate::paint( painter, options, index );
 }
 
 const int PackageView::InstalledIndex = 0;
@@ -226,7 +272,7 @@ PackageView::PackageView( QWidget *parent, Qt::WFlags flags )
     //setup view for installed packages
     installedView = new QTreeView( this );
     installedView->setModel( model  );
-    installedView->setRootIndex( model->index(0,0,QModelIndex()) );
+    installedView->setRootIndex( model->index(InstalledIndex,0,QModelIndex()) );
     installedView->setRootIsDecorated( false );
     connect( installedView, SIGNAL(activated(QModelIndex)),
             this, SLOT(activateItem(QModelIndex)) );
@@ -245,7 +291,7 @@ PackageView::PackageView( QWidget *parent, Qt::WFlags flags )
     //setup view for downloadable packages
     downloadView = new QTreeView( this );
     downloadView->setModel( model );
-    downloadView->setRootIndex( model->index(1,0,QModelIndex()) );
+    downloadView->setRootIndex( model->index(DownloadIndex,0,QModelIndex()) );
     downloadView->setRootIsDecorated( false );
     connect( downloadView, SIGNAL(activated(QModelIndex)),
             this, SLOT(activateItem(QModelIndex)) );
@@ -253,7 +299,8 @@ PackageView::PackageView( QWidget *parent, Qt::WFlags flags )
             downloadView, SLOT(rowsAboutToBeRemoved(QModelIndex,int,int)));
     connect( model, SIGNAL(rowsRemoved(QModelIndex,int,int)),
             downloadView, SLOT(rowsRemoved(QModelIndex,int,int)));
-    downloadView->setItemDelegate( new DownloadViewDelegate( this ) );
+    downloadView->setItemDelegate( new ViewDelegate( this ) );
+    installedView->setItemDelegate(new ViewDelegate(this));
 
     //setup page for downloadable packages
     QWidget *downloadPage = new QWidget(this);
@@ -277,6 +324,11 @@ PackageView::PackageView( QWidget *parent, Qt::WFlags flags )
     tabWidget->addTab( installedPage, tr( "Installed" ) );
     tabWidget->addTab( downloadPage, tr( "Downloads" ) );
     setCentralWidget( tabWidget );
+
+    KeyFilter *keyFilter = new KeyFilter(tabWidget, this);
+    installedView->installEventFilter(keyFilter);
+    downloadView->installEventFilter(keyFilter);
+
     QTimer::singleShot( 0, this, SLOT(init()) );
 }
 
@@ -659,5 +711,3 @@ void PackageView::selectNewlyInstalled( const QModelIndex &index)
     installedView->setCurrentIndex( index );
     QMessageBox::information( this, tr("Successful Installation"), tr("Package successfully installed" ) );
 }
-
-

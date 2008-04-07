@@ -40,7 +40,7 @@ public:
     void setFace( const QPixmap& face );
 
 protected:
-    void resizeEvent( QResizeEvent* event );
+    void resizeEvent( QResizeEvent *event );
     void paintEvent( QPaintEvent *event );
     void drawContents( QPainter *p );
     void drawHand( QPainter *p, QPoint, QPoint );

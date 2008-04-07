@@ -27,7 +27,7 @@
 #include <QDialog>
 
 class QContent;
-class QGridLayout;
+class QFormLayout;
 class QDocumentPropertiesWidgetPrivate;
 
 class QTOPIA_EXPORT QDocumentPropertiesWidget : public QWidget
@@ -53,7 +53,7 @@ protected slots:
 
 private:
     bool moveLnk();
-    void addRights( const QDrmRights &rights, QGridLayout *layout, QWidget *parent, int *row );
+    void addRights( const QDrmRights &rights, QFormLayout *layout );
     QContent lnk;
     int fileSize;
 

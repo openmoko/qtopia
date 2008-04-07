@@ -241,24 +241,31 @@ bool AlarmView::focusNextPrevChild(bool next)
 
 bool AlarmView::showAlarms(QOccurrenceModel* model, const QDateTime& startTime, int /*warnDelay*/)
 {
+    mModel = model;
+    mStartTime = startTime;
+
+    connect(model,SIGNAL(modelReset()),this,SLOT(updateAlarms()));
+
+    return updateAlarms();
+}
+
+bool AlarmView::updateAlarms()
+{
     bool playSound = false;
     QIcon aicon(":icon/audible");
     QIcon sicon(":icon/silent");
 
-    mAlarmCount = 0;
-    mModel = model;
-    mStartTime = startTime;
-
     mStandardModel->clear();
+    mAlarmCount = 0;
 
     QString localDT;
     QString tzDT;
 
     // Filter out occurrences that do not have an alarm
-    for (int i=0; i < model->rowCount(); i++) {
-        QOccurrence o = model->occurrence(i);
+    for (int i=0; i < mModel->rowCount(); i++) {
+        QOccurrence o = mModel->occurrence(i);
         QAppointment a = o.appointment();
-        if (a.hasAlarm() && (o.startInCurrentTZ() == startTime) /* && (o.alarmDelay() == warnDelay)*/) {
+        if (a.hasAlarm() && (o.startInCurrentTZ() == mStartTime) /* && (o.alarmDelay() == warnDelay)*/) {
             if (!playSound && (a.alarm() == QAppointment::Audible)) {
                 playSound = true;
             }
@@ -319,8 +326,10 @@ bool AlarmView::showAlarms(QOccurrenceModel* model, const QDateTime& startTime, 
         }
 
         return true;
-    } else
+    } else {
+        emit closeView();
         return false;
+    }
 }
 
 void AlarmView::timerEvent(QTimerEvent *e)

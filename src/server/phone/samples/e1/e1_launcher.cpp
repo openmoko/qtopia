@@ -38,7 +38,7 @@
 #include "e1_dialog.h"
 #include "themecontrol.h"
 #include "ringcontrol.h"
-#include "phone/dialer.h"
+//#include "phone/dialer.h"
 #include <qtopiaipcenvelope.h>
 #include "dialercontrol.h"
 #include "e1_popup.h"

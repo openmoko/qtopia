@@ -18,7 +18,7 @@ and may involve writing device drivers. It will also require
 \section1 Overview
 
 From a high level, Desktop Synchronization is made up of client and server plugins
-that communicate their changes to the Sync Manager which handles conflicts and
+that communicate their changes to the \l{Sync Manager} which handles conflicts and
 passes on the merged data. The reference implementation provides plugins for
 Qtopia PIM and Outlook. The components look like this.
 

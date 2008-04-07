@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2000-2008 TROLLTECH ASA. All rights reserved.
+** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
 **
 ** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
@@ -55,6 +55,7 @@ public:
     void setType( QCallList::ListType type );
 
     void refresh();
+    int rowCount(const QModelIndex& parent = QModelIndex()) const;
 
 signals:
     void contactsAboutToBeUpdated();
@@ -62,9 +63,11 @@ signals:
 
 protected slots:
     void updateContacts();
+    void reallyUpdateContacts();
 
 private:
     QCallList::ListType mType;
+    bool mDirty;
 };
 
 class CallHistoryListView : public CallContactListView

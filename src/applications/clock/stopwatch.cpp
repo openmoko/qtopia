@@ -47,8 +47,6 @@
 
 
 static const int sw_prec = 2;
-static const int magic_daily = 2292922;
-static const int magic_countdown = 2292923;
 
 static void toggleScreenSaver( bool on )
 {
@@ -138,7 +136,6 @@ StopWatch::StopWatch( QWidget * parent, Qt::WFlags f )
 
 StopWatch::~StopWatch()
 {
-    toggleScreenSaver( true );
 }
 
 void StopWatch::updateClock()

@@ -31,9 +31,6 @@ PhoneSimServer::PhoneSimServer(const QString &f, quint16 port, QObject *parent)
 {
     listen( QHostAddress::Any, port );
     filename = f;
-    // Parse the "peers.xml" file.
-    QFileInfo info( filename );
-    QString peerFile = info.absolutePath() + "/peers.xml";
 }
 
 PhoneSimServer::~PhoneSimServer()
@@ -52,8 +49,6 @@ void PhoneSimServer::setHardwareManipulator(HardwareManipulatorFactory *f)
 void PhoneSimServer::incomingConnection(int s)
 {
   SimRules *sr = new SimRules(s, this, filename, fact);
-    if ( QFile::exists( peerFile ) )
-        sr->loadPeers( peerFile );
     sr->setPhoneNumber(QString::number(phonenumber));
     phonenumber++;
     currentRules = sr;
