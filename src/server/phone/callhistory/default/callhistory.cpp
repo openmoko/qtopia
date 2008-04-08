@@ -56,7 +56,9 @@
 // CallHistoryModel
 
 CallHistoryModel::CallHistoryModel( QCallList & callList, QObject* parent )
-    : CallContactModel(callList, parent), mDirty(true)
+    : CallContactModel(callList, parent)
+    , mType(QCallList::All)
+    , mDirty(true)
 {
     //alt method would be to listen to QPE/PIM for addedContact
     connect(ServerContactModel::instance(), SIGNAL(modelReset()), 
