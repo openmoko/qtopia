@@ -676,10 +676,7 @@ void Ficgta01ModemService::suspend()
     chat( "AT%CGREG=1" );
 
     // Turn off cell broadcast location messages.
-     chat( "AT%CSQ=0" );
-
-    // Turn off signal quality notifications while the system is suspended.
-     QTimer::singleShot( 500, this, SLOT(sendSuspendDone()) );
+    chat( "AT%CSQ=0", this, SLOT(sendSuspendDone()) );
 }
 
 void Ficgta01ModemService::wake()
