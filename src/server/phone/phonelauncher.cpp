@@ -1783,6 +1783,8 @@ CallScreen *PhoneLauncher::callScreen(bool create) const
     if(create && !m_callScreen) {
         m_callScreen = new CallScreen(DialerControl::instance(), 0);
         m_callScreen->move(QApplication::desktop()->screenGeometry().topLeft());
+        QtopiaApplication::prepareMainWidget(m_callScreen);
+
         RingControl *rc = qtopiaTask<RingControl>();
         if(rc)
             QObject::connect(m_callScreen, SIGNAL(muteRing()),
