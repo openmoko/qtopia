@@ -80,7 +80,7 @@ static DelayedWaitDialog *waitDlg = 0;
 class CallData {
 public:
     CallData() {}
-    CallData(const QPhoneCall &c) : call(c), havePhoto(false) {
+    CallData(const QPhoneCall &c) : call(c), callState(c.state()), havePhoto(false) {
         // Get the number or name to display in the text area.
         numberOrName = call.number();
 
