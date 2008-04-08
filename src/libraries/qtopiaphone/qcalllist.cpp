@@ -373,7 +373,10 @@ QString QCallListItem::timeZoneId() const
 */
 bool QCallListItem::isSIMRecord() const
 {
-    return d->simRecord;
+    if ( d )
+        return d->simRecord;
+    else
+        return false;
 }
 
 
