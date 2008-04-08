@@ -735,7 +735,7 @@ void DialerControl::recordCall( const QPhoneCall &call )
         ct = QCallListItem::Dialed;
     else if( call.hasBeenConnected() )
         ct = QCallListItem::Received;
-    else if ( call.missed() ) {
+    else {
         ct = QCallListItem::Missed;
         // increase missed call count
         missedCall( call );
