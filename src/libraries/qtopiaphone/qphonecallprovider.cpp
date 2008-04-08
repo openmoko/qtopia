@@ -115,8 +115,12 @@ QPhoneCallImpl::QPhoneCallImpl
 */
 QPhoneCallImpl::~QPhoneCallImpl()
 {
-    d->provider->deregisterCall( this );
     delete d;
+}
+
+void QPhoneCallImpl::deregisterCall()
+{
+    d->provider->deregisterCall(this);
 }
 
 /*!

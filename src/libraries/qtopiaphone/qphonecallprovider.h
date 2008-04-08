@@ -84,6 +84,9 @@ signals:
     void notification( QPhoneCall::Notification type, const QString& value );
     void floorChanged( bool haveFloor, bool floorAvailable );
 
+protected:
+    void deregisterCall();
+
 private:
     QPhoneCallImplPrivate *d;
 };

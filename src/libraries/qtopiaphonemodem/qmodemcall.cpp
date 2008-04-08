@@ -127,6 +127,7 @@ QModemCall::QModemCall
 */
 QModemCall::~QModemCall()
 {
+    deregisterCall();
     delete d;
 }
 
