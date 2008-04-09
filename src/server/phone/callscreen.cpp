@@ -75,8 +75,6 @@ static const uint SECS_PER_MIN  = 60;
 
 static CallScreen *callScreen = 0;
 
-static DelayedWaitDialog *waitDlg = 0;
-
 class CallData {
 public:
     CallData() {}
@@ -1812,14 +1810,6 @@ bool CallScreen::eventFilter(QObject *o, QEvent *e)
             }
         } else if (e->type() == QEvent::Show) {
             grabMouse();
-        } else if (e->type() == QEvent::FocusIn) {
-            // required to show from here to give waitDlg focus and show no labels
-            if ( showWaitDlg && waitDlg ) {
-                waitDlg->show();
-                waitDlg->setFocus();
-                showWaitDlg = false;
-                QTimer::singleShot( 1000, this, SLOT(interactionDelayTimeout()) );
-            }
         }
     }
 
@@ -1995,21 +1985,7 @@ void CallScreen::callDialing(const QPhoneCall &)
 /*! \internal */
 void CallScreen::callIncoming(const QPhoneCall &)
 {
-    if ( !waitDlg )
-        waitDlg = new DelayedWaitDialog( this );
-    waitDlg->setText( tr( "Incoming Call..." ) );
-    waitDlg->setDelay( 0 );
     QtopiaInputEvents::addKeyboardFilter( new CallScreenKeyboardFilter );
-
-    QSoftMenuBar::setLabel(waitDlg, Qt::Key_Context1, QSoftMenuBar::NoLabel);
-    QSoftMenuBar::setLabel(waitDlg, Qt::Key_Select, QSoftMenuBar::NoLabel);
-    QSoftMenuBar::setLabel(waitDlg, Qt::Key_Back, QSoftMenuBar::NoLabel);
-
-    if ( isVisible() ) {
-        QTimer::singleShot( 1000, this, SLOT(interactionDelayTimeout()) );
-        waitDlg->show();
-    } else
-        showWaitDlg = true;
 
     setItemActive("menu-box", true);
     setItemActive("hold", false);
@@ -2055,10 +2031,6 @@ void CallScreen::rejectModalDialog()
 */
 void CallScreen::interactionDelayTimeout()
 {
-    if ( !waitDlg )
-        return;
-    waitDlg->hide();
-    showWaitDlg = false;
     QtopiaInputEvents::removeKeyboardFilter();
 
     stateChanged();
@@ -2067,18 +2039,11 @@ void CallScreen::interactionDelayTimeout()
 /*! \internal */
 void CallScreen::showProgressDlg()
 {
-    if ( !waitDlg )
-        waitDlg = new DelayedWaitDialog( this );
-    waitDlg->setText( tr( "Please wait..." ) );
-    waitDlg->setDelay( 500 );
-    waitDlg->show();
 }
 
 /*! \internal */
 void CallScreen::hideProgressDlg()
 {
-    if ( waitDlg )
-        waitDlg->hide();
 }
 
 #ifdef QT_ILLUME_LAUNCHER
