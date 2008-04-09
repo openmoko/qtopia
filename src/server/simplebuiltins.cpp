@@ -50,6 +50,14 @@ static QWidget *dialer()
     return 0;
 }
 QTOPIA_SIMPLE_BUILTIN(dialer, dialer);
+
+static QWidget *callScreen()
+{
+    // This will emit a signal
+    if (HomeScreenControl::instance()->homeScreen())
+        HomeScreenControl::instance()->homeScreen()->doShowCallScreen();
+}
+QTOPIA_SIMPLE_BUILTIN(callscreen, callScreen);
 #endif
 
 // "shutdown" builtin

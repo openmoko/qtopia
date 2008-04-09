@@ -64,6 +64,7 @@ public:
     void setMissedCalls(int);
     void showCallHistory(bool missed, const QString &hint);
     void showDialer();
+    void doShowCallScreen();
 #endif
 
 Q_SIGNALS:

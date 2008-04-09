@@ -912,5 +912,11 @@ void QAbstractHomeScreen::hideCBSMessage()
     clearInformation(infoMsgId);
     infoMsgId = 0;
 }
+
+void QAbstractHomeScreen::doShowCallScreen()
+{
+    if ( DialerControl::instance()->allCalls().count() )
+        emit showCallScreen();
+}
 #endif
 

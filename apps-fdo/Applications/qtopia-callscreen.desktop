@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Active Calls
+Comment=See active calls
+Exec=qcop service send Launcher execute\(QString\) callscreen
+Icon=phone/callscreen
+Categories=Office;PIM;Phone;
