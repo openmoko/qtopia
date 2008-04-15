@@ -1134,6 +1134,7 @@ void CallHistory::viewDetails( const QModelIndex& idx )
     if( !mView ) {
         mView = new CallHistoryView();
         mView->installEventFilter(this);
+        QtopiaApplication::prepareMainWidget(mView);
         connect( mView, SIGNAL(deleteCurrentItem()), this, SLOT(deleteCurrentItem()) );
         connect( mView, SIGNAL(externalLinkActivated()), this, SLOT(close()) );
     }
