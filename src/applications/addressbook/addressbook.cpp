@@ -1807,7 +1807,7 @@ void AddressbookWindow::addPhoneNumberToContact(const QString& phoneNumber)
     s->setModal(true);
     s->showMaximized();
 
-    if (s->exec())
+    if (QtopiaApplication::execDialog(s))
     {
         QContact cnt;
         cnt = s->selectedContact();
@@ -1816,12 +1816,16 @@ void AddressbookWindow::addPhoneNumberToContact(const QString& phoneNumber)
         QPhoneTypeSelector *pts = new QPhoneTypeSelector( cnt, phoneNumber, this );
         pts->setModal(true);
         pts->showMaximized();
-        if(pts->exec())
+        if(QtopiaApplication::execDialog(pts))
         {
             pts->updateContact(cnt, phoneNumber);
             mModel->updateContact( cnt );
         }
+
+        delete pts;
     }
+
+    delete s;
 }
 
 void AddressbookWindow::setContactImage( const QDSActionRequest& request )
@@ -1851,7 +1855,7 @@ void AddressbookWindow::setContactImage( const QDSActionRequest& request )
     } else {
         s->setModel(model);
         s->showMaximized();
-        if ( s->exec() )
+        if (QtopiaApplication::execDialog(s))
         {
             QContact cnt = s->selectedContact();
             QIODevice *stream = processingRequest.requestData().toIODevice();
@@ -1882,9 +1886,7 @@ void AddressbookWindow::setContactImage(const QString& filename)
     s->setModel(model);
     s->showMaximized();
 
-    if(
-        s->exec()
-      )
+    if (QtopiaApplication::execDialog(s))
     {
         QContact cnt = s->selectedContact();
         cnt.changePortrait( filename );
@@ -1900,11 +1902,13 @@ void AddressbookWindow::createNewContact(const QString& phoneNumber)
     QPhoneTypeSelector *pts = new QPhoneTypeSelector( cnt, phoneNumber, this );
     pts->setModal(true);
     pts->showMaximized();
-    if (pts->exec())
+    if (QtopiaApplication::execDialog(pts))
     {
         pts->updateContact(cnt, phoneNumber);
         newEntry(cnt);
     }
+
+    delete pts;
 }
 
 void AddressbookWindow::appMessage(const QString &msg, const QByteArray &data)
@@ -2475,7 +2479,7 @@ void AddressbookWindow::qdlRequestLinks( const QDSActionRequest& request )
     s->setModel(mModel);
     s->showMaximized();
 
-    if ( ( s->exec() == QDialog::Accepted ) && ( s->contactSelected() ) ) {
+    if ( (QtopiaApplication::execDialog(s) == QDialog::Accepted ) && ( s->contactSelected() ) ) {
 #ifndef QT_NO_QCOP
         QContact contact = s->selectedContact();
         QList<QDSData> links;
