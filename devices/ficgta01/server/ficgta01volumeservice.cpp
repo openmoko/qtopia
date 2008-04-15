@@ -286,10 +286,12 @@ int Ficgta01VolumeService::saveState()
     }
 
     QString confDir;
-    if(QDir("/etc/alsa").exists())
-        confDir="/etc/alsa/";
+    if (QDir("/usr/share/openmoko/scenarios").exists())
+        confDir = "/usr/share/openmoko/scenarios/";
+    else if (QDir("/etc/alsa").exists())
+        confDir = "/etc/alsa/";
     else
-        confDir="/etc/";
+        confDir = "/etc/";
 
     QString cmd = "/usr/sbin/alsactl -f "+ confDir+m_mode + ".state store";
     qLog(AudioState) << cmd;

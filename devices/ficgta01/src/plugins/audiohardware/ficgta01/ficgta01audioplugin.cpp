@@ -78,7 +78,9 @@ static const char* mode_to_string[] = {
 static bool setAudioMode(enum NeoAudioScenario scenario)
 {
     QString confDir;
-    if (QDir("/etc/alsa").exists())
+    if (QDir("/usr/share/openmoko/scenarios").exists())
+        confDir = "/usr/share/openmoko/scenarios/";
+    else if (QDir("/etc/alsa").exists())
         confDir = "/etc/alsa/";
     else
         confDir = "/etc/";
