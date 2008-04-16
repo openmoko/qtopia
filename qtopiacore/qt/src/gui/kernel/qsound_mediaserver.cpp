@@ -56,33 +56,12 @@
 #include "qbuffer.h"
 #include "quuid.h"
 #include "qdatastream.h"
-#if defined(Q_WS_QWS)
-#include "qcopchannel_qws.h"
-#elif defined(Q_WS_X11)
-#include "qcopchannel_x11.h"
-#endif
+#include "qtopiaservices.h"
 
-#define SERVER_CHANNEL "QPE/MediaServer"
+#include "qcopenvelope_p.h"
 
-class QCopMessage : public QDataStream
-{
-public:
-    QCopMessage( const QString& channel, const QString& message )
-        : QDataStream( new QBuffer ), m_channel( channel ), m_message( message )
-    {
-        device()->open( QIODevice::WriteOnly );
-    }
+#define MEDIA_SERVICE "QPE/MediaServer"
 
-    ~QCopMessage()
-    {
-        QCopChannel::send( m_channel, m_message, ((QBuffer*)device())->buffer() );
-        delete device();
-    }
-
-private:
-    QString m_channel;
-    QString m_message;
-};
 
 class QAuServerMediaServer;
 
@@ -133,7 +112,6 @@ public:
 
     void play( QSound* s )
     {
-        QString filepath = QFileInfo( s->fileName() ).absoluteFilePath();
         bucket( s )->play();
     }
 
@@ -171,6 +149,7 @@ QAuServerMediaServer::QAuServerMediaServer(QObject* parent) :
 QAuBucketMediaServer::QAuBucketMediaServer( QAuServerMediaServer *server, QSound *sound, QObject* parent )
     : QObject( parent ), sound_( sound ), server_( server )
 {
+
     m_id = QUuid::createUuid();
 
     sound->setObjectName( m_id.toString() );
@@ -180,29 +159,27 @@ QAuBucketMediaServer::QAuBucketMediaServer( QAuServerMediaServer *server, QSound
         this, SLOT(processMessage(QString,QByteArray)) );
 
     {
-        QCopMessage message( SERVER_CHANNEL, "subscribe(QUuid)" );
-        message << m_id;
+        QCopEnvelope envelope( MEDIA_SERVICE, "subscribe(QUuid)" );
+        envelope << m_id;
     }
 
     {
         QString filepath = QFileInfo( sound_->fileName() ).absoluteFilePath();
-        QCopMessage message( SERVER_CHANNEL, "open(QUuid,QString)" );
-        message << m_id << filepath;
+        QCopEnvelope envelope( MEDIA_SERVICE, "open(QUuid,QString)" );
+        envelope << m_id << filepath;
     }
 }
 
 void QAuBucketMediaServer::play()
 {
-    QString filepath = QFileInfo( sound_->fileName() ).absoluteFilePath();
-
-    QCopMessage message( SERVER_CHANNEL, "play(QUuid)" );
-    message << m_id;
+    QCopEnvelope envelope( MEDIA_SERVICE, "play(QUuid)" );
+    envelope << m_id;
 }
 
 void QAuBucketMediaServer::stop()
 {
-    QCopMessage message( SERVER_CHANNEL, "stop(QUuid)" );
-    message << m_id;
+    QCopEnvelope envelope( MEDIA_SERVICE, "stop(QUuid)" );
+    envelope << m_id;
 }
 
 void QAuBucketMediaServer::processMessage( const QString& msg, const QByteArray& data )
@@ -215,8 +192,8 @@ void QAuBucketMediaServer::processMessage( const QString& msg, const QByteArray&
 
 QAuBucketMediaServer::~QAuBucketMediaServer()
 {
-    QCopMessage message( SERVER_CHANNEL, "revoke(QUuid)" );
-    message << m_id;
+    QCopEnvelope envelope( MEDIA_SERVICE, "revoke(QUuid)" );
+    envelope << m_id;
 }
 
 
