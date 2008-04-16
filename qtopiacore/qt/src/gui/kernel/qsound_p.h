@@ -69,12 +69,12 @@ class QSound;
   QAuBucket is whatever you want.
 */
 
-class QAuBucket {
+class Q_GUI_EXPORT QAuBucket {
 public:
     virtual ~QAuBucket();
 };
 
-class QAuServer : public QObject {
+class Q_GUI_EXPORT QAuServer : public QObject {
     Q_OBJECT
 
 public:
