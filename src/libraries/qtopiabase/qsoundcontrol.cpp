@@ -20,30 +20,10 @@
 ****************************************************************************/
 
 #include "qsoundcontrol.h"
+#include "qcopenvelope_p.h"
 
 #define SERVER_CHANNEL "QPE/MediaServer"
 
-class QCopMessage : public QDataStream
-{
-public:
-    QCopMessage( const QString& channel, const QString& message )
-        : QDataStream( new QBuffer ), m_channel( channel ), m_message( message )
-    {
-        device()->open( QIODevice::WriteOnly );
-    }
-
-    ~QCopMessage()
-    {
-#ifndef QT_NO_COP
-        QCopChannel::send( m_channel, m_message, ((QBuffer*)device())->buffer() );
-#endif
-        delete device();
-    }
-
-private:
-    QString m_channel;
-    QString m_message;
-};
 
 /*!
     \class QSoundControl
@@ -134,8 +114,8 @@ void QSoundControl::setVolume( int volume )
     m_volume = volume;
 
     if( !m_id.isNull() ) {
-        QCopMessage message( SERVER_CHANNEL, "setVolume(QUuid,int)" );
-        message << m_id << m_volume;
+        QCopEnvelope envelope( SERVER_CHANNEL, "setVolume(QUuid,int)" );
+        envelope << m_id << m_volume;
     }
 }
 
@@ -155,8 +135,8 @@ void QSoundControl::setPriority( Priority priority )
     m_priority = priority;
 
     if( !m_id.isNull() ) {
-        QCopMessage message( SERVER_CHANNEL, "setPriority(QUuid,int)" );
-        message << m_id << m_priority;
+        QCopEnvelope envelope( SERVER_CHANNEL, "setPriority(QUuid,int)" );
+        envelope << m_id << m_priority;
     }
 }
 
