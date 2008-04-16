@@ -94,6 +94,8 @@ QTOPIABASE_PRIVATE_HEADERS+=\
 x11 {
     VPATH+=$$QT_DEPOT_PATH/src/gui/embedded
     INCLUDEPATH+=$$QT_DEPOT_PATH/src/gui/embedded
+    VPATH+=$$QT_DEPOT_PATH/src/gui/kernel
+    INCLUDEPATH+=$$QT_DEPOT_PATH/src/gui/kernel
 
     QTOPIABASE_HEADERS+=\
         qcopchannel_x11.h
@@ -107,7 +109,8 @@ x11 {
         qcopchannel_x11.cpp \
         qunixsocket.cpp \
         qunixsocketserver.cpp \
-        qglobalpixmapcache_x11.cpp
+        qglobalpixmapcache_x11.cpp \
+        qsound_mediaserver.cpp
 
     enable_sxe {
         QTOPIABASE_HEADERS+=\
