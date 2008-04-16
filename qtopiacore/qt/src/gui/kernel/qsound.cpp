@@ -74,7 +74,7 @@ void QAuServer::play(const QString& filename)
     play(&s);
 }
 
-extern QAuServer* qt_new_audio_server() __attribute__((weak));
+extern QAuServer* qt_new_audio_server();
 
 static QAuServer& server()
 {

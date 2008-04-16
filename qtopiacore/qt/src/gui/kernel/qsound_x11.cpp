@@ -274,10 +274,14 @@ QAuServerNull::QAuServerNull(QObject* parent)
 {
 }
 
-extern QAuServer* qt_new_audio_server() __attribute__((weak));
+extern QAuServer* qt_new_audio_server_media_server() __attribute__((weak));
 
 QAuServer* qt_new_audio_server()
 {
+    // Use the QCOP enabled MediaServer
+    if (qt_new_audio_server_media_server)
+        return qt_new_audio_server_media_server();
+
 #ifndef QT_NO_NAS
     QAuServer* s = new QAuServerNAS(qApp);
     if (s->okay())

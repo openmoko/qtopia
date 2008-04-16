@@ -220,7 +220,7 @@ QAuBucketMediaServer::~QAuBucketMediaServer()
 }
 
 
-QAuServer* qt_new_audio_server()
+__attribute__((visibility("default"))) QAuServer* qt_new_audio_server_media_server()
 {
     return new QAuServerMediaServer(qApp);
 }
