@@ -448,8 +448,8 @@ void QWidgetPrivate::create_sys(WId window, bool initializeWindow, bool destroyO
         dialog = popup = false;                        // force these flags off
         data.crect.setRect(0, 0, sw, sh);
     } else if (topLevel && !q->testAttribute(Qt::WA_Resized)) {
-        int width = sw / 2;
-        int height = 4 * sh / 10;
+        int width = sw;
+        int height = sh - 60;
         if (extra) {
             width = qMax(qMin(width, extra->maxw), extra->minw);
             height = qMax(qMin(height, extra->maxh), extra->minh);

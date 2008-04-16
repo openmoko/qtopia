@@ -274,6 +274,7 @@ QAuServerNull::QAuServerNull(QObject* parent)
 {
 }
 
+extern QAuServer* qt_new_audio_server() __attribute__((weak));
 
 QAuServer* qt_new_audio_server()
 {
