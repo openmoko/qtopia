@@ -126,8 +126,10 @@ void QSoundPlayer::playerStateChanged(QtopiaMedia::State state)
     switch (state)
     {
     case QtopiaMedia::Stopped:
-    case QtopiaMedia::Error:
         QCopChannel::send(QString("QPE/QSound/").append(m_id), "done()");
+        break;
+    case QtopiaMedia::Error:
+        QCopChannel::send(QString("QPE/QSound/").append(m_id), "error()");
         break;
 
     default:
