@@ -26,8 +26,10 @@
 
 // TODO: Messages on QPE/QSound and QPE/MediaServer originate from Qt-Embedded land
 //       over QCop.  Need to figure out how to move to DBUS or perhaps keep as is?
-#ifndef QT_NO_COP
+#if defined(Q_WS_QWS)
 #include <qcopchannel_qws.h>
+#elif defined(Q_WS_X11)
+#include <qcopchannel_x11.h>
 #endif
 
 #include <qtopiaglobal.h>
@@ -52,7 +54,7 @@ signals:
     // Sound has finished playing
     void done();
 
-#ifndef QT_NO_COP
+#if !defined(QT_NO_COP) || defined(Q_WS_X11)
 private slots:
     void processMessage( const QString& msg, const QByteArray& data );
 #endif
@@ -64,7 +66,7 @@ private:
     int m_volume;
     Priority m_priority;
 
-#ifndef QT_NO_COP
+#if !defined(QT_NO_COP) || defined(Q_WS_X11)
     QCopChannel *m_channel;
 #endif
 };

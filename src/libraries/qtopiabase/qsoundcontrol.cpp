@@ -90,11 +90,11 @@
 */
 QSoundControl::QSoundControl( QSound* sound, QObject* parent )
     : QObject( parent ), m_sound( sound ), m_volume( 100 ), m_priority( Default )
-#ifndef QT_NO_COP
+#if !defined(QT_NO_COP) || defined(Q_WS_X11)
     , m_channel( 0 )
 #endif
 {
-#ifndef QT_NO_COP
+#if !defined(QT_NO_COP) || defined(Q_WS_X11)
     m_channel = new QCopChannel( QString( "QPE/QSound/" ).append( m_sound->objectName() ), this );
     connect( m_channel, SIGNAL(received(QString,QByteArray)),
         this, SLOT(processMessage(QString,QByteArray)) );
@@ -152,7 +152,7 @@ void QSoundControl::setPriority( Priority priority )
     Returns the sound object the control is associated with.
 */
 
-#ifndef QT_NO_COP
+#if !defined(QT_NO_COP) || defined(Q_WS_X11)
 
 void QSoundControl::processMessage( const QString& msg, const QByteArray& data )
 {

@@ -251,7 +251,7 @@ void QOpenVPN::connect()
             }
         }
     } else {
-#ifndef QT_NO_COP
+#if !defined(QT_NO_COP) || defined(Q_WS_X11)
         QtopiaIpcAdaptor o( QLatin1String("QPE/VPNManager") );
         o.send( MESSAGE(connectVPN(uint)), id() );
 #endif
@@ -280,7 +280,7 @@ void QOpenVPN::disconnect()
             }
         }
     } else {
-#ifndef QT_NO_COP
+#if !defined(QT_NO_COP) || defined(Q_WS_X11)
         QtopiaIpcAdaptor o( QLatin1String("QPE/VPNManager") );
         o.send( MESSAGE(disconnectVPN(uint)), id() );
 #endif
@@ -346,7 +346,7 @@ void QOpenVPN::cleanup()
     if ( !d->serverMode && !d->config.isEmpty() ) {
         uint i = id();
         QFile::remove( d->config );
-#ifndef QT_NO_COP
+#if !defined(QT_NO_COP) || defined(Q_WS_X11)
         QtopiaIpcAdaptor o( QLatin1String("QPE/VPNManager") );
         o.send( MESSAGE(deleteVPN(uint)), i );
 #endif

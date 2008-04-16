@@ -27,9 +27,7 @@
 #include <qtranslatablesettings.h>
 #include <qtopianamespace.h>
 
-#ifdef Q_WS_QWS
 #include <qtopiaipcenvelope.h>
-#endif
 #include <qfile.h>
 
 #ifdef Q_OS_WIN32
@@ -242,7 +240,7 @@ void QTaskIO::ensureDataCurrent(bool force)
 */
 void QTaskIO::notifyAdded(const QUniqueId &id)
 {
-#ifndef QT_NO_COP
+#if !defined(QT_NO_COP) || defined(Q_WS_X11)
     {
         QtopiaIpcEnvelope e("QPE/PIM", "addedTask(int,QUuid,QUniqueId)");
         e << getpid();
@@ -264,7 +262,7 @@ void QTaskIO::notifyAdded(const QUniqueId &id)
 */
 void QTaskIO::notifyUpdated(const QUniqueId &id)
 {
-#ifndef QT_NO_COP
+#if !defined(QT_NO_COP) || defined(Q_WS_X11)
     {
         QtopiaIpcEnvelope e("QPE/PIM", "updatedTask(int,QUuid,QUniqueId)");
         e << getpid();
@@ -286,7 +284,7 @@ void QTaskIO::notifyUpdated(const QUniqueId &id)
 */
 void QTaskIO::notifyRemoved(const QUniqueId & id)
 {
-#ifndef QT_NO_COP
+#if !defined(QT_NO_COP) || defined(Q_WS_X11)
     {
         QtopiaIpcEnvelope e("QPE/PIM", "removedTask(int,QUuid,QUniqueId)");
         e << getpid();
@@ -308,7 +306,7 @@ void QTaskIO::notifyRemoved(const QUniqueId & id)
 */
 void QTaskIO::notifyRemoved(const QList<QUniqueId> &ids)
 {
-#ifndef QT_NO_COP
+#if !defined(QT_NO_COP) || defined(Q_WS_X11)
     {
         QtopiaIpcEnvelope e("QPE/PIM", "removedTasks(int,QUuid,QList<QUniqueId>)");
         e << getpid();
