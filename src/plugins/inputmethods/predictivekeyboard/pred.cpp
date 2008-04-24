@@ -236,9 +236,9 @@ WordPredict::~WordPredict()
     reduction = 0;
 }
 
-void WordPredict::setLetter(char c, const QPoint &p)
+void WordPredict::setLetter(char c, const QRect &rect)
 {
-    m_layout[(int)c] = p;
+    m_layout[(int)c] = rect;
 }
 
 WordPredict::Movement 
@@ -268,7 +268,7 @@ WordPredict::movement(const QPoint &p1, const QPoint &p2)
 
 void WordPredict::addLetter(char l)
 {
-    m_points << m_layout[(int)l];
+    m_points << m_layout[(int)l].center();
     m_mPoints << Perfect;
     reduction->addPossibleCharacters(QByteArray(1,l));
     m_latestDfp[(int)l] = 0;
@@ -441,7 +441,7 @@ QString WordPredict::movementDesc() const
 #define EXCLUDE_DISTANCE 50
 int WordPredict::distanceForPoint(const QPoint &pos, char c)
 {
-    QPoint center = m_layout[(int)c];
+    QPoint center = m_layout[(int)c].center();
     if(center.isNull())
         return -1;
 
@@ -473,7 +473,7 @@ qreal WordPredict::incrWeightForWord(WPWord *w)
 
         int len = w->word.length();
         char c = w->word.at(len - 1).toLower().toLatin1();
-        QPoint cWordPoint = m_layout[(int)c];
+        QPoint cWordPoint = m_layout[(int)c].center();
 
         int distweight = m_latestDfp[(int)c];
         if(distweight == -1) {
@@ -484,7 +484,7 @@ qreal WordPredict::incrWeightForWord(WPWord *w)
 
         QPoint lastWordPoint;
         if(len > 1)
-            lastWordPoint = m_layout[(int)(w->word.at(len - 2).toLower().toLatin1())];
+            lastWordPoint = m_layout[(int)(w->word.at(len - 2).toLower().toLatin1())].center();
 
         Movement expected = None;
         if(!lastWordPoint.isNull())
@@ -582,10 +582,10 @@ qreal WordPredict::weightForWord(const Word &word)
 
         if(lastWordPoint.isNull()) {
             wordMovement << None;
-            QPoint cwordpoint = m_layout[(int)c];
+            QPoint cwordpoint = m_layout[(int)c].center();
             lastWordPoint = cwordpoint;
         } else {
-            QPoint cwordpoint = m_layout[(int)c];
+            QPoint cwordpoint = m_layout[(int)c].center();
             wordMovement << movement(lastWordPoint, cwordpoint);
             lastWordPoint = cwordpoint;
         }

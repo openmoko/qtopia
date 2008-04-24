@@ -44,9 +44,7 @@ void word_prediction_free(word_prediction_handle handle)
 
 void word_prediction_set_position(word_prediction_handle handle, char key, int x, int y, int width, int height)
 {
-    // TODO: The Qtopia prediction code only takes care of the center
-    // but with not equally spaced keys this code will fall apart
-    TO_WORD_PREDICT(handle)->setLetter(key, QRect(x, y, width, height).center());
+    TO_WORD_PREDICT(handle)->setLetter(key, QRect(x, y, width, height));
 }
 
 void word_prediction_add_perfect_letter(word_prediction_handle handle, char letter)

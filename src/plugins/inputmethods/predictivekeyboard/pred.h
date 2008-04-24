@@ -25,6 +25,7 @@
 #include <QList>
 #include <QHash>
 #include <QPoint>
+#include <QRect>
 #include <QString>
 #include <QStringList>
 
@@ -44,7 +45,7 @@ public:
     WordPredict(const Config &, int max, bool includePrefix = false);
     ~WordPredict();
 
-    void setLetter(char, const QPoint &);
+    void setLetter(char, const QRect &);
 
     void addLetter(char);
     void addTouch(const QPoint &);
@@ -79,7 +80,7 @@ private:
     
     QList<Movement> m_mPoints;
     QList<QPoint> m_points;
-    QPoint m_layout[256];
+    QRect m_layout[256];
     int m_latestDfp[256];
     int m_max;
     QString m_prefixedWord;
