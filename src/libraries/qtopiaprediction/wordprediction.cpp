@@ -13,6 +13,7 @@
 #include "wordprediction.h"
 
 #include "pred.h"
+#include <QRect>
 
 #define TO_PREDICT_STATE(handle) reinterpret_cast<PredictState*>(handle)
 #define TO_WORD_PREDICT(handle)  reinterpret_cast<WordPredict*>(TO_PREDICT_STATE(handle))
@@ -43,8 +44,9 @@ void word_prediction_free(word_prediction_handle handle)
 
 void word_prediction_set_position(word_prediction_handle handle, char key, int x, int y, int width, int height)
 {
-    // TODO: use width and height
-    TO_WORD_PREDICT(handle)->setLetter(key, QPoint(x, y));
+    // TODO: The Qtopia prediction code only takes care of the center
+    // but with not equally spaced keys this code will fall apart
+    TO_WORD_PREDICT(handle)->setLetter(key, QRect(x, y, width, height).center());
 }
 
 void word_prediction_add_perfect_letter(word_prediction_handle handle, char letter)
