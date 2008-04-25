@@ -47,9 +47,13 @@ void word_prediction_set_position(word_prediction_handle handle, char key, int x
     TO_WORD_PREDICT(handle)->setLetter(key, QRect(x, y, width, height));
 }
 
-void word_prediction_add_perfect_letter(word_prediction_handle handle, char letter)
+void word_prediction_add_perfect_letter(word_prediction_handle handle, char* letter)
 {
-    TO_WORD_PREDICT(handle)->addLetter(letter);
+    QString string = QString::fromUtf8(letter);
+    if (string.length() < 1)
+        return;
+
+    TO_WORD_PREDICT(handle)->addLetter(string[0].toLatin1());
 }
 
 void word_prediction_add_touch(word_prediction_handle handle, int x, int y)

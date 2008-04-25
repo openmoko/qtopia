@@ -37,7 +37,7 @@ void word_prediction_set_position(word_prediction_handle handle, char key, int x
  * Add the letter to the prediction a perfect hit at the position of @param letter
  * is assumed.
  */
-void word_prediction_add_perfect_letter(word_prediction_handle handle, char letter);
+void word_prediction_add_perfect_letter(word_prediction_handle handle, char *letter);
 
 /**
  * Add a touch and describe the movement from the previos format. The movement has to
