@@ -420,8 +420,9 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
 
 #ifdef QT_ILLUME_LAUNCHER
     SimPinDialog* dialog = new SimPinDialog(this);
-    QObject* obj = new PhoneStatusDBusExporter(dialog, this);
-    QDBusConnection::sessionBus().registerObject("/Status", obj, QDBusConnection::ExportScriptableContents);
+    QDBusConnection::sessionBus().registerObject("/Status",
+                                                 new PhoneStatusDBusExporter(dialog, this),
+                                                 QDBusConnection::ExportScriptableContents);
     QDBusConnection::sessionBus().registerService("org.openmoko.qtopia.Phonestatus");
 #endif
 
