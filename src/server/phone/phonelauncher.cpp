@@ -109,6 +109,7 @@
 #endif
 
 #include "simpindialog.h"
+#include "contactdbusexporter.h"
 #include "phonestatusdbusexporter.h"
 #include "smsstatusdbusexporter.h"
 
@@ -421,6 +422,9 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
 
 #ifdef QT_ILLUME_LAUNCHER
     SimPinDialog* dialog = new SimPinDialog(this);
+    QDBusConnection::sessionBus().registerObject("/Contacts",
+                                                 new ContactDBusExporter(this),
+                                                 QDBusConnection::ExportScriptableContents);
     QDBusConnection::sessionBus().registerObject("/Status",
                                                  new PhoneStatusDBusExporter(dialog, this),
                                                  QDBusConnection::ExportScriptableContents);

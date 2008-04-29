@@ -190,12 +190,14 @@ enable_vpn {
         core_server/qtopiainputevents.cpp
 } else {
     SERVER_HEADERS+=\
+        phone/contactdbusexporter.h \
         phone/phonestatusdbusexporter.h \
         phone/smsstatusdbusexporter.h \
         phone/simpindialog.h
     SERVER_SOURCES+=\
         core_server/windowmanagement_x11.cpp \
         core_server/qtopiainputevents_x11.cpp \
+        phone/contactdbusexporter.cpp \
         phone/phonestatusdbusexporter.cpp \
         phone/smsstatusdbusexporter.cpp \
         phone/simpindialog.cpp
