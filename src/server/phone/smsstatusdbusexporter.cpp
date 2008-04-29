@@ -17,7 +17,6 @@
 SMSStatusDBusExporter::SMSStatusDBusExporter(QObject* parent)
     : QObject(parent)
     , m_sender(0)
-    , m_store(0)
 {}
 
 // the bool is ignored, here for phonekit compat
@@ -43,18 +42,49 @@ void SMSStatusDBusExporter::_q_sent(const QString& id, QTelephony::Result result
 
 void SMSStatusDBusExporter::open()
 {
+    connect(QMailStore::instance(), SIGNAL(messagesAdded(const QMailIdList&)),
+            SLOT(_q_messagesAdded(const QMailIdList&)));
 }
 
 void SMSStatusDBusExporter::close()
 {
+    QMailStore::instance()->disconnect(this);
 }
 
 QList<QVariant> SMSStatusDBusExporter::listMessages() const
 {
-    return QList<QVariant>();
+    QList<QVariant> result;
+    QMailMessageKey key = QMailMessageKey(QMailMessageKey::Type, QMailMessage::Sms);
+    foreach(QMailId id, QMailStore::instance()->queryMessages(key)) 
+        result << id;
+
+    return result;
 }
 
 QMap<QString, QVariant> SMSStatusDBusExporter::message(const QString& id)
 {
-    return QMap<QString, QVariant>();
+    QMailMessage message = QMailStore::instance()->message(QMailId(id.toULongLong()));
+
+    QMap<QString, QVariant> messageResult;
+    messageResult[QLatin1String("uid")] = message.id().toULongLong();
+    messageResult[QLatin1String("from")] = message.from().toString();
+    messageResult[QLatin1String("subject")] = message.subject();
+    messageResult[QLatin1String("content")] = message.body().data();
+
+    return messageResult;
+}
+
+void SMSStatusDBusExporter::_q_messagesAdded(const QMailIdList& list)
+{
+    QList<QVariant> newIds;
+
+    foreach(QMailId id, list) {
+        if (QMailStore::instance()->messageHeader(id).messageType() == QMailMessage::Sms)
+            newIds << id.toULongLong();
+    }
+
+    if (newIds.isEmpty())
+        return;
+
+    emit newSms(newIds);
 }
