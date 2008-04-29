@@ -110,6 +110,7 @@
 
 #include "simpindialog.h"
 #include "phonestatusdbusexporter.h"
+#include "smsstatusdbusexporter.h"
 
 #include <QX11Info>
 #include <X11/Xlib.h>
@@ -422,6 +423,9 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
     SimPinDialog* dialog = new SimPinDialog(this);
     QDBusConnection::sessionBus().registerObject("/Status",
                                                  new PhoneStatusDBusExporter(dialog, this),
+                                                 QDBusConnection::ExportScriptableContents);
+    QDBusConnection::sessionBus().registerObject("/Sms",
+                                                 new SMSStatusDBusExporter(this),
                                                  QDBusConnection::ExportScriptableContents);
     QDBusConnection::sessionBus().registerService("org.openmoko.qtopia.Phonestatus");
 #endif
