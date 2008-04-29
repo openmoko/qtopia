@@ -620,6 +620,7 @@ enable_bluetooth {
 }
 depends(libraries/qtopiaphone)
 depends(libraries/qtopiapim)
+depends(libraries/qtopiamail)
 depends(3rdparty/libraries/openobex)
 depends(libraries/qtopiacomm)
 enable_qtopiamedia {

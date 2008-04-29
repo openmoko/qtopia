@@ -12,9 +12,12 @@
 
 #include "smsstatusdbusexporter.h"
 
+#include "qmailstore.h"
+
 SMSStatusDBusExporter::SMSStatusDBusExporter(QObject* parent)
     : QObject(parent)
     , m_sender(0)
+    , m_store(0)
 {}
 
 // the bool is ignored, here for phonekit compat
@@ -36,4 +39,22 @@ QString SMSStatusDBusExporter::send(const QString& number, const QString& messag
 void SMSStatusDBusExporter::_q_sent(const QString& id, QTelephony::Result result)
 {
     emit smsSent(id, result);
+}
+
+void SMSStatusDBusExporter::open()
+{
+}
+
+void SMSStatusDBusExporter::close()
+{
+}
+
+QList<QVariant> SMSStatusDBusExporter::listMessages() const
+{
+    return QList<QVariant>();
+}
+
+QMap<QString, QVariant> SMSStatusDBusExporter::message(const QString& id)
+{
+    return QMap<QString, QVariant>();
 }

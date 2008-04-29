@@ -18,6 +18,8 @@
 #include <QDBusConnection>
 #include <QSMSSender>
 
+class QMailStore;
+
 
 class SMSStatusDBusExporter : public QObject {
     Q_OBJECT
@@ -28,15 +30,21 @@ public:
 
 Q_SIGNALS:
     Q_SCRIPTABLE void smsSent(const QString&, int result);
+    Q_SCRIPTABLE void newSms(const QString& id);
 
 public Q_SLOTS:
     Q_SCRIPTABLE QString send(const QString& number, const QString& message, bool);
+    Q_SCRIPTABLE void open();
+    Q_SCRIPTABLE void close();
+    Q_SCRIPTABLE QList<QVariant> listMessages() const;
+    Q_SCRIPTABLE QMap<QString,QVariant> message(const QString&);
 
 private Q_SLOTS:
     void _q_sent(const QString &id, QTelephony::Result result);
 
 private:
     QSMSSender *m_sender;
+    QMailStore *m_store;
 };
 
 #endif
