@@ -32,7 +32,6 @@
 #include <qtopiacomm/private/qbluetoothremotedeviceselector_p.h>
 
 #include <qtopiaapplication.h>
-#include <qwaitwidget.h>
 #include <qsoftmenubar.h>
 
 #include <QList>
@@ -69,7 +68,6 @@ MyDevicesDisplay::MyDevicesDisplay(QBluetoothLocalDevice *local, QWidget *parent
       m_browser(0),
       m_devicesPlaceholderLabel(0),
       m_pairingAgent(0),
-      m_pairingWaitWidget(0),
       m_pairingDeviceDialog(0),
       m_pairingDeviceDialogFilter(0),
       m_sdpQuery(0),
@@ -242,15 +240,8 @@ void MyDevicesDisplay::createPairing(const QBluetoothAddress &addr)
         connect(m_pairingAgent, SIGNAL(done(bool)),
                 SLOT(pairingAgentDone(bool)));
     }
-    if (!m_pairingWaitWidget) {
-        m_pairingWaitWidget = new QWaitWidget(this);
-        connect(m_pairingWaitWidget, SIGNAL(cancelled()),
-                m_pairingAgent, SLOT(cancel()));
-    }
 
-    m_pairingWaitWidget->setText(tr("Pairing..."));
-    m_pairingWaitWidget->setCancelEnabled(true);
-    m_pairingWaitWidget->show();
+    #warning "Cancel broken due QWaitWidget removal"
     m_pairingAgent->start(addr);
 }
 
@@ -321,8 +312,6 @@ void MyDevicesDisplay::pairingAgentDone(bool error)
 
             // don't allow cancelling of SDP query, too messy (and it should
             // be quick since we've just paired)
-            m_pairingWaitWidget->setCancelEnabled(false);
-            m_pairingWaitWidget->setText(tr("Checking services..."));
             if (!m_sdpQuery->searchServices(m_pairingAgent->remoteAddress(), *m_local,
                                        QBluetoothSdpUuid::L2cap)) {
                 doneAddDevice(true, tr("<P>Unable to request device services"));
@@ -358,7 +347,6 @@ void MyDevicesDisplay::foundServices(const QBluetoothSdpQueryResult &result)
 
 void MyDevicesDisplay::doneAddDevice(bool error, const QString &errorString)
 {
-    m_pairingWaitWidget->hide();
     if (error) {
         QMessageBox::warning(this, tr("Pairing Error"), errorString);
     }

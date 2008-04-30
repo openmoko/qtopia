@@ -25,7 +25,6 @@
 #include <qtopiacomm/private/qbluetoothremotedeviceselector_p.h>
 
 #include <qtopiaapplication.h>
-#include <qwaitwidget.h>
 #include <qtopialog.h>
 
 #include <QVBoxLayout>
@@ -410,7 +409,6 @@ void QBluetoothRemoteDeviceDialogPrivate::activated(const QBluetoothAddress &add
         // must cancel any current discovery, or SDP query will fail
         if (m_discovering)
             cancelDiscovery();
-        m_validationWaitWidget->show();
         m_deviceUnderValidation = addr;
         validateProfiles();
     }
@@ -430,15 +428,17 @@ void QBluetoothRemoteDeviceDialogPrivate::deviceActivatedOk()
         }
     }
 
-    m_validationWaitWidget->hide();
     // close the dialog
     m_parent->accept();
 }
 
 void QBluetoothRemoteDeviceDialogPrivate::validateProfiles()
 {
+#warning "Might be broken now"
+#if 0
     if (!m_validationWaitWidget->isVisible()) 
         return;
+#endif
 
     if (m_cancellingDiscovery) {
         QTimer::singleShot(100, this, SLOT(validateProfiles()));
@@ -451,14 +451,12 @@ void QBluetoothRemoteDeviceDialogPrivate::validateProfiles()
     }
 
     if (!m_deviceUnderValidation.isValid()) {
-        m_validationWaitWidget->hide();
         return;
     }
 
     if (!m_local || !m_local->isValid()) {
         QMessageBox::warning(this, tr("Bluetooth Error"),
             tr("<P>Bluetooth is not available, cannot verify services."));
-        m_validationWaitWidget->hide();
         return;
     }
 
@@ -475,7 +473,6 @@ void QBluetoothRemoteDeviceDialogPrivate::validationError()
 {
     QMessageBox::warning(this, tr("Service Error"),
         tr("<P>Unable to verify services. Try again, or choose another device."));
-    m_validationWaitWidget->hide();
 
     // don't reset the address - becomes confusing if multiple searches are
     // cancelled
@@ -502,7 +499,6 @@ void QBluetoothRemoteDeviceDialogPrivate::serviceSearchCompleted(const QBluetoot
     } else {
         QMessageBox::warning(this, tr("Service Error"),
             tr("<P>Device does not have the necessary services.  Try again, or choose another device."));
-        m_validationWaitWidget->hide();
     }
 }
 
@@ -513,7 +509,6 @@ void QBluetoothRemoteDeviceDialogPrivate::serviceSearchCancelled()
         m_sdap.cancelSearch();
     }
 
-    m_validationWaitWidget->hide();
 }
 
 void QBluetoothRemoteDeviceDialogPrivate::serviceSearchCancelCompleted()
@@ -602,11 +597,7 @@ void QBluetoothRemoteDeviceDialogPrivate::initWidgets()
     m_statusLabel = new QLabel;
     m_statusIcon = new DiscoveryStatusIcon(this);
 
-    m_validationWaitWidget = new QWaitWidget(this);
-    m_validationWaitWidget->setText(tr("Verifying services..."));
-    m_validationWaitWidget->setCancelEnabled(true);
-    connect(m_validationWaitWidget, SIGNAL(cancelled()),
-            SLOT(serviceSearchCancelled()));
+#warning Canceling of service searching broken by removal of QWaitWidget
 }
 
 void QBluetoothRemoteDeviceDialogPrivate::initLayout()

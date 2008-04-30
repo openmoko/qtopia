@@ -28,7 +28,6 @@ QTOPIA_HEADERS+=\
     inputmethodinterface.h\
     qapplicationplugin.h\
     qpluginmanager.h\
-    qwaitwidget.h\
     qtimezone.h\
     qthumbnail.h\
     qimagedocumentselector.h\
@@ -164,7 +163,6 @@ QTOPIA_SOURCES+=\
     inputmethodinterface.cpp\
     qpluginmanager.cpp\
     qcategorymanager.cpp\
-    qwaitwidget.cpp\
     qtimezone.cpp\
     qthumbnail.cpp\
     qimagedocumentselector.cpp\

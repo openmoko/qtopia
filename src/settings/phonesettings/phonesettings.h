@@ -39,7 +39,6 @@ class QCheckBox;
 class QLineEdit;
 class QTimer;
 class QRadioButton;
-class QWaitWidget;
 
 class QCallVolume;
 
@@ -112,7 +111,6 @@ private:
     QIcon incoming, outgoing, barred;
     QAction *unlock, *pin;
     bool isLoading;
-    QWaitWidget *waitWidget;
 };
 
 class CallWaiting : public QDialog
@@ -138,7 +136,6 @@ private:
     QListWidget *waitOptions;
     QCallSettings *client;
     bool isLoading;
-    QWaitWidget *waitWidget;
 };
 
 class CallerID : public QDialog

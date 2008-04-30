@@ -24,7 +24,6 @@
 
 #include <QMainWindow>
 
-class QWaitWidget;
 class QAction;
 class QBluetoothRfcommSocket;
 class QTextEdit;
@@ -56,7 +55,6 @@ private slots:
 private:
     QTextEdit *logArea;
     QLineEdit *userEntry;
-    QWaitWidget *waiter;
     bool canceled;
     QAction *connectAction;
     QAction *disconnectAction;

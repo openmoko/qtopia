@@ -31,7 +31,6 @@
 #include <QAbstractProxyModel>
 #include <qcontentfilterselector.h>
 #include <qdrmcontent.h>
-#include <qwaitwidget.h>
 #include "drmcontent_p.h"
 #include <QFocusEvent>
 #include <qsoftmenubar.h>
@@ -465,8 +464,6 @@ private:
 
     QDocumentPropertiesDialog *m_propertiesDialog;
 
-    QWaitWidget *m_waitWidget;
-
     QContentSetModel *m_contentModel;
     NewDocumentProxyModel *m_proxyModel;
 
@@ -495,7 +492,6 @@ DocumentView::DocumentView( QWidget *parent )
     , m_typeDialog( 0 )
     , m_categoryDialog( 0 )
     , m_propertiesDialog( 0 )
-    , m_waitWidget( 0 )
     , m_options( QDocumentSelector::ContextMenu )
     , m_sortMode( QDocumentSelector::Alphabetical )
     , m_defaultCategoriesDirty( false )

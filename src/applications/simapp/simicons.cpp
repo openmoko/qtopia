@@ -20,7 +20,6 @@
 ****************************************************************************/
 
 #include "simicons.h"
-#include <QWaitWidget>
 #include <QFile>
 #include <qtopianamespace.h>
 
@@ -29,7 +28,6 @@ SimIcons::SimIcons( QSimIconReader *reader, QWidget *parent )
 {
     this->reader = reader;
     this->parent = parent;
-    this->waitWidget = 0;
 
     if ( reader ) {
         connect( reader, SIGNAL(iconAvailable(int)), this, SLOT(iconDone(int)) );
@@ -42,8 +40,6 @@ SimIcons::~SimIcons()
     QMap<int, QString>::ConstIterator it;
     for ( it = files.begin(); it != files.end(); ++it )
         QFile::remove( it.value() );
-    if ( waitWidget )
-        delete waitWidget;
 }
 
 QIcon SimIcons::icon( int iconId )
@@ -110,11 +106,6 @@ void SimIcons::requestIcons()
         return;
     }
 
-    // Show the wait widget while we fetch the icons.
-    if ( !waitWidget )
-        waitWidget = new QWaitWidget( parent );
-    waitWidget->show();
-
     // Request the icons that we are missing.
     foreach ( int icon, pendingIcons )
         reader->requestIcon( icon );
@@ -128,8 +119,6 @@ void SimIcons::iconDone( int iconId )
     loadedIcons.append( iconId );
     pendingIcons.removeAll( iconId );
     if ( pendingIcons.isEmpty() ) {
-        if ( waitWidget )
-            waitWidget->hide();
         if ( !fileIcons.isEmpty() )
             copyIconsToFiles();
         emit iconsReady();

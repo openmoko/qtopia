@@ -30,7 +30,6 @@
 class QBluetoothRemoteDeviceSelector;
 class QBluetoothLocalDevice;
 class QAction;
-class QWaitWidget;
 class PairingAgent;
 class QBluetoothRemoteDeviceDialog;
 class QBluetoothSdpQuery;
@@ -82,7 +81,6 @@ private:
     int m_refreshIndex;
 
     PairingAgent *m_pairingAgent;
-    QWaitWidget *m_pairingWaitWidget;
 
     QBluetoothRemoteDeviceDialog *m_pairingDeviceDialog;
     DeviceDialogFilter *m_pairingDeviceDialogFilter;

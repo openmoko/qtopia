@@ -46,7 +46,6 @@
 #include <QObexFtpClient>
 
 #include <QtopiaItemDelegate>
-#include <QWaitWidget>
 #include <QMimeType>
 #include <QSoftMenuBar>
 #include <QContent>
@@ -397,8 +396,6 @@ public:
     QBluetoothSdpQuery *m_sdap;
     bool m_sdapCanceled;
 
-    QWaitWidget *m_waitWidget;
-
     QListView *m_files;
     ObexFtpModel *m_model;
 
@@ -483,8 +480,6 @@ BtFtp::BtFtp(QWidget *parent, Qt::WFlags fl) : QMainWindow(parent, fl)
     m_data->m_deleteAction->setVisible(false);
     m_data->m_cancelAction->setVisible(false);
 
-    m_data->m_waitWidget = new QWaitWidget( 0 );
-
     m_data->m_central = new QWidget(this);
     setCentralWidget(m_data->m_central);
 
@@ -522,7 +517,6 @@ BtFtp::~BtFtp()
 {
     delete m_data->m_rfcommSock;
     delete m_data->m_sdap;
-    delete m_data->m_waitWidget;
     delete m_data->m_session;
     delete m_data;
 }
@@ -574,15 +568,11 @@ void BtFtpPrivate::browseDevice()
         return;
     }
 
-    m_waitWidget->setText( tr( "Starting..." ) );
-    m_waitWidget->setCancelEnabled(false);
-    m_waitWidget->show();
-
     m_session = QCommDeviceSession::session(device.deviceName().toLatin1());
 
     if (!m_session) {
-        m_waitWidget->setText( tr("Could not start Bluetooth session!") );
-        m_waitWidget->setCancelEnabled(true);
+        QMessageBox::information(0, tr("No Bluetooth session"),
+                                 tr("Could not start Bluetooth session!") );
         return;
     }
 
@@ -592,7 +582,6 @@ void BtFtpPrivate::browseDevice()
     m_addr = QBluetoothRemoteDeviceDialog::getRemoteDevice(m_parent, profiles);
 
     if (!m_addr.isValid()) {
-        m_waitWidget->hide();
         return;
     }
 
@@ -604,26 +593,19 @@ void BtFtpPrivate::browseDevice()
         QObject::connect(m_sdap,
                          SIGNAL(searchComplete(QBluetoothSdpQueryResult)),
                          this, SLOT(searchCompleted(QBluetoothSdpQueryResult)));
-
-        QObject::connect(m_waitWidget, SIGNAL(cancelled()),
-                         this, SLOT(cancelSearch()));
+        #warning "Canceling search broken due the removal of QWaitWidget
     }
 
     m_sdap->searchServices(m_addr, device,
                                    QBluetooth::FileTransferProfile);
 
     m_sdapCanceled = false;
-    m_waitWidget->setText( tr( "Searching..." ) );
-    m_waitWidget->setCancelEnabled(true);
 }
 
 void BtFtpPrivate::cancelSearch()
 {
     if (m_sdapCanceled)
         return;
-
-    m_waitWidget->setText( tr( "Canceling...") );
-    m_waitWidget->setCancelEnabled(false);
 
     m_sdap->cancelSearch();
 
@@ -632,7 +614,6 @@ void BtFtpPrivate::cancelSearch()
 
 void BtFtpPrivate::searchCompleted(const QBluetoothSdpQueryResult &result)
 {
-    m_waitWidget->setText(tr("Connecting..."));
     m_sdapCanceled = false;
 
     if (!result.isValid()) {
@@ -672,7 +653,6 @@ void BtFtpPrivate::searchCompleted(const QBluetoothSdpQueryResult &result)
 
 void BtFtpPrivate::rfcommConnected()
 {
-    m_waitWidget->hide();
     disconnect(m_rfcommSock, SIGNAL(error(QBluetoothAbstractSocket::SocketError)),
             this, SLOT(rfcommError(QBluetoothAbstractSocket::SocketError)));
 
@@ -711,14 +691,12 @@ void BtFtpPrivate::rfcommError(QBluetoothAbstractSocket::SocketError error)
     disconnect(m_rfcommSock, SIGNAL(error(QBluetoothAbstractSocket::SocketError)),
             this, SLOT(rfcommError(QBluetoothAbstractSocket::SocketError)));
 
-    m_waitWidget->setCancelEnabled(true);
-    m_waitWidget->setText(tr("Could not connect to the remote service!"));
-    QTimer::singleShot(2000, m_waitWidget, SLOT(hide()));
+    QMessageBox::information(0, tr("Could not connect"),
+                             tr("Could not connect to the remote service!"));
 }
 
 void BtFtpPrivate::searchCancelled()
 {
-    m_waitWidget->hide();
     m_sdapCanceled = false;
 
     m_progress->setRange(0, 1);

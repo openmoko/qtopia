@@ -24,7 +24,6 @@
 #include <qmimetype.h>
 #include <qtopianamespace.h>
 #include <qtopialog.h>
-#include <qwaitwidget.h>
 #include <qbluetoothlocaldevice.h>
 #include <qobexpushclient.h>
 #include <qbluetoothlocaldevicemanager.h>
@@ -51,14 +50,13 @@ struct QBluetoothObexAgentPrivate {
     QString m_mimeType;
     QByteArray m_byteArray;
     QBluetoothSdpQuery m_sdap;
-    QWaitWidget *m_waitWidget;
     bool m_autoDelete;
     bool m_inProgress;
     QObexPushClient *m_sender;
 };
 
 QBluetoothObexAgentPrivate::QBluetoothObexAgentPrivate()
-    : m_localDevice( 0 ), m_remoteDevice( 0 ), m_waitWidget( 0 )
+    : m_localDevice( 0 ), m_remoteDevice( 0 )
 , m_autoDelete( false ), m_inProgress( false ), m_sender( 0 )
 {
 }
@@ -69,8 +67,6 @@ QBluetoothObexAgentPrivate::~QBluetoothObexAgentPrivate()
         delete m_localDevice;
     if ( m_remoteDevice )
         delete m_remoteDevice;
-    if ( m_waitWidget )
-        delete m_waitWidget;
 }
 
 /*!
@@ -86,9 +82,6 @@ QBluetoothObexAgent::QBluetoothObexAgent( const QBluetoothRemoteDevice &remoteDe
     d->m_localDevice = new QBluetoothLocalDevice( localDevManager.defaultDevice() );
     d->m_remoteDevice = new QBluetoothRemoteDevice( remoteDevice );
     d->m_profile = profile;
-
-    d->m_waitWidget = new QWaitWidget( 0 );
-    d->m_waitWidget->setText( tr( "Searching..." ) );
 
     connect( &d->m_sdap, SIGNAL(searchComplete(QBluetoothSdpQueryResult)),
             this, SLOT(searchComplete(QBluetoothSdpQueryResult)) );
@@ -107,7 +100,6 @@ void QBluetoothObexAgent::startSearch()
     d->m_inProgress = true;
     d->m_sdap.searchServices( d->m_remoteDevice->address(),
             *d->m_localDevice, d->m_profile );
-    d->m_waitWidget->show();
 }
 
 bool QBluetoothObexAgent::inProgress()
@@ -230,8 +222,6 @@ void QBluetoothObexAgent::searchComplete( const QBluetoothSdpQueryResult &result
             // check if file format is upported if printing
             if ( d->m_profile == DirectPrintingProfile ) {
                 if ( !service.attribute( (quint16)0x0350 ).toString().toLower().contains( d->m_mimeType.toLower() ) ) {
-                    if ( d->m_waitWidget->isVisible() )
-                        d->m_waitWidget->hide();
                     QMessageBox::critical( 0, tr( "Format not supported" ),
                         tr( "<qt>Format (%1) is not supported.</qt>" )
                         .arg( d->m_mimeType ), QMessageBox::Ok );
@@ -282,8 +272,6 @@ void QBluetoothObexAgent::searchComplete( const QBluetoothSdpQueryResult &result
 
     }
     if ( !success ) {
-        if ( d->m_waitWidget->isVisible() )
-            d->m_waitWidget->hide();
         QMessageBox::critical( 0, tr( "Service not found" ),
                 tr( "<qt>The selected device does not support this operation.</qt>" ),
                 QMessageBox::Ok );
@@ -293,6 +281,8 @@ void QBluetoothObexAgent::searchComplete( const QBluetoothSdpQueryResult &result
 
 void QBluetoothObexAgent::progress( qint64 sent, qint64 total )
 {
+#warning broken due QWaitWidget removal
+#if 0
     QString str;
 
     if ( sent > 1024 )
@@ -310,6 +300,7 @@ void QBluetoothObexAgent::progress( qint64 sent, qint64 total )
     d->m_waitWidget->setText( str );
     if ( sent == total )
         d->m_waitWidget->hide();
+#endif
 }
 
 /*!

@@ -31,7 +31,6 @@
 #include <QTimer>
 #include <QtopiaApplication>
 #include <QKeyEvent>
-#include <QWaitWidget>
 #include <qsoftmenubar.h>
 #include <qtopialog.h>
 
@@ -402,8 +401,6 @@ void PackageView::init()
     targetActionGroup->setExclusive( true );
     connect( targetActionGroup, SIGNAL(triggered(QAction*)),
             this, SLOT(targetChoice(QAction*)) );
-
-     waitWidget = new QWaitWidget( this );
 }
 
 void PackageView::activateItem( const QModelIndex &item )
@@ -624,11 +621,8 @@ void PackageView::startUninstall()
                 + tr("All running instances will be terminated."), QMessageBox::Yes | QMessageBox::No )
          == QMessageBox::Yes)
     {
-            waitWidget->show();
-            waitWidget->setText(tr("Uninstalling..."));
             model->activateItem( installedView->currentIndex() );
             installedView->setCurrentIndex(QModelIndex());
-            waitWidget->hide();
     }
 }
 

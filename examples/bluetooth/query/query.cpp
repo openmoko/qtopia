@@ -34,7 +34,6 @@
 #include <QBluetoothRemoteDeviceDialog>
 
 #include <QtopiaApplication>
-#include <QWaitWidget>
 #include <QAction>
 #include <QMenu>
 #include <QSoftMenuBar>
@@ -63,8 +62,7 @@ Query::Query(QWidget *parent, Qt::WFlags f)
     connect(sdap, SIGNAL(searchComplete(const QBluetoothSdpQueryResult &)),
         this, SLOT(searchComplete(const QBluetoothSdpQueryResult &)));
 
-    waiter = new QWaitWidget(this);
-    connect(waiter, SIGNAL(cancelled()), this, SLOT(cancelQuery()));
+    #warning "Canceling query broken due WaitWidget removal"
 
     startQueryAction = new QAction(tr("Query device..."), this);
     connect(startQueryAction, SIGNAL(triggered()), this, SLOT(startQuery()));
@@ -82,8 +80,6 @@ Query::~Query()
 void Query::startQuery()
 {
     canceled = false;
-    waiter->setText(tr("Querying SDP..."));
-    waiter->setCancelEnabled(true);
 
     startQueryAction->setVisible(false);
     serviceList->clear();
@@ -100,14 +96,10 @@ void Query::startQuery()
     // not in public browse group
     quint16 id = 0x0100;
     sdap->searchServices(addr, *btDevice, QBluetoothSdpUuid(id));
-
-    waiter->show();
 }
 
 void Query::searchComplete(const QBluetoothSdpQueryResult &result)
 {
-    waiter->hide();
-
     startQueryAction->setVisible(true);
 
     if (canceled) {
@@ -129,13 +121,10 @@ void Query::searchComplete(const QBluetoothSdpQueryResult &result)
 
 void Query::searchCancelled()
 {
-    waiter->hide();
     startQueryAction->setVisible(true);
 }
 
 void Query::cancelQuery()
 {
-    waiter->setText(tr("Aborting Query..."));
-    waiter->setCancelEnabled(false);
     canceled = true;
 }

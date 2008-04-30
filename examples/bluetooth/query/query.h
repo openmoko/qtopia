@@ -28,7 +28,6 @@ class QBluetoothLocalDevice;
 class QBluetoothSdpQuery;
 class QBluetoothSdpQueryResult;
 
-class QWaitWidget;
 class QListWidget;
 class QAction;
 
@@ -51,7 +50,6 @@ private slots:
 private:
     QBluetoothLocalDevice *btDevice;
     QBluetoothSdpQuery *sdap;
-    QWaitWidget *waiter;
     bool canceled;
     QListWidget *serviceList;
     QAction *startQueryAction;

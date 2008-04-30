@@ -40,7 +40,6 @@
 #include <QTimer>
 #include <qtopiaipcenvelope.h>
 #include <qtopiaservices.h>
-#include <qwaitwidget.h>
 
 static QString voiceMailNumber = QString();
 
@@ -662,9 +661,7 @@ void CallForwarding::init()
 
     setWindowTitle( tr( "Forwarding" ) );
 
-    splash = new QWaitWidget( this );
-    splash->setCancelEnabled( true );
-    connect( splash, SIGNAL(cancelled()), this, SLOT(reject()) );
+    #warning "Rejecting disable due QWaitWidget removal"
 
     reqType = NoRequest;
 
@@ -753,17 +750,12 @@ void CallForwarding::receiveRequest( QCallForwarding::Reason reason, QString num
         client->setForwarding( reason, status, currentItem.enabled );
 
         client->requestForwardingStatus( reason );
-        if ( !isAutoActivation )
-            splash->show();
     }
 }
 
 void CallForwarding::forwardingStatus( QCallForwarding::Reason reason, const QList<QCallForwarding::Status> &status )
 {
     QSettings setting( "Trolltech", "Phone" );
-
-    if ( reason == QCallForwarding::NotReachable )
-        splash->hide();
 
     switch( reqType ) {
     case Status:
@@ -799,8 +791,6 @@ void CallForwarding::forwardingStatus( QCallForwarding::Reason reason, const QLi
 
 void CallForwarding::setForwardingResult( QCallForwarding::Reason reason, QTelephony::Result result )
 {
-    if ( splash->isVisible() )
-        splash->hide();
     // if error ocurred notify requester and do not write config
     if ( result == QTelephony::Error ) {
         QMessageBox::information( this, tr("Forwarding failed"),
@@ -852,7 +842,6 @@ void CallForwarding::checkStatus()
 
     isLoaded = true;
     show();
-    splash->show();
 }
 
 void CallForwarding::pushSettingStatus()

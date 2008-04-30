@@ -34,7 +34,6 @@
 class QAction;
 class QTimer;
 class QValueSpaceItem;
-class QWaitWidget;
 class QSlider;
 
 class CameraMainWindow : public QMainWindow
@@ -131,7 +130,6 @@ private:
     QContentSetModel *m_photoModel;
     QString camcat;
     bool    m_contextMenuActive;
-    QWaitWidget *m_wait;
     bool m_iswaiting;
     void showWaitScreen(const QString& s = "");
     void hideWaitScreen();

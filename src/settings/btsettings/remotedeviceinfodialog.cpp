@@ -29,7 +29,6 @@
 #include <qbluetoothaddress.h>
 
 #include <qformlayout.h>
-#include <qwaitwidget.h>
 #include <qtopiaapplication.h>
 #include <qtopianamespace.h>
 #include <qtopialog.h>
@@ -58,7 +57,6 @@ private slots:
 
 private:
     QBluetoothSdpQuery *m_sdpQuery;
-    QWaitWidget *m_wait;
     QStringListModel *m_serviceModel;
 
     QListView *createListView() const;
@@ -67,20 +65,16 @@ private:
 ServicesDisplay::ServicesDisplay(QWidget *parent)
     : QObject(parent),
       m_sdpQuery(new QBluetoothSdpQuery(this)),
-      m_wait(new QWaitWidget(0)),
       m_serviceModel(new QStringListModel(this))
 {
     connect(m_sdpQuery, SIGNAL(searchComplete(QBluetoothSdpQueryResult)),
             SLOT(foundServices(QBluetoothSdpQueryResult)));
 
-    m_wait->setText(tr("Querying services..."));
-    m_wait->setCancelEnabled(true);
-    connect(m_wait, SIGNAL(cancelled()), m_sdpQuery, SLOT(cancelSearch()));
+    #warning "Cancel broken due QWaitWidget removal"
 }
 
 ServicesDisplay::~ServicesDisplay()
 {
-    delete m_wait;
 }
 
 QListView *ServicesDisplay::createListView() const
@@ -105,12 +99,6 @@ void ServicesDisplay::exec(QBluetoothLocalDevice *local, const QBluetoothAddress
     }
     m_serviceModel->removeRows(0, m_serviceModel->rowCount());
 
-    // don't use QtopiaApplication::execDialog() because the widget won't
-    // animate without a call to show()
-    m_wait->show();
-    m_wait->exec();
-    if (m_wait->wasCancelled() || m_wait->result() != QDialog::Accepted)
-        return;
     QDialog dlg;
     dlg.setWindowTitle(tr("Supported services"));
     QVBoxLayout layout;
@@ -135,7 +123,6 @@ void ServicesDisplay::foundServices(const QBluetoothSdpQueryResult &result)
     if (!result.isValid()) {
         QMessageBox::warning(0, tr("Services Query Error"),
                              tr("<P>Unable to request device services"));
-        m_wait->reject();
         return;
     }
 
@@ -145,7 +132,6 @@ void ServicesDisplay::foundServices(const QBluetoothSdpQueryResult &result)
         serviceNames << (services[i].serviceName());
     }
     m_serviceModel->setStringList(serviceNames);
-    m_wait->accept();
 }
 
 
@@ -324,7 +310,6 @@ private:
     QPushButton *m_connectHeadsetButton;
     QPushButton *m_connectHandsFreeButton;
     QPushButton *m_disconnectButton;
-    QWaitWidget *m_waitWidget;
 };
 
 AudioDeviceConnectionStatus::AudioDeviceConnectionStatus(QBluetoothLocalDevice *local, QWidget *parent)
@@ -334,8 +319,7 @@ AudioDeviceConnectionStatus::AudioDeviceConnectionStatus(QBluetoothLocalDevice *
       m_connectionStatusLabel(new QLabel),
       m_connectHeadsetButton(new QPushButton(tr("Connect headset"))),
       m_connectHandsFreeButton(new QPushButton(tr("Connect handsfree unit"))),
-      m_disconnectButton(new QPushButton(tr("Disconnect"))),
-      m_waitWidget(new QWaitWidget(this))
+      m_disconnectButton(new QPushButton(tr("Disconnect")))
 {
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setMargin(0);
@@ -418,7 +402,6 @@ void AudioDeviceConnectionStatus::updateConnectionStatus()
 void AudioDeviceConnectionStatus::remoteDeviceDisconnected(const QBluetoothAddress &addr)
 {
     DeviceConnectionStatus::remoteDeviceDisconnected(addr);
-    m_waitWidget->hide();
 }
 
 void AudioDeviceConnectionStatus::clickedConnectHeadset()
@@ -433,11 +416,7 @@ void AudioDeviceConnectionStatus::clickedConnectHandsFree()
 
 void AudioDeviceConnectionStatus::connectAudioGateway(QBluetoothAudioGateway *gateway, int channel)
 {
-    m_waitWidget->setText(tr("Connecting..."));
-    m_waitWidget->setCancelEnabled(true);
-    connect(m_waitWidget, SIGNAL(cancelled()), gateway, SLOT(disconnect()));
-    m_waitWidget->show();
-
+    #warning "Disconnect broken due QWaitWidget removal"
     gateway->connect(address(), channel);
 
     qLog(Bluetooth) << "AudioDeviceConnectionStatus: Connecting to audio gateway on"
@@ -449,20 +428,12 @@ void AudioDeviceConnectionStatus::audioGatewayConnected(bool success, const QStr
     qLog(Bluetooth) << "AudioDeviceConnectionStatus: gateway connected" << success << msg;
     updateConnectionStatus();
 
-    if (m_waitWidget->isVisible()) {
-        m_waitWidget->hide();
-        QBluetoothAudioGateway *gateway = qobject_cast<QBluetoothAudioGateway *>(sender());
-        if (gateway) {
-            disconnect(m_waitWidget, SIGNAL(cancelled()), 
-                       gateway, SLOT(disconnect()));
-        }
-
-        if (!success) {
-            qLog(Bluetooth) << "AudioDeviceConnectionStatus: Headset/Handsfree connection failed:"
-                    << msg;
-            QMessageBox::warning(this, tr("Error"),
-                tr("<qt>Connection failed.</qt>"), QMessageBox::Ok);
-        }
+    #warning "QWaitWidget..."
+    if (!success) {
+        qLog(Bluetooth) << "AudioDeviceConnectionStatus: Headset/Handsfree connection failed:"
+                        << msg;
+        QMessageBox::warning(this, tr("Error"),
+                             tr("<qt>Connection failed.</qt>"), QMessageBox::Ok);
     }
 }
 
@@ -471,9 +442,6 @@ void AudioDeviceConnectionStatus::clickedDisconnect()
     qLog(Bluetooth) << "AudioDeviceConnectionStatus::clickedDisconnect()";
 
     QBluetoothAudioGateway *gateway = connectedGateway();
-    m_waitWidget->setText(tr("Disconnecting..."));
-    m_waitWidget->setCancelEnabled(false);
-    m_waitWidget->show();
 
     if (gateway == m_headsetGateway) {
         m_headsetGateway->disconnect();
@@ -490,8 +458,6 @@ void AudioDeviceConnectionStatus::remoteAudioDeviceConnected(const QBluetoothAdd
     // otherwise connect buttons are enabled even if another device is now
     // using the gateway.
     updateConnectionStatus();
-    if (addr == address())
-        m_waitWidget->hide();
 }
 
 void AudioDeviceConnectionStatus::headsetDisconnected()
@@ -505,8 +471,6 @@ void AudioDeviceConnectionStatus::headsetDisconnected()
     // other headset disconnected, then the audio gateway is now available,
     // and the status display needs to change.
     updateConnectionStatus();
-
-    m_waitWidget->hide();
 }
 
 QBluetoothAudioGateway *AudioDeviceConnectionStatus::connectedGateway() const

@@ -41,7 +41,6 @@
 
 class QBluetoothRemoteDeviceSelector;
 class QLabel;
-class QWaitWidget;
 class QBluetoothSdpQueryResult;
 class QActionGroup;
 class QMenu;
@@ -146,7 +145,6 @@ private:
     QBluetoothRemoteDeviceSelector *m_browser;
     QLabel *m_statusLabel;
     DiscoveryStatusIcon *m_statusIcon;
-    QWaitWidget *m_validationWaitWidget;
 
     // actions
     QMenu *m_menu;

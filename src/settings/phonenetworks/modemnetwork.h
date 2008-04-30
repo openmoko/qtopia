@@ -30,7 +30,6 @@
 #include <QListWidget>
 
 class QModemNetworkRegistration;
-class QWaitWidget;
 class TwoLineFloatingTextList;
 
 class ModemNetworkRegister : public QListWidget
@@ -54,7 +53,6 @@ private:
     QBandSelection *m_bandSel;
     QString m_curBand;
     QBandSelection::BandMode m_curBandMode;
-    QWaitWidget *m_waitWidget;
     QDialog *m_opDlg;
     TwoLineFloatingTextList *m_opList;
     QListWidgetItem *m_originalOp;
@@ -103,7 +101,6 @@ private:
     QList<QPreferredNetworkOperators::NameInfo> m_operatorNames;
     QList<QPreferredNetworkOperators::Info> m_currentOpers;
     QList<QPreferredNetworkOperators::Info> m_originalOpers;
-    QWaitWidget *m_waitWidget;
     QAction *m_add, *m_remove, *m_up, *m_down;
     QDialog *m_addNetworkDlg;
     TwoLineFloatingTextList *m_addNetworkList;

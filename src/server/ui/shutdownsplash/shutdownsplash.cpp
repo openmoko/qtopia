@@ -20,7 +20,7 @@
 ****************************************************************************/
 
 #include "shutdownsplash.h"
-#include <QWaitWidget>
+#include <QLabel>
 
 /*!
   \class ShutdownSplashScreen
@@ -51,12 +51,11 @@
 /*! \internal */
 bool ShutdownSplashScreen::systemRestart()
 {
-    QWaitWidget* w = new QWaitWidget( 0 );
+    QLabel* w = new QLabel( 0 );
     w->setText(tr("Please wait..."));
     w->setWindowFlags(Qt::WindowStaysOnTopHint);
     w->setWindowState(Qt::WindowFullScreen);
     w->setAttribute( Qt::WA_DeleteOnClose );
-    w->setCancelEnabled( false );
     w->showFullScreen();
     return true;
 }

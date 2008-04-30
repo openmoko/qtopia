@@ -30,7 +30,6 @@
 #include <QBluetoothRemoteDeviceDialog>
 
 #include <QtopiaApplication>
-#include <QWaitWidget>
 #include <QAction>
 #include <QMenu>
 #include <QSoftMenuBar>
@@ -40,8 +39,7 @@
 RfcommClient::RfcommClient(QWidget *parent, Qt::WFlags f)
     : QMainWindow(parent, f)
 {
-    waiter = new QWaitWidget(this);
-    connect(waiter, SIGNAL(cancelled()), this, SLOT(cancelConnect()));
+    #warning "Cancel broken due removal of WaitWidget"
 
     connectAction = new QAction(tr("Connect..."), this);
     connect(connectAction, SIGNAL(triggered()), this, SLOT(connectSocket()));
@@ -96,13 +94,10 @@ void RfcommClient::connectSocket()
     }
 
     connectAction->setVisible(false);
-    waiter->setText(tr("Connecting..."));
-    waiter->setCancelEnabled(true);
 
     connect(socket, SIGNAL(error(QBluetoothAbstractSocket::SocketError)),
             this, SLOT(connectFailed()));
     socket->connect(QBluetoothAddress::any, addr, 14);
-    waiter->show();
 }
 
 void RfcommClient::socketConnected()
@@ -113,7 +108,6 @@ void RfcommClient::socketConnected()
 
     disconnectAction->setVisible(true);
     sendAction->setVisible(true);
-    waiter->hide();
 
     logArea->append(QString(tr("Connected to %1")).arg(socket->remoteAddress().toString()));
 }
@@ -121,16 +115,11 @@ void RfcommClient::socketConnected()
 void RfcommClient::connectFailed()
 {
     connectAction->setVisible(true);
-    waiter->setText(tr("Connect failed"));
-    QTimer::singleShot(2000, waiter, SLOT(hide()));
 }
 
 void RfcommClient::disconnectSocket()
 {
     connect(socket, SIGNAL(disconnected()), this, SLOT(socketDisconnected()));
-    waiter->setText(tr("Disconnecting..."));
-    waiter->setCancelEnabled(false);
-    waiter->show();
     userEntry->setEnabled(false);
     socket->disconnect();
     disconnectAction->setVisible(false);
@@ -139,7 +128,6 @@ void RfcommClient::disconnectSocket()
 
 void RfcommClient::socketDisconnected()
 {
-    waiter->hide();
     connectAction->setVisible(true);
 
     disconnect(socket, SIGNAL(disconnected()), this, SLOT(socketDisconnected()));

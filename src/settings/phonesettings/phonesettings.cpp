@@ -44,7 +44,6 @@
 #include <QGroupBox>
 #include <QRadioButton>
 #include <QKeyEvent>
-#include <QWaitWidget>
 #include <QtopiaItemDelegate>
 #include <QScrollArea>
 
@@ -294,10 +293,7 @@ void CallBarring::init()
     setObjectName( "barring" );
     setWindowTitle( tr( "Call Barring" ) );
 
-    waitWidget = new QWaitWidget( this );
-    waitWidget->setCancelEnabled( true );
-    connect( waitWidget, SIGNAL(cancelled()), this, SLOT(reject()) );
-    waitWidget->show();
+    #warning "Rejecting broken due QWaitWidget removal"
 
     QVBoxLayout *vb = new QVBoxLayout(this);
 
@@ -402,13 +398,9 @@ void CallBarring::barringStatus( QCallBarring::BarringType type, QTelephony::Cal
     if ( isLoading && type == QCallBarring::IncomingWhenRoaming ) {
         barOptions->setEnabled( true );
         barOptions->setFocus();
-        waitWidget->hide();
         isLoading = false;
         barOptions->setCurrentRow( 0 );
     }
-
-    if ( !isLoading )
-        waitWidget->hide();
 
     updateMenu();
 }
@@ -433,7 +425,6 @@ void CallBarring::itemActivated( QListWidgetItem * item )
     client->setBarringStatus( type, pin2, QTelephony::CallClassVoice, enable );
     client->requestBarringStatus( type );
     barOptions->setEnabled( false );
-    waitWidget->show();
     updateMenu();
 }
 
@@ -547,10 +538,7 @@ void CallWaiting::init()
     setObjectName( "waiting" );
     setWindowTitle( tr( "Call Waiting" ) );
 
-    waitWidget = new QWaitWidget( this );
-    waitWidget->setCancelEnabled( true );
-    connect( waitWidget, SIGNAL(cancelled()), this, SLOT(reject()) );
-    waitWidget->show();
+    #warning "Rejecting broken due QWaitWidget removal"
 
     QVBoxLayout *vb = new QVBoxLayout(this);
     waitOptions = new QListWidget( this );
@@ -594,7 +582,6 @@ void CallWaiting::itemActivated( QListWidgetItem * item )
     client->setCallWaiting( enable, c );
     client->requestCallWaiting();
     waitOptions->setEnabled( false );
-    waitWidget->show();
 }
 
 void CallWaiting::callWaiting( QTelephony::CallClass c )
@@ -610,7 +597,6 @@ void CallWaiting::callWaiting( QTelephony::CallClass c )
     waitOptions->setEnabled( true );
     waitOptions->setFocus();
 
-    waitWidget->hide();
     isLoading = false;
 }
 

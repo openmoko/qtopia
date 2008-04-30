@@ -22,7 +22,6 @@
 #include "modemnetwork.h"
 
 #include <qtopiaapplication.h>
-#include <qwaitwidget.h>
 #include <qsoftmenubar.h>
 #include <QVBoxLayout>
 #include <QRadioButton>
@@ -461,9 +460,6 @@ void ModemNetworkRegister::init()
         (void) new QListWidgetItem( tr( "Select band" ), this );
 
     setCurrentRow( 0 );
-
-    m_waitWidget = new QWaitWidget( this );
-    m_waitWidget->setCancelEnabled( true );
 }
 
 void ModemNetworkRegister::operationSelected( QListWidgetItem * )
@@ -476,19 +472,28 @@ void ModemNetworkRegister::operationSelected( QListWidgetItem * )
         selectSearchMode();
         break;
     case 2:
+        #warning "Eeek was broken before already but let us see"
+#if 0
         if ( !m_waitWidget->isVisible() ) {
             m_client->requestAvailableOperators();
             m_waitWidget->show();
         }
+#else
+        m_client->requestAvailableOperators();
+#endif
         break;
     case 3:
         preferredOperators();
         break;
     case 4:
+#if 0
         if ( !m_waitWidget->isVisible() ) {
             m_bandSel->requestBands();
             m_waitWidget->show();
         }
+#else
+        m_bandSel->requestBands();
+#endif
         break;
     default:
         break;
@@ -602,11 +607,6 @@ void ModemNetworkRegister::band( QBandSelection::BandMode mode, const QString &v
 
 void ModemNetworkRegister::selectBand( const QStringList& bandList )
 {
-    if ( m_waitWidget->isVisible() )
-        m_waitWidget->hide();
-    else // assume operation is cancelled by the user by closing wait widget.
-        return;
-
     QDialog *dlg = new QDialog( this );
     dlg->setWindowTitle( tr( "Select band" ) );
     QVBoxLayout *dlayout = new QVBoxLayout( dlg );
@@ -715,16 +715,10 @@ void ModemNetworkRegister::selectSearchMode()
 
 void ModemNetworkRegister::selectOperator( const QList<QNetworkRegistration::AvailableOperator> &result )
 {
-    if ( m_waitWidget->isVisible() )
-        m_waitWidget->hide();
-    else // assume operation is cancelled by the user by closing wait widget.
-        return;
-
     if ( result.count() == 0 ) {
         if ( QMessageBox::question( this, tr( "No operator found" ),
                 tr( "<qt>Would you like to search again?</qt>" ),
                 QMessageBox::Yes, QMessageBox::No ) == QMessageBox::Yes ) {
-                m_waitWidget->show();
                 m_client->requestAvailableOperators();
         }
         return;
@@ -881,7 +875,6 @@ void PreferredOperatorsDialog::requestOperatorInfo()
 {
     m_PNOClient->requestOperatorNames();
     m_PNOClient->requestPreferredOperators( QPreferredNetworkOperators::Current );
-    m_waitWidget->show();
 }
 
 void PreferredOperatorsDialog::init()
@@ -908,9 +901,7 @@ void PreferredOperatorsDialog::init()
     m_down = contextMenu->addAction( QIcon( ":icon/down" ), tr( "Move down" ), this, SLOT(moveDown()) );
     QSoftMenuBar::setLabel( this, Qt::Key_Select, QSoftMenuBar::NoLabel );
 
-    m_waitWidget = new QWaitWidget( this );
-    m_waitWidget->setCancelEnabled( true );
-    connect( m_waitWidget, SIGNAL(cancelled()), this, SLOT(reject()) );
+    #warning "Canceling broken due WaitWidget removal"
     m_PNOClient = new QPreferredNetworkOperators( "modem", this );
 }
 
@@ -918,7 +909,6 @@ void PreferredOperatorsDialog::operatorNames( const QList<QPreferredNetworkOpera
 {
     m_operatorNames = names;
     if ( m_currentOpers.count() > 0 ) {
-        m_waitWidget->hide();
         populateList();
     }
 }
@@ -929,7 +919,6 @@ void PreferredOperatorsDialog::preferredOperators( QPreferredNetworkOperators::L
     m_currentOpers = names; // will contain latest user selection
     m_originalOpers = names; // will be used to compare changes when dialog accepted
     if ( m_operatorNames.count() > 0 ) {
-        m_waitWidget->hide();
         populateList();
     }
 }

@@ -38,7 +38,6 @@
 #include <custom.h>
 #include <themedview.h>
 #include <qdrmcontent.h>
-#include <qwaitwidget.h>
 #include <QPhoneProfile>
 #include <QPhoneProfileManager>
 #ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
@@ -725,8 +724,6 @@ void PhoneLauncher::sysMessage(const QString& message, const QByteArray &data)
         showHomeScreen(3);
     } else if ( message == "applyStyleSplash()" ) {
         raise();
-        QWaitWidget *waitWidget = new QWaitWidget( this );
-        waitWidget->show();
         qApp->processEvents();
         ThemeControl::instance()->refresh();
         polishWindows();
@@ -734,7 +731,6 @@ void PhoneLauncher::sysMessage(const QString& message, const QByteArray &data)
         m_homeScreen->applyHomeScreenImage();
         if (m_secondDisplay)
             applySecondaryBackgroundImage();
-        delete waitWidget;
         lower();
     } else if ( message == "applyStyleNoSplash()" ) {
         qApp->processEvents();

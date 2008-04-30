@@ -47,7 +47,6 @@
 #endif
 
 #include <qvaluespace.h>
-#include <qwaitwidget.h>
 #include <qcontent.h>
 #include <qmimetype.h>
 #include <qdsactionrequest.h>
@@ -301,7 +300,6 @@ void CustomPushService::stopMessageRingtone()
 */
 InfraredBeamingService::InfraredBeamingService(ObexServiceManager *parent)
     : QtopiaAbstractService("InfraredBeaming", parent)
-        , m_waitWidget(0)
         , m_file(0)
         , m_session(0)
 {
@@ -311,7 +309,6 @@ InfraredBeamingService::InfraredBeamingService(ObexServiceManager *parent)
 
     m_parent = parent;
     m_busy = false;
-    m_waitWidget = new QWaitWidget(0);
     m_file = 0;
     m_current = 0;
 
@@ -329,7 +326,6 @@ InfraredBeamingService::InfraredBeamingService(ObexServiceManager *parent)
  */
 InfraredBeamingService::~InfraredBeamingService()
 {
-    delete m_waitWidget;
     delete m_session;
     delete m_file;
 }
@@ -342,14 +338,12 @@ void InfraredBeamingService::sessionFailed()
     QTimer::singleShot(0, m_session, SLOT(deleteLater()));  // try a new session next time
 
     if (m_type == VObject) {
-        m_waitWidget->setText(tr( "<P>There was an error using the local infrared device."));
-        m_waitWidget->setCancelEnabled(true);
-        QTimer::singleShot(5000, m_waitWidget, SLOT(hide()));
+        QMessageBox::information( 0, tr( "Error with local infrared device" ),
+                                 tr("<P>There was an error using the local infrared device."));
     }
     else {
         QMessageBox::critical( 0, tr( "Beam File" ),
                               tr( "<P>Error while trying to use the infrared device." ));
-        m_waitWidget->hide();
     }
 
     m_busy = false;
@@ -390,10 +384,8 @@ void InfraredBeamingService::handleConnectionFailed()
         return;
 
     m_session->endSession();
-    m_waitWidget->setText(tr( "<P>Could not connect to the remote device.  Please make sure that the Infrared ports are aligned and the device's Infrared capabilities are turned on."));
-
-    m_waitWidget->setCancelEnabled(true);
-    QTimer::singleShot(5000, m_waitWidget, SLOT(hide()));
+    QMessageBox::information( 0, tr("Connection Failed"),
+                             tr( "<P>Could not connect to the remote device.  Please make sure that the Infrared ports are aligned and the device's Infrared capabilities are turned on."));
     m_busy = false;
 
     delete m_socket;
@@ -413,13 +405,11 @@ void InfraredBeamingService::socketConnected()
             this, SLOT(socketError(QIrSocket::SocketError)));
 
     if (m_type == File) {
-        m_waitWidget->hide();
         QObject::connect(pushClient, SIGNAL(done(bool)), this, SLOT(doneBeamingFile(bool)));
         m_parent->setupConnection(pushClient, m_fileName, m_mimeType, m_description);
     }
     else {
         QObject::connect(pushClient, SIGNAL(done(bool)), this, SLOT(doneBeamingVObj(bool)));
-        m_waitWidget->setText("Sending...");
     }
 
     pushClient->connect();
@@ -458,10 +448,6 @@ void InfraredBeamingService::startBeamingVObj(const QByteArray &data, const QStr
 {
     QMessageBox::information( 0, tr( "Beam File" ),
                               tr( "<P>Please align the infrared receivers and hit OK once ready." ));
-
-    m_waitWidget->setText("Connecting...");
-    m_waitWidget->setCancelEnabled(false);
-    m_waitWidget->show();
 
     m_mimeType = mimeType;
     m_description = QString();
@@ -503,9 +489,8 @@ void InfraredBeamingService::doneBeamingVObj(bool error)
             m_current = 0;
         }
 
-        m_waitWidget->setText(tr( "<P>An error has occurred during transmission.  Please make sure that the Infrared ports are kept aligned and the device's Infrared capabilities are turned on.") );
-        m_waitWidget->setCancelEnabled(true);
-        QTimer::singleShot(5000, m_waitWidget, SLOT(hide()));
+        QMessageBox::information(0, tr("Error during Transmision"),
+                                 tr( "<P>An error has occurred during transmission.  Please make sure that the Infrared ports are kept aligned and the device's Infrared capabilities are turned on.") );
         return;
     }
 
@@ -516,8 +501,6 @@ void InfraredBeamingService::doneBeamingVObj(bool error)
     }
 
     m_session->endSession();
-    m_waitWidget->setText("Sending...Done");
-    QTimer::singleShot(1000, m_waitWidget, SLOT(hide()));
 }
 
 /*!
@@ -550,10 +533,6 @@ void InfraredBeamingService::startBeamingFile(const QString &fileName,
     m_autodelete = autodelete;
 
     m_busy = true;
-
-    m_waitWidget->setText("Connecting...");
-    m_waitWidget->setCancelEnabled(false);
-    m_waitWidget->show();
 
     if (!m_session) {
         qLog(Infrared) << "Lazy initializing a QCommDeviceSession object";
@@ -741,8 +720,6 @@ BluetoothPushingService::BluetoothPushingService(ObexServiceManager *parent)
 {
     m_parent = parent;
     m_busy = false;
-    m_waitWidget = new QWaitWidget(0);
-
     m_sdap = new QBluetoothSdpQuery();
     QObject::connect(m_sdap, SIGNAL(searchComplete(QBluetoothSdpQueryResult)),
                      this, SLOT(sdapQueryComplete(QBluetoothSdpQueryResult)));
@@ -766,7 +743,6 @@ BluetoothPushingService::BluetoothPushingService(ObexServiceManager *parent)
 */
 BluetoothPushingService::~BluetoothPushingService()
 {
-    delete m_waitWidget;
     delete m_sdap;
     delete m_session;
 }
@@ -881,9 +857,8 @@ void BluetoothPushingService::sdapQueryComplete(const QBluetoothSdpQueryResult &
         m_busy = false;
         m_session->endSession();
         // This should not happen if the DeviceSelector is working correctly
-        m_waitWidget->setText("<P>The selected device does not support Object Push Profile.");
-        m_waitWidget->setCancelEnabled(true);
-        QTimer::singleShot(5000, m_waitWidget, SLOT(hide()));
+        QMessageBox::information(0, tr("Object Push Profile not supported"),
+                                 tr("<P>The selected device does not support Object Push Profile."));
         return;
     }
 
@@ -901,10 +876,8 @@ void BluetoothPushingService::handleConnectionFailed()
     qLog(Bluetooth) << "BluetoothPushingService: ending session";
     m_session->endSession();
 
-    m_waitWidget->setText("<P>Could not connect to the selected bluetooth device.  Please make sure that the device is turned on and within range.");
-    m_waitWidget->setCancelEnabled(true);
-    QTimer::singleShot(5000, m_waitWidget, SLOT(hide()));
-
+    QMessageBox::information(0, tr("Could not Connect"),
+                             tr("<P>Could not connect to the selected bluetooth device.  Please make sure that the device is turned on and within range."));
     delete m_socket;
     m_socket = 0;
 }
@@ -923,10 +896,8 @@ void BluetoothPushingService::rfcommConnected()
 
     if ((m_req.m_mimeType == "text/x-vcard") || (m_req.m_mimeType == "text/x-vcalendar")) {
         QObject::connect(pushClient, SIGNAL(done(bool)), this, SLOT(donePushingVObj(bool)));
-        m_waitWidget->setText("Sending...");
     }
     else {
-        m_waitWidget->hide();
         QObject::connect(pushClient, SIGNAL(done(bool)), this, SLOT(donePushingFile(bool)));
         m_parent->setupConnection(pushClient, m_req.m_fileName, m_req.m_mimeType, m_req.m_description);
     }
@@ -985,10 +956,6 @@ void BluetoothPushingService::startPushingVObj(const QBluetoothAddress &addr,
 
     QBluetoothLocalDevice localDev;
     m_sdap->searchServices(addr, localDev, QBluetooth::ObjectPushProfile);
-
-    m_waitWidget->setText("Connecting...");
-    m_waitWidget->setCancelEnabled(false);
-    m_waitWidget->show();
 }
 
 /*!
@@ -1007,15 +974,11 @@ void BluetoothPushingService::donePushingVObj(bool error)
             m_current = 0;
         }
 
-        m_waitWidget->setText(tr( "<P>An error has occurred during transmission.  Please ensure that the selected Bluetooth device is kept on and in range.") );
-        QTimer::singleShot(5000, m_waitWidget, SLOT(hide()));
-        m_waitWidget->setCancelEnabled(true);
+        QMessageBox::information(0, tr("Transmission Error"),
+                                 tr( "<P>An error has occurred during transmission.  Please ensure that the selected Bluetooth device is kept on and in range.") );
         m_session->endSession();
         return;
     }
-
-    m_waitWidget->setText("Sending...Done");
-    QTimer::singleShot(1000, m_waitWidget, SLOT(hide()));
 
     // Respond to the request
     if (m_current) {
@@ -1045,10 +1008,6 @@ void BluetoothPushingService::startPushingFile()
 
     QBluetoothLocalDevice localDev;
     m_sdap->searchServices(m_req.m_addr, localDev, QBluetooth::ObjectPushProfile);
-
-    m_waitWidget->setText("Connecting...");
-    m_waitWidget->setCancelEnabled(false);
-    m_waitWidget->show();
 }
 
 /*!

@@ -26,8 +26,6 @@
 #include <QIcon>
 #include <QMap>
 
-class QWaitWidget;
-
 class SimIcons : public QObject
 {
     Q_OBJECT
@@ -52,7 +50,6 @@ private slots:
 private:
     QSimIconReader *reader;
     QWidget *parent;
-    QWaitWidget *waitWidget;
     QList<int> pendingIcons;
     QList<int> loadedIcons;
     QList<int> fileIcons;

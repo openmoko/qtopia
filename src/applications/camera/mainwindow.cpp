@@ -54,7 +54,6 @@
 #include <QByteArray>
 #include <QDesktopWidget>
 #include <QMenu>
-#include <QWaitWidget>
 
 #include <stdlib.h>
 
@@ -144,7 +143,6 @@ CameraMainWindow::CameraMainWindow(QWidget *parent, Qt::WFlags f):
     m_photoModel = new QContentSetModel( &m_photoContentSet, this );
     connect( m_photoModel, SIGNAL(updateFinished()), this, SLOT(loadThumbs()) );
 
-    m_wait = new QWaitWidget(camera->videocaptureview);
     m_iswaiting = false;
     QTimer::singleShot(1, this, SLOT(delayedInit()));
     m_currzoom = 0;
@@ -153,7 +151,6 @@ CameraMainWindow::CameraMainWindow(QWidget *parent, Qt::WFlags f):
 CameraMainWindow::~CameraMainWindow()
 {
     QtopiaApplication::setPowerConstraint(QtopiaApplication::Enable);
-    delete m_wait;
 }
 
 void CameraMainWindow::delayedInit()
@@ -961,18 +958,14 @@ void ThumbButton::drawButtonLabel( QPainter *p )
 
 void CameraMainWindow::showWaitScreen(const QString &descr)
 {
-    m_wait->setText(descr);
-    if(m_iswaiting)
-    {
+    if (m_iswaiting)
         return;
-    }
+
     m_iswaiting = true;
-    m_wait->show();
 }
 
 void CameraMainWindow::hideWaitScreen()
 {
-    m_wait->hide();
     m_iswaiting = false;
 }
 

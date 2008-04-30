@@ -33,7 +33,6 @@
 #include <qcontent.h>
 
 class ObexServiceManager;
-class QWaitWidget;
 class QDSActionRequest;
 class QContact;
 
@@ -108,7 +107,6 @@ private:
 
     ObexServiceManager *m_parent;
     bool m_busy;
-    QWaitWidget *m_waitWidget;
     QBluetoothSdpQuery *m_sdap;
 
     QDSActionRequest *m_current;
@@ -171,7 +169,6 @@ private:
 
     bool m_busy;
     ObexServiceManager *m_parent;
-    QWaitWidget *m_waitWidget;
     QFile *m_file;
     QDSActionRequest *m_current;
     bool m_autodelete;

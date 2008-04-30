@@ -37,7 +37,6 @@ class QAction;
 class QListWidget;
 class QListWidgetItem;
 class QLabel;
-class QWaitWidget;
 
 class ContactSelectDialog : public QDialog
 {
@@ -190,7 +189,6 @@ private:
     QAction *actionCheckStatus;
     QAction *actionCapture;
 
-    QWaitWidget *splash;
     RequestType reqType;
     bool isAutoActivation, isStatusView, isFromActiveProfile, isLoaded;
 
