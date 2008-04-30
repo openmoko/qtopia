@@ -118,7 +118,6 @@ SERVER_HEADERS+=\
     core_server/qtopiapowermanagerservice.h \
     standarddevicefeatures.h \
     core_server/qtopiainputevents.h \
-    ui/waitindicator/waitindicator.h \
     processctrl/appshutdown/applicationshutdowntask.h
 
 SERVER_SOURCES+=\
@@ -171,8 +170,7 @@ SERVER_SOURCES+=\
     core_server/virtualkeyboardservice.cpp \
     core_server/qtopiapowermanager.cpp\
     core_server/qtopiapowermanagerservice.cpp \
-    standarddevicefeatures.cpp \
-    ui/waitindicator/waitindicator.cpp
+    standarddevicefeatures.cpp
 
 enable_vpn {
     SERVER_HEADERS+=net/vpn/vpnmanager.h
