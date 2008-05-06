@@ -201,6 +201,8 @@ enable_vpn {
         phone/simpindialog.cpp
 
     LIBS += -lXtst
+
+    depends(3rdparty/libraries/qtdbus)
 }
 
 equals(LAUNCH_METHOD,quicklaunch) {
