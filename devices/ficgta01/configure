@@ -1,8 +1,6 @@
 -edition phone 
 -displaysize 480x640 
--voip
 -no-drm
 -no-sxe
 -sound-system alsa
--bluetooth
 -mediaengines gstreamer
