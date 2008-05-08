@@ -80,7 +80,7 @@ void SMSStatusDBusExporter::_q_messagesAdded(const QMailIdList& list)
 
     foreach(QMailId id, list) {
         if (QMailStore::instance()->messageHeader(id).messageType() == QMailMessage::Sms)
-            newIds << id.toULongLong();
+            newIds << QString::number(id.toULongLong());
     }
 
     if (newIds.isEmpty())
