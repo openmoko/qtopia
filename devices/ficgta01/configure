@@ -4,3 +4,4 @@
 -no-sxe
 -sound-system alsa
 -mediaengines gstreamer
+-no-samples
