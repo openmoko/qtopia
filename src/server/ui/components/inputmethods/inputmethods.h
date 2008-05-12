@@ -58,6 +58,7 @@ public:
     void setInputMethod(const QString &);
     void setInputMethod(QtopiaInputMethod *);
     void setNextInputMethod();
+    void setHint(const QString &, bool);
 
     void sort();
     uint count() const { return list.count(); }

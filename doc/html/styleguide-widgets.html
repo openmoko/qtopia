@@ -11,7 +11,7 @@
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Qtopia Style Guide: Widgets<br /><span class="subtitle"></span>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Qtopia Style Guide: Widgets<br /><span class="subtitle"></span>
 </h1>
 <ul><li><a href="#layout">Layout</a></li>
 <li><a href="#labels">Labels</a></li>
@@ -105,6 +105,7 @@
 <p>Dialogs are either shown full screen or at the bottom of the screen, depending upon the height of the dialog's sizeHint(). A dialog with a size hint greater than three fifths of the screen height will be shown fullscreen, otherwise it will be positioned at the bottom of the screen at its preferred height. Dialogs always use the full width of the screen.</p>
 <p>Message dialogs that allow a positive or negative response should be phrased such that the user can answer <i>Yes</i> or <i>No</i>, rather than <i>OK</i> or <i>Cancel</i>.</p>
 <p>Informative Message dialogs should only allow the <tt>Back</tt> softkey menu bar option.</p>
+<p>Message boxes should allow no more than two options. Three or more options are difficult for the user to process. If it is absolutely necessary to provide three or more options a list of options should be provided via a Menu-like Dialog.</p>
 <a name="custom-widgets"></a>
 <h2>Custom Widgets</h2>
 <p>Existing Qt widgets should always be used where possible. If a custom widget must be used, make sure that such a widget does not already exist.</p>

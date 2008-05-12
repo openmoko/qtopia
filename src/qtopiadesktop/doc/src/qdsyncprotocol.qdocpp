@@ -249,14 +249,14 @@ QByteArray args = data.toBase64();
 
 The device will respond with a \l 200 or a \l 500 command.
 
-Note that the QCop message will be delivered locally if a local client has
-registered the channel. If a local client has not registered the channel and a
-remote client has registered the channel (or the message is sent to QPE/Application/*)
-the QCop message will be delivered via the usual inter-process mechanism. This
-means that the messages are subject to security restrictions and attempts to send
-QCop messages to disallowed channels will result in the Synchronization application
-being terminated. To allow a particular message to be sent you should mofify the
-\c qdsync SXE profile.
+Note that the QCop message will only be delivered inside the Synchronization application.
+This is to prevent a security hole (Normal QCop delivery is subject to security checks,
+based on the application sending the message).
+
+It is still possible to perform remote delivery of QCop messages but you must create a
+plugin for Synchronization that intercepts the message you are interested in and then
+forwards it on. An example of this in the device_updater tool. It includes a
+Synchronization plugin that lets it send a message to the package manager.
 
 */
 

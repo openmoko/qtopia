@@ -79,6 +79,7 @@ class QTOPIAPIM_EXPORT QTaskSelector : public QDialog
     Q_OBJECT
 public:
     QTaskSelector(bool allowNew, QWidget *);
+    ~QTaskSelector();
     void setModel(QTaskModel *);
 
     bool newTaskSelected() const;

@@ -455,11 +455,12 @@ void NetworkPackageController::install( int packageI )
 
 void NetworkPackageController::packageFetchComplete()
 {
+    progressDisplay->reset();
     if ( hf )
     {
         if ( hf->httpRequestWasAborted() )
         {
-            if ( !hf->getError().isEmpty() )  
+            if ( !hf->getError().isEmpty() )
             {
                 SimpleErrorReporter errorReporter( SimpleErrorReporter::Install, currentPackageName );
                 QString detailedMessage( "NetworkPackageController::packageFetchComplete:- Fetch from %1 failed: %2" );
@@ -479,7 +480,9 @@ void NetworkPackageController::packageFetchComplete()
                     break;
 
             SimpleErrorReporter errorReporter( SimpleErrorReporter::Install, pkgList[i].name);
-            if( installControl->installPackage( pkgList[i], hf->getMd5Sum(), &errorReporter ) )
+
+            bool installSuccessful = installControl->installPackage( pkgList[i], hf->getMd5Sum(), &errorReporter );
+            if(installSuccessful)
             {
                 pi = pkgList[i];
                 emit updated();
@@ -499,7 +502,6 @@ void NetworkPackageController::packageFetchComplete()
 
     }
     QFile::remove( InstallControl::downloadedFileLoc() );
-    progressDisplay->reset();
 }
 
 ////////////////////////////////////////////////////////////////////////

@@ -11,7 +11,7 @@
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QMailMessageKey Class Reference</h1>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QMailMessageKey Class Reference</h1>
 <p>The QMailMessageKey class defines the parameters used for querying a subset of all available mail messages from the mail store. <a href="#details">More...</a></p>
 <pre>    #include &lt;QMailMessageKey&gt;</pre><p><b>This class is under development and is subject to change.</b></p>
 <ul>
@@ -48,7 +48,7 @@
 <p>The QMailMessageKey class defines the parameters used for querying a subset of all available mail messages from the mail store.</p>
 <p>A QMailMessageKey is composed of a message property, an optional comparison operator and a comparison value. The QMailMessageKey class is used in conjunction with the QMailStore::query() and QMailStore::count() functions to filter results which meet the criteria defined by the key.</p>
 <p>QMailMessageKey's can be combined using the logical operators (&amp;), (|) and (~) to create more refined queries.</p>
-<p>For example: To create a query for all message's sent from &quot;<a href="mailto:joe@user">joe@user</a>.com&quot; with subject &quot;meeting&quot;:</p>
+<p>For example: To create a query for all message's sent from &quot;joe@user.com&quot; with subject &quot;meeting&quot;:</p>
 <pre>    QMailMessageKey subjectKey(QMailMessageKey::Subject,&quot;meeting&quot;);
     QMailMessageKey senderKey(QMailMessageKey::Sender,&quot;joe@user.com&quot;)
     QMailIdList results = QMailStore::query(subjectKey &amp; senderKey);</pre>

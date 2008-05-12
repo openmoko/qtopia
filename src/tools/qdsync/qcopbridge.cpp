@@ -414,16 +414,9 @@ void QCopBridgePI::process( const QByteArray &line )
             qdsync::QCopChannel::send( _channel, _message, _data );
         } else {
             if ( qdsync::QCopChannel::isRegistered(channel) ) {
-                // First we check if a local-only channel exists.
+                // We only send to local channels
                 LOG() << "Sending LOCAL QCop:" << "channel" << channel << "message" << message << "data" << data;
                 qdsync::QCopChannel::send( channel, message, data );
-            } else if ( channel.indexOf("QPE/Application/") == 0 || ::QCopChannel::isRegistered(channel) ) {
-                // Messages can be sent to QPE/Application/* or any registered channel.
-                // Note that this is a security hole and the default permissions most likely
-                // do not allow these messages to be delivered, causing the app to be terminated.
-                // If you need to allow a message through add it to the qdsync SXE profile.
-                LOG() << "Sending REMOTE QCop:" << "channel" << channel << "message" << message << "data" << data;
-                ::QCopChannel::send( channel, message, data );
             } else {
                 _send( QString("599 ChannelNotRegistered %1").arg(QString(channel)).toLocal8Bit() );
             }

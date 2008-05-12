@@ -22,7 +22,7 @@
 #ifndef _E3PHONEBROWSER_H_
 #define _E3PHONEBROWSER_H_
 
-#include "phone/qabstractbrowserscreen.h"
+#include "qabstractbrowserscreen.h"
 #include <QContentSet>
 
 class QAction;

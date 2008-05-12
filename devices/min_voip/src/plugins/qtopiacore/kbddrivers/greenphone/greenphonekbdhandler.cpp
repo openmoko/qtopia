@@ -24,7 +24,9 @@
 #ifdef QT_QWS_GREENPHONE
 #include <QScreen>
 #include <QSocketNotifier>
-//#include <QTimer>
+#ifdef GREENPHONE_KEYPAD_REPEAT
+#include <QTimer>
+#endif
 
 #include "qscreen_qws.h"
 #include "qwindowsystem_qws.h"
@@ -103,7 +105,7 @@ GreenphoneKbdHandler::GreenphoneKbdHandler()
     ioctl(kbdFD, VT_GETSTATE, &vtStat);
     vtQws = vtStat.v_active;
 
-#if 0
+#ifdef GREENPHONE_KEYPAD_REPEAT
     m_timer = new QTimer(this);
     m_timer->setSingleShot(true);
     connect(m_timer, SIGNAL(timeout()), this, SLOT(repeat()));
@@ -221,7 +223,7 @@ void GreenphoneKbdHandler::readKbdData()
         else
             endAutoRepeat();
 
-#if 0
+#ifdef GREENPHONE_KEYPAD_REPEAT
         if (isPressed)
         {
             m_repeatKeyCode = qtKeyCode;
@@ -234,7 +236,7 @@ void GreenphoneKbdHandler::readKbdData()
     }
 }
 
-#if 0
+#ifdef GREENPHONE_KEYPAD_REPEAT
 void GreenphoneKbdHandler::repeat()
 {
 //    processKeyEvent(m_unicode, m_repeatKeyCode, Qt::NoModifier, false, true);

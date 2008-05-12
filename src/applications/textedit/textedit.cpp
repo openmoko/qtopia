@@ -616,7 +616,8 @@ void TextEdit::setDocument(const QString& f)
     qCopActivated = true;
     save();
     QContent nf(f);
-    nf.setType("text/plain");
+    if (nf.type().isEmpty())
+        nf.setType("text/plain");
     openFile(nf);
     if (doc) {
         showEditTools();
@@ -865,9 +866,10 @@ void TextEdit::message(const QString& msg, const QByteArray& data)
             if (filename.trimmed().isEmpty()){
                 newFile();
             }else{
-            QContent dc;
+                QContent dc;
                 dc.setFile(filename);
-                dc.setType("text/plain");
+                if (dc.type().isEmpty())
+                    dc.setType("text/plain");
                 openFile(dc);
             }
         } else {

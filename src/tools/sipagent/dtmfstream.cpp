@@ -1136,26 +1136,27 @@ short const DtmfStream::sine[8000] = {
  -12, -11, -9, -8, -6, -4, -3, -1
 };
 
-// Code that generates the sine wave table above.
-#if 0
+/*
+    Code that generates the sine wave table above.
 
-#include <stdio.h>
-#include <math.h>
+    \code
+    #include <stdio.h>
+    #include <math.h>
 
-int main()
-{
-    int i;
-    short sine[8000];
-    for ( i = 0; i < 8000; ++i ) {
-        sine[i] = (short)( ((double)2048) * sin( 2 * M_PI / 8000.0 * i ) );
+    int main()
+    {
+        int i;
+        short sine[8000];
+        for ( i = 0; i < 8000; ++i ) {
+            sine[i] = (short)( ((double)2048) * sin( 2 * M_PI / 8000.0 * i ) );
+        }
+        for ( i = 0; i < 8000; ++i ) {
+            printf( " %d,", sine[i] );
+            if ( ( i % 8 ) == 7 )
+                printf( "\n" );
+        }
+        printf( "\n" );
+        return 0;
     }
-    for ( i = 0; i < 8000; ++i ) {
-        printf( " %d,", sine[i] );
-        if ( ( i % 8 ) == 7 )
-            printf( "\n" );
-    }
-    printf( "\n" );
-    return 0;
-}
-
-#endif
+    \endcode
+*/

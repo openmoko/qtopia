@@ -27,6 +27,7 @@ PROJECTS*=\
     tools/content_installer \
     tools/dbmigrate \
     tools/device_updater \
+    tools/device_updater/plugin \
     tools/printserver \
     tools/qcop \
     tools/qdawggen \

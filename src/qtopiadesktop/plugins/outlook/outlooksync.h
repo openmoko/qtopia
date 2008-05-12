@@ -260,11 +260,6 @@ public:
         stream << "</" #Field ">\n";\
     } while ( 0 )
 
-#define PREPARE_CUSTOM_MAP(qtopiaUserProps)\
-    Outlook::UserPropertiesPtr props = item->GetUserProperties();\
-    Q_ASSERT(props);\
-    QMap<QString,QString> qtopiaUserProps
-
 #define DUMP_CUSTOM_MAP(qtopiaUserProps)\
     do {\
         stream << "<CustomFields>\n";\

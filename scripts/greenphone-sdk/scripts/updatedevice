@@ -5,6 +5,8 @@ if [ -r /opt/Qtopia/SDK/scripts/functions ]; then
     QPEVER=$(version)
 fi
 
+OPTION_FORCE_FLASH=0
+
 die()
 {
     echo -n "updatedevice failed while doing: "
@@ -60,7 +62,11 @@ upload_image()
 
 install_image()
 {
-    ssh root@$PHONEIP "updateqtopia --no-questions $MNTPNT" >/dev/null
+    OPTS="--no-questions"
+    if [ $OPTION_FORCE_FLASH -eq 1 ]; then
+        OPTS="$OPTS --force-flash"
+    fi
+    ssh root@$PHONEIP "updateqtopia $OPTS $MNTPNT" >/dev/null
     RESULT=$?
     ssh root@$PHONEIP "updateqtopiahelper deletetemp $MNTPNT" || die install_image updateqtopiahelper
 
@@ -76,7 +82,7 @@ install_image()
 # Find default update image
 if [ $# -eq 0 ] && [ -r /opt/Qtopia/extras/images/qtopia-greenphone-update.tar.gz ]; then
     QTOPIA_IMAGE=/opt/Qtopia/extras/images/qtopia-greenphone-update.tar.gz
-elif [ $# -eq 1 ]; then    
+elif [ $# -ge 1 ]; then
     case "$1" in
         /*)
             QTOPIA_IMAGE="$1"
@@ -89,6 +95,19 @@ else
     echo "usage: $0 [image]"
     exit 1
 fi
+
+while [ $# -gt 0 ]; do
+    case $1 in
+        --force-flash)
+            OPTION_FORCE_FLASH=1
+            ;;
+        --*)
+            echo "Unknown option $1, aborting."
+            exit 1
+            ;;
+    esac
+    shift
+done
 
 # Check if network is up
 if which gph >/dev/null 2>&1; then

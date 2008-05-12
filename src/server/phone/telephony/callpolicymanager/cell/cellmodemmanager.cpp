@@ -670,7 +670,7 @@ void CellModemManager::pinStatus(const QString& type,
                                    const QPinOptions&)
 {
     qLog(QtopiaServer) << "CellModemManager: Received request for pin"
-                       << type << "status" << status << state();
+                       << type << "status" << status << " state" << state();
     if(UnrecoverableFailure == state())
         return;
 

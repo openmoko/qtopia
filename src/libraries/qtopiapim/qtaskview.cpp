@@ -445,6 +445,13 @@ QTaskSelector::QTaskSelector(bool allowNew, QWidget *parent)
 }
 
 /*!
+    Destroys a QTaskSelector
+    */
+QTaskSelector::~QTaskSelector()
+{
+    delete d;
+}
+/*!
   \internal
   Accepts the dialog and indicates a that a new task should be created.
 */

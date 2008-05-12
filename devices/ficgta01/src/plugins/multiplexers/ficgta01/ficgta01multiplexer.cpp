@@ -59,22 +59,7 @@ Ficgta01MultiplexerPlugin::~Ficgta01MultiplexerPlugin()
 
 bool Ficgta01MultiplexerPlugin::detect( QSerialIODevice *device )
 {
-    // make sure modem is powered up
-    QFile powerFile("/sys/devices/platform/neo1973-pm-gsm.0/power_on");
-    if( !powerFile.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
-        qWarning()<<"File not opened";
-    } else {
-        QTextStream in(&powerFile);
-        QString pFileString;
-        in >> pFileString;
-        if(pFileString == QLatin1String("0")) {
-            qWarning() << "The modem must be started before the device gets opened";
-            return false;
-        }
-    }
-
-
-    // The FIC needs a special line discipline set on the device.
+// The FIC needs a special line discipline set on the device.
     QSerialPort *port = qobject_cast<QSerialPort *>( device );
     if (port) {
         int discipline = N_TIHTC;

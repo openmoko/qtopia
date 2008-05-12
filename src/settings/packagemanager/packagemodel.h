@@ -59,6 +59,7 @@ public:
     void setServer( const QString& server );
     QStringList getServers() const;
     QString getOperation( const QModelIndex & );
+    bool isInstalled(const QModelIndex &index) const;
     InstallControl *installControl();
 
 signals:
@@ -93,6 +94,8 @@ private:
     QHash<QString,QString> servers;
     QHash<QString,QString> mediaNames;
     QString activeServer;
+    static const int InstalledIndex;
+    static const int NetworkedIndex;
 };
 
 ////////////////////////////////////////////////////////////////////////

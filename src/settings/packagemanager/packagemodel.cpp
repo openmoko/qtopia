@@ -90,6 +90,8 @@
 
 const unsigned int PackageModel::ID_SIZE = 32;
 const unsigned int PackageModel::ROW_MAX = (2 << (PackageModel::ID_SIZE-10));
+const int PackageModel::InstalledIndex=0;
+const int PackageModel::NetworkedIndex=1;
 
 #define INVALID_PARENT 0x000000ffU
 
@@ -101,7 +103,8 @@ PackageModel::PackageModel( QObject* parent )
     installed = AbstractPackageController::factory( AbstractPackageController::installed, this );
 
     // can only have a max of 15 top level items
-    rootItems << installed << networked;
+    rootItems << installed << networked;    //this must stay in sync with installedIndex
+                                            //and networkedIndex
 
     for ( int i = 0; i < rootItems.count(); i++ )
         connect( rootItems[i], SIGNAL(updated()),
@@ -242,6 +245,14 @@ QString PackageModel::getOperation( const QModelIndex &item )
         return c->operationName();
     }
     return QString();
+}
+
+bool PackageModel::isInstalled( const QModelIndex &item ) const
+{
+    if (item.parent().row() == InstalledIndex)
+        return true;
+    else
+        return data(item, AbstractPackageController::Filtered).toBool();
 }
 
 void PackageModel::userTargetChoice( const QString &t )

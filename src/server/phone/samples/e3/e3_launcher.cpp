@@ -52,11 +52,11 @@
 #ifdef Q_WS_QWS
 #include <qscreen_qws.h>
 #endif
-#include "phone/qabstractbrowserscreen.h"
+#include "qabstractbrowserscreen.h"
 #include "qabstractdialerscreen.h"
 #include "qabstractmessagebox.h"
 #include "cellmodemmanager.h"
-#include "phone/callscreen.h"
+#include "callscreen.h"
 #include "dialercontrol.h"
 #include "applicationlauncher.h"
 #include "callhistory.h"

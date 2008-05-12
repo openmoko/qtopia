@@ -432,18 +432,6 @@ KSprite::wrap()
         setPos(x(),0);
     else if (tmp_y < 0)
         setPos(x(),scene_->height() - dy);
-
-#if 0
-    if (tmp_x > scene_->width())
-        setPos(x() - scene_->width(),y());
-    else if (tmp_x < 0)
-        setPos(scene_->width() + x(),y());
-
-    if (tmp_y > scene_->height())
-        setPos(x(),y() - scene_->height());
-    else if (tmp_y < 0)
-        setPos(x(),scene_->height() + y());
-#endif
 }
 
 /*!
@@ -1126,7 +1114,7 @@ void KShip::stopBraking()
  */
 void KShip::startEngine()
 {
-    engineIsOn_ = (powerLevel_ > 0);
+    engineIsOn_ = (powerLevel_ > EMPTY_SHIP_POWER_LEVEL);
 }
 
 /*!
@@ -1315,6 +1303,10 @@ void KShip::advance(int phase)
 		    return;
 		}
 	    }
+            else if (powerLevel() <= EMPTY_SHIP_POWER_LEVEL) {
+                ship_->markDead();
+                shield_->markDead();
+            }
 	}
     }
     else { // phase 1
@@ -1405,7 +1397,7 @@ void KShip::advance(int phase)
 	    if (fabs(dy_ + thrusty) < MAX_SHIP_SPEED)
 		dy_ += thrusty;
 	    setVelocity(dx_,dy_);
-	    reducePowerLevel(1);
+	    reducePowerLevel(5);
 	    KExhaust::add(x() + 10 - cosangle_*10,
 			  y() + 10 - sinangle_*10,
 			  dx_-cosangle_,
@@ -1711,7 +1703,7 @@ void KExhaust::advance(int phase)
  */
 KPowerup* KPowerup::create()
 {
-    switch (randInt(30)) {
+    switch (randInt(50)) {
         case 2:
         case 5:
 	    return new KEnergyPowerup();
@@ -1760,7 +1752,7 @@ void KEnergyPowerup::advance(int phase)
     }
     else {
 	if (apply() && ship_)
-	    ship_->increasePowerLevel(MAX_SHIP_POWER_LEVEL);
+	    ship_->increasePowerLevel(FUEL_POWERUP_BONUS);
 	if (isDead() || dying())
 	    delete this;
     }

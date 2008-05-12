@@ -542,6 +542,15 @@ QContactSelector::QContactSelector(QWidget *parent)
     init();
 }
 
+
+/*!
+    Destroys a QContactSelector.
+    */
+QContactSelector::~QContactSelector()
+{
+    delete d;
+}
+
 /*!
   \internal
   Does the work of constructing a QContactSelector
@@ -920,6 +929,15 @@ QPhoneTypeSelector::QPhoneTypeSelector( const QContact &contact, const QString& 
     d = new QPhoneTypeSelectorPrivate(contact, number, allowedTypes);
 
     init();
+}
+
+
+/*!
+    Destroys a QPhoneTypeSelector
+    */
+QPhoneTypeSelector::~QPhoneTypeSelector()
+{
+    delete d;
 }
 
 /*!

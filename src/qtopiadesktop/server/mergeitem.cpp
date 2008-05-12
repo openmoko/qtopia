@@ -388,12 +388,12 @@ QString MergeItem::clientIdentifier() const
 */
 void MergeItem::restrictTo(const MergeItem &reference)
 {
+    if (!rootElement)
+        return;
+
     MergeElement *item, *referenceItem, *referenceRoot;
     QMutableListIterator<MergeElement *> it(rootElement->items);
 
-    // assert rit.hasNext(); 
-    // after all, shouldn't see items in reference that are not in target
-    // top level
     referenceRoot = reference.rootElement;
     while(it.hasNext()) {
         item = it.next();

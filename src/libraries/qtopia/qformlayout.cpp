@@ -2028,16 +2028,3 @@ void QFormLayout::resetLabelAlignment()
     d->labelAlignment = 0;
 }
 
-#if 0
-void QFormLayout::dump() const
-{
-    Q_D(const QFormLayout);
-    for (int i = 0; i < rowCount(); ++i) {
-        for (int j = 0; j < 2; ++j) {
-            qDebug("m_matrix(%d, %d) = %p", i, j, d->m_matrix(i, j));
-        }
-    }
-    for (int i = 0; i < d->m_things.count(); ++i)
-        qDebug("m_things[%d] = %p", i, d->m_things.at(i));
-}
-#endif

@@ -79,7 +79,7 @@ public:
     (phone) and the Bluetooth Audio headset.  This class
     implements the Bluetooth Headset Audio Gateway as defined
     in the Headset Bluetooth Profile specification.
-  
+
     This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
 */
 
@@ -117,7 +117,7 @@ QBluetoothHeadsetService::QBluetoothHeadsetService(const QString &service, const
 
     QByteArray audioDev = find_btsco_device("Headset");
     if (audioDev.isEmpty()) {
-        qWarning("No headset audio devices available...");
+        qLog(Bluetooth) << "No headset audio devices available...";
     }
     else if (!bt_sco_open(&m_data->m_audioDev, audioDev.constData())) {
         qWarning("Unable to open audio device: %s", audioDev.constData());
@@ -795,7 +795,7 @@ public:
     implementation of the QBluetoothAudioGateway interface
     which forwards all calls to the implementation object,
     which is passed in the constructor.
-  
+
     This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
 */
 

@@ -34,29 +34,6 @@
 
 #include <limits.h>
 
-#if 0
-class EzXPhoneStylePlugin : public QStylePlugin
-{
-public:
-    EzXPhoneStylePlugin(QObject* par = 0) : QStylePlugin(par) {}
-
-    QStyle* create(const QString& key) {
-        if(key == "ezxphonestyle") {
-            return new EzXPhoneStyle;
-        }
-        return 0;
-    }
-
-    QStringList keys() const {
-        QStringList k;
-        k << "ezxphonestyle";
-        return k;
-    }
-};
-
-Q_EXPORT_PLUGIN2(ezxphonestyle,EzXPhoneStylePlugin)
-#endif
-
 QPixmap* g_scrollDownPressed;
 QPixmap* g_scrollDown;
 QPixmap* g_scrollUpPressed;
@@ -222,42 +199,13 @@ void EzXPhoneStyle::drawControl(ControlElement ce, const QStyleOption *opt, QPai
             break;
         }
         case CE_ScrollBarAddPage:
-        case CE_ScrollBarSubPage: {
-#if 0
-                QBrush br;
-                QBrush bg = p->background();
-                Qt::BGMode bg_mode = p->backgroundMode();
-                p->setPen(Qt::NoPen);
-                p->setBackgroundMode(Qt::OpaqueMode);
-
-                if (opt->state & State_Sunken) {
-                    br = QBrush(opt->palette.shadow().color(), Qt::Dense4Pattern);
-                    p->setBackground(opt->palette.dark().color());
-                    p->setBrush(br);
-                } else {
-                    QPixmap pm = opt->palette.brush(QPalette::Light).texture();
-                    br = !pm.isNull() ? QBrush(pm) : QBrush(opt->palette.light().color(), Qt::Dense4Pattern);
-                    p->setBackground(opt->palette.background().color());
-                    p->setBrush(br);
-                }
-                p->drawRect(opt->rect);
-                p->setBackground(bg);
-                p->setBackgroundMode(bg_mode);
-#endif
-                p->drawTiledPixmap(opt->rect,*g_scrollBg);
-                break; }
+        case CE_ScrollBarSubPage:
+            p->drawTiledPixmap(opt->rect,*g_scrollBg);
+            break;
         case CE_ScrollBarSlider:
-            {
-                /*
-                QStyleOptionButton buttonOpt;
-                buttonOpt.QStyleOption::operator=(*opt);
-                buttonOpt.state = State_Enabled | State_Raised;
-                drawPrimitive(PE_PanelButtonBevel, &buttonOpt, p, widget);
-                */
-                p->drawTiledPixmap(opt->rect, *g_scrollSliderMiddle);
-                p->drawPixmap(QPoint(opt->rect.x(), opt->rect.y()), *g_scrollSliderTop);
-                p->drawPixmap(QPoint(opt->rect.x(), (opt->rect.y()+opt->rect.height())), *g_scrollSliderBottom);
-            }
+            p->drawTiledPixmap(opt->rect, *g_scrollSliderMiddle);
+            p->drawPixmap(QPoint(opt->rect.x(), opt->rect.y()), *g_scrollSliderTop);
+            p->drawPixmap(QPoint(opt->rect.x(), (opt->rect.y()+opt->rect.height())), *g_scrollSliderBottom);
             break;
         default:
             QPhoneStyle::drawControl(ce, opt, p, widget);

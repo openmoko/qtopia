@@ -36,7 +36,6 @@
 #include <QTextStream>
 #include <QDebug>
 
-
 static QString neo1973BacklightClassFile() {
     QString maxBrightness;
 
@@ -52,11 +51,10 @@ static QString neo1973BacklightClassFile() {
 
 QTOPIABASE_EXPORT int qpe_sysBrightnessSteps()
 {
-
     QFile maxBrightness(neo1973BacklightClassFile());
-
     QString strvalue;
-    if(!maxBrightness.open(QIODevice::ReadOnly | QIODevice::Text)) {
+
+    if (!maxBrightness.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qWarning() << "File not opened";
     } else {
         QTextStream in(&maxBrightness);
@@ -73,19 +71,19 @@ QTOPIABASE_EXPORT void qpe_setBrightness(int b)
 #ifndef QT_ILLUME_LAUNCHER
     qWarning() << "setBrightness" << b <<  qpe_sysBrightnessSteps();
 
+    int brightessSteps = qpe_sysBrightnessSteps();
     // dim(1) or bright (-1) or blank (0)? 
     if(b == 1) {
-        b = 519;
+        b = brightessSteps / 4;
     } else if (b == -1) {
-        b = qpe_sysBrightnessSteps();
+        b = brightessSteps;
     } else if(b == 0) {
-    } else if(b == qpe_sysBrightnessSteps()) {
-    } else {
+    } else if(b == brightessSteps) {
     }
 
     QFile brightness(neo1973BacklightClassFile());
 
-    if(!brightness.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+    if (!brightness.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
         qWarning() << "File not opened";
     } else {
         QTextStream out(&brightness);

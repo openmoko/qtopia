@@ -46,16 +46,14 @@ public slots:
 private slots:
     void init();
     void addNewServer();
-    void removeServer();
     void editServer();
+    void removeServer();
     void contextMenuShow();
 
 private:
     bool m_modified;
-    QAction *removeServerAction;
     QAction *editServerAction;
     QStringList serversToRemove;
-    QStringList permanentServers;
 };
 
 class QLabel;
@@ -65,9 +63,11 @@ class ServerEditor : public QDialog
 
 Q_OBJECT
 
-public:    
-    enum Mode { New, ViewOnly, ViewEdit };
-    ServerEditor( Mode mode, ServerEdit *parent = 0, const QString &name = "", 
+public:
+    enum Mode {New, ViewEdit};
+    enum DialogCode{Modified=QDialog::Accepted + 1,Removed};
+
+    ServerEditor( Mode mode, ServerEdit *parent, const QString &name = "",
                   const QString &url = "" );
     QString name() const;
     QString url() const;
@@ -76,6 +76,9 @@ public:
 public slots:
     virtual void accept();
 
+private slots:
+    void removeServer();
+
 private:
     Mode m_mode;
     ServerEdit *m_parent;
@@ -83,9 +86,9 @@ private:
     QLabel *m_nameLabel;
     QLabel *m_urlLabel;
     QLineEdit *m_nameLineEdit;
-    QTextEdit *m_urlTextEdit; 
+    QTextEdit *m_urlTextEdit;
     QString m_initialName;
-    QString m_initialUrl; 
+    QString m_initialUrl;
 };
 
 ////////////////////////////////////////////////////////////////////////
@@ -109,11 +112,6 @@ inline QString ServerEditor::name() const
 inline QString ServerEditor::url() const
 {
     return m_urlTextEdit->toPlainText();
-}
-
-inline bool ServerEditor::wasModified() const
-{
-    return m_modified;
 }
 
 #endif

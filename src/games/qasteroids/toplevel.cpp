@@ -42,68 +42,23 @@ struct GameLevelStruct
 
 GameLevelStruct gameLevels[MAX_GAME_LEVELS] =
 {
-    { 1, 0.2+0.2 },
-    { 1, 0.3+0.2 },
-    { 1, 0.25+0.2 },
-    { 1, 0.35+0.2 },
-    { 2, 0.4+0.2 },
-    { 2, 0.3+0.2 },
-    { 2, 0.35+0.2 },
-    { 2, 0.4+0.2 },
-    { 3, 0.3+0.2 },
-    { 3, 0.35+0.2 },
-    { 3, 0.4+0.2 },
-    { 3, 0.35+0.2 },
-    { 4, 0.4+0.2 },
-    { 4, 0.45+0.2 },
-    { 4, 0.5+0.2 }
+    { 1, 0.2  + 0.2 },
+    { 1, 0.3  + 0.2 },
+    { 1, 0.25 + 0.2 },
+    { 1, 0.35 + 0.2 },
+    { 2, 0.4  + 0.2 },
+    { 2, 0.3  + 0.2 },
+    { 2, 0.35 + 0.2 },
+    { 2, 0.4  + 0.2 },
+    { 3, 0.3  + 0.2 },
+    { 3, 0.35 + 0.2 },
+    { 3, 0.4  + 0.2 },
+    { 3, 0.35 + 0.2 },
+    { 4, 0.4  + 0.2 },
+    { 4, 0.45 + 0.2 },
+    { 4, 0.5  + 0.2 }
 };
 
-#if 0
-
-/*
-  These had been used for the Qtopia Phone case,
-  but they are too slow on the GreenPhone. mws
- */
-GameLevelStruct gameLevels[MAX_GAME_LEVELS] =
-{
-    { 1, 0.1 },
-    { 1, 0.2 },
-    { 1, 0.3 },
-    { 1, 0.4 },
-    { 2, 0.1 },
-    { 2, 0.2 },
-    { 2, 0.3 },
-    { 2, 0.4 },
-    { 3, 0.1 },
-    { 3, 0.2 },
-    { 3, 0.3 },
-    { 3, 0.4 },
-    { 4, 0.1 },
-    { 4, 0.2 },
-    { 4, 0.3 }
-};
-
-GameLevelStruct gameLevels[MAX_GAME_LEVELS] =
-{
-    { 1, 0.2 },
-    { 1, 0.3 },
-    { 1, 0.25 },
-    { 1, 0.35 },
-    { 2, 0.4 },
-    { 2, 0.3 },
-    { 2, 0.35 },
-    { 2, 0.4 },
-    { 3, 0.3 },
-    { 3, 0.35 },
-    { 3, 0.4 },
-    { 3, 0.35 },
-    { 4, 0.4 },
-    { 4, 0.45 },
-    { 4, 0.5 }
-};
-
-#endif
 
 class RowWidget : public QWidget
 {
@@ -213,7 +168,6 @@ KAstTopLevel::KAstTopLevel(QWidget* parent, Qt::WFlags fl)
                            tr("Launch"));*/
     contextMenu_ = QSoftMenuBar::menuFor(this);
 
-    //QString s = tr("BOZO");
     QString s = tr("Select (OK)");
     view_->constructMessages(s);
     setFocusPolicy(Qt::StrongFocus);
@@ -281,14 +235,6 @@ KAstTopLevel::buildTopRow(QWidget* parent)
     label->setPalette(palette);
     layout->addWidget(label);
 
-#if 0
-    //label = new QLabel(tr(" T"),parent);
-    label->setFont(labelFont);
-    label->setFixedWidth(label->sizeHint().width());
-    label->setPalette(palette);
-    layout->addWidget(label);
-#endif
-
     teleportsLCD_ = new QLCDNumber(1,parent);
     teleportsLCD_->setFrameStyle(QFrame::NoFrame);
     teleportsLCD_->setSegmentStyle(QLCDNumber::Flat);
@@ -301,12 +247,6 @@ KAstTopLevel::buildTopRow(QWidget* parent)
       Add an LCD widget to show the current game score. Give
       it five digits, because some players are very good.
      */
-    /*
-    label = new QLabel(tr("Score"),parent);
-    label->setFont(labelFont);
-    label->setPalette(palette);
-    layout->addWidget(label);
-    */
     scoreLCD_ = new QLCDNumber(5,parent);
     scoreLCD_->setFrameStyle(QFrame::NoFrame);
     scoreLCD_->setSegmentStyle(QLCDNumber::Flat);
@@ -334,11 +274,8 @@ KAstTopLevel::buildTopRow(QWidget* parent)
 
 
     /*
-      Add a label widget for the ship count LCD. For phones,
-      set the label to a pixmap of the ship. For everyone
-      else, set the label text to "Ships." Then add the ship
-      count LCD with a single digit. The maximum number of
-      ships is 3, i think.
+      Add a label widget for the ship count LCD. Then add the ship
+      count LCD with a single digit. The maximum number of ships is 3.
      */
     label = new QLabel(parent);
     label->setPixmap(QPixmap(":image/ship/ship0000"));
@@ -727,8 +664,6 @@ void KAstTopLevel::startNewGame()
 {
 #if 0
     //QTOPIA_PHONE
-    delete contextMenu_;
-    contextMenu_ = 0;
     QSoftMenuBar::setLabel(this,
                            Qt::Key_Select,
                            "qasteroids/powerups/shoot",

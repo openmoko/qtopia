@@ -28,6 +28,7 @@
 #include <QApplication>
 #include <sys/times.h>
 #include <unistd.h>
+#include <time.h>
 
 #ifdef QTOPIA_TEST_HOST
 # include <QDebug>
@@ -41,10 +42,7 @@
 # include <qtopia/qtopiaapplication.h>
 # include <qtopiabase/qtopialog.h>
 # include <qtopiabase/Qtopia>
-# include <sys/ipc.h>
-# include <sys/shm.h>
 # include <errno.h>
-# define SHMKEY 45628540
 #endif // ! QTOPIA_TEST_HOST
 
 
@@ -52,7 +50,7 @@ const int QPerformanceLogData::Timeout = 2000;
 
 QString QPerformanceLogData::toString() const
 {
-    return QString("%1 : %2 : %3 : %4%5%6").arg(ident).arg(appTime).arg(serverTime).arg(QPerformanceLog::stringFromEvent(event)).arg((event != QPerformanceLog::NoEvent) ? " " : "").arg(msg);
+    return QString("%1 : %2 : %3 : %4%5%6").arg(ident).arg(appTime/1000000).arg(serverTime/1000000).arg(QPerformanceLog::stringFromEvent(event)).arg((event != QPerformanceLog::NoEvent) ? " " : "").arg(msg);
 }
 
 class QPerformanceLogPrivate : public QObject
@@ -75,88 +73,74 @@ private:
 };
 #include "qperformancelog.moc"
 
-static struct tms dummy;
-static clock_t start_time = times(&dummy);
-static clock_t *server_start_time;
-static qreal ticks_to_ms = 1000.0/qreal(sysconf(_SC_CLK_TCK));
+qint64 q_gettime_ns()
+{
+    struct timespec spec;
+    if (0 != clock_gettime(
+#if _POSIX_MONOTONIC_CLOCK > 0
+                CLOCK_MONOTONIC,
+#else
+                CLOCK_REALTIME,
+#endif
+                &spec))
+        Q_ASSERT(0);
+    return spec.tv_nsec + Q_INT64_C(1000000000)*qint64(spec.tv_sec);
+}
+
+static qint64 start_time = q_gettime_ns();
+static qint64 server_start_time;
 
 #ifndef QTOPIA_TEST_HOST
 class StartTimeSetup
 {
 public:
     StartTimeSetup();
-    ~StartTimeSetup();
-
-    bool boss;
-    void *ptr;
-    int shmid;
 };
 
 StartTimeSetup::StartTimeSetup()
 {
-    boss = false;
-    /* Create or open shared memory.  If we successfully create "exclusively", we created
-       rather than opened, so we are the "server" process. */
-    shmid = shmget(SHMKEY, sizeof(clock_t), IPC_CREAT | IPC_EXCL | 00777);
-    if (-1 == shmid) {
-        shmid = shmget(SHMKEY, sizeof(clock_t), IPC_CREAT | 00777);
-        if (-1 == shmid) {
-            qWarning("%s:%d shmget failed: %s\n", __FILE__, __LINE__, strerror(errno));
+    bool set = false;
+    do {
+        QByteArray t = qgetenv("QTOPIA_PERFTEST_LAUNCH");
+        if (t.isEmpty() || (t.count(':') != 2 && t.count(':') != 0)) break;
+
+        if (t.count(':') == 0) {
+            server_start_time = t.toLongLong(&set);
+            break;
         }
-        /* If the shmem already existed but no-one is attached, qpe must have crashed
-           or been killed without cleaning up.  We can inherit ownership. */
-        struct shmid_ds shminfo;
-        if (-1 != shmctl(shmid, IPC_STAT, &shminfo) && !shminfo.shm_nattch)
-            boss = true;
-    } else {
-        boss = true;
+
+        QList<QByteArray> tl = t.split(':');
+        bool ok = true;
+        int h, m, s, ms = 0;
+        h = tl[0].toInt(&ok); if (!ok) break;
+        m = tl[1].toInt(&ok); if (!ok) break;
+
+        if (tl[2].count('.') == 1) {
+            QList<QByteArray> tll = tl[2].split('.');
+            s = tll[0].toInt(&ok); if (!ok) break;
+            ms = tll[1].left(3).toInt(&ok); if (!ok) break;
+        } else {
+            s = tl[2].toInt(&ok); if (!ok) break;
+        }
+
+        // launchMs is the time in milliseconds since _midnight_, so we can't
+        // use it as-is.  Figure out what the ms since midnight is now, and subtrct
+        // that difference from the current time.
+        qint64 launchMs = ((h*60 + m)*60 + s)*1000 + ms;
+        QTime now(QTime::currentTime());
+        qint64 nowMs = ((now.hour()*60 + now.minute())*60 + now.second())*1000 + now.msec();
+
+        server_start_time = q_gettime_ns() - (nowMs - launchMs)*Q_INT64_C(1000000);
+
+        set = true;
+
+    } while(0);
+
+    if (!set) {
+        server_start_time = q_gettime_ns();
     }
-
-    ptr = shmat(shmid, 0, (!boss) ? SHM_RDONLY : 0);
-    if (-1 == (long)ptr) qWarning("%s:%d shmat failed: %s\n", __FILE__, __LINE__, strerror(errno));
-    server_start_time = static_cast<clock_t*>(ptr);
-
-    if (boss) {
-        bool set = false;
-        do {
-            QByteArray t = qgetenv("QTOPIA_PERFTEST_LAUNCH");
-            if (t.isEmpty() || t.count(':') != 2) break;
-
-            QList<QByteArray> tl = t.split(':');
-            bool ok = true;
-            int h, m, s, ms = 0;
-            h = tl[0].toInt(&ok); if (!ok) break;
-            m = tl[1].toInt(&ok); if (!ok) break;
-
-            if (tl[2].count('.') == 1) {
-                QList<QByteArray> tll = tl[2].split('.');
-                s = tll[0].toInt(&ok); if (!ok) break;
-                ms = tll[1].left(3).toInt(&ok); if (!ok) break;
-            } else {
-                s = tl[2].toInt(&ok); if (!ok) break;
-            }
-
-            uint launchMs = ((h*60 + m)*60 + s)*1000 + ms;
-            QTime now(QTime::currentTime());
-            uint nowMs = ((now.hour()*60 + now.minute())*60 + now.second())*1000 + now.msec();
-            *server_start_time = clock_t(times(&dummy) - (nowMs - launchMs)/ticks_to_ms);
-
-            set = true;
-
-        } while(0);
-
-        if (!set)
-            *server_start_time = times(&dummy);
-        QPerformanceLog() << "QPerformanceLog server_start_time set to " << QString::number(*server_start_time);
-    }
-}
-
-StartTimeSetup::~StartTimeSetup()
-{
-    shmdt(ptr);
-    if (boss) {
-        shmctl(shmid, IPC_RMID, 0);
-    }
+    ::setenv("QTOPIA_PERFTEST_LAUNCH", QByteArray::number(server_start_time), 1);
+    QPerformanceLog() << "QPerformanceLog server_start_time set to " << QString::number(server_start_time);
 }
 
 static StartTimeSetup time_setup;
@@ -293,19 +277,19 @@ void QPerformanceLogPrivate::send( const QPerformanceLogData &data )
 QPerformanceLog::QPerformanceLog( QString const &applicationName )
 {
     if (enabled()) {
+        qint64 now = q_gettime_ns();
         data = new QPerformanceLogData;
         data->event = NoEvent;
         data->ident = ((applicationName.isEmpty() && qApp) ? qApp->applicationName() : applicationName);
-        clock_t now = times(&dummy);
         {
             static char warned = 0;
-            if (start_time > now || *server_start_time > now && !warned) {
+            if (start_time > now || server_start_time > now && !warned) {
                 warned = 1;
                 qWarning("QPerformanceLog: start time seems to be in the future!");
             }
         }
-        data->appTime = quint64((quint64(now) - quint64(start_time))*ticks_to_ms);
-        data->serverTime = quint64((quint64(now) - quint64(*server_start_time))*ticks_to_ms);
+        data->appTime    = now - start_time;
+        data->serverTime = now - server_start_time;
     }
 }
 

@@ -558,6 +558,7 @@
         <keyword ref="inputmethodselector.html#current">current</keyword>
         <keyword ref="inputmethodselector.html#inputWidgetShown">inputWidgetShown</keyword>
         <keyword ref="inputmethodselector.html#refreshIMMenuAction">refreshIMMenuAction</keyword>
+        <keyword ref="inputmethodselector.html#setHint">setHint</keyword>
         <keyword ref="inputmethodselector.html#setInputMethod">setInputMethod</keyword>
         <keyword ref="inputmethodselector.html#setNextInputMethod">setNextInputMethod</keyword>
         <keyword ref="inputmethodselector.html#showChoice">showChoice</keyword>
@@ -7675,6 +7676,7 @@
         <keyword ref="qtopiaapplication.html#QTOPIA_APP_KEY">QTOPIA_APP_KEY</keyword>
         <keyword ref="qtopiaapplication.html#QTOPIA_DIRECT_DOCUMENT_SYSTEM_CONNECTION">QTOPIA_DIRECT_DOCUMENT_SYSTEM_CONNECTION</keyword>
         <keyword ref="qtopiaapplication.html#QTOPIA_EXPORT_PLUGIN">QTOPIA_EXPORT_PLUGIN</keyword>
+        <keyword ref="qtopiaapplication.html#QTOPIA_EXPORT_QT_PLUGIN">QTOPIA_EXPORT_QT_PLUGIN</keyword>
         <keyword ref="qtopiaapplication.html#QTOPIA_MAIN">QTOPIA_MAIN</keyword>
         <keyword ref="qtopiaapplication.html#QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION">QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION</keyword>
         <keyword ref="qtopiaapplication.html#QTOPIA_SET_KEY">QTOPIA_SET_KEY</keyword>

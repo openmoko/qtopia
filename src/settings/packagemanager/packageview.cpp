@@ -164,7 +164,7 @@ void PackageDetails::init()
 
     if ( m_type == PackageDetails::Info )
     {
-        if ( m_options & Install ) 
+        if (m_options & Install)
             m_acceptAction = new QAction( PackageView::tr("Install"), this );
         else if ( m_options & Uninstall )
             m_acceptAction = new QAction( PackageView::tr("Uninstall"), this );
@@ -202,11 +202,8 @@ void PackageDetails::init()
 
 /*
     \internal
-    The View delgate enables us to show already
-    installed applications as faded/semi-transparent.
-
-    It also lets us ensure an item is correctly
-    highlighted when it has focus.
+    The ViewDelegate lets us correctly show
+    focused items as highlighted
    */
 ViewDelegate::ViewDelegate( QObject *parent ):
     QtopiaItemDelegate( parent )
@@ -223,19 +220,6 @@ void ViewDelegate::paint( QPainter *painter,
 
     QStyleOptionViewItem options = option;
 
-    //for the downloaded view, filtered out packages are those
-    //that have been installed, we want to make these semi-transparent
-    //to show they have been installed.
-    //(for the installs view, there are never any filtered packages)
-    bool isFiltered = index.model()->data( index, AbstractPackageController::Filtered ).toBool();
-    if ( isFiltered )
-    {
-        QColor c = options.palette.color(QPalette::Text);
-        c.setAlphaF( 0.4 );
-        options.palette.setColor( QPalette::Text, c );
-        options.palette.setColor( QPalette::HighlightedText, c );
-    }
-
     //if a package has focus, ensure that it's state is selected
     //so that it will always show with a filled in background highlight
     //(as opposed to a border/box)
@@ -246,6 +230,35 @@ void ViewDelegate::paint( QPainter *painter,
     }
 
     QtopiaItemDelegate::paint( painter, options, index );
+}
+
+/* \internal
+    The download view delegate lets us show
+    installed packages as semi-transparent(/faded) text. */
+DownloadViewDelegate::DownloadViewDelegate(QObject *parent)
+    :ViewDelegate(parent)
+{
+}
+
+void DownloadViewDelegate::paint(QPainter *painter,
+                            const QStyleOptionViewItem &option,
+                            const QModelIndex &index)  const
+{
+    QModelIndex parent = index.parent();
+    if (!parent.isValid())
+        return;
+
+    QStyleOptionViewItem options = option;
+    bool isInstalled = (qobject_cast<const PackageModel*>(index.model()))
+                        ->isInstalled(index);
+    if (isInstalled)
+    {
+        QColor c = options.palette.color(QPalette::Text);
+        c.setAlphaF(0.4);
+        options.palette.setColor(QPalette::Text, c);
+        options.palette.setColor(QPalette::HighlightedText, c);
+    }
+    ViewDelegate::paint(painter, options, index);
 }
 
 const int PackageView::InstalledIndex = 0;
@@ -298,7 +311,7 @@ PackageView::PackageView( QWidget *parent, Qt::WFlags flags )
             downloadView, SLOT(rowsAboutToBeRemoved(QModelIndex,int,int)));
     connect( model, SIGNAL(rowsRemoved(QModelIndex,int,int)),
             downloadView, SLOT(rowsRemoved(QModelIndex,int,int)));
-    downloadView->setItemDelegate( new ViewDelegate( this ) );
+    downloadView->setItemDelegate(new DownloadViewDelegate(this));
     installedView->setItemDelegate(new ViewDelegate(this));
 
     //setup page for downloadable packages
@@ -578,8 +591,16 @@ void PackageView::showDetails( const QModelIndex &item , PackageDetails::Type ty
 
         if ( tabWidget->currentIndex() == InstalledIndex )
             options = PackageDetails::Uninstall;
-        else
-            options = PackageDetails::Install;
+        else //must be DownloadIndex
+        {
+            //check if package has been installed
+            if (model->isInstalled(item))
+                options= PackageDetails::None;  //don't allow install option to appear
+                                                //as a context menu option
+            else
+                options = PackageDetails::Install;  //let install option appear
+                                                    //as a context menu option
+        }
 #ifndef QT_NO_SXE
         if( DomainInfo::hasSensitiveDomains(model->data(item,AbstractPackageController::Domains).toString()) )
             options = PackageDetails::None;
@@ -653,6 +674,8 @@ void PackageView::contextMenuShow()
 {
     QModelIndex currIndex = ( tabWidget->currentIndex() == InstalledIndex ) ? (installedView->currentIndex())
                                                                : (downloadView->currentIndex());
+    //if the current model index is not valid
+    //switch off options in the context menu as appropriate
     if( !currIndex.isValid() || !currIndex.parent().isValid()
         || !model->hasIndex(currIndex.row(), currIndex.column(), currIndex.parent()) )
     {
@@ -668,10 +691,10 @@ void PackageView::contextMenuShow()
             installAction->setVisible( false );
         }
     }
-    else
+    else //make available the appropriate context menu options.
     {
         detailsAction->setVisible( true );
-        if ( tabWidget->currentIndex() == InstalledIndex )
+        if (tabWidget->currentIndex() == InstalledIndex) //Installed tab
         {
             uninstallAction->setVisible( true );
             if ( model->data( currIndex, Qt::StatusTipRole ).toBool() ) //if package is enabled
@@ -681,8 +704,19 @@ void PackageView::contextMenuShow()
         }
         else //Downloads tab
         {
-            installAction->setVisible( true );
+            if (model->isInstalled(currIndex))
+                installAction->setVisible(false);
+            else
+                installAction->setVisible(true);
         }
+    }
+
+    if (tabWidget->currentIndex() == DownloadIndex) //Download tab
+    {
+        if (menuServers->isEmpty() )
+            menuServers->setEnabled(false);
+        else
+            menuServers->setEnabled(true);
     }
 }
 

@@ -33,7 +33,6 @@ QTOPIA_SIMPLE_BUILTIN(taskmanager, taskmanager);
 
 #ifdef QTOPIA_PHONEUI
 // "callhistory" builtin
-#include <phone/phonelauncher.h>
 #include <phone/homescreencontrol.h>
 static QWidget *callhistory()
 {

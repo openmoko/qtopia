@@ -14,6 +14,7 @@ fi
 QTOPIA_VERSION=`version`
 mkdir -p /home/user/Settings/Trolltech
 cp /opt/Qtopia/SDK/$QTOPIA_VERSION/$DEVICE/devices/$DEVICE/etc/default/Trolltech/* /home/user/Settings/Trolltech
+chown -R user.user /home/user
 sudo echo "192.168.0.202 neo" >> /etc/hosts
 #sudo echo "neosdk" > /etc/hostname
 #sudo hostname neosdk

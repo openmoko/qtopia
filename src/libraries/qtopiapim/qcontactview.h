@@ -136,6 +136,7 @@ class QTOPIAPIM_EXPORT QContactSelector : public QDialog
 public:
     QContactSelector(bool allowNew, QWidget * = 0);
     QContactSelector(QWidget * = 0);
+    ~QContactSelector();
 
     void setCreateNewContactEnabled(bool);
     void setAcceptTextEnabled(bool);
@@ -177,6 +178,7 @@ public:
         QWidget *parent = 0);
     QPhoneTypeSelector( const QContact &cnt, const QString &number,
         QList<QContact::PhoneType> allowedTypes, QWidget *parent = 0);
+    ~QPhoneTypeSelector();
 
     QContact::PhoneType selected() const;
     QString selectedNumber() const;

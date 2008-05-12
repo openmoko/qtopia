@@ -30,12 +30,11 @@ class OomPrivate;
 
 class OomManager : public QObject
 {
-  Q_OBJECT
+    Q_OBJECT
 
   public:
-    enum Importance { Expendable, Important, Critical }; 
+    enum Importance { Expendable, Important, Critical };
 
-  public:
     OomManager();
     ~OomManager();
 
@@ -52,12 +51,8 @@ class OomManager : public QObject
     QString procWithBiggestScore(Importance t) const;
     void printOomValues(bool score);
 
-  signals:
-
-  private slots:
-
   private:
-    OomPrivate*	d;
+    OomPrivate* d;
 };
 
 #endif

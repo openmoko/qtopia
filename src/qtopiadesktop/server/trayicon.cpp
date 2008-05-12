@@ -176,12 +176,6 @@ void TrayIcon::setState( int state )
 void TrayIcon::popup( const QPoint &p )
 {
     qLog(UI) << "popup at" << p;
-#if 0
-    popupMenu->grabMouse();
-    popupMenu->activateWindow();
-    popupMenu->exec( p );
-    popupMenu->releaseMouse();
-#endif
     popupMenu->popup( p );
     popupMenu->activateWindow();
 }

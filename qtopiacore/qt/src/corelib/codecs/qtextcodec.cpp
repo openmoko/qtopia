@@ -529,8 +529,6 @@ static void setup()
     for (int i = 0; i < 9; ++i)
         (void)new QIsciiCodec(i);
 
-    for (int i = 0; i < QSimpleTextCodec::numSimpleCodecs; ++i)
-        (void)new QSimpleTextCodec(i);
 
 #  if defined(QT_NO_ICONV) && !defined(QT_BOOTSTRAPPED)
     // no asian codecs when bootstrapping, sorry
@@ -556,6 +554,9 @@ static void setup()
     (void)new QLatin15Codec;
     (void)new QLatin1Codec;
     (void)new QUtf8Codec;
+
+    for (int i = 0; i < QSimpleTextCodec::numSimpleCodecs; ++i)
+        (void)new QSimpleTextCodec(i);
 
 #if defined(Q_OS_UNIX) && !defined(QT_NO_ICONV) && !defined(QT_BOOTSTRAPPED)
     // QIconvCodec depends on the UTF-16 codec, so it needs to be created last

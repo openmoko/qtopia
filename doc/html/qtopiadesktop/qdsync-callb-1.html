@@ -11,7 +11,7 @@
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="../index.html"><font color="#004faf">Qtopia Home</font></a>&nbsp;&middot; <a href="index.html"><font color="#004faf">Index</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">Classes</font></a>&nbsp;&middot; <a href="headers.html"><font color="#004faf">Headers</font></a>&nbsp;&middot; <a href="overviews.html"><font color="#004faf">Overviews</font></a> </td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">CALLB<br /><span class="subtitle"></span>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">CALLB<br /><span class="subtitle"></span>
 </h1>
 <a name="usage"></a>
 <h3>Usage</h3>
@@ -26,7 +26,8 @@
     }
     QByteArray args = data.toBase64();</pre>
 <p>The device will respond with a <a href="qdsync-200-1.html">200</a> or a <a href="qdsync-500-1.html">500</a> command.</p>
-<p>Note that the QCop message will be delivered locally if a local client has registered the channel. If a local client has not registered the channel and a remote client has registered the channel (or the message is sent to QPE/Application/*) the QCop message will be delivered via the usual inter-process mechanism. This means that the messages are subject to security restrictions and attempts to send QCop messages to disallowed channels will result in the Synchronization application being terminated. To allow a particular message to be sent you should mofify the <tt>qdsync</tt> SXE profile.</p>
+<p>Note that the QCop message will only be delivered inside the Synchronization application. This is to prevent a security hole (Normal QCop delivery is subject to security checks, based on the application sending the message).</p>
+<p>It is still possible to perform remote delivery of QCop messages but you must create a plugin for Synchronization that intercepts the message you are interested in and then forwards it on. An example of this in the device_updater tool. It includes a Synchronization plugin that lets it send a message to the package manager.</p>
 <p>See also <a href="qdsync-commands.html">qdsync Protocol</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

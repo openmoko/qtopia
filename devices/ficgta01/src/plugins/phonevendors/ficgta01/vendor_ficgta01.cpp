@@ -283,8 +283,6 @@ bool Ficgta01PhoneBook::hasEmptyPhoneBookIndex() const
 
 void Ficgta01PhoneBook::cstatNotification( const QString& msg )
 {
-    uint statusPosn = 0;
-    uint entityPosn = 8;
     QString entity = msg.mid( 8, 3);
 
     if( entity == "PHB") {
@@ -726,6 +724,7 @@ void Ficgta01VibrateAccessory::setVibrateNow( const bool value )
     qLog(AtChat) << __FUNCTION__ << value;
     int result;
     QString cmd;
+
     if ( value ) { //turn on
         QFile trigger( "/sys/class/leds/neo1973:vibrator/trigger");
         trigger.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
@@ -822,7 +821,6 @@ void Ficgta01CallVolume::setMicVolumeRange(int min,int max)
     setValue( "MinimumMicrophoneVolume", min );
     setValue( "MaximumMicrophoneVolume", max );
 }
-
 
 Ficgta01PreferredNetworkOperators::Ficgta01PreferredNetworkOperators( QModemService *service )
     : QModemPreferredNetworkOperators( service )

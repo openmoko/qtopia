@@ -35,15 +35,6 @@ QDateTime date_to_qdatetime( double date )
         WARNING() << "VariantTimeToSystemTime failed for variant time" << date;
         return QDateTime();
     }
-#if 0
-    qDebug() << "tm.wYear" << tm.wYear;
-    qDebug() << "tm.wMonth" << tm.wMonth;
-    qDebug() << "tm.wDay" << tm.wDay;
-    qDebug() << "tm.wHour" << tm.wHour;
-    qDebug() << "tm.wMinute" << tm.wMinute;
-    qDebug() << "tm.wSecond" << tm.wSecond;
-    qDebug() << "tm.wMilliseconds" << tm.wMilliseconds;
-#endif
     return QDateTime( QDate(tm.wYear, tm.wMonth, tm.wDay),
                       QTime(tm.wHour, tm.wMinute, tm.wSecond, tm.wMilliseconds) );
 }

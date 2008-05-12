@@ -605,6 +605,25 @@ QtopiaServerApplication::QtopiaServerApplication(int& argc, char **argv)
     serverWidgetVsi = new QValueSpaceItem( "/System/ServerWidgets" );
     connect( serverWidgetVsi, SIGNAL(contentsChanged()),
              this, SLOT(serverWidgetVsChanged()) );
+
+#ifdef Q_WS_QWS
+    // Check that the display size is specified
+    QString dispSpec = getenv("QWS_DISPLAY");
+    bool dispArg = false;
+    for (int i = 0; i < argc; ++i) {
+        QString arg(argv[i]);
+        if (dispArg) {
+            dispSpec = arg;
+            break;
+        }
+        if (arg == QLatin1String("-display")) {
+            dispArg = true;
+            continue;
+        }
+    }
+    if (!dispSpec.contains(QLatin1String("mmheight"), Qt::CaseInsensitive))
+        qWarning() << "Warning: Display size not set.  Using default DPI";
+#endif
 }
 
 /*! \internal */

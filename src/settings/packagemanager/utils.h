@@ -38,4 +38,9 @@ class LidsUtils
         static bool isLidsEnabled();
 };
 
+namespace ScriptRunner
+{
+    void runScript(const QString &cmd);
+}
+
 #endif

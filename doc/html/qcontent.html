@@ -11,7 +11,7 @@
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QContent Class Reference</h1>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QContent Class Reference</h1>
 <p>The QContent class represents a content carrying entity in the Qtopia system, where content includes resources which an end-user may view or manage. <a href="#details">More...</a></p>
 <pre>    #include &lt;QContent&gt;</pre><ul>
 <li><a href="qcontent-members.html">List of all members, including inherited members</a></li>
@@ -277,7 +277,7 @@
 <p>See also <a href="qcontent.html#setFile">setFile</a>(), <a href="qcontent.html#executableName">executableName</a>(), <a href="qcontent.html#name">name</a>(), <a href="qcontent.html#fileName">fileName</a>(), and <a href="qcontent.html#fileKnown">fileKnown</a>().</p>
 <h3 class="fn"><a name="fileKnown"></a>bool QContent::fileKnown () const</h3>
 <p>This function is deprecated.</p>
-<p>Returns true if the <a href="qcontent.html">QContent</a> has not been assigned a file name. Calling <a href="qcontent.html#file">file</a>() when fileKnown() is false will generate a new file and assign its file name to the <a href="qcontent.html">QContent</a>.</p>
+<p>Returns true if the <a href="qcontent.html">QContent</a> has been assigned a file name. Calling <a href="qcontent.html#file">file</a>() when fileKnown() is false will generate a new file and assign its file name to the <a href="qcontent.html">QContent</a>.</p>
 <p>See also <a href="qcontent.html#file">file</a>().</p>
 <h3 class="fn"><a name="fileName"></a><a href="./qstring.html">QString</a> QContent::fileName () const</h3>
 <p>Returns the file name of the file backing this content object.</p>

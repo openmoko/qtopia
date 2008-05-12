@@ -25,6 +25,7 @@
 #include <Qtopia>
 #include <QRegExp>
 #include <math.h>
+#include <QProcess>
 
 bool SizeUtils::isSufficientSpace(qlonglong size, QString &neededSpace)
 {
@@ -108,4 +109,19 @@ qlonglong SizeUtils::parseInstalledSize( QString installedSize )
 bool LidsUtils::isLidsEnabled()
 {
     return QFile::exists("/proc/sys/lids/locks");
+}
+
+namespace ScriptRunner
+{
+    void runScript(const QString &cmd)
+    {
+        QProcess process;
+        QEventLoop eventLoop;
+        QObject::connect(&process, SIGNAL(finished(int,QProcess::ExitStatus)),
+                    &eventLoop, SLOT(quit()));
+        QObject::connect(&process, SIGNAL(error(QProcess::ProcessError)),
+                    &eventLoop, SLOT(quit()));
+        process.start(cmd);
+        eventLoop.exec(QEventLoop::ExcludeUserInputEvents);
+    }
 }

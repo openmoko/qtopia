@@ -27,7 +27,7 @@
 #include <QVBoxLayout>
 #include <QHash>
 #include <QKeyEvent>
-#include "phone/phonebrowser.h"
+#include "phonebrowser.h"
 #include <QSoftMenuBar>
 #include <QMenu>
 #include <QAction>

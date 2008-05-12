@@ -102,10 +102,15 @@ QMediaContentContext::~QMediaContentContext()
 
     Adds \a object to the context. The object should be a \l {player object}.
 */
-void QMediaContentContext::addObject( QObject* object )
+
+void QMediaContentContext::addObject(QObject* object)
 {
-    connect( this, SIGNAL(contentChanged(QMediaContent*)),
-        object, SLOT(setMediaContent(QMediaContent*)) );
+    if (connect(this, SIGNAL(contentChanged(QMediaContent*)),
+                object, SLOT(setMediaContent(QMediaContent*)))) {
+
+        if (m_content != 0)
+            QMetaObject::invokeMethod(object, "setMediaContent", Q_ARG(QMediaContent*, m_content));
+    }
 }
 
 /*!
@@ -113,9 +118,10 @@ void QMediaContentContext::addObject( QObject* object )
 
     Removes \a object from the context.
 */
+
 void QMediaContentContext::removeObject( QObject* object )
 {
-    disconnect( object, SLOT(setMediaContent(QMediaContent*)) );
+    disconnect(object, SLOT(setMediaContent(QMediaContent*)));
 }
 
 /*!
@@ -144,10 +150,13 @@ QMediaContent* QMediaContentContext::content() const
 
     \sa contentChanged()
 */
-void QMediaContentContext::setMediaContent( QMediaContent* content )
+
+void QMediaContentContext::setMediaContent(QMediaContent* content)
 {
-    m_content = content;
-    emit contentChanged( m_content );
+    if (m_content != content) {
+        m_content = content;
+        emit contentChanged(m_content);
+    }
 }
 
 class QMediaControlNotifierPrivate

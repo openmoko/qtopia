@@ -182,9 +182,7 @@ void WavDecoder::start()
             {
                 if (strncmp(d->header.riff.descriptor.id, riffId, 4) == 0 &&
                     strncmp(d->header.riff.type, waveId, 4) == 0 &&
-                    strncmp(d->header.wave.descriptor.id, fmtId, 4) == 0 &&
-                    strncmp(d->header.data.descriptor.id, dataId, 4) == 0)
-                {
+                    strncmp(d->header.wave.descriptor.id, fmtId, 4) == 0) {
                     if (d->header.wave.audioFormat == 1)
                     {
                         d->outputInfo.type = QMediaDevice::Info::PCM;
@@ -193,7 +191,7 @@ void WavDecoder::start()
                         d->outputInfo.channels = qFromLittleEndian<quint16>(d->header.wave.numChannels);
                         d->outputInfo.volume = d->volume;
 
-                        d->length = quint32((double(d->header.data.descriptor.size) /
+                        d->length = quint32((double(d->header.riff.descriptor.size) /
                                         d->outputInfo.frequency /
                                         d->outputInfo.channels /
                                         (d->outputInfo.bitsPerSample / 8)) * 1000);

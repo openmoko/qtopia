@@ -188,6 +188,7 @@ private:
 
 };
 
+    void serviceItemPosted( const QString& item );
 class Ficgta01PreferredNetworkOperators : public QModemPreferredNetworkOperators
 {
     Q_OBJECT

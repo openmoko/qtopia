@@ -249,14 +249,10 @@ bool BluetoothAudioState::enter(QAudio::AudioCapability)
 
     if (m_currAudioGateway || resetCurrAudioGateway()) {
         m_currAudioGateway->connectAudio();
-        bool ret = setAudioMode(Scenario_GSMBluetooth);
-        if (ret)
-            m_isActive = true;
-
-        return ret;
+        m_isActive = setAudioMode(Scenario_GSMBluetooth);
     }
 
-    return false;
+    return m_isActive;
 }
 
 bool BluetoothAudioState::leave()
@@ -322,6 +318,7 @@ bool HandsetAudioState::isAvailable() const
 bool HandsetAudioState::enter(QAudio::AudioCapability)
 {
     qLog(AudioState) << __PRETTY_FUNCTION__ << "isPhone" << m_isPhone;
+
     return setAudioMode(Scenario_GSMHandset);
 }
 
@@ -353,7 +350,7 @@ MediaSpeakerAudioState::MediaSpeakerAudioState(bool isPhone, QObject *parent)
     : QAudioState(parent)
     , m_isPhone(isPhone)
 {
-    qLog(AudioState) << "MediaSpeakerAudioState" << isPhone;
+    qLog(AudioState) << __PRETTY_FUNCTION__ << isPhone;
 
     m_info.setDomain("Media");
     m_info.setProfile("MediaSpeaker");
@@ -379,12 +376,14 @@ bool MediaSpeakerAudioState::isAvailable() const
 bool MediaSpeakerAudioState::enter(QAudio::AudioCapability)
 {
     qLog(AudioState) << __PRETTY_FUNCTION__ << m_isPhone;
-    return setAudioMode(Scenario_StereoOut);
+
+    return setAudioMode(Scenario_GSMSpeakerout);
 }
 
 bool MediaSpeakerAudioState::leave()
 {
     qLog(AudioState) << __PRETTY_FUNCTION__;
+
     return true;
 }
 
@@ -412,7 +411,7 @@ MediaCaptureAudioState::MediaCaptureAudioState(bool isPhone, QObject *parent)
     : QAudioState(parent)
     , m_isPhone(isPhone)
 {
-    qLog(AudioState) << "MediaCaptureAudioState" << isPhone;
+    qLog(AudioState) << __PRETTY_FUNCTION__ << isPhone;
 
     m_info.setDomain("Media");
     m_info.setProfile("MediaCapture");
@@ -438,6 +437,7 @@ bool MediaCaptureAudioState::isAvailable() const
 bool MediaCaptureAudioState::enter(QAudio::AudioCapability)
 {
     qLog(AudioState) << __PRETTY_FUNCTION__ << m_isPhone;
+
     return setAudioMode(Scenario_CaptureHandset);
 }
 
@@ -488,8 +488,7 @@ HeadphonesAudioState::HeadphonesAudioState(bool isPhone, QObject *parent)
     m_info.setPriority(25);
 
     m_headset = new QValueSpaceItem("/Hardware/Accessories/PortableHandsfree/Present", this);
-    connect(m_headset, SIGNAL(contentsChanged()),
-            SLOT(onHeadsetModified()));
+    connect(m_headset, SIGNAL(contentsChanged()), SLOT(onHeadsetModified()));
 }
 
 QAudioStateInfo HeadphonesAudioState::info() const
@@ -505,9 +504,10 @@ QAudio::AudioCapabilities HeadphonesAudioState::capabilities() const
 void HeadphonesAudioState::onHeadsetModified()
 {
     qLog(AudioState) << __PRETTY_FUNCTION__;
+
     bool avail = m_headset->value().toBool();
 
-    if(avail) {
+    if (avail) {
         this->enter(QAudio::OutputOnly);
     } else {
         this->leave();
@@ -588,12 +588,14 @@ bool SpeakerphoneAudioState::isAvailable() const
 bool SpeakerphoneAudioState::enter(QAudio::AudioCapability)
 {
     qLog(AudioState)<< __PRETTY_FUNCTION__;
+
     return setAudioMode(Scenario_GSMSpeakerout);
 }
 
 bool SpeakerphoneAudioState::leave()
 {
     qLog(AudioState)<< __PRETTY_FUNCTION__;
+
     return true;
 }
 
@@ -616,8 +618,8 @@ private:
     QAudioStateInfo m_info;
 };
 
-RingtoneAudioState::RingtoneAudioState(QObject *parent)
-    : QAudioState(parent)
+RingtoneAudioState::RingtoneAudioState(QObject *parent):
+    QAudioState(parent)
 {
     m_info.setDomain("RingTone");
     m_info.setProfile("RingToneSpeaker");
@@ -643,12 +645,14 @@ bool RingtoneAudioState::isAvailable() const
 bool RingtoneAudioState::enter(QAudio::AudioCapability)
 {
     qLog(AudioState) << __PRETTY_FUNCTION__;
+
     return setAudioMode(Scenario_StereoOut);
 }
 
 bool RingtoneAudioState::leave()
 {
     qLog(AudioState) << __PRETTY_FUNCTION__;
+
     return true;
 }
 
@@ -659,10 +663,9 @@ public:
     QList<QAudioState*> m_states;
 };
 
-Ficgta01AudioPlugin::Ficgta01AudioPlugin(QObject *parent)
-    : QAudioStatePlugin(parent)
+Ficgta01AudioPlugin::Ficgta01AudioPlugin(QObject *parent):
+    QAudioStatePlugin(parent)
 {
-
     m_data = new Ficgta01AudioPluginPrivate;
 
     m_data->m_states.push_back(new HandsetAudioState(this));
@@ -688,6 +691,7 @@ Ficgta01AudioPlugin::Ficgta01AudioPlugin(QObject *parent)
 Ficgta01AudioPlugin::~Ficgta01AudioPlugin()
 {
     qDeleteAll(m_data->m_states);
+
     delete m_data;
 }
 

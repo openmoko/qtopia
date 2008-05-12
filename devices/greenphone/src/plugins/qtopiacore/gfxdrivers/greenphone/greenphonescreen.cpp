@@ -32,11 +32,13 @@
 #include <sched.h>
 #include <private/qwindowsurface_qws_p.h>
 #include <private/qunixsocketserver_p.h>
+#include <QtNetwork/qtcpsocket.h>
+#include "blend.h"
 
 class ScreenAnimator;
 class GreenphoneScreenPrivate : public QUnixSocketServer
 {
-Q_OBJECT
+    Q_OBJECT
 public:
     GreenphoneScreenPrivate();
 
@@ -112,7 +114,6 @@ public:
         m_lock.unlock();
     }
 
-
     void removeReserved(int);
     void addReserved(int, const QRect &);
 
@@ -171,7 +172,6 @@ GreenphoneScreenPrivate::GreenphoneScreenPrivate()
     }
 }
 
-#include <QtNetwork/qtcpsocket.h>
 class LinuxFbSocket : public QTcpSocket
 {
 public:
@@ -183,10 +183,9 @@ public:
 private:
     uint data[4];
     uint datacount;
-
 };
 
-bool LinuxFbSocket::readReserved(QRect &r) 
+bool LinuxFbSocket::readReserved(QRect &r)
 {
     char *data_ptr = (char *)data;
 
@@ -237,9 +236,7 @@ void GreenphoneScreenPrivate::disconnected()
     sock->deleteLater();
 }
 
-
 void stripe(ushort *dest, int dest_width,
-
             ushort *src, int src_native_width,
             int src_x1, int src_y1, int src_x2, int src_y2)
 {
@@ -258,29 +255,27 @@ void stripe(ushort *dest, int dest_width,
 
     ushort *src_addr = src + src_xx + src_yy * src_native_width;
 
-    if(deltay < 0) {
+    if (deltay < 0)
+    {
         deltay *= -1;
         src_native_width *= -1;
     }
 
-    for(int xx = 0; xx < dest_width; ++xx) {
-
+    for(int xx = 0; xx < dest_width; ++xx)
+    {
         dest[xx] = *src_addr;
 
-        while(src_x1_t_dest_width_tally < 0) {
-
+        while(src_x1_t_dest_width_tally < 0)
+        {
             src_addr++;
 
             error += deltay;
             src_x1_t_dest_width_tally += dest_width;
 
             if(error > 0) {
-
                 src_addr += src_native_width;
                 error -= deltax;
-            } 
-
-
+            }
         }
 
         src_x1_t_dest_width_tally -= src_width;
@@ -296,9 +291,9 @@ ScreenAnimator::ScreenAnimator(int w, int h, int lstep, uchar *buffer, QObject *
     Q_ASSERT(g_animator == 0);
 
     g_animator = this;
-    QObject::connect(qwsServer, 
-                     SIGNAL(windowEvent(QWSWindow*,QWSServer::WindowEvent)), 
-                     this, 
+    QObject::connect(qwsServer,
+                     SIGNAL(windowEvent(QWSWindow*,QWSServer::WindowEvent)),
+                     this,
                      SLOT(windowEvent(QWSWindow*,QWSServer::WindowEvent)),
                      Qt::DirectConnection);
 
@@ -352,17 +347,19 @@ void GreenphoneScreen::removeReserved(int id)
 void ScreenAnimator::receivedQCop(const QString &message, const QByteArray &)
 {
     m_lock.lock();
-    if(message == "go()") {
-
-        if(shrunk) {
+    if (message == "go()")
+    {
+        if (shrunk)
+        {
             int winId = layoutOrder.at(layoutFocus);
             QList<QWSWindow *> windows = qwsServer->clientWindows();
             QWSWindow *raise = 0;
-            for(int ii = 0; !raise && ii < windows.count(); ++ii)
-                if(windows.at(ii)->winId() == winId)
+            for (int ii = 0; !raise && ii < windows.count(); ++ii)
+                if (windows.at(ii)->winId() == winId)
                     raise = windows.at(ii);
 
-            if(raise) {
+            if (raise)
+            {
                 m_lock.unlock();
                 raise->setActiveWindow();
                 raise->raise();
@@ -395,7 +392,6 @@ void ScreenAnimator::windowEvent(QWSWindow *w, QWSServer::WindowEvent e)
                 windows.erase(iter);
                 anim.remove(w->winId());
             }
-
         } else {
             windows.remove(w->winId());
             anim.remove(w->winId());
@@ -434,17 +430,15 @@ void ScreenAnimator::updateAnimation()
 
     if(animationTicker == 0)
         ::gettimeofday(&start_tv, 0);
-    
+
     animationTicker++;
     int togo = ANIM_STEPS - animationTicker;
 
-#if 1
     for(QHash<int, AnimData>::Iterator iter = anim.begin();
-            iter != anim.end(); 
+            iter != anim.end();
             ++iter)
     {
-        if(togo) {
-
+        if (togo) {
             const AnimData &data = *iter;
             int newx = data.fromWindowRect.x() + ((data.destWindowRect.x() - data.fromWindowRect.x()) * animationTicker) / ANIM_STEPS;
             int newy = data.fromWindowRect.y() + ((data.destWindowRect.y() - data.fromWindowRect.y()) * animationTicker) / ANIM_STEPS;
@@ -452,15 +446,14 @@ void ScreenAnimator::updateAnimation()
             int newheight = data.fromWindowRect.height() + ((data.destWindowRect.height() - data.fromWindowRect.height()) * animationTicker) / ANIM_STEPS;
 
             iter->windowRect = QRect(newx, newy, newwidth, newheight);
-
         } else {
             iter->windowRect = iter->destWindowRect;
             iter->fromWindowRect = iter->destWindowRect;
         }
     }
-#endif
 
-    if(animationTicker == ANIM_STEPS) {
+    if (animationTicker == ANIM_STEPS)
+    {
         animationTicker = -1;
         ::gettimeofday(&end_tv, 0);
         int timems = (end_tv.tv_sec - start_tv.tv_sec) * 1000 + (end_tv.tv_usec - start_tv.tv_usec) / 1000;
@@ -480,8 +473,8 @@ void ScreenAnimator::layoutWindows()
 
     QRegion decorationRegion;
 
-    for(int ii = 0; ii < windowOrder.count(); ++ii) {
-
+    for(int ii = 0; ii < windowOrder.count(); ++ii)
+    {
         QHash<int, AWindow>::Iterator iter = windows.find(windowOrder.at(ii));
         if(iter == windows.end())
             continue;
@@ -494,8 +487,8 @@ void ScreenAnimator::layoutWindows()
         }
     }
 
-    for(int ii = 0; ii < windowOrder.count(); ++ii) {
-
+    for (int ii = 0; ii < windowOrder.count(); ++ii)
+    {
         QHash<int, AWindow>::Iterator iter = windows.find(windowOrder.at(ii));
         if(iter == windows.end())
             continue;
@@ -509,15 +502,14 @@ void ScreenAnimator::layoutWindows()
 
         QString name = names[window.winId];
 
-        if(name == "_decoration_") {
-
+        if (name == "_decoration_")
+        {
             windowRect = window.screen;
             imageRect = QRect(QPoint(0,0), window.image.size());
 
             if(shrunk) {
                 destRect = windowRect;
             } else {
-
                 if(window.screen.y() <= height / 2) {
                     // Moves to the top of the screen
                     destRect = window.screen;
@@ -527,24 +519,18 @@ void ScreenAnimator::layoutWindows()
                     destRect = window.screen;
                     destRect.moveTop(height);
                 }
-
             }
-
         } else {
-
-            QRect winRect = 
+            QRect winRect =
                 QRegion(QRect(0,0,width,height)).intersected(window.screen).subtracted(decorationRegion).boundingRect();
 
             if(winRect.size() != window.image.size()) {
-
                     imageRect = QRect(QPoint(winRect.x() - window.screen.x(),
                                              winRect.y() - window.screen.y()),
                                       winRect.size());
-
             } else {
                 imageRect = QRect(QPoint(0,0), window.image.size());
             }
-
 
             windowRect = winRect;
             destRect = windowRect;
@@ -610,9 +596,9 @@ void ScreenAnimator::moveLeft()
     layoutFocus--;
     int delta = anim[layoutOrder.at(layoutFocus + 1)].destWindowRect.x() - anim[layoutOrder.at(layoutFocus)].destWindowRect.x();
 
-   for(QHash<int,  AnimData>::Iterator iter = anim.begin(); 
-       iter != anim.end(); 
-       ++iter) 
+   for(QHash<int,  AnimData>::Iterator iter = anim.begin();
+       iter != anim.end();
+       ++iter)
        if(layoutOrder.contains(iter.key()))
            iter->destWindowRect.translate(delta, 0);
 
@@ -633,24 +619,17 @@ void ScreenAnimator::moveRight()
 
     int delta = anim[layoutOrder.at(layoutFocus)].destWindowRect.x() - anim[layoutOrder.at(layoutFocus - 1)].destWindowRect.x();
 
-    for(QHash<int,  AnimData>::Iterator iter = anim.begin(); 
-            iter != anim.end(); 
-            ++iter) 
+    for(QHash<int,  AnimData>::Iterator iter = anim.begin();
+            iter != anim.end();
+            ++iter)
        if(layoutOrder.contains(iter.key()))
            iter->destWindowRect.translate(-delta, 0);
 
     animationTicker = 0;
 }
 
-
-#include "blend.h"
-
-//#define ANIMATOR_DEBUGGING
 void ScreenAnimator::expose()
 {
-#ifdef ANIMATOR_DEBUGGING
-    qWarning() << "Expose";
-#endif
     QRegion exposedRegion;
     QRegion totalRegion;
 
@@ -662,11 +641,11 @@ void ScreenAnimator::expose()
 
     for(QHash<int, QRect>::ConstIterator iter = reserved.begin();
             iter != reserved.end();
-            ++iter) 
+            ++iter)
         exposedRegion = exposedRegion.united(*iter);
 
-    for(int ii = 0; ii < windowOrder.count(); ++ii) {
-
+    for(int ii = 0; ii < windowOrder.count(); ++ii)
+    {
         QHash<int, AWindow>::Iterator iter = windows.find(windowOrder.at(ii));
         if(iter == windows.end())
             continue;
@@ -684,12 +663,11 @@ void ScreenAnimator::expose()
             exposedRegion = exposedRegion.united(window_screen_rect);
     }
 
-
     QRect reflectionBounds = reflection;
     reflectionBounds.moveBottom(reflectionLine);
 
-    for(int ii = 0; ii < windowOrder.count(); ++ii) {
-
+    for(int ii = 0; ii < windowOrder.count(); ++ii)
+    {
         QHash<int, AWindow>::Iterator iter = windows.find(windowOrder.at(ii));
         if(iter == windows.end()) {
             continue;
@@ -717,19 +695,14 @@ void ScreenAnimator::expose()
             continue;
         }
 
-#ifdef ANIMATOR_DEBUGGING
-        qWarning() << "Window" << window.winId << window_image_size << "->" 
-                   << window_screen_rect; 
-#endif
-
         // Reflection stuff
         QRect reflectRect = window_screen_rect.intersected(reflectionBounds);
         if(!reflectRect.isEmpty()) {
-            reflectRect.moveTop(reflectionLine + 
+            reflectRect.moveTop(reflectionLine +
                                 (reflectionLine - reflectRect.bottom()) + 2);
         }
 
-        QRegion reflectRegion = 
+        QRegion reflectRegion =
             QRegion(reflectRect).subtracted(totalRegion).subtracted(exposedRegion).intersected(QRect(0,0,width,height));
         exposedRegion = exposedRegion.united(reflectRegion);
 
@@ -740,10 +713,9 @@ void ScreenAnimator::expose()
         }
 
         foreach(QRect screen_rect, toDraw.rects()) {
-
             QRect surface_rect;
             if(!scaled) {
-                surface_rect = 
+                surface_rect =
                     screen_rect.translated(-window_screen_rect.topLeft());
             } else {
                 int x = (window_image_size.width() * (screen_rect.x() - window_screen_rect.x())) / window_screen_rect.width();
@@ -754,34 +726,25 @@ void ScreenAnimator::expose()
                 surface_rect = QRect(x, y, width, height);
             }
 
-#ifdef ANIMATOR_DEBUGGING
-            qWarning() << "Drawing" << window.winId << surface_rect << "->" 
-                       << screen_rect; 
-#endif
-
-            ushort *screen_buffer = 
-                (ushort *)(frameBuffer + screen_rect.y() * lineStep) + screen_rect.x();
+            ushort *screen_buffer = (ushort *)(frameBuffer + screen_rect.y() * lineStep) + screen_rect.x();
             int screen_step = lineStep;
 
             int window_step = window_image.bytesPerLine();
-            ushort * window_buffer = 
+            ushort * window_buffer =
                 (ushort *)(window_image.bits() + (window_image_rect.y() + surface_rect.y()) * window_step) + window_image_rect.x() + surface_rect.x();
             ushort * window_bits = (ushort *)window_image.bits();
 
 
             if(screen_rect.size() == surface_rect.size()) {
-
                 for(int ii = 0; ii < screen_rect.height(); ++ii) {
-
-                    ::memcpy(screen_buffer, 
-                             window_buffer, 
+                    ::memcpy(screen_buffer,
+                             window_buffer,
                              screen_rect.width() * sizeof(ushort));
 
                     window_buffer = (ushort *)((uchar *)window_buffer + window_step);
                     screen_buffer = (ushort *)((uchar *)screen_buffer + screen_step);
                 }
             } else {
-
                 // XXX - only supports down scaling
                 Q_ASSERT(screen_rect.height() <= surface_rect.height());
                 Q_ASSERT(screen_rect.width() <= surface_rect.width());
@@ -790,7 +753,6 @@ void ScreenAnimator::expose()
 
                 int image_yy = 0;
                 for(int ii = 0; ii < screen_rect.height(); ++ii) {
-
                     ushort *true_screen_buffer = 0;
                     int true_yy = screen_rect.y() + ii;
                     if(true_yy >= reflectionBounds.top() &&
@@ -801,13 +763,11 @@ void ScreenAnimator::expose()
                     }
 
                     if(scaled_width) {
-                        stripe(screen_buffer, screen_rect.width(), 
-
+                        stripe(screen_buffer, screen_rect.width(),
                                window_bits, window_image.width(),
-                               surface_rect.x() + window_image_rect.x(), 
-                               image_yy + surface_rect.y() + window_image_rect.y(), 
+                               surface_rect.x() + window_image_rect.x(),
+                               image_yy + surface_rect.y() + window_image_rect.y(),
                                surface_rect.x() + window_image_rect.x() + surface_rect.width(), image_yy + surface_rect.y() + window_image_rect.y());
-
                     } else {
                         if(true_screen_buffer)
                             screen_buffer = window_buffer;
@@ -846,14 +806,13 @@ void ScreenAnimator::expose()
                         screen_buffer = true_screen_buffer;
                     }
 
-                    while(image_yy * screen_rect.height() <= 
+                    while(image_yy * screen_rect.height() <=
                             ii * surface_rect.height()) {
                         image_yy++;
                         window_buffer = (ushort *)((uchar *)window_buffer + window_step);
                     }
 
                     screen_buffer = (ushort *)((uchar *)screen_buffer + screen_step);
-
                 }
             }
         }
@@ -861,23 +820,17 @@ void ScreenAnimator::expose()
 
     QRegion toDraw;
 
-#if 1
-
     // Fill the rest with black
     toDraw = QRegion(QRect(0,0,width,height)).subtracted(exposedRegion);
     foreach(QRect screen_rect, toDraw.rects()) {
-
-            uchar *screen_buffer = frameBuffer + screen_rect.y() * lineStep + screen_rect.x() * 2;
-            int screen_step = lineStep;
-            for(int ii = 0; ii < screen_rect.height(); ++ii) {
-                ::memset(screen_buffer, 0, screen_rect.width() * 2);
-                screen_buffer += lineStep;
-            }
-
+        uchar *screen_buffer = frameBuffer + screen_rect.y() * lineStep + screen_rect.x() * 2;
+        int screen_step = lineStep;
+        for(int ii = 0; ii < screen_rect.height(); ++ii) {
+            ::memset(screen_buffer, 0, screen_rect.width() * 2);
+            screen_buffer += lineStep;
+        }
     }
-#endif
 }
-
 
 GreenphoneScreen::GreenphoneScreen(int displayId)
 : QLinuxFbScreen(displayId), d(0)
@@ -897,22 +850,14 @@ void GreenphoneScreen::exposeRegion(QRegion region, int changing)
 {
     struct timeval tv;
     ::gettimeofday(&tv, 0);
-//    qWarning() << "Expose region" << tv.tv_sec << tv.tv_usec;
 
     if(!d->animator)
         d->animator = new ScreenAnimator(w, h, lstep, data);
-#ifdef COMPOSE_DEBUGGING
-    qWarning() << "QLinuxFbScreen::exposeRegion()";
-#endif
 
     QWSWindow *changed = qwsServer->clientWindows().at(changing);
     QWSWindowSurface *surface = changed->windowSurface();
 
     if(!surface) {
-#ifdef COMPOSE_DEBUGGING
-        qWarning() << "Error: Changed window" << changed->winId() 
-                   << "has no surface";
-#endif
         return;
     }
 
@@ -929,14 +874,6 @@ void GreenphoneScreen::exposeRegion(QRegion region, int changing)
 
     QImage window_image = surface->image();
     if(window_image.format() != QImage::Format_RGB16) {
-#ifdef COMPOSE_DEBUGGING
-        qWarning() << "Error: Changed window" << changed->winId() 
-                   << "- region" << changed->requestedRegion()
-                   << "- reserved" << surface->isRegionReserved() 
-                   << "-"
-                   << "has incorrect format (is" << window_image.format() 
-                   << ")";
-#endif
         AWindow achanged;
         achanged.isReserved = true;
         achanged.winId = changed->winId();
@@ -953,7 +890,6 @@ void GreenphoneScreen::exposeRegion(QRegion region, int changing)
     achanged.image = window_image.copy();
 
     achanged.screen =  changed->requestedRegion().boundingRect();
-//    qWarning() << "Updating" << achanged.winId << window_image.size() << achanged.screen;
 
     d->animator->updateWindow(achanged);
 }

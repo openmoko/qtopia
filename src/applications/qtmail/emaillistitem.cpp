@@ -141,7 +141,7 @@ void EmailListItem::setColumns()
         if ( mailStatus & QMailMessage::Removed ) {
             setIcon(*pm_removed);
         } else if ( mailStatus & QMailMessage::Downloaded ) {
-            if ( mailStatus & QMailMessage::Read ) {
+            if ( mailStatus & QMailMessage::Read || mailStatus & QMailMessage::ReadElsewhere ) {
                 setIcon(*pm_normal);
             } else {
                 setIcon(*pm_unread);

@@ -18,8 +18,8 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-#ifndef __QPERFORMANCELOG_P_H__
-#define __QPERFORMANCELOG_P_H__
+#ifndef QPERFORMANCELOG_P_H
+#define QPERFORMANCELOG_P_H
 
 //
 //  W A R N I N G
@@ -43,8 +43,8 @@ public:
     QString msg;
     QPerformanceLog::Event event;
     QString ident;
-    quint64 appTime;
-    quint64 serverTime;
+    qint64 appTime;
+    qint64 serverTime;
 
     static const int Timeout;
 };

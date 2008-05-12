@@ -1647,10 +1647,8 @@ void KeyboardWidget::setBoardByType(BoardType newBoardType)
     int newBoard = -1;
     // find new board that matches type;
 
-    for(int i = 0; i < m_boards.count(); i++)
-    {
-        if (m_boards.at(i)->type() == newBoardType)
-        {
+    for(int i = 0; i < m_boards.count(); i++) {
+        if (m_boards.at(i)->type() == newBoardType) {
             newBoard = i;
             break;
         }
@@ -1659,7 +1657,7 @@ void KeyboardWidget::setBoardByType(BoardType newBoardType)
     if(newBoard == -1) {
         qLog(Input) << "KeyboardWidget::setBoardByType - Failed to find board of type "<<newBoardType;
         return;
-    };
+    }
 
     if( newBoard == m_currentBoard ) {
         qLog(Input) << "KeyboardWidget::setBoardByType - already at board of type "<<newBoardType;
@@ -1685,6 +1683,7 @@ void KeyboardWidget::setBoardByType(BoardType newBoardType)
     } else {
         //not visible, so just change the board
         m_oldBoard = m_currentBoard;
+        m_currentBoard = newBoard;
         update();
     }
 }
@@ -1996,8 +1995,7 @@ void KeyboardWidget::setHint(const QString& hint)
     // update microfocus
     //qwsServer->sendIMQuery ( Qt::ImMicroFocus );
  
-    if (h.contains("propernouns")) // no tr
-    {
+    if (h.contains("propernouns")) { // no tr
         qLog(Input) << "PredictiveKeyboard::setHint(" << h << ") - setting autocapitalisation";
         // TODO: Set autocapitalisation
         setBoardByType(UpperCase);
@@ -2010,26 +2008,23 @@ void KeyboardWidget::setHint(const QString& hint)
     } else {
         m_autoCap = true;
         m_autoCapitaliseEveryWord = false;
-    };
-;
+    }
+
     if ((h == "phone" || h == "int")) { // no tr
         qLog(Input) << "PredictiveKeyboard::setHint(" << h << ") - changing to numbers mode";
         setBoardByType(Numeric);
         boardHasBeenSet = true;
         m_autoCap = false;
-    };
+    }
 
-    if(!boardHasBeenSet && h == "text" || h == "email" || h == "words")
-    {
+    if(!boardHasBeenSet && h == "text" || h == "email" || h == "words") {
         if (!m_autoCap || h == "email")
             setBoardByType(LowerCase);
         else
             setBoardByType(UpperCase);
         boardHasBeenSet = true;
     }
-
-    return;
-};
+}
 
 /*!
     Filter key events.
@@ -2049,14 +2044,16 @@ bool KeyboardWidget::filter ( int unicode, int keycode, int modifiers, bool isPr
 
     if(keycode == Qt::Key_Select) {
         // on release, commit text
-        if (isPress) return true;
+        if (isPress)
+            return true;
         acceptWord();
         return true;
     }
 
     //Handle backspace
     if(keycode == Qt::Key_Back) {
-        if(isPress) return true;
+        if(isPress)
+            return true;
         doBackspace();
         return true;
     }

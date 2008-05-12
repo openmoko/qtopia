@@ -19,27 +19,27 @@
 **
 ****************************************************************************/
 
-/*! 
+/*!
     \class QPrivateImplementationBase
     \mainclass
-    \brief The QPrivateImplementationBase provides a base class for implicitly 
+    \brief The QPrivateImplementationBase provides a base class for implicitly
         shared implementation classes.
     \ingroup messaginglibrary
     \internal
     \sa QSharedData
 */
 
-/*! 
+/*!
     \class QPrivateImplementationPointer
     \mainclass
-    \brief The QPrivateImplementationPointer is a smart pointer which manages 
+    \brief The QPrivateImplementationPointer is a smart pointer which manages
         implicit sharing of classes derived from QPrivateImplementationBase.
     \ingroup messaginglibrary
     \internal
     \sa QSharedDataPointer
 */
 
-/*! 
+/*!
     \class QPrivatelyImplemented
     \mainclass
     \brief The QPrivatelyImplemented class template allows a class to delegate
@@ -48,14 +48,14 @@
     \internal
 */
 
-#if 0
+/*
+    A simple demonstration of these classes...
 
-#include "qprivateimplementationdef_p.h"
+    \code
+    #include "qprivateimplementationdef_p.h"
 
-#include <QString>
-#include "qtopialog.h"
-
-/* A simple demonstration of these classes... */
+    #include <QString>
+    #include "qtopialog.h"
 
     // Class A provides the property 'name'
     class A_Impl;
@@ -261,6 +261,6 @@
     }
 
     static const int testComplete = doTest();
-
-#endif
+    \endcode
+*/
 

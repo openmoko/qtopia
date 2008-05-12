@@ -3888,8 +3888,14 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
             }
 #endif
 #ifdef QTOPIA_USE_TEST_SLAVE
-            if (testSlave() && mb) {
-                testSlave()->showMessageBox(mb, mb->windowTitle(), mb->text());
+            if (testSlave()) {
+                if (mb) {
+                    testSlave()->showMessageBox(mb, mb->windowTitle(), mb->text());
+                } else {
+                    QDialog *dlg = qobject_cast<QDialog*>(o);
+                    if (dlg)
+                        testSlave()->showDialog(dlg, dlg->windowTitle());
+                }
             }
 #endif
         }
@@ -4476,11 +4482,13 @@ void QtopiaApplication::showDialog( QDialog* dialog, bool noMaximize )
     Shows and calls \l{QDialog::exec()}{exec()} on the \a dialog. A heuristic approach is taken to
     determine the size of the dialog and whether it is maximized.
 
+    The function returns a \l QDialog::DialogCode result.
+
     If \a noMaximize is true then the dialog may not be maximized.  This
     is usually unnecessary and it is recommended that the system be allowed
     to decide how the dialog is displayed by passing false for \a noMaximize.
 
-    \sa showDialog()
+    \sa showDialog(), QDialog::exec()
 */
 int QtopiaApplication::execDialog( QDialog* dialog, bool noMaximize )
 {
@@ -4746,8 +4754,21 @@ TestSlaveInterface* QtopiaApplication::testSlave()
   \relates QtopiaApplication
 
   This macro causes a QObject-derived \a classname to be made available from a
-  plugin file (eg foo.so). This plugin should be used instead of Q_EXPORT_PLUGIN because it
+  plugin file (eg foo.so). This macro should be used instead of Q_EXPORT_PLUGIN because it
   works correctly in both dynamic and singleexec builds.
+
+  Note that this function is for Qtopia plugins. For Qt plugins you should use \l QTOPIA_EXPORT_QT_PLUGIN().
+*/
+
+/*!
+  \macro QTOPIA_EXPORT_QT_PLUGIN(classname)
+  \relates QtopiaApplication
+
+  This macro causes a QObject-derived \a classname to be made available from a
+  plugin file (eg foo.so). This macro should be used instead of Q_EXPORT_PLUGIN because it
+  works correctly in both dynamic and singleexec builds.
+
+  Note that this function is for Qt plugins. For Qtopia plugins you should use \l QTOPIA_EXPORT_PLUGIN().
 */
 
 /*!

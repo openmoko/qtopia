@@ -47,11 +47,6 @@ public slots:
 
     void adjustMicrophoneVolume(int volume);
 
-    void setAmpMode(bool);
-    void changeAmpModeVS();
-    void setAmp(QString);
-    void toggleAmpMode();
-
 private Q_SLOTS:
     void registerService();
     void initVolumes();
@@ -66,9 +61,6 @@ private:
 private:
     enum AdjustType { Relative, Absolute };
     void adjustVolume(int leftChannel, int rightChannel, AdjustType);
-
-    int m_leftChannelVolume;
-    int m_rightChannelVolume;
 
     QtopiaIpcAdaptor *m_adaptor;
     QValueSpaceObject *m_vsoVolumeObject;

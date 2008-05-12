@@ -23,9 +23,9 @@
 
 KALedMeter::KALedMeter(QWidget* parent) : QFrame(parent)
 {
-    maxRawValue_ = 100;
+    maxRawValue_ = 1000;
     currentMeterLevel_ = 0;
-    rawValue_ = 100;
+    rawValue_ = 1000;
     meterLevels_ = 20;
     setMinimumWidth(meterLevels_ * 2 + frameWidth());
 }
@@ -87,7 +87,7 @@ void KALedMeter::drawContents()
     p.setBrush(Qt::black);
     p.setPen(Qt::green);
     int i = 0;
-    if (currentMeterLevel_ > 0) {
+    if (currentMeterLevel_ > 1) {
         while (i < currentMeterLevel_) {
             p.drawRect(lx,b.top()+1,lw-1,b.height()-2);
             ++i;

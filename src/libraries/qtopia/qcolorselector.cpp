@@ -97,6 +97,14 @@ QColorSelectorDialog::QColorSelectorDialog( QWidget *parent, Qt::WindowFlags fla
 }
 
 /*!
+    Destroys a QColorSelectorDialog
+    */
+QColorSelectorDialog::~QColorSelectorDialog()
+{
+    delete d;
+}
+
+/*!
     Returns the currently highlighted color.
 
     \sa setColor()
