@@ -223,6 +223,14 @@ QWaitWidget::QWaitWidget(QWidget *parent)
 }
 
 /*!
+    Destroys a QWaitWidget
+    */
+QWaitWidget::~QWaitWidget()
+{
+    delete d;
+}
+
+/*!
     \property QWaitWidget::cancelEnabled
     \brief indicates whether the Cancel button appears on the context menu.
 */

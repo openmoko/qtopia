@@ -21,8 +21,6 @@
 
 #include "dialerservice.h"
 #include "dialercontrol.h"
-#include "phonelauncher.h"
-#include "dialercontrol.h"
 
 /*!
     \service DialerService Dialer

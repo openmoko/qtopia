@@ -44,7 +44,10 @@ INCLUDEPATH+= core_server \
               bluetooth/scomisc \
               pim/savetocontacts \
               pim/servercontactmodel \
+              phone/browserscreen/abstract \
+              phone/browserscreen/gridbrowser \
               phone/callhistory/default \
+              phone/callscreen/themed \
               phone/contextlabel/base \
               phone/dialer/abstract \
               phone/header/themed \
@@ -305,7 +308,7 @@ PHONE_HEADERS=\
     phone/contextlabel/base/contextlabel.h \
     phone/themecontrol/themecontrol.h \
     ui/launcherviews/documentview/documentview.h \
-    phone/phonebrowser.h \
+    phone/browserscreen/gridbrowser/phonebrowser.h \
     processctrl/taskmanagerentry/taskmanagerentry.h \
     ui/launcherviews/taskmanagerview/taskmanagerlauncherview.h \
     infrastructure/camera/cameramonitor.h \
@@ -313,7 +316,7 @@ PHONE_HEADERS=\
     phone/themecontrol/serverthemeview.h \
     phone/homescreencontrol.h \
     phone/qabstracthomescreen.h \
-    phone/themedhomescreen.h \
+    phone/homescreen/themed/themedhomescreen.h \
     phone/themecontrol/themebackground_p.h \
     phone/profileprovider/qphoneprofileprovider.h \
     ui/abstractinterfaces/stdmessagebox/messagebox.h \
@@ -321,8 +324,8 @@ PHONE_HEADERS=\
     phone/phonelock.h\
     ui/taskmanager/taskmanagerservice.h\
     core_server/qabstractmessagebox.h\
-    phone/qabstractbrowserscreen.h\
-    phone/phonelauncher.h \
+    phone/browserscreen/abstract/qabstractbrowserscreen.h\
+    phone/serverinterface/phonelauncher/phonelauncher.h \
     phone/secondarydisplay/abstract/qabstractsecondarydisplay.h \
     infrastructure/softmenubar/qsoftmenubarprovider.h \
     phone/secondarydisplay/themed/secondarythemeddisplay.h \
@@ -337,7 +340,7 @@ TELEPHONY_HEADERS=\
     phone/telephony/atemulator/externalaccess.h \
     phone/telephony/msgcontrol/messagecontrol.h \
     phone/ui/callcontactmodelview/callcontactlist.h \
-    phone/callscreen.h \
+    phone/callscreen/themed/callscreen.h \
     phone/telephony/dialercontrol/dialercontrol.h \
     pim/savetocontacts/savetocontacts.h \
     phone/dialer/keypad/quickdial.h \
@@ -354,17 +357,17 @@ TELEPHONY_HEADERS=\
 
 PHONE_SOURCES=\
     phone/contextlabel/base/contextlabel.cpp \
-    phone/phonelauncher.cpp \
+    phone/serverinterface/phonelauncher/phonelauncher.cpp \
     phone/themecontrol/themecontrol.cpp \
     ui/launcherviews/documentview/documentview.cpp \
-    phone/phonebrowser.cpp \
+    phone/browserscreen/gridbrowser/phonebrowser.cpp \
     processctrl/taskmanagerentry/taskmanagerentry.cpp \
     ui/launcherviews/taskmanagerview/taskmanagerlauncherview.cpp \
     infrastructure/camera/cameramonitor.cpp \
     core_server/alarmcontrol.cpp \
     phone/themecontrol/serverthemeview.cpp \
     phone/qabstracthomescreen.cpp \
-    phone/themedhomescreen.cpp \
+    phone/homescreen/themed/themedhomescreen.cpp \
     phone/themecontrol/themebackground_p.cpp \
     phone/profileprovider/qphoneprofileprovider.cpp \
     ui/abstractinterfaces/stdmessagebox/messagebox.cpp \
@@ -385,7 +388,7 @@ TELEPHONY_SOURCES=\
     phone/telephony/atemulator/externalaccess.cpp \
     phone/telephony/msgcontrol/messagecontrol.cpp \
     phone/ui/callcontactmodelview/callcontactlist.cpp\
-    phone/callscreen.cpp \
+    phone/callscreen/themed/callscreen.cpp \
     phone/telephony/dialercontrol/dialercontrol.cpp \
     pim/savetocontacts/savetocontacts.cpp \
     phone/dialer/keypad/quickdial.cpp \
@@ -436,39 +439,39 @@ enable_hierarchicaldocumentview {
 }
 
 PHONE_UI_SOURCES=\
-    phone/ui/phonelauncherview.cpp \
-    phone/ui/griditem.cpp \
-    phone/ui/selecteditem.cpp \
-    phone/ui/selecteditemconnector.cpp \
-    phone/ui/griditemtable.cpp \
-    phone/ui/oscillator_p.cpp \
-    phone/ui/parabola_p.cpp \
-    phone/ui/animator_p.cpp \
-    phone/ui/animatorfactory_p.cpp \
-    phone/ui/bouncer_p.cpp \
-    phone/ui/zoomer_p.cpp \
-    phone/ui/shearer_p.cpp \
-    phone/ui/rotator_p.cpp \
-    phone/ui/radialbackground_p.cpp \
-    phone/ui/renderer.cpp
+    phone/browserscreen/gridbrowser/phonelauncherview.cpp \
+    phone/browserscreen/gridbrowser/griditem.cpp \
+    phone/browserscreen/gridbrowser/selecteditem.cpp \
+    phone/browserscreen/gridbrowser/selecteditemconnector.cpp \
+    phone/browserscreen/gridbrowser/griditemtable.cpp \
+    phone/browserscreen/gridbrowser/oscillator_p.cpp \
+    phone/browserscreen/gridbrowser/parabola_p.cpp \
+    phone/browserscreen/gridbrowser/animator_p.cpp \
+    phone/browserscreen/gridbrowser/animatorfactory_p.cpp \
+    phone/browserscreen/gridbrowser/bouncer_p.cpp \
+    phone/browserscreen/gridbrowser/zoomer_p.cpp \
+    phone/browserscreen/gridbrowser/shearer_p.cpp \
+    phone/browserscreen/gridbrowser/rotator_p.cpp \
+    phone/browserscreen/gridbrowser/radialbackground_p.cpp \
+    phone/browserscreen/gridbrowser/renderer.cpp
 
 
 PHONE_UI_HEADERS=\
-    phone/ui/phonelauncherview.h \
-    phone/ui/griditem.h \
-    phone/ui/selecteditem.h \
-    phone/ui/selecteditemconnector.h \
-    phone/ui/griditemtable.h \
-    phone/ui/oscillator_p.h \
-    phone/ui/parabola_p.h \
-    phone/ui/animator_p.h \
-    phone/ui/animatorfactory_p.cpp \
-    phone/ui/bouncer_p.h \
-    phone/ui/zoomer_p.h \
-    phone/ui/shearer_p.h \
-    phone/ui/rotator_p.h \
-    phone/ui/radialbackground_p.h \
-    phone/ui/renderer.h
+    phone/browserscreen/gridbrowser/phonelauncherview.h \
+    phone/browserscreen/gridbrowser/griditem.h \
+    phone/browserscreen/gridbrowser/selecteditem.h \
+    phone/browserscreen/gridbrowser/selecteditemconnector.h \
+    phone/browserscreen/gridbrowser/griditemtable.h \
+    phone/browserscreen/gridbrowser/oscillator_p.h \
+    phone/browserscreen/gridbrowser/parabola_p.h \
+    phone/browserscreen/gridbrowser/animator_p.h \
+    phone/browserscreen/gridbrowser/animatorfactory_p.cpp \
+    phone/browserscreen/gridbrowser/bouncer_p.h \
+    phone/browserscreen/gridbrowser/zoomer_p.h \
+    phone/browserscreen/gridbrowser/shearer_p.h \
+    phone/browserscreen/gridbrowser/rotator_p.h \
+    phone/browserscreen/gridbrowser/radialbackground_p.h \
+    phone/browserscreen/gridbrowser/renderer.h
 
 enable_phone_ui {
     HEADERS+=$$PHONE_UI_HEADERS
@@ -477,13 +480,13 @@ enable_phone_ui {
 
 SAMPLES_SOURCES=\
     ui/abstractinterfaces/slideinmessagebox/slideinmessagebox.cpp \
-    phone/samples/wheelbrowser.cpp \
-    phone/samples/qpixmapwheel.cpp
+    phone/browserscreen/wheelbrowser/wheelbrowser.cpp \
+    phone/browserscreen/wheelbrowser/qpixmapwheel.cpp
 
 SAMPLES_HEADERS=\
     ui/abstractinterfaces/slideinmessagebox/slideinmessagebox.h \
-    phone/samples/wheelbrowser.h \
-    phone/samples/qpixmapwheel.h
+    phone/browserscreen/wheelbrowser/wheelbrowser.h \
+    phone/browserscreen/wheelbrowser/qpixmapwheel.h
 
 enable_modem:enable_cell {
     SAMPLES_SOURCES+=\

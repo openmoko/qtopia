@@ -175,13 +175,18 @@ QMAKE_LIBDIR_QT = $$QTDIR/lib
         ALL_DEPS+=sxe_test
     }
 
-    win32:CONFIG(debug,debug|release):lib {
-        isEmpty(DESTDIR):pdb=$${TARGET}.pdb
-        else:pdb=$$DESTDIR/$${TARGET}.pdb
-        pdb.commands=$$QMAKE_COPY $$fixpath($$pdb) $(INSTALL_ROOT)
-        pdb.CONFIG=no_path
-        pdb.depends=install_target
-        INSTALLS+=pdb
+    win32:CONFIG(debug,debug|release) {
+        copypdb=0
+        lib:copypdb=1
+        app:equals(TARGET,qtopiasyncagent):copypdb=1
+        equals(copypdb,1) {
+            isEmpty(DESTDIR):pdb=$${TARGET}.pdb
+            else:pdb=$$DESTDIR/$${TARGET}.pdb
+            pdb.commands=$$QMAKE_COPY $$fixpath($$pdb) $(INSTALL_ROOT)
+            pdb.CONFIG=no_path
+            pdb.depends=install_target
+            INSTALLS+=pdb
+        }
     }
 
     # Prevent dynamic_cast from being used in embedded builds (we disable rtti so it will

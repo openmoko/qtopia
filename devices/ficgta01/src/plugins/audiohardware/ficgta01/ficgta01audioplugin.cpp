@@ -53,63 +53,41 @@
 // gsmhandset.state
 // gsmbluetooth.state
 
-// typedef enum audiostate {
-// stereo = 0,
-// headset,
-// handset,
-// bluetooth
+enum NeoAudioMode {
+    Mode_StereoOut,
+    Mode_GSMHandset,
+    Mode_GSMHeadset,
+    Mode_GSMBluetooth,
+    Mode_GSMSpeakerout,
+    Mode_CaptureHandset,
+    Mode_CaptureHeadset
+};
 
-// };
+static const char* mode_to_string[] = {
+    "stereoout",
+    "gsmhandset",
+    "gsmheadset",
+    "gsmbluetooth",
+    "gsmspeakerout",
+    "capturehandset",
+    "captureheadset",
+};
 
-static inline bool setAudioMode(int mode)
+
+static bool setAudioMode(NeoAudioMode audioMode)
 {
-QString m_mode;
-    switch (mode) {
-    case 0:
-        m_mode = "stereoout";
-        break;
-    case 1:
-        m_mode = "gsmhandset";
-        break;
-    case 2:
-        m_mode = "gsmheadset";
-        break;
-    case 3:
-        m_mode = "gsmbluetooth";
-        break;
-    case 4:
-        m_mode = "gsmspeakerout";
-        break;
-    case 5:
-        m_mode = "capturehandset";
-        break;
-    case 6:
-        m_mode = "captureheadset";
-        break;
+    QString confDir = QDir("/etc/alsa").exists() ? "/etc/alsa/" : "/etc/";
 
-    };
-
-    QString confDir;
-    if( QDir("/etc/alsa").exists())
-        confDir="/etc/alsa/";
-    else
-        confDir="/etc/";
-
-    QString cmd = "/usr/sbin/alsactl -f "+confDir+m_mode+".state restore";
-    qLog(AudioState)<< "cmd="<<cmd;
+    const char* mode = mode_to_string[static_cast<int>(audioMode)];
+    QString cmd = "/usr/sbin/alsactl -f " + confDir + mode + ".state restore";
     int result = system(cmd.toLocal8Bit());
 
-//    int result = QProcess::execute("/usr/sbin/alsactl",
-//QStringList() <<"-f"<< QString( "%1%2.state").arg(confDir).arg(m_mode) << "restore");
+    if (result == 0)
+        qLog(AudioState) << "setAudioMode(); using"<< QString( "/etc/alsa/%1.state").arg(mode);
+    else
+        qLog(AudioState)<< QString("Setting audio mode to: %1 failed").arg(mode);
 
-   qLog(AudioState)<< "setAudioMode "<< QString( "/etc/alsa/%1.state").arg(m_mode);
-   if(result == 0)
-       return true;
-   qLog(AudioState)<< QString("Setting audio mode to: %1 failed").arg( m_mode);
-    return false;
-
-    QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService", "changeAmpModeVS()");
-
+    return result == 0;
 }
 
 #ifdef QTOPIA_BLUETOOTH
@@ -136,22 +114,21 @@ private:
     bool resetCurrAudioGateway();
 
 private:
-    QList<QBluetoothAudioGateway *> m_audioGateways;
+    QList<QBluetoothAudioGateway*> m_audioGateways;
     bool m_isPhone;
-    QBluetoothAudioGateway *m_currAudioGateway;
-//    QtopiaIpcAdaptor *adaptor;
+    QBluetoothAudioGateway* m_currAudioGateway;
     QAudioStateInfo m_info;
     bool m_isActive;
     bool m_isAvail;
 };
 
-BluetoothAudioState::BluetoothAudioState(bool isPhone, QObject *parent)
-    : QAudioState(parent)
+BluetoothAudioState::BluetoothAudioState(bool isPhone, QObject *parent):
+    QAudioState(parent),
+    m_isPhone(isPhone),
+    m_currAudioGateway(0),
+    m_isActive(false),
+    m_isAvail(false)
 {
-    m_isPhone = isPhone;
-    m_currAudioGateway = 0;
-    m_isActive = false;
-
     QBluetoothAudioGateway *hf = new QBluetoothAudioGateway("BluetoothHandsfree");
     m_audioGateways.append(hf);
     qLog(AudioState) << "Handsfree audio gateway: " << hf;
@@ -160,7 +137,7 @@ BluetoothAudioState::BluetoothAudioState(bool isPhone, QObject *parent)
     m_audioGateways.append(hs);
     qLog(AudioState) << "Headset audio gateway: " << hs;
 
-    for (int i=0; i<m_audioGateways.size(); i++) {
+    for (int i = 0; i < m_audioGateways.size(); ++i) {
         QBluetoothAudioGateway *gateway = m_audioGateways.at(i);
         connect(gateway, SIGNAL(audioStateChanged()),
                 SLOT(bluetoothAudioStateChanged()));
@@ -183,24 +160,17 @@ BluetoothAudioState::BluetoothAudioState(bool isPhone, QObject *parent)
     }
 
     m_info.setDisplayName(tr("Bluetooth Headset"));
-
-//    adaptor = new QtopiaIpcAdaptor("QPE/Ficgta01Modem", this );
-
-    m_isAvail = false;
-    if(resetCurrAudioGateway())
-        m_isAvail = true;
+    m_isAvail = resetCurrAudioGateway();
 }
 
 BluetoothAudioState::~BluetoothAudioState()
 {
-    for (int i = 0; i < m_audioGateways.size(); i++) {
-        delete m_audioGateways.at(i);
-    }
+    qDeleteAll(m_audioGateways);
 }
 
 bool BluetoothAudioState::resetCurrAudioGateway()
 {
-    for (int i=0; i<m_audioGateways.size(); i++) {
+    for (int i = 0; i < m_audioGateways.size(); ++i) {
         QBluetoothAudioGateway *gateway = m_audioGateways.at(i);
         if (gateway->isConnected()) {
             m_currAudioGateway = gateway;
@@ -215,7 +185,7 @@ bool BluetoothAudioState::resetCurrAudioGateway()
 
 void BluetoothAudioState::bluetoothAudioStateChanged()
 {
-    qLog(AudioState) << "bluetoothAudioStateChanged" << m_isActive << m_currAudioGateway;
+    qLog(AudioState) << "BluetoothAudioState::bluetoothAudioStateChanged()" << m_isActive << m_currAudioGateway;
 
     if (m_isActive && (m_currAudioGateway || resetCurrAudioGateway())) {
         if (!m_currAudioGateway->audioEnabled()) {
@@ -255,8 +225,7 @@ QAudio::AudioCapabilities BluetoothAudioState::capabilities() const
 
     if (m_isPhone) {
         return QAudio::OutputOnly;
-    }
-    else {
+    } else {
         return QAudio::OutputOnly | QAudio::InputOnly;
     }
 }
@@ -268,27 +237,16 @@ bool BluetoothAudioState::isAvailable() const
 
 bool BluetoothAudioState::enter(QAudio::AudioCapability capability)
 {
-    qLog(AudioState)<<"BluetoothAudioState::enter"<<"isPhone";
-    int mode;
     Q_UNUSED(capability)
 
-    bool ret = false;
+    qLog(AudioState) << "BluetoothAudioState::enter()" << "isPhone" << m_isPhone;
 
     if (m_currAudioGateway || resetCurrAudioGateway()) {
-
-        if (m_isPhone) {
-            mode = 3;
-        } else
-            mode = 3;
-
         m_currAudioGateway->connectAudio();
-        ret = setAudioMode( mode);
-        if (ret) {
-            m_isActive = true;
-        }
+        m_isActive = setAudioMode(Mode_GSMBluetooth);
     }
 
-    return ret;
+    return m_isActive;
 }
 
 bool BluetoothAudioState::leave()
@@ -323,11 +281,11 @@ private:
 
 };
 
-HandsetAudioState::HandsetAudioState(bool isPhone, QObject *parent)
-    : QAudioState(parent)
+HandsetAudioState::HandsetAudioState(bool isPhone, QObject *parent):
+    QAudioState(parent),
+    m_isPhone(isPhone)
 {
-    qLog(AudioState)<<"HandsetAudioState"<<isPhone;
-    m_isPhone = isPhone;
+    qLog(AudioState) << "HandsetAudioState" << isPhone;
 
     m_info.setDomain("Phone");
     m_info.setProfile("PhoneSpeaker");
@@ -353,11 +311,11 @@ bool HandsetAudioState::isAvailable() const
 
 bool HandsetAudioState::enter(QAudio::AudioCapability capability)
 {
-    qLog(AudioState)<<"HandsetAudioState::enter"<<"isPhone";
-
     Q_UNUSED(capability)
 
-    return setAudioMode( 1);
+    qLog(AudioState) << "HHandsetAudioState::enter()" << "isPhone" << m_isPhone;
+
+    return setAudioMode(Mode_GSMHandset);
 }
 
 bool HandsetAudioState::leave()
@@ -381,21 +339,19 @@ public:
 
 private:
     QAudioStateInfo m_info;
-    bool m_Phone;
+    bool m_isPhone;
 };
 
-MediaSpeakerAudioState::MediaSpeakerAudioState(bool isPhone, QObject *parent)
-    : QAudioState(parent)
+MediaSpeakerAudioState::MediaSpeakerAudioState(bool isPhone, QObject *parent):
+    QAudioState(parent),
+    m_isPhone(isPhone)
 {
-    m_Phone = isPhone;
-    qLog(AudioState)<<"MediaSpeakerAudioState"<<isPhone;
+    qLog(AudioState)<< "MediaSpeakerAudioState::MediaSpeakerAudioState() "<< m_isPhone;
 
     m_info.setDomain("Media");
     m_info.setProfile("MediaSpeaker");
     m_info.setDisplayName(tr("Stereo Speaker"));
-
     m_info.setPriority(150);
-
 }
 
 QAudioStateInfo MediaSpeakerAudioState::info() const
@@ -415,16 +371,17 @@ bool MediaSpeakerAudioState::isAvailable() const
 
 bool MediaSpeakerAudioState::enter(QAudio::AudioCapability capability)
 {
-    qLog(AudioState)<<"MediaSpeakerAudioState::enter"<<"isPhone";
+    qLog(AudioState) << "MediaSpeakerAudioState::enter()" << "isPhone" << m_isPhone;
 
     Q_UNUSED(capability)
 
-    return setAudioMode( 0);
+    return setAudioMode(Mode_GSMSpeakerout);
 }
 
 bool MediaSpeakerAudioState::leave()
 {
-    qLog(AudioState)<<"MediaSpeakerAudioState::leave";
+    qLog(AudioState) << "MediaSpeakerAudioState::leave()";
+
     return true;
 }
 
@@ -445,21 +402,19 @@ public:
 
 private:
     QAudioStateInfo m_info;
-    bool m_Phone;
+    bool m_isPhone;
 };
 
-MediaCaptureAudioState::MediaCaptureAudioState(bool isPhone, QObject *parent)
-    : QAudioState(parent)
+MediaCaptureAudioState::MediaCaptureAudioState(bool isPhone, QObject *parent):
+    QAudioState(parent),
+    m_isPhone(isPhone)
 {
-    m_Phone = isPhone;
-    qLog(AudioState)<<"MediaCaptureAudioState"<<isPhone;
+    qLog(AudioState) << "MediaCaptureAudioState::MediaCaptureAudioState()" << "isPhone" << isPhone;
 
     m_info.setDomain("Media");
     m_info.setProfile("MediaCapture");
     m_info.setDisplayName(tr("Stereo Speaker"));
-
     m_info.setPriority(150);
-
 }
 
 QAudioStateInfo MediaCaptureAudioState::info() const
@@ -479,16 +434,17 @@ bool MediaCaptureAudioState::isAvailable() const
 
 bool MediaCaptureAudioState::enter(QAudio::AudioCapability capability)
 {
-    qLog(AudioState)<<"MediaCaptureAudioState::enter"<<"isPhone";
-
     Q_UNUSED(capability)
 
-    return setAudioMode( 5);
+    qLog(AudioState) << "MediaCaptureAudioState::enter()" << "isPhone" << m_isPhone;
+
+    return setAudioMode(Mode_CaptureHandset);
 }
 
 bool MediaCaptureAudioState::leave()
 {
-    qLog(AudioState)<<"MediaCaptureAudioState::leave";
+    qLog(AudioState) << "MediaCaptureAudioState::leave()";
+
     return true;
 }
 
@@ -513,34 +469,27 @@ private:
     QAudioStateInfo m_info;
     bool m_isPhone;
     QValueSpaceItem *m_headset;
-
-
-    //QtopiaIpcAdaptor *adaptor;
 };
 
-HeadphonesAudioState::HeadphonesAudioState(bool isPhone, QObject *parent)
-    : QAudioState(parent)
+HeadphonesAudioState::HeadphonesAudioState(bool isPhone, QObject *parent):
+    QAudioState(parent),
+    m_isPhone(isPhone)
 {
-    m_isPhone = isPhone;
-    qLog(AudioState)<<"isPhone?"<<isPhone;
+    qLog(AudioState) << "HeadphonesAudioState::HeadphonesAudioState()" << "isPhone" << m_isPhone;
 
-    if (isPhone) {
+    if (m_isPhone) {
         m_info.setDomain("Phone");
         m_info.setProfile("PhoneHeadphones");
-        m_info.setDisplayName(tr("Headphones"));
     } else {
         m_info.setDomain("Media");
         m_info.setProfile("MediaHeadphones");
-        m_info.setDisplayName(tr("Headphones"));
     }
 
+    m_info.setDisplayName(tr("Headphones"));
     m_info.setPriority(25);
 
     m_headset = new QValueSpaceItem("/Hardware/Accessories/PortableHandsfree/Present", this);
-    connect( m_headset, SIGNAL(contentsChanged()),
-             this, SLOT(onHeadsetModified()));
-
-//    adaptor = new QtopiaIpcAdaptor("QPE/Ficgta01Modem", this );
+    connect(m_headset, SIGNAL(contentsChanged()), SLOT(onHeadsetModified()));
 }
 
 QAudioStateInfo HeadphonesAudioState::info() const
@@ -550,17 +499,18 @@ QAudioStateInfo HeadphonesAudioState::info() const
 
 QAudio::AudioCapabilities HeadphonesAudioState::capabilities() const
 {
-    return  QAudio::InputAndOutput /*QAudio::InputOnly | QAudio::OutputOnly*/;
+    return QAudio::InputAndOutput /*QAudio::InputOnly | QAudio::OutputOnly*/;
 }
 
 void HeadphonesAudioState::onHeadsetModified()
 {
-    qLog(AudioState)<<"HeadphonesAudioState::onHeadsetModified()";
+    qLog(AudioState) << "HeadphonesAudioState::onHeadsetModified()";
+
     bool avail = m_headset->value().toBool();
 
-    if(avail) {
-        this->enter( QAudio::OutputOnly);
-      } else {
+    if (avail) {
+        this->enter(QAudio::OutputOnly);
+    } else {
         this->leave();
     }
 
@@ -575,7 +525,8 @@ bool HeadphonesAudioState::isAvailable() const
 bool HeadphonesAudioState::enter(QAudio::AudioCapability capability)
 {
     Q_UNUSED(capability)
-        qLog(AudioState)<<"HeadphonesAudioState::enter"<<"isPhone"<<m_isPhone;
+
+    qLog(AudioState)<<"HeadphonesAudioState::enter"<<"isPhone"<<m_isPhone;
 
 //gsmheadset.state
 
@@ -652,15 +603,17 @@ bool SpeakerphoneAudioState::isAvailable() const
 
 bool SpeakerphoneAudioState::enter(QAudio::AudioCapability capability)
 {
-    //handset
     Q_UNUSED(capability)
-        qLog(AudioState)<< " SpeakerphoneAudioState::enter";
-    return setAudioMode( 4);
+
+    qLog(AudioState)<< " SpeakerphoneAudioState::enter()";
+
+    return setAudioMode(Mode_GSMSpeakerout);
 }
 
 bool SpeakerphoneAudioState::leave()
 {
     qLog(AudioState)<<" SpeakerphoneAudioState::leave";
+
     return true;
 }
 
@@ -683,8 +636,8 @@ private:
     QAudioStateInfo m_info;
 };
 
-RingtoneAudioState::RingtoneAudioState(QObject *parent)
-    : QAudioState(parent)
+RingtoneAudioState::RingtoneAudioState(QObject *parent):
+    QAudioState(parent)
 {
     m_info.setDomain("RingTone");
     m_info.setProfile("RingToneSpeaker");
@@ -699,7 +652,7 @@ QAudioStateInfo RingtoneAudioState::info() const
 
 QAudio::AudioCapabilities RingtoneAudioState::capabilities() const
 {
-    return  QAudio::InputOnly | QAudio::OutputOnly;
+    return QAudio::InputOnly | QAudio::OutputOnly;
 }
 
 bool RingtoneAudioState::isAvailable() const
@@ -711,12 +664,13 @@ bool RingtoneAudioState::enter(QAudio::AudioCapability)
 {
     qLog(AudioState)<<" RingtoneAudioState::enter";
 
-    return setAudioMode(0);
+    return setAudioMode(Mode_StereoOut);
 }
 
 bool RingtoneAudioState::leave()
 {
     qLog(AudioState)<<"RingtoneAudioState::leave()";
+
     return true;
 }
 
@@ -724,41 +678,37 @@ bool RingtoneAudioState::leave()
 class Ficgta01AudioPluginPrivate
 {
 public:
-    QList<QAudioState *> m_states;
+    QList<QAudioState*> m_states;
 };
 
-Ficgta01AudioPlugin::Ficgta01AudioPlugin(QObject *parent)
-    : QAudioStatePlugin(parent)
+Ficgta01AudioPlugin::Ficgta01AudioPlugin(QObject *parent):
+    QAudioStatePlugin(parent)
 {
-
     m_data = new Ficgta01AudioPluginPrivate;
 
     m_data->m_states.push_back(new HandsetAudioState(this));
 
     m_data->m_states.push_back(new MediaSpeakerAudioState(this));
-     m_data->m_states.push_back(new MediaCaptureAudioState(this));
+    m_data->m_states.push_back(new MediaCaptureAudioState(this));
 
     m_data->m_states.push_back(new HeadphonesAudioState(false, this));
     m_data->m_states.push_back(new HeadphonesAudioState(true, this));
 
 #ifdef QTOPIA_BLUETOOTH
-    // Can play media through bluetooth.  Can record through bluetooth as well.
+    // Can play media through bluetooth. Can record through bluetooth as well.
     m_data->m_states.push_back(new BluetoothAudioState(false, this));
     m_data->m_states.push_back(new BluetoothAudioState(true, this));
 #endif
 
     m_data->m_states.push_back(new SpeakerphoneAudioState(this));
-
-  m_data->m_states.push_back(new RingtoneAudioState(this));
+    m_data->m_states.push_back(new RingtoneAudioState(this));
 
     //TODO: Need to enable Bluetooth RingTone
 }
 
 Ficgta01AudioPlugin::~Ficgta01AudioPlugin()
 {
-    for (int i = 0; m_data->m_states.size(); i++) {
-        delete m_data->m_states.at(i);
-    }
+    qDeleteAll(m_data->m_states);
 
     delete m_data;
 }

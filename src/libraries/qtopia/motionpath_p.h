@@ -150,9 +150,9 @@ private:
     {
     public:
         AdderConcrete(AdderValue *a) : adder(a) {}
-        virtual void setValue(qreal value) { 
-            ConcreteValue::setValue(value); 
-            adder->recompute(); 
+        virtual void setValue(qreal value) {
+            ConcreteValue::setValue(value);
+            adder->recompute();
         }
 
     private:
@@ -160,8 +160,8 @@ private:
     };
 
 public:
-    IValue *value(int id) const { 
-        IValue *rv = m_vals[id]; 
+    IValue *value(int id) const {
+        IValue *rv = m_vals[id];
         if(!rv) {
             rv = new AdderConcrete(const_cast<AdderValue *>(this));
             m_vals[id] = static_cast<AdderConcrete *>(rv);
@@ -170,7 +170,6 @@ public:
     }
 
 private:
-
     IValue *v;
     typedef QHash<int, AdderConcrete *> Values;
     mutable Values m_vals;
@@ -201,7 +200,7 @@ public:
         for(int ii = 0; ii < m_values.count(); ++ii)
             m_values[ii]->setValue(v);
     }
-   
+
 private:
     QList<IValue *> m_values;
 };
@@ -239,7 +238,7 @@ public:
     void move(int time, qreal destination);
     void moveBy(int time, qreal change);
 
-    void setValue(IValue *); 
+    void setValue(IValue *);
 
     int updateInterval() const;
     void setUpdateInterval(int);
@@ -266,8 +265,8 @@ private:
 
     struct Op {
         enum Type {
-            Pause, 
-            Set,  
+            Pause,
+            Set,
             Move,
             MoveBy,
             Accel,
@@ -300,8 +299,8 @@ private:
 
     // Returns the value for op at time
     qreal value(const Op &op, int time, qreal base) const;
-   
-    // True if running, false if not 
+
+    // True if running, false if not
     bool m_isRunning;
 
     // Interval that timer runs at
@@ -338,74 +337,6 @@ private:
     QSet<MotionTimeLine *> m_timelines;
 };
 
-
-#if 0
-class MotionTimeLine
-{
-public:
-    void addPoint(int time, MotionPoint *);
-    void addFunction(int timeStart, int length, MotionFunction *);
-};
-
-// Motion over time (motion functions always see time as 0.0f - 1.0f)
-class MotionFunction
-{
-public:
-    MotionFunction(MotionValueGroup *);
-    MotionFunction(MotionValue *);
-    virtual void setTime(qreal) = 0;
-    virtual MotionFunction *duplicate() = 0;
-
-protected:
-    MotionValue *value;
-};
-
-// Called at a specific time
-class MotionPoint
-{
-public:
-    MotionPoint(MotionValueGroup *);
-    MotionPoint(MotionValue *);
-    virtual void setTime() = 0;
-
-protected:
-    MotionValue *value;
-};
-#endif 
-
-#if 0
-// Represents a distinct (sequence of) motion of a MotionObject over a relative
-// time block
-
-class MotionPackage
-{
-public:
-    void moveBy(MotionObject *, MotionValue *, qreal, Direction);
-
-    void playPackage(MotionPackage *);
-    void appendPackage(MotionPackage *);
-};
-#endif
-
-#if 0
-// Represents a "group" of objects
-class MotionObjectGroup
-{
-public:
-    void addMotionObject(MotionObject *);
-    void delMotionObject(MotionObject *);
-};
-
-#endif
-
-#if 0
-// Collection of values - represents a "thing" (unit of change) onscreen
-class MotionObject
-{
-public:
-    MotionObject(int values);
-};
-#endif
 
 // declare MotionValue
 class MotionValue
@@ -456,8 +387,6 @@ private:
 
     QList<Notify> notifies;
 };
-
-
 
 #endif // _MOTIONPATH_P_H_
 

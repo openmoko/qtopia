@@ -33,6 +33,7 @@ class LocalServicesDialog;
 class QBluetoothLocalDevice;
 class QAction;
 class QEvent;
+class QPhoneProfileManager;
 
 class SettingsDisplay : public QWidget
 {
@@ -51,6 +52,8 @@ private slots:
     void powerStateChanged(QCommDeviceController::PowerState state);
     void deviceStateChanged(QBluetoothLocalDevice::State state);
 
+    void planeModeChanged(bool enabled);
+
     void showDetailsDialog();
     void showMyServices();
     void init();
@@ -64,6 +67,7 @@ private:
     Ui::Settings *m_ui;
     QBluetoothLocalDevice *m_local;
     QCommDeviceController *m_deviceController;
+    QPhoneProfileManager *m_phoneProfileMgr;
 
     LocalServicesDialog *m_localServicesDialog;
 

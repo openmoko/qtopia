@@ -41,7 +41,6 @@
 #include <qdevicebuttonmanager.h>
 #include <QValueSpaceObject>
 
-#include "phonelauncher.h"
 #include "touchscreenlockdlg.h"
 #include "qtopiainputevents.h"
 #ifdef QTOPIA_CELL

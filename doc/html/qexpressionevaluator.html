@@ -11,7 +11,7 @@
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">QExpressionEvaluator Class Reference</h1>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QExpressionEvaluator Class Reference</h1>
 <p>The QExpressionEvaluator class computes the results of arithmetic, logical and string based expressions. <a href="#details">More...</a></p>
 <pre>    #include &lt;QExpressionEvaluator&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
 <ul>
@@ -111,7 +111,7 @@
 <p>The '+' operator adds two number operands, but the RHS operand is a string. As the LHS is an integer, the expression evaluator tries to coerce the RHS string to an integer to meet the requirements of the '+' operator. In this case, the coercion would succeed and &quot;2&quot; would simply become an integer 2. The result of the expression would then be the integer 4.</p>
 <p>If operands cannot be coerced to the required types for an operator, then for static coercion the setup phase fails and <a href="qexpressionevaluator.html#isValid">isValid</a>() returns false and for run-time coercion <a href="qexpressionevaluator.html#evaluate">evaluate</a>() returns false.</p>
 <p>Run-time coercion failures can occur for 2 reasons:</p>
-<p><i>a</i> term, eg. a key in the valuespace, does not return a value that can be coerced to the required type, or <i>a</i> return value of one side of the expression cannot be coerced to the required type. eg. 2 + (&quot;2&quot; . &quot;<a href="mailto:@">@</a>/value/in/valuespace&quot;) would fail at run-time because the RHS of '+' is a string, calculated at runtime, that cannot be coerced to an integer.</p>
+<p><i>a</i> term, eg. a key in the valuespace, does not return a value that can be coerced to the required type, or <i>a</i> return value of one side of the expression cannot be coerced to the required type. eg. 2 + (&quot;2&quot; . &quot;<a href="qtopiadesktop/qdautoplugin-cpp.html">@</a>/value/in/valuespace&quot;) would fail at run-time because the RHS of '+' is a string, calculated at runtime, that cannot be coerced to an integer.</p>
 <p>Below are the data type requirements of the expression evaluator's operators.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Operator</th><th>Required operand types</th><th>Return type</th></tr></thead>
@@ -126,7 +126,7 @@
 <p>The expression evaluator has the ability to use values from the Qtopia valuespace in its expressions.</p>
 <pre>    2 + @/Value/Space/Key</pre>
 <p>The above code would add 2 and the value for /Value/Space/Key in the valuespace.</p>
-<p>The '<a href="mailto:@">@</a>' character uniquely identifies the subsequent characters as a valuespace key to the expression evaluator.</p>
+<p>The '<a href="qtopiadesktop/qdautoplugin-cpp.html">@</a>' character uniquely identifies the subsequent characters as a valuespace key to the expression evaluator.</p>
 <p>In the above example, /Value/Space/Key must return data that can be converted to an integer. If conversion fails, a run-time error will occur and <a href="qexpressionevaluator.html#evaluate">evaluate</a>() will return false.</p>
 <p>If a value in the valuespace changes, expressions which use that value will emit the <a href="qexpressionevaluator.html#termsChanged">termsChanged</a>() signal.</p>
 <hr />

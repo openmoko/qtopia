@@ -25,7 +25,7 @@
 #include "e1_bar.h"
 #include <QStackedWidget>
 #include <qcategorymanager.h>
-#include "phone/phonebrowser.h"
+#include "phonebrowser.h"
 #include <QPixmap>
 #include <QString>
 #include <QStringList>

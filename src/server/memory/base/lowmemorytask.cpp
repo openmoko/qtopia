@@ -87,7 +87,7 @@
 
   Although the LowMemoryTask is notified of \bold all memory
   state changes, no action is taken when the memory state improves.
-  
+
   This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
@@ -108,8 +108,8 @@ LowMemoryTask::LowMemoryTask()
     }
     else {
         QtopiaServerApplication::taskValueSpaceSetAttribute("LowMemoryTask",
-					    "Error",
-					    "Memory monitor disabled");
+                                            "Error",
+                                            "Memory monitor disabled");
     }
 }
 
@@ -142,28 +142,28 @@ LowMemoryTask::avoidOutOfMemory(MemoryMonitor::MemState state)
     m_state = state;
     switch (m_state) {
         case MemoryMonitor::MemUnknown:
-	    break;
+            break;
         case MemoryMonitor::MemCritical:
-	    qLog(OOM) << "Memory critically low";
-	    handleCriticalMemory();
-	    break;
+            qLog(OOM) << "Memory critically low";
+            handleCriticalMemory();
+            break;
         case MemoryMonitor::MemVeryLow:
-	    qLog(OOM) << "Memory very low";
-	    if (m_prevState == MemoryMonitor::MemCritical)
-		break; // improving
-	    handleVeryLowMemory();
-	    break;
+            qLog(OOM) << "Memory very low";
+            if (m_prevState == MemoryMonitor::MemCritical)
+                break; // improving
+            handleVeryLowMemory();
+            break;
         case MemoryMonitor::MemLow:
-	    qLog(OOM) << "Memory low";
-	    if (m_prevState == MemoryMonitor::MemCritical)
-		break; // improving
-	    if (m_prevState == MemoryMonitor::MemVeryLow)
-		break; // improving
-	    handleLowMemory();
-	    break;
+            qLog(OOM) << "Memory low";
+            if (m_prevState == MemoryMonitor::MemCritical)
+                break; // improving
+            if (m_prevState == MemoryMonitor::MemVeryLow)
+                break; // improving
+            handleLowMemory();
+            break;
         case MemoryMonitor::MemNormal:
-	    qLog(OOM) << "Memory normal";
-	    break;
+            qLog(OOM) << "Memory normal";
+            break;
     };
 }
 
@@ -214,7 +214,7 @@ LowMemoryTask::handleLowMemory()
     int count = quitIfInvisible(m_oomManager.expendableProcs());
     count += quitIfInvisible(m_oomManager.importantProcs());
     if (!count)
-	qLog(OOM) << "No lazy shutdown procs to quit";
+        qLog(OOM) << "No lazy shutdown procs to quit";
 }
 
 /*!
@@ -246,13 +246,13 @@ bool
 LowMemoryTask::quit(const QString& proc)
 {
     if (proc.isEmpty()) {
-	qLog(OOM) << "No proc to quit";
-	return false;
+        qLog(OOM) << "No proc to quit";
+        return false;
     }
     qLog(OOM) << "Quitting" << proc;
     QtopiaIpcEnvelope e(QByteArray("QPE/Application/") +
-			(const char*)proc.toLocal8Bit(),
-			"quit()");
+                        (const char*)proc.toLocal8Bit(),
+                        "quit()");
     QString title("Very Low Memory");
     QString text = QString("%1 quit to recover memory").arg(proc);
     emit showWarning(title,text);
@@ -276,23 +276,18 @@ bool
 LowMemoryTask::kill(const QString& proc)
 {
     if (proc.isEmpty()) {
-	qLog(OOM) << "No proc to kill";
-	return false;
+        qLog(OOM) << "No proc to kill";
+        return false;
     }
     ApplicationLauncher* al = qtopiaTask<ApplicationLauncher>();
     if (al) {
-	qLog(OOM) << "LowMemoryTask::kill():" << proc;
-	al->kill(proc);
-	QString title("Very Low Memory");
-	QString text =
-	    QString("%1 killed to recover memory").arg(proc);
-	emit showWarning(title,text);
+        qLog(OOM) << "LowMemoryTask::kill():" << proc;
+        al->kill(proc);
+        QString title("Very Low Memory");
+        QString text =
+            QString("%1 killed to recover memory").arg(proc);
+        emit showWarning(title,text);
     }
-#if 0
-    QtopiaIpcEnvelope e(QByteArray("QPE/Application/") +
-			(const char*)proc.toLocal8Bit(),
-			"quit()");
-#endif
     return true;
 }
 
@@ -320,18 +315,18 @@ QString LowMemoryTask::selectProcess()
 {
     QString app = WindowManagement::activeAppName();
     if (m_oomManager.isExpendable(app)) {
-	return app;
+        return app;
     }
     app = m_oomManager.procWithBiggestScore(OomManager::Expendable);
     if (!app.isEmpty()) {
-	return app;
+        return app;
     }
     if (m_oomManager.isImportant(app)) {
-	return app;
+        return app;
     }
     app = m_oomManager.procWithBiggestScore(OomManager::Important);
     if (app.isEmpty())
-	qLog(OOM) << "No non-critical procs to kill";
+        qLog(OOM) << "No non-critical procs to kill";
     return app;
 }
 
@@ -353,30 +348,30 @@ int
 LowMemoryTask::quitIfInvisible(const QMap<QString,int>& map)
 {
     if (map.isEmpty())
-	return 0;
+        return 0;
     int count = 0;
     QContentFilter filter(QContent::Application);
     QContentSet set(filter);
     QMap<QString,int>::const_iterator i;
     for (i=map.constBegin(); i!=map.constEnd(); ++i) {
-	QContent app = set.findExecutable(i.key());
-	if (!app.isValid())
-	    continue;
-	if (app.isPreloaded())
-	    continue;
-	QString vsi_path =
-	    QString("/System/Applications/%1/Tasks/UI").arg(i.key());
-	QValueSpaceItem vsi(vsi_path);
-	QVariant v = vsi.value();
-	if (v.isValid()) {
-	    if (v.toBool() == false) {
-		qLog(OOM) << "Quit lazy shutdown app:"
-			  << i.key() << i.value(); 
-		QtopiaIpcEnvelope e(QByteArray("QPE/Application/") + i.key(),
-				    "quitIfInvisible()");
-		++count;
-	    }
-	}
+        QContent app = set.findExecutable(i.key());
+        if (!app.isValid())
+            continue;
+        if (app.isPreloaded())
+            continue;
+        QString vsi_path =
+            QString("/System/Applications/%1/Tasks/UI").arg(i.key());
+        QValueSpaceItem vsi(vsi_path);
+        QVariant v = vsi.value();
+        if (v.isValid()) {
+            if (v.toBool() == false) {
+                qLog(OOM) << "Quit lazy shutdown app:"
+                          << i.key() << i.value();
+                QtopiaIpcEnvelope e(QByteArray("QPE/Application/") + i.key(),
+                                    "quitIfInvisible()");
+                ++count;
+            }
+        }
     }
     QtopiaIpcEnvelope e("QPE/System", "RecoverMemory()");
     return count;

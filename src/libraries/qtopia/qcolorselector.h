@@ -68,6 +68,7 @@ class QTOPIA_EXPORT QColorSelectorDialog : public QDialog
 public:
     explicit QColorSelectorDialog( const QColor &c, QWidget *parent=0, Qt::WindowFlags f = 0 );
     QColorSelectorDialog( QWidget *parent=0, Qt::WindowFlags f = 0 );
+    ~QColorSelectorDialog();
 
     QColor color() const;
 

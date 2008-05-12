@@ -44,6 +44,12 @@ int MAIN_FUNC( int argc, char** argv )
     qLog(DocAPI) << "dbmigrate called with parameters..." << args;
     if(args.contains("--systemupgrade"))
     {
+        if(args.contains("--qws"))
+        {
+            qWarning() << "\"dbmigrate --systemupgrade\" will not work with the --qws command line option\n"
+                       << " as it is designed to be run in this mode as a standalone application";
+            return -1;
+        }
         args.clear();
         QApplication app(argc, argv, false);
         app.setApplicationName( QLatin1String( "dbmigrate" ) );

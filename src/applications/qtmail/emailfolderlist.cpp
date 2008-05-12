@@ -320,8 +320,9 @@ QMailMessageKey MailboxList::statusFilterKey( EmailFolderList::MailType status )
     if (status == EmailFolderList::Unfinished) {
         // Currently unhandled!
     } else if (status == EmailFolderList::Unread) {
-        // Ensure 'read' flag is not set
-        statusKey = ~QMailMessageKey(QMailMessageKey::Status, QMailMessage::Read, QMailMessageKey::Contains);
+        // Ensure 'read' and 'read elsewhere' flags are not set
+        statusKey = (~QMailMessageKey(QMailMessageKey::Status, QMailMessage::Read, QMailMessageKey::Contains) &
+                     ~QMailMessageKey(QMailMessageKey::Status, QMailMessage::ReadElsewhere, QMailMessageKey::Contains));
     } else if (status == EmailFolderList::Unsent) {
         // Ensure 'sent' flag is not set
         statusKey = ~QMailMessageKey(QMailMessageKey::Status, QMailMessage::Sent, QMailMessageKey::Contains);

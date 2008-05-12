@@ -52,7 +52,6 @@ private:
 ServerEdit::ServerEdit( QWidget *parent, Qt::WFlags f )
     : QDialog( parent, f )
     , m_modified( false )
-    , removeServerAction( 0 )
     , editServerAction( 0 )
     , serversToRemove()
 {
@@ -60,27 +59,22 @@ ServerEdit::ServerEdit( QWidget *parent, Qt::WFlags f )
 
     QMenu* contextMenu = QSoftMenuBar::menuFor( this );
 
-    QAction *newServerAction = new QAction( QIcon( ":icon/new" ), tr( "New...", "Adding a new server entry" ), this );
+    QAction *newServerAction = new QAction(QIcon(":icon/new"),tr("New","Adding a new server entry"),this);
     connect( newServerAction, SIGNAL(triggered()),
             this, SLOT(addNewServer()) );
     contextMenu->addAction( newServerAction );
 
-    editServerAction = new QAction( tr( "View/Edit..." ), this );
-    connect( editServerAction, SIGNAL(triggered()),
-            this, SLOT(editServer()) );
-    contextMenu->addAction( editServerAction );
-    
-    removeServerAction = new QAction( QIcon( ":icon/trash" ), tr( "Remove" ), this );
-    contextMenu->addAction( removeServerAction );
-    connect( removeServerAction, SIGNAL(triggered()),
-            this, SLOT(removeServer()) );
+    editServerAction = new QAction(tr("View/Edit"),this);
+    connect(editServerAction, SIGNAL(triggered()),
+            this, SLOT(editServer()));
+    contextMenu->addAction(editServerAction);
 
-    connect( contextMenu, SIGNAL(aboutToShow()), 
-             this, SLOT(contextMenuShow()) );
-    connect( servers, SIGNAL(itemActivated(QListWidgetItem*)), 
-             this, SLOT(editServer()) );
+    connect(contextMenu, SIGNAL(aboutToShow()),
+            this, SLOT(contextMenuShow()) );
+    connect(servers, SIGNAL(itemActivated(QListWidgetItem*)),
+            this, SLOT(editServer()));
     showMaximized();
-    
+
     QTimer::singleShot( 0, this, SLOT(init()) );
 }
 
@@ -110,7 +104,7 @@ void ServerEdit::init()
         serversConf->endGroup();
     }
     delete serversConf;
-    
+
     if ( servers->count() > 0 )
         servers->setCurrentRow(0);
 
@@ -129,26 +123,23 @@ void ServerEdit::accept()
             serverConf.setValue( "URL", servItem->url() );
             serverConf.endGroup();
         }
-        
+
         for ( int srv = 0; srv < serversToRemove.count(); ++srv )
             serverConf.remove( serversToRemove.at( srv ) );
     }
-   QDialog::accept();
+    QDialog::accept();
 }
 
 void ServerEdit::addNewServer()
 {
     ServerEditor serverEditor( ServerEditor::New, this, "", "http://" );
     serverEditor.showMaximized();
-    if ( serverEditor.exec() == QDialog::Accepted )
+    if (serverEditor.exec() == ServerEditor::Modified)
     {
-        if ( serverEditor.wasModified() )
-        {
-            ServerItem* server = new ServerItem(QIcon( ":icon/irreceive" ), servers, serverEditor.name(), serverEditor.url() );
-            if ( serversToRemove.contains( server->name() ) )
-                serversToRemove.removeAll( server->name() );
-            m_modified = true;
-        }
+        ServerItem* server = new ServerItem(QIcon( ":icon/irreceive" ), servers, serverEditor.name(), serverEditor.url() );
+        if (serversToRemove.contains(server->name()))
+            serversToRemove.removeAll(server->name());
+        m_modified = true;
     }
 }
 
@@ -157,7 +148,7 @@ void ServerEdit::removeServer()
     ServerItem *server = static_cast<ServerItem*>( servers->currentItem() );
     if ( server == 0 )
         return;
-    
+
     serversToRemove.append( server->name() );
     delete server;
     m_modified = true;
@@ -168,22 +159,22 @@ void ServerEdit::editServer()
     ServerItem *server = static_cast<ServerItem*>( servers->currentItem() );
     if ( server == 0 )
         return;
-    
-    ServerEditor *serverEditor;
 
-    if ( !permanentServers.contains(server->name()) )
-        serverEditor = new ServerEditor( ServerEditor::ViewEdit, this, server->name(), server->url() );
-    else
-        serverEditor = new ServerEditor( ServerEditor::ViewOnly, this,  server->name(), server->url() );
-     
-    serverEditor->showMaximized();
-    if ( serverEditor->exec() == QDialog::Accepted && serverEditor->wasModified() )
+    ServerEditor *serverEditor =
+        new ServerEditor(ServerEditor::ViewEdit, this,  server->name(), server->url());
+
+    int result = QtopiaApplication::execDialog(serverEditor);
+    if (result == ServerEditor::Modified)
     {
-        if ( serverEditor->name() != server->name() )
-            serversToRemove.append( server->name() );
-        server->setName( serverEditor->name() );
-        server->setUrl( serverEditor->url() );
+        if (serverEditor->name() != server->name())
+            serversToRemove.append(server->name());
+        server->setName(serverEditor->name()) ;
+        server->setUrl(serverEditor->url());
         m_modified = true;
+    } else if (result == ServerEditor::Removed)
+    {
+        m_modified = true;
+        removeServer();
     }
     delete serverEditor;
 }
@@ -192,23 +183,10 @@ void ServerEdit::contextMenuShow()
 {
     ServerItem *server = static_cast<ServerItem *>( servers->currentItem() );
     if ( server  )
-    {
-        if ( permanentServers.contains(server->name()) )
-        {
-            editServerAction->setText( tr("View") );
-            removeServerAction->setVisible( false );
-        }
-        else
-        {
-            editServerAction->setText( tr("View/Edit...") );
-            removeServerAction->setVisible( true );
-        }
-    }
+        editServerAction->setVisible(true);
     else
-    {
-        removeServerAction->setVisible( false );
-    }
-}       
+        editServerAction->setVisible(false);
+}
 
 QHash<QString,QString> ServerEdit::serverList() const
 {
@@ -227,12 +205,12 @@ QHash<QString,QString> ServerEdit::serverList() const
 /////
 ///// ServerItem implementation
 /////
-ServerItem::ServerItem( const QIcon &icon, QListWidget* parent, const QString& name, 
+ServerItem::ServerItem( const QIcon &icon, QListWidget* parent, const QString& name,
                         const QString& url )
     : QListWidgetItem( icon, name, parent )
 {
     setName( name );
-    setUrl( url );    
+    setUrl( url );
 }
 
 ServerItem::~ServerItem()
@@ -241,7 +219,7 @@ ServerItem::~ServerItem()
 
 inline void ServerItem::setName( const QString& name )
 {
-    setText( name );    
+    setText( name );
 }
 
 inline QString ServerItem::name() const
@@ -251,12 +229,12 @@ inline QString ServerItem::name() const
 
 inline void ServerItem::setUrl( const QString &url )
 {
-    m_url = url ; 
+    m_url = url ;
 }
 
 inline QString ServerItem::url() const
-{   
-   return m_url;     
+{
+    return m_url;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -264,44 +242,54 @@ inline QString ServerItem::url() const
 ///// ServerEditor implementation
 /////
 
-ServerEditor::ServerEditor( Mode mode, ServerEdit *parent, 
+ServerEditor::ServerEditor( Mode mode, ServerEdit *parent,
                             const QString &name, const QString &url )
     :QDialog( parent ), m_mode( mode ),
-     m_parent( parent ), m_modified( false ) 
+    m_parent( parent ), m_modified( false )
 {
+    if (!m_parent)
+        qFatal("ServerEditor::ServerEditor: The parent parameter must not be null");
+
     m_nameLabel = new QLabel( "Name:", this );
     m_nameLineEdit = new QLineEdit( name, this );
-    
+
     m_urlLabel = new QLabel( "URL:", this );
     m_urlTextEdit = new QTextEdit( url, this );
-    
+    m_urlLabel->setBuddy( m_urlTextEdit );
+
     QGridLayout *layout = new QGridLayout( this );
     layout->addWidget( m_nameLabel, 0, 0 );
-    layout->addWidget( m_nameLineEdit, 0, 1 );   
+    layout->addWidget( m_nameLineEdit, 0, 1 );
     layout->addWidget( m_urlLabel, 1, 0, Qt::AlignTop );
     layout->addWidget( m_urlTextEdit, 1, 1 );
-    
+
     setLayout( layout );
     m_initialName = name;
-    m_initialUrl = url; 
+    m_initialUrl = url;
 
-    if ( m_mode == ServerEditor::ViewOnly ) 
+    QMenu* contextMenu = QSoftMenuBar::menuFor(this);
+
+    if ( mode == ServerEditor::ViewEdit )
     {
-        m_urlTextEdit->setReadOnly( true );
-        m_nameLineEdit->setReadOnly( true );
+        QAction *removeServerAction = new QAction(QIcon(":icon/trash"), tr("Delete"), this);
+        contextMenu->addAction(removeServerAction);
+        connect( removeServerAction, SIGNAL(triggered()),
+            this, SLOT(removeServer()) );
     }
 }
 
-void ServerEditor::accept() 
+void ServerEditor::accept()
 {
-    if ( m_nameLineEdit->text().isEmpty()  ) 
+    m_nameLineEdit->setText(m_nameLineEdit->text().trimmed());
+    m_urlTextEdit->setText(m_urlTextEdit->toPlainText().trimmed());
+    if (m_nameLineEdit->text().isEmpty())
     {
         if ( m_mode == ServerEditor::New && m_urlTextEdit->toPlainText() == m_initialUrl )
         {
-            QDialog::accept();     
+            QDialog::accept();
             return;
         }
-        
+
         QMessageBox::warning( this, tr( "Warning" ), tr( "Name field is empty" ) );
         const char * dummyStr = QT_TRANSLATE_NOOP("ServerEditor", "Cancel editing?");
         Q_UNUSED( dummyStr );
@@ -310,18 +298,23 @@ void ServerEditor::accept()
     {
         QMessageBox::warning( this, tr( "Warning" ), tr( "URL field is empty" ) );
     }
-    else if ( m_nameLineEdit->text() != m_initialName 
+    else if ( m_nameLineEdit->text() != m_initialName
               && m_parent->serverList().contains(m_nameLineEdit->text()) )
     {
         QMessageBox::warning( this, tr( "Warning" ), tr( "Server already exists" ) );
     }
     else
     {
-        if ( m_initialName.isEmpty() || m_urlTextEdit->toPlainText() != m_initialUrl 
+        if ( m_initialName.isEmpty() || m_urlTextEdit->toPlainText() != m_initialUrl
              || m_nameLineEdit->text() != m_initialName )
         {
             m_modified = true;
-        } 
-        QDialog::accept();
+        }
+        QDialog::done(ServerEditor::Modified);
     }
+}
+
+void ServerEditor::removeServer()
+{
+    QDialog::done(ServerEditor::Removed);
 }

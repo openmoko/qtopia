@@ -20,7 +20,6 @@
 ****************************************************************************/
 
 #include "serverthemeview.h"
-#include "phonelauncher.h"
 #include "homescreencontrol.h"
 #include "homescreenwidgets.h"
 #include <qtopiaservices.h>

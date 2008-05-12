@@ -126,7 +126,8 @@ if ! tar -cjf $BUILDDIR/"$DEVICE"_sdk_build/sdk-files/tools.tar.bz2 $TOOLS; then
 fi
 
 #create extras.tar.bz2
-cd $QTOPIA_DEPOT_PATH/devices/$DEVICE/sdk/extras
+cp -dPR $QTOPIA_DEPOT_PATH/devices/$DEVICE/sdk/extras $BUILDDIR/"$DEVICE"_sdk_build/sdk-files/
+cd $BUILDDIR/"$DEVICE"_sdk_build/sdk-files/extras
 echo "Create extras zip file"
 if ! tar -cjf $BUILDDIR/"$DEVICE"_sdk_build/sdk-files/extras.tar.bz2 *; then
 		echo "Creating extras tarball failed"

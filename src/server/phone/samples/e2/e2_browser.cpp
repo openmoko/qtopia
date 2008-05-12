@@ -27,7 +27,7 @@
 #include <QContentSet>
 #include <QCategoryManager>
 #include <QMap>
-#include "phone/phonebrowser.h"
+#include "phonebrowser.h"
 #include <QStackedWidget>
 #include <QContentSet>
 #include <QContent>

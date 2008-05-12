@@ -21,6 +21,7 @@ This page describes changes to Qtopia Sync Agent 4.3.2.
 \o A bug causing items created in Outlook to be duplicated at every sync has been fixed.
 \o Tasks modified in the server are now changed on the device.
 \o The \l{Sync Manager} page documents the merge algorithm used by Qtopia Sync Agent.
+\o The \l{qdsync Protocol} has been ammended to close a security hole related to \c CALLB messages.
 \endlist
 
 \section1 Known issues

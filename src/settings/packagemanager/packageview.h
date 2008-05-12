@@ -84,6 +84,15 @@ class ViewDelegate: public QtopiaItemDelegate
                         const QModelIndex &index ) const;
 };
 
+class DownloadViewDelegate:public ViewDelegate
+{
+    public:
+        DownloadViewDelegate(QObject *parent=0);
+        virtual void paint(QPainter *painter,
+                        const QStyleOptionViewItem &option,
+                        const QModelIndex &index) const;
+};
+
 class PackageView : public QMainWindow
 {
     Q_OBJECT

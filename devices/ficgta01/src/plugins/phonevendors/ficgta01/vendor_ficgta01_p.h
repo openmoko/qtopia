@@ -204,6 +204,7 @@ protected slots:
 private slots:
     void requestIdentity();
     void cimi( bool ok, const QAtResult& result );
+    void serviceItemPosted( const QString& item );
 
 private:
     Ficgta01SimInfoPrivate *d;

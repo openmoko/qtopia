@@ -63,6 +63,7 @@ protected:
     void mousePressEvent( QMouseEvent* );
     void mouseReleaseEvent( QMouseEvent* );
     void keyPressEvent( QKeyEvent* );
+    void keyReleaseEvent( QKeyEvent* );
     void paintEvent( QPaintEvent* );
 
     int getHint( int row, int col );
@@ -106,6 +107,8 @@ private:
 
     int sizeHintX;
     int sizeHintY;
+
+    bool m_selectPressed;
 };
 
 #endif // MINEFIELD_H

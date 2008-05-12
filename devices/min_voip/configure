@@ -3,7 +3,7 @@
 -edition phone
 -no-modem
 -voip
--no-helix
+-no-qtopiamedia
 -no-drm
 -no-sxe
 -prefix /opt/Qtopia

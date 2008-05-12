@@ -36,35 +36,25 @@
 #include <QTextStream>
 #include <QDebug>
 
-
 QTOPIABASE_EXPORT int qpe_sysBrightnessSteps()
 {
-
     QFile maxBrightness;
+    QString strvalue;
     if (QFileInfo("/sys/class/backlight/gta01-bl/max_brightness").exists() ) {
         //ficgta01
-            maxBrightness.setFileName("/sys/class/backlight/gta01-bl/max_brightness");
-        } else {
+        maxBrightness.setFileName("/sys/class/backlight/gta01-bl/max_brightness");
+    } else {
         //ficgta02
-            maxBrightness.setFileName("/sys/class/backlight/pcf50633-bl/max_brightness");
-        }
-
-    QString strvalue;
-    int value;
-    if( !maxBrightness.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        maxBrightness.setFileName("/sys/class/backlight/pcf50633-bl/max_brightness");
+    }
+    if(!maxBrightness.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qWarning()<<"File not opened";
     } else {
         QTextStream in(&maxBrightness);
         in >> strvalue;
         maxBrightness.close();
     }
-
-//     if(strvalue.isEmpty())
-//         value = 3957;
-//     else
-        value = strvalue.toInt();
-
-    return value;
+     return  strvalue.toInt();
 }
 
 
@@ -72,38 +62,16 @@ QTOPIABASE_EXPORT void qpe_setBrightness(int b)
 {
     char cmd[80];
 
-    qWarning() <<"setBrightness"<<b <<  qpe_sysBrightnessSteps();
+    int brightessSteps = qpe_sysBrightnessSteps();
 
     if(b == 1) {
         // dim
-        b = 519;
-    }
-    else if (b == -1) {
+        b = brightessSteps / 4;
+    } else if (b == -1) {
         //bright
-        b = qpe_sysBrightnessSteps();
-//         QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService","setAmpMode(bool)");
-//         e << true;
-//         qWarning()<<"amp mode on";
-
-    }
-
-    else if( b == 0) {
-     //blanking screen
-//         QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService","setAmpMode(bool)");
-//         e << false;
-//       qWarning()<<"amp mode off";
-
-    } else if( b ==  qpe_sysBrightnessSteps() ) {
-//         QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService","setAmpMode(bool)");
-//         e << true;
-//         qWarning()<<"amp mode on";
-
-    }
-    else {
-//         QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService","setAmpMode(bool)");
-//         e << true;
-//         qWarning()<<"amp mode on";
-
+        b = brightessSteps;
+    } else if(b == 0) {
+    } else if(b == brightessSteps) {
     }
 
     QFile brightness;
@@ -115,12 +83,11 @@ QTOPIABASE_EXPORT void qpe_setBrightness(int b)
         //ficgta02
     }
 
-    if( !brightness.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+    if(!brightness.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
         qWarning()<<"File not opened";
     } else {
         QTextStream out(&brightness);
         out << QString::number(b);
-        //ficgta01
         brightness.close();
     }
 }

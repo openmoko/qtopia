@@ -142,22 +142,8 @@ void E1ServerInterface::mousePressEvent(QMouseEvent *e)
     e->accept();
 }
 
-void E1ServerInterface::showDialer( const QString& msg, const QByteArray& )
+void E1ServerInterface::showDialer( const QString&, const QByteArray& )
 {
-    if( msg == "Dialer::showDialer()" ) {
-#if 0
-        if( !m_dialer ) {
-            m_dialer = new E1Dialer( 0 );
-            m_dialer->setObjectName("Dialer");
-            /* Not connected to anything
-            connect(m_dialer, SIGNAL(dial(QString,QUniqueId)),
-                    this, SLOT(dialNumber(QString,QUniqueId)) );
-                    */
-        }
-        m_dialer->showMaximized();
-        m_dialer->raise();
-#endif
-    }
 }
 
 QTOPIA_REPLACE_WIDGET(QAbstractServerInterface, E1ServerInterface);

@@ -1,8 +1,8 @@
 -edition phone -xplatform nokia -arch arm -no-qvfb
 -reduce-exports=yes
--helix-system-id linux-2.2-libc6-xscale-cross-gcc32
 -prefix /opt/Qtopia
--no-helix -no-sxe -no-drm -no-ssl
+-qtopiamedia -mediaengines cruxus
+-no-sxe -no-drm -no-ssl
 -extra-qtopiacore-config "-depths 8,16,32" 
 -release
 -extra-qt-config -no-glib 

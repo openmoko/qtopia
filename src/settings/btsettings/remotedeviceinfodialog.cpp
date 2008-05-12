@@ -544,6 +544,7 @@ RemoteDeviceInfoDialog::RemoteDeviceInfoDialog(QBluetoothLocalDevice *local, QWi
     menu->addAction(tr("Other details"), this, SLOT(showMoreInfo()));
     menu->addAction(tr("Supported services"), this, SLOT(showServices()));
 
+    setObjectName("remote_device_info");
     setWindowTitle(tr("Details"));
 }
 

@@ -251,7 +251,9 @@ void GroupView::addGroup()
     if(QtopiaApplication::execDialog(&edit) == QDialog::Accepted && !edit.name().isEmpty()) {
         QString name = edit.name();
 
-        QString id = d->categories->add(name);
+        QString id = d->categories->idForLabel(name);
+        if ( id.isEmpty() )
+            id = d->categories->add(name);
         setCurrentGroup(id);
     }
 }

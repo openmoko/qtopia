@@ -285,8 +285,6 @@ bool Ficgta01PhoneBook::hasEmptyPhoneBookIndex() const
 
 void Ficgta01PhoneBook::cstatNotification( const QString& msg )
 {
-    uint statusPosn = 0;
-    uint entityPosn = 8;
     QString entity = msg.mid( 8, 3);
 
     if( entity == "PHB") {
@@ -726,7 +724,6 @@ void Ficgta01VibrateAccessory::setVibrateOnRing( const bool value )
 void Ficgta01VibrateAccessory::setVibrateNow( const bool value )
 {
     qLog(AtChat)<<"setVibrateNow";
-    int result;
     QString cmd;
     if ( value ) { //turn on
         QFile trigger( "/sys/class/leds/gta01:vibrator/trigger");
@@ -837,6 +834,7 @@ public:
     Ficgta01ModemService *service;
     QTimer *checkTimer;
     int count;
+    bool simPinRequired;
 };
 
 Ficgta01SimInfo::Ficgta01SimInfo( Ficgta01ModemService *service )
@@ -848,10 +846,14 @@ Ficgta01SimInfo::Ficgta01SimInfo( Ficgta01ModemService *service )
     d->checkTimer->setSingleShot( true );
     connect( d->checkTimer, SIGNAL(timeout()), this, SLOT(requestIdentity()) );
     d->count = 0;
-
+    d->simPinRequired = false;
 
     // Perform an initial AT+CIMI request to get the SIM identity.
     QTimer::singleShot( 0, this, SLOT(requestIdentity()) );
+
+    // Hook onto the posted event of the service to determine
+    // the current sim pin status
+    connect( service, SIGNAL(posted(QString)), this, SLOT(serviceItemPosted(QString)) );
 }
 
 Ficgta01SimInfo::~Ficgta01SimInfo()
@@ -891,9 +893,12 @@ void Ficgta01SimInfo::cimi( bool ok, const QAtResult& result )
             d->count++;
         } else {
             d->count = 0;
-            // post a message to modem service to stop SIM PIN polling
-            d->service->post( "simnotinserted" );
-            emit notInserted();
+            // If not waiting for SIM pin to be entered by the user
+            if ( !d->simPinRequired ) {
+                // post a message to modem service to stop SIM PIN polling
+                d->service->post( "simnotinserted" );
+                emit notInserted();
+            }
         }
         // If we got a definite "not inserted" or "sim failure" error,
         // then emit notInserted().
@@ -901,6 +906,14 @@ void Ficgta01SimInfo::cimi( bool ok, const QAtResult& result )
           || result.resultCode() == QAtResult::SimFailure)
             emit notInserted();
     }
+}
+
+void Ficgta01SimInfo::serviceItemPosted( const QString &item )
+{
+    if ( item == "simpinrequired" )
+        d->simPinRequired = true;
+    else if ( item == "simpinentered" )
+        d->simPinRequired = false;
 }
 
 // Extract the identity information from the content of an AT+CIMI response.

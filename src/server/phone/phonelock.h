@@ -31,49 +31,6 @@
 #include "cellmodemmanager.h"
 #endif
 
-#if 0
-class QPhoneLock
-{
-Q_OBJECT
-public:
-    QPhoneLock(QObject *parent = 0);
-
-    enum LockState { Open, KeyLock, DeviceLock };
-    static LockState lockState() const;
-
-    void setKeyLockInclusion(QWidget *window);
-    void setDeviceLockExclusion(QWidget *window);
-
-    void setExcludedWindow(QWidget *window);
-    bool promptForUnlock() const;
-    bool promptForUnlock(const QPoint &promptHint) const;
-
-signals:
-    void lockStateChanged(LockState);
-
-private:
-    QPhoneLockPrivate *d;
-};
-
-class QPhoneLockProvider : public QObject
-{
-Q_OBJECT
-public:
-    QPhoneLockProvider(QObject *parent = 0);
-
-    enum State { Open, FullscreenLock, PromptForLock };
-
-    QPoint promptHint() const;
-    State state() const;
-
-signals:
-    void stateChanged(State);
-
-private:
-    QPhoneLockProviderPrivate *d;
-};
-#endif
-
 class BasicKeyLockPrivate;
 class BasicKeyLock : public QObject
 {

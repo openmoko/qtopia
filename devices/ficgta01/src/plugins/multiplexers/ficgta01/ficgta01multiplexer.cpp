@@ -59,23 +59,6 @@ Ficgta01MultiplexerPlugin::~Ficgta01MultiplexerPlugin()
 
 bool Ficgta01MultiplexerPlugin::detect( QSerialIODevice *device )
 {
-// make sure modem is powered up
-
-    QFile powerFile("/sys/bus/platform/devices/gta01-pm-gsm.0/power_on");
-    if( !powerFile.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
-        qWarning()<<"File not opened";
-    } else {
-        QTextStream in(&powerFile);
-        QString pFileString;
-        in >> pFileString;
-        if( pFileString == "0") {
-            QTextStream out(&powerFile);
-            out << "1";
-            powerFile.close();
-        }
-    }
-
-
 // The FIC needs a special line discipline set on the device.
     QSerialPort *port = qobject_cast<QSerialPort *>( device );
     if (port) {
@@ -83,17 +66,21 @@ bool Ficgta01MultiplexerPlugin::detect( QSerialIODevice *device )
         ::ioctl(port->fd(), TIOCSETD, &discipline);
     }
     device->discard();
-	int rc;
-	struct termios t;
-	rc = tcgetattr(port->fd(), &t);
-  t.c_cflag |= CRTSCTS;
-	rc = tcsetattr(port->fd(), TCSANOW, &t);
+    int rc;
+    struct termios t;
+    rc = tcgetattr(port->fd(), &t);
+    t.c_cflag |= CRTSCTS;
+    rc = tcsetattr(port->fd(), TCSANOW, &t);
 
 
     // Issue an innocuous command to wake up the device.
     // It will respond with either "OK" or "AT-Command Interpreter ready".
 
-  QSerialIODeviceMultiplexer::chat( device, "ATZ");
+    // We will do this up to 10 times as the modem is losing the first at
+    // commands (due waking up)
+    int attempts = 10;
+    while (--attempts >= 0 && !QSerialIODeviceMultiplexer::chat( device, "ATZ"));
+
 
     // Issue the AT+CMUX command to determine if this device
     // uses GSM 07.10-style multiplexing.

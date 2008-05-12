@@ -378,7 +378,7 @@ private:
     QPointer<QAction> cancelAction;
     QPointer<QAction> previousAction;
     static QPointer<MenuManager> mmgr;
-    QMenu *activeMenu;
+    QPointer<QMenu> activeMenu;
 };
 
 QPointer<MenuManager> MenuManager::mmgr = 0;

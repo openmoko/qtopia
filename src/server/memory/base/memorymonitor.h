@@ -32,11 +32,11 @@ class MemoryMonitor : public QObject
 
   public:
     enum MemState {
-	MemUnknown 	= 0,
-	MemCritical 	= 1,
-	MemVeryLow	= 2,
-	MemLow		= 3,
-	MemNormal	= 4
+        MemUnknown      = 0,
+        MemCritical     = 1,
+        MemVeryLow      = 2,
+        MemLow          = 3,
+        MemNormal       = 4
     };
 
     virtual MemState memoryState() const = 0;

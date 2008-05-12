@@ -319,6 +319,8 @@ void OTSyncObject::fetchChangesSince( const QDateTime &timestamp )
         QDateTime lm;
         long item_to_get = i+1;
         q->getProperties( items->Item(item_to_get), id, lm );
+        if ( id.isEmpty() ) // A COM error occurred while reading this item!
+            continue;
         LOG() << "I've seen id" << id << "last modified" << lm;
         seenIds << id;
         if ( rememberedIds.contains(id) )
@@ -442,6 +444,8 @@ void OTSyncObject::removeClientRecord(const QString &identifier)
         // Skip items that are of the wrong class
         if ( !q->isValidObject(items->Item(item_to_get)) ) continue;
         q->getProperties( items->Item(item_to_get), id, lm );
+        if ( id.isEmpty() ) // A COM error occurred while reading this item!
+            continue;
         if ( id == identifier ) {
             found = true;
             q->delete_item( items->Item(item_to_get) );
@@ -471,6 +475,8 @@ IDispatchPtr OTSyncObject::findItem( const QString &entryid )
             // Skip items that are of the wrong class
             if ( !q->isValidObject(items->Item(item_to_get)) ) continue;
             q->getProperties( items->Item(item_to_get), id, lm );
+            if ( id.isEmpty() ) // A COM error occurred while reading this item!
+                continue;
             if ( entryid == id ) {
                 disp = items->Item(item_to_get);
                 break;

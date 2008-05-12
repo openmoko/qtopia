@@ -136,6 +136,7 @@ private:
     // device discovery
     bool m_discovering;
     bool m_cancellingDiscovery;
+    int m_discoveryAttempts;
 
     // service search
     QBluetoothSdpQuery m_sdap;

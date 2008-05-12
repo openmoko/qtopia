@@ -126,30 +126,6 @@ QStorageMetaInfo::~QStorageMetaInfo()
 */
 const QFileSystem *QStorageMetaInfo::fileSystemOf( const QString &filename, bool connectedOnly )
 {
-#if 0
-    // The filesystem way of doing things...
-    // NOT updated for the new Storage.conf behaviour
-    QString existingfilename = filename;
-    struct stat st;
-    while (stat(QFile::encodeName(existingfilename),&st)) {
-        int x = existingfilename.findRev('/');
-        if ( x < 0 )
-            return 0;
-        if ( x )
-            existingfilename.truncate(x-1);
-        else
-            break;
-    }
-    int devno = st.st_dev;
-    for (QListIterator<QFileSystem> i(d->fileSystems); i.current(); ++i) {
-        if ( 0==stat(QFile::encodeName((*i)->path()),&st) ) {
-            if ( st.st_dev == devno ) {
-                return *i;
-            }
-        }
-    }
-    return 0;
-#else
     // The filename way (doesn't understand symlinks)
     QFileSystem *bestMatch = 0;
     int bestLen = 0;
@@ -172,7 +148,6 @@ const QFileSystem *QStorageMetaInfo::fileSystemOf( const QString &filename, bool
     if (bestMatch != NULL)
         bestMatch->update();
     return bestMatch;
-#endif
 }
 
 /*!

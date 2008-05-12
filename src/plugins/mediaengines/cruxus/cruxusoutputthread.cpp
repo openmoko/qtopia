@@ -229,6 +229,10 @@ int OutputThreadPrivate::resampleAndMix
             int     requiredDstSamples = rdr;
             qint32  sample[inputInfo.channels];
 
+            // handle case freqs equal and mono to stereo
+            if((requiredDstSamples == 1) && (dstChannelRate == 2))
+                requiredDstSamples++;
+
             memset(sample, 0, sizeof(sample));
 
             while (requiredSrcSamples-- > 0 && dataAmt > 0)

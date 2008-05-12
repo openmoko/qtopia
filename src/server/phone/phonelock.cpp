@@ -25,7 +25,7 @@
 #include <QPhoneProfile>
 #include <QKeyEvent>
 #include <QPhoneProfileManager>
-#include "phonelauncher.h"
+#include <Qtopia>
 
 // declare BasicKeyLockPrivate
 class BasicKeyLockPrivate

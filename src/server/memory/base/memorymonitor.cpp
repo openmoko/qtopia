@@ -36,7 +36,7 @@
   The MemoryMonitor interface is an optional task interface, so
   consumers must be prepared for a request for this interface to
   fail.
-  
+
   This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
@@ -62,18 +62,18 @@
   The MemState enumeration represents the memory level in the system.
 
   \value MemUnknown Memory level is unknown or unavailable.
-  
+
   \value MemCritical Memory level is critically low. Drastic
          measures should be taken to prevent system failure.
 
   \value MemVeryLow Memory level is very low. The system
          should perform any measure that is very likely to
-	 recover memory. User noticable actions are allowed.
-	 
+         recover memory. User noticable actions are allowed.
+
   \value MemLow Memory level is low. The system should attempt
          to recover memory in a way that does not interfere with
-	 the user.
-	 
+         the user.
+
   \value MemNormal Memory level is normal. No action is required.
  */
 

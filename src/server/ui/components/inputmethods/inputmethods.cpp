@@ -302,31 +302,38 @@ void InputMethodSelector::setInputMethod(QtopiaInputMethod *method)
 */
 void InputMethodSelector::setNextInputMethod()
 {
-    if(list.size() < 1) {
+    if(list.size() < 1)
         return;
-    };
 
     if(list.size() == 1) {
-        if (list.first() != mCurrent){
-        setInputMethod(list.first());
-        };
+        if (list.first() != mCurrent)
+            setInputMethod(list.first());
         return;
-    };
+    }
 
     QList<QtopiaInputMethod *>::iterator  i = list.begin();
-    while(i != list.end() && *i != mCurrent) {
+    while(i != list.end() && *i != mCurrent)
         i++;
-    };
 
-    if(i != list.end()) // implies i == mCurrent
-    {
+    if(i != list.end()) { // implies i == mCurrent
         if(++i != list.end()) {
             setInputMethod(*i);
             return;
-        };
-    };
+        }
+    }
 
     setInputMethod(list.first());
+}
+
+/*!
+    Set \a hint for all input methods.  If \a restricted is true the input
+    method is restricted to the specified mode.
+*/
+void InputMethodSelector::setHint(const QString &hint, bool restricted)
+{
+    QList<QtopiaInputMethod *>::iterator it;
+    for (it = list.begin(); it != list.end(); ++it)
+        (*it)->setHint(hint, restricted);
 }
 
 /*!
@@ -983,9 +990,7 @@ void InputMethods::updateHintMap(QWSWindow *w, QWSServer::WindowEvent e)
  */
 void InputMethods::updateHint(int wid)
 {
-    QtopiaInputMethod *imethod = selector->current();
-    if ( imethod )
-        imethod->setHint(hintMap[wid], restrictMap[wid]);
+    selector->setHint(hintMap[wid], restrictMap[wid]);
     updateIMVisibility();
 }
 

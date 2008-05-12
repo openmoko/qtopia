@@ -35,7 +35,6 @@
 #include <qtopiaapplication.h>
 
 #include <qtopia/pim/qcontactview.h>
-#include "phonelauncher.h"
 #include "homescreencontrol.h"
 #include "savetocontacts.h"
 #include "themecontrol.h"

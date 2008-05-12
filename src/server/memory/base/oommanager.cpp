@@ -21,7 +21,6 @@
 ****************************************************************************/
 
 #include "oommanager.h"
-#include <QtDebug>
 #include <QDir>
 #include <QSet>
 #include <QMap>
@@ -36,7 +35,7 @@
   There is one instance of OomPrivate, which is a Q_GLOBAL_STATIC.
   Each instance of the \l {OomManager} {Out-Of-Memory (OOM)} manager
   contains a pointer to it.
-  
+
   This class contains three sets of application names. The first
   set is called \c critical. It contains the names of all the
   Qtopia applications that must not be killed, when Qtopia runs
@@ -57,7 +56,7 @@
   example:
 
   \code
-  
+
   [oom_adj]
   qpe=critical
   qasteroids=expendable
@@ -77,7 +76,7 @@
   long=10000
   short=1000
   rlimit=32
-  
+
   \endcode
 
   Whenever a new process achieves the running state, its name
@@ -90,7 +89,7 @@
 
   Hopefully, if the OOM Manager and the MemoryMonitor do the
   right stuff, they will prevent any hard out-of-memory events.
-  
+
   This class is part of the Qtopia server and cannot be used by other Qtopia applications.
   \internal
  */
@@ -106,40 +105,38 @@ class OomPrivate
     void remove(const QString& app);
 
     const QMap<QString,int>& expendableProcs() const {
-	return expendable_procs_;
+        return expendable_procs_;
     }
     const QMap<QString,int>& importantProcs() const {
-	return important_procs_;
+        return important_procs_;
     }
     bool hasExpendableProcs() const {
-	return !expendable_procs_.isEmpty();
+        return !expendable_procs_.isEmpty();
     }
     bool hasImportantProcs() const {
-	return !important_procs_.isEmpty();
+        return !important_procs_.isEmpty();
     }
     bool isExpendable(const QString& app) const {
-	return expendable_apps_.contains(app);
+        return expendable_apps_.contains(app);
     }
     bool isImportant(const QString& app) const {
-	return important_apps_.contains(app);
+        return important_apps_.contains(app);
     }
     bool isCritical(const QString& app) const {
-	return critical_apps_.contains(app);
+        return critical_apps_.contains(app);
     }
 
     void printOomValues(bool score) const;
     void printOomScores(const QMap<QString,int>& map) const;
     QString procWithBiggestScore(const QMap<QString,int>& map) const;
-    
-  public:
-    QSet<QString>	expendable_apps_;
-    QSet<QString>	important_apps_;
-    QSet<QString>	critical_apps_;
 
-    QMap<QString,int> 	expendable_procs_;
-    QMap<QString,int> 	important_procs_;
-    QMap<QString,int> 	critical_procs_;
-    
+    QSet<QString>       expendable_apps_;
+    QSet<QString>       important_apps_;
+    QSet<QString>       critical_apps_;
+
+    QMap<QString,int>   expendable_procs_;
+    QMap<QString,int>   important_procs_;
+    QMap<QString,int>   critical_procs_;
 };
 
 /*!
@@ -155,40 +152,40 @@ OomPrivate::OomPrivate()
     cfg.beginGroup("oom_adj");
     QStringList slist = cfg.childKeys();
     for (i=0; i<slist.size(); ++i) {
-	QString name = slist.at(i);
-	QString value = cfg.value(name).toString();
-	if (value == QString("critical"))
-	    critical_apps_.insert(name);
-	else if (value == QString("important"))
-	    important_apps_.insert(name);
-	else if (value == QString("expendable"))
-	    expendable_apps_.insert(name);
-	else
-	    qLog(OOM) << "oom.conf illegal value:" << value;
+        QString name = slist.at(i);
+        QString value = cfg.value(name).toString();
+        if (value == QString("critical"))
+            critical_apps_.insert(name);
+        else if (value == QString("important"))
+            important_apps_.insert(name);
+        else if (value == QString("expendable"))
+            expendable_apps_.insert(name);
+        else
+            qLog(OOM) << "oom.conf illegal value:" << value;
     }
     cfg.endGroup();
 
     if (!critical_apps_.contains(QString("qpe")))
-	critical_apps_.insert(QString("qpe"));
-    
-    QSet<QString>::const_iterator s = expendable_apps_.constBegin();
-#if 0    
-    while (s != expendable_apps_.constEnd()) {
-	qLog(OOM) << "Expendable: " << *s;
-	++s;
+        critical_apps_.insert(QString("qpe"));
+
+    if (qtopiaLogEnabled("OOM")) {
+        QSet<QString>::const_iterator s = expendable_apps_.constBegin();
+        while (s != expendable_apps_.constEnd()) {
+            qLog(OOM) << "Expendable: " << *s;
+            ++s;
+        }
+        s = important_apps_.constBegin();
+        while (s != important_apps_.constEnd()) {
+            qLog(OOM) << "Important: " << *s;
+            ++s;
+        }
+        s = critical_apps_.constBegin();
+        while (s != critical_apps_.constEnd()) {
+            qLog(OOM) << "Critical: " << *s;
+            ++s;
+        }
+        printOomValues(true);
     }
-    s = important_apps_.constBegin();
-    while (s != important_apps_.constEnd()) {
-	qLog(OOM) << "Important: " << *s;
-	++s;
-    }
-    s = critical_apps_.constBegin();
-    while (s != critical_apps_.constEnd()) {
-	qLog(OOM) << "Critical: " << *s;
-	++s;
-    }
-    //printOomValues(true);
-#endif    
 }
 
 /*!
@@ -215,31 +212,31 @@ OomPrivate::~OomPrivate()
 void OomPrivate::insert(const QString& app, int pid)
 {
     if (app.isEmpty())
-	return;
+        return;
     int oomadj = 0;
     if (important_apps_.contains(app)) {
-	important_procs_.insert(app,pid);
-	qLog(OOM) << "Important proc added:" << app << pid;
+        important_procs_.insert(app,pid);
+        qLog(OOM) << "Important proc added:" << app << pid;
     }
     else if (critical_apps_.contains(app)) {
-	critical_procs_.insert(app,pid);
-	oomadj = -16;
-	qLog(OOM) << "Critical proc added:" << app << pid;
+        critical_procs_.insert(app,pid);
+        oomadj = -16;
+        qLog(OOM) << "Critical proc added:" << app << pid;
     }
     else {
-	oomadj = 15;
-	expendable_procs_.insert(app,pid);
-	qLog(OOM) << "Expendable proc added:" << app << pid;
+        oomadj = 15;
+        expendable_procs_.insert(app,pid);
+        qLog(OOM) << "Expendable proc added:" << app << pid;
     }
     QString oom_file = QString("/proc/%1/oom_adj").arg(pid);
     QFile file(oom_file);
     if (!file.exists()) {
-	qLog(OOM) << oom_file << "does not exist";
-	return;
+        qLog(OOM) << oom_file << "does not exist";
+        return;
     }
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-	qLog(OOM) << "Unable to open" << oom_file << "for writing";
-	return;
+        qLog(OOM) << "Unable to open" << oom_file << "for writing";
+        return;
     }
     qLog(OOM) << "Writing" << oomadj << "to" << oom_file;
     QTextStream out(&file);
@@ -247,17 +244,11 @@ void OomPrivate::insert(const QString& app, int pid)
     out.flush();
     file.flush();
 
-#if 0    
-    QString cmd=QString("echo \"%1\" > /proc/%2/oom_adj").arg(oomadj).arg(pid);
-    int result = system(cmd.toLatin1());
-    qLog(OOM) << cmd << result;
-#endif    
-
-#if 0    
-    printOomScores(critical_procs_);
-    printOomScores(important_procs_);
-    printOomScores(expendable_procs_);
-#endif    
+    if (qtopiaLogEnabled("OOM")) {
+        printOomScores(critical_procs_);
+        printOomScores(important_procs_);
+        printOomScores(expendable_procs_);
+    }
 }
 
 /*!
@@ -267,36 +258,36 @@ void OomPrivate::insert(const QString& app, int pid)
 void OomPrivate::remove(const QString& app)
 {
     if (app.isEmpty())
-	return;
+        return;
     int pid = 0;
     QMap<QString,int>::iterator i;
     i = important_procs_.find(app);
     if (i != important_procs_.end()) {
-	pid = i.value();
-	important_procs_.erase(i);
-	qLog(OOM) << "Removed important proc:" << app << pid;
-	return;
+        pid = i.value();
+        important_procs_.erase(i);
+        qLog(OOM) << "Removed important proc:" << app << pid;
+        return;
     }
     i = critical_procs_.find(app);
     if (i != critical_procs_.end()) {
-	pid = i.value();
-	critical_procs_.erase(i);
-	qLog(OOM) << "Removed critical proc:" << app << pid;
-	return;
+        pid = i.value();
+        critical_procs_.erase(i);
+        qLog(OOM) << "Removed critical proc:" << app << pid;
+        return;
     }
     i = expendable_procs_.find(app);
     if (i != expendable_procs_.end()) {
-	pid = i.value();
-	expendable_procs_.erase(i);
-	qLog(OOM) << "Removed expendable proc:" << app << pid;
-	return;
+        pid = i.value();
+        expendable_procs_.erase(i);
+        qLog(OOM) << "Removed expendable proc:" << app << pid;
+        return;
     }
 }
 
 /*!
   Returns the application name of the process that has the
   biggest OOM score found in \a map. It reads the value in
-  the oom_score file in /proc for each app/pid pair in \a map. 
+  the oom_score file in /proc for each app/pid pair in \a map.
   \internal
  */
 QString OomPrivate::procWithBiggestScore(const QMap<QString,int>& map) const
@@ -305,27 +296,27 @@ QString OomPrivate::procWithBiggestScore(const QMap<QString,int>& map) const
     QString oom_file;
     QString application("");
     if (map.isEmpty())
-	return application;
+        return application;
     QMap<QString,int>::const_iterator i = map.constBegin();
     while (i != map.constEnd()) {
-	oom_file = QString("/proc/%1/oom_score").arg(i.value());
-	QFile file(oom_file);
-	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-	    qLog(OOM) << "Unable to open:" << oom_file;
-	    continue;
-	}
-	bool ok;
-	QTextStream in(&file);
-	QString s = in.readAll();
-	long oom_score = s.toLong(&ok);
-	if (ok) {
-	    qLog(OOM) << oom_file << "oom_score =" << oom_score;
-	    if (oom_score > biggest_score) {
-		biggest_score = oom_score;
-		application = i.key();
-	    }
-	}
-	++i;
+        oom_file = QString("/proc/%1/oom_score").arg(i.value());
+        QFile file(oom_file);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            qLog(OOM) << "Unable to open:" << oom_file;
+            continue;
+        }
+        bool ok;
+        QTextStream in(&file);
+        QString s = in.readAll();
+        long oom_score = s.toLong(&ok);
+        if (ok) {
+            qLog(OOM) << oom_file << "oom_score =" << oom_score;
+            if (oom_score > biggest_score) {
+                biggest_score = oom_score;
+                application = i.key();
+            }
+        }
+        ++i;
     }
     return application;
 }
@@ -338,31 +329,31 @@ QString OomPrivate::procWithBiggestScore(const QMap<QString,int>& map) const
 void OomPrivate::printOomScores(const QMap<QString,int>& map) const
 {
     if (map.isEmpty())
-	return;
+        return;
     QString oom_file;
     QString oom_app;
     QMap<QString,int>::const_iterator i = map.constBegin();
     while (i != map.constEnd()) {
-	oom_file = QString("/proc/%1/oom_score").arg(i.value());
-	oom_app = QString("/proc/%1/oom_score").arg(i.key());
-	++i;
-	QFile file(oom_file);
-	if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-	    qLog(OOM) << "Unable to open:" << oom_file;
-	    continue;
-	}
-	bool ok;
-	QTextStream in(&file);
-	QString s = in.readAll();
-	long oom_score = s.toLong(&ok);
-	qLog(OOM) << oom_app << "= " << oom_score;
+        oom_file = QString("/proc/%1/oom_score").arg(i.value());
+        oom_app = QString("/proc/%1/oom_score").arg(i.key());
+        ++i;
+        QFile file(oom_file);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            qLog(OOM) << "Unable to open:" << oom_file;
+            continue;
+        }
+        bool ok;
+        QTextStream in(&file);
+        QString s = in.readAll();
+        long oom_score = s.toLong(&ok);
+        qLog(OOM) << oom_app << "= " << oom_score;
     }
 }
 
-/*! 
+/*!
   If \a score is true, print the oom_score values for all
   the processes. Otherwise, print the oom_adj values for
-  all the processes. 
+  all the processes.
   \internal
 */
 void OomPrivate::printOomValues(bool score) const
@@ -370,30 +361,30 @@ void OomPrivate::printOomValues(bool score) const
     QDir proc("/proc");
     QStringList procDirs;
     procDirs = proc.entryList(QDir::AllDirs,QDir::Name|QDir::Reversed);
-    
+
     QString dir;
     QString oom_file;
     bool ok = false;
     foreach (dir,procDirs) {
-        dir.toLong(&ok); //only want processes 
-        if (ok) {   
+        dir.toLong(&ok); //only want processes
+        if (ok) {
             oom_file = QString("/proc/") + dir;
-	    if (score)
-		oom_file = oom_file + QString("/oom_score");
-	    else
-		oom_file = oom_file + QString("/oom_adj");
-	    QFile file(oom_file);
-	    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-		qLog(OOM) << "Unable to open " << oom_file;
-		continue;
-	    }
-	    QTextStream in(&file);
-	    QString s = in.readAll();
-	    long oom_value = s.toLong(&ok);
-	    if (score)
-		qLog(OOM) << oom_file << "oom_score = " << oom_value;
-	    else
-		qLog(OOM) << oom_file << "oom_adj = " << oom_value;
+            if (score)
+                oom_file = oom_file + QString("/oom_score");
+            else
+                oom_file = oom_file + QString("/oom_adj");
+            QFile file(oom_file);
+            if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                qLog(OOM) << "Unable to open " << oom_file;
+                continue;
+            }
+            QTextStream in(&file);
+            QString s = in.readAll();
+            long oom_value = s.toLong(&ok);
+            if (score)
+                qLog(OOM) << oom_file << "oom_score = " << oom_value;
+            else
+                qLog(OOM) << oom_file << "oom_adj = " << oom_value;
         }
     }
 }
@@ -431,7 +422,7 @@ Q_GLOBAL_STATIC(OomPrivate, oomPrivate);
   example:
 
   \code
-  
+
   [oom_adj]
   qpe=critical
   qasteroids=expendable
@@ -451,7 +442,7 @@ Q_GLOBAL_STATIC(OomPrivate, oomPrivate);
   long=10000
   short=1000
   rlimit=32
-  
+
   \endcode
 
   Whenever a new process achieves the running state, its name
@@ -462,9 +453,9 @@ Q_GLOBAL_STATIC(OomPrivate, oomPrivate);
   processes to kill when a hard out-of-memory condition occurs.
   The oom_adj value is stored in \c{/proc/<pid>/oom_adj}.
 
-  \bold{Note:} All OomManager instances share the same internal list 
-  of applications. 
-  
+  \bold{Note:} All OomManager instances share the same internal list
+  of applications.
+
   This class is part of the Qtopia server and cannot be used by other Qtopia applications.
  */
 
@@ -489,7 +480,7 @@ OomManager::~OomManager()
   must be in the running state, and it must be an instance of
   \a app. This function must be called when process \a pid
   enters the running state.
-  
+
   The value in \c{/proc/pid/oom_adj} is set to a value read from
   oom.conf according to whether the process is a critical,
   expendable, or important process.
@@ -558,7 +549,7 @@ bool OomManager::hasImportantProcs() const
   This enum is used to describe the various application priority
   as seen by the OOM Manager.
 
-  \value Expendable Expendable applications have lowest priority and will be killed first. 
+  \value Expendable Expendable applications have lowest priority and will be killed first.
   \value Important Important applications should only be killed if no expendable applications are left to be killed.
   \value Critical Critical applications cannot be killed.
   */
@@ -570,9 +561,9 @@ bool OomManager::hasImportantProcs() const
 QString OomManager::procWithBiggestScore(Importance t) const
 {
     if (t == Expendable)
-	return d->procWithBiggestScore(expendableProcs());
+        return d->procWithBiggestScore(expendableProcs());
     if (t == Important)
-	return d->procWithBiggestScore(importantProcs());
+        return d->procWithBiggestScore(importantProcs());
     return QString("");
 }
 

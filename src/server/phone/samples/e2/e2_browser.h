@@ -22,7 +22,7 @@
 #ifndef _e2_BROWSER_H_
 #define _e2_BROWSER_H_
 
-#include "phone/qabstractbrowserscreen.h"
+#include "qabstractbrowserscreen.h"
 #include <QStringList>
 class E2Menu;
 class E2Button;

@@ -218,7 +218,7 @@ void SandboxInstallJob::removeDestination() const
     cmd += destination;
     Q_ASSERT( !destination.isEmpty() && destination != "/" );
     qLog(Package) << "Removing destination by executing:" << cmd;
-    QProcess::execute( cmd );
+    ScriptRunner::runScript( cmd );
 
     QDir dir( Qtopia::packagePath() );
     if ( dir.cd("tmp") )
@@ -361,7 +361,7 @@ void SandboxInstallJob::runSandbox( const QString &binPath, const QString &sandb
 {
     static QString sandboxCmd;
     static bool commandUnavailable = false;
-    
+
     if ( !LidsUtils::isLidsEnabled() )
         return;
 
@@ -388,7 +388,7 @@ void SandboxInstallJob::runSandbox( const QString &binPath, const QString &sandb
     }
     QString cmd = sandboxCmd.arg( binPath ).arg( sandboxDir );
     qLog(Package) << "Running command" << cmd;
-    QProcess::execute( cmd );
+    ScriptRunner::runScript( cmd );
 }
 
 /*!
@@ -471,7 +471,7 @@ void SandboxInstallJob::applyDomainRules( const QString &binPath, const QString 
 
     QString domainCommand = domainScripts[domain];
     qLog(Package) << "Running domain script: " << ( domainCommand );
-    QProcess::execute( domainCommand );
+    ScriptRunner::runScript( domainCommand );
 }
 
 /*!
@@ -508,7 +508,7 @@ void SandboxInstallJob::reloadRules()
         }
     }
     qLog(Package) << "Running command" << reloadCmd;
-    QProcess::execute( reloadCmd );
+    ScriptRunner::runScript( reloadCmd );
 }
 
 
@@ -1254,7 +1254,7 @@ void SandboxUninstallJob::rollBackSandboxRule( const QString &binPath ) const
     static bool commandUnavailable = false;
 
     if ( !LidsUtils::isLidsEnabled() )
-                return;
+        return;
 
     if ( commandUnavailable )
         return;
@@ -1289,7 +1289,7 @@ void SandboxUninstallJob::rollBackSandboxRule( const QString &binPath ) const
     }
 
     qLog(Package) << "Running unsandboxing script: "<< unsandboxCmd.arg( binPath ).arg(sandboxDir);
-    QProcess::execute( unsandboxCmd.arg( binPath ).arg(sandboxDir) );
+    ScriptRunner::runScript(unsandboxCmd.arg(binPath).arg(sandboxDir));
 }
 
 /*!
@@ -1333,7 +1333,7 @@ void SandboxUninstallJob::removePackage() const
     cmd += packagePath;
     Q_ASSERT( !packagePath.isEmpty() && packagePath != "/" );
     qLog(Package) << "Removing destination by executing:" << cmd;
-    QProcess::execute( cmd );
+    ScriptRunner::runScript( cmd );
 }
 
 /*!

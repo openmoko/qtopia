@@ -31,15 +31,6 @@ static QString szXsz; // STATIC XXX CHANGES NOT HONOURED
 QFileResourceFileEngineHandler::QFileResourceFileEngineHandler()
     : QAbstractFileEngineHandler()
 {
-#if 0
-    QSettings config("Trolltech", "qpe");
-    config.beginGroup("Appearance");
-    QVariant value = config.value("IconSize");
-
-    int size = value.toInt();
-    szXsz.sprintf("%dx%d",size,size);
-    //qLog(Resource) << "Using icon size " << szXsz;
-#endif
     szXsz = "22x22";
 }
 
@@ -231,35 +222,6 @@ QString QFileResourceFileEngineHandler::findResourceFile(const QString &path) co
 
 int QFileResourceFileEngineHandler::fontHeightToIconSize( const int fontHeight )
 {
-#if 0
-    // available icon sizes
-    QSettings is("Trolltech", "IconSizes");
-    is.beginGroup("IconSizes");
-    QVariant available = is.value("Available");
-    QList<QVariant> sizes;
-
-    if ( !available.isNull() )
-        sizes = available.toList();
-
-    if ( sizes.size() == 0 )
-        sizes << "14" << "16" << "22";
-
-    int iconSize;
-    if ( sizes.indexOf( fontHeight ) == -1 ) {
-        int i = 0;
-        int size = sizes.size();
-        // find the first icon size that is the same size or bigger than the given value
-        while ( i < size && sizes.at( i ).toInt() < fontHeight )
-                i++;
-        i = i == size ? size - 1 : i;
-        iconSize = sizes.at( i ).toInt();
-    } else
-        iconSize = fontHeight;
-
-    // set as the current size
-    szXsz.sprintf("%dx%d",iconSize,iconSize);
-    //qLog(Resource) << "Using icon size " << szXsz;
-#endif
     szXsz.sprintf("%dx%d",fontHeight,fontHeight);
     return fontHeight;
 }

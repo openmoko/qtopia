@@ -42,9 +42,11 @@
 
 #define MAX_SHIELD_AGE          350
 #define MAX_POWERUP_AGE         500
-#define EXPIRED_POWERUP		MAX_POWERUP_AGE+1
-#define MAX_MISSILE_AGE		 25
-#define MAX_SHIP_POWER_LEVEL 	100
+#define EXPIRED_POWERUP         MAX_POWERUP_AGE+1
+#define MAX_MISSILE_AGE         25
+#define MAX_SHIP_POWER_LEVEL    1000
+#define EMPTY_SHIP_POWER_LEVEL  0
+#define FUEL_POWERUP_BONUS      250
 
 class KShip;
 class KShield;
@@ -422,7 +424,6 @@ class KShip : public KSprite
     bool	engineIsOn_;
     bool	isBraking_;
     bool	isShooting_;
-
     int	powerLevel_;
     int	teleportCount_;
     int	angleIndex_;

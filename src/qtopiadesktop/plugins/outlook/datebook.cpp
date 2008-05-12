@@ -49,7 +49,12 @@ public:
     {
         TRACE(OutlookSyncPlugin) << "OutlookDatebookSync::getProperties";
         Outlook::_AppointmentItemPtr item( dispatch );
-        entryid = bstr_to_qstring(item->GetEntryID());
+        try {
+            entryid = bstr_to_qstring(item->GetEntryID());
+        } catch (...) {
+            entryid = QString();
+            return;
+        }
         lastModified = date_to_qdatetime(item->GetLastModificationTime());
     }
 
@@ -76,7 +81,9 @@ public:
             return;
         }
 
-        PREPARE_CUSTOM_MAP(qtopiaUserProps);
+        Outlook::UserPropertiesPtr props = item->GetUserProperties();
+        Q_ASSERT(props);
+
         PREPARE_MAPI(Appointment);
 
         stream << "<Appointment>\n";
@@ -214,7 +221,6 @@ public:
         foreach ( const QString &category, bstr_to_qstring(item->GetCategories()).split(", ", QString::SkipEmptyParts) )
             DUMP_EXPR(Category,category);
         stream << "</Categories>\n";
-        //DUMP_CUSTOM_MAP(qtopiaUserProps);
         stream << "</Appointment>\n";
     }
 
@@ -230,7 +236,8 @@ public:
     {
         TRACE(OutlookSyncPlugin) << "OutlookDatebookSync::read_item";
 
-        PREPARE_CUSTOM_MAP(qtopiaUserProps);
+        Outlook::UserPropertiesPtr props = item->GetUserProperties();
+        Q_ASSERT(props);
 
         enum State {
             Idle, When, Alarm, Repeat, Exception, Categories

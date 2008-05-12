@@ -103,8 +103,8 @@ QtopiaInputMethod::State PredictiveKeyboardInputMethod::state() const
 {
     if (input && input->widget() && input->widget()->isVisible())
         return Ready;
-  else
-    return Sleeping;
+    else
+        return Sleeping;
 }
 
 
@@ -135,11 +135,14 @@ QWSInputMethod* PredictiveKeyboardInputMethod::inputModifier(){
     return input;
 }
 
-QList<QIMActionDescription*> PredictiveKeyboardInputMethod::menuDescription(){ return QList<QIMActionDescription*>();}
+QList<QIMActionDescription*> PredictiveKeyboardInputMethod::menuDescription()
+{
+    return QList<QIMActionDescription*>();
+}
 
 void PredictiveKeyboardInputMethod::setHint(QString const& hint, bool)
 {
     input->mKeyboard->setHint(hint);
-    return;
-};
+}
+
 QTOPIA_EXPORT_PLUGIN(PredictiveKeyboardInputMethod);

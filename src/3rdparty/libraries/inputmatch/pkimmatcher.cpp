@@ -163,7 +163,7 @@ QPixmap InputMatcher::pixmap(bool shift) const
             modifiedId = "i18n/" + mId.mid(index+1) + '/' + mId.left(index);
 	key = modifiedId;
     }
-    
+
     if ( !key.isEmpty() )
 	pm = QPixmap(":image/pkim/"+key+ul);
 
@@ -343,7 +343,7 @@ QStringList InputMatcher::choices(bool allowpartial, bool allowpredicted, const 
 	QStringList ch;
 	uint minError;
 	int pl = prefixLength(prefix);
-	int sl = suffixLength(suffix); 
+	int sl = suffixLength(suffix);
 	if (pl == -1 || sl == -1 || (pl + sl >= (int)nsets.size()))
 	    return QStringList();
 	ch = searchDict(allowpartial, allowpredicted, dict, extradict,
@@ -375,7 +375,7 @@ QString InputMatcher::writtenWord(const QString &prefix, const QString &suffix) 
 QString InputMatcher::findBest(const QString &prefix, const QString &suffix, bool isDigit) const
 {
     int pl = prefixLength(prefix);
-    int sl = suffixLength(suffix); 
+    int sl = suffixLength(suffix);
     if (pl == -1 || sl == -1 || (pl + sl >= (int)nsets.size()))
 	return QString();
     QString nword = findBest(pl, nsets.size()-sl, isDigit);
@@ -597,7 +597,7 @@ InputMatcherWordErrorList InputMatcher::findWords(const QDawg::Node* node,
 	    if (guess.length) {
 		r += findWords(node->jump(),
 			set+guess.length, maxset,
-			str+ch, error+(guess.error >> 10), 
+			str+ch, error+(guess.error >> 10),
 			allowprefix, predict);
 	    } else if (predict) {
 		r += findWords(node->jump(),
@@ -663,7 +663,7 @@ void InputMatcher::pushSet(const QString& s, bool shift)
 {
     nsets.append(new InputMatcherGuessList(s, shift));
     longestEnd = 1;
-} 
+}
 
 void InputMatcher::pushGuessSet( const InputMatcherGuessList &nl)
 {
@@ -828,12 +828,11 @@ void InputMatcher::init()
 		dict = d;
 	    else {
                 // no dictionary found for named mode - default to system setting
-                
                 if(chosenLanguages().contains(current_System_Language))
                 {
                     dict = current_System_Language;
                 } else {
-                    // no dictionary specified, and no dictionary found for 
+                    // no dictionary specified, and no dictionary found for
                     // current system language, so default to first language
                     dict = chosenLanguages()[0];// InputLanguages marker
                 }
@@ -918,7 +917,7 @@ void InputMatcher::init()
 */
 int InputMatcher::match(const QString& haystack, int offset, const QString& needle, int n)
 {
-    for (int i=0; i<n; i++) 
+    for (int i=0; i<n; i++)
     {
         if(i + offset >= haystack.length())
             return i;
@@ -1011,7 +1010,7 @@ void InputMatcherSet::populate()
             ++it;
             continue;
         }
-        
+
 	mModes.append(new InputMatcher("dict-"+(*it)));
         // check if this mode matches the system language, and if so set it as default
         if(*it == current_System_Language)
@@ -1020,7 +1019,7 @@ void InputMatcherSet::populate()
     }
 
     if(!current){
-        qWarning() << "Didn't find dictionary for system language. Defaulting to first found.";
+        qLog(Input) << "Didn't find dictionary for system language. Defaulting to first found.";
         current = mModes.first();
     }
 }
@@ -1043,12 +1042,11 @@ void InputMatcherSet::checkDictionaries()
     QSettings cfg("Trolltech","locale");
     cfg.beginGroup("Language");
     QString current_System_Language = cfg.value("Language").toString();
-    
+
     // first remove ones from mMode that are not chosen.
     QListIterator<InputMatcher*> mit(mModes);
     while ( mit.hasNext()) {
 	if (mit.peekNext()->id().left(5) == "dict-") {
-            
 	    it = cl.begin();
 	    bool keep = FALSE;
 
@@ -1066,7 +1064,7 @@ void InputMatcherSet::checkDictionaries()
 		}
 		++it;
 	    }
-            
+
 	    if (keep) {
 		mit.next();
 	    } else {
@@ -1210,7 +1208,7 @@ void InputMatcherSet::nextMode()
 	for ( ; it.hasNext(); it.next() ) {
 	    if (it.peekNext() == current) {
 		it.next();
-		if (it.hasNext()) { 
+		if (it.hasNext()) {
 		    target = it.peekNext();
 		    // skip any mode named replaces.
 		    if (named && named->replaces() == target->id()) {
@@ -1289,7 +1287,7 @@ InputMatcher *InputMatcherSet::mode(const QString &name)
 	index++;
     }
 
-    // ?? yeah.. this is what I mean.  
+    // ?? yeah.. this is what I mean.
     if (named && (named->id() == tmpName || named->replaces() == tmpName))
 	return named;
 

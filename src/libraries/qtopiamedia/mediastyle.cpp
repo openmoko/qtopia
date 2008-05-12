@@ -63,7 +63,7 @@ void MediaStyle::drawControl( ControlElement ce, const QStyleOption *opt, QPaint
         {
         const QStyleOptionProgressBar *pb = qstyleoption_cast<const QStyleOptionProgressBar*>(opt);
         if( pb ) {
-            QRect rect = pb->rect;
+            QRect rect = pb->rect.adjusted(1,1,-1,-1);
             QRect progress;
 
             if( m_groovebuffer.isNull() || rect.size() != m_groovebuffer.size() ) {
@@ -84,7 +84,7 @@ void MediaStyle::drawControl( ControlElement ce, const QStyleOption *opt, QPaint
                         m_silhouettebuffer = generate_progress_bar( color, color.dark( 150 ), rect.size() );
                     }
 
-                    p->drawPixmap( progress, m_silhouettebuffer );
+                    p->drawPixmap( progress, m_silhouettebuffer, progress );
                 }
             } else {
                 if( progress.isValid() ) {
@@ -96,9 +96,15 @@ void MediaStyle::drawControl( ControlElement ce, const QStyleOption *opt, QPaint
                     if( p->paintEngine()->hasFeature( QPaintEngine::PorterDuff ) ) {
                         p->setCompositionMode( QPainter::CompositionMode_Source ); // ### Cheat
                     }
-                    p->drawPixmap( progress, m_barbuffer );
-                    p->drawPixmap( QRect( QPoint( progress.right() + 1, rect.top() + 1 ),
-                        QPoint( rect.right() - 1, rect.bottom() - 1 ) ), m_groovebuffer );
+                    p->drawPixmap( progress, m_barbuffer, progress );
+                    /*
+                    QRect groovrect(QPoint( progress.right() + 1, rect.top() + 1 ),
+                            QPoint( rect.right() - 1, rect.bottom() - 1 ) );
+                            */
+                    QRect groovrect(QPoint( progress.right(), rect.top()),
+                            QPoint( rect.right(), rect.bottom()) );
+
+                    p->drawPixmap( groovrect, m_groovebuffer, groovrect );
                 } else {
                     if( p->paintEngine()->hasFeature( QPaintEngine::PorterDuff ) ) {
                         p->setCompositionMode( QPainter::CompositionMode_Source ); // ### Cheat

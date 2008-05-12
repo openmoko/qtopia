@@ -40,6 +40,7 @@ class QTOPIA_EXPORT QWaitWidget : public QDialog
     Q_PROPERTY(bool cancelEnabled WRITE setCancelEnabled);
 public:
     explicit QWaitWidget( QWidget *parent );
+    ~QWaitWidget();
 
     bool wasCancelled() const;
 

@@ -205,6 +205,7 @@ bool QAppointmentSqlIO::removeOccurrence(const QUniqueId &original,
     if( !q.exec() )
         return false;
 
+    notifyUpdated(original);
     invalidateCache();
     emit recordsUpdated();
     return true;
@@ -229,6 +230,8 @@ bool QAppointmentSqlIO::restoreOccurrence(const QUniqueId &identifier,
    q.prepare("DELETE FROM appointmentexceptions WHERE recid = :i AND edate = :d");
    q.bindValue(":i", identifier.toUInt());
    q.bindValue(":d", date);
+
+   notifyUpdated(identifier);
    return q.exec();
 }
 
@@ -265,6 +268,7 @@ QUniqueId QAppointmentSqlIO::replaceOccurrence(const QUniqueId &original,
     if( !q.exec() )
         return QUniqueId();
 
+    notifyUpdated(original);
     invalidateCache();
     emit recordsUpdated();
     return u;
@@ -304,6 +308,7 @@ QUniqueId QAppointmentSqlIO::replaceRemaining(const QUniqueId &original,
     if (!q.exec())
         return QUniqueId();
 
+    notifyUpdated(original);
     invalidateCache();
     emit recordsUpdated();
     return u;

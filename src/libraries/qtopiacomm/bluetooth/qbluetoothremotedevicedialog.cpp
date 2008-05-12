@@ -49,7 +49,7 @@
     This clss allows the programmer to control whether particular devices
     should be displayed in a QBluetoothRemoteDeviceDialog.
 
-    For example, this will create a QBluetoothRemoteDeviceDialog that only 
+    For example, this will create a QBluetoothRemoteDeviceDialog that only
     displays computers and phones:
     \code
     QBluetoothRemoteDeviceDialogFilter filter;
@@ -333,6 +333,7 @@ void QBluetoothRemoteDeviceDialogPrivate::startDiscovery()
     m_discoveryAction->setText(TEXT_DISCOVERY_CANCEL);
     m_discoveryAction->setIcon(m_discoveryCancelIcon);
 
+    m_discoveryAttempts = 0;
     reallyStartDiscovery();
 }
 
@@ -342,16 +343,18 @@ void QBluetoothRemoteDeviceDialogPrivate::reallyStartDiscovery()
     if (!m_discovering)
         return;
 
-    if (m_cancellingServiceSearch) {
-        // delay discovery, wait for the search to be cancelled
-        QTimer::singleShot(100, this, SLOT(reallyStartDiscovery()));
-        return;
-    }
-
-    if (!m_local->discoverRemoteDevices()) {
-        // delay discovery, try again later
-        QTimer::singleShot(100, this, SLOT(reallyStartDiscovery()));
-        return;
+    // can't start a discovery while service search is still in progress
+    if (m_cancellingServiceSearch ||
+            (!m_local->discoverRemoteDevices() && m_local->error() == QBluetoothLocalDevice::InProgress) ) {
+        if (m_discoveryAttempts < 100) {
+            // delay discovery, try again later
+            m_discoveryAttempts++;
+            QTimer::singleShot(500, this, SLOT(reallyStartDiscovery()));
+        } else {
+            QMessageBox::warning(this, tr("Bluetooth Error"),
+                tr("Bluetooth not available."));
+            discoveryCompleted();
+        }
     }
 }
 
@@ -360,8 +363,10 @@ bool QBluetoothRemoteDeviceDialogPrivate::cancelDiscovery()
     if (!m_local || !m_local->isValid() || !m_discovering || m_cancellingDiscovery)
         return false;
 
-    if (!m_local->cancelDiscovery()) 
+    if (!m_local->cancelDiscovery()) {
+        qLog(Bluetooth) << "QBluetoothRemoteDeviceDialog: cannot cancel discovery";
         return false;
+    }
 
     m_cancellingDiscovery = true;
     m_statusLabel->setText(tr("Canceling..."));
@@ -437,7 +442,7 @@ void QBluetoothRemoteDeviceDialogPrivate::deviceActivatedOk()
 
 void QBluetoothRemoteDeviceDialogPrivate::validateProfiles()
 {
-    if (!m_validationWaitWidget->isVisible()) 
+    if (!m_validationWaitWidget->isVisible())
         return;
 
     if (m_cancellingDiscovery) {
@@ -713,9 +718,9 @@ void QBluetoothRemoteDeviceDialogPrivate::showEvent(QShowEvent *e)
     calling selectedDevice(). If the dialog is canceled, the rejected() signal
     is emitted.
 
-    QBluetoothRemoteDeviceDialog also allows custom menu actions to be added 
-    through QWidget::addAction(). Any added actions will be enabled when a 
-    device is selected, and disabled when no devices are selected. They are 
+    QBluetoothRemoteDeviceDialog also allows custom menu actions to be added
+    through QWidget::addAction(). Any added actions will be enabled when a
+    device is selected, and disabled when no devices are selected. They are
     also disabled during device discoveries.
 
     \ingroup qtopiabluetooth
@@ -775,7 +780,7 @@ QBluetoothAddress QBluetoothRemoteDeviceDialog::getRemoteDevice(QWidget *parent,
     dlg.setValidationProfiles(profiles);
     dlg.setFilter(filter);
 
-    if (QtopiaApplication::execDialog(&dlg) == QDialog::Accepted) 
+    if (QtopiaApplication::execDialog(&dlg) == QDialog::Accepted)
         return dlg.selectedDevice();
     else
         return QBluetoothAddress();

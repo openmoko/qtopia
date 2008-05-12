@@ -48,10 +48,6 @@ Ficgta01VolumeService::Ficgta01VolumeService():
 
     vsoVolumeObject = new QValueSpaceObject("/Hardware/Audio");
 
-     QValueSpaceItem *ampmode = new QValueSpaceItem("/System/Tasks/Ficgta01VolumeService/ampMode");
-     QObject::connect(ampmode, SIGNAL(contentsChanged()),
-                      this, SLOT(toggleAmpMode()));
-
     QTimer::singleShot(0, this, SLOT(registerService()));
 }
 
@@ -59,7 +55,6 @@ Ficgta01VolumeService::~Ficgta01VolumeService()
 {
 }
 
-//public slots:
 void Ficgta01VolumeService::setVolume(int volume)
 {
     adjustVolume(volume, volume, Absolute);
@@ -78,7 +73,6 @@ void Ficgta01VolumeService::increaseVolume(int increment)
 void Ficgta01VolumeService::decreaseVolume(int decrement)
 {
     decrement *= -1;
-
     adjustVolume(decrement, decrement, Relative);
 }
 
@@ -91,7 +85,6 @@ void Ficgta01VolumeService::registerService()
     QtopiaIpcEnvelope e("QPE/AudioVolumeManager", "registerHandler(QString,QString)");
     e << QString("Headset") << QString("QPE/AudioVolumeManager/Ficgta01VolumeService");
 
-//    QTimer::singleShot(0, this, SLOT(setCallDomain()));
     QTimer::singleShot(0, this, SLOT(initVolumes()));
 
 }
@@ -143,19 +136,12 @@ void Ficgta01VolumeService::initVolumes()
 
 }
 
-void Ficgta01VolumeService::setCallDomain()
-{
-    qLog(AudioState)<<"Ficgta01VolumeService::setCallDomain()";
-    QtopiaIpcEnvelope e("QPE/AudioVolumeManager", "setActiveDomain(QString)");
-    e << QString("Headset");
-}
-
 void Ficgta01VolumeService::adjustVolume(int leftChannel, int rightChannel, AdjustType adjust)
 {
     qLog(AudioState)<<" Ficgta01VolumeService::adjustVolume";
-    unsigned int leftright;
-    int left;
-    int right;
+    unsigned int leftright=0;
+    int left=0;
+    int right=0;
 
     if (adjust == Relative) {
 
@@ -229,13 +215,13 @@ void Ficgta01VolumeService::adjustMicrophoneVolume( int volume )
 int Ficgta01VolumeService::initMixer()
 {
     int result;
-  if ((result = snd_mixer_open( &mixerFd, 0)) < 0) {
+    if ((result = snd_mixer_open( &mixerFd, 0)) < 0) {
         qWarning()<<"snd_mixer_open error"<< result;
         mixerFd = NULL;
         return result;
     }
 /*  hw:0
-  hw:0,0*/
+    hw:0,0*/
     if ((result = snd_mixer_attach( mixerFd, "default")) < 0) {
         qWarning()<<"snd_mixer_attach error"<< result;
         snd_mixer_close(mixerFd);
@@ -300,180 +286,9 @@ int Ficgta01VolumeService::saveState()
 
     QString cmd = "/usr/sbin/alsactl -f "+confDir+m_mode+".state store";
     qLog(AudioState)<<cmd;
-    int result = system(cmd.toLocal8Bit());
+    system(cmd.toLocal8Bit());
 return 0;
 }
-
-
-void Ficgta01VolumeService::setAmpMode( bool mode)
-{ //mode false turns off amp
-
-//    qLog(PowerManagement)<<" Ficgta01VolumeService::setAmpMode" << mode;
-
-    char itemname[40];
-    unsigned int item = 0;
-    QString elemName;
-    QString currentMode;
-    QValueSpaceItem ampVS("/Hardware/Audio/CurrentAmpMode");
-    QString ampMode = ampVS.value().toString();
-
-    if(mode)
-        vsoVolumeObject->setAttribute("Amp", "On");
-    else
-        vsoVolumeObject->setAttribute("Amp","Off");
-
-
-    if(ampMode.isEmpty()) ampMode = "Off";
-    if(!mode) ampMode = "Off";
-
-    initMixer();
-
-
-// unsigned int
-    for ( elem = snd_mixer_first_elem( mixerFd); elem; elem = snd_mixer_elem_next( elem) ) {
-        if ( snd_mixer_elem_get_type( elem ) == SND_MIXER_ELEM_SIMPLE &&
-             snd_mixer_selem_is_enumerated( elem) &&
-             snd_mixer_selem_is_active( elem) ) {
-
-            elemName = QString(snd_mixer_selem_get_name( elem));
-            if(elemName == "Amp Mode") {
-
-//current selection
-                snd_mixer_selem_get_enum_item( elem, (snd_mixer_selem_channel_id_t)0, &item);
-                snd_mixer_selem_get_enum_item_name(elem, item, sizeof(itemname) - 1, itemname);
-
-                currentMode = itemname;
-//                qLog(PowerManagement)<<"switch says"<< itemname << ampMode;
-
-                if( mode && currentMode != ampMode && currentMode != "Off")
-                    ampMode = currentMode;
-
-                //             qLog(PowerManagement) << "Current ampMode is "<< currentMode <<"old amp mode is "<< ampMode;
-
-                int enumItems = snd_mixer_selem_get_enum_items(elem);
-
-                for( item = 0;item < enumItems; item++ ) {
-                    snd_mixer_selem_get_enum_item_name(elem, item, sizeof(itemname) - 1, itemname);
-
-                    if(!mode) {
-                        if( QString(itemname) == QString("Off")) {
-                            //      snd_mixer_selem_get_enum_item(elem, channelId, &item);
-//                            qLog(PowerManagement) << "set switch to Off";
-                            snd_mixer_selem_set_enum_item(elem, (snd_mixer_selem_channel_id_t)0, item);
-
-                            break;
-                        }
-                    } else {
-                        if( QString(itemname) == ampMode) {
-                            //      snd_mixer_selem_get_enum_item(elem, channelId, &item);
-//                            qLog(PowerManagement) << "set switch to" << ampMode;
-                            snd_mixer_selem_set_enum_item(elem, (snd_mixer_selem_channel_id_t)0, item);
-
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-    }
-    if(currentMode != "Off") ampMode = currentMode;
-    vsoVolumeObject->setAttribute("CurrentAmpMode",ampMode);
-
-//    qLog(PowerManagement)<<"savemode"<<ampMode;
-    closeMixer();
-}
-
-/*
-  sets the vso to current amp mode from mixer
- */
-void Ficgta01VolumeService::changeAmpModeVS()
-{
-    char itemname[40];
-    unsigned int item = 0;
-    initMixer();
-      for ( elem = snd_mixer_first_elem( mixerFd); elem; elem = snd_mixer_elem_next( elem) ) {
-        if ( snd_mixer_elem_get_type( elem ) == SND_MIXER_ELEM_SIMPLE &&
-             snd_mixer_selem_is_enumerated( elem) &&
-             snd_mixer_selem_is_active( elem) ) {
-
-            elemName = QString(snd_mixer_selem_get_name( elem));
-            if(elemName == "Amp Mode") {
-
-//current selection
-                snd_mixer_selem_get_enum_item( elem, (snd_mixer_selem_channel_id_t)0, &item);
-                snd_mixer_selem_get_enum_item_name(elem, item, sizeof(itemname) - 1, itemname);
-
-                vsoVolumeObject->setAttribute("CurrentAmpMode",itemname);
-
-            }
-        }
-      }
-      closeMixer();
-}
-
-/*
-sets a new AmpMode by name
-*/
-void Ficgta01VolumeService::setAmp( QString amode)
-{
-//    qLog(PowerManagement)<<" Ficgta01VolumeService::setAmp" << amode;
-
-    QValueSpaceItem ampVS("/Hardware/Audio/Amp");
-    QString ok = ampVS.value().toString();
-//    qLog(PowerManagement)<<" ampVS" << ok;
-
-    initMixer();
-    char itemname[40];
-    unsigned int item = 0;
-    for ( elem = snd_mixer_first_elem( mixerFd); elem; elem = snd_mixer_elem_next( elem) ) {
-        if ( snd_mixer_elem_get_type( elem ) == SND_MIXER_ELEM_SIMPLE &&
-             snd_mixer_selem_is_enumerated( elem) &&
-             snd_mixer_selem_is_active( elem) ) {
-
-            elemName = QString(snd_mixer_selem_get_name( elem));
-            if(elemName == "Amp Mode") {
-                int enumItems = snd_mixer_selem_get_enum_items(elem);
-
-                for( item = 0;item < enumItems; item++ ) {
-                    snd_mixer_selem_get_enum_item_name(elem, item, sizeof(itemname) - 1, itemname);
-
-                    if(QString(itemname) == ok) {
-                        //somehow this should still be off
-                           snd_mixer_selem_set_enum_item(elem, (snd_mixer_selem_channel_id_t)0, item);
-                       }
-                    if( QString(itemname) == amode) {
-                        //      snd_mixer_selem_get_enum_item(elem, channelId, &item);
-                        if(ok == "On") {
-                            snd_mixer_selem_set_enum_item(elem, (snd_mixer_selem_channel_id_t)0, item);
-//                        qLog(PowerManagement) << "set switch to" << amode;
-                        }
-                        vsoVolumeObject->setAttribute("CurrentAmpMode",amode);
-
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    closeMixer();
-
-}
-
-void Ficgta01VolumeService::toggleAmpMode()
-{
-    QValueSpaceItem ampVS("/Hardware/Audio/CurrentAmpMode");
-    QString ampMode = ampVS.value().toString();
-
-    if( ampMode == "Off") {
-        setAmpMode(false);
-    } else {
-        setAmpMode(true);
-    }
-
-}
-
-
 
 QTOPIA_TASK(Ficgta01VolumeService, Ficgta01VolumeService);
 

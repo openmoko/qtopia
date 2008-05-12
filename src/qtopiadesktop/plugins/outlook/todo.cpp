@@ -48,7 +48,12 @@ public:
     {
         TRACE(OutlookSyncPlugin) << "OutlookTodoSync::getProperties";
         Outlook::_TaskItemPtr item( dispatch );
-        entryid = bstr_to_qstring(item->GetEntryID());
+        try {
+            entryid = bstr_to_qstring(item->GetEntryID());
+        } catch (...) {
+            entryid = QString();
+            return;
+        }
         lastModified = date_to_qdatetime(item->GetLastModificationTime());
     }
 
@@ -57,8 +62,9 @@ public:
         TRACE(OutlookSyncPlugin) << "OutlookTodoSync::dump_item";
         Q_ASSERT( dispatch );
         Outlook::_TaskItemPtr item( dispatch );
+        Outlook::UserPropertiesPtr props = item->GetUserProperties();
+        Q_ASSERT(props);
 
-        PREPARE_CUSTOM_MAP(qtopiaUserProps);
         PREPARE_MAPI(Task);
 
         stream << "<Task>\n";
@@ -97,10 +103,6 @@ public:
         foreach ( const QString &category, bstr_to_qstring(item->GetCategories()).split(", ") )
             DUMP_EXPR(Category,category);
         stream << "</Categories>\n";
-#ifdef HANDLE_EXTRAS
-        qtopiaUserProps["Outlook Complete"] = item->GetComplete();
-#endif
-        //DUMP_CUSTOM_MAP(qtopiaUserProps);
         stream << "</Task>\n";
     }
 
@@ -109,8 +111,8 @@ public:
         TRACE(OutlookSyncPlugin) << "OutlookTodoSync::read_item";
         Q_ASSERT( dispatch );
         Outlook::_TaskItemPtr item( dispatch );
-
-        PREPARE_CUSTOM_MAP(qtopiaUserProps);
+        Outlook::UserPropertiesPtr props = item->GetUserProperties();
+        Q_ASSERT(props);
 
         enum State {
             Idle, Categories
@@ -169,13 +171,6 @@ public:
                             state = Idle;
                         }
                     }
-#ifdef HANDLE_EXTRAS
-                    READ_QTOPIA_CUSTOM(Outlook Complete,Complete);
-#if 0
-                    bool complete = ( item->PercentComplete() == 100 && item->Status() == Outlook::olTaskComplete );
-                    item->PutComplete( complete );
-#endif
-#endif
                     break;
                 default:
                     break;

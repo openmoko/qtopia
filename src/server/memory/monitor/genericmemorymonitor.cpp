@@ -180,7 +180,8 @@ GenericMemoryMonitorTask::computeMemoryValues()
 
     QTextStream meminfo(&file);
     QString line;
-    int total=0, memfree=0, buffers=0, cached=0;
+    quint64 total=0, memfree=0, buffers=0, cached=0;
+    bool ok = false;
     static QRegExp kernel24HeaderLine("\\s+total:\\s+used:\\s+free:\\s+shared:\\s+buffers:\\s+cached:");
 
     line = meminfo.readLine();
@@ -190,10 +191,10 @@ GenericMemoryMonitorTask::computeMemoryValues()
         line = meminfo.readLine();
         if(kernel24DataLine.indexIn(line) > -1)
         {
-            total = kernel24DataLine.cap(1).toInt();
-            memfree = kernel24DataLine.cap(3).toInt();
-            buffers = kernel24DataLine.cap(5).toInt();
-            cached = kernel24DataLine.cap(6).toInt();
+            total = kernel24DataLine.cap(1).toULongLong(&ok);
+            memfree = kernel24DataLine.cap(3).toULongLong();
+            buffers = kernel24DataLine.cap(5).toULongLong();
+            cached = kernel24DataLine.cap(6).toULongLong();
         }
     }
     else
@@ -204,20 +205,23 @@ GenericMemoryMonitorTask::computeMemoryValues()
         static QRegExp kernel26CachedLine("Cached:\\s+(\\d+)\\s+kB");
         while (!meminfo.atEnd()) {
             if (kernel26MemTotalLine.indexIn(line) > -1)
-                total = kernel26MemTotalLine.cap(1).toInt();
+                total = kernel26MemTotalLine.cap(1).toULongLong(&ok);
             else if (kernel26MemFreeLine.indexIn(line) > -1)
-                memfree = kernel26MemFreeLine.cap(1).toInt();
+                memfree = kernel26MemFreeLine.cap(1).toULongLong();
             else if (kernel26BuffersLine.indexIn(line) > -1)
-                buffers = kernel26BuffersLine.cap(1).toInt();
+                buffers = kernel26BuffersLine.cap(1).toULongLong();
             else if (kernel26CachedLine.indexIn(line) > -1) {
-                cached = kernel26CachedLine.cap(1).toInt();
+                cached = kernel26CachedLine.cap(1).toULongLong();
                 break; //last entry to read
             }
             line = meminfo.readLine();
         }
     }
+
+    if (!ok)
+        qWarning() << "Meminfo cannot monitor available memory";
     m_memory_available = buffers + cached + memfree;
-    m_percent_available = 100 * m_memory_available / total;
+    m_percent_available = total ? (100 * m_memory_available / total) : 0;
 
 #ifdef DEBUG_MEMORY_MONITOR    
     qLog(OOM) << "  MemTotal:        " << total;

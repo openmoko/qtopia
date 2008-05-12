@@ -224,7 +224,7 @@ bool QBluetoothHandsfreeService::audioGatewayInitialized()
     QByteArray audioDev = find_btsco_device("Handsfree");
 
     if (audioDev.isEmpty()) {
-        qWarning("No handsfree audio devices available...");
+        qLog(Bluetooth) << "No handsfree audio devices available...";
     }
     else if (!bt_sco_open(&m_data->m_audioDev, audioDev.constData())) {
         qWarning("Unable to open audio device: %s", audioDev.constData());

@@ -379,6 +379,7 @@ MineField::MineField( QWidget* parent )
     numRows = 0;
     numCols = 0;
     mines = NULL;
+    m_selectPressed = false;
 
     Mine::minePixmap = new QPixmap(":image/mine");
     Mine::flagPixmap = new QPixmap(":image/flag");
@@ -526,7 +527,11 @@ void MineField::placeMines()
 
         Mine* m = mine( row, col );
 
-        if ( m && !m->isMined() && m->state() == Mine::Hidden ) {
+        // place a mine even if the square is flagged, or else player can
+        // manipulate the placement of the mines by flagging lots of squares
+        // before the game starts
+        if ( m && !m->isMined()
+             && (m->state() == Mine::Hidden || m->state() == Mine::Flagged) ) {
             m->setMined( true );
             mines--;
         }
@@ -616,10 +621,16 @@ void MineField::keyPressEvent( QKeyEvent *e )
     switch( key )
     {
         case Qt::Key_Select:
-            // mine this field
-            if ( !e->isAutoRepeat() )
-                cellClicked( currRow, currCol );
-            break;
+            if ( !e->isAutoRepeat() ) {
+                m_selectPressed = true;
+                QMouseEvent *event = new QMouseEvent(QEvent::MouseButtonPress,
+                        QPoint(currCol * cellSize + (cellSize/2),
+                               currRow * cellSize + (cellSize/2)),
+                        Qt::LeftButton, 0, 0);
+                QApplication::postEvent(this, event);
+            }
+            return; // return immediately!
+
         case Qt::Key_Asterisk:
             // flag/unflag this field
             if ( !e->isAutoRepeat() ) {
@@ -655,6 +666,19 @@ void MineField::keyPressEvent( QKeyEvent *e )
     }
 
     flagAction = NoAction;
+}
+
+void MineField::keyReleaseEvent( QKeyEvent *e )
+{
+    // m_selectPressed ensures we don't act on key-up without key-down
+    if (e->key() == Qt::Key_Select && !e->isAutoRepeat() && m_selectPressed) {
+        QMouseEvent *event = new QMouseEvent(QEvent::MouseButtonRelease,
+                QPoint(currCol * cellSize + (cellSize/2),
+                       currRow * cellSize + (cellSize/2)),
+                Qt::LeftButton, 0, 0);
+        QApplication::postEvent(this, event);
+        m_selectPressed = false;
+    }
 }
 
 int MineField::getHint( int row, int col )

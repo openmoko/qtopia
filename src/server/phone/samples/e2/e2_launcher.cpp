@@ -37,7 +37,7 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include "e2_header.h"
-#include "phone/qabstractbrowserscreen.h"
+#include "qabstractbrowserscreen.h"
 #include <QtopiaChannel>
 #include <QContent>
 #include <QContentSet>

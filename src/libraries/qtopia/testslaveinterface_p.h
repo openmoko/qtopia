@@ -46,6 +46,7 @@ public:
     virtual bool isConnected() const = 0;
     virtual void qwsEventFilter(QWSEvent *event) = 0;
     virtual void showMessageBox(QWidget*,QString const&,QString const&) = 0;
+    virtual void showDialog(QWidget*,QString const&) = 0;
 };
 
 Q_DECLARE_INTERFACE(TestSlaveInterface,"com.trolltech.Qtopia.TestSlaveInterface")

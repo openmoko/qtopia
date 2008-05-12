@@ -120,10 +120,6 @@ public:
 
     int rowCount() const;
 
-#if 0
-	void dump() const;
-#endif
-
 private:
     void resetFieldGrowthPolicy();
     void resetRowWrapPolicy();

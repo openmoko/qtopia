@@ -60,6 +60,8 @@ private:
 class CommManagerEvent
 {
 public:
+    CommManagerEvent();
+
     enum Type {
         SESSION_PRE_OPEN,
         SESSION_OPEN,
@@ -74,6 +76,11 @@ public:
     int data; // Either the id or the number of seconds
     Type type;
 };
+
+CommManagerEvent::CommManagerEvent()
+    : data(0),
+      type(SESSION_PRE_OPEN)
+{}
 
 // TODO: Later on this can be done using DBus
 class QAbstractCommDeviceManager_Private : public QObject

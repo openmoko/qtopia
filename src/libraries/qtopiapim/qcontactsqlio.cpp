@@ -1085,9 +1085,13 @@ QUniqueId ContactSqlIO::matchPhoneNumber(const QString &phnumber, int &bestMatch
             QUniqueId numberId = QUniqueId::fromUInt(q.value(0).toUInt());
             QString phoneNumber = q.value(1).toString();
             QString localNumber = QPhoneNumber::localNumber(phoneNumber);
-            
-            if (!localNumber.isEmpty())
+
+            if (!localNumber.isEmpty()) {
+                colonIdx = localNumber.indexOf(':');
+                if (colonIdx > 0 && colonIdx < localNumber.length() - 1)
+                    localNumber = localNumber.mid(colonIdx + 1);
                 mLocalNumberCache.insert(localNumber, qMakePair(numberId, phoneNumber));
+            }
         }
     }
 

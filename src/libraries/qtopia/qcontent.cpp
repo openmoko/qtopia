@@ -690,7 +690,7 @@ QDrmRights QContent::rights( QDrmRights::Permission permission ) const
 }
 
 /*!
-  Returns true if the QContent has not been assigned a file name.  Calling file() when
+  Returns true if the QContent has been assigned a file name.  Calling file() when
   fileKnown() is false will generate a new file and assign its file name to the QContent.
 
   \sa file()

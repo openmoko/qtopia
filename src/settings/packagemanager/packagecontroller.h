@@ -270,12 +270,12 @@ inline QVariant AbstractPackageController::data( int role ) const
 inline QVariant AbstractPackageController::data( int row, int column, int role ) const
 {
     InstallControl::PackageInfo pi = packageInfo( row );
-    if ( role == Qt::DisplayRole ) 
+    if ( role == Qt::DisplayRole )
         return ( column == 0 ) ? pi.name : pi.description;
     if ( role == Qt::DecorationRole )
         return dataIcon( row );
-    if ( role == Qt::WhatsThisRole )//package domain is returned
-        return packageDetails(row);
+    if ( role == Qt::WhatsThisRole )//package metadata is returned
+        return packageDetails(row); //in string format
     if ( role == Qt::StatusTipRole )//is packge enabled
         return true; //always true for general case
     if ( role == AbstractPackageController::Domains )

@@ -723,7 +723,7 @@ bool QMailAddressPrivate::isPhoneNumber() const
 bool QMailAddressPrivate::isEmailAddress() const
 {
     static const QRegExp pattern(QMailAddress::emailAddressPattern());
-    return pattern.exactMatch(_address);
+    return pattern.exactMatch(QMailAddress::removeWhitespace(QMailAddress::removeComments(_address)));
 }
 
 /*! \internal */

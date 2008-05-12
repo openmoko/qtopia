@@ -64,14 +64,14 @@ QMediaDevice::Info const& ContentDevice::dataType() const
 
 bool ContentDevice::connectToInput(QMediaDevice*)
 {
-    qWarning("ContentDevice::connectToInput(); ContentDevice is a sink - inputs are invalid");
+    qWarning("ContentDevice::connectToInput(); ContentDevice is a source - inputs are invalid");
 
     return false;
 }
 
 void ContentDevice::disconnectFromInput(QMediaDevice*)
 {
-    qWarning("ContentDevice::disconnectFromInput(); ContentDevice is a sink - inputs are invalid");
+    qWarning("ContentDevice::disconnectFromInput(); ContentDevice is a source - inputs are invalid");
 }
 
 bool ContentDevice::open(QIODevice::OpenMode)

@@ -225,6 +225,8 @@ bool QDocumentServerContentStore::commitContent( QContent *content )
 
         *content = qvariant_cast< QContent >( response.arguments().first() );
 
+        QContentCache::instance()->cache( *content );
+
         return true;
     }
     else if( response.type() == QDocumentServerMessage::ErrorMessage )

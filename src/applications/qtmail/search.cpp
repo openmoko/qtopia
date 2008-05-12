@@ -200,8 +200,8 @@ bool Search::matchesStatus(const QMailMessage& mail) const
 {
     switch( _status ) {
         case Any:       return true;
-        case Read:      return ( mail.status() & QMailMessage::Read );
-        case Unread:    return ( !(mail.status() & QMailMessage::Read) );
+        case Read:      return ( mail.status() & (QMailMessage::Read | QMailMessage::ReadElsewhere) );
+        case Unread:    return ( !(mail.status() & (QMailMessage::Read | QMailMessage::ReadElsewhere)) );
         case Replied:   return ( (mail.status() & QMailMessage::Replied) 
                                  || (mail.status() & QMailMessage::RepliedAll) );
     }

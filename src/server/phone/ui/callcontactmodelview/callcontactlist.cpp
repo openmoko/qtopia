@@ -268,44 +268,14 @@ QVariant CallContactModel::data(const QModelIndex &index, int role) const
             case QContactModel::PortraitRole:
                 return item->decoration();
             case Qt::DisplayRole:
-                {
-                    QString result;
-                    if (text.isEmpty())
-                        result = item->extraInfoText();
-                    else
-                        result = text;
-                    return result;
-                }
+                return text.isEmpty() ? item->extraInfoText() : text;
             case QContactModel::LabelRole:
                 {
-                    QString result;
-                    if (text.isEmpty())
-                        result = item->extraInfoText();
-                    else
-                        result = text;
-#if 0
-                    /* only a guess, and almost impossible to be right withough
-                       building the label same as QContact does.
-
-                       TODO have QContact do underlining for a given search term?
-                       */
-                    if (!mFilter.isEmpty())
-                    {
-                        int pos = findPattern(result);
-                        if (pos != -1)
-                            result = Qt::escape(result.left(pos)) +
-                                "<u>" + Qt::escape(result.mid(pos, mFilter.length())) +
-                                "</u>" + Qt::escape(result.mid(pos + mFilter.length()));
-
-                    }
-#endif
+                    QString result = text.isEmpty() ? item->extraInfoText() : text;
                     return result.prepend("<b>").append("</b>");
                 }
             case QContactModel::SubLabelRole:
-                if (text.isEmpty())
-                    return QString();
-                else
-                    return item->extraInfoText();
+                return text.isEmpty() ? QString() : item->extraInfoText();
             case QContactModel::StatusIconRole:
                 return item->extraDecoration();
             default:

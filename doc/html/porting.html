@@ -11,7 +11,7 @@
 <tr>
 <td align="left" valign="top" width="32"><img src="images/qpelogo.png" align="left" width="32" height="32" border="0" /></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 align="center">Porting Between Qtopia Versions<br /><span class="subtitle"></span>
+<td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Porting Between Qtopia Versions<br /><span class="subtitle"></span>
 </h1>
 <a name="top"></a><ul><li><a href="#overview">Overview</a></li>
 <li><a href="#porting-from-qtopia-2">Porting from Qtopia 2</a></li>
@@ -554,25 +554,33 @@
 <thead><tr valign="top" class="qt-style"><th>Old file</th><th>New file</th></tr></thead>
 <tr valign="top" class="odd"><td>server/phone/callcontactlist.{cpp|h}</td><td>server/phone/ui/callcontactmodelview/callcontactlist.{cpp|h}</td></tr>
 <tr valign="top" class="even"><td>server/phone/callhistory.{cpp|h}</td><td>server/phone/callhistory/default/callhistory.{cpp|h}</td></tr>
-<tr valign="top" class="odd"><td>server/phone/cellbroadcastcontrol.{cpp|h}</td><td>server/phone/telephony/cell/cellbroadcast/cellbroadcastcontrol.{cpp|h}</td></tr>
-<tr valign="top" class="even"><td>server/phone/contextlabel.{cpp|h}</td><td>server/phone/contextlabel/base/contextlabel.{cpp|h}</td></tr>
-<tr valign="top" class="odd"><td>server/phone/dialer.{cpp|h}</td><td>server/phone/dialer/touch/dialer.{cpp|h}</td></tr>
-<tr valign="top" class="even"><td>server/phone/dialerservice.{cpp|h}</td><td>server/phone/telephony/dialproxy/dialerservice.{cpp|h}</td></tr>
-<tr valign="top" class="odd"><td>server/phone/gsmkeyactions.{cpp|h}</td><td>server/phone/telephony/dialfilter/gsm/gsmkeyactions.{cpp|h}</td></tr>
-<tr valign="top" class="even"><td>server/phone/gsmkeyfilter.{cpp|h}</td><td>server/phone/telephony/dialfilter/gsm/gsmkeyfilter.{cpp|h}</td></tr>
-<tr valign="top" class="odd"><td>server/phone/messagecontrol.{cpp|h}</td><td>server/phone/telephony/msgcontrol/messagecontrol.{cpp|h}</td></tr>
-<tr valign="top" class="even"><td>server/phone/numberdisplay.{cpp|h}</td><td>server/phone/dialer/keypad/numberdisplay.{cpp|h}</td></tr>
+<tr valign="top" class="odd"><td>server/phone/callscreen.{cpp|h}</td><td>server/phone/callscreen/themed/callscreen.{cpp|h}</td></tr>
+<tr valign="top" class="even"><td>server/phone/cellbroadcastcontrol.{cpp|h}</td><td>server/phone/telephony/cell/cellbroadcast/cellbroadcastcontrol.{cpp|h}</td></tr>
+<tr valign="top" class="odd"><td>server/phone/contextlabel.{cpp|h}</td><td>server/phone/contextlabel/base/contextlabel.{cpp|h}</td></tr>
+<tr valign="top" class="even"><td>server/phone/dialer.{cpp|h}</td><td>server/phone/dialer/touch/dialer.{cpp|h}</td></tr>
+<tr valign="top" class="odd"><td>server/phone/dialerservice.{cpp|h}</td><td>server/phone/telephony/dialproxy/dialerservice.{cpp|h}</td></tr>
+<tr valign="top" class="even"><td>server/phone/gsmkeyactions.{cpp|h}</td><td>server/phone/telephony/dialfilter/gsm/gsmkeyactions.{cpp|h}</td></tr>
+<tr valign="top" class="odd"><td>server/phone/gsmkeyfilter.{cpp|h}</td><td>server/phone/telephony/dialfilter/gsm/gsmkeyfilter.{cpp|h}</td></tr>
+<tr valign="top" class="even"><td>server/phone/messagecontrol.{cpp|h}</td><td>server/phone/telephony/msgcontrol/messagecontrol.{cpp|h}</td></tr>
+<tr valign="top" class="odd"><td>server/phone/numberdisplay.{cpp|h}</td><td>server/phone/dialer/keypad/numberdisplay.{cpp|h}</td></tr>
+<tr valign="top" class="even"><td>server/phone/phonebrowser.{cpp|h}</td><td>server/phone/browserscreen/gridbrowser/phonebrowser.{cpp|h}</td></tr>
 <tr valign="top" class="odd"><td>server/phone/phoneheader.{cpp|h}</td><td>server/phone/header/themed/phoneheader.{cpp|h}</td></tr>
-<tr valign="top" class="even"><td>server/phone/phonepowermanager.{cpp|h}</td><td>server/phone/powermanager/phonepowermanager.{cpp|h}</td></tr>
-<tr valign="top" class="odd"><td>server/phone/phonethemeview.{cpp|h}</td><td>server/phone/themecontrol/serverthemeview.{cpp|h} <b>(NAME CHANGED)</b></td></tr>
-<tr valign="top" class="even"><td>server/phone/qabstractdialerscreen.{cpp|h}</td><td>server/phone/dialer/abstract/qabstractdialerscreen.{cpp|h}</td></tr>
-<tr valign="top" class="odd"><td>server/phone/qabstractsecondarydisplay.{cpp|h}</td><td>server/phone/secondarydisplay/abstract/qabstractsecondarydisplay.{cpp|h}</td></tr>
-<tr valign="top" class="even"><td>server/phone/quickdial.{cpp|h}</td><td>server/phone/dialer/keypad/quickdial.{cpp|h}</td></tr>
-<tr valign="top" class="odd"><td>server/phone/ringcontrol.{cpp|h}</td><td>server/phone/telephony/ringcontrol/ringcontrol.{cpp|h}</td></tr>
-<tr valign="top" class="even"><td>server/phone/ringtoneservice.{cpp|h}</td><td>server/phone/telephony/ringcontrol/ringtoneservice.{cpp|h}</td></tr>
-<tr valign="top" class="odd"><td>server/phone/secondarythemeddisplay.{cpp|h}</td><td>server/phone/secondarydisplay/themed/secondarythemeddisplay.{cpp|h}</td></tr>
-<tr valign="top" class="even"><td>server/phone/themebackground_p.{cpp|h}</td><td>server/phone/themecontrol/themebackground_p.{cpp|h}</td></tr>
-<tr valign="top" class="odd"><td>server/phone/themecontrol.{cpp|h}</td><td>server/phone/themecontrol/themecontrol.{cpp|h}</td></tr>
+<tr valign="top" class="even"><td>server/phone/phonelauncher.{cpp|h}</td><td>server/phone/serverinterface/phonelauncher/phonelauncher.{cpp|h}</td></tr>
+<tr valign="top" class="odd"><td>server/phone/phonepowermanager.{cpp|h}</td><td>server/phone/powermanager/phonepowermanager.{cpp|h}</td></tr>
+<tr valign="top" class="even"><td>server/phone/phonethemeview.{cpp|h}</td><td>server/phone/themecontrol/serverthemeview.{cpp|h} <b>(NAME CHANGED)</b></td></tr>
+<tr valign="top" class="odd"><td>server/phone/qabstractbrowserscreen.{cpp|h}</td><td>server/phone/browserscreen/abstract/qabstractbrowserscreen.{cpp|h}</td></tr>
+<tr valign="top" class="even"><td>server/phone/qabstractcallscreen.{cpp|h}</td><td>server/phone/callscreen/abstract/qabstractcallscreen.{cpp|h}</td></tr>
+<tr valign="top" class="odd"><td>server/phone/qabstractdialerscreen.{cpp|h}</td><td>server/phone/dialer/abstract/qabstractdialerscreen.{cpp|h}</td></tr>
+<tr valign="top" class="even"><td>server/phone/qabstractsecondarydisplay.{cpp|h}</td><td>server/phone/secondarydisplay/abstract/qabstractsecondarydisplay.{cpp|h}</td></tr>
+<tr valign="top" class="odd"><td>server/phone/quickdial.{cpp|h}</td><td>server/phone/dialer/keypad/quickdial.{cpp|h}</td></tr>
+<tr valign="top" class="even"><td>server/phone/ringcontrol.{cpp|h}</td><td>server/phone/telephony/ringcontrol/ringcontrol.{cpp|h}</td></tr>
+<tr valign="top" class="odd"><td>server/phone/ringtoneservice.{cpp|h}</td><td>server/phone/telephony/ringcontrol/ringtoneservice.{cpp|h}</td></tr>
+<tr valign="top" class="even"><td>server/phone/samples/qpixmapwheel.{cpp|h}</td><td>server/phone/browserscreen/wheelbrowser/qpixmapwheel.{cpp|h}</td></tr>
+<tr valign="top" class="odd"><td>server/phone/samples/wheelbrowser.{cpp|h}</td><td>server/phone/browserscreen/wheelbrowser.{cpp|h}</td></tr>
+<tr valign="top" class="even"><td>server/phone/secondarythemeddisplay.{cpp|h}</td><td>server/phone/secondarydisplay/themed/secondarythemeddisplay.{cpp|h}</td></tr>
+<tr valign="top" class="odd"><td>server/phone/themebackground_p.{cpp|h}</td><td>server/phone/themecontrol/themebackground_p.{cpp|h}</td></tr>
+<tr valign="top" class="even"><td>server/phone/themecontrol.{cpp|h}</td><td>server/phone/themecontrol/themecontrol.{cpp|h}</td></tr>
+<tr valign="top" class="odd"><td>server/phone/themedhomescreen.{cpp|h}</td><td>server/phone/homescreen/themed/themedhomescreen.{cpp|h}</td></tr>
 <tr valign="top" class="even"><td>server/phone/videoringtone.{cpp|h}</td><td>server/phone/telephony/videoringtone/videoringtone.{cpp|h}</td></tr>
 </table></p>
 <p /><address><hr /><div align="center">

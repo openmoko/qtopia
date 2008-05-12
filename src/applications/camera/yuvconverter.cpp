@@ -37,16 +37,14 @@ YUVConverter::YUVConverter(unsigned int type,int width, int height):
     m_width(width),
     m_height(height)
 {
-    m_buf = new unsigned char[width * height * 4];  
+    m_buf = new unsigned char[width * height * 4];
 
     if (m_type == V4L2_PIX_FMT_YUYV)
     {
-        
         y1i=0;
         ui =1;
         y2i=2;
         vi =3;
-
     }
     else if (m_type == V4L2_PIX_FMT_UYVY)
     {
@@ -54,10 +52,7 @@ YUVConverter::YUVConverter(unsigned int type,int width, int height):
         y1i=1;
         vi =2;
         y2i=3;
-
-
     }
-
 }
 
 YUVConverter::~YUVConverter()
@@ -217,28 +212,18 @@ inline void yuv2rgb24(int y, int u, int v, unsigned int *rgb)
     g = y + greenAdjust1[u] + greenAdjust2[v];
     b = y + blueAdjust[u];
 
-#if 0
-    y -= 16;
-    u -= 128;
-    v -= 128;
-    r = y + 1.13983*v;
-    g = y + 0.39465*u - 0.58060*v;
-    b = y + 2.03211*u;
-#endif
     r = CLAMP(r);
     g = CLAMP(g);
     b = CLAMP(b);
 
-    
-    *rgb = (unsigned int)((r << 24) | (g << 16) | b) | 0xff000000;
+    *rgb = (unsigned int)((r << 16) | (g << 8) | b) | 0xff000000;
 }
 
 unsigned char* YUVConverter::convert(unsigned char* src)
 {
-
     unsigned int* dest = (unsigned int*)m_buf;
     unsigned char *buf = src;
-    
+
     int size = (m_width * m_height) >> 1;
     register int u,v;
 
@@ -252,8 +237,7 @@ unsigned char* YUVConverter::convert(unsigned char* src)
         dest++;
         buf+= 4;
     }
- return m_buf;
-
+    return m_buf;
 }
 
 }

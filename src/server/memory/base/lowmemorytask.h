@@ -51,11 +51,11 @@ class LowMemoryTask : public QObject
     void avoidOutOfMemory(MemoryMonitor::MemState newState);
 
   private:
-    MemoryMonitor::MemState 	m_state;
-    MemoryMonitor::MemState 	m_prevState;
-    OomManager			m_oomManager;
+    MemoryMonitor::MemState     m_state;
+    MemoryMonitor::MemState     m_prevState;
+    OomManager                  m_oomManager;
 };
- 
+
 QTOPIA_TASK_INTERFACE(LowMemoryTask);
 
 #endif // _LOWMEMORYTASK_H_

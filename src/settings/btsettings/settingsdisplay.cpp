@@ -27,6 +27,7 @@
 #include <qtopiaapplication.h>
 #include <qtopialog.h>
 #include <qformlayout.h>
+#include <QPhoneProfileManager>
 
 #include <QDialog>
 #include <QAction>
@@ -45,6 +46,10 @@ SettingsDisplay::SettingsDisplay(QBluetoothLocalDevice *local, QCommDeviceContro
 {
     m_ui = new Ui::Settings();
     m_ui->setupUi(this);
+
+    m_phoneProfileMgr = new QPhoneProfileManager(this);
+    connect(m_phoneProfileMgr, SIGNAL(planeModeChanged(bool)),
+            SLOT(planeModeChanged(bool)));
 
     initDisplayedValues();
     powerStateChanged(m_deviceController->powerState());  // set initial state
@@ -68,6 +73,7 @@ void SettingsDisplay::toggleLocalPowerState(bool enable)
     if (enable) {
         m_ui->powerCheckBox->setEnabled(false);
         m_deviceController->bringUp();
+
     } else {
         if (m_deviceController->sessionsActive()) {
             int result = QMessageBox::question(
@@ -140,10 +146,12 @@ void SettingsDisplay::powerStateChanged(QCommDeviceController::PowerState state)
     // to be reverted
     bool enabled = (state != QCommDeviceController::Off);
     m_ui->powerCheckBox->setChecked(enabled);
-    setInteractive(enabled);
 
-    m_ui->powerCheckBox->setEnabled(true);
-    m_ui->powerCheckBox->setFocus();
+    if (!m_phoneProfileMgr->planeMode()) {
+        setInteractive(enabled);
+        m_ui->powerCheckBox->setEnabled(true);
+        m_ui->powerCheckBox->setFocus();
+    }
 }
 
 void SettingsDisplay::deviceStateChanged(QBluetoothLocalDevice::State state)
@@ -154,10 +162,12 @@ void SettingsDisplay::deviceStateChanged(QBluetoothLocalDevice::State state)
     // to be reverted
     bool discoverable = (state == QBluetoothLocalDevice::Discoverable);
     m_ui->visibilityCheckBox->setChecked(discoverable);
-    m_ui->timeoutSpinBox->setEnabled(discoverable);
 
-    m_ui->visibilityCheckBox->setEnabled(true);
-    m_ui->visibilityCheckBox->setFocus();	
+    if (!m_phoneProfileMgr->planeMode()) {
+        m_ui->timeoutSpinBox->setEnabled(discoverable);
+        m_ui->visibilityCheckBox->setEnabled(true);
+        m_ui->visibilityCheckBox->setFocus();
+    }	
 }
 
 void SettingsDisplay::setInteractive(bool interactive)
@@ -195,6 +205,13 @@ void SettingsDisplay::showDetailsDialog()
     QtopiaApplication::execDialog(&dlg);
 }
 
+void SettingsDisplay::planeModeChanged(bool enabled)
+{
+    m_ui->powerCheckBox->setEnabled(!enabled);
+    setInteractive(!enabled);
+    if (!enabled)
+        m_ui->powerCheckBox->setFocus();
+}
 
 void SettingsDisplay::initDisplayedValues()
 {
@@ -208,6 +225,9 @@ void SettingsDisplay::initDisplayedValues()
     m_ui->timeoutSpinBox->setEnabled(discoverable);
 
     m_ui->nameEdit->setText(m_local->name());
+
+    if (m_phoneProfileMgr->planeMode())
+        planeModeChanged(m_phoneProfileMgr->planeMode());
 }
 
 void SettingsDisplay::showMyServices()

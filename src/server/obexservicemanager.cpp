@@ -1632,7 +1632,7 @@ ObexServiceManager::ObexServiceManager(QObject *parent) : QObject(parent)
         m_infraredService = new InfraredBeamingService(this);
     }
     else {
-        qWarning() << "No IRDA devices found!";
+        qLog(Infrared) << "No IRDA devices found!";
     }
 #endif
 }

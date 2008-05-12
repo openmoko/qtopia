@@ -48,7 +48,12 @@ public:
     {
         TRACE(OutlookSyncPlugin) << "OutlookAddressbookSync::getProperties";
         Outlook::_ContactItemPtr item( dispatch );
-        entryid = bstr_to_qstring(item->GetEntryID());
+        try {
+            entryid = bstr_to_qstring(item->GetEntryID());
+        } catch (...) {
+            entryid = QString();
+            return;
+        }
         lastModified = date_to_qdatetime(item->GetLastModificationTime());
     }
 
@@ -57,8 +62,9 @@ public:
         TRACE(OutlookSyncPlugin) << "OutlookAddressbookSync::dump_item";
         Q_ASSERT( dispatch );
         Outlook::_ContactItemPtr item( dispatch );
+        Outlook::UserPropertiesPtr props = item->GetUserProperties();
+        Q_ASSERT(props);
 
-        PREPARE_CUSTOM_MAP(qtopiaUserProps);
         PREPARE_MAPI(Contact);
 
         stream << "<Contact>\n";
@@ -76,13 +82,11 @@ public:
         DUMP_STRING(Profession,Profession);
         DUMP_STRING(Assistant,AssistantName);
         DUMP_STRING(Manager,ManagerName);
-        //DUMP_CUSTOM(HomeWebpage,Qtopia HomeWebpage);
         DUMP_STRING(Spouse,Spouse);
         DUMP_STRING(Nickname,NickName);
         DUMP_STRING(Children,Children);
         DUMP_DATE(Birthday,Birthday);
         DUMP_DATE(Anniversary,Anniversary);
-        //DUMP_CUSTOM(Portrait,Qtopia Portrait);
         DUMP_MAPI(Notes,Body);
         stream << "<Gender>";
         DUMP_ENUM(Gender,Gender,Outlook::olUnspecified,UnspecifiedGender);
@@ -123,10 +127,6 @@ public:
         foreach ( const QString &category, bstr_to_qstring(item->GetCategories()).split(", ", QString::SkipEmptyParts) )
             DUMP_EXPR(Category,category);
         stream << "</Categories>\n";
-#ifdef HANDLE_EXTRAS
-        qtopiaUserProps["Outlook FileAs"] = item->FileAs();
-#endif
-        //DUMP_CUSTOM_MAP(qtopiaUserProps);
         stream << "</Contact>\n";
     }
 
@@ -135,8 +135,8 @@ public:
         TRACE(OutlookSyncPlugin) << "OutlookAddressbookSync::read_item";
         Q_ASSERT( dispatch );
         Outlook::_ContactItemPtr item( dispatch );
-
-        PREPARE_CUSTOM_MAP(qtopiaUserProps);
+        Outlook::UserPropertiesPtr props = item->GetUserProperties();
+        Q_ASSERT(props);
 
         enum State {
             Idle, HomeAddress, BusinessAddress, Categories
@@ -238,9 +238,6 @@ public:
                                 READ_STRING(Email,Email3Address);
                                 break;
                             default:
-#ifdef HANDLE_EXTRAS
-                                READ_CUSTOM_V(Email,QString("Qtopia Email %1").arg(emailnumber));
-#endif
                                 break;
 
                         }
@@ -254,12 +251,6 @@ public:
                             state = Idle;
                         }
                     }
-#ifdef HANDLE_EXTRAS
-                    READ_QTOPIA_CUSTOM(Outlook FileAs,FileAs);
-                    READ_CUSTOM(HomeWebpage,Qtopia HomeWebpage);
-                    READ_CUSTOM(DefaultPhoneNumber,Qtopia DefaultPhoneNumber);
-                    READ_CUSTOM(DefaultEmail,Qtopia DefaultEmail);
-#endif
                     break;
                 default:
                     break;

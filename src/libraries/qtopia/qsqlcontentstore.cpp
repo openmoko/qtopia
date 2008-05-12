@@ -273,7 +273,14 @@ bool QSqlContentStore::commitContent( QContent *content )
 
         if( dbId == content->id().first )
         {
-            return updateContent( contentEngine( content ) );
+            if( updateContent( contentEngine( content ) ) )
+            {
+                QContentCache::instance()->cache( *content );
+
+                return true;
+            }
+            else
+                return false;
         }
         else if( dbId == quint32(-1) )
         {
@@ -290,7 +297,14 @@ bool QSqlContentStore::commitContent( QContent *content )
 
             uninstallContent( content->id() );
 
-            return insertContent( engine, dbId );
+            if( insertContent( engine, dbId ) )
+            {
+                QContentCache::instance()->cache( *content );
+
+                return true;
+            }
+            else
+                return false;
         }
     }
 }
