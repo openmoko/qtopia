@@ -54,8 +54,21 @@ void SMSStatusDBusExporter::close()
 QList<QVariant> SMSStatusDBusExporter::listMessages() const
 {
     QList<QVariant> result;
+
+    /*
+     * Create a QMailMessageKey that matches any folder called inbox_ident
+     */ 
+    QMailFolderKey inboxKey(QMailFolderKey::Name, "inbox_ident");
+    QMailMessageKey folderKey;
+    foreach(QMailId folderId, QMailStore::instance()->queryFolders(inboxKey))
+        folderKey |= QMailMessageKey(QMailMessageKey::ParentFolderId, folderId);
+    
+
+    /* We want messages that are SMS and within a inbox */
     QMailMessageKey key = QMailMessageKey(QMailMessageKey::Type, QMailMessage::Sms);
-    foreach(QMailId id, QMailStore::instance()->queryMessages(key)) 
+    key &= folderKey;
+
+    foreach(QMailId id, QMailStore::instance()->queryMessages(key))
         result << QString::number(id.toULongLong());
 
     return result;
