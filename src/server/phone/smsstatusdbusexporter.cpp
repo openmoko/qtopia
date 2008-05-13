@@ -92,7 +92,9 @@ void SMSStatusDBusExporter::_q_messagesAdded(const QMailIdList& list)
     QList<QVariant> newIds;
 
     foreach(QMailId id, list) {
-        if (QMailStore::instance()->messageHeader(id).messageType() == QMailMessage::Sms)
+        QMailMessage header = QMailStore::instance()->messageHeader(id);
+        QMailFolder folder = QMailStore::instance()->folder(header.parentFolderId());
+        if (header.messageType() == QMailMessage::Sms && folder.isRoot() && folder.name() == QLatin1String("inbox_ident"))
             newIds << QString::number(id.toULongLong());
     }
 
