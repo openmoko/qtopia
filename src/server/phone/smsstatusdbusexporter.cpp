@@ -56,7 +56,7 @@ QList<QVariant> SMSStatusDBusExporter::listMessages() const
     QList<QVariant> result;
     QMailMessageKey key = QMailMessageKey(QMailMessageKey::Type, QMailMessage::Sms);
     foreach(QMailId id, QMailStore::instance()->queryMessages(key)) 
-        result << id;
+        result << QString::number(id.toULongLong());
 
     return result;
 }
