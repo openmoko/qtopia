@@ -23,12 +23,7 @@ void ContactDBusExporter::open()
 {
     delete m_model;
     m_model = new QContactModel(this);
-    connect(m_model, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)),
-            SIGNAL(modelChanged()));
-    connect(m_model, SIGNAL(rowsInserted(const QModelIndex&, int, int)),
-            SIGNAL(modelChanged()));
-    connect(m_model, SIGNAL(rowsRemoved(const QModelIndex&, int, int)),
-            SIGNAL(modelChanged()));
+    connect(m_model, SIGNAL(modelReset()), SIGNAL(modelChanged()));
 }
 
 void ContactDBusExporter::close()
