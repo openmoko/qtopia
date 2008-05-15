@@ -2699,6 +2699,29 @@ void QtopiaApplication::setInputMethodHint( QWidget* widget, InputMethodHint mod
         sendInputHintFor(widget,QEvent::None);
 }
 
+#ifdef Q_WS_X11
+enum MatchboxKeyboard {
+    Keyboard_Show,
+    Keyboard_Hide
+};
+
+static void matchboxShowKeyboard(enum MatchboxKeyboard cmd)
+{
+    static Atom mbInvokerCommand = XInternAtom(QX11Info::display(), "_MB_IM_INVOKER_COMMAND", False);
+
+    XEvent event;
+    memset(&event, 0, sizeof(XEvent));
+
+    event.xclient.type = ClientMessage;
+    event.xclient.window = QX11Info::appRootWindow();
+    event.xclient.message_type = mbInvokerCommand;
+    event.xclient.format = 32;
+    event.xclient.data.l[0] = cmd == Keyboard_Show ? 1 : 2; 
+
+    XSendEvent(QX11Info::display(), QX11Info::appRootWindow(), False, SubstructureRedirectMask|SubstructureNotifyMask, &event);
+}
+#endif
+
 /*!
   Explicitly show the current input method.
 
@@ -2711,7 +2734,11 @@ void QtopiaApplication::setInputMethodHint( QWidget* widget, InputMethodHint mod
 */
 void QtopiaApplication::showInputMethod()
 {
+#ifdef Q_WS_X11
+    matchboxShowKeyboard(Keyboard_Show);
+#else
     QtopiaChannel::send( QLatin1String("QPE/InputMethod"), QLatin1String("showInputMethod()") );
+#endif
 }
 
 /*!
@@ -2727,7 +2754,11 @@ void QtopiaApplication::showInputMethod()
 */
 void QtopiaApplication::hideInputMethod()
 {
+#ifdef Q_WS_X11
+    matchboxShowKeyboard(Keyboard_Hide);
+#else
     QtopiaChannel::send( QLatin1String("QPE/InputMethod"), QLatin1String("hideInputMethod()") );
+#endif
 }
 
 static bool isSingleFocusWidget(QWidget *focus)
@@ -4083,9 +4114,14 @@ void QtopiaApplication::sendInputHintFor(QWidget *w, QEvent::Type etype)
     }
 
     if (etype == QEvent::FocusOut) {
+#ifdef Q_WS_X11
+        matchboxShowKeyboard(Keyboard_Hide);
+#else
         QtopiaIpcEnvelope env(QLatin1String("QPE/InputMethod"), QLatin1String("inputMethodHint(QString,int)") );
         env << QString();
         env << windowId;
+#endif
+
         return;
     }
 
@@ -4157,6 +4193,12 @@ void QtopiaApplication::sendInputHintFor(QWidget *w, QEvent::Type etype)
 
     // find ancestor.. top ancestor, then get its' window id
     if (etype == QEvent::FocusIn || etype == QEvent::None) {
+#ifdef Q_WS_X11
+        if (n == Normal || n == AlwaysOff)
+            matchboxShowKeyboard(Keyboard_Hide);
+        else
+            matchboxShowKeyboard(Keyboard_Show);
+#else
         if ( n == Named ) {
             QtopiaIpcEnvelope env(QLatin1String("QPE/InputMethod"), QLatin1String("inputMethodHint(QString,int)") );
             env << (hr ? hr->param : QString());
@@ -4170,6 +4212,7 @@ void QtopiaApplication::sendInputHintFor(QWidget *w, QEvent::Type etype)
         passwordenv << passwordFlag;
         passwordenv << windowId;
 
+#endif
 
     }
 }
