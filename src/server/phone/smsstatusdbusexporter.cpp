@@ -87,6 +87,11 @@ QMap<QString, QVariant> SMSStatusDBusExporter::message(const QString& id)
     return messageResult;
 }
 
+bool SMSStatusDBusExporter::removeMessage(const QString& id)
+{
+    return QMailStore::instance()->removeMessage(QMailId(id.toULongLong()));
+}
+
 void SMSStatusDBusExporter::_q_messagesAdded(const QMailIdList& list)
 {
     QList<QVariant> newIds;

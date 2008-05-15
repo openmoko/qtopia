@@ -37,6 +37,7 @@ public Q_SLOTS:
     Q_SCRIPTABLE void close();
     Q_SCRIPTABLE QList<QVariant> listMessages() const;
     Q_SCRIPTABLE QMap<QString,QVariant> message(const QString&);
+    Q_SCRIPTABLE bool removeMessage(const QString&);
 
 private Q_SLOTS:
     void _q_sent(const QString &id, QTelephony::Result result);
