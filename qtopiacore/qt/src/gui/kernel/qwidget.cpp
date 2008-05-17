@@ -5374,11 +5374,14 @@ void QWidgetPrivate::show_helper()
         QApplication::sendEvent(q, &e);
         q->setAttribute(Qt::WA_PendingMoveEvent, false);
     }
+
+#if 0
     if (q->testAttribute(Qt::WA_PendingResizeEvent)) {
         QResizeEvent e(data.crect.size(), QSize());
         QApplication::sendEvent(q, &e);
         q->setAttribute(Qt::WA_PendingResizeEvent, false);
     }
+#endif
 
     // become visible before showing all children
     q->setAttribute(Qt::WA_WState_Visible);
