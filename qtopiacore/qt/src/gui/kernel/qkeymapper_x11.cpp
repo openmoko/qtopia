@@ -1402,6 +1402,7 @@ struct qt_auto_repeat_data
     // queue scanner state
     bool release;
     bool error;
+    bool seen_other_key;
 };
 
 #if defined(Q_C_CALLBACKS)
@@ -1414,6 +1415,12 @@ static Bool qt_keypress_scanner(Display *, XEvent *event, XPointer arg)
         return false;
 
     qt_auto_repeat_data *data = (qt_auto_repeat_data *) arg;
+
+    /* We have seen another key inbetween... */
+    if (data->seen_other_key)
+        return false;
+
+    data->seen_other_key = true;
     if (data->error ||
         event->xkey.window  != data->window ||
         event->xkey.keycode != data->keycode)
@@ -1440,10 +1447,17 @@ static Bool qt_keypress_scanner(Display *, XEvent *event, XPointer arg)
 
 static Bool qt_keyrelease_scanner(Display *, XEvent *event, XPointer arg)
 {
-    const qt_auto_repeat_data *data = (const qt_auto_repeat_data *) arg;
-    return (event->type == XKeyRelease &&
-            event->xkey.window  == data->window &&
-            event->xkey.keycode == data->keycode);
+    qt_auto_repeat_data *data = (qt_auto_repeat_data *) arg;
+    if (data->seen_other_key)
+        return false;
+
+    bool result = (event->type == XKeyRelease &&
+                   event->xkey.window  == data->window &&
+                   event->xkey.keycode == data->keycode);
+    if (event->type == XKeyRelease && !result)
+        data->seen_other_key = true;;
+
+    return result;
 }
 
 #if defined(Q_C_CALLBACKS)
@@ -1489,6 +1503,7 @@ bool QKeyMapperPrivate::translateKeyEvent(QWidget *keyWidget, const XEvent *even
 
         auto_repeat_data.release = true;
         auto_repeat_data.error = false;
+        auto_repeat_data.seen_other_key = false;
         if (XCheckIfEvent(dpy, &nextpress, &qt_keypress_scanner,
                           (XPointer) &auto_repeat_data)) {
             autor = true;
@@ -1608,9 +1623,12 @@ bool QKeyMapperPrivate::translateKeyEvent(QWidget *keyWidget, const XEvent *even
         for (;;) {
             auto_repeat_data.release = false;
             auto_repeat_data.error = false;
+            auto_repeat_data.seen_other_key = false;
             if (! XCheckIfEvent(dpy, &dummy, &qt_keypress_scanner,
                                 (XPointer) &auto_repeat_data))
                 break;
+
+            auto_repeat_data.seen_other_key = false;
             if (! XCheckIfEvent(dpy, &dummy, &qt_keyrelease_scanner,
                                 (XPointer) &auto_repeat_data))
                 break;
