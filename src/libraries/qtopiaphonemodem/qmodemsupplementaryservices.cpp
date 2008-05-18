@@ -23,6 +23,7 @@
 #include <qmodemservice.h>
 #include <qatutils.h>
 #include <qatresult.h>
+#include <qtextcodec.h>
 
 /*!
     \class QModemSupplementaryServices
@@ -139,5 +140,12 @@ void QModemSupplementaryServices::cusd( const QString& msg )
     uint posn = 6;
     uint mflag = QAtUtils::parseNumber( msg, posn );
     QString value = QAtUtils::nextString( msg, posn );
+    uint dcs = QAtUtils::parseNumber( msg, posn );
+
+    /* 00001111 is the default GSM alphabet as of ETSI TS 100 900 V7.2.0 */
+    if (dcs == 15 || dcs == 0)
+        value = QAtUtils::codec("gsm")->toUnicode(value.toLatin1());
+   
+    
     emit unstructuredNotification( (UnstructuredAction)mflag, value );
 }
