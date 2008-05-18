@@ -82,6 +82,7 @@
 #include "qstyle.h"
 #include "qmetaobject.h"
 #include "qtimer.h"
+#include "qlayout.h"
 
 #if !defined(QT_NO_GLIB)
 #  include "qguieventdispatcher_glib_p.h"
@@ -2939,6 +2940,8 @@ int QApplication::x11ProcessEvent(XEvent* event)
 
     case GraphicsExpose:
     case Expose:                                // paint event
+        if (!widget->testAttribute(Qt::WA_WasEverExposed))
+            widget->setAttribute(Qt::WA_WasEverExposed, true);
         widget->translatePaintEvent(event);
         break;
 
@@ -4563,6 +4566,26 @@ bool QETWidget::translateConfigEvent(const XEvent *event)
             ;
     }
 
+    if (!testAttribute(Qt::WA_WasEverConfigured)) {
+        setAttribute(Qt::WA_WasEverConfigured, true);
+
+        if (d->layout)
+            d->layout->activate();
+
+        QSize  newSize(event->xconfigure.width, event->xconfigure.height);
+        QResizeEvent e(newSize, size());
+        QApplication::sendSpontaneousEvent(this, &e);
+
+        if (!wasResize) {
+            if (QWidgetBackingStore::paintOnScreen(this)) {
+                repaint();
+            } else {
+                extern void qt_syncBackingStore(QRegion rgn, QWidget *widget);
+                qt_syncBackingStore(d->clipRect(), this);
+            }
+        }
+    }
+    
     if (wasResize && !testAttribute(Qt::WA_StaticContents)) {
         XEvent xevent;
         PaintEventInfo info;
