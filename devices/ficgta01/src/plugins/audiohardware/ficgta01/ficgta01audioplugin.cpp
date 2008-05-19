@@ -377,7 +377,7 @@ bool MediaSpeakerAudioState::enter(QAudio::AudioCapability)
 {
     qLog(AudioState) << __PRETTY_FUNCTION__ << m_isPhone;
 
-    return setAudioMode(Scenario_GSMSpeakerout);
+    return setAudioMode(Scenario_StereoOut);
 }
 
 bool MediaSpeakerAudioState::leave()
