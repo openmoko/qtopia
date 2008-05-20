@@ -3,4 +3,5 @@ Type=Application
 Name=Internet
 Exec=qcop service send Launcher execute\(QString\) netsetup
 Icon=netsetup/PPPConnect
+X-Application-Screenshot=netsetup/PPPConnect-screenshot
 Categories=Settings;

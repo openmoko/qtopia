@@ -4,4 +4,5 @@ Name=Snake
 Comment=A Snake Game
 Exec=qcop service send Launcher execute\(QString\) snake
 Icon=snake/Snake
+X-Application-Screenshot=snake/Snake-screenshot
 Categories=Game;

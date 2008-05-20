@@ -4,5 +4,6 @@ Name=Contacts
 Comment=An Address Book Program
 Exec=qcop-x11-launch addressbook %f
 Icon=addressbook/AddressBook
+X-Application-Screenshot=addressbook/AddressBook-screenshot
 MimeType=text/x-vcard
 Categories=Office;PIM;Phone;

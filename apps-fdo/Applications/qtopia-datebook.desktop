@@ -4,5 +4,6 @@ Name=Calendar
 Comment=A Calendar and Scheduling Program
 Exec=qcop-x11-launch datebook %f
 Icon=datebook/DateBook
+X-Application-Screenshot=datebook/DateBook-screenshot
 MimeType=text/x-vcalendar
 Categories=Office;PIM;Phone;

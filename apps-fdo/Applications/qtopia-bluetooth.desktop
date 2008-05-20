@@ -4,4 +4,5 @@ Name=Bluetooth FTP
 Comment=Bluetooth Applications Suite
 Exec=qcop service send Launcher execute\(QString\) bluetooth
 Icon=btsettings/BTSettings
+X-Application-Screenshot=btsettings/BTSettings-screenshot
 Categories=Office;PIM;Phone:Network

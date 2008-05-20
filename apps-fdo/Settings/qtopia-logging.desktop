@@ -3,4 +3,5 @@ Type=Application
 Name=Logging
 Exec=qcop service send Launcher execute\(QString\) logging
 Icon=logging/logging
+X-Application-Screenshot=logging/logging-screenshot
 Categories=Settings;

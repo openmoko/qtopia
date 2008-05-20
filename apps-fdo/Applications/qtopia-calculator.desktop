@@ -4,4 +4,5 @@ Name=Calculator
 Comment=A Calculator Program
 Exec=qcop service send Launcher execute\(QString\) calculator
 Icon=calculator/Calculator
+X-Application-Screenshot=calculator/Calculator-screenshot
 Categories=Office;PIM;Phone;

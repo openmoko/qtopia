@@ -4,4 +4,5 @@ Name=Call History
 Comment=Call History Application
 Exec=qcop service send Launcher execute\(QString\) callhistory
 Icon=callhistory/CallHistory
+X-Application-Screenshot=callhistory/CallHistory-screenshot
 Categories=Office;PIM;Phone;

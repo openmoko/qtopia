@@ -4,4 +4,5 @@ Name=Asteradoids
 Comment=Shoot the rocks
 Exec=qcop service send Launcher execute\(QString\) qasteroids
 Icon=qasteroids/Asteroids
+X-Application-Screenshot=qasteroids/Asteroids-screenshot
 Categories=Game;

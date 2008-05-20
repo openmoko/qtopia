@@ -3,4 +3,5 @@ Type=Application
 Name=Camera
 Exec=qcop service send Launcher execute\(QString\) camera
 Icon=camera/Camera
+X-Application-Screenshot=camera/Camera-screenshot
 Categories=Office;PIM;Phone;

@@ -3,4 +3,5 @@ Type=Application
 Name=Appearance
 Exec=qcop service send Launcher execute\(QString\) appearance
 Icon=appearance/Appearance
+X-Application-Screenshot=appearance/Appearance-screenshot
 Categories=Settings;

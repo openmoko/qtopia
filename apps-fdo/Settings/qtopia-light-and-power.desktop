@@ -3,4 +3,5 @@ Type=Application
 Name=Power Management
 Exec=qcop service send Launcher execute\(QString\) light-and-power
 Icon=light-and-power/Light
+X-Application-Screenshot=light-and-power/Light-screenshot
 Categories=Settings;

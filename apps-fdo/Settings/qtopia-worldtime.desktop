@@ -4,4 +4,5 @@ Name=World Time
 Comment=A World Clock and Time Zone Editor
 Exec=qcop service send Launcher execute\(QString\) worldtime
 Icon=worldtime/CityTime
+X-Application-Screenshot=worldtime/CityTime-screenshot
 Categories=Settings;

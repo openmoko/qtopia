@@ -3,4 +3,5 @@ Type=Application
 Name=Call Networks
 Exec=qcop service send Launcher execute\(QString\) phonenetworks
 Icon=phonenetworks/PhoneNetworks
+X-Application-Screenshot=phonenetworks/PhoneNetworks-screenshot
 Categories=Settings;

@@ -4,4 +4,5 @@ Name=Mine Hunt
 Comment=Find the mines
 Exec=qcop service send Launcher execute\(QString\) minesweep
 Icon=minesweep/MineHunt
+X-Application-Screenshot=minesweep/MineHunt-screenshot
 Categories=Game;

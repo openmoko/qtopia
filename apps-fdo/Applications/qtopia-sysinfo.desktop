@@ -4,4 +4,5 @@ Name=System Info
 Comment=System Information
 Exec=qcop service send Launcher execute\(QString\) sysinfo
 Icon=sysinfo/SystemInfo
+X-Application-Screenshot=sysinfo/SystemInfo-screenshot
 Categories=Office;PIM;Phone;

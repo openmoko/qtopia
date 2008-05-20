@@ -4,4 +4,5 @@ Name=Tasks
 Comment=A Todo List Program
 Exec=qcop service send Launcher execute\(QString\) todolist
 Icon=todolist/TodoList
+X-Application-Screenshot=todolist/TodoList-screenshot
 Categories=Office;PIM;Phone;

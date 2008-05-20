@@ -3,4 +3,5 @@ Type=Application
 Name=SIM Applications
 Exec=qcop service send Launcher execute\(QString\) simapp
 Icon=simapp/simapp
+X-Application-Screenshot=simapp/simapp-screenshot
 Categories=Office;PIM;Phone;

@@ -4,4 +4,5 @@ Name=Help
 Comment=A HTML Help Browser Program
 Exec=qcop service send Launcher execute\(QString\) helpbrowser
 Icon=helpbrowser/HelpBrowser
+X-Application-Screenshot=helpbrowser/HelpBrowser-screenshot
 Categories=Office;PIM;Phone;

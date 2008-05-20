@@ -4,4 +4,5 @@ Name=Datetime
 Exec=systemtime
 Exec=qcop service send Launcher execute\(QString\) systemtime
 Icon=systemtime/DateTime
+X-Application-Screenshot=systemtime/DateTime-screenshot
 Categories=Settings;

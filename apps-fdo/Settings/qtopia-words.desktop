@@ -3,4 +3,5 @@ Type=Application
 Name=Words
 Exec=qcop service send Launcher execute\(QString\) words
 Icon=words/Words
+X-Application-Screenshot=words/Words-screenshot
 Categories=Settings;

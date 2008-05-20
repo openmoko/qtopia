@@ -4,5 +4,6 @@ Name=Archives
 Comment=Archive viewer
 Exec=qcop-x11-launch archives %f
 Icon=archives/Archives
+X-Application-Screenshot=archives/Archives-screenshot
 MimeType=application/vnd.oma.drm.dcf
 Categories=Office;PIM;Phone;

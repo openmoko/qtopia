@@ -4,4 +4,5 @@ Name=Clock
 Comment=A Clock Program
 Exec=qcop service send Launcher execute\(QString\) clock
 Icon=clock/Clock
+X-Application-Screenshot=clock/Clock-screenshot
 Categories=Office;PIM;Phone;

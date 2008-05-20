@@ -4,4 +4,5 @@ Name=Dialer
 Comment=Make phone calls
 Exec=qcop service send Launcher execute\(QString\) dialer
 Icon=clock/Clock
+X-Application-Screenshot=clock/Clock-screenshot
 Categories=Office;PIM;Phone;
