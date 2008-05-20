@@ -55,6 +55,7 @@ static QWidget *callScreen()
     // This will emit a signal
     if (HomeScreenControl::instance()->homeScreen())
         HomeScreenControl::instance()->homeScreen()->doShowCallScreen();
+    return 0;
 }
 QTOPIA_SIMPLE_BUILTIN(callscreen, callScreen);
 #endif
