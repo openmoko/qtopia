@@ -3898,6 +3898,14 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
             d->focusOutTimer.start(0, this);
         }
     } else if (e->type() == QEvent::Show) {
+#if defined(Q_WS_X11)
+        // Work with code tht doesn't use the ::show stuff from Qtopia...
+        // this is only a fallback hack
+        QWidget* wid = qobject_cast<QWidget*>(o);
+        if (wid->isWindow())
+            markQtopiaWindow(wid);
+#endif
+
 #if defined(GREENPHONE_EFFECTS) && defined(QT_QWS_GREENPHONE)
         QMenu *menu = qobject_cast<QMenu*>(o);
         if(menu && !d->greenphoneEffects()->inProgress()) {
