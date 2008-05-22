@@ -1678,6 +1678,18 @@ void Qtopia::qtopiaReloadWords(const QString& dictname)
     }
 }
 
+QByteArray Qtopia::currentTimeZone()
+{
+    // Handling and updating TZ in all processes is not feasiable
+    // ignore TZ here. Otherwise we would have issues like a timezone change
+    // and the question what to update where? TZ or the file?
+    QFile file("/etc/timezone");
+    if (file.open(QFile::ReadOnly))
+        return file.readAll().trimmed();
+
+    return QByteArray();
+}
+
 /*!
   \enum Qtopia::ItemDataRole
 

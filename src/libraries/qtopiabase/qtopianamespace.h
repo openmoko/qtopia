@@ -148,6 +148,8 @@ namespace Qtopia
     QTOPIABASE_EXPORT void removeWords(const QString& dictname, const QStringList& word);
     QTOPIABASE_EXPORT void qtopiaReloadWords( const QString& dictname );
 
+    QTOPIABASE_EXPORT QByteArray currentTimeZone();
+
     /*
 
     Qtopia enums

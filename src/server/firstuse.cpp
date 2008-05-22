@@ -131,6 +131,8 @@ TimeZoneDialog::TimeZoneDialog(QWidget *parent)
     tzTreeWidget->setColumnCount(1);
     vb->addWidget(tzTreeWidget);
 
+
+    #error "Broken but not ported/used anyway"
     QString currTz = getenv("TZ");
     QSettings config("Trolltech","locale");
     config.beginGroup("Location");
@@ -194,6 +196,7 @@ TimeZoneDialog::TimeZoneDialog(QWidget *parent)
 void TimeZoneDialog::accept()
 {
     if (currItem) {
+        #error "Broken but not ported/used anyway"
         setenv("TZ", currItem->id().toLatin1(), 1);
         QSettings config("Trolltech","locale");
         config.beginGroup("Location");

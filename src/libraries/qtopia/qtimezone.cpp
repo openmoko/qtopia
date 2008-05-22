@@ -970,7 +970,7 @@ QString lastLocRead;
 QTimeZone QTimeZone::current()
 {
     QString cZone;
-    cZone = getenv("TZ");
+    cZone = Qtopia::currentTimeZone();
 #ifdef Q_WS_MAC
     QTimeZone env(cZone.toLocal8Bit());
     if ( env.isValid() )
@@ -993,9 +993,7 @@ QTimeZone QTimeZone::current()
 #else
     QString currentLoc;
     if (lastLocRead.isEmpty() || lastZoneRead != cZone) {
-        QSettings lconfig("Trolltech","locale");
-        lconfig.beginGroup( "Location" );
-        currentLoc = lconfig.value( "Timezone" ).toString();
+        currentLoc = cZone;
         lastZoneRead = cZone;
         lastLocRead = currentLoc;
     } else {
@@ -1004,33 +1002,6 @@ QTimeZone QTimeZone::current()
 
     if ( !currentLoc.isEmpty() )
         return QTimeZone( currentLoc.toAscii().constData() );
-
-    qWarning("QTimeZone::current Location information is not set in the QSettings file locale!");
-    // this is mainly for windows side code, in the initial case
-    tzset();
-    QString standardAbbrev, daylightAbbrev;
-
-    standardAbbrev = tzname[0];
-    daylightAbbrev = tzname[1];
-
-    QDateTime today = QDateTime::currentDateTime();
-    QStringList allIds = TzCache::instance().ids();
-    foreach (QString id, allIds) {
-        if (id.isEmpty())
-            continue;
-        TimeZoneData *data = TzCache::instance().data( id );
-        if ( data->matchAbbrev( today, standardAbbrev, daylightAbbrev ) ) {
-            currentLoc = id;
-            break;
-        }
-    }
-
-    if ( !currentLoc.isEmpty() ) {
-        QSettings lconfig("Trolltech","locale");
-        lconfig.beginGroup( "Location" );
-        lconfig.setValue( "Timezone", currentLoc );
-        return QTimeZone (currentLoc.toAscii().constData());
-    }
 #endif
 
     return QTimeZone();

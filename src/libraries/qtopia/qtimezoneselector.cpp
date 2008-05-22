@@ -165,7 +165,7 @@ void QTimeZoneComboBox::updateZones()
     clear();
     identifiers.clear();
     int curix=0;
-    QString tz = getenv("TZ");
+    QString tz = QString::fromLatin1(Qtopia::currentTimeZone());
     bool tzFound = false; // found the current timezone.
     bool hasCur = !cur.isEmpty();
     int listIndex = 0;
@@ -426,7 +426,7 @@ void QTimeZoneSelectorPrivate::showWorldmapDialog( void )
     QWorldmapDialog* map = new QWorldmapDialog( q );
 
     if ( cmbTz->prevZone().isEmpty() || ( cmbTz->prevZone() == "None" ) )
-        map->setZone( QTimeZone(getenv( "TZ" )) );
+        map->setZone( QTimeZone(Qtopia::currentTimeZone()));
     else
         map->setZone( QTimeZone( cmbTz->prevZone().toLatin1() ) );
 

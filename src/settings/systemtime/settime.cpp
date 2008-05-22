@@ -293,7 +293,6 @@ void SetDateTime::storeSettings()
 
         QSettings lconfig("Trolltech","locale");
         lconfig.beginGroup( "Location" );
-        lconfig.setValue( "Timezone", tz->currentZone() );
         lconfig.setValue( "TimezoneAuto", atz->currentIndex() > 0 );
         lconfig.setValue( "TimeAuto", atz->currentIndex() > 0 ); // No GUI for this yet, copy as TimezoneAuto
         lconfig.setValue( "TimezoneAutoPrompt", atz->currentIndex() == 1 );
@@ -303,15 +302,22 @@ void SetDateTime::storeSettings()
     if ( timeChanged || dateChanged || tzChanged ) {
         // before we progress further, set our TZ!
         setenv( "TZ", tz->currentZone().toLocal8Bit().constData(), 1 );
-
+        tzset();
         QDateTime dt( date->date(), time->time() );
+        
+
         if ( dt.isValid() ) {
             QtopiaServiceRequest req("TimeUpdate", "changeSystemTime(uint,QString)");
             req << (uint)dt.toTime_t() << tz->currentZone();
+            unsetenv("TZ");
+            tzset();
             req.send();
         } else {
             qWarning( "Invalid date/time" );
+            unsetenv("TZ");
+            tzset();
         }
+
 
     }
 
@@ -363,7 +369,7 @@ void SetDateTime::reject()
 void SetDateTime::sysTimeZoneChanged()
 {
     if ( !tzChanged || atz->currentIndex() != 0 ) {
-        tz->setCurrentZone(::getenv("TZ"));
+        tz->setCurrentZone(Qtopia::currentTimeZone());
     }
 }
 

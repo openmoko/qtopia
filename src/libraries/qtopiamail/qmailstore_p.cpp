@@ -1105,6 +1105,7 @@ void QMailStorePrivate::notifyMessagesChange(const ChangeType& changeType,
         for(int i = segment.first; i < segment.second; ++i)
             idSegment.append(ids[i]);
 
+        qWarning() << "Sending" << funcSig << getpid();
         QtopiaIpcEnvelope e("QPE/Qtopiamail",funcSig); 
         e << getpid();
         e << idSegment; 
@@ -1158,6 +1159,7 @@ void QMailStorePrivate::ipcMessage(const QString& message, const QByteArray& dat
     QMailIdList ids;
     ds >> ids;
 
+    qWarning() << "IPC Messages" << message;
     //for update and remove, clear header cache
     if(message == messageAddedSig)
         emit messagesAdded(ids);

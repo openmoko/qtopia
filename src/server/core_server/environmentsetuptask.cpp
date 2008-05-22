@@ -55,12 +55,6 @@ void EnvironmentSetupTask::initEnvironment()
     char **argv = QtopiaServerApplication::argv();
 
     QSettings config("Trolltech","locale");
-    config.beginGroup( "Location" );
-    QString tz = config.value( "Timezone", getenv("TZ") ).toString().trimmed();
-
-    setenv( "TZ", tz.toLatin1(), 1 );
-
-    config.endGroup();
 
     config.beginGroup( "Language" );
     QString lang = config.value( "Language", getenv("LANG") ).toString().trimmed();

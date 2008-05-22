@@ -45,7 +45,7 @@ void TimeMonitorTask::pokeTimeMonitors()
     // inform all TimeMonitors
     QStringList tms = QtopiaService::channels("TimeMonitor");
     foreach (QString ch, tms) {
-        QString t = getenv("TZ");
+        QString t = Qtopia::currentTimeZone();
         QtopiaIpcEnvelope e(ch, "TimeMonitor::timeChange(QString)");
         e << t;
     }

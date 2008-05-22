@@ -3163,14 +3163,9 @@ void QtopiaApplication::systemMessage( const QString &msg, const QByteArray &dat
             }
         }
     } else if ( msg == QLatin1String("timeChange(QString)") ) {
-        QString t;
-        stream >> t;
-        if ( t.isNull() )
-            unsetenv( "TZ" );
-        else {
-            setenv( "TZ", t.toLatin1(), 1 );
-            tzset(); // ensure TZ value is used by subsequent localtime() calls
-        }
+        // ensure TZ value is used by subsequent localtime() calls
+        // Assume that /etc/localtime changed
+        tzset();
         // emit the signal so everyone else knows...
         emit timeChanged();
     } else if ( msg == QLatin1String("categoriesChanged()") ) {
@@ -3396,15 +3391,9 @@ void QtopiaApplication::pidMessage( const QString &msg, const QByteArray & data)
         QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("appRaised(QString)"));
         e << d->appName;
     } else if ( msg == QLatin1String("TimeMonitor::timeChange(QString)") ) {
-        QDataStream stream( data );
-        QString t;
-        stream >> t;
-        if ( t.isNull() )
-            unsetenv( "TZ" );
-        else {
-            setenv( "TZ", t.toLatin1(), 1 );
-            tzset(); // ensure TZ value is used by subsequent localtime() calls
-        }
+        // ensure TZ value is used by subsequent localtime() calls
+        // Assume that /etc/localtime changed, copy and pasted from timeChange(QString) by TT
+        tzset();
         // emit the signal so everyone else knows...
         emit timeChanged();
     } else {

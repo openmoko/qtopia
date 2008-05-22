@@ -121,10 +121,7 @@ void TimeUpdateService::changeSystemTime(uint newutc, QString newtz)
 {
     // This should be the only place in Qtopia that does this...
 
-    QSettings lconfig("Trolltech","locale");
-    if (newtz != lconfig.value("Location/Timezone")) {
-        lconfig.setValue("Location/Timezone",newtz);
-        setenv( "TZ", newtz.toLatin1().constData(), 1 );
+    if (newtz != Qtopia::currentTimeZone()) {
 #if defined(QTOPIA_ZONEINFO_PATH)
         QString filename = QTOPIA_ZONEINFO_PATH + newtz;
 #else
@@ -132,6 +129,10 @@ void TimeUpdateService::changeSystemTime(uint newutc, QString newtz)
 #endif
         QString cmd = "cp -f " + filename + " /etc/localtime";
         system(cmd.toLocal8Bit().constData());
+
+        QFile file("/etc/timezone");
+        if (file.open(QFile::WriteOnly))
+            file.write(newtz.toLatin1());
     }
     if (newutc) {
         if ( externalTimeTimeStamp ) {
@@ -144,6 +145,7 @@ void TimeUpdateService::changeSystemTime(uint newutc, QString newtz)
         ::settimeofday( &myTv, 0 );
         Qtopia::writeHWClock();
     }
+
     // set the time (from system) and zone (given to their TZ) for everyone else...
     QtopiaIpcEnvelope setTimeZone( "QPE/System", "timeChange(QString)" );
     setTimeZone << newtz;

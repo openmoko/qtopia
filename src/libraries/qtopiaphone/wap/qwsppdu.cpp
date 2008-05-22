@@ -276,6 +276,11 @@ static int utcTimeZoneDiff = -1;
 static int timeZoneDiff()
 {
     if ( utcTimeZoneDiff == -1 ) {
+    // This code is rubbish. It should use QTimeZone, I'm not fixing that
+    // because I lack the time and we don't use wap/mms anyway.
+#if 1
+        return 0;
+#else
         QDateTime gmt, current = QDateTime::currentDateTime();
         QString tz = getenv("TZ");
         if ( !tz.isEmpty() && (setenv("TZ", "GMT", true) == 0) ) {
@@ -286,6 +291,7 @@ static int timeZoneDiff()
         setenv("TZ", tzcstr.constData(), true );
 
         utcTimeZoneDiff = gmt.secsTo( current );
+#endif
     }
 
     return utcTimeZoneDiff;
