@@ -348,7 +348,12 @@ bool QWorldmapPrivate::winToZone(
     int &zoneX,
     int &zoneY ) const
 {
-    if(!bZoom)
+    if (!hImg || !wImg)
+    {
+        zoneY = 1;
+        zoneX = 1;
+    }
+    else if(!bZoom)
     {
       zoneY = ( 648000 * ( OriginY - winY ) ) / hImg;
       zoneX = ( 1296000 * ( winX - OriginX ) ) / wImg;
