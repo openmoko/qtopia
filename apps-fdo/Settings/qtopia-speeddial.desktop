@@ -4,4 +4,4 @@ Name=Speed Dial
 Exec=qcop service send Launcher execute\(QString\) speeddial
 Icon=speeddial/speeddial
 X-Application-Screenshot=speeddial/speeddial-screenshot
-Categories=Settings;
+Categories=System;Settings;

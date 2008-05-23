@@ -4,4 +4,4 @@ Name=Call Options
 Exec=qcop service send Launcher execute\(QString\) phonesettings
 Icon=phonesettings/PhoneSettings
 X-Application-Screenshot=phonesettings/PhoneSettings-screenshot
-Categories=Settings;
+Categories=System;Settings;

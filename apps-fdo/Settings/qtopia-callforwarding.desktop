@@ -4,4 +4,4 @@ Name=Call Forwarding
 Exec=qcop service send Launcher execute\(QString\) callforwarding
 Icon=callforwarding/CallForwarding
 X-Application-Screenshot=callforwarding/CallForwarding-screenshot
-Categories=Settings;
+Categories=System;Settings;

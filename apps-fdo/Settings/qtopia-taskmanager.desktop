@@ -4,4 +4,4 @@ Name=Task Manager
 Exec=qcop service send Launcher execute\(QString\) taskmanager
 Icon=qpe/AppsIcon
 X-Application-Screenshot=qpe/AppsIcon-screenshot
-Categories=Settings;
+Categories=System;Settings;

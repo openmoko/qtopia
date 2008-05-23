@@ -4,4 +4,4 @@ Name=Beaming
 Exec=qcop service send Launcher execute\(QString\) beaming
 Icon=beaming/Infrared
 X-Application-Screenshot=beaming/Infrared-screenshot
-Categories=Settings;
+Categories=System;Settings;

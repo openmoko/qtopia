@@ -5,4 +5,4 @@ Comment=A VoIP Settings Application
 Exec=qcop service send Launcher execute\(QString\) sipsettingss
 Icon=sipsettings/SIP
 X-Application-Screenshot=sipsettings/SIP-screenshot
-Categories=Settings;
+Categories=System;Settings;

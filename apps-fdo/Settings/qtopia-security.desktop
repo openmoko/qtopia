@@ -4,4 +4,4 @@ Name=Security
 Exec=qcop service send Launcher execute\(QString\) security
 Icon=security/Security
 X-Application-Screenshot=security/Security-screenshot
-Categories=Settings;
+Categories=System;Settings;

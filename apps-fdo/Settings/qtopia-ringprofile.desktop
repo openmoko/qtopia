@@ -5,4 +5,4 @@ Comment=Phone profile application
 Exec=qcop service send Launcher execute\(QString\) profileedit
 Icon=profileedit/Note
 X-Application-Screenshot=profileedit/Note-screenshot
-Categories=Settings;
+Categories=System;Settings;

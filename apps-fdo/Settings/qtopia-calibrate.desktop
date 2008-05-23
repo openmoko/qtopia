@@ -4,5 +4,5 @@ Name=Recalibrate
 Exec=qcop service send Launcher execute\(QString\) calibrate
 Icon=calibrate/Calibrate
 X-Application-Screenshot=calibrate/Calibrate-screenshot
-Categories=Settings;
+Categories=System;Settings;
 X-Qtopia-Requires=Calibrate

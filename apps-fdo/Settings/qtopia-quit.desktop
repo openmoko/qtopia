@@ -4,4 +4,4 @@ Name=Shutdown
 Exec=qcop service send Launcher execute\(QString\) shutdown
 Icon=shutdown/Shutdown
 X-Application-Screenshot=shutdown/Shutdown-screenshot
-Categories=Settings;
+Categories=System;Settings;

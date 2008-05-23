@@ -4,5 +4,5 @@ Name=Handwriting
 Exec=qcop service send Launcher execute\(QString\) hwsettings
 Icon=hwsettings/recognition_settings
 X-Application-Screenshot=hwsettings/recognition_settings-screenshot
-Categories=Settings;
+Categories=System;Settings;
 X-Qtopia-Requires=Touchscreen

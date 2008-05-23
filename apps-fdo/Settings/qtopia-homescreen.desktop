@@ -4,4 +4,4 @@ Name=Homescreen
 Exec=qcop service send Launcher execute\(QString\) homescreen
 Icon=homescreen/homescreen
 X-Application-Screenshot=homescreen/homescreen-screenshot
-Categories=Settings;
+Categories=System;Settings;
