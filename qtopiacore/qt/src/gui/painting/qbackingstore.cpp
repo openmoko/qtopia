@@ -1222,7 +1222,6 @@ void QWidgetPrivate::drawWidget(QPaintDevice *pdev, const QRegion &rgn, const QP
 #endif
 
             //actually send the paint event
-            qWarning("PaintEvent: %s:%d", __FILE__, __LINE__);
             QPaintEvent e(toBePainted);
             qt_sendSpontaneousEvent(q, &e);
 
