@@ -5,4 +5,4 @@ Comment=Fifteen Pieces Strategy Game
 Exec=qcop service send Launcher execute\(QString\) fifteen
 Icon=fifteen/Fifteen
 X-Application-Screenshot=fifteen/Fifteen-screenshot
-Categories=Game;
+Categories=Games;
