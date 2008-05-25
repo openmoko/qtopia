@@ -1,0 +1,63 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<!-- Created using Karbon14, part of koffice: http://www.koffice.org/karbon -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="28.057px" height="27.725px">
+  <defs>
+    <radialGradient id="defitem4" gradientUnits="userSpaceOnUse" cx="18.0664" cy="2.328" fx="12.3123" fy="-3.0383" r="4.7257" >
+      <stop stop-color="#f4e9cd" offset="0.0056" stop-opacity="1" />
+      <stop stop-color="#f8e6bf" offset="0.0796" stop-opacity="1" />
+      <stop stop-color="#f9e1ae" offset="0.1842" stop-opacity="1" />
+      <stop stop-color="#f9dfa7" offset="0.2528" stop-opacity="1" />
+      <stop stop-color="#e2c382" offset="0.563" stop-opacity="1" />
+      <stop stop-color="#d6b36e" offset="0.823" stop-opacity="1" />
+      <stop stop-color="#d1ac67" offset="1" stop-opacity="1" />
+    </radialGradient>
+    <linearGradient id="defitem5" gradientUnits="userSpaceOnUse" x1="7.51373" y1="17.0472" x2="11.2212" y2="15.1347" >
+      <stop stop-color="#424242" offset="0.0056" stop-opacity="1" />
+      <stop stop-color="#ffffff" offset="0.3202" stop-opacity="1" />
+      <stop stop-color="#cccccc" offset="0.736" stop-opacity="1" />
+      <stop stop-color="#424242" offset="1" stop-opacity="1" />
+    </linearGradient>
+    <linearGradient id="defitem6" gradientUnits="userSpaceOnUse" x1="6.81273" y1="14.5462" x2="20.402" y2="13.4678" >
+      <stop stop-color="#ebebeb" offset="0.1067" stop-opacity="1" />
+      <stop stop-color="#ffffff" offset="0.3202" stop-opacity="1" />
+      <stop stop-color="#cccccc" offset="0.736" stop-opacity="1" />
+      <stop stop-color="#424242" offset="1" stop-opacity="1" />
+    </linearGradient>
+    <linearGradient id="defitem7" gradientUnits="userSpaceOnUse" x1="8.14905" y1="11.8326" x2="19.0166" y2="10.9702" >
+      <stop stop-color="#f2e854" offset="0" stop-opacity="1" />
+      <stop stop-color="#f2b611" offset="0.9831" stop-opacity="1" />
+    </linearGradient>
+    <linearGradient id="defitem8" gradientUnits="userSpaceOnUse" x1="1.49624" y1="3.7737" x2="3.45086" y2="3.0519" >
+      <stop stop-color="#4f4f4f" offset="0.0056" stop-opacity="1" />
+      <stop stop-color="#ffffff" offset="0.3202" stop-opacity="1" />
+      <stop stop-color="#cccccc" offset="0.736" stop-opacity="1" />
+      <stop stop-color="#424242" offset="1" stop-opacity="1" />
+    </linearGradient>
+  </defs>
+  <g id="Layer">
+    <g>
+      <path fill="#9199a0" stroke="#000000" stroke-width="0.250011" d="M13.1963 13.1826C12.7089 12.8501 13.2343 11.2315 14.3697 9.5673C15.5051 7.903 16.8206 6.8234 17.3079 7.1559C17.7952 7.4883 17.2698 9.107 16.1344 10.7712C14.999 12.4354 13.6836 13.515 13.1963 13.1826Z"  />
+      <path fill="#646d70" stroke="#000000" stroke-width="0.249994" d="M26.435 12.1667C26.028 12.5931 24.5169 11.8113 23.0601 10.4205C21.6032 9.0297 20.7522 7.5566 21.1593 7.1302C21.5664 6.7038 23.0773 7.4856 24.5342 8.8764C25.9911 10.2672 26.8421 11.7403 26.435 12.1667Z"  />
+      <path fill="#ffffff" stroke="#000000" stroke-width="0.25" d="M23.9273 15.2239C22.6764 16.6736 16.178 16.0441 14.8819 15.1455C14.3814 14.7986 15.175 8.5807 17.2075 7.0965C18.7176 5.9918 20.2257 6.1427 21.5059 7.018C23.4201 8.3261 24.3387 14.7474 23.9273 15.2239Z"  />
+      <path fill="#505759" stroke="#000000" stroke-width="0.25" d="M19.6681 10.3978L18.4571 10.4271L18.9057 7.9944L19.4827 7.9944L19.6681 10.3978Z"  />
+      <path fill="#899097" stroke="#000000" stroke-width="0.25" d="M18.9516 10.7681C18.9516 10.7681 17.5266 7.7831 17.5977 6.9123C15.1484 8.4238 13.637 14.0701 14.9138 15.1449C15.6622 15.775 19.3816 16.0441 19.3816 16.0441L18.9516 10.7681Z"  />
+      <path fill="#646d70" stroke="#000000" stroke-width="0.25" d="M18.8738 10.6384C18.8738 10.6384 21.1855 7.8043 21.0685 6.794C23.569 8.2204 24.6371 13.7976 23.9931 15.0671C23.3384 16.3559 18.7755 16.0634 18.7755 16.0634L18.8738 10.6384Z"  />
+      <path fill="url(#defitem4)" stroke="#000000" stroke-width="0.25" d="M22.6518 4.1254C22.6518 5.8951 21.2172 7.3298 19.4474 7.3298C17.6777 7.3298 16.2431 5.8951 16.2431 4.1254C16.2431 2.3557 17.6777 0.9211 19.4474 0.9211C21.2172 0.9211 22.6518 2.3557 22.6518 4.1254Z"  />
+      <path fill="#646d70" stroke="#000000" stroke-width="0.25" d="M21.1922 6.9981C21.2114 7.0373 21.7977 8.7368 21.7977 8.7368L20.9968 8.9515L20.8598 9.9472L19.0433 10.5534C19.0433 10.5534 20.7821 8.2875 21.1922 6.9981Z"  />
+      <path fill="#899097" stroke="#000000" stroke-width="0.25" d="M17.5385 6.8804C17.5113 6.915 16.6173 8.3999 16.6173 8.3999L17.3617 8.7668L17.3012 9.7711L18.7695 10.5248C18.7701 10.5241 17.6901 8.2251 17.5385 6.8804Z"  />
+      <path fill="#ffffff" stroke="#878e95" stroke-width="0.25" d="M19.492 11.8528C19.492 11.9662 19.3959 12.0582 19.2773 12.0582C19.1587 12.0582 19.0626 11.9662 19.0626 11.8528C19.0626 11.7394 19.1587 11.6474 19.2773 11.6474C19.3959 11.6474 19.492 11.7394 19.492 11.8528Z"  />
+      <path fill="#ffffff" stroke="#878e95" stroke-width="0.25" d="M19.5119 13.8454C19.5119 13.9589 19.4069 14.0508 19.2773 14.0508C19.1477 14.0508 19.0426 13.9589 19.0426 13.8454C19.0426 13.732 19.1477 13.6401 19.2773 13.6401C19.4069 13.6401 19.5119 13.732 19.5119 13.8454Z"  />
+      <path fill="#505759" stroke="#000000" stroke-width="0.25" d="M19.4534 7.9452L18.9257 7.9452L18.7894 7.3304L19.5711 7.3304L19.4534 7.9452Z"  />
+    </g>
+    <g id="Layer">
+      <g>
+        <path fill="url(#defitem5)" stroke="#000000" stroke-width="0.25" d="M2.783 7.578C2.783 7.578 11.051 24.762 12.627 26.84C14.206 28.918 20.658 26.368 21.143 23.587C21.631 20.803 9.36 1.899 9.36 1.899C9.36 1.899 7.49 1.887 6.62 2.414C5.99 2.792 3.988 3.905 3.728 4.301C3.469 4.695 2.783 7.578 2.783 7.578Z"  />
+        <path fill="url(#defitem6)" stroke="#000000" stroke-width="0.25" d="M6.267 2.728C6.267 2.728 7.2 1.906 8.836 1.565C10.471 1.229 11.454 1.028 12.406 2.032C13.363 3.038 17.674 12.343 19.521 16.768C19.521 16.768 22.023 22.603 20.797 24.447C19.569 26.289 17.256 27.513 15.921 25.915C14.591 24.314 7.767 7.969 6.952 6.08C6.139 4.191 5.52 3.283 6.267 2.728Z"  />
+        <path fill="url(#defitem7)" stroke="#000000" stroke-width="0.25" d="M7.877 5.758C7.518 4.829 7.205 4.069 8.795 3.651C10.384 3.234 12.527 2.542 12.983 3.113C13.951 4.322 18.751 14.102 19.448 16.9C19.668 17.77 19.424 18.148 18.476 18.263C17.888 18.339 17.509 18.135 16.751 19.07C15.994 20.001 14.803 20.179 14.196 19.354C13.141 17.915 8.24 6.686 7.877 5.758Z"  />
+        <path fill="url(#defitem8)" stroke="#000000" stroke-width="0.25" d="M0.191 1.418C0.191 1.418 -0.114 0.86 0.584 0.473C0.764 0.372 0.754 0.378 1.211 0.187C1.518 0.059 2.131 0.077 2.486 0.769C2.832 1.439 4.681 5.091 4.681 5.091C4.681 5.091 4.968 5.77 4.283 6.267C3.602 6.761 3.146 6.911 2.852 6.743C2.558 6.58 0.191 1.418 0.191 1.418Z"  />
+        <path fill="#97c623" stroke="#000000" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round" d="M9.04 6.249C9.04 6.249 12.377 5.318 13.304 4.954L17.906 14.736L13.98 16.63L9.04 6.249Z"  />
+      </g>
+    </g>
+  </g>
+</svg>
