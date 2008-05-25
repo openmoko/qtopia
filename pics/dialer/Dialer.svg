@@ -1,0 +1,38 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<!-- Created using Karbon14, part of koffice: http://www.koffice.org/karbon -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="28.057px" height="27.725px">
+  <defs>
+    <linearGradient id="defitem4" gradientUnits="userSpaceOnUse" x1="7.51373" y1="17.0472" x2="11.2212" y2="15.1347" >
+      <stop stop-color="#424242" offset="0.0056" stop-opacity="1" />
+      <stop stop-color="#ffffff" offset="0.3202" stop-opacity="1" />
+      <stop stop-color="#cccccc" offset="0.736" stop-opacity="1" />
+      <stop stop-color="#424242" offset="1" stop-opacity="1" />
+    </linearGradient>
+    <linearGradient id="defitem5" gradientUnits="userSpaceOnUse" x1="6.81273" y1="14.5462" x2="20.402" y2="13.4678" >
+      <stop stop-color="#ebebeb" offset="0.1067" stop-opacity="1" />
+      <stop stop-color="#ffffff" offset="0.3202" stop-opacity="1" />
+      <stop stop-color="#cccccc" offset="0.736" stop-opacity="1" />
+      <stop stop-color="#424242" offset="1" stop-opacity="1" />
+    </linearGradient>
+    <linearGradient id="defitem6" gradientUnits="userSpaceOnUse" x1="8.14905" y1="11.8326" x2="19.0166" y2="10.9702" >
+      <stop stop-color="#f2e854" offset="0" stop-opacity="1" />
+      <stop stop-color="#f2b611" offset="0.9831" stop-opacity="1" />
+    </linearGradient>
+    <linearGradient id="defitem7" gradientUnits="userSpaceOnUse" x1="1.49624" y1="3.7737" x2="3.45086" y2="3.0519" >
+      <stop stop-color="#4f4f4f" offset="0.0056" stop-opacity="1" />
+      <stop stop-color="#ffffff" offset="0.3202" stop-opacity="1" />
+      <stop stop-color="#cccccc" offset="0.736" stop-opacity="1" />
+      <stop stop-color="#424242" offset="1" stop-opacity="1" />
+    </linearGradient>
+  </defs>
+  <g id="Layer">
+    <g>
+      <path fill="url(#defitem4)" stroke="#000000" stroke-width="0.25" d="M2.783 7.578C2.783 7.578 11.051 24.762 12.627 26.84C14.206 28.918 20.658 26.368 21.143 23.587C21.631 20.803 9.36 1.899 9.36 1.899C9.36 1.899 7.49 1.887 6.62 2.414C5.99 2.792 3.988 3.905 3.728 4.301C3.469 4.695 2.783 7.578 2.783 7.578Z"  />
+      <path fill="url(#defitem5)" stroke="#000000" stroke-width="0.25" d="M6.267 2.728C6.267 2.728 7.2 1.906 8.836 1.565C10.471 1.229 11.454 1.028 12.406 2.032C13.363 3.038 17.674 12.343 19.521 16.768C19.521 16.768 22.023 22.603 20.797 24.447C19.569 26.289 17.256 27.513 15.921 25.915C14.591 24.314 7.767 7.969 6.952 6.08C6.139 4.191 5.52 3.283 6.267 2.728Z"  />
+      <path fill="url(#defitem6)" stroke="#000000" stroke-width="0.25" d="M7.877 5.758C7.518 4.829 7.205 4.069 8.795 3.651C10.384 3.234 12.527 2.542 12.983 3.113C13.951 4.322 18.751 14.102 19.448 16.9C19.668 17.77 19.424 18.148 18.476 18.263C17.888 18.339 17.509 18.135 16.751 19.07C15.994 20.001 14.803 20.179 14.196 19.354C13.141 17.915 8.24 6.686 7.877 5.758Z"  />
+      <path fill="url(#defitem7)" stroke="#000000" stroke-width="0.25" d="M0.191 1.418C0.191 1.418 -0.114 0.86 0.584 0.473C0.764 0.372 0.754 0.378 1.211 0.187C1.518 0.059 2.131 0.077 2.486 0.769C2.832 1.439 4.681 5.091 4.681 5.091C4.681 5.091 4.968 5.77 4.283 6.267C3.602 6.761 3.146 6.911 2.852 6.743C2.558 6.58 0.191 1.418 0.191 1.418Z"  />
+      <path fill="#97c623" stroke="#000000" stroke-width="0.25" stroke-linecap="round" stroke-linejoin="round" d="M9.04 6.249C9.04 6.249 12.377 5.318 13.304 4.954L17.906 14.736L13.98 16.63L9.04 6.249Z"  />
+    </g>
+  </g>
+</svg>
