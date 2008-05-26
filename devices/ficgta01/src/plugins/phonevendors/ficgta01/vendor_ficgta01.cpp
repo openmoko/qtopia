@@ -722,7 +722,6 @@ void Ficgta01VibrateAccessory::setVibrateOnRing( const bool value )
 void Ficgta01VibrateAccessory::setVibrateNow( const bool value )
 {
     qLog(AtChat) << __FUNCTION__ << value;
-    int result;
     QString cmd;
 
     if ( value ) { //turn on
