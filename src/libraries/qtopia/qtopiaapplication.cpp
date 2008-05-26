@@ -773,6 +773,7 @@ public:
 
 public slots:
     void unregisterRunningTask(QObject *);
+    void lastWindowClosed();
 
 signals:
     void quit();
@@ -807,6 +808,8 @@ QtopiaApplicationLifeCycle::QtopiaApplicationLifeCycle(QtopiaApplication *app)
     Q_ASSERT(m_app);
     m_app->installEventFilter(this);
     m_name = QCoreApplication::applicationName();
+
+    connect(m_app, SIGNAL(lastWindowClosed()), SLOT(lastWindowClosed()));
 
     updateLazyShutdown();
     recalculateInfo();
@@ -856,6 +859,14 @@ void QtopiaApplicationLifeCycle::doQuit()
 
     if(!m_lazyShutdown)
         emit quit();
+}
+
+void QtopiaApplicationLifeCycle::lastWindowClosed()
+{
+    if (!m_runningTasks.isEmpty() || m_lazyShutdown)
+        return;
+
+    emit quit();
 }
 
 bool QtopiaApplicationLifeCycle::eventFilter(QObject *obj, QEvent *e)
