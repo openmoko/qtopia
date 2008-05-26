@@ -672,8 +672,8 @@ void Ficgta01ModemService::suspend()
     chat( "AT+CREG=1" );
     chat( "AT+CGREG=1" );
 
-    chat( "AT%CREG=1" );
-    chat( "AT%CGREG=1" );
+    chat( "AT%CREG=0" );
+    chat( "AT%CGREG=0" );
 
     // Turn off cell broadcast location messages.
     chat( "AT%CSQ=0", this, SLOT(sendSuspendDone()) );
