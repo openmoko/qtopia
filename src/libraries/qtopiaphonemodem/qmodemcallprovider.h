@@ -90,6 +90,11 @@ protected:
     virtual QString deflectCallCommand( const QString& number ) const;
     virtual QStringList gprsSetupCommands() const;
 
+    bool useDetectTimer() const;
+    void setUseDetectTimer(bool);
+    bool useMissedTimer() const;
+    void setUseMissedTimer(bool);
+
 protected slots:
     virtual void resetModem();
 

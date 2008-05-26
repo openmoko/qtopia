@@ -43,6 +43,8 @@ Ficgta01CallProvider::Ficgta01CallProvider( QModemService *service )
         ( "%CPI:", this, SLOT(cpiNotification(QString)) );
     service->primaryAtChat()->registerNotificationType
         ( "%CNAP:", this, SLOT(cnapNotification(QString)) );
+
+    setUseMissedTimer(false);
 }
 
 Ficgta01CallProvider::~Ficgta01CallProvider()

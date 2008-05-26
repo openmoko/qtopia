@@ -64,6 +64,8 @@ class QModemCallProviderPrivate
 {
 public:
     QModemCallProviderPrivate()
+        : useDetectTimer(true)
+        , useMisssedTimer(true)
     {
         incomingModemIdentifier = 0;
         ringBlock = false;
@@ -83,6 +85,8 @@ public:
     uint usedIds;
     int vtsType;
     QModemPPPdManager *pppdManager;
+    bool useDetectTimer;
+    bool useMisssedTimer;
 };
 
 // Time to wait between first seeing an incoming call and actually
@@ -174,7 +178,7 @@ void QModemCallProvider::ringing
     // missed call timer but otherwise ignore this.  This prevents
     // us from creating a new incoming call for every new RING.
     if ( incomingCall() ) {
-        if ( hasRepeatingRings() )
+        if ( hasRepeatingRings() && useMissedTimer() )
             d->missedTimer->start( INCOMING_MISSED_TIMEOUT );
         return;
     }
@@ -193,11 +197,11 @@ void QModemCallProvider::ringing
     }
 
     // Start the detection timer if it isn't already running.
-    if ( !d->detectTimer->isActive() )
+    if ( !d->detectTimer->isActive() && useDetectTimer() )
         d->detectTimer->start( INCOMING_DETECT_TIMEOUT );
 
     // Reset the missed call timer if necessary.
-    if ( hasRepeatingRings() )
+    if ( hasRepeatingRings() && useMissedTimer() )
         d->missedTimer->start( INCOMING_MISSED_TIMEOUT );
 }
 
@@ -971,4 +975,24 @@ int QModemCallProvider::vtsType() const
 void QModemCallProvider::setVtsType( int type )
 {
     d->vtsType = type;
+}
+
+void QModemCallProvider::setUseDetectTimer(bool useTimer)
+{
+    d->useDetectTimer = useTimer;
+}
+
+bool QModemCallProvider::useDetectTimer() const
+{
+    return d->useDetectTimer;
+}
+
+void QModemCallProvider::setUseMissedTimer(bool useTimer)
+{
+    d->useMisssedTimer = useTimer;
+}
+
+bool QModemCallProvider::useMissedTimer() const
+{
+    return d->useMisssedTimer;
 }
