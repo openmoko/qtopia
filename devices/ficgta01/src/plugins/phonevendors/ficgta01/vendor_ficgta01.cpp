@@ -669,8 +669,8 @@ void Ficgta01ModemService::suspend()
     qLog(AtChat)<<" Ficgta01ModemService::suspend()";
     // Turn off cell id information on +CREG and +CGREG as it will
     // cause unnecessary wakeups when moving between cells.
-    chat( "AT+CREG=1" );
-    chat( "AT+CGREG=1" );
+    chat( "AT+CREG=0" );
+    chat( "AT+CGREG=0" );
 
     chat( "AT%CREG=0" );
     chat( "AT%CGREG=0" );
