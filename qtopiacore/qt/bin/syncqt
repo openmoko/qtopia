@@ -297,9 +297,9 @@ sub fixPaths {
     my ($file, $dir) = @_;
     $dir =~ s=^$basedir/=$out_basedir/= if(!($basedir eq $out_basedir));
     $file =~ s=\\=/=g;
-    $file =~ s/\+/\\+/g;
+    #$file =~ s/\+/\\+/g;
     $dir =~ s=\\=/=g;
-    $dir =~ s/\+/\\+/g;
+    #$dir =~ s/\+/\\+/g;
 
     #setup
     my $ret = $file;
