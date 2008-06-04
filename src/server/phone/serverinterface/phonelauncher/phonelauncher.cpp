@@ -109,6 +109,7 @@
 #include "simpindialog.h"
 #include "contactdbusexporter.h"
 #include "phonestatusdbusexporter.h"
+#include "profiledbusexporter.h"
 #include "smsstatusdbusexporter.h"
 
 #include <QX11Info>
@@ -426,6 +427,9 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
                                                  QDBusConnection::ExportScriptableContents);
     QDBusConnection::sessionBus().registerObject("/Sms",
                                                  new SMSStatusDBusExporter(this),
+                                                 QDBusConnection::ExportScriptableContents);
+    QDBusConnection::sessionBus().registerObject("/Profiles",
+                                                 new ProfileDBusExporter(this),
                                                  QDBusConnection::ExportScriptableContents);
     QDBusConnection::sessionBus().registerService("org.openmoko.qtopia.Phonestatus");
 #endif

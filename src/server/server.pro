@@ -193,6 +193,7 @@ enable_vpn {
     SERVER_HEADERS+=\
         phone/contactdbusexporter.h \
         phone/phonestatusdbusexporter.h \
+        phone/profiledbusexporter.h \
         phone/smsstatusdbusexporter.h \
         phone/simpindialog.h
     SERVER_SOURCES+=\
@@ -200,6 +201,7 @@ enable_vpn {
         core_server/qtopiainputevents_x11.cpp \
         phone/contactdbusexporter.cpp \
         phone/phonestatusdbusexporter.cpp \
+        phone/profiledbusexporter.cpp \
         phone/smsstatusdbusexporter.cpp \
         phone/simpindialog.cpp
 
