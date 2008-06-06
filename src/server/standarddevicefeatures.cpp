@@ -85,6 +85,7 @@ StandardDeviceFeaturesImpl::StandardDeviceFeaturesImpl(QObject *parent)
 {
     sdfi = this;
 
+#ifndef QT_ILLUME_LAUNCHER
     if (cameraMonitor) {
         // CameraMonitor keeps the camera QtopiaFeatures upto date
         camera = new CameraMonitor(this);
@@ -95,6 +96,7 @@ StandardDeviceFeaturesImpl::StandardDeviceFeaturesImpl(QObject *parent)
         clamshellVso = new QValueSpaceObject("/Hardware/Devices");
         clamshellVso->setAttribute("ClamshellOpen", clamOpen);
     }
+#endif
 
     if(uiTimeValues)
         time = new TimeControl(this);
@@ -145,10 +147,12 @@ bool StandardDeviceFeaturesImpl::filter(int unicode, int keycode,
     Q_UNUSED(modifiers);
     Q_UNUSED(autoRepeat);
 
+#ifndef QT_ILLUME_LAUNCHER
     if (clamFlipKeyMonitor && keycode == Qt::Key_Flip) {
         clamOpen = !press;
         clamshellVso->setAttribute("ClamshellOpen", clamOpen);
     }
+#endif
 
     return false;
 }

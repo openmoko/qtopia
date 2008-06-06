@@ -285,7 +285,6 @@ PHONE_HEADERS=\
     phone/themecontrol/themecontrol.h \
     ui/launcherviews/documentview/documentview.h \
     processctrl/taskmanagerentry/taskmanagerentry.h \
-    infrastructure/camera/cameramonitor.h \
     core_server/alarmcontrol.h \
     phone/themecontrol/serverthemeview.h \
     phone/homescreencontrol.h \
@@ -324,7 +323,6 @@ PHONE_SOURCES=\
     phone/themecontrol/themecontrol.cpp \
     ui/launcherviews/documentview/documentview.cpp \
     processctrl/taskmanagerentry/taskmanagerentry.cpp \
-    infrastructure/camera/cameramonitor.cpp \
     core_server/alarmcontrol.cpp \
     phone/themecontrol/serverthemeview.cpp \
     phone/qabstracthomescreen.cpp \
