@@ -850,7 +850,9 @@ uint QAbstractHomeScreen::showInformation(const QString &pix, const QString &tex
   */
 void QAbstractHomeScreen::lockScreen()
 {
+#ifndef QT_ILLUME_LAUNCHER
     new TouchScreenLockDialog(0, Qt::WindowStaysOnTopHint);
+#endif
 }
 
 /*!

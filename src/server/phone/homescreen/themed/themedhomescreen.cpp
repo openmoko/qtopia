@@ -258,9 +258,11 @@ void ThemedHomeScreen::themeItemClicked(ThemeItem *item)
             if (worldmap != 0)
                 worldmap->showCity();
         }
+#ifndef QT_ILLUME_LAUNCHER
     } else if (in == "lock") {
         TouchScreenLockDialog *dialog;
         dialog = new TouchScreenLockDialog(0, Qt::WindowStaysOnTopHint);
+#endif
     } else if (in == "mainmenu") {
         emit showPhoneBrowser();
     } else if (in == "speeddial") {

@@ -28,7 +28,6 @@
 #include <QList>
 #include <QProcess>
 #include "qtopiaserverapplication.h"
-#include "oommanager.h"
 
 class QValueSpaceObject;
 
@@ -118,7 +117,6 @@ class ApplicationLauncher : public QObject
     QMap<QString, ApplicationTypeLauncher *> m_runningApps;
     QList<ApplicationTypeLauncher *> m_launchers;
     QValueSpaceObject *m_vso;
-    OomManager	oom_manager;
     QStringList busyApps;
 };
 QTOPIA_TASK_INTERFACE(ApplicationLauncher);

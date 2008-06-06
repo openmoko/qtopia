@@ -53,8 +53,6 @@
 #include <iostream>
 using namespace std;
 
-#include "oommanager.h"
-
 /*!
   \class ApplicationIpcRouter::RouteDestination
   \brief The RouteDestination class represents an IPC route destination.
@@ -413,11 +411,6 @@ struct ExeApplicationLauncherPrivate {
     RunningProcess *runningProcess(QProcess *);
 
     QMap<QString, RunningProcess *> m_runningProcesses;
-    /*
-      The out-of-memory manager keeps track of all the running
-      processes in terms of how killable they are.
-     */
-    OomManager        oom_manager;
 };
 
 /*!
@@ -479,7 +472,6 @@ ExeApplicationLauncher::ExeApplicationLauncher()
  */
 ExeApplicationLauncher::~ExeApplicationLauncher()
 {
-    d->oom_manager.remove(QString("qpe"));
     delete d;
 }
 
@@ -522,12 +514,6 @@ void ExeApplicationLauncher::kill(const QString& app)
     ExeApplicationLauncherPrivate::RunningProcess* rp = d->runningProcess(app);
     if (!rp)
         return;
-    qLog(OOM) << "kill():" << app;
-    /*
-      When a process is killed, the out-of-memory manager
-      must remove it from its data structures.
-     */
-    d->oom_manager.remove(rp->app);
     rp->kill();
 }
 
@@ -591,11 +577,6 @@ void ExeApplicationLauncher::appExited(int , QProcess::ExitStatus)
     }
 
     qLog(OOM) << "appExited():" << rp->app;
-    /*
-      When a process exits, the out-of-memory manager
-      must remove it from its data structures.
-     */
-    d->oom_manager.remove(rp->app);
     d->m_runningProcesses.remove(rp->app);
     delete rp;
 }
@@ -624,12 +605,6 @@ void ExeApplicationLauncher::appError(QProcess::ProcessError error)
     };
 
     rp->state = NotRunning;
-    /*
-      When a process dies because of an error, the
-      out-of-memory manager must remove it from its
-      data structures.
-     */
-    d->oom_manager.remove(rp->app);
     d->m_runningProcesses.remove(rp->app);
 
     {
@@ -675,11 +650,6 @@ void ExeApplicationLauncher::qtopiaApplicationChannel(const QString &message,
             d->runningProcess(name);
         if (rp && rp->proc->pid() == pid) {
             rp->state = Running;
-            /*
-              Tell the out-of-memory manager about this new
-              process that is now running.
-             */
-            d->oom_manager.insert(rp->app,pid);
             emit applicationStateChanged(rp->app,Running);
             return;
         }
@@ -1676,7 +1646,6 @@ ApplicationLauncher::ApplicationLauncher()
     m_vso = new QValueSpaceObject("/System/Applications", this);
 
     new LegacyLauncherService(this);
-    oom_manager.insert(QString("qpe"),getpid());
 
 }
 

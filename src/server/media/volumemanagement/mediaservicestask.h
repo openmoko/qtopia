@@ -43,7 +43,9 @@ signals:
 
 private:
     AudioVolumeManager* m_avm;
+#ifndef QT_ILLUME_LAUNCHER
     MediaKeyService*    m_mks;
+#endif
 };
 QTOPIA_TASK_INTERFACE(MediaServicesTask);
 

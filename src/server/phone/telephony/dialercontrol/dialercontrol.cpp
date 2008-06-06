@@ -706,7 +706,9 @@ void DialerControl::callStateChanged( const QPhoneCall& call )
     else if( call.incoming() )
     {
         // Turn off screen saver so the incoming call will be visible.
+#ifndef QT_ILLUME_LAUNCHER
         QtopiaPowerManager::setActive(false);
+#endif
 
         emit callIncoming( call );
     }

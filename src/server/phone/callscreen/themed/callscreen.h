@@ -98,8 +98,10 @@ private slots:
     void themeItemClicked(ThemeItem*);
     void actionGsmSelected();
     void updateLabels();
+#ifndef QT_ILLUME_LAUNCHER
     void setVideoWidget();
     void deleteVideoWidget();
+#endif
     void initializeAudioConf();
 #ifdef QTOPIA_CELL
     void simControlEvent(const QSimControlEvent &);

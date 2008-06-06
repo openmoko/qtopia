@@ -833,6 +833,7 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     QObject::connect(control, SIGNAL(callIncoming(const QPhoneCall&)),
                      this, SLOT(callIncoming(const QPhoneCall&)));
 
+#ifndef QT_ILLUME_LAUNCHER
     QObject::connect( VideoRingtone::instance(), SIGNAL(videoWidgetReady()),
             this, SLOT(setVideoWidget()) );
     QObject::connect( VideoRingtone::instance(), SIGNAL(videoRingtoneStopped()),
@@ -840,6 +841,7 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     // delete the video widget once call is answered
     connect( this, SIGNAL(acceptIncoming()),
             this, SLOT(deleteVideoWidget()) );
+#endif
 
 #ifdef QTOPIA_CELL
     simToolkit = new QSimToolkit( QString(), this );
@@ -857,6 +859,7 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
         callIncoming( control->incomingCall() );
 }
 
+#ifndef QT_ILLUME_LAUNCHER
 /*!
   Sets the video player widget to the CallScreen.
   */
@@ -889,13 +892,6 @@ void CallScreen::setVideoWidget()
     videoWidget->show();
 }
 
-void CallScreen::initializeAudioConf()
-{
-    // add speaker, bluetooth headset actions, etc
-    m_callAudioHandler = new CallAudioHandler(m_audioConf, this);
-    m_callAudioHandler->addOptionsToMenu(contextMenu);
-}
-
 /*!
   Hides the video player widget.
 */
@@ -906,6 +902,15 @@ void CallScreen::deleteVideoWidget()
 
     videoWidget = 0;
 }
+#endif
+
+void CallScreen::initializeAudioConf()
+{
+    // add speaker, bluetooth headset actions, etc
+    m_callAudioHandler = new CallAudioHandler(m_audioConf, this);
+    m_callAudioHandler->addOptionsToMenu(contextMenu);
+}
+
 
 /*!
   \internal

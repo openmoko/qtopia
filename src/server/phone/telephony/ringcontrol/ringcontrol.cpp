@@ -45,6 +45,12 @@
 #include <qcopchannel_qws.h>
 #endif
 
+#ifdef QT_ILLUME_LAUNCHER
+#define VIDEO_RINGTONE 0
+#else
+#define VIDEO_RINGTONE 1
+#endif
+
 #include "systemsuspend.h"
 
 static const int NotificationTimeout = 15000;
@@ -290,7 +296,7 @@ RingControl::RingControl(QObject *parent)
     QObject::connect(qtopiaTask<SystemSuspend>(), SIGNAL(systemSuspending()),
             this, SLOT(stopMessageAlert()));
 
-#ifdef MEDIA_SERVER
+#if defined(MEDIA_SERVER) && !defined(QT_ILLUME_LAUNCHER)
     QObject::connect(VideoRingtone::instance(), SIGNAL(videoRingtoneFailed()),
             this, SLOT(videoRingtoneFailed()) );
 #endif
@@ -465,7 +471,7 @@ void RingControl::startRinging(RingType t)
     if(d->lastRingVolume && d->curAlertType != QPhoneProfile::Off) {
         initSound();
 #ifdef MEDIA_SERVER
-        if ( !d->videoTone ) {
+        if ( !VIDEO_RINGTONE && !d->videoTone ) {
             if(d->soundcontrol) {
                 delete d->soundcontrol->sound();
                 delete d->soundcontrol;
@@ -479,8 +485,10 @@ void RingControl::startRinging(RingType t)
 
             d->soundcontrol->sound()->play();
         } else {
+#ifndef QT_ILLUME_LAUNCHER
             qLog(Media) << "Video ringtone selected" << d->curRingTone;
             VideoRingtone::instance()->playVideo( d->curRingTone );
+#endif
         }
 #elif defined(Q_WS_QWS)
         if(d->soundclient)
@@ -719,7 +727,7 @@ void RingControl::stateChanged()
     else
     {
         if (ringType() == RingControl::Call) {
-#ifdef MEDIA_SERVER
+#if defined(MEDIA_SERVER) && !defined(QT_ILLUME_LAUNCHER)
             if ( d->videoTone )
                 VideoRingtone::instance()->stopVideo();
 #endif

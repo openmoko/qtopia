@@ -35,10 +35,16 @@
 #include "alertservicetask.h"
 #include <QDebug>
 
+#ifdef QT_ILLUME_LAUNCHER
+static bool shutdownDialog = false;
+static bool powerAlertDialog = false;
+#else
 static bool shutdownDialog = true;
+static bool powerAlertDialog = true;
+#endif
+
 static bool defaultCrashDialog = true;
 static bool preloadCrashDialog = true;
-static bool powerAlertDialog = true;
 static bool terminationHandlerDialog = true;
 static bool volumeDialog = true;
 
@@ -226,6 +232,7 @@ void StandardDialogsImpl::disablePowerAlert()
 
 void StandardDialogsImpl::shutdownRequested()
 {
+#ifndef QT_ILLUME_LAUNCHER
     if(shutdownDialog) {
         ShutdownImpl *sd = new ShutdownImpl(0);
         sd->setAttribute(Qt::WA_DeleteOnClose);
@@ -233,6 +240,7 @@ void StandardDialogsImpl::shutdownRequested()
                 QtopiaServerApplication::instance(), SLOT(shutdown(QtopiaServerApplication::ShutdownType)));
         sd->showMaximized();
     }
+#endif
 }
 
 

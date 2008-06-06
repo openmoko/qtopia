@@ -76,7 +76,6 @@ SERVER_FORMS+=\
 SERVER_HEADERS+=\
     core_server/qabstractserverinterface.h \
     core_server/systemsuspend.h \
-    ui/shutdown/shutdownimpl.h \
     ui/volumedlg/volumeimpl.h \
     ui/launcherviews/base/launcherview.h\
     core_server/qcoprouter.h\
@@ -87,14 +86,10 @@ SERVER_HEADERS+=\
     infrastructure/storagemonitor/storagemonitor.h \
     core_server/qtopiaserverapplication.h \
     core_server/environmentsetuptask.h \
-    memory/base/memorymonitor.h \
     ui/standarddialogs.h \
     ui/components/delayedwaitdialog/delayedwaitdialog.h \
-    memory/testmonitor/testmemorymonitor.h \
     core_server/pressholdgate.h \
-    memory/monitor/genericmemorymonitor.h \
     core_server/applicationlauncher.h \
-    memory/base/oommanager.h \
     processctrl/terminationhandler/qterminationhandlerprovider.h \
     core_server/qcopfile.h \
     net/netserver/networkserver.h \
@@ -102,23 +97,12 @@ SERVER_HEADERS+=\
     core_server/timemonitor.h \
     core_server/timeupdateservice.h \
     core_server/qdeviceindicatorsprovider.h \
-    ui/shutdownsplash/shutdownsplash.h \
     ui/launcherviews/contentsetview/contentsetlauncherview.h \
     infrastructure/stabmonitor/stabmonitortask.h \
     infrastructure/signalstrength/defaultsignal.h \
     core_server/dbmigratetask.h \
-    core_server/defaultbattery.h\
-    infrastructure/apm/apmbattery.h\
     obexservicemanager.h \
-    media/keyclick/keyclick.h \
-    core_server/devicebuttontask.h \
-    ui/components/inputmethods/inputmethods.h \
-    infrastructure/inputdevice/inputdevicesettings.h \
-    memory/base/lowmemorytask.h \
     core_server/windowmanagement.h \
-    core_server/virtualkeyboardservice.h \
-    core_server/qtopiapowermanager.h\
-    core_server/qtopiapowermanagerservice.h \
     standarddevicefeatures.h \
     core_server/qtopiainputevents.h \
     processctrl/appshutdown/applicationshutdowntask.h
@@ -127,8 +111,6 @@ SERVER_SOURCES+=\
     main/main.cpp \
     core_server/qabstractserverinterface.cpp \
     core_server/systemsuspend.cpp \
-    infrastructure/suspendtasks/systemsuspendtasks.cpp \
-    ui/shutdown/shutdownimpl.cpp \
     ui/volumedlg/volumeimpl.cpp \
     ui/launcherviews/base/launcherview.cpp\
     core_server/qcoprouter.cpp\
@@ -139,40 +121,25 @@ SERVER_SOURCES+=\
     infrastructure/storagemonitor/storagemonitor.cpp \
     core_server/qtopiaserverapplication.cpp \
     core_server/environmentsetuptask.cpp \
-    memory/base/memorymonitor.cpp \
     ui/standarddialogs.cpp \
     ui/components/delayedwaitdialog/delayedwaitdialog.cpp \
-    memory/testmonitor/testmemorymonitor.cpp \
     core_server/pressholdgate.cpp \
-    memory/monitor/genericmemorymonitor.cpp \
     core_server/applicationlauncher.cpp \
-    memory/base/oommanager.cpp \
     processctrl/terminationhandler/qterminationhandlerprovider.cpp \
     core_server/qcopfile.cpp \
     net/netserver/networkserver.cpp \
-    ui/shutdownsplash/shutdownsplash.cpp \
     processctrl/startup/startupapps.cpp \
     core_server/timemonitor.cpp \
     core_server/timeupdateservice.cpp \
     core_server/qdeviceindicatorsprovider.cpp \
     simplebuiltins.cpp \
     ui/launcherviews/contentsetview/contentsetlauncherview.cpp \
-    core_server/defaultbattery.cpp\
-    infrastructure/apm/apmbattery.cpp\
     processctrl/qdsync/qdsynctask.cpp\
     obexservicemanager.cpp\
     core_server/dbmigratetask.cpp \
     infrastructure/stabmonitor/stabmonitortask.cpp \
     processctrl/appshutdown/applicationshutdowntask.cpp \
     infrastructure/signalstrength/defaultsignal.cpp \
-    media/keyclick/keyclick.cpp \
-    core_server/devicebuttontask.cpp \
-    ui/components/inputmethods/inputmethods.cpp \
-    infrastructure/inputdevice/inputdevicesettings.cpp \
-    memory/base/lowmemorytask.cpp \
-    core_server/virtualkeyboardservice.cpp \
-    core_server/qtopiapowermanager.cpp\
-    core_server/qtopiapowermanagerservice.cpp \
     standarddevicefeatures.cpp
 
 enable_vpn {
@@ -299,13 +266,11 @@ TRANSLATABLES+=$$INFRARED_HEADERS $$INFRARED_SOURCES
 MEDIA_HEADERS=\
     media/servercontrol/mediaserver.h \
     media/volumemanagement/audiovolumemanager.h \
-    media/volumemanagement/mediakeyservice.h \
     media/volumemanagement/mediaservicestask.h
 
 MEDIA_SOURCES=\
     media/servercontrol/mediaserver.cpp \
     media/volumemanagement/audiovolumemanager.cpp \
-    media/volumemanagement/mediakeyservice.cpp \
     media/volumemanagement/mediaservicestask.cpp  
 
 HEADERS+=$$MEDIA_HEADERS
@@ -331,24 +296,17 @@ PHONE_HEADERS=\
     phone/themecontrol/themebackground_p.h \
     phone/profileprovider/qphoneprofileprovider.h \
     ui/abstractinterfaces/stdmessagebox/messagebox.h \
-    phone/header/themed/phoneheader.h\
     phone/phonelock.h\
-    ui/taskmanager/taskmanagerservice.h\
     core_server/qabstractmessagebox.h\
     phone/browserscreen/abstract/qabstractbrowserscreen.h\
-    phone/serverinterface/phonelauncher/phonelauncher.h \
-    phone/secondarydisplay/abstract/qabstractsecondarydisplay.h \
+    phone/serverinterface/phonelauncher/phonelauncher_illume.h \
     infrastructure/softmenubar/qsoftmenubarprovider.h \
-    phone/secondarydisplay/themed/secondarythemeddisplay.h \
     phone/receivewindow.h \
     phone/homescreenwidgets.h \
-    phone/powermanager/phonepowermanager.h \
     net/gprsmonitor/gprsmonitor.h \
-    phone/themecontrol/qabstractthemewidgetfactory.h \
-    ui/components/touchscreenlockdlg/touchscreenlockdlg.h
+    phone/themecontrol/qabstractthemewidgetfactory.h
 
 TELEPHONY_HEADERS=\
-    phone/telephony/atemulator/externalaccess.h \
     phone/telephony/msgcontrol/messagecontrol.h \
     phone/ui/callcontactmodelview/callcontactlist.h \
     phone/callscreen/themed/callscreen.h \
@@ -363,12 +321,11 @@ TELEPHONY_HEADERS=\
     phone/telephony/ringcontrol/ringcontrol.h\
     phone/telephony/ringcontrol/ringtoneservice.h\
     pim/servercontactmodel/servercontactmodel.h \
-    phone/telephony/callpolicymanager/abstract/qabstractcallpolicymanager.h \
-    phone/telephony/videoringtone/videoringtone.h
+    phone/telephony/callpolicymanager/abstract/qabstractcallpolicymanager.h
 
 PHONE_SOURCES=\
     phone/contextlabel/base/contextlabel.cpp \
-    phone/serverinterface/phonelauncher/phonelauncher.cpp \
+    phone/serverinterface/phonelauncher/phonelauncher_illume.cpp \
     phone/themecontrol/themecontrol.cpp \
     ui/launcherviews/documentview/documentview.cpp \
     phone/browserscreen/gridbrowser/phonebrowser.cpp \
@@ -382,22 +339,15 @@ PHONE_SOURCES=\
     phone/themecontrol/themebackground_p.cpp \
     phone/profileprovider/qphoneprofileprovider.cpp \
     ui/abstractinterfaces/stdmessagebox/messagebox.cpp \
-    phone/header/themed/phoneheader.cpp\
     phone/phonelock.cpp\
     core_server/qabstractmessagebox.cpp\
-    ui/taskmanager/taskmanagerservice.cpp\
-    phone/secondarydisplay/abstract/qabstractsecondarydisplay.cpp \
     infrastructure/softmenubar/qsoftmenubarprovider.cpp \
-    phone/secondarydisplay/themed/secondarythemeddisplay.cpp \
-    phone/powermanager/phonepowermanager.cpp \
     phone/receivewindow.cpp \
     phone/homescreenwidgets.cpp \
-    net/gprsmonitor/gprsmonitor.cpp \
-    ui/components/touchscreenlockdlg/touchscreenlockdlg.cpp
+    net/gprsmonitor/gprsmonitor.cpp
 
 TELEPHONY_SOURCES=\
-    phone/telephony/atemulator/externalaccess.cpp \
-    phone/telephony/msgcontrol/messagecontrol.cpp \
+    phone/telephony/msgcontrol/messagecontrol.cpp\
     phone/ui/callcontactmodelview/callcontactlist.cpp\
     phone/callscreen/themed/callscreen.cpp \
     phone/telephony/dialercontrol/dialercontrol.cpp \
@@ -410,8 +360,7 @@ TELEPHONY_SOURCES=\
     phone/telephony/ringcontrol/ringtoneservice.cpp\
     phone/telephony/phoneserver/base/phoneserver.cpp \
     pim/servercontactmodel/servercontactmodel.cpp \
-    phone/telephony/callpolicymanager/abstract/qabstractcallpolicymanager.cpp \
-    phone/telephony/videoringtone/videoringtone.cpp
+    phone/telephony/callpolicymanager/abstract/qabstractcallpolicymanager.cpp
 
 enable_telephony {
     TELEPHONY_HEADERS+=phone/callhistory/default/callhistory.h

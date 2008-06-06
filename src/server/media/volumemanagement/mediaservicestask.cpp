@@ -44,9 +44,12 @@
 MediaServicesTask::MediaServicesTask()
 {
     m_avm = new AudioVolumeManager();
+
+#ifndef QT_ILLUME_LAUNCHER
     m_mks = new MediaKeyService(m_avm);
     connect(m_mks, SIGNAL(volumeChanged(bool)),
             this, SIGNAL(volumeChanged(bool)));
+#endif
 }
 
 /*!
@@ -55,7 +58,6 @@ MediaServicesTask::MediaServicesTask()
 
 MediaServicesTask::~MediaServicesTask()
 {
-    delete m_mks;
     delete m_avm;
 }
 
@@ -66,7 +68,9 @@ MediaServicesTask::~MediaServicesTask()
 
 void MediaServicesTask::setVolume(bool up)
 {
+#ifndef QT_ILLUME_LAUNCHER
     m_mks->setVolume(up);
+#endif
 }
 
 /*!
