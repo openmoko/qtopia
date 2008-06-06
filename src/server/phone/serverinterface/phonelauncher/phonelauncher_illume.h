@@ -151,7 +151,6 @@ private:
     ContextLabel *context();
     ContextLabel *m_context;
 
-    mutable QAbstractBrowserScreen *m_stack;
     //HomeScreen *homeScreen;
     mutable QAbstractHomeScreen *m_homeScreen;
     QBasicTimer m_multitaskingMultipressTimer;

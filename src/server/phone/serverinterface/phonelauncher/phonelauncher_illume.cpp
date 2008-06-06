@@ -193,7 +193,7 @@ void DialerServiceProxy::showDialer( const QString& digits )
   */
 PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
     : QAbstractServerInterface(parent, fl), m_updateTid(0),
-      m_context(0), m_stack(0), m_homeScreen(0),
+      m_context(0), m_homeScreen(0),
       m_registrationMessageId(0),
     m_warningMessageBox(0),
 #ifdef QTOPIA_PHONEUI
@@ -394,7 +394,6 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
   */
 PhoneLauncher::~PhoneLauncher()
 {
-    delete m_stack;
     delete m_context;
 #ifdef QTOPIA_PHONEUI
     delete m_callScreen;
