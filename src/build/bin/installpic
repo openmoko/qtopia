@@ -248,7 +248,8 @@ sub processFiles
 	my $dest = "$picsDest/$srcfile";
 	DEBUG and print "dest = $dest\n";
 	if ( $picsSource ) {
-	    $dest =~ s,(.+)$picsSource/,$1,;
+            my $quoted = quotemeta($picsSource);
+	    $dest =~ s,(.+)$quoted/,$1,;
         }
 	DEBUG and print "after munging dest = $dest\n";
 	installpic($srcfile, $dest);
