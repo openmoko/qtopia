@@ -65,7 +65,6 @@ class QAction;
 class CallScreen;
 class QuickDial;
 class CallHistory;
-class QExportedBackground;
 class QAbstractDialerScreen;
 class QAbstractBrowserScreen;
 class QtopiaServiceDescription;
@@ -83,7 +82,6 @@ public:
 
     CallScreen *callScreen(bool create = true) const;
     QAbstractDialerScreen *dialer(bool create = true) const;
-    QAbstractHomeScreen *homeScreen() const;
     CallHistory *callHistory() const { return m_callHistory; }
 #endif
 
@@ -106,7 +104,6 @@ protected slots:
     void polishWindows();
     void showEvent(QShowEvent *e);
     void sysMessage(const QString& message, const QByteArray&);
-    void showHomeScreen(int);
 #ifdef QTOPIA_PHONEUI
     void missedCount(int);
     void messageCountChanged(int, bool, bool, bool);
@@ -117,8 +114,6 @@ protected slots:
     void ussdMessage(const QString &);
     void initializeCallHistory();
 #endif
-    void keyStateChanged(bool);
-    void updateBackground();
 #ifdef QTOPIA_CELL
     void cellBroadcast(CellBroadcastControl::Type, const QString &, const QString &);
 #endif

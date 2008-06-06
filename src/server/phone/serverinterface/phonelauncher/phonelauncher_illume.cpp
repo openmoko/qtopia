@@ -191,7 +191,7 @@ void DialerServiceProxy::showDialer( const QString& digits )
   */
 PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
     : QAbstractServerInterface(parent, fl), m_updateTid(0),
-      m_context(0), m_homeScreen(0),
+      m_context(0),
       m_registrationMessageId(0),
     m_warningMessageBox(0),
 #ifdef QTOPIA_PHONEUI
@@ -250,12 +250,8 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
 #ifndef QT_NO_TRANSLATION //load translation for profile names
     QtopiaApplication::loadTranslations("QtopiaDefaults");
 #endif
-#ifdef QT_ILLUME_LAUNCHER
     setGeometry(0, 0, 0, 0);
     hide();
-#else
-    setGeometry(desktopRect);
-#endif
 
     QObject::connect(ThemeControl::instance(), SIGNAL(themeChanged()),
                      this, SLOT(loadTheme()));
@@ -266,17 +262,10 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
     // Create home screen
     m_homeScreen = qtopiaWidget<QAbstractHomeScreen>(this);
     // Homescreen covers the entire screen
-#ifdef QT_ILLUME_LAUNCHER
     m_homeScreen->setGeometry(0, 0, 0, 0);
     m_homeScreen->hide();
-#else
-    if (m_homeScreen->geometry() != rect())
-        m_homeScreen->setGeometry(0, 0, width(), height());
-#endif
     HomeScreenControl::instance()->setHomeScreen(m_homeScreen);
 
-    QObject::connect(m_homeScreen, SIGNAL(keyLockedChanged(bool)),
-                     this, SLOT(keyStateChanged(bool)));
 #ifdef QTOPIA_PHONEUI
     QObject::connect(m_homeScreen, SIGNAL(showCallScreen()),
                      this, SLOT(showCallScreen()));
@@ -307,7 +296,6 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
     connect( sysChannel, SIGNAL(received(QString,QByteArray)),
              this, SLOT(sysMessage(QString,QByteArray)) );
 
-    showHomeScreen(0);
     m_homeScreen->setFocus();
 
 #ifdef QTOPIA_PHONEUI
@@ -407,12 +395,6 @@ PhoneLauncher::~PhoneLauncher()
   */
 void PhoneLauncher::showEvent(QShowEvent *e)
 {
-#ifndef QT_ILLUME_LAUNCHER
-    QTimer::singleShot(0, m_homeScreen, SLOT(show()));
-    QTimer::singleShot(0, m_homeScreen, SLOT(applyHomeScreenImage()));
-#endif
-
-    QTimer::singleShot(0, this, SLOT(updateBackground()));
 #ifdef QTOPIA_PHONEUI
     QTimer::singleShot(0, this, SLOT(initializeCallHistory()));
 #endif
@@ -441,11 +423,7 @@ void PhoneLauncher::loadTheme()
         context()->show();
 
     // home screen - not lazy
-#ifdef QT_ILLUME_LAUNCHER
     m_homeScreen->setGeometry(0, 0, 0, 0);
-#else
-    m_homeScreen->setGeometry(desktopRect);
-#endif
     m_homeScreen->updateInformation();
 
 #ifdef QTOPIA_PHONEUI
@@ -459,11 +437,6 @@ void PhoneLauncher::loadTheme()
 #endif
 
     initInfo();
-
-    if ( v ) {
-        QTimer::singleShot(0, m_homeScreen, SLOT(show()));
-        QTimer::singleShot(0, this, SLOT(updateBackground()));
-    }
 }
 
 #ifdef QTOPIA_PHONEUI
@@ -528,68 +501,18 @@ void PhoneLauncher::closeEvent(QCloseEvent *e)
 void PhoneLauncher::sysMessage(const QString& message, const QByteArray &data)
 {
     QDataStream stream( data );
-    if ( message == "showHomeScreen()" ) {
-        showHomeScreen(0);
-    } else if ( message == QLatin1String("showHomeScreenAndToggleKeylock()") ) {
-        showHomeScreen(2);
-    } else if ( message == QLatin1String("showHomeScreenAndKeylock()") ) {
-        showHomeScreen(3);
-    } else if ( message == "applyStyleSplash()" ) {
+    if ( message == "applyStyleSplash()" ) {
         raise();
         qApp->processEvents();
         ThemeControl::instance()->refresh();
         polishWindows();
         updateLauncherIconSize();
-        m_homeScreen->applyHomeScreenImage();
         lower();
     } else if ( message == "applyStyleNoSplash()" ) {
         qApp->processEvents();
         ThemeControl::instance()->refresh();
         polishWindows();
         updateLauncherIconSize();
-        m_homeScreen->applyHomeScreenImage();
-    } else if ( message == "applyHomeScreenImage()" ) {
-        m_homeScreen->applyHomeScreenImage();
-        updateBackground();
-    } else if ( message == "updateHomeScreenInfo()" ) {
-        m_homeScreen->updateHomeScreenInfo();
-    }
-}
-
-void PhoneLauncher::showHomeScreen(int state)
-{
-    // state: 0 -> no screensaver calls
-    //        1 -> showHomeScreen called by screensaver
-    //        2 -> showHomeScreen called when lock key is toggled
-    //        3 -> showHomeScreen called to key lock
-
-#ifdef QTOPIA_PHONEUI
-    if (state != 0 && m_activeCalls) {
-        return;
-    }
-#endif
-
-    rejectModalDialog();
-    topLevelWidget()->raise();
-    m_homeScreen->raise();
-    m_homeScreen->show();
-    m_homeScreen->setFocus();
-    topLevelWidget()->activateWindow();
-
-    if (state == 1) {
-        //QtopiaIpcEnvelope closeApps( "QPE/System", "close()" );
-        if (!Qtopia::mousePreferred()) {
-            QSettings c("Trolltech","qpe");
-            c.beginGroup("HomeScreen");
-            QString lockType = c.value( "AutoKeyLock", "Disabled" ).toString();
-            if (lockType == "Enabled")
-                m_homeScreen->setKeyLocked(true);
-        }
-    } else if (state == 2 || state == 3) {
-        if (!m_homeScreen->keyLocked())
-            m_homeScreen->setKeyLocked(true);
-        else if (state == 2)
-            QtopiaInputEvents::processKeyEvent(0, BasicKeyLock::lockKey(), 0, true, false);
     }
 }
 
@@ -631,18 +554,7 @@ void PhoneLauncher::rejectModalDialog()
 void PhoneLauncher::missedCount(int count)
 {
     m_homeScreen->setMissedCalls(count);
-
-    if(m_homeScreen->keyLocked()
-#ifdef QTOPIA_CELL
-        || m_homeScreen->simLocked()
-#endif
-    ){
-        // do not show alert this time
-        // but reset missed count so when the phone is unlocked the alert is shown.
-        resetMissedCalls();
-    } else {
-        showAlertDialogs();
-    }
+    showAlertDialogs();
 }
 
 /*!
@@ -744,27 +656,6 @@ void PhoneLauncher::showAlertDialogs()
     }
 }
 #endif
-
-/*!
-  \internal
-  */
-void PhoneLauncher::keyStateChanged(bool locked)
-{
-#ifdef QTOPIA_PHONEUI
-    if(!locked)
-        showAlertDialogs();
-#else
-    Q_UNUSED(locked);
-#endif
-}
-
-/*!
-  \internal
-  */
-void PhoneLauncher::updateBackground()
-{
-    m_homeScreen->updateBackground();
-}
 
 /*!
   \internal
