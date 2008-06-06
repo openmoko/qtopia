@@ -120,10 +120,12 @@ QWidget *PhoneThemedView::newWidget(ThemeWidgetItem *input, const QString &name)
 {
     Q_UNUSED(input);
 
+#ifndef QT_ILLUME_LAUNCHER
     // First check if the theme widget is a homescreen widget
     QWidget* widget = HomeScreenWidgets::create(name, this);
     if (widget != 0)
         return widget;
+#endif
     return 0;
 }
 
