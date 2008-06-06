@@ -284,6 +284,7 @@ PHONE_HEADERS=\
     phone/contextlabel/base/contextlabel.h \
     phone/themecontrol/themecontrol.h \
     ui/launcherviews/documentview/documentview.h \
+    processctrl/taskmanagerentry/taskmanagerentry.h \
     infrastructure/camera/cameramonitor.h \
     core_server/alarmcontrol.h \
     phone/themecontrol/serverthemeview.h \
@@ -322,6 +323,7 @@ PHONE_SOURCES=\
     phone/serverinterface/phonelauncher/phonelauncher_illume.cpp \
     phone/themecontrol/themecontrol.cpp \
     ui/launcherviews/documentview/documentview.cpp \
+    processctrl/taskmanagerentry/taskmanagerentry.cpp \
     infrastructure/camera/cameramonitor.cpp \
     core_server/alarmcontrol.cpp \
     phone/themecontrol/serverthemeview.cpp \
