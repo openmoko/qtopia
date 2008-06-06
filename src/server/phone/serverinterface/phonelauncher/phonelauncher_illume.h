@@ -72,30 +72,6 @@ class QAbstractBrowserScreen;
 class QtopiaServiceDescription;
 class GsmKeyActions;
 
-class QSpeedDialFeedback : public QFrame {
-    Q_OBJECT
-public:
-    QSpeedDialFeedback();
-
-    void setBlindFeedback(bool on);
-    void show(QWidget* center, const QString& input, const QtopiaServiceDescription&);
-
-signals:
-    void requestSent();
-
-protected:
-    void keyReleaseEvent(QKeyEvent*);
-    void mouseReleaseEvent(QMouseEvent*);
-    void timerEvent(QTimerEvent*);
-
-private:
-    QtopiaServiceRequest req;
-    QLabel *icon;
-    QLabel *label;
-    int timerId;
-    bool blind;
-};
-
 class PhoneLauncher : public QAbstractServerInterface
 {
     Q_OBJECT
@@ -128,9 +104,7 @@ public slots:
 		    const QString &callType = QString("Voice"));
     void acceptIncoming();
     void dialVoiceMail();
-    void showSpeedDialer(const QString &);
 #endif
-    bool activateSpeedDial( const QString& input );
     void showWarning(const QString &title, const QString &text);
 
 protected slots:
@@ -175,9 +149,7 @@ private slots:
     void messageBoxDone(int);
     void stateChanged();
     void resetMissedCalls();
-    void speedDialActivated();
 #endif
-    void speedDial( const QString& input );
     void rejectModalDialog();
     void newMessagesChanged();
 
@@ -196,7 +168,6 @@ private:
     uint m_registrationMessageId;
 
     QAbstractMessageBox *m_warningMessageBox;
-    QSpeedDialFeedback *m_speeddialfeedback;
     UIApplicationMonitor m_appMon;
 
 #ifdef QTOPIA_PHONEUI
@@ -224,7 +195,6 @@ private:
 
     bool m_waitingVoiceMailNumber;
     QServiceNumbers *m_serviceNumbers;
-    bool m_dialerSpeedDialFeedbackActive;
 #endif
 #ifdef QTOPIA_VOIP
     QAbstractMessageBox *m_voipNoPresenceMessageBox;

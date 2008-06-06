@@ -32,7 +32,6 @@
 #include <qsoftmenubar.h>
 #include <qtopianamespace.h>
 #include <qtopiaservices.h>
-#include <qspeeddial.h>
 #include <qtopialog.h>
 #include <qtopianamespace.h>
 #include <custom.h>
@@ -197,7 +196,6 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
       m_context(0), m_stack(0), m_homeScreen(0),
       m_registrationMessageId(0),
     m_warningMessageBox(0),
-    m_speeddialfeedback(0),
 #ifdef QTOPIA_PHONEUI
       m_messageCount(0), m_activeCalls(0),
       m_newMessages("Communications/Messages/NewMessages"),
@@ -211,7 +209,6 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
     m_isSystemMessage(false),
     m_queuedIncoming(false),
     m_waitingVoiceMailNumber(false),
-    m_dialerSpeedDialFeedbackActive(false),
 #endif
 #ifdef QTOPIA_VOIP
     m_voipNoPresenceMessageBox(0),
@@ -280,8 +277,6 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
 #endif
     HomeScreenControl::instance()->setHomeScreen(m_homeScreen);
 
-    QObject::connect(m_homeScreen, SIGNAL(speedDial(QString)),
-                     this, SLOT(activateSpeedDial(QString)));
     QObject::connect(m_homeScreen, SIGNAL(showPhoneBrowser()),
                      this, SLOT(showPhoneLauncher()));
     QObject::connect(m_homeScreen, SIGNAL(keyLockedChanged(bool)),
@@ -293,8 +288,6 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
                      this, SLOT(showMissedCalls()));
     QObject::connect(m_homeScreen, SIGNAL(showCallHistory()),
                      this, SLOT(showCallHistory()));
-    QObject::connect(m_homeScreen, SIGNAL(dialNumber(QString)),
-                     this, SLOT(showSpeedDialer(QString)));
     QObject::connect(m_homeScreen, SIGNAL(callEmergency(QString)),
                     this, SLOT(requestDial(QString)));
 #endif
@@ -418,7 +411,6 @@ PhoneLauncher::~PhoneLauncher()
 #if defined(QTOPIA_TELEPHONY)
     delete m_callHistory;
 #endif
-    delete m_speeddialfeedback;
 }
 
 /*!
@@ -944,14 +936,6 @@ ContextLabel *PhoneLauncher::context()
 }
 
 #ifdef QTOPIA_PHONEUI
-/*!
-  \internal
-  */
-void PhoneLauncher::showSpeedDialer(const QString &digits)
-{
-    showDialer(digits, true);
-}
-
 /*!
   \internal
   Displays the dialer, preloaded with \a digits.  If \a speedDial
@@ -1592,8 +1576,6 @@ QAbstractDialerScreen *PhoneLauncher::dialer(bool create) const
                 SIGNAL(requestDial(QString,QUniqueId)),
                 this,
                 SLOT(requestDial(QString,QUniqueId)));
-        connect(m_dialer, SIGNAL(speedDial(QString)),
-                this, SLOT(speedDial(QString)) );
 
     #ifdef QTOPIA_CELL
         m_gsmKeyActions->setDialer(m_dialer);
@@ -1636,65 +1618,7 @@ CallScreen *PhoneLauncher::callScreen(bool create) const
 
 }
 
-void PhoneLauncher::speedDialActivated()
-{
-    if (m_dialerSpeedDialFeedbackActive && dialer(false)) {
-        dialer(false)->reset();
-        dialer(false)->hide();
-    }
-    m_dialerSpeedDialFeedbackActive = false;
-}
-
 #endif
-
-/*!
-  \internal
-  */
-void PhoneLauncher::speedDial( const QString& input )
-{
-    if (activateSpeedDial(input)) {
-#ifdef QTOPIA_PHONEUI
-        m_dialerSpeedDialFeedbackActive = true;
-#endif
-    }
-}
-
-/*!
-  \internal
-  Activate speed dial associated with \a input.
- */
-bool PhoneLauncher::activateSpeedDial( const QString& input )
-{
-    if ( !m_speeddialfeedback ) {
-        m_speeddialfeedback = new QSpeedDialFeedback;
-#ifdef QTOPIA_PHONEUI
-        connect(m_speeddialfeedback, SIGNAL(requestSent()), this, SLOT(speedDialActivated()));
-#endif
-    }
-
-    QString sel = input;
-    if ( input.isEmpty() ) {
-        m_speeddialfeedback->setBlindFeedback(false);
-        sel = QSpeedDial::selectWithDialog(this);
-    } else {
-        m_speeddialfeedback->setBlindFeedback(true);
-    }
-
-    QDesktopWidget *desktop = QApplication::desktop();
-    QtopiaServiceDescription* r = QSpeedDial::find(sel);
-    if(r)
-    {
-        m_speeddialfeedback->show(desktop->screen(desktop->primaryScreen()),sel,*r);
-        return !r->request().isNull();
-    }
-    else
-    {
-        if (!input.isEmpty())
-            m_speeddialfeedback->show(desktop->screen(desktop->primaryScreen()),sel,QtopiaServiceDescription());
-        return false;
-    }
-}
-
 
 /*!
   \internal
@@ -1717,107 +1641,6 @@ void PhoneLauncher::newMessagesChanged()
     m_homeScreen->setNewMessages(m_newMessages.value().toInt());
 }
 
-
-// define QSpeedDialFeedback
-QSpeedDialFeedback::QSpeedDialFeedback() :
-    QFrame(0, (Qt::Tool | Qt::FramelessWindowHint)),
-    timerId(0), blind(true)
-{
-    setFrameStyle(QFrame::WinPanel|QFrame::Raised);
-    QVBoxLayout *vb = new QVBoxLayout(this);
-    vb->setMargin(8);
-    icon = new QLabel(this);
-    vb->addWidget(icon);
-    label = new QLabel(this);
-    label->setWordWrap(true);
-    vb->addWidget(label);
-    icon->setAlignment(Qt::AlignCenter);
-    label->setAlignment(Qt::AlignCenter);
-}
-
-// is user "dialing-blind", or picking from screen?
-void QSpeedDialFeedback::setBlindFeedback(bool on)
-{
-    blind = on;
-}
-
-void QSpeedDialFeedback::show(QWidget* center, const QString& input, const QtopiaServiceDescription& r)
-{
-    req = r.request();
-#ifdef QTOPIA_PHONEUI
-    if ( blind ) {
-        RingControl *rc = qtopiaTask<RingControl>();
-        if ( req.isNull() ) {
-            if(rc) rc->playSound(":sound/speeddial/nak");
-        } else {
-            if(rc) rc->playSound(":sound/speeddial/ack");
-        }
-    }
-#endif
-    if ( req.isNull() ) {
-        QIcon p(":icon/cancel");
-        icon->setPixmap(p.pixmap(style()->pixelMetric(QStyle::PM_LargeIconSize)));
-        label->setText(tr("No speed dial %1").arg(input));
-    } else {
-        // Often times these are actually icons, not images...
-        QIcon p(":icon/" + r.iconName());
-        if (p.isNull())
-            p = QIcon(":image/" + r.iconName());
-        icon->setPixmap(p.pixmap(style()->pixelMetric(QStyle::PM_LargeIconSize)));
-        label->setText(r.label());
-    }
-    QtopiaApplication::sendPostedEvents(this, QEvent::LayoutRequest);
-    QRect w = center->topLevelWidget()->geometry();
-    // Make sure the label wraps (and leave a small amount around the edges)
-    // (which is 2xlayout margin + a little bit)
-    int labelmargins = layout()->margin() * 2 + layout()->spacing() * 2;
-    label->setMaximumSize(w.width() - labelmargins, w.height() - labelmargins);
-    QSize sh = sizeHint();
-    //We have to set the minimumsize before we change the geometry
-    //because setGeometry is based on it and for some weired reason
-    //Minimumsize is set to the size of the previous geometry.
-    //This is a problem when changing from a bigger to a smaller geometry
-    //and seems to be a bug in Qt.
-    setMinimumSize(sh.width(),sh.height());
-    setGeometry(w.x()+(w.width()-sh.width())/2,
-                w.y()+(w.height()-sh.height())/2,sh.width(),sh.height());
-    QFrame::show();
-    activateWindow();
-    setFocus();
-    if( Qtopia::mousePreferred() || !blind ) {
-        if ( !req.isNull() ) {
-            req.send();
-            emit requestSent();
-        }
-        timerId = startTimer(1000);
-    }
-}
-
-void QSpeedDialFeedback::timerEvent(QTimerEvent*)
-{
-    killTimer(timerId);
-    close();
-}
-
-void QSpeedDialFeedback::keyReleaseEvent(QKeyEvent* ke)
-{
-    if ( !ke->isAutoRepeat() ) {
-        if ( !req.isNull() ) {
-            req.send();
-            emit requestSent();
-        }
-        close();
-    }
-}
-
-void QSpeedDialFeedback::mouseReleaseEvent(QMouseEvent*)
-{
-    if ( !req.isNull() ) {
-        req.send();
-        emit requestSent();
-    }
-    close();
-}
 
 QTOPIA_REPLACE_WIDGET(QAbstractServerInterface, PhoneLauncher);
 
