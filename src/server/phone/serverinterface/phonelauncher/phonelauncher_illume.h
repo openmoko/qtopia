@@ -121,8 +121,6 @@ protected:
     void initInfo();
     void resizeEvent(QResizeEvent *);
     void closeEvent(QCloseEvent *);
-    void paintEvent(QPaintEvent *);
-    void updateLauncherIconSize();
 
 private slots:
 #ifdef QTOPIA_CELL

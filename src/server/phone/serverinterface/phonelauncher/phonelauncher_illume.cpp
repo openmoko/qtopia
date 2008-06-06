@@ -506,13 +506,11 @@ void PhoneLauncher::sysMessage(const QString& message, const QByteArray &data)
         qApp->processEvents();
         ThemeControl::instance()->refresh();
         polishWindows();
-        updateLauncherIconSize();
         lower();
     } else if ( message == "applyStyleNoSplash()" ) {
         qApp->processEvents();
         ThemeControl::instance()->refresh();
         polishWindows();
-        updateLauncherIconSize();
     }
 }
 
@@ -663,23 +661,6 @@ void PhoneLauncher::showAlertDialogs()
 void PhoneLauncher::polishWindows()
 {
     ThemeBackground::polishWindows(ThemeBackground::PrimaryScreen);
-}
-
-/*!
-  \internal
-  */
-void PhoneLauncher::paintEvent(QPaintEvent *)
-{
-    QPixmap pm(":image/qpelogo");
-    QPainter p(this);
-    p.drawPixmap((width()-pm.width())/2,( height()-pm.height())/2, pm);
-}
-
-/*!
-  \internal
-  */
-void PhoneLauncher::updateLauncherIconSize()
-{
 }
 
 /*!
