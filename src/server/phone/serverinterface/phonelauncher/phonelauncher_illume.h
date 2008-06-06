@@ -125,7 +125,6 @@ protected slots:
 protected:
     void initInfo();
     void resizeEvent(QResizeEvent *);
-    void timerEvent(QTimerEvent *);
     void closeEvent(QCloseEvent *);
     void paintEvent(QPaintEvent *);
     void updateLauncherIconSize();
@@ -153,8 +152,6 @@ private:
 
     //HomeScreen *homeScreen;
     mutable QAbstractHomeScreen *m_homeScreen;
-    QBasicTimer m_multitaskingMultipressTimer;
-    int m_multitaskingcursor;
     uint m_registrationMessageId;
 
     QAbstractMessageBox *m_warningMessageBox;

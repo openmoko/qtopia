@@ -74,12 +74,10 @@
 #include "qabstracthomescreen.h"
 #include "documentview.h"
 #include "alarmcontrol.h"
-#include "taskmanagerservice.h"
 #include "themecontrol.h"
 #include "qabstractsecondarydisplay.h"
 #include "contentsetlauncherview.h"
 #include "themebackground_p.h"
-#include "lowmemorytask.h"
 #include "qtopiainputevents.h"
 #include "qabstractcallpolicymanager.h"
 
@@ -501,8 +499,6 @@ void PhoneLauncher::initInfo()
 
     update();
 
-    timerEvent(0);
-
 #ifdef QTOPIA_PHONEUI
     int missCalls = DialerControl::instance()->missedCallCount();
     if ( missCalls != 0 )
@@ -723,24 +719,6 @@ void PhoneLauncher::registrationChanged()
 }
 
 #endif
-
-/*!
-  \internal
-  */
-void PhoneLauncher::timerEvent(QTimerEvent * tev)
-{
-    if(tev && tev->timerId() == m_updateTid) {
-        update();
-        killTimer(m_updateTid);
-        m_updateTid = 0;
-        return;
-    }
-
-    if ( tev && m_multitaskingMultipressTimer.timerId() == tev->timerId() ) {
-        m_multitaskingMultipressTimer.stop();
-        return;
-    }
-}
 
 #ifdef QTOPIA_PHONEUI
 /*!
