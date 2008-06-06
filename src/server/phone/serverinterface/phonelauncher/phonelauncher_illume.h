@@ -117,7 +117,6 @@ protected slots:
     void ussdMessage(const QString &);
     void initializeCallHistory();
 #endif
-    void callPressed();
     void keyStateChanged(bool);
     void updateBackground();
 #ifdef QTOPIA_CELL

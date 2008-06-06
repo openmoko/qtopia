@@ -428,17 +428,6 @@ void PhoneLauncher::showEvent(QShowEvent *e)
 /*!
   \internal
   */
-void PhoneLauncher::callPressed()
-{
-#ifdef QTOPIA_PHONEUI
-    // Called if server windows are not on top
-    showCallHistory();
-#endif
-}
-
-/*!
-  \internal
-  */
 void PhoneLauncher::loadTheme()
 {
     bool v = isVisible();
@@ -569,12 +558,6 @@ void PhoneLauncher::sysMessage(const QString& message, const QByteArray &data)
         updateBackground();
     } else if ( message == "updateHomeScreenInfo()" ) {
         m_homeScreen->updateHomeScreenInfo();
-    } else if ( message == "serverKey(int,int)" ) {
-        int key,press;
-        stream >> key >> press;
-        if ( key == Qt::Key_Call && press ) {
-            callPressed();
-        }
     }
 }
 
