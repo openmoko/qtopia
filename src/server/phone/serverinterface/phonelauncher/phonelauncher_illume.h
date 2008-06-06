@@ -54,7 +54,6 @@ class HomeScreen;
 class QAbstractHomeScreen;
 class ContextLabel;
 class PhoneMainMenu;
-class PhoneBrowser;
 class LazyContentStack;
 class QCategoryDialog;
 class QAbstractMessageBox;
@@ -88,10 +87,6 @@ public:
     CallHistory *callHistory() const { return m_callHistory; }
 #endif
 
-    QAbstractBrowserScreen* phoneBrowser(bool create = true) const;
-
-    void hideAll();
-
 public slots:
 #ifdef QTOPIA_PHONEUI
     void showDialer(const QString &, bool speedDial = false);
@@ -112,7 +107,6 @@ protected slots:
     void showEvent(QShowEvent *e);
     void sysMessage(const QString& message, const QByteArray&);
     void showHomeScreen(int);
-    void showPhoneLauncher();
 #ifdef QTOPIA_PHONEUI
     void missedCount(int);
     void messageCountChanged(int, bool, bool, bool);
@@ -124,13 +118,11 @@ protected slots:
     void initializeCallHistory();
 #endif
     void callPressed();
-    void hangupPressed();
     void keyStateChanged(bool);
     void updateBackground();
 #ifdef QTOPIA_CELL
     void cellBroadcast(CellBroadcastControl::Type, const QString &, const QString &);
 #endif
-    void showContentSet();
 protected:
     void initInfo();
     void resizeEvent(QResizeEvent *);

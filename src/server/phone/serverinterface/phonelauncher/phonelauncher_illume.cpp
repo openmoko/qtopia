@@ -277,8 +277,6 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
 #endif
     HomeScreenControl::instance()->setHomeScreen(m_homeScreen);
 
-    QObject::connect(m_homeScreen, SIGNAL(showPhoneBrowser()),
-                     this, SLOT(showPhoneLauncher()));
     QObject::connect(m_homeScreen, SIGNAL(keyLockedChanged(bool)),
                      this, SLOT(keyStateChanged(bool)));
 #ifdef QTOPIA_PHONEUI
@@ -310,8 +308,6 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
     QtopiaChannel* sysChannel = new QtopiaChannel( "QPE/System", this );
     connect( sysChannel, SIGNAL(received(QString,QByteArray)),
              this, SLOT(sysMessage(QString,QByteArray)) );
-
-    phoneBrowser()->resetToView("Main"); // better to get initial icon load cost now, rather then when user clicks.
 
     showHomeScreen(0);
     m_homeScreen->setFocus();
@@ -447,42 +443,6 @@ void PhoneLauncher::callPressed()
 /*!
   \internal
   */
-void PhoneLauncher::hangupPressed()
-{
-    // Called if server windows are not on top
-#ifdef QTOPIA_PHONEUI
-    DialerControl *control = DialerControl::instance();
-    if (control->isConnected() || control->isDialing() ||
-        control->hasIncomingCall()) {
-        // We have an in-progress call, so hang it up rather than
-        // close all running applications.
-        showCallScreen();
-        control->endCall();
-    } else
-#endif
-    {
-        topLevelWidget()->raise();
-        QtopiaIpcEnvelope e("QPE/System","close()");
-        hideAll();
-        showHomeScreen(0);
-    }
-}
-
-/*!
-  \internal
-  */
-void PhoneLauncher::showContentSet()
-{
-    hideAll();
-    phoneBrowser()->moveToView("Folder/ContentSet");
-    phoneBrowser()->showMaximized();
-    phoneBrowser()->raise();
-    phoneBrowser()->activateWindow();
-}
-
-/*!
-  \internal
-  */
 void PhoneLauncher::loadTheme()
 {
     bool v = isVisible();
@@ -515,16 +475,6 @@ void PhoneLauncher::loadTheme()
                         desktopRect.height() - context()->height() );
     }
 #endif
-
-    // update position of launcher stack - lazy
-    if(phoneBrowser(false)) {
-        if ( !phoneBrowser()->isHidden() )
-            phoneBrowser()->showMaximized();
-        else
-            phoneBrowser()->setGeometry(desktopRect.x(), desktopRect.y(),
-                        desktopRect.width(),
-                        desktopRect.height() - context()->height());
-    }
 
     initInfo();
 
@@ -600,8 +550,6 @@ void PhoneLauncher::sysMessage(const QString& message, const QByteArray &data)
     QDataStream stream( data );
     if ( message == "showHomeScreen()" ) {
         showHomeScreen(0);
-    } else if ( message == QLatin1String("showPhoneLauncher()")) {
-        showPhoneLauncher();
     } else if ( message == QLatin1String("showHomeScreenAndToggleKeylock()") ) {
         showHomeScreen(2);
     } else if ( message == QLatin1String("showHomeScreenAndKeylock()") ) {
@@ -630,8 +578,6 @@ void PhoneLauncher::sysMessage(const QString& message, const QByteArray &data)
         stream >> key >> press;
         if ( key == Qt::Key_Call && press ) {
             callPressed();
-        } else if ( (key == Qt::Key_Hangup || key == Qt::Key_Flip) && press ) {
-            hangupPressed();
         }
     }
 }
@@ -655,10 +601,6 @@ void PhoneLauncher::showHomeScreen(int state)
     m_homeScreen->show();
     m_homeScreen->setFocus();
     topLevelWidget()->activateWindow();
-
-    if(phoneBrowser(false)) {
-        phoneBrowser()->hide();
-    }
 
     if (state == 1) {
         //QtopiaIpcEnvelope closeApps( "QPE/System", "close()" );
@@ -706,18 +648,6 @@ void PhoneLauncher::rejectModalDialog()
             d->hideDlg();
         }
     }
-}
-
-/*!
-  \internal
-  */
-void PhoneLauncher::showPhoneLauncher()
-{
-    phoneBrowser()->resetToView("Main");
-
-    phoneBrowser()->showMaximized();
-    phoneBrowser()->raise();
-    phoneBrowser()->activateWindow();
 }
 
 #ifdef QTOPIA_PHONEUI
@@ -1099,24 +1029,6 @@ void PhoneLauncher::cellBroadcast(CellBroadcastControl::Type type,
 
 #endif // QTOPIA_CELL
 
-
-/*!
-  \internal
-  Hides the Call History, Dialer and Call Screen.
-*/
-void PhoneLauncher::hideAll()
-{
-#ifdef QTOPIA_PHONEUI
-    if (callScreen(false))
-        callScreen(false)->close();
-#if defined(QTOPIA_TELEPHONY)
-    if (callHistory())
-        callHistory()->close();
-#endif
-    if (dialer(false))
-        dialer(false)->close();
-#endif
-}
 
 #ifdef QTOPIA_PHONEUI
 /*!
@@ -1619,22 +1531,6 @@ CallScreen *PhoneLauncher::callScreen(bool create) const
 }
 
 #endif
-
-/*!
-  \internal
-  */
-QAbstractBrowserScreen *PhoneLauncher::phoneBrowser(bool create) const
-{
-    if(!m_stack && create) {
-        m_stack = qtopiaWidget<QAbstractBrowserScreen>();
-        if (m_stack)
-            m_stack->move(QApplication::desktop()->screenGeometry().topLeft());
-        else
-            qFatal("Phone launcher requires the presence of a browser screen");
-    }
-
-    return m_stack;
-}
 
 void PhoneLauncher::newMessagesChanged()
 {
