@@ -296,7 +296,6 @@ PHONE_HEADERS=\
     phone/themecontrol/themebackground_p.h \
     phone/profileprovider/qphoneprofileprovider.h \
     ui/abstractinterfaces/stdmessagebox/messagebox.h \
-    phone/phonelock.h\
     core_server/qabstractmessagebox.h\
     phone/browserscreen/abstract/qabstractbrowserscreen.h\
     phone/serverinterface/phonelauncher/phonelauncher_illume.h \
@@ -339,7 +338,6 @@ PHONE_SOURCES=\
     phone/themecontrol/themebackground_p.cpp \
     phone/profileprovider/qphoneprofileprovider.cpp \
     ui/abstractinterfaces/stdmessagebox/messagebox.cpp \
-    phone/phonelock.cpp\
     core_server/qabstractmessagebox.cpp\
     infrastructure/softmenubar/qsoftmenubarprovider.cpp \
     phone/receivewindow.cpp \

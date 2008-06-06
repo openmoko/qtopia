@@ -63,7 +63,11 @@
  */
 bool QAbstractHomeScreen::keyLocked() const
 {
+#ifdef QT_ILLUME_LAUNCHER
+    return false;
+#else
     return keyLock->locked();
+#endif
 }
 
 #ifdef QTOPIA_CELL
@@ -72,7 +76,11 @@ bool QAbstractHomeScreen::keyLocked() const
   */
 bool QAbstractHomeScreen::simLocked() const
 {
+#ifdef QT_ILLUME_LAUNCHER
+    return false;
+#else
     return !simLock->open();
+#endif
 }
 #endif
 
@@ -81,10 +89,14 @@ bool QAbstractHomeScreen::simLocked() const
  */
 void QAbstractHomeScreen::setKeyLocked(bool lock) const
 {
+#ifdef QT_ILLUME_LAUNCHER
+    Q_UNUSED(lock)
+#else
     if (lock)
         keyLock->lock();
     else
         keyLock->unlock();
+#endif
 }
 
 
@@ -114,10 +126,8 @@ QAbstractHomeScreen::QAbstractHomeScreen(QWidget *parent, Qt::WFlags flags)
     missedCalls = 0;
     newMessages = 0;
     smsMemoryFull = 0;
-#ifdef QTOPIA_CELL
-    emLock = 0;
-    simLock = 0;
-#endif
+
+#ifndef QT_ILLUME_LAUNCHER
     keyLock = new BasicKeyLock(this);
 
     QObject::connect(keyLock, SIGNAL(stateChanged(BasicKeyLock::State)),
@@ -141,6 +151,10 @@ QAbstractHomeScreen::QAbstractHomeScreen(QWidget *parent, Qt::WFlags flags)
                      simLock, SLOT(reset()));
     QObject::connect(emLock, SIGNAL(dialEmergency(QString)),
                      keyLock, SLOT(reset()));
+#else
+    emLock = 0;
+    simLock = 0;
+#endif
 #endif
 
     setAttribute(Qt::WA_NoSystemBackground);
@@ -152,6 +166,7 @@ QAbstractHomeScreen::QAbstractHomeScreen(QWidget *parent, Qt::WFlags flags)
     m_contextMenu = contextMenu;
     contextMenu->installEventFilter(this);
 
+#ifndef QT_ILLUME_LAUNCHER
     actionLock = new QAction(QIcon(":icon/padlock"), tr("Key Lock"), this);
     if (Qtopia::mousePreferred()) {
         connect(actionLock, SIGNAL(triggered()), this, SLOT(lockScreen()));
@@ -159,6 +174,7 @@ QAbstractHomeScreen::QAbstractHomeScreen(QWidget *parent, Qt::WFlags flags)
         connect(actionLock, SIGNAL(triggered()), keyLock, SLOT(lock()));
     }
     contextMenu->addAction(actionLock);
+#endif
 
     QAction *actionProfile = new QAction(QIcon(":icon/Note"), tr("Profile..."), this);
     connect(actionProfile, SIGNAL(triggered()), this, SLOT(showProfileSelector()));
@@ -320,6 +336,7 @@ void QAbstractHomeScreen::setSmsMemoryFull(bool full)
   */
 void QAbstractHomeScreen::setContextBarLocked(bool lock, bool waiting)
 {
+#ifndef QT_ILLUME_LAUNCHER
     if ( lock || waiting ) {
         // set the phone to locked - we do it both when we _require_ a lock
         // and when we are not yet sure if we need to lock (waiting).
@@ -351,6 +368,7 @@ void QAbstractHomeScreen::setContextBarLocked(bool lock, bool waiting)
             QSoftMenuBar::clearLabel(this, BasicKeyLock::lockKey());
         }
     }
+#endif
 }
 
 /*!
@@ -368,6 +386,7 @@ void QAbstractHomeScreen::showProfileSelector()
   */
 void QAbstractHomeScreen::showLockInformation()
 {
+#ifndef QT_ILLUME_LAUNCHER
 #ifdef QTOPIA_CELL
     bool lock = keyLock->locked() || !simLock->open();
     bool waiting = simLock->state() == BasicSimPinLock::Waiting;
@@ -399,7 +418,7 @@ void QAbstractHomeScreen::showLockInformation()
 //        else
             QtopiaInputEvents::resumeMouse();
     }
-#ifdef QTOPIA_CELL
+#if defined(QTOPIA_CELL) && !defined(QT_ILLUME_LAUNCHER)
     else if (emLock->emergency()) {
         // disable the lock key cause it can use the emergency number to unlock sim.
         QSoftMenuBar::setLabel(this, BasicKeyLock::lockKey(), QSoftMenuBar::NoLabel);
@@ -504,6 +523,7 @@ void QAbstractHomeScreen::showLockInformation()
     } else if (Qtopia::mousePreferred()) {
         activatePinbox(false);
     }
+#endif
 }
 
 #ifdef QTOPIA_PHONEUI
@@ -577,6 +597,7 @@ void QAbstractHomeScreen::specialButton(int keycode, bool held)
   */
 bool QAbstractHomeScreen::eventFilter(QObject *, QEvent *e)
 {
+#ifndef QT_ILLUME_LAUNCHER
 #ifdef QTOPIA_CELL
     bool locked = keyLock->locked() || !simLock->open();
 #else
@@ -621,6 +642,7 @@ bool QAbstractHomeScreen::eventFilter(QObject *, QEvent *e)
         // make sure the pin entry dialog is shown if sim is still locked.
         showLockInformation();
     }
+#endif
     return false;
 }
 
@@ -776,6 +798,7 @@ void QAbstractHomeScreen::showDialer()
   */
 void QAbstractHomeScreen::phoneStateChanged()
 {
+#ifndef QT_ILLUME_LAUNCHER
     if (DialerControl::instance()->allCalls().count()) {
         QSoftMenuBar::setLabel(this, Qt::Key_Back, "phone/calls", tr("Calls"));
     } else {
@@ -796,6 +819,7 @@ void QAbstractHomeScreen::phoneStateChanged()
 
         actionLock->setEnabled(true);
     }
+#endif
 }
 #endif
 

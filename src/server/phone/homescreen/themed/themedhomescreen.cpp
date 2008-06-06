@@ -220,6 +220,7 @@ PhoneKeyDescription keyMap [] = {
  */
 void ThemedHomeScreen::themeItemClicked(ThemeItem *item)
 {
+#ifndef QT_ILLUME_LAUNCHER
     if (!item)
         return;
 
@@ -272,6 +273,7 @@ void ThemedHomeScreen::themeItemClicked(ThemeItem *item)
         e << QString();
         e.send();
     }
+#endif
 }
 
 /*!

@@ -132,9 +132,13 @@ protected Q_SLOTS:
 #endif
 
 protected:
+#ifndef QT_ILLUME_LAUNCHER
 #ifdef QTOPIA_CELL
     BasicEmergencyLock  *emLock;
     BasicSimPinLock     *simLock;
+#endif
+    BasicKeyLock    *keyLock;
+    QAction         *actionLock;
 #endif
 
 #ifdef QTOPIA_PHONEUI
@@ -142,8 +146,6 @@ protected:
     QAction *actionCalls;
 #endif
 
-    BasicKeyLock    *keyLock;
-    QAction         *actionLock;
     QList<InfoData> infoData;
     QTimer          *speeddialTimer;
     QString         speeddial;
