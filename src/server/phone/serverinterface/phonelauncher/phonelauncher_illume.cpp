@@ -365,10 +365,6 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
 #endif
 //    ThemeControl::instance()->refresh();
 
-    connect( ContentSetViewService::instance(), SIGNAL(showContentSet()),
-             this, SLOT(showContentSet()) );
-
-
 #ifdef QTOPIA_PHONEUI
     registrationChanged();
 #endif
