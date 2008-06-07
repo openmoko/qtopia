@@ -1,0 +1,14 @@
+Random list of bugs...
+
+- Scrollindicator not properly drawn. This can be seen with the addressbook
+  application and the contact pane and is due my hacks in Qt to paint less
+  often on start-up.
+- Missed call dialog and new Message dialog confuse e/illume and it raises
+  the one and then the other dialog.
+- Switching the SIM card will show only old SIM entries and not the one of
+  the new simcard. This can be seen when switching the SIM card. It is a bug
+  in src/libraries/qtopiapim and them likely qsimcontext.cpp 
+- Adding an entry from the callhistory to the addressbook is only working when
+  the addressbook application is already running. Looks like a race or such
+- mediaserver is slow and is making some weird noises... need to investigate
+  a replacement involving oeventd
