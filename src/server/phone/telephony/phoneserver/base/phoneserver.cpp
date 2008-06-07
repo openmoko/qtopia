@@ -86,6 +86,10 @@ PhoneServer::PhoneServer( QObject* parent )
     // Create the AT-based modem service.  If QTOPIA_PHONE_DUMMY is set,
     // we create a dummy handler for testing purposes.
 #ifdef QTOPIA_MODEM
+#ifdef QT_ILLUME_LAUNCHER
+    QTelephonyService *service = QModemService::createVendorSpecific
+            ( "modem", QString(), this );
+#else
     char *env = getenv( "QTOPIA_PHONE_DUMMY" );
     QTelephonyService *service;
     if ( env && *env == '1' ) {
@@ -94,6 +98,7 @@ PhoneServer::PhoneServer( QObject* parent )
         service = QModemService::createVendorSpecific
             ( "modem", QString(), this );
     }
+#endif
     service->initialize();
     serviceCount++;
 #endif

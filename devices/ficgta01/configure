@@ -2,6 +2,8 @@
 -displaysize 480x640 
 -no-drm
 -no-sxe
+-no-bluetooth
+-no-infrared
 -sound-system alsa
 -mediaengines gstreamer
 -no-samples

@@ -247,7 +247,9 @@ CellModemManager::CellModemManager(QObject *parent)
 
     // Create the "SIM Applications" instance, to handle commands that
     // may occur outside of a regular session.  e.g. SetupIdleModeText.
+#ifndef QT_ILLUME_LAUNCHER
     SimApp::instance();
+#endif
 
     if(::profilesControlModem) {
         d->m_profiles = new QPhoneProfileManager(this);

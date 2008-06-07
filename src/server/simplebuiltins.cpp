@@ -68,6 +68,7 @@ static QWidget *shutdown()
 }
 QTOPIA_SIMPLE_BUILTIN(shutdown, shutdown);
 
+#ifndef QT_ILLUME_LAUNCHER
 #ifdef QTOPIA_CELL
 
 // "simapp" builtin
@@ -79,5 +80,6 @@ static QWidget *simapp()
 }
 QTOPIA_SIMPLE_BUILTIN(simapp, simapp);
 
+#endif
 #endif
 

@@ -220,10 +220,13 @@ QAbstractHomeScreen::QAbstractHomeScreen(QWidget *parent, Qt::WFlags flags)
     speeddial_preedit = 0;
     connect(speeddialTimer, SIGNAL(timeout()), this, SLOT(activateSpeedDial()));
 
+#ifndef QT_ILLUME_LAUNCHER
     ph = new PressHoldGate("HomeScreen", this);
     connect(ph, SIGNAL(activate(int,bool,bool)), this, SLOT(specialButton(int,bool)));
+#endif
 
 #if defined(QTOPIA_BLUETOOTH) || defined(QTOPIA_INFRARED)
+#ifndef QT_ILLUME_LAUNCHER
     ObexServiceManager *obexmgr = new ObexServiceManager(this);
     ReceiveWindow *recvWindow = new ReceiveWindow(this);
 
@@ -237,6 +240,7 @@ QAbstractHomeScreen::QAbstractHomeScreen(QWidget *parent, Qt::WFlags flags)
             recvWindow, SLOT(completed(int,bool)));
     connect(recvWindow, SIGNAL(abortTransfer(int)),
             obexmgr, SLOT(abortTransfer(int)));
+#endif
 #endif
 
     installEventFilter(this);
@@ -751,7 +755,9 @@ void QAbstractHomeScreen::keyPressEvent(QKeyEvent *k)
         break;
 
     default:
+#ifndef QT_ILLUME_LAUNCHER
         ph->filterDeviceButton(k->key(), true, k->isAutoRepeat());
+#endif
         k->ignore();
     }
 }
@@ -761,10 +767,12 @@ void QAbstractHomeScreen::keyPressEvent(QKeyEvent *k)
   */
 void QAbstractHomeScreen::keyReleaseEvent(QKeyEvent *k)
 {
+#ifndef QT_ILLUME_LAUNCHER
     if (!k->isAutoRepeat())
         speeddialdown = false;
     if (ph->filterDeviceButton(k->key(), false, k->isAutoRepeat()))
         k->accept();
+#endif
 }
 
 #ifdef QTOPIA_PHONEUI

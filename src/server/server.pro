@@ -77,31 +77,23 @@ SERVER_HEADERS+=\
     core_server/qabstractserverinterface.h \
     core_server/systemsuspend.h \
     ui/volumedlg/volumeimpl.h \
-    ui/launcherviews/base/launcherview.h\
     core_server/qcoprouter.h\
-    dbusrouter.h\
     media/alertservice/alertservicetask.h\
     comm/session/qabstractdevicemanager.h\
     processctrl/appmonitor/applicationmonitor.h\
-    infrastructure/storagemonitor/storagemonitor.h \
     core_server/qtopiaserverapplication.h \
     core_server/environmentsetuptask.h \
     ui/standarddialogs.h \
     ui/components/delayedwaitdialog/delayedwaitdialog.h \
-    core_server/pressholdgate.h \
     core_server/applicationlauncher.h \
     processctrl/terminationhandler/qterminationhandlerprovider.h \
     core_server/qcopfile.h \
-    net/netserver/networkserver.h \
     processctrl/startup/startupapps.h \
     core_server/timemonitor.h \
     core_server/timeupdateservice.h \
     core_server/qdeviceindicatorsprovider.h \
-    ui/launcherviews/contentsetview/contentsetlauncherview.h \
-    infrastructure/stabmonitor/stabmonitortask.h \
     infrastructure/signalstrength/defaultsignal.h \
     core_server/dbmigratetask.h \
-    obexservicemanager.h \
     core_server/windowmanagement.h \
     standarddevicefeatures.h \
     core_server/qtopiainputevents.h \
@@ -112,32 +104,24 @@ SERVER_SOURCES+=\
     core_server/qabstractserverinterface.cpp \
     core_server/systemsuspend.cpp \
     ui/volumedlg/volumeimpl.cpp \
-    ui/launcherviews/base/launcherview.cpp\
     core_server/qcoprouter.cpp\
-    dbusrouter.cpp\
     media/alertservice/alertservicetask.cpp \
     comm/session/qabstractdevicemanager.cpp \
     processctrl/appmonitor/applicationmonitor.cpp \
-    infrastructure/storagemonitor/storagemonitor.cpp \
     core_server/qtopiaserverapplication.cpp \
     core_server/environmentsetuptask.cpp \
     ui/standarddialogs.cpp \
     ui/components/delayedwaitdialog/delayedwaitdialog.cpp \
-    core_server/pressholdgate.cpp \
     core_server/applicationlauncher.cpp \
     processctrl/terminationhandler/qterminationhandlerprovider.cpp \
     core_server/qcopfile.cpp \
-    net/netserver/networkserver.cpp \
     processctrl/startup/startupapps.cpp \
     core_server/timemonitor.cpp \
     core_server/timeupdateservice.cpp \
     core_server/qdeviceindicatorsprovider.cpp \
     simplebuiltins.cpp \
-    ui/launcherviews/contentsetview/contentsetlauncherview.cpp \
     processctrl/qdsync/qdsynctask.cpp\
-    obexservicemanager.cpp\
     core_server/dbmigratetask.cpp \
-    infrastructure/stabmonitor/stabmonitortask.cpp \
     processctrl/appshutdown/applicationshutdowntask.cpp \
     infrastructure/signalstrength/defaultsignal.cpp \
     standarddevicefeatures.cpp
@@ -210,8 +194,6 @@ CALIBRATE_SOURCES=ui/components/calibrate/calibrate.cpp \
 
 VPATH+=$$QTOPIA_DEPOT_PATH/src/applications/simapp
 INCLUDEPATH+=$$QTOPIA_DEPOT_PATH/src/applications/simapp
-SIMAPP_HEADERS=simapp.h simicons.h simwidgets.h
-SIMAPP_SOURCES=simapp.cpp simicons.cpp simwidgets.cpp
 
 enable_cell {
     HEADERS+=$$SIMAPP_HEADERS
@@ -283,7 +265,6 @@ UNPORTED_SOURCES=firstuse.cpp
 PHONE_HEADERS=\
     phone/contextlabel/base/contextlabel.h \
     phone/themecontrol/themecontrol.h \
-    ui/launcherviews/documentview/documentview.h \
     processctrl/taskmanagerentry/taskmanagerentry.h \
     core_server/alarmcontrol.h \
     phone/themecontrol/serverthemeview.h \
@@ -295,10 +276,7 @@ PHONE_HEADERS=\
     ui/abstractinterfaces/stdmessagebox/messagebox.h \
     core_server/qabstractmessagebox.h\
     phone/serverinterface/phonelauncher/phonelauncher_illume.h \
-    infrastructure/softmenubar/qsoftmenubarprovider.h \
-    phone/receivewindow.h \
-    net/gprsmonitor/gprsmonitor.h \
-    phone/themecontrol/qabstractthemewidgetfactory.h
+    infrastructure/softmenubar/qsoftmenubarprovider.h
 
 TELEPHONY_HEADERS=\
     phone/telephony/msgcontrol/messagecontrol.h \
@@ -306,8 +284,6 @@ TELEPHONY_HEADERS=\
     phone/callscreen/themed/callscreen.h \
     phone/telephony/dialercontrol/dialercontrol.h \
     pim/savetocontacts/savetocontacts.h \
-    phone/dialer/keypad/quickdial.h \
-    phone/dialer/keypad/numberdisplay.h \
     phone/dialer/touch/dialer.h \
     phone/telephony/dialproxy/dialerservice.h \
     phone/dialer/abstract/qabstractdialerscreen.h\
@@ -321,7 +297,6 @@ PHONE_SOURCES=\
     phone/contextlabel/base/contextlabel.cpp \
     phone/serverinterface/phonelauncher/phonelauncher_illume.cpp \
     phone/themecontrol/themecontrol.cpp \
-    ui/launcherviews/documentview/documentview.cpp \
     processctrl/taskmanagerentry/taskmanagerentry.cpp \
     core_server/alarmcontrol.cpp \
     phone/themecontrol/serverthemeview.cpp \
@@ -331,9 +306,7 @@ PHONE_SOURCES=\
     phone/profileprovider/qphoneprofileprovider.cpp \
     ui/abstractinterfaces/stdmessagebox/messagebox.cpp \
     core_server/qabstractmessagebox.cpp\
-    infrastructure/softmenubar/qsoftmenubarprovider.cpp \
-    phone/receivewindow.cpp \
-    net/gprsmonitor/gprsmonitor.cpp
+    infrastructure/softmenubar/qsoftmenubarprovider.cpp
 
 TELEPHONY_SOURCES=\
     phone/telephony/msgcontrol/messagecontrol.cpp\
@@ -341,8 +314,6 @@ TELEPHONY_SOURCES=\
     phone/callscreen/themed/callscreen.cpp \
     phone/telephony/dialercontrol/dialercontrol.cpp \
     pim/savetocontacts/savetocontacts.cpp \
-    phone/dialer/keypad/quickdial.cpp \
-    phone/dialer/keypad/numberdisplay.cpp \
     phone/dialer/touch/dialer.cpp \
     phone/telephony/dialproxy/dialerservice.cpp \
     phone/telephony/ringcontrol/ringcontrol.cpp\
@@ -359,12 +330,10 @@ enable_telephony {
 enable_cell {
     PHONE_HEADERS+=phone/telephony/callpolicymanager/cell/cellmodemmanager.h\
                    phone/telephony/cell/cellbroadcast/cellbroadcastcontrol.h\
-                   phone/telephony/phoneserver/dummyservice/phoneserverdummymodem.h\
                    phone/telephony/dialfilter/gsm/gsmkeyactions.h\
                    phone/telephony/dialfilter/gsm/gsmkeyfilter.h
     PHONE_SOURCES+=phone/telephony/callpolicymanager/cell/cellmodemmanager.cpp\
                    phone/telephony/cell/cellbroadcast/cellbroadcastcontrol.cpp\
-                   phone/telephony/phoneserver/dummyservice/phoneserverdummymodem.cpp\
                    phone/telephony/dialfilter/gsm/gsmkeyactions.cpp\
                    phone/telephony/dialfilter/gsm/gsmkeyfilter.cpp
 }
