@@ -63,7 +63,7 @@
 #include <QMenu>
 #include <QScrollArea>
 
-#include "phonelauncher.h"
+#include "phonelauncher_illume.h"
 #include "windowmanagement.h"
 #include "contextlabel.h"
 #include "messagebox.h"
@@ -1298,14 +1298,6 @@ void PhoneLauncher::dialVoiceMail()
 void PhoneLauncher::resetMissedCalls()
 {
     m_alertedMissed = 0;
-}
-
-/*!
-  \internal
-  */
-QAbstractHomeScreen *PhoneLauncher::homeScreen() const
-{
-    return m_homeScreen;
 }
 
 /*!
