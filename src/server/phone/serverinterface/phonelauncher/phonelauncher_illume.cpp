@@ -273,6 +273,8 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
                      this, SLOT(showMissedCalls()));
     QObject::connect(m_homeScreen, SIGNAL(showCallHistory()),
                      this, SLOT(showCallHistory()));
+    QObject::connect(m_homeScreen, SIGNAL(dialNumber(QString)),
+                     this, SLOT(showDialerForHomeScreen(QString)));
     QObject::connect(m_homeScreen, SIGNAL(callEmergency(QString)),
                     this, SLOT(requestDial(QString)));
 #endif
@@ -694,6 +696,15 @@ ContextLabel *PhoneLauncher::context()
 }
 
 #ifdef QTOPIA_PHONEUI
+/*!
+  \internal
+  This will show the dialer if the homescreen requests it
+*/
+void PhoneLauncher::showDialerForHomeScreen(const QString &digits)
+{
+    showDialer(digits, true);
+}
+
 /*!
   \internal
   Displays the dialer, preloaded with \a digits.  If \a speedDial

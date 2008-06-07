@@ -87,6 +87,7 @@ public:
 
 public slots:
 #ifdef QTOPIA_PHONEUI
+    void showDialerForHomeScreen(const QString&);
     void showDialer(const QString &, bool speedDial = false);
     void showCallHistory(bool missed = false, const QString &hint = QString());
     void showMissedCalls();
