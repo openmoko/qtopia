@@ -21,3 +21,7 @@ Random list of bugs...
   remaining starts nothing should be done as there is no migration needed. In a
   perfect world the users of the db would create it on the fly and we could just
   kick out dbmigratetask from src/server
+
+- after adding a name from the callhistory to the contacts the callhistory is
+  not updated. Restarting qpe is fixing that. This means the callhistory model
+  needs to be updated on addressbook changes.
