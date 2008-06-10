@@ -800,180 +800,6 @@ private:
     QString m_name;
 };
 
-// define QtopiaApplicationLifeCycle
-QtopiaApplicationLifeCycle::QtopiaApplicationLifeCycle(QtopiaApplication *app)
-: QObject(app), m_queuedQuit(false), m_lazyShutdown(false), m_canQuit(true),
-  m_uiActive(false), m_app(app), m_vso(0)
-{
-    Q_ASSERT(m_app);
-    m_app->installEventFilter(this);
-    m_name = QCoreApplication::applicationName();
-
-    connect(m_app, SIGNAL(lastWindowClosed()), SLOT(lastWindowClosed()));
-
-    updateLazyShutdown();
-    recalculateInfo();
-    recalculateQuit();
-}
-
-bool QtopiaApplicationLifeCycle::willKeepRunning() const
-{
-    return !m_canQuit;
-}
-
-void QtopiaApplicationLifeCycle::reinit()
-{
-    QString newName = QCoreApplication::applicationName();
-    if(newName != m_name) {
-        m_name = newName;
-
-        // Ahhh.  Name change
-        delete m_vso;
-        m_vso = 0;
-
-        // Reinitialise the ValueSpace layers
-        // QValueSpace::reinitValuespace();
-
-        QValueSpaceObject *obj = vso();
-        for(QMap<QString, QObject *>::ConstIterator iter = m_runningTasks.begin();
-                iter != m_runningTasks.end();
-                ++iter)
-            obj->setAttribute("Tasks/" + iter.key(), true);
-
-        recalculateQuit();
-        recalculateInfo();
-    }
-}
-
-void QtopiaApplicationLifeCycle::doQuit()
-{
-    if(!m_canQuit) {
-        m_queuedQuit = false;
-        return;
-    }
-    recalculateQuit();
-    m_queuedQuit = false;
-
-    if(!m_canQuit)
-        return;
-
-    if(!m_lazyShutdown)
-        emit quit();
-}
-
-void QtopiaApplicationLifeCycle::lastWindowClosed()
-{
-    if (!m_runningTasks.isEmpty() || m_lazyShutdown)
-        return;
-
-    emit quit();
-}
-
-bool QtopiaApplicationLifeCycle::eventFilter(QObject *obj, QEvent *e)
-{
-    if(e->type() == QEvent::Show || e->type() == QEvent::Hide) {
-        if(obj->isWidgetType() && static_cast<QWidget *>(obj)->isTopLevel()) {
-            recalculateQuit();
-        }
-    }
-
-    return QObject::eventFilter(obj, e);
-}
-
-void QtopiaApplicationLifeCycle::updateLazyShutdown()
-{
-    QSettings cfg(QLatin1String("Trolltech"), QLatin1String("Launcher"));
-    cfg.beginGroup(QLatin1String("AppLoading"));
-    m_lazyShutdown = cfg.value(QLatin1String("LazyShutdown"), false).toBool();
-}
-
-void QtopiaApplicationLifeCycle::recalculateInfo()
-{
-    vso()->setAttribute("Info/Pid", ::getpid());
-    vso()->setAttribute("Info/Name", QtopiaApplication::applicationName());
-}
-
-void QtopiaApplicationLifeCycle::recalculateQuit()
-{
-    bool runningTasks = !m_runningTasks.isEmpty();
-    bool uiActive = false;
-
-    QWidgetList widgets = m_app->topLevelWidgets();
-    for(int ii = 0; ii < widgets.count() && !uiActive; ++ii) {
-        if(!widgets.at(ii)->isHidden() || widgets.at(ii)->isMinimized())
-            uiActive = true;
-    }
-
-    if(uiActive != m_uiActive) {
-        vso()->setAttribute("Tasks/UI", uiActive);
-        m_uiActive = uiActive;
-    }
-    m_canQuit = !runningTasks && !uiActive;
-
-    if(m_canQuit && !m_queuedQuit) {
-        m_queuedQuit = true;
-        QTimer::singleShot(0, this, SLOT(doQuit()));
-    }
-}
-
-void QtopiaApplicationLifeCycle::registerRunningTask(const QString &name,
-                                                     QObject *obj)
-{
-    Q_ASSERT(name != "UI");
-
-    if (m_runningTasks.contains(name)) {
-        QObject *oldObj = m_runningTasks.value(name);
-        if (oldObj)
-            QObject::disconnect(oldObj, SIGNAL(destroyed(QObject*)),
-                    this, SLOT(unregisterRunningTask(QObject*)));
-        m_runningTasks[name] = obj;
-    } else {
-        m_runningTasks.insert(name, obj);
-        vso()->setAttribute("Tasks/" + name, true);
-    }
-
-    if(obj)
-        QObject::connect(obj, SIGNAL(destroyed(QObject*)),
-                         this, SLOT(unregisterRunningTask(QObject*)));
-
-    recalculateQuit();
-}
-
-void QtopiaApplicationLifeCycle::unregisterRunningTask(const QString &name)
-{
-    QMap<QString, QObject *>::Iterator iter = m_runningTasks.find(name);
-    if(iter != m_runningTasks.end()) {
-        vso()->removeAttribute("Tasks/" + name);
-        m_runningTasks.erase(iter);
-    }
-
-    recalculateQuit();
-}
-
-void QtopiaApplicationLifeCycle::unregisterRunningTask(QObject *obj)
-{
-    Q_ASSERT(obj);
-
-    for(QMap<QString, QObject *>::ConstIterator iter = m_runningTasks.begin();
-        iter != m_runningTasks.end();
-        ++iter) {
-        if(obj == (*iter)) {
-            unregisterRunningTask(iter.key());
-            return;
-        }
-    }
-}
-
-QValueSpaceObject *QtopiaApplicationLifeCycle::vso()
-{
-    if(!m_vso) {
-        m_vso = new QValueSpaceObject("/System/Applications/" + m_name.toLatin1());
-        m_vso->setAttribute("Tasks/UI", m_uiActive);
-    }
-
-    return m_vso;
-}
-
 /*
    Currently only modifies the short date format string and time format string
 */
@@ -1848,6 +1674,182 @@ public:
     QBasicTimer focusOutTimer;
     QPointer<QWidget> focusOutWidget;
 };
+
+
+// define QtopiaApplicationLifeCycle
+QtopiaApplicationLifeCycle::QtopiaApplicationLifeCycle(QtopiaApplication *app)
+: QObject(app), m_queuedQuit(false), m_lazyShutdown(false), m_canQuit(true),
+  m_uiActive(false), m_app(app), m_vso(0)
+{
+    Q_ASSERT(m_app);
+    m_app->installEventFilter(this);
+    m_name = QCoreApplication::applicationName();
+
+    connect(m_app, SIGNAL(lastWindowClosed()), SLOT(lastWindowClosed()));
+
+    updateLazyShutdown();
+    recalculateInfo();
+    recalculateQuit();
+}
+
+bool QtopiaApplicationLifeCycle::willKeepRunning() const
+{
+    return !m_canQuit;
+}
+
+void QtopiaApplicationLifeCycle::reinit()
+{
+    QString newName = QCoreApplication::applicationName();
+    if(newName != m_name) {
+        m_name = newName;
+
+        // Ahhh.  Name change
+        delete m_vso;
+        m_vso = 0;
+
+        // Reinitialise the ValueSpace layers
+        // QValueSpace::reinitValuespace();
+
+        QValueSpaceObject *obj = vso();
+        for(QMap<QString, QObject *>::ConstIterator iter = m_runningTasks.begin();
+                iter != m_runningTasks.end();
+                ++iter)
+            obj->setAttribute("Tasks/" + iter.key(), true);
+
+        recalculateQuit();
+        recalculateInfo();
+    }
+}
+
+void QtopiaApplicationLifeCycle::doQuit()
+{
+    if(!m_canQuit) {
+        m_queuedQuit = false;
+        return;
+    }
+    recalculateQuit();
+    m_queuedQuit = false;
+
+    if(!m_canQuit)
+        return;
+
+    if(!m_lazyShutdown)
+        emit quit();
+}
+
+void QtopiaApplicationLifeCycle::lastWindowClosed()
+{
+    if (!m_runningTasks.isEmpty() || m_lazyShutdown)
+        return;
+
+    emit quit();
+}
+
+bool QtopiaApplicationLifeCycle::eventFilter(QObject *obj, QEvent *e)
+{
+    if(e->type() == QEvent::Show || e->type() == QEvent::Hide) {
+        if(obj->isWidgetType() && static_cast<QWidget *>(obj)->isTopLevel()) {
+            recalculateQuit();
+        }
+    }
+
+    return QObject::eventFilter(obj, e);
+}
+
+void QtopiaApplicationLifeCycle::updateLazyShutdown()
+{
+    QSettings cfg(QLatin1String("Trolltech"), QLatin1String("Launcher"));
+    cfg.beginGroup(QLatin1String("AppLoading"));
+    m_lazyShutdown = cfg.value(QLatin1String("LazyShutdown"), false).toBool();
+}
+
+void QtopiaApplicationLifeCycle::recalculateInfo()
+{
+    vso()->setAttribute("Info/Pid", ::getpid());
+    vso()->setAttribute("Info/Name", QtopiaApplication::applicationName());
+}
+
+void QtopiaApplicationLifeCycle::recalculateQuit()
+{
+    bool runningTasks = !m_runningTasks.isEmpty();
+    bool uiActive = false;
+
+    QWidgetList widgets = m_app->topLevelWidgets();
+    for(int ii = 0; ii < widgets.count() && !uiActive; ++ii) {
+        if(!widgets.at(ii)->isHidden() || widgets.at(ii)->isMinimized())
+            uiActive = true;
+    }
+
+    if(uiActive != m_uiActive) {
+        vso()->setAttribute("Tasks/UI", uiActive);
+        m_uiActive = uiActive;
+    }
+    m_canQuit = !runningTasks && !uiActive;
+
+    if(m_canQuit && !m_queuedQuit) {
+        m_queuedQuit = true;
+        QTimer::singleShot(0, this, SLOT(doQuit()));
+    }
+}
+
+void QtopiaApplicationLifeCycle::registerRunningTask(const QString &name,
+                                                     QObject *obj)
+{
+    Q_ASSERT(name != "UI");
+
+    if (m_runningTasks.contains(name)) {
+        QObject *oldObj = m_runningTasks.value(name);
+        if (oldObj)
+            QObject::disconnect(oldObj, SIGNAL(destroyed(QObject*)),
+                    this, SLOT(unregisterRunningTask(QObject*)));
+        m_runningTasks[name] = obj;
+    } else {
+        m_runningTasks.insert(name, obj);
+        vso()->setAttribute("Tasks/" + name, true);
+    }
+
+    if(obj)
+        QObject::connect(obj, SIGNAL(destroyed(QObject*)),
+                         this, SLOT(unregisterRunningTask(QObject*)));
+
+    recalculateQuit();
+}
+
+void QtopiaApplicationLifeCycle::unregisterRunningTask(const QString &name)
+{
+    QMap<QString, QObject *>::Iterator iter = m_runningTasks.find(name);
+    if(iter != m_runningTasks.end()) {
+        vso()->removeAttribute("Tasks/" + name);
+        m_runningTasks.erase(iter);
+    }
+
+    recalculateQuit();
+}
+
+void QtopiaApplicationLifeCycle::unregisterRunningTask(QObject *obj)
+{
+    Q_ASSERT(obj);
+
+    for(QMap<QString, QObject *>::ConstIterator iter = m_runningTasks.begin();
+        iter != m_runningTasks.end();
+        ++iter) {
+        if(obj == (*iter)) {
+            unregisterRunningTask(iter.key());
+            return;
+        }
+    }
+}
+
+QValueSpaceObject *QtopiaApplicationLifeCycle::vso()
+{
+    if(!m_vso) {
+        m_vso = new QValueSpaceObject("/System/Applications/" + m_name.toLatin1());
+        m_vso->setAttribute("Tasks/UI", m_uiActive);
+    }
+
+    return m_vso;
+}
+
 
 int qtopia_muted=0;
 
