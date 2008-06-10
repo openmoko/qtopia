@@ -13,11 +13,5 @@ Random list of bugs...
   properly initialized... also taking a look at the actual sim identity would
   be clever.
 
-- Adding an entry from the callhistory to the addressbook is only working when
-  the addressbook application is already running. Looks like a race or such
-
-  I suspect: I played with qcop and see that the addressbook gets launched
-  but is quitting immediately. So maybe a keep running or such is missing?
-
 - mediaserver is slow and is making some weird noises... need to investigate
   a replacement involving oeventd

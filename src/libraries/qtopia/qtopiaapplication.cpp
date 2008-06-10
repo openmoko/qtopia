@@ -741,7 +741,7 @@ void FadeThread::doFade()
 
 
 
-
+class QtopiaApplicationData;
 
 
 // declare QtopiaApplicationLifecycle
@@ -762,8 +762,9 @@ void FadeThread::doFade()
 class QtopiaApplicationLifeCycle : public QObject
 {
 Q_OBJECT
+    friend class QtopiaApplication;
 public:
-    QtopiaApplicationLifeCycle(QtopiaApplication * app);
+    QtopiaApplicationLifeCycle(QtopiaApplicationData* data, QtopiaApplication * app);
 
     void registerRunningTask(const QString &, QObject *);
     void unregisterRunningTask(const QString &);
@@ -795,6 +796,7 @@ private:
     QMap<QString, QObject *> m_runningTasks;
     bool m_canQuit;
     bool m_uiActive;
+    QtopiaApplicationData *m_data;
     QtopiaApplication *m_app;
     QValueSpaceObject *m_vso;
     QString m_name;
@@ -1677,12 +1679,13 @@ public:
 
 
 // define QtopiaApplicationLifeCycle
-QtopiaApplicationLifeCycle::QtopiaApplicationLifeCycle(QtopiaApplication *app)
+QtopiaApplicationLifeCycle::QtopiaApplicationLifeCycle(QtopiaApplicationData* data, QtopiaApplication *app)
     : QObject(app)
     , m_queuedQuit(false)
     , m_lazyShutdown(false)
     , m_canQuit(true)
     , m_uiActive(false)
+    , m_data(data)
     , m_app(app)
     , m_vso(0)
 {
@@ -1738,6 +1741,7 @@ void QtopiaApplicationLifeCycle::doQuit()
     if(!m_canQuit)
         return;
 
+    qWarning() << getpid() << __PRETTY_FUNCTION__ << __LINE__ << m_lazyShutdown << m_data->qcopQok;
     if(!m_lazyShutdown)
         emit quit();
 }
@@ -1789,9 +1793,10 @@ void QtopiaApplicationLifeCycle::recalculateQuit()
         vso()->setAttribute("Tasks/UI", uiActive);
         m_uiActive = uiActive;
     }
-    m_canQuit = !runningTasks && !uiActive;
+    m_canQuit = !runningTasks && !uiActive && m_data->qcopQok;
 
     if(m_canQuit && !m_queuedQuit) {
+        qWarning() << getpid() << __PRETTY_FUNCTION__ << __LINE__ << m_lazyShutdown << m_data->qcopQok;
         m_queuedQuit = true;
         QTimer::singleShot(0, this, SLOT(doQuit()));
     }
@@ -2433,7 +2438,7 @@ void QtopiaApplication::initApp( int argc, char **argv )
         if(d->lifeCycle) {
             d->lifeCycle->reinit();
         } else {
-            d->lifeCycle = new QtopiaApplicationLifeCycle(this);
+            d->lifeCycle = new QtopiaApplicationLifeCycle(d, this);
             QObject::connect(d->lifeCycle, SIGNAL(quit()), this, SLOT(quit()));
         }
     }
@@ -4397,18 +4402,23 @@ void QtopiaApplication::removeSenderFromStylusDict()
 int QtopiaApplication::exec()
 {
 #ifndef QTOPIA_DBUS_IPC
+    qWarning() << __PRETTY_FUNCTION__ << __LINE__;
     d->qcopQok = true;
     d->sendQCopQ();
+    qWarning() << __PRETTY_FUNCTION__ << __LINE__;
 #endif
 
     return QApplication::exec();
+    qWarning() << __PRETTY_FUNCTION__ << __LINE__;
 
     {
         QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("closing(QString)") );
         e << d->appName;
     }
 
+    qWarning() << __PRETTY_FUNCTION__ << __LINE__;
     processEvents();
+    qWarning() << __PRETTY_FUNCTION__ << __LINE__;
     return 0;
 }
 
@@ -4433,6 +4443,7 @@ void QtopiaApplication::tryQuit()
     processEvents();
 
     quit();
+    qWarning() << __PRETTY_FUNCTION__ << __LINE__;
 }
 
 /*!
