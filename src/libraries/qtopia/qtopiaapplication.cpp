@@ -1678,8 +1678,13 @@ public:
 
 // define QtopiaApplicationLifeCycle
 QtopiaApplicationLifeCycle::QtopiaApplicationLifeCycle(QtopiaApplication *app)
-: QObject(app), m_queuedQuit(false), m_lazyShutdown(false), m_canQuit(true),
-  m_uiActive(false), m_app(app), m_vso(0)
+    : QObject(app)
+    , m_queuedQuit(false)
+    , m_lazyShutdown(false)
+    , m_canQuit(true)
+    , m_uiActive(false)
+    , m_app(app)
+    , m_vso(0)
 {
     Q_ASSERT(m_app);
     m_app->installEventFilter(this);
