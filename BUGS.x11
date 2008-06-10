@@ -15,3 +15,9 @@ Random list of bugs...
 
 - mediaserver is slow and is making some weird noises... need to investigate
   a replacement involving oeventd
+
+- dbmigratetask is taking five seconds on system start. This is unfortunate
+  as only on the initial start the databases need to be created and for the
+  remaining starts nothing should be done as there is no migration needed. In a
+  perfect world the users of the db would create it on the fly and we could just
+  kick out dbmigratetask from src/server
