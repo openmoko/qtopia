@@ -135,7 +135,9 @@ QModemIndicators::QModemIndicators( QModemService *service )
                         this, SLOT(pollBatteryCharge()) );
 
     // Turn on time zone reporting.
+#ifndef QT_ILLUME_LAUNCHER
     service->primaryAtChat()->chat( "AT+CTZR=1" );
+#endif
 }
 
 /*!
