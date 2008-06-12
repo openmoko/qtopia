@@ -54,31 +54,6 @@ private slots:
     void cnapNotification( const QString& msg );
 };
 
-class Ficgta01SimToolkit : public QModemSimToolkit
-{
-    Q_OBJECT
-public:
-    Ficgta01SimToolkit( QModemService *service );
-    ~Ficgta01SimToolkit();
-
-public slots:
-    void initialize();
-    void begin();
-    void sendResponse( const QSimTerminalResponse& resp );
-    void sendEnvelope( const QSimEnvelope& env );
-
-private slots:
-    void sataNotification( const QString& msg );
-    void satnNotification( const QString& msg );
-
-private:
-    QSimCommand lastCommand;
-    QByteArray lastCommandBytes;
-    QSimCommand mainMenu;
-    QByteArray mainMenuBytes;
-    bool lastResponseWasExit;
-};
-
 class Ficgta01PhoneBook : public QModemPhoneBook
 {
     Q_OBJECT

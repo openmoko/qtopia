@@ -149,114 +149,6 @@ void Ficgta01CallProvider::cnapNotification( const QString& msg )
         call->emitNotification( QPhoneCall::CallingName, name );
 }
 
-Ficgta01SimToolkit::Ficgta01SimToolkit( QModemService *service )
-    : QModemSimToolkit( service )
-{
-    supportsStk = false;
-    lastCommand.setType( QSimCommand::NoCommand );
-    mainMenu = lastCommand;
-    lastResponseWasExit = false;
-
-    service->primaryAtChat()->registerNotificationType
-        ( "%SATA:", this, SLOT(sataNotification(QString)) );
-    service->primaryAtChat()->registerNotificationType
-	( "%SATN:", this, SLOT(satnNotification(QString)) );
-}
-
-Ficgta01SimToolkit::~Ficgta01SimToolkit()
-{
-}
-
-void Ficgta01SimToolkit::initialize()
-{
-    // We don't need to do anything here, because SIM toolkit initialization
-    // happens during the detection code.
-    QModemSimToolkit::initialize();
-}
-
-void Ficgta01SimToolkit::begin()
-{
-    if ( !supportsStk ) {
-
-	// SIM toolkit functionality is not available.
-	emit beginFailed();
-
-    } else if ( lastCommand.type() == QSimCommand::SetupMenu ) {
-
-	// We just fetched the main menu, so return what we fetched.
-	emit command( lastCommand );
-
-    } else if ( mainMenu.type() == QSimCommand::SetupMenu ) {
-
-	// We have a cached main menu from a previous invocation.
-	lastCommand = mainMenu;
-	lastCommandBytes = mainMenuBytes;
-	emit command( mainMenu );
-
-    } else {
-
-	// The SIM toolkit is in an unknown state, so we cannot proceed.
-	// If the FICGTA01 could perform a proper STK reset, we might have
-	// been able to do something.
-	emit beginFailed();
-
-    }
-}
-
-void Ficgta01SimToolkit::sendResponse( const QSimTerminalResponse& resp )
-{
-    if ( resp.command().type() == QSimCommand::SelectItem &&
-         resp.result() == QSimTerminalResponse::BackwardMove ) {
-        lastResponseWasExit = true;
-    } else {
-        lastResponseWasExit = false;
-    }
-    service()->primaryAtChat()->chat
-        ( "AT%SATR=\"" + QAtUtils::toHex( resp.toPdu() ) + "\"" );
-}
-
-void Ficgta01SimToolkit::sendEnvelope( const QSimEnvelope& env )
-{
-    service()->primaryAtChat()->chat
-        ( "AT%SATE=\"" + QAtUtils::toHex( env.toPdu() ) + "\"" );
-}
-
-void Ficgta01SimToolkit::sataNotification( const QString& msg )
-{
-    // SIM toolkit command indication.
-    QByteArray bytes = QAtUtils::fromHex( msg.mid(6) );
-    if ( bytes.size() > 0 ) {
-
-        lastCommandBytes = bytes;
-        lastCommand = QSimCommand::fromPdu( bytes );
-        if ( lastCommand.type() == QSimCommand::SetupMenu ) {
-            // Cache the main menu, because we won't get it again!
-            mainMenuBytes = bytes;
-            mainMenu = lastCommand;
-        }
-        qLog(AtChat)<< "SIM command of type" << (int)(lastCommand.type());
-        emitCommandAndRespond( lastCommand );
-
-    } else if ( lastResponseWasExit &&
-                mainMenu.type() == QSimCommand::SetupMenu ) {
-
-        // We exited from a submenu and we got an empty "%SATA"
-        // response.  This is the FICGTA01's way of telling us that we
-        // now need to display the main menu.  It would have been
-        // better if the FICGTA01 resent the menu to us itself.
-        lastCommandBytes = mainMenuBytes;
-        lastCommand = mainMenu;
-        qLog(AtChat)<< "Simulating SIM command of type"<< (int)(lastCommand.type());
-        emit command( lastCommand );
-
-    }
-}
-
-void Ficgta01SimToolkit::satnNotification( const QString& )
-{
-    // Nothing to do here at present.  Just ignore the %SATN notifications.
-}
-
 Ficgta01PhoneBook::Ficgta01PhoneBook( QModemService *service )
     : QModemPhoneBook( service )
 {
@@ -510,11 +402,6 @@ Ficgta01ModemService::Ficgta01ModemService
      QTimer::singleShot( 2500, this, SLOT(firstCsqQuery()) );
 
 
-     // Turn on SIM toolkit support in the modem.  This must be done
-    // very early in the process, to ensure that it happens before
-    // the first AT+CFUN command.
-    chat( "AT%SATC=1,\"FFFFFFFFFF\"", this, SLOT(configureDone(bool)) );
-
     // Enable %CPRI for ciphering indications.
 //    chat( "AT%CPRI=1" );
 
@@ -543,11 +430,6 @@ Ficgta01ModemService::~Ficgta01ModemService()
 
 void Ficgta01ModemService::initialize()
 {
-#if 0
-    if ( !supports<QSimToolkit>() )
-        addInterface( new Ficgta01SimToolkit( this ) );
-#endif
-
     if ( !supports<QPinManager>() )
         addInterface( new Ficgta01PinManager( this ) );
 
