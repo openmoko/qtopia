@@ -1979,6 +1979,7 @@ void CallScreen::callDropped(const QPhoneCall &)
 /*! \internal */
 void CallScreen::callDialing(const QPhoneCall &)
 {
+    setItemActive("keypad-box", false);
     setItemActive("menu-box", true);
     setItemActive("answer", false);
     setItemActive("endcall", true);
@@ -1992,6 +1993,7 @@ void CallScreen::callIncoming(const QPhoneCall &)
 {
     QtopiaInputEvents::addKeyboardFilter( new CallScreenKeyboardFilter );
 
+    setItemActive("keypad-box", false);
     setItemActive("menu-box", true);
     setItemActive("hold", false);
     setItemActive("endcall", false);
