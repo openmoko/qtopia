@@ -443,7 +443,7 @@ void QModemSMSReader::nmiStatusReceived( bool, const QAtResult& result )
     // Some modems fail to process this command for a small period
     // of time after the AT+CPIN request at startup, so we need
     // to repeat the command if it fails.
-    new QRetryAtChat( d->service->primaryAtChat(), line, 5 );
+    new QRetryAtChat( d->service->primaryAtChat(), line, 25 );
 
     // We are now initialized.
     d->initializing = false;
