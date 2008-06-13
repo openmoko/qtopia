@@ -1,7 +1,8 @@
 THEMES=finxi
 PROJECTS-=\
     games/qasteroids\
-    applications/camera
+    applications/camera\
+    libraries/qtopiasmil
 
 PROJECTS+=\
     tools/phonebounce\

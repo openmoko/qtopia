@@ -66,7 +66,19 @@ void AccountList::readAccounts()
         accountconf.endGroup();
         accountconf.beginGroup( "account_" + QString::number(x) );
         account->readSettings(&accountconf);
-        append(account);
+
+// If we are compiling without MMS and have an MMS configuration, don't show this
+#ifdef QTOPIA_NO_SMS
+        if (account->accountType() == QMailAccount::MMS) {
+            delete account;
+        } else 
+#else
+        {
+            append(account);
+        }
+#endif
+
+        qWarning() << account->accountType() << QMailAccount::MMS;
 
 #ifndef QTOPIA_NO_SMS
         if (account->accountType() == QMailAccount::SMS)
