@@ -230,7 +230,7 @@ void Alarm::applyDailyAlarm()
 
 bool Alarm::eventFilter(QObject *o, QEvent *e)
 {
-    if (o == alarmDaysEdit) {
+    if (o == alarmDaysEdit && alarmEnabled->isChecked()) {
         if (e->type() == QEvent::MouseButtonRelease) {
             changeAlarmDays();
             return true;
