@@ -23,6 +23,7 @@
 #include "attachmentoptions.h"
 #include "browser.h"
 #include <qtopiaservices.h>
+#include <qprintingsupport.h>
 #include <QAction>
 #include <QMailMessage>
 #include <QMenu>
@@ -33,6 +34,7 @@
 GenericViewer::GenericViewer( QWidget* parent )
     : QMailViewerInterface( parent ),
       browser( new Browser(parent) ),
+      printAction( 0 ),
       message( 0 ),
       plainTextMode( false ),
       containsNumbers( false )
@@ -49,9 +51,11 @@ GenericViewer::GenericViewer( QWidget* parent )
     richTextModeAction->setVisible(plainTextMode);
     richTextModeAction->setWhatsThis(tr("Display the message contents in Rich text format."));
 
-    printAction = new QAction(QIcon(":icon/print"), tr("Print"), this);
-    printAction->setVisible(false);
-    printAction->setWhatsThis(tr("Print the message contents."));
+    if (QPrintingSupport::hasPrintingSupport()) {
+        printAction = new QAction(QIcon(":icon/print"), tr("Print"), this);
+        printAction->setVisible(false);
+        printAction->setWhatsThis(tr("Print the message contents."));
+    }
 
     dialAction = new QAction(this);
     dialAction->setVisible(false);
@@ -79,7 +83,9 @@ void GenericViewer::addActions(QMenu* menu) const
 
     menu->addAction(plainTextModeAction);
     menu->addAction(richTextModeAction);
-    menu->addAction(printAction);
+
+    if (printAction)
+        menu->addAction(printAction);
 
     if (containsNumbers) {
         menu->addSeparator();
@@ -95,7 +101,8 @@ bool GenericViewer::setMessage(const QMailMessage& mail)
     message = &mail;
 
     setPlainTextMode(plainTextMode);
-    printAction->setVisible(true);
+    if (printAction)
+        printAction->setVisible(true);
 
     containsNumbers = !browser->embeddedNumbers().isEmpty();
     dialAction->setVisible(false);
@@ -121,7 +128,7 @@ void GenericViewer::action(QAction* action)
         setPlainTextMode(true);
     } else if (action == richTextModeAction) {
         setPlainTextMode(false);
-    } else if (action == printAction) {
+    } else if (printAction && action == printAction) {
         print();
     } else if (action == dialAction) {
         emit anchorClicked(action->data().toString());

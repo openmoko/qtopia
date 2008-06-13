@@ -31,6 +31,7 @@
 #include <qtopiaservices.h>
 #include <qcontent.h>
 #include <qdrmcontentplugin.h>
+#include <qprintingsupport.h>
 
 #include <QPoint>
 #include <QMessageBox>
@@ -145,7 +146,8 @@ ImageViewer *PhotoEditUI::imageViewer()
         viewer_edit_action = viewer_menu->addAction( QIcon( ":icon/edit" ), tr( "Edit" ), this, SLOT(editCurrentSelection()) );
         viewer_menu->addAction( QIcon( ":icon/info" ), tr( "Properties" ), this, SLOT(launchPropertiesDialog()) );
         viewer_menu->addAction( QIcon( ":icon/beam" ), tr( "Send" ), this, SLOT(beamImage()) );
-        viewer_menu->addAction( QIcon( ":icon/print" ), tr( "Print" ), this, SLOT(printImage()) );
+        if (QPrintingSupport::hasPrintingSupport())
+            viewer_menu->addAction( QIcon( ":icon/print" ), tr( "Print" ), this, SLOT(printImage()) );
         viewer_menu->addAction( QIcon( ":icon/trash" ), tr( "Delete" ), this, SLOT(deleteImage()) );
 
         connect( viewer_menu, SIGNAL(aboutToShow()), this, SLOT(viewerMenuAboutToShow()) );
@@ -239,7 +241,8 @@ QWidget *PhotoEditUI::selectorWidget()
         edit_action = selector_menu->addAction( QIcon( ":icon/edit" ), tr( "Edit" ), this, SLOT(editCurrentSelection()) );
         properties_action = selector_menu->addAction( QIcon( ":icon/info" ), tr( "Properties" ), this, SLOT(launchPropertiesDialog()) );
         beam_action = selector_menu->addAction( QIcon( ":icon/beam" ), tr( "Send" ), this, SLOT(beamImage()) );
-        print_action = selector_menu->addAction( QIcon( ":icon/print" ), tr( "Print" ), this, SLOT(printImage()) );
+        if (QPrintingSupport::hasPrintingSupport())
+            print_action = selector_menu->addAction( QIcon( ":icon/print" ), tr( "Print" ), this, SLOT(printImage()) );
         delete_action = selector_menu->addAction( QIcon( ":icon/trash" ), tr( "Delete" ), this, SLOT(deleteImage()) );
 
         slide_show_action->setVisible( false );

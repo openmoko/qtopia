@@ -286,7 +286,8 @@ TextEdit::TextEdit( QWidget *parent, Qt::WFlags f )
     contextMenu->addAction( findAction );
     contextMenu->addMenu( settingsMenu );
     contextMenu->addSeparator();
-    contextMenu->addAction( QIcon( ":icon/print" ), tr( "Print" ), this, SLOT(print()) );
+    if (QPrintingSupport::hasPrintingSupport())
+        contextMenu->addAction( QIcon( ":icon/print" ), tr( "Print" ), this, SLOT(print()) );
     contextMenu->addAction( QIcon( ":icon/cancel" ), tr( "Cancel" ), this, SLOT(fileRevert()) );
 
     bool wrap;

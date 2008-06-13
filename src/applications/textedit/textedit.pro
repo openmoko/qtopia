@@ -1,4 +1,5 @@
 qtopia_project(qtopia app)
+depends(libraries/qtopiaprinting)
 TARGET=textedit
 CONFIG+=qtopia_main
 

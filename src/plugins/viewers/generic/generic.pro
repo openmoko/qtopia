@@ -1,4 +1,5 @@
 qtopia_project(qtopia plugin)
+depends(libraries/qtopiaprinting)
 TARGET=genericviewer
 
 !enable_cell {
