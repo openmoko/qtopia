@@ -27,6 +27,7 @@
 #include <qdocumentselector.h>
 #include <qsoftmenubar.h>
 #include <qtopiaservices.h>
+#include <qprintingsupport.h>
 
 #include <QListWidget>
 #include <QClipboard>

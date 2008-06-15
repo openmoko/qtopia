@@ -3,9 +3,11 @@ TARGET=qtopiaprinting
 
 FORMS += printdialogbase.ui
 
-HEADERS += qprinterinterface.h
+HEADERS += qprinterinterface.h \
+           qprintingsupport.h
 
-SOURCES += qprinterinterface.cpp
+SOURCES += qprinterinterface.cpp \
+           qprintingsupport.cpp
            
 unix:!x11 {
     PRIVATE_HEADERS += qprintdialogcreator_p.h
