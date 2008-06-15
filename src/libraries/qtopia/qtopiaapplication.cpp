@@ -1741,7 +1741,6 @@ void QtopiaApplicationLifeCycle::doQuit()
     if(!m_canQuit)
         return;
 
-    qWarning() << getpid() << __PRETTY_FUNCTION__ << __LINE__ << m_lazyShutdown << m_data->qcopQok;
     if(!m_lazyShutdown)
         emit quit();
 }
@@ -1796,7 +1795,6 @@ void QtopiaApplicationLifeCycle::recalculateQuit()
     m_canQuit = !runningTasks && !uiActive && m_data->qcopQok;
 
     if(m_canQuit && !m_queuedQuit) {
-        qWarning() << getpid() << __PRETTY_FUNCTION__ << __LINE__ << m_lazyShutdown << m_data->qcopQok;
         m_queuedQuit = true;
         QTimer::singleShot(0, this, SLOT(doQuit()));
     }
@@ -4402,23 +4400,18 @@ void QtopiaApplication::removeSenderFromStylusDict()
 int QtopiaApplication::exec()
 {
 #ifndef QTOPIA_DBUS_IPC
-    qWarning() << __PRETTY_FUNCTION__ << __LINE__;
     d->qcopQok = true;
     d->sendQCopQ();
-    qWarning() << __PRETTY_FUNCTION__ << __LINE__;
 #endif
 
     return QApplication::exec();
-    qWarning() << __PRETTY_FUNCTION__ << __LINE__;
 
     {
         QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("closing(QString)") );
         e << d->appName;
     }
 
-    qWarning() << __PRETTY_FUNCTION__ << __LINE__;
     processEvents();
-    qWarning() << __PRETTY_FUNCTION__ << __LINE__;
     return 0;
 }
 
@@ -4443,7 +4436,6 @@ void QtopiaApplication::tryQuit()
     processEvents();
 
     quit();
-    qWarning() << __PRETTY_FUNCTION__ << __LINE__;
 }
 
 /*!
