@@ -28,3 +28,14 @@ Random list of bugs...
 - after adding a name from the callhistory to the contacts the callhistory is
   not updated. Restarting qpe is fixing that. This means the callhistory model
   needs to be updated on addressbook changes.
+
+- Soft menu is not always updated. We have various bug reports from regina
+  for that.
+
+  After a small chat with raster the root cause is that we do use X11 and QCOP
+  to notify about the change of _content_ of these labels and the labes are
+  only updated when the NET_ACTIVE_WINDOW is changed as well. There is no
+  guarnatee which event (QCOP or X11 PropertyNotify) gets delivered first
+  making a good race. The soft menu code has to be changed to use X properties
+  on the app window that the softmenubarprovider is going to use. Everything
+  else will have races.
