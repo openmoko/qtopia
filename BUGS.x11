@@ -16,6 +16,9 @@ Random list of bugs...
 - mediaserver is slow and is making some weird noises... need to investigate
   a replacement involving oeventd
 
+  using playbin on the neo adds an overhead of 5 seconds. We might add a special
+  case involving filesrc ! decodebin ! autoaudiosink.
+
 - dbmigratetask is taking five seconds on system start. This is unfortunate
   as only on the initial start the databases need to be created and for the
   remaining starts nothing should be done as there is no migration needed. In a
