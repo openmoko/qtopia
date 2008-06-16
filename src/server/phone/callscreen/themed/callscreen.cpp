@@ -1235,6 +1235,11 @@ void CallScreen::stateChanged()
         const QPhoneCall &call(*it);
         item = findCall(call, m);
         if (!item) {
+            // The modem has no identifier for us. There will be another state
+            // changed signal and then we can start showing it to the user.
+            if (call.modemIdentifier() == -1)
+                continue;
+
             item = new CallItemEntry(control, call, m);
             m->addEntry(item);
             manualLayout();
