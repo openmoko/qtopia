@@ -438,8 +438,10 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
     contextMenu->addAction(actionNew);
     contextMenu->addAction(actionSendCat);
 
+#ifndef QT_ILLUME_LAUNCHER
     actionSpeedDial = new QAction(QIcon(":icon/phone/speeddial"), tr("Add to Speed Dial..."), this);
     connect(actionSpeedDial, SIGNAL(triggered()), this, SLOT(addToSpeedDial()));
+#endif
 
     /* groups */
     contextMenu->addAction(actionShowGroups);
@@ -528,7 +530,9 @@ void AddressbookWindow::createViewMenu()
 
     viewMenu->addAction(actionSetPersonal);
     viewMenu->addAction(actionResetPersonal);
+#ifndef QT_ILLUME_LAUNCHER
     viewMenu->addAction(actionSpeedDial);
+#endif
     viewMenu->addAction(actionExportSim);
     viewMenu->addAction(actionImportSim);
 }
@@ -1030,7 +1034,9 @@ void AddressbookWindow::updateContextMenuIfDirty()
 
     actionSettings->setVisible(!details);
 
+#ifndef QT_ILLUME_LAUNCHER
     actionSpeedDial->setVisible(details);
+#endif
     actionTrash->setVisible(details && editable);
 
     if (mHasSim) {
