@@ -3,7 +3,7 @@ TARGET=qtmail
 CONFIG+=qtopia_main
 
 enable_cell:contains(PROJECTS,libraries/qtopiasmil):CONFIG+=enable_mms
-else:DEFINES+=QTOPIA_NO_SMS QTOPIA_NO_MMS
+else:DEFINES+=QTOPIA_NO_MMS
 
 FORMS_MMS = mmseditaccountbase.ui
 FORMS = editaccountbasephone.ui searchviewbasephone.ui

@@ -68,7 +68,7 @@ void AccountList::readAccounts()
         account->readSettings(&accountconf);
 
 // If we are compiling without MMS and have an MMS configuration, don't show this
-#ifdef QTOPIA_NO_SMS
+#ifdef QTOPIA_NO_MMS
         if (account->accountType() == QMailAccount::MMS) {
             delete account;
         } else 
