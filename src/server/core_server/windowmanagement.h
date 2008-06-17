@@ -54,6 +54,7 @@ class WindowManagement : public QObject
   signals:
     void windowActive(const QString &, const QRect &, WId winId);
     void windowCaption(const QString &);
+    void softMenuHintChanged(const QByteArray&);
 
   private:
     WindowManagementPrivate * d;

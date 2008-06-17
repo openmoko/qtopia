@@ -33,6 +33,11 @@
 
 #include <QSoftMenuBar>
 
+#ifdef Q_WS_X11
+// We share the ContextKeyState between the manager
+#include <private/contextkeymanager_p.h>
+#endif
+
 // declare QSoftMenuBarProviderPrivate
 struct QSoftMenuBarProviderPrivate
 {
@@ -295,6 +300,8 @@ QSoftMenuBarProvider::QSoftMenuBarProvider(QObject *parent)
     WindowManagement *man = new WindowManagement(this);
     QObject::connect(man, SIGNAL(windowActive(QString,QRect,WId)),
                      this, SLOT(activeChanged(QString,QRect,WId)));
+    QObject::connect(man, SIGNAL(softMenuHintChanged(const QByteArray&)),
+                     this, SLOT(menuHintChanged(const QByteArray&)));
 }
 
 /*!
@@ -337,6 +344,10 @@ QList<QSoftMenuBarProvider::MenuButton> QSoftMenuBarProvider::keys() const
 /*! \internal */
 void QSoftMenuBarProvider::message(const QString &msg, const QByteArray &data)
 {
+#ifdef Q_WS_X11
+    Q_UNUSED(msg);
+    Q_UNUSED(data);
+#else
     QDataStream stream(data);
     if (msg == "setLabelText(int,int,QString)") {
         int btn;
@@ -459,12 +470,58 @@ void QSoftMenuBarProvider::message(const QString &msg, const QByteArray &data)
             }
         }
     }
+#endif
 }
 
 /*!  \internal */
 void QSoftMenuBarProvider::activeChanged(const QString &, const QRect &, WId win)
 {
     d->activeWin = win;
+}
+
+void QSoftMenuBarProvider::menuHintChanged(const QByteArray& data)
+{
+#ifdef Q_WS_X11
+    QList<ContextKeyState> state;
+    QDataStream stream(data);
+    stream >> state;
+
+    // Clear everything first
+    for (int idx = 0; idx < d->buttons.count(); ++idx) {
+        QSoftMenuBarProvider::MenuButtonPrivate *btn = d->buttons[idx].d;
+        btn->text = QString();
+        btn->pix = QPixmap();
+        btn->pixName = QString();
+        btn->pixStale = false;
+    }
+
+    // Rebuild the status
+    foreach(ContextKeyState keyState, state) {
+        int idx = d->keyToIdx(keyState.keycode);
+        if (idx == -1)
+            continue;
+
+        QSoftMenuBarProvider::MenuButtonPrivate *btn = d->buttons[idx].d;
+
+        if (!keyState.icon.isNull()) {
+            btn->text = QString();
+            // fool the MenuButton::pixmap. We can not laod this from disk on X11 due
+            // network transparency
+            btn->pixName = QString();
+            btn->pix = QPixmap::fromImage(keyState.icon);
+            btn->pixStale = false;
+        } else {
+            btn->text = keyState.text;
+            btn->pixName = QString();
+            btn->pix = QPixmap();
+            btn->pixStale = false;
+        }
+    }
+
+    emit keysChanged();
+#else
+    Q_UNUSED(data)
+#endif
 }
 
 /*!

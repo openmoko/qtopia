@@ -62,10 +62,14 @@ public:
 signals:
     void keyChanged(const QSoftMenuBarProvider::MenuButton &);
     void keyChanged(int);
+    void keysChanged();
 
 private slots:
     void message(const QString &msg, const QByteArray &data);
     void activeChanged(const QString &, const QRect &, WId);
+#ifdef Q_WS_X11
+    void menuHintChanged(const QByteArray& data);
+#endif
 
 private:
     QSoftMenuBarProviderPrivate *d;
