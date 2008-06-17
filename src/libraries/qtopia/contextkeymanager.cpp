@@ -42,6 +42,12 @@
 #include "qsoftmenubar.h"
 #include "qtopialog.h"
 
+#ifdef Q_WS_X11
+#include <QCache>
+#include <QX11Info>
+#include <X11/Xlib.h>
+#include <X11/Xatom.h>
+#endif
 
 class ContextKeyManagerQSpinBoxLineEditAccessor : public QSpinBox
 {
@@ -52,6 +58,31 @@ public:
 
 // should this be Q_GLOBAL_STATIC?
 static ContextKeyManager *contextKeyMgr = 0;
+
+#ifdef Q_WS_X11
+ContextKeyState::ContextKeyState()
+    : keycode(-1)
+{}
+
+static Atom _dataAtom = 0;
+static Atom _softMenuAtom = 0;
+
+QTOPIA_EXPORT Atom contextDataAtom()
+{
+    if (!_dataAtom)
+        _dataAtom = XInternAtom(QX11Info::display(), "QTOPIA_CONTEXT_KEY_STATE", False);
+
+    return _dataAtom;
+}
+
+QTOPIA_EXPORT Atom contextMenuAtom()
+{
+    if (!_softMenuAtom)
+        _softMenuAtom = XInternAtom(QX11Info::display(), "QTOPIA_SOFT_MENU_HINT", False);
+
+    return _softMenuAtom;
+}
+#endif
 
 ContextKeyManager::ContextKeyManager()
 {
@@ -620,10 +651,17 @@ void ContextKeyManager::setText(QWidget *w, int key, const QString &text)
         w = QApplication::activeWindow();
     int win = w->winId();
 
+#ifdef Q_WS_X11
+    // Update the state
+    QByteArray data = updateState(w, key, Update_Text, text, QImage());
+    XChangeProperty(QX11Info::display(), win, contextMenuAtom(), contextDataAtom(), 8,
+                    PropModeReplace, (unsigned char *)data.data(), data.size());
+#else
     QtopiaIpcEnvelope e( "QPE/QSoftMenuBar", "setLabelText(int,int,QString)");
     e << win;
     e << key;
     e << text;
+#endif
 }
 
 void ContextKeyManager::setPixmap(QWidget *w, int key, const QString &pm)
@@ -637,10 +675,20 @@ void ContextKeyManager::setPixmap(QWidget *w, int key, const QString &pm)
         w = QApplication::activeWindow();
     int win = w->winId();
 
+#ifdef Q_WS_X11
+    // Update the state
+    QPixmap pix = QIcon(":icon/" + pm).pixmap(QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize));
+    if (pix.isNull())
+        pix = QIcon(pm).pixmap(QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize));
+    QByteArray data = updateState(w, key, Update_Image, QString(), pix.toImage());
+    XChangeProperty(QX11Info::display(), win, contextMenuAtom(), contextDataAtom(), 8,
+                    PropModeReplace, (unsigned char *)data.data(), data.size());
+#else
     QtopiaIpcEnvelope e( "QPE/QSoftMenuBar", "setLabelPixmap(int,int,QString)");
     e << win;
     e << key;
     e << pm;
+#endif
 }
 
 void ContextKeyManager::clearLabel(QWidget *w, int key)
@@ -652,9 +700,16 @@ void ContextKeyManager::clearLabel(QWidget *w, int key)
     if (w->windowFlags() & Qt::Popup && QApplication::activeWindow())
         w = QApplication::activeWindow();
     int win = w->winId();
+
+#ifdef Q_WS_X11
+    QByteArray data = updateState(w, key, Update_Clear, QString(), QImage());
+    XChangeProperty(QX11Info::display(), win, contextMenuAtom(), contextDataAtom(), 8,
+                    PropModeReplace, (unsigned char *)data.data(), data.size());
+#else
     QtopiaIpcEnvelope e( "QPE/QSoftMenuBar", "clearLabel(int,int)");
     e << win;
     e << key;
+#endif
 }
 
 void ContextKeyManager::setLabelType(QSoftMenuBar::LabelType type)
@@ -755,3 +810,56 @@ void ContextKeyManager::clearContextKeyHelper(QString& className)
 {
     helperClassMap.remove ( className );
 };
+
+#ifdef Q_WS_X11
+QByteArray ContextKeyManager::updateState(QWidget* widget, int key, enum UpdateMode mode, const QString& text, const QImage& image)
+{
+    if (!m_stateMapper.contains(widget))
+        connect(widget, SIGNAL(destroyed(QObject*)), SLOT(slotWidgetDestroyed(QObject*)));
+
+    QList<ContextKeyState> newState;
+
+    bool found = false;
+    foreach(ContextKeyState state, m_stateMapper[widget]) {
+        if (state.keycode == key) {
+            found = true;
+
+            // Skip Clear, it just gets removed from newState
+            if (mode == Update_Text) {
+                state.icon = QImage();
+                state.text = text;
+                newState.append(state);
+            } else if (mode == Update_Image) {
+                state.icon = image;
+                state.text = QString();
+                newState.append(state);
+            }
+        } else {
+            newState.append(state);
+        }
+    }
+
+    if (!found && mode != Update_Clear) {
+        ContextKeyState state;
+        state.icon = image;
+        state.text = text;
+        state.keycode = key;
+        newState.append(state);
+    }
+
+    QByteArray data;
+    QDataStream stream(&data, QIODevice::WriteOnly);
+    stream << newState;
+    
+    m_stateMapper[widget] = newState;
+    return data;
+}
+
+void ContextKeyManager::slotWidgetDestroyed(QObject* object)
+{
+    if (!object->isWidgetType())
+        return;
+
+    m_stateMapper.remove(static_cast<QWidget*>(object));
+}
+#endif

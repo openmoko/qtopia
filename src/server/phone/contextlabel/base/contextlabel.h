@@ -52,6 +52,7 @@ protected slots:
     void itemPressed(ThemeItem *item);
     void itemReleased(ThemeItem *item);
     void keyChanged(const QSoftMenuBarProvider::MenuButton &);
+    void keysChanged();
 
 protected:
     virtual void themeLoaded(const QString &);

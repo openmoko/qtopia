@@ -55,6 +55,7 @@ ContextLabel::ContextLabel( QWidget *parent, Qt::WFlags flags )
 
     menuProvider = new QSoftMenuBarProvider(this);
     QObject::connect(menuProvider, SIGNAL(keyChanged(QSoftMenuBarProvider::MenuButton)), this, SLOT(keyChanged(QSoftMenuBarProvider::MenuButton)));
+    QObject::connect(menuProvider, SIGNAL(keysChanged()), this, SLOT(keysChanged()));
     buttonCount = menuProvider->keyCount();
     qLog(UI) << "ContextLabel: generating" << buttonCount <<  "buttons";
     if(menuProvider->keyCount()) {
@@ -246,6 +247,18 @@ void ContextLabel::keyChanged(const QSoftMenuBarProvider::MenuButton &button)
     Q_ASSERT(button.index() < buttonCount);
     initializeButtons();
     buttons[button.index()].changed = true;
+    updateLabels();
+}
+
+/*! \internal */
+void ContextLabel::keysChanged()
+{
+    initializeButtons();
+
+    // TODO check if updating the labels right a way would be faster
+    for (int idx = 0; idx < buttonCount; ++idx)
+        buttons[idx].changed = true;
+
     updateLabels();
 }
 

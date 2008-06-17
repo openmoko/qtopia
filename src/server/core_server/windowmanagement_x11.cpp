@@ -35,6 +35,9 @@
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
 
+extern Atom contextDataAtom();
+extern Atom contextMenuAtom();
+
 inline static void safeXFree(unsigned char* value)
 {
     if (value)
@@ -60,9 +63,12 @@ public:
 
     bool x11EventFilter(XEvent *event);
 
+    void updateMenuHint();
+
 signals:
     void windowActive(const QString &, const QRect &, WId);
     void windowCaption(const QString &);
+    void softMenuHintChanged(const QByteArray&);
 
 private:
     Atom netActiveWindowAtom;
@@ -150,6 +156,7 @@ bool WindowManagementPrivate::x11EventFilter(XEvent *event)
             safeXFree(value);
         }
         activeChanged(activeId);
+        updateMenuHint();
     }
 
     // Is this one of the client windows we were monitoring?
@@ -161,6 +168,7 @@ bool WindowManagementPrivate::x11EventFilter(XEvent *event)
             if (w == activeId) {
                 activeId = 0;
                 activeChanged(0);
+                updateMenuHint();
             }
         } else if (event->xany.type == PropertyNotify) {
             if (event->xproperty.atom == netWmNameAtom ||
@@ -169,12 +177,15 @@ bool WindowManagementPrivate::x11EventFilter(XEvent *event)
                 // The window's caption has changed.
                 if (w == activeId)
                     activeChanged(w);
+            } else if (event->xproperty.atom == contextMenuAtom() && w == activeId) {
+                updateMenuHint();
             }
         } else if (event->xany.type == UnmapNotify) {
             // The window has been withdrawn from the screen.
             if (w == activeId) {
                 activeId = 0;
                 activeChanged(0);
+                updateMenuHint();
             }
         }
     }
@@ -379,8 +390,31 @@ void WindowManagementPrivate::activeChanged(WId w)
         vs->setAttribute("Title", caption);
         update = true;
     }
+
     if (update) {
         emit windowActive(caption, rect, w);
+    }
+}
+
+void WindowManagementPrivate::updateMenuHint()
+{
+    if (activeId == 0) {
+        emit softMenuHintChanged(QByteArray());
+        return;
+    }
+
+    Atom dummyAtom;
+    unsigned long items;
+    unsigned long dummy;
+    int formatReturn;
+    unsigned char* value = 0;
+    if (XGetWindowProperty(QX11Info::display(), activeId, contextMenuAtom(), 0,
+                           0x7fffffff, False, contextDataAtom(), &dummyAtom,
+                           &formatReturn, &items, &dummy, &value) == Success && value) {
+        emit softMenuHintChanged(QByteArray((char*)value, items));
+        XFree(value);
+    } else {
+        emit softMenuHintChanged(QByteArray());
     }
 }
 
@@ -392,6 +426,8 @@ WindowManagement::WindowManagement(QObject *parent)
             this, SIGNAL(windowActive(QString,QRect,WId)));
     connect(priv, SIGNAL(windowCaption(QString)),
             this, SIGNAL(windowCaption(QString)));
+    connect(priv, SIGNAL(softMenuHintChanged(QByteArray)),
+            this, SIGNAL(softMenuHintChanged(QByteArray)));
 }
 
 WindowManagement::~WindowManagement()
