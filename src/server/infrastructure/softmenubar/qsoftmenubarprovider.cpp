@@ -292,10 +292,6 @@ QSoftMenuBarProvider::QSoftMenuBarProvider(QObject *parent)
         d->buttons.swap( backIdx, menuIdx );
     }
 
-    // setup override buttons
-    for(int ii = 0; ii < buttonCount; ++ii) {
-    }
-
     WindowManagement *man = new WindowManagement(this);
     QObject::connect(man, SIGNAL(windowActive(QString,QRect,WId)),
                      this, SLOT(activeChanged(QString,QRect,WId)));
