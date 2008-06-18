@@ -1343,7 +1343,7 @@ CallScreen *PhoneLauncher::callScreen(bool create) const
             QObject::connect(m_callScreen, SIGNAL(muteRing()),
                              rc, SLOT(muteRing()));
         QObject::connect(m_callScreen, SIGNAL(listEmpty()),
-                         m_callScreen, SLOT(hide()));
+                         this, SLOT(callScreenListEmpty()));
         QObject::connect(m_callScreen, SIGNAL(acceptIncoming()),
                          this, SLOT(acceptIncoming()));
         ThemeControl::instance()->registerThemedView(m_callScreen, "CallScreen");
@@ -1366,6 +1366,12 @@ CallScreen *PhoneLauncher::callScreen(bool create) const
 void PhoneLauncher::newMessagesChanged()
 {
     m_homeScreen->setNewMessages(m_newMessages.value().toInt());
+}
+
+void PhoneLauncher::callScreenListEmpty()
+{
+    if (!DialerControl::instance()->isDialing())
+        m_callScreen->hide();
 }
 
 

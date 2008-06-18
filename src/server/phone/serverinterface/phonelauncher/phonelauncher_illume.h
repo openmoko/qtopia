@@ -102,6 +102,7 @@ public slots:
     void showWarning(const QString &title, const QString &text);
 
 protected slots:
+    void callScreenListEmpty();
     void polishWindows();
     void showEvent(QShowEvent *e);
     void sysMessage(const QString& message, const QByteArray&);
