@@ -1465,8 +1465,6 @@ void CallScreen::updateAll()
 
     if (m->rowCount() == 0) {
         emit listEmpty();
-        if (secondaryCallScreen)
-            secondaryCallScreen->hide();
     } else {
         m->triggerUpdate();
     }
@@ -1757,6 +1755,9 @@ void CallScreen::hideEvent( QHideEvent * )
 {
     if ( updateTimer )
         updateTimer->stop();
+
+    if (secondaryCallScreen)
+        secondaryCallScreen->hide();
 }
 
 /*!
