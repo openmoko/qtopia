@@ -78,8 +78,6 @@ void AccountList::readAccounts()
         }
 #endif
 
-        qWarning() << account->accountType() << QMailAccount::MMS;
-
 #ifndef QTOPIA_NO_SMS
         if (account->accountType() == QMailAccount::SMS)
             smsExists = true;
