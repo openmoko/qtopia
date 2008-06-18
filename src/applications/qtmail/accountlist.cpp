@@ -72,11 +72,10 @@ void AccountList::readAccounts()
         if (account->accountType() == QMailAccount::MMS) {
             delete account;
         } else 
-#else
+#endif
         {
             append(account);
         }
-#endif
 
 #ifndef QTOPIA_NO_SMS
         if (account->accountType() == QMailAccount::SMS)
