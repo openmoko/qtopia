@@ -41,6 +41,31 @@
 
 class QAbstractSoftKeyLabelHelper;
 
+#ifdef Q_WS_X11
+// This and the marshalling is shared between contextkeymanager and src/server
+// QSoftMenuBarProvider. Make sure to recompile both when changing something here
+struct QTOPIA_EXPORT ContextKeyState {
+    ContextKeyState();
+
+    QString text;
+    QImage  icon;
+    int     keycode;
+};
+
+inline QDataStream& operator<<(QDataStream& stream, const ContextKeyState& state)
+{
+    stream << state.text << state.icon << state.keycode;
+    return stream;
+}
+
+inline QDataStream&  operator>>(QDataStream& stream, ContextKeyState& state)
+{
+    stream >> state.text >> state.icon >> state.keycode;
+    return stream;
+}
+
+#endif
+
 class QTOPIA_EXPORT ContextKeyManager : public QObject
 {
     Q_OBJECT
@@ -115,10 +140,24 @@ private slots:
     void removeSenderFromWidgetContext();
     void updateLabelsForFocused();
 
+#ifdef Q_WS_X11
+private Q_SLOTS:
+    void slotWidgetDestroyed(QObject*);
+#endif
+
 private:
     ContextKeyManager();
     bool updateContextLabel(QWidget *w, bool modal, int key);
     void setupStandardSoftKeyHelpers();
+
+#ifdef Q_WS_X11
+    enum UpdateMode {
+        Update_Text,
+        Update_Image,
+        Update_Clear
+    };
+    QByteArray updateState(QWidget*, int key, enum UpdateMode, const QString& text, const QImage& image);
+#endif
 
 private:
     QList<ClassModalState> contextClass;
@@ -128,6 +167,10 @@ private:
     QList<int> buttons;
     QTimer *timer;
     QSoftMenuBar::LabelType lType;
+
+#ifdef Q_WS_X11
+    QMap<QWidget*, QList<ContextKeyState> > m_stateMapper;
+#endif
 };
 
 #endif
