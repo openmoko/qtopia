@@ -4404,7 +4404,7 @@ int QtopiaApplication::exec()
     d->sendQCopQ();
 #endif
 
-    return QApplication::exec();
+    int exec = QApplication::exec();
 
     {
         QtopiaIpcEnvelope e(QLatin1String("QPE/QtopiaApplication"), QLatin1String("closing(QString)") );
@@ -4412,7 +4412,7 @@ int QtopiaApplication::exec()
     }
 
     processEvents();
-    return 0;
+    return exec;
 }
 
 /*!
