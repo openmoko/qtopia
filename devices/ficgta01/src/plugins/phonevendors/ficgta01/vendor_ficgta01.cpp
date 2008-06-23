@@ -45,6 +45,7 @@ Ficgta01CallProvider::Ficgta01CallProvider( QModemService *service )
         ( "%CNAP:", this, SLOT(cnapNotification(QString)) );
 
     setUseMissedTimer(false);
+    setUseDetectTimer(false);
 }
 
 Ficgta01CallProvider::~Ficgta01CallProvider()
@@ -133,6 +134,8 @@ void Ficgta01CallProvider::cpiNotification( const QString& msg )
         uint type = QAtUtils::parseNumber( msg, posn );
         ringing( QAtUtils::decodeNumber( number, type ), callType, identifier );
 
+        // We got everything we need, indicate the call to the outside world
+        announceCall();
     }
 }
 
@@ -147,6 +150,27 @@ void Ficgta01CallProvider::cnapNotification( const QString& msg )
     QModemCall *call = incomingCall();
     if ( call )
         call->emitNotification( QPhoneCall::CallingName, name );
+}
+
+/*
+ * Reimplementation because we don't want the standard notifications
+ * as we have a CPI which should give us everything that we need.
+ * We don't need:
+ *    +CRING (CPI gives us the calltype)
+ *    +CLIP  (CPI gives us the number)
+ *    RING
+ */
+void Ficgta01CallProvider::resetModem()
+{
+    // We don't want RING, CRING, CLIP, COLP, COWA  but callNotification
+    connect( atchat(), SIGNAL(callNotification(QString)),
+             this, SLOT(callNotification(QString)) );
+
+    // disable all of these and do not call the base class
+    atchat()->chat( "AT+CRC=0" );
+    service()->retryChat( "AT+CLIP=0" );
+    service()->retryChat( "AT+COLP=0" );
+    service()->retryChat( "AT+CCWA=0" );
 }
 
 Ficgta01PhoneBook::Ficgta01PhoneBook( QModemService *service )

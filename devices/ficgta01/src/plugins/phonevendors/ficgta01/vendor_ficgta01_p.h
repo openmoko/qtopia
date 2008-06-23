@@ -49,6 +49,10 @@ protected:
     QModemCallProvider::AtdBehavior atdBehavior() const;
     void abortDial( uint modemIdentifier, QPhoneCall::Scope scope );
 
+    // reimplementation
+    void resetModem();
+
+
 private slots:
     void cpiNotification( const QString& msg );
     void cnapNotification( const QString& msg );
@@ -124,6 +128,7 @@ private slots:
     void suspend();
     void wake();
     void sendSuspendDone();
+
 };
 
 class  Ficgta01VibrateAccessory : public QVibrateAccessoryProvider

@@ -109,12 +109,14 @@ private slots:
     void missedTimeout();
     void clccIncoming( bool, const QAtResult& );
 
+protected:
+    void announceCall();
+
 private:
     QModemCallProviderPrivate *d;
 
     void missedTimeout(QModemCall *call);
     void stopRingTimers();
-    void announceCall();
     void useModemIdentifier( uint id );
     void releaseModemIdentifier( uint id );
     bool otherActiveCalls( QModemCall *notThis=0 );
