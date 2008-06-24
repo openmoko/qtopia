@@ -120,9 +120,9 @@ void ContextLabel::initializeButtons()
                 buttons[i].txtItem = 0;
                 buttons[i].changed = true;
                 ThemeImageItem *ii = (ThemeImageItem *)findItem("button"+QString::number(i),
-                        Image);
+                        Image, ThemeItem::All, false);
                 ThemeTextItem *ti = (ThemeTextItem *)findItem("button"+QString::number(i),
-                        Text);
+                        Text, ThemeItem::All, false);
 
                 if (ii || ti) {
                     img[availBtns] = ii;

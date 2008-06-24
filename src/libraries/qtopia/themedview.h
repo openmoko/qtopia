@@ -581,10 +581,10 @@ public:
                                 ThemeItem::State state = ThemeItem::All) const;
 
     ThemeItem *findItem(const QString &name, ThemedView::Type type = ThemedView::Item,
-                        ThemeItem::State state = ThemeItem::All) const;
+                        ThemeItem::State state = ThemeItem::All, bool allowLayout = true) const;
 
     QList<ThemeItem*> findItems(const QString &name, int type, int state = ThemeItem::All) const;
-    ThemeItem *findItem(const QString &name, int type, int state = ThemeItem::All) const;
+    ThemeItem *findItem(const QString &name, int type, int state = ThemeItem::All, bool allowLayout = true) const;
 
     QString themeName() const;
     void setThemeName(const QString& themeName);
@@ -641,7 +641,7 @@ private:
     bool isOn(ThemeItem *item) const;
     ThemeItem *itemAt(const QPoint &pos, ThemeItem *item) const;
     ThemeItem *findItem(ThemeItem *item, const QString &name,
-                        ThemedView::Type type = ThemedView::Item, ThemeItem::State state = ThemeItem::All) const;
+                        ThemedView::Type type = ThemedView::Item, ThemeItem::State state = ThemeItem::All, bool allowLayout = true) const;
     void findItems(ThemeItem *item, const QString &name, ThemedView::Type type,
                    ThemeItem::State state, QList<ThemeItem*> &list) const;
     ThemeItem *findItem(ThemeItem *item, const QString &name, int type, int state = ThemeItem::All) const;

@@ -957,7 +957,7 @@ bool CallScreen::dialNumbers(const QString & numbers)
 void CallScreen::themeLoaded( const QString & )
 {
     ThemeWidgetItem *item = 0;
-    item = (ThemeListItem *)findItem( "callscreen", ThemedView::List );
+    item = (ThemeListItem *)findItem( "callscreen", ThemedView::List, ThemeItem::All, false );
     delete mLayout;
     mLayout = 0;
     if( !item ) {
@@ -982,7 +982,7 @@ void CallScreen::themeLoaded( const QString & )
     connect(listView, SIGNAL(clicked(QModelIndex)), this, SLOT(callClicked(QModelIndex)));
     QSoftMenuBar::setLabel(listView, Qt::Key_Select, QSoftMenuBar::NoLabel);
 
-    item = (ThemeWidgetItem *)findItem( "callscreennumber", ThemedView::Widget );
+    item = (ThemeWidgetItem *)findItem( "callscreennumber", ThemedView::Widget, ThemeItem::All, false );
     if( !item ) {
         qWarning("No callscreennumber input element defined for CallScreen theme.");
         if( !mLayout )
@@ -1014,8 +1014,8 @@ void CallScreen::themeLoaded( const QString & )
   */
 void CallScreen::manualLayout()
 {
-    ThemeRectItem *keypaditem = (ThemeRectItem *)findItem( "keypad-box", ThemedView::Rect );
-    ThemeRectItem *keypadbutton = (ThemeRectItem *)findItem( "keypad-show-container", ThemedView::Rect );
+    ThemeRectItem *keypaditem = (ThemeRectItem *)findItem( "keypad-box", ThemedView::Rect, ThemeItem::All, false );
+    ThemeRectItem *keypadbutton = (ThemeRectItem *)findItem( "keypad-show-container", ThemedView::Rect, ThemeItem::All, false );
     if( keypaditem && keypadbutton ) {
         keypaditem->setActive( keypadVisible );
         keypadbutton->setActive( !keypadVisible );
@@ -1556,7 +1556,7 @@ void CallScreen::callClicked(const QModelIndex& index)
   */
 void CallScreen::setItemActive(const QString &name, bool active)
 {
-    ThemeItem *item = (ThemeItem *)findItem(name);
+    ThemeItem *item = (ThemeItem *)findItem(name, ThemedView::Item, ThemeItem::All, false);
     if (item)
         item->setActive(active);
 }

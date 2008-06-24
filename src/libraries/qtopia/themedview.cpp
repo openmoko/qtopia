@@ -5066,7 +5066,7 @@ void ThemeListModelEntry::getTemplateInstance() {
     if ( d->templateInstance == 0 ) {
         // FIXME : should only search under theme list item
         //qWarning("ThemeListModelEntry::getTemplateInstance() - Type returned '%s'", type().toAscii().data());
-        ThemeTemplateItem* ti = static_cast<ThemeTemplateItem*>(d->model->themedView()->findItem( /*li,*/ type(), ThemedView::Template ));
+        ThemeTemplateItem* ti = static_cast<ThemeTemplateItem*>(d->model->themedView()->findItem( /*li,*/ type(), ThemedView::Template, true));
         if ( !ti ) {
             qWarning("ThemeListModelEntry::getTemplateInstance() - Cannot find template item with name '%s'", type().toAscii().data());
             return;
@@ -5923,9 +5923,9 @@ QList<ThemeItem*> ThemedView::findItems(const QString &name, int type, int state
 /*!
   \deprecated
 */
-ThemeItem *ThemedView::findItem(const QString &name, int type, int state) const
+ThemeItem *ThemedView::findItem(const QString &name, int type, int state, bool allowLayout) const
 {
-    return findItem(name, (Type)type, (ThemeItem::State)state);
+    return findItem(name, (Type)type, (ThemeItem::State)state, allowLayout);
 }
 
 /*!
@@ -5951,12 +5951,13 @@ void ThemedView::findItems(ThemeItem *item, const QString &name, int type,
   The default value of \a state is ThemeItem::All which matches the state of all items.
   Returns a pointer to the item if found, otherwise returns 0.
 */
-ThemeItem *ThemedView::findItem(const QString &name, ThemedView::Type type, ThemeItem::State state) const
+ThemeItem *ThemedView::findItem(const QString &name, ThemedView::Type type, ThemeItem::State state, bool allowLayout) const
 {
     if (!d->root)
         return 0;
-    ThemeItem *item = findItem(d->root, name, type, state);
-    if (item && d->needLayout) {
+
+    ThemeItem *item = findItem(d->root, name, type, state, allowLayout);
+    if (allowLayout && item && d->needLayout) {
         ThemedView *v = const_cast<ThemedView*>(this);
         v->layout();
     }
@@ -5965,7 +5966,7 @@ ThemeItem *ThemedView::findItem(const QString &name, ThemedView::Type type, Them
 }
 
 ThemeItem *ThemedView::findItem(ThemeItem *item, const QString &name,
-                                ThemedView::Type type, ThemeItem::State state) const
+                                ThemedView::Type type, ThemeItem::State state, bool allowLayout) const
 {
     if (!item)
         item = d->root;
@@ -5975,7 +5976,7 @@ ThemeItem *ThemedView::findItem(ThemeItem *item, const QString &name,
 
     QList<ThemeItem*> c = item->children();
     foreach ( ThemeItem *itm, c ) {
-        ThemeItem *fi = findItem(itm, name, type, state);
+        ThemeItem *fi = findItem(itm, name, type, state, allowLayout);
         if (fi)
             return fi;
     }

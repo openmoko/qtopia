@@ -284,7 +284,7 @@ void Dialer::dialerItemClicked( ThemeItem *item )
 
 void Dialer::themeLoaded( const QString & )
 {
-    ThemeWidgetItem *i = (ThemeWidgetItem *)findItem( "dialernumber", ThemedView::Widget );
+    ThemeWidgetItem *i = (ThemeWidgetItem *)findItem( "dialernumber", ThemedView::Widget, ThemeItem::All, false );
     if( !i ) {
         qWarning("No input field available for dialer theme.");
         display = new DialerLineEdit( this );
@@ -305,25 +305,25 @@ void Dialer::themeLoaded( const QString & )
     // if any of these items aren't provided by the theme, put them in the contextmenu
     QAction *newAction = 0;
     int actionCount = 0;
-    if( !findItem( "selectcontact" ) ) {
+    if( !findItem( "selectcontact", ThemedView::Item, ThemeItem::All, false ) ) {
         newAction = new QAction( QIcon( ":icon/addressbook/AddressBook" ),
                 tr("Select Contact"), m_actions );
         connect( newAction, SIGNAL(triggered()), this, SLOT(selectContact()) );
         ++actionCount;
     }
-    if( !findItem( "callhistory" ) ) {
+    if( !findItem( "callhistory", ThemedView::Item, ThemeItem::All, false ) ) {
         newAction = new QAction( QPixmap( ":image/callhistory/CallHistory"),
                 tr("Call History"), m_actions );
         connect( newAction, SIGNAL(triggered()), this, SLOT(selectCallHistory()) );
         ++actionCount;
     }
-    if( !findItem( "messages" ) ) {
+    if( !findItem( "messages", ThemedView::Item, ThemeItem::All, false ) ) {
         newAction = new QAction( QIcon( ":icon/txt" ),
                 tr("Send Message"), m_actions );
         connect( newAction, SIGNAL(triggered()), this, SLOT(sms()) );
         ++actionCount;
     }
-    if( !findItem( "savecontact" ) ) {
+    if( !findItem( "savecontact", ThemedView::Item, ThemeItem::All, false ) ) {
         newAction = new QAction( QIcon( ":image/addressbook/AddressBook" ),
                 tr( "Save to Contacts" ), m_actions );
         connect( newAction, SIGNAL(triggered()), this, SLOT(saveToContact()) );
@@ -464,7 +464,7 @@ void Dialer::wait()
 
 void Dialer::character()
 {
-    ThemeItem *i = findItem( "star" );
+    ThemeItem *i = findItem( "star", ThemedView::Item, ThemeItem::All, false  );
     if( !i )
         return;
 
