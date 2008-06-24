@@ -979,9 +979,11 @@ void QModemCallProvider::setVtsType( int type )
 }
 
 /*
- * Setting this to false means that we won't listen to CRING, RING, CLIP and other
- * indications but assume someone will call ring with the right parameter
- * and then announce the call
+ * Setting this to false means that we won't start a timer to collect the
+ * different CRING, RING, CLIP status messages but solely rely on someone
+ * else to call ring with the right options and announce the call.
+ * If you don't want to enable the USC's for CRING/RING/CLIP/COWA you
+ * should reiplement resetModem.
  */
 void QModemCallProvider::setUseDetectTimer(bool useTimer)
 {
