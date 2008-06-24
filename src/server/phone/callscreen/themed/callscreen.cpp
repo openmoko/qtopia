@@ -1585,6 +1585,8 @@ void CallScreen::themeItemClicked(ThemeItem *item)
     {
         if (!control->hasActiveCalls())
             return;
+
+        // FIXME, TODO, bad assumption, hold may fail?
         item->setActive(false);
         setItemActive("resume", true);
         actionHold->trigger();
@@ -1593,6 +1595,8 @@ void CallScreen::themeItemClicked(ThemeItem *item)
     {
         if (!control->hasCallsOnHold())
             return;
+
+        // FIXME, TODO, bad assumption, resume may fail?
         item->setActive(false);
         setItemActive("hold", true);
         actionResume->trigger();
