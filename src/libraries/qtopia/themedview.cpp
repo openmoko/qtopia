@@ -6102,12 +6102,7 @@ void ThemedView::setActiveItems(const QHash<QString, bool>& _items)
 void ThemedView::resizeEvent(QResizeEvent *r)
 {
     QWidget::resizeEvent(r);
-    if (d->root) {
-        if (isVisible())
-            layout();
-        else
-            d->needLayout = true;
-    }
+    d->needLayout = true;
 }
 
 /*!
@@ -6115,8 +6110,6 @@ void ThemedView::resizeEvent(QResizeEvent *r)
   */
 void ThemedView::showEvent(QShowEvent *)
 {
-    if (d->needLayout && d->root)
-        layout();
 }
 
 void ThemedView::visChanged(ThemeItem *item, bool vis)
