@@ -261,6 +261,7 @@
 
 QPhoneCall::QPhoneCall( QPhoneCallPrivate *priv )
 {
+    qRegisterMetaType<QPhoneCall>("QPhoneCall");
     d = priv;
     if ( d )
         d->ref();
@@ -271,6 +272,7 @@ QPhoneCall::QPhoneCall( QPhoneCallPrivate *priv )
 */
 QPhoneCall::QPhoneCall()
 {
+    qRegisterMetaType<QPhoneCall>("QPhoneCall");
     d = 0;
 }
 
@@ -279,6 +281,7 @@ QPhoneCall::QPhoneCall()
 */
 QPhoneCall::QPhoneCall( const QPhoneCall& call )
 {
+    qRegisterMetaType<QPhoneCall>("QPhoneCall");
     d = call.d;
     if ( d ) {
         d->ref();

@@ -1585,6 +1585,8 @@ void CallScreen::themeItemClicked(ThemeItem *item)
     {
         if (!control->hasActiveCalls())
             return;
+
+        // FIXME, TODO, bad assumption, hold may fail?
         item->setActive(false);
         setItemActive("resume", true);
         actionHold->trigger();
@@ -1593,6 +1595,8 @@ void CallScreen::themeItemClicked(ThemeItem *item)
     {
         if (!control->hasCallsOnHold())
             return;
+
+        // FIXME, TODO, bad assumption, resume may fail?
         item->setActive(false);
         setItemActive("hold", true);
         actionResume->trigger();
@@ -1603,13 +1607,23 @@ void CallScreen::themeItemClicked(ThemeItem *item)
     }
     else if (item->itemName() == "show_keypad")
     {
-        setItemActive("menu-box", false);
-        setItemActive("keypad-box", true);
+        static QHash<QString, bool> showKeypad;
+        if (showKeypad.isEmpty()) {
+            showKeypad["menu-box"]   = false;
+            showKeypad["keypad-box"] = true;
+        }
+
+        setActiveItems(showKeypad);
     }
     else if (item->itemName() == "hide_keypad")
     {
-        setItemActive("keypad-box", false);
-        setItemActive("menu-box", true);
+        static QHash<QString, bool> hideKeypad;
+        if (hideKeypad.isEmpty()) {
+            hideKeypad["menu-box"]   = true;
+            hideKeypad["keypad-box"] = false;
+        }
+
+        setActiveItems(hideKeypad);
     }
     else if (item->itemName().left( 11 ) == "keypad-show") {
         // themed touchscreen keypad
@@ -1961,37 +1975,58 @@ void CallScreen::muteRingSelected()
 /*! \internal */
 void CallScreen::callConnected(const QPhoneCall &)
 {
-    setItemActive("answer", false);
-    setItemActive("endcall", true);
-    setItemActive("resume", false);
-    setItemActive("sendbusy", false);
-    setItemActive("hold", true);
+    static QHash<QString, bool>  connectedCall;
+    if (connectedCall.isEmpty()) {
+        connectedCall["answer"] = false;
+        connectedCall["endcall"] = true;
+        connectedCall["resume"] = false;
+        connectedCall["sendbusy"] = false;
+        connectedCall["hold"] = true;
+    }
+
+    setActiveItems(connectedCall);
 }
 
 /*! \internal */
 void CallScreen::callDropped(const QPhoneCall &)
 {
+    static QHash<QString, bool> activeCalls;
+    static QHash<QString, bool> callsOnHolds;
+
+    if (activeCalls.isEmpty()) {
+        activeCalls["hold"] = true;
+        activeCalls["endcall"] = true;
+
+        callsOnHolds["resume"] = true;
+        callsOnHolds["answer"] = true;
+    }
+
+
     if (control->hasActiveCalls()) {
-        setItemActive("hold", true);
-        setItemActive("endcall", true);
+        setActiveItems(activeCalls);
     } else if (control->hasCallsOnHold()) {
-        setItemActive("resume", true);
-        setItemActive("answer", true);
+        setActiveItems(callsOnHolds);
     } else {
         setItemActive("menu-box", false);
     }
+
 }
 
 /*! \internal */
 void CallScreen::callDialing(const QPhoneCall &)
 {
-    setItemActive("keypad-box", false);
-    setItemActive("menu-box", true);
-    setItemActive("answer", false);
-    setItemActive("endcall", true);
-    setItemActive("resume", false);
-    setItemActive("sendbusy", false);
-    setItemActive("hold", true);
+    static QHash<QString, bool> dialing;
+    if (dialing.isEmpty()) {
+        dialing["keypad-box"] = false;
+        dialing["menu-box"] = true;
+        dialing["answer"] = false;
+        dialing["endcall"] = true;
+        dialing["resume"] = false;
+        dialing["sendbusy"] = false;
+        dialing["hold"] = true;
+    }
+
+    setActiveItems(dialing);
 }
 
 /*! \internal */
@@ -1999,13 +2034,18 @@ void CallScreen::callIncoming(const QPhoneCall &)
 {
     QtopiaInputEvents::addKeyboardFilter( new CallScreenKeyboardFilter );
 
-    setItemActive("keypad-box", false);
-    setItemActive("menu-box", true);
-    setItemActive("hold", false);
-    setItemActive("endcall", false);
-    setItemActive("resume", false);
-    setItemActive("answer", true);
-    setItemActive("sendbusy", true);
+    static QHash<QString, bool> incoming;
+    if (incoming.isEmpty()) {
+        incoming["keypad-box"] = false;
+        incoming["menu-box"] = true;
+        incoming["hold"] = false;
+        incoming["endcall"] = false;
+        incoming["resume"] = false;
+        incoming["answer"] = true;
+        incoming["sendbusy"] = true;
+    }
+
+    setActiveItems(incoming);
 }
 
 /*!

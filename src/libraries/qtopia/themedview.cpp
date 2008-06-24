@@ -6065,6 +6065,37 @@ void ThemedView::paletteChange(ThemeItem *item, const QPalette &p)
     }
 }
 
+/*
+ * Simple update. Find items, set active, do one update/layout
+ */
+void ThemedView::setActiveItems(const QHash<QString, bool>& _items)
+{
+    if (!d->root || d->root->children().isEmpty())
+        return;
+
+    // We have to walk the whole tree
+    QHash<QString, bool> items = _items;
+    QList<ThemeItem*> itemList = d->root->children();
+    while (!itemList.isEmpty() && !items.isEmpty()) {
+        ThemeItem *item = itemList.takeFirst();
+
+        if (items.contains(item->itemName()) && items[item->itemName()] != item->active()) {
+            item->d->actv = !item->d->actv;
+            if (!item->d->actv)
+                item->d->press = false;
+
+            // Assume that the names are unique. Empty the hash to exit early
+            items.remove(item->itemName());
+        }
+        
+        // Add the children of this item to the list of to be visited nodes
+        itemList += item->children();
+    }
+
+    d->needLayout = true;
+    update();
+}
+
 /*!
   \reimp
   */

@@ -53,6 +53,7 @@ class QTOPIA_EXPORT ThemeItem
 {
     friend class ThemeTemplateInstanceItem;
     friend class ThemeFactory;
+    friend class ThemeView;
     friend struct ThemeItemPrivate;
 public:
     enum State
@@ -598,6 +599,8 @@ public:
     void setGeometryAndLayout(int x, int y, int w, int h);
 
     void paint(QPainter *painter, const QRect &clip, ThemeItem *item = 0);
+
+    void setActiveItems(const QHash<QString, bool>& activeNames);
 
     void dumpState() const;
 signals:
