@@ -97,8 +97,7 @@ SERVER_HEADERS+=\
     core_server/virtualkeyboardservice.h \
     core_server/windowmanagement.h \
     standarddevicefeatures.h \
-    core_server/qtopiainputevents.h \
-    processctrl/appshutdown/applicationshutdowntask.h
+    core_server/qtopiainputevents.h
 
 SERVER_SOURCES+=\
     main/main.cpp \
@@ -123,7 +122,6 @@ SERVER_SOURCES+=\
     simplebuiltins.cpp \
     processctrl/qdsync/qdsynctask.cpp\
     core_server/dbmigratetask.cpp \
-    processctrl/appshutdown/applicationshutdowntask.cpp \
     infrastructure/signalstrength/defaultsignal.cpp \
     core_server/virtualkeyboardservice.cpp \
     standarddevicefeatures.cpp
