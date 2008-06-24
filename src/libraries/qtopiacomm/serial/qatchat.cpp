@@ -580,7 +580,8 @@ void QAtChat::registerErrorPrefix( const QString& type )
 
 /*!
     Registers \a cmd as a command to be sent to wake up the modem if no
-    commands have been sent in the last \a wakeupTime milliseconds.
+    commands have been sent or notifications been received in the last
+    \a wakeupTime milliseconds.
 
     \since 4.3.1
 */
@@ -700,6 +701,7 @@ bool QAtChat::processLine( const QString& line )
     QString command;
     if ( d->first )
         command = d->first->d->command;
+
     switch ( d->matcher->lookup( line, command ) ) {
 
         case QPrefixMatcher::Unknown:
@@ -839,6 +841,11 @@ bool QAtChat::processLine( const QString& line )
             // Recognised as a notification.  The prefix matcher
             // has already dispatched the notification for us.
             qLog(AtChat) << d->notifyChar << ":" << line;
+
+            // There is something from the modem, so it is not asleep,
+            // restart the timer. This speeds up accepting calls.
+            if (d->wakeupActive)
+                d->lastSendTime.restart();
         }
         break;
     }
