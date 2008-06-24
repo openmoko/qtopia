@@ -270,7 +270,7 @@ PHONE_HEADERS=\
     phone/themecontrol/serverthemeview.h \
     phone/homescreencontrol.h \
     phone/qabstracthomescreen.h \
-    phone/homescreen/themed/themedhomescreen.h \
+    phone/homescreen/nohomescreen/nohomescreen.h \
     phone/themecontrol/themebackground_p.h \
     phone/profileprovider/qphoneprofileprovider.h \
     ui/abstractinterfaces/stdmessagebox/messagebox.h \
@@ -301,7 +301,7 @@ PHONE_SOURCES=\
     core_server/alarmcontrol.cpp \
     phone/themecontrol/serverthemeview.cpp \
     phone/qabstracthomescreen.cpp \
-    phone/homescreen/themed/themedhomescreen.cpp \
+    phone/homescreen/nohomescreen/nohomescreen.cpp \
     phone/themecontrol/themebackground_p.cpp \
     phone/profileprovider/qphoneprofileprovider.cpp \
     ui/abstractinterfaces/stdmessagebox/messagebox.cpp \
