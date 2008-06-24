@@ -762,11 +762,7 @@ void QWidgetBackingStore::copyToScreen(const QRegion &rgn, QWidget *widget, cons
 
 void QWidgetBackingStore::cleanRegion(const QRegion &rgn, QWidget *widget, bool recursiveCopyToScreen)
 {
-    if (!widget->isVisible() || !widget->updatesEnabled())
-
-    if (widget->window()->windowType() != Qt::Popup
-        && !widget->testAttribute(Qt::WA_WasEverConfigured)
-        && !widget->testAttribute(Qt::WA_WasEverExposed))
+    if (!widget->isVisible() || !widget->updatesEnabled() || !tlw->testAttribute(Qt::WA_Mapped))
         return;
 
     if(QWidgetBackingStore::paintOnScreen(widget))
@@ -928,11 +924,6 @@ void QWidgetBackingStore::cleanRegion(const QRegion &rgn, QWidget *widget, bool 
 void QWidgetBackingStore::cleanRegion(const QRegion &rgn, QWidget *widget, bool recursiveCopyToScreen)
 {
     if (!widget->isVisible() || !widget->updatesEnabled() || !tlw->testAttribute(Qt::WA_Mapped))
-        return;
-
-    if (widget->window()->windowType() != Qt::Popup
-        && !widget->testAttribute(Qt::WA_WasEverConfigured)
-        && !widget->testAttribute(Qt::WA_WasEverExposed))
         return;
 
     if(QWidgetBackingStore::paintOnScreen(widget))
@@ -1278,11 +1269,6 @@ void QWidgetPrivate::invalidateBuffer(const QRegion &rgn)
 void QWidget::repaint(const QRegion& rgn)
 {
     if (testAttribute(Qt::WA_WState_ConfigPending)) {
-        update(rgn);
-        return;
-    }
-
-    if (window()->windowType() != Qt::Popup && !testAttribute(Qt::WA_WasEverConfigured) && !testAttribute(Qt::WA_WasEverExposed)) {
         update(rgn);
         return;
     }

@@ -420,9 +420,6 @@ public:
 
         WA_StyleSheet = 97, // internal
 
-        WA_WasEverExposed = 117, // internal
-        WA_WasEverConfigured = 118,
-
         // Add new attributes before this line
         WA_AttributeCount
     };
