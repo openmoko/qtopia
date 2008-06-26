@@ -300,6 +300,7 @@ Q_GUI_EXPORT void qt_x11_enforce_cursor(QWidget * w)
     }
 }
 
+// Left here for compat. Do something better than waiting for a WM
 Q_GUI_EXPORT void qt_x11_wait_for_window_manager(QWidget* w)
 {
     QApplication::flush();
@@ -1730,7 +1731,6 @@ void QWidgetPrivate::show_sys()
                  && X11->isSupportedByWM(ATOM(_NET_WM_STATE_MAXIMIZED_VERT)))) {
             XMapWindow(X11->display, q->internalWinId());
             data.fstrut_dirty = true;
-            qt_x11_wait_for_window_manager(q);
 
             // if the wm was not smart enough to adjust our size, do that manually
             QRect maxRect = QApplication::desktop()->availableGeometry(q);
@@ -1754,7 +1754,6 @@ void QWidgetPrivate::show_sys()
 
         if (q->isFullScreen() && !X11->isSupportedByWM(ATOM(_NET_WM_STATE_FULLSCREEN))) {
             XMapWindow(X11->display, q->internalWinId());
-            qt_x11_wait_for_window_manager(q);
             q->setAttribute(Qt::WA_Mapped);
             return;
         }
