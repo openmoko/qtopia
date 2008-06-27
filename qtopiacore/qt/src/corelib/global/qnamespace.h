@@ -420,6 +420,8 @@ public:
 
         WA_StyleSheet = 97, // internal
 
+        WA_WasConfigured = 116,
+
         // Add new attributes before this line
         WA_AttributeCount
     };

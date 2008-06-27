@@ -5368,6 +5368,9 @@ void QWidgetPrivate::show_helper()
 {
     Q_Q(QWidget);
     data.in_show = true; // qws optimization
+
+// We will get a ConfigureEvent from the server and can do the move resize there
+#ifndef Q_WS_X11
     // make sure we receive pending move and resize events
     if (q->testAttribute(Qt::WA_PendingMoveEvent)) {
         QMoveEvent e(data.crect.topLeft(), data.crect.topLeft());
@@ -5379,6 +5382,7 @@ void QWidgetPrivate::show_helper()
         QApplication::sendEvent(q, &e);
         q->setAttribute(Qt::WA_PendingResizeEvent, false);
     }
+#endif
 
     // become visible before showing all children
     q->setAttribute(Qt::WA_WState_Visible);
@@ -6411,13 +6415,22 @@ bool QWidget::event(QEvent *event)
         changeEvent(event);
         break;
 
-#if defined(Q_WS_X11) || defined(Q_WS_QWS) || (defined(Q_WS_WIN) && defined(Q_WIN_USE_QT_UPDATE_EVENT))
+#if defined(Q_WS_QWS) || (defined(Q_WS_WIN) && defined(Q_WIN_USE_QT_UPDATE_EVENT))
     case QEvent::UpdateRequest: {
 #ifndef Q_WS_WIN
         extern void qt_syncBackingStore(QWidget *widget);
 #endif
         qt_syncBackingStore(this);
         break; }
+#endif
+#if defined(Q_WS_X11)
+    case QEvent::UpdateRequest: {
+        extern bool isMappedAndConfigured(QWidget*);
+        // We will get an expose event anyway, so just skip this
+        if (isMappedAndConfigured(this))
+            qt_syncBackingStore(this);
+        break;
+    }
 #endif
 
     case QEvent::UpdateLater:

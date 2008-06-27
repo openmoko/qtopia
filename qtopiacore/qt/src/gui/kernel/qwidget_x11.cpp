@@ -377,6 +377,25 @@ static QVector<Atom> getNetWmState(QWidget *w)
     return returnValue;
 }
 
+// This can be used to determine if resize/move/paint events should be send to
+// the widget or if things need to be postponed.
+bool isMappedAndConfigured(QWidget *widget)
+{
+    if (!widget->isVisible())
+        return false;
+
+    // walk the list of parents and check if they were configured...
+    QWidget* parent = widget;
+    while (parent) {
+        if (!parent->testAttribute(Qt::WA_WasConfigured))
+            return false;
+
+        parent = parent->parentWidget();
+    }
+
+    return true;
+}
+
 void QWidgetPrivate::create_sys(WId window, bool initializeWindow, bool destroyOldWindow)
 {
     Q_Q(QWidget);
@@ -2193,7 +2212,7 @@ void QWidgetPrivate::setGeometry_sys(int x, int y, int w, int h, bool isMove)
         }
     }
 
-    if (q->isVisible()) {
+    if (isMappedAndConfigured(q)) {
         if (isMove && q->pos() != oldPos) {
             if (X11->desktopEnvironment != DE_4DWM) {
                 // pos() is right according to ICCCM 4.1.5

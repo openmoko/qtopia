@@ -4461,8 +4461,12 @@ bool QETWidget::translateScrollDoneEvent(const XEvent *event)
 bool QETWidget::translateConfigEvent(const XEvent *event)
 {
     Q_D(QWidget);
+    extern bool isMappedAndConfigured(QWidget*);
     bool wasResize = testAttribute(Qt::WA_WState_ConfigPending); // set in QWidget::setGeometry_sys()
     setAttribute(Qt::WA_WState_ConfigPending, false);
+    setAttribute(Qt::WA_WasConfigured, true);
+
+    bool isMapped = isMappedAndConfigured(this);
 
     if (testAttribute(Qt::WA_OutsideWSRange)) {
         // discard events for windows that have a geometry X can't handle
@@ -4546,7 +4550,7 @@ bool QETWidget::translateConfigEvent(const XEvent *event)
                 QApplication::sendEvent(this, &e);
             }
 
-            if (isVisible()) {
+            if (isMapped) {
                 QResizeEvent e(newSize, oldSize);
                 QApplication::sendSpontaneousEvent(this, &e);
             } else {
@@ -4574,7 +4578,7 @@ bool QETWidget::translateConfigEvent(const XEvent *event)
             ;
         if(QWidgetBackingStore::paintOnScreen(this)) {
             repaint();
-        } else {
+        } else if (isMapped) {
             extern void qt_syncBackingStore(QRegion rgn, QWidget *widget);
             qt_syncBackingStore(d->clipRect(), this);
         }
