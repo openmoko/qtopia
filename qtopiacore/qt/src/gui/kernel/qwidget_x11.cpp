@@ -387,7 +387,7 @@ bool isMappedAndConfigured(QWidget *widget)
     // walk the list of parents and check if they were configured...
     QWidget* parent = widget;
     while (parent) {
-        if (!parent->testAttribute(Qt::WA_WasConfigured))
+        if (parent->testAttribute(Qt::WA_WState_ConfigPending))
             return false;
 
         parent = parent->parentWidget();

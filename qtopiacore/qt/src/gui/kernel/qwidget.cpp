@@ -6427,7 +6427,7 @@ bool QWidget::event(QEvent *event)
     case QEvent::UpdateRequest: {
         extern bool isMappedAndConfigured(QWidget*);
         // We will get an expose event anyway, so just skip this
-        if (isMappedAndConfigured(this))
+        if (testAttribute(Qt::WA_WasExposed) && isMappedAndConfigured(this))
             qt_syncBackingStore(this);
         break;
     }
@@ -7505,6 +7505,7 @@ QWidget *QWidget::childAt(const QPoint &p) const
     return 0;
 }
 
+extern bool isMappedAndConfigured(QWidget*);
 void QWidgetPrivate::updateGeometry_helper(bool forceUpdate)
 {
     Q_Q(QWidget);
@@ -7513,8 +7514,13 @@ void QWidgetPrivate::updateGeometry_helper(bool forceUpdate)
         if (!q->isWindow() && !q->isHidden() && (parent = q->parentWidget())) {
             if (parent->d_func()->layout)
                 parent->d_func()->layout->invalidate();
+#ifdef Q_WS_X11
+            else if (isMappedAndConfigured(parent))
+                QApplication::postEvent(parent, new QEvent(QEvent::LayoutRequest));
+#else
             else if (parent->isVisible())
                 QApplication::postEvent(parent, new QEvent(QEvent::LayoutRequest));
+#endif
         }
     }
 }
