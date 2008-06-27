@@ -4564,6 +4564,20 @@ bool QETWidget::translateConfigEvent(const XEvent *event)
                !qt_x11EventFilter(&xevent)  &&
                !x11Event(&xevent)) // send event through filter
             ;
+
+        if (isMappedAndConfigured(this)) {
+            if (testAttribute(Qt::WA_PendingMoveEvent)) {
+                QMoveEvent e(d->data.crect.topLeft(), d->data.crect.topLeft());
+                QApplication::sendSpontaneousEvent(this, &e);
+                setAttribute(Qt::WA_PendingMoveEvent, false);
+            }
+
+            if (testAttribute(Qt::WA_PendingResizeEvent)) {
+                QResizeEvent e(size(), QSize());
+                QApplication::sendSpontaneousEvent(this, &e);
+                setAttribute(Qt::WA_PendingResizeEvent, false);
+            }
+        }
     }
 
     if (wasResize && !testAttribute(Qt::WA_StaticContents)) {
