@@ -341,5 +341,5 @@ void QAnalogClock::display( const QTime& time )
     d->currTime = time;
     if  ( isVisible() )
         d->isEvent = false; // XXX forced to true before used anyway
-    repaint();
+    update();
 }

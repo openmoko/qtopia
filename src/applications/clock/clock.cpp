@@ -92,8 +92,7 @@ void Clock::updateClock()
         clockAmPm->hide();
     }
     clockLcd->display( s );
-    if (isVisible())
-        clockLcd->repaint();
+    clockLcd->update();
     analogClock->display( QTime::currentTime() );
 
     QString df = "dddd "+dateFormat;
