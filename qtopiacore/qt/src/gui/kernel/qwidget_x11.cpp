@@ -381,7 +381,7 @@ static QVector<Atom> getNetWmState(QWidget *w)
 // the widget or if things need to be postponed.
 bool isMappedAndConfigured(QWidget *widget)
 {
-    if (!widget->isVisible())
+    if (!widget->testAttribute(Qt::WA_Mapped))
         return false;
 
     // walk the list of parents and check if they were configured...
