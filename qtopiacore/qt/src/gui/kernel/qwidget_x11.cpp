@@ -1729,7 +1729,6 @@ void QWidgetPrivate::show_sys()
         if (q->isMaximized() && !q->isFullScreen()
             && !(X11->isSupportedByWM(ATOM(_NET_WM_STATE_MAXIMIZED_HORZ))
                  && X11->isSupportedByWM(ATOM(_NET_WM_STATE_MAXIMIZED_VERT)))) {
-            XMapWindow(X11->display, q->internalWinId());
             data.fstrut_dirty = true;
 
             // if the wm was not smart enough to adjust our size, do that manually
@@ -1748,6 +1747,8 @@ void QWidgetPrivate::show_sys()
             top->normalGeometry = normalRect;
             // internalSetGeometry() clears the maximized flag... make sure we set it back
             data.window_state = data.window_state | Qt::WindowMaximized;
+
+            XMapWindow(X11->display, q->internalWinId());
             q->setAttribute(Qt::WA_Mapped);
             return;
         }
