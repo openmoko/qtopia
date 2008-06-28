@@ -1014,14 +1014,11 @@ void CallScreen::themeLoaded( const QString & )
   */
 void CallScreen::manualLayout()
 {
-    ThemeRectItem *keypaditem = (ThemeRectItem *)findItem( "keypad-box", ThemedView::Rect, ThemeItem::All, false );
-    ThemeRectItem *keypadbutton = (ThemeRectItem *)findItem( "keypad-show-container", ThemedView::Rect, ThemeItem::All, false );
-    if( keypaditem && keypadbutton ) {
-        keypaditem->setActive( keypadVisible );
-        keypadbutton->setActive( !keypadVisible );
+    QHash<QString, bool>  layout;
+    layout["keypad-box"] = keypadVisible;
+    layout["keypad-showcontainer"] = !keypadVisible;
 
-    }
-    update();
+    setActiveItems(layout);
 }
 
 /*!
