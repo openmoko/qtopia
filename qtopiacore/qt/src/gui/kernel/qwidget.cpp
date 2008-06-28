@@ -5369,7 +5369,7 @@ void QWidgetPrivate::show_helper()
     Q_Q(QWidget);
     data.in_show = true; // qws optimization
 
-// We will get a ConfigureEvent from the server and can do the move resize there
+// We will get some events for that later
 #ifndef Q_WS_X11
     // make sure we receive pending move and resize events
     if (q->testAttribute(Qt::WA_PendingMoveEvent)) {
@@ -5377,6 +5377,7 @@ void QWidgetPrivate::show_helper()
         QApplication::sendEvent(q, &e);
         q->setAttribute(Qt::WA_PendingMoveEvent, false);
     }
+
     if (q->testAttribute(Qt::WA_PendingResizeEvent)) {
         QResizeEvent e(data.crect.size(), QSize());
         QApplication::sendEvent(q, &e);
@@ -5482,7 +5483,6 @@ void QWidgetPrivate::hide_helper()
         q->parentWidget()->activateWindow();        // Activate parent
 #endif
 
-    q->setAttribute(Qt::WA_Mapped, false);
     hide_sys();
 
     bool wasVisible = q->testAttribute(Qt::WA_WState_Visible);
@@ -5712,9 +5712,10 @@ void QWidgetPrivate::hideChildren(bool spontaneous)
         QWidget *widget = qobject_cast<QWidget*>(childList.at(i));
         if (!widget || widget->isWindow() || widget->testAttribute(Qt::WA_WState_Hidden))
             continue;
-        if (spontaneous)
+        if (spontaneous) {
             widget->setAttribute(Qt::WA_Mapped, false);
-        else
+            widget->setAttribute(Qt::WA_PendingMapNotify, false);
+        } else
             widget->setAttribute(Qt::WA_WState_Visible, false);
         widget->d_func()->hideChildren(spontaneous);
         QHideEvent e;
@@ -6427,7 +6428,7 @@ bool QWidget::event(QEvent *event)
     case QEvent::UpdateRequest: {
         extern bool isMappedAndConfigured(QWidget*);
         // We will get an expose event anyway, so just skip this
-        if (testAttribute(Qt::WA_WasExposed) && isMappedAndConfigured(this))
+        if (isMappedAndConfigured(this))
             qt_syncBackingStore(this);
         break;
     }

@@ -386,6 +386,7 @@ bool isMappedAndConfigured(QWidget *widget)
     while (parent) {
         if (parent->testAttribute(Qt::WA_WState_ConfigPending))
             return false;
+
         if (parent->testAttribute(Qt::WA_Mapped) && parent->testAttribute(Qt::WA_PendingMapNotify))
             return false;
 
@@ -918,6 +919,7 @@ void QWidgetPrivate::setParent_sys(QWidget *parent, Qt::WindowFlags f)
     // hide and reparent our own window away. Otherwise we might get
     // destroyed when emitting the child remove event below. See QWorkspace.
     if (wasCreated) {
+        q->setAttribute(Qt::WA_UnmapPending);
         XUnmapWindow(X11->display, old_winid);
         XReparentWindow(X11->display, old_winid, RootWindow(X11->display, xinfo.screen()), 0, 0);
     }
@@ -977,6 +979,7 @@ void QWidgetPrivate::setParent_sys(QWidget *parent, Qt::WindowFlags f)
                       note that the WM_TRANSIENT_FOR hint is actually updated in
                       QWidgetPrivate::show_sys()
                     */
+                    q->setAttribute(Qt::WA_UnmapPending);
                     XUnmapWindow(X11->display, w->internalWinId());
                     QApplication::postEvent(w, new QEvent(QEvent::ShowWindowRequest));
                 }
@@ -1596,7 +1599,7 @@ void QWidget::setWindowState(Qt::WindowStates newstate)
                     XSendEvent(X11->display,
                                RootWindow(X11->display,d->xinfo.screen()),
                                False, (SubstructureNotifyMask|SubstructureRedirectMask), &e);
-                } else {
+                } else if (!testAttribute(Qt::WA_Mapped) || !testAttribute(Qt::WA_UnmapPending)) {
                     setAttribute(Qt::WA_Mapped);
                     setAttribute(Qt::WA_PendingMapNotify);
                     XMapWindow(X11->display, internalWinId());
@@ -1767,13 +1770,16 @@ void QWidgetPrivate::show_sys()
             // internalSetGeometry() clears the maximized flag... make sure we set it back
             data.window_state = data.window_state | Qt::WindowMaximized;
 
-            XMapWindow(X11->display, q->internalWinId());
-            q->setAttribute(Qt::WA_Mapped);
-            q->setAttribute(Qt::WA_PendingMapNotify);
+            if (!q->testAttribute(Qt::WA_Mapped) || q->testAttribute(Qt::WA_UnmapPending)) {
+                XMapWindow(X11->display, q->internalWinId());
+                q->setAttribute(Qt::WA_Mapped);
+                q->setAttribute(Qt::WA_PendingMapNotify);
+            }
             return;
         }
 
-        if (q->isFullScreen() && !X11->isSupportedByWM(ATOM(_NET_WM_STATE_FULLSCREEN))) {
+        if (q->isFullScreen() && !X11->isSupportedByWM(ATOM(_NET_WM_STATE_FULLSCREEN))
+            && (!q->testAttribute(Qt::WA_Mapped) || q->testAttribute(Qt::WA_UnmapPending))) {
             XMapWindow(X11->display, q->internalWinId());
             q->setAttribute(Qt::WA_Mapped);
             q->setAttribute(Qt::WA_PendingMapNotify);
@@ -1785,8 +1791,12 @@ void QWidgetPrivate::show_sys()
 
     if (q->testAttribute(Qt::WA_OutsideWSRange))
         return;
-    q->setAttribute(Qt::WA_Mapped);
-    q->setAttribute(Qt::WA_PendingMapNotify);
+
+    if (!q->testAttribute(Qt::WA_Mapped) || q->testAttribute(Qt::WA_UnmapPending)) {
+        q->setAttribute(Qt::WA_Mapped);
+        q->setAttribute(Qt::WA_PendingMapNotify);
+    }
+
     if (q->isWindow())
         topData()->waitingForMapNotify = 1;
 
@@ -1855,15 +1865,18 @@ void QWidgetPrivate::hide_sys()
     deactivateWidgetCleanup();
     if (q->isWindow()) {
         X11->deferred_map.removeAll(q);
-        if (q->internalWinId()) // in nsplugin, may be 0
+        if (q->internalWinId()) { // in nsplugin, may be 0
+            q->setAttribute(Qt::WA_UnmapPending);
             XWithdrawWindow(X11->display, q->internalWinId(), xinfo.screen());
+        }
         XFlush(X11->display);
     } else {
         invalidateBuffer(q->rect());
-        if (q->internalWinId()) // in nsplugin, may be 0
+        if (q->internalWinId()) { // in nsplugin, may be 0
+            q->setAttribute(Qt::WA_UnmapPending);
             XUnmapWindow(X11->display, q->internalWinId());
+        }
     }
-    q->setAttribute(Qt::WA_Mapped, false);
 }
 
 void QWidgetPrivate::setFocus_sys()
@@ -2042,8 +2055,8 @@ void QWidgetPrivate::setWSGeometry(bool dontShow)
     if (q->testAttribute(Qt::WA_OutsideWSRange) != outsideRange) {
         q->setAttribute(Qt::WA_OutsideWSRange, outsideRange);
         if (outsideRange) {
+            q->setAttribute(Qt::WA_UnmapPending);
             XUnmapWindow(dpy, data.winid);
-            q->setAttribute(Qt::WA_Mapped, false);
         } else if (!q->isHidden()) {
             mapWindow = true;
         }
@@ -2080,7 +2093,9 @@ void QWidgetPrivate::setWSGeometry(bool dontShow)
             QObject *object = children.at(i);
             if (object->isWidgetType()) {
                 QWidget *w = static_cast<QWidget *>(object);
-                if (!w->testAttribute(Qt::WA_OutsideWSRange) && !w->testAttribute(Qt::WA_Mapped) && !w->isHidden()) {
+                if (!w->testAttribute(Qt::WA_OutsideWSRange)
+                    && (!w->testAttribute(Qt::WA_Mapped) || w->testAttribute(Qt::WA_UnmapPending))
+                    && !w->isHidden()) {
                     w->setAttribute(Qt::WA_Mapped);
                     w->setAttribute(Qt::WA_PendingMapNotify);
                     XMapWindow(dpy, w->data->winid);
@@ -2093,7 +2108,8 @@ void QWidgetPrivate::setWSGeometry(bool dontShow)
     if  (jump)
         XClearArea(dpy, data.winid, 0, 0, wrect.width(), wrect.height(), True);
 
-    if (mapWindow && !dontShow) {
+    if (mapWindow && !dontShow
+        && (!q->testAttribute(Qt::WA_Mapped) || !q->testAttribute(Qt::WA_UnmapPending))) {
             q->setAttribute(Qt::WA_Mapped);
             q->setAttribute(Qt::WA_PendingMapNotify);
             XMapWindow(dpy, data.winid);

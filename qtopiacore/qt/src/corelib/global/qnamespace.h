@@ -422,6 +422,7 @@ public:
 
         WA_WasExposed = 116,
         WA_PendingMapNotify = 117,
+        WA_UnmapPending = 118,
 
         // Add new attributes before this line
         WA_AttributeCount

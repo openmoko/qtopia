@@ -385,7 +385,7 @@ public:
 #endif
     bool translatePropertyEvent(const XEvent *);
 
-    void sendPendingEvents();
+    bool sendPendingEvents();
 
     void doDeferredMap()
     {
@@ -3093,6 +3093,8 @@ int QApplication::x11ProcessEvent(XEvent* event)
 
     case UnmapNotify:                                // window hidden
         widget->setAttribute(Qt::WA_PendingMapNotify, false);
+        widget->setAttribute(Qt::WA_Mapped, false);
+        widget->setAttribute(Qt::WA_UnmapPending, false);
         if (widget->isWindow()) {
             Q_ASSERT(widget->testAttribute(Qt::WA_WState_Created));
             widget->d_func()->topData()->waitingForMapNotify = 0;
@@ -3110,9 +3112,14 @@ int QApplication::x11ProcessEvent(XEvent* event)
             if (!widget->d_func()->topData()->validWMState && X11->deferred_map.removeAll(widget))
                 widget->doDeferredMap();
         }
+
+        // Okay we might have waited for this widget to be "done" and are gone now...
+        if (widget->parentWidget() && isMappedAndConfigured(widget->parentWidget()))
+            static_cast<QETWidget*>(widget->parentWidget())->sendPendingEvents();
         break;
 
     case MapNotify:                                // window shown
+        widget->setAttribute(Qt::WA_PendingMapNotify, false);
         if (widget->isWindow()) {
             widget->d_func()->topData()->waitingForMapNotify = 0;
 
@@ -4421,6 +4428,8 @@ void QETWidget::translatePaintEvent(const XEvent *event)
 
     QRegion paintRegion = paintRect;
 
+    bool reconfigured = sendPendingEvents();
+
     // WARNING: this is O(number_of_events * number_of_matching_events)
     while (XCheckIfEvent(X11->display,&xevent,isPaintOrScrollDoneEvent,
                          (XPointer)&info) &&
@@ -4440,7 +4449,7 @@ void QETWidget::translatePaintEvent(const XEvent *event)
         }
     }
 
-    if (!paintRegion.isEmpty() && !(!testAttribute(Qt::WA_StaticContents) && testAttribute(Qt::WA_WState_ConfigPending))) {
+    if (!reconfigured && !paintRegion.isEmpty() && !(!testAttribute(Qt::WA_StaticContents) && testAttribute(Qt::WA_WState_ConfigPending))) {
         extern void qt_syncBackingStore(QRegion rgn, QWidget *widget);
         qt_syncBackingStore(paintRegion, this);
     }
@@ -4574,7 +4583,7 @@ bool QETWidget::translateConfigEvent(const XEvent *event)
             ;
     }
 
-    sendPendingEvents();
+    bool reconfigured = sendPendingEvents();
 
     if (wasResize && !testAttribute(Qt::WA_StaticContents)) {
         XEvent xevent;
@@ -4585,9 +4594,9 @@ bool QETWidget::translateConfigEvent(const XEvent *event)
                !qt_x11EventFilter(&xevent)  &&
                !x11Event(&xevent)) // send event through filter
             ;
-        if(QWidgetBackingStore::paintOnScreen(this)) {
+        if(!reconfigured && QWidgetBackingStore::paintOnScreen(this)) {
             repaint();
-        } else if (isMappedAndConfigured(this)) {
+        } else if (!reconfigured && isMappedAndConfigured(this)) {
             extern void qt_syncBackingStore(QRegion rgn, QWidget *widget);
             qt_syncBackingStore(d->clipRect(), this);
         }
@@ -4595,21 +4604,31 @@ bool QETWidget::translateConfigEvent(const XEvent *event)
     return true;
 }
 
-void QETWidget::sendPendingEvents()
+bool QETWidget::sendPendingEvents()
 {
+    bool send = false;
+
     if (isMappedAndConfigured(this)) {
         if (testAttribute(Qt::WA_PendingMoveEvent)) {
+            send = true;
             QMoveEvent e(data->crect.topLeft(), data->crect.topLeft());
             QApplication::sendSpontaneousEvent(this, &e);
             setAttribute(Qt::WA_PendingMoveEvent, false);
         }
 
         if (testAttribute(Qt::WA_PendingResizeEvent)) {
+            send = true;
             QResizeEvent e(size(), QSize());
             QApplication::sendSpontaneousEvent(this, &e);
             setAttribute(Qt::WA_PendingResizeEvent, false);
         }
+
+        // force an update now
+        if (send)
+            update();
     }
+
+    return send;
 }
 
 //
