@@ -299,6 +299,8 @@ extern void qt_desktopwidget_update_workarea();
 // Function to change the window manager state (from qwidget_x11.cpp)
 extern void qt_change_net_wm_state(const QWidget *w, bool set, Atom one, Atom two = 0);
 
+extern bool isMappedAndConfigured(QWidget*);
+
 // modifier masks for alt, meta, super, hyper, and mode_switch - detected when the application starts
 // and/or keyboard layout changes
 uchar qt_alt_mask = 0;
@@ -383,6 +385,8 @@ public:
 #endif
     bool translatePropertyEvent(const XEvent *);
 
+    void sendPendingEvents();
+
     void doDeferredMap()
     {
         Q_ASSERT(testAttribute(Qt::WA_WState_Created));
@@ -408,6 +412,7 @@ public:
                           s.height());
 
         setAttribute(Qt::WA_Mapped);
+        setAttribute(Qt::WA_PendingMapNotify);
         d_func()->topData()->waitingForMapNotify = 1;
         XMapWindow(X11->display, internalWinId());
     }
@@ -3087,6 +3092,7 @@ int QApplication::x11ProcessEvent(XEvent* event)
         break;
 
     case UnmapNotify:                                // window hidden
+        widget->setAttribute(Qt::WA_PendingMapNotify, false);
         if (widget->isWindow()) {
             Q_ASSERT(widget->testAttribute(Qt::WA_WState_Created));
             widget->d_func()->topData()->waitingForMapNotify = 0;
@@ -3128,6 +3134,9 @@ int QApplication::x11ProcessEvent(XEvent* event)
                 }
             }
         }
+
+        if (isMappedAndConfigured(widget))
+            static_cast<QETWidget*>(widget)->sendPendingEvents();
         break;
 
     case ClientMessage:                        // client message
@@ -4463,7 +4472,6 @@ bool QETWidget::translateScrollDoneEvent(const XEvent *event)
 bool QETWidget::translateConfigEvent(const XEvent *event)
 {
     Q_D(QWidget);
-    extern bool isMappedAndConfigured(QWidget*);
     bool wasResize = testAttribute(Qt::WA_WState_ConfigPending); // set in QWidget::setGeometry_sys()
     setAttribute(Qt::WA_WState_ConfigPending, false);
 
@@ -4564,21 +4572,9 @@ bool QETWidget::translateConfigEvent(const XEvent *event)
                !qt_x11EventFilter(&xevent)  &&
                !x11Event(&xevent)) // send event through filter
             ;
-
-        if (isMappedAndConfigured(this)) {
-            if (testAttribute(Qt::WA_PendingMoveEvent)) {
-                QMoveEvent e(d->data.crect.topLeft(), d->data.crect.topLeft());
-                QApplication::sendSpontaneousEvent(this, &e);
-                setAttribute(Qt::WA_PendingMoveEvent, false);
-            }
-
-            if (testAttribute(Qt::WA_PendingResizeEvent)) {
-                QResizeEvent e(size(), QSize());
-                QApplication::sendSpontaneousEvent(this, &e);
-                setAttribute(Qt::WA_PendingResizeEvent, false);
-            }
-        }
     }
+
+    sendPendingEvents();
 
     if (wasResize && !testAttribute(Qt::WA_StaticContents)) {
         XEvent xevent;
@@ -4597,6 +4593,23 @@ bool QETWidget::translateConfigEvent(const XEvent *event)
         }
     }
     return true;
+}
+
+void QETWidget::sendPendingEvents()
+{
+    if (isMappedAndConfigured(this)) {
+        if (testAttribute(Qt::WA_PendingMoveEvent)) {
+            QMoveEvent e(data->crect.topLeft(), data->crect.topLeft());
+            QApplication::sendSpontaneousEvent(this, &e);
+            setAttribute(Qt::WA_PendingMoveEvent, false);
+        }
+
+        if (testAttribute(Qt::WA_PendingResizeEvent)) {
+            QResizeEvent e(size(), QSize());
+            QApplication::sendSpontaneousEvent(this, &e);
+            setAttribute(Qt::WA_PendingResizeEvent, false);
+        }
+    }
 }
 
 //

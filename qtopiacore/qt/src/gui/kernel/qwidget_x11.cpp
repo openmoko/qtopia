@@ -381,13 +381,12 @@ static QVector<Atom> getNetWmState(QWidget *w)
 // the widget or if things need to be postponed.
 bool isMappedAndConfigured(QWidget *widget)
 {
-    if (!widget->testAttribute(Qt::WA_Mapped))
-        return false;
-
     // walk the list of parents and check if they were configured...
     QWidget* parent = widget;
     while (parent) {
         if (parent->testAttribute(Qt::WA_WState_ConfigPending))
+            return false;
+        if (parent->testAttribute(Qt::WA_Mapped) && parent->testAttribute(Qt::WA_PendingMapNotify))
             return false;
 
         parent = parent->parentWidget();
@@ -1599,6 +1598,7 @@ void QWidget::setWindowState(Qt::WindowStates newstate)
                                False, (SubstructureNotifyMask|SubstructureRedirectMask), &e);
                 } else {
                     setAttribute(Qt::WA_Mapped);
+                    setAttribute(Qt::WA_PendingMapNotify);
                     XMapWindow(X11->display, internalWinId());
                 }
             }
@@ -1769,12 +1769,14 @@ void QWidgetPrivate::show_sys()
 
             XMapWindow(X11->display, q->internalWinId());
             q->setAttribute(Qt::WA_Mapped);
+            q->setAttribute(Qt::WA_PendingMapNotify);
             return;
         }
 
         if (q->isFullScreen() && !X11->isSupportedByWM(ATOM(_NET_WM_STATE_FULLSCREEN))) {
             XMapWindow(X11->display, q->internalWinId());
             q->setAttribute(Qt::WA_Mapped);
+            q->setAttribute(Qt::WA_PendingMapNotify);
             return;
         }
     }
@@ -1784,6 +1786,7 @@ void QWidgetPrivate::show_sys()
     if (q->testAttribute(Qt::WA_OutsideWSRange))
         return;
     q->setAttribute(Qt::WA_Mapped);
+    q->setAttribute(Qt::WA_PendingMapNotify);
     if (q->isWindow())
         topData()->waitingForMapNotify = 1;
 
@@ -2079,6 +2082,7 @@ void QWidgetPrivate::setWSGeometry(bool dontShow)
                 QWidget *w = static_cast<QWidget *>(object);
                 if (!w->testAttribute(Qt::WA_OutsideWSRange) && !w->testAttribute(Qt::WA_Mapped) && !w->isHidden()) {
                     w->setAttribute(Qt::WA_Mapped);
+                    w->setAttribute(Qt::WA_PendingMapNotify);
                     XMapWindow(dpy, w->data->winid);
                 }
             }
@@ -2091,6 +2095,7 @@ void QWidgetPrivate::setWSGeometry(bool dontShow)
 
     if (mapWindow && !dontShow) {
             q->setAttribute(Qt::WA_Mapped);
+            q->setAttribute(Qt::WA_PendingMapNotify);
             XMapWindow(dpy, data.winid);
     }
 }

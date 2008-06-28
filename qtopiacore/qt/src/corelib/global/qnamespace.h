@@ -421,6 +421,7 @@ public:
         WA_StyleSheet = 97, // internal
 
         WA_WasExposed = 116,
+        WA_PendingMapNotify = 117,
 
         // Add new attributes before this line
         WA_AttributeCount
