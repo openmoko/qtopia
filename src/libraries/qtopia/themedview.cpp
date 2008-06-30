@@ -5155,7 +5155,7 @@ void ThemeListModelEntry::getTemplateInstance() {
     if ( d->templateInstance == 0 ) {
         // FIXME : should only search under theme list item
         //qWarning("ThemeListModelEntry::getTemplateInstance() - Type returned '%s'", type().toAscii().data());
-        ThemeTemplateItem* ti = static_cast<ThemeTemplateItem*>(d->model->themedView()->findItem( /*li,*/ type(), ThemedView::Template, true));
+        ThemeTemplateItem* ti = static_cast<ThemeTemplateItem*>(d->model->themedView()->findItem( /*li,*/ type(), ThemedView::Template, ThemeItem::All, false));
         if ( !ti ) {
             qWarning("ThemeListModelEntry::getTemplateInstance() - Cannot find template item with name '%s'", type().toAscii().data());
             return;
