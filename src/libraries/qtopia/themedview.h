@@ -614,6 +614,7 @@ protected:
 
     virtual void themeLoaded(const QString &);
     void layout(ThemeItem *item=0);
+    void scheduleLayout();
 
 
     void mousePressEvent(QMouseEvent *e);

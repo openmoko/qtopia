@@ -1257,7 +1257,7 @@ void ThemeItem::setActive(bool active)
         d->actv = active;
         if ( !d->actv )
             d->press = false; //can't be pressed when not active
-        view()->layout();
+        view()->scheduleLayout();
         // update me or my parent, position controlling layout?
         ThemeItem* item = this;
         ThemeItem *plhelp = 0;
@@ -6142,6 +6142,11 @@ void ThemedView::layout(ThemeItem *item)
             layout(itm);
     }
     EXIT
+}
+
+void ThemedView::scheduleLayout()
+{
+    d->needLayout = true;
 }
 
 void ThemedView::paletteChange(const QPalette &p)
