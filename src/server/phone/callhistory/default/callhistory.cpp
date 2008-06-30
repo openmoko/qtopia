@@ -248,6 +248,7 @@ void CallHistoryListView::modelChanged()
 CallHistoryView::CallHistoryView( QWidget *parent, Qt::WFlags fl )
     : QWidget( parent, fl ), mHaveFocus( false ), mHaveContact( false ),
       mPhoneType( QContactModel::Invalid ), deleteMsg(0), addContactMsg(0)
+    , mDialButton(0)
 {
     setObjectName( "callhistory-view" );
     mMenu = QSoftMenuBar::menuFor( this );
@@ -285,10 +286,12 @@ CallHistoryView::CallHistoryView( QWidget *parent, Qt::WFlags fl )
     // new widgets
     mCallTypePic = new QLabel( container );
     mCallType = new QLabel( container );
+    mNameLabel = new QLabel( tr("Name:"), container);
     mName = new QLabel( container );
     //mName->setWordWrap( true );
     mContactTypePic = new QLabel( container );
     mPhoneTypePic = new QLabel( container );
+    mNumberLabel = new QLabel( tr("Number:"), container);
     mNumber = new QLabel( container );
     mPortrait = new QLabel( container );
     mStartDate = new QLabel( container );
@@ -311,17 +314,16 @@ CallHistoryView::CallHistoryView( QWidget *parent, Qt::WFlags fl )
     h->addWidget( mName );
     h->addWidget( mContactTypePic );
     h->addStretch();
-    l->addRow( tr("Name:"), h );
+    l->addRow( mNameLabel, h );
     h = new QHBoxLayout();
     h->addWidget( mNumber );
     h->addWidget( mPhoneTypePic );
     if (style()->inherits("QThumbStyle")) { // No find dialog for QThumbStyle
-        QPushButton *dialBtn = new QPushButton( tr( "Dial", "dial highlighted number" ), container );
-        h->addWidget( dialBtn );
-        connect( dialBtn, SIGNAL(released()), this, SLOT(dialNumber()) );
+        mDialButton = new QPushButton( tr( "Dial", "dial highlighted number" ), container );
+        h->addWidget( mDialButton, 0, Qt::AlignRight );
+        connect( mDialButton, SIGNAL(released()), this, SLOT(dialNumber()) );
     }
-    h->addStretch();
-    l->addRow( tr("Number:"), h );
+    l->addRow( mNumberLabel, h );
     l->addRow( tr("Date:"), mStartDate );
     l->addRow( tr("Time:"), mStartTime );
     l->addRow( tr("Duration:", "Duration of phone call"), mDuration );
@@ -464,6 +466,15 @@ void CallHistoryView::clear()
     updateMenu();
 }
 
+static void elideText(QLabel* label, int width, int used)
+{
+    QFontMetrics fm( label->font() );
+    // calculate available width for the label
+    int w = width   // parent rect
+        - used;
+    label->setText( fm.elidedText( label->text(), Qt::ElideRight, w) );
+}
+
 void CallHistoryView::updateContent()
 {
     // find call type icon
@@ -531,24 +542,19 @@ void CallHistoryView::updateContent()
     else
         mName->setText( tr("Unknown") );
 
-    if ( mCallListItem.number().trimmed().isEmpty() )
-        mNumber->setText( tr( "Unknown Number" ) );
-    else
-        mNumber->setText( mCallListItem.number().trimmed() );
-
     QIcon phoneTypeIcon(phoneTypeFileName);
     mPhoneTypePic->setPixmap( phoneTypeIcon.pixmap( QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize)) );
 
-    // elided text for long contact name
-    QFontMetrics fm( mName->font() );
-    // calculate available width for the label
-    int w = rect().width()  // parent rect
-            - mName->x()         // starting point of label
-            - ( phoneTypeIcon.isNull()
-                    ? 0
-                    : QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) ) // icon size
-            - 9; // margin
-    mName->setText( fm.elidedText( mName->text(), Qt::ElideRight, w ) );
+
+    if ( mCallListItem.number().trimmed().isEmpty() )
+        mNumber->setText( tr( "Unknown Number" ) );
+    else 
+        mNumber->setText( mCallListItem.number().trimmed());
+
+    // make sure the text fits
+    int phoneTypeIconWidth = phoneTypeIcon.isNull() ? 0 : QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
+    elideText(mNumber, rect().width(), mNumberLabel->x() + mNumberLabel->width() + phoneTypeIconWidth + 11 + (mDialButton ? mDialButton->sizeHint().width() : 0));
+    elideText(mName,   rect().width(), mNameLabel->x()   + mNameLabel->width()   + phoneTypeIconWidth + 11);
 
     if (hasPhoto) {
         mPortrait->setPixmap( photoFileName );

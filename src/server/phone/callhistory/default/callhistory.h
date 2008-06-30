@@ -134,6 +134,8 @@ private:
     bool mHaveContact;
     bool mHaveDialer;
     QLabel *mCallTypePic, *mCallType, *mPortrait, *mName, *mContactTypePic, *mPhoneTypePic, *mNumber, *mStartDate, *mStartTime, *mDuration, *mTimeZone, *mTimeZoneLabel;
+    QLabel *mNumberLabel;
+    QLabel *mNameLabel;
     QCallListItem mCallListItem;
     QContact mContact;
     QContactModel::Field mPhoneType;
@@ -141,6 +143,7 @@ private:
 
     QMenu *mMenu;
     QAction *mDeleteAction, *mOpenContact, *mSendMessage, *mAddContact;
+    QPushButton *mDialButton;
 };
 
 class CallHistoryClearList : public QDialog
