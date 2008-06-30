@@ -744,6 +744,7 @@ bool MenuManager::eventFilter(QObject *o, QEvent *e)
         return false;
     }
     
+#ifndef Q_WS_X11
     if (e->type() == QEvent::Resize) {
         QMenu *menu = qobject_cast<QMenu*>(o);
         if (menu && menu->isVisible()) {    //menu needs to be moved when resized (since it is bottom-anchored)
@@ -755,6 +756,7 @@ bool MenuManager::eventFilter(QObject *o, QEvent *e)
             menu->move(x, y);
         }
     }
+#endif
 
     if (!o || !e || e->type() != QEvent::KeyPress )
         return false;
