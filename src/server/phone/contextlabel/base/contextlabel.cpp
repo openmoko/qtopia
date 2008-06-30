@@ -47,7 +47,7 @@
   */
 ContextLabel::ContextLabel( QWidget *parent, Qt::WFlags flags )
     : PhoneThemedView(parent, flags), buttons(0), blockUpdates(false),
-    pressedBtn(-1), loadedTheme(false), themeInit(false), menuProvider(0)
+    loadedTheme(false), themeInit(false), menuProvider(0)
 
 {
     if(!parent)
@@ -183,26 +183,8 @@ int ContextLabel::buttonForItem(ThemeItem *item) const
 void ContextLabel::itemPressed(ThemeItem *item)
 {
     initializeButtons();
-    pressedBtn = buttonForItem(item);
-    if (pressedBtn >= 0) {
-        int keycode = buttons[pressedBtn].key;
-        //we have to swap the keycode because the Keyfilter in ServerApplication
-        //swaps these two keys by default
-        if ( QApplication::layoutDirection() == Qt::RightToLeft ) {
-            if ( keycode == Qt::Key_Context1 )
-                keycode = Qt::Key_Back;
-            else if ( keycode == Qt::Key_Back )
-                keycode = Qt::Key_Context1;
-        }
-        QtopiaInputEvents::processKeyEvent(0xffff, keycode, 0, true, false);
-    }
-}
 
-/*! \internal */
-void ContextLabel::itemReleased( ThemeItem *item )
-{
-    Q_UNUSED(item);
-    initializeButtons();
+    int pressedBtn = buttonForItem(item);
     if (pressedBtn >= 0) {
         int keycode = buttons[pressedBtn].key;
         //we have to swap the keycode because the Keyfilter in ServerApplication
@@ -213,8 +195,10 @@ void ContextLabel::itemReleased( ThemeItem *item )
             else if ( keycode == Qt::Key_Back )
                 keycode = Qt::Key_Context1;
         }
+
+        // Send the press and release to avoid issues with autorepeat
+        QtopiaInputEvents::processKeyEvent(0xffff, keycode, 0, true, false);
         QtopiaInputEvents::processKeyEvent(0xffff, keycode, 0, false, false);
-        pressedBtn = -1;
     }
 }
 

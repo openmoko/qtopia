@@ -50,7 +50,6 @@ protected:
 
 protected slots:
     void itemPressed(ThemeItem *item);
-    void itemReleased(ThemeItem *item);
     void keyChanged(const QSoftMenuBarProvider::MenuButton &);
     void keysChanged();
 
@@ -73,7 +72,6 @@ private:
     Button *buttons;
     int buttonCount;
     bool blockUpdates;
-    int pressedBtn;
     bool loadedTheme;
     bool themeInit;
     QSoftMenuBarProvider *menuProvider;
