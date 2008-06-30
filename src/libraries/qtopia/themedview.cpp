@@ -59,6 +59,7 @@
 //===================================================================
 /* declare ThemeListDelegate */
 
+#define PERF_DEBUG
 #ifdef PERF_DEBUG
 static int call_depth = 0;
 QString tab_string(int depth)
@@ -3496,14 +3497,26 @@ bool ThemePixmapItem::verticalScale() const
 void ThemePixmapItem::scaleImage( const QString &key, int width, int height )
 {
     ENTRY
+
+    // We are not visible anymore.. do not scale the image as we might want to use it again
+    if (width == 0 && height == 0) {
+        EXIT
+        return;
+    }
+
+
     for ( int i = 0; i < 3; i++ ) {
         QTagMap<Image> &map = d->images[i];
         QString filename = map[key].filename;
+
+        if (map[key].pixmap.width() == width && map[key].pixmap.height() == height)
+            continue;
+
         if ( filename.endsWith(".svg") ) {
             QColor colour = color( QLatin1String("color") );
             int alpha = attribute( QLatin1String("alpha") );
             map[key].pixmap = loadImage( map[key].filename, QPalette::NColorRoles, colour, alpha, width, height );
-        } else {
+        } else if (!filename.isEmpty() && !map[key].pixmap.isNull()) {
             map[key].pixmap = scalePixmap( map[key].pixmap, width, height );
         }
     }
