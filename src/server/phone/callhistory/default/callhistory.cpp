@@ -367,7 +367,7 @@ void CallHistoryView::contactsChanged()
         mPhoneType = QContactModel::Invalid;
         mHaveContact = false;
     }
-    update();
+    updateContent();
 }
 
 void CallHistoryView::sendMessage()
@@ -446,12 +446,14 @@ void CallHistoryView::setContact( const QContact &cnt, QContactModel::Field phon
     mPhoneType = phoneType;
     mHaveContact = true;
     updateMenu();
+    updateContent();
 }
 
 void CallHistoryView::setCallListItem( QCallListItem item )
 {
     mCallListItem = item;
     updateMenu();
+    updateContent();
 }
 
 void CallHistoryView::clear()
@@ -462,7 +464,7 @@ void CallHistoryView::clear()
     updateMenu();
 }
 
-void CallHistoryView::update()
+void CallHistoryView::updateContent()
 {
     // find call type icon
     QString callTypeFileName;
@@ -1131,7 +1133,6 @@ void CallHistory::viewDetails( const QModelIndex& idx )
     QCallListItem clItem = item->callListItem();
     if( !mView ) {
         mView = new CallHistoryView();
-        mView->installEventFilter(this);
         QtopiaApplication::prepareMainWidget(mView);
         connect( mView, SIGNAL(deleteCurrentItem()), this, SLOT(deleteCurrentItem()) );
         connect( mView, SIGNAL(externalLinkActivated()), this, SLOT(close()) );
@@ -1160,7 +1161,6 @@ void CallHistory::viewDetails( QCallListItem item, QContact contact, int fieldTy
 
     if( !mView ) {
         mView = new CallHistoryView();
-        mView->installEventFilter(this);
         QtopiaApplication::prepareMainWidget(mView);
         connect( mView, SIGNAL(deleteCurrentItem()), this, SLOT(deleteViewedItem()) );
         connect( mView, SIGNAL(externalLinkActivated()), this, SLOT(close()) );
@@ -1310,19 +1310,6 @@ bool CallHistory::eventFilter( QObject *o, QEvent *e )
                 return true;
             }
         }
-    }
-    else if ( o == mView )
-    {
-        // Need to force update on first paint
-        // because the sizeHint of mName is not correctly calculated
-        // because of the pixmap next to it.
-        static bool forceUpdateOnFirstPaint = true;
-        if ( forceUpdateOnFirstPaint && e->type() == QEvent::Paint ) {
-            mView->update();
-            forceUpdateOnFirstPaint = false;
-        }
-        if (e->type() == QEvent::WindowActivate)
-            mView->update();
     }
     return false;
 }

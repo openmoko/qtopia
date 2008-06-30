@@ -108,7 +108,6 @@ public:
     void setCallListItem( QCallListItem item );
 
 public slots:
-    void update();
     void clear();
 
 signals:
@@ -128,6 +127,7 @@ protected slots:
 
 protected:
     void keyPressEvent( QKeyEvent *e );
+    void updateContent();
 
 private:
     bool mHaveFocus;
