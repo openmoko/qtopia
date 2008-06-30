@@ -58,6 +58,7 @@ private Q_SLOTS:
     void _q_registrationStateChanged(QTelephony::RegistrationState);
     void _q_planeModeEnabledChanged(bool);
     void _q_cellBroadcast(CellBroadcastControl::Type, const QString& chan, const QString& text);
+    void _q_signalStrengthChanged(int);
 
 private:
     static QString cellModemStateToString(CellModemManager::State);
