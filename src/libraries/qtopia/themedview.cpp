@@ -5557,7 +5557,7 @@ void ThemedView::mouseMoveEvent( QMouseEvent *e )
     ThemeItem *item = itemAt( e->pos() );
     //no item under mouse or an item that is not the initially pressed item
     if ( !item || item != d->pressedItem )
-        while( (item = findItem( QString(), ThemedView::Item, ThemeItem::Pressed)) )
+        while( (item = findItem( QString(), ThemedView::Item, ThemeItem::Pressed, false)) )
             item->setPressed( false );
     //item that was initially pressed, set to be pressed if not already
     else if ( !item->pressed() )
@@ -5575,7 +5575,7 @@ void ThemedView::mouseReleaseEvent( QMouseEvent *e )
     if ( item && item == d->pressedItem )
         ic = true;
     ThemeItem *pitem;
-    while( (pitem = findItem( QString(), ThemedView::Item, ThemeItem::Pressed )) )
+    while( (pitem = findItem( QString(), ThemedView::Item, ThemeItem::Pressed, false)) )
         pitem->setPressed( false );
     if (item)
         emit itemReleased( item );
