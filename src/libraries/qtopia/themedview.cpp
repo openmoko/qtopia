@@ -53,9 +53,30 @@
 #include <limits.h>
 
 #include <QXmlStreamReader>
+#include <QTime>
+#include <time.h>
 
 //===================================================================
 /* declare ThemeListDelegate */
+
+#ifdef PERF_DEBUG
+static int call_depth = 0;
+QString tab_string(int depth)
+{
+    QString r;
+    r.reserve(depth);
+    for (int i = 0; i < depth; ++i)
+        r += "\t";
+
+    return r;
+}
+
+#define ENTRY QTime _perfTime; _perfTime.start(); qWarning() << tab_string(call_depth++) << __PRETTY_FUNCTION__ << __LINE__ << ::time(NULL);
+#define EXIT  qWarning() << tab_string(--call_depth) << __PRETTY_FUNCTION__ << __LINE__ << ::time(NULL) << _perfTime.elapsed();
+#else
+#define ENTRY do {} while (0);
+#define EXIT  do {} while (0);
+#endif
 
 struct ThemeListDelegatePrivate;
 class ThemeListDelegate : public QItemDelegate
@@ -1300,6 +1321,7 @@ int ThemeItem::resolveUnit(qreal value, int bound, ThemeItem::Unit unit) const
 */
 void ThemeItem::layout()
 {
+    ENTRY
     Q_ASSERT(parentItem() != 0);
     bool rtl = view()->layoutDirection() == Qt::RightToLeft;
     int pw = parentItem()->d->br.width();
@@ -1322,6 +1344,7 @@ void ThemeItem::layout()
 
     if ( rtl && d->br.width() < parentItem()->d->br.width() )
         d->br.moveRight( parentItem()->d->br.width() - d->br.left() - 1 );
+    EXIT
 }
 
 /*!
@@ -1641,11 +1664,13 @@ void ThemePluginItem::paint(QPainter *painter, const QRect &r)
 */
 void ThemePluginItem::layout()
 {
+    ENTRY
     QSize oldSize = geometry().size();
     ThemeItem::layout();
     if (d->iface && geometry().size() != oldSize) {
         d->iface->resize(geometry().width(), geometry().height());
     }
+    EXIT
 }
 
 void ThemePluginItem::releasePlugin()
@@ -1702,6 +1727,7 @@ int ThemeExclusiveItem::rtti() const
 */
 void ThemeExclusiveItem::layout()
 {
+    ENTRY
     ThemeItem::layout();
     QList<ThemeItem*> c = children();
     if ( c.count() != 0 ) {
@@ -1716,6 +1742,7 @@ void ThemeExclusiveItem::layout()
             }
         }
     }
+    EXIT
 }
 
 //---------------------------------------------------------------------------
@@ -1798,6 +1825,7 @@ void ThemeLayoutItem::paint(QPainter *p, const QRect &r)
 */
 void ThemeLayoutItem::layout()
 {
+    ENTRY
     ThemeItem::layout();
     int fixedSize = 0;
     int visCount = 0;
@@ -1824,8 +1852,10 @@ void ThemeLayoutItem::layout()
             }
         }
     }
-    if (!visCount)
+    if (!visCount) {
+        EXIT
         return;
+    }
 
     int offs = 0;
     int expansionSize = 0;
@@ -1866,6 +1896,7 @@ void ThemeLayoutItem::layout()
             offs += d->spacing;
         }
     }
+    EXIT
 }
 
 //---------------------------------------------------------------------------
@@ -2103,6 +2134,7 @@ QRectF ThemePageItem::calcPageGeometry(const QSize &defSize) const
 */
 void ThemePageItem::layout()
 {
+    ENTRY
     int oldWidth = geometry().width();
     QSize ps = view()->size();
 
@@ -2111,6 +2143,7 @@ void ThemePageItem::layout()
     setGeometry( pgr.toRect() );
     if (!d->maskImg.isEmpty() && pgr.width() != oldWidth)
         applyMask();
+    EXIT
 }
 
 /*!
@@ -2224,6 +2257,7 @@ void ThemeGraphicItem::setupAlpha( const QString &key, const QString &alpha, The
 */
 void ThemeGraphicItem::setupAlpha( const QLatin1String &key, const QString &alpha, ThemeItem::State state )
 {
+    ENTRY
     bool ok;
     int _alpha = alpha.toInt(&ok);
     Q_UNUSED(_alpha);
@@ -2231,6 +2265,7 @@ void ThemeGraphicItem::setupAlpha( const QLatin1String &key, const QString &alph
         //still set a string version, so can easily check for 'emptiness' in usage case
         setAttribute( key, alpha, state );
     }
+    EXIT
 }
 
 /*!
@@ -3139,6 +3174,7 @@ static inline QRgb blendYuv(QRgb rgb, int /*sr*/, int /*sg*/, int /*sb*/, int sy
 */
 void ThemePixmapItem::colorizeImage( QImage& img, const QColor& col, int alpha, bool blendColor )
 {
+    ENTRY
     QColor colour = col;
     Q_ASSERT( !img.isNull() );
     Q_ASSERT( col.isValid() );
@@ -3167,6 +3203,7 @@ void ThemePixmapItem::colorizeImage( QImage& img, const QColor& col, int alpha, 
                     blendColor);
         img.setColorTable(ctable);
     }
+    EXIT
 }
 
 /*!
@@ -3175,6 +3212,7 @@ void ThemePixmapItem::colorizeImage( QImage& img, const QColor& col, int alpha, 
 */
 bool ThemePixmapItem::replaceColor(QImage &image, const QColor &before, const QColor &after)
 {
+    ENTRY
     QRgb b = before.rgb();
     QRgb a = after.rgb();
     bool modified = false;
@@ -3187,6 +3225,7 @@ bool ThemePixmapItem::replaceColor(QImage &image, const QColor &before, const QC
             }
         }
     }
+    EXIT
     return modified;
 }
 
@@ -3230,13 +3269,16 @@ QString imageTr( const QString& path, const QString& image, bool i18n )
 */
 QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const QColor &col, int alpha, int width, int height)
 {
+    ENTRY
     qLog(Resource) << "ThemePixmapItem::loadImage" << filename << colorRole << col << alpha << width << height << "geometry=" << geometry();
 
     QPixmap pm;
     static QString dflt_path(QLatin1String("default/"));
 
-    if (filename.isEmpty())
+    if (filename.isEmpty()) {
+        EXIT
         return pm;
+    }
 
     QString imgName = filename;
 
@@ -3249,15 +3291,19 @@ QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const
     if (filename.endsWith(".svg")) {
         int w = width ? width : geometry().width();
         int h = height ? height : geometry().height();
-        if ( !w || !h )
+        if ( !w || !h ) {
+            EXIT
             return pm;
+        }
         QColor colour;
         if (colorRole != QPalette::NColorRoles || alpha != 255)
             colour = getColor(col, colorRole);
         QString key("QTV_%1_%2_%3_%4");
         key = key.arg(filename).arg(w).arg(h).arg(colour.name());
-        if (QPixmapCache::find(key, pm))
+        if (QPixmapCache::find(key, pm)) {
+            EXIT
             return pm;
+        }
         QImage buffer(w, h, QImage::Format_ARGB32_Premultiplied);
         buffer.fill(0);
         QPainter painter(&buffer);
@@ -3314,6 +3360,7 @@ QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const
             colorizeImage( buffer, colour, alpha, colorRole != QPalette::NColorRoles );
         pm = QPixmap::fromImage(buffer);
         QPixmapCache::insert(key, pm);
+        EXIT
         return pm;
     }
 
@@ -3323,8 +3370,10 @@ QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const
         if (imgName.startsWith(":icon")) {
             int w = width ? width : geometry().width();
             int h = height ? height : geometry().height();
-            if ( !w || !h )
+            if ( !w || !h ) {
+                EXIT
                 return pm;
+            }
             QIcon icon(imgName);
             img = icon.pixmap(w, h).toImage();
         } else {
@@ -3346,8 +3395,10 @@ QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const
             }
         }
         if ( img.isNull() )
-        if ( img.isNull() )
+        if ( img.isNull() ) {
+            EXIT
             return pm;
+        }
         if ( colour.isValid() ) // only call colorizeImage if the colour isValid
             colorizeImage( img, colour, alpha, colorRole != QPalette::NColorRoles );
         pm = pm.fromImage( img );
@@ -3355,8 +3406,10 @@ QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const
         if (imgName.startsWith(":icon")) {
             int w = width ? width : geometry().width();
             int h = height ? height : geometry().height();
-            if ( !w || !h )
+            if ( !w || !h ) {
+                EXIT
                 return pm;
+            }
             QIcon icon(imgName);
             if (!icon.isNull())
                 pm = icon.pixmap(w, h);
@@ -3379,6 +3432,7 @@ QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const
         if( pm.isNull() )
             pm = QPixmap(imgName);
     }
+    EXIT
     return pm;
 }
 
@@ -3387,9 +3441,14 @@ QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const
 */
 QPixmap ThemePixmapItem::scalePixmap( const QPixmap &pix, int width, int height )
 {
-    if ( pix.isNull() || (width <= 0 || height <= 0) || (pix.width() == width && pix.height() == height) )
+    ENTRY
+    if ( pix.isNull() || (width <= 0 || height <= 0) || (pix.width() == width && pix.height() == height) ) {
+        EXIT
         return pix;
-    return pix.scaled(width, height);
+    }
+    QPixmap bla = pix.scaled(width, height);
+    EXIT
+    return bla;
 }
 
 /*!
@@ -3436,6 +3495,7 @@ bool ThemePixmapItem::verticalScale() const
 */
 void ThemePixmapItem::scaleImage( const QString &key, int width, int height )
 {
+    ENTRY
     for ( int i = 0; i < 3; i++ ) {
         QTagMap<Image> &map = d->images[i];
         QString filename = map[key].filename;
@@ -3447,6 +3507,7 @@ void ThemePixmapItem::scaleImage( const QString &key, int width, int height )
             map[key].pixmap = scalePixmap( map[key].pixmap, width, height );
         }
     }
+    EXIT
 }
 
 /*!
@@ -3775,10 +3836,12 @@ void ThemeAnimationItem::paint(QPainter *p, const QRect &)
 */
 void ThemeAnimationItem::layout()
 {
+    ENTRY
     int count = attribute(QLatin1String("count"));
     ThemeItem::layout();
     scaleImages( count );
     setAttribute( QLatin1String("width"), pixmap( QLatin1String("src") ).width() / count );
+    EXIT
 }
 
 /*!
@@ -4004,9 +4067,11 @@ void ThemeLevelItem::setRange(int min, int max)
 */
 void ThemeLevelItem::layout()
 {
+    ENTRY
     int oldFrame = frame();
     ThemeAnimationItem::layout();
     ThemeAnimationItem::setFrame(oldFrame);
+    EXIT
 }
 
 /*!
@@ -4238,7 +4303,9 @@ void ThemeStatusItem::paint(QPainter *p, const QRect &rect)
 */
 void ThemeStatusItem::layout()
 {
+    ENTRY
     ThemeItem::layout();
+    EXIT
 }
 
 //---------------------------------------------------------------------------
@@ -4435,7 +4502,10 @@ void ThemeImageItem::setImage(const QPixmap &pixImage, ThemeItem::State state)
 */
 QPixmap ThemeImageItem::image( ThemeItem::State state ) const
 {
-    return pixmap( QLatin1String("src"), state );
+    ENTRY
+    QPixmap pix = pixmap( QLatin1String("src"), state );
+    EXIT
+    return pix;
 }
 
 /*!
@@ -4445,6 +4515,7 @@ QPixmap ThemeImageItem::image( ThemeItem::State state ) const
 */
 void ThemeImageItem::layout()
 {
+    ENTRY
     int width = 0, height = 0;
 
     ThemeItem::layout();
@@ -4470,6 +4541,7 @@ void ThemeImageItem::layout()
         d->offs[1] = qRound( ratio * d->offs[1] );
     }
     scaleImage( QLatin1String("src"), width, height );
+    EXIT
 }
 
 /*!
@@ -4792,8 +4864,11 @@ void ThemeWidgetItem::paletteChange(const QPalette &)
 */
 void ThemeWidgetItem::layout()
 {
-    if ( !d->widget )
+    ENTRY
+    if ( !d->widget ) {
+        EXIT
         return;
+    }
 
     if( ThemeItem::d->rmode == Rect && ThemeItem::d->sr.width() < 0 )
         ThemeItem::d->sr.setWidth( d->widget->sizeHint().width() );
@@ -4808,6 +4883,7 @@ void ThemeWidgetItem::layout()
             d->widget->move(rect().x(), rect().y());
         }
     }
+    EXIT
 }
 
 
@@ -6032,12 +6108,15 @@ void ThemedView::themeLoaded(const QString &)
 */
 void ThemedView::layout(ThemeItem *item)
 {
+    ENTRY
     if (!item) {
         item = d->root;
         d->needLayout = false;
     }
-    if ( !item )
+    if ( !item ) {
+        EXIT
         return;
+    }
     if ( !item->parentItem() || item->parentItem()->rtti() != ThemedView::Layout ) {
         /* Don't call layout() on items that are direct children of a ThemeLayoutItem. ThemeLayoutItem
            calls layout() on its direct children before it lays out itself in order to get their 'real' geometry (stored in br).
@@ -6049,6 +6128,7 @@ void ThemedView::layout(ThemeItem *item)
     foreach ( ThemeItem *itm, c ) {
             layout(itm);
     }
+    EXIT
 }
 
 void ThemedView::paletteChange(const QPalette &p)
