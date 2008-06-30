@@ -71,9 +71,6 @@ ContextLabel::ContextLabel( QWidget *parent, Qt::WFlags flags )
 
     connect(this, SIGNAL(itemPressed(ThemeItem*)),
             this, SLOT(itemPressed(ThemeItem*)));
-    connect(this, SIGNAL(itemReleased(ThemeItem*)),
-            this, SLOT(itemReleased(ThemeItem*)));
-
     QtopiaInputEvents::addKeyboardFilter(this);
 }
 
