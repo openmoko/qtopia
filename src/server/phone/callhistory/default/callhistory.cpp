@@ -864,8 +864,6 @@ void CallHistory::constructTab( QCallList::ListType type,
             this, SIGNAL(requestedDial(QString,QUniqueId)) );
     connect( list, SIGNAL(activated(QModelIndex)),
             this, SLOT(viewDetails(QModelIndex)) );
-    connect( list, SIGNAL(clicked(QModelIndex)),
-            this, SLOT(viewDetails(QModelIndex)) );
     list->installEventFilter( this );
 }
 
