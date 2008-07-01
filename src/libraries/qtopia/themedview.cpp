@@ -59,7 +59,6 @@
 //===================================================================
 /* declare ThemeListDelegate */
 
-#define PERF_DEBUG
 #ifdef PERF_DEBUG
 static int call_depth = 0;
 QString tab_string(int depth)
