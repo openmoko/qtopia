@@ -5823,9 +5823,14 @@ void ThemedView::paintEvent(QPaintEvent *pe)
 {
     if (!d->root)
         return;
-    if (d->needLayout)
+    QRect clip = pe->rect();
+
+    if (d->needLayout) {
+        setUpdatesEnabled(false);
         layout();
-    const QRect &clip = pe->rect();
+        setUpdatesEnabled(true);
+        clip = rect();
+    }
 
     QPainter bp(this);
     paintItem(&bp, d->root, clip);
