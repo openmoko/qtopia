@@ -47,7 +47,7 @@ INCLUDEPATH+= core_server \
               phone/browserscreen/abstract \
               phone/browserscreen/gridbrowser \
               phone/callhistory/default \
-              phone/callscreen/themed \
+              phone/callscreen/semithemed \
               phone/contextlabel/base \
               phone/dialer/abstract \
               phone/header/themed \
@@ -281,7 +281,7 @@ PHONE_HEADERS=\
 TELEPHONY_HEADERS=\
     phone/telephony/msgcontrol/messagecontrol.h \
     phone/ui/callcontactmodelview/callcontactlist.h \
-    phone/callscreen/themed/callscreen.h \
+    phone/callscreen/semithemed/callscreen.h \
     phone/telephony/dialercontrol/dialercontrol.h \
     pim/savetocontacts/savetocontacts.h \
     phone/dialer/touch/dialer.h \
@@ -311,7 +311,7 @@ PHONE_SOURCES=\
 TELEPHONY_SOURCES=\
     phone/telephony/msgcontrol/messagecontrol.cpp\
     phone/ui/callcontactmodelview/callcontactlist.cpp\
-    phone/callscreen/themed/callscreen.cpp \
+    phone/callscreen/semithemed/callscreen.cpp \
     phone/telephony/dialercontrol/dialercontrol.cpp \
     pim/savetocontacts/savetocontacts.cpp \
     phone/dialer/touch/dialer.cpp \
