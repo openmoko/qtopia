@@ -405,6 +405,15 @@ void Ficgta01BandSelection::bandSet( bool, const QAtResult& result )
     emit setBandResult( (QTelephony::Result)result.resultCode() );
 }
 
+DummyCellBroadcast::DummyCellBroadcast(QModemService* service)
+    : QCellBroadcast(service->service(), service, QCommInterface::Server)
+{
+}
+
+void DummyCellBroadcast::setChannels(const QList<int>&)
+{
+}
+
 Ficgta01ModemService::Ficgta01ModemService
         ( const QString& service, QSerialIODeviceMultiplexer *mux,
           QObject *parent )
@@ -481,6 +490,10 @@ void Ficgta01ModemService::initialize()
 
     if ( !supports<QPreferredNetworkOperators>() )
         addInterface( new Ficgta01PreferredNetworkOperators(this));
+
+    // CBMs create an issue on suspend/resume disable for now #1530
+    if ( !supports<QCellBroadcast>() )
+        addInterface( new DummyCellBroadcast(this) );
 
 
    QModemService::initialize();
@@ -560,6 +573,10 @@ void Ficgta01ModemService::configureDone( bool ok )
     if( !cfg.value("PlaneMode",false).toBool()) {
          chat("AT%NRG=0"); //force auto operations
      }
+
+    // Set a default CBM state, disable all, setChannels on QCellBroadcast
+    // would enable them again. This should mean no (empty) CBM is accepted.
+    chat("AT+CSCB=0");
 
 //      chat("AT%COPS=0");
 

@@ -31,6 +31,7 @@
 #include <qmodempreferrednetworkoperators.h>
 #include <qbandselection.h>
 #include <qvibrateaccessory.h>
+#include <qcellbroadcast.h>
 
 #include <qmodemsiminfo.h>
 
@@ -175,6 +176,16 @@ class Ficgta01PreferredNetworkOperators : public QModemPreferredNetworkOperators
 public:
     explicit Ficgta01PreferredNetworkOperators( QModemService *service );
     ~Ficgta01PreferredNetworkOperators();
+};
+
+class DummyCellBroadcast : public QCellBroadcast
+{
+    Q_OBJECT
+public:
+    DummyCellBroadcast(QModemService* service);
+
+public Q_SLOTS:
+    void setChannels(const QList<int>& list);
 };
 
 
