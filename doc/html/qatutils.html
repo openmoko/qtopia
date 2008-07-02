@@ -23,6 +23,7 @@
 <li><div class="fn"/>QString <b><a href="qatutils.html#decode">decode</a></b> ( const QString &amp; <i>str</i>, QTextCodec * <i>codec</i> )</li>
 <li><div class="fn"/>QString <b><a href="qatutils.html#decodeNumber">decodeNumber</a></b> ( const QString &amp; <i>value</i>, uint <i>type</i> )</li>
 <li><div class="fn"/>QString <b><a href="qatutils.html#decodeNumber-2">decodeNumber</a></b> ( QAtResultParser &amp; <i>parser</i> )</li>
+<li><div class="fn"/>QString <b><a href="qatutils.html#decodeString">decodeString</a></b> ( const QString &amp; <i>value</i>, uint <i>dcs</i> )</li>
 <li><div class="fn"/>QString <b><a href="qatutils.html#encodeNumber">encodeNumber</a></b> ( const QString &amp; <i>value</i>, bool <i>keepPlus</i> = false )</li>
 <li><div class="fn"/>QByteArray <b><a href="qatutils.html#fromHex">fromHex</a></b> ( const QString &amp; <i>hex</i> )</li>
 <li><div class="fn"/>QString <b><a href="qatutils.html#nextString">nextString</a></b> ( const QString &amp; <i>buf</i>, uint &amp; <i>posn</i> )</li>
@@ -73,6 +74,10 @@
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Read a string field and a numeric field from <i>parser</i> and then decode them into a properly normalized phone number.</p>
 <p>See also <a href="qatutils.html#encodeNumber">encodeNumber</a>().</p>
+<h3 class="fn"><a name="decodeString"></a><a href="./qstring.html">QString</a> QAtUtils::decodeString ( const <a href="./qstring.html">QString</a> &amp; <i>value</i>, <a href="./qtglobal.html#uint-typedef">uint</a> <i>dcs</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Decodes <i>value</i> according to the cell broadcast data coding scheme <i>dcs</i>. The <i>value</i> is assumed to have been parsed by <a href="qatutils.html#nextString">nextString</a>() and be compliant with section 5 of 3GPP TS 23.038.</p>
+<p>This function was introduced in Qtopia 4.3&#x2e;3.</p>
+<p>See also <a href="qatutils.html#nextString">nextString</a>().</p>
 <h3 class="fn"><a name="encodeNumber"></a><a href="./qstring.html">QString</a> QAtUtils::encodeNumber ( const <a href="./qstring.html">QString</a> &amp; <i>value</i>, bool <i>keepPlus</i> = false )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Encode the phone number in <i>value</i> into a string plus a type of address octet. International numbers that start with <tt>+</tt> become <tt>&quot;number&quot;,145</tt>, and local numbers become <tt>&quot;number&quot;,129</tt>. If <i>keepPlus</i> is true, then the <tt>+</tt> will be left on the resulting number, even if the type is 145.</p>
 <p>See also <a href="qatutils.html#decodeNumber">decodeNumber</a>().</p>

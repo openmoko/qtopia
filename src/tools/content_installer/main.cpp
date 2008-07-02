@@ -306,10 +306,11 @@ int main( int argc, char** argv )
     }
     if(!semaphore.tryAcquire(150000))
         qFatal( "Failed acquiring the semaphore. If this is because of a failed install, please run make install from the root directory again to clear out the failed lock" );
-    
+
     // Add one or more .desktop files to the database
     QtopiaSql::instance()->loadConfig(QString ("QSQLITE"), dbPath, QString ());
-    if(!QDBMigrationEngine::instance()->doMigrate(QStringList() << dbPath))
+
+    if(!QDBMigrationEngine().migrate(&QtopiaSql::instance()->systemDatabase()))
     {
         semaphore.release();
         qFatal( "Database creation/upgrade failed on database %s", qPrintable( dbPath ));
@@ -327,6 +328,8 @@ int main( int argc, char** argv )
             QString name = settings.value( QLatin1String("Name[]") ).toString();
             QString icon = settings.value( QLatin1String("Icon") ).toString();
             categories = settings.value( QLatin1String("Categories") ).toString().split( QLatin1Char( ';' ), QString::SkipEmptyParts );
+            if (categories.count() == 1)
+                categories = categories.first().split(QLatin1Char(','), QString::SkipEmptyParts);
             settings.endGroup();
             settings.beginGroup( QLatin1String( "Translation" ) );
             QString translationFile = settings.value( QLatin1String( "File" ) ).toString();

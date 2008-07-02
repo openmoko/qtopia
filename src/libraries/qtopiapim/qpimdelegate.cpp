@@ -356,13 +356,8 @@ void QPimDelegate::drawBackground(QPainter *p,
             pp.setPen(color);
 
             QLinearGradient bgg(QPoint(0,0), QPoint(0, size.height()));
-#if QT_VERSION >= 0x040300
             bgg.setColorAt(0.0f, color.lighter(175));
             bgg.setColorAt(0.49f, color.lighter(105));
-#else
-            bgg.setColorAt(0.0f, color.light(175));
-            bgg.setColorAt(0.49f, color.light(105));
-#endif
             bgg.setColorAt(0.5f, color);
             pp.setBrush(bgg);
             pp.drawRoundRect(QRect(QPoint(0,0),size), 800/size.width(),800/size.height());

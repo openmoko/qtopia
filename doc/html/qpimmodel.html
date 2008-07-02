@@ -96,6 +96,7 @@
 <p>See also <a href="qpimmodel.html#updateRecord">updateRecord</a>() and <a href="qpimmodel.html#removeRecord">removeRecord</a>().</p>
 <h3 class="fn"><a name="added"></a><a href="./qlist.html">QList</a>&lt;<a href="quniqueid.html">QUniqueId</a>&gt; QPimModel::added ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>timestamp</i> ) const</h3>
 <p>Returns the list of identifiers for records added to the current set of visible sources on or after the specified <i>timestamp</i>.</p>
+<p>Timestamps are stored in UTC. Please use <a href="qtimezone.html#toUtc">QTimeZone::toUtc</a>() for times passed into this function.</p>
 <p>See also <a href="qpimmodel.html#removed">removed</a>() and <a href="qpimmodel.html#modified">modified</a>().</p>
 <h3 class="fn"><a name="availableSources"></a><a href="./qset.html">QSet</a>&lt;<a href="qpimsource.html">QPimSource</a>&gt; QPimModel::availableSources () const</h3>
 <p>Returns the set of storage sources that can be shown.</p>
@@ -153,6 +154,7 @@
 <p>See also <a href="qpimmodel.html#contains">contains</a>() and <a href="qpimmodel.html#exists">exists</a>().</p>
 <h3 class="fn"><a name="modified"></a><a href="./qlist.html">QList</a>&lt;<a href="quniqueid.html">QUniqueId</a>&gt; QPimModel::modified ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>timestamp</i> ) const</h3>
 <p>Returns the list of identifiers for records modified in the current set of visible sources on or after the specified <i>timestamp</i>.</p>
+<p>Timestamps are stored in UTC. Please use <a href="qtimezone.html#toUtc">QTimeZone::toUtc</a>() for times passed into this function.</p>
 <p>See also <a href="qpimmodel.html#added">added</a>() and <a href="qpimmodel.html#removed">removed</a>().</p>
 <h3 class="fn"><a name="record"></a><a href="./qbytearray.html">QByteArray</a> QPimModel::record ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>identifier</i>, const <a href="./qstring.html">QString</a> &amp; <i>format</i> = QString() ) const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the record in the model with the specified <i>identifier</i> encoded in the format specified by the <i>format</i> string. An empty format string will cause the record to be written using the data stream operators for the PIM data type of the model.</p>
@@ -165,6 +167,7 @@
 <p>See also <a href="qpimmodel.html#addRecord">addRecord</a>() and <a href="qpimmodel.html#updateRecord">updateRecord</a>().</p>
 <h3 class="fn"><a name="removed"></a><a href="./qlist.html">QList</a>&lt;<a href="quniqueid.html">QUniqueId</a>&gt; QPimModel::removed ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>timestamp</i> ) const</h3>
 <p>Returns the list of identifiers for records removed from the current set of visible sources on or after the specified <i>timestamp</i>.</p>
+<p>Timestamps are stored in UTC. Please use <a href="qtimezone.html#toUtc">QTimeZone::toUtc</a>() for times passed into this function.</p>
 <p>See also <a href="qpimmodel.html#added">added</a>() and <a href="qpimmodel.html#modified">modified</a>().</p>
 <h3 class="fn"><a name="setCategoryFilter"></a>void QPimModel::setCategoryFilter ( const <a href="qcategoryfilter.html">QCategoryFilter</a> &amp; <i>filter</i> )</h3>
 <p>Sets the model to only contain records accepted by the specified category <i>filter</i>.</p>
@@ -183,6 +186,7 @@
 <p>Prepares the currently visible sources for synchronization. All modifications between startSyncTransaction() and <a href="qpimmodel.html#commitSyncTransaction">commitSyncTransaction</a>() will be marked with the given <i>timestamp</i> for modification or creation as appropriate.</p>
 <p>Returns true if transaction successfully initiated.</p>
 <p>Does not abort the transaction if it is unsuccessful. The calling code must call <a href="qpimmodel.html#abortSyncTransaction">abortSyncTransaction</a>() to do that.</p>
+<p>Timestamps are stored in UTC. Please use <a href="qtimezone.html#toUtc">QTimeZone::toUtc</a>() for times passed into this function.</p>
 <p>See also <a href="qpimmodel.html#commitSyncTransaction">commitSyncTransaction</a>() and <a href="qpimmodel.html#abortSyncTransaction">abortSyncTransaction</a>().</p>
 <h3 class="fn"><a name="updateRecord"></a>bool QPimModel::updateRecord ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>id</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>bytes</i>, const <a href="./qstring.html">QString</a> &amp; <i>format</i> = QString() )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Updates the corresponding record in the model to equal the record encoded in <i>bytes</i>. The format of the record in <i>bytes</i> is given by the <i>format</i> string. An empty <i>format</i> string will cause the record to be read using the data stream operators for the PIM data type of the model. If <i>id</i> is not null will set the record identifier to <i>id</i> ready from the given <i>bytes</i> before attempting to update the record.</p>

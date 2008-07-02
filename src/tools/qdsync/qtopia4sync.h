@@ -79,6 +79,9 @@ public:
     void registerPlugin( Qtopia4SyncPlugin *plugin );
     QStringList datasets();
 
+public slots:
+    void abort();
+
 private slots:
     void handleMessage( const QString &message, const QByteArray &data );
 
@@ -91,7 +94,6 @@ private slots:
     void mappedId(const QString &serverId, const QString &clientId);
     void clientError();
     void clientEnd();
-    void abort();
 
 private:
     void serverSyncRequest(const QString &source);

@@ -148,6 +148,11 @@ CameraMainWindow::CameraMainWindow(QWidget *parent, Qt::WFlags f):
     m_iswaiting = false;
     QTimer::singleShot(1, this, SLOT(delayedInit()));
     m_currzoom = 0;
+    zoomActive = false;
+
+    zoomTimer.setSingleShot(true);
+    zoomTimer.setInterval(5000);
+    connect(&zoomTimer, SIGNAL(timeout()), this, SLOT(hideZoom()));
 }
 
 CameraMainWindow::~CameraMainWindow()
@@ -305,6 +310,7 @@ void CameraMainWindow::zoomChanged(int val)
     else if(val < m_currzoom)
         camera->videocaptureview->zoomOut();
     m_currzoom = val;
+    showZoom();
 }
 
 bool CameraMainWindow::event(QEvent* e)
@@ -320,8 +326,19 @@ bool CameraMainWindow::event(QEvent* e)
 
 void CameraMainWindow::showZoom()
 {
+    if(zoomActive) { zoomTimer.stop(); zoomTimer.start(); return;}
+    zoomActive = true;
     m_zoom->show();
-    QTimer::singleShot(7000,m_zoom,SLOT(hide()));
+    m_zoom->setEditFocus(true);
+    zoomTimer.start();
+}
+
+void CameraMainWindow::hideZoom()
+{
+    if (m_zoom->isSliderDown()) { showZoom(); return; }
+    m_zoom->hide();
+    m_zoom->setEditFocus(false);
+    zoomActive = false;
 }
 
 bool CameraMainWindow::eventFilter(QObject* o, QEvent* e)
@@ -344,6 +361,7 @@ bool CameraMainWindow::eventFilter(QObject* o, QEvent* e)
             {
                 m_currzoom--;
                 m_zoom->setValue(m_currzoom);
+                showZoom();
             }
             camera->videocaptureview->zoomOut();
 
@@ -354,10 +372,16 @@ bool CameraMainWindow::eventFilter(QObject* o, QEvent* e)
             {
                 m_currzoom++;
                 m_zoom->setValue(m_currzoom);
+                showZoom();
             }
             camera->videocaptureview->zoomIn();
 
         }
+        if ( ke->key() == Qt::Key_Select )
+            for(int i = 0; i <nthumb-1; ++i)
+                if( o == thumb[i])
+                    return true;
+
         if ( ke->key() == Qt::Key_Up ) {
             camera->photo->setFocus();
             return true;
@@ -432,6 +456,7 @@ void CameraMainWindow::updateActions()
     //a_settings->setVisible(p || v);
     bool th=!p && !v;
     if ( th ) {
+
         int i;
         for (i=0; i<nthumb; i++) {
             if ( thumb[i] == foc ) {
@@ -442,6 +467,7 @@ void CameraMainWindow::updateActions()
         if ( i==nthumb || thumb[i]->icon().isNull() )
             selectThumb(-1);
     } else {
+
         selectThumb(-1);
     }
 }
@@ -794,8 +820,11 @@ void CameraMainWindow::selectThumb(int i)
         QImage img( picturefile[i].fileName() );
         camera->videocaptureview->setStill(img);
         thumb[i]->setFocus();
+        thumb[i]->setDown(false);
+        QSoftMenuBar::setLabel(thumb[i], Qt::Key_Select, QString(""), QString(""));
     } else {
         camera->videocaptureview->setLive();
+        QSoftMenuBar::setLabel(camera->thumbs, Qt::Key_Select, QSoftMenuBar::Select);
     }
     a_th_edit->setVisible(i>=0);
     a_th_del->setVisible(i>=0);

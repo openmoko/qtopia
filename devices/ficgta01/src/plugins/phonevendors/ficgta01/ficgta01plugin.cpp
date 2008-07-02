@@ -35,7 +35,7 @@ Ficgta01PluginImpl::~Ficgta01PluginImpl()
 
 bool Ficgta01PluginImpl::supports( const QString& manufacturer )
 {
-    return  manufacturer.contains( "OpenMoko" );
+    return  manufacturer.contains( "Openmoko", Qt::CaseInsensitive );
     // "Neo1973 GTA01 Embedded GSM Modem"
     //
 }

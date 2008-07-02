@@ -150,8 +150,8 @@ void QDSyncTask::systemSuspending()
     if ( launcher->canLaunch( "qdsync" ) && running && gadget() == "winserial" ) {
         qLog(QDSync) << "Stopping QDSync daemons";
         QCopEnvelope e("QPE/Application/qdsync", "stopDaemons()");
-        ::sleep(1);
     }
+    ::sleep(1);
 }
 
 void QDSyncTask::systemWaking()

@@ -7,6 +7,7 @@
 -no-drm
 -no-sxe
 -prefix /opt/Qtopia
+-no-dbus
 -no-bluetooth
 -no-infrared
 -iconsize 22
@@ -21,3 +22,6 @@
 -release
 -silent
 -no-samples
+-no-test
+-extra-qt-config '-no-accessibility -system-sqlite -no-qt3support -no-openssl -no-nis -no-cups -no-iconv -no-qdbus -no-opengl -no-glib'
+-extra-qtopiacore-config '-no-accessibility -no-openssl -no-nis -no-cups -no-iconv -no-opengl -no-glib'

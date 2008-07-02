@@ -38,6 +38,7 @@
 </ol>
 <p>To demonstrate the process, this document describes how to integrate the IAX2 protocol used by the <a href="http://www.asterisk.org/">Asterisk</a> telephony server. We will use the open source <a href="http://iaxclient.sourceforge.net/">iaxclient</a> library to provide the IAX2 protocol implementation. The full source code for the Asterisk integration can be found in the Qtopia source tree under <tt>examples/asterisk</tt>.</p>
 <p>The Qtopia source tree also contains a SIP-based VoIP agent that uses the open source <tt>libdissipate2</tt> library from the <a href="http://www.wirlab.net/kphone/">KPhone</a> project. We will briefly touch on this SIP integration below when we discuss presence, because Asterisk does not support presence. The full source code for the SIP integration can be found in the Qtopia source tree under <tt>src/tools/sipagent</tt> and <tt>src/settings/sipsettings</tt>.</p>
+<p><b>Note:</b> Currently due to licensing inconsistencies <tt>libdissipate2</tt> cannot be shipped with Qtopia.</p>
 <p>In the examples below, the <tt>virtual</tt> keyword will be shown on methods that must be overridden from a parent class. If a method does not have the <tt>virtual</tt> keyboard, then it is unique to the subclass.</p>
 <a name="qtopia-phone-library"></a>
 <h3>Qtopia Phone Library</h3>

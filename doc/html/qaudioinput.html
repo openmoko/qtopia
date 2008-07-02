@@ -98,7 +98,7 @@
 <h3 class="fn"><a name="isSequential"></a>bool QAudioInput::isSequential () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Determines if this <a href="./qiodevice.html">QIODevice</a> is sequential. Always returns true.</p>
 <p>Reimplemented from <a href="./qiodevice.html#isSequential">QIODevice</a>.</p>
-<h3 class="fn"><a name="open"></a>bool QAudioInput::open ( <a href="./qiodevice.html#openmode-typedef">QIODevice::OpenMode</a> <i>mode</i> )</h3>
+<h3 class="fn"><a name="open"></a>bool QAudioInput::open ( <a href="./qiodevice.html#OpenMode-typedef">QIODevice::OpenMode</a> <i>mode</i> )</h3>
 <p>Opens this audio input stream in <i>mode</i>. Returns true if the audio input stream could be opened; false otherwise.</p>
 <h3 class="fn"><a name="readData"></a><a href="./qtglobal.html#qint64-typedef">qint64</a> QAudioInput::readData ( char * <i>data</i>, <a href="./qtglobal.html#qint64-typedef">qint64</a> <i>maxlen</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Reads a block of raw audio samples from the input device into <i>data</i>. The samples are guaranteed to be signed, 16 bits in size, and in host byte order. The <i>maxlen</i> value is the maximum buffer size in bytes, which is twice the number of logical samples.</p>

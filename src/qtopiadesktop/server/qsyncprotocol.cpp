@@ -159,11 +159,13 @@ void QSyncProtocol::startSync(QDClientSyncPlugin *_client, QDServerSyncPlugin *_
     connect( server, SIGNAL(replaceServerRecord(QByteArray)), merge, SLOT(replaceServerRecord(QByteArray)) );
     connect( server, SIGNAL(removeServerRecord(QString)), merge, SLOT(removeServerRecord(QString)) );
     connect( server, SIGNAL(serverChangesCompleted()), this, SLOT(markServerChangesComplete()) );
+    connect( server, SIGNAL(serverError()), this, SLOT(serverError()) );
 
     merge->clearChanges();
     datasource.clear();
     clientid.clear();
     datasource = source;
+    merge->setDatasource(datasource);
     state = Header;
     serverSyncRequest(datasource);
     serverIdentity(DesktopSettings::deviceId());
@@ -179,6 +181,15 @@ void QSyncProtocol::clientIdentity(const QString &id)
         return;
     }
     clientid = id;
+
+    merge->lastSync(clientid, datasource, m_clientLastSync, m_serverLastSync);
+    LOG() << "Last client sync was" << m_clientLastSync;
+    LOG() << "Last server sync was" << m_serverLastSync;
+#ifdef QSYNCPROTOCOL_DO_NOT_SET_TIME
+    // The test harness uses synthetic time. It sets m_serverNextSync before the sync starts.
+#else
+    m_serverNextSync = QDateTime::currentDateTime().toUTC();
+#endif
 }
 
 void QSyncProtocol::clientVersion(int major, int minor, int patch)
@@ -193,11 +204,7 @@ void QSyncProtocol::clientVersion(int major, int minor, int patch)
         return;
     }
 
-
-    lastSync = merge->lastSync(clientid, datasource);
-    // TODO nextSync
-
-    serverSyncAnchors(lastSync, nextSync);
+    serverSyncAnchors(m_serverLastSync, m_serverNextSync);
 }
 
 void QSyncProtocol::clientSyncAnchors(const QDateTime &clientLastSync, const QDateTime &clientNextSync)
@@ -211,22 +218,24 @@ void QSyncProtocol::clientSyncAnchors(const QDateTime &clientLastSync, const QDa
     emit progress();
     pendingServerChanges = true;
     pendingClientChanges = true;
-    LOG() << "compare last sync" << lastSync << clientLastSync;
-    nextSync = clientNextSync; // so last sync when stored will match client
-    if (lastSync.isNull()
+    LOG() << "compare last sync" << m_clientLastSync << clientLastSync;
+    m_clientNextSync = clientNextSync; // so last sync when stored will match client
+    m_clientNextSync.setTimeSpec(Qt::UTC); // this is not preserved over the wire
+    DesktopSettings settings("settings");
+    bool forceSlowSync = settings.value("ForceSlowSync").toBool();
+    if (forceSlowSync || m_clientLastSync.isNull()
             // We need to use a reduced resolution for comparrison because QDateTime
             // cannot be saved and restored to a database without losing resolution.
-            || lastSync.toString("yyyy.MM.dd hh:mm:ss") != clientLastSync.toString("yyyy.MM.dd hh:mm:ss")) {
+            || m_clientLastSync.toString("yyyy.MM.dd hh:mm:ss") != clientLastSync.toString("yyyy.MM.dd hh:mm:ss"))
+    {
         SyncLog() << "Performing slow sync" << endl;
-        // clear id mapping for this sync.
-        // TODO merge should have specific mappings for specific plugins
         merge->clearIdentifierMap();
         requestSlowSync();
         server->fetchChangesSince(QDateTime());
     } else {
         SyncLog() << "Performing fast sync" << endl;
         requestTwoWaySync();
-        server->fetchChangesSince(lastSync.addSecs(1)); // don't re-sync items matching last time-stamp
+        server->fetchChangesSince(m_serverLastSync.addSecs(1)); // don't re-sync items matching last time-stamp
     }
 }
 
@@ -302,7 +311,7 @@ void QSyncProtocol::clientEnd()
         case IdMapping:
             state = None;
             emit syncComplete();
-            merge->recordLastSync(clientid, datasource, nextSync);
+            merge->recordLastSync(clientid, datasource, m_clientNextSync, m_serverNextSync);
             break;
         default:
             abort(tr("Protocol error - unexpected response from client"));

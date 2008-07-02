@@ -376,6 +376,9 @@ void QSqlPimTableModel::cacheRows(QPreparedSqlQuery &q, int current, int cacheSt
 
         uint rowid = q.value(0).toUInt();
 
+        if (rowid == recid) // cache all rows including this one from here
+            recid = 0;
+
         if (recid == 0) {
             // e.g. current is accurate
             if (!(current % rowStep) && !cachedKeys.contains(current/rowStep)) {
@@ -389,9 +392,6 @@ void QSqlPimTableModel::cacheRows(QPreparedSqlQuery &q, int current, int cacheSt
                     mSimpleCache->cacheRow(current, q);
             }
 
-            current++;
-        } else if (rowid == recid) {
-            recid = 0;
             current++;
         }
     }

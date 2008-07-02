@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -95,7 +95,6 @@ public:
     QVistaBackButton *backButton() const { return backButton_; }
     void setWindowPosHack();
     static bool isCompositionEnabled();
-    static bool isVista();
 
     static int titleBarSize() { return frameSize() + captionSize(); }
 

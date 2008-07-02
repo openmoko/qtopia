@@ -293,8 +293,9 @@ export QTOPIA_SYSTEMTESTHELPER=1
 export QTOPIA_RESTART_FILE=/tmp/qtopia-${display}/restart-qtopia
 touch $QTOPIA_RESTART_FILE
 while [ -f $QTOPIA_RESTART_FILE ]; do
-    ( eval `cat /tmp/qtopia-${display}/qtopiatest_cmds 2>/dev/null`;
-      LD_PRELOAD=$QTOPIA_PREFIX/lib/libqtopiatestoverrides.so $qpe "$@"; ) || exit $?
+    ( export LD_PRELOAD=$QTOPIA_PREFIX/lib/libqtopiatestoverrides.so;
+      eval `cat /tmp/qtopia-${display}/qtopiatest_cmds 2>/dev/null`;
+      $qpe "$@"; ) || exit $?
 done
 END
     ],
@@ -435,7 +436,7 @@ sub run_qvfb
     my $qvfb_mouse = "/tmp/.qtvfb_mouse-".opt("display");
     if ( fuser($qvfb_mouse) ) {
         print "WARNING: QVFb display ".opt("display")." is already running (see /tmp/.qtvfb_*-".opt("display").")\n";
-        return;
+        return 0;
     }
     my $qvfb_path = "$QPEDIR/bin/qvfb";
     my $skin_path = "$QPEDIR/src/tools/qt/qvfb";

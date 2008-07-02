@@ -105,7 +105,7 @@ private:
     void hookupSocket(QBluetoothRfcommSocket *socket);
     bool setupTty(QBluetoothRfcommSocket *socket, bool incoming);
     void doDisconnect();
-    bool audioGatewayInitialized();
+    void initializeAudioGateway();
     void scoConnectionEstablished(QBluetoothScoSocket *socket);
 
     QBluetoothHandsfreeServicePrivate *m_data;

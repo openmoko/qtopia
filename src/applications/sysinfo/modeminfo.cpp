@@ -19,6 +19,7 @@
 **
 ****************************************************************************/
 
+#include <QApplication>
 #include <QKeyEvent>
 #include <QLayout>
 #include <QScrollBar>
@@ -117,5 +118,9 @@ QString ModemInfo::format()
         infoString += Qt::escape( extraVersion ).replace( "\n", "<br/>" );
     }
 
+    if (QApplication::layoutDirection() == Qt::RightToLeft) {
+        infoString.prepend("<p align=\"right\">");
+        infoString.append("</p>");
+    }
     return infoString;
 }

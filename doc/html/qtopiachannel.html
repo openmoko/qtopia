@@ -59,7 +59,7 @@
 <h2>Detailed Description</h2>
 <p>The QtopiaChannel class provides communication capabilities between clients.</p>
 <p>QtopiaChannel provides a many-to-many (broadcast) inter-process communication protocol. The messages transferred are identified by channel, message and message signature. A channel is identified by a name, and anyone who wants to can listen to it, restricted by an active security framework, if any. The QtopiaChannel protocol allows clients to communicate both within the same address space and between different processes.</p>
-<p>There are currently two implementations for QtopiaChannel, one layered over the Qt QCop mechanism, and another one for DBus. QCop mechanism is currently only available on <a href="./qtopiacore.html">Qtopia Core</a>.</p>
+<p>There are currently two implementations for QtopiaChannel, one layered over the Qt QCop mechanism, and another one for <a href="legal-dbus.html">DBus</a>. QCop mechanism is currently only available on <a href="./qtopiacore.html">Qtopia Core</a>.</p>
 <p>Typically, QtopiaChannel is either used to send messages to a channel using the provided static functions, or to listen to the traffic on a channel by deriving from the class to take advantage of the provided functionality for receiving messages.</p>
 <p>QtopiaChannel provides a couple of static functions which are usable without an object: The <a href="qtopiachannel.html#send">send</a>() function, which sends the given message and data on the specified channel, and the <a href="qtopiachannel.html#isRegistered">isRegistered</a>() function which queries the server for the existence of the given channel.</p>
 <p>In addition, the QtopiaChannel class provides the <a href="qtopiachannel.html#channel">channel</a>() function which returns the name of the object's channel, and the <a href="qtopiachannel.html#received">received</a>() signal which is emitted with the given message and data when a QtopiaChannel receives a message from its channel.</p>
@@ -76,7 +76,7 @@
 <h3 class="fn"><a name="flush"></a>bool QtopiaChannel::flush ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Flushes all pending messages destined from this channel, causing them to be sent immediately. Returns true if the flush succeeded; otherwise returns false.</p>
 <h3 class="fn"><a name="isRegistered"></a>bool QtopiaChannel::isRegistered ( const <a href="./qstring.html">QString</a> &amp; <i>channel</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns true if the <i>channel</i> is registered. Note that this function always returns true in the DBus implementation. In the QCop implementation, this function requires a round-trip to the QWS server, which may impact system performance.</p>
+<p>Returns true if the <i>channel</i> is registered. Note that this function always returns true in the <a href="legal-dbus.html">DBus</a> implementation. In the QCop implementation, this function requires a round-trip to the QWS server, which may impact system performance.</p>
 <h3 class="fn"><a name="received"></a>void QtopiaChannel::received ( const <a href="./qstring.html">QString</a> &amp; <i>message</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>data</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted with the given <i>message</i> and <i>data</i> whenever the channel receives a message on the channel being listened on.</p>
 <p>See also <a href="qtopiachannel.html#send">send</a>().</p>

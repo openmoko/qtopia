@@ -93,7 +93,7 @@
 <p>For Bluetooth RFCOMM sockets, keepOpen() should be false.</p>
 <p>The keepOpen() state is ignored if the underlying serial device is a socket connection to a phone simulator.</p>
 <p>See also <a href="qserialport.html#setKeepOpen">setKeepOpen</a>().</p>
-<h3 class="fn"><a name="open"></a>bool QSerialPort::open ( <a href="./qiodevice.html#openmode-typedef">OpenMode</a> <i>mode</i> )</h3>
+<h3 class="fn"><a name="open"></a>bool QSerialPort::open ( <a href="./qiodevice.html#OpenMode-typedef">OpenMode</a> <i>mode</i> )</h3>
 <p>Opens the serial device with the specified <i>mode</i>. Returns true if the device could be opened; false otherwise.</p>
 <h3 class="fn"><a name="setFlowControl"></a>void QSerialPort::setFlowControl ( bool <i>value</i> )</h3>
 <p>Sets the state of CTS/RTS flow control on the serial device to <i>value</i>. This must be called before <a href="qserialport.html#open">QSerialPort::open</a>(). Changes to the value after opening will be ignored.</p>

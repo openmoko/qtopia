@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/test1/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.4/doc/src/compiler-notes.qdoc -->
+<!-- /home/test1/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.5/doc/src/compiler-notes.qdoc -->
 <head>
   <title>Qt 4.3: Compiler Notes</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -12,7 +12,7 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Compiler Notes<br /><span class="subtitle"></span>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 class="title">Compiler Notes<br /><span class="subtitle"></span>
 </h1>
 <p>This page contains information about the C++ compilers and tools used to build Qt on various platforms.</p>
 <ul><li><a href="#gcc-most-platforms">GCC (most platforms)</a></li>
@@ -83,17 +83,15 @@
 <h4>Intel C++ Compiler for Linux</h4>
 <p>Trolltech currently tests the following compilers:</p>
 <ul>
-<li>Intel(R) C++ Compiler for applications running on IA-32, Version 10.0 Build 20070809 Package ID: l_cc_c_10.0.026</li>
-<li>Intel(R) C++ Compiler for applications running on IA-32, Version 10.1 Build 20070913 Package ID: l_cc_p_10.1.008</li>
-<li>Intel(R) C++ Compiler for applications running on Intel(R) 64, Version 10.0 Build 20070809 Package ID: l_cc_c_10.0.026</li>
-<li>Intel(R) C++ Compiler for applications running on Intel(R) 64, Version 10.1 Build 20070913 Package ID: l_cc_p_10.1.008</li>
+<li>Intel(R) C++ Compiler for applications running on IA-32, Version 10.1 Build 20080112 Package ID: l_cc_p_10.1.012</li>
+<li>Intel(R) C++ Compiler for applications running on Intel(R) 64, Version 10.1 Build 20080112 Package ID: l_cc_p_10.1.012</li>
 </ul>
 <a name="known-issues-with-intel-c-compiler-for-linux"></a>
 <h4>Known issues with Intel C++ Compiler for Linux</h4>
 <ul>
 <li>Precompiled header support does not work prior in version 10.0&#x2e;025 and older. For these compilers, you should configure Qt with -no-pch. Precompiled header support works properly in version 10.0&#x2e;026.</li>
-<li>Version 10.0&#x2e;026 for Intel 64 is known to miscompile qmake when building in release mode. For now, configure Qt with -debug. This issue has been reported to Intel and is awaiting resolution.</li>
-<li>Version 10.1&#x2e;008 for both IA-32 and Intel 64 is known crash with &quot;(0): internal error: 0_47021&quot; when compiling Designer in release mode. For now, configure Qt with -debug. This issue has been reported to Intel and is awaiting resolution.</li>
+<li>Version 10.0&#x2e;026 for Intel 64 is known to miscompile qmake when building in release mode. For now, configure Qt with -debug. Version 10.1&#x2e;008 and later can compile qmake in release mode.</li>
+<li>Versions 10.1&#x2e;008, 10.1&#x2e;011, and 10.1&#x2e;012 for both IA-32 and Intel 64 is known crash with &quot;(0): internal error: 0_47021&quot; when compiling Designer in release mode. For now, configure Qt with -debug. This issue has been reported to Intel and is awaiting resolution.</li>
 </ul>
 <a name="intel-c-compiler-windows-altix"></a>
 <h4>Intel C++ Compiler (Windows, Altix)</h4>
@@ -142,6 +140,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.4</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.5</div></td>
 </tr></table></div></address></body>
 </html>

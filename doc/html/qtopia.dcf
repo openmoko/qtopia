@@ -323,9 +323,6 @@
         <keyword ref="dateservice.html#editDate">editDate</keyword>
         <section ref="dateservice-members.html" title="List of all members"/>
     </section>
-    <section ref="dbmigratetask.html" title="DBMigrateTask Class Reference">
-        <keyword ref="dbmigratetask.html">DBMigrateTask</keyword>
-    </section>
     <section ref="defaultbattery.html" title="DefaultBattery Class Reference">
         <keyword ref="defaultbattery.html">DefaultBattery</keyword>
         <section ref="defaultbattery-members.html" title="List of all members"/>
@@ -1308,6 +1305,7 @@
         <keyword ref="qatutils.html#codec">codec</keyword>
         <keyword ref="qatutils.html#decode">decode</keyword>
         <keyword ref="qatutils.html#decodeNumber">decodeNumber</keyword>
+        <keyword ref="qatutils.html#decodeString">decodeString</keyword>
         <keyword ref="qatutils.html#encodeNumber">encodeNumber</keyword>
         <keyword ref="qatutils.html#fromHex">fromHex</keyword>
         <keyword ref="qatutils.html#nextString">nextString</keyword>
@@ -5642,21 +5640,6 @@
         <section ref="qpassworddialog-members.html" title="List of all members"/>
         <section ref="qpassworddialog-obsolete.html" title="Obsolete members"/>
     </section>
-    <section ref="qperformancelog.html" title="QPerformanceLog Class Reference">
-        <keyword ref="qperformancelog.html">QPerformanceLog</keyword>
-        <keyword ref="qperformancelog.html#EventType-enum">EventType</keyword>
-        <keyword ref="qperformancelog.html#EventType-enum">Event</keyword>
-        <keyword ref="qperformancelog.html#EventType-enum">QPerformanceLog::LibraryLoading</keyword>
-        <keyword ref="qperformancelog.html#EventType-enum">QPerformanceLog::NoEvent</keyword>
-        <keyword ref="qperformancelog.html#EventType-enum">QPerformanceLog::Begin</keyword>
-        <keyword ref="qperformancelog.html#EventType-enum">QPerformanceLog::MainWindow</keyword>
-        <keyword ref="qperformancelog.html#EventType-enum">QPerformanceLog::EventLoop</keyword>
-        <keyword ref="qperformancelog.html#EventType-enum">QPerformanceLog::End</keyword>
-        <keyword ref="qperformancelog.html#enabled">enabled</keyword>
-        <keyword ref="qperformancelog.html#stringFromEvent">stringFromEvent</keyword>
-        <keyword ref="qperformancelog.html#operator-lt-lt">operator&lt;&lt;</keyword>
-        <section ref="qperformancelog-members.html" title="List of all members"/>
-    </section>
     <section ref="qphonebook.html" title="QPhoneBook Class Reference">
         <keyword ref="qphonebook.html">QPhoneBook</keyword>
         <keyword ref="qphonebook.html#add">add</keyword>
@@ -9145,11 +9128,11 @@
     <section ref="atcommands.html" title="AT Commands">
         <keyword ref="atcommands.html">AT Commands</keyword>
     </section>
-    <section ref="atdlegal.html" title="atd">
-        <keyword ref="atdlegal.html">atd</keyword>
+    <section ref="legal-atd.html" title="atd">
+        <keyword ref="legal-atd.html">atd</keyword>
     </section>
-    <section ref="basic.html" title="Basic Widgets">
-        <keyword ref="basic.html">Basic Widgets</keyword>
+    <section ref="basicwidgets.html" title="Basic Widgets">
+        <keyword ref="basicwidgets.html">Basic Widgets</keyword>
     </section>
     <section ref="qtopiabluetooth.html" title="Bluetooth">
         <keyword ref="qtopiabluetooth.html">Bluetooth</keyword>
@@ -9205,6 +9188,9 @@
     <section ref="time.html" title="Date and Time Classes">
         <keyword ref="time.html">Date and Time Classes</keyword>
     </section>
+    <section ref="legal-dbus.html" title="dbus">
+        <keyword ref="legal-dbus.html">dbus</keyword>
+    </section>
     <section ref="debug-qtopia.html" title="Debugging Qtopia Applications">
         <keyword ref="debug-qtopia.html">Debugging Qtopia Applications</keyword>
     </section>
@@ -9220,8 +9206,11 @@
     <section ref="syscust-partitionlayout.html" title="Device Partition Layout">
         <keyword ref="syscust-partitionlayout.html">Device Partition Layout</keyword>
     </section>
-    <section ref="dissipate2legal.html" title="Dissipate2">
-        <keyword ref="dissipate2legal.html">Dissipate2</keyword>
+    <section ref="device-synchronization.html" title="Device Synchronization">
+        <keyword ref="device-synchronization.html">Device Synchronization</keyword>
+    </section>
+    <section ref="legal-dlmalloc.html" title="dlmalloc">
+        <keyword ref="legal-dlmalloc.html">dlmalloc</keyword>
     </section>
     <section ref="documentselection.html" title="Document Selection">
         <keyword ref="documentselection.html">Document Selection</keyword>
@@ -9247,6 +9236,9 @@
     <section ref="syscust-drm.html" title="DRM Agent Integration">
         <keyword ref="syscust-drm.html">DRM Agent Integration</keyword>
     </section>
+    <section ref="legal-drmagent.html" title="drmagent">
+        <keyword ref="legal-drmagent.html">drmagent</keyword>
+    </section>
     <section ref="environment.html" title="Environment Classes">
         <keyword ref="environment.html">Environment Classes</keyword>
     </section>
@@ -9268,6 +9260,9 @@
     <section ref="functions.html" title="Functions">
         <keyword ref="functions.html">Functions</keyword>
     </section>
+    <section ref="legal-g711.html" title="g711">
+        <keyword ref="legal-g711.html">g711</keyword>
+    </section>
     <section ref="getting-started.html" title="Getting Started">
         <keyword ref="getting-started.html">Getting Started</keyword>
     </section>
@@ -9277,14 +9272,20 @@
     <section ref="greenphone-integration-guide.html" title="Greenphone Integration Guide">
         <keyword ref="greenphone-integration-guide.html">Greenphone Integration Guide</keyword>
     </section>
+    <section ref="qreenphone-performance-results.html" title="Greenphone Performance Test Results">
+        <keyword ref="qreenphone-performance-results.html">Greenphone Performance Test Results</keyword>
+    </section>
     <section ref="groups.html" title="Grouped Classes">
         <keyword ref="groups.html">Grouped Classes</keyword>
     </section>
-    <section ref="gsmlegal.html" title="GSM">
-        <keyword ref="gsmlegal.html">GSM</keyword>
+    <section ref="legal-gsm.html" title="gsm">
+        <keyword ref="legal-gsm.html">gsm</keyword>
     </section>
     <section ref="syscust-gsm.html" title="GSM Modem Integration">
         <keyword ref="syscust-gsm.html">GSM Modem Integration</keyword>
+    </section>
+    <section ref="legal-gstreamer.html" title="gstreamer">
+        <keyword ref="legal-gstreamer.html">gstreamer</keyword>
     </section>
     <section ref="building-guide.html" title="Guide to Configuring and Building Qtopia">
         <keyword ref="building-guide.html">Guide to Configuring and Building Qtopia</keyword>
@@ -9297,6 +9298,9 @@
     </section>
     <section ref="syscust-hardware.html" title="Hardware Configuration">
         <keyword ref="syscust-hardware.html">Hardware Configuration</keyword>
+    </section>
+    <section ref="legal-helix.html" title="helix">
+        <keyword ref="legal-helix.html">helix</keyword>
     </section>
     <section ref="help-preprocessor.html" title="Help Browser Preprocessor">
         <keyword ref="help-preprocessor.html">Help Browser Preprocessor</keyword>
@@ -9340,6 +9344,9 @@
     <section ref="inputmethods-description.html" title="Input Methods Documentation">
         <keyword ref="inputmethods-description.html">Input Methods Documentation</keyword>
     </section>
+    <section ref="legal-inputmatch.html" title="inputmatch">
+        <keyword ref="legal-inputmatch.html">inputmatch</keyword>
+    </section>
     <section ref="installedsoftware.html" title="Installed Software">
         <keyword ref="installedsoftware.html">Installed Software</keyword>
     </section>
@@ -9367,8 +9374,14 @@
     <section ref="geomanagement.html" title="Layout Management">
         <keyword ref="geomanagement.html">Layout Management</keyword>
     </section>
+    <section ref="legal-libtimidity.html" title="libtimidity">
+        <keyword ref="legal-libtimidity.html">libtimidity</keyword>
+    </section>
     <section ref="syscust-memusage.html" title="Managing Memory Usage">
         <keyword ref="syscust-memusage.html">Managing Memory Usage</keyword>
+    </section>
+    <section ref="legal-md5.html" title="md5">
+        <keyword ref="legal-md5.html">md5</keyword>
     </section>
     <section ref="messaging.html" title="Messages">
         <keyword ref="messaging.html">Messages</keyword>
@@ -9379,8 +9392,8 @@
     <section ref="messaginglibrary.html" title="Messaging Classes">
         <keyword ref="messaginglibrary.html">Messaging Classes</keyword>
     </section>
-    <section ref="microhttpdlegal.html" title="micro_httpd">
-        <keyword ref="microhttpdlegal.html">micro_httpd</keyword>
+    <section ref="legal-micro-httpd.html" title="micro_httpd">
+        <keyword ref="legal-micro-httpd.html">micro_httpd</keyword>
     </section>
     <section ref="misc.html" title="Miscellaneous Classes">
         <keyword ref="misc.html">Miscellaneous Classes</keyword>
@@ -9430,6 +9443,9 @@
     <section ref="multimedia.html" title="Multimedia, Graphics, and Printing">
         <keyword ref="multimedia.html">Multimedia, Graphics, and Printing</keyword>
     </section>
+    <section ref="neo1973-performance-results.html" title="Neo 1973 Performance Test Results">
+        <keyword ref="neo1973-performance-results.html">Neo 1973 Performance Test Results</keyword>
+    </section>
     <section ref="networkservices.html" title="Network Services">
         <keyword ref="networkservices.html">Network Services</keyword>
     </section>
@@ -9438,6 +9454,9 @@
     </section>
     <section ref="objectmodel.html" title="Object Model">
         <keyword ref="objectmodel.html">Object Model</keyword>
+    </section>
+    <section ref="legal-openobex.html" title="openobex">
+        <keyword ref="legal-openobex.html">openobex</keyword>
     </section>
     <section ref="organizers.html" title="Organizers">
         <keyword ref="organizers.html">Organizers</keyword>
@@ -9465,6 +9484,12 @@
     </section>
     <section ref="qpepim-class-overview.html" title="PIM Library: Class Overview">
         <keyword ref="qpepim-class-overview.html">PIM Library: Class Overview</keyword>
+    </section>
+    <section ref="qpepim-synchronization.html" title="PIM Synchronization">
+        <keyword ref="qpepim-synchronization.html">PIM Synchronization</keyword>
+    </section>
+    <section ref="legal-pkim.html" title="pkim">
+        <keyword ref="legal-pkim.html">pkim</keyword>
     </section>
     <section ref="plugins.html" title="Plug-in Classes">
         <keyword ref="plugins.html">Plug-in Classes</keyword>
@@ -9592,6 +9617,339 @@
     <section ref="quicklaunch.html" title="Quicklauncher">
         <keyword ref="quicklaunch.html">Quicklauncher</keyword>
     </section>
+    <section ref="fd-802-11wirelessipsupport.html" title="Requirements: 802.11 Wireless IP support">
+        <keyword ref="fd-802-11wirelessipsupport.html">Requirements: 802.11 Wireless IP support</keyword>
+    </section>
+    <section ref="fd-appearance.html" title="Requirements: Appearance">
+        <keyword ref="fd-appearance.html">Requirements: Appearance</keyword>
+    </section>
+    <section ref="fd-applicationexecution.html" title="Requirements: Application Execution">
+        <keyword ref="fd-applicationexecution.html">Requirements: Application Execution</keyword>
+    </section>
+    <section ref="fd-asteroids.html" title="Requirements: Asteroids">
+        <keyword ref="fd-asteroids.html">Requirements: Asteroids</keyword>
+    </section>
+    <section ref="fd-audiomanagement.html" title="Requirements: Audio Management">
+        <keyword ref="fd-audiomanagement.html">Requirements: Audio Management</keyword>
+    </section>
+    <section ref="fd-avstreaming.html" title="Requirements: AV Streaming">
+        <keyword ref="fd-avstreaming.html">Requirements: AV Streaming</keyword>
+    </section>
+    <section ref="fd-bidirectionality.html" title="Requirements: Bidirectionality">
+        <keyword ref="fd-bidirectionality.html">Requirements: Bidirectionality</keyword>
+    </section>
+    <section ref="fd-bluetooth.html" title="Requirements: Bluetooth">
+        <keyword ref="fd-bluetooth.html">Requirements: Bluetooth</keyword>
+    </section>
+    <section ref="fd-buildsystem.html" title="Requirements: Build System">
+        <keyword ref="fd-buildsystem.html">Requirements: Build System</keyword>
+    </section>
+    <section ref="fd-calculator.html" title="Requirements: Calculator">
+        <keyword ref="fd-calculator.html">Requirements: Calculator</keyword>
+    </section>
+    <section ref="fd-calendar.html" title="Requirements: Calendar">
+        <keyword ref="fd-calendar.html">Requirements: Calendar</keyword>
+    </section>
+    <section ref="fd-callforwarding.html" title="Requirements: Call Forwarding">
+        <keyword ref="fd-callforwarding.html">Requirements: Call Forwarding</keyword>
+    </section>
+    <section ref="fd-callhistory.html" title="Requirements: Call History">
+        <keyword ref="fd-callhistory.html">Requirements: Call History</keyword>
+    </section>
+    <section ref="fd-callmanagement.html" title="Requirements: Call Management">
+        <keyword ref="fd-callmanagement.html">Requirements: Call Management</keyword>
+    </section>
+    <section ref="fd-callnetworks.html" title="Requirements: Call Networks">
+        <keyword ref="fd-callnetworks.html">Requirements: Call Networks</keyword>
+    </section>
+    <section ref="fd-calloptions.html" title="Requirements: Call Options">
+        <keyword ref="fd-calloptions.html">Requirements: Call Options</keyword>
+    </section>
+    <section ref="fd-camera.html" title="Requirements: Camera">
+        <keyword ref="fd-camera.html">Requirements: Camera</keyword>
+    </section>
+    <section ref="fd-chineseinputmethod.html" title="Requirements: Chinese Input Method">
+        <keyword ref="fd-chineseinputmethod.html">Requirements: Chinese Input Method</keyword>
+    </section>
+    <section ref="fd-clock.html" title="Requirements: Clock">
+        <keyword ref="fd-clock.html">Requirements: Clock</keyword>
+    </section>
+    <section ref="fd-colorschemes.html" title="Requirements: Color Schemes">
+        <keyword ref="fd-colorschemes.html">Requirements: Color Schemes</keyword>
+    </section>
+    <section ref="fd-contacts.html" title="Requirements: Contacts">
+        <keyword ref="fd-contacts.html">Requirements: Contacts</keyword>
+    </section>
+    <section ref="fd-datasharing.html" title="Requirements: Data Sharing">
+        <keyword ref="fd-datasharing.html">Requirements: Data Sharing</keyword>
+    </section>
+    <section ref="fd-desktop.html" title="Requirements: Desktop">
+        <keyword ref="fd-desktop.html">Requirements: Desktop</keyword>
+    </section>
+    <section ref="fd-dialer.html" title="Requirements: Dialer">
+        <keyword ref="fd-dialer.html">Requirements: Dialer</keyword>
+    </section>
+    <section ref="fd-display.html" title="Requirements: Display">
+        <keyword ref="fd-display.html">Requirements: Display</keyword>
+    </section>
+    <section ref="fd-documentmanagement.html" title="Requirements: Document Management">
+        <keyword ref="fd-documentmanagement.html">Requirements: Document Management</keyword>
+    </section>
+    <section ref="fd-drm.html" title="Requirements: DRM">
+        <keyword ref="fd-drm.html">Requirements: DRM</keyword>
+    </section>
+    <section ref="fd-email.html" title="Requirements: Email">
+        <keyword ref="fd-email.html">Requirements: Email</keyword>
+    </section>
+    <section ref="fd-emergencycalls.html" title="Requirements: Emergency Calls">
+        <keyword ref="fd-emergencycalls.html">Requirements: Emergency Calls</keyword>
+    </section>
+    <section ref="fd-fifteen.html" title="Requirements: Fifteen">
+        <keyword ref="fd-fifteen.html">Requirements: Fifteen</keyword>
+    </section>
+    <section ref="fd-fullscreenstrokerecognition.html" title="Requirements: Full Screen Stroke Recognition">
+        <keyword ref="fd-fullscreenstrokerecognition.html">Requirements: Full Screen Stroke Recognition</keyword>
+    </section>
+    <section ref="fd-gprs.html" title="Requirements: GPRS">
+        <keyword ref="fd-gprs.html">Requirements: GPRS</keyword>
+    </section>
+    <section ref="fd-greenphone.html" title="Requirements: Greenphone">
+        <keyword ref="fd-greenphone.html">Requirements: Greenphone</keyword>
+    </section>
+    <section ref="fd-hardkeys.html" title="Requirements: Hard Keys">
+        <keyword ref="fd-hardkeys.html">Requirements: Hard Keys</keyword>
+    </section>
+    <section ref="fd-hardwarenotification.html" title="Requirements: Hardware Notification">
+        <keyword ref="fd-hardwarenotification.html">Requirements: Hardware Notification</keyword>
+    </section>
+    <section ref="fd-helixintegration.html" title="Requirements: Helix Integration">
+        <keyword ref="fd-helixintegration.html">Requirements: Helix Integration</keyword>
+    </section>
+    <section ref="fd-help.html" title="Requirements: Help">
+        <keyword ref="fd-help.html">Requirements: Help</keyword>
+    </section>
+    <section ref="fd-homescreen.html" title="Requirements: Home Screen">
+        <keyword ref="fd-homescreen.html">Requirements: Home Screen</keyword>
+    </section>
+    <section ref="fd-inputmethods.html" title="Requirements: Input Methods">
+        <keyword ref="fd-inputmethods.html">Requirements: Input Methods</keyword>
+    </section>
+    <section ref="fd-installedsoftware.html" title="Requirements: Installed Software">
+        <keyword ref="fd-installedsoftware.html">Requirements: Installed Software</keyword>
+    </section>
+    <section ref="fd-integrationlayer.html" title="Requirements: Integration Layer">
+        <keyword ref="fd-integrationlayer.html">Requirements: Integration Layer</keyword>
+    </section>
+    <section ref="fd-internationalization.html" title="Requirements: Internationalization">
+        <keyword ref="fd-internationalization.html">Requirements: Internationalization</keyword>
+    </section>
+    <section ref="fd-internet.html" title="Requirements: Internet">
+        <keyword ref="fd-internet.html">Requirements: Internet</keyword>
+    </section>
+    <section ref="fd-irda.html" title="Requirements: IrDA">
+        <keyword ref="fd-irda.html">Requirements: IrDA</keyword>
+    </section>
+    <section ref="fd-languageselection.html" title="Requirements: Language Selection">
+        <keyword ref="fd-languageselection.html">Requirements: Language Selection</keyword>
+    </section>
+    <section ref="fd-launcher.html" title="Requirements: Launcher">
+        <keyword ref="fd-launcher.html">Requirements: Launcher</keyword>
+    </section>
+    <section ref="fd-logging.html" title="Requirements: Logging">
+        <keyword ref="fd-logging.html">Requirements: Logging</keyword>
+    </section>
+    <section ref="fd-mediaplayer.html" title="Requirements: Media Player">
+        <keyword ref="fd-mediaplayer.html">Requirements: Media Player</keyword>
+    </section>
+    <section ref="fd-memory.html" title="Requirements: Memory">
+        <keyword ref="fd-memory.html">Requirements: Memory</keyword>
+    </section>
+    <section ref="fd-messaging.html" title="Requirements: Messaging">
+        <keyword ref="fd-messaging.html">Requirements: Messaging</keyword>
+    </section>
+    <section ref="fd-messagingaccounts.html" title="Requirements: Messaging Accounts">
+        <keyword ref="fd-messagingaccounts.html">Requirements: Messaging Accounts</keyword>
+    </section>
+    <section ref="fd-messagingfoldersandsearching.html" title="Requirements: Messaging Folders and Searching">
+        <keyword ref="fd-messagingfoldersandsearching.html">Requirements: Messaging Folders and Searching</keyword>
+    </section>
+    <section ref="fd-midi.html" title="Requirements: MIDI">
+        <keyword ref="fd-midi.html">Requirements: MIDI</keyword>
+    </section>
+    <section ref="fd-minehunt.html" title="Requirements: Mine Hunt">
+        <keyword ref="fd-minehunt.html">Requirements: Mine Hunt</keyword>
+    </section>
+    <section ref="fd-mms.html" title="Requirements: MMS">
+        <keyword ref="fd-mms.html">Requirements: MMS</keyword>
+    </section>
+    <section ref="fd-modememulation.html" title="Requirements: Modem Emulation">
+        <keyword ref="fd-modememulation.html">Requirements: Modem Emulation</keyword>
+    </section>
+    <section ref="fd-modemsimulator.html" title="Requirements: Modem Simulator">
+        <keyword ref="fd-modemsimulator.html">Requirements: Modem Simulator</keyword>
+    </section>
+    <section ref="fd-multimedia.html" title="Requirements: Multimedia">
+        <keyword ref="fd-multimedia.html">Requirements: Multimedia</keyword>
+    </section>
+    <section ref="fd-multipledisplays.html" title="Requirements: Multiple Displays">
+        <keyword ref="fd-multipledisplays.html">Requirements: Multiple Displays</keyword>
+    </section>
+    <section ref="fd-multitasking.html" title="Requirements: Multitasking">
+        <keyword ref="fd-multitasking.html">Requirements: Multitasking</keyword>
+    </section>
+    <section ref="fd-navigation.html" title="Requirements: Navigation">
+        <keyword ref="fd-navigation.html">Requirements: Navigation</keyword>
+    </section>
+    <section ref="fd-obex.html" title="Requirements: OBEX">
+        <keyword ref="fd-obex.html">Requirements: OBEX</keyword>
+    </section>
+    <section ref="fd-operatingsystem.html" title="Requirements: Operating System">
+        <keyword ref="fd-operatingsystem.html">Requirements: Operating System</keyword>
+    </section>
+    <section ref="fd-ota-network.html" title="Requirements: OTA (Network)">
+        <keyword ref="fd-ota-network.html">Requirements: OTA (Network)</keyword>
+    </section>
+    <section ref="fd-ota-pim.html" title="Requirements: OTA (PIM)">
+        <keyword ref="fd-ota-pim.html">Requirements: OTA (PIM)</keyword>
+    </section>
+    <section ref="fd-packagemanager.html" title="Requirements: Package Manager">
+        <keyword ref="fd-packagemanager.html">Requirements: Package Manager</keyword>
+    </section>
+    <section ref="fd-pictures.html" title="Requirements: Pictures">
+        <keyword ref="fd-pictures.html">Requirements: Pictures</keyword>
+    </section>
+    <section ref="fd-pim.html" title="Requirements: PIM">
+        <keyword ref="fd-pim.html">Requirements: PIM</keyword>
+    </section>
+    <section ref="fd-plug-ins.html" title="Requirements: Plug-ins">
+        <keyword ref="fd-plug-ins.html">Requirements: Plug-ins</keyword>
+    </section>
+    <section ref="fd-powermanagement.html" title="Requirements: Power Management">
+        <keyword ref="fd-powermanagement.html">Requirements: Power Management</keyword>
+    </section>
+    <section ref="fd-predictiveinput.html" title="Requirements: Predictive Input">
+        <keyword ref="fd-predictiveinput.html">Requirements: Predictive Input</keyword>
+    </section>
+    <section ref="fd-printing.html" title="Requirements: Printing">
+        <keyword ref="fd-printing.html">Requirements: Printing</keyword>
+    </section>
+    <section ref="fd-processmanagement.html" title="Requirements: Process Management">
+        <keyword ref="fd-processmanagement.html">Requirements: Process Management</keyword>
+    </section>
+    <section ref="fd-profiles.html" title="Requirements: Profiles">
+        <keyword ref="fd-profiles.html">Requirements: Profiles</keyword>
+    </section>
+    <section ref="fd-qpicture.html" title="Requirements: QPicture">
+        <keyword ref="fd-qpicture.html">Requirements: QPicture</keyword>
+    </section>
+    <section ref="fd-removablestorage.html" title="Requirements: Removable Storage">
+        <keyword ref="fd-removablestorage.html">Requirements: Removable Storage</keyword>
+    </section>
+    <section ref="fd-resources.html" title="Requirements: Resources">
+        <keyword ref="fd-resources.html">Requirements: Resources</keyword>
+    </section>
+    <section ref="fd-ringtones.html" title="Requirements: Ringtones">
+        <keyword ref="fd-ringtones.html">Requirements: Ringtones</keyword>
+    </section>
+    <section ref="fd-safeexecutionenvironment.html" title="Requirements: Safe Execution Environment">
+        <keyword ref="fd-safeexecutionenvironment.html">Requirements: Safe Execution Environment</keyword>
+    </section>
+    <section ref="fd-sdk.html" title="Requirements: SDK">
+        <keyword ref="fd-sdk.html">Requirements: SDK</keyword>
+    </section>
+    <section ref="fd-securitysettings.html" title="Requirements: Security Settings">
+        <keyword ref="fd-securitysettings.html">Requirements: Security Settings</keyword>
+    </section>
+    <section ref="fd-services.html" title="Requirements: Services">
+        <keyword ref="fd-services.html">Requirements: Services</keyword>
+    </section>
+    <section ref="fd-simtoolkit.html" title="Requirements: SIM Toolkit">
+        <keyword ref="fd-simtoolkit.html">Requirements: SIM Toolkit</keyword>
+    </section>
+    <section ref="fd-sms.html" title="Requirements: SMS">
+        <keyword ref="fd-sms.html">Requirements: SMS</keyword>
+    </section>
+    <section ref="fd-snake.html" title="Requirements: Snake">
+        <keyword ref="fd-snake.html">Requirements: Snake</keyword>
+    </section>
+    <section ref="fd-speakerphone.html" title="Requirements: Speaker Phone">
+        <keyword ref="fd-speakerphone.html">Requirements: Speaker Phone</keyword>
+    </section>
+    <section ref="fd-speeddialing.html" title="Requirements: Speed Dialing">
+        <keyword ref="fd-speeddialing.html">Requirements: Speed Dialing</keyword>
+    </section>
+    <section ref="fd-sqldatabase.html" title="Requirements: SQL Database">
+        <keyword ref="fd-sqldatabase.html">Requirements: SQL Database</keyword>
+    </section>
+    <section ref="fd-standardscompliance.html" title="Requirements: Standards Compliance">
+        <keyword ref="fd-standardscompliance.html">Requirements: Standards Compliance</keyword>
+    </section>
+    <section ref="fd-stereosound.html" title="Requirements: Stereo Sound">
+        <keyword ref="fd-stereosound.html">Requirements: Stereo Sound</keyword>
+    </section>
+    <section ref="fd-storagemanagement.html" title="Requirements: Storage Management">
+        <keyword ref="fd-storagemanagement.html">Requirements: Storage Management</keyword>
+    </section>
+    <section ref="fd-strokerecognition.html" title="Requirements: Stroke Recognition">
+        <keyword ref="fd-strokerecognition.html">Requirements: Stroke Recognition</keyword>
+    </section>
+    <section ref="fd-svg.html" title="Requirements: SVG">
+        <keyword ref="fd-svg.html">Requirements: SVG</keyword>
+    </section>
+    <section ref="fd-systeminfo.html" title="Requirements: System Info">
+        <keyword ref="fd-systeminfo.html">Requirements: System Info</keyword>
+    </section>
+    <section ref="fd-tasks.html" title="Requirements: Tasks">
+        <keyword ref="fd-tasks.html">Requirements: Tasks</keyword>
+    </section>
+    <section ref="fd-telephony.html" title="Requirements: Telephony">
+        <keyword ref="fd-telephony.html">Requirements: Telephony</keyword>
+    </section>
+    <section ref="fd-textnotes.html" title="Requirements: Text Notes">
+        <keyword ref="fd-textnotes.html">Requirements: Text Notes</keyword>
+    </section>
+    <section ref="fd-themes.html" title="Requirements: Themes">
+        <keyword ref="fd-themes.html">Requirements: Themes</keyword>
+    </section>
+    <section ref="fd-time.html" title="Requirements: Time">
+        <keyword ref="fd-time.html">Requirements: Time</keyword>
+    </section>
+    <section ref="fd-touchscreencalibration.html" title="Requirements: Touchscreen Calibration">
+        <keyword ref="fd-touchscreencalibration.html">Requirements: Touchscreen Calibration</keyword>
+    </section>
+    <section ref="fd-transparency.html" title="Requirements: Transparency">
+        <keyword ref="fd-transparency.html">Requirements: Transparency</keyword>
+    </section>
+    <section ref="fd-usb.html" title="Requirements: USB">
+        <keyword ref="fd-usb.html">Requirements: USB</keyword>
+    </section>
+    <section ref="fd-userinterface.html" title="Requirements: User Interface">
+        <keyword ref="fd-userinterface.html">Requirements: User Interface</keyword>
+    </section>
+    <section ref="fd-videoringtones.html" title="Requirements: Video Ringtones">
+        <keyword ref="fd-videoringtones.html">Requirements: Video Ringtones</keyword>
+    </section>
+    <section ref="fd-voicenotes.html" title="Requirements: Voice Notes">
+        <keyword ref="fd-voicenotes.html">Requirements: Voice Notes</keyword>
+    </section>
+    <section ref="fd-voip.html" title="Requirements: VoIP">
+        <keyword ref="fd-voip.html">Requirements: VoIP</keyword>
+    </section>
+    <section ref="fd-vpn.html" title="Requirements: VPN">
+        <keyword ref="fd-vpn.html">Requirements: VPN</keyword>
+    </section>
+    <section ref="fd-wapstack.html" title="Requirements: WAP Stack">
+        <keyword ref="fd-wapstack.html">Requirements: WAP Stack</keyword>
+    </section>
+    <section ref="fd-widgetstyles.html" title="Requirements: Widget Styles">
+        <keyword ref="fd-widgetstyles.html">Requirements: Widget Styles</keyword>
+    </section>
+    <section ref="fd-words.html" title="Requirements: Words">
+        <keyword ref="fd-words.html">Requirements: Words</keyword>
+    </section>
+    <section ref="fd-worldtime.html" title="Requirements: World Time">
+        <keyword ref="fd-worldtime.html">Requirements: World Time</keyword>
+    </section>
     <section ref="running-qtopia.html" title="Running Qtopia">
         <keyword ref="running-qtopia.html">Running Qtopia</keyword>
     </section>
@@ -9624,6 +9982,9 @@
     </section>
     <section ref="sycust-sql.html" title="SQL Integration">
         <keyword ref="sycust-sql.html">SQL Integration</keyword>
+    </section>
+    <section ref="legal-sqlite.html" title="sqlite">
+        <keyword ref="legal-sqlite.html">sqlite</keyword>
     </section>
     <section ref="dialogs.html" title="Standard Dialog Classes">
         <keyword ref="dialogs.html">Standard Dialog Classes</keyword>
@@ -9676,8 +10037,8 @@
     <section ref="syscust-index.html" title="System Customization">
         <keyword ref="syscust-index.html">System Customization</keyword>
     </section>
-    <section ref="tarlegal.html" title="Tar">
-        <keyword ref="tarlegal.html">Tar</keyword>
+    <section ref="legal-tar.html" title="tar">
+        <keyword ref="legal-tar.html">tar</keyword>
     </section>
     <section ref="qtopia-telephony.html" title="Telephony">
         <keyword ref="qtopia-telephony.html">Telephony</keyword>
@@ -9709,11 +10070,20 @@
     <section ref="syscust-time.html" title="Time on an Embedded Device">
         <keyword ref="syscust-time.html">Time on an Embedded Device</keyword>
     </section>
+    <section ref="legal-timiditycodec.html" title="timiditycodec">
+        <keyword ref="legal-timiditycodec.html">timiditycodec</keyword>
+    </section>
     <section ref="tools.html" title="Tool Classes">
         <keyword ref="tools.html">Tool Classes</keyword>
     </section>
     <section ref="tools-list.html" title="Tools">
         <keyword ref="tools-list.html">Tools</keyword>
+    </section>
+    <section ref="legal-tremor.html" title="tremor">
+        <keyword ref="legal-tremor.html">tremor</keyword>
+    </section>
+    <section ref="legal-tremorcodec.html" title="tremorcodec">
+        <keyword ref="legal-tremorcodec.html">tremorcodec</keyword>
     </section>
     <section ref="qtopiaserver--phoneui--ttsmartphone.html" title="Trolltech SmartPhone UI">
         <keyword ref="qtopiaserver--phoneui--ttsmartphone.html">Trolltech SmartPhone UI</keyword>
@@ -9772,8 +10142,8 @@
     <section ref="userinterface.html" title="User Interface">
         <keyword ref="userinterface.html">User Interface</keyword>
     </section>
-    <section ref="vobjectlegal.html" title="VObject">
-        <keyword ref="vobjectlegal.html">VObject</keyword>
+    <section ref="legal-vobject.html" title="vobject">
+        <keyword ref="legal-vobject.html">vobject</keyword>
     </section>
     <section ref="syscust-voip.html" title="VoIP Integration">
         <keyword ref="syscust-voip.html">VoIP Integration</keyword>
@@ -9798,6 +10168,9 @@
     </section>
     <section ref="xml-tools.html" title="XML Classes">
         <keyword ref="xml-tools.html">XML Classes</keyword>
+    </section>
+    <section ref="legal-zlib.html" title="zlib">
+        <keyword ref="legal-zlib.html">zlib</keyword>
     </section>
 </section>
 <section ref="tut-index.html" title="Tutorial &amp; Examples">

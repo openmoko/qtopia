@@ -47,8 +47,14 @@
 #include <QListView>
 #include <QContentFilterDialog>
 #include <QDesktopWidget>
+#include <QWaitWidget>
 
 #include <cmath>
+
+static const qreal q_imageZoomScales[] = {
+        0.01, 0.0125, 0.025, 0.033, 0.05, 0.0667, 0.075,
+        0.1, 0.125, 0.25, 0.333, 0.5, 0.667, 0.75, 0.9,
+        1.0, 1.1, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0, 4.0};
 
 PhotoEditUI::PhotoEditUI( QWidget* parent, Qt::WFlags f )
     : QWidget( parent, f )
@@ -70,6 +76,7 @@ PhotoEditUI::PhotoEditUI( QWidget* parent, Qt::WFlags f )
     , type_label(0)
     , category_label(0)
     , selector_widget(0)
+    , m_viewerZoomSlider(0)
     , region_selector(0)
     , navigator(0)
     , brightness_slider(0)
@@ -88,6 +95,8 @@ PhotoEditUI::PhotoEditUI( QWidget* parent, Qt::WFlags f )
     , category_dialog( 0 )
     , currEditImageRequest(0)
     , list_init_timer_id(-1)
+    , m_imageWidget(0)
+    , m_viewerWaitWidget(0)
 {
     setWindowTitle( tr( "Pictures" ) );
 
@@ -130,32 +139,78 @@ bool PhotoEditUI::eventFilter(QObject *object, QEvent *event)
 }
 
 
-ImageViewer *PhotoEditUI::imageViewer()
+QWidget *PhotoEditUI::imageViewer()
 {
     if( !image_viewer )
     {
+        QBoxLayout *viewerLayout = new QVBoxLayout;
+        viewerLayout->setMargin(0);
+        viewerLayout->setSpacing(0);
+
+        m_viewerZoomSlider = new Slider(0, 0, 1, 0, 0);
+        m_viewerZoomSlider->setVisible(false);
+
+        connect(m_viewerZoomSlider, SIGNAL(selected()), this, SLOT(exitCurrentUIState()));
+        connect(m_viewerZoomSlider, SIGNAL(valueChanged(int)), this, SLOT(setViewerZoom(int)));
+
+        QBoxLayout *sliderLayout = new QVBoxLayout;
+        sliderLayout->setMargin(style()->pixelMetric(QStyle::PM_ScrollBarExtent) * 2);
+        sliderLayout->addStretch();
+        sliderLayout->addWidget(m_viewerZoomSlider);
+
+        viewerLayout->addLayout(sliderLayout);
+
+        QSoftMenuBar::menuFor(m_viewerZoomSlider);
+
         image_viewer = new ImageViewer;
 
         image_viewer->setScaleMode( ImageViewer::ScaleToFit );
+        image_viewer->setLayout(viewerLayout);
 
         connect( image_viewer, SIGNAL(imageInvalidated()), this, SLOT(exitCurrentUIState()) );
+        connect(image_viewer, SIGNAL(imageChanged()), this, SLOT(viewerImageChanged()));
+
+        m_viewerWaitWidget = new QWaitWidget(this);
+        connect(image_viewer, SIGNAL(imageChanged()), m_viewerWaitWidget, SLOT(hide()));
 
         QMenu *viewer_menu = QSoftMenuBar::menuFor( image_viewer );
+
+        viewer_menu->addAction(
+                QIcon(":icon/slideshow"), tr("Slide Show..."), this, SLOT(launchSlideShowDialog()));
+        viewer_menu->addSeparator();
 
         viewer_edit_action = viewer_menu->addAction( QIcon( ":icon/edit" ), tr( "Edit" ), this, SLOT(editCurrentSelection()) );
         viewer_menu->addAction( QIcon( ":icon/info" ), tr( "Properties" ), this, SLOT(launchPropertiesDialog()) );
         viewer_menu->addAction( QIcon( ":icon/beam" ), tr( "Send" ), this, SLOT(beamImage()) );
         viewer_menu->addAction( QIcon( ":icon/print" ), tr( "Print" ), this, SLOT(printImage()) );
         viewer_menu->addAction( QIcon( ":icon/trash" ), tr( "Delete" ), this, SLOT(deleteImage()) );
+        viewer_menu->addSeparator();
+
+        if( !Qtopia::mousePreferred() ) {
+            QAction *fullScreenAction = viewer_menu->addAction(
+                    QIcon(":icon/fullscreen"), tr("Full Screen"), this, SLOT(enterFullScreen()));
+
+            connect(this, SIGNAL(fullScreenDisabled(bool)), fullScreenAction, SLOT(setVisible(bool)));
+        }
+
+        viewer_menu->addAction(QIcon(":/icon/view"), tr("Zoom"), this, SLOT(zoomViewer()));
 
         connect( viewer_menu, SIGNAL(aboutToShow()), this, SLOT(viewerMenuAboutToShow()) );
 
-        QSoftMenuBar::setLabel( image_viewer, Qt::Key_Select, QSoftMenuBar::NoLabel );
+        QSoftMenuBar::setLabel(image_viewer, Qt::Key_Select, QLatin1String(":icon/view"), tr("Zoom"));
 
-        widget_stack->addWidget( image_viewer );
+        QBoxLayout *layout = new QVBoxLayout;
+        layout->setMargin(0);
+        layout->setSpacing(0);
+        layout->addWidget(image_viewer);
+
+        m_imageWidget = new QWidget;
+        m_imageWidget->setLayout(layout);
+
+        widget_stack->addWidget(m_imageWidget);
     }
 
-    return image_viewer;
+    return m_imageWidget;
 }
 
 QWidget *PhotoEditUI::selectorWidget()
@@ -341,8 +396,7 @@ ImageUI *PhotoEditUI::imageEditor()
         editor_stack->addWidget( brightness_widget );
 
         // Construct zoom control
-        zoom_slider = new Slider( 100, 200, 10, 0, 0 );
-        zoom_slider->setSingleStep( 5 );
+        zoom_slider = new Slider( 0, 0, 1, 0, 0 );
 
         connect( zoom_slider, SIGNAL(selected()),
             this, SLOT(exitCurrentEditorState()) );
@@ -377,8 +431,11 @@ ImageUI *PhotoEditUI::imageEditor()
 
         if( !Qtopia::mousePreferred() ) {
             fullscreen_action = context_menu->addAction( QIcon( ":icon/fullscreen" ), tr( "Full Screen" ), this, SLOT(enterFullScreen()) );
+
+            connect(this, SIGNAL(fullScreenDisabled(bool)), fullscreen_action, SLOT(setVisible(bool)));
         }
         context_menu->addSeparator();
+        context_menu->addAction(QIcon(":icon/save"), tr("Save As..."), this, SLOT(saveImageAs()));
         context_menu->addAction( QIcon( ":icon/cancel" ), tr( "Cancel" ), this, SLOT(cancelEdit()) );
 
         widget_stack->addWidget(image_ui);
@@ -457,7 +514,7 @@ void PhotoEditUI::editImage( const QDSActionRequest& request )
     clearEditor();
     service_requested = true;
 
-    if( !navigation_stack.isEmpty() && navigation_stack.last() == image_viewer )
+    if( !navigation_stack.isEmpty() && navigation_stack.last() == m_imageWidget )
     {
         current_image = image_viewer->content();
         image_viewer->setContent( QContent() );
@@ -473,9 +530,11 @@ void PhotoEditUI::imageSelected( const QModelIndex &index )
 
 void PhotoEditUI::viewImage( const QContent &content )
 {
-    ImageViewer *viewer = imageViewer();
+    QWidget *viewer = imageViewer();
 
-    viewer->setContent( content );
+    m_viewerWaitWidget->show();
+
+    image_viewer->setContent(content);
 
     widget_stack->setCurrentWidget( viewer );
 
@@ -577,6 +636,94 @@ void PhotoEditUI::selectCategory()
     settings.setValue( QLatin1String( "Categories" ), category_filter.arguments( QContentFilter::Category ).join( QLatin1String( ";" ) ) );
 }
 
+
+void PhotoEditUI::zoomViewer()
+{
+    m_viewerZoomSlider->setVisible(true);
+
+    m_viewerZoomSlider->setEditFocus(true);
+}
+
+void PhotoEditUI::zoomViewerToScreenSize()
+{
+    QSize viewSize = image_viewer->size();
+    QSize desktopSize = QApplication::desktop()->availableGeometry(image_viewer).size();
+
+    viewSize = QSize(
+            qMin(viewSize.width(), desktopSize.width()),
+            qMin(viewSize.height(), desktopSize.height()));
+
+    QSize imageSize = image_viewer->imageSize();
+
+    int value = m_viewerZoomSlider->minimum();
+
+    for (; value < m_viewerZoomSlider->maximum()
+        && q_imageZoomScales[value] < 1.0
+        && q_imageZoomScales[value] * imageSize.width() < viewSize.width()
+        && q_imageZoomScales[value] * imageSize.height() < viewSize.height();
+        ++value);
+
+    m_viewerZoomSlider->setValue(value);
+
+    image_viewer->setScaleMode(ImageViewer::ScaleToFit);
+}
+
+void PhotoEditUI::setViewerZoom(int zoom)
+{
+    image_viewer->setScale(q_imageZoomScales[zoom], q_imageZoomScales[zoom]);
+}
+
+void PhotoEditUI::updateViewerZoomRange()
+{
+    QSize viewSize = image_viewer->size();
+    QSize desktopSize = QApplication::desktop()->size();
+
+    viewSize = QSize(
+            qMin(viewSize.width(), desktopSize.width()),
+            qMin(viewSize.height(), desktopSize.height()));
+
+    QSize imageSize = image_viewer->imageSize();
+
+    QPair<int, int> range = calculateZoomRange(imageSize, viewSize);
+
+    m_viewerZoomSlider->setRange(range.first, range.second);
+}
+
+QPair<int, int> PhotoEditUI::calculateZoomRange(const QSize &imageSize, const QSize &viewSize) const
+{
+    int minimum = 0;
+
+    for (; q_imageZoomScales[minimum] < 1.0
+        && q_imageZoomScales[minimum + 1] * imageSize.width() < viewSize.width()
+        && q_imageZoomScales[minimum + 1] * imageSize.height() < viewSize.height();
+        ++minimum);
+
+    int maximum = minimum;
+
+    for (; q_imageZoomScales[maximum] < 1.0; ++maximum);
+
+    for (; maximum + 1 < int(sizeof(q_imageZoomScales) / sizeof(qreal))
+        && q_imageZoomScales[maximum + 1] * imageSize.width() < 4096
+        && q_imageZoomScales[minimum + 1] * imageSize.height() < 4096;
+        ++maximum);
+
+    return qMakePair(minimum, maximum);
+}
+
+void PhotoEditUI::viewerImageChanged()
+{
+    updateViewerZoomRange();
+    zoomViewerToScreenSize();
+
+    QContent content = image_viewer->content();
+
+    if (content.isNull())
+        setWindowTitle(tr("Pictures"));
+    else
+        setWindowTitle(content.name());
+}
+
+
 void PhotoEditUI::viewerMenuAboutToShow()
 {
     viewer_edit_action->setEnabled( image_viewer->content().drmState() != QContent::Protected );
@@ -673,19 +820,30 @@ void PhotoEditUI::enterEditor()
             QSize size = image_io->size();
             QSize view = image_ui->size();
             disconnect( zoom_slider, SIGNAL(valueChanged(int)), this, SLOT(setZoom(int)) );
+
+            QPair<int, int> range = calculateZoomRange(size, view);
+
+            zoom_slider->setRange(range.first, range.second);
+
+            int value = zoom_slider->minimum();
+
+            for (; value < m_viewerZoomSlider->maximum()
+                && q_imageZoomScales[value] < 1.0
+                && q_imageZoomScales[value] * size.width() < view.width()
+                && q_imageZoomScales[value] * size.height() < view.height();
+                ++value);
+
+            zoom_slider->setValue(value);
+
             if( size.width() > view.width() || size.height() > view.height() ) {
                 double ratio = REDUCTION_RATIO( view.width(), view.height(), size.width(), size.height() );
                 ratio = LIMIT( ratio, 0.1, 1.0 );
                 image_processor->setZoom( ratio );
-                zoom_slider->setMaximum( 200 );
-                zoom_slider->setValue( (int) ( log( ratio * 100 ) / log( 10.0 ) * 100 ) );
             } else {
                 double ratio = REDUCTION_RATIO( view.width(), view.height(), size.width(), size.height() );
                 ratio = LIMIT( ratio, 1.0, 10.0 );
-                image_processor->setZoom( 1.0 );
-                zoom_slider->setMaximum( (int) ( log( ratio * 100 ) / log( 10.0 ) * 100 ) );
-                zoom_slider->setValue( 200 );
             }
+
             connect( zoom_slider, SIGNAL(valueChanged(int)), this, SLOT(setZoom(int)) );
             image_ui->reset();
             image_ui->setEnabled( true );
@@ -707,7 +865,7 @@ void PhotoEditUI::enterEditor()
             navigation_stack.removeLast();
             if( !navigation_stack.isEmpty() )
             {
-                if( navigation_stack.last() == image_viewer )
+                if( navigation_stack.last() == m_imageWidget )
                     image_viewer->setContent( current_image );
 
                 widget_stack->setCurrentWidget( navigation_stack.last() );
@@ -729,7 +887,7 @@ void PhotoEditUI::enterEditor()
             navigation_stack.removeLast();
             if( !navigation_stack.isEmpty() )
             {
-                if( navigation_stack.last() == image_viewer )
+                if( navigation_stack.last() == m_imageWidget )
                     image_viewer->setContent( current_image );
 
                 widget_stack->setCurrentWidget( navigation_stack.last() );
@@ -770,9 +928,18 @@ void PhotoEditUI::enterFullScreen()
 
     setWindowTitle( title );
 
-    fullscreen_action->setVisible( false );
+    emit fullScreenDisabled(false);
 
     is_fullscreen = true;
+}
+
+void PhotoEditUI::exitFullScreen()
+{
+    is_fullscreen = false;
+
+    emit fullScreenDisabled(true);
+
+    QTimer::singleShot(0, this, SLOT(showMaximized()));
 }
 
 void PhotoEditUI::setViewThumbnail()
@@ -794,7 +961,7 @@ void PhotoEditUI::setViewSingle()
     }
 
     // If image selector not in single, change to single and update context menu
-    widget_stack->setCurrentWidget( image_viewer );
+    widget_stack->setCurrentWidget( m_imageWidget );
 }
 
 void PhotoEditUI::launchSlideShowDialog()
@@ -833,7 +1000,7 @@ void PhotoEditUI::launchPropertiesDialog()
 {
     QContent image;
 
-    if( widget_stack->currentWidget() == image_viewer )
+    if( widget_stack->currentWidget() == m_imageWidget )
         image = image_viewer->content();
     else if( widget_stack->currentWidget() == selector_widget )
         image = qvariant_cast< QContent >( selector_view->currentIndex().data( Qt::UserRole + 1 ) );
@@ -851,67 +1018,57 @@ bool PhotoEditUI::exitCurrentUIState()
     if( navigation_stack.isEmpty() )
         return true;
 
-    navigation_stack.removeLast();
+    if (widget_stack->currentWidget() == m_imageWidget) {
+        if (m_viewerZoomSlider->isVisible()) {
+            m_viewerZoomSlider->setVisible(false);
+        } else {
+            image_viewer->setContent(QContent());
 
-    if( widget_stack->currentWidget() == image_ui )
-    {
-        if( service_requested ) {
-            if( !edit_canceled ) {
-                sendValueSupplied();
-            }
-            setWindowState( windowState() | Qt::WindowMinimized );
-        } else if( !edit_canceled ) {
-            saveChanges();
+            navigation_stack.removeLast();
         }
-        edit_canceled = false;
+    } else {
+        navigation_stack.removeLast();
 
-        if( !navigation_stack.isEmpty() && navigation_stack.last() == image_viewer )
-            image_viewer->setContent( current_image );
-    }
-    else if( widget_stack->currentWidget() == image_viewer )
-    {
-        image_viewer->setContent( QContent() );
-    }
-    else if( widget_stack->currentWidget() == slide_show_ui )
-    {
-        QtopiaApplication::setPowerConstraint( QtopiaApplication::Enable );
+        if (widget_stack->currentWidget() == image_ui) {
+            if (service_requested) {
+                if (!edit_canceled) {
+                    sendValueSupplied();
+                }
+                setWindowState(windowState() | Qt::WindowMinimized);
+            } else if (!edit_canceled) {
+                saveChanges();
+            }
+            edit_canceled = false;
+
+            if (!navigation_stack.isEmpty() && navigation_stack.last() == m_imageWidget)
+                image_viewer->setContent(current_image);
+        } else if( widget_stack->currentWidget() == slide_show_ui ) {
+            QtopiaApplication::setPowerConstraint( QtopiaApplication::Enable );
+        }
     }
 
-    if( !navigation_stack.isEmpty() )
-    {
-        widget_stack->setCurrentWidget( navigation_stack.last() );
+    if (!navigation_stack.isEmpty()) {
+        widget_stack->setCurrentWidget(navigation_stack.last());
 
         return false;
-    }
-    else
-    {
+    } else {
         return true;
     }
 }
 
 void PhotoEditUI::exitCurrentEditorState()
 {
-    if( editor_stack->currentWidget() == navigator ) {
-        // If in full screen, return from full screen
-        if( is_fullscreen ) {
-            is_fullscreen = false;
-            fullscreen_action->setVisible( true );
-
-            QTimer::singleShot( 0, this, SLOT(showMaximized()) );
-        // If in view, no change
-        }
-    } else {
-        if( editor_stack->currentWidget() == region_selector ) {
+    if (editor_stack->currentWidget() != navigator) {
+        if (editor_stack->currentWidget() == region_selector)
             region_selector->update();
-        }
 
-        editor_stack->setCurrentWidget( navigator );
+        editor_stack->setCurrentWidget(navigator);
     }
 }
 
 void PhotoEditUI::setZoom( int x )
 {
-    image_processor->setZoom( pow( 10.0, (double)x / 100.0 ) / 100.0 );
+    image_processor->setZoom(q_imageZoomScales[x]);
 }
 
 void PhotoEditUI::setBrightness( int x )
@@ -921,7 +1078,7 @@ void PhotoEditUI::setBrightness( int x )
 
 void PhotoEditUI::editCurrentSelection()
 {
-    if( widget_stack->currentWidget() == image_viewer )
+    if( widget_stack->currentWidget() == m_imageWidget )
     {
         current_image = image_viewer->content();
 
@@ -949,6 +1106,26 @@ void PhotoEditUI::cancelEdit()
     }
 }
 
+void PhotoEditUI::saveImageAs()
+{
+    QContent content;
+    content.setName(current_image.name());
+    content.setType(image_io->saveType());
+    content.setMedia(current_image.media());
+    content.setCategories(current_image.categories());
+
+    QDocumentPropertiesDialog properties(content, this);
+
+    if (QtopiaApplication::execDialog(&properties)) {
+        content = properties.document();
+
+        if (saveImage(image_processor->image(), &content))
+            image_processor->setCheckpoint();
+        else
+            content.removeFiles();
+    }
+}
+
 void PhotoEditUI::cropImage()
 {
     // Ensure cropping region is valid
@@ -968,7 +1145,7 @@ void PhotoEditUI::beamImage()
     // Send current image over IR link
     QContent image;
 
-    if( widget_stack->currentWidget() == image_viewer )
+    if( widget_stack->currentWidget() == m_imageWidget )
         image = image_viewer->content();
     else if( widget_stack->currentWidget() == selector_widget )
         image = qvariant_cast< QContent >( selector_view->currentIndex().data( Qt::UserRole + 1 ) );
@@ -982,7 +1159,7 @@ void PhotoEditUI::printImage()
 {
     QContent image;
 
-    if( widget_stack->currentWidget() == image_viewer )
+    if( widget_stack->currentWidget() == m_imageWidget )
         image = image_viewer->content();
     else if( widget_stack->currentWidget() == selector_widget )
         image = qvariant_cast< QContent >( selector_view->currentIndex().data( Qt::UserRole + 1 ) );
@@ -1000,7 +1177,7 @@ void PhotoEditUI::deleteImage()
     // Retrieve currently highlighted image from selector
     QContent image;
 
-    if( widget_stack->currentWidget() == image_viewer )
+    if( widget_stack->currentWidget() == m_imageWidget )
         image = image_viewer->content();
     else if( widget_stack->currentWidget() == selector_widget )
         image = qvariant_cast< QContent >( selector_view->currentIndex().data( Qt::UserRole + 1 ) );
@@ -1020,7 +1197,7 @@ void PhotoEditUI::deleteImage()
     if( mb.exec() == QMessageBox::Yes ) {
         image.removeFiles();
 
-        if ( widget_stack->currentWidget() == image_viewer && exitCurrentUIState() ) {
+        if ( widget_stack->currentWidget() == m_imageWidget && exitCurrentUIState() ) {
             close();
         }
     }
@@ -1029,7 +1206,7 @@ void PhotoEditUI::deleteImage()
 void PhotoEditUI::contentChanged( const QContentIdList &idList, const QContent::ChangeType type )
 {
     // If content is current image and has been deleted, show selector
-    if ( QContent::Removed == type && widget_stack->currentWidget() == image_viewer && idList.contains(current_image.id()) ) {
+    if ( QContent::Removed == type && widget_stack->currentWidget() == m_imageWidget && idList.contains(current_image.id()) ) {
         navigation_stack.removeLast();
         if( !navigation_stack.isEmpty() )
             widget_stack->setCurrentWidget( navigation_stack.last() );
@@ -1070,51 +1247,66 @@ void PhotoEditUI::rowsInserted( const QModelIndex &parent, int start, int end )
 
 void PhotoEditUI::keyPressEvent( QKeyEvent *e )
 {
-    if( e->key() == Qt::Key_Back )
-    {
-        if( widget_stack->currentWidget() == image_ui && editor_stack->currentWidget() != navigator || is_fullscreen )
-        {
+    switch (e->key()) {
+    case Qt::Key_Back:
+        if (widget_stack->currentWidget() == image_ui
+            && editor_stack->currentWidget() != navigator) {
             exitCurrentEditorState();
-        }
-        else if( exitCurrentUIState() )
-        {
+
+            e->accept();
+        } else if (is_fullscreen) {
+            exitFullScreen();
+
+            e->accept();
+        } else if (exitCurrentUIState()) {
             close();
-        }
-        e->accept();
-    }
-    else if( e->key() == Qt::Key_Select && widget_stack->currentWidget() == image_ui && editor_stack->currentWidget() == navigator )
-    {
-        enterZoom();
-
-        e->accept();
-    }
-    else if( selector_view && widget_stack->currentWidget() == image_viewer && (
-             e->key() == Qt::Key_Left  ||
-             e->key() == Qt::Key_Right ||
-             e->key() == Qt::Key_Up    ||
-             e->key() == Qt::Key_Down ) )
-    {
-        QModelIndex nextIndex;
-        QModelIndex currentIndex = selector_view->currentIndex();
-
-        if( e->key() == (QApplication::keyboardInputDirection() == Qt::LeftToRight ? Qt::Key_Left : Qt::Key_Right) ||
-            e->key() == Qt::Key_Down )
-            nextIndex = currentIndex.sibling( currentIndex.row() + 1, currentIndex.column() );
-        else
-            nextIndex = currentIndex.sibling( currentIndex.row() - 1, currentIndex.column() );
-
-        if( nextIndex.isValid() )
-        {
-            selector_view->setCurrentIndex( nextIndex );
-            selector_view->scrollTo( nextIndex );
-
-            image_viewer->setContent( qvariant_cast< QContent >( nextIndex.data( Qt::UserRole + 1 ) ) );
 
             e->accept();
         }
-    }
-    else
+        break;
+    case Qt::Key_Select:
+        if (widget_stack->currentWidget() == image_ui && editor_stack->currentWidget() == navigator) {
+            enterZoom();
+
+            e->accept();
+        } else if (widget_stack->currentWidget() == m_imageWidget) {
+            zoomViewer();
+
+            e->accept();
+        }
+        break;
+    case Qt::Key_Left:
+    case Qt::Key_Right:
+    case Qt::Key_Up:
+    case Qt::Key_Down:
+        if (!e->isAutoRepeat() && selector_view && widget_stack->currentWidget() == m_imageWidget) {
+            QModelIndex nextIndex;
+            QModelIndex currentIndex = selector_view->currentIndex();
+
+            const int nextKey = QApplication::keyboardInputDirection() == Qt::LeftToRight
+                    ? Qt::Key_Left
+                    : Qt::Key_Right;
+
+            if (e->key() == nextKey || e->key() == Qt::Key_Down)
+                nextIndex = currentIndex.sibling(currentIndex.row() + 1, currentIndex.column());
+            else
+                nextIndex = currentIndex.sibling(currentIndex.row() - 1, currentIndex.column());
+
+            if (nextIndex.isValid()) {
+                selector_view->setCurrentIndex(nextIndex);
+                selector_view->scrollTo(nextIndex);
+
+                m_viewerWaitWidget->show();
+
+                image_viewer->setContent(qvariant_cast<QContent>(nextIndex.data(Qt::UserRole + 1)));
+
+                e->accept();
+            }
+        }
+        break;
+    default:
         QWidget::keyPressEvent( e );
+    }
 }
 
 void PhotoEditUI::clearEditor()
@@ -1128,77 +1320,61 @@ void PhotoEditUI::clearEditor()
 void PhotoEditUI::saveChanges()
 {
     // If image was changed, prompt user to save changes
-    if( image_processor->isChanged() && current_image.drmState() == QContent::Unprotected ) {
-        // If save supported, prompt user to overwrite original
-        // Otherwise, save as new file
-        bool overwrite = false;
-        if( image_io->isSaveSupported() ) {
-            if ( image_io->isReadOnly() ) {
+    if (image_processor->isChanged()) {
+        QMessageBox mb(
+                QMessageBox::Question,
+                tr("Save Changes "),
+                tr("<qt>Do you want to save your changes?</qt>"),
+                QMessageBox::Yes | QMessageBox::No);
+        mb.setEscapeButton(QMessageBox::Discard);
+
+        if (mb.exec() == QMessageBox::Yes) {
+            if (image_io->isReadOnly()) {
                 QMessageBox mb(
                         QMessageBox::Information,
                         tr("Read-Only File"),
                         tr("<qt>Saving a copy of the read-only file.</qt>"),
                         QMessageBox::Ok);
                 mb.setEscapeButton(QMessageBox::Ok);
-
                 mb.exec();
-            } else {
+
+                saveImageAs();
+            } else if (!image_io->isSaveSupported()) {
+                QByteArray format = image_io->format();
+
                 QMessageBox mb(
-                    QMessageBox::Question,
-                        tr("Save Changes "),
-                        tr("<qt>Do you want to overwrite the original?</qt>"),
-                        QMessageBox::Yes | QMessageBox::No | QMessageBox::Discard);
+                        QMessageBox::Warning,
+                        tr( "Saving %1" ).arg(format.constData()),
+                        tr("<qt>Saving as %1 is not supported. Using the default format instead.</qt>"),
+                        QMessageBox::Ok);
+                mb.setEscapeButton(QMessageBox::Ok);
+                mb.exec();
 
-                mb.setEscapeButton(QMessageBox::Discard);
-
-                switch(mb.exec()) {
-                case QMessageBox::Yes:
-                    overwrite = true;
-                    break;
-                case QMessageBox::Discard:
-                    return;
-                }
-            }
-        } else {
-            QByteArray format = image_io->format();
-
-            QMessageBox mb(
-                    QMessageBox::Warning,
-                    tr( "Saving %1" ).arg(format.constData()),
-                    tr("<qt>Saving as %1 is not supported. Using the default format instead.</qt>"),
-                    QMessageBox::Ok);
-
-            mb.setEscapeButton(QMessageBox::Ok);
-            mb.exec();
-        }
-
-        QImage image = image_processor->image();
-        // Attempt to save changes
-
-        QContent content = image_io->save( image, overwrite );
-
-        if ( content.isNull() ) {
-            QMessageBox mb(
-                    QMessageBox::Warning,
-                    tr("Save failed"),
-                    tr("<qt>Your edits were not saved.</qt>"),
-                    QMessageBox::Ok);
-
-            mb.setEscapeButton(QMessageBox::Ok);
-            mb.exec();
-        } else {
-            current_image = content;
-
-            if ( !overwrite ) {
-                QDocumentPropertiesDialog *properties = new QDocumentPropertiesDialog( current_image, this );
-
-                if ( QtopiaApplication::execDialog( properties ) ) {
-                    current_image = properties->document();
-                }
-
-                delete properties;
+                saveImageAs();
+            } else {
+                // Attempt to save changes
+                saveImage(image_processor->image(), &current_image);
             }
         }
+    }
+}
+
+bool PhotoEditUI::saveImage(const QImage &image, QContent *content)
+{
+    if (image_io->save(image, content)) {
+        current_image = *content;
+
+        return true;
+    } else {
+        QMessageBox mb(
+                QMessageBox::Warning,
+                tr("Save failed"),
+                tr("<qt>Your edits were not saved.</qt>"),
+                QMessageBox::Ok);
+        mb.setEscapeButton(QMessageBox::Ok);
+        mb.exec();
+
+        return false;
     }
 }
 

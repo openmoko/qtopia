@@ -33,6 +33,8 @@
 #ifndef QTOPIA_CONTENT_INSTALLER
 #include <QDSServiceInfo>
 #include <QDSAction>
+#include <qtopiasqlmigrateplugin_p.h>
+#include <QPluginManager>
 #endif
 #include <unistd.h>
 #include <QTextCodec>
@@ -96,11 +98,28 @@
 void QtopiaSql::openDatabase()
 {
     if (!d()->defaultConn) {
+
         d()->defaultConn = connectDatabase(QLatin1String(QSqlDatabase::defaultConnection));
         init(*d()->defaultConn);
         d()->masterAttachedConns[0] = *d()->defaultConn;
         d()->dbs[QThread::currentThreadId()].insert(0, *d()->defaultConn);
-        d()->disksChanged();
+
+#ifndef QTOPIA_CONTENT_INSTALLER
+        if (QApplication::type() == QApplication::GuiServer) {
+            QPluginManager manager(QLatin1String("qtopiasqlmigrate"));
+
+            if (QtopiaSqlMigratePlugin *plugin = qobject_cast<QtopiaSqlMigratePlugin *>(
+                manager.instance(QLatin1String("dbmigrate")))) {
+                plugin->migrate(d()->defaultConn);
+
+                d()->disksChanged(plugin);
+            }
+        } else {
+#else
+        {
+#endif
+            d()->disksChanged();
+        }
     }
 }
 
@@ -493,6 +512,28 @@ QString QtopiaSql::escapeString(const QString &input)
 */
 void QtopiaSql::attachDB(const QString& path, const QString& dbPath)
 {
+#ifndef QTOPIA_CONTENT_INSTALLER
+    if (QApplication::type() == QApplication::GuiServer) {
+        QPluginManager manager(QLatin1String("qtopiasqlmigrate"));
+
+        if (QtopiaSqlMigratePlugin *plugin = qobject_cast<QtopiaSqlMigratePlugin *>(
+            manager.instance(QLatin1String("dbmigrate")))) {
+            attachDB(path, dbPath, plugin);
+        }
+    } else {
+#else
+    {
+#endif
+        attachDB(path, dbPath, 0);
+    }
+}
+
+void QtopiaSql::attachDB(const QString& path, const QString& dbPath, QtopiaSqlMigratePlugin *plugin)
+{
+#ifdef QTOPIA_CONTENT_INSTALLER
+    Q_UNUSED(plugin);
+#endif
+
     qLog(Sql) << "Attaching database for path" << path << "with the db located at" << dbPath;
     QMutexLocker guard(&d()->guardMutex);
     // add database to default connections list.
@@ -501,38 +542,6 @@ void QtopiaSql::attachDB(const QString& path, const QString& dbPath)
     QtopiaDatabaseId dbid = databaseIdForDatabasePath(dbPath);
     if(dbid != quint32(-1) && !isValidDatabaseId(dbid))
     {
-#ifndef QTOPIA_CONTENT_INSTALLER
-
-#if defined(Q_WS_QWS)
-        const QFileSystem *fs = qt_fbdpy ? QStorageMetaInfo::instance()->fileSystemOf( path ) : 0;
-#elif defined(Q_WS_X11)
-        const QFileSystem *fs = QX11Info::display() ? QStorageMetaInfo::instance()->fileSystemOf( path ) : 0;
-#endif
-        // ensure the database has the correct definition
-        if ( qApp->type() == QApplication::GuiServer && fs && fs->isRemovable() )
-        {
-            static QMutex mutex;
-            QMutexLocker lock(&mutex);
-            qLog(Sql) << QDateTime::currentDateTime () << "before doMigrate service call";
-            QDSServiceInfo service( "doMigrate", "DBMigrationEngine" );
-            QDSAction action( service );
-            QDSData request(dbPath, QMimeType::fromId("text/x-dbm-qstring"));
-            int rcode = action.exec(request);
-            if ( /*rcode != QDSAction::Complete && */rcode != QDSAction::CompleteData) {
-                qWarning() << QDateTime::currentDateTime () << "Couldn't use QDS service doMigrate from DBMigrationEngine, not attaching database"  << dbPath << "\nError:" << action.errorMessage();
-                qLog(Sql) << "doMigrate: Error =" << action.errorMessage();
-                return;
-            }
-            qLog(Sql) << QDateTime::currentDateTime () << "after service call";
-            QString result=action.responseData().data();
-            qLog(Sql) << "doMigrate: action.responseData().data() =" << result;
-            if(result != "Y") {
-                qWarning() << "QDS service doMigrate from DBMigrationEngine failed, not attaching database" << dbPath;
-                return;
-            }
-        }
-#endif
-
         if (!d()->dbs.contains(QThread::currentThreadId())) {
             QObject::connect(QThread::currentThread(), SIGNAL(finished()), d(), SLOT(threadTerminated()), Qt::DirectConnection);
             QObject::connect(QThread::currentThread(), SIGNAL(terminated()), d(), SLOT(threadTerminated()), Qt::DirectConnection);
@@ -552,6 +561,13 @@ void QtopiaSql::attachDB(const QString& path, const QString& dbPath)
             return;
         }
 
+#ifndef QTOPIA_CONTENT_INSTALLER
+        if (plugin && !plugin->migrate(&db)) {
+            db.close();
+
+            return;
+        }
+#endif
         d()->installSorting(db);
         QSqlQuery xsql( db );
         xsql.exec(QLatin1String("PRAGMA synchronous = OFF"));   // full/normal sync is safer, but by god slower.
@@ -704,10 +720,10 @@ QtopiaDatabaseId QtopiaSql::databaseIdForPath(const QString& path)
 QtopiaDatabaseId QtopiaSql::databaseIdForDatabasePath(const QString& dbPath)
 {
     openDatabase();
-    if(database(0).databaseName() == QDir::cleanPath(dbPath))
+    if(database(0).databaseName() == dbPath)
         return 0;
     else
-        return qHash(QDir::cleanPath(dbPath));
+        return qHash(dbPath);
 }
 
 /*!
@@ -813,26 +829,17 @@ QSqlDatabase QtopiaSql::applicationSpecificDatabase(const QString &appname)
 /*!
   Ensure that the given table \a tableName exists in the database \a db
 
-  Internally this invokes the "DBMigrationEngine" service to run any migrations
-  or schema updates required.
-
   Return true if the operation was successful; otherwise returns false
 */
 bool QtopiaSql::ensureTableExists(const QString &tableName, QSqlDatabase &db )
 {
 #ifndef QTOPIA_CONTENT_INSTALLER
-    loadConfig();
-    static QMutex mutex;
-    QMutexLocker lock(&mutex);
-    if(db.tables().contains(tableName))
+    if (db.tables().contains(tableName))
         return true;
-    qLog(Sql) << QDateTime::currentDateTime () << "before ensureTableExists service call";
-    QDSServiceInfo service( "ensureTableExists", "DBMigrationEngine" );
-    QDSAction action( service );
-    QDSData request(tableName, QMimeType::fromId("text/x-dbm-qstring"));
+
     QFile data(QLatin1String(":/QtopiaSql/") + db.driverName() + QLatin1String("/") + tableName);
-    if (!data.open(QIODevice::ReadOnly))
-    {
+
+    if (!data.open(QIODevice::ReadOnly)) {
         qLog(Sql) << "QtopiaSql::ensureTableExists: resource" << tableName << "not found";
         return false;
     }
@@ -842,32 +849,35 @@ bool QtopiaSql::ensureTableExists(const QString &tableName, QSqlDatabase &db )
     ts.setCodec(QTextCodec::codecForName("utf8"));
     ts.setAutoDetectUnicode(true);
 
-    QStringList script;
-    script << db.driverName();
-    script << db.databaseName();
-    script << db.userName();
-    script << db.password();
-    script << db.hostName();
-    script << ts.readAll().split("\n");
+    QString qry;
+    while (!ts.atEnd()) {
+        /*
+        Simplistic parsing.
+        no comments in middle of line
+        no starting another sql statment on same line one ends.
 
-    db.close();
-    int rcode = action.exec(request, script.join("\n").toUtf8());
-    if ( rcode != QDSAction::CompleteData) {
-        qWarning() << QDateTime::currentDateTime () << "Couldn't use QDS service ensureTableExists from DBMigrationEngine\nError:" << action.errorMessage();
-        qLog(Sql) << "ensureTableExists: Error =" << action.errorMessage();
-        db.open();
-        return false;
+        For now, shouldn't be a problem.
+        */
+
+        QString line = ts.readLine();
+        // comment, remove.
+        if (line.contains(QLatin1String("--")))
+            line.truncate(line.indexOf (QLatin1String("--")));
+        if (line.trimmed().length () == 0)
+            continue;
+        qry += line;
+
+        if (line.contains(QLatin1Char(';'))) {
+            if (!QSqlQuery(db).exec(qry))
+                return false;
+
+            qry = QString();
+        } else { // no ;, query spans to next line, keep going.
+            qry += QLatin1Char(' ');
+        }
     }
-    qLog(Sql) << QDateTime::currentDateTime () << "after service call";
-    QString result=action.responseData().data();
-    qLog(Sql) << "ensureTableExists: action.responseData().data() =" << result;
-    if(result != "Y") {
-        qWarning() << "QDS service ensureTableExists from DBMigrationEngine failed";
-        db.open();
-        return false;
-    }
-    db.open();
-    return true;
+
+    return qry.isEmpty() || QSqlQuery(db).exec(qry);
 #else
     Q_UNUSED(tableName);
     Q_UNUSED(db);
@@ -883,12 +893,10 @@ bool QtopiaSql::ensureTableExists(const QString &tableName, QSqlDatabase &db )
 */
 bool QtopiaSql::ensureTableExists(const QStringList &tableNames, QSqlDatabase&db )
 {
-
-    foreach(const QString table, tableNames)
-    {
-        if(ensureTableExists(table, db) == false)
+    foreach (const QString table, tableNames)
+        if (ensureTableExists(table, db))
             return false;
-    }
+
     return true;
 }
 

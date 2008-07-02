@@ -207,6 +207,16 @@
 <tr valign="top" class="even"><td><tt>&lt;ci&gt;</tt></td><td>String type, indicating the two byte cell ID in hexadecimal format.</td></tr>
 </table></p>
 <p>Conforms with: 3GPP TS 27.007.</p>
+<p><b>AT+CTFR Call Deflection</b></p>
+<p>The <tt>AT+CTFR</tt> command causes an incoming alerting call to be forwarded to a specific number.</p>
+<p>Call Deflection is only available to Teleservice 11.</p>
+<p><table align="center" cellpadding="2" cellspacing="1" border="0">
+<thead><tr valign="top" class="qt-style"><th>Command</th><th>Possible Responses</th></tr></thead>
+<tr valign="top" class="odd"><td><tt>AT+CTFR=&lt;number&gt;[,&lt;type&gt;[,&lt;subaddr&gt;[,&lt;satype&gt;]]]</tt></td><td><tt>+CME ERROR: &lt;err&gt;</tt></td></tr>
+<tr valign="top" class="even"><td><tt>AT+CTFR=?</tt></td><td></td></tr>
+</table></p>
+<p>The <tt>&lt;type&gt;</tt>,<tt>&lt;subaddr&gt;</tt> and <tt>&lt;satype&gt;</tt> parameters are ignored in this implementation. The <tt>&lt;number&gt;</tt> parameter is a string type phone number.</p>
+<p>Conforms with: 3GPP TS 27.007.</p>
 <p><table width="100%" class="annotated" cellpadding="2" cellspacing="1" border="0">
 </table></p>
 <p>

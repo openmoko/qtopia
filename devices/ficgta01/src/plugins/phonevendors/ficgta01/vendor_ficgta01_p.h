@@ -93,6 +93,9 @@ protected:
 
 private slots:
     void cstatNotification( const QString& msg );
+
+private:
+    QModemService *service;
 };
 
 class Ficgta01PinManager : public QModemPinManager
@@ -149,6 +152,9 @@ private slots:
     void suspend();
     void wake();
     void sendSuspendDone();
+    void mcsqOff();
+    void mcsqOn();
+    
 };
 
 class  Ficgta01VibrateAccessory : public QVibrateAccessoryProvider

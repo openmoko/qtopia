@@ -21,9 +21,7 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include <qtopialog.h>
-#include "trace.h"
-
+#include <trace.h>
 #include <QTextBrowser>
 extern QTextBrowser *qdsync_tb;
 #define USERLOG(x)\

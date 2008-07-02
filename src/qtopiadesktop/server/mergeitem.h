@@ -44,7 +44,7 @@ public:
         DataOnly,
     };
 
-    MergeItem(const QSyncMerge *);
+    MergeItem(QSyncMerge *);
     ~MergeItem();
 
     /* future intent
@@ -59,19 +59,21 @@ public:
        without changing the API
        */
     QByteArray write(ChangeSource) const;
-    void read(const QByteArray &,ChangeSource);
+    bool read(const QByteArray &,ChangeSource);
 
     void restrictTo(const MergeItem &);
 
     QString serverIdentifier() const;
     QString clientIdentifier() const;
 
+    QString dump() const;
+
     // may need to do mappings....
 private:
     // attempt for now is to disable copying.  Can implement later
     MergeItem(const MergeItem &) {}
     MergeElement *rootElement;
-    const QSyncMerge *mMerge; // for id mapping.
+    QSyncMerge *mMerge; // for id mapping.
 
     void writeElement(QXmlStreamWriter &, MergeElement *item, ChangeSource) const;
 };

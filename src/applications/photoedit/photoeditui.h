@@ -44,6 +44,7 @@ class ThumbnailContentSetModel;
 class ImageViewer;
 class QListView;
 class QContentFilterDialog;
+class QWaitWidget;
 
 class PhotoEditUI : public QWidget
 {
@@ -58,6 +59,9 @@ public:
 public slots:
     // Open image for editing
     void setDocument( const QString& lnk );
+
+signals:
+    void fullScreenDisabled(bool enabled);
 
 private slots:
     // Respond to service request
@@ -80,6 +84,7 @@ private slots:
 
     // Show editor view in full screen
     void enterFullScreen();
+    void exitFullScreen();
 
     // Change to single view in image selector
     void setViewSingle();
@@ -112,6 +117,8 @@ private slots:
     // Ignore changes to image and exit from editor
     void cancelEdit();
 
+    void saveImageAs();
+
     // Perform crop on current image using region from region selector
     void cropImage();
 
@@ -141,6 +148,12 @@ private slots:
 
     void selectCategory();
 
+    void zoomViewer();
+    void zoomViewerToScreenSize();
+    void setViewerZoom(int zoom);
+
+    void viewerImageChanged();
+
     void viewerMenuAboutToShow();
     void selectorMenuAboutToShow();
 
@@ -153,15 +166,18 @@ protected:
     bool event( QEvent *event );
 private:
 
-    ImageViewer *imageViewer();
+    QWidget *imageViewer();
     QWidget *selectorWidget();
     ImageUI *imageEditor();
 
+    void updateViewerZoomRange();
+    QPair<int, int> calculateZoomRange(const QSize &imageSize, const QSize &viewSize) const;
     // Hide editor controls, clear and show editor
     void clearEditor();
 
     // Prompt user to save changes to image if image was modified
     void saveChanges();
+    bool saveImage(const QImage &image, QContent *content);
 
     // Send modified image back in qcop message
     void sendValueSupplied();
@@ -192,6 +208,8 @@ private:
     QContentSet *image_set;
     ThumbnailContentSetModel *image_model;
 
+    QSlider *m_viewerZoomSlider;
+
     RegionSelector *region_selector;
     Navigator *navigator;
     QSlider *brightness_slider, *zoom_slider;
@@ -219,6 +237,9 @@ private:
     QDSActionRequest* currEditImageRequest;
 
     int list_init_timer_id;
+
+    QWidget *m_imageWidget;
+    QWaitWidget *m_viewerWaitWidget;
 };
 
 class PhotoEditService : public QtopiaAbstractService

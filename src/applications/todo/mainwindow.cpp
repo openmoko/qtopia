@@ -228,8 +228,9 @@ QString TodoView::createTaskText(const QTask &task)
                 }
             }
 
+            // XXX Fix I18N for 4.4
             if ( ev.frequency() > 1 )
-                word = tr("every %2 weeks on %1", "eg. every 2 weeks on: Monday, Wednesday").arg(ev.frequency());
+                word = tr("every %2 weeks on %1", "eg. every 2 weeks on: Monday, Wednesday");
             else
                 word = tr("every week on %1", "e.g. every week on: Monday, Thursday");
 
@@ -252,6 +253,9 @@ QString TodoView::createTaskText(const QTask &task)
             }
 
             word = word.arg(repStr);
+
+            if (ev.frequency() > 1)
+                word = word.arg(ev.frequency());
         }
         else if ( ev.repeatRule() == QAppointment::MonthlyDate ||
                 ev.repeatRule() == QAppointment::MonthlyDay ||

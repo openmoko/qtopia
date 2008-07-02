@@ -55,15 +55,16 @@
 <tr valign="top" class="even"><td><tt>Icon</tt></td><td>Specifies the icon to be found in /opt/Qtopia/pics. Endings are auto-detected.<p>This is equivalent to the <a href="qcontent.html#iconName">QContent::iconName</a>() property.</p>
 </td><td>No</td></tr>
 <tr valign="top" class="odd"><td><tt>Comment[]</tt></td><td>Specifies a comment describing the launcher entry.</td><td>No</td></tr>
-<tr valign="top" class="even"><td><tt>MimeType</tt></td><td>Specifies a semi-colon separated list of MIME types an application can open. Note if there are multiple items in the list it must be enclosed in double quotes.<p>This is equivalent to the <a href="qcontent.html#mimeTypes">QContent::mimeTypes</a>() property.</p>
+<tr valign="top" class="even"><td><tt>MimeType</tt></td><td>Specifies a comma separated list of MIME types an application can open.<p>This is equivalent to the <a href="qcontent.html#mimeTypes">QContent::mimeTypes</a>() property.</p>
 <p>See <a href="docwidget.html">Qtopia - Main Document Widget</a> for more information on associating MIME types with an application.</p>
 </td><td>No</td></tr>
-<tr valign="top" class="odd"><td><tt>MimeTypeIcons</tt></td><td>Specifies a semi-colon separated list of icons for documents of the types in the <tt>MimeType</tt> list. There should be an icon in this list for each type in the <tt>MimeType</tt> list.<p>This is equivalent to the <a href="qcontent.html#mimeTypeIcons">QContent::mimeTypeIcons</a>() property.</p>
-</td></tr>
-<tr valign="top" class="even"><td><tt>Categories</tt></td><td>Specifies categories to add the launcher entry to in addition to the one specified in the installation path. Categories should be listed as a semi-colon separated list of category IDs.</td><td>No</td><td>No</td></tr>
+<tr valign="top" class="odd"><td><tt>MimeTypeIcons</tt></td><td>Specifies a comma separated list of icons for documents of the types in the <tt>MimeType</tt> list. There should be an icon in this list for each type in the <tt>MimeType</tt> list.<p>This is equivalent to the <a href="qcontent.html#mimeTypeIcons">QContent::mimeTypeIcons</a>() property.</p>
+</td><td>No</td></tr>
+<tr valign="top" class="even"><td><tt>Categories</tt></td><td>Specifies categories to add the launcher entry to in addition to the one specified in the installation path. Categories should be listed as a comma separated list of category IDs.</td><td>No</td></tr>
 <tr valign="top" class="odd"><td><tt>CanFastLoad</tt></td><td>Indicates whether the application can be fast loaded.</td><td>No</td></tr>
 <tr valign="top" class="even"><td><tt>Builtin</tt></td><td>Indicates the application is a built-in application.</td><td>No</td></tr>
 </table></p>
+<p><b>Note</b>: Lists may by semi-colon separated instead of comma separated, however semi-colon separated lists must be enclosed in double quotes otherwise the first semi-colon will be interpreted as a comment character and everything following it will be discarded.</p>
 <a name="translation"></a>
 <h3>Translation</h3>
 <p>The <tt>[Translation]</tt> group identifies where translation data for the .desktop file can be loaded from.</p>
@@ -78,7 +79,7 @@
 <p>The <tt>[DRM]</tt> group contains additional information required for DRM enabled applications.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Parameter</th><th>Description</th></tr></thead>
-<tr valign="top" class="odd"><td><tt>MimeTypePermissions</tt></td><td>Contains a semi-colon separated list of permissions that must be verified before asking the application to open a document. There should be one permission for each MIME type in the <tt>MimeType</tt> parameter.</td></tr>
+<tr valign="top" class="odd"><td><tt>MimeTypePermissions</tt></td><td>Contains a comma separated list of permissions that must be verified before asking the application to open a document. There should be one permission for each MIME type in the <tt>MimeType</tt> parameter.</td></tr>
 </table></p>
 <p>See also <a href="docsys-drmintegr.html">Document System: DRM Integration</a></p>
 <a name="other-groups"></a>

@@ -18,6 +18,7 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+
 #ifndef __SETTINGSDISPLAY_H__
 #define __SETTINGSDISPLAY_H__
 
@@ -25,15 +26,14 @@
 #include <QBluetoothLocalDevice>
 #include <QCommDeviceController>
 
-namespace Ui {
-    class Settings;
-};
-
 class LocalServicesDialog;
-class QBluetoothLocalDevice;
 class QAction;
 class QEvent;
 class QPhoneProfileManager;
+class QGroupBox;
+class QCheckBox;
+class QSpinBox;
+class QLineEdit;
 
 class SettingsDisplay : public QWidget
 {
@@ -46,6 +46,7 @@ private slots:
     bool eventFilter(QObject *watched, QEvent *event);
     void toggleLocalPowerState(bool enable);
     void toggleLocalVisibility(bool visible);
+    void nameChanged(const QString &name);
     void nameEditingFinished();
     void timeoutEditingFinished();
 
@@ -61,15 +62,17 @@ private slots:
 private:
     int getTimeout();
     void setInteractive(bool interactive);
-    void initDisplayedValues();
-    void initActions();
 
-    Ui::Settings *m_ui;
     QBluetoothLocalDevice *m_local;
     QCommDeviceController *m_deviceController;
     QPhoneProfileManager *m_phoneProfileMgr;
-
     LocalServicesDialog *m_localServicesDialog;
+
+    QGroupBox *m_optionsGroupBox;
+    QCheckBox *m_powerCheckBox;
+    QCheckBox *m_visibilityCheckBox;
+    QSpinBox  *m_timeoutSpinBox;
+    QLineEdit *m_nameEdit;
 
     QAction *m_servicesAction;
     QAction *m_detailsAction;

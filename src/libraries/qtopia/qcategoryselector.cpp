@@ -1135,9 +1135,11 @@ void QCategorySelector::selectCategories(const QString &categoryids)
 void QCategorySelector::selectCategories(const QStringList &categoryids)
 {
     QStringList appliedCategories;
-    if (categoryids.count() == 0)
-        return selectUnfiled();
-    else if ((d->flags & SingleSelection) != 0)
+    if (categoryids.count() == 0) {
+        selectUnfiled();
+        emit categoriesSelected(selectedCategories());
+        return;
+    } else if ((d->flags & SingleSelection) != 0)
         appliedCategories.append(categoryids[0]);
     else
         appliedCategories = categoryids;

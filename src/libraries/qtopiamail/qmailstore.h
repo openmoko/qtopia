@@ -46,7 +46,7 @@ static QMailStore* QMailStoreInstance();
 
 class QTOPIAMAIL_EXPORT QMailStore : public QObject
 {
-    Q_OBJECT 
+    Q_OBJECT
 
 public:
     enum ReturnOption
@@ -90,13 +90,13 @@ public:
 
     QMailMessage messageHeader(const QMailId& id) const;
     QMailMessage messageHeader(const QString& uid, const QString& account) const;
-    QMailMessageList messageHeaders(const QMailMessageKey& key, 
+    QMailMessageList messageHeaders(const QMailMessageKey& key,
                                     const QMailMessageKey::Properties& properties,
                                     const ReturnOption& option = ReturnAll) const;
 
     static QMailStore* instance();
-#ifdef QMAILSTOREINSTANCE_DEFINED_HERE	
-    friend QMailStore* QMailStoreInstance();    
+#ifdef QMAILSTOREINSTANCE_DEFINED_HERE
+    friend QMailStore* QMailStoreInstance();
 #endif
 
 signals:
@@ -109,7 +109,7 @@ signals:
 
 private:
     QMailStore();
-				
+
     friend class EmailFolderList;
     friend class EmailClient;
 

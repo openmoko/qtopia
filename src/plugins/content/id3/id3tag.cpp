@@ -28,6 +28,8 @@
 */
 Id3Tag::Id3Tag( QIODevice *device )
     : stream( device )
+    , isSyncSafe(false)
+    , isNotSyncSafe(false)
 {
     stream.setByteOrder( QDataStream::BigEndian );
 
@@ -91,6 +93,9 @@ Id3Frame *Id3Tag::readFrame( quint64 position )
 
     Id3Frame::Header frameHeader = Id3Frame::readHeader( stream, header.version );
 
+    if (isSyncSafe)
+        frameHeader.size = convertSyncSafeInteger(frameHeader.size);
+
     QByteArray data = stream.device()->read( frameHeader.size );
 
     return new Id3Frame( frameHeader, data, header.majorVersion, unsynchroniseFrames );
@@ -117,20 +122,64 @@ void Id3Tag::readExtendedHeaders()
 
 void Id3Tag::readFrameHeaders()
 {
-    while( stream.device()->pos() < offset + header.size )
-    {
+    for (;;) {
         qint64 pos = stream.device()->pos();
 
-        Id3Frame::Header frameHeader = Id3Frame::readHeader( stream, header.version );
+        Id3Frame::Header frameHeader = Id3Frame::readHeader(stream, header.version);
 
-        if( frameHeader.id == 0 )
+        if (!isValidFrame(frameHeader)) {
+            return;
+        } else if (isSyncSafe) {
+            frameHeader.size = convertSyncSafeInteger(frameHeader.size);
+        } else if (!isNotSyncSafe && header.majorVersion == 4 && frameHeader.size >= 0x80) {
+            if ((isSyncSafe = stream.device()->pos() + frameHeader.size > offset + header.size)) {
+                frameHeader.size = convertSyncSafeInteger(frameHeader.size);
+            } else if (!(isNotSyncSafe = frameHeader.size & 0x80808080)) {
+                Id3Frame::Header lastHeader = frameHeader;
+                qint64 lastPos = pos;
+
+                quint32 syncSafeSize = convertSyncSafeInteger(frameHeader.size);
+
+                stream.device()->seek(stream.device()->pos() + syncSafeSize);
+
+                pos = stream.device()->pos();
+
+                frameHeader = Id3Frame::readHeader(stream, header.version);
+
+                if ((isSyncSafe = isValidFrame(frameHeader))) {
+                    lastHeader.size = syncSafeSize;
+                    frameHeader.size = convertSyncSafeInteger(frameHeader.size);
+                } else {
+                    stream.device()->seek(
+                            stream.device()->pos() + lastHeader.size - 10 - syncSafeSize);
+
+                    pos = stream.device()->pos();
+
+                    frameHeader = Id3Frame::readHeader(stream, header.version);
+
+                    isNotSyncSafe = isValidFrame(frameHeader);
+                }
+
+                frames.append(QPair<quint32, qint64>(lastHeader.id, lastPos));
+            }
+        }
+
+        frames.append(QPair<quint32, qint64>(frameHeader.id, pos));
+
+        if (stream.device()->pos() + frameHeader.size >= offset + header.size)
             return;
 
-        frames.append( QPair< quint32, qint64 >( frameHeader.id, pos ) );
-
-        stream.device()->seek( stream.device()->pos() + frameHeader.size );
-
+        stream.device()->seek(stream.device()->pos() + frameHeader.size);
     }
+}
+
+bool Id3Tag::isValidFrame(const Id3Frame::Header &header) const
+{
+    return header.size != 0
+            && (header.idBytes[0] >= '0' && header.idBytes[0] <= 'Z' || header.idBytes[0] == '\0')
+            && (header.idBytes[1] >= '0' && header.idBytes[1] <= 'Z')
+            && (header.idBytes[2] >= '0' && header.idBytes[2] <= 'Z')
+            && (header.idBytes[3] >= '0' && header.idBytes[3] <= 'Z' || header.idBytes[3] == '\0');
 }
 
 quint32 Id3Tag::convertSyncSafeInteger( quint32 syncSafe )

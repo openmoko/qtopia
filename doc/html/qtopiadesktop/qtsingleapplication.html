@@ -107,15 +107,15 @@
 <p>Once this QtSingleApplication instance is destroyed(for example, when the user quits), when the user next attempts to run the application this instance will not, of course, be encountered.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QtSingleApplication"></a>QtSingleApplication::QtSingleApplication ( const <a href="../qstring.html">QString</a> &amp; <i>id</i>, int &amp; <i>argc</i>, char ** <i>argv</i>, <a href="../qapplication.html#type-enum">Type</a> <i>type</i> = GuiClient )</h3>
+<h3 class="fn"><a name="QtSingleApplication"></a>QtSingleApplication::QtSingleApplication ( const <a href="../qstring.html">QString</a> &amp; <i>id</i>, int &amp; <i>argc</i>, char ** <i>argv</i>, <a href="../qapplication.html#Type-enum">Type</a> <i>type</i> = GuiClient )</h3>
 <p>Creates a <a href="qtsingleapplication.html">QtSingleApplication</a> object with the identifier <i>id</i>. <i>argc</i>, <i>argv</i> and <i>type</i> are passed on to the QAppliation constructor.</p>
 <p>There can only be one <a href="qtsingleapplication.html">QtSingleApplication</a> object(and since there can only be one <a href="../qapplication.html">QApplication</a> object you do not need to create another <a href="../qapplication.html">QApplication</a> object yourself).</p>
-<p><b>Warning:</b> On X11 type can not be <a href="../qapplication.html#type-enum">QApplication::Tty</a>.</p>
+<p><b>Warning:</b> On X11 type can not be <a href="../qapplication.html#Type-enum">QApplication::Tty</a>.</p>
 <h3 class="fn"><a name="dtor.QtSingleApplication"></a>QtSingleApplication::~QtSingleApplication ()</h3>
 <p>Destroys the object, freeing all allocated resources.</p>
 <p>If the same application is started again it will not find this instance.</p>
 <h3 class="fn"><a name="activateMainWidget"></a>void QtSingleApplication::activateMainWidget ()&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
-<p>Calls <a href="../qwidget.html#setActiveWindow">QWidget::setActiveWindow</a>() on this application's <a href="../qapplication.html#mainWidget">mainWidget</a>(). This function does nothing if no main widget has been set.</p>
+<p>Calls <a href="../qwidget-qt3.html#setActiveWindow">QWidget::setActiveWindow</a>() on this application's <a href="../qapplication-qt3.html#mainWidget">mainWidget</a>(). This function does nothing if no main widget has been set.</p>
 <p>This slot is typically connected to the <a href="qtsingleapplication.html#messageReceived">messageReceived</a>() signal.</p>
 <p>See also <a href="qtsingleapplication.html#messageReceived">messageReceived</a>().</p>
 <h3 class="fn"><a name="id"></a><a href="../qstring.html">QString</a> QtSingleApplication::id () const</h3>

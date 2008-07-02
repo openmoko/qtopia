@@ -68,8 +68,7 @@ public:
     int matchingItemCount;
 };
 
-#ifdef DEBUG_MERGE
-QString dumpItems(const QList<MergeElement*> &items)
+static QString dumpItems(const QList<MergeElement*> &items)
 {
     QString ret = "\n";
     QTextStream stream(&ret);
@@ -83,6 +82,7 @@ QString dumpItems(const QList<MergeElement*> &items)
     }
     return ret;
 }
+#ifdef DEBUG_MERGE
 #define RETURN_REASON(ret,reason) {qDebug() << "returning" << ret << "because:" << #reason << "(" << left->reason << "vs" << right->reason << ")"; return ret;}
 #else
 #define RETURN_REASON(ret,reason) return ret;
@@ -186,7 +186,7 @@ void MergeElement::finalize()
     }
 }
 
-MergeItem::MergeItem(const QSyncMerge *parent)
+MergeItem::MergeItem(QSyncMerge *parent)
     : rootElement(0), mMerge(parent)
 {
 }
@@ -206,7 +206,6 @@ QByteArray MergeItem::write(ChangeSource source) const
     writer.setAutoFormatting(true);
 
     writeElement(writer, rootElement, source);
-    //qDebug() << "written" << QString::fromUtf8(result);
     return result;
 }
 
@@ -268,12 +267,24 @@ void MergeItem::writeElement(QXmlStreamWriter &writer, MergeElement *item, Chang
     }
 }
 
-void MergeItem::read(const QByteArray &data, ChangeSource source)
+#define CHECK_CURRENTELEMENT()\
+do {\
+    if (rootElement && !currentElement) {\
+        qWarning() << "BUG! currentElement is null while reading token" << reader.tokenString() << __FILE__ << __LINE__;\
+        return false;\
+    }\
+} while ( 0 )
+
+bool MergeItem::read(const QByteArray &data, ChangeSource source)
 {
     if (rootElement) {
         delete rootElement;
         rootElement = 0;
     }
+    // shortcut, it's a "valid", empty XML document (but if we let it go through the parser it'll raise an error)
+    if ( data.isEmpty() )
+        return true;
+
     MergeElement *currentElement = 0;
 
     QXmlStreamReader reader(data);
@@ -292,6 +303,7 @@ void MergeItem::read(const QByteArray &data, ChangeSource source)
             case QXmlStreamReader::DTD:
                 break;
             case QXmlStreamReader::StartElement:
+                CHECK_CURRENTELEMENT();
                 MergeElement *e;
                 if (reader.qualifiedName() == "Identifier")
                     e = new MergeIdentifierElement;
@@ -311,6 +323,7 @@ void MergeItem::read(const QByteArray &data, ChangeSource source)
 
                 break;
             case QXmlStreamReader::EndElement:
+                CHECK_CURRENTELEMENT();
                 // assumption, properly formed xml item, only one root
                 // element.  Hence if parent is 0, its an error.
                 // of course crashing isn't acceptable...
@@ -336,15 +349,19 @@ void MergeItem::read(const QByteArray &data, ChangeSource source)
 
                 currentElement->finalize();
                 currentElement = currentElement->parent;
-                if (!currentElement)
-                    return;
                 break;
             case QXmlStreamReader::Characters:
+                CHECK_CURRENTELEMENT();
                 if (!reader.isWhitespace())
-                    currentElement->text = reader.text().toString();
+                    currentElement->text += reader.text().toString();
                 break;
         }
     }
+    if (reader.hasError()) {
+        qWarning() << "BUG! XML read error: " << reader.errorString() << __FILE__ << __LINE__ << endl << data;
+        return false;
+    }
+    return true;
 }
 
 QString MergeItem::serverIdentifier() const
@@ -388,8 +405,10 @@ QString MergeItem::clientIdentifier() const
 */
 void MergeItem::restrictTo(const MergeItem &reference)
 {
-    if (!rootElement)
+    if (!rootElement) {
+        qWarning() << "BUG! No rootElement when restricting to reference" << __FILE__ << __LINE__ << endl << reference.dump();
         return;
+    }
 
     MergeElement *item, *referenceItem, *referenceRoot;
     QMutableListIterator<MergeElement *> it(rootElement->items);
@@ -424,3 +443,10 @@ void MergeItem::restrictTo(const MergeItem &reference)
         }
     }
 }
+
+QString MergeItem::dump() const
+{
+    Q_ASSERT(rootElement);
+    return dumpItems(QList<MergeElement*>() << rootElement);
+}
+

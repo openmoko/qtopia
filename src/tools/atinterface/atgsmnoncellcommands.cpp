@@ -1892,12 +1892,12 @@ void AtGsmNonCellCommands::atcmee( const QString& params )
     \row \o \c{AT+CMER=[<mode>[,<keyp>[,<disp>[,<ind>[,<bfr>]]]]]}
          \o \list \o \c{OK} \o \c{+CME ERROR: 3} \endlist
     \row \o \c{AT+CMER?} \o \c{+CMER: 1,0,0,<ind>,0}
-    \row \o \c{AT+CMER=?} \o \c{+CMER: (1),(0),(0),(0-2),(0)}
+    \row \o \c{AT+CMER=?} \o \c{+CMER: (1,3),(0),(0),(0-2),(0)}
     \endtable
 
     Set command enables or disables unsolicited result codes for
     indicators.  This implementation does not support the other event
-    types and \c{<mode>} must always be 1.
+    types and \c{<mode>} must be 1 or 3, which are treated as identical.
 
     \table
     \row \o \c{<ind>}
@@ -1924,7 +1924,8 @@ void AtGsmNonCellCommands::atcmer( const QString& params )
 
         case AtParseUtils::Get:
         {
-            atc->send( "+CMER: 1,0,0," +
+            atc->send( "+CMER: " +
+                  QString::number( atc->options()->cmer ) + ",0,0," +
                   QString::number( atc->options()->cind ) + ",0" );
             atc->done();
         }
@@ -1939,10 +1940,12 @@ void AtGsmNonCellCommands::atcmer( const QString& params )
             while ( posn < (uint)(params.length()) ) {
                 value = (int)(QAtUtils::parseNumber( params, posn ));
                 if ( index == 0 ) {
-                    if ( value != 1 ) {
+                    // We treat modes 1 and 3 as identical for now.
+                    if ( value != 1 && value != 3 ) {
                         atc->done( QAtResult::OperationNotAllowed );
                         return;
                     }
+                    atc->options()->cmer = value;
                 } else if ( index == 1 || index == 2 || index == 4 ) {
                     if ( value != 0 ) {
                         atc->done( QAtResult::OperationNotAllowed );
@@ -1968,7 +1971,7 @@ void AtGsmNonCellCommands::atcmer( const QString& params )
 
         case AtParseUtils::Support:
         {
-            atc->send( "+CMER: (1),(0),(0),(0-2),(0)" );
+            atc->send( "+CMER: (1,3),(0),(0),(0-2),(0)" );
             atc->done();
         }
         break;
@@ -3852,7 +3855,7 @@ void AtGsmNonCellCommands::atcsvm( const QString& params )
 }
 
 /*!
-    /ingroup ModemEmulator::Network
+    \ingroup ModemEmulator::Network
     \bold{AT+CTFR Call Deflection}
     \compat
 

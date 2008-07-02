@@ -18,16 +18,16 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
-#ifdef QTOPIA_DESKTOP
-#include <qdlinkhelper.h>
 #include <trace.h>
 QD_LOG_OPTION(QDLinkHelper)
+
+#ifdef QTOPIA_DESKTOP
+#include <qdlinkhelper.h>
 #include <desktopsettings.h>
 #include <qdplugin.h>
 #include <qdthread.h>
 #else
 #include "qdlinkhelper.h"
-#include "log.h"
 #include "qdthread.h"
 QD_EXPORT bool qdsync_send_200;
 #endif
@@ -38,6 +38,7 @@ QD_EXPORT bool qdsync_send_200;
 #include <QTimer>
 #include <QTextStream>
 #include <QBuffer>
+#include <QVariant>
 
 // =====================================================================
 

@@ -41,6 +41,7 @@ public:
     {
         TRACE(OutlookSyncPlugin) << "OutlookAddressbookSync::isValidObject";
         Outlook::_ContactItemPtr item( dispatch );
+        LOG() << "The item class is" << dump_item_class(item->GetClass()) << "expecting" << dump_item_class(Outlook::olContact);
         return ( item->GetClass() == Outlook::olContact );
     }
 
@@ -57,7 +58,7 @@ public:
         lastModified = date_to_qdatetime(item->GetLastModificationTime());
     }
 
-    void dump_item( IDispatchPtr dispatch, QTextStream &stream )
+    void dump_item( IDispatchPtr dispatch, QXmlStreamWriter &stream )
     {
         TRACE(OutlookSyncPlugin) << "OutlookAddressbookSync::dump_item";
         Q_ASSERT( dispatch );
@@ -67,7 +68,7 @@ public:
 
         PREPARE_MAPI(Contact);
 
-        stream << "<Contact>\n";
+        stream.writeStartElement("Contact");
         DUMP_STRING(Identifier,EntryID);
         DUMP_STRING(NameTitle,Title);
         DUMP_STRING_ATTRIB(FirstName,FirstName,pronunciation,bstr_to_qstring(item->GetYomiFirstName()));
@@ -88,28 +89,32 @@ public:
         DUMP_DATE(Birthday,Birthday);
         DUMP_DATE(Anniversary,Anniversary);
         DUMP_MAPI(Notes,Body);
-        stream << "<Gender>";
+        stream.writeStartElement("Gender");
         DUMP_ENUM(Gender,Gender,Outlook::olUnspecified,UnspecifiedGender);
         DUMP_ENUM(Gender,Gender,Outlook::olMale,Male);
         DUMP_ENUM(Gender,Gender,Outlook::olFemale,Female);
-        stream << "</Gender>\n";
-        stream << "<Addresses maxItems=\"2\">\n";
-        stream << "<Address type=\"Home\">\n";
+        stream.writeEndElement();
+        stream.writeStartElement("Addresses");
+        stream.writeAttribute("maxItems", "2");
+        stream.writeStartElement("Address");
+        stream.writeAttribute("type", "Home");
         DUMP_STRING(Street,HomeAddressStreet);
         DUMP_STRING(City,HomeAddressCity);
         DUMP_STRING(State,HomeAddressState);
         DUMP_STRING(Zip,HomeAddressPostalCode);
         DUMP_STRING(Country,HomeAddressCountry);
-        stream << "</Address>\n";
-        stream << "<Address type=\"Business\">\n";
+        stream.writeEndElement();
+        stream.writeStartElement("Address");
+        stream.writeAttribute("type", "Business");
         DUMP_STRING(Street,BusinessAddressStreet);
         DUMP_STRING(City,BusinessAddressCity);
         DUMP_STRING(State,BusinessAddressState);
         DUMP_STRING(Zip,BusinessAddressPostalCode);
         DUMP_STRING(Country,BusinessAddressCountry);
-        stream << "</Address>\n";
-        stream << "</Addresses>\n";
-        stream << "<PhoneNumbers maxItems=\"7\">\n";
+        stream.writeEndElement();
+        stream.writeEndElement();
+        stream.writeStartElement("PhoneNumbers");
+        stream.writeAttribute("maxItems", "7");
         DUMP_STRING_ATTRIB(Number,HomeTelephoneNumber,type,"HomePhone");
         DUMP_STRING_ATTRIB(Number,Home2TelephoneNumber,type,"HomeMobile");
         DUMP_STRING_ATTRIB(Number,HomeFaxNumber,type,"HomeFax");
@@ -117,17 +122,18 @@ public:
         DUMP_STRING_ATTRIB(Number,MobileTelephoneNumber,type,"BusinessMobile");
         DUMP_STRING_ATTRIB(Number,BusinessFaxNumber,type,"BusinessFax");
         DUMP_STRING_ATTRIB(Number,PagerNumber,type,"BusinessPager");
-        stream << "</PhoneNumbers>\n";
-        stream << "<EmailAddresses maxItems=\"3\">\n";
+        stream.writeEndElement();
+        stream.writeStartElement("EmailAddresses");
+        stream.writeAttribute("maxItems", "3");
         DUMP_MAPI(Email,Email1Address);
         DUMP_MAPI(Email,Email2Address);
         DUMP_MAPI(Email,Email3Address);
-        stream << "</EmailAddresses>\n";
-        stream << "<Categories>\n";
+        stream.writeEndElement();
+        stream.writeStartElement("Categories");
         foreach ( const QString &category, bstr_to_qstring(item->GetCategories()).split(", ", QString::SkipEmptyParts) )
             DUMP_EXPR(Category,category);
-        stream << "</Categories>\n";
-        stream << "</Contact>\n";
+        stream.writeEndElement();
+        stream.writeEndElement();
     }
 
     QString read_item( IDispatchPtr dispatch, const QByteArray &record )
@@ -165,11 +171,10 @@ public:
                         state = Categories;
                     break;
                 case QXmlStreamReader::Characters:
-                    value = unescape(reader.text().toString());
+                    value += reader.text().toString();
                     break;
                 case QXmlStreamReader::EndElement:
                     key = reader.qualifiedName().toString();
-                    //LOG() << "key" << key << "value" << value;
                     READ_STRING(NameTitle,Title);
                     READ_STRING_ATTRIB(FirstName,FirstName,pronunciation,YomiFirstName);
                     READ_STRING(MiddleName,MiddleName);

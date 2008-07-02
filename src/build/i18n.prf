@@ -145,9 +145,11 @@ for(it,INSTALLS) {
         commands+=\
             mkdir -p $(INSTALL_ROOT)$$resdir/i18n/$$lang
         for(pkg,EXTRA_TS_FILES) {
-            commands+=$$LINE_SEP\
+            exists($$QTOPIA_DEPOT_PATH/i18n/$$lang/$${pkg}.ts):commands+=$$LINE_SEP\
                 $$fixpath($$DQTDIR/bin/lrelease) $$fixpath($$QTOPIA_DEPOT_PATH/i18n/$$lang/$${pkg}.ts) \
                     -qm $$fixpath($(INSTALL_ROOT)$$resdir/i18n/$$lang/$${pkg}.qm)
+            else:commands+=$$LINE_SEP\
+                echo "WARNING: $$QTOPIA_DEPOT_PATH/i18n/$$lang/$${pkg}.ts is missing and cannot be installed."
         }
     }
     extra_ts_files.commands=$$commands

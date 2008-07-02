@@ -556,7 +556,12 @@ void RingControl::stopRing( )
     if (d->curAlertType != QPhoneProfile::Off)
     {
 #ifdef MEDIA_SERVER
-        if(d->soundcontrol) d->soundcontrol->sound()->stop();
+        if(d->soundcontrol) {
+            d->soundcontrol->sound()->stop();
+            delete d->soundcontrol->sound();
+            delete d->soundcontrol;
+            d->soundcontrol = 0;
+        }
 #elif defined(Q_WS_QWS)
         if (d->soundclient) d->soundclient->stop(0);
 #endif

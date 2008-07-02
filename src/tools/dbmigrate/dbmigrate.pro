@@ -1,9 +1,9 @@
-qtopia_project(qtopia app)
+qtopia_project(qtopia plugin)
 TARGET=dbmigrate
-CONFIG+=no_tr singleexec_main
+plugin_type = qtopiasqlmigrate
+CONFIG+=no_tr
 
 SOURCES	= \
-    main.cpp \
     migrateengine.cpp\
     qtopiapim/pimmigrate.cpp\
     qtopiaphone/phonemigrate.cpp

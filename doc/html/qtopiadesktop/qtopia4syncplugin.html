@@ -89,6 +89,7 @@
 <p>Returns the dataset that this plugin handles.</p>
 <h3 class="fn"><a name="fetchChangesSince"></a>void Qtopia4SyncPlugin::fetchChangesSince ( const <a href="../qdatetime.html">QDateTime</a> &amp; <i>timestamp</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Fetch changes since <i>timestamp</i>. Data and progress should be reported by emitting signals. This funtion can return before the fetching is completed.</p>
+<p><b>Note</b> that <i>timestamp</i> is in UTC time.</p>
 <p>See also <a href="qtopia4syncplugin.html#createClientRecord">createClientRecord</a>(), <a href="qtopia4syncplugin.html#replaceClientRecord">replaceClientRecord</a>(), <a href="qtopia4syncplugin.html#removeClientRecord">removeClientRecord</a>(), and <a href="qtopia4syncplugin.html#clientChangesCompleted">clientChangesCompleted</a>().</p>
 <h3 class="fn"><a name="mappedId"></a>void Qtopia4SyncPlugin::mappedId ( const <a href="../qstring.html">QString</a> &amp; <i>serverId</i>, const <a href="../qstring.html">QString</a> &amp; <i>clientId</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emit this signal in response to <a href="qtopia4syncplugin.html#createServerRecord">createServerRecord</a>(). It maps server id <i>serverId</i> to client id <i>clientId</i>.</p>

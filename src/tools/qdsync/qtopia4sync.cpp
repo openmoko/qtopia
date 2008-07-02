@@ -19,7 +19,8 @@
 **
 ****************************************************************************/
 #include "qtopia4sync.h"
-#include "trace.h"
+#include <trace.h>
+QD_LOG_OPTION(Qtopia4Sync)
 #include <qtopianamespace.h>
 #include <QDateTime>
 #include <QTimeZone>
@@ -109,6 +110,8 @@ Qtopia4SyncPlugin::~Qtopia4SyncPlugin()
   \fn void Qtopia4SyncPlugin::fetchChangesSince(const QDateTime &timestamp)
   Fetch changes since \a timestamp. Data and progress should be reported by emitting signals.
   This funtion can return before the fetching is completed.
+
+  \bold Note that \a timestamp is in UTC time.
   \sa createClientRecord(), replaceClientRecord(), removeClientRecord(), clientChangesCompleted()
 */
 

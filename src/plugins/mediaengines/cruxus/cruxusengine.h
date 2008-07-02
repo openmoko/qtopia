@@ -29,6 +29,7 @@
 
 class QMediaSessionRequest;
 class QMediaServerSession;
+class SimpleSession;
 
 namespace cruxus
 {
@@ -59,6 +60,7 @@ public:
     void unregisterSession(QMediaServerSession* session);
 
 private:
+    QList<SimpleSession*>   s;
     CruxusEnginePrivate*    d;
 };
 

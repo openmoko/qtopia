@@ -109,11 +109,8 @@
 <ul><li><a href="#styles">Styles</a></li>
 <li><a href="#theming">Theming</a></li>
 <li><a href="#server-widgets">Server widgets</a></li>
-<li><a href="#home-screen-widgets-unknown">Home screen widgets (unknown)</a></li>
 </ul>
-<li><a href="#media-server-integration-unknown">Media server integration (unknown)</a></li>
 <li><a href="#web-browser-integration">Web Browser integration</a></li>
-<li><a href="#java-integration-unknown">Java integration (unknown)</a></li>
 </ul>
 </ul>
 <a name="introduction"></a>
@@ -244,7 +241,7 @@
 <li>CONFIG_NLS_*</li>
 </ul>
 </td></tr>
-<tr valign="top" class="even"><td>Audio Playback and Recording</td><td>Qtopia can be configured to process sound either with or without the Media Server integration. For details on Media Server integration is see <a href="#media-server-integration-unknown">Media server integration (unknown)</a>.<p>The Linux kernel provides two sets of sound drivers, the Open Sound System (OSS) and the Advanced Linux Sound Architecture (ALSA). Qtopia supports both sets of drivers when built without Media Server integration. Generally only one set of drivers will be used at a time. Check the documentation on the Media Server for it's requirements if Media Server integration is being used.</p>
+<tr valign="top" class="even"><td>Audio Playback and Recording</td><td>Qtopia can be configured to process sound either with or without the Media Server integration.<p>The Linux kernel provides two sets of sound drivers, the Open Sound System (OSS) and the Advanced Linux Sound Architecture (ALSA). Qtopia supports both sets of drivers when built without Media Server integration. Generally only one set of drivers will be used at a time. Check the documentation on the Media Server for it's requirements if Media Server integration is being used.</p>
 <p>The Linux kernel must be configured with the following options to enable OSS based audio playback and recording</p>
 <ul>
 <li>CONFIG_SOUND</li>
@@ -298,7 +295,7 @@
 <tr valign="top" class="odd"><td><tt>/var</tt></td><td>variable data</td></tr>
 </table></p>
 <p>More information is available on the Linux filesystem at <a href="http://www.pathname.com/fhs/">Filesystem Hierarchy Standard</a></p>
-<p>Qtopia has it's own file system hierarchy, which is usually mounted at <i>/opt/Qtopia</i></p>
+<p>Qtopia has it's own file system hierarchy, which is usually mounted at <i>/opt/Qtopia</i>. For more details see the Qtopia <a href="files.html">File System Standards</a>.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Directory</th><th>Usage</th></tr></thead>
 <tr valign="top" class="odd"><td><tt>/bin</tt></td><td>Qtopia binaries.</td></tr>
@@ -376,12 +373,12 @@
 <li>Bluez-utils</li>
 <li>Bluez-firmware</li>
 <li>Bluez-hcidump</li>
-<li>OpenObex</li>
+<li><a href="legal-openobex.html">OpenObex</a></li>
 <li>expat</li>
 </ul>
 </td></tr>
 <tr valign="top" class="odd"><td>Irda</td><td><ul>
-<li>OpenObex</li>
+<li><a href="legal-openobex.html">OpenObex</a></li>
 </ul>
 </td></tr>
 <tr valign="top" class="even"><td>Media Player</td><td><ul>
@@ -396,7 +393,7 @@
 </ul>
 </td></tr>
 <tr valign="top" class="even"><td>Messages</td><td><ul>
-<li><a href="./3rdparty.html">SQlite</a></li>
+<li><a href="legal-sqlite.html">SQlite</a></li>
 <li>WAP</li>
 </ul>
 </td></tr>
@@ -406,7 +403,7 @@
 </ul>
 </td></tr>
 <tr valign="top" class="even"><td>PIM</td><td><ul>
-<li><a href="./3rdparty.html">SQlite</a></li>
+<li><a href="legal-sqlite.html">SQlite</a></li>
 <li>zoneinfo</li>
 </ul>
 </td></tr>
@@ -432,7 +429,7 @@
 <tr valign="top" class="even"><td>D-Bus</td><td>1.0&#x2e;2</td><td>Message Bus system / Inter process communication <a href="http://www.freedesktop.org/wiki/Software/dbus">D-Bus</a></td><td>dbus</td><td></td></tr>
 <tr valign="top" class="odd"><td>DHCP</td><td></td><td>DHCP server</td><td>Networking</td><td></td></tr>
 <tr valign="top" class="even"><td>Helix</td><td></td><td><a href="http://www.helixcommunity.org/">Helix Multimedia Engine</a></td><td>Media Player</td><td><a href="syscust-mediaplayer.html">Helix Integration</a></td></tr>
-<tr valign="top" class="odd"><td>OpenObex</td><td></td><td><a href="http://dev.zuckschwerdt.org/openobex/">Object Exchange protocol</a></td><td><a href="bluetooth.html">bluetooth</a>, Irda</td><td></td></tr>
+<tr valign="top" class="odd"><td><a href="legal-openobex.html">OpenObex</a></td><td></td><td><a href="http://dev.zuckschwerdt.org/openobex/">Object Exchange protocol</a></td><td><a href="bluetooth.html">bluetooth</a>, Irda</td><td></td></tr>
 <tr valign="top" class="even"><td>PPP</td><td></td><td>Point to Point Protocol</td><td>Networking</td><td></td></tr>
 <tr valign="top" class="odd"><td>TSLib</td><td>1.0</td><td><a href="http://tslib.berlios.de/">Touchscreen Library</a></td><td>TSLib plugin</td><td><a href="syscust-pointer.html">Mouse Pointer Handling</a></td></tr>
 <tr valign="top" class="even"><td>WAP</td><td></td><td>Integrator-provided component</td><td>MMS</td><td></td></tr>
@@ -519,6 +516,7 @@
     -no-drm
     -no-sxe
     -prefix /opt/Qtopia
+    -no-dbus
     -no-bluetooth
     -no-infrared
     -iconsize 22
@@ -532,7 +530,10 @@
     -extra-qtopiacore-config &quot;-no-accessibility&quot;
     -release
     -silent
-    -no-samples</pre>
+    -no-samples
+    -no-test
+    -extra-qt-config '-no-accessibility -system-sqlite -no-qt3support -no-openssl -no-nis -no-cups -no-iconv -no-qdbus -no-opengl -no-glib'
+    -extra-qtopiacore-config '-no-accessibility -no-openssl -no-nis -no-cups -no-iconv -no-opengl -no-glib'</pre>
 <p>Qtopia maintains two sets of configure options. The first set is related to Qtopia's configure script and the second set is related to Qt's configure script.</p>
 <ul>
 <li><a href="buildsystem/over-configure-options-1.html">Qtopia configure options</a></li>
@@ -1011,6 +1012,7 @@
 <h4>VoIP integration</h4>
 <p>Qtopia's main telephony components are based on GSM/UMTS networks. However many other communication bearers require similar if not even identicial infrastructure support. Therefore new bearers can easily be integrated into Qtopia's telephony API. In fact Qtopia's higher API layers are almost agnostic in regards to the actual communication protocol.</p>
 <p>One additional communication bearer that is directly supported by Qtopia is Voice over IP (VoIP). The <a href="voip-overview.html">VoIP Overview</a> describes the main VoIP components used by Qtopia's reference implementation and demonstrates how they interact with Qtopia's phone user interface. The reference implementation uses the open source library <tt>libdissipate2</tt> which provides simple SIP functionality.</p>
+<p><b>Note:</b> Currently due to licensing inconsistencies <tt>libdissipate2</tt> cannot be shipped with Qtopia.</p>
 <p>If the hardware platform already features its own SIP implementation Qtopia's VoIP implementation can easily be replaced as described by Qtopia's general <a href="syscust-voip.html">VoIP Integration</a> guide. It describes the necessary steps to integrate new SIP clients as well as new telephony services in general.</p>
 <a name="phone-keypad"></a>
 <h3>Phone keypad</h3>
@@ -1161,21 +1163,14 @@
 <tr valign="top" class="odd"><td><a href="qabstractmessagebox.html">QAbstractMessageBox</a></td><td>This abstract server widget is Qtopia Phone specific and provides an interface for message boxes. This allows the easy replacement of message boxes. The <a href="phonemessagebox.html">PhoneMessageBox</a> class implements Qtopia's default message box.</td></tr>
 </table></p>
 <p>The main benefits of server widgets are their flexibility and configurability. Large UI parts can be exchanged against alternative implementations by changing a confguration file. However unlike themes the Qtopia server must be restarted in order to update the user interface. Besides the default implementations Qtopia ships with a couple of sample server widgets which demonstrate the possibilities. The server widget settings application (see <tt>$QPEDIR/src/settings/serverwidgets</tt>) is a reference application that allows the user to change the server appearance using server widgets.</p>
-<a name="home-screen-widgets-unknown"></a>
-<h4>Home screen widgets (unknown)</h4>
-<a name="media-server-integration-unknown"></a>
-<h3>Media server integration (unknown)</h3>
 <a name="web-browser-integration"></a>
 <h3>Web Browser integration</h3>
 <p>Any web browser integrated with Qtopia should respond to the <a href="webaccessservice.html">WebAccess service</a>. The web browser should invoke Qtopia services to fullfil external application needs, including:</p>
 <ol type="1">
-<li>Messages::composeMessage(QMailMessage) - for &quot;mailto:&quot; URLs.</li>
-<li>Dialer::dial(QString,QString) - for &quot;tel:&quot; URLs.</li>
-<li>PlayMedia::openURL(QString) - for media URLs not handled the browser.</li>
+<li><a href="messagesservice.html#composeMessage">Messages::composeMessage(QMailMessage)</a> - for &quot;mailto:&quot; URLs.</li>
+<li><a href="dialerservice.html#dial">Dialer::dial(QString,QString)</a> - for &quot;tel:&quot; URLs.</li>
 </ol>
 <p>The <a href="./qsettings.html">QSettings</a> value &quot;Trolltech/WebAccess/Locations/Home&quot; is the user's globally set Home page.</p>
-<a name="java-integration-unknown"></a>
-<h3>Java integration (unknown)</h3>
 <p>See also <a href="qdeviceindicators.html">QDeviceIndicators</a> and <a href="qvaluespaceitem.html">QValueSpaceItem</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

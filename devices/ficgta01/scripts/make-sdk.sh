@@ -278,7 +278,7 @@ update_extras()
 		fi
 
 # copy one or all flashing gif's
-     cp -f $QTOPIA_DEPOT_PATH/devices/greenphone/src/devtools/flash-files/flash-status-flashing.gif /opt/Qtopia/extras
+     cp -f $QTOPIA_DEPOT_PATH/devices/$DEVICE/src/devtools/flash-files/*.gif /opt/Qtopia/extras
 
 }
 

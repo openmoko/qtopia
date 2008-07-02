@@ -20,12 +20,8 @@
 ****************************************************************************/
 #include "qdthread.h"
 
-#ifdef QTOPIA_DESKTOP
 #include <trace.h>
 QD_LOG_OPTION(QDThread)
-#else
-#include "log.h"
-#endif
 
 /*!
   \class QDThread

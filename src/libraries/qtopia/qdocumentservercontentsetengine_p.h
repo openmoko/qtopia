@@ -55,14 +55,13 @@ public:
 
     virtual void clear();
 
+    virtual void commitChanges();
+
     virtual bool contains( const QContent &content ) const;
 
     void insertContent( int start, int end );
     void removeContent( int start, int end );
     void refreshContent( int start, int end );
-    void emitContentChanged( const QContentIdList &contentIds, QContent::ChangeType change );
-    void emitContentChanged();
-    void emitReset();
 
 signals:
     void releaseContentSet( int setId );
@@ -71,23 +70,15 @@ protected:
     virtual void filterChanged( const QContentFilter &filter );
     virtual void sortCriteriaChanged( const QContentSortCriteria &sort );
 
-private slots:
-    void performRefresh();
-
 private:
     virtual QContentList values( int index, int count );
     virtual int valueCount() const;
-
-    void refresh( bool reset );
 
     int m_setId;
 
     QDocumentServerContentStore *m_store;
 
     int m_count;
-    bool m_refreshPending;
-    bool m_filterDirty;
-    bool m_sortDirty;
 
     friend class QDocumentServerContentStorePrivate;
 };

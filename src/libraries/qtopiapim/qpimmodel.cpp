@@ -323,6 +323,9 @@ QPimContext *QPimModel::context(const QUniqueId &identifier) const
   Does not abort the transaction if it is unsuccessful. The calling code must call
   abortSyncTransaction() to do that.
 
+  Timestamps are stored in UTC.  Please use QTimeZone::toUtc() for times
+  passed into this function.
+
   \sa commitSyncTransaction(), abortSyncTransaction()
 */
 bool QPimModel::startSyncTransaction(const QDateTime &timestamp)
@@ -381,6 +384,9 @@ bool QPimModel::commitSyncTransaction()
   Returns the list of identifiers for records removed from the current set of visible sources
   on or after the specified \a timestamp.
 
+  Timestamps are stored in UTC.  Please use QTimeZone::toUtc() for times
+  passed into this function.
+
   \sa added(), modified()
 */
 QList<QUniqueId> QPimModel::removed(const QDateTime &timestamp) const
@@ -396,6 +402,9 @@ QList<QUniqueId> QPimModel::removed(const QDateTime &timestamp) const
   Returns the list of identifiers for records added to the current set of visible sources
   on or after the specified \a timestamp.
 
+  Timestamps are stored in UTC.  Please use QTimeZone::toUtc() for times
+  passed into this function.
+
   \sa removed(), modified()
 */
 QList<QUniqueId> QPimModel::added(const QDateTime &timestamp) const
@@ -410,6 +419,9 @@ QList<QUniqueId> QPimModel::added(const QDateTime &timestamp) const
 /*!
   Returns the list of identifiers for records modified in the current set of visible sources
   on or after the specified \a timestamp.
+
+  Timestamps are stored in UTC.  Please use QTimeZone::toUtc() for times
+  passed into this function.
 
   \sa added(), removed()
 */

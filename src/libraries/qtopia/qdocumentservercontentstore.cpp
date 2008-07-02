@@ -81,30 +81,6 @@ void QDocumentServerContentStorePrivate::invokeSignal( const QDocumentServerMess
             contentSet->refreshContent( arguments[ 1 ].toInt(), arguments[ 2 ].toInt() );
         }
     }
-    else if( signature == "contentSetChanged(int)" )
-    {
-        Q_ASSERT( arguments.count() == 1 );
-
-        QDocumentServerContentSetEngine *contentSet = contentSets.value( arguments[ 0 ].toInt(), 0 );
-
-        if( contentSet )
-        {
-            contentSet->emitContentChanged();
-        }
-    }
-    else if( signature == "contentSetChanged(int,QContentIdList,QContent::ChangeType)" )
-    {
-        Q_ASSERT( arguments.count() == 3 );
-
-        QDocumentServerContentSetEngine *contentSet = contentSets.value( arguments[ 0 ].toInt(), 0 );
-
-        if( contentSet )
-        {
-            contentSet->emitContentChanged(
-                    qvariant_cast< QContentIdList >( arguments[ 1 ] ),
-                    qvariant_cast< QContent::ChangeType >( arguments[ 2 ] ) );
-        }
-    }
     else if( signature == "contentSetUpdateStarted(int)" )
     {
         Q_ASSERT( arguments.count() == 1 );
@@ -125,17 +101,6 @@ void QDocumentServerContentStorePrivate::invokeSignal( const QDocumentServerMess
         if( contentSet )
         {
             contentSet->updateFinished();
-        }
-    }
-    else if( signature == "contentSetReset(int)" )
-    {
-        Q_ASSERT( arguments.count() == 1 );
-
-        QDocumentServerContentSetEngine *contentSet = contentSets.value( arguments[ 0 ].toInt(), 0 );
-
-        if( contentSet )
-        {
-            contentSet->emitReset();
         }
     }
 }
@@ -472,8 +437,12 @@ QMimeTypeData QDocumentServerContentStore::mimeTypeFromId( const QString &mimeId
 */
 QContentSetEngine *QDocumentServerContentStore::contentSet( const QContentFilter &filter, const QContentSortCriteria &order, QContentSet::UpdateMode mode )
 {
-    QDocumentServerMessage response = d->callWithArgumentList( "createContentSet(QContentSet::UpdateMode)",
-            QVariantList() << QVariant::fromValue( mode ) );
+    QDocumentServerMessage response = d->callWithArgumentList(
+            "createContentSet(QContentFilter,QContentSortCriteria,QContentSet::UpdateMode)",
+            QVariantList()
+                    << QVariant::fromValue(filter)
+                    << QVariant::fromValue(order)
+                    << QVariant::fromValue(mode));
 
     if( response.type() == QDocumentServerMessage::ReplyMessage )
     {
@@ -638,6 +607,16 @@ void QDocumentServerContentStore::removeContentFromSet( int setId, const QConten
 {
     d->callSlotWithArgumentList( "removeContentFromSet(int,QContent)",
                                  QVariantList() << setId << QVariant::fromValue( content ) );
+}
+
+void QDocumentServerContentStore::clearContentSet(int setId)
+{
+    d->callSlotWithArgumentList("clearContentSet(int)", QVariantList() << setId);
+}
+
+void QDocumentServerContentStore::commitContentSet(int setId)
+{
+    d->callSlotWithArgumentList("commitContentSet(int)", QVariantList() << setId);
 }
 
 bool QDocumentServerContentStore::contentSetContains( int setId, const QContent &content )

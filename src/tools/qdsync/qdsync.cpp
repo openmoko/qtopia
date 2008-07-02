@@ -18,6 +18,9 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+#include <trace.h>
+QD_LOG_OPTION(QDSync)
+
 #include "qdsync.h"
 #include "qcopbridge.h"
 #include "log.h"
@@ -27,9 +30,7 @@
 
 #include <QtopiaApplication>
 #include <QCloseEvent>
-#ifndef QTOPIA_VERSION
 #include <version.h>
-#endif
 #include <QSoftMenuBar>
 #include <QMenu>
 #include <QProcess>
@@ -119,12 +120,7 @@ void QDSync::appMessage( const QString &message, const QByteArray & /*data*/ )
         stopDaemons();
     } else if ( message == "shutdown()" ) {
         stopDaemons();
-#if QTOPIA_VERSION >= 0x040200
         QtopiaApplication::instance()->unregisterRunningTask("qdsync");
-#else
-        if ( ! isVisible() )
-            close();
-#endif
     }
 }
 
@@ -173,18 +169,10 @@ void QDSync::qdMessage( const QString &message, const QByteArray &data )
     }
 }
 
-void QDSync::closeEvent( QCloseEvent *e )
+void QDSync::closeEvent( QCloseEvent * /*e*/ )
 {
     TRACE(QDSync) << "QDSync::closeEvent";
-#if QTOPIA_VERSION >= 0x040200
     // The registerRunningTask() call prevents us from dying
-    Q_UNUSED(e)
-#else
-    if ( bridge ) {
-        hide();
-        e->accept();
-    }
-#endif
 }
 
 void QDSync::showEvent( QShowEvent * /*e*/ )
@@ -205,11 +193,7 @@ void QDSync::startDaemons()
 {
     TRACE(QDSync) << "QDSync::startDaemons" << (bridge?"RUNNING":"NOT RUNNING");
     if ( !bridge ) {
-#if QTOPIA_VERSION >= 0x040200
         QtopiaApplication::instance()->registerRunningTask("qdsync", this);
-#else
-        QtopiaApplication::setKeepRunning( QtopiaApplication::HideUI );
-#endif
 
         QSettings settings("Trolltech", "qdsync");
 
@@ -244,7 +228,7 @@ void QDSync::startDaemons()
                 interfaces++;
                 USERLOG(QString("QCopBridge started on TCP port %1").arg(port));
             } else {
-                WARNING() << "Cannot start QCopBridge on port" << port;
+                WARNING() << "Synchronization cannot start QCopBridge on port" << port;
             }
         }
 
@@ -254,7 +238,7 @@ void QDSync::startDaemons()
             if ( bridge->startSerial( serialPort ) ) {
                 interfaces++;
             } else {
-                WARNING() << "Cannot start QCopBridge on" << serialPort;
+                WARNING() << "Synchronization cannot start QCopBridge on" << serialPort;
             }
         }
     }

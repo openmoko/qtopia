@@ -147,74 +147,39 @@ bool ImageIO::isReadOnly() const
     return false;
 }
 
-QContent ImageIO::save( const QImage& image, bool overwrite )
+QString ImageIO::saveType() const
+{
+#define DEFAULT_MIME_TYPE "image/png"
+
+    return isSaveSupported()
+            ? _lnk.type()
+            : QLatin1String(DEFAULT_MIME_TYPE);
+}
+
+bool ImageIO::save(const QImage& image, QContent *content)
 {
 #define DEFAULT_FORMAT "PNG"
-#define DEFAULT_MIME_TYPE "image/png"
+
 
     // If saving supported, save using original format
     // Otherwise, save using default format
-    QString filename( _lnk.fileName() );
-    if( isSaveSupported() ) {
-        // If overwriting, save image to current file
-        // Otherwise, save image as new file
-        if( overwrite ) {
-            if( image.save( filename, _format.constData() ) ) {
-                // Generate link changed signal to notify of change to image
-                _lnk.commit();
+    bool saved = false;
 
-                return _lnk;
-            }
-        } else {
-            // Generate unique file name
-            QContent lnk;
-            // Perserve name and category
-            lnk.setName( _lnk.name() );
-            lnk.setType( _lnk.type() );
-            lnk.setMedia( _lnk.media() );
-            lnk.setCategories( _lnk.categories() );
-            // Save image to disk
-            QIODevice *device = lnk.open( QIODevice::WriteOnly );
-            if( device && image.save( device, _format.constData() ) ) {
-                device->close();
-                delete device;
-                lnk.commit();
+    QByteArray format = isSaveSupported()
+            ? _format
+            : DEFAULT_FORMAT;
 
-                return lnk;
-            }
-            else if( device )
-            {
-                delete device;
+    if (QIODevice *device = content->open(QIODevice::WriteOnly)) {
+        if ((saved = image.save(device, format.constData()))) {
+            content->commit();
 
-                lnk.removeFiles();
-            }
+            _lnk = *content;
         }
-    } else {
-        // Generate unique file name
-            QContent lnk;
-            // Perserve name and category
-            lnk.setName( _lnk.name() );
-            lnk.setType( DEFAULT_MIME_TYPE );
-            lnk.setMedia( _lnk.media() );
-            lnk.setCategories( _lnk.categories() );
-            // Save image to disk
-            QIODevice *device = lnk.open( QIODevice::WriteOnly );
-            if( device && image.save( device, DEFAULT_FORMAT ) ) {
-                device->close();
-                delete device;
-                lnk.commit();
 
-                return lnk;
-            }
-            else if( device )
-            {
-                delete device;
-
-                lnk.removeFiles();
-            }
+        delete device;
     }
 
-    return QContent();
+    return saved;
 }
 
 int ImageIO::level( double x ) const

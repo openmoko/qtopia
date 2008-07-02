@@ -333,6 +333,15 @@ void QWaitWidget::hideEvent( QHideEvent *e )
 /*!
   \reimp
 */
+void QWaitWidget::done(int r)
+{
+    if (d->cancelEnabled && d->wasCancelled)
+        QDialog::done(r);
+}
+
+/*!
+  \reimp
+*/
 void QWaitWidget::keyPressEvent( QKeyEvent *e )
 {
     if ( e->key() == Qt::Key_Back && d->cancelEnabled ) {

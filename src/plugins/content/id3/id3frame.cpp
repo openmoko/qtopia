@@ -24,6 +24,7 @@
 #include <QBuffer>
 #include <QTextStream>
 #include <QtDebug>
+#include <QtCore/qendian.h>
 
 /*!
     \class Id3Frame
@@ -116,26 +117,35 @@ Id3Frame::Header Id3Frame::readHeader( QDataStream &stream, quint32 version )
 {
     Id3Frame::Header header;
 
-    stream.readRawData( header.idBytes, 4 );
-
     if( (version & 0xFF00) == 0x0200 )
     {
-        quint16 size;
+        stream.readRawData( header.idBytes, 3 );
+        header.idBytes[ 3 ] = '\0';
 
-        stream >> size;
+        union
+        {
+            quint32 size;
+            char sizeBytes[ 4 ];
+        };
 
-        header.size = size;
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+        sizeBytes[ 3 ] = '\0';
+        stream.readRawData( &(sizeBytes[ 0 ]), 3 );
+#else
+        sizeBytes[ 0 ] = '\0';
+        stream.readRawData( &(sizeBytes[ 1 ]), 3 );
+#endif
+        header.size = qFromBigEndian( size );
         header.flags = 0;
     }
     else
     {
-        stream >> header.size;
-        stream >> header.flags;
-
-        // Header size should be a syncsafe integer according to Id3v2.4 spec
-        // but at least iTunes does not encode it as such.
-//         if( (header.version & 0xFF00) == 0x0400 )
-//             frameHeader.size = convertSyncSafeInteger( frameHeader.size );
+        if( stream.readRawData( header.idBytes, 4 ) == 4 ) {
+            stream >> header.size;
+            stream >> header.flags;
+        } else {
+            header.id = 0;
+        }
     }
 
     return header;

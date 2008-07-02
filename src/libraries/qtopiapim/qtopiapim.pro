@@ -10,6 +10,7 @@ enable_cell:depends(libraries/qtopiaphone)
 depends(libraries/qtopiacomm)
 depends(3rdparty/libraries/inputmatch)
 depends(3rdparty/libraries/sqlite)
+depends(3rdparty/libraries/vobject)
 
 QTOPIAPIM_HEADERS+=\
     qpimrecord.h\
@@ -31,8 +32,6 @@ QTOPIAPIM_HEADERS+=\
 
 QTOPIAPIM_PRIVATE_HEADERS+=\
     qannotator_p.h\
-    vcc_yacc_p.h\
-    vobject_p.h\
     qsqlpimtablemodel_p.h\
     qtaskio_p.h\
     qappointmentio_p.h\
@@ -49,8 +48,6 @@ QTOPIAPIM_PRIVATE_HEADERS+=\
 
 QTOPIAPIM_SOURCES+=\
     qannotator.cpp\
-    vcc_yacc.cpp\
-    vobject.cpp\
     qsqlpimtablemodel.cpp\
     qpreparedquery.cpp\
     qpimrecord.cpp\

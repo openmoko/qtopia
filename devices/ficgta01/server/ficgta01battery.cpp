@@ -74,7 +74,13 @@ void Ficgta01Battery::apmFileChanged(const QString & file)
 
 void Ficgta01Battery::openDetect()
 {
-    kbdFDpower = ::open("/dev/input/event2", O_RDONLY|O_NDELAY, 0);
+        QString powerPath;
+    if (QFileInfo("/dev/input/event4").exists())
+        powerPath = "/dev/input/event4";
+    else
+        powerPath = "/dev/input/event2";
+
+    kbdFDpower = ::open(powerPath.toLocal8Bit(), O_RDONLY|O_NDELAY, 0);
     if (kbdFDpower >= 0) {
         powerNotify = new QSocketNotifier( kbdFDpower, QSocketNotifier::Read, this );
         connect( powerNotify, SIGNAL(activated(int)), this, SLOT(readPowerKbdData()));

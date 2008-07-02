@@ -90,7 +90,7 @@
 <h3 class="fn"><a name="clientIdentity"></a>void QDClientSyncPlugin::clientIdentity ( const <a href="../qstring.html">QString</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emit this signal to set the client's identity to <i>id</i>.</p>
 <h3 class="fn"><a name="clientSyncAnchors"></a>void QDClientSyncPlugin::clientSyncAnchors ( const <a href="../qdatetime.html">QDateTime</a> &amp; <i>clientLastSync</i>, const <a href="../qdatetime.html">QDateTime</a> &amp; <i>clientNextSync</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
-<p>Emit this signal to set the client's sync anchors to <i>clientLastSync</i> and <i>clientNextSync</i>.</p>
+<p>Emit this signal to set the client's sync anchors to <i>clientLastSync</i> and <i>clientNextSync</i>. <b>Note</b> that <i>clientLastSync</i> and <i>clientNextSync</i> should be in UTC time.</p>
 <h3 class="fn"><a name="clientVersion"></a>void QDClientSyncPlugin::clientVersion ( int <i>major</i>, int <i>minor</i>, int <i>patch</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emit this signal to set the client's version to the values <i>major</i>, <i>minor</i> and <i>patch</i>.</p>
 <h3 class="fn"><a name="createClientRecord"></a>void QDClientSyncPlugin::createClientRecord ( const <a href="../qbytearray.html">QByteArray</a> &amp; <i>record</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -121,7 +121,7 @@
 <h3 class="fn"><a name="serverIdentity"></a>void QDClientSyncPlugin::serverIdentity ( const <a href="../qstring.html">QString</a> &amp; <i>server</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
 <p>The server's identity is <i>server</i>.</p>
 <h3 class="fn"><a name="serverSyncAnchors"></a>void QDClientSyncPlugin::serverSyncAnchors ( const <a href="../qdatetime.html">QDateTime</a> &amp; <i>serverLastSync</i>, const <a href="../qdatetime.html">QDateTime</a> &amp; <i>serverNextSync</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
-<p>The server's sync anchors are <i>serverLastSync</i> and <i>serverNextSync</i>.</p>
+<p>The server's sync anchors are <i>serverLastSync</i> and <i>serverNextSync</i>. <b>Note</b> that <i>serverLastSync</i> and <i>serverNextSync</i> are in UTC time.</p>
 <h3 class="fn"><a name="serverSyncRequest"></a>void QDClientSyncPlugin::serverSyncRequest ( const <a href="../qstring.html">QString</a> &amp; <i>source</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
 <p>The server has requested a sync with datasource <i>source</i>.</p>
 <h3 class="fn"><a name="serverVersion"></a>void QDClientSyncPlugin::serverVersion ( int <i>major</i>, int <i>minor</i>, int <i>patch</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>

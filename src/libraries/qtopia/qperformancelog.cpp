@@ -210,6 +210,7 @@ void QPerformanceLogPrivate::send( const QPerformanceLogData &data )
 }
 
 /*!
+  \internal
   \class QPerformanceLog
   \brief The QPerformanceLog class implements a performance logging mechanism available to all Qtopia applications.
 \if defined(QTOPIA_TEST)

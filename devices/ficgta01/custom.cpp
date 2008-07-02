@@ -63,6 +63,8 @@ QTOPIABASE_EXPORT void qpe_setBrightness(int b)
     char cmd[80];
 
     int brightessSteps = qpe_sysBrightnessSteps();
+    if(b > brightessSteps)
+        b = brightessSteps;
 
     if(b == 1) {
         // dim
@@ -70,8 +72,6 @@ QTOPIABASE_EXPORT void qpe_setBrightness(int b)
     } else if (b == -1) {
         //bright
         b = brightessSteps;
-    } else if(b == 0) {
-    } else if(b == brightessSteps) {
     }
 
     QFile brightness;

@@ -51,6 +51,7 @@ public slots:
     void setColor( const QColor &col );
     void setExpiryTime( int msec );
     void setCancelEnabled(bool enabled);
+    void done(int r);
 
 signals:
     void cancelled();

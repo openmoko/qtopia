@@ -65,6 +65,7 @@
 </ul>
 <li><a href="#porting-to-qtopia-4-3-2">Porting to Qtopia 4.3&#x2e;2</a></li>
 <ul><li><a href="#server-file-changes">Server file changes</a></li>
+<li><a href="#dbmigrate-changes">DBMigrate changes</a></li>
 </ul>
 </ul>
 <a name="overview"></a>
@@ -342,12 +343,12 @@
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Qtopia 4.2</th><th>Qtopia 4.3</th></tr></thead>
 <tr valign="top" class="odd"><td><tt>aboutToShowPage(int)</tt> (signal)</td><td>QWizard::initializePage(int) (virtual)</td></tr>
-<tr valign="top" class="even"><td><tt>setNextText(QString)</tt></td><td>QWizard::setButtonText(<a href="./qwizard.html#wizardbutton-enum">QWizard::NextButton</a>,<a href="./qstring.html">QString</a>)</td></tr>
-<tr valign="top" class="odd"><td><tt>nextText()</tt></td><td>QWizard::buttonText(<a href="./qwizard.html#wizardbutton-enum">QWizard::NextButton</a>)</td></tr>
-<tr valign="top" class="even"><td><tt>setPrevText(QString)</tt></td><td>QWizard::setButtonText(<a href="./qwizard.html#wizardbutton-enum">QWizard::BackButton</a>,<a href="./qstring.html">QString</a>)</td></tr>
-<tr valign="top" class="odd"><td><tt>prevText()</tt></td><td>QWizard::buttonText(<a href="./qwizard.html#wizardbutton-enum">QWizard::BackButton</a>)</td></tr>
-<tr valign="top" class="even"><td><tt>setNextEnabled()</tt></td><td>Manage the QWizard::button(<a href="./qwizard.html#wizardbutton-enum">QWizard::NextButton</a>) directly</td></tr>
-<tr valign="top" class="odd"><td><tt>setPrevEnabled()</tt></td><td>Manage the QWizard::button(<a href="./qwizard.html#wizardbutton-enum">QWizard::BackButton</a>) directly</td></tr>
+<tr valign="top" class="even"><td><tt>setNextText(QString)</tt></td><td>QWizard::setButtonText(<a href="./qwizard.html#WizardButton-enum">QWizard::NextButton</a>,<a href="./qstring.html">QString</a>)</td></tr>
+<tr valign="top" class="odd"><td><tt>nextText()</tt></td><td>QWizard::buttonText(<a href="./qwizard.html#WizardButton-enum">QWizard::NextButton</a>)</td></tr>
+<tr valign="top" class="even"><td><tt>setPrevText(QString)</tt></td><td>QWizard::setButtonText(<a href="./qwizard.html#WizardButton-enum">QWizard::BackButton</a>,<a href="./qstring.html">QString</a>)</td></tr>
+<tr valign="top" class="odd"><td><tt>prevText()</tt></td><td>QWizard::buttonText(<a href="./qwizard.html#WizardButton-enum">QWizard::BackButton</a>)</td></tr>
+<tr valign="top" class="even"><td><tt>setNextEnabled()</tt></td><td>Manage the QWizard::button(<a href="./qwizard.html#WizardButton-enum">QWizard::NextButton</a>) directly</td></tr>
+<tr valign="top" class="odd"><td><tt>setPrevEnabled()</tt></td><td>Manage the QWizard::button(<a href="./qwizard.html#WizardButton-enum">QWizard::BackButton</a>) directly</td></tr>
 <tr valign="top" class="even"><td><tt>connectPageEnabler()</tt></td><td><a href="./qwizard.html#nextId">QWizard::nextId</a>() (virtual) or <a href="./qwizardpage.html#nextId">QWizardPage::nextId</a>() (virtual)</td></tr>
 <tr valign="top" class="odd"><td><tt>setAppropriate()</tt></td><td><a href="./qwizard.html#nextId">QWizard::nextId</a>() (virtual) or <a href="./qwizardpage.html#nextId">QWizardPage::nextId</a>() (virtual)</td></tr>
 <tr valign="top" class="even"><td><tt>showPage()</tt></td><td><a href="./qwizard.html#restart">QWizard::restart</a>(), <a href="./qwizard.html#next">QWizard::next</a>() or QWizardPage::back()</td></tr>
@@ -583,6 +584,11 @@
 <tr valign="top" class="odd"><td>server/phone/themedhomescreen.{cpp|h}</td><td>server/phone/homescreen/themed/themedhomescreen.{cpp|h}</td></tr>
 <tr valign="top" class="even"><td>server/phone/videoringtone.{cpp|h}</td><td>server/phone/telephony/videoringtone/videoringtone.{cpp|h}</td></tr>
 </table></p>
+<a name="dbmigrate-changes"></a>
+<h3>DBMigrate changes</h3>
+<p>The dbmigrate application has been deprecated and replaced with a plug-in of the same name. The plug-in is run in process and as such does not suffer the same synchronization and time-out issues as the DBMigrate service did.</p>
+<p>This isn't expected to effect non Qtopia code but if required the command line and service interfaces of the dbmigrate application are still available from a new project in <tt>src/tools/dbmigrateservice</tt>.</p>
+<p>This change also obsoletes the DBMigrate server task which has been removed from the server. Any references to DBMigrate in <tt>Tasks.cfg</tt> files are now obsolete and should be removed.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>

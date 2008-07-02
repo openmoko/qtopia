@@ -25,6 +25,8 @@
 #include <QFile>
 #include <QTextStream>
 #include <qtopialog.h>
+#include <Qtopia>
+#include <sys/vfs.h>
 
 /**
   Base constructor
@@ -33,6 +35,7 @@ PackageInformationReader::PackageInformationReader( InstallControl::PackageInfo:
     : isError( false )
     , hasContent( false )
     , accumulatingFullDesc( false )
+    , wasSizeUpdated( false )
     , source( src )
 {
     reset();
@@ -49,6 +52,7 @@ PackageInformationReader::PackageInformationReader( QTextStream &ts,
     : isError( false )
     , hasContent( false )
     , accumulatingFullDesc( false )
+    , wasSizeUpdated( false )
     , source( src )
 {
     reset();
@@ -57,7 +61,8 @@ PackageInformationReader::PackageInformationReader( QTextStream &ts,
         QString line = ts.readLine();
         readLine( line );
     }
-    
+    updateInstalledSize();
+
     if ( !pkg.isComplete(source, &error) )
         isError = true;
 }
@@ -73,6 +78,7 @@ PackageInformationReader::PackageInformationReader( const QString& fName,
     : isError( false )
     , hasContent( false )
     , accumulatingFullDesc( false )
+    , wasSizeUpdated( false )
     , source( src )
 {
     reset();
@@ -101,6 +107,8 @@ PackageInformationReader::PackageInformationReader( const QString& fName,
     }
     if ( !pkg.isComplete(source, &error) )
         isError = true;
+
+    updateInstalledSize();
 }
 
 void PackageInformationReader::reset()
@@ -119,10 +127,12 @@ void PackageInformationReader::reset()
     pkg.qtopiaVersion = QString::null;
     pkg.devices = QString::null;
     pkg.installedSize = QString::null;
+    pkg.fileCount = QString::null;
     pkg.type = QString::null;
     error = QString::null;
     isError = false;
     hasContent = false;
+    wasSizeUpdated = false;
 }
 
 void PackageInformationReader::checkCompleted()
@@ -247,6 +257,11 @@ void PackageInformationReader::readLine( const QString &line )
         pkg.installedSize = lineStr.mid( colon ).trimmed();
         if ( !pkg.installedSize.isEmpty() ) hasContent = true;
     }
+    else if ( lineStr.startsWith( QLatin1String( "File-Count: " ), Qt::CaseInsensitive ))
+    {
+        pkg.fileCount = lineStr.mid( colon ).trimmed();
+        if ( !pkg.fileCount.isEmpty() ) hasContent = true;
+    }
     else if ( lineStr.startsWith( QLatin1String( "Type: " ), Qt::CaseInsensitive ))
     {
         pkg.type = lineStr.mid( colon ).trimmed();
@@ -258,4 +273,37 @@ void PackageInformationReader::readLine( const QString &line )
     }
 }
 
+/*!
+    \internal
+    Update the installed size based on the filecount
+
+    Implementation note:
+    The Installed-Size field of the control file only shows the apparent size of a package.
+    The actual disk size will be different based upon the file system block size.
+    Since we  don't know the file system block size during package creation, we include the number of files
+    and directories in the file count of the control file.  We can then use this to update the installed size
+    so it reflects what is actually needed on the device taking into account a worst case scenario of
+    every file using up a(n) (extra) near empty block.
+*/
+void PackageInformationReader::updateInstalledSize()
+{
+    if (wasSizeUpdated)
+        return;
+
+    //re-calculate installed size based on file count
+    int fileCount = pkg.fileCount.toInt();
+    if ( fileCount > 0 )
+    {
+        //if there is a fileCount then, the installed
+        //size must be have already been expressed as bytes
+        //as opposed to Kb of Mb
+        qulonglong size= pkg.installedSize.toLong();
+        struct statfs stats;
+        statfs( Qtopia::packagePath().toLatin1(), &stats);
+        qulonglong blockSize = (qulonglong)stats.f_bsize;
+        size = size + fileCount * blockSize;
+        pkg.installedSize =  QString::number(size);
+    }
+    wasSizeUpdated = true;
+}
 

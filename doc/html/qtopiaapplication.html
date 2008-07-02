@@ -215,7 +215,7 @@
 <p>See also <a href="./qapplication.html#exec">QApplication::exec</a>().</p>
 <h3 class="fn"><a name="execDialog"></a>int QtopiaApplication::execDialog ( <a href="./qdialog.html">QDialog</a> * <i>dialog</i>, bool <i>noMaximize</i> = false )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Shows and calls <a href="./qdialog.html#exec">exec()</a> on the <i>dialog</i>. A heuristic approach is taken to determine the size of the dialog and whether it is maximized.</p>
-<p>The function returns a <a href="./qdialog.html#dialogcode-enum">QDialog::DialogCode</a> result.</p>
+<p>The function returns a <a href="./qdialog.html#DialogCode-enum">QDialog::DialogCode</a> result.</p>
 <p>If <i>noMaximize</i> is true then the dialog may not be maximized. This is usually unnecessary and it is recommended that the system be allowed to decide how the dialog is displayed by passing false for <i>noMaximize</i>.</p>
 <p>See also <a href="qtopiaapplication.html#showDialog">showDialog</a>() and <a href="./qdialog.html#exec">QDialog::exec</a>().</p>
 <h3 class="fn"><a name="hideInputMethod"></a>void QtopiaApplication::hideInputMethod ()&nbsp;&nbsp;<tt> [static]</tt></h3>
@@ -301,7 +301,7 @@
 <p>See also <a href="qtopiaapplication.html#stylusOperation">stylusOperation</a>() and <a href="qtopiaapplication.html#StylusMode-enum">StylusMode</a>.</p>
 <h3 class="fn"><a name="setSxeAuthorizerRole"></a>void QtopiaApplication::setSxeAuthorizerRole ( <a href="qtopiaapplication.html#SxeAuthorizerRole-enum">SxeAuthorizerRole</a> <i>role</i> )</h3>
 <p>Sets this applications <a href="qtopiaapplication.html#SxeAuthorizerRole-enum">QtopiaApplication::SxeAuthorizerRole</a> to <i>role</i>. In general this should not be required for all but a few applications such as the mediaserver, and other applications which must authorize requests using SXE; since the default value of <a href="qtopiaapplication.html#SxeAuthorizerRole-enum">SxeAuthorizerClientOnly</a> will be correct.</p>
-<p>The qpe server (actually any app for which <a href="./qapplication.html#type">type</a>() is <a href="./qapplication.html#type-enum">GuiServer</a>) will default to <a href="qtopiaapplication.html#SxeAuthorizerRole-enum">SxeAuthorizerServerOnly</a>.</p>
+<p>The qpe server (actually any app for which <a href="./qapplication.html#type">type</a>() is <a href="./qapplication.html#Type-enum">GuiServer</a>) will default to <a href="qtopiaapplication.html#SxeAuthorizerRole-enum">SxeAuthorizerServerOnly</a>.</p>
 <p>See also <a href="qtopiaapplication.html#sxeAuthorizerRole">sxeAuthorizerRole</a>() and <a href="qtopiaapplication.html#SxeAuthorizerRole-enum">QtopiaApplication::SxeAuthorizerRole</a>.</p>
 <h3 class="fn"><a name="showDialog"></a>void QtopiaApplication::showDialog ( <a href="./qdialog.html">QDialog</a> * <i>dialog</i>, bool <i>noMaximize</i> = false )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Shows <i>dialog</i>. A heuristic approach is taken to determine the size of the dialog and whether it is maximized.</p>

@@ -28,6 +28,7 @@
 #include <QLabel>
 #include <QDesktopWidget>
 #include <QProcess>
+#include <QtopiaIpcAdaptor>
 
 #include <qcontentset.h>
 #include <qtopiaapplication.h>
@@ -38,88 +39,59 @@
 #include <qtopiaipcenvelope.h>
 
 #include <qtopiaserverapplication.h>
-#include <standarddevicefeatures.h>
-#include <ui/standarddialogs.h>
 
 #include <fcntl.h>
 #include <errno.h>
 #include <unistd.h>
+#include <linux/input.h>
 
 #include <sys/ioctl.h>
-
-struct Ficgta01Input {
-    unsigned int   dummy1;
-    unsigned int   dummy2;
-    unsigned short type;
-    unsigned short code;
-    unsigned int   value;
-};
 
 QTOPIA_TASK(Ficgta01Hardware, Ficgta01Hardware);
 
 Ficgta01Hardware::Ficgta01Hardware()
-      :vsoPortableHandsfree("/Hardware/Accessories/PortableHandsfree")
+    : vsoPortableHandsfree("/Hardware/Accessories/PortableHandsfree"),
+      vsoUsbCable("/Hardware/UsbGadget")
 {
+    adaptor = new QtopiaIpcAdaptor("QPE/Neo1973Hardware");
 
-    qWarning()<<"ficgta01hardware plugin";
+    qLog(Hardware) << "ficgta01hardware";
 
     vsoPortableHandsfree.setAttribute("Present", false);
+    vsoPortableHandsfree.sync();
 
+    QtopiaIpcAdaptor::connect(adaptor, MESSAGE(headphonesInserted(bool)),
+                              this, SLOT(headphonesInserted(bool)));
 
-    detectFd = ::open("/dev/input/event0", O_RDONLY|O_NDELAY, 0);
-     if (detectFd >= 0) {
-      auxNotify = new QSocketNotifier( detectFd, QSocketNotifier::Read, this );
-      connect( auxNotify, SIGNAL(activated(int)), this, SLOT(readAuxKbdData()));
-    } else {
-      qWarning("Cannot open /dev/input/event0 for keypad (%s)", strerror(errno));
-    }
+    QtopiaIpcAdaptor::connect(adaptor, MESSAGE(cableConnected(bool)),
+                              this, SLOT(cableConnected(bool)));
+
 }
 
 Ficgta01Hardware::~Ficgta01Hardware()
 {
 }
 
-void Ficgta01Hardware::readAuxKbdData()
+
+void Ficgta01Hardware::headphonesInserted(bool b)
 {
-
-    Ficgta01Input event;
-
-    int n = read(detectFd, &event, sizeof(Ficgta01Input));
-    if(n != (int)sizeof(Ficgta01Input)) {
-        return;
-    }
-
-    if(event.type != 5)
-        return;
-
-    qWarning("keypressed: type=%03d, code=%03d, value=%03d (%s)",
-              event.type, event.code,event.value,((event.value)!=0) ? "Down":"Up");
-
-    switch(event.code) {
-    case 0x02: //headphone insert
-    {
-        //  type=005, code=002, value=000 (Up) //insert
-        //  type=005, code=002, value=001 (Down) //out
-
-        if(event.value != 0x01) {
-            vsoPortableHandsfree.setAttribute("Present", true);
-            vsoPortableHandsfree.sync();
-        } else {
-            vsoPortableHandsfree.setAttribute("Present", false);
-            vsoPortableHandsfree.sync();
-        }
-    }
-    break;
-    };
+    qLog(Hardware)<< __PRETTY_FUNCTION__ << b;
+    vsoPortableHandsfree.setAttribute("Present", b);
+    vsoPortableHandsfree.sync();
 }
+
+void Ficgta01Hardware::cableConnected(bool b)
+{
+    qLog(Hardware)<< __PRETTY_FUNCTION__ << b;
+    vsoUsbCable.setAttribute("cableConnected", b);
+    vsoUsbCable.sync();
+}
+
 
 
 void Ficgta01Hardware::shutdownRequested()
 {
-    qLog(PowerManagement)<<" Ficgta01Hardware::shutdownRequested";
-
-    QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService", "setAmpMode(bool)");
-    e << false;
+    qLog(PowerManagement)<< __PRETTY_FUNCTION__;
 
     QFile powerFile;
     QFile btPower;

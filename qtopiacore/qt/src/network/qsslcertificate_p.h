@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -31,6 +31,18 @@
 ** link to functionality provided by Qt Designer and its related
 ** libraries.
 **
+** In addition, as a special exception, Trolltech gives permission to
+** link the code of its release of Qt with the OpenSSL project's
+** "OpenSSL" library (or modified versions of it that use the same
+** license as the "OpenSSL" library), and distribute the linked
+** executables.  You must comply with the GNU General Public License
+** version 2 or the GNU General Public License version 3 in all
+** respects for all of the code used other than the "OpenSSL" code.
+** If you modify this file, you may extend this exception to your
+** version of the file, but you are not obligated to do so.  If you do
+** not wish to do so, delete this exception statement from your
+** version of this file.
+**
 ** This file is provided "AS IS" with NO WARRANTY OF ANY KIND,
 ** INCLUDING THE WARRANTIES OF DESIGN, MERCHANTABILITY AND FITNESS FOR
 ** A PARTICULAR PURPOSE. Trolltech reserves all rights not expressly
@@ -41,20 +53,6 @@
 **
 ****************************************************************************/
 
-/****************************************************************************
-**
-** In addition, as a special exception, Trolltech gives permission to link
-** the code of its release of Qt with the OpenSSL project's "OpenSSL" library
-** (or modified versions of the "OpenSSL" library that use the same license
-** as the original version), and distribute the linked executables.
-**
-** You must comply with the GNU General Public License version 2 in all
-** respects for all of the code used other than the "OpenSSL" code.  If you
-** modify this file, you may extend this exception to your version of the file,
-** but you are not obligated to do so.  If you do not wish to do so, delete
-** this exception statement from your version of this file.
-**
-****************************************************************************/
 
 #ifndef QSSLCERTIFICATE_P_H
 #define QSSLCERTIFICATE_P_H

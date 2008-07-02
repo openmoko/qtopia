@@ -64,6 +64,7 @@ private slots:
     void trayIconClicked();
     void filequit();
     void syncall();
+    void syncallslow();
     void serverMessage( const QString &message, const QByteArray &data );
 
 private:

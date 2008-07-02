@@ -44,7 +44,7 @@ public:
         Contains
      };
 
-	enum Property
+    enum Property
     {
         Id,
         Name,
@@ -72,8 +72,8 @@ public:
     bool isEmpty() const;
 
 private:
-	friend class QMailStore;
-	friend class QMailStorePrivate;
+    friend class QMailStore;
+    friend class QMailStorePrivate;
 
 private:
     QSharedDataPointer<QMailFolderKeyPrivate> d;

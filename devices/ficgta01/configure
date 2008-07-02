@@ -9,7 +9,6 @@
 -mediaengines cruxus
 -helix-system-id linux-2.2-libc6-arm9-cross-gcc4
 -prefix /opt/Qtopia
--voip
 -no-drm
 -no-sxe
 -no-test
@@ -27,5 +26,4 @@
 -extra-qtopiacore-config "-D QT_QWS_DISABLE_FLUSHCLIPPING" 
 -extra-qt-config -no-glib 
 -release
--verbose
 -no-samples

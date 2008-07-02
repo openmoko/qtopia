@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -303,29 +303,30 @@ void QInotifyFileSystemWatcherEngine::readFromInotify()
     ioctl(inotifyFd, FIONREAD, &buffSize);
     QVarLengthArray<char, 4096> buffer(buffSize);
     buffSize = read(inotifyFd, buffer.data(), buffSize);
-    inotify_event *ev = reinterpret_cast<inotify_event *>(buffer.data());
-    inotify_event *end = reinterpret_cast<inotify_event *>(buffer.data() + buffSize);
-    while (ev < end) {
-        // qDebug() << "inotify event, wd" << ev->wd << "mask" << hex << ev->mask;
+    const char *at = buffer.data();
+    const char * const end = at + buffSize;
+    while (at < end) {
+        const inotify_event *event = reinterpret_cast<const inotify_event *>(at);
+        // qDebug() << "inotify event, wd" << event->wd << "mask" << hex << event->mask;
 
-        int id = ev->wd;
+        int id = event->wd;
         QString path = idToPath.value(id);
         if (path.isEmpty()) {
             // perhaps a directory?
             id = -id;
             path = idToPath.value(id);
             if (path.isEmpty()) {
-                ev += sizeof(inotify_event) + ev->len;
+                at += sizeof(inotify_event) + event->len;
                 continue;
             }
         }
 
         // qDebug() << "event for path" << path;
 
-        if ((ev->mask & (IN_DELETE_SELF | IN_UNMOUNT)) != 0) {
+        if ((event->mask & (IN_DELETE_SELF | IN_UNMOUNT)) != 0) {
             pathToID.remove(path);
             idToPath.remove(id);
-            inotify_rm_watch(inotifyFd, ev->wd);
+            inotify_rm_watch(inotifyFd, event->wd);
 
             if (id < 0)
                 emit directoryChanged(path, true);
@@ -338,7 +339,7 @@ void QInotifyFileSystemWatcherEngine::readFromInotify()
                 emit fileChanged(path, false);
         }
 
-        ev += sizeof(inotify_event) + ev->len;
+        at += sizeof(inotify_event) + event->len;
     }
 }
 

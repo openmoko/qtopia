@@ -125,7 +125,8 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QAppointment class holds the data of a calendar appointment.</p>
-<p>This data includes descriptive data of the appointment and scheduling information.</p>
+<p>This data includes descriptive data of the appointment and scheduling information. Appointments can also repeat and have exceptions to their repeat rules. Repetition of appointments is defined by the appointment's <a href="qappointment.html#repeatRule">repeatRule</a>(), <a href="qappointment.html#frequency">frequency</a>(), <a href="qappointment.html#weekFlags">weekFlags</a>() and <a href="qappointment.html#start">start</a>(). The repeat rule defines what type of repetition the appointment has and how to interpret the other aspect of repetition information. For instance Daily indicates that the appointment repeats every N days, where N is provided by the <a href="qappointment.html#frequency">frequency</a>() of the appointment. Whereas Weekly would indicate every N weeks, where N is the <a href="qappointment.html#frequency">frequency</a>() and the <a href="qappointment.html#weekFlags">weekFlags</a>() function indicates on which days of the week the appointment occurs.</p>
+<p>The start date is used to determine the Instance of the occurrence. For example if the start date of the appointment is the 16th of April, then for the purposes of the repeat <a href="qappointment.html#RepeatRule-enum">MonthlyDate</a> rule, the Instance is 16. This differs from some other systems that explicitly store the Instance information separate from the start information. In Qtopia the start of an appointment must always be a valid occurrence for the appointments repetition behavior.</p>
 <p>See also <a href="qpim-library.html">Pim Library</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -221,7 +222,7 @@
 <p>Returns how often the appointment repeats.</p>
 <p>See also <a href="qappointment.html#setFrequency">setFrequency</a>().</p>
 <h3 class="fn"><a name="fromDateDay"></a><a href="qappointment.html#WeekFlag-enum">WeekFlag</a> QAppointment::fromDateDay ( int <i>day</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns the <a href="qappointment.html#WeekFlag-enum">WeekFlag</a> associated with <i>day</i> as a <a href="./qt.html#dayofweek-enum">Qt::DayOfWeek</a>.</p>
+<p>Returns the <a href="qappointment.html#WeekFlag-enum">WeekFlag</a> associated with <i>day</i> as a <a href="./qt.html#DayOfWeek-enum">Qt::DayOfWeek</a>.</p>
 <h3 class="fn"><a name="hasAlarm"></a>bool QAppointment::hasAlarm () const</h3>
 <p>Returns true if there is an alarm set for the appointment. Otherwise returns false.</p>
 <p>See also <a href="qappointment.html#setAlarm">setAlarm</a>().</p>
@@ -351,7 +352,7 @@
 <p>Returns the time zone of the appointment or an invalid <a href="qtimezone.html">QTimeZone</a> if the appointment has no time zone. All day appointments always have no time zone.</p>
 <p>See also <a href="qappointment.html#setTimeZone">setTimeZone</a>() and <a href="qappointment.html#isAllDay">isAllDay</a>().</p>
 <h3 class="fn"><a name="toDateDay"></a>int QAppointment::toDateDay ( <a href="qappointment.html#WeekFlag-enum">WeekFlag</a> <i>day</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns the <a href="./qt.html#dayofweek-enum">Qt::DayOfWeek</a> associated with <i>day</i>.</p>
+<p>Returns the <a href="./qt.html#DayOfWeek-enum">Qt::DayOfWeek</a> associated with <i>day</i>.</p>
 <h3 class="fn"><a name="uidRef"></a><a href="quniqueid.html">QUniqueId</a> &amp; QAppointment::uidRef ()&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Reimplemented from <a href="qpimrecord.html#uidRef">QPimRecord</a>.</p>
 <h3 class="fn"><a name="uidRef-2"></a>const <a href="quniqueid.html">QUniqueId</a> &amp; QAppointment::uidRef () const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>

@@ -42,11 +42,9 @@
 #include <QtopiaApplication>
 #endif
 
-Q_GLOBAL_STATIC(QDBMigrationEngine,migrationEngine);
-
-QDBMigrationEngine *QDBMigrationEngine::instance()
+QDBMigrationEngine::QDBMigrationEngine()
+    : mi(this)
 {
-    return migrationEngine();
 }
 
 bool QDBMigrationEngine::check(bool result, int line, const char *file, const char *message)
@@ -269,93 +267,65 @@ bool QDBMigrationEngine::loadSchema(QTextStream &ts, bool transact)
         return true;
 }
 
-bool QDBMigrationEngine::doMigrate(const QStringList &args)
+bool QDBMigrationEngine::migrate(QSqlDatabase *database)
 {
-#ifndef QTOPIA_CONTENT_INSTALLER
-    // Ensure QStorageMetaInfo and QtopiaSql are up to date.
-    QStorageMetaInfo::instance()->update();
-#endif
+    setDatabase(*database);
 
-    // this should be passed a list of database paths
-    QList<QtopiaDatabaseId> databaseIds;
-    if(args.count() > 0)
-    {
-        foreach(const QString &arg, args) {
-            const QtopiaDatabaseId &id( QtopiaSql::instance()->databaseIdForDatabasePath(arg) );
-            if(!databaseIds.contains(id))
-                databaseIds.append(id);
-        }
-    }
-    else
-        databaseIds = QtopiaSql::instance()->databaseIds();
-    foreach(QtopiaDatabaseId id, databaseIds)
-    {
-#ifndef QTOPIA_CONTENT_INSTALLER
-        bool removable=false;
-        if(id != 0 && !QtopiaSql::instance()->databasePathForId(id).isEmpty() && QStorageMetaInfo::instance()->fileSystemOf(QtopiaSql::instance()->databasePathForId(id)) != NULL)
-            removable = QStorageMetaInfo::instance()->fileSystemOf(QtopiaSql::instance()->databasePathForId(id))->isRemovable();
-#endif
-
-        db=QtopiaSql::instance()->database(id);
-        if(db.isOpen()==false)
-        {
-            if(!db.open())
-            {
-                QString errString=QString("OPEN DATABASE: failed (%1, %2, %3)\n").arg(db.lastError().number()).arg(db.lastError().databaseText()).arg(db.lastError().driverText());
-                qCritical(qPrintable(errString));
-                return false;
-            }
-        }
-        bool hasChanges=false;
-        if(db.driverName() == QLatin1String("QSQLITE"))
-        {
-#ifndef QTOPIA_CONTENT_INSTALLER
-            if( !checkIntegrity( db, false ) )
-            {   // Attempt to recover by doing a vacuum.
-                db.exec( "VACUUM" );
-
-                if( !checkIntegrity( db, true ) )
-                {   // Still no good, backup the old database to documents and create a new one.
-                    db.close();
-
-                    QFileSystem fs = QFileSystem::fromFileName( db.databaseName() );
-                    QDir backupDir( fs.documents() ? fs.documentsPath() : QFileSystem::documentsFileSystem().documentsPath() );
-                    QString backup = QLatin1String( "qtopia_db.sqlite.corrupt000" );
-                    for( int i = 0; backupDir.exists( backup ); backup = QString( "qtopia_db.sqlite.corrupt%1" ).arg( ++i, 3, 10, QLatin1Char( '0' ) ) );
-
-                    QFile dbFile( db.databaseName() );
-
-                    dbFile.copy( backupDir.absoluteFilePath( backup ) );
-
-                    dbFile.remove();
-
-                    // Should notify the user at this point that the database is corrupted and unrecoverable.
-                    // Deferred to a later release due to string freeze: Task 193949.
-
-                    if(!db.open())
-                    {
-                        QString errString=QString("OPEN DATABASE: failed (%1, %2, %3)\n").arg(db.lastError().number()).arg(db.lastError().databaseText()).arg(db.lastError().driverText());
-                        qCritical(qPrintable(errString));
-                        return false;
-                    }
-                }
-            }
-#endif
-
-            EXEC("PRAGMA synchronous = OFF");   // full/normal sync is safer, but by god slower.
-            EXEC("PRAGMA temp_store = memory");
-            EXEC("PRAGMA cache_size = 1000");
-            //EXEC("PRAGMA default_cache_size = 1000");
-        }
-        if(!db.transaction())
-        {
-            QString errString=QString("BEGIN TRANSACTION: failed (%1, %2, %3)\n").arg(db.lastError().number()).arg(db.lastError().databaseText()).arg(db.lastError().driverText());
-            db.close();
+    if (!database->isOpen()) {
+        if (!database->open()) {
+            QString errString=QString("OPEN DATABASE: failed (%1, %2, %3)\n").arg(db.lastError().number()).arg(db.lastError().databaseText()).arg(db.lastError().driverText());
             qCritical(qPrintable(errString));
             return false;
         }
+    }
 
-        QStringList tables = db.tables();   // grr. db.tables() holds open a lock on the database
+    bool hasChanges=false;
+    if (database->driverName() == QLatin1String("QSQLITE")) {
+#ifndef QTOPIA_CONTENT_INSTALLER
+        if (!checkIntegrity(*database, false)) {
+            // Attempt to recover by doing a vacuum.
+            database->exec( "VACUUM" );
+
+            if (!checkIntegrity(*database, true)) {
+                // Still no good, backup the old database to documents and create a new one.
+                database->close();
+
+                QFileSystem fs = QFileSystem::fromFileName(database->databaseName());
+                QDir backupDir( fs.documents() ? fs.documentsPath() : QFileSystem::documentsFileSystem().documentsPath() );
+                QString backup = QLatin1String( "qtopia_db.sqlite.corrupt000" );
+                for( int i = 0; backupDir.exists( backup ); backup = QString( "qtopia_db.sqlite.corrupt%1" ).arg( ++i, 3, 10, QLatin1Char( '0' ) ) );
+
+                QFile dbFile( db.databaseName() );
+
+                dbFile.copy( backupDir.absoluteFilePath( backup ) );
+
+                dbFile.remove();
+
+                // Should notify the user at this point that the database is corrupted and unrecoverable.
+                // Deferred to a later release due to string freeze: Task 193949.
+
+                if (!database->open()) {
+                    QString errString=QString("OPEN DATABASE: failed (%1, %2, %3)\n").arg(db.lastError().number()).arg(db.lastError().databaseText()).arg(db.lastError().driverText());
+                    qCritical(qPrintable(errString));
+                    return false;
+                }
+            }
+        }
+#endif
+
+        EXEC("PRAGMA synchronous = OFF");   // full/normal sync is safer, but by god slower.
+        EXEC("PRAGMA temp_store = memory");
+        EXEC("PRAGMA cache_size = 1000");
+        //EXEC("PRAGMA default_cache_size = 1000");
+    }
+    if (!database->transaction()) {
+        QString errString=QString("BEGIN TRANSACTION: failed (%1, %2, %3)\n").arg(database->lastError().number()).arg(database->lastError().databaseText()).arg(db.lastError().driverText());
+        db.close();
+        qCritical(qPrintable(errString));
+        return false;
+    }
+
+    QStringList tables = db.tables();   // grr. db.tables() holds open a lock on the database
 //         db.close();
 //         db.open();
         
@@ -365,179 +335,175 @@ bool QDBMigrationEngine::doMigrate(const QStringList &args)
 //
 
 #ifndef QTOPIA_CONTENT_INSTALLER
-        if(tables.contains("content")) // pre-existing database
+    if(tables.contains("content")) // pre-existing database
+    {
+        QSqlQuery xsql(db);
+        if(!tables.contains("versioninfo"))
         {
-            QSqlQuery xsql(db);
-            if(!tables.contains("versioninfo"))
-            {
-                EXEC("CREATE TABLE \"versioninfo\" \
-                        ( \
-                        tableName NVARCHAR (255) NOT NULL, \
-                        versionNum INTEGER NOT NULL, \
-                        lastUpdated NVARCHAR(20) NOT NULL, \
-                        PRIMARY KEY(tableName, versionNum) \
-                                            )");
-                hasChanges=true;
-            }
-            int user_version=0;
-            if(db.driverName() == QLatin1String("QSQLITE") && tableVersion("content") < 111)
-            {
-                CHECK(xsql.exec(QLatin1String("PRAGMA user_version")) && xsql.first());
-                user_version=xsql.value(0).toInt();
-                if(user_version < 105)
-                {
-                    qLog(Sql) << "Performing version 105 updates";
-                    EXEC("DROP TABLE content");
-                    EXEC("DROP TABLE contentProps");
-                    EXEC("DROP TABLE mapCategoryToContent");
-                    EXEC("DROP TABLE locationLookup");
-                    EXEC("DROP TABLE mimeTypeLookup");
-                    EXEC("DROP TRIGGER fkdc_mapCategoryToContent_content");
-                    EXEC("DROP TRIGGER fkdc_mapCategoryToContent_category");
-                    EXEC("DROP TRIGGER fkuc_mapCategoryToContent_category");
-                    EXEC("DROP TRIGGER fkdc_contentProps");
-                    EXEC("DROP TRIGGER fkuc_contentProps");
-                    QStringList tableslist;
-                    tableslist << "content" << "contentProps" << "mapCategoryToContent" << "locationLookup" << "mimeTypeLookup";
-                    CHECK(ensureSchema(tableslist));
-                    CHECK(setTableVersion("content", 105));
-                    CHECK(setTableVersion("contentProps", 105));
-                    CHECK(setTableVersion("mapCategoryToContent", 105));
-                    CHECK(setTableVersion("locationLookup", 105));
-                    CHECK(setTableVersion("mimeTypeLookup", 105));
-                    
-                    user_version = 105;
-                    hasChanges=true;
-                }
-                if(user_version < 106)
-                {
-                    qLog(Sql) << "Performing version 106 updates";
-                    if(!db.record(QLatin1String("categories")).contains(QLatin1String("categoryicon")))
-                    {
-                        EXEC("ALTER TABLE categories ADD categoryicon VARCHAR(255)");
-                    }
-                    EXEC("CREATE UNIQUE INDEX mCidCatIndex ON mapCategoryToContent ( cid, categoryid )");
-                    CHECK(setTableVersion("categories", 106));
-                    
-                    user_version = 106;
-                    hasChanges=true;
-                }
-                if(user_version < 107)
-                {
-                    qLog(Sql) << "Performing version 107 updates";
-                    EXEC("delete from content");
-                    EXEC("delete from contentProps");
-                    EXEC("delete from mapCategoryToContent");
-                    EXEC("delete from mimeTypeLookup");
-                    EXEC("delete from locationLookup");
-                    CHECK(setTableVersion("content", 107));
-                    CHECK(setTableVersion("contentProps", 107));
-                    CHECK(setTableVersion("mapCategoryToContent", 107));
-                    CHECK(setTableVersion("mimeTypeLookup", 107));
-                    CHECK(setTableVersion("locationLookup", 107));
-                    user_version = 107;
-                    hasChanges=true;
-                }
-                if(user_version < 108)
-                {
-                    qLog(Sql) << "Performing version 108 updates";
-                    if(!db.record(QLatin1String("categories")).contains("flags"))
-                        EXEC("ALTER TABLE categories ADD flags INTEGER");
-                    CHECK(setTableVersion("categories", 108));
-                    user_version = 108;
-                    hasChanges=true;
-                }
-                if(user_version < 109)
-                {
-                    xsql.prepare(QLatin1String("update categories set flags=1 where categoryid=:id"));
-                    xsql.bindValue(QLatin1String(":id"), QLatin1String("Business"));
-                    EXEC(xsql);
-                    xsql.bindValue(QLatin1String(":id"), QLatin1String("Personal"));
-                    EXEC(xsql);
-                    xsql.bindValue(QLatin1String(":id"), QLatin1String("SystemRingtones"));
-                    EXEC(xsql);
-                    CHECK(setTableVersion("categories", 109));
-                    user_version = 109;
-                    hasChanges=true;
-                }
-                if(user_version < 110)
-                {
-                    EXEC("ALTER TABLE content ADD uiNameSortOrder VARCHAR(100)");
-                    EXEC("CREATE INDEX cNameSortOrderIndex ON content ( uiNameSortOrder )");
-
-                    EXEC("CREATE TABLE databaseProperties("
-                            "key NVARCHAR (255) NOT NULL, "
-                            "property NVARCHAR (255) NOT NULL)");
-                }
-                CHECK(setTableVersion("content", 111));
-                CHECK(setTableVersion("contentProps", 111));
-                CHECK(setTableVersion("mapCategoryToContent", 111));
-                CHECK(setTableVersion("mimeTypeLookup", 111));
-                CHECK(setTableVersion("locationLookup", 111));
-                CHECK(setTableVersion("categories", 111));
-                CHECK(setTableVersion("databaseProperties",100));
-                user_version = 110;
-                hasChanges=true;
-
-            }
-            if (!db.tables().contains("categoryringtone"))
-            {
-                CHECK(ensureSchema("categoryringtone"));
-                CHECK(setTableVersion("categoryringtone", 110));
-            }
-            if(!db.tables().contains("mimeTypeMapping"))
-            {
-                CHECK(ensureSchema("mimeTypeMapping"));
-                CHECK(setTableVersion("mimeTypeMapping", 100));
-            }
+            EXEC("CREATE TABLE \"versioninfo\" \
+                    ( \
+                    tableName NVARCHAR (255) NOT NULL, \
+                    versionNum INTEGER NOT NULL, \
+                    lastUpdated NVARCHAR(20) NOT NULL, \
+                    PRIMARY KEY(tableName, versionNum) \
+                                        )");
+            hasChanges=true;
         }
-        else
-#endif // QTOPIA_CONTENT_INSTALLER
+        int user_version=0;
+        if(db.driverName() == QLatin1String("QSQLITE") && tableVersion("content") < 111)
         {
-            QStringList tableList;
-            tableList << "categories" << "content" << "mapCategoryToContent" << "locationLookup" << "contentProps";
-            CHECK(ensureSchema(tableList));
-            foreach(const QString &tableName, tableList)
-                CHECK(setTableVersion(tableName, 111));
-            CHECK(setTableVersion("mimeTypeLookup", 111));
-            CHECK(ensureSchema("categoryringtone"));
-            CHECK(setTableVersion("categoryringtone", 110));
-            CHECK(ensureSchema("mimeTypeMapping"));
-            CHECK(setTableVersion("mimeTypeMapping", 100));
-
-            if( !tables.contains("databaseProperties") )
+            CHECK(xsql.exec(QLatin1String("PRAGMA user_version")) && xsql.first());
+            user_version=xsql.value(0).toInt();
+            if(user_version < 105)
             {
+                qLog(Sql) << "Performing version 105 updates";
+                EXEC("DROP TABLE content");
+                EXEC("DROP TABLE contentProps");
+                EXEC("DROP TABLE mapCategoryToContent");
+                EXEC("DROP TABLE locationLookup");
+                EXEC("DROP TABLE mimeTypeLookup");
+                EXEC("DROP TRIGGER fkdc_mapCategoryToContent_content");
+                EXEC("DROP TRIGGER fkdc_mapCategoryToContent_category");
+                EXEC("DROP TRIGGER fkuc_mapCategoryToContent_category");
+                EXEC("DROP TRIGGER fkdc_contentProps");
+                EXEC("DROP TRIGGER fkuc_contentProps");
+                QStringList tableslist;
+                tableslist << "content" << "contentProps" << "mapCategoryToContent" << "locationLookup" << "mimeTypeLookup";
+                CHECK(ensureSchema(tableslist));
+                CHECK(setTableVersion("content", 105));
+                CHECK(setTableVersion("contentProps", 105));
+                CHECK(setTableVersion("mapCategoryToContent", 105));
+                CHECK(setTableVersion("locationLookup", 105));
+                CHECK(setTableVersion("mimeTypeLookup", 105));
+                
+                user_version = 105;
+                hasChanges=true;
+            }
+            if(user_version < 106)
+            {
+                qLog(Sql) << "Performing version 106 updates";
+                if(!db.record(QLatin1String("categories")).contains(QLatin1String("categoryicon")))
+                {
+                    EXEC("ALTER TABLE categories ADD categoryicon VARCHAR(255)");
+                }
+                EXEC("CREATE UNIQUE INDEX mCidCatIndex ON mapCategoryToContent ( cid, categoryid )");
+                CHECK(setTableVersion("categories", 106));
+                
+                user_version = 106;
+                hasChanges=true;
+            }
+            if(user_version < 107)
+            {
+                qLog(Sql) << "Performing version 107 updates";
+                EXEC("delete from content");
+                EXEC("delete from contentProps");
+                EXEC("delete from mapCategoryToContent");
+                EXEC("delete from mimeTypeLookup");
+                EXEC("delete from locationLookup");
+                CHECK(setTableVersion("content", 107));
+                CHECK(setTableVersion("contentProps", 107));
+                CHECK(setTableVersion("mapCategoryToContent", 107));
+                CHECK(setTableVersion("mimeTypeLookup", 107));
+                CHECK(setTableVersion("locationLookup", 107));
+                user_version = 107;
+                hasChanges=true;
+            }
+            if(user_version < 108)
+            {
+                qLog(Sql) << "Performing version 108 updates";
+                if(!db.record(QLatin1String("categories")).contains("flags"))
+                    EXEC("ALTER TABLE categories ADD flags INTEGER");
+                CHECK(setTableVersion("categories", 108));
+                user_version = 108;
+                hasChanges=true;
+            }
+            if(user_version < 109)
+            {
+                xsql.prepare(QLatin1String("update categories set flags=1 where categoryid=:id"));
+                xsql.bindValue(QLatin1String(":id"), QLatin1String("Business"));
+                EXEC(xsql);
+                xsql.bindValue(QLatin1String(":id"), QLatin1String("Personal"));
+                EXEC(xsql);
+                xsql.bindValue(QLatin1String(":id"), QLatin1String("SystemRingtones"));
+                EXEC(xsql);
+                CHECK(setTableVersion("categories", 109));
+                user_version = 109;
+                hasChanges=true;
+            }
+            if(user_version < 110)
+            {
+                EXEC("ALTER TABLE content ADD uiNameSortOrder VARCHAR(100)");
+                EXEC("CREATE INDEX cNameSortOrderIndex ON content ( uiNameSortOrder )");
+
                 EXEC("CREATE TABLE databaseProperties("
                         "key NVARCHAR (255) NOT NULL, "
                         "property NVARCHAR (255) NOT NULL)");
-                CHECK(setTableVersion("databaseProperties",100));
             }
-
+            CHECK(setTableVersion("content", 111));
+            CHECK(setTableVersion("contentProps", 111));
+            CHECK(setTableVersion("mapCategoryToContent", 111));
+            CHECK(setTableVersion("mimeTypeLookup", 111));
+            CHECK(setTableVersion("locationLookup", 111));
+            CHECK(setTableVersion("categories", 111));
+            CHECK(setTableVersion("databaseProperties",100));
+            user_version = 110;
             hasChanges=true;
+
         }
-        if(hasChanges)
+        if (!db.tables().contains("categoryringtone"))
         {
-            if(!db.commit())
-            {
-                QString errString=QString("COMMIT: failed (%1, %2, %3)\n").arg(db.lastError().number()).arg(db.lastError().databaseText()).arg(db.lastError().driverText());
-                db.rollback();
-                db.close();
-                qCritical(qPrintable(errString));
-                return false;
-            }
+            CHECK(ensureSchema("categoryringtone"));
+            CHECK(setTableVersion("categoryringtone", 110));
         }
-        else
-            db.rollback();
-
-        CHECK(verifyLocale( db ));
-
+        if(!db.tables().contains("mimeTypeMapping"))
+        {
+            CHECK(ensureSchema("mimeTypeMapping"));
+            CHECK(setTableVersion("mimeTypeMapping", 100));
+        }
     }
+    else
+#endif // QTOPIA_CONTENT_INSTALLER
+    {
+        QStringList tableList;
+        tableList << "categories" << "content" << "mapCategoryToContent" << "locationLookup" << "contentProps";
+        CHECK(ensureSchema(tableList));
+        foreach(const QString &tableName, tableList)
+            CHECK(setTableVersion(tableName, 111));
+        CHECK(setTableVersion("mimeTypeLookup", 111));
+        CHECK(ensureSchema("categoryringtone"));
+        CHECK(setTableVersion("categoryringtone", 110));
+        CHECK(ensureSchema("mimeTypeMapping"));
+        CHECK(setTableVersion("mimeTypeMapping", 100));
+
+        if( !tables.contains("databaseProperties") )
+        {
+            EXEC("CREATE TABLE databaseProperties("
+                    "key NVARCHAR (255) NOT NULL, "
+                    "property NVARCHAR (255) NOT NULL)");
+            CHECK(setTableVersion("databaseProperties",100));
+        }
+
+        hasChanges=true;
+    }
+    if (hasChanges) {
+        if(!db.commit())
+        {
+            QString errString=QString("COMMIT: failed (%1, %2, %3)\n").arg(db.lastError().number()).arg(db.lastError().databaseText()).arg(db.lastError().driverText());
+            db.rollback();
+            db.close();
+            qCritical(qPrintable(errString));
+            return false;
+        }
+    } else {
+        database->rollback();
+    }
+
+    CHECK(verifyLocale(*database));
 
 #ifndef QTOPIA_CONTENT_INSTALLER
     // do system-database only migrations
-    if(databaseIds.contains(0))
+    if (database->databaseName() == QtopiaSql::instance()->systemDatabase().databaseName())
     {
-        db=QtopiaSql::instance()->systemDatabase();
         if(db.isOpen()==false)
         CHECK(db.open());
         if(!db.transaction())
@@ -670,6 +636,10 @@ bool QDBMigrationEngine::checkIntegrity( const QSqlDatabase &database, bool prin
     {
         if( query.value( 0 ).toString() == QLatin1String( "ok" ) )
         {
+            // Integrity check passes some blatantly broken databases so try setting the synchronous
+            // mode here as that will fail if the database is corrupted.
+            EXEC("PRAGMA synchronous = OFF");
+
             return true;
         }
         else if( printErrors )
@@ -686,93 +656,5 @@ bool QDBMigrationEngine::checkIntegrity( const QSqlDatabase &database, bool prin
 }
 
 #ifndef QTOPIA_CONTENT_INSTALLER
-MigrationEngineService::MigrationEngineService( QObject *parent )
-        : QtopiaAbstractService( "DBMigrationEngine", parent )
-{
-    publishAll();
-    QtopiaApplication::instance()->registerRunningTask("dbmigrate");
-    unregistrationTimer.setSingleShot(true);
-    unregistrationTimer.setInterval(60000);
-    connect(&unregistrationTimer, SIGNAL(timeout()), this, SLOT(unregister()));
-}
-
-void MigrationEngineService::doMigrate( const QDSActionRequest &request )
-{
-    if(unregistrationTimer.isActive())
-        unregistrationTimer.stop();
-    unregistrationTimer.start();
-    QDSActionRequest requestCopy( request );
-    QString data=requestCopy.requestData().data();
-    if(QDBMigrationEngine::instance()->doMigrate(data.split("\n"))==true)
-        requestCopy.respond(QDSData(QByteArray("Y"), QMimeType("text/x-dbm-qstring")));
-    else
-        requestCopy.respond(QDSData(QByteArray("N"), QMimeType("text/x-dbm-qstring")));
-}
-
-void MigrationEngineService::unregister()
-{
-    QtopiaApplication::instance()->unregisterRunningTask("dbmigrate");
-}
-
-void MigrationEngineService::ensureTableExists( const QDSActionRequest &request )
-{
-    if(unregistrationTimer.isActive())
-        unregistrationTimer.stop();
-    unregistrationTimer.start();
-    QDSActionRequest requestCopy( request );
-    QString table=requestCopy.requestData().data();
-    QStringList script=QString(requestCopy.auxiliaryData().data()).split("\n");
-    if(script.count() < 5)
-    {
-        requestCopy.respond(QDSData(QByteArray("N"), QMimeType("text/x-dbm-qstring")));
-        return;
-    }
-
-    // set up the database connection...
-    QSqlDatabase db=QSqlDatabase::addDatabase(script.first(), QLatin1String("dbmigrateconnection"));
-    script.erase(script.begin());
-    db.setDatabaseName(script.first());
-    script.erase(script.begin());
-    db.setUserName(script.first());
-    script.erase(script.begin());
-    db.setPassword(script.first());
-    script.erase(script.begin());
-    db.setHostName(script.first());
-    script.erase(script.begin());
-    if(!db.open())
-    {
-        qLog(Sql) << "failed to open database";
-        requestCopy.respond(QDSData(QByteArray("N"), QMimeType("text/x-dbm-qstring")));
-        return;
-    }
-    db.open();
-    QDBMigrationEngine::instance()->setDatabase(db);
-
-    QStringList tables = QDBMigrationEngine::instance()->database().tables();
-    if (tables.contains(table, Qt::CaseInsensitive))
-    {
-        QDBMigrationEngine::instance()->setDatabase(QSqlDatabase());
-        db=QSqlDatabase();
-        QSqlDatabase::removeDatabase(QLatin1String("dbmigrateconnection"));
-        requestCopy.respond(QDSData(QByteArray("Y"), QMimeType("text/x-dbm-qstring")));
-        return;
-    }
-    
-    QTextStream ts(script.join("\n").toUtf8());
-    // read assuming utf8 encoding.
-    ts.setCodec(QTextCodec::codecForName("utf8"));
-    ts.setAutoDetectUnicode(true);
-
-    bool result = QDBMigrationEngine::instance()->loadSchema(ts, true);
-    QDBMigrationEngine::instance()->setDatabase(QSqlDatabase());
-    db.close();
-    db=QSqlDatabase();
-    QSqlDatabase::removeDatabase(QLatin1String("dbmigrateconnection"));
-    if (result)
-        requestCopy.respond(QDSData(QByteArray("Y"), QMimeType("text/x-dbm-qstring")));
-    else
-        requestCopy.respond(QDSData(QByteArray("N"), QMimeType("text/x-dbm-qstring")));
-}
-
-
+QTOPIA_EXPORT_PLUGIN(QDBMigrationEngine);
 #endif

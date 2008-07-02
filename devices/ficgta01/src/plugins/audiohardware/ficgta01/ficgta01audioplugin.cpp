@@ -53,14 +53,14 @@
 // gsmhandset.state
 // gsmbluetooth.state
 
-enum NeoAudioMode {
-    Mode_StereoOut,
-    Mode_GSMHandset,
-    Mode_GSMHeadset,
-    Mode_GSMBluetooth,
-    Mode_GSMSpeakerout,
-    Mode_CaptureHandset,
-    Mode_CaptureHeadset
+enum NeoAudioScenario {
+    Scenario_StereoOut,
+    Scenario_GSMHandset,
+    Scenario_GSMHeadset,
+    Scenario_GSMBluetooth,
+    Scenario_GSMSpeakerout,
+    Scenario_CaptureHandset,
+    Scenario_CaptureHeadset
 };
 
 static const char* mode_to_string[] = {
@@ -74,16 +74,16 @@ static const char* mode_to_string[] = {
 };
 
 
-static bool setAudioMode(NeoAudioMode audioMode)
+static bool setAudioScenario(NeoAudioScenario audioScenario)
 {
     QString confDir = QDir("/etc/alsa").exists() ? "/etc/alsa/" : "/etc/";
 
-    const char* mode = mode_to_string[static_cast<int>(audioMode)];
+    const char* mode = mode_to_string[static_cast<int>(audioScenario)];
     QString cmd = "/usr/sbin/alsactl -f " + confDir + mode + ".state restore";
     int result = system(cmd.toLocal8Bit());
 
     if (result == 0)
-        qLog(AudioState) << "setAudioMode(); using"<< QString( "/etc/alsa/%1.state").arg(mode);
+        qLog(AudioState) << "setAudioScenario(); using"<< QString( "/etc/alsa/%1.state").arg(mode);
     else
         qLog(AudioState)<< QString("Setting audio mode to: %1 failed").arg(mode);
 
@@ -243,7 +243,7 @@ bool BluetoothAudioState::enter(QAudio::AudioCapability capability)
 
     if (m_currAudioGateway || resetCurrAudioGateway()) {
         m_currAudioGateway->connectAudio();
-        m_isActive = setAudioMode(Mode_GSMBluetooth);
+        m_isActive = setAudioScenario(Scenario_GSMBluetooth);
     }
 
     return m_isActive;
@@ -315,7 +315,7 @@ bool HandsetAudioState::enter(QAudio::AudioCapability capability)
 
     qLog(AudioState) << "HHandsetAudioState::enter()" << "isPhone" << m_isPhone;
 
-    return setAudioMode(Mode_GSMHandset);
+    return setAudioScenario(Scenario_GSMHandset);
 }
 
 bool HandsetAudioState::leave()
@@ -375,7 +375,7 @@ bool MediaSpeakerAudioState::enter(QAudio::AudioCapability capability)
 
     Q_UNUSED(capability)
 
-    return setAudioMode(Mode_GSMSpeakerout);
+    return setAudioScenario(Scenario_StereoOut);
 }
 
 bool MediaSpeakerAudioState::leave()
@@ -438,7 +438,7 @@ bool MediaCaptureAudioState::enter(QAudio::AudioCapability capability)
 
     qLog(AudioState) << "MediaCaptureAudioState::enter()" << "isPhone" << m_isPhone;
 
-    return setAudioMode(Mode_CaptureHandset);
+    return setAudioScenario(Scenario_CaptureHandset);
 }
 
 bool MediaCaptureAudioState::leave()
@@ -607,7 +607,7 @@ bool SpeakerphoneAudioState::enter(QAudio::AudioCapability capability)
 
     qLog(AudioState)<< " SpeakerphoneAudioState::enter()";
 
-    return setAudioMode(Mode_GSMSpeakerout);
+    return setAudioScenario(Scenario_GSMSpeakerout);
 }
 
 bool SpeakerphoneAudioState::leave()
@@ -664,7 +664,7 @@ bool RingtoneAudioState::enter(QAudio::AudioCapability)
 {
     qLog(AudioState)<<" RingtoneAudioState::enter";
 
-    return setAudioMode(Mode_StereoOut);
+    return setAudioScenario(Scenario_StereoOut);
 }
 
 bool RingtoneAudioState::leave()

@@ -1125,3 +1125,40 @@ void QAtUtils::setOctalEscapes( bool value )
 {
     octalEscapesFlag = value;
 }
+
+enum QSMSDataCodingScheme {
+    QSMS_Compressed      = 0x0020,
+    QSMS_MessageClass    = 0x0010,
+    QSMS_DefaultAlphabet = 0x0000,
+    QSMS_8BitAlphabet    = 0x0004,
+    QSMS_UCS2Alphabet    = 0x0008,
+    QSMS_ReservedAlphabet= 0x000C
+};
+
+/*!
+    Decodes \a value according to the cell broadcast data coding scheme \a dcs.
+    The \a value is assumed to have been parsed by nextString() and be
+    compliant with section 5 of 3GPP TS 23.038.
+
+    \sa nextString()
+    \since 4.3.3
+*/
+QString QAtUtils::decodeString( const QString& value, uint dcs )
+{
+    // Extract just the alphabet bits.
+    QSMSDataCodingScheme scheme;
+    if ((dcs & 0xC0) == 0)
+        scheme = QSMS_DefaultAlphabet;  // Other bits indicate 7-bit GSM language.
+    else
+        scheme = (QSMSDataCodingScheme)(dcs & 0x0C);
+    if ( scheme == QSMS_UCS2Alphabet ) {
+        // The string is hex-encoded UCS-2.
+        return codec("ucs2")->toUnicode( value.toLatin1() );
+    } else if ( scheme == QSMS_8BitAlphabet ) {
+        // The string is 8-bit encoded in the current locale.
+        return QTextCodec::codecForLocale()->toUnicode( value.toLatin1() );
+    } else {
+        // Assume that everything else is in the default GSM alphabet.
+        return codec("gsm")->toUnicode( value.toLatin1() );
+    }
+}

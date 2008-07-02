@@ -56,3 +56,27 @@ PROJECTS-=libraries/qtopiamedia
 PROJECTS-=libraries/qtopiasmil
 PROJECTS-=libraries/qtopiaprinting
 THEMES=qtopia
+PROJECTS-=tools/phonesim
+PROJECTS-=tools/phonesim/lib
+PROJECTS-=tools/phonesim_target
+PROJECTS-=tools/device_updater
+# Disable Qt projects we don't want
+PROJECTS-=libraries/qt/qt3support
+PROJECTS-=libraries/qt/script
+PROJECTS-=libraries/qt/network
+PROJECTS-=libraries/qt/qtestlib
+PROJECTS-=tools/qt/lupdate
+PROJECTS-=tools/qt/assistant
+PROJECTS-=tools/qt/assistant/lib
+PROJECTS-=tools/qt/linguist
+PROJECTS-=tools/qt/designer/src/uitools
+PROJECTS-=tools/qt/designer/src/lib
+PROJECTS-=tools/qt/designer/src/components
+PROJECTS-=tools/qt/designer/src/designer
+PROJECTS-=tools/qt/designer/src/plugins
+PROJECTS-=libraries/qt/tools/uic3
+PROJECTS-=libraries/qt/opengl
+# Disable Qtopia Core projects we don't want
+PROJECTS-=libraries/qtopiacore/script
+PROJECTS-=libraries/qtopiacore/svg
+PROJECTS-=plugins/qtopiacore/iconengines/qtopiasvgiconengine

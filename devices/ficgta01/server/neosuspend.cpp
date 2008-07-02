@@ -64,31 +64,20 @@ bool NeoSuspend::suspend()
 {
     qLog(PowerManagement)<<"NeoSuspend::suspend()";
 
-    QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService", "setAmpMode(bool)");
-    e << false;
-
-//     QProcess apm;
-//     apm.start("apm", QStringList() << "-s");
-//     apm.waitForFinished(-1);
-
       QFile powerStateFile("/sys/power/state");
-     if( !powerStateFile.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
-         qWarning()<<"File not opened";
-     } else {
-         QTextStream out(&powerStateFile);
-         out << "mem";
-         powerStateFile.close();
-     }
-
+    if( !powerStateFile.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
+        qWarning()<<"File not opened";
+    } else {
+        QTextStream out(&powerStateFile);
+        out << "mem";
+        powerStateFile.close();
+    }
     return true;
 }
 
 bool NeoSuspend::wake()
 {
     qLog(PowerManagement)<<" NeoSuspend::wake()";
-
-    QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService", "setAmpMode(bool)");
-    e << true;
 
     QtopiaIpcEnvelope("QPE/Card", "mtabChanged()" ); // might have changed while asleep
 

@@ -78,7 +78,8 @@ public:
         QString qtopiaVersion;
         QString url;
         QString devices;
-        QString installedSize; //size after decompression
+        QString installedSize; //apparent size after decompression
+        QString fileCount; //number of files and directories in the package.
         QString type;
         bool isEnabled;
         bool isComplete( Source source = PackageInfo::PkgList, QString *reason = 0) const;
@@ -185,6 +186,7 @@ inline InstallControl::PackageInfo &InstallControl::PackageInfo::operator=( cons
     isEnabled = d.isEnabled;
     files = d.files; //files is deprecated
     installedSize = d.installedSize;
+    fileCount = d.fileCount;
     type = d.type;
     return *this;
 }

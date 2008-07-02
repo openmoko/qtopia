@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -65,8 +65,10 @@ static QByteArray normalizeType(const char *s, bool fixScope = false)
             last = *d++ = *s++;
         while (*s && is_space(*s))
             s++;
-        if (*s && is_ident_char(*s) && is_ident_char(last))
+        if (*s && ((is_ident_char(*s) && is_ident_char(last))
+                   || ((*s == ':') && (last == '<')))) {
             last = *d++ = ' ';
+        }
     }
     *d = '\0';
     QByteArray result;
@@ -212,8 +214,10 @@ Type Moc::parseType()
             QByteArray templ = lexemUntil(RANGLE);
             for (int i = 0; i < templ.size(); ++i) {
                 type.name += templ.at(i);
-                if (templ.at(i) == '>' && i < templ.size()-1 && templ.at(i+1) == '>')
+                if ((templ.at(i) == '<' && i < templ.size()-1 && templ.at(i+1) == ':')
+                    || (templ.at(i) == '>' && i < templ.size()-1 && templ.at(i+1) == '>')) {
                     type.name += ' ';
+                }
             }
         }
         if (test(SCOPE)) {

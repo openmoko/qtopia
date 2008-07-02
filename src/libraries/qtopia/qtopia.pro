@@ -144,7 +144,8 @@ QTOPIA_PRIVATE_HEADERS+=\
     motionpath_p.h \
     qthumbstyle_p.h \
     testslaveinterface_p.h \
-    qtagmap_p.h
+    qtagmap_p.h \
+    qtopiasqlmigrateplugin_p.h
 
 QTOPIA_SOURCES+=\
     qmimetype.cpp\
@@ -259,7 +260,8 @@ QTOPIA_SOURCES+=\
     qdocumentselectorsocketserver.cpp \
     qtopiaitemdelegate.cpp \
     motionpath_p.cpp \
-    qthumbstyle_p.cpp
+    qthumbstyle_p.cpp \
+    qtopiasqlmigrateplugin.cpp
 
     QTOPIA_HEADERS+=\
         qexportedbackground.h

@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -162,6 +162,9 @@ static void initWinTabFunctions();        // resolve the WINTAB api functions
 typedef QHash<UINT, QTabletDeviceData> QTabletCursorInfo;
 Q_GLOBAL_STATIC(QTabletCursorInfo, tCursorInfo)
 QTabletDeviceData currentTabletPointer;
+
+// from qregion_win.cpp
+extern HRGN qt_tryCreateRegion(QRegion::RegionType type, int left, int top, int right, int bottom);
 
 Q_CORE_EXPORT bool winPeekMessage(MSG* msg, HWND hWnd, UINT wMsgFilterMin,
                             UINT wMsgFilterMax, UINT wRemoveMsg);
@@ -2126,7 +2129,7 @@ LRESULT CALLBACK QtWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam
                         dispatch = !hittest || hittest->internalWinId() != curWin;
                     }
                     if (!dispatch) {
-                        HRGN hrgn = CreateRectRgn(0,0,0,0);
+                        HRGN hrgn = qt_tryCreateRegion(QRegion::Rectangle, 0,0,0,0);
                         if (GetWindowRgn(curWin, hrgn) != ERROR) {
                             QPoint lcpos = widget->mapFromGlobal(cpos);
                             dispatch = !PtInRegion(hrgn, lcpos.x(), lcpos.y());

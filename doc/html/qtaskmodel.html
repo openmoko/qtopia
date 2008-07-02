@@ -148,7 +148,7 @@
 <h3 class="fn"><a name="identifierField"></a><a href="qtaskmodel.html#Field-enum">Field</a> QTaskModel::identifierField ( const <a href="./qstring.html">QString</a> &amp; <i>identifier</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the task model field for the non-translated field <i>identifier</i>.</p>
 <p>See also <a href="qtaskmodel.html#fieldLabel">fieldLabel</a>(), <a href="qtaskmodel.html#fieldIcon">fieldIcon</a>(), and <a href="qtaskmodel.html#fieldIdentifier">fieldIdentifier</a>().</p>
-<h3 class="fn"><a name="match"></a><a href="./qmodelindex.html#qmodelindexlist-typedef">QModelIndexList</a> QTaskModel::match ( const <a href="./qmodelindex.html">QModelIndex</a> &amp; <i>start</i>, int <i>role</i>, const <a href="./qvariant.html">QVariant</a> &amp; <i>value</i>, int <i>hits</i> = 1, <a href="./qt.html#matchflags-typedef">Qt::MatchFlags</a> <i>flags</i> = Qt::MatchFlags( Qt::MatchStartsWith | Qt::MatchWrap ) ) const</h3>
+<h3 class="fn"><a name="match"></a><a href="./qmodelindex.html#QModelIndexList-typedef">QModelIndexList</a> QTaskModel::match ( const <a href="./qmodelindex.html">QModelIndex</a> &amp; <i>start</i>, int <i>role</i>, const <a href="./qvariant.html">QVariant</a> &amp; <i>value</i>, int <i>hits</i> = 1, <a href="./qt.html#MatchFlags-typedef">Qt::MatchFlags</a> <i>flags</i> = Qt::MatchFlags( Qt::MatchStartsWith | Qt::MatchWrap ) ) const</h3>
 <p>Returns a list of indexes for the items where the data matches the specified <i>value</i>. The list that is returned may be empty. The search starts from the <i>start</i> index.</p>
 <p>Currently unimplemented, this function ignores <i>start</i>, <i>role</i>, <i>value</i>, <i>hits</i> and <i>flags</i>.</p>
 <h3 class="fn"><a name="record"></a><a href="./qbytearray.html">QByteArray</a> QTaskModel::record ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>identifier</i>, const <a href="./qstring.html">QString</a> &amp; <i>format</i> = QString() ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
@@ -183,7 +183,7 @@
 <p>Sets the value for the specified <i>field</i> of the given <i>task</i> to <i>value</i>.</p>
 <p>Returns true if the task was modified.</p>
 <p>See also <a href="qtaskmodel.html#taskField">taskField</a>() and <a href="qtaskmodel.html#setData">setData</a>().</p>
-<h3 class="fn"><a name="sort"></a>void QTaskModel::sort ( int <i>column</i>, <a href="./qt.html#sortorder-enum">Qt::SortOrder</a> <i>order</i> = Qt::AscendingOrder )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="sort"></a>void QTaskModel::sort ( int <i>column</i>, <a href="./qt.html#SortOrder-enum">Qt::SortOrder</a> <i>order</i> = Qt::AscendingOrder )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Sorts the model by <i>column</i> in ascending order</p>
 <p>Currently <i>order</i> is ignored but may be implemented at a future date.</p>
 <p>Reimplemented from <a href="./qabstractitemmodel.html#sort">QAbstractItemModel</a>.</p>

@@ -50,6 +50,7 @@ public:
     bool clip;              // +CLIP unsolicited notification state
     bool qcam;              // *QCAM unsolicited notification state
     int cind;               // +CMER indicator reporting mode (0-2)
+    int cmer;               // +CMER indicator buffering mode (0-3)
     bool qsq;               // *QSQ signal quality notification state
     bool qbc;               // *QBC battery charge notification state
     int creg;               // +CREG unsolicited notification state

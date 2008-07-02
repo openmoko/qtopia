@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -49,6 +49,50 @@
 #include "qregion.h"
 #include "qt_windows.h"
 
+/*
+    In Windows versions before Windows Vista CreateRectRgn - when called in a multi-threaded
+    environment - might return an invalid handle. This function works around this limitation
+    by verifying the handle with a quick GetRegionData() call and re-creates the region
+    if necessary.
+*/
+HRGN qt_tryCreateRegion(QRegion::RegionType type, int left, int top, int right, int bottom)
+{ 
+    const int tries = 10;
+    for (int i = 0; i < tries; ++i) { 
+        HRGN region;
+        switch (type) {
+        case QRegion::Rectangle:
+            region = CreateRectRgn(left, top, right, bottom); 
+            break;
+        case QRegion::Ellipse:
+            region = CreateEllipticRgn(left, top, right, bottom);
+            break;
+        }
+        if (region) { 
+            if (GetRegionData(region, 0, 0)) 
+                return region; 
+            else 
+                DeleteObject(region);         
+        } 
+    } 
+    return 0; 
+}
+
+HRGN qt_tryCreatePolygonRegion(const QPolygon &a, Qt::FillRule fillRule)
+{ 
+    const int tries = 10;
+    for (int i = 0; i < tries; ++i) { 
+        HRGN region = CreatePolygonRgn(reinterpret_cast<const POINT*>(a.data()), a.size(),
+                                       fillRule == Qt::OddEvenFill ? ALTERNATE : WINDING);
+        if (region) { 
+            if (GetRegionData(region, 0, 0)) 
+                return region; 
+            else 
+                DeleteObject(region);         
+        } 
+    } 
+    return 0; 
+}
 
 QRegion::QRegionData QRegion::shared_empty = { Q_ATOMIC_INIT(1), 0 };
 
@@ -67,11 +111,11 @@ QRegion::QRegion(const QRect &r, RegionType t)
         d = new QRegionData;
         d->ref.init(1);
         if (t == Rectangle)
-            d->rgn = CreateRectRgn(r.left(), r.top(), r.x() + r.width(), r.y() + r.height());
+            d->rgn = qt_tryCreateRegion(t, r.left(), r.top(), r.x() + r.width(), r.y() + r.height());
 #ifndef Q_OS_TEMP
         else if (t == Ellipse) {
             // need to add 1 to width/height for the ellipse to have correct boundingrect.
-            d->rgn = CreateEllipticRgn(r.x(), r.y(), r.x() + r.width() + 1, r.y() + r.height() + 1);
+            d->rgn = qt_tryCreateRegion(t, r.x(), r.y(), r.x() + r.width() + 1, r.y() + r.height() + 1);
         }
 #endif
     }
@@ -85,8 +129,7 @@ QRegion::QRegion(const QPolygon &a, Qt::FillRule fillRule)
     } else {
         d = new QRegionData;
         d->ref.init(1);
-        d->rgn = CreatePolygonRgn(reinterpret_cast<const POINT*>(a.data()), a.size(),
-                                  fillRule == Qt::OddEvenFill ? ALTERNATE : WINDING);
+        d->rgn = qt_tryCreatePolygonRegion(a, fillRule);
     }
 }
 
@@ -185,7 +228,7 @@ HRGN qt_win_bitmapToRegion(const QBitmap& bitmap)
 
     if (!region) {
         // Surely there is some better way.
-        region = CreateRectRgn(0,0,1,1);
+        region = qt_tryCreateRegion(QRegion::Rectangle, 0,0,1,1);
         CombineRgn(region, region, region, RGN_XOR);
     }
     return region;
@@ -237,7 +280,7 @@ QRegion QRegion::copy() const
     QRegionData *x = new QRegionData;
     x->ref.init(1);
     if (d->rgn) {
-        x->rgn = CreateRectRgn(0, 0, 2, 2);
+        x->rgn = qt_tryCreateRegion(QRegion::Rectangle, 0, 0, 2, 2);
         CombineRgn(x->rgn, d->rgn, 0, RGN_COPY);
     } else {
         x->rgn = 0;
@@ -319,7 +362,7 @@ QRegion QRegion::winCombine(const QRegion &r, int op) const
     int allCombineRgnResults = NULLREGION;
     QRegion result;
     result.detach();
-    result.d->rgn = CreateRectRgn(0, 0, 0, 0);
+    result.d->rgn = qt_tryCreateRegion(QRegion::Rectangle, 0, 0, 0, 0);
     if (d->rgn && r.d->rgn)
         allCombineRgnResults = CombineRgn(result.d->rgn, d->rgn, r.d->rgn, both);
     else if (d->rgn && left != RGN_NOP)

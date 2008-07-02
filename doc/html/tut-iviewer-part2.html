@@ -117,7 +117,7 @@
 <p>In this list screen, it would be nice to open the image directly when the &quot;Select&quot; key (usually the center button on the direction pad) is pressed. There are two options here.</p>
 <ul>
 <li>1. connect to signal <tt>activated(const QModelIndex &amp;)</tt> of the list widget</li>
-<li>2. override the <tt>keyPressed(QKeyEvent *event)</tt> method to intercept the <a href="./qt.html#key-enum">Qt::Key_Select</a> key.</li>
+<li>2. override the <tt>keyPressed(QKeyEvent *event)</tt> method to intercept the <a href="./qt.html#Key-enum">Qt::Key_Select</a> key.</li>
 </ul>
 <p>Both will be described.</p>
 <a name="opening-image-using-signals-and-slots"></a>
@@ -132,7 +132,7 @@
     }</pre>
 <a name="opening-image-using-key-events"></a>
 <h3>Opening image using key Events</h3>
-<p>As seen previously, the <tt>keyPressed(QKeyEvent)</tt> method has to be override to handle the <a href="./qt.html#key-enum">Qt::Key_Select</a> key. The keyPressed method is defined in the <a href="./qwidget.html">QWidget</a> class. There is also the partner method keyReleased. Both take a <a href="./qkeyevent.html">QKeyEvent</a> as parameter.</p>
+<p>As seen previously, the <tt>keyPressed(QKeyEvent)</tt> method has to be override to handle the <a href="./qt.html#Key-enum">Qt::Key_Select</a> key. The keyPressed method is defined in the <a href="./qwidget.html">QWidget</a> class. There is also the partner method keyReleased. Both take a <a href="./qkeyevent.html">QKeyEvent</a> as parameter.</p>
 <pre>    void ListScreen::keyPressEvent(QKeyEvent* event)
     {
         switch (event-&gt;key()) {

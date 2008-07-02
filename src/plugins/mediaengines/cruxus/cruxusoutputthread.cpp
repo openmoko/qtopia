@@ -78,7 +78,7 @@ private:
 
 void OutputThreadPrivate::run()
 {
-    unsigned long   timeout = ULONG_MAX;
+    unsigned long   timeout = 30000;
 
     quit = false;
 
@@ -101,35 +101,42 @@ void OutputThreadPrivate::run()
     do
     {
         QMutexLocker    conditionLock(&mutex);
+
         int             sc = activeSessions.size();
 
-        if (sc == 0)
-            condition.wait(&mutex, timeout);
-        else
-        {
+        if (sc == 0) {
+            if(!condition.wait(&mutex, timeout) && opened) {
+                audioOutput->close();
+                opened = false;
+                timeout = ULONG_MAX;
+            }
+        } else {
+            bool    first = true;
             int     mixLength = 0;
             char    working[default_frame_size];
 
-            for (int i = 0; i < sc; --sc)
-            {
+            for (int i = 0; i < sc; ++i) {
                 QMediaDevice* input = activeSessions.at(i);
                 QMediaDevice::Info const& info = input->dataType();
 
                 int read = readFromDevice(input, info, working);
 
-                if (read > 0)
-                {
-                    if (info.volume > 0)
-                        mixLength = qMax(resampleAndMix(info, working, read, i++ == 0), mixLength);
+                if (read > 0) {
+                    if (info.volume > 0) {
+                        mixLength = qMax(resampleAndMix(info, working, read, first), mixLength);
+                        first = false;
+                    }
                 }
-                else
+                else {
                     activeSessions.removeAt(i);
+                    --sc;
+                }
             }
 
             if (mixLength > 0)
                 audioOutput->write(mixbuf, mixLength);
 
-            timeout = activeSessions.size() > 0 ? 0 : ULONG_MAX;
+            timeout = activeSessions.size() > 0 ? 0 : 30000;
         }
 
     } while (!quit);
@@ -359,6 +366,11 @@ void OutputThread::close()
 void OutputThread::deviceReady()
 {
     QMutexLocker    lock(&d->mutex);
+
+    if(!d->opened) {
+        d->audioOutput->open(QIODevice::ReadWrite | QIODevice::Unbuffered);
+        d->opened = true;
+    }
 
     d->activeSessions.append(qobject_cast<QMediaDevice*>(sender()));
 

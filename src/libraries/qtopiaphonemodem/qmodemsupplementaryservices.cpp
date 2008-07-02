@@ -139,5 +139,7 @@ void QModemSupplementaryServices::cusd( const QString& msg )
     uint posn = 6;
     uint mflag = QAtUtils::parseNumber( msg, posn );
     QString value = QAtUtils::nextString( msg, posn );
+    uint dcs = QAtUtils::parseNumber( msg, posn );
+    value = QAtUtils::decodeString( value, dcs );
     emit unstructuredNotification( (UnstructuredAction)mflag, value );
 }

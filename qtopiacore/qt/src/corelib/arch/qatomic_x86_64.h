@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -151,6 +151,7 @@ inline int q_atomic_fetch_and_add_release_int(volatile int *ptr, int value)
 extern "C" {
     int q_atomic_test_and_set_int(volatile int *ptr, int expected, int newval);
     int q_atomic_test_and_set_ptr(volatile void *ptr, void *expected, void *newval);
+    int q_atomic_fetch_and_add_int(volatile int *ptr, int value);
 } // extern "C"
 
 inline int q_atomic_test_and_set_acquire_int(volatile int *ptr, int expected, int newval)
@@ -205,6 +206,16 @@ inline void *q_atomic_set_ptr(volatile void *ptr, void *newval)
             break;
     }
     return expected;
+}
+
+inline int q_atomic_fetch_and_add_acquire_int(volatile int *ptr, int value)
+{
+    return q_atomic_fetch_and_add_int(ptr, value);
+}
+
+inline int q_atomic_fetch_and_add_release_int(volatile int *ptr, int value)
+{
+    return q_atomic_fetch_and_add_int(ptr, value);
 }
 
 #endif

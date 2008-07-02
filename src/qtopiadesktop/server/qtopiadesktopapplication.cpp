@@ -449,6 +449,7 @@ void QtopiaDesktopApplication::setupPlugins()
             connect( mainWindow, SIGNAL(settings()), settingsDialog, SLOT(show()) );
             connect( mainWindow, SIGNAL(quit()), this, SLOT(filequit()) );
             connect( mainWindow, SIGNAL(syncall()), this, SLOT(syncall()) );
+            connect( mainWindow, SIGNAL(syncallslow()), this, SLOT(syncallslow()) );
 #if 0
             connect( mainWindow, SIGNAL(import()), this, SLOT() );
             connect( mainWindow, SIGNAL(sync()), this, SLOT() );
@@ -647,6 +648,20 @@ void QtopiaDesktopApplication::syncall()
     delete syncManager;
     syncManager = 0;
     { QCopEnvelope e("QPE/QDSync", "syncEnd()"); }
+}
+
+void QtopiaDesktopApplication::syncallslow()
+{
+    TRACE(QDA) << "QtopiaDesktopApplication::syncallslow";
+    if ( syncManager ) {
+        LOG() << "Can't call syncall() while a sync is in progress!";
+        return;
+    }
+    DesktopSettings settings("settings");
+    settings.setValue("ForceSlowSync", true);
+    settings.sync();
+    syncall();
+    settings.setValue("ForceSlowSync", false);
 }
 
 void QtopiaDesktopApplication::serverMessage( const QString &message, const QByteArray &data )

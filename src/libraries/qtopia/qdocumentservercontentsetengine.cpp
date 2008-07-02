@@ -41,11 +41,7 @@ QDocumentServerContentSetEngine::QDocumentServerContentSetEngine( const QContent
     , m_setId( setId )
     , m_store( store )
     , m_count( 0 )
-    , m_refreshPending( false )
-    , m_filterDirty( true )
-    , m_sortDirty( true )
 {
-    refresh( false );
 }
 
 QDocumentServerContentSetEngine::~QDocumentServerContentSetEngine()
@@ -55,9 +51,6 @@ QDocumentServerContentSetEngine::~QDocumentServerContentSetEngine()
 
 QContent QDocumentServerContentSetEngine::content( int index ) const
 {
-    if( m_refreshPending )
-        const_cast< QDocumentServerContentSetEngine * >( this )->performRefresh();
-
     return QContentSetEngine::content( index );
 }
 
@@ -66,9 +59,6 @@ QContent QDocumentServerContentSetEngine::content( int index ) const
  */
 int QDocumentServerContentSetEngine::count() const
 {
-    if( m_refreshPending )
-        const_cast< QDocumentServerContentSetEngine * >( this )->performRefresh();
-
     return m_count;
 }
 
@@ -85,11 +75,7 @@ bool QDocumentServerContentSetEngine::isEmpty() const
  */
 void QDocumentServerContentSetEngine::filterChanged( const QContentFilter &filter )
 {
-    Q_UNUSED( filter );
-
-    m_filterDirty = true;
-
-    refresh( true );
+    m_store->setContentSetFilter(m_setId, filter);
 }
 
 /*!
@@ -97,11 +83,7 @@ void QDocumentServerContentSetEngine::filterChanged( const QContentFilter &filte
  */
 void QDocumentServerContentSetEngine::sortCriteriaChanged( const QContentSortCriteria &order )
 {
-    Q_UNUSED( order );
-
-    m_sortDirty = true;
-
-    refresh( true );
+    m_store->setContentSetSortOrder(m_setId, order);
 }
 
 /*!
@@ -110,8 +92,6 @@ void QDocumentServerContentSetEngine::sortCriteriaChanged( const QContentSortCri
 void QDocumentServerContentSetEngine::insertContent( const QContent &content )
 {
     m_store->insertContentIntoSet( m_setId, content );
-
-    refresh( false );
 }
 
 /*!
@@ -120,8 +100,6 @@ void QDocumentServerContentSetEngine::insertContent( const QContent &content )
 void QDocumentServerContentSetEngine::removeContent( const QContent &content )
 {
     m_store->removeContentFromSet( m_setId, content );
-
-    refresh( false );
 }
 
 /*!
@@ -131,13 +109,20 @@ void QDocumentServerContentSetEngine::clear()
 {
     setFilter( QContentFilter() );
     setSortCriteria( QContentSortCriteria() );
+    m_store->clearContentSet(m_setId);
+}
 
-    if( updateMode() == QContentSet::Synchronous )
-    {
-        m_count = 0;
+/*!
+    \reimp
+*/
+void QDocumentServerContentSetEngine::commitChanges()
+{
+    m_store->commitContentSet(m_setId);
+
+    if (updateMode() == QContentSet::Synchronous) {
         clearCache();
 
-        emit reset();
+        m_count = m_store->contentSetCount(m_setId);
     }
 }
 
@@ -182,65 +167,6 @@ void QDocumentServerContentSetEngine::refreshContent( int start, int end )
     refreshRange( start, count );
 
     emit contentChanged( start, end );
-}
-
-void QDocumentServerContentSetEngine::emitContentChanged( const QContentIdList &contentIds, QContent::ChangeType change )
-{
-    emit contentChanged( contentIds, change );
-}
-
-void QDocumentServerContentSetEngine::emitContentChanged()
-{
-    emit contentChanged();
-}
-
-void QDocumentServerContentSetEngine::emitReset()
-{
-    m_count = 0;
-    clearCache();
-
-    m_refreshPending = updateMode() == QContentSet::Synchronous;
-
-    emit reset();
-}
-
-void QDocumentServerContentSetEngine::performRefresh()
-{
-    if( m_refreshPending )
-    {
-        m_refreshPending = false;
-
-        if( m_filterDirty && m_sortDirty )
-            m_store->setContentSetCriteria( m_setId, filter(), sortCriteria() );
-        else if( m_filterDirty )
-            m_store->setContentSetFilter( m_setId, filter() );
-        else if( m_sortDirty )
-            m_store->setContentSetSortOrder( m_setId, sortCriteria() );
-
-        if( updateMode() == QContentSet::Synchronous )
-        {
-            m_count = m_store->contentSetCount( m_setId );
-            clearCache();
-        }
-    }
-}
-
-/*!
-    Requeries the content of the set.
- */
-void QDocumentServerContentSetEngine::refresh( bool reset )
-{
-    if( !m_refreshPending )
-    {
-        m_refreshPending = true;
-
-        QTimer::singleShot( 0, this, SLOT(performRefresh()) );
-    }
-
-    if( reset && updateMode() == QContentSet::Synchronous )
-    {
-        emit this->reset();
-    }
 }
 
 QContentList QDocumentServerContentSetEngine::values( int index, int count )

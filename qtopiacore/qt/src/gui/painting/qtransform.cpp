@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -1602,7 +1602,7 @@ QTransform::operator QVariant() const
     \fn bool QTransform::isRotating() const
 
     Returns true if the matrix represents some kind of a
-    scaling transformation, otherwise returns false.
+    rotating transformation, otherwise returns false.
 
     \sa reset()
 */

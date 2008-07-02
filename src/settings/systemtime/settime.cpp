@@ -372,15 +372,17 @@ void SetDateTime::tzChange( const QString &tz )
     QDateTime newDateTime = QTimeZone(tz.toLatin1())
             .convert( QDateTime::currentDateTime(), QTimeZone::current() );
 
-    // Ignore this date change
-    bool olddc = dateChanged;
-    date->setDate( newDateTime.date() );
-    dateChanged = olddc;
+    if (!dateChanged) {
+        // Ignore this date change
+        date->setDate( newDateTime.date() );
+        dateChanged = false;
+    }
 
-    // Ignore this time change
-    bool oldtc = timeChanged;
-    time->setTime( newDateTime.time() );
-    timeChanged = oldtc;
+    if (!timeChanged) {
+        // Ignore this time change
+        time->setTime( newDateTime.time() );
+        timeChanged = false;
+    }
 
     tzChanged = true;
 }

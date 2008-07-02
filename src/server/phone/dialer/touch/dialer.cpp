@@ -508,6 +508,7 @@ QMenu *Dialer::characterMenu()
 PhoneTouchDialerScreen::PhoneTouchDialerScreen(QWidget *parent, Qt::WFlags flags)
 : QAbstractDialerScreen(parent, flags)
 {
+    setWindowTitle( tr("Dialer") );
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setSpacing(0);
     layout->setMargin(0);

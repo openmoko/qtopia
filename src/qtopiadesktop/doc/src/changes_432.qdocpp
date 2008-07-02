@@ -22,6 +22,17 @@ This page describes changes to Qtopia Sync Agent 4.3.2.
 \o Tasks modified in the server are now changed on the device.
 \o The \l{Sync Manager} page documents the merge algorithm used by Qtopia Sync Agent.
 \o The \l{qdsync Protocol} has been ammended to close a security hole related to \c CALLB messages.
+\o You can now force a slow sync (look in the Tools menu). Note that a slow sync will create many
+   duplicate records due to how the merge algorithm works and because Qtopia and Outlook generate
+   different XML for the same record.
+\o Fixed a problem where a slow sync (forced or otherwise) causes identifier mappings to be lost.
+   Identifier mappings are now stored with a dataset. Qtopia Sync Agent associates a dataset
+   with the existing mappings as it maps them so the upgrade process is gradual.
+\o Fixed the XML writing code that the Outlook plugin uses to avoid text encoding bugs.
+\o Fixed a Synchronization bug causing Outlook appointments with no alarm to be only partially
+   transferred to Qtopia.
+\o Correctly parse long items so that notes are transferred in full.
+\o The clock does not need to be set the same on the client and desktop.
 \endlist
 
 \section1 Known issues

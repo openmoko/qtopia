@@ -38,6 +38,9 @@ stub {
 }
 
 # Run the test (ignore errors so that all the tests can run)
-test.commands=$$OUT_PWD/$$TARGET $(ARGS)
+test.commands=$$COMMAND_HEADER\
+    export QPEHOME=\$\$(mktemp -d /tmp/qtopia_maketest_XXXXXX);\
+    $$OUT_PWD/$$TARGET $(ARGS);\
+    rm -rf \$\$QPEHOME
 test.depends+=all
 QMAKE_EXTRA_TARGETS+=test

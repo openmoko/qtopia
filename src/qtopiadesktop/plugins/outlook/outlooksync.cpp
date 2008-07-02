@@ -162,20 +162,8 @@ QDateTime OutlookSyncPlugin::stringToDateTime( const QString &string, bool utc )
 QString OutlookSyncPlugin::escape( const QString &string )
 {
     QString ret = string;
-    ret.replace(QRegExp("&"), "&amp;");
-    ret.replace(QRegExp(">"), "&gt;");
-    ret.replace(QRegExp("<"), "&lt;");
     ret.replace(QRegExp("\r\n"), "\n"); // convert to Unix line endings
     ret.replace(QRegExp("\n$"), ""); // remove the trailing newline
-    return ret;
-}
-
-QString OutlookSyncPlugin::unescape( const QString &string )
-{
-    QString ret = string;
-    ret.replace(QRegExp("&lt;"), "<");
-    ret.replace(QRegExp("&gt;"), ">");
-    ret.replace(QRegExp("&amp;"), "&");
     return ret;
 }
 
@@ -207,7 +195,7 @@ bool OutlookSyncPlugin::getIdentifier( const QByteArray &record, QString &id, bo
                 break;
             case QXmlStreamReader::Characters:
                 if (isIdent)
-                    id = unescape(reader.text().toString());
+                    id = reader.text().toString();
                 break;
             default:
                 break;
@@ -216,6 +204,84 @@ bool OutlookSyncPlugin::getIdentifier( const QByteArray &record, QString &id, bo
             break;
     }
     return true;
+}
+
+QString OutlookSyncPlugin::dump_item_class( Outlook::OlObjectClass item_class )
+{
+#define CASE(x) case Outlook::x: return #x;
+    switch ( item_class ) {
+        CASE(olApplication)
+        CASE(olNamespace)
+        CASE(olFolder)
+        CASE(olRecipient)
+        CASE(olAttachment)
+        CASE(olAddressList)
+        CASE(olAddressEntry)
+        CASE(olFolders)
+        CASE(olItems)
+        CASE(olRecipients)
+        CASE(olAttachments)
+        CASE(olAddressLists)
+        CASE(olAddressEntries)
+        CASE(olAppointment)
+        CASE(olMeetingRequest)
+        CASE(olMeetingCancellation)
+        CASE(olMeetingResponseNegative)
+        CASE(olMeetingResponsePositive)
+        CASE(olMeetingResponseTentative)
+        CASE(olRecurrencePattern)
+        CASE(olExceptions)
+        CASE(olException)
+        CASE(olAction)
+        CASE(olActions)
+        CASE(olExplorer)
+        CASE(olInspector)
+        CASE(olPages)
+        CASE(olFormDescription)
+        CASE(olUserProperties)
+        CASE(olUserProperty)
+        CASE(olContact)
+        CASE(olDocument)
+        CASE(olJournal)
+        CASE(olMail)
+        CASE(olNote)
+        CASE(olPost)
+        CASE(olReport)
+        CASE(olRemote)
+        CASE(olTask)
+        CASE(olTaskRequest)
+        CASE(olTaskRequestUpdate)
+        CASE(olTaskRequestAccept)
+        CASE(olTaskRequestDecline)
+        CASE(olExplorers)
+        CASE(olInspectors)
+        CASE(olPanes)
+        CASE(olOutlookBarPane)
+        CASE(olOutlookBarStorage)
+        CASE(olOutlookBarGroups)
+        CASE(olOutlookBarGroup)
+        CASE(olOutlookBarShortcuts)
+        CASE(olOutlookBarShortcut)
+        CASE(olDistributionList)
+        CASE(olPropertyPageSite)
+        CASE(olPropertyPages)
+        CASE(olSyncObject)
+        CASE(olSyncObjects)
+        CASE(olSelection)
+        CASE(olLink)
+        CASE(olLinks)
+        CASE(olSearch)
+        CASE(olResults)
+        CASE(olViews)
+        CASE(olView)
+        CASE(olItemProperties)
+        CASE(olItemProperty)
+        CASE(olReminders)
+        CASE(olReminder)
+#undef CASE
+        default:
+            return QString("Unknown (%1)").arg((int)item_class);
+    }
 }
 
 void OutlookSyncPlugin::init_item( IDispatchPtr dispatch )
@@ -304,8 +370,10 @@ void OTSyncObject::waitForAbort()
     TRACE(OutlookSyncPlugin) << "OTSyncObject::abort";
 }
 
-void OTSyncObject::fetchChangesSince( const QDateTime &timestamp )
+void OTSyncObject::fetchChangesSince( const QDateTime &_timestamp )
 {
+    // Outlook timestamps are in local time
+    QDateTime timestamp = _timestamp.toLocalTime();
     TRACE(OutlookSyncPlugin) << "OTSyncObject::fetchChangesSince" << "timestamp" << timestamp;
     QStringList leftover = rememberedIds;
     Outlook::MAPIFolderPtr folder = o->ns->GetDefaultFolder(q->folderEnum());
@@ -326,14 +394,19 @@ void OTSyncObject::fetchChangesSince( const QDateTime &timestamp )
         if ( rememberedIds.contains(id) )
             leftover.removeAt( leftover.indexOf(id) );
         // Skip items that are of the wrong class
-        if ( !q->isValidObject(items->Item(item_to_get)) ) continue;
+        if ( !q->isValidObject(items->Item(item_to_get)) ) {
+            LOG() << "Item is not valid";
+            continue;
+        }
         if ( lm >= timestamp ) {
             QBuffer buffer;
             buffer.open( QIODevice::WriteOnly );
             {
                 // scoped to ensure everything gets flushed out
-                QTextStream stream( &buffer );
+                QXmlStreamWriter stream( &buffer );
+                stream.writeStartDocument();
                 q->dump_item(items->Item(item_to_get), stream);
+                stream.writeEndDocument();
             }
             LOG() << "remembered?" << (bool)rememberedIds.contains(id);
             if ( timestamp.isNull() || !rememberedIds.contains(id) ) {
@@ -442,7 +515,10 @@ void OTSyncObject::removeClientRecord(const QString &identifier)
         QDateTime lm;
         long item_to_get = i+1;
         // Skip items that are of the wrong class
-        if ( !q->isValidObject(items->Item(item_to_get)) ) continue;
+        if ( !q->isValidObject(items->Item(item_to_get)) ) {
+            LOG() << "Item is not valid";
+            continue;
+        }
         q->getProperties( items->Item(item_to_get), id, lm );
         if ( id.isEmpty() ) // A COM error occurred while reading this item!
             continue;
@@ -473,7 +549,10 @@ IDispatchPtr OTSyncObject::findItem( const QString &entryid )
             QDateTime lm;
             long item_to_get = i+1;
             // Skip items that are of the wrong class
-            if ( !q->isValidObject(items->Item(item_to_get)) ) continue;
+            if ( !q->isValidObject(items->Item(item_to_get)) ) {
+                LOG() << "Item is not valid";
+                continue;
+            }
             q->getProperties( items->Item(item_to_get), id, lm );
             if ( id.isEmpty() ) // A COM error occurred while reading this item!
                 continue;
@@ -506,10 +585,9 @@ void OTSyncObject::setPreviousBuffer( const QString &id, const QByteArray &data 
 {
     CacheSettings settings(q->id());
     settings.beginGroup("cache");
-    if (data.count()) {
-        qDebug() << "saving previous buffer";
+    if (data.count())
         settings.setValue(id, QString(data));
-    } else
+    else
         settings.remove(id);
 }
 

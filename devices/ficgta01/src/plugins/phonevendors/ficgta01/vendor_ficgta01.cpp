@@ -287,25 +287,27 @@ void Ficgta01PhoneBook::cstatNotification( const QString& msg )
 {
     QString entity = msg.mid( 8, 3);
 
-    if( entity == "PHB") {
-// phonebook
-
-        uint status = msg.mid(13).toInt();
-        if(status == 1) {
-            phoneBooksReady();
-        }
-
-    } else if (entity == "RDY" ) {
-    } else if (entity == "SMS") {
-    }
-
-    // "%CSTAT: PHB, 0"
-    // %CSTAT: <entity>,<status>
+    bool phonebkOk = false;
+    bool smsOk = false;
     // PHB (phone book)
     // SMS
     // RDY (Ready when both PHB and SMS have reported they are ready)
-    //
-    //
+
+    if( entity == "PHB") {
+        phonebkOk = true;
+    } else if (entity == "SMS") {
+        smsOk = true;
+    } else if (entity == "RDY" ) {
+        smsOk = true;
+        phonebkOk = true;
+    }
+
+    uint status = msg.mid(13).toInt();
+    if(status == 1) {
+        if (phonebkOk)
+            phoneBooksReady();
+        if (smsOk)
+            service->post( "smsready" );    }
 }
 
 Ficgta01PinManager::Ficgta01PinManager( QModemService *service )
@@ -335,7 +337,7 @@ static BandInfo const bandInfo[] = {
     {"DCS 1800",            2},
     {"PCS 1900",            4},
     {"E-GSM",               8},
-/*    {"GSM 850",             16}, */
+    {"GSM 850",             16},
     {"Tripleband 900/1800/1900", 15},
 };
 #define numBands    ((int)(sizeof(bandInfo) / sizeof(BandInfo)))
@@ -358,14 +360,14 @@ void Ficgta01BandSelection::requestBand()
 
 void Ficgta01BandSelection::requestBands()
 {
-    QStringList list;
-    for ( int index = 0; index < numBands; ++index ) {
-        list += QString( bandInfo[index].name );
-    }
-    emit bands( list );
+//     QStringList list;
+//     for ( int index = 0; index < numBands; ++index ) {
+//         list += QString( bandInfo[index].name );
+//     }
+//     emit bands( list );
 
-//     service->primaryAtChat()->chat
-//         ( "AT%BAND=?", this, SLOT(bandList(bool,QAtResult)) );
+    service->primaryAtChat()->chat
+        ( "AT%BAND=?", this, SLOT(bandList(bool,QAtResult)) );
 }
 
 void Ficgta01BandSelection::setBand( QBandSelection::BandMode mode, const QString& value )
@@ -513,7 +515,9 @@ Ficgta01ModemService::Ficgta01ModemService
      // Turn on SIM toolkit support in the modem.  This must be done
     // very early in the process, to ensure that it happens before
     // the first AT+CFUN command.
-    chat( "AT%SATC=1,\"FFFFFFFFFF\"", this, SLOT(configureDone(bool)) );
+
+     // until we get something intelligent from the modem...
+     //   chat( "AT%SATC=1,\"FFFFFFFFFF\"", this, SLOT(configureDone(bool)) );
 
     // Enable %CPRI for ciphering indications.
 //    chat( "AT%CPRI=1" );
@@ -673,10 +677,13 @@ void Ficgta01ModemService::suspend()
     chat( "AT%CGREG=1" );
 
     // Turn off cell broadcast location messages.
-     chat( "AT%CSQ=0" );
+    chat( "AT%CSQ=0", this, SLOT(sendSuspendDone()) );
+
+    // Turn off timezone notifications.
+    chat( "AT+CTZR=0" );
 
     // Turn off signal quality notifications while the system is suspended.
-     QTimer::singleShot( 500, this, SLOT(sendSuspendDone()) );
+    chat( "AT*MCSQ=0", this, SLOT(mcsqOff()) );
 }
 
 void Ficgta01ModemService::wake()
@@ -692,6 +699,9 @@ void Ficgta01ModemService::wake()
      chat( "AT+CREG=2" );
      chat( "AT+CGREG=2" );
 
+     // Turn on timezone notifications again.
+    chat( "AT+CTZR=1" );
+
      //   chat( "AT%CREG=2" );
      //   chat( "AT%CGREG=2" );
     // Turn cell broadcast location messages back on again.
@@ -700,6 +710,17 @@ void Ficgta01ModemService::wake()
    // Turn on dynamic signal quality notifications.
     chat( "AT%CSQ=1" );
 
+    // Re-enable signal quality notifications when the system wakes up again.
+    chat( "AT*MCSQ=1", this, SLOT(mcsqOn()) );
+}
+
+void Ficgta01ModemService::mcsqOff()
+{
+    QTimer::singleShot( 500, this, SLOT(sendSuspendDone()) );
+}
+
+void Ficgta01ModemService::mcsqOn()
+{
     wakeDone();
 }
 
@@ -724,28 +745,33 @@ void Ficgta01VibrateAccessory::setVibrateOnRing( const bool value )
 void Ficgta01VibrateAccessory::setVibrateNow( const bool value )
 {
     qLog(AtChat)<<"setVibrateNow";
+    QString vibFile;
+    if (QFileInfo("/sys/class/leds/gta01:vibrator").exists())
+        vibFile = "/sys/class/leds/gta01:vibrator";
+    else
+        vibFile = "/sys/class/leds/neo1973:vibrator";
     QString cmd;
     if ( value ) { //turn on
-        QFile trigger( "/sys/class/leds/gta01:vibrator/trigger");
+        QFile trigger( vibFile + "/trigger");
         trigger.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
         QTextStream out(&trigger);
         out<<"timer";
         trigger.close();
 
-        QFile delayOn( "/sys/class/leds/gta01:vibrator/delay_on");
+        QFile delayOn( vibFile + "/delay_on");
         delayOn.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
         QTextStream out1(&delayOn);
         out1<<"500";
         delayOn.close();
 
-        QFile delayOff("/sys/class/leds/gta01:vibrator/delay_off");
+        QFile delayOff(vibFile + "/delay_off");
         delayOff.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
         QTextStream out2(&delayOff);
         out2<<"1000";
         delayOff.close();
 
     } else { //turn off
-        QFile trigger( "/sys/class/leds/gta01:vibrator/trigger");
+        QFile trigger( vibFile + "/trigger");
         trigger.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
         QTextStream out(&trigger);
         out<<"none";

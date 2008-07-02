@@ -41,6 +41,7 @@ public:
     {
         TRACE(OutlookSyncPlugin) << "OutlookTodoSync::isValidObject";
         Outlook::_TaskItemPtr item( dispatch );
+        LOG() << "The item class is" << dump_item_class(item->GetClass()) << "expecting" << dump_item_class(Outlook::olTask);
         return ( item->GetClass() == Outlook::olTask );
     }
 
@@ -57,7 +58,7 @@ public:
         lastModified = date_to_qdatetime(item->GetLastModificationTime());
     }
 
-    void dump_item( IDispatchPtr dispatch, QTextStream &stream )
+    void dump_item( IDispatchPtr dispatch, QXmlStreamWriter &stream )
     {
         TRACE(OutlookSyncPlugin) << "OutlookTodoSync::dump_item";
         Q_ASSERT( dispatch );
@@ -67,7 +68,7 @@ public:
 
         PREPARE_MAPI(Task);
 
-        stream << "<Task>\n";
+        stream.writeStartElement("Task");
         DUMP_STRING(Identifier,EntryID);
         DUMP_STRING(Description,Subject);
         QString high = "High";
@@ -82,28 +83,28 @@ public:
                     low = "VeryLow";
             }
         }
-        stream << "<Priority>";
+        stream.writeStartElement("Priority");
         DUMP_ENUM_V(Priority,Importance,Outlook::olImportanceHigh,high);
         DUMP_ENUM(Priority,Importance,Outlook::olImportanceNormal,Normal);
         DUMP_ENUM_V(Priority,Importance,Outlook::olImportanceLow,low);
-        stream << "</Priority>\n";
-        stream << "<Status>";
+        stream.writeEndElement();
+        stream.writeStartElement("Status");
         DUMP_ENUM(Status,Status,Outlook::olTaskNotStarted,NotStarted);
         DUMP_ENUM(Status,Status,Outlook::olTaskInProgress,InProgress);
         DUMP_ENUM(Status,Status,Outlook::olTaskComplete,Completed);
         DUMP_ENUM(Status,Status,Outlook::olTaskWaiting,Waiting);
         DUMP_ENUM(Status,Status,Outlook::olTaskDeferred,Deferred);
-        stream << "</Status>\n";
+        stream.writeEndElement();
         DUMP_DATE(DueDate,DueDate);
         DUMP_DATE(StartedDate,StartDate);
         DUMP_DATE(CompletedDate,DateCompleted);
         DUMP_INT(PercentCompleted,PercentComplete);
         DUMP_MAPI(Notes,Body);
-        stream << "<Categories>\n";
+        stream.writeStartElement("Categories");
         foreach ( const QString &category, bstr_to_qstring(item->GetCategories()).split(", ") )
             DUMP_EXPR(Category,category);
-        stream << "</Categories>\n";
-        stream << "</Task>\n";
+        stream.writeEndElement();
+        stream.writeEndElement();
     }
 
     QString read_item( IDispatchPtr dispatch, const QByteArray &record )
@@ -134,7 +135,7 @@ public:
                         state = Categories;
                     break;
                 case QXmlStreamReader::Characters:
-                    value = unescape(reader.text().toString());
+                    value += reader.text().toString();
                     break;
                 case QXmlStreamReader::EndElement:
                     key = reader.qualifiedName().toString();

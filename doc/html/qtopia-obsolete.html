@@ -23,7 +23,16 @@
 <h2>Function Documentation</h2>
 <h3 class="fn"><a name="execute"></a>void Qtopia::execute ( const <a href="./qstring.html">QString</a> &amp; <i>app</i>, const <a href="./qstring.html">QString</a> &amp; <i>document</i> = QString() )</h3>
 <p>Executes the application identified by <i>app</i>, passing <i>document</i> if it isn't null.</p>
-<p>Please use the <a href="qcontent.html">QContent</a> system instead.</p>
+<p><a href="qcontent.html">QContent</a> should be used to execute applications instead.</p>
+<p>A specific application may be launched by calling the <a href="qcontent.html#execute">execute()</a> member of a <a href="qcontent.html">QContent</a> object representing the application.</p>
+<pre>    QContent content(app);
+    content.execute();</pre>
+<p>To open a document using a specific application the file name of the document should be passed as the first argument of <a href="qcontent.html#execute">QContent::execute</a>().</p>
+<pre>    QContent content(app);
+    content.execute(QStringList() &lt;&lt; document);</pre>
+<p>A document may be opened in the default application for its type by calling the <a href="qcontent.html#execute">execute()</a> member of a <a href="qcontent.html">QContent</a> object representing the document.</p>
+<pre>    QContent content(document);
+    content.execute();</pre>
 <p>See also <a href="qcontent.html#execute">QContent::execute</a>().</p>
 <h3 class="fn"><a name="statusMessage"></a>void Qtopia::statusMessage ( const <a href="./qstring.html">QString</a> &amp; <i>message</i> )</h3>
 <p>Displays a status <i>message</i> to the user. This usually appears in the task bar for a short amount of time, then disappears.</p>

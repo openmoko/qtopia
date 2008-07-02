@@ -33,7 +33,7 @@ class PackageInformationReader : public QObject
 public:
 
     PackageInformationReader(const QString& fileName, InstallControl::PackageInfo::Source source = InstallControl::PackageInfo::PkgList);
-    PackageInformationReader(QTextStream &ts, InstallControl::PackageInfo::Source source = InstallControl::PackageInfo::PkgList); 
+    PackageInformationReader(QTextStream &ts, InstallControl::PackageInfo::Source source = InstallControl::PackageInfo::PkgList);
     PackageInformationReader(InstallControl::PackageInfo::Source source = InstallControl::PackageInfo::PkgList);
 
     void readLine( const QString & );
@@ -49,12 +49,14 @@ public:
     QString qtopiaVersion() const { return pkg.qtopiaVersion; }
     QString devices() const { return pkg.devices; }
     QString installedSize() const { return pkg.installedSize; }
+    QString fileCount() const { return pkg.fileCount; }
     QString type() const { return pkg.type; }
 
 
     const InstallControl::PackageInfo &package() const { return pkg; }
     bool getIsError() const { return isError; }
     QString getError() const { return error; }
+    void updateInstalledSize();
 
 signals:
     void packageComplete();
@@ -63,6 +65,7 @@ private:
     QString error;
     bool isError;
     bool hasContent;
+    bool wasSizeUpdated;
 
     bool accumulatingFullDesc;
     InstallControl::PackageInfo pkg;

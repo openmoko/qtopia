@@ -65,7 +65,7 @@
 <h3 class="fn"><a name="canInvoke"></a>bool QSlotInvoker::canInvoke ( int <i>numArgs</i> ) const</h3>
 <p>Returns true if the member can be invoked with <i>numArgs</i> arguments. That is, the receiver has not been destroyed, the member is present, and it requires <i>numArgs</i> or less arguments.</p>
 <h3 class="fn"><a name="invoke"></a><a href="./qvariant.html">QVariant</a> QSlotInvoker::invoke ( const <a href="./qlist.html">QList</a>&lt;<a href="./qvariant.html">QVariant</a>&gt; &amp; <i>args</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Invokes the slot represented by this object with the argument list <i>args</i>. The slot's return value is returned from this method. If the slot's return type is &quot;void&quot;, then a <a href="./qvariant.html">QVariant</a> instance of type <a href="./qvariant.html#type-enum">QVariant::Invalid</a> will be returned.</p>
+<p>Invokes the slot represented by this object with the argument list <i>args</i>. The slot's return value is returned from this method. If the slot's return type is &quot;void&quot;, then a <a href="./qvariant.html">QVariant</a> instance of type <a href="./qvariant.html#Type-enum">QVariant::Invalid</a> will be returned.</p>
 <p>If it is possible that the slot may throw an exception, it is the responsibility of the caller to catch and handle the exception.</p>
 <h3 class="fn"><a name="member"></a><a href="./qbytearray.html">QByteArray</a> QSlotInvoker::member () const</h3>
 <p>Returns the member that will receiver slot invocations.</p>

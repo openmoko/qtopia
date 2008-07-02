@@ -27,12 +27,12 @@
     \class QMailFolderSortKey
     \mainclass
     \preliminary
-    \brief The QMailFolderSortKey class defines the parameters used for sorting a subset of 
+    \brief The QMailFolderSortKey class defines the parameters used for sorting a subset of
     queried folders from the mail store.
     \ingroup messaginglibrary
 
-    A QMailFolderSortKey is composed of a folder property to sort and a sort order. 
-    The QMailFolderSortKey class is used in conjunction with the QMailStore::queryFolders() 
+    A QMailFolderSortKey is composed of a folder property to sort and a sort order.
+    The QMailFolderSortKey class is used in conjunction with the QMailStore::queryFolders()
     function to sort folder results according to the criteria defined by the sort key.
 
     For example:
@@ -41,7 +41,7 @@
     QMailFolderSortKey sortNameKey(QMailFolderSortKey::Name,Qt::Ascending);
     QMailIdList results = QMailStore::instance()->queryFolders(sortNameKey);
     \endcode
-    
+
     \sa QMailStore, QMailFolderKey
 */
 
@@ -58,9 +58,9 @@
 /*!
     Create a QMailFolderSortKey with specifying matching parameters.
 
-    A default-constructed key (one for which isEmpty() returns true) sorts no folders. 
+    A default-constructed key (one for which isEmpty() returns true) sorts no folders.
 
-    The result of combining an empty key with a non-empty key is the same as the original 
+    The result of combining an empty key with a non-empty key is the same as the original
     non-empty key.
 
     The result of combining two empty keys is an empty key.
@@ -72,15 +72,15 @@ QMailFolderSortKey::QMailFolderSortKey()
 }
 
 /*!
-    Construct a QMailFolderSortKey which sorts a set of results based on the  
-    QMailFolderSortKey::Property \a p and the Qt::SortOrder \a order 
+    Construct a QMailFolderSortKey which sorts a set of results based on the
+    QMailFolderSortKey::Property \a p and the Qt::SortOrder \a order
 */
 
 QMailFolderSortKey::QMailFolderSortKey(const Property& p, const Qt::SortOrder& order)
 {
-	d = new QMailFolderSortKeyPrivate();
-	QMailFolderSortKeyPrivate::Argument a(p,order);
-	d->arguments.append(a);
+    d = new QMailFolderSortKeyPrivate();
+    QMailFolderSortKeyPrivate::Argument a(p,order);
+    d->arguments.append(a);
 }
 
 /*!
@@ -109,8 +109,8 @@ QMailFolderSortKey::~QMailFolderSortKey()
 QMailFolderSortKey QMailFolderSortKey::operator&(const QMailFolderSortKey& other) const
 {
     QMailFolderSortKey k;
-	k.d->arguments = d->arguments + other.d->arguments;
-	return k;
+    k.d->arguments = d->arguments + other.d->arguments;
+    return k;
 }
 
 /*!
@@ -125,13 +125,13 @@ QMailFolderSortKey& QMailFolderSortKey::operator&=(const QMailFolderSortKey& oth
 }
 
 /*!
-    Returns \c true if the value of this key is the same as the key \a other. Returns 
+    Returns \c true if the value of this key is the same as the key \a other. Returns
     \c false otherwise.
 */
 
 bool QMailFolderSortKey::operator==(const QMailFolderSortKey& other) const
 {
-	return d->arguments == other.d->arguments;
+    return d->arguments == other.d->arguments;
 }
 /*!
     Returns \c true if the value of this key is not the same as the key \a other. Returns
@@ -140,7 +140,7 @@ bool QMailFolderSortKey::operator==(const QMailFolderSortKey& other) const
 
 bool QMailFolderSortKey::operator!=(const QMailFolderSortKey& other) const
 {
-   return !(*this == other); 
+   return !(*this == other);
 }
 
 /*!

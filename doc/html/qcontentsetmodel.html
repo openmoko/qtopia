@@ -102,7 +102,7 @@
 <p>See also <a href="qdrmrights.html">QDrmRights</a> and <a href="qcontentsetmodel.html#setSelectPermission">setSelectPermission</a>().</p>
 <h3 class="fn"><a name="setMandatoryPermissions"></a>void QContentSetModel::setMandatoryPermissions ( <a href="qdrmrights.html#Permission-enum">QDrmRights::Permissions</a> <i>permissions</i> )</h3>
 <p>Sets the <i>permissions</i> a <a href="qcontent.html">QContent</a> must have to in order to be selectable in the content model.</p>
-<p>If a row in the model doesn't have all the mandatory permissions the <a href="./qt.html#itemflag-enum">Qt::ItemIsEnabled</a> and <a href="./qt.html#itemflag-enum">Qt::ItemIsSelectable</a> flags will be cleared.</p>
+<p>If a row in the model doesn't have all the mandatory permissions the <a href="./qt.html#ItemFlag-enum">Qt::ItemIsEnabled</a> and <a href="./qt.html#ItemFlag-enum">Qt::ItemIsSelectable</a> flags will be cleared.</p>
 <p>See also <a href="qdrmrights.html">QDrmRights</a> and <a href="qcontentsetmodel.html#mandatoryPermissions">mandatoryPermissions</a>().</p>
 <h3 class="fn"><a name="setSelectPermission"></a>void QContentSetModel::setSelectPermission ( <a href="qdrmrights.html#Permission-enum">QDrmRights::Permission</a> <i>permission</i> )</h3>
 <p>Sets the <i>permission</i> which indicates the intended usage of the content in the model. Content in the model which doesn't have the selected permission will be displayed with an invalid rights icon.</p>

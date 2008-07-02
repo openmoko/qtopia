@@ -30,9 +30,9 @@
 #include <QDSActionRequest>
 #include <QtopiaAbstractService>
 #include <QContentSet>
+#include <QTimer>
 
 class QAction;
-class QTimer;
 class QValueSpaceItem;
 class QWaitWidget;
 class QSlider;
@@ -68,6 +68,7 @@ private slots:
     void delayedInit();
     void zoomChanged(int);
     void showZoom();
+    void hideZoom();
 private:
     bool event(QEvent* e);
     void updateActions();
@@ -97,7 +98,9 @@ private:
     int vquality;
     int vframerate;
     int m_currzoom;
+    bool zoomActive;
     QSlider* m_zoom;
+    QTimer zoomTimer;
     // Snap
     QSize snap_max;
     void setSnapMode( bool snapMode );

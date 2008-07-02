@@ -180,7 +180,7 @@
 </table></p>
 <p>See also <a href="qcontactmodel.html#setFilter">setFilter</a>().</p>
 <h3 class="fn"><a name="QContactModelRole-enum"></a>enum QContactModel::QContactModelRole</h3>
-<p>Extends <a href="./qt.html#itemdatarole-enum">Qt::ItemDataRole</a></p>
+<p>Extends <a href="./qt.html#ItemDataRole-enum">Qt::ItemDataRole</a></p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QContactModel::LabelRole</tt></td><td align="center" valign="top"><tt>Qt::UserRole</tt></td><td valign="top">A short formatted text label of the contacts name.</td></tr>
@@ -265,7 +265,7 @@
 <p>Returns known name titles for the current language settings. These are used to assist in parsing and constructing contact name information. Contacts are not restricted to these name titles.</p>
 <h3 class="fn"><a name="localeSuffixes"></a><a href="./qstringlist.html">QStringList</a> QContactModel::localeSuffixes ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns known suffixes for the current language settings. These are used to assist in parsing and constructing contact name information. Contacts are not restricted to these suffixes.</p>
-<h3 class="fn"><a name="match"></a><a href="./qmodelindex.html#qmodelindexlist-typedef">QModelIndexList</a> QContactModel::match ( const <a href="./qmodelindex.html">QModelIndex</a> &amp; <i>start</i>, int <i>role</i>, const <a href="./qvariant.html">QVariant</a> &amp; <i>value</i>, int <i>hits</i> = 1, <a href="./qt.html#matchflags-typedef">Qt::MatchFlags</a> <i>flags</i> = Qt::MatchFlags( Qt::MatchStartsWith | Qt::MatchWrap ) ) const</h3>
+<h3 class="fn"><a name="match"></a><a href="./qmodelindex.html#QModelIndexList-typedef">QModelIndexList</a> QContactModel::match ( const <a href="./qmodelindex.html">QModelIndex</a> &amp; <i>start</i>, int <i>role</i>, const <a href="./qvariant.html">QVariant</a> &amp; <i>value</i>, int <i>hits</i> = 1, <a href="./qt.html#MatchFlags-typedef">Qt::MatchFlags</a> <i>flags</i> = Qt::MatchFlags( Qt::MatchStartsWith | Qt::MatchWrap ) ) const</h3>
 <p>Returns a list of indexes for the items where the data matches the specified <i>value</i>. The list that is returned may be empty.</p>
 <p>The search starts from the <i>start</i> index and continues until the number of matching data items equals <i>hits</i> or the search reaches the last row</p>
 <p>The arguments <i>role</i> and <i>flags</i> are currently ignored.</p>
@@ -328,7 +328,7 @@
 <p>See also <a href="qcontactmodel.html#personalDetails">personalDetails</a>() and <a href="qcontactmodel.html#clearPersonalDetails">clearPersonalDetails</a>().</p>
 <h3 class="fn"><a name="simSource"></a><a href="qpimsource.html">QPimSource</a> QContactModel::simSource () const</h3>
 <p>Returns the identifier for storage sources relating to the SIM Card.</p>
-<h3 class="fn"><a name="sort"></a>void QContactModel::sort ( int <i>column</i>, <a href="./qt.html#sortorder-enum">Qt::SortOrder</a> <i>order</i> = Qt::AscendingOrder )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="sort"></a>void QContactModel::sort ( int <i>column</i>, <a href="./qt.html#SortOrder-enum">Qt::SortOrder</a> <i>order</i> = Qt::AscendingOrder )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Sorts the model by <i>column</i> in ascending order</p>
 <p>Currently <i>order</i> is ignored but may be implemented at a future date.</p>
 <p>Reimplemented from <a href="./qabstractitemmodel.html#sort">QAbstractItemModel</a>.</p>

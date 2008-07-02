@@ -6,5 +6,6 @@ CONFIG+=no_link_test
 
 SOURCES=main.cpp
 
-depends(tools/qdsync/common)
+contains(PROJECTS,tools/qdsync/common):depends(tools/qdsync/common)
+else:requires("contains(PROJECTS,tools/qdsync/common)")
 

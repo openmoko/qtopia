@@ -27,6 +27,7 @@
 #include <qmediaengineinformation.h>
 
 #include "cruxusurisessionbuilder.h"
+#include "cruxussimplesession.h"
 
 #include "cruxusengine.h"
 
@@ -159,12 +160,16 @@ void Engine::stop()
 
 void Engine::suspend()
 {
-    // nothing
+    for(int i = 0; i < s.size(); ++i) {
+        s.at(i)->suspend();
+    }
 }
 
 void Engine::resume()
 {
-    // nothing
+    for(int i = 0; i < s.size(); ++i) {
+        s.at(i)->resume();
+    }
 }
 
 QMediaEngineInformation const* Engine::engineInformation()
@@ -174,12 +179,16 @@ QMediaEngineInformation const* Engine::engineInformation()
 
 void Engine::registerSession(QMediaServerSession* session)
 {
-    Q_UNUSED(session);
+    s.append(static_cast<SimpleSession*>(session));
 }
 
 void Engine::unregisterSession(QMediaServerSession* session)
 {
-    Q_UNUSED(session);
+    for(int i = 0; i < s.size(); ++i) {
+        if(s.at(i) == (static_cast<SimpleSession*>(session))) {
+            s.removeAt(i);
+        }
+    }
 }
 // }}}
 

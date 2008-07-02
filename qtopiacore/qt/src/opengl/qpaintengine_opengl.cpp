@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -1215,15 +1215,12 @@ bool QOpenGLPaintEngine::begin(QPaintDevice *pdev)
 
     QGLContext *ctx = const_cast<QGLContext *>(d->drawable.context());
     if (has_frag_program)
-        has_frag_program = qt_resolve_frag_program_extensions(ctx);
+        has_frag_program = qt_resolve_frag_program_extensions(ctx) && qt_resolve_version_1_3_functions(ctx);
 
     d->use_stencil_method = d->drawable.format().stencil() &&
                             QGLExtensions::glExtensions & QGLExtensions::StencilWrap;
     if (d->use_stencil_method && QGLExtensions::glExtensions & QGLExtensions::StencilTwoSide)
         d->has_stencil_face_ext = qt_resolve_stencil_face_extension(ctx);
-
-    if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_3)
-        qt_resolve_version_1_3_functions(ctx);
 
 #ifndef Q_WS_QWS
     glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);

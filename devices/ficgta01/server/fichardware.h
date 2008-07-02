@@ -19,8 +19,8 @@
 **
 ****************************************************************************/
 
-#ifndef FICGTA01HARDWARE_H
-#define FICGTA01HARDWARE_H
+#ifndef FICHARDWARE_H
+#define FICHARDWARE_H
 
 #ifdef QT_QWS_FICGTA01
 
@@ -28,6 +28,7 @@
 #include <QProcess>
 
 #include <qvaluespace.h>
+#include <linux/input.h>
 
 class QBootSourceAccessoryProvider;
 class QPowerSourceProvider;
@@ -45,19 +46,17 @@ public:
     ~Ficgta01Hardware();
 
 private:
+     QValueSpaceObject vsoPortableHandsfree;
+     QValueSpaceObject vsoUsbCable;
+     QtopiaIpcAdaptor *adaptor;
 
-
-    QValueSpaceObject vsoPortableHandsfree;
-
-    QSocketNotifier *auxNotify;
-    int detectFd;
-    
-
+ 
 private slots:
-    void readAuxKbdData();
-    void shutdownRequested();
+     void headphonesInserted(bool);
+     void cableConnected(bool);
+     void shutdownRequested();
 };
 
-#endif // QT_QWS_FICGTA01
+#endif
 
-#endif // FICGTA01HARDWARE_H
+#endif

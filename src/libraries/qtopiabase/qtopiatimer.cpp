@@ -28,7 +28,7 @@ struct QtopiaTimerPrivate
 {
     QtopiaTimerPrivate() : 
         type(QtopiaTimer::Normal), 
-        interval(0), active(false), timerId(0), singleShot(false), item(0) {}
+        interval(0), active(false), timerId(0), singleShot(false), elapsedInterval(0), item(0) {}
 
     QtopiaTimer::Type type;
 
@@ -41,6 +41,7 @@ struct QtopiaTimerPrivate
     // Applies only to pause timers
     QDate pDate;
     QTime pTime;
+    int elapsedInterval;
     int runningInterval;
 
     QValueSpaceItem *item;
@@ -165,6 +166,8 @@ void QtopiaTimer::start()
 
     } else {
         d->timerId = startTimer(d->interval);
+        d->pTime.start();
+        d->elapsedInterval = 0;
     }
 }
 
@@ -202,6 +205,8 @@ void QtopiaTimer::timerEvent(QTimerEvent *)
         if(d->timerId)
             killTimer(d->timerId);
         d->timerId = startTimer(d->interval);
+        d->pTime.start();
+        d->elapsedInterval = 0;
         d->runningInterval = d->interval;
     }
 
@@ -219,8 +224,10 @@ void QtopiaTimer::disable(bool forceReset)
 {
     Q_ASSERT(PauseWhenInactive == type() && isActive());
     if(d->timerId || forceReset) {
-        if(d->timerId)
+        if (d->timerId) {
+            d->elapsedInterval = d->pTime.elapsed();
             killTimer(d->timerId);
+        }
         d->timerId = 0;
 
         d->pDate = QDate::currentDate();
@@ -240,18 +247,22 @@ void QtopiaTimer::enable()
     Q_ASSERT(PauseWhenInactive == type() && isActive() && !d->timerId);
 
     // Do we need an immediate emit?
-    if(d->pDate != QDate::currentDate() ||
-       d->pTime.elapsed() >= d->interval) {
+    if (d->pDate != QDate::currentDate() ||
+        d->pTime.elapsed() + d->elapsedInterval >= d->interval) {
         // Yes!
         d->timerId = startTimer(d->interval);
+        d->pTime.start();
+        d->elapsedInterval = 0;
         d->runningInterval = d->interval;
         emit timeout();
     } else {
         // No
-        int interval = d->interval - d->pTime.elapsed();
+        int interval = d->interval - d->pTime.elapsed() - d->elapsedInterval;
         Q_ASSERT(interval > 0);
 
         d->timerId = startTimer(interval);
+        d->pTime.start();
+        d->elapsedInterval = 0;
         d->runningInterval = interval;
     }
 }

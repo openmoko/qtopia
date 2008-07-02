@@ -306,7 +306,7 @@ QProcess *QSerialIODevice::run( const QStringList& arguments,
     int slaveFd = -1;
     char slaveName[BUFSIZ];
     if ( !createPseudoTty( masterFd, slaveFd, slaveName ) ) {
-        qWarning( "QServiceDeviceBase::run: could not find a pseudo-tty" );
+        qWarning( "qdsync::QSerialIODevice::run: could not find a pseudo-tty" );
         return 0;
     }
 

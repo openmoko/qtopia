@@ -41,14 +41,14 @@
 class QMailMessageSortKeyPrivate : public QSharedData
 {
 public:
-	typedef QPair<QMailMessageSortKey::Property,Qt::SortOrder> Argument;
+    typedef QPair<QMailMessageSortKey::Property,Qt::SortOrder> Argument;
 
 public:
     QMailMessageSortKeyPrivate() : QSharedData() {};
-    
-	QList<Argument> arguments;
+
+    QList<Argument> arguments;
 };
 
 
 
-#endif 
+#endif

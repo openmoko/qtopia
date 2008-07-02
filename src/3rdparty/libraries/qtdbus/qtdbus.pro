@@ -1,5 +1,4 @@
 qtopia_project(qtopia core lib)
-license(FREEWARE)
 TARGET          =   QtDBus
 CONFIG+=no_tr
 

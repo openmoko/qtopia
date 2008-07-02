@@ -62,6 +62,9 @@ HelpPreProcessor::HelpPreProcessor( const QString &file, int maxrecurs )
 #if !defined(QT_NO_CLIPBOARD)
     replace["CLIPBOARD"]="1";
 #endif
+#if defined(QTOPIA_VPN)
+    replace["VPN"]="1";
+#endif
 
     if (QApplication::style()->inherits("QThumbStyle"))
         replace["FINGER"]="1";

@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -149,7 +149,6 @@ bool QVistaHelper::is_vista = false;
 QVistaBackButton::QVistaBackButton(QWidget *widget)
     : QAbstractButton(widget)
 {
-    Q_ASSERT(pDrawThemeBackground);
     setFocusPolicy(Qt::NoFocus);
 }
 
@@ -222,11 +221,6 @@ QVistaHelper::QVistaHelper(QWizard *wizard)
 
 QVistaHelper::~QVistaHelper()
 {
-}
-
-bool QVistaHelper::isVista()
-{
-    return is_vista;
 }
 
 bool QVistaHelper::isCompositionEnabled()
@@ -635,7 +629,19 @@ bool QVistaHelper::resolveSymbols()
             pDrawThemeTextEx = (PtrDrawThemeTextEx)themeLib.resolve("DrawThemeTextEx");
         }
     }
-    return (pDwmIsCompositionEnabled != 0 && pIsAppThemed != 0);
+
+    return (
+        pDwmIsCompositionEnabled != 0
+        && pDwmDefWindowProc != 0
+        && pDwmExtendFrameIntoClientArea != 0
+        && pIsAppThemed != 0
+        && pDrawThemeBackground != 0
+        && pGetThemePartSize != 0
+        && pIsThemeActive != 0
+        && pOpenThemeData != 0
+        && pCloseThemeData != 0
+        && pGetThemeSysFont != 0
+        && pDrawThemeTextEx != 0);
 }
 
 int QVistaHelper::titleOffset()

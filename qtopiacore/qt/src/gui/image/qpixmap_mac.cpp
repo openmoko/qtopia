@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -916,6 +916,29 @@ static QPixmap qt_mac_grabScreenRect(const QRect &rect)
     }
 }
 
+#ifndef Q_WS_MAC64 // no QuickDraw in 64-bit mode
+static QPixmap qt_mac_grabScreenRect_10_3(int x, int y, int w, int h, QWidget *widget)
+{
+    QPixmap pm = QPixmap(w, h);
+    extern WindowPtr qt_mac_window_for(const QWidget *); // qwidget_mac.cpp
+    const BitMap *windowPort = 0;
+    if((widget->windowType() == Qt::Desktop)) {
+        GDHandle gdh;
+          if(!(gdh=GetMainDevice()))
+              qDebug("Qt: internal: Unexpected condition reached: %s:%d", __FILE__, __LINE__);
+          windowPort = (BitMap*)(*(*gdh)->gdPMap);
+    } else {
+        windowPort = GetPortBitMapForCopyBits(GetWindowPort(qt_mac_window_for(widget)));
+    }
+    const BitMap *pixmapPort = GetPortBitMapForCopyBits(static_cast<GWorldPtr>(pm.macQDHandle()));
+    Rect macSrcRect, macDstRect;
+    SetRect(&macSrcRect, x, y, x + w, y + h);
+    SetRect(&macDstRect, 0, 0, w, h);
+    CopyBits(windowPort, pixmapPort, &macSrcRect, &macDstRect, srcCopy, 0);
+    return pm;
+}
+#endif
+
 QPixmap QPixmap::grabWindow(WId window, int x, int y, int w, int h)
 {
     QWidget *widget = QWidget::find(window);
@@ -927,7 +950,20 @@ QPixmap QPixmap::grabWindow(WId window, int x, int y, int w, int h)
     if(h == -1)
         h = widget->height() - y;
 
-    return qt_mac_grabScreenRect(QRect(widget->x() + x, widget->y() + y, w, h));
+    QRect rect(widget->x() + x, widget->y() + y, w, h);
+
+#ifdef Q_WS_MAC64
+    return qt_mac_grabScreenRect(rect);
+#else
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4)
+    if (QSysInfo::MacintoshVersion >= QSysInfo::MV_10_4) {
+        return qt_mac_grabScreenRect(rect);
+    } else
+#endif
+   {
+        return qt_mac_grabScreenRect_10_3(x, y, w, h, widget);
+   }
+#endif // ifdef Q_WS_MAC64
 }
 
 /*! \internal

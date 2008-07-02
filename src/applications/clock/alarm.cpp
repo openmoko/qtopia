@@ -40,7 +40,6 @@
 #endif
 
 static const int magic_daily = 2292922;     //type for daily alarm
-static const int magic_countdown = 2292923; //type for countdown/timer alarm (currently no UI to set this type of alarm)
 
 void Alarm::setRingPriority(bool v)
 {
@@ -150,11 +149,6 @@ void Alarm::triggerAlarm(const QDateTime &when, int type)
             alarmt->stop();
             setRingPriority(false);
         }
-    } else if ( type == magic_countdown ) {
-        // countdown
-        setRingPriority(true);
-        Qtopia::soundAlarm();
-        setRingPriority(false);
     }
 }
 

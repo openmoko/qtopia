@@ -2428,6 +2428,7 @@ void AbFullEditor::contactFromFields(QContact &e)
     e.setLastName( fields[ QContactModel::LastName ] );
     e.setFirstNamePronunciation( fields[ QContactModel::FirstNamePronunciation ] );
     e.setLastNamePronunciation( fields[ QContactModel::LastNamePronunciation ] );
+    e.setNickname( fields[ QContactModel::Nickname ] );
 
     QString strDefaultEmail;
     QStringList emails;
@@ -2462,8 +2463,6 @@ void AbFullEditor::contactFromFields(QContact &e)
             e.setBirthday( bdayEdit->date() );
         else
             e.setBirthday( QDate() );
-
-        e.setNickname( fields[ QContactModel::Nickname ] );
 
         if (anniversaryCheck->isChecked())
             e.setAnniversary( anniversaryEdit->date() );

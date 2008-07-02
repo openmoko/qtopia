@@ -159,7 +159,7 @@
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QFormLayout::FieldsStayAtSizeHint</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">The fields never grow beyond their <a href="./qlayoutitem.html#sizeHint">effective size hint</a>. This is the default for <a href="./qmacstyle.html">QMacStyle</a>.</td></tr>
-<tr><td valign="top"><tt>QFormLayout::ExpandingFieldsGrow</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">Fields with an horizontal <a href="./qsizepolicy.html">size policy</a> of <a href="./qsizepolicy.html#policy-enum">Expanding</a> or <a href="./qsizepolicy.html#policy-enum">MinimumExpanding</a> will grow to fill the available space. The other fields will not grow beyond their effective size hint. This is the default policy for <a href="./qcommonstyle.html">QCommonStyle</a> derived styles (like Plastique and Windows).</td></tr>
+<tr><td valign="top"><tt>QFormLayout::ExpandingFieldsGrow</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">Fields with an horizontal <a href="./qsizepolicy.html">size policy</a> of <a href="./qsizepolicy.html#Policy-enum">Expanding</a> or <a href="./qsizepolicy.html#Policy-enum">MinimumExpanding</a> will grow to fill the available space. The other fields will not grow beyond their effective size hint. This is the default policy for <a href="./qcommonstyle.html">QCommonStyle</a> derived styles (like Plastique and Windows).</td></tr>
 <tr><td valign="top"><tt>QFormLayout::AllNonFixedFieldsGrow</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">All fields with a size policy that allows them to grow will grow to fill the available space. This is the default policy for Qtopia styles.</td></tr>
 </table></p>
 <p>See also <a href="qformlayout.html#fieldGrowthPolicy-prop">fieldGrowthPolicy</a>.</p>
@@ -192,9 +192,9 @@
 <li><div class="fn"/><b>void setFieldGrowthPolicy ( FieldGrowthPolicy <i>policy</i> )</b></li>
 </ul>
 <p>See also <a href="qformlayout.html#formAlignment-prop">formAlignment</a> and <a href="qformlayout.html#rowWrapPolicy-prop">rowWrapPolicy</a>.</p>
-<h3 class="fn"><a name="formAlignment-prop"></a>formAlignment : <a href="./qt.html#alignment-typedef">Qt::Alignment</a></h3>
+<h3 class="fn"><a name="formAlignment-prop"></a>formAlignment : <a href="./qt.html#Alignment-typedef">Qt::Alignment</a></h3>
 <p>This property holds the alignment of the form layout's contents within the layout's geometry.</p>
-<p>The default value depends on the widget or application style. For <a href="./qmacstyle.html">QMacStyle</a>, the default is <a href="./qt.html#alignmentflag-enum">Qt::AlignHCenter</a> | <a href="./qt.html#alignmentflag-enum">Qt::AlignTop</a>; for the other styles, the default is <a href="./qt.html#alignmentflag-enum">Qt::AlignLeft</a> | <a href="./qt.html#alignmentflag-enum">Qt::AlignTop</a>.</p>
+<p>The default value depends on the widget or application style. For <a href="./qmacstyle.html">QMacStyle</a>, the default is <a href="./qt.html#AlignmentFlag-enum">Qt::AlignHCenter</a> | <a href="./qt.html#AlignmentFlag-enum">Qt::AlignTop</a>; for the other styles, the default is <a href="./qt.html#AlignmentFlag-enum">Qt::AlignLeft</a> | <a href="./qt.html#AlignmentFlag-enum">Qt::AlignTop</a>.</p>
 <p>Access functions:</p>
 <ul>
 <li><div class="fn"/><b>Qt::Alignment formAlignment () const</b></li>
@@ -209,10 +209,10 @@
 <li><div class="fn"/><b>int horizontalSpacing () const</b></li>
 <li><div class="fn"/><b>void setHorizontalSpacing ( int <i>spacing</i> )</b></li>
 </ul>
-<p>See also <a href="qformlayout.html#verticalSpacing-prop">verticalSpacing</a>, <a href="./qstyle.html#pixelMetric">QStyle::pixelMetric</a>(), and <a href="./qstyle.html#pixelmetric-enum">PM_LayoutHorizontalSpacing</a>.</p>
-<h3 class="fn"><a name="labelAlignment-prop"></a>labelAlignment : <a href="./qt.html#alignment-typedef">Qt::Alignment</a></h3>
+<p>See also <a href="qformlayout.html#verticalSpacing-prop">verticalSpacing</a>, <a href="./qstyle.html#pixelMetric">QStyle::pixelMetric</a>(), and <a href="./qstyle.html#PixelMetric-enum">PM_LayoutHorizontalSpacing</a>.</p>
+<h3 class="fn"><a name="labelAlignment-prop"></a>labelAlignment : <a href="./qt.html#Alignment-typedef">Qt::Alignment</a></h3>
 <p>This property holds the horizontal alignment of the labels.</p>
-<p>The default value depends on the widget or application style. For <a href="./qcommonstyle.html">QCommonStyle</a> derived styles, except for <a href="./qplastiquestyle.html">QPlastiqueStyle</a>, the default is <a href="./qt.html#alignmentflag-enum">Qt::AlignLeft</a>; for the other styles, the default is <a href="./qt.html#alignmentflag-enum">Qt::AlignRight</a>.</p>
+<p>The default value depends on the widget or application style. For <a href="./qcommonstyle.html">QCommonStyle</a> derived styles, except for <a href="./qplastiquestyle.html">QPlastiqueStyle</a>, the default is <a href="./qt.html#AlignmentFlag-enum">Qt::AlignLeft</a>; for the other styles, the default is <a href="./qt.html#AlignmentFlag-enum">Qt::AlignRight</a>.</p>
 <p>Access functions:</p>
 <ul>
 <li><div class="fn"/><b>Qt::Alignment labelAlignment () const</b></li>
@@ -237,7 +237,7 @@
 <li><div class="fn"/><b>int verticalSpacing () const</b></li>
 <li><div class="fn"/><b>void setVerticalSpacing ( int <i>spacing</i> )</b></li>
 </ul>
-<p>See also <a href="qformlayout.html#horizontalSpacing-prop">horizontalSpacing</a>, <a href="./qstyle.html#pixelMetric">QStyle::pixelMetric</a>(), and <a href="./qstyle.html#pixelmetric-enum">PM_LayoutHorizontalSpacing</a>.</p>
+<p>See also <a href="qformlayout.html#horizontalSpacing-prop">horizontalSpacing</a>, <a href="./qstyle.html#pixelMetric">QStyle::pixelMetric</a>(), and <a href="./qstyle.html#PixelMetric-enum">PM_LayoutHorizontalSpacing</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QFormLayout"></a>QFormLayout::QFormLayout ( <a href="./qwidget.html">QWidget</a> * <i>parent</i> = 0 )</h3>

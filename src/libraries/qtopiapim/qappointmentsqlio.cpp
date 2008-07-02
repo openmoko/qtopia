@@ -409,18 +409,18 @@ QList<QAppointment> QAppointmentSqlIO::fastRange(const QDateTime &start, const Q
     }
 
     QPreparedSqlQuery q(database());
-    static const QLatin1String nonRepeatFields("t1.recid, t1.description, t1.location, t1.'start', t1.'end', t1.allday, t1.starttimezone, t1.alarm, t1.alarmdelay, t1.repeatrule ");
-    static const QLatin1String repeatFields("t1.recid, t1.description, t1.location, t1.'start', t1.'end', t1.allday, t1.starttimezone, t1.alarm, t1.alarmdelay, t1.repeatrule, t1.repeatfrequency, t1.repeatenddate, t1.repeatweekflags");
+    static const QLatin1String queryFields("t1.recid, t1.description, t1.location, t1.'start', t1.'end', t1.allday, t1.starttimezone, t1.alarm, t1.alarmdelay, t1.repeatrule, t1.repeatfrequency, t1.repeatenddate, t1.repeatweekflags");
 
     if (count > 0) {
-        q.prepare(selectText(nonRepeatFields, nonRepeatFilter) + " ORDER BY \"start\" LIMIT " + QString::number(count));
+        q.prepare(selectText(queryFields, nonRepeatFilter) + " ORDER BY \"start\" LIMIT " + QString::number(count));
     } else {
-        q.prepare(selectText(nonRepeatFields, nonRepeatFilter));
+        q.prepare(selectText(queryFields, nonRepeatFilter));
     }
     q.exec();
     while(q.next()) {
         QAppointment a;
-        a.setUid(QUniqueId::fromUInt(q.value(0).toUInt()));
+        uint uid = q.value(0).toUInt();
+        a.setUid(QUniqueId::fromUInt(uid));
         a.setDescription(q.value(1).toString());
         a.setLocation(q.value(2).toString());
         a.setStart(q.value(3).toDateTime());
@@ -433,6 +433,25 @@ QList<QAppointment> QAppointmentSqlIO::fastRange(const QDateTime &start, const Q
             a.setAlarm(q.value(8).toInt(), af);
 
         a.setRepeatRule((QAppointment::RepeatRule)q.value(9).toInt());
+        a.setFrequency(q.value(10).toInt());
+        a.setRepeatUntil(q.value(11).toDate());
+        a.setWeekFlags((QAppointment::WeekFlags)q.value(12).toInt());
+
+        exceptionsQuery.prepare();
+        exceptionsQuery.bindValue(":id", uid);
+        exceptionsQuery.exec();
+
+        QList<QAppointment::Exception> elist;
+        while(exceptionsQuery.next()) {
+            QAppointment::Exception ae;
+            ae.date = exceptionsQuery.value(0).toDate();
+            if (!exceptionsQuery.value(1).isNull())
+                ae.alternative = QUniqueId::fromUInt(exceptionsQuery.value(1).toUInt());
+            elist.append(ae);
+        }
+        a.setExceptions(elist);
+
+        exceptionsQuery.reset();
 
         result.append(a);
 
@@ -440,7 +459,7 @@ QList<QAppointment> QAppointmentSqlIO::fastRange(const QDateTime &start, const Q
             break;
     }
 
-    q.prepare(selectText(repeatFields, repeatFilter));
+    q.prepare(selectText(queryFields, repeatFilter));
     q.exec();
     while(q.next()) {
         QAppointment a;

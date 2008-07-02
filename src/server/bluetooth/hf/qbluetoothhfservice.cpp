@@ -213,13 +213,13 @@ void QBluetoothHandsfreeService::serialPortsChanged()
 
 /*!
     \internal
-  Returns true if the audio gateway is up and running
-  otherwise attempts to start the gateway
+  Attempts to initialize the audio gateway by registering with
+  the BT SCO handler.  
   */
-bool QBluetoothHandsfreeService::audioGatewayInitialized()
+void QBluetoothHandsfreeService::initializeAudioGateway()
 {
     if ( m_data->m_interface )
-        return true;
+        return;
 
     QByteArray audioDev = find_btsco_device("Handsfree");
 
@@ -232,8 +232,6 @@ bool QBluetoothHandsfreeService::audioGatewayInitialized()
 
     m_data->m_interface = new QBluetoothHandsfreeCommInterface(audioDev, this);
     m_data->m_interface->initialize();
-
-    return true;
 }
 
 /*!
@@ -265,12 +263,7 @@ void QBluetoothHandsfreeService::start()
         return;
     }
 
-    if ( !audioGatewayInitialized() ) {
-        unregisterRecord(m_data->m_sdpRecordHandle);
-        emit started(true,
-                     tr("Could not start audio gateway."));
-        return;
-    }
+    initializeAudioGateway();
 
     if (!m_data->m_server->listen(QBluetoothAddress::any,
                 QBluetoothSdpRecord::rfcommChannel(sdpRecord))) {

@@ -91,6 +91,8 @@ LoggingEdit::LoggingEdit( QWidget* parent, Qt::WFlags fl )
         missing.removeAll("TEST");
 #endif
 
+        if ( name.isEmpty() )
+            name = group; // Allow for displaying unadvertised values that the user has added to Log.conf
         if ( !name.isEmpty() && missing.isEmpty() ) {
             QTreeWidgetItem *i = new QTreeWidgetItem(list,QStringList() << name);
             i->setCheckState(0,qtopiaLogEnabled(group.toLatin1()) ? Qt::Checked : Qt::Unchecked);

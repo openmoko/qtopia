@@ -1,11 +1,21 @@
 /****************************************************************************
-** $Id: .emacs,v 1.3 1998/02/20 15:06:53 agulbra Exp $
 **
-** Definition of something or other
+** Copyright (C) 2008-2008 TROLLTECH ASA. All rights reserved.
 **
-** Created : 979899
+** This file is part of the Opensource Edition of the Qtopia Toolkit.
 **
-** Copyright (C) 1997 by Troll Tech AS.  All rights reserved.
+** This software is licensed under the terms of the GNU General Public
+** License (GPL) version 2.
+**
+** See http://www.trolltech.com/gpl/ for GPL licensing information.
+**
+** Contact info@trolltech.com if any conditions of this licensing are
+** not clear to you.
+**
+**
+**
+** This file is provided AS IS with NO WARRANTY OF ANY KIND, INCLUDING THE
+** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
 

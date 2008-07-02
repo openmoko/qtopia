@@ -62,6 +62,8 @@ private slots:
     void copy();
     void clipboardChanged();
 #endif
+private slots:
+    void negate();
 };
 
 #endif

@@ -42,11 +42,11 @@ public:
         And,
         Or
     };
-    
+
     class Argument
     {
     public:
-		QMailMessageKey::Property property;
+        QMailMessageKey::Property property;
         QMailMessageKey::Operand op;
         QVariantList valueList;
         bool operator==(const Argument& other) const
@@ -54,11 +54,11 @@ public:
             return property == other.property &&
                    op == other.op &&
                    valueList == other.valueList;
-        }   
+        }
     };
 
 public:
-    QMailMessageKeyPrivate() : QSharedData(), 
+    QMailMessageKeyPrivate() : QSharedData(),
                                logicalOp(None),
                                negated(false)
     {};

@@ -20,12 +20,15 @@
 ****************************************************************************/
 
 #include "renderer.h"
+#ifndef QTOPIA_NO_SVG
 #include <QSvgRenderer>
+#endif
 #include <QPicture>
 #include <QPainter>
 #include <QFileInfo>
 #include <QDebug>
 
+#ifndef QTOPIA_NO_SVG
 class SvgRenderer : public Renderer
 {
 public:
@@ -48,6 +51,7 @@ void SvgRenderer::render(QPainter *painter, const QRectF &bounds)
 {
     renderer.render(painter, bounds);
 }
+#endif
 
 //===========================================================================
 #ifndef QT_NO_PICTURE
@@ -87,13 +91,16 @@ Renderer *Renderer::rendererFor(const QString &filename)
 {
     QFileInfo fi(filename);
     Renderer *r = 0;
+#ifndef QTOPIA_NO_SVG
     if (fi.suffix() == "svg") {
         r = new SvgRenderer;
-#ifndef QT_NO_PICTURE
-    } else if (fi.suffix() == "pic") {
-        r = new PictureRenderer;
-#endif
     }
+#endif
+#ifndef QT_NO_PICTURE
+    if (fi.suffix() == "pic") {
+        r = new PictureRenderer;
+    }
+#endif
 
     if (r && !r->load(fi.filePath())) {
         delete r;

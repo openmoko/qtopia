@@ -247,7 +247,8 @@ sub make_pkg
         if ( $format eq "ipk" ) {
             print OUT "Files: ".join(" ", @files)."\n";
         }
-        print OUT "Installed-Size: ".`du -sh $path | awk '{print \$1}'`;
+        print OUT "Installed-Size: ".`du -sb $path | awk '{print \$1}'`;
+        print OUT "File-Count: ".`expr \`(du -ah $path | wc -l)\` - 1`;
         close OUT;
 
         if ( DEBUG )

@@ -59,7 +59,9 @@ QString roundDigits( const QString number, int precision ) {
 void DoubleData::set(double d) {
     dbl = d;
     edited = false;
-    formattedOutput = formattedOutput.sprintf("%13.13f", dbl);
+
+    bool negative = (d<0);
+    formattedOutput = formattedOutput.sprintf("%13.13f", negative ? d*(-1) : d );
     int point = formattedOutput.indexOf('.');
     if (point > 11)
     {
@@ -87,6 +89,8 @@ void DoubleData::set(double d) {
         if (formattedOutput.at( i ) == '.')
             formattedOutput.remove( i , 1 );
     }
+    if (negative)
+        formattedOutput.prepend('-');
 
     if (!strcmp(formattedOutput.toLatin1(),"nan")) { // No tr
         systemEngine->setError(eNotANumber);

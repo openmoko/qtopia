@@ -433,18 +433,6 @@ QModemCall *QModemCallProvider::dialingCall() const
 }
 
 /*!
-    \reimp
-*/
-void QModemCallProvider::deregisterCall( QPhoneCallImpl *call )
-{
-    // Make sure that the modem identifier for the call is released.
-    releaseModemIdentifier( ((QModemCall *)call)->modemIdentifier() );
-
-    // Remove the call from the provider's call list.
-    QPhoneCallProvider::deregisterCall( call );
-}
-
-/*!
     Returns the AT command to use to dial the supplementary service
     specified by \a options.  The default implementation returns
     \c{ATDnumber}.

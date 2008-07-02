@@ -361,7 +361,7 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
 
     /* group actions */
 
-    actionShowGroups = new QAction(QIcon(":icon/contactgroup"), tr("Show Groups..."), this);
+    actionShowGroups = new QAction(QIcon(":icon/contactgroup"), tr("Show Group..."), this);
     actionShowGroups->setWhatsThis(tr("Show the list of contact groups."));
     connect( actionShowGroups, SIGNAL(triggered()), this, SLOT(groupList()));
 
@@ -1686,17 +1686,15 @@ void AddressbookWindow::callCurrentContact()
     if (numbers.count() > 0) {
         /* XXX we could check to see if we can make calls here before popping a selector */
         if (numbers.count() > 1) {
-            QPhoneTypeSelector *pts = new QPhoneTypeSelector(currentContact(), QString(), this);
-            pts->setModal(true);
-            pts->showMaximized();
-            if (QtopiaApplication::execDialog(pts) && !pts->selectedNumber().isEmpty()) {
+            QPhoneTypeSelector pts(currentContact(), QString(), this);
+            pts.setModal(true);
+            pts.showMaximized();
+            if (QtopiaApplication::execDialog(&pts) && !pts.selectedNumber().isEmpty()) {
                 QtopiaServiceRequest req( "Dialer", "dial(QString,QUniqueId)" ); // No tr
-                req << pts->selectedNumber();
+                req << pts.selectedNumber();
                 req << currentContact().uid();
                 req.send();
             }
-            pts->hide();
-            pts->deleteLater();
         } else {
             /* Just the one, so call it */
             QMap<QContact::PhoneType, QString>::iterator it = numbers.begin();
@@ -1722,16 +1720,14 @@ void AddressbookWindow::textCurrentContact()
 
     if ( numbers.count() > 0) {
         if ( numbers.count() > 1) {
-            QPhoneTypeSelector *pts = new QPhoneTypeSelector(currentContact(), QString(), this);
-            pts->setModal(true);
-            pts->showMaximized();
-            if (QtopiaApplication::execDialog(pts) && !pts->selectedNumber().isEmpty()) {
+            QPhoneTypeSelector pts(currentContact(), QString(), this);
+            pts.setModal(true);
+            pts.showMaximized();
+            if (QtopiaApplication::execDialog(&pts) && !pts.selectedNumber().isEmpty()) {
                 QtopiaServiceRequest req( "SMS", "writeSms(QString,QString)" );
-                req << currentContact().label() << pts->selectedNumber();
+                req << currentContact().label() << pts.selectedNumber();
                 req.send();
             }
-            pts->hide();
-            pts->deleteLater();
         } else {
             QMap<QContact::PhoneType, QString>::iterator it = numbers.begin();
             QtopiaServiceRequest req( "SMS", "writeSms(QString,QString)" );
@@ -1748,18 +1744,16 @@ void AddressbookWindow::emailCurrentContact()
 
     if (emails.count() > 0) {
         if (emails.count() > 1) {
-            EmailDialog * ed = new EmailDialog(this, true);
-            ed->setEmails(currentContact().defaultEmail(), emails);
-            ed->setModal(true);
-            ed->showMaximized();
-            QtopiaApplication::setMenuLike(ed, true);
-            if (QtopiaApplication::execDialog(ed) && !ed->selectedEmail().isEmpty()) {
+            EmailDialog ed(this, true);
+            ed.setEmails(currentContact().defaultEmail(), emails);
+            ed.setModal(true);
+            ed.showMaximized();
+            QtopiaApplication::setMenuLike(&ed, true);
+            if (QtopiaApplication::execDialog(&ed) && !ed.selectedEmail().isEmpty()) {
                 QtopiaServiceRequest req( "Email", "writeMail(QString,QString)" );
-                req << currentContact().label() << ed->selectedEmail();
+                req << currentContact().label() << ed.selectedEmail();
                 req.send();
             }
-            ed->hide();
-            ed->deleteLater();
         } else {
             /* Just the one, so call it */
             QtopiaServiceRequest req( "Email", "writeMail(QString,QString)" );
@@ -1802,23 +1796,21 @@ void AddressbookWindow::showJustItem(const QUniqueId& uid)
 
 void AddressbookWindow::addPhoneNumberToContact(const QString& phoneNumber)
 {
-    QContactSelector *s = new QContactSelector( false, this );
-    s->setModel(mModel);
-    s->setModal(true);
-    s->showMaximized();
+    QContactSelector s( false, this );
+    s.setModel(mModel);
+    s.setModal(true);
+    s.showMaximized();
 
-    if (s->exec())
-    {
+    if (QtopiaApplication::execDialog(&s)) {
         QContact cnt;
-        cnt = s->selectedContact();
+        cnt = s.selectedContact();
 
         //get the user to choose the type of the number
-        QPhoneTypeSelector *pts = new QPhoneTypeSelector( cnt, phoneNumber, this );
-        pts->setModal(true);
-        pts->showMaximized();
-        if(pts->exec())
-        {
-            pts->updateContact(cnt, phoneNumber);
+        QPhoneTypeSelector pts( cnt, phoneNumber, this );
+        pts.setModal(true);
+        pts.showMaximized();
+        if(QtopiaApplication::execDialog(&pts)) {
+            pts.updateContact(cnt, phoneNumber);
             mModel->updateContact( cnt );
         }
     }
@@ -1832,15 +1824,13 @@ void AddressbookWindow::setContactImage( const QDSActionRequest& request )
         return;
     }
 
-    QContactSelector *s = new QContactSelector( false, this );
-
     // Create a different model to exclude sim contacts
-    QContactModel *model = new QContactModel( this );
-    QSet<QPimSource> sources = model->availableSources();
-    sources.remove( model->simSource() );
-    model->setVisibleSources( sources );
+    QContactModel model;
+    QSet<QPimSource> sources = model.availableSources();
+    sources.remove( model.simSource() );
+    model.setVisibleSources( sources );
 
-    if ( model->count() == 0 ) {
+    if (model.count() == 0) {
         QMessageBox::warning(
             this,
             tr( "Contacts" ),
@@ -1849,11 +1839,12 @@ void AddressbookWindow::setContactImage( const QDSActionRequest& request )
 
         processingRequest.respond( "No phone contacts available." );
     } else {
-        s->setModel(model);
-        s->showMaximized();
-        if ( s->exec() )
-        {
-            QContact cnt = s->selectedContact();
+        QContactSelector s( false, this );
+
+        s.setModel(&model);
+        s.showMaximized();
+        if (QtopiaApplication::execDialog(&s)) {
+            QContact cnt = s.selectedContact();
             QIODevice *stream = processingRequest.requestData().toIODevice();
             QImage image;
             if (image.load(stream, "JPEG")) {
@@ -1865,44 +1856,35 @@ void AddressbookWindow::setContactImage( const QDSActionRequest& request )
 
         processingRequest.respond();
     }
-
-    delete s;
-    delete model;
 }
 
 void AddressbookWindow::setContactImage(const QString& filename)
 {
-    QContactSelector *s = new QContactSelector( false, this );
-    QContactModel *model =new QContactModel(this); // different filtering from app view.
+    QContactSelector s( false, this );
+    QContactModel model; // different filtering from app view.
     // exlcude sim contacts
-    QSet<QPimSource> sources = model->availableSources();
-    sources.remove(model->simSource());
-    model->setVisibleSources(sources);
+    QSet<QPimSource> sources = model.availableSources();
+    sources.remove(model.simSource());
+    model.setVisibleSources(sources);
 
-    s->setModel(model);
-    s->showMaximized();
+    s.setModel(&model);
+    s.showMaximized();
 
-    if(
-        s->exec()
-      )
-    {
-        QContact cnt = s->selectedContact();
+    if(QtopiaApplication::execDialog(&s)) {
+        QContact cnt = s.selectedContact();
         cnt.changePortrait( filename );
-        model->updateContact( cnt );
+        model.updateContact( cnt );
     }
-    delete s;
-    delete model;
 }
 
 void AddressbookWindow::createNewContact(const QString& phoneNumber)
 {
     QContact cnt;
-    QPhoneTypeSelector *pts = new QPhoneTypeSelector( cnt, phoneNumber, this );
-    pts->setModal(true);
-    pts->showMaximized();
-    if (pts->exec())
-    {
-        pts->updateContact(cnt, phoneNumber);
+    QPhoneTypeSelector pts( cnt, phoneNumber, this );
+    pts.setModal(true);
+    pts.showMaximized();
+    if (QtopiaApplication::execDialog(&pts)) {
+        pts.updateContact(cnt, phoneNumber);
         newEntry(cnt);
     }
 }
@@ -2470,14 +2452,14 @@ void AddressbookWindow::qdlRequestLinks( const QDSActionRequest& request )
         return;
     }
 
-    QContactSelector *s = new QContactSelector( false, ( isVisible() ? this : 0 ) );
-    s->setModal( true );
-    s->setModel(mModel);
-    s->showMaximized();
+    QContactSelector s(false, ( isVisible() ? this : 0 ));
+    s.setModal( true );
+    s.setModel(mModel);
+    s.showMaximized();
 
-    if ( ( s->exec() == QDialog::Accepted ) && ( s->contactSelected() ) ) {
+    if ((QtopiaApplication::execDialog(&s) == QDialog::Accepted) && (s.contactSelected())) {
 #ifndef QT_NO_QCOP
-        QContact contact = s->selectedContact();
+        QContact contact = s.selectedContact();
         QList<QDSData> links;
         links.push_back( contactQDLLink( contact ) );
 
@@ -2490,7 +2472,6 @@ void AddressbookWindow::qdlRequestLinks( const QDSActionRequest& request )
         processingRequest.respond( QDSData( array, QDLLink::listMimeType() ) );
 #endif
     }
-    delete s;
 }
 
 QDSData AddressbookWindow::contactQDLLink( const QContact& c )

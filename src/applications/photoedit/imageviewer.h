@@ -57,6 +57,7 @@ public:
 
 signals:
     void imageInvalidated();
+    void imageChanged();
 
 public slots:
     void setScale( qreal sx, qreal sy );
@@ -69,12 +70,11 @@ protected:
     void mousePressEvent( QMouseEvent *event );
     void mouseMoveEvent( QMouseEvent *event );
     void mouseReleaseEvent( QMouseEvent *event );
-    void timerEvent( QTimerEvent *event );
     void scrollContentsBy( int dx, int dy );
 
 private slots:
     void licenseExpired();
-    void rectAvailable( const QRect &rect, const QImage &image );
+    void imageLoaded(const QContent &content, const QList<QImage> &images, const QSize &size, qreal prescaling);
 
 private:
     ImageViewerPrivate *d;

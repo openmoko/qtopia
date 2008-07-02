@@ -208,7 +208,7 @@ public:
     bool operator==(const QOccurrence &other) const;
 
     bool isValid() const
-    { return !mStart.isNull() && !appointmentCache.uid().isNull(); }
+    { return !mStart.isNull(); }
 
     QOccurrence nextOccurrence() const;
 

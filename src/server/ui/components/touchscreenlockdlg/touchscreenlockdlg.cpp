@@ -33,8 +33,13 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QTimeLine>
 #include <QFileInfo>
-#include <QSvgRenderer>
+#ifndef QT_NO_PICTURE
 #include <QPicture>
+#else
+#ifndef QTOPIA_NO_SVG
+#include <QSvgRenderer>
+#endif
+#endif
 
 class KeyItem : public QObject, public QGraphicsPixmapItem
 {
@@ -176,8 +181,10 @@ QPixmap TouchScreenLockDialog::generatePixmap(const QString &filename, int width
     painter.scale(qreal(width) / br.width(), qreal(height) / br.height());
     painter.drawPicture(0, 0, picture);
 #else
+#ifndef QTOPIA_NO_SVG
     QSvgRenderer renderer(fileInfo.filePath());
     renderer.render(&painter);
+#endif
 #endif
     painter.end();
     return QPixmap::fromImage(image);

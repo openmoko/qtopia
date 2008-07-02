@@ -30,6 +30,7 @@
 
 #include <qsoftmenubar.h>
 #include <qtopianamespace.h>
+#include <QtopiaApplication>
 #include <qtopiaipcadaptor.h>
 #include <QAction>
 #include <QMenu>
@@ -176,11 +177,13 @@ void WapUI::updateActions()
 void WapUI::addWap()
 {
     AddWapUI dlg( QString(""), this, 0 );
-    dlg.showMaximized();
-    dlg.exec();
-
+    QtopiaApplication::execDialog( &dlg );
 
     loadConfigs();
+    //last account automatically selected
+    if ( wapList->count() == 1 ) {
+        selectDefaultWAP();
+    }
     updateActions();
     updateNetStates();
 }
@@ -205,6 +208,10 @@ void WapUI::removeWap()
     }
 
     loadConfigs();
+    //last account automatically selected
+    if ( wapList->count() == 1 ) {
+        selectDefaultWAP();
+    }
     updateActions();
     updateNetStates();
 }
@@ -216,8 +223,7 @@ void WapUI::doWap()
         return;
 
     AddWapUI dlg( item->data( WapUI::ConfigRole ).toString(), this );
-    dlg.showMaximized();
-    if (dlg.exec() == QDialog::Accepted)
+    if (QtopiaApplication::execDialog(&dlg) == QDialog::Accepted)
         updateNetStates();
 
     loadConfigs();

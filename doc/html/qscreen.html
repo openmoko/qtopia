@@ -11,7 +11,7 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QScreen Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 class="title">QScreen Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
 </h1>
 <p>The QScreen class is a base class for screen drivers in Qtopia Core. <a href="#details">More...</a></p>
 <pre> #include &lt;QScreen&gt;</pre><ul>
@@ -44,7 +44,7 @@
 <li><div class="fn"/>virtual bool <b><a href="qscreen.html#initDevice">initDevice</a></b> () = 0</li>
 <li><div class="fn"/>virtual bool <b><a href="qscreen.html#isInterlaced">isInterlaced</a></b> () const</li>
 <li><div class="fn"/>virtual bool <b><a href="qscreen.html#isTransformed">isTransformed</a></b> () const</li>
-<li><div class="fn"/>int <b><a href="qscreen.html#linestep">linestep</a></b> () const</li>
+<li><div class="fn"/>int <b><a href="qscreen.html#linestepx">linestep</a></b> () const</li>
 <li><div class="fn"/>virtual QSize <b><a href="qscreen.html#mapFromDevice">mapFromDevice</a></b> ( const QSize &amp; <i>size</i> ) const</li>
 <li><div class="fn"/>virtual QPoint <b><a href="qscreen.html#mapFromDevice-2">mapFromDevice</a></b> ( const QPoint &amp; <i>point</i>, const QSize &amp; <i>screenSize</i> ) const</li>
 <li><div class="fn"/>virtual QRect <b><a href="qscreen.html#mapFromDevice-3">mapFromDevice</a></b> ( const QRect &amp; <i>rectangle</i>, const QSize &amp; <i>screenSize</i> ) const</li>
@@ -131,7 +131,7 @@
 <tr valign="top" class="odd"><td>Pixmap Alignment</td><td>Use the <a href="qscreen.html#pixmapOffsetAlignment">pixmapOffsetAlignment</a>() function to retrieve the value to which the start address of pixmaps held in the graphics card's memory, should be aligned.<p>Use the <a href="qscreen.html#pixmapLinestepAlignment">pixmapLinestepAlignment</a>() to retrieve the value to which the <i>individual scanlines</i> of pixmaps should be aligned.</p>
 </td></tr>
 <tr valign="top" class="even"><td>Image Display</td><td>The <a href="qscreen.html#isInterlaced">isInterlaced</a>() function tells whether the screen is displaying images progressively, and the <a href="qscreen.html#isTransformed">isTransformed</a>() function whether it is rotated. The <a href="qscreen.html#transformOrientation">transformOrientation</a>() function can be reimplemented to return the current rotation.</td></tr>
-<tr valign="top" class="odd"><td>Scanlines</td><td>Use the <a href="qscreen.html#linestep">linestep</a>() function to retrieve the length of each scanline of the framebuffer.</td></tr>
+<tr valign="top" class="odd"><td>Scanlines</td><td>Use the <a href="qscreen.html#linestepx">linestep</a>() function to retrieve the length of each scanline of the framebuffer.</td></tr>
 <tr valign="top" class="even"><td>Pixel Type</td><td>The <a href="qscreen.html#pixelType">pixelType</a>() function returns the screen's pixel storage format as described by the <a href="qscreen.html#PixelType-enum">PixelType</a> enum.</td></tr>
 </table></p>
 <p>See also <a href="qscreendriverplugin.html">QScreenDriverPlugin</a>, <a href="qscreendriverfactory.html">QScreenDriverFactory</a>, and <a href="qtopiacore-displaymanagement.html">Qtopia Core Display Management</a>.</p>
@@ -226,11 +226,11 @@
 <h3 class="fn"><a name="isInterlaced"></a>bool QScreen::isInterlaced () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns true if the display is interlaced (i.e&#x2e; is displaying images progressively like a television screen); otherwise returns false.</p>
 <p>If the display is interlaced, the drawing is altered to look better.</p>
-<p>See also <a href="qscreen.html#isTransformed">isTransformed</a>() and <a href="qscreen.html#linestep">linestep</a>().</p>
+<p>See also <a href="qscreen.html#isTransformed">isTransformed</a>() and <a href="qscreen.html#linestepx">linestep</a>().</p>
 <h3 class="fn"><a name="isTransformed"></a>bool QScreen::isTransformed () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns true if the screen is transformed (for instance, rotated 90 degrees); otherwise returns false.</p>
 <p>See also <a href="qscreen.html#transformOrientation">transformOrientation</a>() and <a href="qscreen.html#isInterlaced">isInterlaced</a>().</p>
-<h3 class="fn"><a name="linestep"></a>int QScreen::linestep () const</h3>
+<h3 class="fn"><a name="linestepx"></a>int QScreen::linestep () const</h3>
 <p>Returns the length of each scanline of the framebuffer in bytes.</p>
 <p>See also <a href="qscreen.html#isInterlaced">isInterlaced</a>().</p>
 <h3 class="fn"><a name="mapFromDevice"></a><a href="qsize.html">QSize</a> QScreen::mapFromDevice ( const <a href="qsize.html">QSize</a> &amp; <i>size</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
@@ -364,6 +364,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.4</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.5</div></td>
 </tr></table></div></address></body>
 </html>

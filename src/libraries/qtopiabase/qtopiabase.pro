@@ -67,6 +67,7 @@ enable_sxe:QTOPIABASE_SOURCES+=qtopiasxe.cpp
 
 VPATH+=$$QTOPIA_DEPOT_PATH/src/libraries/qtopiail
 INCLUDEPATH+=$$QTOPIA_DEPOT_PATH/src/3rdparty/libraries/qtopiail
+depends(3rdparty/libraries/dlmalloc)
 
 QTOPIABASE_SOURCES+=\
     framework/applayer.cpp \

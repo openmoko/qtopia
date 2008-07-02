@@ -1023,19 +1023,26 @@ png_set_unknown_chunks(png_structp png_ptr,
         png_unknown_chunkp to = np + info_ptr->unknown_chunks_num + i;
         png_unknown_chunkp from = unknowns + i;
 
-        png_strncpy((png_charp)to->name, (png_charp)from->name, 5);
-        to->data = (png_bytep)png_malloc_warn(png_ptr, from->size);
-        if (to->data == NULL)
-        {
-           png_warning(png_ptr, "Out of memory processing unknown chunk.");
-        }
+        png_memcpy((png_charp)to->name,
+                   (png_charp)from->name,
+                   png_sizeof(to->name));
+        to->name[png_sizeof(to->name)-1] = '\0';
+        to->size = from->size;
+        /* note our location in the read or write sequence */
+        to->location = (png_byte)(png_ptr->mode & 0xff);
+        if (from->size == 0)
+           to->data=NULL;
         else
         {
-           png_memcpy(to->data, from->data, from->size);
-           to->size = from->size;
-
-           /* note our location in the read or write sequence */
-           to->location = (png_byte)(png_ptr->mode & 0xff);
+           to->data = (png_bytep)png_malloc_warn(png_ptr, from->size);
+           if (to->data == NULL)
+           {
+              png_warning(png_ptr,
+		      "Out of memory processing unknown chunk.");
+              to->size=0;
+           }
+           else
+              png_memcpy(to->data, from->data, from->size);
         }
     }
 

@@ -106,7 +106,6 @@ SERVER_HEADERS+=\
     ui/launcherviews/contentsetview/contentsetlauncherview.h \
     infrastructure/stabmonitor/stabmonitortask.h \
     infrastructure/signalstrength/defaultsignal.h \
-    core_server/dbmigratetask.h \
     core_server/defaultbattery.h\
     infrastructure/apm/apmbattery.h\
     obexservicemanager.h \
@@ -162,7 +161,6 @@ SERVER_SOURCES+=\
     infrastructure/apm/apmbattery.cpp\
     processctrl/qdsync/qdsynctask.cpp\
     obexservicemanager.cpp\
-    core_server/dbmigratetask.cpp \
     infrastructure/stabmonitor/stabmonitortask.cpp \
     processctrl/appshutdown/applicationshutdowntask.cpp \
     infrastructure/signalstrength/defaultsignal.cpp \
@@ -629,8 +627,10 @@ enable_modem {
 
 # This is documented in src/build/doc/src/deviceprofiles.qdoc
 !isEmpty(DEVICE_CONFIG_PATH) {
+    INCLUDEPATH+=$$DEVICE_CONFIG_PATH/server
     SERVER_HEADERS+=$$files($$DEVICE_CONFIG_PATH/server/*.h)
     SERVER_SOURCES+=$$files($$DEVICE_CONFIG_PATH/server/*.cpp)
+    SERVER_FORMS+=$$files($$DEVICE_CONFIG_PATH/server/*.ui)
 }
 
 enable_sxe:depends(libraries/qtopiasecurity)

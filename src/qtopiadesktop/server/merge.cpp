@@ -27,13 +27,14 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QSqlRecord>
 #include <QStringList>
 #include <QVariant>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 #include <QFile>
 
-#define SANITIZE(array) QString(array).replace("\n","").replace(QRegExp("> +<"), "><").trimmed()
+#define SANITIZE(array) QString(array).replace("\n","").replace(QRegExp("> +<"), "><").replace(QRegExp("<\\?xml .*\\?>"),"").trimmed()
 
 Conflict::Conflict(const Change &c, const Change &s)
     : client(c), server(s)
@@ -73,6 +74,7 @@ public:
     QByteArray serverReference;
     QByteArray clientReference;
     MergeItem *reference;
+    QString datasource;
 };
 
 QSyncMerge::QSyncMerge(QObject *parent)
@@ -98,8 +100,16 @@ QSyncMerge::QSyncMerge(QObject *parent)
         q.prepare("CREATE TABLE identifiermap (serverid TEXT, clientid TEXT, UNIQUE(serverid), UNIQUE(clientid))");
         q.exec();
     }
+    if (!d->database.tables().contains("identifiermap2")) {
+        q.prepare("CREATE TABLE identifiermap2 (serverid TEXT, clientid TEXT, datasource TEXT, UNIQUE(serverid), UNIQUE(clientid))");
+        q.exec();
+    }
     if (!d->database.tables().contains("syncClients")) {
-        q.prepare("CREATE TABLE syncClients (clientIdentity VARCHAR(255), datasource VARCHAR(255), lastSyncAnchor TIMESTAMP, UNIQUE(clientIdentity, datasource))");
+        q.prepare("CREATE TABLE syncClients (clientIdentity VARCHAR(255), datasource VARCHAR(255), lastSyncAnchor TIMESTAMP, lastSyncServer TIMESTAMP, UNIQUE(clientIdentity, datasource))");
+        q.exec();
+    } else if (!d->database.record("syncClients").contains("lastSyncServer")) {
+        // lastSyncAnchor would be lastSyncClient, except can't rename or remove columns, only add.
+        q.prepare("ALTER TABLE syncClients ADD COLUMN lastSyncServer TIMESTAMP");
         q.exec();
     }
 }
@@ -132,21 +142,35 @@ void QSyncMerge::setClientReferenceSchema(const QByteArray &data)
 
 MergeItem *QSyncMerge::referenceItem()
 {
+    bool ok = true;
     if (!d->reference) {
         if (!d->serverReference.isEmpty()) {
             d->reference = new MergeItem(this) ;
-            d->reference->read(d->serverReference, MergeItem::DataOnly);
+            ok = d->reference->read(d->serverReference, MergeItem::DataOnly);
+            if ( !ok ) {
+                qWarning() << "BUG! d->serverReference could not be parsed" << __FILE__ << __LINE__;
+                d->serverReference = "";
+            }
         }
         if (!d->clientReference.isEmpty()) {
             if (d->reference) {
                 MergeItem item(this);
-                item.read(d->clientReference, MergeItem::DataOnly);
-                d->reference->restrictTo(item);
+                ok = item.read(d->clientReference, MergeItem::DataOnly);
+                if ( ok )
+                    d->reference->restrictTo(item);
             } else {
                 d->reference = new MergeItem(this) ;
-                d->reference->read(d->clientReference, MergeItem::DataOnly);
+                ok = d->reference->read(d->clientReference, MergeItem::DataOnly);
+            }
+            if ( !ok ) {
+                qWarning() << "BUG! clientReference could not be parsed" << __FILE__ << __LINE__;
+                d->clientReference = "";
             }
         }
+    }
+    if ( d->reference && !ok ) {
+        delete d->reference;
+        d->reference = 0;
     }
     return d->reference;
 }
@@ -156,10 +180,11 @@ void QSyncMerge::mapIdentifier(const QString &serverId, const QString &clientId)
     TRACE(QDSync) << "QSyncMerge::mapIdentifier" << "serverId" << serverId << "clientId" << clientId;
     SyncLog() << "Mapping server identifier" << serverId << "to client identifier" << clientId << endl;
     QSqlQuery q = d->query();
-    if (!q.prepare("INSERT INTO identifiermap (serverid, clientid) VALUES (:s, :c)"))
+    if (!q.prepare("INSERT INTO identifiermap2 (serverid, clientid, datasource) VALUES (:s, :c, :d)"))
         WARNING() << "failed to prepare" << q.lastError().text() << __LINE__;
     q.bindValue(":s", serverId);
     q.bindValue(":c", clientId);
+    q.bindValue(":d", d->datasource);
     if (!q.exec())
         WARNING() << "failed to exec" << q.lastError().text() << __LINE__;
 }
@@ -167,16 +192,39 @@ void QSyncMerge::mapIdentifier(const QString &serverId, const QString &clientId)
 void QSyncMerge::clearIdentifierMap()
 {
     TRACE(QDSync) << "QSyncMerge::clearIdentifierMap";
+    {
+        QSqlQuery q = d->query();
+        if (!q.prepare("DELETE FROM identifiermap"))
+            WARNING() << "failed to prepare" << q.lastError().text() << __LINE__;
+        if (!q.exec())
+            WARNING() << "failed to exec" << q.lastError().text() << __LINE__;
+    }
     QSqlQuery q = d->query();
-    if (!q.prepare("DELETE FROM identifiermap"))
+    if (!q.prepare("DELETE FROM identifiermap2 where datasource = :d"))
         WARNING() << "failed to prepare" << q.lastError().text() << __LINE__;
+    q.bindValue(":d", d->datasource);
     if (!q.exec())
         WARNING() << "failed to exec" << q.lastError().text() << __LINE__;
 }
 
-QString QSyncMerge::map(const QString &ident, ChangeSource source) const
+QString QSyncMerge::map(const QString &ident, ChangeSource source)
 {
     TRACE(QDSync) << "QSyncMerge::map" << "ident" << ident << "source" << (source==Server?"Server":"Client");
+    {
+        QSqlQuery q = d->query();
+        if (source == Server) {
+            if (!q.prepare("SELECT clientid FROM identifiermap2 WHERE serverid = :s"))
+                WARNING() << "error in prepare" << __LINE__ << q.lastError().text();
+            q.bindValue(":s", ident);
+        } else {
+            if (!q.prepare("SELECT serverid FROM identifiermap2 WHERE clientid = :c"))
+                WARNING() << "error in prepare" << __LINE__ << q.lastError().text();
+            q.bindValue(":c", ident);
+        }
+        if (q.exec() && q.next())
+            return q.value(0).toString();
+    }
+    // Transparently migrate data from the old identifiermap table to the new identifiermap2 table.
     QSqlQuery q = d->query();
     if (source == Server) {
         if (!q.prepare("SELECT clientid FROM identifiermap WHERE serverid = :s"))
@@ -187,30 +235,52 @@ QString QSyncMerge::map(const QString &ident, ChangeSource source) const
             WARNING() << "error in prepare" << __LINE__ << q.lastError().text();
         q.bindValue(":c", ident);
     }
-    if (q.exec() && q.next())
-        return q.value(0).toString();
+    if (q.exec() && q.next()) {
+        QString ret = q.value(0).toString();
+        QString serverid;
+        QString clientid;
+        if (source == Server) {
+            serverid = ident;
+            clientid = ret;
+        } else {
+            serverid = ret;
+            clientid = ident;
+        }
+        // register the mapping in the new table
+        mapIdentifier(serverid, clientid);
+        // remove the mapping from the old table
+        QSqlQuery del = d->query();
+        if (!del.prepare("DELETE FROM identifiermap WHERE serverid = :s"))
+            WARNING() << "error in prepare" << __LINE__ << q.lastError().text();
+        del.bindValue(":s", serverid);
+        del.exec();
+        return ret;
+    }
     return QString();
 }
 
-QDateTime QSyncMerge::lastSync(const QString &clientid, const QString &datasource) const
+void QSyncMerge::lastSync(const QString &clientid, const QString &datasource, QDateTime &clientLastSync, QDateTime &serverLastSync)
 {
     TRACE(QDSync) << "QSyncMerge::lastSync" << "clientid" << clientid << "datasource" << datasource;
     QSqlQuery q = d->query();
-    if (!q.prepare("SELECT lastSyncAnchor FROM syncClients WHERE clientIdentity = :c AND datasource = :d"))
+    if (!q.prepare("SELECT lastSyncAnchor, lastSyncServer FROM syncClients WHERE clientIdentity = :c AND datasource = :d"))
         WARNING() << "error in prepare" << __LINE__ << q.lastError().text();
 
     q.bindValue(":c", clientid);
     q.bindValue(":d", datasource);
     q.exec();
 
-    if (q.next())
-        return q.value(0).toDateTime();
-    return QDateTime();
+    if (q.next()) {
+        clientLastSync = q.value(0).toDateTime();
+        clientLastSync.setTimeSpec(Qt::UTC); // This is not preserved in the database
+        serverLastSync = q.value(1).toDateTime();
+        serverLastSync.setTimeSpec(Qt::UTC); // This is not preserved in the database
+    }
 }
 
-void QSyncMerge::recordLastSync(const QString &clientid, const QString &datasource, const QDateTime &syncTime)
+void QSyncMerge::recordLastSync(const QString &clientid, const QString &datasource, const QDateTime &clientLastSync, const QDateTime &serverLastSync)
 {
-    TRACE(QDSync) << "QSyncMerge::recordLastSync" << "clientid" << clientid << "datasource" << datasource << "syncTime" << syncTime;
+    TRACE(QDSync) << "QSyncMerge::recordLastSync" << "clientid" << clientid << "datasource" << datasource << "clientLastSync" << clientLastSync << "serverLastSync" << serverLastSync;
     QSqlQuery q = d->query();
     q.prepare("SELECT lastSyncAnchor FROM syncClients WHERE clientIdentity = :c AND datasource = :d");
 
@@ -219,13 +289,14 @@ void QSyncMerge::recordLastSync(const QString &clientid, const QString &datasour
     q.exec();
 
     if (q.next()) {
-        q.prepare("UPDATE syncClients SET lastSyncAnchor = :ls WHERE clientIdentity = :id AND datasource = :ds");
+        q.prepare("UPDATE syncClients SET lastSyncAnchor = :cls, lastSyncServer = :sls WHERE clientIdentity = :id AND datasource = :ds");
     } else {
-        q.prepare("INSERT INTO syncClients (clientIdentity, datasource, lastSyncAnchor) VALUES (:id, :ds, :ls)");
+        q.prepare("INSERT INTO syncClients (clientIdentity, datasource, lastSyncAnchor, lastSyncServer) VALUES (:id, :ds, :cls, :sls)");
     }
     q.bindValue(":id", clientid);
     q.bindValue(":ds", datasource);
-    q.bindValue(":ls", syncTime);
+    q.bindValue(":cls", clientLastSync);
+    q.bindValue(":sls", serverLastSync);
 
     q.exec();
 }
@@ -246,7 +317,12 @@ void QSyncMerge::createServerRecord(const QByteArray &array)
     LOG() << "array" << array;
     SyncLog() << "Create server record" << SANITIZE(array) << endl;
     MergeItem item(this);
-    item.read(array, MergeItem::Server);
+    bool ok = item.read(array, MergeItem::Server);
+    if (!ok) {
+        LOG() << "Could not parse record!";
+        SyncLog() << "Could not parse record!";
+        return;
+    }
     if (referenceItem())
         item.restrictTo(*referenceItem());
     addServerChange(Change::Create, item);
@@ -258,7 +334,12 @@ void QSyncMerge::replaceServerRecord(const QByteArray &array)
     LOG() << "array" << array;
     SyncLog() << "Replace server record" << SANITIZE(array) << endl;
     MergeItem item(this);
-    item.read(array, MergeItem::Server);
+    bool ok = item.read(array, MergeItem::Server);
+    if (!ok) {
+        LOG() << "Could not parse record!";
+        SyncLog() << "Could not parse record!";
+        return;
+    }
     if (referenceItem())
         item.restrictTo(*referenceItem());
     addServerChange(Change::Replace, item);
@@ -267,9 +348,11 @@ void QSyncMerge::replaceServerRecord(const QByteArray &array)
 void QSyncMerge::removeServerRecord(const QString &id)
 {
     TRACE(QDSync) << "QSyncMerge::removeServerRecord" << "id" << id;
-    SyncLog() << "Remove server record" << id << endl;
-    if (!canMap(id, Server))
+    if (!canMap(id, Server)) {
+        SyncLog() << "Ignoring remove server record (not on device?)" << id << endl;
         return;
+    }
+    SyncLog() << "Remove server record" << id << endl;
 
     QSqlQuery q = d->query();
     if (!q.prepare("INSERT INTO serverchanges (clientid, changetype) VALUES (:r, :t)"))
@@ -288,7 +371,12 @@ void QSyncMerge::createClientRecord(const QByteArray &array)
     LOG() << "array" << array;
     SyncLog() << "Create client record" << SANITIZE(array) << endl;
     MergeItem item(this);
-    item.read(array, MergeItem::Client);
+    bool ok = item.read(array, MergeItem::Client);
+    if (!ok) {
+        LOG() << "Could not parse record!";
+        SyncLog() << "Could not parse record!";
+        return;
+    }
     if (referenceItem())
         item.restrictTo(*referenceItem());
     addClientChange(Change::Create, item);
@@ -300,7 +388,12 @@ void QSyncMerge::replaceClientRecord(const QByteArray &array)
     LOG() << "array" << array;
     SyncLog() << "Replace client record" << SANITIZE(array) << endl;
     MergeItem item(this);
-    item.read(array, MergeItem::Client);
+    bool ok = item.read(array, MergeItem::Client);
+    if (!ok) {
+        LOG() << "Could not parse record!";
+        SyncLog() << "Could not parse record!";
+        return;
+    }
     if (referenceItem())
         item.restrictTo(*referenceItem());
     addClientChange(Change::Replace, item);
@@ -365,7 +458,7 @@ void QSyncMerge::addClientChange(Change::Type type, const MergeItem &item)
         WARNING() << "exec failed" << q.lastError().text() << __LINE__;
 }
 
-void QSyncMerge::readConflict(Change &client, Change &server, const QSqlQuery &q) const
+void QSyncMerge::readConflict(Change &client, Change &server, const QSqlQuery &q)
 {
     TRACE(QDSync) << "QSyncMerge::readConflict";
     MergeItem clientItem(this), serverItem(this);
@@ -384,7 +477,7 @@ void QSyncMerge::readConflict(Change &client, Change &server, const QSqlQuery &q
     server.record = serverItem.write(MergeItem::Server);
 }
 
-QList<Conflict> QSyncMerge::conflicts() const
+QList<Conflict> QSyncMerge::conflicts()
 {
     TRACE(QDSync) << "QSyncMerge::conflicts";
     QList<Conflict> list;
@@ -619,7 +712,7 @@ bool QSyncMerge::resolveAllServer()
   Resolved changes for contacts modified on the server and to be applied to the client.
   Identifiers are client identifiers where mapping is available.
 */
-QList<Change> QSyncMerge::serverDiff() const
+QList<Change> QSyncMerge::serverDiff()
 {
     TRACE(QDSync) << "QSyncMerge::serverDiff";
     QList<Change> list;
@@ -633,9 +726,11 @@ QList<Change> QSyncMerge::serverDiff() const
         client.id = q.value(0).toString();
         client.type = Change::Type(q.value(1).toInt());
 
-        clientItem.read(q.value(3).toByteArray(), MergeItem::DataOnly);
-        clientItem.read(q.value(2).toByteArray(), MergeItem::IdentifierOnly);
-        client.record = clientItem.write(MergeItem::Client);
+        if ( client.type != Change::Remove ) {
+            clientItem.read(q.value(3).toByteArray(), MergeItem::DataOnly);
+            clientItem.read(q.value(2).toByteArray(), MergeItem::IdentifierOnly);
+            client.record = clientItem.write(MergeItem::Client);
+        }
         list.append(client);
     }
     return list;
@@ -645,7 +740,7 @@ QList<Change> QSyncMerge::serverDiff() const
   Resolved changes for contacts modified on the client and to be applied to the server.
   Identifiers are server identifiers where mapping is available.
 */
-QList<Change> QSyncMerge::clientDiff() const
+QList<Change> QSyncMerge::clientDiff()
 {
     TRACE(QDSync) << "QSyncMerge::clientDiff";
     QList<Change> list;
@@ -682,7 +777,7 @@ QList<Change> QSyncMerge::clientDiff() const
 
   The specified \a source is used to identify which way to map the identifiers.
 */
-QString QSyncMerge::parseIdentifiers(QByteArray &array, ChangeSource source, bool revert) const
+QString QSyncMerge::parseIdentifiers(QByteArray &array, ChangeSource source, bool revert)
 {
     TRACE(QDSync) << "QSyncMerge::parseIdentifiers";
     QByteArray result;
@@ -840,10 +935,15 @@ void QSyncMerge::revertIdentifierMapping(const Conflict &conflict)
     q.exec();
 
     // then delete mapping line from ident tables.
-    q.prepare("DELETE FROM identifiermap WHERE serverid = :s AND clientid = :c");
+    q.prepare("DELETE FROM identifiermap2 WHERE serverid = :s AND clientid = :c");
     q.bindValue(":s", conflict.server.id);
     q.bindValue(":c", conflict.client.id);
     q.exec();
+}
+
+void QSyncMerge::setDatasource( const QString &datasource )
+{
+    d->datasource = datasource;
 }
 
 // =====================================================================

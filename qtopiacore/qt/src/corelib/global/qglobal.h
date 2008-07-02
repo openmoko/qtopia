@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -46,17 +46,17 @@
 
 #include <stddef.h>
 
-#define QT_VERSION_STR   "4.3.4"
+#define QT_VERSION_STR   "4.3.5"
 /*
    QT_VERSION is (major << 16) + (minor << 8) + patch.
 */
-#define QT_VERSION 0x040304
+#define QT_VERSION 0x040305
 /*
    can be used like #if (QT_VERSION >= QT_VERSION_CHECK(4, 3, 0))
 */
 #define QT_VERSION_CHECK(major, minor, patch) ((major<<16)|(minor<<8)|(patch))
 
-#define QT_PACKAGEDATE_STR "2008-02-20"
+#define QT_PACKAGEDATE_STR "2008-06-03"
 
 #if !defined(QT_BUILD_MOC)
 #include <QtCore/qconfig.h>

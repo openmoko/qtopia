@@ -679,6 +679,7 @@ QDClientSyncPlugin::~QDClientSyncPlugin()
 /*!
   \fn void QDClientSyncPlugin::serverSyncAnchors(const QDateTime &serverLastSync, const QDateTime &serverNextSync)
   The server's sync anchors are \a serverLastSync and \a serverNextSync.
+  \bold Note that \a serverLastSync and \a serverNextSync are in UTC time.
 */
 
 /*!
@@ -730,6 +731,7 @@ QDClientSyncPlugin::~QDClientSyncPlugin()
 /*!
   \fn void QDClientSyncPlugin::clientSyncAnchors(const QDateTime &clientLastSync, const QDateTime &clientNextSync)
   Emit this signal to set the client's sync anchors to \a clientLastSync and \a clientNextSync.
+  \bold Note that \a clientLastSync and \a clientNextSync should be in UTC time.
 */
 
 /*!
@@ -844,6 +846,8 @@ QDServerSyncPlugin::~QDServerSyncPlugin()
   \fn void QDServerSyncPlugin::fetchChangesSince(const QDateTime &timestamp)
   Fetch changes since \a timestamp. Data and progress should be reported by emitting signals.
   This funtion can return before the fetching is completed.
+
+  \bold Note that \a timestamp is in UTC time.
   \sa createServerRecord(), replaceServerRecord(), removeServerRecord(), serverChangesCompleted()
 */
 

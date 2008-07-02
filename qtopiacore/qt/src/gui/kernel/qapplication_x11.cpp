@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -966,7 +966,10 @@ static void qt_set_x11_resources(const char* font = 0, const char* fg = 0,
         resBG = QString::fromLocal8Bit(bg);
     if (resButton.isEmpty())
         resButton = QString::fromLocal8Bit(button);
-    if (!resFont.isEmpty() && !X11->has_fontconfig) { // set application font
+    if (!resFont.isEmpty()
+        && !X11->has_fontconfig
+        && !QApplicationPrivate::sys_font) {
+        // set application font
         QFont fnt;
         fnt.setRawName(resFont);
 
@@ -3659,9 +3662,9 @@ bool QETWidget::translateMouseEvent(const XEvent *event)
         if (event->type == ButtonPress) {        // mouse button pressed
             buttons |= button;
 #if defined(Q_OS_IRIX) && !defined(QT_NO_TABLET)
-            TabletDeviceDataList *tablets = qt_tablet_devices();
+            QTabletDeviceDataList *tablets = qt_tablet_devices();
             for (int i = 0; i < tablets->size(); ++i) {
-                const TabletDeviceData &tab = tablets->at(i);
+                const QTabletDeviceData &tab = tablets->at(i);
                 XEvent myEv;
                 if (XCheckTypedEvent(X11->display, tab.xinput_button_press, &myEv)) {
                         if (translateXinputEvent(&myEv, &tab)) {
@@ -3697,9 +3700,9 @@ bool QETWidget::translateMouseEvent(const XEvent *event)
         } else {                                // mouse button released
             buttons &= ~button;
 #if defined(Q_OS_IRIX) && !defined(QT_NO_TABLET)
-            TabletDeviceDataList *tablets = qt_tablet_devices();
+            QTabletDeviceDataList *tablets = qt_tablet_devices();
             for (int i = 0; i < tablets->size(); ++i) {
-                const TabletDeviceData &tab = tablets->at(i);
+                const QTabletDeviceData &tab = tablets->at(i);
                 XEvent myEv;
                 if (XCheckTypedEvent(X11->display, tab.xinput_button_press, &myEv)) {
                         if (translateXinputEvent(&myEv, &tab)) {
