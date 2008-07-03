@@ -88,7 +88,6 @@ protected:
     void closeEvent(QCloseEvent *);
     bool eventFilter(QObject *, QEvent *);
     void hideEvent( QHideEvent * );
-    void mousePressEvent(QMouseEvent *);
 
 private slots:
     void updateAll();
@@ -98,23 +97,16 @@ private slots:
     void themeItemClicked(ThemeItem*);
     void actionGsmSelected();
     void updateLabels();
-#ifndef QT_ILLUME_LAUNCHER
-    void setVideoWidget();
-    void deleteVideoWidget();
-#endif
     void initializeAudioConf();
 #ifdef QTOPIA_CELL
     void simControlEvent(const QSimControlEvent &);
 #endif
-    void grabMouse();
-    void releaseMouse();
     void muteRingSelected();
     void callConnected(const QPhoneCall &);
     void callDropped(const QPhoneCall &);
     void callIncoming(const QPhoneCall &);
     void callDialing(const QPhoneCall &);
     void rejectModalDialog();
-    void initializeMouseControlDialog();
 
 private:
     void clearDtmfDigits(bool clearOneChar = false);
@@ -153,17 +145,14 @@ private:
     QVBoxLayout *m_layout;
     QTimer* m_updateTimer;
     QTimer* m_gsmActionTimer;
-    SecondaryCallScreen *m_secondaryCallScreen;
     ThemeListModel* m_model;
     CallAudioHandler* m_callAudioHandler;
-    QWidget* m_videoWidget;
     QAudioStateConfiguration *m_audioConf;
 #ifdef QTOPIA_CELL
     QSimToolkit *m_simToolkit;
 #endif
     QAbstractMessageBox *m_simMsgBox;
     QTimer *m_symbolTimer;
-    MouseControlDialog *m_mouseCtrlDlg;
 
 #ifdef QT_ILLUME_LAUNCHER
     QString m_screenSaverCommand;

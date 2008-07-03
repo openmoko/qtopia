@@ -498,162 +498,6 @@ void CallAudioHandler::callStateChanged(bool enableAudio)
 
 //===========================================================================
 
-class MouseControlDialog : public QDialog
-{
-    Q_OBJECT
-public:
-    MouseControlDialog( QWidget* parent = 0, Qt::WFlags fl = 0 )
-        : QDialog(parent, fl), m_tid(0), m_parent(parent), m_mouseUnlocked(false)
-    {
-        QColor c(Qt::black);
-        c.setAlpha(180);
-
-        setAttribute(Qt::WA_SetPalette, true);
-
-        QPalette p = palette();
-        p.setBrush(QPalette::Window, c);
-        setPalette(p);
-
-        QVBoxLayout *vBox = new QVBoxLayout(this);
-        QHBoxLayout *hBox = new QHBoxLayout;
-
-        QIcon icon(":icon/select");
-
-        QLabel *l = new QLabel(this);
-        l->setPixmap(icon.pixmap(44, 44));
-        hBox->addStretch();
-        hBox->addWidget(l);
-        hBox->addStretch();
-
-        int height = l->sizeHint().height();
-
-        vBox->addLayout(hBox);
-
-        l = new QLabel(this);
-        l->setWordWrap(true);
-        if (Qtopia::mousePreferred()) {
-            l->setText(tr("Move the slider to activate the touch screen."));
-        } else {
-            l->setText(tr("Press key <b>Down</b> to activate the touch screen.", "translate DOWN to name of key with down arrow"));
-        }
-        vBox->addWidget(l);
-        height += l->sizeHint().height();
-
-        if (Qtopia::mousePreferred()) {
-            m_slider = new QSlider(Qt::Horizontal, this);
-            m_slider->installEventFilter(this);
-            m_slider->setRange(0, 10);
-            m_slider->setPageStep(1);
-            connect(m_slider, SIGNAL(valueChanged(int)), this, SLOT(sliderMoved(int)));
-            vBox->addWidget(m_slider);
-
-            height += m_slider->sizeHint().height();
-        }
-
-        QRect d = QApplication::desktop()->screenGeometry();
-        int dw = d.width();
-        int dh = d.height();
-
-        height += QApplication::style()->pixelMetric(QStyle::PM_LayoutVerticalSpacing);
-        height += QApplication::style()->pixelMetric(QStyle::PM_LayoutTopMargin);
-        height += QApplication::style()->pixelMetric(QStyle::PM_LayoutBottomMargin);
-        setGeometry(20*dw/100, (dh - height)/2, 60*dw/100, height);
-
-        m_parent->installEventFilter(this);
-    }
-
-    static const int TIMEOUT = 2000;
-signals:
-    void releaseMouse();
-    void grabMouse();
-
-protected:
-    void timerEvent( QTimerEvent *e )
-    {
-        Q_UNUSED(e)
-        close();
-    }
-
-    void closeEvent( QCloseEvent *e )
-    {
-        // if failed to unlock the touch screen
-        // hand over mouse grab to call screen
-        if ( Qtopia::mousePreferred() )
-            if ( m_slider->value() != m_slider->maximum() )
-               emit grabMouse();
-        QDialog::closeEvent( e );
-    }
-
-    void showEvent( QShowEvent *e )
-    {
-        m_mouseUnlocked = false;
-        if (Qtopia::mousePreferred()) {
-            m_slider->grabMouse();
-            m_slider->setValue(0);
-        }
-
-        resetTimer();
-        QDialog::showEvent( e );
-    }
-
-    void keyPressEvent( QKeyEvent *e )
-    {
-        if ( e->key() == Qt::Key_Down ) {
-            m_mouseUnlocked = true;
-            emit releaseMouse();
-            close();
-        }
-    }
-
-    bool eventFilter( QObject *o, QEvent *e )
-    {
-        if ( o == m_parent ) {
-            if ( e->type() == QEvent::WindowActivate ) {
-                if ( !m_mouseUnlocked )
-                   emit grabMouse();
-            } else if ( e->type() == QEvent::WindowDeactivate ) {
-                if ( !isVisible() ) {
-                    m_mouseUnlocked = false;
-                    emit releaseMouse();
-                }
-            }
-        }
-
-        if ( Qtopia::mousePreferred() && o == m_slider ) {
-            // do not allow to move slider with key press
-            if ( e->type() == QEvent::KeyPress
-                    || e->type() == QEvent::KeyRelease )
-                return true;
-        }
-        return false;
-    }
-
-private slots:
-    void resetTimer()
-    {
-        killTimer( m_tid );
-        m_tid = startTimer( TIMEOUT );
-    }
-
-    void sliderMoved( int value )
-    {
-        if ( value == m_slider->maximum() ) {
-            m_slider->releaseMouse();
-            close();
-        } else {
-            resetTimer();
-        }
-    }
-
-private:
-    int m_tid;
-    QSlider *m_slider;
-    QWidget *m_parent;
-    bool m_mouseUnlocked;
-};
-
-//===========================================================================
-
 /*!
   \class CallScreen
   \brief The CallScreen class provides a phone call screen.
@@ -721,8 +565,8 @@ private:
 CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     : PhoneThemedView(parent, fl), m_control(ctrl), m_digits(0), m_listView(0), m_actionGsm(0),
     m_activeCount(0), m_holdCount(0) , m_keypadVisible(false), m_layout( 0 ),
-    m_updateTimer( 0 ), m_gsmActionTimer(0), m_secondaryCallScreen(0), m_model(0), m_callAudioHandler(0),
-    m_videoWidget(0), m_simMsgBox(0), m_symbolTimer(0), m_mouseCtrlDlg(0)
+    m_updateTimer( 0 ), m_gsmActionTimer(0), m_model(0), m_callAudioHandler(0),
+    m_simMsgBox(0), m_symbolTimer(0)
 {
     callScreen = this;
     setObjectName(QLatin1String("calls"));
@@ -792,12 +636,6 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
 
     setWindowTitle(tr("Calls"));
 
-    if (QApplication::desktop()->numScreens() > 1) {
-        // We have a secondary screen
-        m_secondaryCallScreen = new SecondaryCallScreen;
-        m_secondaryCallScreen->setGeometry(QApplication::desktop()->availableGeometry(1));
-    }
-
     QObject::connect(m_control,
                      SIGNAL(requestFailed(QPhoneCall,QPhoneCall::Request)),
                      this,
@@ -818,16 +656,6 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     QObject::connect(m_control, SIGNAL(callIncoming(const QPhoneCall&)),
                      this, SLOT(callIncoming(const QPhoneCall&)));
 
-#ifndef QT_ILLUME_LAUNCHER
-    QObject::connect( VideoRingtone::instance(), SIGNAL(videoWidgetReady()),
-            this, SLOT(setVideoWidget()) );
-    QObject::connect( VideoRingtone::instance(), SIGNAL(videoRingtoneStopped()),
-            this, SLOT(deleteVideoWidget()) );
-    // delete the video widget once call is answered
-    connect( this, SIGNAL(acceptIncoming()),
-            this, SLOT(deleteVideoWidget()) );
-#endif
-
 #ifdef QTOPIA_CELL
     m_simToolkit = new QSimToolkit( QString(), this );
     QObject::connect( m_simToolkit, SIGNAL(controlEvent(QSimControlEvent)),
@@ -843,51 +671,6 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     if ( m_control->hasIncomingCall() )
         callIncoming( m_control->incomingCall() );
 }
-
-#ifndef QT_ILLUME_LAUNCHER
-/*!
-  Sets the video player widget to the CallScreen.
-  */
-void CallScreen::setVideoWidget()
-{
-    if ( !m_model->rowCount() )
-        return;
-
-    videoWidget = VideoRingtone::instance()->videoWidget();
-
-    videoWidget->setParent( this );
-
-    QRect availableGeometry = rect();
-    QRect lastItemRect =
-        m_listView->visualRect( m_model->index( m_model->rowCount() - 1 ) );
-
-    availableGeometry.setTop(
-            lastItemRect.top()
-            + lastItemRect.height() );
-
-    videoWidget->setGeometry( availableGeometry );
-
-    // set menu.
-    QMenu *menu = QSoftMenuBar::menuFor( videoWidget );
-    menu = m_contextMenu;
-    QSoftMenuBar::setLabel(videoWidget, Qt::Key_Select, "phone/answer", tr("Answer"));
-    QSoftMenuBar::setLabel(m_listView, Qt::Key_Back, ":icon/mute", tr("Mute"));
-
-    qLog(Media) << "Displaying the video ringtone";
-    videoWidget->show();
-}
-
-/*!
-  Hides the video player widget.
-*/
-void CallScreen::deleteVideoWidget()
-{
-    if (videoWidget != 0)
-        delete videoWidget;
-
-    videoWidget = 0;
-}
-#endif
 
 void CallScreen::initializeAudioConf()
 {
@@ -1141,17 +924,6 @@ void CallScreen::appendDtmfDigits(const QString &dtmf)
     m_digits->setCursorPosition(m_digits->text().length());
     m_digits->show();
 
-    // if video widget is shown reduce the size
-    if ( m_videoWidget ) {
-
-        QRect curGeometry = m_videoWidget->geometry();
-        QRect m_digitsRect = m_digits->geometry();
-
-        curGeometry.setBottom( m_digitsRect.top() );
-
-        m_videoWidget->setGeometry( curGeometry );
-    }
-
     manualLayout();
     CallItemModel* m = qobject_cast<CallItemModel *>(m_listView->model());
     m->triggerUpdate();
@@ -1303,9 +1075,6 @@ void CallScreen::stateChanged()
         }
     }
 
-    if (m_secondaryCallScreen && primaryItem)
-        m_secondaryCallScreen->setCallData(primaryItem->callData);
-
     // update available m_actions.
     m_actionAnswer->setVisible(m_control->hasIncomingCall());
     m_actionSendBusy->setVisible(m_control->hasIncomingCall());
@@ -1440,10 +1209,6 @@ void CallScreen::updateAll()
         item->setValue( "Duration", item->callData.durationString() );
         if( item->value("Photo").toString().isEmpty() )
             item->setValue( "Photo", item->callData.photo );
-        if (m_secondaryCallScreen && item->call() == m_secondaryCallScreen->call()) {
-            m_secondaryCallScreen->setCallData(item->callData);
-            m_secondaryCallScreen->showMaximized();
-        }
     }
 
     if (m->rowCount() == 0) {
@@ -1712,7 +1477,6 @@ void CallScreen::showEvent( QShowEvent *e )
     m_updateTimer->start(1000);
     ThemedView::showEvent( e );
     manualLayout();
-    QTimer::singleShot(0, this, SLOT(initializeMouseControlDialog()));
 }
 
 /*!
@@ -1752,9 +1516,6 @@ void CallScreen::hideEvent( QHideEvent * )
 {
     if ( m_updateTimer )
         m_updateTimer->stop();
-
-    if (m_secondaryCallScreen)
-        m_secondaryCallScreen->hide();
 }
 
 /*!
@@ -1816,9 +1577,7 @@ bool CallScreen::eventFilter(QObject *o, QEvent *e)
                     }
                 }
             }
-        } else if (e->type() == QEvent::Show) {
-            grabMouse();
-        }
+        } 
     }
 
     return false;
@@ -1899,53 +1658,6 @@ void CallScreen::simControlEvent(const QSimControlEvent &e)
 }
 
 #endif
-
-/*! \internal */
-void CallScreen::grabMouse()
-{
-    // lock touch screen
-    if (!Qtopia::mousePreferred())
-        PhoneThemedView::grabMouse();
-}
-
-/*! \internal */
-void CallScreen::releaseMouse()
-{
-    // unlock touch screen
-    if (!Qtopia::mousePreferred())
-        PhoneThemedView::releaseMouse();
-}
-
-void CallScreen::initializeMouseControlDialog()
-{
-    // Do not use screen lock if touch screen only
-    if (Qtopia::mousePreferred())
-        return;
-
-    if ( !m_mouseCtrlDlg ) {
-        m_mouseCtrlDlg = new MouseControlDialog(this, Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
-        connect( m_mouseCtrlDlg, SIGNAL(releaseMouse()), this, SLOT(releaseMouse()) );
-        connect( m_mouseCtrlDlg, SIGNAL(grabMouse()), this, SLOT(grabMouse()) );
-    }
-}
-
-/*! \internal */
-void CallScreen::mousePressEvent(QMouseEvent *e)
-{
-    // if touch screen is not locked no need to show unlock dialog
-    if ( !QWidget::mouseGrabber() ) {
-        PhoneThemedView::mousePressEvent(e);
-        return;
-    }
-
-    // if touch screen only phone, the mouse control dialog need to grab mouse
-    // so release the mouse before show the dialog.
-    if ( Qtopia::mousePreferred() )
-        releaseMouse();
-
-    if ( m_mouseCtrlDlg )
-        m_mouseCtrlDlg->show();
-}
 
 /*! \internal */
 void CallScreen::muteRingSelected()
