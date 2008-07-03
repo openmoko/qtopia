@@ -456,12 +456,7 @@ void PhoneLauncher::showMissedCalls()
 */
 void PhoneLauncher::showCallScreen()
 {
-    if( !callScreen()->sourceLoaded() ) {
-        callScreen()->loadSource();
-    }
-    callScreen()->showMaximized();
-    callScreen()->raise();
-    callScreen()->activateWindow();
+    callScreen()->makeVisible();
 }
 #endif
 
@@ -1346,7 +1341,7 @@ CallScreen *PhoneLauncher::callScreen(bool create) const
                          this, SLOT(callScreenListEmpty()));
         QObject::connect(m_callScreen, SIGNAL(acceptIncoming()),
                          this, SLOT(acceptIncoming()));
-        ThemeControl::instance()->registerThemedView(m_callScreen, "CallScreen");
+        ThemeControl::instance()->registerThemedView(m_callScreen->view(), "CallScreen");
 
 #ifdef QTOPIA_CELL
         QObject::connect( m_callScreen, SIGNAL(filterKeys(QString,bool&)),

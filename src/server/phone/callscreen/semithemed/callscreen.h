@@ -46,10 +46,26 @@ class QSimToolkit;
 class QAbstractMessageBox;
 class MouseControlDialog;
 
-class CallScreen : public PhoneThemedView
+class CallScreenView : public PhoneThemedView {
+    Q_OBJECT
+
+public:
+    CallScreenView(QWidget* parent);
+
+Q_SIGNALS:
+    void themeWasLoaded(const QString&);
+
+protected:
+    QWidget *newWidget(ThemeWidgetItem* input, const QString& name);
+    void themeLoaded(const QString&);
+
+};
+
+class CallScreen : public QWidget
 {
     friend class CallItemListView;
     friend class CallItemEntry;
+    friend class CallScreenView;
 
     Q_OBJECT
 public:
@@ -60,6 +76,9 @@ public:
     int heldCallCount() const { return m_holdCount; }
     bool incomingCall() const { return m_incoming; }
     bool inMultiCall() const { return m_activeCount > 1 || m_holdCount > 1; }
+    void makeVisible();
+
+    PhoneThemedView* view() const { return m_view; }
 
 signals:
     void acceptIncoming();
@@ -73,10 +92,9 @@ public slots:
     void stateChanged();
     void requestFailed(const QPhoneCall &,QPhoneCall::Request);
     CallItemEntry *findCall(const QPhoneCall &call, CallItemModel *model);
+    void themeLoaded( const QString &theme );
 
 protected:
-    virtual void themeLoaded( const QString &theme );
-    QWidget *newWidget(ThemeWidgetItem* input, const QString& name);
     void showEvent(QShowEvent *);
     void keyPressEvent(QKeyEvent *);
     void keyReleaseEvent(QKeyEvent *);
@@ -113,6 +131,7 @@ private:
 
 private:
     // User interface
+    CallScreenView *m_view;
     QListView *m_listView;
     ThemeListModel* m_model;
 

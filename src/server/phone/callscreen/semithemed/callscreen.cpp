@@ -495,6 +495,38 @@ void CallAudioHandler::callStateChanged(bool enableAudio)
 }
 
 //===========================================================================
+CallScreenView::CallScreenView(QWidget* parent)
+    : PhoneThemedView(parent)
+{}
+
+/* Reimplemented from ThemedView */
+/*!
+  \internal
+  */
+QWidget *CallScreenView::newWidget(ThemeWidgetItem* input, const QString& name)
+{
+    if( name == "callscreen" )  {
+        Q_ASSERT(input->rtti() == ThemedView::List);
+        CallItemListView * lv = new CallItemListView( input, this );
+        if(callScreen->m_model != 0)
+            delete callScreen->m_model;
+        callScreen->m_model = new CallItemModel( this, static_cast<ThemeListItem*>(input), this );
+        lv->setModel(callScreen->m_model);
+        return lv;
+    } else if( name == "callscreennumber" ) {
+        return new QLineEdit( this );
+    }
+    return 0;
+}
+
+void CallScreenView::themeLoaded(const QString& fn)
+{
+    emit themeWasLoaded(fn);
+}
+
+
+
+//===========================================================================
 
 /*!
   \class CallScreen
@@ -561,7 +593,7 @@ void CallAudioHandler::callStateChanged(bool enableAudio)
   \internal
   */
 CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
-    : PhoneThemedView(parent, fl)
+    : QWidget(parent, fl)
     , m_listView(0)
     , m_model(0)
     , m_digits(0)
@@ -577,6 +609,18 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
 {
     callScreen = this;
     setObjectName(QLatin1String("calls"));
+
+    // ui bits
+    m_view = new CallScreenView(this);
+    connect(m_view, SIGNAL(itemReleased(ThemeItem*)),
+            SLOT(themeItemReleased(ThemeItem*)));
+    connect(m_view, SIGNAL(themeWasLoaded(const QString&)),
+            SLOT(themeLoaded(const QString&)));
+
+    QVBoxLayout* lay = new QVBoxLayout(this);
+    lay->setMargin(0);
+    lay->addWidget(m_view);
+    
 
     m_contextMenu = QSoftMenuBar::menuFor(this);
 
@@ -637,9 +681,6 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     else
         QObject::connect(m_audioConf, SIGNAL(configurationInitialized()),
                          this, SLOT(initializeAudioConf()));
-
-    QObject::connect(this, SIGNAL(itemReleased(ThemeItem*)),
-                     this, SLOT(themeItemReleased(ThemeItem*)));
 
     setWindowTitle(tr("Calls"));
 
@@ -730,7 +771,7 @@ bool CallScreen::dialNumbers(const QString & numbers)
 void CallScreen::themeLoaded( const QString & )
 {
     ThemeWidgetItem *item = 0;
-    item = (ThemeListItem *)findItem( "callscreen", ThemedView::List, ThemeItem::All, false );
+    item = (ThemeWidgetItem*)m_view->findItem( "callscreen", ThemedView::List, ThemeItem::All, false );
     if( !item ) {
         qWarning("No callscreen element defined for CallScreen theme.");
         m_listView = 0;
@@ -753,7 +794,7 @@ void CallScreen::themeLoaded( const QString & )
     connect(m_listView, SIGNAL(activated(QModelIndex)), this, SLOT(callSelected(QModelIndex)));
     QSoftMenuBar::setLabel(m_listView, Qt::Key_Select, QSoftMenuBar::NoLabel);
 
-    item = (ThemeWidgetItem *)findItem( "callscreennumber", ThemedView::Widget, ThemeItem::All, false );
+    item = (ThemeWidgetItem*)m_view->findItem( "callscreennumber", ThemedView::Widget, ThemeItem::All, false );
     if( !item ) {
         qWarning("No callscreennumber input element defined for CallScreen theme.");
         m_digits = 0;
@@ -787,6 +828,16 @@ QString CallScreen::ringTone()
         }
     }
     return QString();
+}
+
+void CallScreen::makeVisible()
+{
+    if(!m_view->sourceLoaded())
+        m_view->loadSource();
+
+    showMaximized();
+    raise();
+    activateWindow();
 }
 
 /*!
@@ -1249,7 +1300,7 @@ void CallScreen::callSelected(const QModelIndex& index)
   */
 void CallScreen::setItemActive(const QString &name, bool active)
 {
-    ThemeItem *item = (ThemeItem *)findItem(name, ThemedView::Item, ThemeItem::All, false);
+    ThemeItem *item = m_view->findItem(name, ThemedView::Item, ThemeItem::All, false);
     if (item)
         item->setActive(active);
 }
@@ -1302,7 +1353,7 @@ void CallScreen::themeItemReleased(ThemeItem *item)
             showKeypad["keypad-box"] = true;
         }
 
-        setActiveItems(showKeypad);
+        m_view->setActiveItems(showKeypad);
     }
     else if (item->itemName() == "hide_keypad")
     {
@@ -1312,7 +1363,7 @@ void CallScreen::themeItemReleased(ThemeItem *item)
             hideKeypad["keypad-box"] = false;
         }
 
-        setActiveItems(hideKeypad);
+        m_view->setActiveItems(hideKeypad);
     }
     else if ( item->itemName() == "zero" )
     {
@@ -1405,7 +1456,7 @@ void CallScreen::showEvent( QShowEvent *e )
         connect(m_updateTimer, SIGNAL(timeout()), this, SLOT(updateAll()));
     }
     m_updateTimer->start(1000);
-    ThemedView::showEvent( e );
+    QWidget::showEvent(e);
 }
 
 /*!
@@ -1540,26 +1591,6 @@ void CallScreen::setSelectMode(bool s)
     }
 }
 
-/* Reimplemented from ThemedView */
-/*!
-  \internal
-  */
-QWidget *CallScreen::newWidget(ThemeWidgetItem* input, const QString& name)
-{
-    if( name == "callscreen" )  {
-        Q_ASSERT(input->rtti() == ThemedView::List);
-        CallItemListView * lv = new CallItemListView( input, this );
-        if(m_model != 0)
-            delete m_model;
-        m_model = new CallItemModel( this, static_cast<ThemeListItem*>(input), this );
-        lv->setModel(m_model);
-        return lv;
-    } else if( name == "callscreennumber" ) {
-        return new QLineEdit( this );
-    }
-    return 0;
-}
-
 /*!
   \internal
   Informs user with extra information from SIM when control event occurs.
@@ -1609,7 +1640,7 @@ void CallScreen::callConnected(const QPhoneCall &)
         connectedCall["hold"] = true;
     }
 
-    setActiveItems(connectedCall);
+    m_view->setActiveItems(connectedCall);
 }
 
 /*! \internal */
@@ -1628,9 +1659,9 @@ void CallScreen::callDropped(const QPhoneCall &)
 
 
     if (m_control->hasActiveCalls()) {
-        setActiveItems(activeCalls);
+        m_view->setActiveItems(activeCalls);
     } else if (m_control->hasCallsOnHold()) {
-        setActiveItems(callsOnHolds);
+        m_view->setActiveItems(callsOnHolds);
     } else {
         setItemActive("menu-box", false);
     }
@@ -1651,7 +1682,7 @@ void CallScreen::callDialing(const QPhoneCall &)
         dialing["hold"] = true;
     }
 
-    setActiveItems(dialing);
+    m_view->setActiveItems(dialing);
 }
 
 /*! \internal */
@@ -1668,7 +1699,7 @@ void CallScreen::callIncoming(const QPhoneCall &)
         m_incoming["sendbusy"] = true;
     }
 
-    setActiveItems(m_incoming);
+    m_view->setActiveItems(m_incoming);
 }
 
 /*!
