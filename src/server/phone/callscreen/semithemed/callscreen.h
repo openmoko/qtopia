@@ -112,11 +112,16 @@ private:
 #endif
 
 private:
+    // User interface
+    QListView *m_listView;
+    ThemeListModel* m_model;
+
+    // dtmf handling
+    QLineEdit *m_digits;
     QString m_dtmfActiveCall;
     QString m_dtmfDigits;
-    DialerControl *m_control;
-    QLineEdit *m_digits;
-    QListView *m_listView;
+
+    // Softmenu handling
     QMenu *m_contextMenu;
     QAction *m_actionAnswer;
     QAction *m_actionSendBusy;
@@ -129,12 +134,14 @@ private:
     QAction *m_actionSplit;
     QAction *m_actionTransfer;
     QAction *m_actionGsm;
+
+    // call handling
+    DialerControl *m_control;
     int m_activeCount;
     int m_holdCount;
     bool m_incoming;
     QTimer* m_updateTimer;
     QTimer* m_gsmActionTimer;
-    ThemeListModel* m_model;
     CallAudioHandler* m_callAudioHandler;
     QAudioStateConfiguration *m_audioConf;
     QSimToolkit *m_simToolkit;
