@@ -61,9 +61,7 @@
 #include <themedview.h>
 #include <qphonecallmanager.h>
 
-#ifdef QTOPIA_CELL
 #include <QSimToolkit>
-#endif
 
 #include "delayedwaitdialog.h"
 
@@ -667,11 +665,9 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     QObject::connect(m_control, SIGNAL(callIncoming(const QPhoneCall&)),
                      this, SLOT(callIncoming(const QPhoneCall&)));
 
-#ifdef QTOPIA_CELL
     m_simToolkit = new QSimToolkit( QString(), this );
     QObject::connect( m_simToolkit, SIGNAL(controlEvent(QSimControlEvent)),
             this, SLOT(simControlEvent(QSimControlEvent)) );
-#endif
 
 #ifdef QT_ILLUME_LAUNCHER
     m_screenSaverCommand = QString::fromLocal8Bit(qgetenv("ILLUME_PHONE_CALL"));
@@ -1635,8 +1631,6 @@ QWidget *CallScreen::newWidget(ThemeWidgetItem* input, const QString& name)
     return 0;
 }
 
-#ifdef QTOPIA_CELL
-
 /*!
   \internal
   Informs user with extra information from SIM when control event occurs.
@@ -1663,8 +1657,6 @@ void CallScreen::simControlEvent(const QSimControlEvent &e)
         QtopiaApplication::execDialog(m_simMsgBox);
     }
 }
-
-#endif
 
 /*! \internal */
 void CallScreen::muteRingSelected()

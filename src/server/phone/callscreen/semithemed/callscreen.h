@@ -27,9 +27,7 @@
 #include <QListWidget>
 #include "serverthemeview.h"
 #include <QPhoneCall>
-#ifdef QTOPIA_CELL
 #include <QSimControlEvent>
-#endif
 
 class DialerControl;
 class QMenu;
@@ -98,9 +96,7 @@ private slots:
     void actionGsmSelected();
     void updateLabels();
     void initializeAudioConf();
-#ifdef QTOPIA_CELL
     void simControlEvent(const QSimControlEvent &);
-#endif
     void muteRingSelected();
     void callConnected(const QPhoneCall &);
     void callDropped(const QPhoneCall &);
@@ -148,9 +144,7 @@ private:
     ThemeListModel* m_model;
     CallAudioHandler* m_callAudioHandler;
     QAudioStateConfiguration *m_audioConf;
-#ifdef QTOPIA_CELL
     QSimToolkit *m_simToolkit;
-#endif
     QAbstractMessageBox *m_simMsgBox;
     QTimer *m_symbolTimer;
 
