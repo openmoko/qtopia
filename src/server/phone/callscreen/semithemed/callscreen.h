@@ -133,7 +133,6 @@ private:
     int m_activeCount;
     int m_holdCount;
     bool m_incoming;
-    QVBoxLayout *m_layout;
     QTimer* m_updateTimer;
     QTimer* m_gsmActionTimer;
     ThemeListModel* m_model;

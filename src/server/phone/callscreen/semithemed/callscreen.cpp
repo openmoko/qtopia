@@ -568,7 +568,6 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     , m_actionGsm(0)
     , m_activeCount(0)
     , m_holdCount(0)
-    , m_layout( 0 )
     , m_updateTimer( 0 )
     , m_gsmActionTimer(0)
     , m_model(0)
@@ -732,22 +731,21 @@ void CallScreen::themeLoaded( const QString & )
 {
     ThemeWidgetItem *item = 0;
     item = (ThemeListItem *)findItem( "callscreen", ThemedView::List, ThemeItem::All, false );
-    delete m_layout;
-    m_layout = 0;
     if( !item ) {
         qWarning("No callscreen element defined for CallScreen theme.");
-        m_layout = new QVBoxLayout( this );
-        m_listView = new CallItemListView(0,this);
-    } else {
-        m_listView = qobject_cast<CallItemListView *>(item->widget());
-        Q_ASSERT(m_listView != 0 );
-        // active item
-        // hold item
-        // joined call indicator
-        // contact image
-        // phone number text
-        // status text
+        m_listView = 0;
+        return;
     }
+
+    m_listView = qobject_cast<CallItemListView *>(item->widget());
+    Q_ASSERT(m_listView != 0 );
+    // active item
+    // hold item
+    // joined call indicator
+    // contact image
+    // phone number text
+    // status text
+
     m_listView->setFrameStyle(QFrame::NoFrame);
     m_listView->installEventFilter(this);
     m_listView->setSelectionMode(QAbstractItemView::NoSelection);
@@ -759,24 +757,17 @@ void CallScreen::themeLoaded( const QString & )
     item = (ThemeWidgetItem *)findItem( "callscreennumber", ThemedView::Widget, ThemeItem::All, false );
     if( !item ) {
         qWarning("No callscreennumber input element defined for CallScreen theme.");
-        if( !m_layout )
-            m_layout = new QVBoxLayout( this );
-        m_digits = new QLineEdit( this );
-    } else {
-        m_digits = qobject_cast<QLineEdit*>(item->widget());
-        Q_ASSERT(m_digits != 0);
+        m_digits = 0;
+        return;
     }
+    m_digits = qobject_cast<QLineEdit*>(item->widget());
+    Q_ASSERT(m_digits != 0);
+
     m_digits->setFrame(false);
     m_digits->setReadOnly(true);
     m_digits->setFocusPolicy(Qt::NoFocus);
-    m_digits->hide();
     connect( m_digits, SIGNAL(textChanged(QString)),
             this, SLOT(updateLabels()) );
-
-    if( m_layout ) {
-        m_layout->addWidget( m_listView );
-        m_layout->addWidget( m_digits );
-    }
 
     stateChanged();
 }
@@ -786,6 +777,9 @@ void CallScreen::themeLoaded( const QString & )
   */
 QString CallScreen::ringTone()
 {
+    if (!m_listView)
+        return QString();
+
     CallItemModel* m = qobject_cast<CallItemModel *>(m_listView->model());
     for (int i = m->rowCount()-1; i>=0; i--) {
         CallItemEntry* item = m->callItemEntry(m->index(i));
@@ -808,17 +802,22 @@ void CallScreen::clearDtmfDigits(bool clearOneChar)
         m_dtmfDigits = m_dtmfDigits.left(m_dtmfDigits.length() - 1);
     else
         m_dtmfDigits.clear();
-    m_digits->setText(m_dtmfDigits);
+
+    if (m_digits)
+        m_digits->setText(m_dtmfDigits);
 
     if (m_dtmfDigits.isEmpty()) {
-        m_digits->hide();
+        if (m_digits)
+            m_digits->hide();
         updateLabels();
     } else if (m_gsmActionTimer) {
         m_gsmActionTimer->start();
     }
 
-    CallItemModel* m = qobject_cast<CallItemModel *>(m_listView->model());
-    m->triggerUpdate();
+    if (m_listView) {
+        CallItemModel* m = qobject_cast<CallItemModel *>(m_listView->model());
+        m->triggerUpdate();
+    }
 
     // remove menu item
     setGsmMenuItem();
@@ -841,7 +840,7 @@ void CallScreen::setGsmMenuItem()
     m_actionGsm->setVisible(!m_dtmfDigits.isEmpty());
 
     // update menu text & lable for Key_Select
-    if (!m_dtmfDigits.isEmpty() ) {
+    if (!m_dtmfDigits.isEmpty() && m_listView) {
         if (filterable) {
             m_actionGsm->setText(tr("Send %1").arg(m_dtmfDigits));
             QSoftMenuBar::setLabel(m_listView, Qt::Key_Select, "", tr("Send"));
@@ -885,18 +884,20 @@ void CallScreen::actionGsmSelected()
 void CallScreen::updateLabels()
 {
     // update context label according to the current call count.
-    if (m_control->allCalls().count() >= 2)
-        QSoftMenuBar::setLabel(m_listView, Qt::Key_Select, "phone/swap", tr("Swap"));
-    else if (m_control->activeCalls().count() == 1)
-        QSoftMenuBar::setLabel(m_listView, Qt::Key_Select, "phone/hold", tr("Hold"));
-    else
-        QSoftMenuBar::setLabel(m_listView, Qt::Key_Select, QSoftMenuBar::NoLabel);
+    if (m_listView) {
+        if (m_control->allCalls().count() >= 2)
+            QSoftMenuBar::setLabel(m_listView, Qt::Key_Select, "phone/swap", tr("Swap"));
+        else if (m_control->activeCalls().count() == 1)
+            QSoftMenuBar::setLabel(m_listView, Qt::Key_Select, "phone/hold", tr("Hold"));
+        else
+            QSoftMenuBar::setLabel(m_listView, Qt::Key_Select, QSoftMenuBar::NoLabel);
+    }
 
     // display clear icon when dtmf m_digits are entered.
-    if (m_digits->text().isEmpty())
-        QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Back);
-    else
+    if (m_digits && !m_digits->text().isEmpty())
         QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::BackSpace);
+    else
+        QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Back);
 }
 
 /*!
@@ -908,12 +909,16 @@ void CallScreen::appendDtmfDigits(const QString &dtmf)
     if(m_dtmfDigits.isEmpty())
         return;
 
-    m_digits->setText(m_dtmfDigits);
-    m_digits->setCursorPosition(m_digits->text().length());
-    m_digits->show();
+    if (m_digits) {
+        m_digits->setText(m_dtmfDigits);
+        m_digits->setCursorPosition(m_digits->text().length());
+        m_digits->show();
+    }
 
-    CallItemModel* m = qobject_cast<CallItemModel *>(m_listView->model());
-    m->triggerUpdate();
+    if (m_listView) {
+        CallItemModel* m = qobject_cast<CallItemModel *>(m_listView->model());
+        m->triggerUpdate();
+    }
 
     // add menu item.
     setGsmMenuItem();
@@ -1556,6 +1561,9 @@ bool CallScreen::eventFilter(QObject *o, QEvent *e)
   */
 void CallScreen::setSelectMode(bool s)
 {
+    if (!m_listView)
+        return;
+
     if (s) {
         m_listView->setSelectionMode(QAbstractItemView::SingleSelection);
         QSoftMenuBar::setLabel(m_listView, Qt::Key_Select, QSoftMenuBar::Select);
@@ -1628,7 +1636,9 @@ void CallScreen::muteRingSelected()
 {
     m_actionMute->setVisible(false);
     emit muteRing();
-    QSoftMenuBar::setLabel(m_listView, Qt::Key_Back, "phone/reject", tr("Send Busy"));
+
+    if (m_listView)
+        QSoftMenuBar::setLabel(m_listView, Qt::Key_Back, "phone/reject", tr("Send Busy"));
 }
 
 /*! \internal */
