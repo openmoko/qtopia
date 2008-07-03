@@ -563,10 +563,21 @@ void CallAudioHandler::callStateChanged(bool enableAudio)
   \internal
   */
 CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
-    : PhoneThemedView(parent, fl), m_control(ctrl), m_digits(0), m_listView(0), m_actionGsm(0),
-    m_activeCount(0), m_holdCount(0) , m_keypadVisible(false), m_layout( 0 ),
-    m_updateTimer( 0 ), m_gsmActionTimer(0), m_model(0), m_callAudioHandler(0),
-    m_simMsgBox(0), m_symbolTimer(0)
+    : PhoneThemedView(parent, fl)
+    , m_control(ctrl)
+    , m_digits(0)
+    , m_listView(0)
+    , m_actionGsm(0)
+    , m_activeCount(0)
+    , m_holdCount(0)
+    , m_keypadVisible(false)
+    , m_layout( 0 )
+    , m_updateTimer( 0 )
+    , m_gsmActionTimer(0)
+    , m_model(0)
+    , m_callAudioHandler(0)
+    , m_simMsgBox(0)
+    , m_symbolTimer(0)
 {
     callScreen = this;
     setObjectName(QLatin1String("calls"));
@@ -1315,10 +1326,6 @@ void CallScreen::setItemActive(const QString &name, bool active)
 void CallScreen::themeItemClicked(ThemeItem *item)
 {
     if (!item)
-        return;
-
-    // if the touch screen is locked to nothing
-    if (QWidget::mouseGrabber() == this)
         return;
 
     if (item->itemName() == "answer")
