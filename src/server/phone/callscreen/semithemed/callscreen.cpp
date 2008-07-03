@@ -806,8 +806,6 @@ void CallScreen::clearDtmfDigits(bool clearOneChar)
         m_digits->setText(m_dtmfDigits);
 
     if (m_dtmfDigits.isEmpty()) {
-        if (m_digits)
-            m_digits->hide();
         updateLabels();
     } else if (m_gsmActionTimer) {
         m_gsmActionTimer->start();
@@ -911,7 +909,6 @@ void CallScreen::appendDtmfDigits(const QString &dtmf)
     if (m_digits) {
         m_digits->setText(m_dtmfDigits);
         m_digits->setCursorPosition(m_digits->text().length());
-        m_digits->show();
     }
 
     if (m_listView) {
