@@ -113,9 +113,6 @@ private slots:
     void callDropped(const QPhoneCall &);
     void callIncoming(const QPhoneCall &);
     void callDialing(const QPhoneCall &);
-    void showProgressDlg();
-    void hideProgressDlg();
-    void interactionDelayTimeout();
     void rejectModalDialog();
     void initializeMouseControlDialog();
 
@@ -165,7 +162,6 @@ private:
     QSimToolkit *m_simToolkit;
 #endif
     QAbstractMessageBox *m_simMsgBox;
-    bool m_showWaitDlg;
     QTimer *m_symbolTimer;
     MouseControlDialog *m_mouseCtrlDlg;
 

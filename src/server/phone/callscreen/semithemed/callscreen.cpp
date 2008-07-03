@@ -652,18 +652,6 @@ private:
     bool m_mouseUnlocked;
 };
 
-class CallScreenKeyboardFilter : public QtopiaKeyboardFilter
-{
-public:
-    CallScreenKeyboardFilter() {}
-    ~CallScreenKeyboardFilter() {}
-protected:
-    virtual bool filter(int, int, int, bool, bool)
-    {
-        return true;
-    }
-};
-
 //===========================================================================
 
 /*!
@@ -734,7 +722,7 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     : PhoneThemedView(parent, fl), m_control(ctrl), m_digits(0), m_listView(0), m_actionGsm(0),
     m_activeCount(0), m_holdCount(0) , m_keypadVisible(false), m_layout( 0 ),
     m_updateTimer( 0 ), m_gsmActionTimer(0), m_secondaryCallScreen(0), m_model(0), m_callAudioHandler(0),
-    m_videoWidget(0), m_simMsgBox(0), m_showWaitDlg(false), m_symbolTimer(0), m_mouseCtrlDlg(0)
+    m_videoWidget(0), m_simMsgBox(0), m_symbolTimer(0), m_mouseCtrlDlg(0)
 {
     callScreen = this;
     setObjectName(QLatin1String("calls"));
@@ -790,9 +778,6 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     connect(m_actionTransfer, SIGNAL(triggered()), m_control, SLOT(transfer()));
     m_actionTransfer->setVisible(false);
     m_contextMenu->addAction(m_actionTransfer);
-
-    connect(m_control, SIGNAL(callControlRequested()), this, SLOT(showProgressDlg()));
-    connect(m_control, SIGNAL(callControlSucceeded()), this, SLOT(hideProgressDlg()));
 
     m_audioConf = new QAudioStateConfiguration(this);
 
@@ -1390,8 +1375,6 @@ void CallScreen::stateChanged()
   */
 void CallScreen::requestFailed(const QPhoneCall &,QPhoneCall::Request r)
 {
-    hideProgressDlg();
-
     QString title, text;
     title = tr("Failure");
     if(r == QPhoneCall::HoldFailed) {
@@ -2032,8 +2015,6 @@ void CallScreen::callDialing(const QPhoneCall &)
 /*! \internal */
 void CallScreen::callIncoming(const QPhoneCall &)
 {
-    QtopiaInputEvents::addKeyboardFilter( new CallScreenKeyboardFilter );
-
     static QHash<QString, bool> m_incoming;
     if (m_incoming.isEmpty()) {
         m_incoming["keypad-box"] = false;
@@ -2077,26 +2058,6 @@ void CallScreen::rejectModalDialog()
             d->hide();
         }
     }
-}
-
-/*!
-  \internal
-*/
-void CallScreen::interactionDelayTimeout()
-{
-    QtopiaInputEvents::removeKeyboardFilter();
-
-    stateChanged();
-}
-
-/*! \internal */
-void CallScreen::showProgressDlg()
-{
-}
-
-/*! \internal */
-void CallScreen::hideProgressDlg()
-{
 }
 
 #ifdef QT_ILLUME_LAUNCHER
