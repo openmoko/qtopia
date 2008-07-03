@@ -639,7 +639,7 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
                          this, SLOT(initializeAudioConf()));
 
     QObject::connect(this, SIGNAL(itemReleased(ThemeItem*)),
-                     this, SLOT(themeItemClicked(ThemeItem*)));
+                     this, SLOT(themeItemReleased(ThemeItem*)));
 
     setWindowTitle(tr("Calls"));
 
@@ -1260,7 +1260,7 @@ void CallScreen::setItemActive(const QString &name, bool active)
 /*!
   \internal
   */
-void CallScreen::themeItemClicked(ThemeItem *item)
+void CallScreen::themeItemReleased(ThemeItem *item)
 {
     if (!item)
         return;
