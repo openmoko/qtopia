@@ -751,7 +751,6 @@ void CallScreen::themeLoaded( const QString & )
     m_listView->setSelectionMode(QAbstractItemView::NoSelection);
     m_listView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     connect(m_listView, SIGNAL(activated(QModelIndex)), this, SLOT(callSelected(QModelIndex)));
-    connect(m_listView, SIGNAL(clicked(QModelIndex)), this, SLOT(callClicked(QModelIndex)));
     QSoftMenuBar::setLabel(m_listView, Qt::Key_Select, QSoftMenuBar::NoLabel);
 
     item = (ThemeWidgetItem *)findItem( "callscreennumber", ThemedView::Widget, ThemeItem::All, false );
@@ -1246,46 +1245,6 @@ void CallScreen::callSelected(const QModelIndex& index)
                 m_control->hold();
         }
     }
-}
-
-/*!
-  \internal
-  */
-void CallScreen::callClicked(const QModelIndex& index)
-{
-/*  Comment this out for the moment. We don't want to click on call items even if the touchscreen
-    is the preferred method of input. We might want to put it back for a desk phone. */
-    Q_UNUSED(index)
-/*
-    CallItemModel* m = qobject_cast<CallItemModel *>(m_listView->model());
-    CallItemEntry *callItem = m->callItemEntry(index);
-    if (!callItem)
-        return;
-
-    if (m_listView->selectionMode() == QAbstractItemView::NoSelection) {
-        // Only perform these operations if touchscreen is the preferred method of input.
-        //    This stops the user's ear putting a call on hold or accepting an m_incoming call etc.
-        if(Qtopia::mousePreferred()) {
-            // We are not in selection mode.
-            if (m_incoming && callItem->call().incoming()) {
-                if(m_control->incomingCall().startTime().secsTo(QDateTime::currentDateTime()) >= 1)
-                    emit acceptIncoming();
-            } else if (callItem->call().onHold()) {
-                m_control->unhold();
-            } else if (callItem->call().connected()) {
-                m_control->hold();
-            }
-        }
-    } else {
-        // In selection mode - just used to split calls at the moment
-        if (m->flags(index) & Qt::ItemIsSelectable) {
-            setSelectMode(false);
-            //XXX I could be used for more than just split
-            callItem->call().activate(QPhoneCall::CallOnly);
-            setWindowTitle(tr("Calls"));
-        }
-    }
-*/
 }
 
 /*!

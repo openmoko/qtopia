@@ -88,7 +88,6 @@ private slots:
     void updateAll();
     void splitCall();
     void callSelected(const QModelIndex&);
-    void callClicked(const QModelIndex&);
     void themeItemClicked(ThemeItem*);
     void actionGsmSelected();
     void updateLabels();
