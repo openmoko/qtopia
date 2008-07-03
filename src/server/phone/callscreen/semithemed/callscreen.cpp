@@ -513,8 +513,6 @@ QWidget *CallScreenView::newWidget(ThemeWidgetItem* input, const QString& name)
         callScreen->m_model = new CallItemModel( this, static_cast<ThemeListItem*>(input), this );
         lv->setModel(callScreen->m_model);
         return lv;
-    } else if( name == "callscreennumber" ) {
-        return new QLineEdit( this );
     }
     return 0;
 }
@@ -617,9 +615,21 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     connect(m_view, SIGNAL(themeWasLoaded(const QString&)),
             SLOT(themeLoaded(const QString&)));
 
+    m_digits = new QLineEdit(this);
+    QFont font = m_digits->font();
+    font.setPointSize(12);
+    font.setWeight(QFont::Bold);
+    m_digits->setFont(font);
+    m_digits->setFrame(false);
+    m_digits->setReadOnly(true);
+    m_digits->setFocusPolicy(Qt::NoFocus);
+    connect(m_digits, SIGNAL(textChanged(QString)),
+            this, SLOT(updateLabels()) );
+
     QVBoxLayout* lay = new QVBoxLayout(this);
     lay->setMargin(0);
     lay->addWidget(m_view);
+    lay->addWidget(m_digits);
     
 
     m_contextMenu = QSoftMenuBar::menuFor(this);
@@ -794,20 +804,6 @@ void CallScreen::themeLoaded( const QString & )
     connect(m_listView, SIGNAL(activated(QModelIndex)), this, SLOT(callSelected(QModelIndex)));
     QSoftMenuBar::setLabel(m_listView, Qt::Key_Select, QSoftMenuBar::NoLabel);
 
-    item = (ThemeWidgetItem*)m_view->findItem( "callscreennumber", ThemedView::Widget, ThemeItem::All, false );
-    if( !item ) {
-        qWarning("No callscreennumber input element defined for CallScreen theme.");
-        m_digits = 0;
-        return;
-    }
-    m_digits = qobject_cast<QLineEdit*>(item->widget());
-    Q_ASSERT(m_digits != 0);
-
-    m_digits->setFrame(false);
-    m_digits->setReadOnly(true);
-    m_digits->setFocusPolicy(Qt::NoFocus);
-    connect( m_digits, SIGNAL(textChanged(QString)),
-            this, SLOT(updateLabels()) );
 
     stateChanged();
 }
@@ -853,8 +849,7 @@ void CallScreen::clearDtmfDigits(bool clearOneChar)
     else
         m_dtmfDigits.clear();
 
-    if (m_digits)
-        m_digits->setText(m_dtmfDigits);
+    m_digits->setText(m_dtmfDigits);
 
     if (m_dtmfDigits.isEmpty()) {
         updateLabels();
@@ -942,7 +937,7 @@ void CallScreen::updateLabels()
     }
 
     // display clear icon when dtmf m_digits are entered.
-    if (m_digits && !m_digits->text().isEmpty())
+    if (!m_digits->text().isEmpty())
         QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::BackSpace);
     else
         QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::Back);
@@ -957,10 +952,8 @@ void CallScreen::appendDtmfDigits(const QString &dtmf)
     if(m_dtmfDigits.isEmpty())
         return;
 
-    if (m_digits) {
-        m_digits->setText(m_dtmfDigits);
-        m_digits->setCursorPosition(m_digits->text().length());
-    }
+    m_digits->setText(m_dtmfDigits);
+    m_digits->setCursorPosition(m_digits->text().length());
 
     if (m_listView) {
         CallItemModel* m = qobject_cast<CallItemModel *>(m_listView->model());
@@ -991,7 +984,7 @@ void CallScreen::appendDtmfDigits(const QString &dtmf)
   */
 void CallScreen::stateChanged()
 {
-    if( !m_listView || !m_digits )
+    if( !m_listView )
         return;
     const QList<QPhoneCall> &calls = m_control->allCalls();
 
@@ -1218,7 +1211,7 @@ CallItemEntry *CallScreen::findCall(const QPhoneCall &call, CallItemModel *m)
   */
 void CallScreen::updateAll()
 {
-    if( !m_listView || !m_digits )
+    if( !m_listView )
         return;
 
     CallItemModel *m = qobject_cast<CallItemModel *>(m_listView->model());
