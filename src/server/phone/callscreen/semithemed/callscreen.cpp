@@ -568,7 +568,6 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     , m_actionGsm(0)
     , m_activeCount(0)
     , m_holdCount(0)
-    , m_keypadVisible(false)
     , m_layout( 0 )
     , m_updateTimer( 0 )
     , m_gsmActionTimer(0)
@@ -777,26 +776,9 @@ void CallScreen::themeLoaded( const QString & )
     if( m_layout ) {
         m_layout->addWidget( m_listView );
         m_layout->addWidget( m_digits );
-    } else {
-        manualLayout();
     }
 
     stateChanged();
-}
-
-/*!
-  \internal
-  */
-void CallScreen::manualLayout()
-{
-    ThemeRectItem *keypaditem = (ThemeRectItem *)findItem( "keypad-box", ThemedView::Rect, ThemeItem::All, false );
-    ThemeRectItem *keypadbutton = (ThemeRectItem *)findItem( "keypad-show-container", ThemedView::Rect, ThemeItem::All, false );
-    if( keypaditem && keypadbutton ) {
-        keypaditem->setActive( m_keypadVisible );
-        keypadbutton->setActive( !m_keypadVisible );
-
-    }
-    update();
 }
 
 /*!
@@ -835,7 +817,6 @@ void CallScreen::clearDtmfDigits(bool clearOneChar)
         m_gsmActionTimer->start();
     }
 
-    manualLayout();
     CallItemModel* m = qobject_cast<CallItemModel *>(m_listView->model());
     m->triggerUpdate();
 
@@ -931,7 +912,6 @@ void CallScreen::appendDtmfDigits(const QString &dtmf)
     m_digits->setCursorPosition(m_digits->text().length());
     m_digits->show();
 
-    manualLayout();
     CallItemModel* m = qobject_cast<CallItemModel *>(m_listView->model());
     m->triggerUpdate();
 
@@ -1006,7 +986,6 @@ void CallScreen::stateChanged()
 
             item = new CallItemEntry(m_control, call, m);
             m->addEntry(item);
-            manualLayout();
         }
         if (item->callData.connectTime.isNull() && call.established())
             item->callData.connectTime = QDateTime::currentDateTime();
@@ -1198,7 +1177,6 @@ void CallScreen::updateAll()
         if (item->call().state() == QPhoneCall::ServiceHangup) {
             // USSD message is coming soon, so remove from the call screen.
             m->removeEntry(m->index(i)); // removeEntry will delete the item
-            manualLayout();
             i--;
             continue;
         } else if (item->call().dropped()) {
@@ -1206,7 +1184,6 @@ void CallScreen::updateAll()
             if (!item->callData.disconnectTime.isNull() &&
                 item->callData.disconnectTime.time().elapsed() > 3000) {
                 m->removeEntry(m->index(i)); // removeEntry will delete the item
-                manualLayout();
                 i--;
                 continue;
             }
@@ -1376,17 +1353,6 @@ void CallScreen::themeItemClicked(ThemeItem *item)
 
         setActiveItems(hideKeypad);
     }
-    else if (item->itemName().left( 11 ) == "keypad-show") {
-        // themed touchscreen keypad
-        m_keypadVisible = true;
-        manualLayout();
-    }
-    else if ( item->itemName().left( 11 ) == "keypad-hide" )
-    {
-        m_keypadVisible = false;
-        manualLayout();
-        clearDtmfDigits();
-    }
     else if ( item->itemName() == "zero" )
     {
         dialNumbers("0");
@@ -1479,7 +1445,6 @@ void CallScreen::showEvent( QShowEvent *e )
     }
     m_updateTimer->start(1000);
     ThemedView::showEvent( e );
-    manualLayout();
 }
 
 /*!

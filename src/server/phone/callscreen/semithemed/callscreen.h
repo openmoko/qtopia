@@ -74,9 +74,6 @@ public slots:
     void requestFailed(const QPhoneCall &,QPhoneCall::Request);
     CallItemEntry *findCall(const QPhoneCall &call, CallItemModel *model);
 
-protected slots:
-    void manualLayout();
-
 protected:
     virtual void themeLoaded( const QString &theme );
     QWidget *newWidget(ThemeWidgetItem* input, const QString& name);
@@ -136,7 +133,6 @@ private:
     int m_activeCount;
     int m_holdCount;
     bool m_incoming;
-    bool m_keypadVisible;
     QVBoxLayout *m_layout;
     QTimer* m_updateTimer;
     QTimer* m_gsmActionTimer;
