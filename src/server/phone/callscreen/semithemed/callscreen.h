@@ -108,7 +108,6 @@ private:
     void clearDtmfDigits(bool clearOneChar = false);
     void appendDtmfDigits(const QString &);
     void setSelectMode(bool);
-    int callListHeight() const;
     bool dialNumbers(const QString & numbers);
     void setGsmMenuItem();
     void setItemActive(const QString &name, bool active);
