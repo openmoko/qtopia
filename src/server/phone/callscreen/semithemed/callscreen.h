@@ -58,10 +58,10 @@ public:
     CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl = 0);
 
     QString ringTone();
-    int activeCallCount() const { return activeCount; }
-    int heldCallCount() const { return holdCount; }
-    bool incomingCall() const { return incoming; }
-    bool inMultiCall() const { return activeCount > 1 || holdCount > 1; }
+    int activeCallCount() const { return m_activeCount; }
+    int heldCallCount() const { return m_holdCount; }
+    bool incomingCall() const { return m_incoming; }
+    bool inMultiCall() const { return m_activeCount > 1 || m_holdCount > 1; }
 
 signals:
     void acceptIncoming();
@@ -132,41 +132,41 @@ private:
 #endif
 
 private:
-    QString dtmfActiveCall;
-    QString dtmfDigits;
-    DialerControl *control;
-    QLineEdit *digits;
-    QListView *listView;
-    QMenu *contextMenu;
-    QAction *actionAnswer;
-    QAction *actionSendBusy;
-    QAction *actionMute;
-    QAction *actionHold;
-    QAction *actionResume;
-    QAction *actionEnd;
-    QAction *actionEndAll;
-    QAction *actionMerge;
-    QAction *actionSplit;
-    QAction *actionTransfer;
-    QAction *actionGsm;
-    int activeCount;
-    int holdCount;
-    bool incoming;
-    bool keypadVisible;
-    QVBoxLayout *mLayout;
-    QTimer* updateTimer;
-    QTimer* gsmActionTimer;
-    SecondaryCallScreen *secondaryCallScreen;
+    QString m_dtmfActiveCall;
+    QString m_dtmfDigits;
+    DialerControl *m_control;
+    QLineEdit *m_digits;
+    QListView *m_listView;
+    QMenu *m_contextMenu;
+    QAction *m_actionAnswer;
+    QAction *m_actionSendBusy;
+    QAction *m_actionMute;
+    QAction *m_actionHold;
+    QAction *m_actionResume;
+    QAction *m_actionEnd;
+    QAction *m_actionEndAll;
+    QAction *m_actionMerge;
+    QAction *m_actionSplit;
+    QAction *m_actionTransfer;
+    QAction *m_actionGsm;
+    int m_activeCount;
+    int m_holdCount;
+    bool m_incoming;
+    bool m_keypadVisible;
+    QVBoxLayout *m_layout;
+    QTimer* m_updateTimer;
+    QTimer* m_gsmActionTimer;
+    SecondaryCallScreen *m_secondaryCallScreen;
     ThemeListModel* m_model;
     CallAudioHandler* m_callAudioHandler;
-    QWidget* videoWidget;
+    QWidget* m_videoWidget;
     QAudioStateConfiguration *m_audioConf;
 #ifdef QTOPIA_CELL
-    QSimToolkit *simToolkit;
+    QSimToolkit *m_simToolkit;
 #endif
-    QAbstractMessageBox *simMsgBox;
-    bool showWaitDlg;
-    QTimer *symbolTimer;
+    QAbstractMessageBox *m_simMsgBox;
+    bool m_showWaitDlg;
+    QTimer *m_symbolTimer;
     MouseControlDialog *m_mouseCtrlDlg;
 
 #ifdef QT_ILLUME_LAUNCHER
