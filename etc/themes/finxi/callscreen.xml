@@ -75,7 +75,7 @@
           <text bold="yes" outline="#000000" color="#FFFFFF" size="7" align="hcenter,vcenter">Hold</text>
         </image>
         <image name="resume" src="button.svg" onclick="src=buttonp.svg" interactive="yes" scale="yes">
-          <text bold="yes" outline="#000000" color="#FFFFFF" size="7" align="hcenter,vcenter">Resume</text>
+          <text name="resume_text" bold="yes" outline="#000000" color="#FFFFFF" size="7" align="hcenter,vcenter">Resume</text>
         </image>
         <image name="sendbusy" src="button.svg" onclick="src=buttonp.svg" interactive="yes" scale="yes">
           <text bold="yes" outline="#000000" color="#FFFFFF" size="7" align="hcenter,vcenter">Send Busy</text>

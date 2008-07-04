@@ -1122,6 +1122,10 @@ void CallScreen::stateChanged()
     m_actionSplit->setVisible(m_activeCount > 1 && !m_holdCount && !m_incoming);
     m_actionTransfer->setVisible(m_activeCount == 1 && m_holdCount == 1 && !m_incoming);
 
+    // Update the content based on our action state
+    setItemActive("hold", m_actionHold->isVisible());
+    setItemActive("resume", m_actionResume->isVisible());
+
     // update the speaker and bluetooth headset m_actions.
     bool nonActiveDialing = dialing && !m_activeCount;
 
@@ -1131,10 +1135,12 @@ void CallScreen::stateChanged()
     if (m_incoming) {
         QSoftMenuBar::setLabel(m_listView, Qt::Key_Select, "phone/answer", tr("Answer"));
     } else if (m_activeCount && m_holdCount) {
+        setItemText("resume_text", tr("Swap"));
         m_actionResume->setText(tr("Swap", "change to 2nd open phoneline and put 1st on hold"));
         m_actionResume->setIcon(QPixmap(":icon/phone/swap"));
         QSoftMenuBar::setLabel(m_listView, Qt::Key_Select, "phone/swap", tr("Swap"));
     } else if (m_holdCount && !m_activeCount && !dialing && !m_incoming) {
+        setItemText("resume_text", tr("Resume"));
         m_actionResume->setText(tr("Resume"));
         m_actionResume->setIcon(QIcon(":icon/phone/resume"));
         QSoftMenuBar::setLabel(m_listView, Qt::Key_Select, "phone/resume", tr("Resume"));
@@ -1303,6 +1309,16 @@ void CallScreen::setItemActive(const QString &name, bool active)
 /*!
   \internal
   */
+void CallScreen::setItemText(const QString &name, const QString& text)
+{
+    ThemeItem *item = m_view->findItem(name, ThemedView::Text, ThemeItem::All, false);
+    if (item && item->rtti() == ThemedView::Text)
+        static_cast<ThemeTextItem*>(item)->setText(text);
+}
+
+/*!
+  \internal
+  */
 void CallScreen::themeItemReleased(ThemeItem *item)
 {
     if (!item)
@@ -1321,9 +1337,6 @@ void CallScreen::themeItemReleased(ThemeItem *item)
         if (!m_control->hasActiveCalls())
             return;
 
-        // FIXME, TODO, bad assumption, hold may fail?
-        item->setActive(false);
-        setItemActive("resume", true);
         m_actionHold->trigger();
     }
     else if (item->itemName() == "resume")
@@ -1331,9 +1344,6 @@ void CallScreen::themeItemReleased(ThemeItem *item)
         if (!m_control->hasCallsOnHold())
             return;
 
-        // FIXME, TODO, bad assumption, resume may fail?
-        item->setActive(false);
-        setItemActive("hold", true);
         m_actionResume->trigger();
     }
     else if (item->itemName() == "sendbusy")

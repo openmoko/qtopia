@@ -125,6 +125,7 @@ private:
     bool dialNumbers(const QString & numbers);
     void setGsmMenuItem();
     void setItemActive(const QString &name, bool active);
+    void setItemText(const QString& name, const QString& text);
 #ifdef QT_ILLUME_LAUNCHER
     void informScreenSaver(CallItemEntry*, const QString& name);
 #endif
