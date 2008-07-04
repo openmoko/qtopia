@@ -1657,6 +1657,8 @@ void CallScreen::callDropped(const QPhoneCall &)
     if (activeCalls.isEmpty()) {
         activeCalls["hold"] = true;
         activeCalls["endcall"] = true;
+        activeCalls["answer"] = false;
+        activeCalls["sendbusy"] = false;
 
         callsOnHolds["resume"] = true;
         callsOnHolds["answer"] = true;
