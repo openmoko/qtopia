@@ -305,31 +305,6 @@ void QModemCall::accept()
         command = provider()->acceptCallCommand( false );
     }
     provider()->atchat()->chat( command, this, SLOT(acceptDone(bool)) );
-
-    if( provider()->partOfHoldGroup( callType() ) )
-    {
-        provider()->beginStateTransaction();
-
-        // All active calls will be put on hold by this operation.
-        provider()->changeGroup( QPhoneCall::Connected, QPhoneCall::Hold,
-                                 QPhoneCallImpl::ActivateGroup |
-                                 QPhoneCallImpl::Join |
-                                 QPhoneCallImpl::JoinAndDetach );
-
-        // Set the actions that can be performed.
-        QPhoneCallImpl::Actions actions;
-        actions = QPhoneCallImpl::Tone | QPhoneCallImpl::Transfer;
-        if ( !provider()->hasGroup( QPhoneCall::Hold ) )
-            actions |= QPhoneCallImpl::Hold;
-        else
-            actions |= QPhoneCallImpl::Join | QPhoneCallImpl::JoinAndDetach;
-        setActions( actions );
-
-        // This call is now the active one.
-        setState( QPhoneCall::Connected );
-
-        provider()->endStateTransaction();
-    }
 }
 
 class QHoldUserData : public QAtResult::UserData
@@ -551,6 +526,28 @@ void QModemCall::acceptDone( bool ok )
         // by the remote caller while we were sending the command.
         provider()->missedTimeout( this );
 
+    } else if( provider()->partOfHoldGroup( callType() ) ) {
+        provider()->beginStateTransaction();
+
+        // All active calls will be put on hold by this operation.
+        provider()->changeGroup( QPhoneCall::Connected, QPhoneCall::Hold,
+                                 QPhoneCallImpl::ActivateGroup |
+                                 QPhoneCallImpl::Join |
+                                 QPhoneCallImpl::JoinAndDetach );
+
+        // Set the actions that can be performed.
+        QPhoneCallImpl::Actions actions;
+        actions = QPhoneCallImpl::Tone | QPhoneCallImpl::Transfer;
+        if ( !provider()->hasGroup( QPhoneCall::Hold ) )
+            actions |= QPhoneCallImpl::Hold;
+        else
+            actions |= QPhoneCallImpl::Join | QPhoneCallImpl::JoinAndDetach;
+        setActions( actions );
+
+        // This call is now the active one.
+        setState( QPhoneCall::Connected );
+
+        provider()->endStateTransaction();
     }
 }
 
