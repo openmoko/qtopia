@@ -1661,7 +1661,9 @@ void CallScreen::callDropped(const QPhoneCall &)
         activeCalls["sendbusy"] = false;
 
         callsOnHolds["resume"] = true;
-        callsOnHolds["answer"] = true;
+        callsOnHolds["answer"] = false;
+        callsOnHolds["endcall"] = true;
+        callsOnHolds["sendbusy"] = false;
     }
 
 
