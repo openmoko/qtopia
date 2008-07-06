@@ -523,7 +523,7 @@ void ReadMail::updateButtons()
 
     // Show the 'Store to Contacts' action if we don't have a matching contact
     QMailAddress address = extractAddress();
-    bool unknownContact = !address.matchesExistingContact();
+    bool unknownContact = !address.matchesExistingContact() && allowSaveAddress(address);
     storeButton->setVisible(unknownContact);
 
     if ( current )
@@ -742,7 +742,7 @@ void ReadMail::switchView(QWidget* widget, const QString& title)
 void ReadMail::storeContact()
 {
     QMailAddress address = extractAddress();
-    if (!address.isPhoneNumber() && !address.isEmailAddress()) {
+    if (!allowSaveAddress(address)) {
         qWarning() << "Unable to store unknown address type:" << address.toString();
     } else {
         QString text = "<qt>" + tr("Create a new contact?") + "</qt>";
@@ -846,3 +846,7 @@ QMailAddress ReadMail::extractAddress() const
         
 }
 
+bool ReadMail::allowSaveAddress(const QMailAddress& address)
+{
+    return address.isPhoneNumber() || address.isEmailAddress();
+}

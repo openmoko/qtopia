@@ -126,6 +126,7 @@ private:
 
     void switchView(QWidget* widget, const QString& title);
     QMailAddress extractAddress() const;
+    static bool allowSaveAddress(const QMailAddress&);
 
 private slots:
     void mmsFinished();
