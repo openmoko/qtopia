@@ -125,6 +125,7 @@ private:
     void dialNumber(const QString&);
 
     void switchView(QWidget* widget, const QString& title);
+    QMailAddress extractAddress() const;
 
 private slots:
     void mmsFinished();
