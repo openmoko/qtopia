@@ -1160,13 +1160,14 @@ void PhoneLauncher::requestDial(const QString &n, const QUniqueId &c)
 
     // Ask all of the call policy managers what they want to do
     // with this phone number.
+    QString reasons;
     QAbstractCallPolicyManager::CallHandling handling;
     QList<QAbstractCallPolicyManager *> managers;
     QList<QAbstractCallPolicyManager *> candidates;
     QAbstractCallPolicyManager *chosenManager = 0;
     managers = qtopiaTasks<QAbstractCallPolicyManager>();
     foreach (QAbstractCallPolicyManager *manager, managers) {
-        handling = manager->handling(n);
+        handling = manager->handling(n, reasons);
         if ( handling == QAbstractCallPolicyManager::MustHandle ) {
             chosenManager = manager;
             break;
@@ -1182,7 +1183,7 @@ void PhoneLauncher::requestDial(const QString &n, const QUniqueId &c)
     // Bail out if nothing can dial this number at this time.
     if (!chosenManager && candidates.isEmpty()) {
         showWarning(tr("No GSM/VoIP Network"),
-                tr("<qt>No phone call is possible.</qt>"));
+                tr("<qt>No phone call is possible.<br />Reasons %1</qt>").arg(reasons));
         return;
     }
 

@@ -75,7 +75,7 @@ public:
     QString callType() const;
     QString trCallType() const;
     QString callTypeIcon() const;
-    QAbstractCallPolicyManager::CallHandling handling(const QString& number);
+    QAbstractCallPolicyManager::CallHandling handling(const QString& number, QString& error);
     bool isAvailable(const QString& number);
     QString registrationMessage() const;
     QString registrationIcon() const;
