@@ -71,15 +71,20 @@ void Ficgta01CallProvider::abortDial( uint id, QPhoneCall::Scope scope )
 void Ficgta01CallProvider::cpiNotification( const QString& msg )
 {
     // Call progress notification for the FICGTA01 device.
-    // %CPI: <id>,<msgType>,<ibt>,<tch>,<dir>,<mode>,<number>,<ton>,<alpha>
-    // where <id> is the call identifier, and <msgType> is one of:
+    // %CPI: <cId>,<msgType>,<ibt>,<tch>,[<dir>],[<mode>][,<number>,<type>[,<alpha>]] 
+    // where <cId> is the call identifier, and <msgType> is one of:
     // 0 = SETUP, 1 = DISCONNECT, 2 = ALERT, 3 = PROCEED,
     // 4 = SYNCHRONIZATION, 5 = PROGRESS, 6 = CONNECTED,
     // 7 = RELEASE, 8 = REJECT
+    // dir: 0 = mobile originated, 1 = mobile terminated, 2 = network initiaited mobile
+    // originated call, 3 = redialing mobile originated
     uint posn = 5;
     uint identifier = QAtUtils::parseNumber( msg, posn );
 
     uint status = QAtUtils::parseNumber( msg, posn );
+    QAtUtils::skipField( msg, posn );
+    QAtUtils::skipField( msg, posn );
+    uint direction = QAtUtils::parseNumber( msg, posn );
     QModemCall *call = callForIdentifier( identifier );
 
     if ( status == 6 && call &&
@@ -116,12 +121,9 @@ void Ficgta01CallProvider::cpiNotification( const QString& msg )
         // This is an indication that an incoming call was missed.
         call->setState( QPhoneCall::Missed );
 
-    } else if ( ( status == 2 || status == 4 ) && !call ) {
+    } else if ( ( status == 2 || status == 4 ) && !call && direction == 1) {
 
         // This is a newly waiting call.  Treat it the same as "RING".
-        QAtUtils::skipField( msg, posn );
-        QAtUtils::skipField( msg, posn );
-        QAtUtils::skipField( msg, posn );
         uint mode = QAtUtils::parseNumber( msg, posn );
         QString callType;
         if ( mode == 1 || mode == 6 || mode == 7 )
