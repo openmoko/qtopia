@@ -115,15 +115,17 @@ QTelephony::RegistrationState AsteriskManager::registrationState() const
     \reimp
 */
 QAbstractCallPolicyManager::CallHandling AsteriskManager::handling
-        (const QString& number)
+        (const QString& number, QString &error)
 {
     // Cannot handle URI's that contain '@' or ':'.
     if (number.contains(QChar('@')) || number.contains(QChar(':')))
         return CannotHandle;
 
     // If no network registration, then cannot handle at this time.
-    if (registrationState() != QTelephony::RegistrationHome)
+    if (registrationState() != QTelephony::RegistrationHome) {
+        error += tr("Asterisk is not registered to the home network (%1).<br>").arg(registrationState());
         return CannotHandle;
+    }
 
     // Assume that this is a number that we can dial.
     return CanHandle;

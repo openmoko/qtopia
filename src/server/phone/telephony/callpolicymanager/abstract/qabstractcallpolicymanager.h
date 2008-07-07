@@ -44,7 +44,7 @@ public:
     virtual QString trCallType() const = 0;
     virtual QString callTypeIcon() const = 0;
     virtual QTelephony::RegistrationState registrationState() const = 0;
-    virtual QAbstractCallPolicyManager::CallHandling handling(const QString& number) = 0;
+    virtual QAbstractCallPolicyManager::CallHandling handling(const QString& number, QString& errorReason) = 0;
     virtual bool isAvailable(const QString& number) = 0;
     virtual QString registrationMessage() const = 0;
     virtual QString registrationIcon() const = 0;

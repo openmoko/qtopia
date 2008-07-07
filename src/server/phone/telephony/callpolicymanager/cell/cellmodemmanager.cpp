@@ -980,7 +980,7 @@ QString CellModemManager::callTypeIcon() const
     \reimp
 */
 QAbstractCallPolicyManager::CallHandling CellModemManager::handling
-        (const QString& number)
+        (const QString& number, QString& error)
 {
     // Cannot handle if in plane mode.
     if (planeModeEnabled())
@@ -995,8 +995,10 @@ QAbstractCallPolicyManager::CallHandling CellModemManager::handling
         return CannotHandle;
 
     // If no network registration, then cannot handle at this time.
-    if (!networkRegistered())
+    if (!networkRegistered()) {
+        error += tr("Cell not registered (%1 %2 %3 %4).<br>").arg(registrationState()).arg(state()).arg(d->m_regState).arg(d->m_netReg->registrationState());
         return CannotHandle;
+    }
 
     // Assume that this is a number that we can dial.
     return CanHandle;

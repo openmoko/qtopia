@@ -100,11 +100,13 @@ QString VoIPManager::callTypeIcon() const
     \reimp
 */
 QAbstractCallPolicyManager::CallHandling VoIPManager::handling
-        (const QString& number)
+        (const QString& number, QString& error)
 {
     // If no network registration, then cannot use this to dial.
-    if ( registrationState() != QTelephony::RegistrationHome )
+    if ( registrationState() != QTelephony::RegistrationHome ) {
+        error += tr("VoIP is not registered to the home network (%1).<br>").arg(registrationState());
         return CannotHandle;
+    }
 
     // If at least one '@' sign, then assume that it is a VoIP URI.
     if ( number.contains(QChar('@')) )

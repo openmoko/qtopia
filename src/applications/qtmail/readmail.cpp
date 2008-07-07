@@ -522,8 +522,8 @@ void ReadMail::updateButtons()
     previousButton->setVisible(mailView->row(current) > 0);
 
     // Show the 'Store to Contacts' action if we don't have a matching contact
-    QMailAddress fromAddress(mail.from());
-    bool unknownContact = !fromAddress.matchesExistingContact();
+    QMailAddress address = extractAddress();
+    bool unknownContact = !address.matchesExistingContact() && allowSaveAddress(address);
     storeButton->setVisible(unknownContact);
 
     if ( current )
@@ -741,9 +741,9 @@ void ReadMail::switchView(QWidget* widget, const QString& title)
 
 void ReadMail::storeContact()
 {
-    QMailAddress fromAddress = mail.from();
-    if (!fromAddress.isPhoneNumber() && !fromAddress.isEmailAddress()) {
-        qWarning() << "Unable to store unknown address type:" << fromAddress.toString();
+    QMailAddress address = extractAddress();
+    if (!allowSaveAddress(address)) {
+        qWarning() << "Unable to store unknown address type:" << address.toString();
     } else {
         QString text = "<qt>" + tr("Create a new contact?") + "</qt>";
         bool newContact = (QMessageBox::warning(0,
@@ -759,16 +759,16 @@ void ReadMail::storeContact()
 
         modelUpdatePending = true;
 
-        if (fromAddress.isPhoneNumber()) {
+        if (address.isPhoneNumber()) {
             QtopiaServiceRequest req( "Contacts", (newContact ? "createNewContact(QString)"
                                                               : "addPhoneNumberToContact(QString)") );
-            req << fromAddress.toString();
+            req << address.toString();
             req.send();
         } else {
             // The Contacts app doesn't provide email address services at this time
             if (newContact) {
                 QContact contact;
-                contact.insertEmail(fromAddress.address());
+                contact.insertEmail(address.address());
 
                 QtopiaServiceRequest req( "Contacts", "addAndEditContact(QContact)" );
                 req << contact;
@@ -802,7 +802,7 @@ void ReadMail::storeContact()
                 selector.showMaximized();
                 if (QtopiaApplication::execDialog(&selector) == QDialog::Accepted) {
                     QContact contact(selector.selectedContact());
-                    contact.insertEmail(fromAddress.address());
+                    contact.insertEmail(address.address());
 
                     if (!model.updateContact(contact)) {
                         qWarning() << "Unable to update contact:" << contact.label();
@@ -833,3 +833,20 @@ void ReadMail::contactModelReset()
     }
 }
 
+// If we are in the outbox/sent folder we want the to-address.
+QMailAddress ReadMail::extractAddress() const
+{
+    // With more than one recipient it is going to fail
+    if ((mail.status() & QMailMessage::Outgoing 
+        || mail.status() & QMailMessage::Sent)
+        && mail.to().count() == 1)
+        return mail.to()[0];
+
+    return mail.from();
+        
+}
+
+bool ReadMail::allowSaveAddress(const QMailAddress& address)
+{
+    return address.isPhoneNumber() || address.isEmailAddress();
+}
