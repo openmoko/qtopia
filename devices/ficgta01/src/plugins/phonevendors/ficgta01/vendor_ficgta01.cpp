@@ -121,7 +121,7 @@ void Ficgta01CallProvider::cpiNotification( const QString& msg )
         // This is an indication that an incoming call was missed.
         call->setState( QPhoneCall::Missed );
 
-    } else if ( ( status == 2 || status == 4 ) && !call && direction == 1) {
+    } else if ( ( status == 2 || status == 4 || status == 0) && !call && direction == 1) {
 
         // This is a newly waiting call.  Treat it the same as "RING".
         uint mode = QAtUtils::parseNumber( msg, posn );
@@ -172,7 +172,9 @@ void Ficgta01CallProvider::resetModem()
     atchat()->chat( "AT+CRC=0" );
     service()->retryChat( "AT+CLIP=0" );
     service()->retryChat( "AT+COLP=0" );
-    service()->retryChat( "AT+CCWA=0" );
+
+    // enable callwaiting support
+    service()->retryChat( "AT+CCWA=1" );
 }
 
 Ficgta01PhoneBook::Ficgta01PhoneBook( QModemService *service )
