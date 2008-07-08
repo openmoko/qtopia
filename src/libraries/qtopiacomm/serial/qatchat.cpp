@@ -860,11 +860,20 @@ void QAtChat::incoming()
             // LF terminates the line.
             buf[posn] = '\0';
             d->line += buf;
-            if ( !d->wakeupInProgress ) {
-                resetTimer |= processLine( d->line );
+
+            // If we have send the wakeup command we do not want to parse
+            // the response as we actually wait for a timeout. Now two things
+            // can happen. We send the wakeup command and the modem is already
+            // awake and will send us a response or the modem is sending us a 
+            // notification. We are not interested in the response of the modem
+            // but in any notification coming along (specially on the resume
+            // path). So send the line through the prefixmatcher to send out
+            // notifications.
+            if ( d->wakeupInProgress ) {
+                int result = d->matcher->lookup( d->line, d->wakeupCommand );
+                qLog(AtChat) << "W :" << d->line << result;
             } else {
-                // Discard response lines while a wakeup is in progress.
-                qLog(AtChat) << "W :" << d->line;
+                resetTimer |= processLine( d->line );
             }
             d->line = "";
             posn = 0;
