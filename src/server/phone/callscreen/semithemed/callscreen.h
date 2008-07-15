@@ -126,9 +126,6 @@ private:
     void setGsmMenuItem();
     void setItemActive(const QString &name, bool active);
     void setItemText(const QString& name, const QString& text);
-#ifdef QT_ILLUME_LAUNCHER
-    void informScreenSaver(CallItemEntry*, const QString& name);
-#endif
 
 private:
     // User interface
@@ -167,10 +164,6 @@ private:
     QSimToolkit *m_simToolkit;
     QAbstractMessageBox *m_simMsgBox;
     QTimer *m_symbolTimer;
-
-#ifdef QT_ILLUME_LAUNCHER
-    QString m_screenSaverCommand;
-#endif
 };
 
 #endif

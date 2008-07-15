@@ -720,10 +720,6 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     QObject::connect( m_simToolkit, SIGNAL(controlEvent(QSimControlEvent)),
             this, SLOT(simControlEvent(QSimControlEvent)) );
 
-#ifdef QT_ILLUME_LAUNCHER
-    m_screenSaverCommand = QString::fromLocal8Bit(qgetenv("ILLUME_PHONE_CALL"));
-#endif
-
     // Due to delayed intialization of call screen
     // manual update on incoming call is required when call screen is created
     if ( m_control->hasIncomingCall() )
@@ -1087,10 +1083,6 @@ void CallScreen::stateChanged()
             primaryItem = item;
             primaryOrder = sortOrder;
         }
-
-#if QT_ILLUME_LAUNCHER
-       informScreenSaver(item, name); 
-#endif
     }
 
     for (int i = m->rowCount()-1; i>=0; i--) {
@@ -1101,10 +1093,6 @@ void CallScreen::stateChanged()
             continue;
         if( item->call().dropped() ) {
             item->setValue("State", tr( " (Disconnected)", "describing call state, make sure keeping the space in the beginning") );
-
-#if QT_ILLUME_LAUNCHER
-           informScreenSaver(item, item->callData.numberOrName.isEmpty() ? tr("Unknown caller") : item->callData.numberOrName); 
-#endif
         }
     }
 
@@ -1741,51 +1729,5 @@ void CallScreen::rejectModalDialog()
         }
     }
 }
-
-#ifdef QT_ILLUME_LAUNCHER
-/*! \internal */
-void CallScreen::informScreenSaver(CallItemEntry* entry, const QString& name)
-{
-    if (m_screenSaverCommand.isEmpty())
-        return;
-
-    QString state = "unknown"; // No tr
-    const QPhoneCall& call = entry->callData.call;
-    if (call.dropped())
-        state = "disconnected";
-    else {
-        switch (call.state()) {
-        case QPhoneCall::Connected:
-            state = "connected";
-            break;
-        case QPhoneCall::Hold:
-            state = "hold";
-            break;
-        case QPhoneCall::Dialing: // fall through
-        case QPhoneCall::Alerting:
-            state = "dialing";
-            break;
-        case QPhoneCall::Incoming:
-            state = "incoming";
-            break;
-        case QPhoneCall::Idle: // fall through
-        case QPhoneCall::HangupLocal: // fall through
-        case QPhoneCall::HangupRemote: // fall through
-        case QPhoneCall::Missed: // fall through
-        case QPhoneCall::NetworkFailure: // fall through
-        case QPhoneCall::OtherFailure: // fall through
-        case QPhoneCall::ServiceHangup: // fall through
-            break;
-
-        }
-    }
-
-    QStringList parameters;
-    parameters << call.number() << name << state;
-    if (entry->callData.havePhoto)
-       parameters << entry->callData.photo; 
-    QProcess::startDetached(m_screenSaverCommand, parameters);
-}
-#endif
 
 #include "callscreen.moc"
