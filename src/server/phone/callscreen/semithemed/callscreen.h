@@ -126,6 +126,7 @@ private:
     void setGsmMenuItem();
     void setItemActive(const QString &name, bool active);
     void setItemText(const QString& name, const QString& text);
+    void updatePowerStatus();
 
 private:
     // User interface
@@ -164,6 +165,8 @@ private:
     QSimToolkit *m_simToolkit;
     QAbstractMessageBox *m_simMsgBox;
     QTimer *m_symbolTimer;
+
+    bool m_hadActiveCall;
 };
 
 #endif

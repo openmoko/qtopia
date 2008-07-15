@@ -29,6 +29,8 @@
 #include <QAction>
 #include <QApplication>
 #include <QDateTime>
+#include <QDBusConnection>
+#include <QDBusMessage>
 #include <QDebug>
 #include <QDialog>
 #include <QItemDelegate>
@@ -606,6 +608,7 @@ CallScreen::CallScreen(DialerControl *ctrl, QWidget *parent, Qt::WFlags fl)
     , m_callAudioHandler(0)
     , m_simMsgBox(0)
     , m_symbolTimer(0)
+    , m_hadActiveCall(false)
 {
     callScreen = this;
     setObjectName(QLatin1String("calls"));
@@ -1663,6 +1666,7 @@ void CallScreen::callDropped(const QPhoneCall &)
         setItemActive("menu-box", false);
     }
 
+    updatePowerStatus();
 }
 
 /*! \internal */
@@ -1680,6 +1684,7 @@ void CallScreen::callDialing(const QPhoneCall &)
     }
 
     m_view->setActiveItems(dialing);
+    updatePowerStatus();
 }
 
 /*! \internal */
@@ -1697,6 +1702,7 @@ void CallScreen::callIncoming(const QPhoneCall &)
     }
 
     m_view->setActiveItems(m_incoming);
+    updatePowerStatus();
 }
 
 /*!
@@ -1728,6 +1734,45 @@ void CallScreen::rejectModalDialog()
             d->hide();
         }
     }
+}
+
+void CallScreen::updatePowerStatus()
+{
+
+    // check if we have active calls...
+    bool hasActiveCall = false;
+
+    foreach(QPhoneCall call, m_control->allCalls()) {
+        if (call.state() == QPhoneCall::Idle
+            || call.state() == QPhoneCall::Incoming
+            || call.state() == QPhoneCall::Dialing
+            || call.state() == QPhoneCall::Alerting
+            || call.state() == QPhoneCall::Connected
+            || call.state() == QPhoneCall::Hold) {
+            hasActiveCall = true;
+            break;
+        }
+    }
+
+    // Claim/Release a resource
+    if (!hasActiveCall && m_hadActiveCall) {
+        QDBusMessage message = QDBusMessage::createMethodCall("org.openmoko.Power", "/",
+                                                              "org.openmoko.Power.Core", "RemoveRequestedResourceState");
+        message << QLatin1String("cpu");
+        message << QLatin1String("qpe-callscreen");
+        QDBusConnection::systemBus().send(message);
+    } else if (hasActiveCall && !m_hadActiveCall) {
+        QDBusMessage message = QDBusMessage::createMethodCall("org.openmoko.Power", "/",
+                                                              "org.openmoko.Power.Core", "RequestResourceState");
+        message << QLatin1String("cpu");
+        message << QLatin1String("qpe-callscreen");
+        message << QLatin1String("on");
+        QDBusConnection::systemBus().send(message);
+    } else {
+        Q_ASSERT(hasActiveCall == m_hadActiveCall);
+    }
+
+    m_hadActiveCall = hasActiveCall;
 }
 
 #include "callscreen.moc"
