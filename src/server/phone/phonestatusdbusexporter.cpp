@@ -71,6 +71,9 @@ PhoneStatusDBusExporter::PhoneStatusDBusExporter(SimPinDialog* dialog, QObject* 
 
     connect(CellBroadcastControl::instance(), SIGNAL(broadcast(CellBroadcastControl::Type,QString,QString)),
             SLOT(_q_cellBroadcast(CellBroadcastControl::Type,QString,QString)));
+
+    // emit some default values...
+    emit signalStrengthChanged(signalStrength());
 }
 
 QString PhoneStatusDBusExporter::phoneState() const
