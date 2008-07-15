@@ -234,6 +234,8 @@ CellModemManager::CellModemManager(QObject *parent)
     d->m_rfFunc = new QPhoneRfFunctionality("modem", this);
     QObject::connect(d->m_rfFunc,
                      SIGNAL(levelChanged()), this, SLOT(rfLevelChanged()));
+    QObject::connect(d->m_rfFunc,
+                     SIGNAL(setLevelResult(QTelephony::Result)), this, SLOT(rfLevelResult(QTelephony::Result)));
 
     d->m_callForwarding = new QCallForwarding("modem", this);
     QObject::connect(d->m_callForwarding,
@@ -264,9 +266,6 @@ CellModemManager::CellModemManager(QObject *parent)
         d->m_aerialOn = true;
 
     setAerialEnabled(d->m_aerialOn);
-    updateStatus();
-
-    doInitialize();
 }
 
 /*!
@@ -377,10 +376,26 @@ void CellModemManager::rfLevelChanged()
         setAerialEnabled(true);
 
     } else {
+        // We have deferred initialisation until this point
+        if (state() == Initializing) {
+            updateStatus();
+            doInitialize();
+        }
+
         d->m_aerialStable = true;
         tryDoAerialOff();
         tryDoReady();
     }
+}
+
+void CellModemManager::rfLevelResult(QTelephony::Result result)
+{
+    // We need to try it again and again...
+    if (result != QTelephony::OK) {
+        qLog(Modem) << __PRETTY_FUNCTION__ << "CFUN failed retrying. result was " << result << state();
+        setAerialEnabled(d->m_aerialOn);
+    }
+
 }
 
 void CellModemManager::queryCallForwarding()

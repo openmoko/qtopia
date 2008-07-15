@@ -118,6 +118,7 @@ signals:
 
 private slots:
     void rfLevelChanged();
+    void rfLevelResult(QTelephony::Result);
     void pinStatus(const QString& type, QPinManager::Status status,
                    const QPinOptions&);
     void currentOperatorChanged();
