@@ -758,10 +758,7 @@ bool MenuManager::eventFilter(QObject *o, QEvent *e)
     }
 #endif
 
-    if (!o || !e || e->type() != QEvent::KeyPress )
-        return false;
-
-    if (!o->isWidgetType())
+    if (!o || !e || e->type() != QEvent::KeyPress || !o->isWidgetType())
         return false;
 
     QKeyEvent *k = (QKeyEvent *) e;
