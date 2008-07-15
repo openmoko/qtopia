@@ -140,6 +140,7 @@ private slots:
         ( const QString& store, const QList<QPhoneBookEntry>& list );
     void callHistoryEntriesFetched
         ( const QString& store, const QList<QPhoneBookEntry>& list );
+    void retryRfLevelRequest();
 
 private:
     void doAutoRegister();

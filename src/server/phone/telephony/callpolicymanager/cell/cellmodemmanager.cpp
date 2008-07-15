@@ -392,10 +392,16 @@ void CellModemManager::rfLevelResult(QTelephony::Result result)
 {
     // We need to try it again and again...
     if (result != QTelephony::OK) {
-        qLog(Modem) << __PRETTY_FUNCTION__ << "CFUN failed retrying. result was " << result << state();
-        setAerialEnabled(d->m_aerialOn);
+        qLog(Modem) << __PRETTY_FUNCTION__ << "CFUN failed scheduling retry. result was " << result << state();
+        QTimer::singleShot(1000, this, SLOT(retryRfLevelRequest()));
     }
 
+}
+
+void CellModemManager::retryRfLevelRequest()
+{
+    qLog(Modem) << __PRETTY_FUNCTION__ << "Retrying cfun";
+    setAerialEnabled(d->m_aerialOn);
 }
 
 void CellModemManager::queryCallForwarding()
