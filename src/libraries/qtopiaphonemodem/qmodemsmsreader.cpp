@@ -28,6 +28,8 @@
 #include <qretryatchat.h>
 #include <qsimenvelope.h>
 
+#include <qtopialog.h>
+
 /*!
     \class QModemSMSReader
     \mainclass
@@ -510,7 +512,7 @@ void QModemSMSReader::extractMessages( const QString& store, const QAtResult& re
     }
 }
 
-void QModemSMSReader::cpmsDone( bool, const QAtResult& result )
+void QModemSMSReader::cpmsDone( bool ok, const QAtResult& result )
 {
     // Look at the used and total values to determine if the
     // incoming SMS memory store is full or not, so we can update
@@ -532,6 +534,13 @@ void QModemSMSReader::cpmsDone( bool, const QAtResult& result )
         // Update the local value space with the actual counts.
         setValue( "usedMessages", (int)used, Delayed );
         setValue( "totalMessages", (int)total );
+    }
+
+    if (ok) {
+        d->service->primaryAtChat()->chat
+            ( messageListCommand(), this, SLOT(storeListDone(bool,QAtResult)) );
+    } else {
+        qLog(Modem) << __PRETTY_FUNCTION__ << "Giving up on CPMS.... it keeps failing. how to escalate?";
     }
 }
 
@@ -602,19 +611,15 @@ void QModemSMSReader::fetchMessages()
 
     // Select the message store and request the message list.
     QString store = messageStore();
-    QString cmd = messageListCommand();
+    QString cmd;
     if ( !store.isEmpty() ) {
-        // Select the store and inspect the results to see if it is full.
-        d->service->primaryAtChat()->chat
-            ( "AT+CPMS=\"" + store + "\"",
-              this, SLOT(cpmsDone(bool,QAtResult)) );
+        cmd = "AT+CPMS=\"" + store + "\"";
     } else {
-        // We don't know the store name, but we can ask if it is full.
-        d->service->primaryAtChat()->chat
-            ( "AT+CPMS?", this, SLOT(cpmsDone(bool,QAtResult)) );
+        cmd = "AT+CPMS?";
     }
-    d->service->primaryAtChat()->chat
-        ( messageListCommand(), this, SLOT(storeListDone(bool,QAtResult)) );
+
+    QRetryAtChat* chat = new QRetryAtChat(d->service->primaryAtChat(), cmd, 25);
+    connect(chat, SIGNAL(done(bool,QAtResult)), SLOT(cpmsDone(bool,QAtResult)));
 }
 
 void QModemSMSReader::joinMessages()
