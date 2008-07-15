@@ -114,6 +114,19 @@
   \value TextLabel
 */
 
+static bool anyActionVisible(QMenu* menu)
+{
+    if (!menu)
+        return false;
+
+    foreach(QAction* action, menu->actions())
+        if (action->isVisible())
+            return true;
+
+    return false;
+}
+
+
 
 QSoftMenuBar::QSoftMenuBar()
 {
@@ -351,6 +364,7 @@ private:
     QString findHelp(const QWidget* w);
     bool triggerMenuItem( QMenu *menu, int keyNum );
     QPoint positionForMenu(QWidget*, const QMenu *menu);
+    void updateMenu(QMenu*);
 
 private slots:
     void widgetDestroyed();
@@ -574,8 +588,13 @@ void MenuManager::addMenuTo(QWidget *w, QMenu *menu, QSoftMenuBar::FocusState st
         menu->installEventFilter(this);
         connect(menu, SIGNAL(destroyed()), this, SLOT(menuDestroyed()));
     }
-    QSoftMenuBar::setLabel(fw, key(), QSoftMenuBar::Options, state);
-    QSoftMenuBar::setLabel(w, key(), QSoftMenuBar::Options, state);
+
+    // Set the "Options" menu only if we have options, gets updated with the event filter
+    if (anyActionVisible(menu)) {
+        QSoftMenuBar::setLabel(fw, key(), QSoftMenuBar::Options, state);
+        QSoftMenuBar::setLabel(w, key(), QSoftMenuBar::Options, state);
+    }
+
     QSoftMenuBar::setLabel(menu, key(), "options-hide", tr("Hide"), QSoftMenuBar::AnyFocus);
     if (QApplication::style()->inherits("Series60Style"))   //HACK
         QSoftMenuBar::setLabel(menu, key(), "select", tr("Select"), QSoftMenuBar::AnyFocus);
@@ -758,13 +777,22 @@ bool MenuManager::eventFilter(QObject *o, QEvent *e)
     }
 #endif
 
+    // Do we need to update the "Options" label?
+    QMenu *menu = qobject_cast<QMenu*>(o);
+    if (menu) {
+        if (e->type() == QEvent::ActionChanged
+            || e->type() == QEvent::ActionAdded
+            || e->type() == QEvent::ActionRemoved) {
+                updateMenu(menu);
+        }
+    }
+
     if (!o || !e || e->type() != QEvent::KeyPress || !o->isWidgetType())
         return false;
 
     QKeyEvent *k = (QKeyEvent *) e;
     int keyNum = k->key();
 
-    QMenu *menu = qobject_cast<QMenu*>(o);
     if (menu && keyNum >= Qt::Key_0 && keyNum <= Qt::Key_9 ) {
         // trigger menuitem and close menu
         if (triggerMenuItem(menu, keyNum)) {
@@ -905,18 +933,6 @@ void MenuManager::inputMethod()
         envelope << 0;
         qLog(Input) << "MenuManager not able to determine which input method menu action was selected";
     };
-}
-
-static bool anyActionVisible(QMenu* menu)
-{
-    if (!menu)
-        return false;
-
-    foreach(QAction* action, menu->actions())
-        if (action->isVisible())
-            return true;
-
-    return false;
 }
 
 void MenuManager::popup(QWidget *w, QMenu *menu)
@@ -1155,6 +1171,58 @@ QPoint MenuManager::positionForMenu(QWidget* w, const QMenu *menu)
     Q_UNUSED(w)
     return QPoint(x, r.bottom());
 #endif
+}
+
+/*
+  \internal
+
+ Go through the modalMenuMap and the nonModalMenuMap and set/clear the "Options"
+ menu depending on if our menu has any visible entires. Testing for an empty
+ menu is not possible as we at least have the edit options in the menu that will
+ be set to invisible. We need our custom iterator over the two maps to extract
+ state.
+ */
+void MenuManager::updateMenu(QMenu* menu)
+{
+    bool visible = anyActionVisible(menu);
+
+    // We can not use widgetsFor or widgetsWithMenu... as we will need the state
+    // for each widget as well. So we will be the third implementation going over
+    // the two maps.
+    for (QMap<QWidget*, QMenu*>::iterator it = modalMenuMap.begin(); it != modalMenuMap.end(); ++it) {
+        if (it.value() != menu)
+            continue;
+    
+        QWidget* fw = it.key();
+        while (fw->focusProxy())
+            fw = fw->focusProxy();
+
+        QSoftMenuBar::FocusState state = nonModalMenuMap.contains(it.key()) ? QSoftMenuBar::AnyFocus : QSoftMenuBar::EditFocus;
+        if (visible) {
+            QSoftMenuBar::setLabel(it.key(), key(), QSoftMenuBar::Options, state);
+            QSoftMenuBar::setLabel(fw, key(), QSoftMenuBar::Options, state);
+        } else {
+            QSoftMenuBar::clearLabel(it.key(), key(), state);
+            QSoftMenuBar::clearLabel(fw, key(), state);
+        }
+    }
+
+    for (QMap<QWidget*, QMenu*>::iterator it = nonModalMenuMap.begin(); it != nonModalMenuMap.end(); ++it) {
+        if (it.value() != menu || modalMenuMap.contains(it.key()))
+            continue;
+
+        QWidget* fw = it.key();
+        while (fw->focusProxy())
+            fw = fw->focusProxy();
+
+        if (visible) {
+            QSoftMenuBar::setLabel(it.key(), key(), QSoftMenuBar::Options, QSoftMenuBar::NavigationFocus);
+            QSoftMenuBar::setLabel(fw, key(), QSoftMenuBar::Options, QSoftMenuBar::NavigationFocus);
+        } else {
+            QSoftMenuBar::clearLabel(it.key(), key(), QSoftMenuBar::NavigationFocus);
+            QSoftMenuBar::clearLabel(fw, key(), QSoftMenuBar::NavigationFocus);
+        }
+    }
 }
 
 #include "qsoftmenubar.moc"
