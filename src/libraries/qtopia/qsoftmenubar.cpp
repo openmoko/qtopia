@@ -588,7 +588,7 @@ void MenuManager::addMenuTo(QWidget *w, QMenu *menu, QSoftMenuBar::FocusState st
     WidgetData d;
     d.shown = 0;
     d.helpexists = 0;
-    d.helpEnabled = 1;
+    d.helpEnabled = !QtopiaService::apps("Help").isEmpty();
     d.inputMethodEnabled = 1;
     d.cancelEnabled = 1;
     d.hasHelp = 0;
