@@ -910,9 +910,25 @@ void MenuManager::inputMethod()
     };
 }
 
+static bool anyActionVisible(QMenu* menu)
+{
+    if (!menu)
+        return false;
+
+    foreach(QAction* action, menu->actions())
+        if (action->isVisible())
+            return true;
+
+    return false;
+}
+
 void MenuManager::popup(QWidget *w, QMenu *menu)
 {
     if (!widgetDataMap.contains(w))
+        return;
+
+    // do not show an empty menu
+    if (!anyActionVisible(menu))
         return;
 
     WidgetData &d = widgetDataMap[w];
