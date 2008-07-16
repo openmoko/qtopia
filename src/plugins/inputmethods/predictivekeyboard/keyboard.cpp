@@ -1121,7 +1121,7 @@ void KeyboardWidget::addBoard(const QStringList &chars, BoardType type)
 
         QString chars = board->characters();
         for(int ii = 0; ii < chars.length(); ++ii) {
-            m_predict->setLetter(chars.at(ii).toLower().toLatin1(), board->rect(chars.at(ii)).center());
+            m_predict->setLetter(chars.at(ii).toLower().toLatin1(), board->rect(chars.at(ii)));
         }
 
     }
