@@ -759,10 +759,10 @@ bool CallScreen::dialNumbers(const QString & numbers)
         }
     }
 
-    // do not send dtmf tones while dialing for now.
-    // but need a way to queue dtmf tones while dialing.
-    // e.g. a phone number followed by an extension.
-    if (/*m_control->isDialing() || */m_control->hasActiveCalls()) {
+    if (m_control->isDialing() && !m_control->hasActiveCalls()) {
+        appendDtmfDigits(numbers);
+        return true;
+    } else if (m_control->hasActiveCalls()) {
         // Inject the specified m_digits into the display area.
         m_control->activeCalls().first().tone(numbers);
         appendDtmfDigits(numbers);
