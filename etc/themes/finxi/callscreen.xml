@@ -67,10 +67,7 @@
             </template>
 	</list>
     <rect name="menu-box" rect="0,0,0x275" active="yes" interactive="yes" transient="yes">
-      <image rect="0,0,0x91" name="show_keypad" src="button.svg" onclick="src=buttonp.svg" interactive="yes" scale="yes">
-        <text bold="yes" outline="#000000" color="#FFFFFF" size="7" align="hcenter,vcenter">Show Keypad</text>
-      </image>
-      <exclusive rect="0,91,0x91">
+      <exclusive rect="0,0,0x91">
         <image name="hold" src="button.svg" onclick="src=buttonp.svg" interactive="yes" scale="yes">
           <text bold="yes" outline="#000000" color="#FFFFFF" size="7" align="hcenter,vcenter">Hold</text>
         </image>
@@ -81,6 +78,9 @@
           <text bold="yes" outline="#000000" color="#FFFFFF" size="7" align="hcenter,vcenter">Send Busy</text>
         </image>
       </exclusive>
+      <image rect="0,91,0x91" name="show_keypad" src="button.svg" onclick="src=buttonp.svg" interactive="yes" scale="yes">
+        <text bold="yes" outline="#000000" color="#FFFFFF" size="7" align="hcenter,vcenter">Show Keypad</text>
+      </image>
       <exclusive rect="0,182,0x91">
         <image name="endcall" src="buttonendcall.svg" onclick="src=buttonp.svg" interactive="yes" scale="yes">
           <text bold="yes" outline="#000000" color="#FFFFFF" size="7" align="hcenter,vcenter">End Call</text>
