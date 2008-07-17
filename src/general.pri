@@ -86,6 +86,7 @@ PROJECTS*=\
         plugins/content/id3 \
         plugins/content/exif \
         plugins/content/threegpp \
+        plugins/inputmethods/predictivekeyboard \
         # Qtmail stuff
         applications/qtmail \
         libraries/qtopiamail \
@@ -140,7 +141,6 @@ phone {
 !x11 {
     # input methods that are available in all editions, except X11
     PROJECTS*=\
-        plugins/inputmethods/predictivekeyboard \
         plugins/inputmethods/keyboard \
         plugins/inputmethods/dockedkeyboard \
         3rdparty/plugins/inputmethods/pkim
