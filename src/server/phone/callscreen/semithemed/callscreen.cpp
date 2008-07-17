@@ -1478,7 +1478,8 @@ void CallScreen::closeEvent(QCloseEvent *e)
         setWindowTitle(tr("Calls"));
         setSelectMode(false);
         stateChanged();
-    } else if (m_control->hasIncomingCall()) {
+    } else if (m_hadActiveCall) {
+        setWindowState(Qt::WindowMinimized);
         e->ignore();
     } else {
         e->accept();
