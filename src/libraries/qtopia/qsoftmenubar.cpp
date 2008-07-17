@@ -34,7 +34,6 @@
 # include <QWizard>
 #endif
 
-#include <QtopiaApplication>
 #include <QtopiaInputMethod>
 
 #include <qtopialog.h>
@@ -363,7 +362,7 @@ private:
     QList<QWidget*> widgetsWithMenu(QMenu *menu, QSoftMenuBar::FocusState state);
     QString findHelp(const QWidget* w);
     bool triggerMenuItem( QMenu *menu, int keyNum );
-    QPoint positionForMenu(QWidget*, const QMenu *menu);
+    QPoint positionForMenu(const QMenu *menu);
     void updateMenu(QMenu*);
 
 private slots:
@@ -1039,7 +1038,7 @@ void MenuManager::popup(QWidget *w, QMenu *menu)
 
     if (menu->actions().count()) {
 #ifndef GREENPHONE_EFFECTS
-        menu->popup(positionForMenu(w, menu), menu->actions().last());  //last item at bottom of screen
+        menu->popup(positionForMenu(menu), menu->actions().last());  //last item at bottom of screen
 #endif
         if (!Qtopia::mousePreferred()) {
             //select first action by default
@@ -1061,7 +1060,7 @@ void MenuManager::popup(QWidget *w, QMenu *menu)
             }
         }
 #ifdef GREENPHONE_EFFECTS
-        menu->popup(positionForMenu(w, menu), menu->actions().last());  //last item at bottom of screen
+        menu->popup(positionForMenu(menu), menu->actions().last());  //last item at bottom of screen
 #endif
     }
 }
@@ -1142,35 +1141,21 @@ bool MenuManager::helpExists(QWidget *w)
     return d.helpexists;
 }
 
-QPoint MenuManager::positionForMenu(QWidget* w, const QMenu *menu)
+QPoint MenuManager::positionForMenu(const QMenu *menu)
 {
     if (!menu)
         return QPoint(0,0);
     QDesktopWidget *desktop = QApplication::desktop();
     QRect r = desktop->availableGeometry(desktop->primaryScreen());
-    int x = 0;
+    QPoint pos;
     if ( QApplication::layoutDirection() == Qt::LeftToRight )
-        x = r.left();
+        pos = QPoint(r.left(), r.bottom());
     else {
-        x = r.right() - menu->sizeHint().width()+1;
+        int x = r.right() - menu->sizeHint().width()+1;
         if ( x < 0 ) x=1;
+        pos = QPoint(x, r.bottom());
     }
-
-#ifdef Q_WS_X11
-    /*
-     * We can not always rely on the _NET_WORKAREA to be properly set. E.g.
-     * enlightenment is not setting these. QDesktopWidget is using this to determine
-     * the size. Replace this assumption with another one not always holding true:
-     *   The main window is properly sized and is at the top of the menu...
-     *
-     * THIS whole code makes also an assumption about the position of the softmenu
-     * which could be docked everywhere by the qpe process...
-     */
-    return QPoint(x, w->window()->rect().bottom());
-#else
-    Q_UNUSED(w)
-    return QPoint(x, r.bottom());
-#endif
+    return pos;
 }
 
 /*
