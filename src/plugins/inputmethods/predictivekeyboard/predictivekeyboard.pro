@@ -13,6 +13,10 @@ SOURCES		= predictivekeyboard.cpp \
                   pred.cpp \
                   keyboard.cpp \
                   proxyscreen.cpp
+x11 {
+    HEADERS += qwsinputmethod_x11.h
+    SOURCES += qwsinputmethod_x11.cpp
+}
 
 pkg.name=qpe-predictivekeyboard
 pkg.domain=trusted

@@ -21,9 +21,14 @@
 #ifndef predictivekeyboard_H
 #define predictivekeyboard_H
 
-#include <qwindowsystem_qws.h>
 #include <qtopiaipcenvelope.h>
 #include <QDebug> //tmp
+
+#ifdef Q_WS_QWS
+#include <qwindowsystem_qws.h>
+#elif defined(Q_WS_X11)
+#include "qwsinputmethod_x11.h"
+#endif
 
 /*
     PredictiveKeyboard is an input method for Qtopia.  PredictiveKeyboard displays a popup widget depiciting keys onscreen (PredictiveKeyboardWidget), and converts them into key events.
@@ -52,20 +57,26 @@ signals:
     void stateChanged();
 
 public slots:
-    void checkMicroFocus();
     void erase();
     void submitWord(QString word);
     void preedit(QString text);
+#ifdef Q_WS_QWS
+    void checkMicroFocus();
     void windowEvent(QWSWindow *w, QWSServer::WindowEvent e);
+#endif
 
 protected:
+#ifdef Q_WS_QWS
     virtual void updateHandler(int type);
+#endif
 
 private:
     friend class PredictiveKeyboardInputMethod;
     QAction* mAction;
     KeyboardWidget *mKeyboard;
+#ifdef Q_WS_QWS
     QWSWindow *mActive;
+#endif
 };
 
 #endif //predictivekeyboard_H

@@ -22,15 +22,22 @@
 #include "predictivekeyboard.h"
 #include "keyboard.h"
 #include <QVariant>
-#include <qwindowsystem_qws.h>
 #include <QAction>
 #include <QtopiaApplication>
 #include <QDesktopWidget>
 #include <QDebug>
 #include <qtopialog.h>
 
+#ifdef Q_WS_QWS
+#include <qwindowsystem_qws.h>
+#endif
+
 PredictiveKeyboard::PredictiveKeyboard(QWidget* parent) 
-: QWSInputMethod(), mKeyboard(0), mActive(0)
+    : QWSInputMethod()
+    , mKeyboard(0)
+#ifdef Q_WS_QWS
+    , mActive(0)
+#endif
 {
     // The predictivekeyboard frame is meaningless after the 
     // PredictiveKeyboard IM is destroyed, so keep control of it by never 
@@ -38,7 +45,9 @@ PredictiveKeyboard::PredictiveKeyboard(QWidget* parent)
     // predictivekeyboard on top of other widgets.
     Q_UNUSED(parent);
 
+#ifdef Q_WS_QWS
     QObject::connect(qwsServer, SIGNAL(windowEvent(QWSWindow *, QWSServer::WindowEvent)), this, SLOT(windowEvent(QWSWindow *, QWSServer::WindowEvent)));
+#endif
 };
 
 PredictiveKeyboard::~PredictiveKeyboard()
@@ -136,7 +145,9 @@ QWidget* PredictiveKeyboard::widget(QWidget*)
 
         QObject::connect(mKeyboard, SIGNAL(preedit(QString)), this, SLOT(preedit(QString)));
         QObject::connect(mKeyboard, SIGNAL(commit(QString)), this, SLOT(submitWord(QString)));
+#ifdef Q_WS_QWS
         QObject::connect(mKeyboard, SIGNAL(commit(QString)), this, SLOT(checkMicroFocus()));
+#endif
         QObject::connect(mKeyboard, SIGNAL(backspace()), this, SLOT(erase()));
         KeyboardWidget::instantiatePopupScreen();
     }
@@ -144,6 +155,7 @@ QWidget* PredictiveKeyboard::widget(QWidget*)
     return mKeyboard;
 };
 
+#ifdef Q_WS_QWS
 void PredictiveKeyboard::checkMicroFocus()
 {
     qwsServer->sendIMQuery ( Qt::ImMicroFocus );
@@ -162,12 +174,6 @@ void PredictiveKeyboard::queryResponse ( int property, const QVariant & result )
 
         mKeyboard->setAcceptDest(p);
     }
-};
-
-void PredictiveKeyboard::resetState()
-{
-    if(mKeyboard) 
-        mKeyboard->reset();
 };
 
 void PredictiveKeyboard::windowEvent(QWSWindow *w, QWSServer::WindowEvent e)
@@ -192,6 +198,15 @@ void PredictiveKeyboard::updateHandler(int type)
         case QWSInputMethod::Destroyed:
             break;
     };
+};
+
+
+#endif
+
+void PredictiveKeyboard::resetState()
+{
+    if(mKeyboard) 
+        mKeyboard->reset();
 };
 
 
