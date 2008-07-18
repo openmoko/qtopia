@@ -442,6 +442,9 @@ Ficgta01ModemService::Ficgta01ModemService
     // Enable %CPRI for ciphering indications.
 //    chat( "AT%CPRI=1" );
 
+    // Set the side to the minimum value
+    chat("AT@ST=\"-26\"" );
+
     // Make the modem send unsolicited reports at any time
     // the "user is not typing".  i.e. don't intersperse unsolicited
     // notifications and command echo as it will confuse QAtChat.
