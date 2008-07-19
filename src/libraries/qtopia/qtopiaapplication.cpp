@@ -154,6 +154,30 @@ QMap<const QWidget *, int> qpeWidgetFlags;
 
 //#define GREENPHONE_EFFECTS
 
+#ifdef Q_WS_X11
+// Handle focus changes and update the window hint...
+class QtopiaApplicationFocusHandler : public QObject {
+    Q_OBJECT
+    friend class QtopiaApplication;
+public:
+    QtopiaApplicationFocusHandler(QObject* parent);
+
+private Q_SLOTS:
+    void focusChanged(QWidget*, QWidget*);
+
+protected:
+    static QWidget* topLevelWidget(QWidget*);
+    static int inputHint(QWidget* w, QString* name);
+};
+
+enum MatchboxKeyboard {
+    Keyboard_Show,
+    Keyboard_Hide
+};
+
+static void matchboxShowKeyboard(enum MatchboxKeyboard cmd);
+#endif
+
 #ifdef GREENPHONE_EFFECTS
 
 #include <sys/types.h>
@@ -1285,6 +1309,9 @@ public:
 #if defined(GREENPHONE_EFFECTS) && defined(QT_QWS_GREENPHONE)
         , m_greenphoneEffects(0)
 #endif
+#ifdef Q_WS_X11
+        , m_focusHandler(0)
+#endif
     {
 #if !defined(QT_NO_SXE) && QT_VERSION < 0x040400
         authorizerInitialized.init( 0 );
@@ -1673,8 +1700,14 @@ public:
     }
     FadeThread *m_greenphoneEffects;
 #endif
+#ifdef Q_WS_QWS
     QBasicTimer focusOutTimer;
     QPointer<QWidget> focusOutWidget;
+#endif
+#ifdef Q_WS_X11
+    QtopiaApplicationFocusHandler* m_focusHandler;
+#endif
+
 };
 
 
@@ -2382,6 +2415,10 @@ void QtopiaApplication::init(int argc, char **argv, Type t)
     connect( d->sysChannel, SIGNAL(received(QString,QByteArray)),
              this, SLOT(systemMessage(QString,QByteArray)) );
 
+#ifdef Q_WS_X11
+    d->m_focusHandler = new QtopiaApplicationFocusHandler(this);
+#endif
+
     initApp( argc, argv );
 
     d->qpe_system_locale = new QtopiaSystemLocale();
@@ -2716,32 +2753,15 @@ void QtopiaApplication::setInputMethodHint( QWidget* widget, InputMethodHint mod
         inputMethodDict->insert(widget, new InputMethodHintRec(mode,param));
         connect(widget, SIGNAL(destroyed(QObject*)), qApp, SLOT(removeSenderFromIMDict()));
     }
-    if ( widget->hasFocus() )
-        sendInputHintFor(widget,QEvent::None);
-}
 
 #ifdef Q_WS_X11
-enum MatchboxKeyboard {
-    Keyboard_Show,
-    Keyboard_Hide
-};
-
-static void matchboxShowKeyboard(enum MatchboxKeyboard cmd)
-{
-    static Atom mbInvokerCommand = XInternAtom(QX11Info::display(), "_MB_IM_INVOKER_COMMAND", False);
-
-    XEvent event;
-    memset(&event, 0, sizeof(XEvent));
-
-    event.xclient.type = ClientMessage;
-    event.xclient.window = QX11Info::appRootWindow();
-    event.xclient.message_type = mbInvokerCommand;
-    event.xclient.format = 32;
-    event.xclient.data.l[0] = cmd == Keyboard_Show ? 1 : 2; 
-
-    XSendEvent(QX11Info::display(), QX11Info::appRootWindow(), False, SubstructureRedirectMask|SubstructureNotifyMask, &event);
-}
+    if (widget->hasFocus() && QtopiaApplication::instance()->d->m_focusHandler)
+        static_cast<QtopiaApplication*>(qApp)->d->m_focusHandler->focusChanged(0, widget);
+#else
+    if ( widget->hasFocus() )
+        sendInputHintFor(widget,QEvent::None);
 #endif
+}
 
 /*!
   Explicitly show the current input method.
@@ -3823,8 +3843,10 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
 
         QWidget *w = (QWidget *)o;
 
+#ifdef Q_WS_QWS
         d->focusOutTimer.stop();
         d->focusOutWidget = 0;
+#endif
 
         if (e->type() == QEvent::FocusIn && !mousePreferred
                 && w->focusPolicy() != Qt::NoFocus) {
@@ -3835,8 +3857,10 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
         if (!activeWindow())
             return false;
 
+#ifdef Q_WS_QWS
         if (e->type() != QEvent::FocusIn || ((QFocusEvent*)e)->reason() != Qt::PopupFocusReason)
             sendInputHintFor(w, e->type());
+#endif
         if (qApp->focusWidget() == w && qApp->activeWindow())
             ContextKeyManager::instance()->updateContextLabels();
         if (w->inherits("QDateEdit")) {
@@ -3901,12 +3925,14 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
                     qApp, SLOT(textBrowserHighlightChange(QString)));
         }
 
+#ifdef Q_WS_QWS
         if (fe->reason() != Qt::PopupFocusReason) {
             // If we don't have a FocusIn on its way then we need
             // to deal with the FocusOut.
             d->focusOutWidget = w;
             d->focusOutTimer.start(0, this);
         }
+#endif
     } else if (e->type() == QEvent::Show) {
 #if defined(Q_WS_X11)
         // Work with code tht doesn't use the ::show stuff from Qtopia...
@@ -4118,23 +4144,23 @@ void QtopiaApplication::hideMessageBoxButtons( QMessageBox *mb )
     }
 }
 
+#ifdef Q_WS_QWS
 void QtopiaApplication::sendInputHintFor(QWidget *w, QEvent::Type etype)
 {
     qint32 windowId = 0;
+    QWidget *p = 0;
     if (w) {
         // popups don't send window active events... so need
         // to find the window id for the actual active window,
         // rather than that of the popup.
-        QWidget *p = w->topLevelWidget();;
+        p = w->topLevelWidget();;
         while(p->windowType() == Qt::Popup && p->parentWidget())
             p = p->parentWidget();
         windowId = p->topLevelWidget()->winId();
     }
 
     if (etype == QEvent::FocusOut) {
-#ifdef Q_WS_X11
-        matchboxShowKeyboard(Keyboard_Hide);
-#else
+#ifdef Q_WS_QWS
         QtopiaIpcEnvelope env(QLatin1String("QPE/InputMethod"), QLatin1String("inputMethodHint(QString,int)") );
         env << QString();
         env << windowId;
@@ -4211,12 +4237,7 @@ void QtopiaApplication::sendInputHintFor(QWidget *w, QEvent::Type etype)
 
     // find ancestor.. top ancestor, then get its' window id
     if (etype == QEvent::FocusIn || etype == QEvent::None) {
-#ifdef Q_WS_X11
-        if (n == Normal || n == AlwaysOff)
-            matchboxShowKeyboard(Keyboard_Hide);
-        else
-            matchboxShowKeyboard(Keyboard_Show);
-#else
+#ifdef Q_WS_QWS
         if ( n == Named ) {
             QtopiaIpcEnvelope env(QLatin1String("QPE/InputMethod"), QLatin1String("inputMethodHint(QString,int)") );
             env << (hr ? hr->param : QString());
@@ -4229,11 +4250,11 @@ void QtopiaApplication::sendInputHintFor(QWidget *w, QEvent::Type etype)
         QtopiaIpcEnvelope passwordenv(QLatin1String("QPE/InputMethod"), QLatin1String("inputMethodPasswordHint(bool,int)") );
         passwordenv << passwordFlag;
         passwordenv << windowId;
-
 #endif
 
     }
 }
+#endif
 
 /*!
   \internal
@@ -4367,6 +4388,7 @@ bool QtopiaApplication::notify(QObject* o, QEvent* e)
 */
 void QtopiaApplication::timerEvent( QTimerEvent *e )
 {
+#ifdef Q_WS_QWS
     if (e->timerId() == d->focusOutTimer.timerId()) {
         d->focusOutTimer.stop();
         sendInputHintFor(d->focusOutWidget, QEvent::FocusOut);
@@ -4382,6 +4404,9 @@ void QtopiaApplication::timerEvent( QTimerEvent *e )
             d->fadeInTimer.stop();
         }
     }
+#endif
+#else
+Q_UNUSED(e)
 #endif
 }
 
@@ -4930,5 +4955,162 @@ void QContentChangedChannel::contentChanged(QContentIdList idList, QContent::Cha
     }
     emit contentChangedSignal(idList, ct);
 }
+
+#ifdef Q_WS_X11
+QtopiaApplicationFocusHandler::QtopiaApplicationFocusHandler(QObject* parent)
+    : QObject(parent)
+{
+    connect(qApp, SIGNAL(focusChanged(QWidget*,QWidget*)), SLOT(focusChanged(QWidget*,QWidget*)));
+}
+
+/*
+ * The focus changed and we need to update the atoms hints:
+ *  1.)
+ *    - If the oldWidget exists. Find the topLevel widget
+ *    - If the newWidget exists. Find the topLevel widget
+ *  2.)
+ *    - If new topLevel != old topLevel, set the hint to none on the old one
+ *  3.)
+ *    - If the new top level exists. Find the hint to use and set that
+ */
+void QtopiaApplicationFocusHandler::focusChanged(QWidget* oldWidget, QWidget* newWidget)
+{
+    static Atom _E_VIRTUAL_KEYBOARD_STATE = XInternAtom(QX11Info::display(), "_E_VIRTUAL_KEYBOARD_STATE", False);
+    static Atom _E_VIRTUAL_KEYBOARD_OFF = XInternAtom(QX11Info::display(), "_E_VIRTUAL_KEYBOARD_OFF", False);
+    static Atom _E_VIRTUAL_KEYBOARD_ON = XInternAtom(QX11Info::display(), "_E_VIRTUAL_KEYBOARD_ON", False);
+    static Atom _E_VIRTUAL_KEYBOARD_ALPHA = XInternAtom(QX11Info::display(), "_E_VIRTUAL_KEYBOARD_ALPHA", False);
+    static Atom _E_VIRTUAL_KEYBOARD_NUMERIC = XInternAtom(QX11Info::display(), "_E_VIRTUAL_KEYBOARD_NUMERIC", False);
+
+
+    // Find the toplevel widgets
+    QWidget* oldTopLevel = topLevelWidget(oldWidget);
+    QWidget* newTopLevel = topLevelWidget(newWidget);
+
+
+    // Remove the hint
+    if (oldTopLevel && oldTopLevel != newTopLevel)
+        XChangeProperty(QX11Info::display(), oldTopLevel->winId(), _E_VIRTUAL_KEYBOARD_STATE,
+                        XA_ATOM, 32, PropModeReplace, (unsigned char*)&_E_VIRTUAL_KEYBOARD_OFF, 1);
+
+    // Find the hints
+    if (!newTopLevel)
+        return;
+
+    QString hintName;
+    int hint = inputHint(newWidget, &hintName);
+
+    Atom keyboardState;
+
+    switch(hint) {
+    case QtopiaApplication::Normal:
+    case QtopiaApplication::AlwaysOff:
+        keyboardState = _E_VIRTUAL_KEYBOARD_OFF;
+        break;
+    case QtopiaApplication::Number:
+    case QtopiaApplication::PhoneNumber:
+        keyboardState = _E_VIRTUAL_KEYBOARD_NUMERIC;
+        break;
+    case QtopiaApplication::Words:
+    case QtopiaApplication::Text:
+    case QtopiaApplication::ProperNouns:
+        keyboardState = _E_VIRTUAL_KEYBOARD_ALPHA;
+        break;
+
+    // not mappable, use text for now
+    case QtopiaApplication::Named:
+        keyboardState = _E_VIRTUAL_KEYBOARD_ON;
+        break;
+    }
+
+    XChangeProperty(QX11Info::display(), newTopLevel->winId(), _E_VIRTUAL_KEYBOARD_STATE,
+                    XA_ATOM, 32, PropModeReplace, (unsigned char*)&keyboardState, 1);
+}
+
+QWidget* QtopiaApplicationFocusHandler::topLevelWidget(QWidget* widget)
+{
+    if (!widget)
+        return 0;
+
+    // QtopiaApplication::sendInputHintFor is special casing popup's.
+    // I have no idea why, so leave that out for now.
+    return widget->topLevelWidget();
+}
+
+// Similar to QtopiaApplication::sendInputHintFor, but we don't connect
+// or disconnect the multiLineEditTextChange/lineEditTextChange signals.
+// So this only works for touchscreen devices, when mouse is not preferred
+// these signals should be connected in the proper eventFilter anyway.
+int QtopiaApplicationFocusHandler::inputHint(QWidget* w, QString* name)
+{
+    const QValidator* v = 0;
+    InputMethodHintRec *hr=0;
+    bool passwordFlag = false ;
+    if ( inputMethodDict ) {
+        if (!inputMethodDict->contains(w)) {
+            QWidget* p = w->parentWidget();
+            if ( p ) {
+                if ( p->focusProxy() == w ) {
+                    if (inputMethodDict->contains(p))
+                        hr = inputMethodDict->value(p);
+                } else {
+                    p = p->parentWidget();
+                    if (p && p->focusProxy() == w && inputMethodDict->contains(p))
+                        hr = inputMethodDict->value(p);
+                }
+            }
+        } else {
+            hr = inputMethodDict->value(w);
+        }
+    }
+    int n = hr ? (int)hr->hint : 0;
+    QLineEdit *l = qobject_cast<QLineEdit*>(w);
+    if (!l && w->inherits("QSpinBox")) {
+        l = ((QSpinBoxLineEditAccessor*)w)->getLineEdit();
+        if (!hr)
+            n = (int)QtopiaApplication::Number;
+    }
+    if (!l && w->inherits("QComboBox"))
+        l = ((QComboBox*)w)->lineEdit();
+    if (l) {
+        if ( !n && !l->isReadOnly()) {
+            if( l->echoMode()==QLineEdit::Normal){
+                n = (int)QtopiaApplication::Words;
+            } else {
+                n = (int)QtopiaApplication::Text;
+                passwordFlag = true;
+            };
+            v = l->validator();
+        }
+    } else if (w->inherits("QTextEdit") && !w->inherits("QTextBrowser")) {
+        QTextEdit* l = (QTextEdit*)w;
+        if ( !n && !l->isReadOnly()) {
+            n = (int)QtopiaApplication::Words;
+        }
+    }
+    if ( !hr && v && v->inherits("QIntValidator") )
+        n = (int)QtopiaApplication::Number;
+
+    if (n == QtopiaApplication::Named && hr)
+        *name = hr->param;
+
+    return n;
+}
+static void matchboxShowKeyboard(enum MatchboxKeyboard cmd)
+{
+    static Atom mbInvokerCommand = XInternAtom(QX11Info::display(), "_MB_IM_INVOKER_COMMAND", False);
+
+    XEvent event;
+    memset(&event, 0, sizeof(XEvent));
+
+    event.xclient.type = ClientMessage;
+    event.xclient.window = QX11Info::appRootWindow();
+    event.xclient.message_type = mbInvokerCommand;
+    event.xclient.format = 32;
+    event.xclient.data.l[0] = cmd == Keyboard_Show ? 1 : 2; 
+
+    XSendEvent(QX11Info::display(), QX11Info::appRootWindow(), False, SubstructureRedirectMask|SubstructureNotifyMask, &event);
+}
+#endif
+
 
 #include "qtopiaapplication.moc"
