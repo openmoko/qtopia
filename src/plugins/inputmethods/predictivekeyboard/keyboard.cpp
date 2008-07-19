@@ -181,7 +181,7 @@ private:
 };
 
 AcceptWindow::AcceptWindow(int time)
-: QWidget(0, (Qt::WindowFlags)(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)), m_anim(time)
+: QWidget(0, (Qt::WindowFlags)(Qt::Tool | Qt::X11BypassWindowManagerHint | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)), m_anim(time)
 {
 #ifdef Q_WS_QWS
     QPalette p = palette();
@@ -391,7 +391,7 @@ static void colorizeImage( QImage& img, const QColor& col, int alpha, bool blend
     }
 }
 OptionsWindow::OptionsWindow(int wordSpacing)
-: QWidget(0, (Qt::WindowFlags)(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)), m_specialDelete(false), m_ignore(false),
+: QWidget(0, (Qt::WindowFlags)(Qt::Tool | Qt::X11BypassWindowManagerHint | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)), m_specialDelete(false), m_ignore(false),
   m_selectedWord(0), m_slideTimeline(300), m_backgroundTimeline(300),
   m_background(":image/predictivekeyboard/softbar"),
   m_wordSpacing(wordSpacing), m_clearTimer(0)
@@ -826,7 +826,7 @@ private:
 };
 
 PopupWindow::PopupWindow(int raise, QWidget *parent)
-: QWidget(parent, (Qt::WindowFlags)(Qt::Tool | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)),
+: QWidget(parent, (Qt::WindowFlags)(Qt::Tool | Qt::X11BypassWindowManagerHint | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)),
   m_ignore(false), m_timeline(300), m_showtimeline(300), m_board(0),
   m_offset(raise), m_dismissing(false)
 {
