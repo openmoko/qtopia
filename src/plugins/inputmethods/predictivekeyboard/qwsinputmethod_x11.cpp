@@ -38,11 +38,11 @@
 #define QTOPIAXK_Hangup		0x1100060F
 #define QTOPIAXK_Flip		0x11000610
 
-static int prevModifiers = 0;
-static bool hasTestExtension = false;
-static bool initialized = false;
-static KeySym shiftKeycode = 0;
-static KeySym modeSwitchKeycode = 0;
+static int s_prevModifiers = 0;
+static bool s_hasTestExtension = false;
+static bool s_initialized = false;
+static KeySym s_shiftKeycode = 0;
+static KeySym s_modeSwitchKeycode = 0;
 
 QWSInputMethod::QWSInputMethod()
 {}
@@ -58,21 +58,21 @@ void QWSServer::sendKeyEvent(int, int keycode, int modifiers, bool isPress, bool
         return;
 
     // Initialize the XTEST extension if necessary.
-    if (!initialized) {
+    if (!s_initialized) {
         int event_base, error_base, major, minor;
-        initialized = true;
+        s_initialized = true;
         if (!XTestQueryExtension
                 (dpy, &event_base, &error_base, &major, &minor)) {
             qWarning("X server does not support the XTEST extension; "
                      "cannot emulate key events");
             return;
         }
-        hasTestExtension = true;
-        shiftKeycode = XKeysymToKeycode(dpy, XK_Shift_L);
-        if (shiftKeycode == NoSymbol)
-            shiftKeycode = XKeysymToKeycode(dpy, XK_Shift_R);
-        modeSwitchKeycode = XKeysymToKeycode(dpy, XK_Mode_switch);
-    } else if (!hasTestExtension) {
+        s_hasTestExtension = true;
+        s_shiftKeycode = XKeysymToKeycode(dpy, XK_Shift_L);
+        if (s_shiftKeycode == NoSymbol)
+            s_shiftKeycode = XKeysymToKeycode(dpy, XK_Shift_R);
+        s_modeSwitchKeycode = XKeysymToKeycode(dpy, XK_Mode_switch);
+    } else if (!s_hasTestExtension) {
         return;
     }
 
@@ -307,7 +307,7 @@ void QWSServer::sendKeyEvent(int, int keycode, int modifiers, bool isPress, bool
         extraModifiers |= ShiftMask;
     if ((index & 2) != 0)
         extraModifiers |= Mod2Mask;
-    if ((prevModifiers & LockMask) != 0) {
+    if ((s_prevModifiers & LockMask) != 0) {
         // If Caps Lock is set, then flip the shift state for alphabetic keys.
         if (keycode >= Qt::Key_A && keycode <= Qt::Key_Z)
             extraModifiers ^= ShiftMask;
@@ -322,18 +322,18 @@ void QWSServer::sendKeyEvent(int, int keycode, int modifiers, bool isPress, bool
     unsigned long delay = 0;
     if (extraModifiers != 0) {
         if ((extraModifiers & ShiftMask) != 0) {
-            if ((prevModifiers & ShiftMask) == 0)
-                XTestFakeKeyEvent(dpy, shiftKeycode, true, delay++);
+            if ((s_prevModifiers & ShiftMask) == 0)
+                XTestFakeKeyEvent(dpy, s_shiftKeycode, true, delay++);
         } else {
-            if ((prevModifiers & ShiftMask) != 0)
-                XTestFakeKeyEvent(dpy, shiftKeycode, false, delay++);
+            if ((s_prevModifiers & ShiftMask) != 0)
+                XTestFakeKeyEvent(dpy, s_shiftKeycode, false, delay++);
         }
         if ((extraModifiers & Mod2Mask) != 0) {
-            if ((prevModifiers & Mod2Mask) == 0)
-                XTestFakeKeyEvent(dpy, modeSwitchKeycode, true, delay++);
+            if ((s_prevModifiers & Mod2Mask) == 0)
+                XTestFakeKeyEvent(dpy, s_modeSwitchKeycode, true, delay++);
         } else {
-            if ((prevModifiers & Mod2Mask) != 0)
-                XTestFakeKeyEvent(dpy, modeSwitchKeycode, false, delay++);
+            if ((s_prevModifiers & Mod2Mask) != 0)
+                XTestFakeKeyEvent(dpy, s_modeSwitchKeycode, false, delay++);
         }
     }
 
@@ -343,18 +343,18 @@ void QWSServer::sendKeyEvent(int, int keycode, int modifiers, bool isPress, bool
     // Adjust the modifiers back.
     if (extraModifiers != 0) {
         if ((extraModifiers & ShiftMask) != 0) {
-            if ((prevModifiers & ShiftMask) == 0)
-                XTestFakeKeyEvent(dpy, shiftKeycode, false, delay++);
+            if ((s_prevModifiers & ShiftMask) == 0)
+                XTestFakeKeyEvent(dpy, s_shiftKeycode, false, delay++);
         } else {
-            if ((prevModifiers & ShiftMask) != 0)
-                XTestFakeKeyEvent(dpy, shiftKeycode, true, delay++);
+            if ((s_prevModifiers & ShiftMask) != 0)
+                XTestFakeKeyEvent(dpy, s_shiftKeycode, true, delay++);
         }
         if ((extraModifiers & Mod2Mask) != 0) {
-            if ((prevModifiers & Mod2Mask) == 0)
-                XTestFakeKeyEvent(dpy, modeSwitchKeycode, false, delay++);
+            if ((s_prevModifiers & Mod2Mask) == 0)
+                XTestFakeKeyEvent(dpy, s_modeSwitchKeycode, false, delay++);
         } else {
-            if ((prevModifiers & Mod2Mask) != 0)
-                XTestFakeKeyEvent(dpy, modeSwitchKeycode, true, delay++);
+            if ((s_prevModifiers & Mod2Mask) != 0)
+                XTestFakeKeyEvent(dpy, s_modeSwitchKeycode, true, delay++);
         }
     }
 
@@ -364,17 +364,17 @@ void QWSServer::sendKeyEvent(int, int keycode, int modifiers, bool isPress, bool
     // Update the modifiers if this was a shift key.
     if (isPress) {
         if (keycode == Qt::Key_Shift)
-            prevModifiers |= ShiftMask;
+            s_prevModifiers |= ShiftMask;
         if (keycode == Qt::Key_CapsLock)
-            prevModifiers |= LockMask;
+            s_prevModifiers |= LockMask;
         if (keycode == Qt::Key_Mode_switch)
-            prevModifiers |= Mod2Mask;
+            s_prevModifiers |= Mod2Mask;
     } else {
         if (keycode == Qt::Key_Shift)
-            prevModifiers &= ~ShiftMask;
+            s_prevModifiers &= ~ShiftMask;
         if (keycode == Qt::Key_CapsLock)
-            prevModifiers &= ~LockMask;
+            s_prevModifiers &= ~LockMask;
         if (keycode == Qt::Key_Mode_switch)
-            prevModifiers &= ~Mod2Mask;
+            s_prevModifiers &= ~Mod2Mask;
     }
 }
