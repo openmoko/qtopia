@@ -194,7 +194,11 @@ AcceptWindow::AcceptWindow(int time)
     QObject::connect(&m_anim, SIGNAL(valueChanged(qreal)),
                      this, SLOT(valueChanged(qreal)));
 
+#ifdef Q_WS_X11
+    setWindowTitle("AcceptWindow");
+#else
     setWindowTitle("_allow_on_top_"); // Use window manager back door.
+#endif
     setWindowModality (Qt::NonModal);
     setFocusPolicy(Qt::NoFocus);
 }
@@ -412,7 +416,11 @@ OptionsWindow::OptionsWindow(int wordSpacing)
     QObject::connect(&m_slideTimeline, SIGNAL(valueChanged(qreal)),
                      this, SLOT(update()));
 
+#ifdef Q_WS_X11
+    setWindowTitle("OptionsWindow");
+#else
     setWindowTitle("_allow_on_top_"); // Use window manager back door.
+#endif
     setWindowModality (Qt::NonModal);
     setFocusPolicy(Qt::NoFocus);
 
@@ -831,7 +839,11 @@ PopupWindow::PopupWindow(int raise, QWidget *parent)
     QObject::connect(&m_timeline, SIGNAL(valueChanged(qreal)), this, SLOT(valueChanged(qreal)));
     QObject::connect(&m_showtimeline, SIGNAL(valueChanged(qreal)), this, SLOT(showvalueChanged(qreal)));
 
+#ifdef Q_WS_X11
+    setWindowTitle("PopupWindow");
+#else
     setWindowTitle("_allow_on_top_"); // Use window manager back door.
+#endif
     setWindowModality (Qt::NonModal);
     setFocusPolicy(Qt::NoFocus);
 }
@@ -1060,7 +1072,11 @@ KeyboardWidget::KeyboardWidget(const Config &config,
     QObject::connect(m_options, SIGNAL(wordAccepted()),
                      this, SLOT(acceptWord()));
 
+#ifdef Q_WS_X11
+    setWindowTitle("KeyboardWidget");
+#else
     setWindowTitle("_allow_on_top_"); // Use window manager back door.
+#endif
     setWindowModality (Qt::NonModal);
     setFocusPolicy(Qt::NoFocus);
 }
