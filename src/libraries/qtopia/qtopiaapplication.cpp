@@ -3463,7 +3463,7 @@ static void markQtopiaWindow(QWidget *w)
     Display *dpy = QX11Info::display();
     Window wId = (w ? w->winId() : 0);
     if (dpy && wId) {
-        Atom atom = XInternAtom(dpy, "_QTOPIA_SOFT_MENUS", False);
+        static Atom atom = XInternAtom(dpy, "_QTOPIA_SOFT_MENUS", False);
         unsigned long flag = 1;
         XChangeProperty(dpy, wId, atom, XA_CARDINAL, 32, PropModeReplace,
                         (unsigned char *)&flag, 1);
