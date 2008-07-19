@@ -3012,6 +3012,7 @@ QtopiaApplication::~QtopiaApplication()
 
     delete d->editMenu;
     delete d->calendarMenu;
+    delete d->lifeCycle;
     delete d;
     d = 0;
 }
