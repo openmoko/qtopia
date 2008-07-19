@@ -176,6 +176,16 @@ enum MatchboxKeyboard {
 };
 
 static void matchboxShowKeyboard(enum MatchboxKeyboard cmd);
+
+static Atom _QTOPIA_SOFT_MENUS;
+static Atom _NET_ACTIVE_WINDOW;
+static Atom _E_VIRTUAL_KEYBOARD_STATE;
+static Atom _E_VIRTUAL_KEYBOARD_OFF;
+static Atom _E_VIRTUAL_KEYBOARD_ON;
+static Atom _E_VIRTUAL_KEYBOARD_ALPHA;
+static Atom _E_VIRTUAL_KEYBOARD_NUMERIC;
+static Atom _MB_IM_INVOKER_COMMAND;
+
 #endif
 
 #ifdef GREENPHONE_EFFECTS
@@ -2443,6 +2453,30 @@ void QtopiaApplication::init(int argc, char **argv, Type t)
         setVolume();
     }
 
+#ifdef Q_WS_X11
+    // Get the atoms now
+    Atom atoms[8];
+    const char* names[] = {
+        "_QTOPIA_SOFT_MENUS",
+        "_NET_ACTIVE_WINDOW",
+        "_E_VIRTUAL_KEYBOARD_STATE",
+        "_E_VIRTUAL_KEYBOARD_OFF",
+        "_E_VIRTUAL_KEYBOARD_ON",
+        "_E_VIRTUAL_KEYBOARD_ALPHA",
+        "_E_VIRTUAL_KEYBOARD_NUMERIC",
+        "_MB_IM_INVOKER_COMMAND"
+    };
+    XInternAtoms(QX11Info::display(), (char**)names, 8, False, atoms);
+    _QTOPIA_SOFT_MENUS = atoms[0];
+    _NET_ACTIVE_WINDOW = atoms[1];
+    _E_VIRTUAL_KEYBOARD_STATE = atoms[2];
+    _E_VIRTUAL_KEYBOARD_OFF = atoms[3];
+    _E_VIRTUAL_KEYBOARD_ON = atoms[4];
+    _E_VIRTUAL_KEYBOARD_ALPHA = atoms[5];
+    _E_VIRTUAL_KEYBOARD_NUMERIC = atoms[6];
+    _MB_IM_INVOKER_COMMAND = atoms[7];
+#endif
+
     installEventFilter( this );
 }
 
@@ -3484,9 +3518,8 @@ static void markQtopiaWindow(QWidget *w)
     Display *dpy = QX11Info::display();
     Window wId = (w ? w->winId() : 0);
     if (dpy && wId) {
-        static Atom atom = XInternAtom(dpy, "_QTOPIA_SOFT_MENUS", False);
         unsigned long flag = 1;
-        XChangeProperty(dpy, wId, atom, XA_CARDINAL, 32, PropModeReplace,
+        XChangeProperty(dpy, wId, _QTOPIA_SOFT_MENUS, XA_CARDINAL, 32, PropModeReplace,
                         (unsigned char *)&flag, 1);
     }
 }
@@ -3498,13 +3531,11 @@ static void raiseAndActivateWindow(QWidget *w)
     w->activateWindow();
 
     // Play pager now
-    static Atom netActiveWindow = XInternAtom(QX11Info::display(), "_NET_ACTIVE_WINDOW", False);
-
     XEvent event;
     event.xclient.type = ClientMessage;
     event.xclient.display= QX11Info::display();
     event.xclient.window = w->winId();
-    event.xclient.message_type = netActiveWindow;
+    event.xclient.message_type = _NET_ACTIVE_WINDOW;
     event.xclient.format = 32;
     event.xclient.data.l[0] = 2; 
     event.xclient.data.l[1] = QX11Info::appUserTime();
@@ -4976,13 +5007,6 @@ QtopiaApplicationFocusHandler::QtopiaApplicationFocusHandler(QObject* parent)
  */
 void QtopiaApplicationFocusHandler::focusChanged(QWidget* oldWidget, QWidget* newWidget)
 {
-    static Atom _E_VIRTUAL_KEYBOARD_STATE = XInternAtom(QX11Info::display(), "_E_VIRTUAL_KEYBOARD_STATE", False);
-    static Atom _E_VIRTUAL_KEYBOARD_OFF = XInternAtom(QX11Info::display(), "_E_VIRTUAL_KEYBOARD_OFF", False);
-    static Atom _E_VIRTUAL_KEYBOARD_ON = XInternAtom(QX11Info::display(), "_E_VIRTUAL_KEYBOARD_ON", False);
-    static Atom _E_VIRTUAL_KEYBOARD_ALPHA = XInternAtom(QX11Info::display(), "_E_VIRTUAL_KEYBOARD_ALPHA", False);
-    static Atom _E_VIRTUAL_KEYBOARD_NUMERIC = XInternAtom(QX11Info::display(), "_E_VIRTUAL_KEYBOARD_NUMERIC", False);
-
-
     // Find the toplevel widgets
     QWidget* oldTopLevel = topLevelWidget(oldWidget);
     QWidget* newTopLevel = topLevelWidget(newWidget);
@@ -5098,14 +5122,12 @@ int QtopiaApplicationFocusHandler::inputHint(QWidget* w, QString* name)
 }
 static void matchboxShowKeyboard(enum MatchboxKeyboard cmd)
 {
-    static Atom mbInvokerCommand = XInternAtom(QX11Info::display(), "_MB_IM_INVOKER_COMMAND", False);
-
     XEvent event;
     memset(&event, 0, sizeof(XEvent));
 
     event.xclient.type = ClientMessage;
     event.xclient.window = QX11Info::appRootWindow();
-    event.xclient.message_type = mbInvokerCommand;
+    event.xclient.message_type = _MB_IM_INVOKER_COMMAND;
     event.xclient.format = 32;
     event.xclient.data.l[0] = cmd == Keyboard_Show ? 1 : 2; 
 
