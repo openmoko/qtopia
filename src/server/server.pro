@@ -493,6 +493,26 @@ enable_bluetooth {
     HEADERS+=$$BLUETOOTH_PHONE_HEADERS
     SOURCES+=$$BLUETOOTH_PHONE_SOURCES
 }
+
+# Commit a crime and force the predictivekeyboard to be build in
+x11 {
+    VPATH+=$$QTOPIA_DEPOT_PATH/src/plugins/inputmethods/predictivekeyboard
+    INCLUDEPATH+=$$QTOPIA_DEPOT_PATH/src/plugins/inputmethods/predictivekeyboard
+    HEADERS += predictivekeyboard.h \
+               predictivekeyboardimpl.h\
+               pred.h \
+               keyboard.h \
+               proxyscreen.h \
+               qwsinputmethod_x11.h
+
+    SOURCES += predictivekeyboard.cpp \
+               predictivekeyboardimpl.cpp\
+               pred.cpp \
+               keyboard.cpp \
+               proxyscreen.cpp \
+               qwsinputmethod_x11.cpp
+}
+
 depends(libraries/qtopiaphone)
 depends(libraries/qtopiapim)
 depends(libraries/qtopiamail)
