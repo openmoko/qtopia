@@ -161,8 +161,22 @@ static void sendKeySym(KeySym keysym, int modifiers, int keycode, bool isPress)
 QWSInputMethod::QWSInputMethod()
 {}
 
-void QWSInputMethod::sendCommitString(const QString&)
+void QWSInputMethod::sendCommitString(const QString& text)
 {
+    if (!initializeIfNeeded())
+        return;
+
+    // Send each char now
+    for (int i = 0; i < text.length(); ++i) {
+        KeySym sym = XStringToKeysym(text.mid(i, 1).toUtf8().data());
+        if (sym == NoSymbol) {
+            qWarning("Can not map: '%s' at %d of '%s'", qPrintable(text.mid(i, 1)), i, qPrintable(text));
+            continue;
+        }
+
+        sendKeySym(sym, 0, 0, true);
+        sendKeySym(sym, 0, 0, false);
+    }
 }
 
 void QWSServer::sendKeyEvent(int, int keycode, int modifiers, bool isPress, bool)
