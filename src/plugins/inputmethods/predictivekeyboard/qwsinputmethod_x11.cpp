@@ -168,14 +168,21 @@ void QWSInputMethod::sendCommitString(const QString& text)
 
     // Send each char now
     for (int i = 0; i < text.length(); ++i) {
-        KeySym sym = XStringToKeysym(text.mid(i, 1).toUtf8().data());
-        if (sym == NoSymbol) {
+        KeySym xsymbol = NoSymbol;
+        QString symbol = text.mid(i, 1);
+
+        if (symbol == QLatin1String(" "))
+            xsymbol = XK_space;
+        else
+            xsymbol = XStringToKeysym(text.mid(i, 1).toUtf8().data());
+
+        if (xsymbol == NoSymbol) {
             qWarning("Can not map: '%s' at %d of '%s'", qPrintable(text.mid(i, 1)), i, qPrintable(text));
             continue;
         }
 
-        sendKeySym(sym, 0, 0, true);
-        sendKeySym(sym, 0, 0, false);
+        sendKeySym(xsymbol, 0, 0, true);
+        sendKeySym(xsymbol, 0, 0, false);
     }
 }
 
