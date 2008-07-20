@@ -376,15 +376,17 @@ PhoneLauncher::PhoneLauncher(QWidget *parent, Qt::WFlags fl)
     QDBusConnection::sessionBus().registerService("org.openmoko.qtopia.Phonestatus");
 
     // Create a virtual keyboard
-    PredictiveKeyboard* keyboard = new PredictiveKeyboard(this);
+    if (qgetenv("QTOPIA_NO_VIRTUAL_KEYBOARD").isEmpty()) {
+        PredictiveKeyboard* keyboard = new PredictiveKeyboard(this);
 
-    Atom keyboardAtom = XInternAtom(QX11Info::display(), "_E_VIRTUAL_KEYBOARD", False);
-    unsigned char data = 1;
-    QWidget* widget = keyboard->widget();
-    XChangeProperty(QX11Info::display(), widget->winId(), keyboardAtom,
-                    XA_CARDINAL, 32, PropModeReplace, &data, 1);
-    widget->setFocusPolicy(Qt::NoFocus);
-    widget->show();
+        Atom keyboardAtom = XInternAtom(QX11Info::display(), "_E_VIRTUAL_KEYBOARD", False);
+        unsigned char data = 1;
+        QWidget* widget = keyboard->widget();
+        XChangeProperty(QX11Info::display(), widget->winId(), keyboardAtom,
+                XA_CARDINAL, 32, PropModeReplace, &data, 1);
+        widget->setFocusPolicy(Qt::NoFocus);
+        widget->show();
+    }
 #endif
 
     loadTheme();
