@@ -3970,7 +3970,7 @@ bool QtopiaApplication::eventFilter( QObject *o, QEvent *e )
         // Work with code tht doesn't use the ::show stuff from Qtopia...
         // this is only a fallback hack
         QWidget* wid = qobject_cast<QWidget*>(o);
-        if (wid->isWindow())
+        if (wid->isWindow() && !wid->testAttribute(Qt::WA_InputMethodTransparent))
             markQtopiaWindow(wid);
 #endif
 
