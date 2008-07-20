@@ -823,6 +823,7 @@ private:
     bool m_dismissing;
     qreal m_dismissValue;
     QPoint m_point;
+    QRegion m_oldShape;
 };
 
 PopupWindow::PopupWindow(int raise, QWidget *parent)
@@ -874,6 +875,22 @@ void PopupWindow::valueChanged(qreal v)
 {
     if(m_ignore)
         return;
+
+#if 0
+    int ewidth;
+    if(!m_dismissing)
+        ewidth = (int)(m_showtimeline.currentValue() * (width() - 2));
+    else
+        ewidth = (int)(m_dismissValue * (1.0f - m_showtimeline.currentValue()) * (width() - 2));
+
+    const QRegion shape((width() - ewidth) / 2,
+                        (width() - ewidth) / 2, ewidth, ewidth, QRegion::Ellipse);
+    if (ewidth != 0 && shape != m_oldShape) {
+        setMask(shape);
+        m_oldShape = shape;
+    }
+#endif
+
     QPoint newPos = m_startPoint + (m_endPoint - m_startPoint) * v;
     update();
     move(newPos);
