@@ -66,6 +66,98 @@ static inline bool initializeIfNeeded()
     return s_hasTestExtension;
 }
 
+static void sendKeySym(KeySym keysym, int modifiers, int keycode, bool isPress)
+{
+    // Convert the X keysym into an X keycode.
+    Display* dpy = QX11Info::display();
+    KeyCode xkeycode = XKeysymToKeycode(dpy, keysym);
+    if (xkeycode == NoSymbol) {
+        qWarning("X keysym 0x%x could not be mapped to an X keycode",
+                 (int)keysym);
+        return;
+    }
+
+    // Determine if we need to fake shift keys as well.
+    int index = 0;
+    while (index < 4 && XKeycodeToKeysym(dpy, xkeycode, index) != keysym)
+        ++index;
+    int extraModifiers = 0;
+    if ((index & 1) != 0)
+        extraModifiers |= ShiftMask;
+    if ((index & 2) != 0)
+        extraModifiers |= Mod2Mask;
+    if ((s_prevModifiers & LockMask) != 0) {
+        // If Caps Lock is set, then flip the shift state for alphabetic keys.
+        if (keycode >= Qt::Key_A && keycode <= Qt::Key_Z)
+            extraModifiers ^= ShiftMask;
+    }
+    if (keycode >= Qt::Key_A && keycode <= Qt::Key_Z &&
+        (modifiers & Qt::ShiftModifier) != 0) {
+        // Alphabetic shift modifier supplied in the parameters.
+        extraModifiers ^= ShiftMask;
+    }
+
+    // Adjust modifier keys for the required shift states.
+    unsigned long delay = 0;
+    if (extraModifiers != 0) {
+        if ((extraModifiers & ShiftMask) != 0) {
+            if ((s_prevModifiers & ShiftMask) == 0)
+                XTestFakeKeyEvent(dpy, s_shiftKeycode, true, delay++);
+        } else {
+            if ((s_prevModifiers & ShiftMask) != 0)
+                XTestFakeKeyEvent(dpy, s_shiftKeycode, false, delay++);
+        }
+        if ((extraModifiers & Mod2Mask) != 0) {
+            if ((s_prevModifiers & Mod2Mask) == 0)
+                XTestFakeKeyEvent(dpy, s_modeSwitchKeycode, true, delay++);
+        } else {
+            if ((s_prevModifiers & Mod2Mask) != 0)
+                XTestFakeKeyEvent(dpy, s_modeSwitchKeycode, false, delay++);
+        }
+    }
+
+    // Fake the actual key.
+    XTestFakeKeyEvent(dpy, xkeycode, (Bool)isPress, delay++);
+
+    // Adjust the modifiers back.
+    if (extraModifiers != 0) {
+        if ((extraModifiers & ShiftMask) != 0) {
+            if ((s_prevModifiers & ShiftMask) == 0)
+                XTestFakeKeyEvent(dpy, s_shiftKeycode, false, delay++);
+        } else {
+            if ((s_prevModifiers & ShiftMask) != 0)
+                XTestFakeKeyEvent(dpy, s_shiftKeycode, true, delay++);
+        }
+        if ((extraModifiers & Mod2Mask) != 0) {
+            if ((s_prevModifiers & Mod2Mask) == 0)
+                XTestFakeKeyEvent(dpy, s_modeSwitchKeycode, false, delay++);
+        } else {
+            if ((s_prevModifiers & Mod2Mask) != 0)
+                XTestFakeKeyEvent(dpy, s_modeSwitchKeycode, true, delay++);
+        }
+    }
+
+    // Flush the key events.
+    XFlush(dpy);
+
+    // Update the modifiers if this was a shift key.
+    if (isPress) {
+        if (keycode == Qt::Key_Shift)
+            s_prevModifiers |= ShiftMask;
+        if (keycode == Qt::Key_CapsLock)
+            s_prevModifiers |= LockMask;
+        if (keycode == Qt::Key_Mode_switch)
+            s_prevModifiers |= Mod2Mask;
+    } else {
+        if (keycode == Qt::Key_Shift)
+            s_prevModifiers &= ~ShiftMask;
+        if (keycode == Qt::Key_CapsLock)
+            s_prevModifiers &= ~LockMask;
+        if (keycode == Qt::Key_Mode_switch)
+            s_prevModifiers &= ~Mod2Mask;
+    }
+}
+
 QWSInputMethod::QWSInputMethod()
 {}
 
@@ -292,96 +384,11 @@ void QWSServer::sendKeyEvent(int, int keycode, int modifiers, bool isPress, bool
 
         case Qt::Key_unknown: keysym = NoSymbol; break;
     }
+
     if (keysym == NoSymbol) {
         qWarning("Could not map Qt keycode 0x%x to an X keysym", (int)keycode);
         return;
     }
 
-    // Convert the X keysym into an X keycode.
-    KeyCode xkeycode = XKeysymToKeycode(dpy, keysym);
-    if (xkeycode == NoSymbol) {
-        qWarning("X keysym 0x%x could not be mapped to an X keycode",
-                 (int)keysym);
-        return;
-    }
-
-    // Determine if we need to fake shift keys as well.
-    int index = 0;
-    while (index < 4 && XKeycodeToKeysym(dpy, xkeycode, index) != keysym)
-        ++index;
-    int extraModifiers = 0;
-    if ((index & 1) != 0)
-        extraModifiers |= ShiftMask;
-    if ((index & 2) != 0)
-        extraModifiers |= Mod2Mask;
-    if ((s_prevModifiers & LockMask) != 0) {
-        // If Caps Lock is set, then flip the shift state for alphabetic keys.
-        if (keycode >= Qt::Key_A && keycode <= Qt::Key_Z)
-            extraModifiers ^= ShiftMask;
-    }
-    if (keycode >= Qt::Key_A && keycode <= Qt::Key_Z &&
-        (modifiers & Qt::ShiftModifier) != 0) {
-        // Alphabetic shift modifier supplied in the parameters.
-        extraModifiers ^= ShiftMask;
-    }
-
-    // Adjust modifier keys for the required shift states.
-    unsigned long delay = 0;
-    if (extraModifiers != 0) {
-        if ((extraModifiers & ShiftMask) != 0) {
-            if ((s_prevModifiers & ShiftMask) == 0)
-                XTestFakeKeyEvent(dpy, s_shiftKeycode, true, delay++);
-        } else {
-            if ((s_prevModifiers & ShiftMask) != 0)
-                XTestFakeKeyEvent(dpy, s_shiftKeycode, false, delay++);
-        }
-        if ((extraModifiers & Mod2Mask) != 0) {
-            if ((s_prevModifiers & Mod2Mask) == 0)
-                XTestFakeKeyEvent(dpy, s_modeSwitchKeycode, true, delay++);
-        } else {
-            if ((s_prevModifiers & Mod2Mask) != 0)
-                XTestFakeKeyEvent(dpy, s_modeSwitchKeycode, false, delay++);
-        }
-    }
-
-    // Fake the actual key.
-    XTestFakeKeyEvent(dpy, xkeycode, (Bool)isPress, delay++);
-
-    // Adjust the modifiers back.
-    if (extraModifiers != 0) {
-        if ((extraModifiers & ShiftMask) != 0) {
-            if ((s_prevModifiers & ShiftMask) == 0)
-                XTestFakeKeyEvent(dpy, s_shiftKeycode, false, delay++);
-        } else {
-            if ((s_prevModifiers & ShiftMask) != 0)
-                XTestFakeKeyEvent(dpy, s_shiftKeycode, true, delay++);
-        }
-        if ((extraModifiers & Mod2Mask) != 0) {
-            if ((s_prevModifiers & Mod2Mask) == 0)
-                XTestFakeKeyEvent(dpy, s_modeSwitchKeycode, false, delay++);
-        } else {
-            if ((s_prevModifiers & Mod2Mask) != 0)
-                XTestFakeKeyEvent(dpy, s_modeSwitchKeycode, true, delay++);
-        }
-    }
-
-    // Flush the key events.
-    XFlush(dpy);
-
-    // Update the modifiers if this was a shift key.
-    if (isPress) {
-        if (keycode == Qt::Key_Shift)
-            s_prevModifiers |= ShiftMask;
-        if (keycode == Qt::Key_CapsLock)
-            s_prevModifiers |= LockMask;
-        if (keycode == Qt::Key_Mode_switch)
-            s_prevModifiers |= Mod2Mask;
-    } else {
-        if (keycode == Qt::Key_Shift)
-            s_prevModifiers &= ~ShiftMask;
-        if (keycode == Qt::Key_CapsLock)
-            s_prevModifiers &= ~LockMask;
-        if (keycode == Qt::Key_Mode_switch)
-            s_prevModifiers &= ~Mod2Mask;
-    }
+    sendKeySym(keysym, modifiers, keycode, isPress);
 }
