@@ -39,6 +39,9 @@
 
 #include <alsa/asoundlib.h>
 
+
+class Ficgta01VibrateAccessory;
+
 class Ficgta01CallProvider : public QModemCallProvider
 {
     Q_OBJECT
@@ -130,6 +133,10 @@ private slots:
     void wake();
     void sendSuspendDone();
 
+    void modemDied();
+
+private:
+    Ficgta01VibrateAccessory* m_vibratorService;
 };
 
 class  Ficgta01VibrateAccessory : public QVibrateAccessoryProvider

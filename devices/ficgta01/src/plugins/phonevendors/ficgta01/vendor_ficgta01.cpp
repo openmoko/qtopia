@@ -422,6 +422,7 @@ Ficgta01ModemService::Ficgta01ModemService
         ( const QString& service, QSerialIODeviceMultiplexer *mux,
           QObject *parent )
     : QModemService( service, mux, parent )
+    , m_vibratorService( 0 )
 {
     connect( this, SIGNAL(resetModem()), this, SLOT(reset()) );
 
@@ -437,6 +438,10 @@ Ficgta01ModemService::Ficgta01ModemService
          ( "%CSQ:", this, SLOT(csq(QString)) );
      chat("AT%CSQ=1");
      QTimer::singleShot( 2500, this, SLOT(firstCsqQuery()) );
+
+    // Modem dead detection for https://docs.openmoko.org/trac/ticket/1192
+    primaryAtChat()->registerNotificationType
+        ( "+CME ERROR: 512", this, SLOT(modemDied()));
 
 
     // Enable %CPRI for ciphering indications.
@@ -489,8 +494,10 @@ void Ficgta01ModemService::initialize()
     if ( !callProvider() )
         setCallProvider( new Ficgta01CallProvider( this ) );
 
-   if ( !supports<QVibrateAccessory>() )
-        addInterface( new Ficgta01VibrateAccessory( this ) );
+   if ( !supports<QVibrateAccessory>() ) {
+        m_vibratorService = new Ficgta01VibrateAccessory( this );
+        addInterface( m_vibratorService );
+    }
 
     if ( !supports<QCallVolume>() )
         addInterface( new Ficgta01CallVolume(this));
@@ -631,6 +638,36 @@ void Ficgta01ModemService::wake()
     chat( "AT%CSQ=1" );
 
     wakeDone();
+}
+
+// Modem dead detection for https://docs.openmoko.org/trac/ticket/1192
+// The modem will not work with us anymore. We would need to make the AT
+// command queue to freeze, fail all commands, we would need to reset the
+// modem, force reinit (send the commands from all the c'tors again), make sure
+// every application logic gets restarted. This will be a major effort. So the
+// 2nd best thing is to detect the error and inform the user that he should
+// restart his device. Currently I have no idea how often the error occurs
+// and assume that it is not often at all.
+//
+// We do something unusual and open a QWidget from this plugin. This is okay
+// as we will have a QtopiaApplication for the QCOP communication anyway. So
+// there will be a GUI connection.
+void Ficgta01ModemService::modemDied()
+{
+    static bool claimedDead = false;
+    if (claimedDead)
+        return;
+
+    claimedDead = true;
+
+    if (m_vibratorService)
+        m_vibratorService->setVibrateNow(true);
+    QMessageBox::information(0, tr("Modem Died"),
+                             tr("The firmware of the modem appears to have crashed. "
+                                "No further interaction with the modem will be possible. "
+                                "Please restart the device."), QMessageBox::Ok);
+    if (m_vibratorService)
+        m_vibratorService->setVibrateNow(false);
 }
 
  Ficgta01VibrateAccessory::Ficgta01VibrateAccessory
