@@ -16,6 +16,7 @@ SOURCES		= predictivekeyboard.cpp \
 x11 {
     HEADERS += qwsinputmethod_x11.h
     SOURCES += qwsinputmethod_x11.cpp
+    LIBS += -lXtst
 }
 
 pkg.name=qpe-predictivekeyboard
