@@ -44,6 +44,28 @@ static bool s_initialized = false;
 static KeySym s_shiftKeycode = 0;
 static KeySym s_modeSwitchKeycode = 0;
 
+static inline bool initializeIfNeeded()
+{
+    if (s_initialized)
+        return s_hasTestExtension;
+
+    int event_base, error_base, major, minor;
+    s_initialized = true;
+    if (!XTestQueryExtension
+            (QX11Info::display(), &event_base, &error_base, &major, &minor)) {
+        qWarning("X server does not support the XTEST extension; "
+                "cannot emulate key events");
+        return s_hasTestExtension;
+    }
+    s_hasTestExtension = true;
+    s_shiftKeycode = XKeysymToKeycode(QX11Info::display(), XK_Shift_L);
+    if (s_shiftKeycode == NoSymbol)
+        s_shiftKeycode = XKeysymToKeycode(QX11Info::display(), XK_Shift_R);
+    s_modeSwitchKeycode = XKeysymToKeycode(QX11Info::display(), XK_Mode_switch);
+
+    return s_hasTestExtension;
+}
+
 QWSInputMethod::QWSInputMethod()
 {}
 
@@ -58,23 +80,8 @@ void QWSServer::sendKeyEvent(int, int keycode, int modifiers, bool isPress, bool
         return;
 
     // Initialize the XTEST extension if necessary.
-    if (!s_initialized) {
-        int event_base, error_base, major, minor;
-        s_initialized = true;
-        if (!XTestQueryExtension
-                (dpy, &event_base, &error_base, &major, &minor)) {
-            qWarning("X server does not support the XTEST extension; "
-                     "cannot emulate key events");
-            return;
-        }
-        s_hasTestExtension = true;
-        s_shiftKeycode = XKeysymToKeycode(dpy, XK_Shift_L);
-        if (s_shiftKeycode == NoSymbol)
-            s_shiftKeycode = XKeysymToKeycode(dpy, XK_Shift_R);
-        s_modeSwitchKeycode = XKeysymToKeycode(dpy, XK_Mode_switch);
-    } else if (!s_hasTestExtension) {
+    if (!initializeIfNeeded())
         return;
-    }
 
     // Convert the Qt key code into an X keysym.
     KeySym keysym = NoSymbol;
