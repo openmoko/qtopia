@@ -919,7 +919,8 @@ void QWidgetPrivate::setParent_sys(QWidget *parent, Qt::WindowFlags f)
     // hide and reparent our own window away. Otherwise we might get
     // destroyed when emitting the child remove event below. See QWorkspace.
     if (wasCreated) {
-        q->setAttribute(Qt::WA_UnmapPending);
+        if (q->testAttribute(Qt::WA_Mapped))
+            q->setAttribute(Qt::WA_UnmapPending);
         XUnmapWindow(X11->display, old_winid);
         XReparentWindow(X11->display, old_winid, RootWindow(X11->display, xinfo.screen()), 0, 0);
     }
@@ -979,7 +980,8 @@ void QWidgetPrivate::setParent_sys(QWidget *parent, Qt::WindowFlags f)
                       note that the WM_TRANSIENT_FOR hint is actually updated in
                       QWidgetPrivate::show_sys()
                     */
-                    q->setAttribute(Qt::WA_UnmapPending);
+                    if (q->testAttribute(Qt::WA_Mapped))
+                        q->setAttribute(Qt::WA_UnmapPending);
                     XUnmapWindow(X11->display, w->internalWinId());
                     QApplication::postEvent(w, new QEvent(QEvent::ShowWindowRequest));
                 }
@@ -1866,14 +1868,16 @@ void QWidgetPrivate::hide_sys()
     if (q->isWindow()) {
         X11->deferred_map.removeAll(q);
         if (q->internalWinId()) { // in nsplugin, may be 0
-            q->setAttribute(Qt::WA_UnmapPending);
+            if (q->testAttribute(Qt::WA_Mapped))
+                q->setAttribute(Qt::WA_UnmapPending);
             XWithdrawWindow(X11->display, q->internalWinId(), xinfo.screen());
         }
         XFlush(X11->display);
     } else {
         invalidateBuffer(q->rect());
         if (q->internalWinId()) { // in nsplugin, may be 0
-            q->setAttribute(Qt::WA_UnmapPending);
+            if (q->testAttribute(Qt::WA_Mapped))
+                q->setAttribute(Qt::WA_UnmapPending);
             XUnmapWindow(X11->display, q->internalWinId());
         }
     }
@@ -2055,7 +2059,8 @@ void QWidgetPrivate::setWSGeometry(bool dontShow)
     if (q->testAttribute(Qt::WA_OutsideWSRange) != outsideRange) {
         q->setAttribute(Qt::WA_OutsideWSRange, outsideRange);
         if (outsideRange) {
-            q->setAttribute(Qt::WA_UnmapPending);
+            if (q->testAttribute(Qt::WA_Mapped))
+                q->setAttribute(Qt::WA_UnmapPending);
             XUnmapWindow(dpy, data.winid);
         } else if (!q->isHidden()) {
             mapWindow = true;
