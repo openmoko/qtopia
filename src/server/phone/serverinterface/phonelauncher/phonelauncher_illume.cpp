@@ -652,6 +652,14 @@ void PhoneLauncher::showAlertDialogs()
     if (isVisible()) {
         if(DialerControl::instance()->missedCallCount() &&
            DialerControl::instance()->missedCallCount() != m_alertedMissed) {
+
+            // hide the callscreen if there are no more calls
+            CallScreen* screen = callScreen();
+            if (screen->activeCallCount() == 0 && screen->heldCallCount() == 0) {
+                qWarning() << "Hiding CallScreen";
+                screen->hide();
+            }
+
             m_alertedMissed = DialerControl::instance()->missedCallCount();
             if (!m_missedMessageBox) {
                 QString missedMsg = tr("Do you wish to view missed calls?");
