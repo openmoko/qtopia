@@ -64,6 +64,7 @@ public:
 public slots:
     void muteRing();
     void stopMessageAlert();
+    void channelRegistered(QString);
 
 signals:
     void ringTypeChanged(RingControl::RingType);
@@ -82,6 +83,7 @@ private:
     virtual void timerEvent(QTimerEvent *e);
     void startRinging(RingType);
     void initSound();
+    void initSoundControl();
     void setSoundPriority(bool priorityPlay);
 
     QString findRingTone();

@@ -122,7 +122,8 @@ public:
         videoToneFailed(false),
         messageWaiting(false)
 #ifdef MEDIA_SERVER
-        , soundcontrol(0)
+        , ringtonecontrol(0)
+        , msgtonecontrol(0)
 #elif defined(Q_WS_QWS)
         , soundclient(0)
 #endif
@@ -135,7 +136,6 @@ public:
     int vrbTid;
     int msgRingTime;
     int vibrateTime;
-    QString curRingTone;
     QPhoneProfile::AlertType curAlertType;
     RingControl::RingType currentRingSource;
     QTime ringtime;
@@ -148,9 +148,11 @@ public:
     bool videoToneFailed;
     bool messageWaiting;
 #ifdef MEDIA_SERVER
-    QSoundControl *soundcontrol;
+    QSoundControl *ringtonecontrol;
+    QSoundControl *msgtonecontrol;
 #elif defined(Q_WS_QWS)
     QWSSoundClient *soundclient;
+    QString curRingTone;
 #endif
 };
 
@@ -313,6 +315,11 @@ RingControl::RingControl(QObject *parent)
             this, SLOT(stopRingtone(QString)));
 
     d->curAlertType = QPhoneProfile::Off;
+
+    connect(QCopServer::instance(), SIGNAL(newChannel(QString)),
+        this, SLOT(channelRegistered(QString)));
+    if (QCopChannel::isRegistered("QPE/MediaServer"))
+        initSoundControl();
 }
 
 /*!
@@ -370,6 +377,42 @@ int RingControl::ringTime() const
     return d->currentRingSource == NotRinging ?0:d->ringtime.elapsed();
 }
 
+void RingControl::initSoundControl()
+{
+    QPhoneProfile profile = d->profileManager->activeProfile();
+    QString ringToneDoc;
+
+    ringToneDoc = findRingTone();
+    if (ringToneDoc.isEmpty())
+        ringToneDoc = profile.videoTone().fileName();
+
+    if (ringToneDoc.isEmpty())
+        ringToneDoc = profile.callTone().fileName();
+
+    if (ringToneDoc.isEmpty())
+        ringToneDoc = profile.systemCallTone().fileName();
+
+    if(d->ringtonecontrol) {
+        delete d->ringtonecontrol->sound();
+        delete d->ringtonecontrol;
+    }
+    d->ringtonecontrol = new QSoundControl(new QSound(ringToneDoc));
+    connect(d->ringtonecontrol, SIGNAL(done()), this, SLOT(nextRing()) );
+
+    // Attempt to find a good messagetone. Fallback to the ones provided
+    // by the  system
+    ringToneDoc = profile.messageTone().fileName();
+    if (ringToneDoc.isEmpty())
+        ringToneDoc = profile.systemMessageTone().fileName();
+
+    if(d->msgtonecontrol) {
+	delete d->msgtonecontrol->sound();
+	delete d->msgtonecontrol;
+    }
+    d->msgtonecontrol = new QSoundControl(new QSound(ringToneDoc));
+    connect(d->msgtonecontrol, SIGNAL(done()), this, SLOT(nextRing()) );
+}
+
 void RingControl::startRinging(RingType t)
 {
     stopRing();
@@ -403,9 +446,8 @@ void RingControl::startRinging(RingType t)
     QPhoneProfile profile = d->profileManager->activeProfile();
 
     // try contact ringtone
+    QString ringToneDoc;
     if (t == Call) {
-        QString ringToneDoc;
-
         // try personalized ring tone
         ringToneDoc = findRingTone();
         // try profile ring tone
@@ -429,8 +471,6 @@ void RingControl::startRinging(RingType t)
         if (ringToneDoc.isEmpty())
             ringToneDoc = profile.systemCallTone().fileName();
 
-        d->curRingTone = ringToneDoc;
-
         d->curAlertType = profile.callAlert();
     }
     else if (t == Msg)
@@ -443,14 +483,11 @@ void RingControl::startRinging(RingType t)
             d->msgTid = startTimer(msgRingTime());
         }
 
-        QString ringToneDoc;
         ringToneDoc = profile.messageTone().fileName();
 
         // fall back if above settings lead to non-existent ringtone.
         if (ringToneDoc.isEmpty())
             ringToneDoc = profile.systemMessageTone().fileName();
-
-        d->curRingTone = ringToneDoc;
     }
 
     if (profile.vibrate())
@@ -471,28 +508,26 @@ void RingControl::startRinging(RingType t)
     if(d->lastRingVolume && d->curAlertType != QPhoneProfile::Off) {
         initSound();
 #ifdef MEDIA_SERVER
-        if ( !VIDEO_RINGTONE && !d->videoTone ) {
-            if(d->soundcontrol) {
-                delete d->soundcontrol->sound();
-                delete d->soundcontrol;
+        if( !VIDEO_RINGTONE && !d->videoTone) {
+            if(t == Call && d->ringtonecontrol) {
+                d->ringtonecontrol->setPriority(QSoundControl::RingTone);
+                d->ringtonecontrol->setVolume(volmap[d->lastRingVolume]);
+                d->ringtonecontrol->sound()->play();
+            } else if(t == Msg && d->msgtonecontrol) {
+                d->msgtonecontrol->setPriority(QSoundControl::RingTone);
+                d->msgtonecontrol->setVolume(volmap[d->lastRingVolume]);
+                d->msgtonecontrol->sound()->play();
             }
-
-            d->soundcontrol = new QSoundControl(new QSound(d->curRingTone));
-            connect(d->soundcontrol, SIGNAL(done()), this, SLOT(nextRing()) );
-
-            d->soundcontrol->setPriority(QSoundControl::RingTone);
-            d->soundcontrol->setVolume(volmap[d->lastRingVolume]);
-
-            d->soundcontrol->sound()->play();
         } else {
 #ifndef QT_ILLUME_LAUNCHER
-            qLog(Media) << "Video ringtone selected" << d->curRingTone;
-            VideoRingtone::instance()->playVideo( d->curRingTone );
+            qLog(Media) << "Video ringtone selected" << ringToneDoc;
+            VideoRingtone::instance()->playVideo( ringToneDoc );
 #endif
         }
 #elif defined(Q_WS_QWS)
+        d->curRingTone = ringToneDoc;
         if(d->soundclient)
-            d->soundclient->play(0, d->curRingTone,
+            d->soundclient->play(0, ringToneDoc,
                                  volmap[d->lastRingVolume],
                                  QWSSoundClient::Priority);
 #endif
@@ -564,7 +599,10 @@ void RingControl::stopRing( )
     if (d->curAlertType != QPhoneProfile::Off)
     {
 #ifdef MEDIA_SERVER
-        if(d->soundcontrol) d->soundcontrol->sound()->stop();
+        if(d->ringtonecontrol)
+            d->ringtonecontrol->sound()->stop();
+        if(d->msgtonecontrol)
+            d->msgtonecontrol->sound()->stop();
 #elif defined(Q_WS_QWS)
         if (d->soundclient) d->soundclient->stop(0);
 #endif
@@ -596,6 +634,12 @@ void RingControl::stopMessageAlert()
     }
 }
 
+void RingControl::channelRegistered(QString ch)
+{
+    if(ch == "QPE/MediaServer")
+        initSoundControl();
+}
+
 /*!
   \fn void RingControl::ringTypeChanged(RingControl::RingType type)
 
@@ -608,6 +652,9 @@ void RingControl::profileChanged()
     QPhoneProfile prof = d->profileManager->activeProfile();
     setVolume(prof.volume());
     setMsgRingTime(prof.msgAlertDuration());
+
+    // Assume the tone changed and reinstaniate the qsoundcontrols
+    initSoundControl();
 }
 
 // should eventually timeout.
@@ -620,12 +667,19 @@ void RingControl::nextRing()
             d->lastRingVolume++;
 
 #ifdef MEDIA_SERVER
-        d->soundcontrol->setVolume(volmap[d->lastRingVolume]);
-        d->soundcontrol->sound()->stop();
-        d->soundcontrol->sound()->play();
+        if(ringType() == Call) {
+            d->ringtonecontrol->setVolume(volmap[d->lastRingVolume]);
+            d->ringtonecontrol->sound()->stop();
+            d->ringtonecontrol->sound()->play();
+        } else if(ringType() == Msg) {
+            d->msgtonecontrol->setVolume(volmap[d->lastRingVolume]);
+            d->msgtonecontrol->sound()->stop();
+            d->msgtonecontrol->sound()->play();
+        }
 #elif defined(Q_WS_QWS)
         if (d->soundclient)
         {
+            d->curRingTone = ringToneDoc;
             d->soundclient->play(0,
                                  d->curRingTone,
                                  volmap[d->lastRingVolume],
@@ -652,19 +706,27 @@ void RingControl::playSound(const QString &soundFile)
         return;
 
 #ifdef MEDIA_SERVER
-    if(d->soundcontrol) {
-        delete d->soundcontrol->sound();
-        delete d->soundcontrol;
-    }
+    if(ringType() == Call) {
+        if(!d->ringtonecontrol)
+            initSoundControl();
 
-    d->soundcontrol = new QSoundControl(new QSound(soundFile));
-    d->soundcontrol->setPriority(QSoundControl::RingTone);
-    d->soundcontrol->setVolume(volmap[d->ringVolume]);
-    d->soundcontrol->sound()->play();
+        d->ringtonecontrol->setPriority(QSoundControl::RingTone);
+        d->ringtonecontrol->setVolume(volmap[d->ringVolume]);
+        d->ringtonecontrol->sound()->play();
+    } else if (ringType() == Msg) {
+        if(!d->msgtonecontrol) 
+            initSoundControl();
+
+        d->msgtonecontrol->setPriority(QSoundControl::RingTone);
+        d->msgtonecontrol->setVolume(volmap[d->ringVolume]);
+        d->msgtonecontrol->sound()->play();
+    }
 #elif defined(Q_WS_QWS)
-    if(d->soundclient)
+    if(d->soundclient) {
+        d->curRingTone = ringToneDoc;
         d->soundclient->play(0, soundFile, volmap[d->ringVolume],
                              QWSSoundClient::Priority);
+    }
 #endif
 }
 
@@ -688,15 +750,15 @@ void RingControl::initSound()
 void RingControl::muteRing()
 {
 #ifdef MEDIA_SERVER
-    if(d->soundcontrol) {
-        d->soundcontrol->sound()->stop();
-        disconnect(d->soundcontrol, SIGNAL(done()), this, SLOT(nextRing()) );
-    }
+    if(d->ringtonecontrol)
+        d->ringtonecontrol->sound()->stop();
+    if(d->msgtonecontrol)
+        d->msgtonecontrol->sound()->stop();
 #elif defined(Q_WS_QWS)
     if (d->soundclient) {
         d->soundclient->stop(0);
         disconnect(d->soundclient, SIGNAL(soundCompleted(int)),
-                this, SLOT(nextRing()));
+                   this, SLOT(nextRing()));
     }
 #endif
 }
@@ -808,12 +870,18 @@ void RingControl::startRingtone( const QString& fileName )
 void RingControl::stopRingtone( const QString& fileName )
 {
 #ifdef MEDIA_SERVER
-    if (d->soundcontrol) {
+    if (d->ringtonecontrol) {
         // Check if the same ringtone is still the most recently played
-        if (QSound* sound = d->soundcontrol->sound())
+        if (QSound* sound = d->ringtonecontrol->sound())
             if (sound->fileName() == fileName)
                 sound->stop();
     }
+    if (d->msgtonecontrol) {
+        if (QSound* sound = d->msgtonecontrol->sound())
+            if (sound->fileName() == fileName)
+                sound->stop();
+    }
+
 #elif defined(Q_WS_QWS)
     Q_UNUSED(fileName);
     if (d->soundclient) {
