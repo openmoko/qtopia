@@ -10,9 +10,11 @@
 **
 ***************************************************************************/
 
+#include "qemailsupport.h"
+
+#include <qtopiaglobal.h>
 #include <qsettings.h>
 #include <qdebug.h>
-#include "qemailsupport.h"
 
 
 namespace QEmailSupport {
@@ -30,7 +32,7 @@ bool _getEmailConf(QSettings *conf, int count)
     return false;
 }
 
-bool hasEmailSupport() 
+QTOPIAMAIL_EXPORT bool hasEmailSupport()
 {
     int count;
     QSettings accountconf("Trolltech","qtmail_account");

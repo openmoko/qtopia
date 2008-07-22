@@ -26,7 +26,7 @@ namespace QPrintingSupport {
  currently installed because the printserver could interact with the installer
  to install printing.
  */
-bool hasPrintingSupport()
+QTOPIAPRINTING_EXPORT bool hasPrintingSupport()
 {
     if (QtopiaService::apps("Print").isEmpty())
         return false;
