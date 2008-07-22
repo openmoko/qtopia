@@ -438,7 +438,7 @@ private:
     PhoneFieldManager *phoneMan;
 
     QAction *actionEmailDetails;
-#if defined(QTOPIA_TELEPHONY)
+#if defined(QTOPIA_PER_CONTACT_RINGTONE)
     RingToneButton *editTonePB, *editVideoTonePB;
 #endif
     QWidget *wOtherTab;
@@ -452,7 +452,7 @@ private:
     QAction* actionAddGroup;
     QAction* actionRemoveGroup;
     QAction* actionRenameGroup;
-#if defined(QTOPIA_TELEPHONY)
+#if defined(QTOPIA_PER_CONTACT_RINGTONE)
     QAction* actionSetRingTone;
 #endif
     QAction *actionRemoveNumber;

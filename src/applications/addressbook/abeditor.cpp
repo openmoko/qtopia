@@ -72,7 +72,7 @@
 
 #include "qmailaddress.h"
 
-#if defined(QTOPIA_TELEPHONY)
+#if defined(QTOPIA_PER_CONTACT_RINGTONE)
 #include "../../settings/ringprofile/ringtoneeditor.h"
 #endif
 
@@ -1682,7 +1682,7 @@ void AbFullEditor::setupTabOther()
     connect( photoPB, SIGNAL(clicked()), this, SLOT(editPhoto()) );
     formLayout->addRow(tr("Photo"), photoPB);
 
-#if defined(QTOPIA_TELEPHONY)
+#if defined(QTOPIA_PER_CONTACT_RINGTONE)
     //
     //      Ringtone selection
     //
@@ -1925,7 +1925,7 @@ void AbFullEditor::editGroups()
         actionAddGroup = new QAction(QIcon(":icon/new"), QApplication::translate("AddressbookWindow", "New group"), this);
         actionAddGroup->setWhatsThis(QApplication::translate("AddressbookWindow", "Add new contact group."));
 
-#if defined(QTOPIA_TELEPHONY)
+#if defined(QTOPIA_PER_CONTACT_RINGTONE)
         actionSetRingTone = new QAction(QIcon(), QApplication::translate("AddressbookWindow", "Set group ringtone...", "Set ringtone to current contact group"), this);
         actionSetRingTone->setWhatsThis(QApplication::translate("AddressbookWindow", "Set a ringtone that is played when an incoming call comes in from this group members."));
 #endif
@@ -1936,7 +1936,7 @@ void AbFullEditor::editGroups()
         actionRenameGroup = new QAction(QIcon(":icon/edit"), QApplication::translate("AddressbookWindow", "Rename", "Rename current contact group"), this);
         actionRenameGroup->setWhatsThis(QApplication::translate("AddressbookWindow", "Rename highlighted contact group."));
 
-#if defined(QTOPIA_TELEPHONY)
+#if defined(QTOPIA_PER_CONTACT_RINGTONE)
         connect(actionSetRingTone, SIGNAL(triggered()), mGroupPicker, SLOT(setGroupRingTone()));
 #endif
         connect(actionAddGroup, SIGNAL(triggered()), mGroupPicker, SLOT(addGroup()));
@@ -1946,7 +1946,7 @@ void AbFullEditor::editGroups()
         QMenu* contextMenu = QSoftMenuBar::menuFor(mGroupDialog);
 
         contextMenu->addAction(actionAddGroup);
-#if defined(QTOPIA_TELEPHONY)
+#if defined(QTOPIA_PER_CONTACT_RINGTONE)
         contextMenu->addAction(actionSetRingTone);
 #endif
         contextMenu->addAction(actionRemoveGroup);
@@ -1973,7 +1973,7 @@ void AbFullEditor::updateContextMenu()
         bool groupSelected = mGroupPicker->currentIndex().isValid();
         bool groupSystem = groupSelected && mGroupPicker->isCurrentSystemGroup();
 
-#if defined(QTOPIA_TELEPHONY)
+#if defined(QTOPIA_PER_CONTACT_RINGTONE)
         actionSetRingTone->setVisible( groupSelected );
 #endif
         actionRemoveGroup->setVisible( groupSelected && !groupSystem);
@@ -2228,7 +2228,7 @@ void AbFullEditor::setEntryOther()
         QDL::loadLinks( ent.customField( QDL::CLIENT_DATA_KEY ), QDL::clients( this ) );
     txtNoteQC->verifyLinks();
 
-#if defined(QTOPIA_TELEPHONY)
+#if defined(QTOPIA_PER_CONTACT_RINGTONE)
     if ( !ent.customField("tone").isEmpty() )
         editTonePB->setTone( QContent( ent.customField("tone") ) ); // No tr()
     if ( !ent.customField("videotone").isEmpty() )
@@ -2380,7 +2380,7 @@ bool AbFullEditor::isEmpty() const
         if ( ent.gender() != QContact::UnspecifiedGender )
             return false;
     }
-#if defined(QTOPIA_TELEPHONY)
+#if defined(QTOPIA_PER_CONTACT_RINGTONE)
     if(wOtherTab) {
         if (editTonePB->tone().isValid() )
             return false;
@@ -2517,7 +2517,7 @@ void AbFullEditor::contactFromFields(QContact &e)
             e.setNotes(QString());
         else
             e.setNotes( txtNote->toHtml() );
-#if defined(QTOPIA_TELEPHONY)
+#if defined(QTOPIA_PER_CONTACT_RINGTONE)
         if ( !editTonePB->tone().isValid() )
             e.removeCustomField("tone"); // No tr()
         else
@@ -2566,7 +2566,7 @@ void AbFullEditor::setNameFocus()
 
 void AbFullEditor::toneSelected( const QContent &tone )
 {
-#if defined(QTOPIA_TELEPHONY)
+#if defined(QTOPIA_PER_CONTACT_RINGTONE)
     // normal ringtone and video ringtone are mutually exclusive
     if ( sender() == editTonePB && tone.isValid() )
         editVideoTonePB->setTone( QContent() );
