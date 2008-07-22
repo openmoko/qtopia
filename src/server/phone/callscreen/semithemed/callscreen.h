@@ -119,6 +119,7 @@ private slots:
     void rejectModalDialog();
 
 private:
+    void updateAll(bool forceRemoval);
     void clearDtmfDigits(bool clearOneChar = false);
     void appendDtmfDigits(const QString &);
     void setSelectMode(bool);

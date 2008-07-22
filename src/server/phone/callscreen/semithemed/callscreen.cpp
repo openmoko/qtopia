@@ -1210,6 +1210,14 @@ CallItemEntry *CallScreen::findCall(const QPhoneCall &call, CallItemModel *m)
   */
 void CallScreen::updateAll()
 {
+    updateAll(false);
+}
+
+/*!
+  \internal
+  */
+void CallScreen::updateAll(bool force)
+{
     if( !m_listView )
         return;
 
@@ -1225,8 +1233,9 @@ void CallScreen::updateAll()
             continue;
         } else if (item->call().dropped()) {
             // Remove dropped calls after a short delay
-            if (!item->callData.disconnectTime.isNull() &&
-                item->callData.disconnectTime.time().elapsed() > 3000) {
+            if (force
+                || (!item->callData.disconnectTime.isNull() &&
+                item->callData.disconnectTime.time().elapsed() > 3000)) {
                 m->removeEntry(m->index(i)); // removeEntry will delete the item
                 i--;
                 continue;
@@ -1491,8 +1500,11 @@ void CallScreen::closeEvent(QCloseEvent *e)
   */
 void CallScreen::hideEvent( QHideEvent * )
 {
-    if ( m_updateTimer )
+    if ( m_updateTimer ) {
         m_updateTimer->stop();
+    }
+
+    updateAll(true);
 }
 
 /*!
