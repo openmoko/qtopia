@@ -12,6 +12,8 @@
 
 #include "qwsinputmethod_x11.h"
 
+#include <QMap>
+
 #include <QX11Info>
 #include <X11/Xlib.h>
 #include <X11/extensions/XTest.h>
@@ -161,18 +163,64 @@ static void sendKeySym(KeySym keysym, int modifiers, int keycode, bool isPress)
 QWSInputMethod::QWSInputMethod()
 {}
 
+static QMap<QChar, KeySym>& keyMap()
+{
+    static QMap<QChar, KeySym> s_keyMap;
+    if (!s_keyMap.isEmpty())
+        return s_keyMap;
+
+    // initialize the key's XStringToKeysym can not handle
+    s_keyMap[' '] = XK_space;
+    s_keyMap['^'] = XK_asciicircum;
+    s_keyMap['#'] = XK_numbersign;
+    s_keyMap['@'] = XK_at;
+    s_keyMap['!'] = XK_exclam;
+    s_keyMap['$'] = XK_dollar;
+    s_keyMap['('] = XK_parenleft;
+    s_keyMap[')'] = XK_parenright;
+    s_keyMap['*'] = XK_asterisk;
+    s_keyMap['&'] = XK_ampersand;
+    s_keyMap['%'] = XK_percent;
+
+    s_keyMap['|']  = XK_bar;
+    s_keyMap[',']  = XK_comma;
+    s_keyMap['.']  = XK_period;
+    s_keyMap[';']  = XK_semicolon;
+    s_keyMap[':']  = XK_colon;
+    s_keyMap['\''] = XK_apostrophe;
+    s_keyMap['?']  = XK_question;
+    s_keyMap['\\'] = XK_backslash;
+    s_keyMap['`']  = XK_grave;
+
+    s_keyMap['[']  = XK_bracketleft;
+    s_keyMap[']']  = XK_bracketright;
+    s_keyMap['+']  = XK_plus;
+    s_keyMap['=']  = XK_equal;
+    s_keyMap['-']  = XK_minus;
+    s_keyMap['/']  = XK_slash;
+    s_keyMap['~']  = XK_asciitilde;
+    s_keyMap['\"'] = XK_quotedbl;
+    s_keyMap['_']  = XK_underscore;
+    s_keyMap['\n'] = XK_Return;
+
+
+    return s_keyMap;
+}
+
 void QWSInputMethod::sendCommitString(const QString& text)
 {
     if (!initializeIfNeeded())
         return;
 
     // Send each char now
+    const QMap<QChar, KeySym> &keys = keyMap();
     for (int i = 0; i < text.length(); ++i) {
         KeySym xsymbol = NoSymbol;
         QString symbol = text.mid(i, 1);
 
-        if (symbol == QLatin1String(" "))
-            xsymbol = XK_space;
+
+        if (keys.contains(symbol.at(0)))
+            xsymbol = keys[symbol.at(0)];
         else
             xsymbol = XStringToKeysym(text.mid(i, 1).toUtf8().data());
 
