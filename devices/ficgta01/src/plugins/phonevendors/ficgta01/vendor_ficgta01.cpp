@@ -46,6 +46,7 @@ Ficgta01CallProvider::Ficgta01CallProvider( QModemService *service )
 
     setUseMissedTimer(false);
     setUseDetectTimer(false);
+    setTreatAcceptCommandFailedAsMissed(false);
 }
 
 Ficgta01CallProvider::~Ficgta01CallProvider()

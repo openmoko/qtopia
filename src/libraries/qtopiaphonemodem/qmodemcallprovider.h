@@ -94,6 +94,7 @@ protected:
     void setUseDetectTimer(bool);
     bool useMissedTimer() const;
     void setUseMissedTimer(bool);
+    void setTreatAcceptCommandFailedAsMissed(bool);
 
 protected slots:
     virtual void resetModem();
@@ -115,6 +116,7 @@ protected:
 private:
     QModemCallProviderPrivate *d;
 
+    void acceptCommandFailed(QModemCall *call);
     void missedTimeout(QModemCall *call);
     void stopRingTimers();
     void useModemIdentifier( uint id );

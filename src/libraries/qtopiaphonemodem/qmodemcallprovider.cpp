@@ -66,6 +66,7 @@ public:
     QModemCallProviderPrivate()
         : useDetectTimer(true)
         , useMisssedTimer(true)
+        , acceptFailureMeansMissed(true)
     {
         incomingModemIdentifier = 0;
         ringBlock = false;
@@ -87,6 +88,7 @@ public:
     QModemPPPdManager *pppdManager;
     bool useDetectTimer;
     bool useMisssedTimer;
+    bool acceptFailureMeansMissed;
 };
 
 // Time to wait between first seeing an incoming call and actually
@@ -765,6 +767,14 @@ void QModemCallProvider::detectTimeout()
     }
 }
 
+void QModemCallProvider::acceptCommandFailed(QModemCall *call)
+{
+    if (!d->acceptFailureMeansMissed)
+        return;
+
+    missedTimeout( call );
+}
+
 void QModemCallProvider::missedTimeout(QModemCall *call)
 {
     d->detectTimer->stop();
@@ -1003,4 +1013,10 @@ void QModemCallProvider::setUseMissedTimer(bool useTimer)
 bool QModemCallProvider::useMissedTimer() const
 {
     return d->useMisssedTimer;
+}
+
+void QModemCallProvider::setTreatAcceptCommandFailedAsMissed(bool treatAsMissed)
+{
+    d->acceptFailureMeansMissed = treatAsMissed;
+
 }

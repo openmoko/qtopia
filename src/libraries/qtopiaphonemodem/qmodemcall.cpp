@@ -522,9 +522,8 @@ void QModemCall::acceptDone( bool ok )
 {
     if ( !ok ) {
 
-        // "ATA" failed, so the connection was probably hung up
-        // by the remote caller while we were sending the command.
-        provider()->missedTimeout( this );
+        // "ATA" failed, let the provider() handle it
+        provider()->acceptCommandFailed( this );
 
     } else if( provider()->partOfHoldGroup( callType() ) ) {
         provider()->beginStateTransaction();
