@@ -762,19 +762,19 @@ bool MenuManager::eventFilter(QObject *o, QEvent *e)
         return false;
     }
     
-#ifndef Q_WS_X11
+    //menu needs to be moved when resized (since it is bottom-anchored)
     if (e->type() == QEvent::Resize) {
         QMenu *menu = qobject_cast<QMenu*>(o);
-        if (menu && menu->isVisible()) {    //menu needs to be moved when resized (since it is bottom-anchored)
-            QResizeEvent* resizeEvent = static_cast<QResizeEvent*>(e);
-            int widthDelta = resizeEvent->oldSize().width() - resizeEvent->size().width();
-            int heightDelta = resizeEvent->oldSize().height() - resizeEvent->size().height();
-            int x = QApplication::layoutDirection() == Qt::LeftToRight ? menu->pos().x() : menu->pos().x() + widthDelta;
-            int y = menu->pos().y() + heightDelta;
-            menu->move(x, y);
+        if (menu && menu->isVisible()) {
+            // popup to make the last item align with the softmenu
+            // (assuming it is bottom-anchored)
+            // Only QMenu::popup know how to properly position the popup
+            // so let us hope it is smart and knows that we are already visible.
+            // If that ever gets an issue QMenu has to export the position
+            // calculation and modification code... without starting animations
+            menu->popup(positionForMenu(menu), menu->actions().last());
         }
     }
-#endif
 
     // Do we need to update the "Options" label?
     QMenu *menu = qobject_cast<QMenu*>(o);
