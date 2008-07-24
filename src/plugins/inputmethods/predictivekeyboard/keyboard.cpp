@@ -1861,7 +1861,15 @@ void KeyboardWidget::showEvent(QShowEvent *)
 
 void KeyboardWidget::moveEvent(QMoveEvent *)
 {
-    m_options->setVisible(qApp->desktop()->screenGeometry(this).contains(pos()));
+    if (!qApp->desktop()->screenGeometry(this).contains(pos())) {
+    	m_options->setVisible(false);
+	if (m_charWindow) {
+		m_charWindow->dismiss();
+		m_charWindow=0;
+	}
+    }else {
+    	m_options->setVisible(true);
+    }
     positionOptionsWindow();
 }
 
