@@ -6,6 +6,7 @@ Name[]=Messages
 [emailVCard]
 RequestDataType=text/x-vcard
 ResponseDataType=
+Depends="hasEmailSupport"
 Attributes="email;send"
 Description[]=Email VCard
 Icon=email

@@ -89,7 +89,8 @@ QTOPIA_HEADERS+=\
     qcontentfilterselector.h\
     qperformancelog.h \
     qdocumentselectorservice.h \
-    qtopiaitemdelegate.h
+    qtopiaitemdelegate.h \
+    qemailsupport.h
 
 QTOPIA_PRIVATE_HEADERS+=\
     ezxphonestyle_p.h\
@@ -143,7 +144,7 @@ QTOPIA_PRIVATE_HEADERS+=\
     motionpath_p.h \
     qthumbstyle_p.h \
     testslaveinterface_p.h \
-    qtagmap_p.h
+    qtagmap_p.h 
 
 QTOPIA_SOURCES+=\
     qmimetype.cpp\
@@ -257,7 +258,8 @@ QTOPIA_SOURCES+=\
     qdocumentselectorsocketserver.cpp \
     qtopiaitemdelegate.cpp \
     motionpath_p.cpp \
-    qthumbstyle_p.cpp
+    qthumbstyle_p.cpp \
+    qemailsupport.cpp
 
     QTOPIA_HEADERS+=\
         qexportedbackground.h

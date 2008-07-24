@@ -36,6 +36,7 @@
 #include <qaction.h>
 #include <qmenu.h>
 #include <qlayout.h>
+#include "qemailsupport.h"
 
 
 AccountSettings::AccountSettings(AccountList *al, EmailClient *parent, const char *name, bool modal)
@@ -95,6 +96,7 @@ void AccountSettings::populateAccountList()
     oldSel = qMin(qMax(0, oldSel), accountListBox->count()-1);
     accountListBox->setCurrentRow(oldSel);
     accountHighlighted(oldSel);
+    QEmailSupport::updateEmailSupportFeature();
 //     if (!accountsExist)
 //      addAccount();
 //     accountsExist = true;

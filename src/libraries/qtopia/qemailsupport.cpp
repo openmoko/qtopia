@@ -15,9 +15,13 @@
 #include <qtopiaglobal.h>
 #include <qsettings.h>
 #include <qdebug.h>
+#include <QtopiaFeatures>
+
 
 
 namespace QEmailSupport {
+
+static const char * const HAS_EMAIL_ACCOUNT_FEATURE = "hasEmailSupport";
 
 bool _getEmailConf(QSettings *conf, int count) 
 {
@@ -32,16 +36,22 @@ bool _getEmailConf(QSettings *conf, int count)
     return false;
 }
 
-QTOPIAMAIL_EXPORT bool hasEmailSupport()
+QTOPIAMAIL_EXPORT bool updateEmailSupportFeature()
 {
     int count;
     QSettings accountconf("Trolltech","qtmail_account");
     accountconf.beginGroup( "accountglobal" );
     count =  accountconf.value("accounts", 0).toInt();
     accountconf.endGroup();
-    if(count==0) 
+    if(count==0) {
+        QtopiaFeatures::removeFeature( HAS_EMAIL_ACCOUNT_FEATURE );
         return false;
-    return _getEmailConf(&accountconf, count);
+    }
+    if (_getEmailConf(&accountconf, count)) 
+        QtopiaFeatures::setFeature( HAS_EMAIL_ACCOUNT_FEATURE );
+    else
+        QtopiaFeatures::removeFeature( HAS_EMAIL_ACCOUNT_FEATURE );
+    return QtopiaFeatures::hasFeature( HAS_EMAIL_ACCOUNT_FEATURE );
 }
 
 }

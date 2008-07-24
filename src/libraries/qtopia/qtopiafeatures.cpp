@@ -25,6 +25,9 @@
 #include <QValueSpaceItem>
 #include <QValueSpaceObject>
 
+#include "qemailsupport.h"
+
+
 // declare QtopiaFeaturesPrivate
 class QtopiaFeaturesPrivate : public QObject
 {
@@ -83,6 +86,7 @@ void QtopiaFeaturesPrivate::refreshFeatures()
 {
     Q_ASSERT(m_hasFeatures);
     m_features = m_hasFeatures->subPaths();
+    QEmailSupport::updateEmailSupportFeature();
 }
 
 /*!

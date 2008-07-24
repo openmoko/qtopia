@@ -123,6 +123,7 @@ void QDSServices::processQdsServiceFile( const QString service,
             continue;
         QDSServiceInfo serviceInfo( name, service );
         if ( serviceInfo.isValid() &&
+             serviceInfo.isAvailable() &&
              passTypeFilter( serviceInfo, requestDataTypeFilter, Request ) &&
              passTypeFilter( serviceInfo, responseDataTypeFilter, Response ) &&
              passAttributesFilter( serviceInfo, attributesFilter ) )

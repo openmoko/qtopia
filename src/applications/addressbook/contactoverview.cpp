@@ -36,7 +36,7 @@
 #include <QResizeEvent>
 
 #include <QtopiaService>
-#include <qemailsupport.h>
+#include <QtopiaFeatures>
 
 // -------------------------------------------------------------
 // ContactOverview
@@ -93,7 +93,7 @@ void ContactOverview::updateCommands()
 #endif
 
         mCall->setVisible( bDialer && numbers.count() > 0 );
-        mEmail->setVisible(bEmail && !ent.defaultEmail().isEmpty() && QEmailSupport::hasEmailSupport());
+        mEmail->setVisible(bEmail && !ent.defaultEmail().isEmpty() && QtopiaFeatures::hasFeature( "hasEmailSupport" ));
         mText->setVisible( bSMS && numbers.count() > 0 );
 
         if (numbers.count() > 1) {

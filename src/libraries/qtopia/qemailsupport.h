@@ -15,7 +15,7 @@
 #define _QEMAILSUPPORT_H_
 
 namespace QEmailSupport {
-    bool hasEmailSupport();
+    bool updateEmailSupportFeature();
 };
 
 #endif

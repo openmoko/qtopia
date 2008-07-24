@@ -33,8 +33,7 @@ HEADERS+=\
     qmailid.h\
 	mailbodystore_p.h\
     qprivateimplementation_p.h\
-    qprivateimplementationdef_p.h\
-    qemailsupport.h 
+    qprivateimplementationdef_p.h
 
 SOURCES+=\
     qmailaddress.cpp\
@@ -56,8 +55,7 @@ SOURCES+=\
     qmailviewerplugin.cpp\
     qmailid.cpp\
 	mailbodystore.cpp\
-    qprivateimplementation.cpp\
-    qemailsupport.cpp
+    qprivateimplementation.cpp
 
 depends(libraries/qtopiapim)
 
