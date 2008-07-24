@@ -341,12 +341,18 @@ void CallItemListView::currentChanged(const QModelIndex &cur, const QModelIndex 
         return;
 
     CallItemModel *m = qobject_cast<CallItemModel *>(model());
+    if (!m)
+        return;
+
     CallItemEntry *item = m->callItemEntry(cur);
     if (!item)
         return;
     item->setValue( "State", tr( " (Connect)",
                 "describing an action to take on a call, make sure keeping the space in the beginning" ) );
     item = m->callItemEntry(prev);
+
+    if (!item)
+        return;
     item->setValue( "State", tr( " (Hold)",
                 "describing an action to take on a call, make sure keeping the space in the beginning" ) );
 }

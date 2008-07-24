@@ -415,6 +415,9 @@ void PlaybinSession::readySession()
         connect(d->busHelper, SIGNAL(message(Message)), SLOT(busMessage(Message)));
 
         g_object_get(G_OBJECT(d->playbin), "volume", &d->volume, NULL);
+
+        if (gst_element_set_state(d->playbin, GST_STATE_PAUSED) == GST_STATE_CHANGE_FAILURE)
+            qWarning() << "GStreamer; Unable to pause in ctor -" << d->url.toString();
     }
 }
 
