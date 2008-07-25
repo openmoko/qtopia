@@ -48,7 +48,8 @@ public:
         AtdOkIsConnect,
         AtdOkIsDialing,
         AtdOkIsDialingWithStatus,
-        AtdUnknown
+        AtdUnknown,
+        AtdOkIgnore
     };
 
     QModemService *service() const;

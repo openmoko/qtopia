@@ -55,9 +55,10 @@ Ficgta01CallProvider::~Ficgta01CallProvider()
 
 QModemCallProvider::AtdBehavior Ficgta01CallProvider::atdBehavior() const
 {
-    // When ATD reports OK, it indicates that it is back in command
-    // mode and a %CPI notification will indicate when we are connected.
-    return AtdOkIsDialingWithStatus;
+    // When ATD reports OK or NO CARRIER, it indicates that it is
+    // back in command mode. We just want to ignore these in QModemCall
+    // as we will have %CPI that is going to give us the right state.
+    return AtdOkIgnore;
 }
 
 void Ficgta01CallProvider::abortDial( uint id, QPhoneCall::Scope scope )

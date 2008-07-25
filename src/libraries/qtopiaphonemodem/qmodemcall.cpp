@@ -559,14 +559,22 @@ void QModemCall::dialRequestDone( bool ok )
         // the other party is busy/unavailable, or the call was
         // aborted by hangup().
         return;
+
     }
+
+    QModemCallProvider::AtdBehavior ab = provider()->atdBehavior();
+    if (ab == QModemCallProvider::AtdOkIgnore) {
+        qLog(Modem) << __PRETTY_FUNCTION__ << "ignore the ATD result: " << ok;
+        return;
+    }
+
+
     if ( ok ) {
         // The ATD could respond with OK if it has actually connected,
         // or if it has simply returned to command mode.  We now need
         // to figure out what happened.  Note: if atdBehavior() returns
         // AtdOkIsDialingWithStatus, we wait until the modem vendor
         // plug-in tells us that the transition has occurred.
-        QModemCallProvider::AtdBehavior ab = provider()->atdBehavior();
         if ( ab == QModemCallProvider::AtdOkIsConnect ) {
             qLog(Modem) << "dialing was ok, we are connected";
             setConnected();
