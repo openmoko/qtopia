@@ -166,10 +166,6 @@ void Ficgta01CallProvider::cnapNotification( const QString& msg )
  */
 void Ficgta01CallProvider::resetModem()
 {
-    // We don't want RING, CRING, CLIP, COLP, COWA  but callNotification
-    connect( atchat(), SIGNAL(callNotification(QString)),
-             this, SLOT(callNotification(QString)) );
-
     // disable all of these and do not call the base class
     atchat()->chat( "AT+CRC=0" );
     service()->retryChat( "AT+CLIP=0" );
