@@ -392,12 +392,16 @@ void RingControl::initSoundControl()
     if (ringToneDoc.isEmpty())
         ringToneDoc = profile.systemCallTone().fileName();
 
-    if(d->ringtonecontrol) {
+    if(d->ringtonecontrol && d->ringtonecontrol->sound()->fileName() != ringToneDoc) {
         delete d->ringtonecontrol->sound();
         delete d->ringtonecontrol;
+        d->ringtonecontrol = 0;
     }
-    d->ringtonecontrol = new QSoundControl(new QSound(ringToneDoc));
-    connect(d->ringtonecontrol, SIGNAL(done()), this, SLOT(nextRing()) );
+
+    if (!d->ringtonecontrol) {
+        d->ringtonecontrol = new QSoundControl(new QSound(ringToneDoc));
+        connect(d->ringtonecontrol, SIGNAL(done()), this, SLOT(nextRing()) );
+    }
 
     // Attempt to find a good messagetone. Fallback to the ones provided
     // by the  system
@@ -405,12 +409,16 @@ void RingControl::initSoundControl()
     if (ringToneDoc.isEmpty())
         ringToneDoc = profile.systemMessageTone().fileName();
 
-    if(d->msgtonecontrol) {
+    if(d->msgtonecontrol && d->msgtonecontrol->sound()->fileName() != ringToneDoc) {
 	delete d->msgtonecontrol->sound();
 	delete d->msgtonecontrol;
+        d->msgtonecontrol = 0;
     }
-    d->msgtonecontrol = new QSoundControl(new QSound(ringToneDoc));
-    connect(d->msgtonecontrol, SIGNAL(done()), this, SLOT(nextRing()) );
+
+    if (!d->msgtonecontrol) {
+        d->msgtonecontrol = new QSoundControl(new QSound(ringToneDoc));
+        connect(d->msgtonecontrol, SIGNAL(done()), this, SLOT(nextRing()) );
+    }
 }
 
 void RingControl::startRinging(RingType t)
