@@ -56,6 +56,7 @@ private slots:
     void pduNotification( const QString& type, const QByteArray& pdu );
     void cpmsDone( bool ok, const QAtResult& result );
     void storeListDone( bool ok, const QAtResult& result );
+    void listMessages();
 
 private:
     QModemSMSReaderPrivate *d;

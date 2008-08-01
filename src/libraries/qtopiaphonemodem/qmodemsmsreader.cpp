@@ -27,6 +27,7 @@
 #include <qatutils.h>
 #include <qretryatchat.h>
 #include <qsimenvelope.h>
+#include <qtimer.h>
 
 #include <qtopialog.h>
 
@@ -537,15 +538,26 @@ void QModemSMSReader::cpmsDone( bool ok, const QAtResult& result )
     }
 
     if (ok) {
-        d->service->primaryAtChat()->chat
-            ( messageListCommand(), this, SLOT(storeListDone(bool,QAtResult)) );
+        listMessages();
     } else {
         qLog(Modem) << __PRETTY_FUNCTION__ << "Giving up on CPMS.... it keeps failing. how to escalate?";
     }
 }
 
+void QModemSMSReader::listMessages()
+{
+    d->service->primaryAtChat()->chat
+        ( messageListCommand(), this, SLOT(storeListDone(bool,QAtResult)) );
+}
+
 void QModemSMSReader::storeListDone( bool ok, const QAtResult& result )
 {
+    if (!ok)  {
+        // ask again... CPMS succeeded so CMGL will work sooner or later too
+        QTimer::singleShot(500, this, SLOT(listMessages()));
+        return;
+    }
+
     // Read the messages from the response.
     QString store = messageStore();
     if ( store.isEmpty() )
