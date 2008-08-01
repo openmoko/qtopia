@@ -105,6 +105,10 @@ PlaybinSession::PlaybinSession
 
 PlaybinSession::~PlaybinSession()
 {
+    delete d->busHelper;
+    if (d->bus)
+        gst_object_unref(GST_OBJECT(d->bus));
+
     if (d->playbin != 0)
     {
         stop();
