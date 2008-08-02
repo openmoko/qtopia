@@ -54,6 +54,11 @@
 #define QTOPIA_INTERNAL_QDAWG_TRIE
 #include "qdawg.h"
 
+
+#ifdef Q_WS_X11
+#define NO_ACCEPT_WINDOW
+#endif
+
 class Board
 {
 public:
@@ -157,6 +162,7 @@ QString Board::characters() const
     return m_characters;
 }
 
+#ifndef NO_ACCEPT_WINDOW
 class AcceptWindow : public QWidget
 {
 Q_OBJECT
@@ -255,6 +261,7 @@ void AcceptWindow::paintEvent(QPaintEvent *)
     p.setPen(color);
     p.drawText(rect(), m_word, Qt::AlignHCenter | Qt::AlignVCenter);
 }
+#endif
 
 class OptionsWindow : public QWidget
 {
@@ -314,7 +321,9 @@ private:
     int m_clearTimer;
     ClearType m_clearType;
 
+#ifndef NO_ACCEPT_WINDOW
     QPointer<AcceptWindow> m_lastAccept;
+#endif
 };
 
 // Absurd functions copied from themedview
@@ -592,8 +601,10 @@ void OptionsWindow::clear(ClearType type)
 
 void OptionsWindow::setAcceptDest(const QPoint &p)
 {
+#ifndef NO_ACCEPT_WINDOW
     if(m_lastAccept)
         m_lastAccept->setToPoint(p);
+#endif
 }
 
 QString OptionsWindow::selectedWord() const
@@ -609,12 +620,17 @@ QString OptionsWindow::acceptWord(const QPoint &p, bool animate)
     QString word = m_words.at(m_selectedWord).first;
     QRect startRect = wordRect(m_selectedWord);
 
+#ifndef NO_ACCEPT_WINDOW
     if(animate) {
         AcceptWindow *win = new AcceptWindow(500 /* XXX */);
         win->accept(word,
                 QRect(mapToGlobal(startRect.topLeft()), startRect.size()), p);
         m_lastAccept = win;
     }
+#else
+    Q_UNUSED(p)
+    Q_UNUSED(animate)
+#endif
     m_words.clear();
     update();
     return word;
