@@ -1,9 +1,5 @@
 Random list of bugs...
 
-- Scrollindicator not properly drawn. This can be seen with the addressbook
-  application and the contact pane and is due my hacks in Qt to paint less
-  often on start-up.
-
 - Switching the SIM card will show only old SIM entries and not the one of
   the new simcard. This can be seen when switching the SIM card. It is a bug
   in src/libraries/qtopiapim and them likely qsimcontext.cpp 
@@ -11,12 +7,6 @@ Random list of bugs...
   I suspect: The synctime is not properly handled or the readState is not
   properly initialized... also taking a look at the actual sim identity would
   be clever.
-
-- mediaserver is slow and is making some weird noises... need to investigate
-  a replacement involving oeventd
-
-  using playbin on the neo adds an overhead of 5 seconds. We might add a special
-  case involving filesrc ! decodebin ! autoaudiosink.
 
 - dbmigratetask is taking five seconds on system start. This is unfortunate
   as only on the initial start the databases need to be created and for the
