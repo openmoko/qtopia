@@ -14,6 +14,18 @@ Random list of bugs...
   perfect world the users of the db would create it on the fly and we could just
   kick out dbmigratetask from src/server
 
+  This task got killed by a Qtopia update, git-merge rsync-version should bring
+  these changes.
+
 - after adding a name from the callhistory to the contacts the callhistory is
   not updated. Restarting qpe is fixing that. This means the callhistory model
   needs to be updated on addressbook changes.
+
+- PIN and PUK handling. Second PIN Entry is supposed to "stall", PUK screen
+  after restart is "flickering" (shown and withdrawn)
+
+- Modem init. Sometimes COPS, CGML and phonebook listing is failing even after
+  the modem signalled that the phonebook is ready...
+
+- mediaserver "PAUSE" to preroll hack is likely to leak open sound devices.
+  Setting the pipeline from pause to stop doesn't seem to have an effect...
