@@ -267,7 +267,7 @@ public:
     enum ClearType { ClearImmediate, ClearSoon, ClearEventually };
     void clear(ClearType = ClearImmediate);
 
-    QString acceptWord(const QPoint &, bool animate = true);
+    QString acceptWord(const QPoint &, bool animate);
     void setAcceptDest(const QPoint &);
     QString selectedWord() const;
 
@@ -1829,7 +1829,11 @@ void KeyboardWidget::acceptWord()
         return;
     }
 
+#ifdef Q_WS_QWS
     QString word = m_options->acceptWord(QPoint(0, 0), m_animate_accept /* XXX microfocushint */);
+#else
+    QString word = m_options->acceptWord(QPoint(0, 0), false);
+#endif
     m_options->clear(OptionsWindow::ClearEventually);
     clear();
     m_autoCap = m_autoCapitaliseEveryWord;
