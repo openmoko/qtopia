@@ -375,7 +375,7 @@ void QModemService::chat( const QString& command, QObject *target,
 */
 void QModemService::retryChat( const QString& command )
 {
-    new QRetryAtChat( d->primaryAtChat, command, 15 );
+    new QRetryAtChat( d->primaryAtChat, command, 45 );
 }
 
 /*!
