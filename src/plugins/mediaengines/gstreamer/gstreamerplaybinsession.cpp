@@ -420,8 +420,8 @@ void PlaybinSession::readySession()
 
         g_object_get(G_OBJECT(d->playbin), "volume", &d->volume, NULL);
 
-        if (gst_element_set_state(d->playbin, GST_STATE_PAUSED) == GST_STATE_CHANGE_FAILURE)
-            qWarning() << "GStreamer; Unable to pause in ctor -" << d->url.toString();
+        if (gst_element_set_state(d->playbin, GST_STATE_READY) == GST_STATE_CHANGE_FAILURE)
+            qWarning() << "GStreamer; Unable to ready in ctor -" << d->url.toString();
     }
 }
 
