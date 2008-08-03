@@ -179,12 +179,6 @@ Ficgta01PhoneBook::Ficgta01PhoneBook( QModemService *service )
     : QModemPhoneBook( service )
 {
     qLog(AtChat)<<"Ficgta01PhoneBook::Ficgta01PhoneBook";
-    // Turn on status notification messages for finding out when
-    // the phone book is ready to use.
-
-    service->primaryAtChat()->registerNotificationType
-        ( "%CSTAT:", this, SLOT(cstatNotification(QString)) );
-    service->primaryAtChat()->chat( "AT%CSTAT=1" );
 }
 
 Ficgta01PhoneBook::~Ficgta01PhoneBook()
@@ -201,34 +195,10 @@ bool Ficgta01PhoneBook::hasEmptyPhoneBookIndex() const
     return true;
 }
 
-void Ficgta01PhoneBook::cstatNotification( const QString& msg )
-{
-    QString entity = msg.mid( 8, 3);
-
-    if( entity == "PHB") {
-// phonebook
-
-        uint status = msg.mid(13).toInt();
-        if(status == 1) {
-            phoneBooksReady();
-        }
-
-    } else if (entity == "RDY" ) {
-    } else if (entity == "SMS") {
-    }
-
-    // "%CSTAT: PHB, 0"
-    // %CSTAT: <entity>,<status>
-    // PHB (phone book)
-    // SMS
-    // RDY (Ready when both PHB and SMS have reported they are ready)
-    //
-    //
-}
-
 Ficgta01PinManager::Ficgta01PinManager( QModemService *service )
     : QModemPinManager( service )
 {
+    setShouldSendSimReady(false);
 }
 
 Ficgta01PinManager::~Ficgta01PinManager()
@@ -421,6 +391,7 @@ Ficgta01ModemService::Ficgta01ModemService
           QObject *parent )
     : QModemService( service, mux, parent )
     , m_vibratorService( 0 )
+    , m_phoneBook( 0 )
 {
     connect( this, SIGNAL(resetModem()), this, SLOT(reset()) );
 
@@ -464,7 +435,11 @@ Ficgta01ModemService::Ficgta01ModemService
 
     chat("AT+COPS=0");
 
-
+    // Turn on status notification messages for finding out when
+    // the SIM/phonebook/SMS is ready to use.
+    primaryAtChat()->registerNotificationType
+        ( "%CSTAT:", this, SLOT(cstatNotification(QString)) );
+    primaryAtChat()->chat( "AT%CSTAT=1" );
 }
 
 Ficgta01ModemService::~Ficgta01ModemService()
@@ -476,8 +451,10 @@ void Ficgta01ModemService::initialize()
     if ( !supports<QPinManager>() )
         addInterface( new Ficgta01PinManager( this ) );
 
-    if ( !supports<QPhoneBook>() )
-        addInterface( new Ficgta01PhoneBook( this ) );
+    if ( !supports<QPhoneBook>() ) {
+        m_phoneBook = new Ficgta01PhoneBook( this );
+        addInterface( m_phoneBook );
+    }
 
 
     if ( !supports<QBandSelection>() )
@@ -637,6 +614,30 @@ void Ficgta01ModemService::wake()
 
     wakeDone();
 }
+
+// Modem state notification. It will tell us once the SIM is ready
+// to give us access to the phonebook and SMS. To delay certain access
+// we will also send simready from here...
+void Ficgta01ModemService::cstatNotification( const QString& msg )
+{
+    // %CSTAT: PHB, 0
+    // %CSTAT: <entity>,<status>
+    // PHB (phone book)
+    // SMS
+    // RDY (Ready when both PHB and SMS have reported they are ready)
+    QString entity = msg.mid(8, 3);
+
+    if (entity == "RDY" ) {
+        uint status = msg.mid(13).toInt();
+        if (status == 1) {
+            post("simready"); 
+
+            if (m_phoneBook)
+                m_phoneBook->phoneBooksReady();
+        }
+    }
+}
+
 
 // Modem dead detection for https://docs.openmoko.org/trac/ticket/1192
 // The modem will not work with us anymore. We would need to make the AT

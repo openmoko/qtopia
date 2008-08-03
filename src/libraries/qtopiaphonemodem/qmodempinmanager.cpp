@@ -70,6 +70,7 @@ public:
         this->service = service;
         this->querying = false;
         this->simMissing = false;
+        this->shouldSendSimReady = true;
     }
 
     QModemService *service;
@@ -83,6 +84,7 @@ public:
     QString pendingPin;
     QTimer *lastPinTimer;
     bool simMissing;
+    bool shouldSendSimReady;
 
     QModemPendingPin *findPending( const QString& type );
 };
@@ -388,7 +390,9 @@ void QModemPinManager::cpinQuery( bool ok, const QAtResult& result )
 
             // No more PIN's are required, so the sim is ready.
             d->expectedPin = QString();
-            d->service->post( "simready" );
+
+            if (shouldSendSimReady())
+                d->service->post( "simready" );
 
             // Notify the application level that the sim is ready.
             emit pinStatus( "READY", QPinManager::Valid, QPinOptions() );
@@ -619,4 +623,14 @@ int QModemPinManager::pinMaximum() const
 void QModemPinManager::simMissing()
 {
     d->simMissing = true;
+}
+
+void QModemPinManager::setShouldSendSimReady(bool send)
+{
+    d->shouldSendSimReady = send;
+}
+
+bool QModemPinManager::shouldSendSimReady() const
+{
+    return d->shouldSendSimReady;
 }

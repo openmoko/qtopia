@@ -66,6 +66,8 @@ protected:
     virtual bool emptyPinIsReady() const;
     virtual QString pinTypeToCode( const QString& type ) const;
     virtual int pinMaximum() const;
+    void setShouldSendSimReady(bool);
+    bool shouldSendSimReady() const;
 
 private slots:
     void simMissing();

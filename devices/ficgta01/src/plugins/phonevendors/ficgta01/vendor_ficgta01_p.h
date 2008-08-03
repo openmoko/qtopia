@@ -72,10 +72,6 @@ public:
 protected:
     bool hasModemPhoneBookCache() const;
     bool hasEmptyPhoneBookIndex() const;
-
-
-private slots:
-    void cstatNotification( const QString& msg );
 };
 
 class Ficgta01PinManager : public QModemPinManager
@@ -135,8 +131,12 @@ private slots:
 
     void modemDied();
 
+private slots:
+    void cstatNotification( const QString& msg );
+
 private:
     Ficgta01VibrateAccessory* m_vibratorService;
+    Ficgta01PhoneBook* m_phoneBook;
 };
 
 class  Ficgta01VibrateAccessory : public QVibrateAccessoryProvider
