@@ -1102,6 +1102,7 @@ KeyboardWidget::KeyboardWidget(const Config &config,
     QObject::connect(&m_boardChangeTimeline, SIGNAL(valueChanged(qreal)), this, SLOT(update()));
 
     m_options = new OptionsWindow(m_config.optionWordSpacing);
+    m_options->hide();
     QObject::connect(m_options, SIGNAL(wordAccepted()),
                      this, SLOT(acceptWord()));
 
@@ -1887,9 +1888,10 @@ void KeyboardWidget::moveEvent(QMoveEvent *)
 		m_charWindow->dismiss();
 		m_charWindow=0;
 	}
-    }else {
-    	m_options->setVisible(true);
+    } else {
+        m_options->setVisible(!m_words.isEmpty());
     }
+
     positionOptionsWindow();
 }
 
