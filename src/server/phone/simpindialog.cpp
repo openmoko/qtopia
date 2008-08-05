@@ -144,10 +144,10 @@ void SimPinDialog::askForSimPuk()
 void SimPinDialog::accept()
 {
     if (m_mode == Enter_SIMPin && m_pinEntry) {
-        m_cellModem->setSimPin(m_pinEntry->text());
+        m_cellModem->setSimPin(m_pinEntry->text().simplified());
         setEnabled(false);
     } else if (m_mode == Enter_SIMPuk && m_pukEntry && m_pinEntry) {
-        m_cellModem->setSimPuk(m_pukEntry->text(), m_pinEntry->text());
+        m_cellModem->setSimPuk(m_pukEntry->text().simplified(), m_pinEntry->text().simplified());
         setEnabled(false);
     } else {
         QDialog::accept();
