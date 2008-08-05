@@ -46,6 +46,26 @@ SimPinDialog::SimPinDialog(QWidget* parent)
     m_status->setWordWrap(true);
     m_status->setTextFormat(Qt::RichText);
 
+    m_pinLabel = new QLabel(this);
+    m_pinEntry = new QLineEdit(this);
+    m_pinEntry->setEchoMode(QLineEdit::Password);
+    m_pinLabel->setBuddy(m_pinEntry);
+
+    m_pukLabel = new QLabel(this);
+    m_pukEntry = new QLineEdit(this);
+    m_pukEntry->setEchoMode(QLineEdit::Password);
+    m_pukLabel->setBuddy(m_pukEntry);
+
+    QFormLayout* layout = new QFormLayout(this);
+    layout->addRow(m_introduction);
+    layout->addRow(m_pinLabel, m_pinEntry);
+    layout->addRow(m_pukLabel, m_pukEntry);
+    layout->addRow(m_status);
+
+    m_introduction->setFocusPolicy(Qt::NoFocus);
+    m_status->setFocusPolicy(Qt::NoFocus);
+    setFocusPolicy(Qt::NoFocus);
+
     connect(m_cellModem, SIGNAL(stateChanged(CellModemManager::State, CellModemManager::State)),
             SLOT(stateChanged(CellModemManager::State, CellModemManager::State)), Qt::QueuedConnection);
 
@@ -58,28 +78,6 @@ void SimPinDialog::checkStatus()
     stateChanged(m_cellModem->state(), CellModemManager::NoCellModem);
 }
 
-void SimPinDialog::initializePinEntry()
-{
-    if (!m_pinLabel)
-        m_pinLabel = new QLabel(this);
-
-    if (!m_pinEntry) {
-        m_pinEntry = new QLineEdit(this);
-        m_pinEntry->setEchoMode(QLineEdit::Password);
-    }
-}
-
-void SimPinDialog::initializePukEntry()
-{
-    if (!m_pukLabel)
-        m_pukLabel = new QLabel(this);
-
-    if (!m_pukEntry) {
-        m_pukEntry = new QLineEdit(this);
-        m_pukEntry->setEchoMode(QLineEdit::Password);
-    }
-}
-
 /*
  * Setup the UI and ask for a SIM Pin
  */
@@ -89,21 +87,14 @@ void SimPinDialog::askForSimPin()
     setEnabled(true);
 
 
-    // Initialize the GUI Elements
-    initializePinEntry();
-
     setWindowTitle(tr("SIM Pin required"));
     m_pinLabel->setText(tr("SIM Pin:"));
     m_pinEntry->setText(QString());
 
-    // Arrange the GUI Elements. We just delete the old layout
-    delete layout();
-    QFormLayout* layout = new QFormLayout;
-    layout->addRow(m_introduction);
-    layout->addRow(m_pinLabel, m_pinEntry);
-    layout->addRow(m_status);
+    m_pukEntry->hide();
+    m_pukLabel->hide();
 
-    setLayout(layout);
+    m_pinEntry->setFocus();
 
     QtopiaApplication::showDialog(this);
 }
@@ -116,9 +107,6 @@ void SimPinDialog::askForSimPuk()
     m_mode = Enter_SIMPuk;
     setEnabled(true);
 
-    initializePinEntry();
-    initializePukEntry();
-
     // Initialize
     setWindowTitle(tr("SIM Puk required"));
     m_pukLabel->setText(tr("SIM Puk:"));
@@ -126,14 +114,10 @@ void SimPinDialog::askForSimPuk()
     m_pinLabel->setText(tr("New SIM Pin:"));
     m_pinEntry->setText(QString());
 
-    // Arrange the GUI Elements. We just delete the old layout
-    delete layout();
-    QFormLayout* layout = new QFormLayout;
-    layout->addRow(m_introduction);
-    layout->addRow(m_pukLabel, m_pukEntry);
-    layout->addRow(m_pinLabel, m_pinEntry);
-    layout->addRow(m_status);
-    setLayout(layout);
+    m_pukEntry->show();
+    m_pukLabel->show();
+
+    m_pinEntry->setFocus();
 
     QtopiaApplication::showDialog(this);
 }

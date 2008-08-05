@@ -48,8 +48,6 @@ private Q_SLOTS:
     void stateChanged(CellModemManager::State, CellModemManager::State);
 
 private:
-    void initializePinEntry();
-    void initializePukEntry();
     void askForSimPin();
     void askForSimPuk();
     void hideDialog();
