@@ -177,8 +177,11 @@ void Ficgta01CallProvider::resetModem()
 
 Ficgta01PhoneBook::Ficgta01PhoneBook( QModemService *service )
     : QModemPhoneBook( service )
+    , m_phoneBookWasReady(false)
 {
     qLog(AtChat)<<"Ficgta01PhoneBook::Ficgta01PhoneBook";
+    connect(this, SIGNAL(queryFailed(const QString&)),
+            SLOT(slotQueryFailed(const QString&)));
 }
 
 Ficgta01PhoneBook::~Ficgta01PhoneBook()
@@ -193,6 +196,22 @@ bool Ficgta01PhoneBook::hasModemPhoneBookCache() const
 bool Ficgta01PhoneBook::hasEmptyPhoneBookIndex() const
 {
     return true;
+}
+
+void Ficgta01PhoneBook::sendPhoneBooksReady()
+{
+    m_phoneBookWasReady = true;
+    phoneBooksReady();
+}
+
+void Ficgta01PhoneBook::slotQueryFailed(const QString& book)
+{
+    // We didn't say we are ready, ignore this
+    if (!m_phoneBookWasReady)
+        return;
+
+    qLog(Modem) << "Phonebook query failed, ask to retry. " << book;
+    phoneBooksReady();
 }
 
 Ficgta01PinManager::Ficgta01PinManager( QModemService *service )
@@ -633,7 +652,7 @@ void Ficgta01ModemService::cstatNotification( const QString& msg )
             post("simready"); 
 
             if (m_phoneBook)
-                m_phoneBook->phoneBooksReady();
+                m_phoneBook->sendPhoneBooksReady();
         }
     }
 }

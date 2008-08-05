@@ -69,9 +69,17 @@ public:
     Ficgta01PhoneBook( QModemService *service );
     ~Ficgta01PhoneBook();
 
+    void sendPhoneBooksReady();
+
 protected:
     bool hasModemPhoneBookCache() const;
     bool hasEmptyPhoneBookIndex() const;
+
+protected Q_SLOTS:
+    void slotQueryFailed(const QString&);
+
+protected:
+    bool m_phoneBookWasReady;
 };
 
 class Ficgta01PinManager : public QModemPinManager

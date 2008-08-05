@@ -839,6 +839,9 @@ void QModemPhoneBook::queryDone( bool ok, const QAtResult& result )
     QString store = ((QStoreUserData *)result.userData())->store;
     QModemPhoneBookCache *cache = findCache( store, false );
 
+    if ( !ok || !cache->selectOk )
+        emit queryFailed(cache->store);
+
     // If the query failed on a modem that caches phone books internally,
     // we need to queue it again for later.
     if ( !ok && hasModemPhoneBookCache() ) {

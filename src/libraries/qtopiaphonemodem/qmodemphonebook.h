@@ -55,6 +55,9 @@ public slots:
     void phoneBooksReady();
     void updateCodec( const QString& gsmCharset );
 
+Q_SIGNALS:
+    void queryFailed(const QString&);
+
 protected:
     virtual bool hasModemPhoneBookCache() const;
     virtual bool hasEmptyPhoneBookIndex() const;
