@@ -26,8 +26,6 @@
 #include <QTimer>
 #include <QTextCodec>
 
-#include <qtopialog.h>
-
 /*!
     \class QModemPhoneBook
     \mainclass
@@ -840,16 +838,6 @@ void QModemPhoneBook::queryDone( bool ok, const QAtResult& result )
     // Get the storage area that this response applies to.
     QString store = ((QStoreUserData *)result.userData())->store;
     QModemPhoneBookCache *cache = findCache( store, false );
-
-    // If selecting the phonebook failed let us try again. This
-    // assumes that the phonebook exists and that we will be able
-    // to use it. Queue that immediately.. if selectDone failed
-    // or queryDone then let us get the entry again...
-    if (!ok || !cache->selectOk) {
-        qLog(Modem) << "Retrying phonebook listing of" << store;
-        getEntries(store);
-        return;
-    }
 
     // If the query failed on a modem that caches phone books internally,
     // we need to queue it again for later.
