@@ -40,7 +40,7 @@ SimPinDialog::SimPinDialog(QWidget* parent)
     m_introduction = new QLabel(this);
     m_introduction->setWordWrap(true);
     m_introduction->setTextFormat(Qt::RichText);
-    m_introduction->setText(tr("To use the phone please enter the needed PIN."));
+    m_introduction->setText(tr("Please enter the needed PIN."));
 
     m_status = new QLabel(this);
     m_status->setWordWrap(true);
@@ -215,7 +215,7 @@ void SimPinDialog::stateChanged(CellModemManager::State newState, CellModemManag
         if (oldState == CellModemManager::VerifyingSIMPin)
             m_status->setText(tr("<qt>The SIM Pin was incorrect. The SIM is locked and you need to enter the SIM Puk now.</qt>"));
         else if (oldState == CellModemManager::VerifyingSIMPuk)
-            m_status->setText(tr("<qt>The SIM Puk or the new SIMwas wrong or the new SIM Pin.</qt>"));
+            m_status->setText(tr("<qt>The SIM Puk or the new SIM was wrong or the new SIM Pin.</qt>"));
         askForSimPuk();
         break;
 
