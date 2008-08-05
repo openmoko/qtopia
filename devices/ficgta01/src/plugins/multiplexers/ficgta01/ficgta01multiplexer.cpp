@@ -82,6 +82,9 @@ bool Ficgta01MultiplexerPlugin::detect( QSerialIODevice *device )
     int attempts = 10;
     while (--attempts >= 0 && !QSerialIODeviceMultiplexer::chat( device, "ATZ"));
 
+    // force a reset of the modemq
+    QSerialIODeviceMultiplexer::chat(device, "AT+CFUN=0,1");
+
     // Issue the AT+CMUX command to determine if this device
     // uses GSM 07.10-style multiplexing.
 #ifndef FICGTA01_NO_MUX
