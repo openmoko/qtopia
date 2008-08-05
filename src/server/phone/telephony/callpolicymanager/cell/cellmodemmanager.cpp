@@ -1017,7 +1017,7 @@ QAbstractCallPolicyManager::CallHandling CellModemManager::handling
 
     // If no network registration, then cannot handle at this time.
     if (!networkRegistered()) {
-        error += tr("Cell not registered (%1 %2 %3 %4).<br>").arg(registrationState()).arg(state()).arg(d->m_regState).arg(d->m_netReg->registrationState());
+        error += tr("GSM Phone is not registered. %1.<br>").arg(registrationMessage());
         return CannotHandle;
     }
 

@@ -123,7 +123,7 @@ QAbstractCallPolicyManager::CallHandling AsteriskManager::handling
 
     // If no network registration, then cannot handle at this time.
     if (registrationState() != QTelephony::RegistrationHome) {
-        error += tr("Asterisk is not registered to the home network (%1).<br>").arg(registrationState());
+        error += tr("Asterisk is not registered to the home network.<br>").arg(registrationState());
         return CannotHandle;
     }
 

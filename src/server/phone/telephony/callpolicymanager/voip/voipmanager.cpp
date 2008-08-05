@@ -104,7 +104,7 @@ QAbstractCallPolicyManager::CallHandling VoIPManager::handling
 {
     // If no network registration, then cannot use this to dial.
     if ( registrationState() != QTelephony::RegistrationHome ) {
-        error += tr("VoIP is not registered to the home network (%1).<br>").arg(registrationState());
+        error += tr("VoIP is not registered to the home network.<br>").arg(registrationState());
         return CannotHandle;
     }
 
