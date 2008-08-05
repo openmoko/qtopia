@@ -47,7 +47,7 @@ SimPinDialog::SimPinDialog(QWidget* parent)
     m_status->setTextFormat(Qt::RichText);
 
     connect(m_cellModem, SIGNAL(stateChanged(CellModemManager::State, CellModemManager::State)),
-            SLOT(stateChanged(CellModemManager::State, CellModemManager::State)));
+            SLOT(stateChanged(CellModemManager::State, CellModemManager::State)), Qt::QueuedConnection);
 
     // Be safe and call stateChanged at least once
     checkStatus();

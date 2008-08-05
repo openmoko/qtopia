@@ -194,6 +194,8 @@ public:
 CellModemManager::CellModemManager(QObject *parent)
 : QAbstractCallPolicyManager(parent), d(new CellModemManagerPrivate)
 {
+    qRegisterMetaType<CellModemManager::State>("CellModemManager::State");
+
     Q_ASSERT(!cellModemManagerInstance);
     cellModemManagerInstance = true;
 
