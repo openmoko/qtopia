@@ -893,6 +893,9 @@ void CellModemManager::doInitialize2()
     doStateChanged(Initializing2);
     tryDoReady();
     tryDoAerialOff();
+
+    // force sending COPS=0 at least once
+    d->m_netReg->setCurrentOperator(QTelephony::OperatorModeAutomatic);
 }
 
 /* Moves to Ready state if it can. */
