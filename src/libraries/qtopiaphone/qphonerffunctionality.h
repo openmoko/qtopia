@@ -53,6 +53,7 @@ public slots:
 
 signals:
     void levelChanged();
+    void levelQueryFailed();
     void setLevelResult( QTelephony::Result result );
 };
 

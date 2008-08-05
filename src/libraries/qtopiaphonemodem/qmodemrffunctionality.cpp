@@ -84,7 +84,7 @@ void QModemRfFunctionality::setLevel( QPhoneRfFunctionality::Level level )
           new QCFunUserData( level ) );
 }
 
-void QModemRfFunctionality::cfun( bool, const QAtResult& result )
+void QModemRfFunctionality::cfun( bool ok, const QAtResult& result )
 {
     QAtResultParser parser( result );
     if ( parser.next( "+CFUN:" ) ) {
@@ -92,6 +92,9 @@ void QModemRfFunctionality::cfun( bool, const QAtResult& result )
         setValue( "level", qVariantFromValue( level ) );
         emit levelChanged();
     }
+
+    if ( !ok )
+        emit levelQueryFailed();
 }
 
 void QModemRfFunctionality::cfunSet( bool ok, const QAtResult& result )

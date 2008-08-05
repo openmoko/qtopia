@@ -237,7 +237,7 @@ CellModemManager::CellModemManager(QObject *parent)
     QObject::connect(d->m_rfFunc,
                      SIGNAL(levelChanged()), this, SLOT(rfLevelChanged()));
     QObject::connect(d->m_rfFunc,
-                     SIGNAL(setLevelResult(QTelephony::Result)), this, SLOT(rfLevelResult(QTelephony::Result)));
+                     SIGNAL(levelQueryFailed()), this, SLOT(retryRfLevelRequest()));
 
     d->m_callForwarding = new QCallForwarding("modem", this);
     QObject::connect(d->m_callForwarding,
@@ -388,16 +388,6 @@ void CellModemManager::rfLevelChanged()
         tryDoAerialOff();
         tryDoReady();
     }
-}
-
-void CellModemManager::rfLevelResult(QTelephony::Result result)
-{
-    // We need to try it again and again...
-    if (result != QTelephony::OK) {
-        qLog(Modem) << __PRETTY_FUNCTION__ << "CFUN failed scheduling retry. result was " << result << state();
-        QTimer::singleShot(1000, this, SLOT(retryRfLevelRequest()));
-    }
-
 }
 
 void CellModemManager::retryRfLevelRequest()
