@@ -16,6 +16,7 @@
 #include <QHBoxLayout>
 #include <QLineEdit>
 #include <QLabel>
+#include <QMenu>
 #include <QSoftMenuBar>
 #include <QTimer>
 
@@ -32,7 +33,10 @@ SimPinDialog::SimPinDialog(QWidget* parent)
 {
     hide();
     QtopiaApplication::prepareMainWidget(this);
+
     QSoftMenuBar::setLabel(this, Qt::Key_Back, QString(), tr("Enter"));
+    QMenu* dummyMenu = new QMenu(this);
+    QSoftMenuBar::addMenuTo(this, dummyMenu);
 
     m_cellModem = qtopiaTask<CellModemManager>();
     Q_ASSERT(m_cellModem);
@@ -49,11 +53,13 @@ SimPinDialog::SimPinDialog(QWidget* parent)
     m_pinLabel = new QLabel(this);
     m_pinEntry = new QLineEdit(this);
     m_pinEntry->setEchoMode(QLineEdit::Password);
+    QSoftMenuBar::addMenuTo(m_pinEntry, dummyMenu);
     m_pinLabel->setBuddy(m_pinEntry);
 
     m_pukLabel = new QLabel(this);
     m_pukEntry = new QLineEdit(this);
     m_pukEntry->setEchoMode(QLineEdit::Password);
+    QSoftMenuBar::addMenuTo(m_pukEntry, dummyMenu);
     m_pukLabel->setBuddy(m_pukEntry);
 
     QFormLayout* layout = new QFormLayout(this);
