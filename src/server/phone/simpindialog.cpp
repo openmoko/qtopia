@@ -65,7 +65,7 @@ void SimPinDialog::initializePinEntry()
 
     if (!m_pinEntry) {
         m_pinEntry = new QLineEdit(this);
-        m_pinEntry->setEchoMode(QLineEdit::PasswordEchoOnEdit);
+        m_pinEntry->setEchoMode(QLineEdit::Password);
     }
 }
 
@@ -76,7 +76,7 @@ void SimPinDialog::initializePukEntry()
 
     if (!m_pukEntry) {
         m_pukEntry = new QLineEdit(this);
-        m_pukEntry->setEchoMode(QLineEdit::PasswordEchoOnEdit);
+        m_pukEntry->setEchoMode(QLineEdit::Password);
     }
 }
 
