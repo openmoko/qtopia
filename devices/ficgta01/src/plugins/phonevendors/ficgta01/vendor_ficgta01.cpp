@@ -420,6 +420,11 @@ Ficgta01ModemService::Ficgta01ModemService
     // to the next command that is sent afterwards.
     primaryAtChat()->registerWakeupCommand( QChar(0x1a), 5000 );
 
+    // Attempt to reset the modem
+    chat("AT%CWUP=1");
+    chat("AT+CFUN=0");
+
+
     // Turn on dynamic signal quality notifications.
     // Register for "%CSQ" notifications to get signal quality updates.
      primaryAtChat()->registerNotificationType
