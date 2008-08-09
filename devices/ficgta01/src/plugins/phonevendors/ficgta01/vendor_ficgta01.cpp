@@ -418,7 +418,7 @@ Ficgta01ModemService::Ficgta01ModemService
     // sent anything during the last 5 seconds.  This command may
     // not get a response, but the modem should then become responsive
     // to the next command that is sent afterwards.
-    primaryAtChat()->registerWakeupCommand( "ATE0", 5000 );
+    primaryAtChat()->registerWakeupCommand( QChar(0x1a), 5000 );
 
     // Turn on dynamic signal quality notifications.
     // Register for "%CSQ" notifications to get signal quality updates.
