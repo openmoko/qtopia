@@ -26,6 +26,8 @@
 
 #include <qgsm0710multiplexer.h>
 #include <qserialport.h>
+#include <qtopialog.h>
+
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -72,15 +74,29 @@ bool Ficgta01MultiplexerPlugin::detect( QSerialIODevice *device )
     t.c_cflag |= CRTSCTS;
     rc = tcsetattr(port->fd(), TCSANOW, &t);
 
+    // Make the modem talk to us. It can be a bit rough to get
+    // it initialized... So we will empty the current buffer
+    // and then send ^Z\r\n and wait for an OK or AT from the modem. This is
+    // mostly based on ideas from ogsmd
+    device->readAll();
+    int attempts = 0;
+    for (; attempts < 10; ++attempts) {
+        if (QSerialIODeviceMultiplexer::chat(device, QChar(0x1a))) {
+            qLog(Modem) << "Attempts needed to initialize the modem" << attempts;
+            break;
+        }
+    }
 
-    // Issue an innocuous command to wake up the device. And send some more to make sure it is listening
-    // It will respond with either "OK" or "AT-Command Interpreter ready".
-    // We will do this up to 10 times as the modem is losing the first at commands (due waking up)
-    for (int i = 0; i < 5; ++i)
-        QSerialIODeviceMultiplexer::chat( device, "ATZ");
-        
-    int attempts = 10;
-    while (--attempts >= 0 && !QSerialIODeviceMultiplexer::chat( device, "ATZ"));
+    if (attempts == 10) {
+        qWarning() << "Initializing the modem failed. What should one do?... abort";
+        abort();
+    }
+
+
+    // disable echoing of commands
+    QSerialIODeviceMultiplexer::chat(device, "ATE0");
+    device->readAll();
+
 
     // Issue the AT+CMUX command to determine if this device
     // uses GSM 07.10-style multiplexing.
