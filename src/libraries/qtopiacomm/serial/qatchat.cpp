@@ -959,6 +959,13 @@ void QAtChat::prime()
         return;
     }
 
+    // Did we send a wakeup command and didn't wait for the timeout yet? The command
+    // should get send from performWakeup where  we prime again.
+    if ( d->wakeupInProgress ) {
+        qLog(AtChat) << "Trying to prime a command while wakeup is active" << cmd->d->command;
+        return;
+    }
+
     // Do we need to perform a wakeup on the device?
     if ( d->wakeupActive ) {
         if ( d->lastSendTime.elapsed() >= d->wakeupTime ) {
