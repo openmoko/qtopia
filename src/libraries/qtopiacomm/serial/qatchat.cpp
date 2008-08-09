@@ -870,8 +870,8 @@ void QAtChat::incoming()
             // path). So send the line through the prefixmatcher to send out
             // notifications.
             if ( d->wakeupInProgress ) {
+                qLog(AtChat) << "W :" << d->line;
                 int result = d->matcher->lookup( d->line, d->wakeupCommand );
-                qLog(AtChat) << "W :" << d->line << result;
             } else {
                 resetTimer |= processLine( d->line );
             }
