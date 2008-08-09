@@ -93,6 +93,7 @@ private:
     void queue( QAtChatCommand *command );
     void done();
     bool writeLine( const QString& line );
+    bool write( const QString& line );
     void writePduLine( const QString& line );
     bool processLine( const QString& line );
 

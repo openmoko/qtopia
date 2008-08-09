@@ -682,6 +682,26 @@ bool QAtChat::writeLine( const QString& line )
     return result;
 }
 
+bool QAtChat::write( const QString& line )
+{
+    bool result;
+    if ( ! d->device->isValid() ) {
+        if ( !d->noModemReported ) {
+            qWarning() << "**********************************************************";
+            qWarning() << "* WARNING: Failed to open modem device";
+            qWarning() << "* Modem functions will be disabled";
+            qWarning() << "**********************************************************";
+            d->noModemReported = true;
+        }
+        result = false;
+    } else {
+        d->device->write( line.toLatin1() );
+        result = true;
+    }
+    qLog(AtChat) << d->toChar << ":" << line;
+    return result;
+}
+
 void QAtChat::writePduLine( const QString& line )
 {
     if ( ! d->device->isValid() )
@@ -939,7 +959,7 @@ void QAtChat::retryTimeout()
 void QAtChat::performWakeup()
 {
     d->wakeupInProgress = true;
-    writeLine( d->wakeupCommand );
+    write( d->wakeupCommand );
     d->lastSendTime.restart();
     QTimer::singleShot( 500, this, SLOT(wakeupFinished()) );
 }
