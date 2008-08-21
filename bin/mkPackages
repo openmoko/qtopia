@@ -43,7 +43,7 @@ if [ -z $2 ]; then
     URL=""
 else
     if [ $2 = "--descriptors" ]; then
-        URL=$3
+        URL=${3%/}
     else
         echo "Dont understand \"$2\""
         usage

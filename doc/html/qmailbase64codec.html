@@ -45,7 +45,7 @@
 <p>An instance of QMailBase64Codec contains state information about the encoding or decoding operation it performs, so an instance should be used for a single coding operation only:</p>
 <pre>    QString textData = acquireInput();
 
-<span class="comment">    //</span> Encode the string data to a UTF-8 byte sequence, and then encode to Base64
+<span class="comment">    // Encode the string data to a UTF-8 byte sequence, and then encode to Base64</span>
     QMailBase64Codec encoder;
     QByteArray base64Data = encoder.encode(textData, &quot;UTF-8&quot;);</pre>
 <p>See also <a href="qmailcodec.html">QMailCodec</a>.</p>

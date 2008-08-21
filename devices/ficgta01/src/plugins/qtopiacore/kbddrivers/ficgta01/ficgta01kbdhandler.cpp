@@ -56,7 +56,7 @@ bool operator==(const input_id& left, const input_id& right)
         left.version == right.version;
 }
 
-FicLinuxInputEventHandler::FicLinuxInputEventHandler(QObject* parent)
+ FicLinuxInputEventHandler::FicLinuxInputEventHandler(QObject* parent)
     : QObject(parent)
     , m_fd(-1)
     , m_notifier(0)
@@ -153,6 +153,7 @@ Ficgta01KbdHandler::Ficgta01KbdHandler()
 
     bool ok;
 
+    powerHandler = new FicLinuxInputEventHandler(this);
     if (QFileInfo("/dev/input/event4").exists()){
         ok =  powerHandler->openByName("GTA02 PMU events");
     } else {
@@ -182,7 +183,7 @@ Ficgta01KbdHandler::~Ficgta01KbdHandler()
 void Ficgta01KbdHandler::inputEvent(struct input_event& event)
 {
 
-    if(event.type == 0)
+    if(event.type ==  EV_SYN/* || event.type ==  EV_SW */)
         return;
 
     bool isPress = (event.value);
@@ -205,13 +206,13 @@ void Ficgta01KbdHandler::inputEvent(struct input_event& event)
 
     case SW_HEADPHONE_INSERT: //x02
     {
-        QtopiaIpcEnvelope e("QPE/Neo1973Hardware", "headphonesInserted(bool)");
-        e <<  ((isPress)!=0);
+        QtopiaIpcEnvelope e("QPE/NeoHardware", "headphonesInserted(bool)");
+        e <<  isPress;
     }
     break;
     case KEY_POWER2:
     {
-        QtopiaIpcEnvelope e2("QPE/Neo1973Hardware", "cableConnected(bool)");
+        QtopiaIpcEnvelope e2("QPE/NeoHardware", "cableConnected(bool)");
         e2 <<  ((isPress)!=0);
     }
     break;

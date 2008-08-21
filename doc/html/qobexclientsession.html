@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QObexClientSession Class Reference</h1>
 <p>The QObexClientSession class provides an implementation of the client side of the OBEX protocol. <a href="#details">More...</a></p>
-<pre>    #include &lt;QObexClientSession&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QObexClientSession&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qobexclientsession-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -51,7 +51,7 @@
 <li><div class="fn"/>int <b><a href="qobexclientsession.html#setPath">setPath</a></b> ( const QObexHeader &amp; <i>header</i>, QObex::SetPathFlags <i>flags</i> = 0 )</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -59,7 +59,7 @@
 <li><div class="fn"/>void <b><a href="qobexclientsession.html#abort">abort</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -74,21 +74,21 @@
 <li><div class="fn"/>void <b><a href="qobexclientsession.html#responseHeaderReceived">responseHeaderReceived</a></b> ( const QObexHeader &amp; <i>header</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
 <p>The QObexClientSession class provides an implementation of the client side of the OBEX protocol.</p>
-<p>A QObexClientSession can be used over any type of transport that is accessible through a subclass of <a href="./qiodevice.html">QIODevice</a>. For example, <a href="qbluetoothrfcommsocket.html">QBluetoothRfcommSocket</a>, <a href="qirsocket.html">QIrSocket</a> and <a href="./qtcpsocket.html">QTcpSocket</a> are all subclasses of <a href="./qiodevice.html">QIODevice</a>, and objects of these subclasses can passed to the QObexClientSession constructor to run an OBEX client over RFCOMM, IrDA or TCP, respectively.</p>
+<p>A QObexClientSession can be used over any type of transport that is accessible through a subclass of <a href="qiodevice.html">QIODevice</a>. For example, <a href="qbluetoothrfcommsocket.html">QBluetoothRfcommSocket</a>, <a href="qirsocket.html">QIrSocket</a> and <a href="qtcpsocket.html">QTcpSocket</a> are all subclasses of <a href="qiodevice.html">QIODevice</a>, and objects of these subclasses can passed to the QObexClientSession constructor to run an OBEX client over RFCOMM, IrDA or TCP, respectively.</p>
 <p>QObexClientSession performs OBEX requests asynchronously and depends on the presence of a running event loop.</p>
 <ul><li><a href="#executing-obex-client-requests">Executing OBEX client requests</a></li>
 <li><a href="#multiplexing-and-connection-ids">Multiplexing and Connection IDs</a></li>
@@ -148,12 +148,12 @@
 <p>Note that the Connection Id will not be automatically added if a request already contains a <tt>Target</tt> header, as a request cannot have both of these headers at the same time. (If it did, the server would be unsure as to whether the client was establishing a new directed connection or using an existing connection.)</p>
 <a name="handling-socket-disconnections"></a>
 <h3>Handling socket disconnections</h3>
-<p>You should ensure that the <a href="./qiodevice.html">QIODevice</a> provided in the constructor emits <a href="./qiodevice.html#aboutToClose">QIODevice::aboutToClose</a>() or <a href="./qobject.html#destroyed">QObject::destroyed</a>() when the associated transport connection is disconnected. If one of these signals are emitted while a request is in progress, QObexClientSession will know the transport connection has been lost, and will emit <a href="qobexclientsession.html#requestFinished">requestFinished</a>() with <tt>error</tt> set to <tt>true</tt>, and <a href="qobexclientsession.html#error">error</a>() will return <a href="qobexclientsession.html#Error-enum">ConnectionError</a>.</p>
-<p>This is particularly an issue for socket classes such as <a href="./qtcpsocket.html">QTcpSocket</a> that do not emit <a href="./qiodevice.html#aboutToClose">QIODevice::aboutToClose</a>() when a <tt>disconnected()</tt> signal is emitted. In these cases, QObexClientSession will not know that the transport has been disconnected. To avoid this, you can make the socket emit <a href="./qiodevice.html#aboutToClose">QIODevice::aboutToClose</a>() when it is disconnected:</p>
-<pre><span class="comment">    //</span> make the socket emit aboutToClose() when disconnected() is emitted
+<p>You should ensure that the <a href="qiodevice.html">QIODevice</a> provided in the constructor emits <a href="qiodevice.html#aboutToClose">QIODevice::aboutToClose</a>() or <a href="qobject.html#destroyed">QObject::destroyed</a>() when the associated transport connection is disconnected. If one of these signals are emitted while a request is in progress, QObexClientSession will know the transport connection has been lost, and will emit <a href="qobexclientsession.html#requestFinished">requestFinished</a>() with <tt>error</tt> set to <tt>true</tt>, and <a href="qobexclientsession.html#error">error</a>() will return <a href="qobexclientsession.html#Error-enum">ConnectionError</a>.</p>
+<p>This is particularly an issue for socket classes such as <a href="qtcpsocket.html">QTcpSocket</a> that do not emit <a href="qiodevice.html#aboutToClose">QIODevice::aboutToClose</a>() when a <tt>disconnected()</tt> signal is emitted. In these cases, QObexClientSession will not know that the transport has been disconnected. To avoid this, you can make the socket emit <a href="qiodevice.html#aboutToClose">QIODevice::aboutToClose</a>() when it is disconnected:</p>
+<pre><span class="comment">    // make the socket emit aboutToClose() when disconnected() is emitted</span>
     QObject::connect(socket, SIGNAL(disconnected()), socket, SIGNAL(aboutToClose()));</pre>
 <p>Or, if the socket can be discarded as soon as it is disconnected:</p>
-<pre><span class="comment">    //</span> delete the socket when the transport is disconnected
+<pre><span class="comment">    // delete the socket when the transport is disconnected</span>
     QObject::connect(socket, SIGNAL(disconnected()), socket, SLOT(deleteLater()));</pre>
 <p>See also <a href="qobexserversession.html">QObexServerSession</a>.</p>
 <hr />
@@ -163,7 +163,7 @@
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
 <tr><td valign="top"><tt>QObexClientSession::NoError</tt></td><td align="center" valign="top"><tt>0</tt></td><td valign="top">No error has occurred.</td></tr>
-<tr><td valign="top"><tt>QObexClientSession::ConnectionError</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The client is unable to send data, or the client-server communication process is otherwise disrupted. In this case, the client and server are no longer synchronized with each other, so the <a href="./qiodevice.html">QIODevice</a> provided in the constructor should not be used for any more OBEX requests.</td></tr>
+<tr><td valign="top"><tt>QObexClientSession::ConnectionError</tt></td><td align="center" valign="top"><tt>1</tt></td><td valign="top">The client is unable to send data, or the client-server communication process is otherwise disrupted. In this case, the client and server are no longer synchronized with each other, so the <a href="qiodevice.html">QIODevice</a> provided in the constructor should not be used for any more OBEX requests.</td></tr>
 <tr><td valign="top"><tt>QObexClientSession::RequestFailed</tt></td><td align="center" valign="top"><tt>2</tt></td><td valign="top">The request was refused by the server (i.e&#x2e; the server responded with a response code other than <a href="qobex.html#ResponseCode-enum">QObex::Success</a>).</td></tr>
 <tr><td valign="top"><tt>QObexClientSession::InvalidRequest</tt></td><td align="center" valign="top"><tt>3</tt></td><td valign="top">The client request is invalid.</td></tr>
 <tr><td valign="top"><tt>QObexClientSession::InvalidResponse</tt></td><td align="center" valign="top"><tt>4</tt></td><td valign="top">The server sent an invalid or unreadable response.</td></tr>
@@ -173,8 +173,8 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QObexClientSession"></a>QObexClientSession::QObexClientSession ( <a href="./qiodevice.html">QIODevice</a> * <i>device</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs an OBEX client session that uses <i>device</i> for the transport connection. The <i>parent</i> is the <a href="./qobject.html">QObject</a> parent.</p>
+<h3 class="fn"><a name="QObexClientSession"></a>QObexClientSession::QObexClientSession ( <a href="qiodevice.html">QIODevice</a> * <i>device</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs an OBEX client session that uses <i>device</i> for the transport connection. The <i>parent</i> is the <a href="qobject.html">QObject</a> parent.</p>
 <p>The <i>device</i> must be opened in order to perform client requests. Otherwise, requests will fail with the <a href="qobexclientsession.html#Error-enum">QObexClientSession::ConnectionError</a> error.</p>
 <h3 class="fn"><a name="dtor.QObexClientSession"></a>QObexClientSession::~QObexClientSession ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the client.</p>
@@ -193,7 +193,7 @@
 <p>Set <i>accept</i> to <tt>true</tt> if the authentication details in <i>response</i> are correct. If <i>accept</i> is set to <tt>true</tt>, the request will continue. Otherwise, the <a href="qobexclientsession.html#requestFinished">requestFinished</a>() signal will be emitted with the <tt>error</tt> argument set to <tt>true</tt>, and the <a href="qobexclientsession.html#error">error</a>() function will return <a href="qobexclientsession.html#Error-enum">QObexClientSession::AuthenticationFailed</a>.</p>
 <p>To issue an authentication challenge to the server, send a request with a <a href="qobexheader.html">QObexHeader</a> object that includes an authentication challenge (by calling <a href="qobexheader.html#setAuthenticationChallenge">QObexHeader::setAuthenticationChallenge</a>()).</p>
 <p><b>Note:</b> It is not possible to use a QueuedConnection to connect to this signal, as <i>accept</i> will automatically be set to <tt>false</tt> if its value has not been set when the signal returns.</p>
-<h3 class="fn"><a name="bytesAvailable"></a><a href="./qtglobal.html#qint64-typedef">qint64</a> QObexClientSession::bytesAvailable () const</h3>
+<h3 class="fn"><a name="bytesAvailable"></a><a href="qtglobal.html#qint64-typedef">qint64</a> QObexClientSession::bytesAvailable () const</h3>
 <p>Returns the number of bytes that can be read from <a href="qobexclientsession.html#read">read</a>() or <a href="qobexclientsession.html#readAll">readAll</a>() at the moment.</p>
 <p>See also <a href="qobexclientsession.html#read">read</a>(), <a href="qobexclientsession.html#readyRead">readyRead</a>(), <a href="qobexclientsession.html#readAll">readAll</a>(), and <a href="qobexclientsession.html#get">get</a>().</p>
 <h3 class="fn"><a name="clearPendingRequests"></a>void QObexClientSession::clearPendingRequests ()</h3>
@@ -204,14 +204,14 @@
 <p>The function does not block and returns immediately. The request is scheduled, and executed asynchronously.</p>
 <p>This function returns a unique identifier for the request. This identifier is passed by the <a href="qobexclientsession.html#requestStarted">requestStarted</a>() signal when the request starts, and by the <a href="qobexclientsession.html#requestFinished">requestFinished</a>() signal when the request is finished.</p>
 <p>See also <a href="qobexclientsession.html#done">done</a>().</p>
-<h3 class="fn"><a name="connectionId"></a><a href="./qtglobal.html#quint32-typedef">quint32</a> QObexClientSession::connectionId () const</h3>
+<h3 class="fn"><a name="connectionId"></a><a href="qtglobal.html#quint32-typedef">quint32</a> QObexClientSession::connectionId () const</h3>
 <p>Returns the client's Connection Id, or 0 if it does not have a connection Id.</p>
 <p>The Connection Id is used for directed OBEX connections. If the client sends a <tt>Connect</tt> request with a <tt>Target</tt> header, the OBEX server will include a <tt>Connection Id</tt> header in its response. In this case, the client will automatically send this Connection Id value in all future requests; you do not have to include the <tt>Connection Id</tt> header yourself.</p>
 <p>The Connection Id will be reset following a <tt>Disconnect</tt> request.</p>
 <p>See also <a href="qobexclientsession.html#hasConnectionId">hasConnectionId</a>().</p>
-<h3 class="fn"><a name="currentDevice"></a><a href="./qiodevice.html">QIODevice</a> * QObexClientSession::currentDevice () const</h3>
-<p>Returns the <a href="./qiodevice.html">QIODevice</a> pointer that is used as the data source or data target of the request currently in progress. Returns 0 if the current request does not use an IO device, or if there is no request in progress.</p>
-<p>This function can be used to delete the <a href="./qiodevice.html">QIODevice</a> in a slot connected to the <a href="qobexclientsession.html#requestFinished">requestFinished</a>() signal.</p>
+<h3 class="fn"><a name="currentDevice"></a><a href="qiodevice.html">QIODevice</a> * QObexClientSession::currentDevice () const</h3>
+<p>Returns the <a href="qiodevice.html">QIODevice</a> pointer that is used as the data source or data target of the request currently in progress. Returns 0 if the current request does not use an IO device, or if there is no request in progress.</p>
+<p>This function can be used to delete the <a href="qiodevice.html">QIODevice</a> in a slot connected to the <a href="qobexclientsession.html#requestFinished">requestFinished</a>() signal.</p>
 <p>See also <a href="qobexclientsession.html#put">put</a>() and <a href="qobexclientsession.html#get">get</a>().</p>
 <h3 class="fn"><a name="currentId"></a>int QObexClientSession::currentId () const</h3>
 <p>Returns the identifier of the request that is being executed, or 0 if there is no request being executed.</p>
@@ -219,7 +219,7 @@
 <h3 class="fn"><a name="currentRequest"></a><a href="qobex.html#Request-enum">QObex::Request</a> QObexClientSession::currentRequest () const</h3>
 <p>Returns the request that is being executed, or <a href="qobex.html#Request-enum">QObex::NoRequest</a> if there is no request being executed.</p>
 <p>See also <a href="qobexclientsession.html#currentId">currentId</a>().</p>
-<h3 class="fn"><a name="dataTransferProgress"></a>void QObexClientSession::dataTransferProgress ( <a href="./qtglobal.html#qint64-typedef">qint64</a> <i>done</i>, <a href="./qtglobal.html#qint64-typedef">qint64</a> <i>total</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="dataTransferProgress"></a>void QObexClientSession::dataTransferProgress ( <a href="qtglobal.html#qint64-typedef">qint64</a> <i>done</i>, <a href="qtglobal.html#qint64-typedef">qint64</a> <i>total</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted during file transfer requests to indicate the progress of the transfer. The <i>done</i> value is the number of bytes that have been sent or received so far, and <i>total</i> is the total number of bytes to be sent or received.</p>
 <h3 class="fn"><a name="disconnect"></a>int QObexClientSession::disconnect ( const <a href="qobexheader.html">QObexHeader</a> &amp; <i>header</i> = QObexHeader() )</h3>
 <p>Signals the end of the OBEX session by sending a <tt>Disconnect</tt> request with the given <i>header</i>.</p>
@@ -228,16 +228,16 @@
 <p>See also <a href="qobexclientsession.html#done">done</a>().</p>
 <h3 class="fn"><a name="done"></a>void QObexClientSession::done ( bool <i>error</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when all pending requests have finished; it is emitted after the <a href="qobexclientsession.html#requestFinished">requestFinished</a>() signal for the last request. The <i>error</i> value is <tt>true</tt> if an error occurred during the processing of the request; otherwise <i>error</i> is <tt>false</tt>.</p>
-<p><b>Warning:</b> Do not delete a <a href="qobexclientsession.html">QObexClientSession</a> instance while it is emitting this signal. If you need to delete it, call <a href="./qobject.html#deleteLater">QObject::deleteLater</a>() instead of using the <tt>delete</tt> keyword. (If you do this, you may have to store the instance as a <a href="./qpointer.html">QPointer</a> if you need to check the validity of the pointer later on.)</p>
+<p><b>Warning:</b> Do not delete a <a href="qobexclientsession.html">QObexClientSession</a> instance while it is emitting this signal. If you need to delete it, call <a href="qobject.html#deleteLater">QObject::deleteLater</a>() instead of using the <tt>delete</tt> keyword. (If you do this, you may have to store the instance as a <a href="qpointer.html">QPointer</a> if you need to check the validity of the pointer later on.)</p>
 <h3 class="fn"><a name="error"></a><a href="qobexclientsession.html#Error-enum">Error</a> QObexClientSession::error () const</h3>
 <p>Returns the last error that occurred. This is useful for finding out what happened when receiving an <a href="qobexclientsession.html#requestFinished">requestFinished</a>() or <a href="qobexclientsession.html#done">done</a>() signal that has the <tt>error</tt> argument set to <tt>true</tt>.</p>
 <p>If you start a new request, the error status is reset to <a href="qobexclientsession.html#Error-enum">QObexClientSession::NoError</a>.</p>
 <p>See also <a href="qobexclientsession.html#errorString">errorString</a>().</p>
-<h3 class="fn"><a name="errorString"></a><a href="./qstring.html">QString</a> QObexClientSession::errorString () const</h3>
+<h3 class="fn"><a name="errorString"></a><a href="qstring.html">QString</a> QObexClientSession::errorString () const</h3>
 <p>Returns a human-readable description of the last error that occurred.</p>
 <p>The error string is reset when a new request is started.</p>
 <p>See also <a href="qobexclientsession.html#error">error</a>().</p>
-<h3 class="fn"><a name="get"></a>int QObexClientSession::get ( const <a href="qobexheader.html">QObexHeader</a> &amp; <i>header</i>, <a href="./qiodevice.html">QIODevice</a> * <i>dev</i> = 0 )</h3>
+<h3 class="fn"><a name="get"></a>int QObexClientSession::get ( const <a href="qobexheader.html">QObexHeader</a> &amp; <i>header</i>, <a href="qiodevice.html">QIODevice</a> * <i>dev</i> = 0 )</h3>
 <p>Retrieves a data object through a <tt>Get</tt> request with the given <i>header</i>.</p>
 <p>If <i>dev</i> is not 0, the received data is written to <i>dev</i>. Make sure that the <i>dev</i> pointer is valid for the duration of the request; it is safe to delete it when the <a href="qobexclientsession.html#requestFinished">requestFinished</a>() signal is emitted.</p>
 <p>If <i>dev</i> is 0, the <a href="qobexclientsession.html#readyRead">readyRead</a>() signal is emitted when there is data available to be read. You can then read the data with <a href="qobexclientsession.html#read">read</a>() or <a href="qobexclientsession.html#readAll">readAll</a>().</p>
@@ -258,14 +258,14 @@
 <p>Returns the last response headers received from the server.</p>
 <p>This value is reset when a new request is started.</p>
 <p>See also <a href="qobexclientsession.html#responseHeaderReceived">responseHeaderReceived</a>().</p>
-<h3 class="fn"><a name="put"></a>int QObexClientSession::put ( const <a href="qobexheader.html">QObexHeader</a> &amp; <i>header</i>, <a href="./qiodevice.html">QIODevice</a> * <i>dev</i> )</h3>
-<p>Sends a data object to the server through a <tt>Put</tt> request with the data from <i>dev</i> and the given <i>header</i>. The data is read in chunks from the <a href="./qiodevice.html">QIODevice</a> object, so this allows you to transmit large chunks of data without the need to read all the data into memory at once.</p>
+<h3 class="fn"><a name="put"></a>int QObexClientSession::put ( const <a href="qobexheader.html">QObexHeader</a> &amp; <i>header</i>, <a href="qiodevice.html">QIODevice</a> * <i>dev</i> )</h3>
+<p>Sends a data object to the server through a <tt>Put</tt> request with the data from <i>dev</i> and the given <i>header</i>. The data is read in chunks from the <a href="qiodevice.html">QIODevice</a> object, so this allows you to transmit large chunks of data without the need to read all the data into memory at once.</p>
 <p>Make sure that the <i>dev</i> pointer is valid for the duration of the request; it is safe to delete it when the <a href="qobexclientsession.html#requestFinished">requestFinished</a>() signal is emitted.</p>
 <p>The progress of the data transfer is reported via the <a href="qobexclientsession.html#dataTransferProgress">dataTransferProgress</a>() signal.</p>
 <p>The function does not block and returns immediately. The request is scheduled, and executed asynchronously.</p>
 <p>This function returns a unique identifier for the request. This identifier is passed by the <a href="qobexclientsession.html#requestStarted">requestStarted</a>() signal when the request starts, and by the <a href="qobexclientsession.html#requestFinished">requestFinished</a>() signal when the request is finished.</p>
 <p>See also <a href="qobexclientsession.html#dataTransferProgress">dataTransferProgress</a>(), <a href="qobexclientsession.html#putDelete">putDelete</a>(), and <a href="qobexclientsession.html#done">done</a>().</p>
-<h3 class="fn"><a name="put-2"></a>int QObexClientSession::put ( const <a href="qobexheader.html">QObexHeader</a> &amp; <i>header</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>data</i> )</h3>
+<h3 class="fn"><a name="put-2"></a>int QObexClientSession::put ( const <a href="qobexheader.html">QObexHeader</a> &amp; <i>header</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Sends a data object to the server through a <tt>Put</tt> request with a copy of the data from <i>data</i> and the given <i>header</i>.</p>
 <h3 class="fn"><a name="putDelete"></a>int QObexClientSession::putDelete ( const <a href="qobexheader.html">QObexHeader</a> &amp; <i>header</i> )</h3>
@@ -273,10 +273,10 @@
 <p>The function does not block and returns immediately. The request is scheduled, and executed asynchronously.</p>
 <p>This function returns a unique identifier for the request. This identifier is passed by the <a href="qobexclientsession.html#requestStarted">requestStarted</a>() signal when the request starts, and by the <a href="qobexclientsession.html#requestFinished">requestFinished</a>() signal when the request is finished.</p>
 <p>See also <a href="qobexclientsession.html#done">done</a>().</p>
-<h3 class="fn"><a name="read"></a><a href="./qtglobal.html#qint64-typedef">qint64</a> QObexClientSession::read ( char * <i>data</i>, <a href="./qtglobal.html#qint64-typedef">qint64</a> <i>maxlen</i> )</h3>
+<h3 class="fn"><a name="read"></a><a href="qtglobal.html#qint64-typedef">qint64</a> QObexClientSession::read ( char * <i>data</i>, <a href="qtglobal.html#qint64-typedef">qint64</a> <i>maxlen</i> )</h3>
 <p>Reads <i>maxlen</i> bytes from the response content into <i>data</i> and returns the number of bytes read. Returns -1 if an error occurred.</p>
 <p>See also <a href="qobexclientsession.html#readAll">readAll</a>(), <a href="qobexclientsession.html#bytesAvailable">bytesAvailable</a>(), <a href="qobexclientsession.html#readyRead">readyRead</a>(), and <a href="qobexclientsession.html#get">get</a>().</p>
-<h3 class="fn"><a name="readAll"></a><a href="./qbytearray.html">QByteArray</a> QObexClientSession::readAll ()</h3>
+<h3 class="fn"><a name="readAll"></a><a href="qbytearray.html">QByteArray</a> QObexClientSession::readAll ()</h3>
 <p>Reads all the bytes available from the data buffer and returns them.</p>
 <p>See also <a href="qobexclientsession.html#read">read</a>(), <a href="qobexclientsession.html#readyRead">readyRead</a>(), and <a href="qobexclientsession.html#get">get</a>().</p>
 <h3 class="fn"><a name="readyRead"></a>void QObexClientSession::readyRead ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -287,14 +287,14 @@
 <h3 class="fn"><a name="requestFinished"></a>void QObexClientSession::requestFinished ( int <i>id</i>, bool <i>error</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the client has finished processing the request identified by <i>id</i>. The <i>error</i> value is <tt>true</tt> if an error occurred during the processing of the request; otherwise <i>error</i> is <tt>false</tt>.</p>
 <p><b>Note:</b> <i>error</i> is set to <tt>true</tt> if the server responded with a response code other than <a href="qobex.html#ResponseCode-enum">QObex::Success</a>. In this case, <a href="qobexclientsession.html#error">error</a>() will return <a href="qobexclientsession.html#Error-enum">QObexClientSession::RequestFailed</a>, and <a href="qobexclientsession.html#lastResponseCode">lastResponseCode</a>() will return the response code sent by the server.</p>
-<p><b>Warning:</b> Do not delete a <a href="qobexclientsession.html">QObexClientSession</a> instance while it is emitting this signal. If you need to delete it, call <a href="./qobject.html#deleteLater">QObject::deleteLater</a>() instead of using the <tt>delete</tt> keyword. (If you do this, you may have to store the instance as a <a href="./qpointer.html">QPointer</a> if you need to check the validity of the pointer later on.)</p>
+<p><b>Warning:</b> Do not delete a <a href="qobexclientsession.html">QObexClientSession</a> instance while it is emitting this signal. If you need to delete it, call <a href="qobject.html#deleteLater">QObject::deleteLater</a>() instead of using the <tt>delete</tt> keyword. (If you do this, you may have to store the instance as a <a href="qpointer.html">QPointer</a> if you need to check the validity of the pointer later on.)</p>
 <p>See also <a href="qobexclientsession.html#requestStarted">requestStarted</a>(), <a href="qobexclientsession.html#currentId">currentId</a>(), and <a href="qobexclientsession.html#currentRequest">currentRequest</a>().</p>
 <h3 class="fn"><a name="requestStarted"></a>void QObexClientSession::requestStarted ( int <i>id</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the client has started processing the request identified by <i>id</i>.</p>
 <p>See also <a href="qobexclientsession.html#requestFinished">requestFinished</a>(), <a href="qobexclientsession.html#currentId">currentId</a>(), and <a href="qobexclientsession.html#currentRequest">currentRequest</a>().</p>
 <h3 class="fn"><a name="responseHeaderReceived"></a>void QObexClientSession::responseHeaderReceived ( const <a href="qobexheader.html">QObexHeader</a> &amp; <i>header</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when a response header is received. The <i>header</i> contains the header data that was received.</p>
-<h3 class="fn"><a name="sessionDevice"></a><a href="./qiodevice.html">QIODevice</a> * QObexClientSession::sessionDevice () const</h3>
+<h3 class="fn"><a name="sessionDevice"></a><a href="qiodevice.html">QIODevice</a> * QObexClientSession::sessionDevice () const</h3>
 <p>Returns the device used for this client session, as provided in the constructor.</p>
 <h3 class="fn"><a name="setPath"></a>int QObexClientSession::setPath ( const <a href="qobexheader.html">QObexHeader</a> &amp; <i>header</i>, <a href="qobex.html#SetPathFlag-enum">QObex::SetPathFlags</a> <i>flags</i> = 0 )</h3>
 <p>Sets the remote path on the server through a <tt>SetPath</tt> reqest with the specified <i>flags</i> and the given <i>header</i>.</p>

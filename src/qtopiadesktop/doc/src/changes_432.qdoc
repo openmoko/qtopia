@@ -29,12 +29,18 @@ This page describes changes to Qtopia Sync Agent 4.3.2.
    transferred to Qtopia.
 \o Correctly parse long items so that notes are transferred in full.
 \o The clock does not need to be set the same on the client and desktop.
+\o All day events can now be synchronized correctly between Qtopia and Outlook. This also resolves
+   the problem of events starting and ending at midnight.
+\o Outlook items that are not known to Qtopia Sync Agent but have a last modified timestamp
+   that is before the sync timestamp are now transferred.
+\o Outlook events have their recurrence cleared before being updating to prevent a crash.
+\o Birthdays and anniversaries are no longer duplicated in the calendar.
 \endlist
 
 \section1 Known issues
 
 \list
-\o Appointments starting and ending at midnight are mis-reported as all day events.
+\o None
 \endlist
 
 */

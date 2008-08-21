@@ -28,17 +28,17 @@
 </ul>
 <ul>
 <li><div class="fn"/>7 public functions inherited from <a href="qdplugin.html#public-functions">QDPlugin</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="../qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="../qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="../qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="../qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="../qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="../qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="../qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="../qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -47,13 +47,13 @@
 <p>The sync implementation uses both remote and local plugins. For each dataset supported by the remote system a <a href="qdclientsyncplugin.html">QDClientSyncPlugin</a> instance must be created. The QDClientSyncPluginFactory class allows this creation to happen at the time the sync is started so that the remote system's datasets can be queried.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QDClientSyncPluginFactory"></a>QDClientSyncPluginFactory::QDClientSyncPluginFactory ( <a href="../qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Construct a <a href="qdclientsyncpluginfactory.html">QDClientSyncPluginFactory</a> with <i>parent</i> as the owning <a href="../qobject.html">QObject</a>.</p>
+<h3 class="fn"><a name="QDClientSyncPluginFactory"></a>QDClientSyncPluginFactory::QDClientSyncPluginFactory ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Construct a <a href="qdclientsyncpluginfactory.html">QDClientSyncPluginFactory</a> with <i>parent</i> as the owning <a href="qobject.html">QObject</a>.</p>
 <h3 class="fn"><a name="dtor.QDClientSyncPluginFactory"></a>QDClientSyncPluginFactory::~QDClientSyncPluginFactory ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destructor.</p>
-<h3 class="fn"><a name="datasets"></a><a href="../qstringlist.html">QStringList</a> QDClientSyncPluginFactory::datasets ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="datasets"></a><a href="qstringlist.html">QStringList</a> QDClientSyncPluginFactory::datasets ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns a list of the datasets this factory can handle.</p>
-<h3 class="fn"><a name="pluginForDataset"></a><a href="qdclientsyncplugin.html">QDClientSyncPlugin</a> * QDClientSyncPluginFactory::pluginForDataset ( const <a href="../qstring.html">QString</a> &amp; <i>dataset</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="pluginForDataset"></a><a href="qdclientsyncplugin.html">QDClientSyncPlugin</a> * QDClientSyncPluginFactory::pluginForDataset ( const <a href="qstring.html">QString</a> &amp; <i>dataset</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns a <a href="qdclientsyncplugin.html">QDClientSyncPlugin</a> for <i>dataset</i>. It is recommended to use <a href="centerinterface.html#syncObject">CenterInterface::syncObject</a>() as the parent of any plugins created to ensure they are removed when the sync is finished.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

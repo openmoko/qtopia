@@ -70,7 +70,7 @@
 <p>Images can be provided for the buttons by placing them in <tt>pics/Button/</tt>. The name of the image should be the number of the button as described in <tt>defaultbuttons.conf</tt>. For this example, the image for the calendar button would be <tt>Button/0.png</tt>.</p>
 <pre>    Key=F9</pre>
 <p>This describes the Qt keycode the button maps to. These are the codes listed in <tt>qnamespace.h</tt> found in the Qt include directory.</p>
-<p>If your driver does not already map to the right keycode a custom driver may be required. Driver's can be added by deriving from the <a href="./qwsmousehandler.html">QWSMouseHandler</a> and <a href="./qmousedriverplugin.html">QMouseDriverPlugin</a> classes, or the <a href="./qwskeyboardhandler.html">QWSKeyboardHandler</a> and <a href="./qkbddriverplugin.html">QKbdDriverPlugin</a> classes, and using Qt's plugin mechanism. See the <a href="./plugins-howto.html">How to Create Qt Plugins</a> documentation and the <a href="./tools-plugandpaint.html">Plug &amp; Paint</a> example for details.</p>
+<p>If your driver does not already map to the right keycode a custom driver may be required. Driver's can be added by deriving from the <a href="qwsmousehandler.html">QWSMouseHandler</a> and <a href="qmousedriverplugin.html">QMouseDriverPlugin</a> classes, or the <a href="qwskeyboardhandler.html">QWSKeyboardHandler</a> and <a href="qkbddriverplugin.html">QKbdDriverPlugin</a> classes, and using Qt's plugin mechanism. See the <a href="plugins-howto.html">How to Create Qt Plugins</a> documentation and the <a href="tools-plugandpaint.html">Plug &amp; Paint</a> example for details.</p>
 <pre>    PressedActionService=Calendar
     PressedActionMessage=raiseToday()
     HeldActionService=Calendar

@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QKeyboardLock Class Reference</h1>
 <p>The QKeyboardLock class provides a convenient way of blocking any keyboard input. <a href="#details">More...</a></p>
-<pre>    #include &lt;QKeyboardLock&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QKeyboardLock&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qkeyboardlock-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -29,7 +29,7 @@
 <li><div class="fn"/>void <b><a href="qkeyboardlock.html#unlock">unlock</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -37,16 +37,16 @@
 <li><div class="fn"/>void <b><a href="qkeyboardlock.html#lockedKeyEvent">lockedKeyEvent</a></b> ( uint <i>keycode</i>, ushort <i>unicode</i>, bool <i>isPressed</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -56,21 +56,21 @@
 <p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QKeyboardLock"></a>QKeyboardLock::QKeyboardLock ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QKeyboardLock"></a>QKeyboardLock::QKeyboardLock ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs a new <a href="qkeyboardlock.html">QKeyboardLock</a> instance with the given <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QKeyboardLock"></a>QKeyboardLock::~QKeyboardLock ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destorys the <a href="qkeyboardlock.html">QKeyboardLock</a> instance.</p>
-<h3 class="fn"><a name="exemptions"></a><a href="./qlist.html">QList</a>&lt;<a href="./qt.html#Key-enum">Qt::Key</a>&gt; QKeyboardLock::exemptions () const</h3>
-<p>Returns the keys that are exempt to lock filtering. By default, <a href="./qt.html#Key-enum">Qt::Key_Back</a> and <a href="./qt.html#Key-enum">Qt::Key_No</a> are exempt to allow visible dialogs to be dismissed.</p>
+<h3 class="fn"><a name="exemptions"></a><a href="qlist.html">QList</a>&lt;<a href="qt.html#Key-enum">Qt::Key</a>&gt; QKeyboardLock::exemptions () const</h3>
+<p>Returns the keys that are exempt to lock filtering. By default, <a href="qt.html#Key-enum">Qt::Key_Back</a> and <a href="qt.html#Key-enum">Qt::Key_No</a> are exempt to allow visible dialogs to be dismissed.</p>
 <p>See also <a href="qkeyboardlock.html#setExemptions">setExemptions</a>().</p>
 <h3 class="fn"><a name="isLocked"></a>bool QKeyboardLock::isLocked () const</h3>
 <p>Returns true if the keyboard is locked, false otherwise.</p>
 <h3 class="fn"><a name="lock"></a>void QKeyboardLock::lock ( bool <i>locked</i> = true )</h3>
 <p>Sets the keyboard to <i>locked</i>.</p>
 <p>See also <a href="qkeyboardlock.html#unlock">unlock</a>().</p>
-<h3 class="fn"><a name="lockedKeyEvent"></a>void QKeyboardLock::lockedKeyEvent ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>keycode</i>, <a href="./qtglobal.html#ushort-typedef">ushort</a> <i>unicode</i>, bool <i>isPressed</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="lockedKeyEvent"></a>void QKeyboardLock::lockedKeyEvent ( <a href="qtglobal.html#uint-typedef">uint</a> <i>keycode</i>, <a href="qtglobal.html#ushort-typedef">ushort</a> <i>unicode</i>, bool <i>isPressed</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when a key input has been surpressed. <i>keycode</i>, <i>unicode</i> and <i>isPressed</i> describe the blocked key press.</p>
-<h3 class="fn"><a name="setExemptions"></a>void QKeyboardLock::setExemptions ( const <a href="./qlist.html">QList</a>&lt;<a href="./qt.html#Key-enum">Qt::Key</a>&gt; &amp; <i>exempt</i> )</h3>
+<h3 class="fn"><a name="setExemptions"></a>void QKeyboardLock::setExemptions ( const <a href="qlist.html">QList</a>&lt;<a href="qt.html#Key-enum">Qt::Key</a>&gt; &amp; <i>exempt</i> )</h3>
 <p>Set the keys exempt to lock filtering to <i>exempt</i>.</p>
 <p>See also <a href="qkeyboardlock.html#exemptions">exemptions</a>().</p>
 <h3 class="fn"><a name="unlock"></a>void QKeyboardLock::unlock ()</h3>

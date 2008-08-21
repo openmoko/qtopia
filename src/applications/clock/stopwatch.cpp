@@ -131,6 +131,9 @@ StopWatch::StopWatch( QWidget * parent, Qt::WFlags f )
 
     swFrame->installEventFilter( this );
     totalTime = 0;
+    if (!Qtopia::mousePreferred() )
+      QSoftMenuBar::setLabel( this, Qt::Key_Select,  QSoftMenuBar::Select);
+
     updateClock();
 }
 

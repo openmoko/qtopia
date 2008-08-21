@@ -25,19 +25,19 @@
 </ul>
 <ul>
 <li><div class="fn"/>5 public functions inherited from <a href="qbluetoothabstractservice.html#public-functions">QBluetoothAbstractService</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>2 signals inherited from <a href="qbluetoothabstractservice.html#signals">QBluetoothAbstractService</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>3 protected functions inherited from <a href="qbluetoothabstractservice.html#protected-functions">QBluetoothAbstractService</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -49,16 +49,16 @@
 <p>This class is part of the Qtopia server and cannot be used by other QtopiaApplications.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QBluetoothSerialPortService"></a>QBluetoothSerialPortService::QBluetoothSerialPortService ( const <a href="./qstring.html">QString</a> &amp; <i>serviceID</i>, const <a href="./qstring.html">QString</a> &amp; <i>serviceName</i>, const <a href="qbluetoothsdprecord.html">QBluetoothSdpRecord</a> &amp; <i>record</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QBluetoothSerialPortService"></a>QBluetoothSerialPortService::QBluetoothSerialPortService ( const <a href="qstring.html">QString</a> &amp; <i>serviceID</i>, const <a href="qstring.html">QString</a> &amp; <i>serviceName</i>, const <a href="qbluetoothsdprecord.html">QBluetoothSdpRecord</a> &amp; <i>record</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Creates a Bluetooth serial port service and registers the service using <i>record</i>. This is frequently used when the Serial Port Profile is a prerequisite for another Bluetooth profile that needs access to the modem device, such as the Dial-up Networking Profile:</p>
-<pre><span class="comment">    //</span> Use a file that contains the SDP record data in XML format for creating
-<span class="comment">    //</span> a Dial-Up Networking service.
+<pre><span class="comment">    // Use a file that contains the SDP record data in XML format for creating</span>
+<span class="comment">    // a Dial-Up Networking service.</span>
     QFile file( &quot;dun.xml&quot; );
     QBluetoothSdpRecord record = QBluetoothSdpRecord::fromDevice( &amp;file );
 
     QBluetoothSerialPortService* srv = new QBluetoothSerialPortService( &quot;DialupNetworking&quot;,
             tr(&quot;Dial-up Networking Service&quot;), record );</pre>
-<p>The <i>serviceID</i> is the unique identifier for this Bluetooth service. The user visible (translatable) name for this service is <i>serviceName</i>. <i>parent</i> is the standard parent parameter defined by <a href="./qobject.html">QObject</a>.</p>
+<p>The <i>serviceID</i> is the unique identifier for this Bluetooth service. The user visible (translatable) name for this service is <i>serviceName</i>. <i>parent</i> is the standard parent parameter defined by <a href="qobject.html">QObject</a>.</p>
 <p>A new service is registered in the Qtopia Bluetooth framework when the constructor is called.</p>
 <h3 class="fn"><a name="dtor.QBluetoothSerialPortService"></a>QBluetoothSerialPortService::~QBluetoothSerialPortService ()</h3>
 <p>Destructs this object.</p>

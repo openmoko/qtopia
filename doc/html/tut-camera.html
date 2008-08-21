@@ -72,7 +72,7 @@
             return;
         }
 
-        <span class="comment">//</span> Start capturing the next frame (we alternate between 0 and 1).
+        <span class="comment">// Start capturing the next frame (we alternate between 0 and 1).</span>
         int frame = currentFrame;
         struct video_mmap capture;
         if ( mbuf.frames &gt; 1 ) {
@@ -84,11 +84,11 @@
             ioctl( fd, VIDIOCMCAPTURE, &amp;capture );
         }
 
-        <span class="comment">//</span> Wait for the current frame to complete.
+        <span class="comment">// Wait for the current frame to complete.</span>
         ioctl( fd, VIDIOCSYNC, &amp;frame );
 
-        <span class="comment">//</span> Create an image that refers directly to the kernel's
-        <span class="comment">//</span> frame buffer, to avoid having to copy the data.
+        <span class="comment">// Create an image that refers directly to the kernel's</span>
+        <span class="comment">// frame buffer, to avoid having to copy the data.</span>
         if ( !copy ) {
             img = QImage( frames + mbuf.offsets[frame], width, height,
                           QImage::Format_RGB32 );
@@ -97,7 +97,7 @@
             memcpy( img.bits(), frames + mbuf.offsets[frame], width * height * 4 );
         }
 
-        <span class="comment">//</span> Queue up another frame if the device only supports one at a time.
+        <span class="comment">// Queue up another frame if the device only supports one at a time.</span>
         if ( mbuf.frames &lt;= 1 ) {
             capture.frame = currentFrame;
             capture.width = width;

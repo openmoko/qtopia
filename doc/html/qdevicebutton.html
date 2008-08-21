@@ -55,7 +55,7 @@
 <p>Constructs <a href="qdevicebutton.html">QDeviceButton</a>.</p>
 <h3 class="fn"><a name="dtor.QDeviceButton"></a>QDeviceButton::~QDeviceButton ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destructs <a href="qdevicebutton.html">QDeviceButton</a>.</p>
-<h3 class="fn"><a name="context"></a><a href="./qstring.html">QString</a> QDeviceButton::context () const</h3>
+<h3 class="fn"><a name="context"></a><a href="qstring.html">QString</a> QDeviceButton::context () const</h3>
 <p>Returns the button context. If the context is empty, then the button applies in all contexts. The semantics of non-empty contexts is device specific, but in general the meaning of a context is a certain device state. The Qtopia server defines the context &quot;HomeScreen&quot; such that device button mappings can be made that only apply on the device home screen.</p>
 <p>See also <a href="qdevicebutton.html#setContext">setContext</a>().</p>
 <h3 class="fn"><a name="heldAction"></a><a href="qtopiaservicerequest.html">QtopiaServiceRequest</a> QDeviceButton::heldAction () const</h3>
@@ -65,9 +65,9 @@
 <p>Returns the mappability set for the pressed action.</p>
 <p>See also <a href="qdevicebutton.html#setHeldActionMappable">setHeldActionMappable</a>().</p>
 <h3 class="fn"><a name="keycode"></a>int QDeviceButton::keycode () const</h3>
-<p>Returns the button keycode. See the <a href="./qt.html#Key-enum">Qt::Key</a> enum for the values.</p>
+<p>Returns the button keycode. See the <a href="qt.html#Key-enum">Qt::Key</a> enum for the values.</p>
 <p>See also <a href="qdevicebutton.html#setKeycode">setKeycode</a>().</p>
-<h3 class="fn"><a name="pixmap"></a><a href="./qpixmap.html">QPixmap</a> QDeviceButton::pixmap () const</h3>
+<h3 class="fn"><a name="pixmap"></a><a href="qpixmap.html">QPixmap</a> QDeviceButton::pixmap () const</h3>
 <p>Returns the pixmap for this button, or an empty (null) pixmap if none is defined.</p>
 <p>See also <a href="qdevicebutton.html#setPixmap">setPixmap</a>().</p>
 <h3 class="fn"><a name="pressedAction"></a><a href="qtopiaservicerequest.html">QtopiaServiceRequest</a> QDeviceButton::pressedAction () const</h3>
@@ -82,7 +82,7 @@
 <h3 class="fn"><a name="releasedActionMappable"></a>bool QDeviceButton::releasedActionMappable () const</h3>
 <p>Returns the mappability set for the released action.</p>
 <p>See also <a href="qdevicebutton.html#setReleasedActionMappable">setReleasedActionMappable</a>().</p>
-<h3 class="fn"><a name="setContext"></a>void QDeviceButton::setContext ( const <a href="./qstring.html">QString</a> &amp; <i>context</i> )</h3>
+<h3 class="fn"><a name="setContext"></a>void QDeviceButton::setContext ( const <a href="qstring.html">QString</a> &amp; <i>context</i> )</h3>
 <p>Sets the <i>context</i> where the keycode applies.</p>
 <p>See also <a href="qdevicebutton.html#context">context</a>().</p>
 <h3 class="fn"><a name="setHeldAction"></a>void QDeviceButton::setHeldAction ( const <a href="qtopiaservicerequest.html">QtopiaServiceRequest</a> &amp; <i>action</i> )</h3>
@@ -94,7 +94,7 @@
 <h3 class="fn"><a name="setKeycode"></a>void QDeviceButton::setKeycode ( int <i>keycode</i> )</h3>
 <p>Sets the <i>keycode</i> that is sent when the button is pressed.</p>
 <p>See also <a href="qdevicebutton.html#keycode">keycode</a>().</p>
-<h3 class="fn"><a name="setPixmap"></a>void QDeviceButton::setPixmap ( const <a href="./qstring.html">QString</a> &amp; <i>pmn</i> )</h3>
+<h3 class="fn"><a name="setPixmap"></a>void QDeviceButton::setPixmap ( const <a href="qstring.html">QString</a> &amp; <i>pmn</i> )</h3>
 <p>Set the pixmap for this button to the resource named <i>pmn</i>. This will ideally match the label on the physical button.</p>
 <p>See also <a href="qdevicebutton.html#pixmap">pixmap</a>().</p>
 <h3 class="fn"><a name="setPressedAction"></a>void QDeviceButton::setPressedAction ( const <a href="qtopiaservicerequest.html">QtopiaServiceRequest</a> &amp; <i>action</i> )</h3>
@@ -109,10 +109,10 @@
 <h3 class="fn"><a name="setReleasedActionMappable"></a>void QDeviceButton::setReleasedActionMappable ( bool <i>mappable</i> )</h3>
 <p>Set the mappability of the released action to <i>mappable</i>.</p>
 <p>See also <a href="qdevicebutton.html#releasedActionMappable">releasedActionMappable</a>().</p>
-<h3 class="fn"><a name="setUserText"></a>void QDeviceButton::setUserText ( const <a href="./qstring.html">QString</a> &amp; <i>text</i> )</h3>
+<h3 class="fn"><a name="setUserText"></a>void QDeviceButton::setUserText ( const <a href="qstring.html">QString</a> &amp; <i>text</i> )</h3>
 <p>Sets the human-readable, translated description of the button to <i>text</i>.</p>
 <p>See also <a href="qdevicebutton.html#userText">userText</a>().</p>
-<h3 class="fn"><a name="userText"></a><a href="./qstring.html">QString</a> QDeviceButton::userText () const</h3>
+<h3 class="fn"><a name="userText"></a><a href="qstring.html">QString</a> QDeviceButton::userText () const</h3>
 <p>Returns a human-readable, translated description of the button.</p>
 <p>See also <a href="qdevicebutton.html#setUserText">setUserText</a>().</p>
 <h3 class="fn"><a name="operator-eq-eq"></a>bool QDeviceButton::operator== ( const QDeviceButton &amp; <i>e</i> ) const</h3>

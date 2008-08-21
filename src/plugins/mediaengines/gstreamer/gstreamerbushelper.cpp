@@ -72,6 +72,7 @@ private slots:
             while ((message = gst_bus_poll(it.value(), GST_MESSAGE_ANY, 0)) != 0)
             {
                 it.key()->message(message);
+                gst_message_unref(message);
             }
 
             it.key()->message(Message());

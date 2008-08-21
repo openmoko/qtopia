@@ -26,6 +26,9 @@
 #include <QProcess>
 #include <stdio.h>
 #include <stdlib.h>
+#include <QDesktopWidget>
+#include <QTimer>
+
 
 #include "systemsuspend.h"
 
@@ -43,6 +46,7 @@ public:
     virtual bool canSuspend() const;
     virtual bool suspend();
     virtual bool wake();
+private slots:
 };
 
 QTOPIA_DEMAND_TASK(NeoSuspend, NeoSuspend);
@@ -64,7 +68,10 @@ bool NeoSuspend::suspend()
 {
     qLog(PowerManagement)<<"NeoSuspend::suspend()";
 
-      QFile powerStateFile("/sys/power/state");
+      QProcess apm;
+      apm.start("apm", QStringList() << "-s");
+      apm.waitForFinished(-1);
+/*      QFile powerStateFile("/sys/power/state");
     if( !powerStateFile.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
         qWarning()<<"File not opened";
     } else {
@@ -72,12 +79,13 @@ bool NeoSuspend::suspend()
         out << "mem";
         powerStateFile.close();
     }
+*/
     return true;
 }
 
 bool NeoSuspend::wake()
 {
-    qLog(PowerManagement)<<" NeoSuspend::wake()";
+    QWSServer::instance()->refresh();
 
     QtopiaIpcEnvelope("QPE/Card", "mtabChanged()" ); // might have changed while asleep
 
@@ -97,7 +105,5 @@ bool NeoSuspend::wake()
         QtopiaIpcEnvelope("QPE/NetworkState", "updateNetwork()"); //might have changed
     }
 #endif
-
     return true;
 }
-

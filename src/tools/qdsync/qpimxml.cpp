@@ -493,8 +493,8 @@ void QPimXmlStreamReader::readCustomFieldElements(QPimRecord &record)
             QMapIterator<QString, QString> it(orig);
             while(it.hasNext()) {
                 it.next();
-                // e.g. replace, but not remove.
-                if (result.contains(it.key()))
+                // non-destructive.
+                if (!result.contains(it.key()))
                     result.insert(it.key(), it.value());
             }
         }

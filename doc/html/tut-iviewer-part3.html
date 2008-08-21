@@ -18,7 +18,7 @@
 <p>In this part, the image screen will be introduced. Navigation from the list screen can be done by selecting an image. From the image screen, navigating back to the list screen is possible. The image screen will show the selected image. Later rotating and zooming functions will be added to this screen.</p>
 <a name="setup-the-image-screen"></a>
 <h3>Setup the Image Screen</h3>
-<p>In order to set up the image screen, a similar pattern as for the first screen is used. Instead of deriving from a <a href="./qlistwidget.html">QListWidget</a>, the Image Screen derives from a <a href="./qwidget.html">QWidget</a> for displaying the image.</p>
+<p>In order to set up the image screen, a similar pattern as for the first screen is used. Instead of deriving from a <a href="qlistwidget.html">QListWidget</a>, the Image Screen derives from a <a href="qwidget.html">QWidget</a> for displaying the image.</p>
 <p>File: imagescreen.h</p>
 <pre>    #ifndef IMAGESCREEN_H
     #define IMAGESCREEN_H
@@ -70,7 +70,7 @@
             break;
         }
     }</pre>
-<p>The screen has to be added to our <a href="./qstackedwidget.html">QStackedWidget</a> to be able to switch between the screens. This screen will also get lazily created. For that purpose, a <tt>imageScreen()</tt> method is added to the IViewer class.</p>
+<p>The screen has to be added to our <a href="qstackedwidget.html">QStackedWidget</a> to be able to switch between the screens. This screen will also get lazily created. For that purpose, a <tt>imageScreen()</tt> method is added to the IViewer class.</p>
 <pre>    ImageScreen* IViewer::imageScreen()
     {
         if (!_imageScreen) {
@@ -79,7 +79,7 @@
         }
         return _imageScreen;
     }</pre>
-<p>The _imageScreen needs to be initialized with 0 in the IViewer constructor. Before giving it a run, a way to go back to the list screen from the image screen is needed. The <a href="./qt.html#Key-enum">Qt::Key_Back</a> key will be used to come back to the list screen.</p>
+<p>The _imageScreen needs to be initialized with 0 in the IViewer constructor. Before giving it a run, a way to go back to the list screen from the image screen is needed. The <a href="qt.html#Key-enum">Qt::Key_Back</a> key will be used to come back to the list screen.</p>
 <p>The <tt>doBack()</tt> method is added in that purpose:</p>
 <pre>    void ImageScreen::doBack()
     {
@@ -97,12 +97,12 @@
         s-&gt;setImage(c);
         _viewer-&gt;setCurrentWidget(s);
     }</pre>
-<p>Finally the screen is shown by using the <tt>setCurrentWidget</tt> on the <a href="./qstackedwidget.html">QStackedWidget</a>.</p>
+<p>Finally the screen is shown by using the <tt>setCurrentWidget</tt> on the <a href="qstackedwidget.html">QStackedWidget</a>.</p>
 <p>Now its time to compile and launch the application. When an image is selected and the select key is pressed, a new screen should be opened, but nothing will be painted yet. The back key returns to the list screen.</p>
 <p>Great! Well done.</p>
 <a name="drawing-the-image"></a>
 <h3>Drawing the image</h3>
-<p>The way to draw the image is to load a <a href="./qimage.html">QImage</a> from a file and to paint it with a <a href="./qpainter.html">QPainter</a> on the <a href="./qwidget.html">QWidget</a>. The image should be centred on the screen. To centre the image, the centre of the widget is calculated and half the image's width and height are subtracted.</p>
+<p>The way to draw the image is to load a <a href="qimage.html">QImage</a> from a file and to paint it with a <a href="qpainter.html">QPainter</a> on the <a href="qwidget.html">QWidget</a>. The image should be centred on the screen. To centre the image, the centre of the widget is calculated and half the image's width and height are subtracted.</p>
 <p>File: imagescreen.cpp</p>
 <pre>    void ImageScreen::paintEvent(QPaintEvent* event)
     {
@@ -171,8 +171,8 @@
         painter.drawImage(QPoint(x, y), *_image);
         painter.end();
     }</pre>
-<p>The <tt>translate()</tt> methods are used to translate every x-y coordinates to the center of the widget. Otherwise the image would rotate around the top-left corner ( <a href="./qpoint.html">QPoint</a>(0,0) ). Now, the image can be rotated with the rotate method. The second <tt>translate()</tt> call translates every call back to the top left corner of the now rotated x-y coordinate system. The image is then painted on the top-left corner of this coordination system.</p>
-<p>Instead of calculating the center of the screen manually, the <a href="./qrect.html">QRect</a>.<a href="./qtextstream.html#center">center</a>() method of the <a href="./qwidget.html">QWidget</a>.<a href="themed-view-elements.html#rect">rect</a>() could also have been used. This would also be the preferred way. The documentation provides useful information about the translation and rotation.</p>
+<p>The <tt>translate()</tt> methods are used to translate every x-y coordinates to the center of the widget. Otherwise the image would rotate around the top-left corner ( <a href="qpoint.html">QPoint</a>(0,0) ). Now, the image can be rotated with the rotate method. The second <tt>translate()</tt> call translates every call back to the top left corner of the now rotated x-y coordinate system. The image is then painted on the top-left corner of this coordination system.</p>
+<p>Instead of calculating the center of the screen manually, the <a href="qrect.html">QRect</a>.<a href="qtextstream.html#center">center</a>() method of the <a href="qwidget.html">QWidget</a>.<a href="themed-view-elements.html#rect">rect</a>() could also have been used. This would also be the preferred way. The documentation provides useful information about the translation and rotation.</p>
 <p>After a compilation, the application can be run. Now the rotate actions are available from the rotate menu in the options menu of the image screen.</p>
 <a name="zooming-in-and-out"></a>
 <h3>Zooming in and out</h3>

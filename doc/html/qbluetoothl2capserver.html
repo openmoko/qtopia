@@ -33,18 +33,18 @@
 </ul>
 <ul>
 <li><div class="fn"/>10 public functions inherited from <a href="qbluetoothabstractserver.html#public-functions">QBluetoothAbstractServer</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qbluetoothabstractserver.html#signals">QBluetoothAbstractServer</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -56,11 +56,11 @@
 <p>Call <a href="qbluetoothabstractserver.html#nextPendingConnection">nextPendingConnection</a>() to accept the pending client connection.</p>
 <p>When listening for connections, server address and PSM are available by calling <a href="qbluetoothl2capserver.html#serverAddress">serverAddress</a>() and <a href="qbluetoothl2capserver.html#serverPsm">serverPsm</a>().</p>
 <p>Calling <a href="qbluetoothabstractserver.html#close">close</a>() will make the QBluetoothL2CapServer stop listening for connections and delete all pending connections.</p>
-<pre><span class="comment">    //</span> Create a new L2CapServer on PSM 25
+<pre><span class="comment">    // Create a new L2CapServer on PSM 25</span>
     QBluetoothL2CapServer *server = new QBluetoothL2CapServer;
     server-&gt;listen(QBluetoothAddress::any, 25);
 
-<span class="comment">    //</span> wait for newConnection() signal
+<span class="comment">    // wait for newConnection() signal</span>
 
     QBluetoothL2CapSocket *sock =
         qobject_cast&lt;QBluetoothL2CapSocket *&gt;( sock-&gt;nextPendingConnection() );
@@ -69,7 +69,7 @@
 <p>See also <a href="qbluetoothl2capsocket.html">QBluetoothL2CapSocket</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QBluetoothL2CapServer"></a>QBluetoothL2CapServer::QBluetoothL2CapServer ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QBluetoothL2CapServer"></a>QBluetoothL2CapServer::QBluetoothL2CapServer ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs a new <a href="qbluetoothl2capserver.html">QBluetoothL2CapServer</a> with parent <i>parent</i>. The server is in the UnconnectedState.</p>
 <h3 class="fn"><a name="dtor.QBluetoothL2CapServer"></a>QBluetoothL2CapServer::~QBluetoothL2CapServer ()</h3>
 <p>Destroys the server.</p>

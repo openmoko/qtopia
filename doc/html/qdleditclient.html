@@ -28,7 +28,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>12 public functions inherited from <a href="qdlclient.html#public-functions">QDLClient</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -37,31 +37,31 @@
 </ul>
 <ul>
 <li><div class="fn"/>5 public slots inherited from <a href="qdlclient.html#public-slots">QDLClient</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
 <p>The QDLEditClient class is used to add QDLLinks to rich-text documents.</p>
-<p>QDLEditClient is a subclass of <a href="qdlclient.html">QDLClient</a> which manages the QDLLinks in collaboration with the rich-text in <a href="./qtextedit.html">QTextEdit</a>. This allows the anchor text for QDLLinks to updated as links are added, set, or removed from the client object.</p>
+<p>QDLEditClient is a subclass of <a href="qdlclient.html">QDLClient</a> which manages the QDLLinks in collaboration with the rich-text in <a href="qtextedit.html">QTextEdit</a>. This allows the anchor text for QDLLinks to updated as links are added, set, or removed from the client object.</p>
 <p>See also <a href="qdlclient.html">QDLClient</a> and <a href="qdlbrowserclient.html">QDLBrowserClient</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QDLEditClient"></a>QDLEditClient::QDLEditClient ( <a href="./qtextedit.html">QTextEdit</a> * <i>edit</i>, const <a href="./qstring.html">QString</a> &amp; <i>name</i> )</h3>
+<h3 class="fn"><a name="QDLEditClient"></a>QDLEditClient::QDLEditClient ( <a href="qtextedit.html">QTextEdit</a> * <i>edit</i>, const <a href="qstring.html">QString</a> &amp; <i>name</i> )</h3>
 <p>Constructs a <a href="qdleditclient.html">QDLEditClient</a> with <i>edit</i> as the parent widget. The <a href="qdlclient.html">QDLClient</a> is identified by <i>name</i>, which should be unique within a group of QDLClients. <i>name</i> should only contain alpha-numeric characters, underscores and spaces.</p>
 <p>See also <a href="qdleditclient.html#isValid">isValid</a>().</p>
 <h3 class="fn"><a name="dtor.QDLEditClient"></a>QDLEditClient::~QDLEditClient ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys a QDL Edit Client.</p>
-<h3 class="fn"><a name="hint"></a><a href="./qstring.html">QString</a> QDLEditClient::hint () const</h3>
+<h3 class="fn"><a name="hint"></a><a href="qstring.html">QString</a> QDLEditClient::hint () const</h3>
 <p>Returns the hint used when requesting links.</p>
 <p>See also <a href="qdlclient.html#setHint">QDLClient::setHint</a>().</p>
 <h3 class="fn"><a name="isValid"></a>bool QDLEditClient::isValid () const</h3>
@@ -69,7 +69,7 @@
 <h3 class="fn"><a name="requestLinks"></a>void QDLEditClient::requestLinks ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Requests QDLLinks from a selected QDL source. The user selects the source from a list of available QDL sources. Returned links from the source are automatically added to the client using <a href="qdlclient.html#addLink">QDLEditClient::addLink</a>().</p>
 <p>See also <a href="qdlclient.html#addLink">addLink</a>().</p>
-<h3 class="fn"><a name="setupStandardContextMenu"></a><a href="./qmenu.html">QMenu</a> * QDLEditClient::setupStandardContextMenu ( <a href="./qmenu.html">QMenu</a> * <i>context</i> = 0 )</h3>
+<h3 class="fn"><a name="setupStandardContextMenu"></a><a href="qmenu.html">QMenu</a> * QDLEditClient::setupStandardContextMenu ( <a href="qmenu.html">QMenu</a> * <i>context</i> = 0 )</h3>
 <p>Adds an &quot;Insert Link&quot; action item to <i>context</i> which connects to <a href="qdleditclient.html#requestLinks">QDLEditClient::requestLinks</a>().</p>
 <p>See also <a href="qdleditclient.html#requestLinks">requestLinks</a>().</p>
 <p /><address><hr /><div align="center">

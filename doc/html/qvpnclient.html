@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QVPNClient Class Reference</h1>
 <p>The QVPNClient class abstracts data and state of a virtual private network. <a href="#details">More...</a></p>
-<pre>    #include &lt;QVPNClient&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QVPNClient&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qvpnclient-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -38,7 +38,7 @@
 <li><div class="fn"/>virtual Type <b><a href="qvpnclient.html#type">type</a></b> () const = 0</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -46,7 +46,7 @@
 <li><div class="fn"/>void <b><a href="qvpnclient.html#connectionStateChanged">connectionStateChanged</a></b> ( bool <i>error</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -55,15 +55,15 @@
 <li><div class="fn"/><b><a href="qvpnclient.html#QVPNClient-2">QVPNClient</a></b> ( bool <i>serverMode</i>, uint <i>vpnID</i>, QObject * <i>parent</i> = 0 )</li>
 </ul>
 <ul>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -97,12 +97,12 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QVPNClient"></a>QVPNClient::QVPNClient ( bool <i>serverMode</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="QVPNClient"></a>QVPNClient::QVPNClient ( bool <i>serverMode</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Creates a new <a href="qvpnclient.html">QVPNClient</a> instance with the given <i>parent</i>. <a href="qvpnclient.html">QVPNClient</a> instances can only be created via <a href="qvpnfactory.html#create">QVPNFactory::create</a>().</p>
 <p><i>serverMode</i> determines whether this VPN object operates in server mode. Qtopia applications usually obtain client mode instances of <a href="qvpnclient.html">QVPNClient</a>. In this mode all request are forwarded to the <a href="qtopiavpnmanager.html">QtopiaVpnManager</a> which keeps a reference to a VPNClient instance running in server mode. This allows the synchronization of multiple VPN requests to the same VPN.</p>
 <p>This constructor is used internally by <a href="qvpnfactory.html">QVPNFactory</a> whenever the user creates a new VPN that doesn't exist yet.</p>
 <p>See also <a href="qtopiavpnmanager.html">QtopiaVpnManager</a> and <a href="qvpnfactory.html">QVPNFactory</a>.</p>
-<h3 class="fn"><a name="QVPNClient-2"></a>QVPNClient::QVPNClient ( bool <i>serverMode</i>, <a href="./qtglobal.html#uint-typedef">uint</a> <i>vpnID</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="QVPNClient-2"></a>QVPNClient::QVPNClient ( bool <i>serverMode</i>, <a href="qtglobal.html#uint-typedef">uint</a> <i>vpnID</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Creates a new <a href="qvpnclient.html">QVPNClient</a> instance with the given <i>parent</i>. <a href="qvpnclient.html">QVPNClient</a> instances can only be created via <a href="qvpnfactory.html#create">QVPNFactory::create</a>().</p>
 <p><i>serverMode</i> determines whether this VPN object operates in server mode. Qtopia applications usually obtain client mode instances of <a href="qvpnclient.html">QVPNClient</a>. In this mode all request are forwarded to the <a href="qtopiavpnmanager.html">QtopiaVpnManager</a> which keeps a reference to a VPNClient instance running in server mode. This allows the synchronization of multiple VPN requests to the same VPN.</p>
 <p><i>vpnID</i> acts as an identifier for a particular VPN.</p>
@@ -111,7 +111,7 @@
 <p>Destroys the virtual private network.</p>
 <h3 class="fn"><a name="cleanup"></a>void QVPNClient::cleanup ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Deletes the VPN client and all files associated to it. This function does nothing if the client is still connected.</p>
-<h3 class="fn"><a name="configure"></a><a href="./qdialog.html">QDialog</a> * QVPNClient::configure ( <a href="./qwidget.html">QWidget</a> * <i>parent</i> = 0 )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="configure"></a><a href="qdialog.html">QDialog</a> * QVPNClient::configure ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0 )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the default configuration dialog that is shown to the user when he configures this interface. <i>parent</i> is the parent widget for the returned dialog.</p>
 <h3 class="fn"><a name="connect"></a>void QVPNClient::connect ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>This function starts the VPN connection.</p>
@@ -121,11 +121,11 @@
 <p>This signal must be emitted by subclasses of <a href="qvpnclient.html">QVPNClient</a> when state transitions occur.</p>
 <h3 class="fn"><a name="disconnect"></a>void QVPNClient::disconnect ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>This function stops the active connection.</p>
-<h3 class="fn"><a name="errorString"></a><a href="./qstring.html">QString</a> QVPNClient::errorString () const</h3>
+<h3 class="fn"><a name="errorString"></a><a href="qstring.html">QString</a> QVPNClient::errorString () const</h3>
 <p>Returns a human-readable description of the last error that occurred. This is useful for presenting an error message to the user when receiving a <a href="qvpnclient.html#connectionStateChanged">connectionStateChanged</a>() signal with the error argument set to true;</p>
-<h3 class="fn"><a name="id"></a><a href="./qtglobal.html#uint-typedef">uint</a> QVPNClient::id () const</h3>
+<h3 class="fn"><a name="id"></a><a href="qtglobal.html#uint-typedef">uint</a> QVPNClient::id () const</h3>
 <p>Returns the unique ID of this virtual private network.</p>
-<h3 class="fn"><a name="name"></a><a href="./qstring.html">QString</a> QVPNClient::name () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QVPNClient::name () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns the user set name for this VPN.</p>
 <h3 class="fn"><a name="state"></a><a href="qvpnclient.html#State-enum">State</a> QVPNClient::state () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the current state of this VPN client.</p>

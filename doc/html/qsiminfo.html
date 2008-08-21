@@ -25,7 +25,7 @@
 <li><div class="fn"/><b><a href="qsiminfo.html#insertedTime-prop">insertedTime</a></b> : const QDateTime</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 </ul>
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
@@ -38,7 +38,7 @@
 <ul>
 <li><div class="fn"/>1 public function inherited from <a href="qcomminterface.html#public-functions">QCommInterface</a></li>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -49,7 +49,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -58,14 +58,14 @@
 </ul>
 <ul>
 <li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -76,13 +76,13 @@
 <p>If the modem eventually determines that there is no SIM present at all, the <a href="qsiminfo.html#notInserted">notInserted</a>() signal will be emitted. Note that some modems cannot tell the difference between a missing SIM and a SIM which is not yet ready for use, so the <a href="qsiminfo.html#notInserted">notInserted</a>() signal may not be reliable. It is the responsibility of modem vendor plug-ins to correctly implement the <a href="qsiminfo.html#notInserted">notInserted</a>() feature.</p>
 <hr />
 <h2>Property Documentation</h2>
-<h3 class="fn"><a name="identity-prop"></a>identity : const <a href="./qstring.html">QString</a></h3>
+<h3 class="fn"><a name="identity-prop"></a>identity : const <a href="qstring.html">QString</a></h3>
 <p>This property holds the identity of the SIM.</p>
 <p>Access functions:</p>
 <ul>
 <li><div class="fn"/><b>QString identity () const</b></li>
 </ul>
-<h3 class="fn"><a name="insertedTime-prop"></a>insertedTime : const <a href="./qdatetime.html">QDateTime</a></h3>
+<h3 class="fn"><a name="insertedTime-prop"></a>insertedTime : const <a href="qdatetime.html">QDateTime</a></h3>
 <p>This property holds the date and time of the last time the SIM was detected as inserted.</p>
 <p>Access functions:</p>
 <ul>
@@ -90,7 +90,7 @@
 </ul>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QSimInfo"></a>QSimInfo::QSimInfo ( const <a href="./qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="./qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
+<h3 class="fn"><a name="QSimInfo"></a>QSimInfo::QSimInfo ( const <a href="qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
 <p>Construct a new SIM information object for <i>service</i> and attach it to <i>parent</i>. The object will be created in client mode if <i>mode</i> is Client, or server mode otherwise.</p>
 <p>If <i>service</i> is empty, this class will use the first available service that supports SIM information. If there is more than one service that supports SIM information, the caller should enumerate them with <a href="qabstractipcinterfacegroupmanager.html#supports">QCommServiceManager::supports</a>() and create separate <a href="qsiminfo.html">QSimInfo</a> objects for each.</p>
 <p>See also <a href="qabstractipcinterfacegroupmanager.html#supports">QCommServiceManager::supports</a>().</p>
@@ -106,7 +106,7 @@
 <h3 class="fn"><a name="removed"></a>void QSimInfo::removed ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when a SIM is removed from the phone. The <a href="qsiminfo.html#identity-prop">identity</a>() function will return an empty string.</p>
 <p>See also <a href="qsiminfo.html#identity-prop">identity</a>(), <a href="qsiminfo.html#insertedTime-prop">insertedTime</a>(), and <a href="qsiminfo.html#inserted">inserted</a>().</p>
-<h3 class="fn"><a name="setIdentity"></a>void QSimInfo::setIdentity ( const <a href="./qstring.html">QString</a> &amp; <i>identity</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="setIdentity"></a>void QSimInfo::setIdentity ( const <a href="qstring.html">QString</a> &amp; <i>identity</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Sets the SIM <i>identity</i> and emit <a href="qsiminfo.html#inserted">inserted</a>() or <a href="qsiminfo.html#removed">removed</a>() signals as appropriate. This function is intended for use by server-side implementations of the <a href="qsiminfo.html">QSimInfo</a> interface.</p>
 <p>See also <a href="qsiminfo.html#identity-prop">identity</a>(), <a href="qsiminfo.html#inserted">inserted</a>(), and <a href="qsiminfo.html#removed">removed</a>().</p>
 <p /><address><hr /><div align="center">

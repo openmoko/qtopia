@@ -29,18 +29,12 @@ class NokiaScreen : public QLinuxFbScreen
 public:
     NokiaScreen(int displayId);
     ~NokiaScreen();
-    void exposeRegion(QRegion region, int windowIndex);
 
 private:
     QScreen * screen;
     int infd;
-    bool okToUpdate;
-    
-private slots:
-    void readBrightness(const QString &);
-    
+    bool okToUpdate();
+    void setDirty(const QRect&);
 };
 
-#endif // NOKIASCREEN_H
-
-
+#endif

@@ -15,20 +15,27 @@
 <p />
 
 <h2>Features</h2>
-<ul><li><a href="#QTOPIA-2136">Change of PIN</a>
+<ul><li><a href="#QTOPIA-8394">Abbreviated Dialing Numbers</a>
+<li><a href="#QTOPIA-2136">Change of PIN</a>
 <li><a href="#QTOPIA-433">Contact and Call History Look-up</a>
 <li><a href="#QTOPIA-432">General Phone Call Set-up</a>
 <li><a href="#QTOPIA-436">Keypad Dialer User Interface</a>
 <li><a href="#QTOPIA-435">Other Application Integration</a>
 <li><a href="#QTOPIA-434">Saving to Contacts</a>
 <li><a href="#QTOPIA-437">Touchscreen Dialer User Interface</a>
-</ul><h3><a name=QTOPIA-2136>Change of PIN (QTOPIA-2136)</a></h3>
+</ul><h3><a name=QTOPIA-8394>Abbreviated Dialing Numbers (QTOPIA-8394)</a></h3>
+<p>Numbers stored on the device or SIM can be retrieved entering the address of that number into the dialer.
+
+<p>For example, the seventh accessible number can be retrieved using <em>7#</em></p>
+
+<p>Abbreviated dialing numbers may contain wildcards, in the form of the character 'D'.  When retrieved, the user is prompted to complete this number before it can be dialed.</p>
+<h3><a name=QTOPIA-2136>Change of PIN (QTOPIA-2136)</a></h3>
 <p>The following procedure permits the user to change the PIN in the SIM: <br/>
 	PIN:		**04*OLD_PIN*NEW_PIN*NEW_PIN#<br/>
 Note that the SEND function is not used in these procedures.<br/>
 An indication is given to the user showing whether this procedure was successful.
 
-<p>Same as 3GPP TS 02.30, 4.6.2</p>
+<p>Complies with 3GPP TS 02.30-711, Section 4.6.2</p>
 <h3><a name=QTOPIA-433>Contact and Call History Look-up (QTOPIA-433)</a></h3>
 <p>To assist with quick-dialing <b>Dialer</b> is able to look-up <b>Contact</b> and <span class="nobr"><a href="fd-CallHistory.html">Call History<sup></sup></a></span> records that match the digits the user has entered.
 
@@ -95,7 +102,8 @@ An indication is given to the user showing whether this procedure was successful
 
 <p>Selecting any item in the list begins a call to its phone number.</p>
 <h3><a name=QTOPIA-432>General Phone Call Set-up (QTOPIA-432)</a></h3>
-<p>The user is shown the digits they have currently entered. Pressing the <em>Dial</em> button dials the entered number. Pressing the <em>Hang-up</em> button exits the application.
+<p>The dialer is accessed from the Home Screen by pressing a numerical key or tapping the dialer icon on touchscreen devices.<br/>
+The user is shown the digits they have currently entered. Pressing the Delete key removes the last entered number.  Pressing the <em>Dial</em> button dials the entered number. Pressing the <em>Hang-up</em> button exits the application.
 <h3><a name=QTOPIA-436>Keypad Dialer User Interface (QTOPIA-436)</a></h3>
 <p>The Keypad <b>Dialer</b> user interface consists of a number of input fields and the look-up list. When the user inputs numbers the look-up list is updated to show <span class="nobr"><a href="fd-Contacts.html">Contacts<sup></sup></a></span> and <span class="nobr"><a href="fd-CallHistory.html">Call History<sup></sup></a></span> records matching the new input.
 <h3><a name=QTOPIA-435>Other Application Integration (QTOPIA-435)</a></h3>

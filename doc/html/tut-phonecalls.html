@@ -78,20 +78,20 @@
         char buffer[1024];
         qint64 len;
         while ( ( len = dataDevice-&gt;read( buffer, sizeof(buffer) ) ) &gt; 0 ) {
-            <span class="comment">//</span> There is new data ready to process.
-            <span class="comment">//</span> ...
+            <span class="comment">// There is new data ready to process.</span>
+            <span class="comment">// ...</span>
         }
     }
 
     void Caller::dataClosed()
     {
-        <span class="comment">//</span> The data call has ended - the device is now closed.
+        <span class="comment">// The data call has ended - the device is now closed.</span>
         dataDevice = 0;
     }
 
     void Caller::dataWrite( const char *buf, int len )
     {
-        <span class="comment">//</span> Send the specified data on the data call if it is still active.
+        <span class="comment">// Send the specified data on the data call if it is still active.</span>
         if (dataDevice)
             dataDevice-&gt;write(buf, len);
     }</pre>

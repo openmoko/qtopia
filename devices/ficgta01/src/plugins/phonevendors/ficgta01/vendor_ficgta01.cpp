@@ -267,6 +267,7 @@ Ficgta01PhoneBook::Ficgta01PhoneBook( QModemService *service )
     service->primaryAtChat()->registerNotificationType
         ( "%CSTAT:", this, SLOT(cstatNotification(QString)) );
     service->primaryAtChat()->chat( "AT%CSTAT=1" );
+    this->service = service;
 }
 
 Ficgta01PhoneBook::~Ficgta01PhoneBook()
@@ -307,7 +308,7 @@ void Ficgta01PhoneBook::cstatNotification( const QString& msg )
         if (phonebkOk)
             phoneBooksReady();
         if (smsOk)
-            service->post( "smsready" );    }
+            this->service->post( "smsready" );    }
 }
 
 Ficgta01PinManager::Ficgta01PinManager( QModemService *service )
@@ -532,13 +533,10 @@ Ficgta01ModemService::Ficgta01ModemService
          ( "%CTZV:", this, SLOT(ctzv(QString)), true );
     chat( "AT%CTZV=1" );
 
-
 // Turn on call progress indications, with phone number information.
     chat( "AT%CPI=2" );
 
     chat("AT+COPS=0");
-
-
 }
 
 Ficgta01ModemService::~Ficgta01ModemService()
@@ -670,48 +668,46 @@ void Ficgta01ModemService::suspend()
     qLog(AtChat)<<" Ficgta01ModemService::suspend()";
     // Turn off cell id information on +CREG and +CGREG as it will
     // cause unnecessary wakeups when moving between cells.
-    chat( "AT+CREG=1" );
-    chat( "AT+CGREG=1" );
+    chat( "AT%CREG=0" );
+    chat( "AT%CGREG=0" );
 
-    chat( "AT%CREG=1" );
-    chat( "AT%CGREG=1" );
-
-    // Turn off cell broadcast location messages.
-    chat( "AT%CSQ=0", this, SLOT(sendSuspendDone()) );
+    chat( "AT+CREG=0" );
+    chat( "AT+CGREG=0" );
 
     // Turn off timezone notifications.
     chat( "AT+CTZR=0" );
+    chat("AT+CSCB=0");
 
-    // Turn off signal quality notifications while the system is suspended.
-    chat( "AT*MCSQ=0", this, SLOT(mcsqOff()) );
+//     // Turn off signal quality notifications while the system is suspended.
+     chat( "AT%CSQ=0", this, SLOT(mcsqOff()) );
 }
 
 void Ficgta01ModemService::wake()
 {
     qLog(AtChat)<<" Ficgta01ModemService::wake()";
 
-//reset modem
-
-//  chat( "AT%CWUP=1" );
     chat("\r");
     chat("ATE0\r");
     // Turn cell id information back on.
-     chat( "AT+CREG=2" );
-     chat( "AT+CGREG=2" );
+    chat( "AT+CREG=2" );
+    chat( "AT+CGREG=2" );
+
+    chat( "AT%CREG=2" );
+    chat( "AT%CGREG=2" );
 
      // Turn on timezone notifications again.
     chat( "AT+CTZR=1" );
 
-     //   chat( "AT%CREG=2" );
-     //   chat( "AT%CGREG=2" );
-    // Turn cell broadcast location messages back on again.
+    chat("AT+CSCB=1");
+
+// Turn cell broadcast location messages back on again.
+    chat("AT+CSCB=2");
 
     // Re-enable signal quality notifications when the system wakes up again.
    // Turn on dynamic signal quality notifications.
-    chat( "AT%CSQ=1" );
 
     // Re-enable signal quality notifications when the system wakes up again.
-    chat( "AT*MCSQ=1", this, SLOT(mcsqOn()) );
+    chat( "AT%CSQ=1", this, SLOT(mcsqOn()) );
 }
 
 void Ficgta01ModemService::mcsqOff()

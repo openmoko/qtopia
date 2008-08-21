@@ -37,15 +37,15 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QUniqueIdGenerator class provides a generator of unique identifiers.</p>
-<p>The unique identifiers that are generated are 32 bits and are unique within the device they are created upon. If you require an identifier that is unique across multiple devices use <a href="./quuid.html">QUuid</a> instead.</p>
-<p>The identifiers are are generated with a <a href="./quuid.html">QUuid</a> context identifier and an index. The context should be generated with a program such as <i>uuidgen</i> and represent the data store or context within which the identifier is generated. For example SQL and SIM card storage for QContacts each have their own context. The context is mapped to a 8 bit value allowing for 255 contexts for a single device.</p>
+<p>The unique identifiers that are generated are 32 bits and are unique within the device they are created upon. If you require an identifier that is unique across multiple devices use <a href="quuid.html">QUuid</a> instead.</p>
+<p>The identifiers are are generated with a <a href="quuid.html">QUuid</a> context identifier and an index. The context should be generated with a program such as <i>uuidgen</i> and represent the data store or context within which the identifier is generated. For example SQL and SIM card storage for QContacts each have their own context. The context is mapped to a 8 bit value allowing for 255 contexts for a single device.</p>
 <p>The usual approach to constructing QUniqueIds is:</p>
 <pre>    QUniqueIdGenerator generator(myContext);
     id = generator.createId();</pre>
-<p>QUniqueIdGenerator is suitable in cases where you need to generate an average of 100 identifiers a day or less and require a low number of bits when stored. If your program is likely to need more than 100 unique identifiers a day or does not benefit from the low 32bit storage size it is recommended you look at another type of unique id such as <a href="./quuid.html">QUuid</a>.</p>
+<p>QUniqueIdGenerator is suitable in cases where you need to generate an average of 100 identifiers a day or less and require a low number of bits when stored. If your program is likely to need more than 100 unique identifiers a day or does not benefit from the low 32bit storage size it is recommended you look at another type of unique id such as <a href="quuid.html">QUuid</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QUniqueIdGenerator"></a>QUniqueIdGenerator::QUniqueIdGenerator ( const <a href="./quuid.html">QUuid</a> &amp; <i>context</i> )</h3>
+<h3 class="fn"><a name="QUniqueIdGenerator"></a>QUniqueIdGenerator::QUniqueIdGenerator ( const <a href="quuid.html">QUuid</a> &amp; <i>context</i> )</h3>
 <p>Constructs a <a href="quniqueidgenerator.html">QUniqueIdGenerator</a> with the given <i>context</i>. It is recommended that the context be hard coded into your application.</p>
 <p>Example:</p>
 <pre>    QUniqueIdGenerator(QUUid(&quot;bd668b78-d892-4345-b0a3-77502d684f06&quot;));</pre>
@@ -54,10 +54,10 @@
 <p>Constructs a copy of <i>other</i>.</p>
 <h3 class="fn"><a name="dtor.QUniqueIdGenerator"></a>QUniqueIdGenerator::~QUniqueIdGenerator ()</h3>
 <p>Destroys the <a href="quniqueidgenerator.html">QUniqueIdGenerator</a>.</p>
-<h3 class="fn"><a name="constructTemporaryId"></a><a href="quniqueid.html">QUniqueId</a> QUniqueIdGenerator::constructTemporaryId ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>index</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="constructTemporaryId"></a><a href="quniqueid.html">QUniqueId</a> QUniqueIdGenerator::constructTemporaryId ( <a href="qtglobal.html#uint-typedef">uint</a> <i>index</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns an identifier that is valid only within a single application with the given <i>index</i> component. This identifier should not be shared or persisted between different applications or different executions of the same application. This function does not ensure the constructed identifier is not in conflict with past or future <a href="quniqueid.html">QUniqueId</a> objects.</p>
 <p>This function is not threadsafe.</p>
-<h3 class="fn"><a name="constructUniqueId"></a><a href="quniqueid.html">QUniqueId</a> QUniqueIdGenerator::constructUniqueId ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>index</i> )</h3>
+<h3 class="fn"><a name="constructUniqueId"></a><a href="quniqueid.html">QUniqueId</a> QUniqueIdGenerator::constructUniqueId ( <a href="qtglobal.html#uint-typedef">uint</a> <i>index</i> )</h3>
 <p>Returns a identifier with the given <i>index</i> component. Does not ensure the constructed identifier is not in conflict with past or future <a href="quniqueid.html">QUniqueId</a> objects.</p>
 <p>See also <a href="quniqueidgenerator.html#createUniqueId">createUniqueId</a>().</p>
 <h3 class="fn"><a name="createTemporaryId"></a><a href="quniqueid.html">QUniqueId</a> QUniqueIdGenerator::createTemporaryId ()&nbsp;&nbsp;<tt> [static]</tt></h3>
@@ -69,7 +69,7 @@
 <h3 class="fn"><a name="isValid"></a>bool QUniqueIdGenerator::isValid () const</h3>
 <p>Returns true if the generator is valid and can be used to create or construct unique identifers. Otherwise returns false.</p>
 <p>This function should only be needed during debugging as only a generator constructed using null QUuids will be invalid.</p>
-<h3 class="fn"><a name="mappedContext"></a><a href="./qtglobal.html#uint-typedef">uint</a> QUniqueIdGenerator::mappedContext ( const <a href="./quuid.html">QUuid</a> &amp; <i>context</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="mappedContext"></a><a href="qtglobal.html#uint-typedef">uint</a> QUniqueIdGenerator::mappedContext ( const <a href="quuid.html">QUuid</a> &amp; <i>context</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a locally mapped integer value for <i>context</i> suitable for efficiently checking if a <a href="quniqueid.html">QUniqueId</a> was generated from an equivalent <a href="quniqueidgenerator.html">QUniqueIdGenerator</a>.</p>
 <p>See also <a href="quniqueid.html#mappedContext">QUniqueId::mappedContext</a>().</p>
 <p /><address><hr /><div align="center">

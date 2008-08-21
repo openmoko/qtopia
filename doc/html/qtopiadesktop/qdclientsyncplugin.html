@@ -26,7 +26,7 @@
 <ul>
 <li><div class="fn"/>4 public functions inherited from <a href="qdsyncplugin.html#public-functions">QDSyncPlugin</a></li>
 <li><div class="fn"/>7 public functions inherited from <a href="qdplugin.html#public-functions">QDPlugin</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="../qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -44,7 +44,7 @@
 <li><div class="fn"/>virtual void <b><a href="qdclientsyncplugin.html#serverVersion">serverVersion</a></b> ( int <i>major</i>, int <i>minor</i>, int <i>patch</i> ) = 0</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="../qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -61,15 +61,15 @@
 </ul>
 <ul>
 <li><div class="fn"/>2 signals inherited from <a href="qdsyncplugin.html#signals">QDSyncPlugin</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="../qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="../qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="../qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="../qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="../qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="../qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -79,36 +79,36 @@
 <p>Note that this class is designed to be remoted. The methods can return immediately as status is returned via signals.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QDClientSyncPlugin"></a>QDClientSyncPlugin::QDClientSyncPlugin ( <a href="../qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Construct a <a href="qdclientsyncplugin.html">QDClientSyncPlugin</a> with <i>parent</i> as the owning <a href="../qobject.html">QObject</a>.</p>
+<h3 class="fn"><a name="QDClientSyncPlugin"></a>QDClientSyncPlugin::QDClientSyncPlugin ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Construct a <a href="qdclientsyncplugin.html">QDClientSyncPlugin</a> with <i>parent</i> as the owning <a href="qobject.html">QObject</a>.</p>
 <h3 class="fn"><a name="dtor.QDClientSyncPlugin"></a>QDClientSyncPlugin::~QDClientSyncPlugin ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destructor.</p>
 <h3 class="fn"><a name="clientEnd"></a>void QDClientSyncPlugin::clientEnd ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emit this signal when all changes have been sent.</p>
 <h3 class="fn"><a name="clientError"></a>void QDClientSyncPlugin::clientError ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emit this signal to send an error. The sync will be aborted.</p>
-<h3 class="fn"><a name="clientIdentity"></a>void QDClientSyncPlugin::clientIdentity ( const <a href="../qstring.html">QString</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="clientIdentity"></a>void QDClientSyncPlugin::clientIdentity ( const <a href="qstring.html">QString</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emit this signal to set the client's identity to <i>id</i>.</p>
-<h3 class="fn"><a name="clientSyncAnchors"></a>void QDClientSyncPlugin::clientSyncAnchors ( const <a href="../qdatetime.html">QDateTime</a> &amp; <i>clientLastSync</i>, const <a href="../qdatetime.html">QDateTime</a> &amp; <i>clientNextSync</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="clientSyncAnchors"></a>void QDClientSyncPlugin::clientSyncAnchors ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>clientLastSync</i>, const <a href="qdatetime.html">QDateTime</a> &amp; <i>clientNextSync</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emit this signal to set the client's sync anchors to <i>clientLastSync</i> and <i>clientNextSync</i>. <b>Note</b> that <i>clientLastSync</i> and <i>clientNextSync</i> should be in UTC time.</p>
 <h3 class="fn"><a name="clientVersion"></a>void QDClientSyncPlugin::clientVersion ( int <i>major</i>, int <i>minor</i>, int <i>patch</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emit this signal to set the client's version to the values <i>major</i>, <i>minor</i> and <i>patch</i>.</p>
-<h3 class="fn"><a name="createClientRecord"></a>void QDClientSyncPlugin::createClientRecord ( const <a href="../qbytearray.html">QByteArray</a> &amp; <i>record</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="createClientRecord"></a>void QDClientSyncPlugin::createClientRecord ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>record</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emit this signal to send a new <i>record</i>.</p>
 <p>See also <a href="qdclientsyncplugin.html#replaceClientRecord">replaceClientRecord</a>(), <a href="qdclientsyncplugin.html#removeClientRecord">removeClientRecord</a>(), and <a href="qdclientsyncplugin.html#clientEnd">clientEnd</a>().</p>
-<h3 class="fn"><a name="createServerRecord"></a>void QDClientSyncPlugin::createServerRecord ( const <a href="../qbytearray.html">QByteArray</a> &amp; <i>record</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
+<h3 class="fn"><a name="createServerRecord"></a>void QDClientSyncPlugin::createServerRecord ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>record</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
 <p>Create the item specified in <i>record</i>. Emit <a href="qdclientsyncplugin.html#mappedId">mappedId</a>() so that the server record can be matched to the client record.</p>
-<h3 class="fn"><a name="mappedId"></a>void QDClientSyncPlugin::mappedId ( const <a href="../qstring.html">QString</a> &amp; <i>serverId</i>, const <a href="../qstring.html">QString</a> &amp; <i>clientId</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="mappedId"></a>void QDClientSyncPlugin::mappedId ( const <a href="qstring.html">QString</a> &amp; <i>serverId</i>, const <a href="qstring.html">QString</a> &amp; <i>clientId</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emit this signal in response to <a href="qdclientsyncplugin.html#createServerRecord">createServerRecord</a>(). It maps server id <i>serverId</i> to client id <i>clientId</i>.</p>
-<h3 class="fn"><a name="removeClientRecord"></a>void QDClientSyncPlugin::removeClientRecord ( const <a href="../qstring.html">QString</a> &amp; <i>clientId</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="removeClientRecord"></a>void QDClientSyncPlugin::removeClientRecord ( const <a href="qstring.html">QString</a> &amp; <i>clientId</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emit this signal to send a delete of the record with client id <i>clientId</i>.</p>
 <p>See also <a href="qdclientsyncplugin.html#createClientRecord">createClientRecord</a>(), <a href="qdclientsyncplugin.html#replaceClientRecord">replaceClientRecord</a>(), and <a href="qdclientsyncplugin.html#clientEnd">clientEnd</a>().</p>
-<h3 class="fn"><a name="removeServerRecord"></a>void QDClientSyncPlugin::removeServerRecord ( const <a href="../qstring.html">QString</a> &amp; <i>clientId</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
+<h3 class="fn"><a name="removeServerRecord"></a>void QDClientSyncPlugin::removeServerRecord ( const <a href="qstring.html">QString</a> &amp; <i>clientId</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
 <p>Remove the item indicated by client id <i>clientId</i>.</p>
-<h3 class="fn"><a name="replaceClientRecord"></a>void QDClientSyncPlugin::replaceClientRecord ( const <a href="../qbytearray.html">QByteArray</a> &amp; <i>record</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="replaceClientRecord"></a>void QDClientSyncPlugin::replaceClientRecord ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>record</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emit this signal to send a modified <i>record</i>.</p>
 <p>See also <a href="qdclientsyncplugin.html#createClientRecord">createClientRecord</a>(), <a href="qdclientsyncplugin.html#removeClientRecord">removeClientRecord</a>(), and <a href="qdclientsyncplugin.html#clientEnd">clientEnd</a>().</p>
-<h3 class="fn"><a name="replaceServerRecord"></a>void QDClientSyncPlugin::replaceServerRecord ( const <a href="../qbytearray.html">QByteArray</a> &amp; <i>record</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
+<h3 class="fn"><a name="replaceServerRecord"></a>void QDClientSyncPlugin::replaceServerRecord ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>record</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
 <p>Update the item specified in <i>record</i>.</p>
 <h3 class="fn"><a name="requestSlowSync"></a>void QDClientSyncPlugin::requestSlowSync ()&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
 <p>Perform a slow sync. All changes should be sent.</p>
@@ -118,11 +118,11 @@
 <p>The server has finished sending changes.</p>
 <h3 class="fn"><a name="serverError"></a>void QDClientSyncPlugin::serverError ()&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
 <p>The server has encountered an error. The sync will be aborted.</p>
-<h3 class="fn"><a name="serverIdentity"></a>void QDClientSyncPlugin::serverIdentity ( const <a href="../qstring.html">QString</a> &amp; <i>server</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
+<h3 class="fn"><a name="serverIdentity"></a>void QDClientSyncPlugin::serverIdentity ( const <a href="qstring.html">QString</a> &amp; <i>server</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
 <p>The server's identity is <i>server</i>.</p>
-<h3 class="fn"><a name="serverSyncAnchors"></a>void QDClientSyncPlugin::serverSyncAnchors ( const <a href="../qdatetime.html">QDateTime</a> &amp; <i>serverLastSync</i>, const <a href="../qdatetime.html">QDateTime</a> &amp; <i>serverNextSync</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
+<h3 class="fn"><a name="serverSyncAnchors"></a>void QDClientSyncPlugin::serverSyncAnchors ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>serverLastSync</i>, const <a href="qdatetime.html">QDateTime</a> &amp; <i>serverNextSync</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
 <p>The server's sync anchors are <i>serverLastSync</i> and <i>serverNextSync</i>. <b>Note</b> that <i>serverLastSync</i> and <i>serverNextSync</i> are in UTC time.</p>
-<h3 class="fn"><a name="serverSyncRequest"></a>void QDClientSyncPlugin::serverSyncRequest ( const <a href="../qstring.html">QString</a> &amp; <i>source</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
+<h3 class="fn"><a name="serverSyncRequest"></a>void QDClientSyncPlugin::serverSyncRequest ( const <a href="qstring.html">QString</a> &amp; <i>source</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
 <p>The server has requested a sync with datasource <i>source</i>.</p>
 <h3 class="fn"><a name="serverVersion"></a>void QDClientSyncPlugin::serverVersion ( int <i>major</i>, int <i>minor</i>, int <i>patch</i> )&nbsp;&nbsp;<tt> [pure virtual slot]</tt></h3>
 <p>The server's version is equivalent to the values <i>major</i>, <i>minor</i> and <i>patch</i>.</p>

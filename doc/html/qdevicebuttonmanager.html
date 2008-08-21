@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QDeviceButtonManager Class Reference</h1>
 <p>The QDeviceButtonManager class manages device button mappings. <a href="#details">More...</a></p>
-<pre>    #include &lt;QDeviceButtonManager&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QDeviceButtonManager&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qdevicebuttonmanager-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -29,7 +29,7 @@
 <li><div class="fn"/>void <b><a href="qdevicebuttonmanager.html#remapReleasedAction">remapReleasedAction</a></b> ( int <i>button_index</i>, const QtopiaServiceRequest &amp; <i>action</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -37,16 +37,16 @@
 <li><div class="fn"/>QDeviceButtonManager &amp; <b><a href="qdevicebuttonmanager.html#instance">instance</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -73,7 +73,7 @@
     HeldActionMessage=&lt;Message type&gt;
     HeldActionArgs=&lt;Argument list&gt;</pre>
 <p>The first group, <tt>Button</tt> contains the number of mappings present in the file. Subsequent <tt>Button&lt;X&gt;</tt> groups are then named from <tt>X = 0 ... Count - 1</tt> to represent each mapped key.</p>
-<p>Each key mapping contains the key to which it maps, a name, a context and the actions to take when the key is pressed and when it is held. The key is mandatory and can be any one of the keys named in the <a href="./qt.html#Key-enum">Qt::Key</a> enum. For example, <tt>Context1</tt> and <tt>F34</tt> are both valid. The user visible name and context are accessible through <a href="qdevicebutton.html#userText">QDeviceButton::userText</a>() and <a href="qdevicebutton.html#context">QDeviceButton::context</a>() respectively.</p>
+<p>Each key mapping contains the key to which it maps, a name, a context and the actions to take when the key is pressed and when it is held. The key is mandatory and can be any one of the keys named in the <a href="qt.html#Key-enum">Qt::Key</a> enum. For example, <tt>Context1</tt> and <tt>F34</tt> are both valid. The user visible name and context are accessible through <a href="qdevicebutton.html#userText">QDeviceButton::userText</a>() and <a href="qdevicebutton.html#context">QDeviceButton::context</a>() respectively.</p>
 <p>The <tt>PressedActionMappable</tt> and <tt>HeldActionMappable</tt> allow the mapping for either the pressed or held action to be disabled. If ommitted, each action is enabled (assuming the service and message information required to define a complete action is present).</p>
 <p>The <tt>PressedActionMessage</tt> and <tt>PressedActionService</tt> define the message and the service to which the message will be sent. The <tt>PressedActionArgs</tt> defines the arguments to send with the message and is deserialized using the QtopiaServiceRequest::deserializeArguments() method. The held action grouping takes the same form as the pressed action.</p>
 <p>Whenever the device buttons are updated through the QDeviceButtonManager API, a <tt>deviceButtonMappingChanged()</tt> message is sent on the <tt>QPE/System</tt> channel.</p>
@@ -82,10 +82,10 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="buttonForKeycode"></a>const <a href="qdevicebutton.html">QDeviceButton</a> * QDeviceButtonManager::buttonForKeycode ( int <i>keyCode</i> ) const</h3>
 <p>Returns the <a href="qdevicebutton.html">QDeviceButton</a> for the <i>keyCode</i> in the global context. If <i>keyCode</i> is not found, it returns 0.</p>
-<h3 class="fn"><a name="buttonForKeycode-2"></a>const <a href="qdevicebutton.html">QDeviceButton</a> * QDeviceButtonManager::buttonForKeycode ( int <i>keyCode</i>, const <a href="./qstring.html">QString</a> &amp; <i>context</i> ) const</h3>
+<h3 class="fn"><a name="buttonForKeycode-2"></a>const <a href="qdevicebutton.html">QDeviceButton</a> * QDeviceButtonManager::buttonForKeycode ( int <i>keyCode</i>, const <a href="qstring.html">QString</a> &amp; <i>context</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns the <a href="qdevicebutton.html">QDeviceButton</a> for the <i>keyCode</i> in a certain <i>context</i>. If <i>keyCode</i> is not found, it returns 0.</p>
-<h3 class="fn"><a name="buttons"></a>const <a href="./qlist.html">QList</a>&lt;<a href="qdevicebutton.html">QDeviceButton</a> *&gt; &amp; QDeviceButtonManager::buttons () const</h3>
+<h3 class="fn"><a name="buttons"></a>const <a href="qlist.html">QList</a>&lt;<a href="qdevicebutton.html">QDeviceButton</a> *&gt; &amp; QDeviceButtonManager::buttons () const</h3>
 <p>Returns the available buttons on this device. The number and location of buttons will vary depending on the device. Button numbers will be assigned by the device manufacturer and will be from most preferred button to least preffered button. Note that this list only contains user-programmable buttons.</p>
 <h3 class="fn"><a name="factoryResetButtons"></a>void QDeviceButtonManager::factoryResetButtons ()</h3>
 <p>Reset the buttons back to the factory default settings.</p>

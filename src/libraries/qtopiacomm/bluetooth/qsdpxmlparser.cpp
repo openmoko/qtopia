@@ -114,7 +114,7 @@ bool QSdpXmlHandler::parseUInt32Element(const QString &value)
 bool QSdpXmlHandler::parseUInt64Element(const QString &value)
 {
     bool ok;
-    QVariant var = QVariant::fromValue<quint64>(value.toULong(&ok, 0));
+    QVariant var = QVariant::fromValue<quint64>(value.toULongLong(&ok, 0));
 
     if (!ok) {
         m_errorString = "Trouble parsing uint64 value";

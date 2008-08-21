@@ -73,21 +73,21 @@
     {
         switch( index++ )
         {
-            <span class="comment">//</span> Filter for all applications.
+            <span class="comment">// Filter for all applications.</span>
         case 0:
             contentSet.setCriteria( QContentFilter( QContent::Application ) );
             return true;
-            <span class="comment">//</span> Restrict the existing filter to only display content in the 'Games' category.
+            <span class="comment">// Restrict the existing filter to only display content in the 'Games' category.</span>
         case 1:
             contentSet.addCriteria( QContentFilter::Category, &quot;Games&quot;, QContentFilter::And );
             return true;
-            <span class="comment">//</span> Filter for documents with the 'image/jpeg' or 'image/png' MIME type.
+            <span class="comment">// Filter for documents with the 'image/jpeg' or 'image/png' MIME type.</span>
         case 2:
             contentSet.setCriteria( QContentFilter::MimeType, &quot;image/jpeg&quot; );
             contentSet.addCriteria( QContentFilter::mimeType( &quot;image/png&quot; ), QContentFilter::Or );
             contentSet.addCriteria( QContentFilter( QContent::Document ), QContentFilter::And );
             return true;
-            <span class="comment">//</span> Extend the existing filter to also include applications in the 'Games' category.
+            <span class="comment">// Extend the existing filter to also include applications in the 'Games' category.</span>
         case 3:
             contentSet.addCriteria( QContentFilter( QContent::Application )
                                   &amp; QContentFilter::category( &quot;Games&quot; )

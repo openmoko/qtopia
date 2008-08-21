@@ -120,7 +120,7 @@
 <p>Several details of the Qtopia OOM solution can be reconfigured by the user to suit specific embedded device characteristics. Additionally, the Memory Monitor component can be replaced by a memory monitor designed by the user.</p>
 <a name="reconfigurable-items"></a>
 <h3>Reconfigurable Items</h3>
-<p>The reconfigurable items are all found in the configuration file <tt>oom.conf</tt>, which is found in <tt>$HOME/Settings/Trolltech</tt>. The file is read by the <a href="./qsettings.html">QSettings</a> class. It contains two settings groups named <tt>[oom_adj]</tt> and <tt>[values]</tt>.</p>
+<p>The reconfigurable items are all found in the configuration file <tt>oom.conf</tt>, which is found in <tt>$HOME/Settings/Trolltech</tt>. The file is read by the <a href="qsettings.html">QSettings</a> class. It contains two settings groups named <tt>[oom_adj]</tt> and <tt>[values]</tt>.</p>
 <a name="the-group"></a>
 <h4>The <tt>[oom_adj]</tt> Group</h4>
 <p>This group allows the user to specify which applications to mark critical, important, and expendable. Any application that is not assigned one of these marks defaults to expendable. The Qtopia server (&quot;qpe&quot;) must always be defined to be critical. The following partial example illustrates how to create the <tt>[oom_adj]</tt> group. The application name appears to the left of the equal sign. The priority appears to the right. The only priorities allowed are critical, important, and expendable.</p>

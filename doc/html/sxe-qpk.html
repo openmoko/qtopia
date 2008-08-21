@@ -74,7 +74,7 @@
 <li>Set up the device to point to the package server feed. There are two ways to do this:<ul>
 <li>Add the package server to a running Qtopia device by using the <tt>Settings-&gt;Software Packages</tt> application on the device. Navigate to the <tt>Downloads</tt> tab, invoke the <tt>Options</tt> context menu and choose the <tt>Edit Servers</tt> option. Invoke <tt>Options-&gt;New...</tt> and enter in the server details</li>
 <li>Add a package server by editing/creating the <tt>$HOME/Applications/packagemanager/ServersList.conf</tt> file on the device with an entry similar to that below:<pre>        [My packages]
-        URL=http:<span class="comment">//</span>10.10.10.21/feed</pre>
+        URL=http:<span class="comment">//10.10.10.21/feed</span></pre>
 </li>
 </ul>
 </li>
@@ -116,8 +116,8 @@
 <p>See Also <a href="syscust-internat.html">Internationalization</a></p>
 <a name="qpk-settings"></a><a name="settings-files"></a>
 <h2>Settings Files</h2>
-<p>Any settings files used by the package should not correspond with any organizations listed under the RestrictedOrganizations parameter in the <a href="sxe-pkgmgr.html#packagemanager-conf">PackageManager.conf</a> file. On an SXE configured Qtopia, packages won't have write access to these settings files and so should use other organizations to avoid any problems. For similar reasons, packages should use <a href="./qsettings.html">QSettings</a> objects at user scope.</p>
-<p>Creating a settings file using <a href="./qsettings.html">QSettings</a> will automatically (on both SXE and non-SXE enabled devices) place the settings files in the package sandbox directory.</p>
+<p>Any settings files used by the package should not correspond with any organizations listed under the RestrictedOrganizations parameter in the <a href="sxe-pkgmgr.html#packagemanager-conf">PackageManager.conf</a> file. On an SXE configured Qtopia, packages won't have write access to these settings files and so should use other organizations to avoid any problems. For similar reasons, packages should use <a href="qsettings.html">QSettings</a> objects at user scope.</p>
+<p>Creating a settings file using <a href="qsettings.html">QSettings</a> will automatically (on both SXE and non-SXE enabled devices) place the settings files in the package sandbox directory.</p>
 <p>Pre-generated settings files that should be placed in the Settings directory in a similar manner to that shown below:</p>
 <pre>    foo.files=mysettings/*
     foo.path=/Settings/

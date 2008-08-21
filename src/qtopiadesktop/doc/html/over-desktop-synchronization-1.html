@@ -43,7 +43,7 @@
 <a name="remote-engine"></a>
 <h3>Remote Engine</h3>
 <p>The remote engine is an abstract entity. It consists of a combination of hardware, software and drivers but these do not matter to the high level synchronization process. A simplified overview of these components is given below.</p>
-<p align="center"><img src="images/dsremote.png" alt="Remote Engine Overview" /></p><p>As you can see the components on each machine are roughly the same. The plugin interface is remoted using QCop messages which are serialized onto a stream. The underlying driver is exposed as a <a href="../qiodevice.html">QIODevice</a> which carries the messages. The components of the Remote Engine are examined in more detail below.</p>
+<p align="center"><img src="images/dsremote.png" alt="Remote Engine Overview" /></p><p>As you can see the components on each machine are roughly the same. The plugin interface is remoted using QCop messages which are serialized onto a stream. The underlying driver is exposed as a <a href="qiodevice.html">QIODevice</a> which carries the messages. The components of the Remote Engine are examined in more detail below.</p>
 <a name="synchronization"></a>
 <h3>Synchronization</h3>
 <p>The Synchronization application runs on Qtopia.</p>
@@ -55,10 +55,10 @@
 <p>This class converts from QCop messages to the <a href="qtopia4syncplugin.html">Qtopia4SyncPlugin</a> API. It also performs device-specific house keeping such as recording the sync anchors.</p>
 <a name="qcop-bridge"></a>
 <h4>QCop Bridge</h4>
-<p>This class serializes QCop messages for transmission. It uses the <a href="qdsync-commands.html">qdsync Protocol</a> over a <a href="../qiodevice.html">QIODevice</a>.</p>
+<p>This class serializes QCop messages for transmission. It uses the <a href="qdsync-commands.html">qdsync Protocol</a> over a <a href="qiodevice.html">QIODevice</a>.</p>
 <a name="qserialport"></a>
 <h4>QSerialPort</h4>
-<p>This class exposes the USB serial driver as a <a href="../qiodevice.html">QIODevice</a> for the QCop Bridge. See <a href="task-use-a-serial-connection-1.html">Use a Serial Connection</a> for more information. Synchronization also contains support for TCP/IP. See <a href="task-use-a-tcp-ip-connection-1.html">Use a TCP/IP Connection</a> for more information.</p>
+<p>This class exposes the USB serial driver as a <a href="qiodevice.html">QIODevice</a> for the QCop Bridge. See <a href="task-use-a-serial-connection-1.html">Use a Serial Connection</a> for more information. Synchronization also contains support for TCP/IP. See <a href="task-use-a-tcp-ip-connection-1.html">Use a TCP/IP Connection</a> for more information.</p>
 <a name="usb-serial-gadget"></a>
 <h4>USB Serial Gadget</h4>
 <p>This is the Linux 2.4 serial_fd gadget. The Greenphone also supports the Linux 2.4 net_fd gadget which works well with Linux PCs.</p>
@@ -74,10 +74,10 @@
 <p>This class implements <a href="qdclientsyncplugin.html">QDClientSyncPlugin</a> and converts to QCop messages. A <a href="qdclientsyncpluginfactory.html">QDClientSyncPluginFactory</a> is used so that one Qtopia4Sync instance can be created for each dataset that the device supports.</p>
 <a name="qcop-connection"></a>
 <h4>QCop Connection</h4>
-<p>This class implements <a href="qdconplugin.html">QDConPlugin</a> and serializes QCop messages for transmission. It uses the <a href="qdsync-commands.html">qdsync Protocol</a> over a <a href="../qiodevice.html">QIODevice</a>.</p>
+<p>This class implements <a href="qdconplugin.html">QDConPlugin</a> and serializes QCop messages for transmission. It uses the <a href="qdsync-commands.html">qdsync Protocol</a> over a <a href="qiodevice.html">QIODevice</a>.</p>
 <a name="serial-link"></a>
 <h4>Serial Link</h4>
-<p>This class implements <a href="qdlinkplugin.html">QDLinkPlugin</a> and exposes the USB driver as a <a href="../qiodevice.html">QIODevice</a> to the QCop Connection. It supports proper COM ports and the broken COM port implementation used by the Greenphone USB serial driver. See <a href="task-use-a-serial-connection-1.html">Use a Serial Connection</a> for more information. Qtopia Sync Agent also contains support for a TCP/IP link. See <a href="task-use-a-tcp-ip-connection-1.html">Use a TCP/IP Connection</a> for more information.</p>
+<p>This class implements <a href="qdlinkplugin.html">QDLinkPlugin</a> and exposes the USB driver as a <a href="qiodevice.html">QIODevice</a> to the QCop Connection. It supports proper COM ports and the broken COM port implementation used by the Greenphone USB serial driver. See <a href="task-use-a-serial-connection-1.html">Use a Serial Connection</a> for more information. Qtopia Sync Agent also contains support for a TCP/IP link. See <a href="task-use-a-tcp-ip-connection-1.html">Use a TCP/IP Connection</a> for more information.</p>
 <a name="usb-serial-driver"></a>
 <h4>USB Serial Driver</h4>
 <p>This is a Windows driver for the Greenphone's serial_fd gadget.</p>

@@ -48,8 +48,14 @@ public:
 private:
      QValueSpaceObject vsoPortableHandsfree;
      QValueSpaceObject vsoUsbCable;
+     QValueSpaceObject vsoNeoHardware;
      QtopiaIpcAdaptor *adaptor;
 
+     void findHardwareVersion();
+
+     QtopiaIpcAdaptor         *audioMgr;
+//     QAudioStateConfiguration *audioConf;
+    
  
 private slots:
      void headphonesInserted(bool);

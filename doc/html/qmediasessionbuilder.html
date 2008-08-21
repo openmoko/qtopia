@@ -45,7 +45,7 @@
         public:
             UriSessionBuilder()
             {
-                <span class="comment">//</span> create m_attributes, perhaps from args
+                <span class="comment">// create m_attributes, perhaps from args</span>
             }
 
             ~UriSessionBuilder() {}
@@ -57,7 +57,7 @@
             {
                 QUrl    url;
                 request &gt;&gt; url;
-                <span class="comment">//</span> do something
+                <span class="comment">// do something</span>
                 return session;
             }
 
@@ -74,20 +74,20 @@
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="Attributes-typedef"></a>typedef QMediaSessionBuilder::Attributes</h3>
-<p>A <a href="./qmap.html">QMap</a> of <a href="./qstring.html">QString</a> to <a href="./qvariant.html">QVariant</a>. Attributes are generic name value pairs for use in communicating static information about the builder.</p>
+<p>A <a href="qmap.html">QMap</a> of <a href="qstring.html">QString</a> to <a href="qvariant.html">QVariant</a>. Attributes are generic name value pairs for use in communicating static information about the builder.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="dtor.QMediaSessionBuilder"></a>QMediaSessionBuilder::~QMediaSessionBuilder ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destruct a <a href="qmediasessionbuilder.html">QMediaSessionBuilder</a>.</p>
 <h3 class="fn"><a name="attributes"></a><a href="qmediasessionbuilder.html#Attributes-typedef">Attributes</a> const &amp; QMediaSessionBuilder::attributes () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
-<p>Returns a <a href="./qmap.html">QMap</a> of Attribute Name and Value pairs. This may be used for communication of some builder type information to a builder type manager, or for custom builder types may just be information that is useful to be presented into the Qtopia Value-space.</p>
+<p>Returns a <a href="qmap.html">QMap</a> of Attribute Name and Value pairs. This may be used for communication of some builder type information to a builder type manager, or for custom builder types may just be information that is useful to be presented into the Qtopia Value-space.</p>
 <p>See also <a href="qvaluespaceitem.html">QValueSpaceItem</a>.</p>
 <h3 class="fn"><a name="createSession"></a><a href="qmediaserversession.html">QMediaServerSession</a> * QMediaSessionBuilder::createSession ( <a href="qmediasessionrequest.html">QMediaSessionRequest</a> <i>sessionRequest</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>This function should create a <a href="qmediaserversession.html">QMediaServerSession</a>, if able, based upon the information in the session request. This function will be called if the type of the <a href="qmediasessionrequest.html">QMediaSessionRequest</a> <i>sessionRequest</i> matches the type of the builder. Additionally, if the builder is one of the common builder types it will only be called if it matches extra criteria, as defined by the builder type, for example, the mime type of the content.</p>
 <p>See also <a href="qmediasessionrequest.html">QMediaSessionRequest</a> and <a href="qmediaserversession.html">QMediaServerSession</a>.</p>
 <h3 class="fn"><a name="destroySession"></a>void QMediaSessionBuilder::destroySession ( <a href="qmediaserversession.html">QMediaServerSession</a> * <i>serverSession</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>This function is called when the session <i>serverSession</i> is no longer necessary. The builder will only be asked to destroy sessions that it created. The builder must destroy the session at this time.</p>
-<h3 class="fn"><a name="type"></a><a href="./qstring.html">QString</a> QMediaSessionBuilder::type () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="type"></a><a href="qstring.html">QString</a> QMediaSessionBuilder::type () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns a string used as an identifier for the type of builder. The string should be of the form reverse-dns.local-type. Example: com.trolltech.qtopia.uri.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

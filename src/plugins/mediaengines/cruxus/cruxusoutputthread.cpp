@@ -230,6 +230,7 @@ int OutputThreadPrivate::resampleAndMix
 
         converted = (dataAmt / iss / deviceInfo.channels) * rdr * oss * inputInfo.channels;
 
+        int offset = 0;
         while (dataAmt > 0)
         {
             int     requiredSrcSamples = rsr;
@@ -280,14 +281,41 @@ int OutputThreadPrivate::resampleAndMix
                 dataAmt -= iss * deviceInfo.channels;
             }
 
-            for (int i = requiredDstSamples * inputInfo.channels; i > 0; --i)
-            {
-                qint32 samplei = (sample[i % inputInfo.channels] / rsr) * deviceInfo.volume / MAX_VOLUME;
+            if(deviceInfo.frequency ==  8000 && inputInfo.frequency == 44100)
+                offset++;
+            if(offset > requiredDstSamples*inputInfo.channels-1) {
+                // Handle special cases of 8000Hz to 11025 or 22050 or 44100!
+                qint32 samplei = 0, ss = 0;
+                offset = 0;
+                for (int i = requiredDstSamples * inputInfo.channels; i > 0; --i)
+                {
+                    samplei = (sample[i % inputInfo.channels] / rsr) * deviceInfo.volume / MAX_VOLUME;
+                    if (first) {
+                        setNextSamplePart(dst, samplei, oss);
+                    } else {
+                        qint32 ss = (samplei + getNextSamplePart(mix, oss)) / 2;
+                        setNextSamplePart(dst, ss, oss);
+                    }
+                }
+                for (int i = requiredDstSamples * inputInfo.channels; i > 0; --i)
+                {
+                    if (first) {
+                        setNextSamplePart(dst, samplei, oss);
+                    } else {
+                        setNextSamplePart(dst, ss, oss);
+                    }
+                    converted+=2;
+                }
+            } else {
+                for (int i = requiredDstSamples * inputInfo.channels; i > 0; --i)
+                {
+                    qint32 samplei = (sample[i % inputInfo.channels] / rsr) * deviceInfo.volume / MAX_VOLUME;
 
-                if (first)
-                    setNextSamplePart(dst, samplei, oss);
-                else
-                    setNextSamplePart(dst, (samplei + getNextSamplePart(mix, oss)) / 2, oss);
+                    if (first)
+                        setNextSamplePart(dst, samplei, oss);
+                    else
+                        setNextSamplePart(dst, (samplei + getNextSamplePart(mix, oss)) / 2, oss);
+                }
             }
         }
     }

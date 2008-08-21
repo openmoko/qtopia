@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QNetworkDevice Class Reference</h1>
 <p>The QNetworkDevice class provides information about the connectivity state of a network device. <a href="#details">More...</a></p>
-<pre>    #include &lt;QNetworkDevice&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QNetworkDevice&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qnetworkdevice-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -31,7 +31,7 @@
 <li><div class="fn"/>QtopiaNetworkInterface::Status <b><a href="qnetworkdevice.html#state">state</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -39,16 +39,16 @@
 <li><div class="fn"/>void <b><a href="qnetworkdevice.html#stateChanged">stateChanged</a></b> ( QtopiaNetworkInterface::Status <i>newState</i>, bool <i>error</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -62,23 +62,23 @@
 <p align="center"><img src="images/netdevice-netconnection.png" /></p><p>See also <a href="qtopianetwork.html">QtopiaNetwork</a>, <a href="qnetworkstate.html">QNetworkState</a>, <a href="qnetworkconnection.html">QNetworkConnection</a>, and <a href="qtopianetworkinterface.html">QtopiaNetworkInterface</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QNetworkDevice"></a>QNetworkDevice::QNetworkDevice ( const <a href="./qstring.html">QString</a> &amp; <i>handle</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QNetworkDevice"></a>QNetworkDevice::QNetworkDevice ( const <a href="qstring.html">QString</a> &amp; <i>handle</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs a <a href="qnetworkdevice.html">QNetworkDevice</a> object for the network device which is defined by <i>handle</i>. <i>parent</i> is the standard Qt parent object .</p>
 <h3 class="fn"><a name="dtor.QNetworkDevice"></a>QNetworkDevice::~QNetworkDevice ()</h3>
 <p>Deconstructs the object.</p>
-<h3 class="fn"><a name="address"></a><a href="./qnetworkinterface.html">QNetworkInterface</a> QNetworkDevice::address () const</h3>
-<p>Returns the associated <a href="./qnetworkinterface.html">QNetworkInterface</a>.</p>
+<h3 class="fn"><a name="address"></a><a href="qnetworkinterface.html">QNetworkInterface</a> QNetworkDevice::address () const</h3>
+<p>Returns the associated <a href="qnetworkinterface.html">QNetworkInterface</a>.</p>
 <h3 class="fn"><a name="error"></a><a href="qtopianetworkinterface.html#Error-enum">QtopiaNetworkInterface::Error</a> QNetworkDevice::error () const</h3>
 <p>Returns the last error that occured. This is useful to find out what went wrong when receiving a <a href="qnetworkdevice.html#stateChanged">stateChanged</a>() signal with the <tt>error</tt> argument set to <tt>true</tt>.</p>
 <p>Note: There could be various reasons why a device may report <tt>QtopiaNetworkInterface::NotConnected</tt>. A detailed description for such an error can be obtained by using <a href="qnetworkdevice.html#errorString">errorString</a>().</p>
-<h3 class="fn"><a name="errorString"></a><a href="./qstring.html">QString</a> QNetworkDevice::errorString () const</h3>
+<h3 class="fn"><a name="errorString"></a><a href="qstring.html">QString</a> QNetworkDevice::errorString () const</h3>
 <p>Returns a human-readable description of the last error that occurred. This is useful for presenting an error message to the user.</p>
-<h3 class="fn"><a name="handle"></a><a href="./qstring.html">QString</a> QNetworkDevice::handle () const</h3>
+<h3 class="fn"><a name="handle"></a><a href="qstring.html">QString</a> QNetworkDevice::handle () const</h3>
 <p>Returns the interface handle which is the full path of the associated configuration file.</p>
-<h3 class="fn"><a name="interfaceName"></a><a href="./qstring.html">QString</a> QNetworkDevice::interfaceName () const</h3>
+<h3 class="fn"><a name="interfaceName"></a><a href="qstring.html">QString</a> QNetworkDevice::interfaceName () const</h3>
 <p>Returns the name of the associated *nix network interface, e.g&#x2e; <tt>eth0</tt> or <tt>ppp2</tt>. The name should not be used to identify the network interface as it can change during the life time of the device. The returned name is empty if the interface hasn't been initialized yet or is not available.</p>
 <p>See also <a href="qnetworkdevice.html#state">state</a>().</p>
-<h3 class="fn"><a name="name"></a><a href="./qstring.html">QString</a> QNetworkDevice::name () const</h3>
+<h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QNetworkDevice::name () const</h3>
 <p>Returns the human-readable name of the device (e.g&#x2e; Vodafone GPRS). The name can be set by the user when creating and/or configuring the device.</p>
 <h3 class="fn"><a name="state"></a><a href="qtopianetworkinterface.html#Status-enum">QtopiaNetworkInterface::Status</a> QNetworkDevice::state () const</h3>
 <p>This function returns the connectivity state of this device.</p>

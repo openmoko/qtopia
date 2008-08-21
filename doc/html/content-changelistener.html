@@ -42,11 +42,11 @@
         QString categoryId;
         QFileInfoList imageFiles;
     };</pre>
-<p>The ChangeListener class is composed of a single widget; a <a href="./qlabel.html">QLabel</a> used to display the images, so for convenience we'll inherit a <a href="./qlabel.html">QLabel</a> rather than embed one in a <a href="./qwidget.html">QWidget</a>.</p>
+<p>The ChangeListener class is composed of a single widget; a <a href="qlabel.html">QLabel</a> used to display the images, so for convenience we'll inherit a <a href="qlabel.html">QLabel</a> rather than embed one in a <a href="qwidget.html">QWidget</a>.</p>
 <p>There are two private slots; a <tt>timeout()</tt> slot which is called each time the timer expires, and a <tt>changed()</tt> slot which is called when changes to the document system are made.</p>
 <a name="changelistener-class-implementation"></a>
 <h2>ChangeListener Class Implementation</h2>
-<p>In the constructor we first initialize the <a href="./qlabel.html">QLabel</a> so it scales images to fit its dimensions, and so it has a context menu bar. The context menu will only have the help entry which is automatically added so there's no need to do more than initialize the menu.</p>
+<p>In the constructor we first initialize the <a href="qlabel.html">QLabel</a> so it scales images to fit its dimensions, and so it has a context menu bar. The context menu will only have the help entry which is automatically added so there's no need to do more than initialize the menu.</p>
 <pre>    ChangeListener::ChangeListener( QWidget *parent, Qt::WindowFlags flags )
         : QLabel( parent, flags )
         , nextIndex( 0 )
@@ -55,7 +55,7 @@
         setScaledContents( true );
 
          QSoftMenuBar::menuFor( this );</pre>
-<p>Next we'll construct a list of the images we're going to display, we use resource paths here so we don't have to worry about where the application is installed. <a href="./qfileinfo.html#absoluteFilePath">QFileInfo::absoluteFilePath</a>() will resolve to the actual file path so we won't actually be using the resource path when installing to the document system.</p>
+<p>Next we'll construct a list of the images we're going to display, we use resource paths here so we don't have to worry about where the application is installed. <a href="qfileinfo.html#absoluteFilePath">QFileInfo::absoluteFilePath</a>() will resolve to the actual file path so we won't actually be using the resource path when installing to the document system.</p>
 <pre>        imageFiles.append( QFileInfo( &quot;:image/Bubble.png&quot; ) );
         imageFiles.append( QFileInfo( &quot;:image/Clouds.png&quot; ) );
         imageFiles.append( QFileInfo( &quot;:image/Splatters.png&quot; ) );
@@ -76,7 +76,7 @@
         for ( int i = 0; i &lt; contentSet-&gt;count(); i++ ) {
             QContent::uninstall( contentSet-&gt;contentId( i ) );
         }</pre>
-<p>Finally we'll construct a <a href="./qtimer.html">QTimer</a> and set it trigger the <tt>timeout()</tt> slot every 3 seconds.</p>
+<p>Finally we'll construct a <a href="qtimer.html">QTimer</a> and set it trigger the <tt>timeout()</tt> slot every 3 seconds.</p>
 <pre>        QTimer *timer = new QTimer( this );
 
         connect( timer, SIGNAL(timeout()), this, SLOT(timeout()) );
@@ -89,7 +89,7 @@
         if( lastContentId != QContent::InvalidId )
             QContent::uninstall( lastContentId );
     }</pre>
-<p>The <tt>timeout()</tt> slot periodically creates a new <a href="qcontent.html">QContent</a> for an image and commits it to the document system. We get the name, and the absolute file path from the <a href="./qfileinfo.html">QFileInfo</a>, and all of the images are of the <tt>image/png</tt> type. We assign the <a href="qcontent.html#Role-enum">QContent::Data</a> role instead of the usual <a href="qcontent.html#Role-enum">QContent::Document</a> so that the images don't appear in any of the document selectors, and assign the <tt>Change Listener</tt> category to identify it later.</p>
+<p>The <tt>timeout()</tt> slot periodically creates a new <a href="qcontent.html">QContent</a> for an image and commits it to the document system. We get the name, and the absolute file path from the <a href="qfileinfo.html">QFileInfo</a>, and all of the images are of the <tt>image/png</tt> type. We assign the <a href="qcontent.html#Role-enum">QContent::Data</a> role instead of the usual <a href="qcontent.html#Role-enum">QContent::Document</a> so that the images don't appear in any of the document selectors, and assign the <tt>Change Listener</tt> category to identify it later.</p>
 <pre>    void ChangeListener::timeout()
     {
         QFileInfo fileInfo = imageFiles.at( nextIndex );
@@ -119,7 +119,7 @@
             foreach ( QContentId id, idList ) {
                 QContent content( id );
                 if ( content.isValid() &amp;&amp; content.categories().contains( categoryId ) ) {</pre>
-<p>Once a new <a href="qcontent.html">QContent</a> has been identified we want to set its name as the window title and display the image in the body of the window. To display the image we open the <a href="qcontent.html">QContent</a> in read-only mode using <a href="qcontent.html#open">QContent::open</a>() and load the data from the returned <a href="./qiodevice.html">QIODevice</a> into the image. The caller takes ownership of the <a href="./qiodevice.html">QIODevice</a> returned by <a href="qcontent.html#open">QContent::open</a>() so we'll need to delete it once we've closed it.</p>
+<p>Once a new <a href="qcontent.html">QContent</a> has been identified we want to set its name as the window title and display the image in the body of the window. To display the image we open the <a href="qcontent.html">QContent</a> in read-only mode using <a href="qcontent.html#open">QContent::open</a>() and load the data from the returned <a href="qiodevice.html">QIODevice</a> into the image. The caller takes ownership of the <a href="qiodevice.html">QIODevice</a> returned by <a href="qcontent.html#open">QContent::open</a>() so we'll need to delete it once we've closed it.</p>
 <pre>                    setWindowTitle( content.name() );
                     QIODevice *ioDevice = content.open( QIODevice::ReadOnly );
                     if ( ioDevice ) {

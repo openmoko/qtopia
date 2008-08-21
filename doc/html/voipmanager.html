@@ -27,7 +27,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>8 public functions inherited from <a href="qabstractcallpolicymanager.html#public-functions">QAbstractCallPolicyManager</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -37,7 +37,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractcallpolicymanager.html#signals">QAbstractCallPolicyManager</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -45,15 +45,15 @@
 <li><div class="fn"/>VoIPManager * <b><a href="voipmanager.html#instance">instance</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -64,11 +64,11 @@
 <p>See also <a href="phoneserver.html">PhoneServer</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="VoIPManager"></a>VoIPManager::VoIPManager ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="VoIPManager"></a>VoIPManager::VoIPManager ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Create a new VoIP telephony service manager and attach it to <i>parent</i>.</p>
 <h3 class="fn"><a name="instance"></a>VoIPManager * VoIPManager::instance ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the <a href="voipmanager.html">VoIPManager</a> instance.</p>
-<h3 class="fn"><a name="isAvailable"></a>bool VoIPManager::isAvailable ( const <a href="./qstring.html">QString</a> &amp; <i>uri</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="isAvailable"></a>bool VoIPManager::isAvailable ( const <a href="qstring.html">QString</a> &amp; <i>uri</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns true if the VoIP user associated with <i>uri</i> is available for calling; false otherwise.</p>
 <p>Reimplemented from <a href="qabstractcallpolicymanager.html#isAvailable">QAbstractCallPolicyManager</a>.</p>
 <p>See also <a href="voipmanager.html#monitoredPresenceChanged">monitoredPresenceChanged</a>() and <a href="voipmanager.html#startMonitoring">startMonitoring</a>().</p>
@@ -78,7 +78,7 @@
 <h3 class="fn"><a name="localPresenceChanged"></a>void VoIPManager::localPresenceChanged ( <a href="qpresence.html#Status-enum">QPresence::Status</a> <i>status</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when <a href="voipmanager.html#localPresence">localPresence</a>() changes to <i>status</i>.</p>
 <p>See also <a href="voipmanager.html#localPresence">localPresence</a>().</p>
-<h3 class="fn"><a name="monitoredPresenceChanged"></a>void VoIPManager::monitoredPresenceChanged ( const <a href="./qstring.html">QString</a> &amp; <i>uri</i>, bool <i>available</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="monitoredPresenceChanged"></a>void VoIPManager::monitoredPresenceChanged ( const <a href="qstring.html">QString</a> &amp; <i>uri</i>, bool <i>available</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when the presence of the user identified by <i>uri</i> changes to <i>available</i>.</p>
 <p>See also <a href="voipmanager.html#isAvailable">isAvailable</a>() and <a href="voipmanager.html#startMonitoring">startMonitoring</a>().</p>
 <h3 class="fn"><a name="startMonitoring"></a>void VoIPManager::startMonitoring ()</h3>

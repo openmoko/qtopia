@@ -40,7 +40,7 @@
 </td></tr>
 </table></p>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 </ul>
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
@@ -59,7 +59,7 @@
 <ul>
 <li><div class="fn"/>1 public function inherited from <a href="qcomminterface.html#public-functions">QCommInterface</a></li>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -68,7 +68,7 @@
 <li><div class="fn"/>virtual void <b><a href="qnetworkregistration.html#setCurrentOperator">setCurrentOperator</a></b> ( QTelephony::OperatorMode <i>mode</i>, const QString &amp; <i>id</i> = QString(), const QString &amp; <i>technology</i> = QString() )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -82,15 +82,15 @@
 </ul>
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -107,7 +107,7 @@
 <ul>
 <li><div class="fn"/><b>int cellId () const</b></li>
 </ul>
-<h3 class="fn"><a name="currentOperatorId-prop"></a>currentOperatorId : const <a href="./qstring.html">QString</a></h3>
+<h3 class="fn"><a name="currentOperatorId-prop"></a>currentOperatorId : const <a href="qstring.html">QString</a></h3>
 <p>This property holds the identifier of the current network operator.</p>
 <p>Access functions:</p>
 <ul>
@@ -119,13 +119,13 @@
 <ul>
 <li><div class="fn"/><b>QTelephony::OperatorMode currentOperatorMode () const</b></li>
 </ul>
-<h3 class="fn"><a name="currentOperatorName-prop"></a>currentOperatorName : const <a href="./qstring.html">QString</a></h3>
+<h3 class="fn"><a name="currentOperatorName-prop"></a>currentOperatorName : const <a href="qstring.html">QString</a></h3>
 <p>This property holds the name of the current network operator.</p>
 <p>Access functions:</p>
 <ul>
 <li><div class="fn"/><b>QString currentOperatorName () const</b></li>
 </ul>
-<h3 class="fn"><a name="currentOperatorTechnology-prop"></a>currentOperatorTechnology : const <a href="./qstring.html">QString</a></h3>
+<h3 class="fn"><a name="currentOperatorTechnology-prop"></a>currentOperatorTechnology : const <a href="qstring.html">QString</a></h3>
 <p>This property holds the technology used the current network operator.</p>
 <p>Access functions:</p>
 <ul>
@@ -151,13 +151,13 @@
 </ul>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QNetworkRegistration"></a>QNetworkRegistration::QNetworkRegistration ( const <a href="./qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="./qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
+<h3 class="fn"><a name="QNetworkRegistration"></a>QNetworkRegistration::QNetworkRegistration ( const <a href="qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
 <p>Construct a new network registration object for <i>service</i> and attach it to <i>parent</i>. The object will be created in client mode if <i>mode</i> is Client, or server mode otherwise.</p>
 <p>If <i>service</i> is empty, this class will use the first available service that supports network registration. If there is more than one service that supports network registration, the caller should enumerate them with <a href="qabstractipcinterfacegroupmanager.html#supports">QCommServiceManager::supports</a>() and create separate <a href="qnetworkregistration.html">QNetworkRegistration</a> objects for each.</p>
 <p>See also <a href="qabstractipcinterfacegroupmanager.html#supports">QCommServiceManager::supports</a>().</p>
 <h3 class="fn"><a name="dtor.QNetworkRegistration"></a>QNetworkRegistration::~QNetworkRegistration ()</h3>
 <p>Destroy this network registration object.</p>
-<h3 class="fn"><a name="availableOperators"></a>void QNetworkRegistration::availableOperators ( const <a href="./qlist.html">QList</a>&lt;<a href="qnetworkregistration-availableoperator.html">QNetworkRegistration::AvailableOperator</a>&gt; &amp; <i>opers</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="availableOperators"></a>void QNetworkRegistration::availableOperators ( const <a href="qlist.html">QList</a>&lt;<a href="qnetworkregistration-availableoperator.html">QNetworkRegistration::AvailableOperator</a>&gt; &amp; <i>opers</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when a <a href="qnetworkregistration.html#requestAvailableOperators">requestAvailableOperators</a>() request completes. The <i>opers</i> parameter contains the list of available operators.</p>
 <p>See also <a href="qnetworkregistration.html#requestAvailableOperators">requestAvailableOperators</a>().</p>
 <h3 class="fn"><a name="currentOperatorChanged"></a>void QNetworkRegistration::currentOperatorChanged ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -177,7 +177,7 @@
 <p>Request a list of all available network operators. The server will respond with the <a href="qnetworkregistration.html#availableOperators">availableOperators</a>() signal.</p>
 <p>The preferred operator list on the SIM card can be accessed with the <a href="qpreferrednetworkoperators.html">QPreferredNetworkOperators</a> class.</p>
 <p>See also <a href="qnetworkregistration.html#availableOperators">availableOperators</a>() and <a href="qpreferrednetworkoperators.html">QPreferredNetworkOperators</a>.</p>
-<h3 class="fn"><a name="setCurrentOperator"></a>void QNetworkRegistration::setCurrentOperator ( <a href="qtelephony.html#OperatorMode-enum">QTelephony::OperatorMode</a> <i>mode</i>, const <a href="./qstring.html">QString</a> &amp; <i>id</i> = QString(), const <a href="./qstring.html">QString</a> &amp; <i>technology</i> = QString() )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="setCurrentOperator"></a>void QNetworkRegistration::setCurrentOperator ( <a href="qtelephony.html#OperatorMode-enum">QTelephony::OperatorMode</a> <i>mode</i>, const <a href="qstring.html">QString</a> &amp; <i>id</i> = QString(), const <a href="qstring.html">QString</a> &amp; <i>technology</i> = QString() )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Sets the current network operator information to <i>mode</i>, <i>id</i>, and <i>technology</i>. The server will respond with the <a href="qnetworkregistration.html#setCurrentOperatorResult">setCurrentOperatorResult</a>() signal when the request completes.</p>
 <p>If the request succeeds, then the client may also receive the <a href="qnetworkregistration.html#currentOperatorChanged">currentOperatorChanged</a>() signal to indicate the newly selected values. The <a href="qnetworkregistration.html#currentOperatorChanged">currentOperatorChanged</a>() signal may be suppressed if the request succeeded, but the new values are the same as the previous ones.</p>
 <p>See also <a href="qnetworkregistration.html#setCurrentOperatorResult">setCurrentOperatorResult</a>().</p>

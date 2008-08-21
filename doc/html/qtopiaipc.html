@@ -31,7 +31,7 @@
 <p>The Qtopia IPC API is based on the notion of channels and messages. Messages can be used by by an application to notify another application to take some action. Messages can have arguments associated with them. In essence, a message can be thought of as a remote method call. A message consists of a function identifier followed by a list of types in parantheses. There is no whitespace in the message name.</p>
 <p>Channels are unique string based identifiers which are used to logically group a set of messages together. Effectively, a set of messages on a particular channel defines an interface. By convention all channels within Qtopia start with &quot;QPE/&quot;.</p>
 <p>The Qtopia IPC system uses the event-processing loop. If you create a message it will not be sent until the next the event loop is entered.</p>
-<p>Qtopia IPC system consists of three major classes. The <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a> is the preferred way to interface with the system. In addition, <a href="qtopiachannel.html">QtopiaChannel</a> and <a href="qtopiaipcenvelope.html">QtopiaIpcEnvelope</a> classes are provided to ease the transition between the Qtopia <a href="./qcopchannel.html">QCopChannel</a> based systems and the new API.</p>
+<p>Qtopia IPC system consists of three major classes. The <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a> is the preferred way to interface with the system. In addition, <a href="qtopiachannel.html">QtopiaChannel</a> and <a href="qtopiaipcenvelope.html">QtopiaIpcEnvelope</a> classes are provided to ease the transition between the Qtopia <a href="qcopchannel.html">QCopChannel</a> based systems and the new API.</p>
 <a name="qtopiaipcadaptor"></a>
 <h2>QtopiaIpcAdaptor</h2>
 <a name="overview"></a>
@@ -40,11 +40,11 @@
 <p>To use <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a> directly, we first construct a new object by providing a channel as so:</p>
 <pre>    QtopiaIpcAdaptor *adaptor = new QtopiaIpcAdaptor(&quot;QPE/CannonExample&quot;);</pre>
 <p>The newly created <i>adaptor</i> object can now be used to send messages to remote applications, or to receive messages. To send messages use the <tt>send</tt> method calls:</p>
-<pre><span class="comment">    //</span> First we aim the cannon
+<pre><span class="comment">    // First we aim the cannon</span>
     QtopiaIpcSendEnvelope envelope = adaptor-&gt;send(MESSAGE(aimCannon(int,int)));
     envelope &lt;&lt; direction &lt;&lt; elevation;
 
-<span class="comment">    //</span> Alternatively if there are less than 3 arguments we can use send directly
+<span class="comment">    // Alternatively if there are less than 3 arguments we can use send directly</span>
     adaptor-&gt;send(MESSAGE(shootCannon(int)), cannonPower);</pre>
 <p>Another application is responsible for actually aiming and shooting the cannon. Let us suppose that the cannon application can reply with two types of messages, a hit or a miss. E.g&#x2e; the remote application will send a <i>missed()</i> or <i>hit()</i> message. We can listen for such messages in the following manner:</p>
 <pre>    class CannonListener : public QObject
@@ -81,11 +81,11 @@
     CannonController *control = new CannonController;
     QtopiaIpcAdaptor *adaptor = new QtopiaIpcAdaptor(&quot;QPE/CannonExample&quot;);
 
-<span class="comment">    //</span> Hookup remote messages to our object
+<span class="comment">    // Hookup remote messages to our object</span>
     QtopiaIpcAdaptor::connect(adaptor, SIGNAL(missed()), control, SLOT(missed()));
     QtopiaIpcAdaptor::connect(adaptor, SIGNAL(hit()), control, SLOT(hit()));
 
-<span class="comment">    //</span> Send our signals to the remote object
+<span class="comment">    // Send our signals to the remote object</span>
     QtopiaIpcAdaptor::connect(control, SIGNAL(aimCannon(int,int)), adaptor, SLOT(aimCannon(int,int)));
     QtopiaIpcAdaptor::connect(control, SIGNAL(shootCannon(int)), adaptor, SLOT(shootCannon(int)));</pre>
 <p>We should now recognize that for non-trivial interactions the last example is a quite common use case. It is thus desirable to avoid using QtopiaIpcAdaptor::connect for each connection, which can be quite error prone. <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a> provides an alternate interaction technique based on inheritance. Instead of creating another class and using QtopiaIpcAdaptor::connect, we inherit directly from <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a> and use the publish or publishAll methods to automatically publish all signals and slots on the channel. E.g&#x2e;:</p>
@@ -137,7 +137,7 @@
 <a name="enumerations"></a>
 <h4>Enumerations</h4>
 <p>To make the example complete, we show how to extend our example with custom data types. First let us suppose that we'd like to use a custom ammunition type. We define a new enumeration named appropriately <i>AmmunitionType</i>. In order to exchange these enumerations, we must first register it with the meta-type system. This is accomplished by using the <i>Q_DECLARE_USER_METATYPE_ENUM</i> macro. This macro must be used in the header file where the enumeration is defined. Additionally we must use the <i>Q_IMPLEMENT_USER_METATYPE_ENUM</i> macro to implement the necessary serialization and deserialization functions.</p>
-<pre>        <span class="comment">//</span> Header
+<pre>        <span class="comment">// Header</span>
         class CannonController : public QtopiaIpcAdaptor
         {
             Q_OBJECT
@@ -162,7 +162,7 @@
 
     ...
 
-        <span class="comment">//</span> Implementation:
+        <span class="comment">// Implementation:</span>
 
         Q_IMPLEMENT_USER_METATYPE_ENUM(CannonController::AmmunitionType)</pre>
 <a name="custom-classes"></a>
@@ -245,7 +245,7 @@
 <p>Each application listens on a channel called <b>QPE/Application/<i>appname</i></b> , where <b><i>appname</i></b> is the executable name (the application identifier). Standard messages on this channel are:</p>
 <p><b>QPE/Application/<i>appname</i></b></p>
 <ul>
-<li>setDocument(<a href="./qstring.html">QString</a>) -- Internal. Causes the setDocument(const <a href="./qstring.html">QString</a>&amp;) slot of <a href="docwidget.html">the main document widget</a> be called.</li>
+<li>setDocument(<a href="qstring.html">QString</a>) -- Internal. Causes the setDocument(const <a href="qstring.html">QString</a>&amp;) slot of <a href="docwidget.html">the main document widget</a> be called.</li>
 <li>nextView() -- Applications connected to hardware buttons will receive this message if they are already visible.</li>
 <li>raise() -- Internal. Causes the the main document widget and the current modal widget to be raised.</li>
 <li><a href="qtopiadesktop/qdsync-quit-1.html">quit</a>() -- Internal. Terminates the application.</li>

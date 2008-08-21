@@ -27,7 +27,7 @@
 <ul>
 <li><div class="fn"/>1 public function inherited from <a href="qcomminterface.html#public-functions">QCommInterface</a></li>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -36,7 +36,7 @@
 <li><div class="fn"/>virtual void <b><a href="qtelephonyconfiguration.html#update">update</a></b> ( const QString &amp; <i>name</i>, const QString &amp; <i>value</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -45,16 +45,16 @@
 </ul>
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -66,17 +66,17 @@
 <p>See also <a href="qmodemconfiguration.html">QModemConfiguration</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QTelephonyConfiguration"></a>QTelephonyConfiguration::QTelephonyConfiguration ( const <a href="./qstring.html">QString</a> &amp; <i>service</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
+<h3 class="fn"><a name="QTelephonyConfiguration"></a>QTelephonyConfiguration::QTelephonyConfiguration ( const <a href="qstring.html">QString</a> &amp; <i>service</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
 <p>Construct a new telephony configuration object for <i>service</i> and attach it to <i>parent</i>. The object will be created in client mode if <i>mode</i> is Client, or server mode otherwise.</p>
 <h3 class="fn"><a name="dtor.QTelephonyConfiguration"></a>QTelephonyConfiguration::~QTelephonyConfiguration ()</h3>
 <p>Destroy this configuration object.</p>
-<h3 class="fn"><a name="notification"></a>void QTelephonyConfiguration::notification ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, const <a href="./qstring.html">QString</a> &amp; <i>value</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="notification"></a>void QTelephonyConfiguration::notification ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qstring.html">QString</a> &amp; <i>value</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted by the configuration service to indicate that the value of <i>name</i> is now <i>value</i>. This is usually emitted in response to a call on <a href="qtelephonyconfiguration.html#request">request</a>(), but it may also be emitted if the configuration <i>name</i> corresponds to an unsolicited value.</p>
 <p>See also <a href="qtelephonyconfiguration.html#request">request</a>().</p>
-<h3 class="fn"><a name="request"></a>void QTelephonyConfiguration::request ( const <a href="./qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="request"></a>void QTelephonyConfiguration::request ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Request the current value of the configuration item <i>name</i>. The value will be returned via the <a href="qtelephonyconfiguration.html#notification">notification</a>() signal.</p>
 <p>See also <a href="qtelephonyconfiguration.html#notification">notification</a>() and <a href="qtelephonyconfiguration.html#update">update</a>().</p>
-<h3 class="fn"><a name="update"></a>void QTelephonyConfiguration::update ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, const <a href="./qstring.html">QString</a> &amp; <i>value</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="update"></a>void QTelephonyConfiguration::update ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qstring.html">QString</a> &amp; <i>value</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Update the configuration item <i>name</i> to <i>value</i>.</p>
 <p>See also <a href="qtelephonyconfiguration.html#request">request</a>().</p>
 <p /><address><hr /><div align="center">

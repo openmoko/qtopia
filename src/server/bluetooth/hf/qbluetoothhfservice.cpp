@@ -126,7 +126,7 @@ public:
     (phone) and the Bluetooth Audio headset.  This class
     implements the Bluetooth Handsfree Audio Gateway as defined
     in the Handsfree Bluetooth Profile specification.
-  
+
     This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
 */
 
@@ -214,7 +214,7 @@ void QBluetoothHandsfreeService::serialPortsChanged()
 /*!
     \internal
   Attempts to initialize the audio gateway by registering with
-  the BT SCO handler.  
+  the BT SCO handler.
   */
 void QBluetoothHandsfreeService::initializeAudioGateway()
 {
@@ -257,6 +257,9 @@ void QBluetoothHandsfreeService::start()
         if (!sdpRecord.isNull())
             m_data->m_sdpRecordHandle = registerRecord(sdpRecord);
     }
+
+    if (sdpRecord.isNull())
+        qWarning() << "QBluetoothHandsfreeService: cannot read" << sdpRecordFile.fileName();
 
     if (m_data->m_sdpRecordHandle == 0) {
         emit started(true, tr("Error registering with SDP server"));
@@ -440,7 +443,9 @@ void QBluetoothHandsfreeService::disconnect()
 
     QtopiaServiceRequest req( "ModemEmulator", "removeSerialPort(QString)" );
     req << m_data->m_activeClient->device();
-    req.send();
+    if (!req.send()) {
+        qWarning("QBluetoothHandsfreeService: unable to send removeSerialPort() request to ModemEmulator, ensure atinterface is available");
+    }
 }
 
 /*!
@@ -746,22 +751,29 @@ bool QBluetoothHandsfreeService::setupTty(QBluetoothRfcommSocket *socket, bool i
     qLog(Bluetooth) << "CreateTty returned: " << dev;
 
     if ( !dev.isEmpty() ) {
+        QBluetoothAddress socketAddress = socket->remoteAddress();
+
+        // Need to ensure we close the socket before handing it off to the Modem Emulator
+        delete socket;
+
+        QtopiaServiceRequest req( "ModemEmulator", "addSerialPort(QString,QString)" );
+        req << m_data->m_activeClient->device() << "handsfree,noecho";
+        if (!req.send()) {
+            qWarning("QBluetoothHandsfreeService: unable to send addSerialPort() request to ModemEmulator, ensure atinterface is available");
+            return false;
+        }
+
+        qLog(Bluetooth) << "Handsfree connected to" << socketAddress.toString();
+
         m_data->m_interface->setValue("IsConnected", true);
-        m_data->m_remotePeer = socket->remoteAddress();
+        m_data->m_remotePeer = socketAddress;
         m_data->m_interface->setValue("RemotePeer",
                                       QVariant::fromValue(m_data->m_remotePeer));
 
         if (incoming)
-            emit newConnection(socket->remoteAddress());
+            emit newConnection(socketAddress);
         else
             emit connectResult(true, QString());
-
-        delete socket;
-
-        // Need to ensure we close the socket before handing it off to the Modem Emulator
-        QtopiaServiceRequest req( "ModemEmulator", "addSerialPort(QString,QString)" );
-        req << m_data->m_activeClient->device() << "handsfree,noecho";
-        req.send();
 
         return true;
     }
@@ -884,7 +896,7 @@ public:
     implementation of the QBluetoothAudioGateway interface
     which forwards all calls to the implementation object,
     which is passed in the constructor.
-  
+
     This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
 */
 

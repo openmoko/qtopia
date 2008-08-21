@@ -198,6 +198,55 @@ void ZoomButton::focusOutEvent( QFocusEvent *e )
 
 // ============================================================================
 //
+// CityLabel
+//
+// ============================================================================
+
+class CityLabel : public QLabel
+{
+public:
+    CityLabel(const QString& text, QWidget *parent = 0);
+
+protected:
+    void mouseMoveEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+};
+
+CityLabel::CityLabel(const QString& text, QWidget *parent)
+    : QLabel(text, parent)
+{
+    setMinimumSize(sizeHint());
+    setFrameStyle(QFrame::Plain | QFrame::Box);
+    setFont(QApplication::font());
+
+    QPalette pal(palette());
+    QColor col = pal.color(QPalette::Highlight);
+    col.setAlpha(192);
+    pal.setColor(QPalette::Background, col);
+    pal.setColor(QPalette::WindowText, Qt::black);
+    setPalette(pal);
+    setAutoFillBackground(true);
+    hide();
+}
+
+void CityLabel::mouseMoveEvent(QMouseEvent *event)
+{
+    event->ignore();
+}
+
+void CityLabel::mousePressEvent(QMouseEvent *event)
+{
+    event->ignore();
+}
+
+void CityLabel::mouseReleaseEvent(QMouseEvent *event)
+{
+    event->ignore();
+}
+
+// ============================================================================
+//
 // QWorldmapPrivate
 //
 // ============================================================================
@@ -221,7 +270,7 @@ public:
 
     // Data members
     QPixmap*     pixCurr; // image to be drawn on the screen
-    QLabel*      lblCity;    // the "tool-tip" that shows up when you pick a city...
+    CityLabel*   lblCity; // the "tool-tip" that shows up when you pick a city...
     ZoomButton*  cmdZoom;   // our zoom option...
     ZoomButton*  selecButton;
     ZoomButton*  cancelButton;
@@ -486,20 +535,7 @@ QWorldmap::QWorldmap( QWidget *parent )
         d->cancelButton->resize(  buttonSizeW, buttonSizeH);
     }
 
-
-    d->lblCity = new QLabel( tr( "CITY" ), this );
-    d->lblCity->setMinimumSize( d->lblCity->sizeHint() );
-    d->lblCity->setFrameStyle( QFrame::Plain | QFrame::Box );
-    d->lblCity->setFont( QApplication::font() );
-    QPalette pal( d->lblCity->palette() );
-
-    QColor col = pal.color( QPalette::Highlight);
-    col.setAlpha(192);
-    pal.setColor(QPalette::Background, col);
-    pal.setColor(QPalette::WindowText, Qt::black);
-    d->lblCity->setPalette( pal );
-    d->lblCity->setAutoFillBackground( true );
-    d->lblCity->hide();
+    d->lblCity = new CityLabel(tr("CITY"), this);
 
     // A timer to make sure the label gets hidden
     d->tHide = new QTimer( this );
@@ -1137,7 +1173,7 @@ void QWorldmap::setZone( const QTimeZone& zone )
                               viewport() );
             }
             setCursorPoint( olwx, olwy, zone.id() );
-}
+        }
     }
 }
 
@@ -1509,6 +1545,8 @@ void QWorldmap::toggleZoom( )
         verticalScrollBar()->setRange( 0,  ( QWORLDMAP_ZOOM - 1) * d->hImg );
         horizontalScrollBar()->setRange( 0, ( QWORLDMAP_ZOOM - 1) * d->wImg );
         makeMap( QWORLDMAP_ZOOM * d->wImg , QWORLDMAP_ZOOM * d->hImg );
+        verticalScrollBar()->setSliderPosition(0);
+        horizontalScrollBar()->setSliderPosition(0);
     } else {
         setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
         setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
@@ -1678,6 +1716,23 @@ void QWorldmap::initCities()
         }
     }
     viewport()->update();
+}
+
+bool QWorldmap::event(QEvent *event)
+{
+    switch (event->type()) {
+    case QEvent::MouseButtonPress:
+        mousePressEvent(static_cast<QMouseEvent *>(event));
+        return true;
+    case QEvent::MouseButtonRelease:
+        mouseReleaseEvent(static_cast<QMouseEvent *>(event));
+        return true;
+    case QEvent::MouseMove:
+        mouseMoveEvent(static_cast<QMouseEvent *>(event));
+        return true;
+    default:
+        return QAbstractScrollArea::event(event);
+    }
 }
 
 #ifdef DEBUG_QWORLDMAP

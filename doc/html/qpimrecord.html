@@ -62,44 +62,44 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="dtor.QPimRecord"></a>QPimRecord::~QPimRecord ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the record.</p>
-<h3 class="fn"><a name="categories"></a><a href="./qlist.html">QList</a>&lt;<a href="./qstring.html">QString</a>&gt; QPimRecord::categories () const</h3>
+<h3 class="fn"><a name="categories"></a><a href="qlist.html">QList</a>&lt;<a href="qstring.html">QString</a>&gt; QPimRecord::categories () const</h3>
 <p>Returns the set of categories the record belongs to.</p>
 <p>See also <a href="qpimrecord.html#setCategories">setCategories</a>() and <a href="qpimrecord.html#categoriesRef">categoriesRef</a>().</p>
-<h3 class="fn"><a name="categoriesRef"></a><a href="./qlist.html">QList</a>&lt;<a href="./qstring.html">QString</a>&gt; &amp; QPimRecord::categoriesRef ()&nbsp;&nbsp;<tt> [pure virtual protected]</tt></h3>
+<h3 class="fn"><a name="categoriesRef"></a><a href="qlist.html">QList</a>&lt;<a href="qstring.html">QString</a>&gt; &amp; QPimRecord::categoriesRef ()&nbsp;&nbsp;<tt> [pure virtual protected]</tt></h3>
 <p>Subclasses should re-implement this function to return a reference to the categories for this object.</p>
 <p>See also <a href="qpimrecord.html#categories">categories</a>().</p>
-<h3 class="fn"><a name="categoriesRef-2"></a>const <a href="./qlist.html">QList</a>&lt;<a href="./qstring.html">QString</a>&gt; &amp; QPimRecord::categoriesRef () const&nbsp;&nbsp;<tt> [pure virtual protected]</tt></h3>
+<h3 class="fn"><a name="categoriesRef-2"></a>const <a href="qlist.html">QList</a>&lt;<a href="qstring.html">QString</a>&gt; &amp; QPimRecord::categoriesRef () const&nbsp;&nbsp;<tt> [pure virtual protected]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Subclasses should re-implement this function to return a reference to the categories for this object.</p>
 <p>See also <a href="qpimrecord.html#categories">categories</a>().</p>
-<h3 class="fn"><a name="customField"></a><a href="./qstring.html">QString</a> QPimRecord::customField ( const <a href="./qstring.html">QString</a> &amp; <i>key</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="customField"></a><a href="qstring.html">QString</a> QPimRecord::customField ( const <a href="qstring.html">QString</a> &amp; <i>key</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns the string stored for the custom field <i>key</i>. Returns a null string if the field does not exist.</p>
 <p>See also <a href="qpimrecord.html#setCustomField">setCustomField</a>() and <a href="qpimrecord.html#customFields">customFields</a>().</p>
-<h3 class="fn"><a name="customFields"></a><a href="./qmap.html">QMap</a>&lt;<a href="./qstring.html">QString</a>, <a href="./qstring.html">QString</a>&gt; QPimRecord::customFields () const</h3>
+<h3 class="fn"><a name="customFields"></a><a href="qmap.html">QMap</a>&lt;<a href="qstring.html">QString</a>, <a href="qstring.html">QString</a>&gt; QPimRecord::customFields () const</h3>
 <p>Returns a map of custom field key and value pairs for the record.</p>
 <p>See also <a href="qpimrecord.html#setCustomFields">setCustomFields</a>(), <a href="qpimrecord.html#customField">customField</a>(), and <a href="qpimrecord.html#customFieldsRef">customFieldsRef</a>().</p>
-<h3 class="fn"><a name="customFieldsRef"></a><a href="./qmap.html">QMap</a>&lt;<a href="./qstring.html">QString</a>, <a href="./qstring.html">QString</a>&gt; &amp; QPimRecord::customFieldsRef ()&nbsp;&nbsp;<tt> [pure virtual protected]</tt></h3>
+<h3 class="fn"><a name="customFieldsRef"></a><a href="qmap.html">QMap</a>&lt;<a href="qstring.html">QString</a>, <a href="qstring.html">QString</a>&gt; &amp; QPimRecord::customFieldsRef ()&nbsp;&nbsp;<tt> [pure virtual protected]</tt></h3>
 <p>Subclasses should re-implement this function to return a reference to the custom fields for this object.</p>
 <p>See also <a href="qpimrecord.html#customFields">customFields</a>().</p>
-<h3 class="fn"><a name="customFieldsRef-2"></a>const <a href="./qmap.html">QMap</a>&lt;<a href="./qstring.html">QString</a>, <a href="./qstring.html">QString</a>&gt; &amp; QPimRecord::customFieldsRef () const&nbsp;&nbsp;<tt> [pure virtual protected]</tt></h3>
+<h3 class="fn"><a name="customFieldsRef-2"></a>const <a href="qmap.html">QMap</a>&lt;<a href="qstring.html">QString</a>, <a href="qstring.html">QString</a>&gt; &amp; QPimRecord::customFieldsRef () const&nbsp;&nbsp;<tt> [pure virtual protected]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Subclasses should re-implement this function to return a reference to the custom fields for this object.</p>
 <p>See also <a href="qpimrecord.html#customFields">customFields</a>().</p>
-<h3 class="fn"><a name="dependentChildren"></a><a href="./qmap.html">QMap</a>&lt;<a href="./qstring.html">QString</a>, <a href="quniqueid.html">QUniqueId</a>&gt; QPimRecord::dependentChildren () const</h3>
+<h3 class="fn"><a name="dependentChildren"></a><a href="qmap.html">QMap</a>&lt;<a href="qstring.html">QString</a>, <a href="quniqueid.html">QUniqueId</a>&gt; QPimRecord::dependentChildren () const</h3>
 <p>Returns the identifiers and type of dependency for any records that depend on this record.</p>
 <p>See also <a href="qpimrecord.html#dependentChildrenOfType">dependentChildrenOfType</a>().</p>
-<h3 class="fn"><a name="dependentChildrenOfType"></a><a href="./qlist.html">QList</a>&lt;<a href="quniqueid.html">QUniqueId</a>&gt; QPimRecord::dependentChildrenOfType ( const <a href="./qstring.html">QString</a> &amp; <i>type</i> ) const</h3>
+<h3 class="fn"><a name="dependentChildrenOfType"></a><a href="qlist.html">QList</a>&lt;<a href="quniqueid.html">QUniqueId</a>&gt; QPimRecord::dependentChildrenOfType ( const <a href="qstring.html">QString</a> &amp; <i>type</i> ) const</h3>
 <p>Returns the record identifiers for any records that have the specified <i>type</i> of dependency on this record.</p>
 <p>For example, if this record is a <a href="qcontact.html">QContact</a>, there may be <a href="qappointment.html">QAppointment</a> objects that have a <tt>&quot;birthday&quot;</tt> or <tt>&quot;anniversary&quot;</tt> dependency on this record.</p>
 <p>See also <a href="qpimrecord.html#dependentChildren">dependentChildren</a>().</p>
-<h3 class="fn"><a name="notes"></a><a href="./qstring.html">QString</a> QPimRecord::notes () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="notes"></a><a href="qstring.html">QString</a> QPimRecord::notes () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the notes for the record.</p>
 <p>See also <a href="qpimrecord.html#setNotes">setNotes</a>().</p>
 <h3 class="fn"><a name="parentDependency"></a><a href="quniqueid.html">QUniqueId</a> QPimRecord::parentDependency () const</h3>
 <p>If this record is a dependant of another record (for example, this record is the appointment that represents a contact's birthday), this function returns the identifier for the original record.</p>
 <p>Otherwise, returns a null identifier.</p>
 <p>See also <a href="qpimrecord.html#parentDependencyType">parentDependencyType</a>().</p>
-<h3 class="fn"><a name="parentDependencyType"></a><a href="./qstring.html">QString</a> QPimRecord::parentDependencyType () const</h3>
+<h3 class="fn"><a name="parentDependencyType"></a><a href="qstring.html">QString</a> QPimRecord::parentDependencyType () const</h3>
 <p>If this record is a dependant of another record (for example, this record is the appointment that represents a contact's birthday), this function returns the type of the dependency. The types are defined by the PIM library, and include:</p>
 <ul>
 <li><tt>&quot;birthday&quot;</tt> - the parent record is a <a href="qcontact.html">QContact</a>, and the dependent record is the <a href="qappointment.html">QAppointment</a> representing that contact's birthday</li>
@@ -108,27 +108,27 @@
 </ul>
 <p>If there is no dependency, this will return a null string.</p>
 <p>See also <a href="qpimrecord.html#parentDependency">parentDependency</a>().</p>
-<h3 class="fn"><a name="pruneDeadCategories"></a>bool QPimRecord::pruneDeadCategories ( const <a href="./qlist.html">QList</a>&lt;<a href="./qstring.html">QString</a>&gt; &amp; <i>categories</i> )</h3>
+<h3 class="fn"><a name="pruneDeadCategories"></a>bool QPimRecord::pruneDeadCategories ( const <a href="qlist.html">QList</a>&lt;<a href="qstring.html">QString</a>&gt; &amp; <i>categories</i> )</h3>
 <p>Removes categories from record that do not appear in the given set of valid <i>categories</i>. Returns true if the record was modified.</p>
-<h3 class="fn"><a name="reassignCategoryId"></a>void QPimRecord::reassignCategoryId ( const <a href="./qstring.html">QString</a> &amp; <i>oldId</i>, const <a href="./qstring.html">QString</a> &amp; <i>newId</i> )</h3>
+<h3 class="fn"><a name="reassignCategoryId"></a>void QPimRecord::reassignCategoryId ( const <a href="qstring.html">QString</a> &amp; <i>oldId</i>, const <a href="qstring.html">QString</a> &amp; <i>newId</i> )</h3>
 <p>Renames category <i>oldId</i> in record to category <i>newId</i>.</p>
-<h3 class="fn"><a name="removeCustomField"></a>void QPimRecord::removeCustomField ( const <a href="./qstring.html">QString</a> &amp; <i>key</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="removeCustomField"></a>void QPimRecord::removeCustomField ( const <a href="qstring.html">QString</a> &amp; <i>key</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Removes the custom field for the given <i>key</i>.</p>
-<h3 class="fn"><a name="setCategories"></a>void QPimRecord::setCategories ( const <a href="./qlist.html">QList</a>&lt;<a href="./qstring.html">QString</a>&gt; &amp; <i>categories</i> )</h3>
+<h3 class="fn"><a name="setCategories"></a>void QPimRecord::setCategories ( const <a href="qlist.html">QList</a>&lt;<a href="qstring.html">QString</a>&gt; &amp; <i>categories</i> )</h3>
 <p>Sets the record to belong to the given set of <i>categories</i>.</p>
 <p>See also <a href="qpimrecord.html#categories">categories</a>() and <a href="categories.html">Categories</a>.</p>
-<h3 class="fn"><a name="setCategories-2"></a>void QPimRecord::setCategories ( const <a href="./qstring.html">QString</a> &amp; <i>identifier</i> )</h3>
+<h3 class="fn"><a name="setCategories-2"></a>void QPimRecord::setCategories ( const <a href="qstring.html">QString</a> &amp; <i>identifier</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Sets the record to belong only to the given category <i>identifier</i>.</p>
 <p>See also <a href="qpimrecord.html#categories">categories</a>() and <a href="categories.html">Categories</a>.</p>
-<h3 class="fn"><a name="setCustomField"></a>void QPimRecord::setCustomField ( const <a href="./qstring.html">QString</a> &amp; <i>key</i>, const <a href="./qstring.html">QString</a> &amp; <i>value</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="setCustomField"></a>void QPimRecord::setCustomField ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, const <a href="qstring.html">QString</a> &amp; <i>value</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Sets the string stored for the custom field <i>key</i> to the given <i>value</i>.</p>
 <p>See also <a href="qpimrecord.html#customField">customField</a>().</p>
-<h3 class="fn"><a name="setCustomFields"></a>void QPimRecord::setCustomFields ( const <a href="./qmap.html">QMap</a>&lt;<a href="./qstring.html">QString</a>, <a href="./qstring.html">QString</a>&gt; &amp; <i>fields</i> )</h3>
+<h3 class="fn"><a name="setCustomFields"></a>void QPimRecord::setCustomFields ( const <a href="qmap.html">QMap</a>&lt;<a href="qstring.html">QString</a>, <a href="qstring.html">QString</a>&gt; &amp; <i>fields</i> )</h3>
 <p>Sets the custom fields for the record to the given <i>fields</i>.</p>
 <p>Custom fields allow storing data that doesn't fit into the existing fields for a given PIM record.</p>
 <p>See also <a href="qpimrecord.html#customFields">customFields</a>() and <a href="qpimrecord.html#setCustomField">setCustomField</a>().</p>
-<h3 class="fn"><a name="setNotes"></a>void QPimRecord::setNotes ( const <a href="./qstring.html">QString</a> &amp; <i>text</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="setNotes"></a>void QPimRecord::setNotes ( const <a href="qstring.html">QString</a> &amp; <i>text</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Sets the notes for the record to the given <i>text</i>.</p>
 <p>See also <a href="qpimrecord.html#notes">notes</a>().</p>
 <h3 class="fn"><a name="setUid"></a>void QPimRecord::setUid ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>identifier</i> )</h3>

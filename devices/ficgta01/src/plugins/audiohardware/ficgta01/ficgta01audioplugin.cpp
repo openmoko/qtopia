@@ -76,18 +76,23 @@ static const char* mode_to_string[] = {
 
 static bool setAudioScenario(NeoAudioScenario audioScenario)
 {
-    QString confDir = QDir("/etc/alsa").exists() ? "/etc/alsa/" : "/etc/";
+    QString confDir;
+    if (QDir("/etc/alsa").exists())
+        confDir = "/etc/alsa/";
+    else
+        confDir = "/usr/share/openmoko/scenarios/";
 
     const char* mode = mode_to_string[static_cast<int>(audioScenario)];
     QString cmd = "/usr/sbin/alsactl -f " + confDir + mode + ".state restore";
     int result = system(cmd.toLocal8Bit());
 
     if (result == 0)
-        qLog(AudioState) << "setAudioScenario(); using"<< QString( "/etc/alsa/%1.state").arg(mode);
+        qLog(AudioState) << "setAudioScenario(); using"<< QString( "/usr/share/openmoko/scenarios/%1.state").arg(mode);
     else
         qLog(AudioState)<< QString("Setting audio mode to: %1 failed").arg(mode);
 
     return result == 0;
+
 }
 
 #ifdef QTOPIA_BLUETOOTH
@@ -486,7 +491,7 @@ HeadphonesAudioState::HeadphonesAudioState(bool isPhone, QObject *parent):
     }
 
     m_info.setDisplayName(tr("Headphones"));
-    m_info.setPriority(25);
+    m_info.setPriority(50);
 
     m_headset = new QValueSpaceItem("/Hardware/Accessories/PortableHandsfree/Present", this);
     connect(m_headset, SIGNAL(contentsChanged()), SLOT(onHeadsetModified()));
@@ -532,11 +537,11 @@ bool HeadphonesAudioState::enter(QAudio::AudioCapability capability)
 
     qLog(AudioState) << "HeadphonesAudioState::enter" << capability;
 
-      QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService", "setAmp(QString)");
-      e << QString("Headphones");
+      QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService", "setAmp(bool)");
+      e << true;
 
-      m_info.setPriority(25);
-
+      m_info.setPriority(50);
+//    return setAudioScenario(Scenario_GSMHeadset);
     return true;
 }
 
@@ -544,16 +549,10 @@ bool HeadphonesAudioState::leave()
 {
     qLog(AudioState)<<" HeadphonesAudioState::leave()"<<m_isPhone;
 
-    if(m_isPhone) {
 
-  QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService", "setAmp(QString)");
-  e << QString("Stereo Speakers + Headphones");
+      QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService", "setAmp(bool)");
+      e << false;
 
-    } else {
-
-      QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService", "setAmp(QString)");
-      e << QString("Stereo Speakers + Headphones");
-    }
     m_info.setPriority(200);
 
     return true;

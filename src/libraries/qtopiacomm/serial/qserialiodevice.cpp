@@ -251,6 +251,18 @@ bool QSerialIODevice::isValid() const
 // We would like to use "openpty", but it isn't in libc on some systems.
 static bool createPseudoTty(int& masterFd, int& slaveFd, char *ttyname)
 {
+        // try opening Unix98 pseudo tty
+    if ((masterFd = ::open("/dev/ptmx", O_RDWR | O_NONBLOCK, 0)) >= 0) {
+        if (grantpt(masterFd) == 0) {
+            if (unlockpt(masterFd) == 0) {
+                ptsname_r(masterFd, ttyname, BUFSIZ);
+                if ((slaveFd = ::open(ttyname, O_RDWR | O_NOCTTY, 0)) >= 0)
+                    return true;
+            }
+        }
+        ::close(masterFd);
+    }
+
     static char const firstChars[]  = "pqrstuvwxyzabcde";
     static char const secondChars[] = "0123456789abcdef";
     const char *first;

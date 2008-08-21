@@ -96,13 +96,15 @@ PlaybinSession::PlaybinSession
 
 PlaybinSession::~PlaybinSession()
 {
-    if (d->playbin != 0)
-    {
+    if (d->playbin != 0) {
         stop();
+
+        delete d->busHelper;
+        delete d->sinkWidget;
+        gst_object_unref(GST_OBJECT(d->bus));
         gst_object_unref(GST_OBJECT(d->playbin));
     }
 
-    delete d->sinkWidget;
     delete d->videoControlServer;
 
     delete d;
@@ -386,22 +388,21 @@ void PlaybinSession::getStreamsInfo()
 void PlaybinSession::readySession()
 {
     d->playbin = gst_element_factory_make("playbin", NULL);
-    if (d->playbin != 0)
-    {
-        g_object_set(G_OBJECT(d->playbin), "uri", d->url.toString().toLocal8Bit().constData(), NULL);
-
+    if (d->playbin != 0) {
         // Pre-set video element, even if no video
         d->sinkWidget = new DirectPainterWidget;
         g_object_set(G_OBJECT(d->playbin), "video-sink", d->sinkWidget->element(), NULL);
 
         // Sort out messages
         d->bus = gst_element_get_bus(d->playbin);
-
         d->busHelper = new BusHelper(d->bus, this);
-
         connect(d->busHelper, SIGNAL(message(Message)), SLOT(busMessage(Message)));
 
+        // Initial volume
         g_object_get(G_OBJECT(d->playbin), "volume", &d->volume, NULL);
+
+        // URI for media
+        g_object_set(G_OBJECT(d->playbin), "uri", d->url.toString().toLocal8Bit().constData(), NULL);
     }
 }
 

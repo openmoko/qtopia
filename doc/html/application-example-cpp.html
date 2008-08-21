@@ -37,13 +37,13 @@
     Example::Example(QWidget *parent, Qt::WFlags f)
         : QWidget(parent, f)
     {
-        setupUi(this); <span class="comment">//</span> reads the .ui file to determine widgets and layout
-        <span class="comment">//</span> Construct context menu, available to the user via Qtopia's soft menu bar.
+        setupUi(this); <span class="comment">// reads the .ui file to determine widgets and layout</span>
+        <span class="comment">// Construct context menu, available to the user via Qtopia's soft menu bar.</span>
         QMenu *menu = QSoftMenuBar::menuFor(this);
-        Q_UNUSED(menu); <span class="comment">//</span> Normally, we would use &quot;menu&quot; to add more actions.
-        <span class="comment">//</span> The context menu will not be active unless it has at least one action.
-        <span class="comment">//</span> Tell Qtopia to provide the &quot;Help&quot; option, which will enable the user to
-        <span class="comment">//</span> read the Help documentation for this application.
+        Q_UNUSED(menu); <span class="comment">// Normally, we would use &quot;menu&quot; to add more actions.</span>
+        <span class="comment">// The context menu will not be active unless it has at least one action.</span>
+        <span class="comment">// Tell Qtopia to provide the &quot;Help&quot; option, which will enable the user to</span>
+        <span class="comment">// read the Help documentation for this application.</span>
         QSoftMenuBar::setHelpEnabled(this,true);
     }
 
@@ -52,7 +52,7 @@
      */</span>
     Example::~Example()
     {
-        <span class="comment">//</span> no need to delete child widgets, Qt does it all for us
+        <span class="comment">// no need to delete child widgets, Qt does it all for us</span>
     }
 
 <span class="comment">    /*

@@ -169,7 +169,7 @@
 <a name="extensibility"></a>
 <h2>Extensibility</h2>
 <p>As <a href="qdsdata.html">QDSData</a> is typed, QDS provides an extensible API which can be used with user-defined classes by defining a MIME type for the class.</p>
-<p>The example below shows to create a <a href="qdsdata.html">QDSData</a> instance of a VCard using a streaming operator to pack the VCard into a <a href="./qbytearray.html">QByteArray</a>.</p>
+<p>The example below shows to create a <a href="qdsdata.html">QDSData</a> instance of a VCard using a streaming operator to pack the VCard into a <a href="qbytearray.html">QByteArray</a>.</p>
 <pre>    VCard vcard;
     QByteArray vCardArray;
     {
@@ -179,12 +179,12 @@
     QDSData vCardData( vCardArray, QMimeType( &quot;text/x-vCard&quot; ) );</pre>
 <p>This allows services to be provided for <tt>text/x-vCard</tt> data assuming that there has streaming operator defined in the VCard class.</p>
 <p>For example</p>
-<pre><span class="comment">    //</span>declare the streaming function in the VCard's header file
+<pre><span class="comment">    //declare the streaming function in the VCard's header file</span>
     QDataStream&amp; operator&lt;&lt;( QDataStream&amp; stream, const VCard&amp; vcard );
 
     ...
 
-<span class="comment">    //</span>implement the streaming function in the VCard's cpp file
+<span class="comment">    //implement the streaming function in the VCard's cpp file</span>
     QDataStream&amp; operator&lt;&lt;( QDataStream&amp; stream, const VCard&amp; vcard )
     {
     ...

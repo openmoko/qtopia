@@ -259,6 +259,15 @@ update_extras()
   chmod 555 qt3to4
   wget -nv http://qtopiaweb.trolltech.com.au/dist/input/qtopia/$QPEVER/greenphone/extras/usbflash
   chmod 555 usbflash
+
+
+#addional device specific extra add-ons here 
+# to be run at update time
+		if [ -e $QTOPIA_DEPOT_PATH/devices/greenphone/scripts/extras.sh ]; then
+				cp -a $QTOPIA_DEPOT_PATH/devices/greenphone/scripts/extras.sh /opt/Qtopia/extras/bin
+				chmod +x /opt/Qtopia/extras/bin/extras.sh
+		fi
+
 }
 
 make_flash()

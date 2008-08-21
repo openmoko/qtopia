@@ -55,7 +55,7 @@ DirectPainterWidget::DirectPainterWidget(QWidget* parent):
 
 DirectPainterWidget::~DirectPainterWidget()
 {
-    g_object_unref(m_sink);
+    // Don't unref the sink.
 }
 
 GstElement* DirectPainterWidget::element()

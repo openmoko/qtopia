@@ -28,7 +28,7 @@
 <li><div class="fn"/>void <b><a href="qmediavideocontrolserver.html#unsetRenderTarget">unsetRenderTarget</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -38,23 +38,23 @@
 </ul>
 <ul>
 <li><div class="fn"/>2 signals inherited from <a href="qmediaabstractcontrolserver.html#signals">QMediaAbstractControlServer</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>2 protected functions inherited from <a href="qmediaabstractcontrolserver.html#protected-functions">QMediaAbstractControlServer</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
 <p>The QMediaVideoControlServer class is used by Media Engines to inform clients that video is available for the associated media session.</p>
-<p>A Media Engine using the <a href="qtopiamedia.html">QtopiaMedia</a> API constructs a QMediaVideoControlServer when it would like to inform and enable a client to access a <a href="./qwidget.html">QWidget</a> based video widget in the server.</p>
+<p>A Media Engine using the <a href="qtopiamedia.html">QtopiaMedia</a> API constructs a QMediaVideoControlServer when it would like to inform and enable a client to access a <a href="qwidget.html">QWidget</a> based video widget in the server.</p>
 <pre>    {
         VideoWidget* videoWidget = new VideoWidget(videoSource, parent);
 
@@ -65,22 +65,22 @@
 <p>See also <a href="qmediavideocontrol.html">QMediaVideoControl</a> and <a href="qmediaabstractcontrolserver.html">QMediaAbstractControlServer</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QMediaVideoControlServer"></a>QMediaVideoControlServer::QMediaVideoControlServer ( QMediaHandle const &amp; <i>handle</i>, <a href="./qwidget.html">QWidget</a> * <i>target</i> = 0, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs a <a href="qmediavideocontrolserver.html">QMediaVideoControlServer</a> with the session <i>handle</i>, and optionally the video <i>target</i> widget for sharing with the client and the <i>parent</i> <a href="./qobject.html">QObject</a>.</p>
+<h3 class="fn"><a name="QMediaVideoControlServer"></a>QMediaVideoControlServer::QMediaVideoControlServer ( QMediaHandle const &amp; <i>handle</i>, <a href="qwidget.html">QWidget</a> * <i>target</i> = 0, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs a <a href="qmediavideocontrolserver.html">QMediaVideoControlServer</a> with the session <i>handle</i>, and optionally the video <i>target</i> widget for sharing with the client and the <i>parent</i> <a href="qobject.html">QObject</a>.</p>
 <h3 class="fn"><a name="dtor.QMediaVideoControlServer"></a>QMediaVideoControlServer::~QMediaVideoControlServer ()</h3>
 <p>Destroy the <a href="qmediavideocontrolserver.html">QMediaVideoControlServer</a> object.</p>
-<h3 class="fn"><a name="setRenderTarget"></a>void QMediaVideoControlServer::setRenderTarget ( <a href="./qwidget.html">QWidget</a> * <i>renderTarget</i> )</h3>
+<h3 class="fn"><a name="setRenderTarget"></a>void QMediaVideoControlServer::setRenderTarget ( <a href="qwidget.html">QWidget</a> * <i>renderTarget</i> )</h3>
 <p>Set the video target widget to <i>renderTarget</i>.</p>
 <p>The Media Engine calls this function when it has a widget that it would like to make available to a client application.</p>
-<p>The <a href="./qwidget.html">QWidget</a> will exist in the Media Server process, but will be made available to the session client. A session client will be able to control different widget states, for example whether the widget is hidden or visible.</p>
+<p>The <a href="qwidget.html">QWidget</a> will exist in the Media Server process, but will be made available to the session client. A session client will be able to control different widget states, for example whether the widget is hidden or visible.</p>
 <h3 class="fn"><a name="setRenderTarget-2"></a>void QMediaVideoControlServer::setRenderTarget ( int <i>wid</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Set the video target to the window with <i>wid</i>.</p>
 <p>The Media Engine calls this function when it has a widget that it would like to make available to a client application.</p>
-<p>The <a href="./qwidget.html">QWidget</a> will exist in the Media Server process, but will be made available to the session client. A session client will be able to control different widget states, for example whether the widget is hidden or visible.</p>
+<p>The <a href="qwidget.html">QWidget</a> will exist in the Media Server process, but will be made available to the session client. A session client will be able to control different widget states, for example whether the widget is hidden or visible.</p>
 <h3 class="fn"><a name="unsetRenderTarget"></a>void QMediaVideoControlServer::unsetRenderTarget ()</h3>
 <p>Remove the video target widget.</p>
-<p>The Media Engine should call this function when it will no longer be rendering video into the <a href="./qwidget.html">QWidget</a> set in <a href="qmediavideocontrolserver.html#setRenderTarget">setRenderTarget</a>(). The Session client will be notified that the widget is no longer valid.</p>
+<p>The Media Engine should call this function when it will no longer be rendering video into the <a href="qwidget.html">QWidget</a> set in <a href="qmediavideocontrolserver.html#setRenderTarget">setRenderTarget</a>(). The Session client will be notified that the widget is no longer valid.</p>
 <h3 class="fn"><a name="videoTargetAvailable"></a>void QMediaVideoControlServer::videoTargetAvailable ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when a render target has been set. It will indicate to the client <a href="qmediavideocontrol.html">QMediaVideoControl</a> class, that a video widget is available to be displayed.</p>
 <h3 class="fn"><a name="videoTargetRemoved"></a>void QMediaVideoControlServer::videoTargetRemoved ()&nbsp;&nbsp;<tt> [signal]</tt></h3>

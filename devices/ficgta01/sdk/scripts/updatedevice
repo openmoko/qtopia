@@ -25,7 +25,7 @@ prepare_device()
 install_image()
 {
 
-cat $QTOPIA_IMAGE | ssh "root@$PHONEIP" '(set -x;rm -f /tmp/restart-qtopia;killall qpe;/usr/bin/fbv -c -e /tmp/flash-status-flashing.gif &;sleep 2;mkdir -p /opt/Qtopia;rm -rf /opt/Qtopia/*; cd /opt/Qtopia;gunzip |tar xvf -)'   
+cat $QTOPIA_IMAGE | ssh "root@$PHONEIP" '(set -x;rm -f /tmp/restart-qtopia;killall qpe;/usr/bin/fbv -c -e /tmp/flash-status-flashing.gif &;sleep 2;mkdir -p /opt/Qtopia;rm -rf /opt/Qtopia/*; cd /opt/Qtopia;gunzip |tar xvf -)'
 
  RESULT=$?
 

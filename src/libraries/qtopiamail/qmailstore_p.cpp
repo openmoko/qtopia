@@ -689,7 +689,7 @@ QVariantList QMailStorePrivate::whereClauseValues(const QMailMessageKey& key) co
     //subkeys
 
     foreach(QMailMessageKey subkey,key.d->subKeys)
-        values.append(whereClauseValues(subkey));
+        values << whereClauseValues(subkey);
 
     return values;
 }
@@ -815,7 +815,7 @@ QVariantList QMailStorePrivate::whereClauseValues(const QMailFolderKey& key) con
     }
 
     foreach(QMailFolderKey subkey,key.d->subKeys)
-        values.append(whereClauseValues(subkey));
+        values << whereClauseValues(subkey);
 
     return values;
 }

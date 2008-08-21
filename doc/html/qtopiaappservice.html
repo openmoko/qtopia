@@ -31,18 +31,18 @@
 <li><div class="fn"/>void <b><a href="qtopiaappservice.html#setDocument">setDocument</a></b> ( const QString &amp; <i>doc</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>1 protected function inherited from <a href="qtopiaabstractservice.html#protected-functions">QtopiaAbstractService</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -54,7 +54,7 @@
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="close"></a>void QtopiaAppService::close ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Make the application's main window &quot;go away&quot;. If the application is preloaded, this will merely hide the main window. Otherwise this calls <a href="./qcoreapplication.html#quit">QCoreApplication::quit</a>().</p>
+<p>Make the application's main window &quot;go away&quot;. If the application is preloaded, this will merely hide the main window. Otherwise this calls <a href="qcoreapplication.html#quit">QCoreApplication::quit</a>().</p>
 <h3 class="fn"><a name="disablePreload"></a>void QtopiaAppService::disablePreload ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Disable preloading of this application. This will cause the <a href="qtopiaappservice.html#close">close</a>() message to quit the application rather than just hide the main window.</p>
 <h3 class="fn"><a name="enablePreload"></a>void QtopiaAppService::enablePreload ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
@@ -64,12 +64,12 @@
 <h3 class="fn"><a name="quit"></a>void QtopiaAppService::quit ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Ask the application to quit if doing so will not lose state. Internally, this calls QtopiaApplication::tryQuit().</p>
 <h3 class="fn"><a name="quitIfInvisible"></a>void QtopiaAppService::quitIfInvisible ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
-<p>Quit the application if it has no windows currently displayed. Internally, this calls <a href="./qcoreapplication.html#quit">QCoreApplication::quit</a>().</p>
+<p>Quit the application if it has no windows currently displayed. Internally, this calls <a href="qcoreapplication.html#quit">QCoreApplication::quit</a>().</p>
 <h3 class="fn"><a name="raise"></a>void QtopiaAppService::raise ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Raise this application to the top-most position and make its main window visible.</p>
 <h3 class="fn"><a name="reload"></a>void QtopiaAppService::reload ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Tell the application to reload its data after syncing with a desktop system. This will cause the QtopiaApplication::reload() signal to be emitted, which the application can connect to if it needs to perform non-trivial operations to reload its data.</p>
-<h3 class="fn"><a name="setDocument"></a>void QtopiaAppService::setDocument ( const <a href="./qstring.html">QString</a> &amp; <i>doc</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="setDocument"></a>void QtopiaAppService::setDocument ( const <a href="qstring.html">QString</a> &amp; <i>doc</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Set the document to be displayed in the application to <i>doc</i>. If the main window object has a <tt>setDocument(QString)</tt> slot, then that slot will be invoked automatically, with <i>doc</i> as its argument.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

@@ -43,7 +43,16 @@ public:
         TRACE(OutlookSyncPlugin) << "OutlookDatebookSync::isValidObject";
         Outlook::_AppointmentItemPtr item( dispatch );
         LOG() << "The item class is" << dump_item_class(item->GetClass()) << "expecting" << dump_item_class(Outlook::olAppointment);
-        return ( item->GetClass() == Outlook::olAppointment );
+        if ( item->GetClass() == Outlook::olAppointment ) {
+            PREPARE_MAPI(Appointment);
+            // If we don't have MAPI we can't detect birthday/anniversary events
+            if ( mc && mc->IsBirthday() ) {
+                LOG() << "The item is a birthday/anniversary";
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     void getProperties( IDispatchPtr dispatch, QString &entryid, QDateTime &lastModified )
@@ -100,14 +109,15 @@ public:
         }
         DUMP_EXPR(TimeZone,timezone);
         stream.writeStartElement("When");
-        // For some reason item->GetAllDayEvent() is always false when pulling data from Outlook.
-        // To work around this we check if the start and end times are 00:00:00
-        // (which is what Outlook sets for all day events). This breaks timed
-        // events that start and stop at midnight... perhaps such events are rare enough to ignore.
-        //if ( item->GetAllDayEvent() ) {
-        if ( date_to_qdatetime(item->GetStart()).time() == QTime(0, 0, 0) && date_to_qdatetime(item->GetEnd()).time() == QTime(0, 0, 0) ) {
+        if ( item->GetAllDayEvent() ) {
             DUMP_DATE(StartDate,Start);
-            DUMP_DATE(EndDate,End);
+            // We can't just dump the end date because Outlook does it differently to Qtopia.
+            // Qtopia expects something like "starts 7/10/08, ends 7/10/08" but Outlook
+            // has given us "starts 7/10/08 00:00:00, ends 8/10/08 00:00:00".
+            // Simply remove one day from the end date to get something Qtopia won't barf over.
+            QDate dt = date_to_qdatetime(item->GetEnd()).date();
+            dt = dt.addDays(-1);
+            DUMP_EXPR(EndDate,escape(dateToString(dt)));
         } else {
             QDateTime dt = date_to_qdatetime(item->GetStart());
             bool utc = !timezone.isEmpty();
@@ -244,6 +254,10 @@ public:
         Outlook::UserPropertiesPtr props = item->GetUserProperties();
         Q_ASSERT(props);
 
+        // We need to clear the recurrence pattern now or we will fail to update recurring events
+        if ( !dump_exception )
+            item->ClearRecurrencePattern();
+
         enum State {
             Idle, When, Alarm, Repeat, Exception, Categories
         };
@@ -289,7 +303,6 @@ public:
                     if ( !dump_exception ) {
                         if ( key == "Repeat" ) {
                             state = Repeat;
-                            item->ClearRecurrencePattern();
                         }
                         if ( state == Repeat && key == "Type" ) {
                             recpat = item->GetRecurrencePattern();
@@ -317,7 +330,16 @@ public:
                         if ( allday ) {
                             item->PutAllDayEvent( true );
                             READ_DATE(StartDate,Start);
-                            READ_DATE(EndDate,End);
+                            // We can't just read the end date because Outlook does it differently to Qtopia.
+                            // Qtopia gives us something like "starts 7/10/08, ends 7/10/08" but Outlook
+                            // expects "starts 7/10/08 00:00:00, ends 8/10/08 00:00:00".
+                            // Simply add one day to the end date to get something Outlook won't barf over.
+                            if ( key == "EndDate" ) {
+                                QDate dt = stringToDate(value);
+                                QDateTime actual( dt.addDays(1), QTime(0,0,0) );
+                                LOG() << "item->PutEnd" << actual;
+                                item->PutEnd( qdatetime_to_date(actual) );
+                            }
                         } else {
                             item->PutAllDayEvent( false );
                             if ( key == "Start" ) {

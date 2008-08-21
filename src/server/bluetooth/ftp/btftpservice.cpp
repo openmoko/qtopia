@@ -912,6 +912,9 @@ void BtFtpService::start()
             m_sdpRecordHandle = registerRecord(sdpRecord);
     }
 
+    if (sdpRecord.isNull())
+        qWarning() << "BtFtpService: cannot read" << sdpRecordFile.fileName();
+
     if (m_sdpRecordHandle == 0) {
         emit started(true, tr("Error registering with SDP server"));
         return;

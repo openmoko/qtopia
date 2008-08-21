@@ -30,20 +30,20 @@
 <li><div class="fn"/>void <b><a href="inputmethodservice.html#showInputMethod">showInputMethod</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>6 public functions inherited from <a href="qtopiaipcadaptor.html#public-functions">QtopiaIpcAdaptor</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>1 static public member inherited from <a href="qtopiaipcadaptor.html#static-public-members">QtopiaIpcAdaptor</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>5 protected functions inherited from <a href="qtopiaipcadaptor.html#protected-functions">QtopiaIpcAdaptor</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -65,13 +65,13 @@
 <h3 class="fn"><a name="inputMethodHint"></a>void InputMethodService::inputMethodHint ( int <i>hint</i>, int <i>windowId</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Set the input method <i>hint</i> for <i>windowId</i>. The valid values for <i>hint</i> are specified in <a href="qtopiaapplication.html#InputMethodHint-enum">QtopiaApplication::InputMethodHint</a>. This method should not be used if the <tt>Named</tt> hint is requested.</p>
 <p>This slot corresponds to the <a href="qtopiaipc.html">IPC</a> message <tt>inputMethodHint(int,int)</tt> on the <tt>QPE/InputMethod</tt> channel.</p>
-<h3 class="fn"><a name="inputMethodHint-2"></a>void InputMethodService::inputMethodHint ( const <a href="./qstring.html">QString</a> &amp; <i>hint</i>, int <i>windowId</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="inputMethodHint-2"></a>void InputMethodService::inputMethodHint ( const <a href="qstring.html">QString</a> &amp; <i>hint</i>, int <i>windowId</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Set the input method <i>hint</i> for <i>windowId</i>. This method should be used for <tt>Named</tt> hints.</p>
 <p>This slot corresponds to the <a href="qtopiaipc.html">IPC</a> message <tt>inputMethodHint(QString,int)</tt> on the <tt>QPE/InputMethod</tt> channel.</p>
 <h3 class="fn"><a name="inputMethodPasswordHint"></a>void InputMethodService::inputMethodPasswordHint ( bool <i>passwordFlag</i>, int <i>windowId</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Set the input method <i>passwordFlag</i> for <i>windowId</i>.</p>
-<h3 class="fn"><a name="setInputMethod"></a>void InputMethodService::setInputMethod ( const <a href="./qstring.html">QString</a> &amp; <i>inputMethodName</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="setInputMethod"></a>void InputMethodService::setInputMethod ( const <a href="qstring.html">QString</a> &amp; <i>inputMethodName</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Change to the input method named <i>inputMethodName</i> if it exists.</p>
 <h3 class="fn"><a name="setNextInputMethod"></a>void InputMethodService::setNextInputMethod ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Cycle to the next input method.</p>

@@ -13,6 +13,9 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="../index.html"><font color="#004faf">Qtopia Home</font></a>&nbsp;&middot; <a href="index.html"><font color="#004faf">Index</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">Classes</font></a>&nbsp;&middot; <a href="headers.html"><font color="#004faf">Headers</font></a>&nbsp;&middot; <a href="overviews.html"><font color="#004faf">Overviews</font></a> </td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">&lt;trace.h&gt; - &lt;trace.h&gt;<br /><span class="subtitle"></span>
 </h1>
+<p>The &lt;trace.h&gt; header contains some useful debugging macros. <a href="#details">More...</a></p>
+<ul>
+</ul>
 <a name="Macros"></a>
 <h3>Macros</h3>
 <ul>
@@ -45,11 +48,11 @@
 <hr />
 <h2>Macro Documentation</h2>
 <h3 class="fn"><a name="LOG"></a>LOG ()</h3>
-<p>Use this macro like <a href="../qtglobal.html#qDebug">qDebug</a>() and the output will be indented.</p>
+<p>Use this macro like <a href="qtglobal.html#qDebug">qDebug</a>() and the output will be indented.</p>
 <h3 class="fn"><a name="TRACE"></a>TRACE (  <i>CATEGORY</i> )</h3>
 <p>Register the logging category to use (TRACE if <i>CATEGORY</i> is null). This statement must appear before calls to <a href="trace-h.html#LOG">LOG</a>() so that indenting happens correctly. See <a href="qtopiadesktoplog-h.html">&lt;qtopiadesktoplog.h&gt;</a> for the available categories.</p>
 <h3 class="fn"><a name="WARNING"></a>WARNING ()</h3>
-<p>Use this macro like <a href="../qtglobal.html#qWarning">qWarning</a>() and the output will be indented. Note that calls to WARNING() cannot be turned off like calls to <a href="trace-h.html#LOG">LOG</a>().</p>
+<p>Use this macro like <a href="qtglobal.html#qWarning">qWarning</a>() and the output will be indented. Note that calls to WARNING() cannot be turned off like calls to <a href="trace-h.html#LOG">LOG</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 Trolltech</td>

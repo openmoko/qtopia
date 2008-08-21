@@ -34,7 +34,7 @@
 <ul>
 <li><div class="fn"/>1 public function inherited from <a href="qcomminterface.html#public-functions">QCommInterface</a></li>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -44,7 +44,7 @@
 <li><div class="fn"/>virtual void <b><a href="qpreferrednetworkoperators.html#writePreferredOperator">writePreferredOperator</a></b> ( QPreferredNetworkOperators::List <i>list</i>, const QPreferredNetworkOperators::Info &amp; <i>oper</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -55,7 +55,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -63,15 +63,15 @@
 <li><div class="fn"/>QList&lt;QPreferredNetworkOperators::Info&gt; <b><a href="qpreferrednetworkoperators.html#resolveNames">resolveNames</a></b> ( const QList&lt;QPreferredNetworkOperators::Info&gt; &amp; <i>opers</i>, const QList&lt;QPreferredNetworkOperators::NameInfo&gt; &amp; <i>names</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
 <li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -93,16 +93,16 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QPreferredNetworkOperators"></a>QPreferredNetworkOperators::QPreferredNetworkOperators ( const <a href="./qstring.html">QString</a> &amp; <i>service</i> = QString::null, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
+<h3 class="fn"><a name="QPreferredNetworkOperators"></a>QPreferredNetworkOperators::QPreferredNetworkOperators ( const <a href="qstring.html">QString</a> &amp; <i>service</i> = QString::null, <a href="qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
 <p>Construct a new preferred network operators object for <i>service</i> and attach it to <i>parent</i>. The object will be created in client mode if <i>mode</i> is Client, or server mode otherwise.</p>
 <p>If <i>service</i> is empty, this class will use the first available service that supports preferred network operators. If there is more than one service that supports preferred network operators, the caller should enumerate them with <a href="qabstractipcinterfacegroupmanager.html#supports">QCommServiceManager::supports</a>() and create separate <a href="qpreferrednetworkoperators.html">QPreferredNetworkOperators</a> objects for each.</p>
 <p>See also <a href="qabstractipcinterfacegroupmanager.html#supports">QCommServiceManager::supports</a>().</p>
 <h3 class="fn"><a name="dtor.QPreferredNetworkOperators"></a>QPreferredNetworkOperators::~QPreferredNetworkOperators ()</h3>
 <p>Destroy this preferred operator handling object.</p>
-<h3 class="fn"><a name="operatorNames"></a>void QPreferredNetworkOperators::operatorNames ( const <a href="./qlist.html">QList</a>&lt;<a href="qpreferrednetworkoperators-nameinfo.html">QPreferredNetworkOperators::NameInfo</a>&gt; &amp; <i>names</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="operatorNames"></a>void QPreferredNetworkOperators::operatorNames ( const <a href="qlist.html">QList</a>&lt;<a href="qpreferrednetworkoperators-nameinfo.html">QPreferredNetworkOperators::NameInfo</a>&gt; &amp; <i>names</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted in response to a <a href="qpreferrednetworkoperators.html#requestOperatorNames">requestOperatorNames</a>() request. The <i>names</i> parameter will contain the list of all names and numeric identifiers.</p>
 <p>See also <a href="qpreferrednetworkoperators.html#requestOperatorNames">requestOperatorNames</a>().</p>
-<h3 class="fn"><a name="preferredOperators"></a>void QPreferredNetworkOperators::preferredOperators ( <a href="qpreferrednetworkoperators.html#List-enum">QPreferredNetworkOperators::List</a> <i>list</i>, const <a href="./qlist.html">QList</a>&lt;<a href="qpreferrednetworkoperators-info.html">QPreferredNetworkOperators::Info</a>&gt; &amp; <i>opers</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="preferredOperators"></a>void QPreferredNetworkOperators::preferredOperators ( <a href="qpreferrednetworkoperators.html#List-enum">QPreferredNetworkOperators::List</a> <i>list</i>, const <a href="qlist.html">QList</a>&lt;<a href="qpreferrednetworkoperators-info.html">QPreferredNetworkOperators::Info</a>&gt; &amp; <i>opers</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted in response to a <a href="qpreferrednetworkoperators.html#requestPreferredOperators">requestPreferredOperators</a>() request. The <i>list</i> parameter indicates the list that was requested, and <i>opers</i> will contain the list.</p>
 <p>If the requested list was <a href="qpreferrednetworkoperators.html#List-enum">QPreferredNetworkOperators::Current</a> in the call to <a href="qpreferrednetworkoperators.html#requestPreferredOperators">requestPreferredOperators</a>(), then the <i>list</i> parameter to this signal will indicate the actual current list.</p>
 <p>It is normally necessary to call <a href="qpreferrednetworkoperators.html#resolveNames">resolveNames</a>() to convert <i>opers</i> into a list suitable for display to a user.</p>
@@ -114,7 +114,7 @@
 <p>Request a specific <i>list</i> of preferred operators from the SIM. The service will respond by emitting the <a href="qpreferrednetworkoperators.html#preferredOperators">preferredOperators</a>() signal.</p>
 <p>If <i>list</i> is <a href="qpreferrednetworkoperators.html#List-enum">QPreferredNetworkOperators::Current</a>, then the current preferred operator list on the SIM will be returned.</p>
 <p>See also <a href="qpreferrednetworkoperators.html#preferredOperators">preferredOperators</a>().</p>
-<h3 class="fn"><a name="resolveNames"></a><a href="./qlist.html">QList</a>&lt;<a href="qpreferrednetworkoperators-info.html">QPreferredNetworkOperators::Info</a>&gt; QPreferredNetworkOperators::resolveNames ( const <a href="./qlist.html">QList</a>&lt;<a href="qpreferrednetworkoperators-info.html">QPreferredNetworkOperators::Info</a>&gt; &amp; <i>opers</i>, const <a href="./qlist.html">QList</a>&lt;<a href="qpreferrednetworkoperators-nameinfo.html">QPreferredNetworkOperators::NameInfo</a>&gt; &amp; <i>names</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="resolveNames"></a><a href="qlist.html">QList</a>&lt;<a href="qpreferrednetworkoperators-info.html">QPreferredNetworkOperators::Info</a>&gt; QPreferredNetworkOperators::resolveNames ( const <a href="qlist.html">QList</a>&lt;<a href="qpreferrednetworkoperators-info.html">QPreferredNetworkOperators::Info</a>&gt; &amp; <i>opers</i>, const <a href="qlist.html">QList</a>&lt;<a href="qpreferrednetworkoperators-nameinfo.html">QPreferredNetworkOperators::NameInfo</a>&gt; &amp; <i>names</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Resolve numeric identifiers in <i>opers</i> according to <i>names</i>. Any item within <i>opers</i> that has a format of 2 (numeric) will be resolved and the correct name written to the corresponding item in the return list. If a numeric identifier cannot be resolved, then the <tt>name</tt> field will be set to the string form of the identifier.</p>
 <p>See also <a href="qpreferrednetworkoperators.html#requestOperatorNames">requestOperatorNames</a>() and <a href="qpreferrednetworkoperators.html#requestPreferredOperators">requestPreferredOperators</a>().</p>
 <h3 class="fn"><a name="writePreferredOperator"></a>void QPreferredNetworkOperators::writePreferredOperator ( <a href="qpreferrednetworkoperators.html#List-enum">QPreferredNetworkOperators::List</a> <i>list</i>, const <a href="qpreferrednetworkoperators-info.html">QPreferredNetworkOperators::Info</a> &amp; <i>oper</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>

@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QContentSet Class Reference</h1>
 <p>The QContentSet class represents a filtered view of all content on a device. <a href="#details">More...</a></p>
-<pre>    #include &lt;QContentSet&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QContentSet&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qcontentset-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -64,7 +64,7 @@
 <li><div class="fn"/>QContentSet &amp; <b><a href="qcontentset.html#operator-eq">operator=</a></b> ( const QContentSet &amp; <i>contentset</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -80,7 +80,7 @@
 <li><div class="fn"/>void <b><a href="qcontentset.html#sorted">sorted</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -90,7 +90,7 @@
 <li><div class="fn"/>void <b><a href="qcontentset.html#scan">scan</a></b> ( const QString &amp; <i>path</i>, Priority <i>priority</i> = NormalPriority )</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 </ul>
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
@@ -99,11 +99,11 @@
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -123,12 +123,12 @@
 <h3>Example: Iterating over a set of user audio recordings sorted by most recently modified.</h3>
 <pre>    QContentSet contentSet;
 
-<span class="comment">    //</span> Filter for documents with the mime type 'audio/wav' in the 'Recordings' category.
+<span class="comment">    // Filter for documents with the mime type 'audio/wav' in the 'Recordings' category.</span>
     contentSet.setCriteria( QContentFilter( Document ) );
     contentSet.addCriteria( QContentFilter::mimeType( &quot;audio/wav&quot; ), QContentFilter::And );
     contentSet.addCriteria( QContentFilter::category( &quot;Recordings&quot; ), QContentFilter::And );
 
-<span class="comment">    //</span> Sort by modified date in descending order.
+<span class="comment">    // Sort by modified date in descending order.</span>
     contentSet.setSortCriteria( QContentSortCriteria(
             QContentSortCriteria::LastModified,
             Qt::DescendingOrder ) );
@@ -160,40 +160,40 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QContentSet"></a>QContentSet::QContentSet ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QContentSet"></a>QContentSet::QContentSet ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs a new unfiltered <a href="qcontentset.html">QContentSet</a> with the specified <i>parent</i>.</p>
 <p>The <a href="qcontentset.html">QContentSet</a> can be populated with content from the backing store by specifying a filtering criteria with <a href="qcontentset.html#setCriteria">setCriteria</a>() or <a href="qcontentset.html#addCriteria">addCriteria</a>().</p>
 <p>See also <a href="qcontentset.html#setCriteria">setCriteria</a>(), <a href="qcontentset.html#addCriteria">addCriteria</a>(), and <a href="qcontentset.html#setSortCriteria">setSortCriteria</a>().</p>
-<h3 class="fn"><a name="QContentSet-2"></a>QContentSet::QContentSet ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>criteria</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QContentSet-2"></a>QContentSet::QContentSet ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>criteria</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs a new <a href="qcontentset.html">QContentSet</a> with the specified <i>parent</i> containing all content from the backing store which matches the filtering <i>criteria</i>.</p>
 <p>See also <a href="qcontentset.html#addCriteria">addCriteria</a>() and <a href="qcontentset.html#setSortCriteria">setSortCriteria</a>().</p>
-<h3 class="fn"><a name="QContentSet-3"></a>QContentSet::QContentSet ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>criteria</i>, const <a href="./qstringlist.html">QStringList</a> &amp; <i>sortOrder</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QContentSet-3"></a>QContentSet::QContentSet ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>criteria</i>, const <a href="qstringlist.html">QStringList</a> &amp; <i>sortOrder</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>This function is deprecated.</p>
 <p>Constructs a new <a href="qcontentset.html">QContentSet</a> with the specified <i>parent</i> containing all content from the backing store which matches the filtering <i>criteria</i> and is sorted by <i>sortOrder</i>.</p>
-<p><b>Note:</b> The use of a <a href="./qstringlist.html">QStringList</a> to specify the sort order is deprecated, use a <a href="qcontentsortcriteria.html">QContentSortCriteria</a> instead.</p>
+<p><b>Note:</b> The use of a <a href="qstringlist.html">QStringList</a> to specify the sort order is deprecated, use a <a href="qcontentsortcriteria.html">QContentSortCriteria</a> instead.</p>
 <p>See also <a href="qcontentset.html#addCriteria">addCriteria</a>() and <a href="qcontentset.html#setSortOrder">setSortOrder</a>().</p>
-<h3 class="fn"><a name="QContentSet-4"></a>QContentSet::QContentSet ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>tag</i>, const <a href="./qstring.html">QString</a> &amp; <i>filter</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QContentSet-4"></a>QContentSet::QContentSet ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>tag</i>, const <a href="qstring.html">QString</a> &amp; <i>filter</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs a new <a href="qcontentset.html">QContentSet</a> with the specified <i>parent</i> containing all content from the backing store which matches the <i>tag</i> filtering criteria <i>filter</i>.</p>
 <p>See also <a href="qcontentset.html#addCriteria">addCriteria</a>() and <a href="qcontentset.html#setSortCriteria">setSortCriteria</a>().</p>
-<h3 class="fn"><a name="QContentSet-5"></a>QContentSet::QContentSet ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>tag</i>, const <a href="./qstring.html">QString</a> &amp; <i>filter</i>, const <a href="./qstringlist.html">QStringList</a> &amp; <i>sortOrder</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QContentSet-5"></a>QContentSet::QContentSet ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>tag</i>, const <a href="qstring.html">QString</a> &amp; <i>filter</i>, const <a href="qstringlist.html">QStringList</a> &amp; <i>sortOrder</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>This function is deprecated.</p>
 <p>Constructs a new <a href="qcontentset.html">QContentSet</a> with the specified <i>parent</i> containing all content from the backing store which matches the <i>tag</i> filtering criteria <i>filter</i> and is sorted by <i>sortOrder</i>.</p>
 <p><b>Example</b>: Construct a <a href="qcontentset.html">QContentSet</a> containing wave files sorted by most recently modified.</p>
 <pre>    QContentSet contentSet(
         QContentFilter::MimeType, &quot;audio/wav&quot;,
         &quot;time desc&quot; );</pre>
-<p><b>Note:</b> The use of a <a href="./qstringlist.html">QStringList</a> to specify the sort order is deprecated, use a <a href="qcontentsortcriteria.html">QContentSortCriteria</a> instead.</p>
+<p><b>Note:</b> The use of a <a href="qstringlist.html">QStringList</a> to specify the sort order is deprecated, use a <a href="qcontentsortcriteria.html">QContentSortCriteria</a> instead.</p>
 <p>See also <a href="qcontentset.html#addCriteria">addCriteria</a>() and <a href="qcontentset.html#setSortOrder">setSortOrder</a>().</p>
-<h3 class="fn"><a name="QContentSet-6"></a>QContentSet::QContentSet ( const QContentSet &amp; <i>original</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QContentSet-6"></a>QContentSet::QContentSet ( const QContentSet &amp; <i>original</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs a new <a href="qcontentset.html">QContentSet</a> with the specified <i>parent</i>, containing all content from <i>original</i>.</p>
-<h3 class="fn"><a name="QContentSet-7"></a>QContentSet::QContentSet ( <a href="qcontentset.html#UpdateMode-enum">UpdateMode</a> <i>mode</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QContentSet-7"></a>QContentSet::QContentSet ( <a href="qcontentset.html#UpdateMode-enum">UpdateMode</a> <i>mode</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs an unfiltered <a href="qcontentset.html">QContentSet</a> with the specified <i>parent</i> and update <i>mode</i>.</p>
 <p>The <a href="qcontentset.html">QContentSet</a> can be populated with content from the backing store by specifying a filtering criteria with <a href="qcontentset.html#setCriteria">setCriteria</a>() or <a href="qcontentset.html#addCriteria">addCriteria</a>().</p>
 <p>See also <a href="qcontentset.html#setCriteria">setCriteria</a>(), <a href="qcontentset.html#addCriteria">addCriteria</a>(), and <a href="qcontentset.html#setSortCriteria">setSortCriteria</a>().</p>
-<h3 class="fn"><a name="QContentSet-8"></a>QContentSet::QContentSet ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>criteria</i>, <a href="qcontentset.html#UpdateMode-enum">UpdateMode</a> <i>mode</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QContentSet-8"></a>QContentSet::QContentSet ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>criteria</i>, <a href="qcontentset.html#UpdateMode-enum">UpdateMode</a> <i>mode</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs a <a href="qcontentset.html">QContentSet</a> with the specified <i>parent</i> and update <i>mode</i> containing all content from the backing store which matches the filtering <i>criteria</i>.</p>
 <p>See also <a href="qcontentset.html#addCriteria">addCriteria</a>() and <a href="qcontentset.html#setSortCriteria">setSortCriteria</a>().</p>
-<h3 class="fn"><a name="QContentSet-9"></a>QContentSet::QContentSet ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>criteria</i>, const <a href="qcontentsortcriteria.html">QContentSortCriteria</a> &amp; <i>sort</i>, <a href="qcontentset.html#UpdateMode-enum">UpdateMode</a> <i>mode</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QContentSet-9"></a>QContentSet::QContentSet ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>criteria</i>, const <a href="qcontentsortcriteria.html">QContentSortCriteria</a> &amp; <i>sort</i>, <a href="qcontentset.html#UpdateMode-enum">UpdateMode</a> <i>mode</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs a <a href="qcontentset.html">QContentSet</a> with the specified <i>parent</i> and update <i>mode</i> containing all content from the backing store which matches the filtering <i>criteria</i> and is sorted by <i>sort</i>.</p>
 <p><b>Example</b>: Construct an asynchronous <a href="qcontentset.html">QContentSet</a> containing wave files sorted by most recently modified.</p>
 <pre>    QContentSet contentSet(
@@ -208,7 +208,7 @@
 <h3 class="fn"><a name="add"></a>void QContentSet::add ( const <a href="qcontent.html">QContent</a> &amp; <i>content</i> )</h3>
 <p>Adds <i>content</i> to an explicitly maintained internal list of content. Items in this list appear in the content set irregardless of whether they match the filtering criteria.</p>
 <p>See also <a href="qcontentset.html#remove">remove</a>(), <a href="qcontentset.html#contains">contains</a>(), and <a href="qcontentset.html#clear">clear</a>().</p>
-<h3 class="fn"><a name="addCriteria"></a>void QContentSet::addCriteria ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>kind</i>, const <a href="./qstring.html">QString</a> &amp; <i>filter</i>, <a href="qcontentfilter.html#Operand-enum">QContentFilter::Operand</a> <i>operand</i> )</h3>
+<h3 class="fn"><a name="addCriteria"></a>void QContentSet::addCriteria ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>kind</i>, const <a href="qstring.html">QString</a> &amp; <i>filter</i>, <a href="qcontentfilter.html#Operand-enum">QContentFilter::Operand</a> <i>operand</i> )</h3>
 <p>Appends a <i>kind</i> filter matching the value <i>filter</i> to the existing filtering criteria using the given <i>operand</i>.</p>
 <p><b>Example</b>: Filter for documents with the mime type <tt>image/jpeg</tt> or <tt>image/png</tt>.</p>
 <pre>    QContentSet contentSet;
@@ -273,12 +273,12 @@
 <p>Returns the number of <a href="qcontent.html">QContent</a>s in the database that match a content <i>filter</i>.</p>
 <h3 class="fn"><a name="filter"></a><a href="qcontentfilter.html">QContentFilter</a> QContentSet::filter () const</h3>
 <p>Returns the current filtering criteria of the <a href="qcontentset.html">QContentSet</a>.</p>
-<h3 class="fn"><a name="findDocuments"></a>void QContentSet::findDocuments ( QContentSet * <i>folder</i>, const <a href="./qstring.html">QString</a> &amp; <i>mimefilter</i> = QString() )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="findDocuments"></a>void QContentSet::findDocuments ( QContentSet * <i>folder</i>, const <a href="qstring.html">QString</a> &amp; <i>mimefilter</i> = QString() )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Finds all documents in the system's document directories which match the filter <i>mimefilter</i>, and appends the resulting <a href="qcontent.html">QContent</a> objects to <i>folder</i>.</p>
-<h3 class="fn"><a name="findExecutable"></a><a href="qcontent.html">QContent</a> QContentSet::findExecutable ( const <a href="./qstring.html">QString</a> &amp; <i>exec</i> ) const</h3>
+<h3 class="fn"><a name="findExecutable"></a><a href="qcontent.html">QContent</a> QContentSet::findExecutable ( const <a href="qstring.html">QString</a> &amp; <i>exec</i> ) const</h3>
 <p>Find a <a href="qcontent.html">QContent</a> object for the executable <i>exec</i> in the current <a href="qcontentset.html">QContentSet</a>. Returns an empty/invalid <a href="qcontent.html">QContent</a> if unsuccessful.</p>
 <p>See also <a href="qcontent.html#InvalidId-var">QContent::InvalidId</a>.</p>
-<h3 class="fn"><a name="findFileName"></a><a href="qcontent.html">QContent</a> QContentSet::findFileName ( const <a href="./qstring.html">QString</a> &amp; <i>filename</i> ) const</h3>
+<h3 class="fn"><a name="findFileName"></a><a href="qcontent.html">QContent</a> QContentSet::findFileName ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> ) const</h3>
 <p>Find a <a href="qcontent.html">QContent</a> object for the <i>filename</i> in the current <a href="qcontentset.html">QContentSet</a>. Returns an empty/invalid <a href="qcontent.html">QContent</a> if unsuccessful.</p>
 <p>Paths are not acceptable in <i>filename</i>, ie the <i>filename</i> must not contain any &quot;/&quot; characters.</p>
 <p>Note that if more than one item with the <i>filename</i> exists in the <a href="qcontentset.html">QContentSet</a> no guarantee is provided as to which one is returned.</p>
@@ -311,10 +311,10 @@
 <h3 class="fn"><a name="remove"></a>void QContentSet::remove ( const <a href="qcontent.html">QContent</a> &amp; <i>content</i> )</h3>
 <p>Removes <i>content</i> from an explicitly maintained internal list of content. Items in this list appear in the content set irregardless of whether they match the filtering criteria.</p>
 <p>See also <a href="qcontentset.html#add">add</a>(), <a href="qcontentset.html#contains">contains</a>(), and <a href="qcontentset.html#clear">clear</a>().</p>
-<h3 class="fn"><a name="scan"></a>void QContentSet::scan ( const <a href="./qstring.html">QString</a> &amp; <i>path</i>, <a href="qcontentset.html#Priority-enum">Priority</a> <i>priority</i> = NormalPriority )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="scan"></a>void QContentSet::scan ( const <a href="qstring.html">QString</a> &amp; <i>path</i>, <a href="qcontentset.html#Priority-enum">Priority</a> <i>priority</i> = NormalPriority )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Initiates a document scan of a <i>path</i> and its sub-directories looking for documents that have been added, removed, or modified to bring the backing store's view of the path up to date with the file system.</p>
 <p>Scans are performed threaded in a server process, the scan <i>priority</i> sets the run priority of the scanner threads. A higher priority scan will finish sooner but may reduce the device responsiveness.</p>
-<h3 class="fn"><a name="setCriteria"></a>void QContentSet::setCriteria ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>kind</i>, const <a href="./qstring.html">QString</a> &amp; <i>filter</i> )</h3>
+<h3 class="fn"><a name="setCriteria"></a>void QContentSet::setCriteria ( <a href="qcontentfilter.html#FilterType-enum">QContentFilter::FilterType</a> <i>kind</i>, const <a href="qstring.html">QString</a> &amp; <i>filter</i> )</h3>
 <p>Sets the filtering criteria of a <a href="qcontentset.html">QContentSet</a> to a <i>kind</i> filter matching the value <i>filter</i>.</p>
 <p>This will replace any existing filtering criteria.</p>
 <h3 class="fn"><a name="setCriteria-2"></a>void QContentSet::setCriteria ( const <a href="qcontentfilter.html">QContentFilter</a> &amp; <i>filter</i> )</h3>
@@ -329,7 +329,7 @@
 <h3 class="fn"><a name="setSortCriteria"></a>void QContentSet::setSortCriteria ( const <a href="qcontentsortcriteria.html">QContentSortCriteria</a> &amp; <i>criteria</i> )</h3>
 <p>Sets the sort <i>criteria</i> used to order the set.</p>
 <p>See also <a href="qcontentset.html#sortCriteria">sortCriteria</a>().</p>
-<h3 class="fn"><a name="setSortOrder"></a>void QContentSet::setSortOrder ( const <a href="./qstringlist.html">QStringList</a> &amp; <i>sortOrder</i> )</h3>
+<h3 class="fn"><a name="setSortOrder"></a>void QContentSet::setSortOrder ( const <a href="qstringlist.html">QStringList</a> &amp; <i>sortOrder</i> )</h3>
 <p>This function is deprecated.</p>
 <p>Sets the attributes that content in this <a href="qcontentset.html">QContentSet</a> is ordered by to <i>sortOrder</i>.</p>
 <p>Valid sort attributes are:</p>
@@ -347,14 +347,14 @@
 <h3 class="fn"><a name="sortCriteria"></a><a href="qcontentsortcriteria.html">QContentSortCriteria</a> QContentSet::sortCriteria () const</h3>
 <p>Returns the sort criteria used to order the set.</p>
 <p>See also <a href="qcontentset.html#setSortCriteria">setSortCriteria</a>().</p>
-<h3 class="fn"><a name="sortOrder"></a><a href="./qstringlist.html">QStringList</a> QContentSet::sortOrder () const</h3>
+<h3 class="fn"><a name="sortOrder"></a><a href="qstringlist.html">QStringList</a> QContentSet::sortOrder () const</h3>
 <p>This function is deprecated.</p>
 <p>Returns the attributes the content in this <a href="qcontentset.html">QContentSet</a> is ordered by.</p>
 <p>This method has been deprecated, use <a href="qcontentset.html#sortCriteria">sortCriteria</a>() instead.</p>
 <p>See also <a href="qcontentset.html#setSortOrder">setSortOrder</a>() and <a href="qcontentset.html#sortCriteria">sortCriteria</a>().</p>
 <h3 class="fn"><a name="sorted"></a>void QContentSet::sorted ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when this <a href="qcontentset.html">QContentSet</a> has been sorted.</p>
-<h3 class="fn"><a name="types"></a><a href="./qstringlist.html">QStringList</a> QContentSet::types () const</h3>
+<h3 class="fn"><a name="types"></a><a href="qstringlist.html">QStringList</a> QContentSet::types () const</h3>
 <p>Returns the list of mime-types contained in this set.</p>
 <p>For applications, games and settings the type is application/x-executable.</p>
 <p>For documents the type is the document's MIME type, or application/octet-stream if the file type is unknown.</p>
@@ -365,7 +365,7 @@
 <hr />
 <h2>Related Non-Members</h2>
 <h3 class="fn"><a name="QContentList-typedef"></a>typedef QContentList</h3>
-<p>Synonym for <a href="./qlist.html">QList</a>&lt;<a href="qcontent.html">QContent</a>&gt;.</p>
+<p>Synonym for <a href="qlist.html">QList</a>&lt;<a href="qcontent.html">QContent</a>&gt;.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>

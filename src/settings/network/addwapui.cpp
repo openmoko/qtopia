@@ -75,7 +75,7 @@ public:
         vb->addItem( spacer );
 
         if ( wapAccount->name().isEmpty() ) {
-            wapAccount->setName("WAP account");
+            wapAccount->setName( tr("WAP account", "name of default wap account") );
             account->setText( tr("WAP account", "name of default wap account") );
         } else {
             account->setText( wapAccount->name() );

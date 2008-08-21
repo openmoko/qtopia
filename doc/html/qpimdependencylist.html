@@ -41,25 +41,25 @@
 <p>See also <a href="qpim-library.html">Pim Library</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="addDependency"></a>bool QPimDependencyList::addDependency ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>srcid</i>, const <a href="quniqueid.html">QUniqueId</a> &amp; <i>destid</i>, const <a href="./qstring.html">QString</a> &amp; <i>deptype</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="addDependency"></a>bool QPimDependencyList::addDependency ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>srcid</i>, const <a href="quniqueid.html">QUniqueId</a> &amp; <i>destid</i>, const <a href="qstring.html">QString</a> &amp; <i>deptype</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Records the dependency of the record given by <i>destid</i> on the parent record <i>srcid</i>, with the given dependency type <i>deptype</i>.</p>
 <p>Returns true on success, false otherwise.</p>
-<h3 class="fn"><a name="childrenRecords"></a><a href="./qmap.html">QMap</a>&lt;<a href="./qstring.html">QString</a>, <a href="quniqueid.html">QUniqueId</a>&gt; QPimDependencyList::childrenRecords ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>recid</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="childrenRecords"></a><a href="qmap.html">QMap</a>&lt;<a href="qstring.html">QString</a>, <a href="quniqueid.html">QUniqueId</a>&gt; QPimDependencyList::childrenRecords ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>recid</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the dependency type and identifier of any records that are a dependant of the record with the given <i>recid</i></p>
 <p>See also <a href="qpimdependencylist.html#typedChildrenRecords">typedChildrenRecords</a>().</p>
-<h3 class="fn"><a name="parentDependencyType"></a><a href="./qstring.html">QString</a> QPimDependencyList::parentDependencyType ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>recid</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="parentDependencyType"></a><a href="qstring.html">QString</a> QPimDependencyList::parentDependencyType ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>recid</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>If the record identified by <i>recid</i> has a parent dependency, returns the type of the dependency. Otherwise returns a null string.</p>
 <p>See also <a href="qpimdependencylist.html#parentRecord">parentRecord</a>().</p>
 <h3 class="fn"><a name="parentRecord"></a><a href="quniqueid.html">QUniqueId</a> QPimDependencyList::parentRecord ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>recid</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>If the record identified by <i>recid</i> has a parent dependency, returns the identifier for that parent. Otherwise returns a null identifier.</p>
 <p>See also <a href="qpimdependencylist.html#parentDependencyType">parentDependencyType</a>().</p>
-<h3 class="fn"><a name="removeDependency"></a>bool QPimDependencyList::removeDependency ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>srcid</i>, const <a href="quniqueid.html">QUniqueId</a> &amp; <i>destid</i>, const <a href="./qstring.html">QString</a> &amp; <i>deptype</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="removeDependency"></a>bool QPimDependencyList::removeDependency ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>srcid</i>, const <a href="quniqueid.html">QUniqueId</a> &amp; <i>destid</i>, const <a href="qstring.html">QString</a> &amp; <i>deptype</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Removes the dependency from the record <i>destid</i> to the record <i>srcid</i>, with the specified dependency type <i>deptype</i>.</p>
 <p>Returns true on success, false otherwise.</p>
-<h3 class="fn"><a name="typedChildrenRecords"></a><a href="./qlist.html">QList</a>&lt;<a href="quniqueid.html">QUniqueId</a>&gt; QPimDependencyList::typedChildrenRecords ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>recid</i>, const <a href="./qstring.html">QString</a> &amp; <i>deptype</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="typedChildrenRecords"></a><a href="qlist.html">QList</a>&lt;<a href="quniqueid.html">QUniqueId</a>&gt; QPimDependencyList::typedChildrenRecords ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>recid</i>, const <a href="qstring.html">QString</a> &amp; <i>deptype</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the identifiers of any records that are a dependant of the record with the given <i>recid</i>, and have the given <i>deptype</i> of dependency.</p>
 <p>See also <a href="qpimdependencylist.html#childrenRecords">childrenRecords</a>().</p>
-<h3 class="fn"><a name="updateDependency"></a>bool QPimDependencyList::updateDependency ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>srcid</i>, const <a href="quniqueid.html">QUniqueId</a> &amp; <i>destid</i>, const <a href="./qstring.html">QString</a> &amp; <i>deptype</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="updateDependency"></a>bool QPimDependencyList::updateDependency ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>srcid</i>, const <a href="quniqueid.html">QUniqueId</a> &amp; <i>destid</i>, const <a href="qstring.html">QString</a> &amp; <i>deptype</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Updates the target of the dependency from the given <i>srcid</i> and type <i>deptype</i> to the new destination <i>destid</i>.</p>
 <p>Returns true on success, false otherwise.</p>
 <p /><address><hr /><div align="center">

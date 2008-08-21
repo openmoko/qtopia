@@ -34,18 +34,18 @@
 <li><div class="fn"/>void <b><a href="calendarservice.html#updateAppointment">updateAppointment</a></b> ( const QAppointment &amp; <i>appointment</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>1 protected function inherited from <a href="qtopiaabstractservice.html#protected-functions">QtopiaAbstractService</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -61,12 +61,12 @@
 <h3 class="fn"><a name="addAppointment"></a>void CalendarService::addAppointment ( const <a href="qappointment.html">QAppointment</a> &amp; <i>appointment</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Add the specified <i>appointment</i> to the calendar. The request will be ignored if the system is currently syncing.</p>
 <p>This slot corresponds to the QCop service message <tt>Calendar::addAppointment(QAppointment)</tt>.</p>
-<h3 class="fn"><a name="alarm"></a>void CalendarService::alarm ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>time</i>, int <i>delay</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="alarm"></a>void CalendarService::alarm ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>time</i>, int <i>delay</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Activates the alarm dialog for appointments with alarms occurring at the given <i>time</i>. The specified <i>delay</i> indicates how many minutes before the start of the appointment that the alarm has been activated.</p>
 <h3 class="fn"><a name="newAppointment"></a>void CalendarService::newAppointment ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Open a dialog so the user can create a new appointment. Default values are used.</p>
 <p>This slot corresponds to the QCop service message <tt>Calendar::newAppointment()</tt>.</p>
-<h3 class="fn"><a name="newAppointment-2"></a>void CalendarService::newAppointment ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>start</i>, const <a href="./qdatetime.html">QDateTime</a> &amp; <i>end</i>, const <a href="./qstring.html">QString</a> &amp; <i>description</i>, const <a href="./qstring.html">QString</a> &amp; <i>notes</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="newAppointment-2"></a>void CalendarService::newAppointment ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>start</i>, const <a href="qdatetime.html">QDateTime</a> &amp; <i>end</i>, const <a href="qstring.html">QString</a> &amp; <i>description</i>, const <a href="qstring.html">QString</a> &amp; <i>notes</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Open a dialog so the user can create a new appointment. The new appointment will use the specified <i>start</i> and <i>end</i> times, <i>description</i> and <i>notes</i>.</p>
 <p>This slot corresponds to the QCop service message <tt>Calendar::newAppointment(QDateTime,QDateTime,QString,QString)</tt>.</p>
@@ -86,7 +86,7 @@
 <h3 class="fn"><a name="showAppointment"></a>void CalendarService::showAppointment ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>uid</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Show the appointment indicated by <i>uid</i> in the calendar application.</p>
 <p>This slot corresponds to the QCop service message <tt>Calendar::showAppointment(QUniqueId)</tt>.</p>
-<h3 class="fn"><a name="showAppointment-2"></a>void CalendarService::showAppointment ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>uid</i>, const <a href="./qdate.html">QDate</a> &amp; <i>date</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="showAppointment-2"></a>void CalendarService::showAppointment ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>uid</i>, const <a href="qdate.html">QDate</a> &amp; <i>date</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Show the occurrence of the appointment indicated by <i>uid</i> on <i>date</i>.</p>
 <p>This slot corresponds to the QCop service message <tt>Calendar::showAppointment(QUniqueId,QDate)</tt>.</p>

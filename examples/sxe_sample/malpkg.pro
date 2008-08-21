@@ -23,7 +23,7 @@ INSTALLS+=pics
 
 pkg.name=malpkg
 pkg.desc=Sample Malware Application
-pkg.domain=trusted
+pkg.domain=untrusted
 pkg.version=1.0.0
 pkg.multi=pkgA pkgB pkgC pkgD pkgE pkgF pkgG pkgH pkgJ pkgK
 pkg.maintainer=Sarah Smith <sarah.smith@trolltech.com>

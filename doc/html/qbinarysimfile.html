@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QBinarySimFile Class Reference</h1>
 <p>The QBinarySimFile class provides an interface to access binary files on a SIM. <a href="#details">More...</a></p>
-<pre>    #include &lt;QBinarySimFile&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QBinarySimFile&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qbinarysimfile-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -28,7 +28,7 @@
 <li><div class="fn"/>void <b><a href="qbinarysimfile.html#write-2">write</a></b> ( int <i>pos</i>, const QByteArray &amp; <i>data</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -39,16 +39,16 @@
 <li><div class="fn"/>void <b><a href="qbinarysimfile.html#writeDone">writeDone</a></b> ( int <i>pos</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -62,7 +62,7 @@
 <p>See also <a href="qrecordbasedsimfile.html">QRecordBasedSimFile</a> and <a href="qsimfiles.html">QSimFiles</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QBinarySimFile"></a>QBinarySimFile::QBinarySimFile ( const <a href="./qstring.html">QString</a> &amp; <i>fileid</i>, const <a href="./qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QBinarySimFile"></a>QBinarySimFile::QBinarySimFile ( const <a href="qstring.html">QString</a> &amp; <i>fileid</i>, const <a href="qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Create a binary SIM file access object for <i>fileid</i> and attach it to <i>parent</i>. The <i>service</i> parameter indicates the telephony service to use to access the file, or an empty string to use the default service.</p>
 <p>The <i>fileid</i> should be the complete hexadecimal path to the file on the SIM. For example, the <i>EFimg</i> file is numbered <tt>4F20</tt> underneath the <i>DFgraphics</i> directory (<tt>5F50</tt>), which is in turn underneath the <i>DFtelecom</i> directory (<tt>7F10</tt>). Therefore, <i>fileid</i> should be <tt>7F105F504F20</tt>.</p>
 <h3 class="fn"><a name="dtor.QBinarySimFile"></a>QBinarySimFile::~QBinarySimFile ()</h3>
@@ -76,7 +76,7 @@
 <h3 class="fn"><a name="read"></a>void QBinarySimFile::read ( int <i>pos</i>, int <i>len</i> )</h3>
 <p>Request that <i>len</i> bytes be read from this binary file at position <i>pos</i>. The data will be returned in a <a href="qbinarysimfile.html#readDone">readDone</a>() signal.</p>
 <p>See also <a href="qbinarysimfile.html#readDone">readDone</a>() and <a href="qbinarysimfile.html#write">write</a>().</p>
-<h3 class="fn"><a name="readDone"></a>void QBinarySimFile::readDone ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>data</i>, int <i>pos</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="readDone"></a>void QBinarySimFile::readDone ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i>, int <i>pos</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when a read from position <i>pos</i> of this binary file completes. The <i>data</i> parameter contains the data that was read from the file.</p>
 <p>See also <a href="qbinarysimfile.html#read">read</a>().</p>
 <h3 class="fn"><a name="requestFileSize"></a>void QBinarySimFile::requestFileSize ()</h3>
@@ -85,7 +85,7 @@
 <h3 class="fn"><a name="write"></a>void QBinarySimFile::write ( int <i>pos</i>, const char * <i>data</i>, int <i>len</i> )</h3>
 <p>Write <i>len</i> bytes of <i>data</i> to position <i>pos</i> in this binary file. The <a href="qbinarysimfile.html#writeDone">writeDone</a>() signal will be emitted once the write completes.</p>
 <p>See also <a href="qbinarysimfile.html#writeDone">writeDone</a>() and <a href="qbinarysimfile.html#read">read</a>().</p>
-<h3 class="fn"><a name="write-2"></a>void QBinarySimFile::write ( int <i>pos</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>data</i> )</h3>
+<h3 class="fn"><a name="write-2"></a>void QBinarySimFile::write ( int <i>pos</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Write <i>data</i> to position <i>pos</i> in this binary file. The <a href="qbinarysimfile.html#writeDone">writeDone</a>() signal will be emitted once the write completes.</p>
 <p>See also <a href="qbinarysimfile.html#writeDone">writeDone</a>() and <a href="qbinarysimfile.html#read">read</a>().</p>

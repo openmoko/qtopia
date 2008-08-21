@@ -30,7 +30,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>7 public functions inherited from <a href="qdplugin.html#public-functions">QDPlugin</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="../qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -39,16 +39,16 @@
 <li><div class="fn"/>void <b><a href="qdsyncplugin.html#readyForSync">readyForSync</a></b> ( bool <i>ready</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="../qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="../qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="../qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="../qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="../qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="../qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="../qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -57,11 +57,11 @@
 <p>All Qtopia Sync Agent sync plugins inherit from QDSyncPlugin but the class itself is abstract.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QDSyncPlugin"></a>QDSyncPlugin::QDSyncPlugin ( <a href="../qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Construct a <a href="qdsyncplugin.html">QDSyncPlugin</a> with <i>parent</i> as the owning <a href="../qobject.html">QObject</a>.</p>
+<h3 class="fn"><a name="QDSyncPlugin"></a>QDSyncPlugin::QDSyncPlugin ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Construct a <a href="qdsyncplugin.html">QDSyncPlugin</a> with <i>parent</i> as the owning <a href="qobject.html">QObject</a>.</p>
 <h3 class="fn"><a name="dtor.QDSyncPlugin"></a>QDSyncPlugin::~QDSyncPlugin ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destructor.</p>
-<h3 class="fn"><a name="dataset"></a><a href="../qstring.html">QString</a> QDSyncPlugin::dataset ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="dataset"></a><a href="qstring.html">QString</a> QDSyncPlugin::dataset ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the dataset that this sync plugin supports.</p>
 <p>See also <a href="datasets.html">Datasets</a>.</p>
 <h3 class="fn"><a name="finishSync"></a>void QDSyncPlugin::finishSync ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
@@ -73,7 +73,7 @@
 <p>This method is called when the plugin is about to be used. The plugin should allocate any required resources and should indicate readyness using the <a href="qdsyncplugin.html#readyForSync">readyForSync</a>() signal. This can be done asynchronously but it must be done or the sync will stall.</p>
 <h3 class="fn"><a name="readyForSync"></a>void QDSyncPlugin::readyForSync ( bool <i>ready</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal should be emitted after <a href="qdsyncplugin.html#prepareForSync">prepareForSync</a>() is called to indicate that the plugin is <i>ready</i>. Use false to indicate that the plugin cannot sync at this time (for example, if the data source is not available).</p>
-<h3 class="fn"><a name="referenceSchema"></a><a href="../qbytearray.html">QByteArray</a> QDSyncPlugin::referenceSchema ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="referenceSchema"></a><a href="qbytearray.html">QByteArray</a> QDSyncPlugin::referenceSchema ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns an example xml schema for the records handled by the plugin. This schema should represent the fields handled by the plugin and is used to improve conflict detection by the merge algorithm.</p>
 <p>This method should be implemented by plugins that do not support the entire schema.</p>
 <p /><address><hr /><div align="center">

@@ -29,12 +29,12 @@
 <p>Once a license has been granted and file access is available it is necessary to update the constraints of the protected file as it is rendered. This is performed using calls to <a href="qdrmcontent.html#renderStarted">QDrmContent::renderStarted</a>(), <a href="qdrmcontent.html#renderPaused">QDrmContent::renderPaused</a>(), and <a href="qdrmcontent.html#renderStopped">QDrmContent::renderStopped</a>() on the <a href="qdrmcontent.html">QDrmContent</a> instance the license for the file was requested from. The agent will time these calls and count the number of times rendering is started and update the constraints. If rights to the file expire while it is being rendered <a href="qdrmcontent.html">QDrmContent</a> will emit a rights expired signal notifying the application it should release its license and stop rendering the content.</p>
 <a name="downloading-and-receiving-drm-files"></a>
 <h2>Downloading and Receiving DRM Files</h2>
-<p>Received DRM files may be content files, or rights objects or triggers. DRM content files is saved to the file system and registered with the document system like any other content. The preferred method of saving content is to construct a new <a href="qcontent.html">QContent</a> and assign it the name and type of the received file and then write the file to the <a href="qcontent.html">QContent</a> using either the <a href="qcontent.html#save">QContent::save</a>() or by opening a write only <a href="./qiodevice.html">QIODevice</a> using <a href="qcontent.html#open">QContent::open</a>() and writing to it. If the IO device is used it is important to commit the <a href="qcontent.html">QContent</a> after closing the IO device to ensure the <a href="qcontent.html">QContent</a> is saved.</p>
+<p>Received DRM files may be content files, or rights objects or triggers. DRM content files is saved to the file system and registered with the document system like any other content. The preferred method of saving content is to construct a new <a href="qcontent.html">QContent</a> and assign it the name and type of the received file and then write the file to the <a href="qcontent.html">QContent</a> using either the <a href="qcontent.html#save">QContent::save</a>() or by opening a write only <a href="qiodevice.html">QIODevice</a> using <a href="qcontent.html#open">QContent::open</a>() and writing to it. If the IO device is used it is important to commit the <a href="qcontent.html">QContent</a> after closing the IO device to ensure the <a href="qcontent.html">QContent</a> is saved.</p>
 <p>If the file is rights object or trigger it shouldn't be saved to the file system, instead a <a href="datasharing.html">Qtopia Data Sharing (QDS)</a> service which handles the type of the file should be invoked. File types that should be handled in this manner can be identified by performing a search for a service with the request type that of the received file, no response type and the attribute 'handle', the 'drm' attribute may also optionally be used to only invoke services for DRM file types.</p>
 <p>The example below checks for a service which handle the mime type of received data and invokes it if found, if not found it saves the data and invokes the default application for handling it.</p>
 <pre>    void receive( const QString &amp;name, const QString &amp;type, const QByteArray &amp;data )
     {
-        <span class="comment">//</span> First check if the mime type is handled by a QDS service.
+        <span class="comment">// First check if the mime type is handled by a QDS service.</span>
         QDSServices services( type, QString(), QStringList() &lt;&lt; &quot;handle&quot; );
 
         if( !services.isEmpty() )
@@ -45,7 +45,7 @@
 
             action.exec( QDSData( data, QMimeType( type ) ) );
         }
-        else <span class="comment">//</span> Not handled by a QDS service so save to the file system and open in the default application.
+        else <span class="comment">// Not handled by a QDS service so save to the file system and open in the default application.</span>
         {
             QContent content;
 

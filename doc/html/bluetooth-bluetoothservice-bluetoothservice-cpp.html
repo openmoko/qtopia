@@ -83,7 +83,7 @@
         if (!m_rfcommServer)
             m_rfcommServer = new QBluetoothRfcommServer(this);
 
-        <span class="comment">//</span> Read the SDP record that we want to register for this service.
+        <span class="comment">// Read the SDP record that we want to register for this service.</span>
         QFile file(Qtopia::qtopiaDir() + &quot;/etc/bluetooth/sdp/SerialPortSDPRecord.xml&quot;);
         if (!file.exists()) {
             emit started(true, tr(&quot;Cannot find SDP record file&quot;));
@@ -96,8 +96,8 @@
         QBluetoothSdpRecord record = QBluetoothSdpRecord::fromDevice(&amp;file);
         file.close();
 
-        <span class="comment">//</span> QBluetoothAbstractService::registerRecord() registers a SDP record and
-        <span class="comment">//</span> returns the service record handle for the newly registered service.
+        <span class="comment">// QBluetoothAbstractService::registerRecord() registers a SDP record and</span>
+        <span class="comment">// returns the service record handle for the newly registered service.</span>
         m_sdpRecordHandle = registerRecord(record);
         if (m_sdpRecordHandle == 0) {
             emit started(true, tr(&quot;Error registering the SDP service&quot;));
@@ -107,8 +107,8 @@
         int rfcommChannel = QBluetoothSdpRecord::rfcommChannel(record);
 
         if (!startRfcommServer(rfcommChannel)) {
-            <span class="comment">//</span> The server could not be started, so clean up and unregister the
-            <span class="comment">//</span> SDP record using QBluetoothAbstractService::unregisterRecord().
+            <span class="comment">// The server could not be started, so clean up and unregister the</span>
+            <span class="comment">// SDP record using QBluetoothAbstractService::unregisterRecord().</span>
             unregisterRecord(m_sdpRecordHandle);
             m_sdpRecordHandle = 0;
 
@@ -173,7 +173,7 @@
         }
     }
 
-<span class="comment">    //</span>=================================================================
+<span class="comment">    //=================================================================</span>
 
 <span class="comment">    /*
         Normally, Bluetooth services in Qtopia are created as server tasks using
@@ -188,19 +188,19 @@
     BluetoothService::BluetoothService(QWidget *parent, Qt::WFlags f)
         : QMainWindow(parent, f)
     {
-        <span class="comment">//</span> This is the string used as the service name in the
-        <span class="comment">//</span> BluetoothSerialPortExampleService constructor.
+        <span class="comment">// This is the string used as the service name in the</span>
+        <span class="comment">// BluetoothSerialPortExampleService constructor.</span>
         QString serviceName = &quot;SerialPortExampleService&quot;;
 
-        <span class="comment">//</span> Create the service if it has not already been created (if this
-        <span class="comment">//</span> application has previously been launched).
+        <span class="comment">// Create the service if it has not already been created (if this</span>
+        <span class="comment">// application has previously been launched).</span>
         QBluetoothServiceController controller;
         if (!controller.services().contains(serviceName)) {
 
             BluetoothSerialPortExampleService *service = new BluetoothSerialPortExampleService;
 
-            <span class="comment">//</span> Register the service as a task so it will continue to run after the
-            <span class="comment">//</span> application is closed.
+            <span class="comment">// Register the service as a task so it will continue to run after the</span>
+            <span class="comment">// application is closed.</span>
             QtopiaApplication::instance()-&gt;registerRunningTask(
                     &quot;BluetoothServiceExample&quot;, this);
         }

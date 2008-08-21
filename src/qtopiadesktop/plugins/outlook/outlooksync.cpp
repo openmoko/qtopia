@@ -398,7 +398,11 @@ void OTSyncObject::fetchChangesSince( const QDateTime &_timestamp )
             LOG() << "Item is not valid";
             continue;
         }
-        if ( lm >= timestamp ) {
+        // New items need to be synced even if their last modified timestamp
+        // is before the actual timestamp because when Outlook imports items
+        // from another .pst it does not update the last modified timestamp.
+        bool new_item = timestamp.isNull() || !rememberedIds.contains(id);
+        if ( new_item || lm >= timestamp ) {
             QBuffer buffer;
             buffer.open( QIODevice::WriteOnly );
             {
@@ -409,7 +413,7 @@ void OTSyncObject::fetchChangesSince( const QDateTime &_timestamp )
                 stream.writeEndDocument();
             }
             LOG() << "remembered?" << (bool)rememberedIds.contains(id);
-            if ( timestamp.isNull() || !rememberedIds.contains(id) ) {
+            if ( new_item ) {
                 setPreviousBuffer(id, buffer.buffer());
                 emit createServerRecord( buffer.buffer() );
             } else {

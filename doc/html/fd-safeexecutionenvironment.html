@@ -69,31 +69,11 @@ download and secure execution of games</strong> <p />
 </ul>
 
 <h3><a name=QTOPIA-7752>Two tier domain model (QTOPIA-7752)</a></h3>
-<p><font color=red>NOT YET RELEASED</font></p><p><h2><a name="Rationale"></a>Rationale</h2>
-<p>As of 4.3.0, the current implementation of SXE has approximately 60 domains to choose from.  Such a large number makes it difficult for a developer to choose what domains are needed.  The difficulty for the developer is compounded by the fact that it is not easy to precisely determine what capabilities each domain gives.  Another problem is the fact that SXE's authorization implementation makes it difficult to introduce new service provider applications without having to modify policy files.</p>
+<p>SXE adopts a two tier domain model, all applications must declare whether they belong into the trusted or untrusted domains.  Application and OS level policy files have been developed so that untrusted applications will run under sandbox conditions while trusted applications are unrestricted. 
 
-<p>To simplify this state of affairs, it has been proposed that there be only 2 domains trusted and untrusted.  For 4.3.1, we have promised to deliver a solution for the secure running of games.  All games would therefore run under the untrusted domain with would allow the following capabilities:</p>
-<ul>
-	<li>play audio</li>
-	<li>write settings files</li>
-	<li>draw into application area</li>
-	<li>change the context bar</li>
-	<li>write access to sandboxed directory</li>
-</ul>
+<p>All system applications are trusted while downloaded applications are may either be untrusted or trusted.  (SXE may be configured so that downloaded applications must always declare themselves untrusted).</p>
 
-
-<p>All applications in the trusted domain would be unrestricted. </p>
-
-<h2><a name="TaskSummary"></a>Task Summary</h2>
-<h3><a name="SetupTrustedDomain"></a>Set up Trusted Domain</h3>
-<p>A trusted domain needs to be created and all Qtopia system applications need to declare this domain.  Any scripts which setup the "default" set of rules for the filesystem should no longer be run and eventually removed.</p>
-
-<h3><a name="SetupUntrusteddomain"></a>Set up Untrusted domain</h3>
-<p>An untrusted domain needs to be created and should only give the capabilities listed above.  Qtopia games such as<br/>
-qasteroids, minesweep etc need to declare the untrusted domain.</p>
-
-
-
+<p>SXE only supports the running of games within the untrusted domain.</p>
 <hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>

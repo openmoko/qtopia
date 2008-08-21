@@ -11,8 +11,15 @@ DIR=${SCRIPT%"install.sh"}
 if [ "$DIR" != "./" ]; then
     cd $DIR
 fi
-
+clear
 cat license.txt
+echo ""
+echo "Have you agreed? Press Y for Yes"
+read -e ANSWER
+if [ "$ANSWER" != "Y" ]; then
+exit 1;
+fi
+
 more release.txt
 
 # try to be tricky here....

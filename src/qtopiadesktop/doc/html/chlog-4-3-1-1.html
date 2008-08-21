@@ -37,6 +37,10 @@
 <li>Certain characters appearing in text (eg. the elipsis character) can cause Qtopia Sync Agent to crash due to a text encoding bug.</li>
 <li>Long notes are not transferred in full (the beginning part of the note is cut off).</li>
 <li>The clocks on the desktop and device must match or some items may not be synchronized.</li>
+<li>All day events do not synchronize correctly between Qtopia and Outlook.</li>
+<li>Outlook items that are not known to Qtopia Sync Agent but have a last modified timestamp that is before the sync timestamp are not transferred. This can be observed by importing items from a .pst file (they may not sync).</li>
+<li>Changing a recurring event in Qtopia to a non-recurring event causes Qtopia Sync Agent to crash.</li>
+<li>Birthdays and anniversaries are duplicated in the calendar.</li>
 </ul>
 <p>See also <a href="changes.html">What's New?</a>.</p>
 <p /><address><hr /><div align="center">

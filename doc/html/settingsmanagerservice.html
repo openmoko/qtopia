@@ -24,18 +24,18 @@
 <li><div class="fn"/>void <b><a href="settingsmanagerservice.html#pushSettingStatus">pushSettingStatus</a></b> ( const QString &amp; <i>appName</i>, const QString &amp; <i>windowTitle</i>, const QString &amp; <i>details</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>1 protected function inherited from <a href="qtopiaabstractservice.html#protected-functions">QtopiaAbstractService</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -45,11 +45,11 @@
 <p>See also <a href="settingsservice.html">SettingsService</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="pullSettingStatus"></a>void SettingsManagerService::pullSettingStatus ( const <a href="./qstring.html">QString</a> &amp; <i>appName</i>, const <a href="./qstring.html">QString</a> &amp; <i>windowTitle</i>, const <a href="./qstring.html">QString</a> &amp; <i>details</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="pullSettingStatus"></a>void SettingsManagerService::pullSettingStatus ( const <a href="qstring.html">QString</a> &amp; <i>appName</i>, const <a href="qstring.html">QString</a> &amp; <i>windowTitle</i>, const <a href="qstring.html">QString</a> &amp; <i>details</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Send the settings for an application to the settings manager. This is invoked in response to a <a href="settingsservice.html#pullSettingStatus">SettingsService::pullSettingStatus</a>() request.</p>
 <p>The <i>appName</i> is the name of the application (e.g&#x2e; <tt>appearance</tt>), <i>windowTitle</i> is the title on the window to indicate to the user what kind of settings are being sent, and <i>details</i> is an opaque string that can be later sent to <a href="settingsservice.html#activateSettings">SettingsService::activateSettings</a>().</p>
 <p>See also <a href="settingsservice.html#pullSettingStatus">SettingsService::pullSettingStatus</a>().</p>
-<h3 class="fn"><a name="pushSettingStatus"></a>void SettingsManagerService::pushSettingStatus ( const <a href="./qstring.html">QString</a> &amp; <i>appName</i>, const <a href="./qstring.html">QString</a> &amp; <i>windowTitle</i>, const <a href="./qstring.html">QString</a> &amp; <i>details</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="pushSettingStatus"></a>void SettingsManagerService::pushSettingStatus ( const <a href="qstring.html">QString</a> &amp; <i>appName</i>, const <a href="qstring.html">QString</a> &amp; <i>windowTitle</i>, const <a href="qstring.html">QString</a> &amp; <i>details</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Push the settings for an application to the settings manager. This is used when the application chooses to update its settings, rather than upon an explicit request from the settings manager.</p>
 <p>The <i>appName</i> is the name of the application (e.g&#x2e; <tt>appearance</tt>), <i>windowTitle</i> is the title on the window to indicate to the user what kind of settings are being sent, and <i>details</i> is an opaque string that can be later sent to <a href="settingsservice.html#activateSettings">SettingsService::activateSettings</a>().</p>
 <p /><address><hr /><div align="center">

@@ -21,7 +21,7 @@
 <a name="gsm-modem-integration"></a><a name="gsm-modem-integration"></a>
 <h2>GSM Modem Integration</h2>
 <p>The implementation of the 3GPP AT command specifications (3GPP TS 27.007 and 3GPP TS 27.005) varies between modems, with most modems supporting proprietary AT commands for special features.</p>
-<p>Qtopia Phone supports vendor-specific modem commands through the use of plug-ins to the <a href="telephony--modem.html">Qtopia Phone Modem Library</a>. The vendor-specific code is placed in the device-specific directory <tt>devices/DEVNAME/src/plugins/phonevendors/DEVNAME</tt>, where <tt>DEVNAME</tt> is the manufacturer's name for the device.</p>
+<p>Qtopia Phone supports vendor-specific modem commands through the use of plug-ins to the <a href="telephony-modem.html">Qtopia Phone Modem Library</a>. The vendor-specific code is placed in the device-specific directory <tt>devices/DEVNAME/src/plugins/phonevendors/DEVNAME</tt>, where <tt>DEVNAME</tt> is the manufacturer's name for the device.</p>
 <p>Qtopia Phone will load every vendor plug-in that is installed and query each one to see which is capable of handling the modem. The <tt>QTOPIA_PHONE_VENDOR</tt> macro in <tt>custom.h</tt> can be used to force Qtopia Phone to load only that plug-in, ignoring any others that may be present in the system. For example, setting <tt>QTOPIA_PHONE_VENDOR</tt> to <tt>wavecom</tt> will instruct Qtopia Phone to load <tt>libwavecomvendor.so</tt> to provide vendor-specific AT commands. The <tt>QTOPIA_PHONE_VENDOR</tt> value can also be set as an environment variable.</p>
 <p>3GPP TS 07.10 multiplexing can also be a source of problems when supporting a new modem. During initial testing it can be disabled by setting the <tt>QTOPIA_PHONE_MUX</tt> environment variable to <tt>no</tt>. Qtopia Phone will still function, but you will be unable to make GPRS calls without multiplexing support.</p>
 <p>If your modem does not support 3GPP TS 07.10 multiplexing, or you need to modify the 3GPP TS 07.10 parameters, it will be necessary to write a multiplexer plug-in. See <a href="tut-multiplexing.html">Writing a Multiplexer Plug-in</a> for more information on how to do this.</p>
@@ -60,7 +60,7 @@
         return new WavecomModemService( service, mux, parent );
     }</pre>
 <p>The <tt>supports()</tt> function checks the manufacturer string from the <tt>AT+CGMI</tt> command against the expected value. The first plug-in that returns true from <tt>supports()</tt> will used.</p>
-<p>The <tt>create()</tt> function creates a <a href="qmodemservice.html">QModemService</a> instance to handle the modem specifics. It is passed the name of the service (usually <tt>modem</tt>), the multiplexing object that is used to communicate with the modem, and the parent <a href="./qobject.html">QObject</a> to attach the modem service to.</p>
+<p>The <tt>create()</tt> function creates a <a href="qmodemservice.html">QModemService</a> instance to handle the modem specifics. It is passed the name of the service (usually <tt>modem</tt>), the multiplexing object that is used to communicate with the modem, and the parent <a href="qobject.html">QObject</a> to attach the modem service to.</p>
 <p>The modem service implementation inherits from <a href="qmodemservice.html">QModemService</a> and should override <tt>initialize()</tt> to create the vendor-specific functionality handlers:</p>
 <pre>    #include &lt;qmodemservice.h&gt;
     class WavecomModemService : public QModemService
@@ -88,7 +88,7 @@
 
     void WavecomModemService::initialize()
     {
-        <span class="comment">//</span> Create our Wavecom-specific overrides for the service interfaces.
+        <span class="comment">// Create our Wavecom-specific overrides for the service interfaces.</span>
         if ( !supports&lt;QSimInfo&gt;() )
             addInterface( new WavecomSimInfo( this ) );
 
@@ -107,7 +107,7 @@
         if ( !callProvider() )
             setCallProvider( new WavecomCallProvider( this ) );
 
-        <span class="comment">//</span> Call QModemService to create other interfaces that we didn't override.
+        <span class="comment">// Call QModemService to create other interfaces that we didn't override.</span>
         QModemService::initialize();
     }</pre>
 <p>Modem services within Qtopia are split up into several handlers, one for each functionality area (phone calls, network registration, SMS, SIM toolkit, phone books, etc).</p>
@@ -121,7 +121,7 @@
 <tr valign="top" class="odd"><td><tt>WavecomConfiguration</tt></td><td><a href="qmodemconfiguration.html">QModemConfiguration</a></td></tr>
 <tr valign="top" class="even"><td><tt>WavecomCallProvider</tt></td><td><a href="qmodemcallprovider.html">QModemCallProvider</a></td></tr>
 </table></p>
-<p>A complete list of classes for accessing AT-based modems can be found on the <a href="telephony--modem.html">Modem Classes</a> page.</p>
+<p>A complete list of classes for accessing AT-based modems can be found on the <a href="telephony-modem.html">Modem Classes</a> page.</p>
 <a name="modem-porting-sequence"></a>
 <h2>Modem Porting Sequence</h2>
 <p>To support a modem the following sequence may be used as a guide:</p>

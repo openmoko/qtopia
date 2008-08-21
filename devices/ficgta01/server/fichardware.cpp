@@ -51,33 +51,68 @@ QTOPIA_TASK(Ficgta01Hardware, Ficgta01Hardware);
 
 Ficgta01Hardware::Ficgta01Hardware()
     : vsoPortableHandsfree("/Hardware/Accessories/PortableHandsfree"),
-      vsoUsbCable("/Hardware/UsbGadget")
+      vsoUsbCable("/Hardware/UsbGadget"),
+      vsoNeoHardware("/Hardware/Neo")
 {
-    adaptor = new QtopiaIpcAdaptor("QPE/Neo1973Hardware");
+    adaptor = new QtopiaIpcAdaptor("QPE/NeoHardware");
 
     qLog(Hardware) << "ficgta01hardware";
 
     vsoPortableHandsfree.setAttribute("Present", false);
     vsoPortableHandsfree.sync();
 
+// Handle Audio State Changes
+    audioMgr = new QtopiaIpcAdaptor("QPE/AudioStateManager", this);
+
+
     QtopiaIpcAdaptor::connect(adaptor, MESSAGE(headphonesInserted(bool)),
                               this, SLOT(headphonesInserted(bool)));
 
     QtopiaIpcAdaptor::connect(adaptor, MESSAGE(cableConnected(bool)),
                               this, SLOT(cableConnected(bool)));
-
+    findHardwareVersion();
 }
 
 Ficgta01Hardware::~Ficgta01Hardware()
 {
 }
 
+void Ficgta01Hardware::findHardwareVersion()
+{
+    QFile cpuinfo( "/proc/cpuinfo");
+    QString inStr;
+    cpuinfo.open(QIODevice::ReadOnly | QIODevice::Text);
+    QTextStream in(&cpuinfo);
+    QString line;
+    do {
+        line  = in.readLine();
+        if (line.contains("Hardware") ){
+            QStringList token = line.split(":");
+            inStr = token.at(1).simplified();
+        }
+    } while (!line.isNull());
+
+    cpuinfo.close();
+    qLog(Hardware)<<"Neo"<< inStr;
+
+    vsoNeoHardware.setAttribute("Device", inStr);
+    vsoNeoHardware.sync();
+}
 
 void Ficgta01Hardware::headphonesInserted(bool b)
 {
     qLog(Hardware)<< __PRETTY_FUNCTION__ << b;
     vsoPortableHandsfree.setAttribute("Present", b);
     vsoPortableHandsfree.sync();
+    if (b) {
+        QByteArray mode("Headphone");
+        audioMgr->send("setProfile(QByteArray)", mode);
+    } else {
+        QByteArray mode("MediaSpeaker");
+        audioMgr->send("setProfile(QByteArray)", mode);
+    }
+
+
 }
 
 void Ficgta01Hardware::cableConnected(bool b)
@@ -86,8 +121,6 @@ void Ficgta01Hardware::cableConnected(bool b)
     vsoUsbCable.setAttribute("cableConnected", b);
     vsoUsbCable.sync();
 }
-
-
 
 void Ficgta01Hardware::shutdownRequested()
 {

@@ -35,7 +35,7 @@
 
     void MainWidget::showSettings()
     {
-        <span class="comment">//</span> If settingsDialog has not yet been created, create it now.
+        <span class="comment">// If settingsDialog has not yet been created, create it now.</span>
         if ( !settingsDialog )
             settingsDialog = new SettingsDialog( this );
         settingsDialog-&gt;exec();
@@ -44,14 +44,14 @@
 <pre>    MainWidget::MainWidget( QWidget *parent, Qt::WFlags f )
         : QMainWindow( parent, f ), settingsDialog(0)
     {
-        <span class="comment">//</span> After the event queue has been processed and the mainwindow is
-        <span class="comment">//</span> visible, load the data.
+        <span class="comment">// After the event queue has been processed and the mainwindow is</span>
+        <span class="comment">// visible, load the data.</span>
         QTimer::singleShot(0, this, SLOT(loadData()));
     }
 
     void MainWidget::loadData()
     {
-        <span class="comment">//</span> Open data file and populate data view.
+        <span class="comment">// Open data file and populate data view.</span>
     }</pre>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

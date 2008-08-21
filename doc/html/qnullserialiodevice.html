@@ -29,8 +29,8 @@
 </ul>
 <ul>
 <li><div class="fn"/>16 public functions inherited from <a href="qserialiodevice.html#public-functions">QSerialIODevice</a></li>
-<li><div class="fn"/>32 public functions inherited from <a href="./qiodevice.html#public-functions">QIODevice</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>32 public functions inherited from <a href="qiodevice.html#public-functions">QIODevice</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -39,20 +39,20 @@
 <li><div class="fn"/>virtual qint64 <b><a href="qnullserialiodevice.html#writeData">writeData</a></b> ( const char * <i>data</i>, qint64 <i>len</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>5 protected functions inherited from <a href="./qiodevice.html#protected-functions">QIODevice</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>5 protected functions inherited from <a href="qiodevice.html#protected-functions">QIODevice</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>4 signals inherited from <a href="qserialiodevice.html#signals">QSerialIODevice</a></li>
-<li><div class="fn"/>3 signals inherited from <a href="./qiodevice.html#signals">QIODevice</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>3 signals inherited from <a href="qiodevice.html#signals">QIODevice</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>1 protected slot inherited from <a href="qserialiodevice.html#protected-slots">QSerialIODevice</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -63,27 +63,27 @@
 <p>See also <a href="qserialiodevice.html">QSerialIODevice</a> and <a href="qserialport.html">QSerialPort</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QNullSerialIODevice"></a>QNullSerialIODevice::QNullSerialIODevice ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QNullSerialIODevice"></a>QNullSerialIODevice::QNullSerialIODevice ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Create a null serial device and attach it to <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QNullSerialIODevice"></a>QNullSerialIODevice::~QNullSerialIODevice ()</h3>
 <p>Destruct this null serial device.</p>
-<h3 class="fn"><a name="bytesAvailable"></a><a href="./qtglobal.html#qint64-typedef">qint64</a> QNullSerialIODevice::bytesAvailable () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="bytesAvailable"></a><a href="qtglobal.html#qint64-typedef">qint64</a> QNullSerialIODevice::bytesAvailable () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns the number of bytes that are available on this null serial device (always 0).</p>
-<p>Reimplemented from <a href="./qiodevice.html#bytesAvailable">QIODevice</a>.</p>
+<p>Reimplemented from <a href="qiodevice.html#bytesAvailable">QIODevice</a>.</p>
 <h3 class="fn"><a name="close"></a>void QNullSerialIODevice::close ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Closes this null serial device.</p>
-<p>Reimplemented from <a href="./qiodevice.html#close">QIODevice</a>.</p>
+<p>Reimplemented from <a href="qiodevice.html#close">QIODevice</a>.</p>
 <h3 class="fn"><a name="isValid"></a>bool QNullSerialIODevice::isValid () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>This override always returns false.</p>
 <p>Reimplemented from <a href="qserialiodevice.html#isValid">QSerialIODevice</a>.</p>
-<h3 class="fn"><a name="open"></a>bool QNullSerialIODevice::open ( <a href="./qiodevice.html#OpenMode-typedef">OpenMode</a> <i>mode</i> )</h3>
+<h3 class="fn"><a name="open"></a>bool QNullSerialIODevice::open ( <a href="qiodevice.html#OpenMode-typedef">OpenMode</a> <i>mode</i> )</h3>
 <p>Opens this null serial device in <i>mode</i>. Returns true if the device can be opened; false otherwise.</p>
-<h3 class="fn"><a name="readData"></a><a href="./qtglobal.html#qint64-typedef">qint64</a> QNullSerialIODevice::readData ( char * <i>data</i>, <a href="./qtglobal.html#qint64-typedef">qint64</a> <i>maxlen</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="readData"></a><a href="qtglobal.html#qint64-typedef">qint64</a> QNullSerialIODevice::readData ( char * <i>data</i>, <a href="qtglobal.html#qint64-typedef">qint64</a> <i>maxlen</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Read up to <i>maxlen</i> bytes of data from this serial device into <i>data</i>.</p>
-<p>Reimplemented from <a href="./qiodevice.html#readData">QIODevice</a>.</p>
-<h3 class="fn"><a name="writeData"></a><a href="./qtglobal.html#qint64-typedef">qint64</a> QNullSerialIODevice::writeData ( const char * <i>data</i>, <a href="./qtglobal.html#qint64-typedef">qint64</a> <i>len</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<p>Reimplemented from <a href="qiodevice.html#readData">QIODevice</a>.</p>
+<h3 class="fn"><a name="writeData"></a><a href="qtglobal.html#qint64-typedef">qint64</a> QNullSerialIODevice::writeData ( const char * <i>data</i>, <a href="qtglobal.html#qint64-typedef">qint64</a> <i>len</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Write <i>len</i> bytes from <i>data</i>.</p>
-<p>Reimplemented from <a href="./qiodevice.html#writeData">QIODevice</a>.</p>
+<p>Reimplemented from <a href="qiodevice.html#writeData">QIODevice</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>

@@ -143,8 +143,8 @@
     };
 
     #endif</pre>
-<p>Classes: <a href="./qstackedwidget.html">QStackedWidget</a>, <a href="./qwidget.html">QWidget</a></p>
-<p>The IViewer should be a <a href="./qstackedwidget.html">QStackedWidget</a> derived class. The widget stack will be used later to manage our screens. The constructor needs to have the <a href="./qwidget.html">QWidget</a> and <a href="./qt.html#WindowFlags-typedef">Qt::WindowFlags</a> as parameters, due to the QTOPIA macros in main.cpp.</p>
+<p>Classes: <a href="qstackedwidget.html">QStackedWidget</a>, <a href="qwidget.html">QWidget</a></p>
+<p>The IViewer should be a <a href="qstackedwidget.html">QStackedWidget</a> derived class. The widget stack will be used later to manage our screens. The constructor needs to have the <a href="qwidget.html">QWidget</a> and <a href="qt.html#WindowFlags-typedef">Qt::WindowFlags</a> as parameters, due to the QTOPIA macros in main.cpp.</p>
 <p>File: iviewer.cpp</p>
 <pre>    #include &quot;iviewer.h&quot;
     IViewer::IViewer(QWidget *parent, Qt::WFlags <span class="comment">/*f*/</span>)
@@ -158,7 +158,7 @@
 <p>It is now time for the first run. qtopiamake and make must be called. When the QVFB emulator is running, the application can be started with ./iviewer. This should display an empty application in the emulator. Great!</p>
 <a name="the-list-screen"></a>
 <h3>The List Screen</h3>
-<p>The list screen will be derived from the <a href="./qlistwidget.html">QListWidget</a> for convenience.</p>
+<p>The list screen will be derived from the <a href="qlistwidget.html">QListWidget</a> for convenience.</p>
 <p>File: listscreen.h</p>
 <pre>    #ifndef LISTSCREEN_H
     #define LISTSCREEN_H
@@ -182,7 +182,7 @@
     };
 
     #endif</pre>
-<p>Classes: <a href="./qlistwidget.html">QListWidget</a></p>
+<p>Classes: <a href="qlistwidget.html">QListWidget</a></p>
 <p>As parent, the iviewer is passed and the pointer is stored in _iviewer. The forward declaration (class IViewer) is used to avoid dependency with the created header files. Dependencies to qt/qtopia header files do not have to be handled.</p>
 <p>File: listscreen.cpp</p>
 <pre>    #include &quot;listscreen.h&quot;

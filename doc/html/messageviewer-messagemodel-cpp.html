@@ -60,10 +60,10 @@
         static QIcon mmsIcon(&quot;:icon/multimedia&quot;);
         static QIcon emailIcon(&quot;:icon/email&quot;);
 
-        <span class="comment">//</span> Load the header for this message
+        <span class="comment">// Load the header for this message</span>
         QMailMessage message(id, QMailMessage::Header);
 
-        <span class="comment">//</span> Determine the properties we want to display
+        <span class="comment">// Determine the properties we want to display</span>
         QIcon* messageIcon = &amp;smsIcon;
         if (message.messageType() == QMailMessage::Mms)
             messageIcon = &amp;mmsIcon;
@@ -79,7 +79,7 @@
         QString time(QTimeString::localHM(messageTime.time(), QTimeString::Short));
         QString sublabel(QString(&quot;%1 %2 %3&quot;).arg(action).arg(date).arg(time));
 
-        <span class="comment">//</span> Configure this item
+        <span class="comment">// Configure this item</span>
         setIcon(sent ? sentMessageIcon : receivedMessageIcon);
         setText(message.subject());
         setData(sublabel, MessageDelegate::SubLabelRole);
@@ -108,31 +108,31 @@
     {
         clear();
 
-        <span class="comment">//</span> Locate messages whose sender is this contact
+        <span class="comment">// Locate messages whose sender is this contact</span>
         QMailMessageKey msgsFrom;
 
-        <span class="comment">//</span> Locate messages whose recipients list contains this contact
+        <span class="comment">// Locate messages whose recipients list contains this contact</span>
         QMailMessageKey msgsTo;
 
-        <span class="comment">//</span> Match on any of contact's phone numbers
+        <span class="comment">// Match on any of contact's phone numbers</span>
         foreach(const QString&amp; number, contact.phoneNumbers().values()) {
             msgsFrom |= QMailMessageKey(QMailMessageKey::Sender, number);
             msgsTo |= QMailMessageKey(QMailMessageKey::Recipients, number, QMailMessageKey::Contains);
         }
 
-        <span class="comment">//</span> Match on any of contact's email addresses
+        <span class="comment">// Match on any of contact's email addresses</span>
         foreach(const QString&amp; address, contact.emailList()) {
             msgsFrom |= QMailMessageKey(QMailMessageKey::Sender, address);
             msgsTo |= QMailMessageKey(QMailMessageKey::Recipients, address, QMailMessageKey::Contains);
         }
 
-        <span class="comment">//</span> Sort messages by timestamp, newest to oldest
+        <span class="comment">// Sort messages by timestamp, newest to oldest</span>
         QMailMessageSortKey sort(QMailMessageSortKey::TimeStamp, Qt::DescendingOrder);
 
-        <span class="comment">//</span> Fetch the messages matching either of our queries, and return them sorted
+        <span class="comment">// Fetch the messages matching either of our queries, and return them sorted</span>
         QMailIdList matches(QMailStore::instance()-&gt;queryMessages(msgsFrom | msgsTo, sort));
 
-        <span class="comment">//</span> Add each returned message to our data model
+        <span class="comment">// Add each returned message to our data model</span>
         foreach (const QMailId&amp; id, matches)
             appendRow(new MessageItem(id));
     }

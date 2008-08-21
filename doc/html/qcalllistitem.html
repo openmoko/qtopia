@@ -65,9 +65,9 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QCallListItem"></a>QCallListItem::QCallListItem ()</h3>
 <p>Constructs a null <a href="qcalllistitem.html">QCallListItem</a>.</p>
-<h3 class="fn"><a name="QCallListItem-2"></a>QCallListItem::QCallListItem ( <a href="qcalllistitem.html#CallType-enum">CallType</a> <i>type</i>, const <a href="./qstring.html">QString</a> &amp; <i>number</i>, const <a href="./qdatetime.html">QDateTime</a> &amp; <i>start</i>, const <a href="./qdatetime.html">QDateTime</a> &amp; <i>end</i>, const <a href="quniqueid.html">QUniqueId</a> &amp; <i>contact</i> = QUniqueId(), const <a href="./qstring.html">QString</a> &amp; <i>serviceType</i> = QString(), const <a href="./qstring.html">QString</a> &amp; <i>timeZoneId</i> = QString(), bool <i>simRecord</i> = false )</h3>
+<h3 class="fn"><a name="QCallListItem-2"></a>QCallListItem::QCallListItem ( <a href="qcalllistitem.html#CallType-enum">CallType</a> <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>number</i>, const <a href="qdatetime.html">QDateTime</a> &amp; <i>start</i>, const <a href="qdatetime.html">QDateTime</a> &amp; <i>end</i>, const <a href="quniqueid.html">QUniqueId</a> &amp; <i>contact</i> = QUniqueId(), const <a href="qstring.html">QString</a> &amp; <i>serviceType</i> = QString(), const <a href="qstring.html">QString</a> &amp; <i>timeZoneId</i> = QString(), bool <i>simRecord</i> = false )</h3>
 <p>Constructs a <a href="qcalllistitem.html">QCallListItem</a> given the <i>type</i> of call, the phone <i>number</i> and the <i>start</i> and <i>end</i> times of the call. The contact can be optionally specified by <i>contact</i>. <i>serviceType</i> specifies the type of service such as Voice or VoIP. <i>timeZoneId</i> describes the time zone id at the time when the call is made e.g&#x2e; Australia/Brisbane. If <i>simRecord</i> is true, then the call list item originated from a storage area on a SIM.</p>
-<h3 class="fn"><a name="QCallListItem-3"></a>QCallListItem::QCallListItem ( <a href="qcalllistitem.html#CallType-enum">CallType</a> <i>type</i>, const <a href="./qstring.html">QString</a> &amp; <i>number</i>, bool <i>simRecord</i> = true )</h3>
+<h3 class="fn"><a name="QCallListItem-3"></a>QCallListItem::QCallListItem ( <a href="qcalllistitem.html#CallType-enum">CallType</a> <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>number</i>, bool <i>simRecord</i> = true )</h3>
 <p>Constructs a <a href="qcalllistitem.html">QCallListItem</a> given the <i>type</i> of call and the phone <i>number</i>. Use this constructor when reading SIM phone books as they contain only call type and phone number. If <i>simRecord</i> is true, then the call list item originated from a storage area on a SIM.</p>
 <h3 class="fn"><a name="QCallListItem-4"></a>QCallListItem::QCallListItem ( const QCallListItem &amp; <i>other</i> )</h3>
 <p>Constructs copy of <i>other</i>.</p>
@@ -77,31 +77,31 @@
 <p>Returns the unique id of the contact associated with this call, if any.</p>
 <h3 class="fn"><a name="deserialize"></a>void QCallListItem::deserialize ( Stream &amp; <i>stream</i> )</h3>
 <p>Reads the contents of a <a href="qcalllistitem.html">QCallListItem</a> from <i>stream</i>.</p>
-<h3 class="fn"><a name="end"></a><a href="./qdatetime.html">QDateTime</a> QCallListItem::end () const</h3>
-<p>Returns end time of the call, or a null <a href="./qdatetime.html">QDateTime</a> if no connection was made for the call in the case of a missed call, or a dialed call that did not connect.</p>
+<h3 class="fn"><a name="end"></a><a href="qdatetime.html">QDateTime</a> QCallListItem::end () const</h3>
+<p>Returns end time of the call, or a null <a href="qdatetime.html">QDateTime</a> if no connection was made for the call in the case of a missed call, or a dialed call that did not connect.</p>
 <p>See also <a href="qcalllistitem.html#start">start</a>() and <a href="qcalllistitem.html#originalTimeZoneEnd">originalTimeZoneEnd</a>().</p>
 <h3 class="fn"><a name="isNull"></a>bool QCallListItem::isNull () const</h3>
 <p>Returns true if this is an invalid call list item.</p>
 <h3 class="fn"><a name="isSIMRecord"></a>bool QCallListItem::isSIMRecord () const</h3>
 <p>Returns true if the call item is imported from SIM phone book.</p>
-<h3 class="fn"><a name="number"></a><a href="./qstring.html">QString</a> QCallListItem::number () const</h3>
+<h3 class="fn"><a name="number"></a><a href="qstring.html">QString</a> QCallListItem::number () const</h3>
 <p>Returns the phone number associated with this call.</p>
-<h3 class="fn"><a name="originalTimeZoneEnd"></a><a href="./qdatetime.html">QDateTime</a> QCallListItem::originalTimeZoneEnd () const</h3>
+<h3 class="fn"><a name="originalTimeZoneEnd"></a><a href="qdatetime.html">QDateTime</a> QCallListItem::originalTimeZoneEnd () const</h3>
 <p>Returns the ending time of the call in the original timezone that the user was in when the call was made or received.</p>
 <p>This can be useful to display that a call ended at 11:05 am local time, regardless of what the timezone is set to now. The <a href="qcalllistitem.html#end">end</a>() function returns the end time in the current timezone.</p>
 <p>See also <a href="qcalllistitem.html#originalTimeZoneStart">originalTimeZoneStart</a>() and <a href="qcalllistitem.html#end">end</a>().</p>
-<h3 class="fn"><a name="originalTimeZoneStart"></a><a href="./qdatetime.html">QDateTime</a> QCallListItem::originalTimeZoneStart () const</h3>
+<h3 class="fn"><a name="originalTimeZoneStart"></a><a href="qdatetime.html">QDateTime</a> QCallListItem::originalTimeZoneStart () const</h3>
 <p>Returns the starting time of the call in the original timezone that the user was in when the call was made or received.</p>
 <p>This can be useful to display that a call started at 11:00 am local time, regardless of what the timezone is set to now. The <a href="qcalllistitem.html#start">start</a>() function returns the start time in the current timezone.</p>
 <p>See also <a href="qcalllistitem.html#originalTimeZoneEnd">originalTimeZoneEnd</a>() and <a href="qcalllistitem.html#start">start</a>().</p>
 <h3 class="fn"><a name="serialize"></a>void QCallListItem::serialize ( Stream &amp; <i>stream</i> ) const</h3>
 <p>Writes the contents of a <a href="qcalllistitem.html">QCallListItem</a> to a <i>stream</i>.</p>
-<h3 class="fn"><a name="serviceType"></a><a href="./qstring.html">QString</a> QCallListItem::serviceType () const</h3>
+<h3 class="fn"><a name="serviceType"></a><a href="qstring.html">QString</a> QCallListItem::serviceType () const</h3>
 <p>Returns the service type associated with this call (Voice, Data, etc).</p>
-<h3 class="fn"><a name="start"></a><a href="./qdatetime.html">QDateTime</a> QCallListItem::start () const</h3>
+<h3 class="fn"><a name="start"></a><a href="qdatetime.html">QDateTime</a> QCallListItem::start () const</h3>
 <p>Returns the starting time of the call.</p>
 <p>See also <a href="qcalllistitem.html#end">end</a>() and <a href="qcalllistitem.html#originalTimeZoneStart">originalTimeZoneStart</a>().</p>
-<h3 class="fn"><a name="timeZoneId"></a><a href="./qstring.html">QString</a> QCallListItem::timeZoneId () const</h3>
+<h3 class="fn"><a name="timeZoneId"></a><a href="qstring.html">QString</a> QCallListItem::timeZoneId () const</h3>
 <p>Returns the time zone id associated with this call (e.g&#x2e; Australia/Brisbane).</p>
 <h3 class="fn"><a name="type"></a><a href="qcalllistitem.html#CallType-enum">CallType</a> QCallListItem::type () const</h3>
 <p>Returns the type of call this item represents. If this item is null, then the return value of this function is undefined.</p>
@@ -112,7 +112,7 @@
 <p>Assigns a copy of <i>other</i> to this item.</p>
 <h3 class="fn"><a name="operator-eq-eq"></a>bool QCallListItem::operator== ( const QCallListItem &amp; <i>other</i> ) const</h3>
 <p>Returns true if this item is the same as <i>other</i> or false if they are different.</p>
-<p>The time properties such as <a href="qcalllistitem.html#start">start</a>() and <a href="qcalllistitem.html#end">end</a>() are converted to string using <a href="./qt.html#DateFormat-enum">Qt::ISODate</a> format for comparison.</p>
+<p>The time properties such as <a href="qcalllistitem.html#start">start</a>() and <a href="qcalllistitem.html#end">end</a>() are converted to string using <a href="qt.html#DateFormat-enum">Qt::ISODate</a> format for comparison.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>

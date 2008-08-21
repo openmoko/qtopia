@@ -157,7 +157,7 @@ QFile *CustomPushService::createReceivingFile(const QString &name)
     if (sepIndex != -1)
         fileName = fileName.mid(sepIndex + 1);
     if (fileName.isEmpty())
-        fileName = "unnamed";
+        fileName = tr("unnamed");
 
     // assuming incomingDirectory() ends with a dir separator
     QFile *file = new QFile(incomingDirectory() + fileName);
@@ -419,7 +419,7 @@ void InfraredBeamingService::socketConnected()
     }
     else {
         QObject::connect(pushClient, SIGNAL(done(bool)), this, SLOT(doneBeamingVObj(bool)));
-        m_waitWidget->setText("Sending...");
+        m_waitWidget->setText(tr("Sending..."));
     }
 
     pushClient->connect();
@@ -459,7 +459,7 @@ void InfraredBeamingService::startBeamingVObj(const QByteArray &data, const QStr
     QMessageBox::information( 0, tr( "Beam File" ),
                               tr( "<P>Please align the infrared receivers and hit OK once ready." ));
 
-    m_waitWidget->setText("Connecting...");
+    m_waitWidget->setText(tr("Connecting..."));
     m_waitWidget->setCancelEnabled(false);
     m_waitWidget->show();
 
@@ -516,7 +516,7 @@ void InfraredBeamingService::doneBeamingVObj(bool error)
     }
 
     m_session->endSession();
-    m_waitWidget->setText("Sending...Done");
+    m_waitWidget->setText(tr("Done"));
     QTimer::singleShot(1000, m_waitWidget, SLOT(hide()));
 }
 
@@ -551,7 +551,7 @@ void InfraredBeamingService::startBeamingFile(const QString &fileName,
 
     m_busy = true;
 
-    m_waitWidget->setText("Connecting...");
+    m_waitWidget->setText(tr("Connecting..."));
     m_waitWidget->setCancelEnabled(false);
     m_waitWidget->show();
 
@@ -881,7 +881,7 @@ void BluetoothPushingService::sdapQueryComplete(const QBluetoothSdpQueryResult &
         m_busy = false;
         m_session->endSession();
         // This should not happen if the DeviceSelector is working correctly
-        m_waitWidget->setText("<P>The selected device does not support Object Push Profile.");
+        m_waitWidget->setText(tr("<qt>The selected device does not support this service.</qt>"));
         m_waitWidget->setCancelEnabled(true);
         QTimer::singleShot(5000, m_waitWidget, SLOT(hide()));
         return;
@@ -901,7 +901,7 @@ void BluetoothPushingService::handleConnectionFailed()
     qLog(Bluetooth) << "BluetoothPushingService: ending session";
     m_session->endSession();
 
-    m_waitWidget->setText("<P>Could not connect to the selected bluetooth device.  Please make sure that the device is turned on and within range.");
+    m_waitWidget->setText(tr("Unable to connect.  Please ensure the Bluetooth device is in range and try again."));
     m_waitWidget->setCancelEnabled(true);
     QTimer::singleShot(5000, m_waitWidget, SLOT(hide()));
 
@@ -923,7 +923,7 @@ void BluetoothPushingService::rfcommConnected()
 
     if ((m_req.m_mimeType == "text/x-vcard") || (m_req.m_mimeType == "text/x-vcalendar")) {
         QObject::connect(pushClient, SIGNAL(done(bool)), this, SLOT(donePushingVObj(bool)));
-        m_waitWidget->setText("Sending...");
+        m_waitWidget->setText(tr("Sending..."));
     }
     else {
         m_waitWidget->hide();
@@ -986,7 +986,7 @@ void BluetoothPushingService::startPushingVObj(const QBluetoothAddress &addr,
     QBluetoothLocalDevice localDev;
     m_sdap->searchServices(addr, localDev, QBluetooth::ObjectPushProfile);
 
-    m_waitWidget->setText("Connecting...");
+    m_waitWidget->setText(tr("Connecting..."));
     m_waitWidget->setCancelEnabled(false);
     m_waitWidget->show();
 }
@@ -1014,7 +1014,7 @@ void BluetoothPushingService::donePushingVObj(bool error)
         return;
     }
 
-    m_waitWidget->setText("Sending...Done");
+    m_waitWidget->setText(tr("Done"));
     QTimer::singleShot(1000, m_waitWidget, SLOT(hide()));
 
     // Respond to the request
@@ -1046,7 +1046,7 @@ void BluetoothPushingService::startPushingFile()
     QBluetoothLocalDevice localDev;
     m_sdap->searchServices(m_req.m_addr, localDev, QBluetooth::ObjectPushProfile);
 
-    m_waitWidget->setText("Connecting...");
+    m_waitWidget->setText(tr("Connecting..."));
     m_waitWidget->setCancelEnabled(false);
     m_waitWidget->show();
 }
@@ -1440,6 +1440,9 @@ void ObexPushServiceProvider::start()
         if (!sdpRecord.isNull())
             m_sdpRecordHandle = registerRecord(sdpRecord);
     }
+
+    if (sdpRecord.isNull())
+        qWarning() << "ObexPushServiceProvider: cannot read" << sdpRecordFile.fileName();
 
     if (m_sdpRecordHandle == 0) {
         emit started(true, tr("Error registering with SDP server"));

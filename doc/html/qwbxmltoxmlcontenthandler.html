@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QWbXmlToXmlContentHandler Class Reference</h1>
 <p>The QWbXmlToXmlContentHandler class assists with converting WBXML documents into ordinary XML. <a href="#details">More...</a></p>
-<pre>    #include &lt;QWbXmlToXmlContentHandler&gt;</pre><p>Inherits <a href="./qxmlcontenthandler.html">QXmlContentHandler</a>.</p>
+<pre>    #include &lt;QWbXmlToXmlContentHandler&gt;</pre><p>Inherits <a href="qxmlcontenthandler.html">QXmlContentHandler</a>.</p>
 <ul>
 <li><a href="qwbxmltoxmlcontenthandler-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -37,7 +37,7 @@
 <li><div class="fn"/>QString <b><a href="qwbxmltoxmlcontenthandler.html#toString">toString</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>12 public functions inherited from <a href="./qxmlcontenthandler.html#public-functions">QXmlContentHandler</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qxmlcontenthandler.html#public-functions">QXmlContentHandler</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -51,43 +51,43 @@
 <p>Construct a new WBXML to XML content conversion handler.</p>
 <h3 class="fn"><a name="dtor.QWbXmlToXmlContentHandler"></a>QWbXmlToXmlContentHandler::~QWbXmlToXmlContentHandler ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destruct a WBXML to XML content conversion handler.</p>
-<h3 class="fn"><a name="characters"></a>bool QWbXmlToXmlContentHandler::characters ( const <a href="./qstring.html">QString</a> &amp; <i>ch</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="characters"></a>bool QWbXmlToXmlContentHandler::characters ( const <a href="qstring.html">QString</a> &amp; <i>ch</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Process the character data in <i>ch</i>.</p>
-<p>Reimplemented from <a href="./qxmlcontenthandler.html#characters">QXmlContentHandler</a>.</p>
+<p>Reimplemented from <a href="qxmlcontenthandler.html#characters">QXmlContentHandler</a>.</p>
 <h3 class="fn"><a name="endDocument"></a>bool QWbXmlToXmlContentHandler::endDocument ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>End parsing the document.</p>
-<p>Reimplemented from <a href="./qxmlcontenthandler.html#endDocument">QXmlContentHandler</a>.</p>
-<h3 class="fn"><a name="endElement"></a>bool QWbXmlToXmlContentHandler::endElement ( const <a href="./qstring.html">QString</a> &amp; <i>namespaceURI</i>, const <a href="./qstring.html">QString</a> &amp; <i>localName</i>, const <a href="./qstring.html">QString</a> &amp; <i>qName</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Reimplemented from <a href="qxmlcontenthandler.html#endDocument">QXmlContentHandler</a>.</p>
+<h3 class="fn"><a name="endElement"></a>bool QWbXmlToXmlContentHandler::endElement ( const <a href="qstring.html">QString</a> &amp; <i>namespaceURI</i>, const <a href="qstring.html">QString</a> &amp; <i>localName</i>, const <a href="qstring.html">QString</a> &amp; <i>qName</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>End an element called <i>qName</i>, which can be broken up into <i>namespaceURI</i> and <i>localName</i>.</p>
-<p>Reimplemented from <a href="./qxmlcontenthandler.html#endElement">QXmlContentHandler</a>.</p>
-<h3 class="fn"><a name="endPrefixMapping"></a>bool QWbXmlToXmlContentHandler::endPrefixMapping ( const <a href="./qstring.html">QString</a> &amp; <i>prefix</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Reimplemented from <a href="qxmlcontenthandler.html#endElement">QXmlContentHandler</a>.</p>
+<h3 class="fn"><a name="endPrefixMapping"></a>bool QWbXmlToXmlContentHandler::endPrefixMapping ( const <a href="qstring.html">QString</a> &amp; <i>prefix</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>End a namspace <i>prefix</i> mapping.</p>
-<p>Reimplemented from <a href="./qxmlcontenthandler.html#endPrefixMapping">QXmlContentHandler</a>.</p>
-<h3 class="fn"><a name="errorString"></a><a href="./qstring.html">QString</a> QWbXmlToXmlContentHandler::errorString () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Reimplemented from <a href="qxmlcontenthandler.html#endPrefixMapping">QXmlContentHandler</a>.</p>
+<h3 class="fn"><a name="errorString"></a><a href="qstring.html">QString</a> QWbXmlToXmlContentHandler::errorString () const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Return a string that describes the last occurring error.</p>
-<p>Reimplemented from <a href="./qxmlcontenthandler.html#errorString">QXmlContentHandler</a>.</p>
-<h3 class="fn"><a name="ignorableWhitespace"></a>bool QWbXmlToXmlContentHandler::ignorableWhitespace ( const <a href="./qstring.html">QString</a> &amp; <i>ch</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Reimplemented from <a href="qxmlcontenthandler.html#errorString">QXmlContentHandler</a>.</p>
+<h3 class="fn"><a name="ignorableWhitespace"></a>bool QWbXmlToXmlContentHandler::ignorableWhitespace ( const <a href="qstring.html">QString</a> &amp; <i>ch</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Process the ignorable whitespace in <i>ch</i>.</p>
-<p>Reimplemented from <a href="./qxmlcontenthandler.html#ignorableWhitespace">QXmlContentHandler</a>.</p>
-<h3 class="fn"><a name="processingInstruction"></a>bool QWbXmlToXmlContentHandler::processingInstruction ( const <a href="./qstring.html">QString</a> &amp; <i>target</i>, const <a href="./qstring.html">QString</a> &amp; <i>data</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Reimplemented from <a href="qxmlcontenthandler.html#ignorableWhitespace">QXmlContentHandler</a>.</p>
+<h3 class="fn"><a name="processingInstruction"></a>bool QWbXmlToXmlContentHandler::processingInstruction ( const <a href="qstring.html">QString</a> &amp; <i>target</i>, const <a href="qstring.html">QString</a> &amp; <i>data</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Handle the processing instruction <i>target</i>, with content <i>data</i>.</p>
-<p>Reimplemented from <a href="./qxmlcontenthandler.html#processingInstruction">QXmlContentHandler</a>.</p>
-<h3 class="fn"><a name="setDocumentLocator"></a>void QWbXmlToXmlContentHandler::setDocumentLocator ( <a href="./qxmllocator.html">QXmlLocator</a> * <i>locator</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Reimplemented from <a href="qxmlcontenthandler.html#processingInstruction">QXmlContentHandler</a>.</p>
+<h3 class="fn"><a name="setDocumentLocator"></a>void QWbXmlToXmlContentHandler::setDocumentLocator ( <a href="qxmllocator.html">QXmlLocator</a> * <i>locator</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Set the document <i>locator</i>.</p>
-<p>Reimplemented from <a href="./qxmlcontenthandler.html#setDocumentLocator">QXmlContentHandler</a>.</p>
-<h3 class="fn"><a name="skippedEntity"></a>bool QWbXmlToXmlContentHandler::skippedEntity ( const <a href="./qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Reimplemented from <a href="qxmlcontenthandler.html#setDocumentLocator">QXmlContentHandler</a>.</p>
+<h3 class="fn"><a name="skippedEntity"></a>bool QWbXmlToXmlContentHandler::skippedEntity ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Process the skipped entity <i>name</i>.</p>
-<p>Reimplemented from <a href="./qxmlcontenthandler.html#skippedEntity">QXmlContentHandler</a>.</p>
+<p>Reimplemented from <a href="qxmlcontenthandler.html#skippedEntity">QXmlContentHandler</a>.</p>
 <h3 class="fn"><a name="startDocument"></a>bool QWbXmlToXmlContentHandler::startDocument ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Start parsing the document.</p>
-<p>Reimplemented from <a href="./qxmlcontenthandler.html#startDocument">QXmlContentHandler</a>.</p>
-<h3 class="fn"><a name="startElement"></a>bool QWbXmlToXmlContentHandler::startElement ( const <a href="./qstring.html">QString</a> &amp; <i>namespaceURI</i>, const <a href="./qstring.html">QString</a> &amp; <i>localName</i>, const <a href="./qstring.html">QString</a> &amp; <i>qName</i>, const <a href="./qxmlattributes.html">QXmlAttributes</a> &amp; <i>atts</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Reimplemented from <a href="qxmlcontenthandler.html#startDocument">QXmlContentHandler</a>.</p>
+<h3 class="fn"><a name="startElement"></a>bool QWbXmlToXmlContentHandler::startElement ( const <a href="qstring.html">QString</a> &amp; <i>namespaceURI</i>, const <a href="qstring.html">QString</a> &amp; <i>localName</i>, const <a href="qstring.html">QString</a> &amp; <i>qName</i>, const <a href="qxmlattributes.html">QXmlAttributes</a> &amp; <i>atts</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Start parsing an element called <i>qName</i>, which can be be broken up into <i>namespaceURI</i> and <i>localName</i>. The attribute list is <i>atts</i>.</p>
-<p>Reimplemented from <a href="./qxmlcontenthandler.html#startElement">QXmlContentHandler</a>.</p>
-<h3 class="fn"><a name="startPrefixMapping"></a>bool QWbXmlToXmlContentHandler::startPrefixMapping ( const <a href="./qstring.html">QString</a> &amp; <i>prefix</i>, const <a href="./qstring.html">QString</a> &amp; <i>uri</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Reimplemented from <a href="qxmlcontenthandler.html#startElement">QXmlContentHandler</a>.</p>
+<h3 class="fn"><a name="startPrefixMapping"></a>bool QWbXmlToXmlContentHandler::startPrefixMapping ( const <a href="qstring.html">QString</a> &amp; <i>prefix</i>, const <a href="qstring.html">QString</a> &amp; <i>uri</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Start a namespace <i>prefix</i> mapping for <i>uri</i>.</p>
-<p>Reimplemented from <a href="./qxmlcontenthandler.html#startPrefixMapping">QXmlContentHandler</a>.</p>
-<h3 class="fn"><a name="toString"></a><a href="./qstring.html">QString</a> QWbXmlToXmlContentHandler::toString () const</h3>
+<p>Reimplemented from <a href="qxmlcontenthandler.html#startPrefixMapping">QXmlContentHandler</a>.</p>
+<h3 class="fn"><a name="toString"></a><a href="qstring.html">QString</a> QWbXmlToXmlContentHandler::toString () const</h3>
 <p>Return the final XML string representation.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

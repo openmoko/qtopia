@@ -30,7 +30,7 @@
 </ul>
 <a name="introduction"></a>
 <h2>Introduction</h2>
-<p>The primary purpose of tutorial describes how to write keyboard and touchscreen/mouse input plug-ins for a device. Qtopia Core includes <a href="./qtopiacore-charinput.html">keyboard</a> and <a href="./qtopiacore-pointer.html">mouse</a> handlers for some common devices. The source code for these drivers is located in the <tt>&lt;qt-root-dir&gt;/src/gui/embedded</tt> directory. These handlers may be appropriate for your device. Additional plug-in examples can be found under the <a href="buildsystem/over-device-profiles-1.html">Device Profiles</a> for various devices, see <tt>&lt;qtopia-root-dir&gt;/devices/&lt;device&gt;/src/plugins/qtopiacore</tt>.</p>
+<p>The primary purpose of tutorial describes how to write keyboard and touchscreen/mouse input plug-ins for a device. Qtopia Core includes <a href="qtopiacore-charinput.html">keyboard</a> and <a href="qtopiacore-pointer.html">mouse</a> handlers for some common devices. The source code for these drivers is located in the <tt>&lt;qt-root-dir&gt;/src/gui/embedded</tt> directory. These handlers may be appropriate for your device. Additional plug-in examples can be found under the <a href="buildsystem/over-device-profiles-1.html">Device Profiles</a> for various devices, see <tt>&lt;qtopia-root-dir&gt;/devices/&lt;device&gt;/src/plugins/qtopiacore</tt>.</p>
 <p>This tutorial assumes that you will be using and have set up a <a href="buildsystem/over-device-profiles-1.html">device profile</a> for your device.</p>
 <p>The following directories are of particular interest:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -47,7 +47,7 @@
 <p>The steps taken to implement a new plug-in depend on whether you are implementing a keyboard plug-in or a touchscreen/mouse plug-in. This tutorial provides the steps for both.</p>
 <a name="keyboard"></a>
 <h2>Keyboard</h2>
-<p>To create a keyboard plug-in we need to create two classes. The first class will be a subclass of <a href="./qwskeyboardhandler.html">QWSKeyboardHandler</a> and will implement the actual keyboard handler. The second class will be a subclass of <a href="./qkbddriverplugin.html">QKbdDriverPlugin</a> and links our keyboard handler with the Qtopia Core keyboard input system.</p>
+<p>To create a keyboard plug-in we need to create two classes. The first class will be a subclass of <a href="qwskeyboardhandler.html">QWSKeyboardHandler</a> and will implement the actual keyboard handler. The second class will be a subclass of <a href="qkbddriverplugin.html">QKbdDriverPlugin</a> and links our keyboard handler with the Qtopia Core keyboard input system.</p>
 <p>In this tutorial we will be implementing a keyboard plug-in for the Linux event interface. The full source for this plug-in is available in the <tt>&lt;qtopia-root-dir&gt;/devices/example/src/plugins/qtopiacore/kbddrivers/example</tt> directory. When creating your own keyboard plug-ins your source code should be located in the <tt>&lt;qtopia-root-dir&gt;/devices/&lt;device profile&gt;/src/plugins/qtopiacore/kbddrivers/&lt;driver name&gt;</tt> directory.</p>
 <a name="keyboard-handler"></a>
 <h3>Keyboard Handler</h3>
@@ -68,7 +68,7 @@
         void readKbdData();
     };</pre>
 <p>The implementation consists of the class constructor and destructor and the <tt>readKbdData()</tt> slot.</p>
-<p>The constructor opens the keyboard device, <tt>/dev/input/event0</tt>. A <a href="./qsocketnotifier.html">QSocketNotifier</a> is used to get asynchronous notification on the availability of data from the device. The <tt>readKbdData()</tt> slot is connected to the <a href="./qsocketnotifier.html#activated">QSocketNotifier::activated</a>() signal and will be called whenever data is available to be read from the device.</p>
+<p>The constructor opens the keyboard device, <tt>/dev/input/event0</tt>. A <a href="qsocketnotifier.html">QSocketNotifier</a> is used to get asynchronous notification on the availability of data from the device. The <tt>readKbdData()</tt> slot is connected to the <a href="qsocketnotifier.html#activated">QSocketNotifier::activated</a>() signal and will be called whenever data is available to be read from the device.</p>
 <pre>    ExampleKbdHandler::ExampleKbdHandler(const QString &amp;device)
     {
         qLog(Input) &lt;&lt; &quot;Loaded Example keyboard plugin!&quot;;
@@ -99,7 +99,7 @@
         unsigned short code;
         unsigned int   value;
     };</pre>
-<p>Whenever data is available to be read from the device the <tt>readKbdData()</tt> slot will be invoked by the <a href="./qsocketnotifier.html">QSocketNotifier</a>. <tt>readKbdData()</tt> reads and processes a single packet from the device.</p>
+<p>Whenever data is available to be read from the device the <tt>readKbdData()</tt> slot will be invoked by the <a href="qsocketnotifier.html">QSocketNotifier</a>. <tt>readKbdData()</tt> reads and processes a single packet from the device.</p>
 <pre>    void ExampleKbdHandler::readKbdData()
     {
         ExampleInput event;
@@ -114,7 +114,7 @@
                     &lt;&lt; &quot;code=&quot; &lt;&lt; event.code
                     &lt;&lt; &quot;value=&quot; &lt;&lt; event.value
                     &lt;&lt; ((event.value != 0) ? &quot;(Down)&quot; : &quot;(Up)&quot;);</pre>
-<p>A switch statement is used to convert events into <a href="./qt.html#Key-enum">Qt::Key</a> and Unicode mappings.</p>
+<p>A switch statement is used to convert events into <a href="qt.html#Key-enum">Qt::Key</a> and Unicode mappings.</p>
 <pre>        Qt::KeyboardModifiers modifiers = Qt::NoModifier;
         int unicode = 0xffff;
         int key_code = 0;
@@ -135,7 +135,7 @@
         ...
         }
         if (shift) modifiers |= Qt::ShiftModifier;</pre>
-<p><a href="./qwskeyboardhandler.html#processKeyEvent">QWSKeyboardHandler::processKeyEvent</a>() is called to process the key event.</p>
+<p><a href="qwskeyboardhandler.html#processKeyEvent">QWSKeyboardHandler::processKeyEvent</a>() is called to process the key event.</p>
 <pre>        processKeyEvent(unicode, key_code, modifiers, event.value!=0, false);
     }</pre>
 <a name="keyboard-plug-in"></a>
@@ -159,7 +159,7 @@
         return QStringList() &lt;&lt; &quot;examplekbdhandler&quot;;
     }</pre>
 <p>The create functions are responsible for returning an instance of the keyboard driver. We do this only if the driver parameter matches our key.</p>
-<p>The device parameter is the driver specific options specified in the <a href="./qtopiacore-envvars.html">QWS_KEYBOARD</a> environment variable. For our driver we use this to specify the device name. If no device name is specified the driver defaults to <tt>/dev/input/event0</tt>.</p>
+<p>The device parameter is the driver specific options specified in the <a href="qtopiacore-envvars.html">QWS_KEYBOARD</a> environment variable. For our driver we use this to specify the device name. If no device name is specified the driver defaults to <tt>/dev/input/event0</tt>.</p>
 <pre>    QWSKeyboardHandler* ExampleKbdDriverPlugin::create(const QString&amp; driver,
                                                        const QString&amp; device)
     {
@@ -182,7 +182,7 @@
 <pre>    QTOPIA_EXPORT_QT_PLUGIN(ExampleKbdDriverPlugin)</pre>
 <a name="building-and-testing-the-plug-in"></a>
 <h3>Building and testing the plug-in</h3>
-<p>The <a href="./qmake-manual.html">qmake</a> project file for the plug-in (example.pro):</p>
+<p>The <a href="qmake-manual.html">qmake</a> project file for the plug-in (example.pro):</p>
 <pre>    qtopia_project(embedded qtopia core plugin)
     TARGET = examplekbdhandler
 
@@ -194,14 +194,14 @@
 <pre>    PROJECTS *= plugins/qtopiacore/kbddrivers/example</pre>
 <p>Build and install Qtopia.</p>
 <p><b>Note:</b> When creating a plug-in it is not necessary to rebuild all of Qtopia to enable it. Simply rebuild the plug-in and copy the files to the <tt>image/Qtopia</tt> directory and restart Qtopia.</p>
-<p>Set the <a href="./qtopiacore-envvars.html">QWS_KEYBOARD</a> environment variable</p>
+<p>Set the <a href="qtopiacore-envvars.html">QWS_KEYBOARD</a> environment variable</p>
 <pre>    export QWS_KEYBOARD=examplekbdhandler</pre>
 <p>or if the keyboard device is different from the default, for example <tt>/dev/input/event1</tt>:</p>
 <pre>    export QWS_KEYBOARD=examplekbdhandler:/dev/input/event1</pre>
 <p>Start Qtopia.</p>
 <a name="touchscreen-mouse"></a>
 <h2>Touchscreen/Mouse</h2>
-<p>To create a touchscreen/mouse plug-in we need to create two classes. The first class will be a subclass of <a href="./qwscalibratedmousehandler.html">QWSCalibratedMouseHandler</a> and will implement the actual touchscreen handler. The second class will be a subclass of <a href="./qmousedriverplugin.html">QMouseDriverPlugin</a> and links our touchscreen handler with the Qtopia Core mouse input system.</p>
+<p>To create a touchscreen/mouse plug-in we need to create two classes. The first class will be a subclass of <a href="qwscalibratedmousehandler.html">QWSCalibratedMouseHandler</a> and will implement the actual touchscreen handler. The second class will be a subclass of <a href="qmousedriverplugin.html">QMouseDriverPlugin</a> and links our touchscreen handler with the Qtopia Core mouse input system.</p>
 <p>In this tutorial we will be implementing a mouse plug-in for the Linux event interface. The full source for this plug-in is available in the <tt>&lt;qtopia-root-dir/devices/example/src/plugins/qtopiacore/mousedrivers/example</tt> directory. When creating your own mouse plug-ins your source code should be located in the <tt>&lt;qtopia-root-dir&gt;/devices/&lt;device profile&gt;/src/plugins/qtopiacore/mousedrivers/&lt;driver name&gt;</tt> directory.</p>
 <p>As touchscreen drivers may output noisy samples, we will be implementing basic filtering of the input data in our handler.</p>
 <a name="mouse-handler"></a>
@@ -233,7 +233,7 @@
     private Q_SLOTS:
         void readMouseData();
     };</pre>
-<p>The constructor opens the mouse device, <tt>/dev/input/event1</tt>. A <a href="./qsocketnotifier.html">QSocketNotifier</a> is used to get asynchronous notification on the availability of data from the device. The <tt>readMouseData()</tt> slot is connected tot he <a href="./qsocketnotifier.html#activated">QSocketNotifier::activated</a>() signal and will be called whenever data is available to be read from the device.</p>
+<p>The constructor opens the mouse device, <tt>/dev/input/event1</tt>. A <a href="qsocketnotifier.html">QSocketNotifier</a> is used to get asynchronous notification on the availability of data from the device. The <tt>readMouseData()</tt> slot is connected tot he <a href="qsocketnotifier.html#activated">QSocketNotifier::activated</a>() signal and will be called whenever data is available to be read from the device.</p>
 <pre>    ExampleMouseHandler::ExampleMouseHandler(const QString &amp;device)
         : nX(0), nY(0), min_x(INT_MAX), min_y(INT_MAX), mouseIdx(0)
     {
@@ -256,7 +256,7 @@
         if (mouseFd &gt;= 0)
             ::close(mouseFd);
     }</pre>
-<p>The <tt>suspend()</tt> and <tt>resume()</tt> functions are called to stop and start the flow of mouse events to the system. We just enable and disable notifications from <a href="./qsocketnotifier.html">QSocketNotifier</a>.</p>
+<p>The <tt>suspend()</tt> and <tt>resume()</tt> functions are called to stop and start the flow of mouse events to the system. We just enable and disable notifications from <a href="qsocketnotifier.html">QSocketNotifier</a>.</p>
 <pre>    void ExampleMouseHandler::suspend()
     {
         m_notify-&gt;setEnabled( false );
@@ -274,7 +274,7 @@
         unsigned short code;
         unsigned int   value;
     };</pre>
-<p>Whenever data is available to be read from the device the <tt>readMouseData()</tt> slot will be invoked by the <a href="./qsocketnotifier.html">QSocketNotifier</a>. <tt>readMouseData()</tt> reads and processes all available mouse events.</p>
+<p>Whenever data is available to be read from the device the <tt>readMouseData()</tt> slot will be invoked by the <a href="qsocketnotifier.html">QSocketNotifier</a>. <tt>readMouseData()</tt> reads and processes all available mouse events.</p>
 <pre>    void ExampleMouseHandler::readMouseData()
     {
         if (!qt_screen)
@@ -294,11 +294,11 @@
                 uchar *mb = mouseBuf+idx;
                 data = (ExampleInput*)mb;
                 if (data-&gt;code == 0) {
-                    <span class="comment">//</span> x value
+                    <span class="comment">// x value</span>
                     sx[nX] = data-&gt;value;
                     nX++;
                 } else if (data-&gt;code == 1) {
-                    <span class="comment">//</span> y value
+                    <span class="comment">// y value</span>
                     sy[nY] = data-&gt;value;
                     nY++;
                 }</pre>
@@ -350,7 +350,7 @@
                 }</pre>
 <p>Emit <tt>mouseChanged()</tt> signal when the stylus is removed from the screen.</p>
 <pre>                if ((data-&gt;code == 24) &amp;&amp; (data-&gt;value == 0)) {
-                    <span class="comment">//</span> Removed pen from screen
+                    <span class="comment">// Removed pen from screen</span>
                     qLog(Input) &lt;&lt; &quot;Mouse Up  :x=&quot; &lt;&lt; oldmouse.x() &lt;&lt; &quot;,y=&quot; &lt;&lt; oldmouse.y();
                     emit mouseChanged(oldmouse, 0);
                     nX = 0;
@@ -386,7 +386,7 @@
         return QStringList() &lt;&lt; &quot;examplemousehandler&quot;;
     }</pre>
 <p>The create functions are responsible for returning an instance of the mouse driver. We do this only if the driver parameter matches our key.</p>
-<p>The device parameter is the driver specific options specified in the <a href="./qtopiacore-envvars.html">QWS_MOUSE_PROTO</a> environment variable. For our driver we use this to specify the device name. If no device name is specified the driver defaults to <tt>/dev/input/event1</tt>.</p>
+<p>The device parameter is the driver specific options specified in the <a href="qtopiacore-envvars.html">QWS_MOUSE_PROTO</a> environment variable. For our driver we use this to specify the device name. If no device name is specified the driver defaults to <tt>/dev/input/event1</tt>.</p>
 <pre>    QWSMouseHandler* ExampleMouseDriverPlugin::create(const QString&amp; driver, const QString&amp; device)
     {
         if ( driver.toLower() == &quot;examplemousehandler&quot; ) {
@@ -408,7 +408,7 @@
 <pre>    QTOPIA_EXPORT_QT_PLUGIN(ExampleMouseDriverPlugin)</pre>
 <a name="building-and-testing-the-plug-in"></a>
 <h3>Building and testing the plug-in</h3>
-<p>The <a href="./qmake-manual.html">qmake</a> project file for the plug-in (example.pro):</p>
+<p>The <a href="qmake-manual.html">qmake</a> project file for the plug-in (example.pro):</p>
 <pre>    qtopia_project(embedded qtopia core plugin)
     TARGET = examplemousehandler
 
@@ -420,14 +420,14 @@
 <pre>    PROJECTS *= plugins/qtopiacore/mousedrivers/example</pre>
 <p>Build and install Qtopia.</p>
 <p><b>Note:</b> When creating a plug-in it is not necessary to rebuild all of Qtopia to enable it. Simply rebuild the plug-in and copy the files to the <tt>image/Qtopia</tt> directory and restart Qtopia.</p>
-<p>Set the <a href="./qtopiacore-envvars.html">QWS_MOUSE_PROTO</a> environment variable</p>
+<p>Set the <a href="qtopiacore-envvars.html">QWS_MOUSE_PROTO</a> environment variable</p>
 <pre>    export QWS_MOUSE_PROTO=examplemousehandler</pre>
 <p>or if the mouse device is different from the default, for example <tt>/dev/input/event2</tt>:</p>
 <pre>    export QWS_MOUSE_PROTO=examplemousehandler:/dev/input/event2</pre>
 <a name="creating-a-custom-screen-driver"></a>
 <h2>Creating a Custom Screen Driver</h2>
-<p>For some hardware there is a need to make minor changes to how the screen is written to the device. One such example is where there needs to be an ioctl sent to the framebuffer device after each frame update. To see how one might create a <a href="./qscreendriverplugin.html">QScreenDriverPlugin</a> plugin to do that, see <tt>src/plugins/qtopiacore/gfxdrivers/example/</tt> and modify the <tt>ExampleScreen::exposeRegion</tt> function to send the ioctl required.</p>
-<p>To make use of this created screen driver plugin set <a href="./qtopiacore-envvars.html">QWS_DISPLAY</a>, for example:</p>
+<p>For some hardware there is a need to make minor changes to how the screen is written to the device. One such example is where there needs to be an ioctl sent to the framebuffer device after each frame update. To see how one might create a <a href="qscreendriverplugin.html">QScreenDriverPlugin</a> plugin to do that, see <tt>src/plugins/qtopiacore/gfxdrivers/example/</tt> and modify the <tt>ExampleScreen::exposeRegion</tt> function to send the ioctl required.</p>
+<p>To make use of this created screen driver plugin set <a href="qtopiacore-envvars.html">QWS_DISPLAY</a>, for example:</p>
 <pre>        export QWS_DISPLAY=examplescreen</pre>
 <a name="creating-network-scripts"></a>
 <h2>Creating network scripts</h2>

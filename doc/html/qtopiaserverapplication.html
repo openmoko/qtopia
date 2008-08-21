@@ -31,9 +31,9 @@
 </ul>
 <ul>
 <li><div class="fn"/>13 public functions inherited from <a href="qtopiaapplication.html#public-functions">QtopiaApplication</a></li>
-<li><div class="fn"/>13 public functions inherited from <a href="./qapplication.html#public-functions">QApplication</a></li>
-<li><div class="fn"/>4 public functions inherited from <a href="./qcoreapplication.html#public-functions">QCoreApplication</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>13 public functions inherited from <a href="qapplication.html#public-functions">QApplication</a></li>
+<li><div class="fn"/>4 public functions inherited from <a href="qcoreapplication.html#public-functions">QCoreApplication</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -41,9 +41,9 @@
 <li><div class="fn"/>void <b><a href="qtopiaserverapplication.html#shutdown">shutdown</a></b> ( QtopiaServerApplication::ShutdownType <i>type</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>3 public slots inherited from <a href="./qapplication.html#public-slots">QApplication</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qcoreapplication.html#public-slots">QCoreApplication</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>3 public slots inherited from <a href="qapplication.html#public-slots">QApplication</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qcoreapplication.html#public-slots">QCoreApplication</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -52,9 +52,9 @@
 </ul>
 <ul>
 <li><div class="fn"/>9 signals inherited from <a href="qtopiaapplication.html#signals">QtopiaApplication</a></li>
-<li><div class="fn"/>4 signals inherited from <a href="./qapplication.html#signals">QApplication</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qcoreapplication.html#signals">QCoreApplication</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>4 signals inherited from <a href="qapplication.html#signals">QApplication</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qcoreapplication.html#signals">QCoreApplication</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -72,9 +72,9 @@
 </ul>
 <ul>
 <li><div class="fn"/>16 static public members inherited from <a href="qtopiaapplication.html#static-public-members">QtopiaApplication</a></li>
-<li><div class="fn"/>71 static public members inherited from <a href="./qapplication.html#static-public-members">QApplication</a></li>
-<li><div class="fn"/>35 static public members inherited from <a href="./qcoreapplication.html#static-public-members">QCoreApplication</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>71 static public members inherited from <a href="qapplication.html#static-public-members">QApplication</a></li>
+<li><div class="fn"/>35 static public members inherited from <a href="qcoreapplication.html#static-public-members">QCoreApplication</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 </ul>
 <a name="related-non-members"></a>
 <h3>Related Non-Members</h3>
@@ -98,12 +98,12 @@
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>11 properties inherited from <a href="./qapplication.html#properties">QApplication</a></li>
-<li><div class="fn"/>3 properties inherited from <a href="./qcoreapplication.html#properties">QCoreApplication</a></li>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>11 properties inherited from <a href="qapplication.html#properties">QApplication</a></li>
+<li><div class="fn"/>3 properties inherited from <a href="qcoreapplication.html#properties">QCoreApplication</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -176,7 +176,7 @@
 <a name="qtopia-server-widgets"></a>
 <h3>Qtopia Server Widgets</h3>
 <p>There are many cases of Qt widgets being used throughout the Qtopia server that may need to be customized to achieve a desired look and feel. For example, while it supports customization through theming, a customer that wants to replace the Qtopia phone dialer with a &quot;rotary dial&quot; style dialer would need to replace the entire dialer widget.</p>
-<p>To simplify the task and minimize the code changes needed to replace visual components of the Qtopia Server, the concept of Qtopia Server Widgets exists. Qtopia Server Widgets splits the definition of a visual component - or server widget - into two parts: the server widget interface (hereafter referred to as the AbstractWidget) and the concrete server widget implementation (ConcreteWidget). While not technically necessary, the AbstractWidget is generally an abstract interface that derives directly from <a href="./qwidget.html">QWidget</a>.</p>
+<p>To simplify the task and minimize the code changes needed to replace visual components of the Qtopia Server, the concept of Qtopia Server Widgets exists. Qtopia Server Widgets splits the definition of a visual component - or server widget - into two parts: the server widget interface (hereafter referred to as the AbstractWidget) and the concrete server widget implementation (ConcreteWidget). While not technically necessary, the AbstractWidget is generally an abstract interface that derives directly from <a href="qwidget.html">QWidget</a>.</p>
 <p>Rather than using the regular <tt>new ClassName(parent, flags)</tt> syntax for instantiating a widget, the special <a href="qtopiaserverapplication.html#qtopiaWidget">qtopiaWidget</a>() template method, parameterized on AbstractWidget, is provided. This method uses the server widgets replacement system to look up the ConcreteWidget instance type it should return.</p>
 <p>Developers use the <a href="qtopiaserverapplication.html#QTOPIA_REPLACE_WIDGET">QTOPIA_REPLACE_WIDGET</a>(), <a href="qtopiaserverapplication.html#QTOPIA_REPLACE_WIDGET_WHEN">QTOPIA_REPLACE_WIDGET_WHEN</a>() and <a href="qtopiaserverapplication.html#QTOPIA_REPLACE_WIDGET_OVERRIDE">QTOPIA_REPLACE_WIDGET_OVERRIDE</a>() macros to provide ConcreteWidget for a particular AbstractWidget. The server widget replacement system then resolves which ConcreteWidget to return by executing the following set of rules in order until a ConcreteWidget is determined.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -206,7 +206,7 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="addAggregateObject"></a>void QtopiaServerApplication::addAggregateObject ( <a href="./qobject.html">QObject</a> * <i>me</i>, <a href="./qobject.html">QObject</a> * <i>them</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="addAggregateObject"></a>void QtopiaServerApplication::addAggregateObject ( <a href="qobject.html">QObject</a> * <i>me</i>, <a href="qobject.html">QObject</a> * <i>them</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Add an object <i>them</i> to <i>me</i> to create an &quot;aggregate&quot; task. Aggregate tasks are designed to work around the limitations in Qt's support for multiple interface inheritance by allowing multiple objects to be &quot;stuck together&quot; to form a single object from the task system's perspective.</p>
 <p>For example, consider the following interfaces:</p>
 <pre>    class ApplicationTypeLauncher : public QObject {};
@@ -238,11 +238,11 @@
 <h3 class="fn"><a name="argv"></a>char ** QtopiaServerApplication::argv ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the argv reference passed to <a href="qtopiaserverapplication.html#startup">startup</a>().</p>
 <h3 class="fn"><a name="installQWSEventFilter"></a>void QtopiaServerApplication::installQWSEventFilter ( <a href="qtopiaserverapplication-qwseventfilter.html">QWSEventFilter</a> * <i>filter</i> )</h3>
-<p>Install the <i>filter</i> for QWS events. Installing an event filter is equivalent to deriving from <a href="qtopiaapplication.html">QtopiaApplication</a> directly and overriding the <a href="./qapplication.html#qwsEventFilter">QtopiaApplication::qwsEventFilter</a>() method.</p>
+<p>Install the <i>filter</i> for QWS events. Installing an event filter is equivalent to deriving from <a href="qtopiaapplication.html">QtopiaApplication</a> directly and overriding the <a href="qapplication.html#qwsEventFilter">QtopiaApplication::qwsEventFilter</a>() method.</p>
 <p>Multiple QWS event filters may be installed simultaneously. In this case, each event filter is queried sequentially in the order it was installed. If any filter filters the event, subsequent filters will not be called.</p>
 <h3 class="fn"><a name="instance"></a>QtopiaServerApplication * QtopiaServerApplication::instance ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Return the instantiated <a href="qtopiaserverapplication.html">QtopiaServerApplication</a> instance. An instance of the class <b>must</b> have been constructed prior to calling this method.</p>
-<h3 class="fn"><a name="qtopiaTask"></a><a href="./qobject.html">QObject</a> * QtopiaServerApplication::qtopiaTask ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>taskName</i>, bool <i>onlyRunning</i> = false )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="qtopiaTask"></a><a href="qobject.html">QObject</a> * QtopiaServerApplication::qtopiaTask ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>taskName</i>, bool <i>onlyRunning</i> = false )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Return the task with name <i>taskName</i>. If <i>onlyRunning</i> is true, the task will be returned only if it has already been instantiated, otherwise it will be instantiated and returned.</p>
 <h3 class="fn"><a name="removeQWSEventFilter"></a>void QtopiaServerApplication::removeQWSEventFilter ( <a href="qtopiaserverapplication-qwseventfilter.html">QWSEventFilter</a> * <i>filter</i> )</h3>
 <p>Remove all instances of <i>filter</i> from the list of event filters. This method should be called when an event filter is destroyed. No automatic cleanup is performed.</p>
@@ -253,48 +253,48 @@
 <p>Generally a UI will be connected to the shutdownRequested() signal to ask the user what they want to do. This UI should then invoke the <a href="qtopiaserverapplication.html#shutdown">shutdown</a>() method to perform the appropriate action.</p>
 <h3 class="fn"><a name="shutdownType"></a><a href="qtopiaserverapplication.html#ShutdownType-enum">ShutdownType</a> QtopiaServerApplication::shutdownType ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the type of shutdown previously requested by calling <a href="qtopiaserverapplication.html#shutdown">shutdown</a>(), or <a href="qtopiaserverapplication.html#ShutdownType-enum">NoShutdown</a> if no shutdown has been requested.</p>
-<h3 class="fn"><a name="startup"></a>bool QtopiaServerApplication::startup ( int &amp; <i>argc</i>, char ** <i>argv</i>, const <a href="./qlist.html">QList</a>&lt;<a href="./qbytearray.html">QByteArray</a>&gt; &amp; <i>startupGroups</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="startup"></a>bool QtopiaServerApplication::startup ( int &amp; <i>argc</i>, char ** <i>argv</i>, const <a href="qlist.html">QList</a>&lt;<a href="qbytearray.html">QByteArray</a>&gt; &amp; <i>startupGroups</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Launches server tasks. This method is used to start the Qtopia server and should never be called from other code. Returns true on success, false on failure.</p>
 <p><i>argc</i> and <i>argv</i> should be the values passed to the main() function. <i>startupGroups</i> contains a list of Task groups to start.</p>
-<h3 class="fn"><a name="taskConfigFile"></a><a href="./qstring.html">QString</a> QtopiaServerApplication::taskConfigFile ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="taskConfigFile"></a><a href="qstring.html">QString</a> QtopiaServerApplication::taskConfigFile ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the task system's configuration file.</p>
-<h3 class="fn"><a name="taskValueSpaceObject"></a><a href="./qbytearray.html">QByteArray</a> QtopiaServerApplication::taskValueSpaceObject ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>taskName</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="taskValueSpaceObject"></a><a href="qbytearray.html">QByteArray</a> QtopiaServerApplication::taskValueSpaceObject ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>taskName</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the path to an object in the value space that the task <i>taskName</i> can use to store status information. Will return a null byte array if the value space has not been initialized. This method is for task implementors only.</p>
-<h3 class="fn"><a name="taskValueSpaceSetAttribute"></a>bool QtopiaServerApplication::taskValueSpaceSetAttribute ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>taskName</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>attribute</i>, const <a href="./qvariant.html">QVariant</a> &amp; <i>value</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="taskValueSpaceSetAttribute"></a>bool QtopiaServerApplication::taskValueSpaceSetAttribute ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>taskName</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>attribute</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>value</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Sets a value space <i>attribute</i> for task <i>taskName</i> to <i>value</i>. This is a convenience method to simplify the usage of the value space for a task. For more complex usage, tasks should use the <a href="qtopiaserverapplication.html#taskValueSpaceObject">taskValueSpaceObject</a>() to request a path, and manually create a <a href="qvaluespaceobject.html">QValueSpaceObject</a> for their own use. Returns true upon success; otherwise returns false.</p>
 <p>The value remains in the value space until the task is unloaded.</p>
 <hr />
 <h2>Related Non-Members</h2>
 <h3 class="fn"><a name="qtopiaTask"></a>T * qtopiaTask ( bool <i>onlyActive</i> = false )</h3>
 <p>Return a task instance that supports the T interface. If <i>onlyActive</i> is true the system will only select from tasks that are already active. Otherwise, if needed, the system will instantiate tasks to satisfy the request.</p>
-<h3 class="fn"><a name="qtopiaTasks"></a><a href="./qlist.html">QList</a>&lt;T *&gt; qtopiaTasks ( bool <i>onlyActive</i> = false )</h3>
+<h3 class="fn"><a name="qtopiaTasks"></a><a href="qlist.html">QList</a>&lt;T *&gt; qtopiaTasks ( bool <i>onlyActive</i> = false )</h3>
 <p>Returns all task instances that support the T interface. The instances are in the intended instantiation order. If <i>onlyActive</i> is true the system will only select from tasks that are already active. Otherwise, if needed, the system will instantiate tasks to satisfy the request.</p>
-<h3 class="fn"><a name="qtopiaWidget"></a>T * qtopiaWidget ( <a href="./qwidget.html">QWidget</a> * <i>parent</i>, <a href="./qt.html#WFlags-typedef">Qt::WFlags</a> <i>flags</i> )</h3>
+<h3 class="fn"><a name="qtopiaWidget"></a>T * qtopiaWidget ( <a href="qwidget.html">QWidget</a> * <i>parent</i>, <a href="qt.html#WFlags-typedef">Qt::WFlags</a> <i>flags</i> )</h3>
 <p>Returns a concrete implementation of T, with the specified <i>parent</i> and <i>flags</i>. Concrete implementations are provided with the <a href="qtopiaserverapplication.html#QTOPIA_REPLACE_WIDGET">QTOPIA_REPLACE_WIDGET</a>(), <a href="qtopiaserverapplication.html#QTOPIA_REPLACE_WIDGET_WHEN">QTOPIA_REPLACE_WIDGET_WHEN</a>() and <a href="qtopiaserverapplication.html#QTOPIA_REPLACE_WIDGET_OVERRIDE">QTOPIA_REPLACE_WIDGET_OVERRIDE</a>() macros and selected as described in the <a href="qtopiaserverapplication.html#qtopia-server-widgets">Qtopia Server Widgets</a> overview.</p>
 <hr />
 <h2>Macro Documentation</h2>
 <h3 class="fn"><a name="QTOPIA_DEMAND_TASK"></a>QTOPIA_DEMAND_TASK (  <i>TaskName</i>,  <i>Object</i> )</h3>
-<p>Mark the <i>Object</i> as task <i>TaskName</i>. Only <a href="./qobject.html">QObject</a> derived types may be tasks. QTOPIA_DEMAND_TASK() differs from <a href="qtopiaserverapplication.html#QTOPIA_TASK">QTOPIA_TASK</a>() in that tasks installed using this macro are automatically marked as &quot;demand&quot; tasks, unless specifically overridden in the <tt>Tasks.cfg</tt> file. That is, tasks installed like this will only be instantiated on request, not during server startup.</p>
+<p>Mark the <i>Object</i> as task <i>TaskName</i>. Only <a href="qobject.html">QObject</a> derived types may be tasks. QTOPIA_DEMAND_TASK() differs from <a href="qtopiaserverapplication.html#QTOPIA_TASK">QTOPIA_TASK</a>() in that tasks installed using this macro are automatically marked as &quot;demand&quot; tasks, unless specifically overridden in the <tt>Tasks.cfg</tt> file. That is, tasks installed like this will only be instantiated on request, not during server startup.</p>
 <p>As the QTOPIA_DEMAND_TASK() macro defines symbols, it should appear only in the implementation file of a task, and not in the header file.</p>
 <h3 class="fn"><a name="QTOPIA_REPLACE_WIDGET"></a>QTOPIA_REPLACE_WIDGET (  <i>AbstractWidget</i>,  <i>ConcreteWidget</i> )</h3>
 <p>Mark <i>ConcreteWidget</i> as a replacement for <i>AbstractWidget</i>. While <i>AbstractWidget</i> does not actually have to be abstract, it is generally an interface that <i>ConcreteWidget</i> implements. This macro should appear as part of the definition of <i>ConcreteWidget</i>.</p>
 <p>For example,</p>
-<pre><span class="comment">    //</span> wheelbrowserscreen.h
+<pre><span class="comment">    // wheelbrowserscreen.h</span>
     class WheelBrowserScreen : public QAbstractBrowserScreen
     {
-        <span class="comment">//</span> ...
+        <span class="comment">// ...</span>
     };
 
-<span class="comment">    //</span> wheelbrowserscreen.cpp
+<span class="comment">    // wheelbrowserscreen.cpp</span>
     QTOPIA_REPLACE_WIDGET(QAbstractBrowserScreen, WheelBrowserScreen);</pre>
 <h3 class="fn"><a name="QTOPIA_REPLACE_WIDGET_OVERRIDE"></a>QTOPIA_REPLACE_WIDGET_OVERRIDE (  <i>AbstractWidget</i>,  <i>ConcreteWidget</i> )</h3>
 <p>Set <i>ConcreteWidget</i> as the <b>static</b> replacement for <i>AbstractWidget</i>.</p>
 <p>While as efficient as possible, use of the widget replacement system instead of explicitly instantiating concrete classes does introduce some indirection costs. For shipping software where this flexibility is not necessary, QTOPIA_REPLACE_WIDGET_OVERRIDE() can be used to force the selection of a specified <i>ConcreteWidget</i>. This eliminates the cost of the widget replacement system for the particular <i>AbstractWidget</i> by bypassing the replacement system. The macro should appear inline with the <i>AbstractWidget</i> declaration, and must have visibility of the <i>ConcreteWidget</i>'s declaration.</p>
 <p>For example,</p>
-<pre><span class="comment">    //</span> qabstractbrowserscreen.h
+<pre><span class="comment">    // qabstractbrowserscreen.h</span>
     class QAbstractBrowserScreen : public QWidget
     {
-        <span class="comment">//</span> ...
+        <span class="comment">// ...</span>
     };
 
     #include &quot;wheelbrowserscreen.h&quot;
@@ -303,32 +303,32 @@
 <p>Mark <i>ConcreteWidget</i> as a replacement for <i>AbstractWidget</i>. While <i>AbstractWidget</i> does not actually have to be abstract, it is generally an interface that <i>ConcreteWidget</i> implements. This macro should appear as part of the definition of <i>ConcreteWidget</i>.</p>
 <p>Unless explicitly specified in the <tt>Trolltech/ServerWidgets</tt> file, a widget specified in this fashion if <i>Feature</i> is currently provided by Qtopia, as returned by the <a href="qtopiafeatures.html#hasFeature">QtopiaFeatures::hasFeature</a>() method.</p>
 <p>For example,</p>
-<pre><span class="comment">    //</span> touchscreendialer.h
+<pre><span class="comment">    // touchscreendialer.h</span>
     class TouchscreenDialerScreen : public QAbstractDialerScreen
     {
-        <span class="comment">//</span> ...
+        <span class="comment">// ...</span>
     };
 
-<span class="comment">    //</span> touchscreendialer.cpp
+<span class="comment">    // touchscreendialer.cpp</span>
     QTOPIA_REPLACE_WIDGET_WHEN(QAbstractDialerScreen, TouchscreenDialerScreen, Touchscreen);</pre>
 <h3 class="fn"><a name="QTOPIA_STATIC_TASK"></a>QTOPIA_STATIC_TASK (  <i>TaskName</i>,  <i>Function</i> )</h3>
 <p>Install a functional task. A functional task is one that does not consist of an instantiable object, but is, instead, a simple function. Static tasks can obviously not provide interfaces.</p>
 <p><i>TaskName</i> should be set to the name of the task, and <i>Function</i> to the static function to call to run the task.</p>
 <p>As the QTOPIA_STATIC_TASK() macro defines symbols, it should appear only in the implementation file of a task, and not in the header file.</p>
 <h3 class="fn"><a name="QTOPIA_TASK"></a>QTOPIA_TASK (  <i>TaskName</i>,  <i>Object</i> )</h3>
-<p>Mark the <i>Object</i> as task <i>TaskName</i>. Only <a href="./qobject.html">QObject</a> derived types may be tasks.</p>
+<p>Mark the <i>Object</i> as task <i>TaskName</i>. Only <a href="qobject.html">QObject</a> derived types may be tasks.</p>
 <p>As the QTOPIA_TASK() macro defines symbols, it should appear only in the implementation file of a task, and not in the header file.</p>
 <h3 class="fn"><a name="QTOPIA_TASK_INTERFACE"></a>QTOPIA_TASK_INTERFACE (  <i>ClassName</i> )</h3>
-<p>Mark the specified <a href="./qobject.html">QObject</a>-derived <i>ClassName</i> as a task interface. Any class interface that is required to support the qtopiaTask&lt;&gt;() or qtopiaTasks&lt;&gt;() request mechanism must be marked as a task interface.</p>
+<p>Mark the specified <a href="qobject.html">QObject</a>-derived <i>ClassName</i> as a task interface. Any class interface that is required to support the qtopiaTask&lt;&gt;() or qtopiaTasks&lt;&gt;() request mechanism must be marked as a task interface.</p>
 <p>The QTOPIA_TASK_INTERFACE() macro must be used in a header file, immediately following the interface's declaration.</p>
-<p>If the interface is not a <a href="./qobject.html">QObject</a> type, but rather a Qt Q_INTERFACE() style interface, use the <a href="qtopiaserverapplication.html#QTOPIA_TASK_QINTERFACE">QTOPIA_TASK_QINTERFACE</a>() macro instead.</p>
+<p>If the interface is not a <a href="qobject.html">QObject</a> type, but rather a Qt Q_INTERFACE() style interface, use the <a href="qtopiaserverapplication.html#QTOPIA_TASK_QINTERFACE">QTOPIA_TASK_QINTERFACE</a>() macro instead.</p>
 <h3 class="fn"><a name="QTOPIA_TASK_PROVIDES"></a>QTOPIA_TASK_PROVIDES (  <i>TaskName</i>,  <i>Interface</i> )</h3>
 <p>Indicate that the task <i>TaskName</i> provides <i>Interface</i>, as previously declared by QTOPIA_TASK_INTERFACE. A task can provide more than one interface.</p>
 <p>For a task to support the interface, it must either inherit directly from the interface or aggregate itself with an object that does during its construction. The <a href="qtopiaserverapplication.html#addAggregateObject">QtopiaServerApplication::addAggregateObject</a>() method can be used to aggregate a task with another object.</p>
 <h3 class="fn"><a name="QTOPIA_TASK_QINTERFACE"></a>QTOPIA_TASK_QINTERFACE (  <i>InterfaceName</i> )</h3>
 <p>Mark the specified <i>InterfaceName</i> as a task interface. Any class interface that is required to support the qtopiaTask&lt;&gt;() or qtopiaTasks&lt;&gt;() request mechanism must be marked as a task interface.</p>
 <p>The QTOPIA_TASK_!INTERFACE() macro must be used in a header file, immediately following the interface's declaration.</p>
-<p><i>InterfaceName</i> should be a Qt Q_INTERFACE style interface. If you want to use a <a href="./qobject.html">QObject</a> derived type as an interface, use the <a href="qtopiaserverapplication.html#QTOPIA_TASK_INTERFACE">QTOPIA_TASK_INTERFACE</a>() macro instead.</p>
+<p><i>InterfaceName</i> should be a Qt Q_INTERFACE style interface. If you want to use a <a href="qobject.html">QObject</a> derived type as an interface, use the <a href="qtopiaserverapplication.html#QTOPIA_TASK_INTERFACE">QTOPIA_TASK_INTERFACE</a>() macro instead.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>

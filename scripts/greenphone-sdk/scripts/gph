@@ -77,7 +77,7 @@ gp_source()
     ARCH="greenphone" 
   fi
 
-  source /opt/Qtopia/SDK/scripts/devel-$ARCH.sh
+  . /opt/Qtopia/SDK/scripts/devel-$ARCH.sh
 }
 
 #---------------------------------------------------------------
@@ -89,7 +89,7 @@ gp_config()
   echo
   #Set ARCH to new option passed in and source environment
   ARCH=$CONFIG
-  source /opt/Qtopia/SDK/scripts/devel-$ARCH.sh
+  . /opt/Qtopia/SDK/scripts/devel-$ARCH.sh
 
   if [ "$ARCH" = "x86" ] ; then
     #This just makes output align in quiet mode
@@ -206,7 +206,7 @@ gp_install()
 			sudo cp -f pkg/$PKG $QPKWEBSERVER
 			sudo chmod 644 $QPKWEBSERVER/$PKG
 	done;
-  sudo /opt/Qtopia/SDK/scripts/mkPackages $QPKWEBSERVER --descriptors http://$HOSTIP/
+  sudo /opt/Qtopia/SDK/scripts/mkPackages $QPKWEBSERVER --descriptors http://$HOSTIP
 
   if [ "$ARCH" = "x86" ] ;then
     PATH=/opt/Qtopia/SDK/$QPEVER/x86/image/bin:$PATH

@@ -106,11 +106,11 @@
 <p>This grabs the environment variable to a local variable. It then asserts that it was set and includes one of the common files. If the file cannot be found it asserts.</p>
 <a name="custom-h-custom-cpp"></a>
 <h3>custom.h/custom.cpp</h3>
-<p>Since these files are tied to a device it is useful to have them in the device profile. If these files are not present configure will look in the traditional location, <tt>&lt;source&gt;/src/libraries/qtopia/custom-&lt;xplatform&gt;.(h|cpp)</tt>. See <a href="../custom-h.html">&lt;custom.h&gt;</a> for more information about these files.</p>
+<p>Since these files are tied to a device it is useful to have them in the device profile. If these files are not present configure will look in the traditional location, <tt>&lt;source&gt;/src/libraries/qtopia/custom-&lt;xplatform&gt;.(h|cpp)</tt>. See <a href="custom-h.html">&lt;custom.h&gt;</a> for more information about these files.</p>
 <p>For reference implementations of these files, the existing files found in <tt>&lt;source&gt;/devices/&lt;device&gt;/custom.*</tt> and <tt>&lt;source&gt;/src/libraries/qtopiabase/custom-&lt;xplatform&gt;.*</tt> may be of assistance.</p>
 <a name="defaultbuttons-conf"></a>
 <h3>defaultbuttons.conf</h3>
-<p>Every device needs a suitable defaultbuttons.conf. Use of this file only happens if -defaultbuttons is not passed to configure. See <a href="../syscust-keypadbutt.html">Keypad Button Behavior</a> for a description of defaultbuttons.conf.</p>
+<p>Every device needs a suitable defaultbuttons.conf. Use of this file only happens if -defaultbuttons is not passed to configure. See <a href="syscust-keypadbutt.html">Keypad Button Behavior</a> for a description of defaultbuttons.conf.</p>
 <a name="config-pri"></a>
 <h3>config.pri</h3>
 <p>Configuration tweaks can be done here. This is read just after the configure-generated config.pri, before each .pro file is read.</p>
@@ -132,7 +132,7 @@
 <p>This file overrides the use of qconfig-qpe.h&#x2e; It can define all it's own things or it can <tt>#include &quot;qconfig-qpe.h&quot;</tt> and override settings (watch out for dependencies if you do this though!).</p>
 <a name="storage-conf"></a>
 <h3>Storage.conf</h3>
-<p>See <a href="../syscust-docstorage.html">Document Storage</a> for information about Storage.conf.</p>
+<p>See <a href="syscust-docstorage.html">Document Storage</a> for information about Storage.conf.</p>
 <a name="help"></a>
 <h3>help</h3>
 <p>This directory is used to provide device-specific help file overrides. It can only be used to override files in <tt>&lt;source&gt;/help</tt>.</p>
@@ -155,7 +155,7 @@
 <li>etc/sxe_qtopia/sxe_qtopia</li>
 <li>etc/sxe_qtopia/sxe_sandbox</li>
 <li>etc/sxe_qtopia/sxe_unsandbox</li>
-<li>etc/<a href="../sxe-pkgmgr-profiles.html">sxe_domains</a>/*</li>
+<li>etc/<a href="sxe-pkgmgr-profiles.html">sxe_domains</a>/*</li>
 </ul>
 <p>The server will use <tt>server/scomisc.cpp</tt> instead of it's own <tt>bluetooth/scomisc/scomisc.cpp</tt>. It will also include <tt>server/*.ui</tt>, <tt>server/*.h</tt> and <tt>server/*.cpp</tt>.</p>
 <p>The camera will disable it's built-in drivers if <tt>camera/*.cpp</tt> exists. It also pulls in <tt>camera/*.h</tt>.</p>

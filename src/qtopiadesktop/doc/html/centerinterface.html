@@ -38,15 +38,15 @@
 <p>Return the current device plugin that Qtopia Sync Agent is connected to.</p>
 <h3 class="fn"><a name="devicePlugins"></a>const <a href="qdplugindefs-h.html#QDDevPluginList-typedef">QDDevPluginList</a> CenterInterface::devicePlugins ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Return the available device plugins.</p>
-<h3 class="fn"><a name="getPlugin"></a><a href="qdplugin.html">QDPlugin</a> * CenterInterface::getPlugin ( const <a href="../qstring.html">QString</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="getPlugin"></a><a href="qdplugin.html">QDPlugin</a> * CenterInterface::getPlugin ( const <a href="qstring.html">QString</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Return a plugin instance based on it's <i>id</i>. If the requested plugin does not exist returns 0.</p>
 <h3 class="fn"><a name="linkPlugins"></a>const <a href="qdplugindefs-h.html#QDLinkPluginList-typedef">QDLinkPluginList</a> CenterInterface::linkPlugins ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Return the available link plugins.</p>
-<h3 class="fn"><a name="syncObject"></a><a href="../qobject.html">QObject</a> * CenterInterface::syncObject ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="syncObject"></a><a href="qobject.html">QObject</a> * CenterInterface::syncObject ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns an object that exists for as long as the sync does.</p>
 <p>The object is deleted after QDLinkPluginList::finishSync() is called but before control returns from the sync process.</p>
 <p>Resources shared by multiple sync objects can be assigned this object as a parent so that they are cleaned up when the sync ends.</p>
-<p>See also <a href="../qobject.html#destroyed">QObject::destroyed</a>().</p>
+<p>See also <a href="qobject.html#destroyed">QObject::destroyed</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 Trolltech</td>

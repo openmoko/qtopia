@@ -29,8 +29,8 @@
     #include &quot;messageviewer.h&quot;
     #include &lt;qtopiaapplication.h&gt;
 
-<span class="comment">    //</span> Comment out this line to use a manual main() function.
-<span class="comment">    //</span> Ensure you also remove CONFIG+=qtopia_main from application.pro if you do this.
+<span class="comment">    // Comment out this line to use a manual main() function.</span>
+<span class="comment">    // Ensure you also remove CONFIG+=qtopia_main from application.pro if you do this.</span>
     #define USE_THE_MAIN_MACROS
 
     #ifdef USE_THE_MAIN_MACROS
@@ -47,18 +47,18 @@
     #define MAIN_FUNC main
     #endif
 
-<span class="comment">    //</span> This is the storage for the SXE key that uniquely identified this applicaiton.
-<span class="comment">    //</span> make will fail without this!
+<span class="comment">    // This is the storage for the SXE key that uniquely identified this applicaiton.</span>
+<span class="comment">    // make will fail without this</span>!
     QSXE_APP_KEY
 
     int MAIN_FUNC( int argc, char **argv )
     {
-        <span class="comment">//</span> This is required to load the SXE key into memory
+        <span class="comment">// This is required to load the SXE key into memory</span>
         QSXE_SET_APP_KEY(argv[0]);
 
         QtopiaApplication a( argc, argv );
 
-        <span class="comment">//</span> Set the preferred document system connection type
+        <span class="comment">// Set the preferred document system connection type</span>
         QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION();
 
         MessageViewer *mw = new MessageViewer();

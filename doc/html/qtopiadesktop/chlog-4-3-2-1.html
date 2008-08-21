@@ -31,11 +31,15 @@
 <li>Fixed a Synchronization bug causing Outlook appointments with no alarm to be only partially transferred to Qtopia.</li>
 <li>Correctly parse long items so that notes are transferred in full.</li>
 <li>The clock does not need to be set the same on the client and desktop.</li>
+<li>All day events can now be synchronized correctly between Qtopia and Outlook. This also resolves the problem of events starting and ending at midnight.</li>
+<li>Outlook items that are not known to Qtopia Sync Agent but have a last modified timestamp that is before the sync timestamp are now transferred.</li>
+<li>Outlook events have their recurrence cleared before being updating to prevent a crash.</li>
+<li>Birthdays and anniversaries are no longer duplicated in the calendar.</li>
 </ul>
 <a name="known-issues"></a>
 <h3>Known issues</h3>
 <ul>
-<li>Appointments starting and ending at midnight are mis-reported as all day events.</li>
+<li>None</li>
 </ul>
 <p>See also <a href="changes.html">What's New?</a>.</p>
 <p /><address><hr /><div align="center">

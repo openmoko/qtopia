@@ -93,7 +93,7 @@ QMediaVideoControlServer::~QMediaVideoControlServer()
 
 void QMediaVideoControlServer::setRenderTarget(QWidget* renderTarget)
 {
-    setRenderTarget(renderTarget == 0 ? -1 : renderTarget->winId());
+    setRenderTarget(renderTarget == 0 ? -1 : int(renderTarget->winId()));
 }
 
 /*!

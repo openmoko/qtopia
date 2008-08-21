@@ -39,7 +39,7 @@
 <h3>Streaming Media</h3>
 <p>Qtopia supports streaming media through the Helix Integration. To stream media, send a setDocument() message to the MediaPlayer application, with the URL of the media to be streamed.</p>
 <pre>    QtopiaServiceRequest r(&quot;mediaplayer&quot;, &quot;setDocument(QString)&quot;);
-    r &lt;&lt; QString(&quot;rtsp:<span class="comment">//</span>host/path&quot;);
+    r &lt;&lt; QString(&quot;rtsp:<span class="comment">//host/path&quot;);</span>
     r.send();</pre>
 <p><b>Note:</b> The Helix engine is published under a number of licenses, ranging from Research and Development to commercial. For further information please refer to: <a href="https://helixcommunity.org">Helix Community</a>.</p>
 <p /><address><hr /><div align="center">

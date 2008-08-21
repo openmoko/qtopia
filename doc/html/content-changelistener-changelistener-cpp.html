@@ -54,16 +54,16 @@
     {
         setScaledContents( true );
 
-        <span class="comment">//</span> Construct context menu, available to the user via Qtopia's soft menu bar.
+        <span class="comment">// Construct context menu, available to the user via Qtopia's soft menu bar.</span>
          QSoftMenuBar::menuFor( this );
 
-         <span class="comment">//</span> Populate the list of images to display.
+         <span class="comment">// Populate the list of images to display.</span>
         imageFiles.append( QFileInfo( &quot;:image/Bubble.png&quot; ) );
         imageFiles.append( QFileInfo( &quot;:image/Clouds.png&quot; ) );
         imageFiles.append( QFileInfo( &quot;:image/Splatters.png&quot; ) );
         imageFiles.append( QFileInfo( &quot;:image/Water.png&quot; ) );
 
-        <span class="comment">//</span> Ensure the 'Change Listener' category exists in the the 'Examples' scope.
+        <span class="comment">// Ensure the 'Change Listener' category exists in the the 'Examples' scope.</span>
         QCategoryManager categoryManager( &quot;Examples&quot; );
 
         categoryId = categoryManager.idForLabel( &quot;Change Listener&quot; );
@@ -71,9 +71,9 @@
         if( categoryId.isEmpty() )
             categoryId = categoryManager.add( &quot;Change Listener&quot; );
 
-        <span class="comment">//</span> Create a content set and listen to it's changed() signal.  Unistall any content in the
-        <span class="comment">//</span> Change Listener category that may have been left over from an earlier run that was abnormally
-        <span class="comment">//</span> terminated.
+        <span class="comment">// Create a content set and listen to it's changed() signal.  Unistall any content in the</span>
+        <span class="comment">// Change Listener category that may have been left over from an earlier run that was abnormally</span>
+        <span class="comment">// terminated.</span>
         QContentSet *contentSet = new QContentSet( QContentFilter::category( categoryId ), this );
 
         connect( contentSet, SIGNAL(changed(QContentIdList,QContent::ChangeType)),
@@ -83,7 +83,7 @@
             QContent::uninstall( contentSet-&gt;contentId( i ) );
         }
 
-        <span class="comment">//</span> Construct a timer to time out at 3 second intervals.
+        <span class="comment">// Construct a timer to time out at 3 second intervals.</span>
         QTimer *timer = new QTimer( this );
 
         connect( timer, SIGNAL(timeout()), this, SLOT(timeout()) );
@@ -108,9 +108,9 @@
     {
         QFileInfo fileInfo = imageFiles.at( nextIndex );
 
-        <span class="comment">//</span> At the least, we want to set the QContent's name and mime type. We'll also
-        <span class="comment">//</span> give the object a category, so that all picture objects created by this application
-        <span class="comment">//</span> can be grouped together and the QContent::Data role so it doesn't appear in document menus.
+        <span class="comment">// At the least, we want to set the QContent's name and mime type. We'll also</span>
+        <span class="comment">// give the object a category, so that all picture objects created by this application</span>
+        <span class="comment">// can be grouped together and the QContent::Data role so it doesn't appear in document menus.</span>
         QContent image;
         image.setName( fileInfo.baseName() );
         image.setFile( fileInfo.absoluteFilePath() );
@@ -139,25 +139,25 @@
         if ( changeType == QContent::Added ) {
             foreach ( QContentId id, idList ) {
                 QContent content( id );
-                <span class="comment">//</span> Check that we've got a valid content object and that its category is the same
-                <span class="comment">//</span> as that which was set in the generate() method.
+                <span class="comment">// Check that we've got a valid content object and that its category is the same</span>
+                <span class="comment">// as that which was set in the generate() method.</span>
                 if ( content.isValid() &amp;&amp; content.categories().contains( categoryId ) ) {
                     setWindowTitle( content.name() );
-                    <span class="comment">//</span> Open the content in read-only mode.
+                    <span class="comment">// Open the content in read-only mode.</span>
                     QIODevice *ioDevice = content.open( QIODevice::ReadOnly );
                     if ( ioDevice ) {
-                        <span class="comment">//</span> Read the image and display it.
+                        <span class="comment">// Read the image and display it.</span>
                         QImage image;
                         image.load( ioDevice,&quot;PNG&quot; );
                         setPixmap( QPixmap::fromImage( image ) );
 
-                        <span class="comment">//</span> Close and delete the I/O device.
+                        <span class="comment">// Close and delete the I/O device.</span>
                         ioDevice-&gt;close();
                         delete ioDevice;
                     }
 
-                    <span class="comment">//</span> For the purposes of this example, we're only interested in one (and there
-                    <span class="comment">//</span> should only be one).
+                    <span class="comment">// For the purposes of this example, we're only interested in one (and there</span>
+                    <span class="comment">// should only be one).</span>
                     break;
                 }
             }

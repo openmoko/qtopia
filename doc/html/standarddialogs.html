@@ -35,16 +35,16 @@
 <hr />
 <h2>Function Documentation</h2>
 <h3 class="fn"><a name="disableDefaultCrashDialog"></a>void StandardDialogs::disableDefaultCrashDialog ()</h3>
-<p>The default crash handler dialog appears whenever an unfiltered application crash occurs. An application crash may be filtered by the <a href="applicationterminationhandler.html">ApplicationTerminationHandler</a> interface. The default implementation is a standard <a href="./qmessagebox.html">QMessageBox</a> alerting the user to the name of the crashed application.</p>
+<p>The default crash handler dialog appears whenever an unfiltered application crash occurs. An application crash may be filtered by the <a href="applicationterminationhandler.html">ApplicationTerminationHandler</a> interface. The default implementation is a standard <a href="qmessagebox.html">QMessageBox</a> alerting the user to the name of the crashed application.</p>
 <p>The dialog appears whenever the <a href="applicationlauncher.html#applicationTerminated">ApplicationLauncher::applicationTerminated</a>() signal is emitted with the filtered parameter set to false.</p>
 <p>Invoking this method will disable the default crash dialog.</p>
 <h3 class="fn"><a name="disablePowerAlertDialog"></a>void StandardDialogs::disablePowerAlertDialog ()</h3>
-<p>The power alert dialog appears whenever the device battery runs low. The default implementation is a standard <a href="./qmessagebox.html">QMessageBox</a> and an audible sound alerting the user to the low power situation.</p>
+<p>The power alert dialog appears whenever the device battery runs low. The default implementation is a standard <a href="qmessagebox.html">QMessageBox</a> and an audible sound alerting the user to the low power situation.</p>
 <p>The dialog appears when the battery level is very low or critical. The dialog will be redisplayed every five minutes, when very low, or every minute, when critical, until the power state improves or the device is placed on a charger. The default implementation uses the <a href="qpowerstatus.html">QPowerStatus</a> to determine this information.</p>
 <p>The period at which the power alert dialog redisplays can be configured by setting the <tt>PowerAlertDialog/DisplayPeriod</tt> and <tt>PowerAlertDialog/CriticalDisplayPeriod</tt> values to the period in seconds in the <tt>Trolltech/HardwareAccessories</tt> configuration file. If not specified the default values of 300 seconds (5 minutes) and 60 seconds are used for <tt>PowerAlertDialog/DisplayPeriod</tt> and <tt>PowerAlertDialog/CriticalDisplayPeriod</tt> respectively. Setting <tt>PowerAlertDialog/DisplayPeriod</tt> to 0 disables the power alert dialog.</p>
 <p>Invoking this method will disable the power alert dialog.</p>
 <h3 class="fn"><a name="disablePreloadCrashDialog"></a>void StandardDialogs::disablePreloadCrashDialog ()</h3>
-<p>The preload crash dialog appears whenever a preloaded application crashes. The default implementation is a standard <a href="./qmessagebox.html">QMessageBox</a> alerting the user to the name of the crashed application, and informing them that it has been removed from the preload list.</p>
+<p>The preload crash dialog appears whenever a preloaded application crashes. The default implementation is a standard <a href="qmessagebox.html">QMessageBox</a> alerting the user to the name of the crashed application, and informing them that it has been removed from the preload list.</p>
 <p>The dialog appears whenever the <a href="startupapplications.html#preloadCrashed">StartupApplications::preloadCrashed</a>() signal is emitted.</p>
 <p>Invoking this method will diable the preload crash dialog.</p>
 <h3 class="fn"><a name="disableShutdownDialog"></a>void StandardDialogs::disableShutdownDialog ()</h3>
@@ -52,7 +52,7 @@
 <p>The shutdown dialog appears in response to the <a href="qtopiaserverapplication.html#shutdownRequested">QtopiaServerApplication::shutdownRequested</a>() signal. Once the user has selected their desired option, the dialog invokes the <a href="qtopiaserverapplication.html#shutdown">QtopiaServerApplication::shutdown</a>() method and closes.</p>
 <p>Invoking this method will disable the shutdown dialog.</p>
 <h3 class="fn"><a name="disableTerminationHandlerDialog"></a>void StandardDialogs::disableTerminationHandlerDialog ()</h3>
-<p>Applications can install custom termination messages using the <a href="qterminationhandler.html">QTerminationHandler</a> class. The default implementation displays a standard <a href="./qmessagebox.html">QMessageBox</a> alerting th euser to the termination and the specified reason.</p>
+<p>Applications can install custom termination messages using the <a href="qterminationhandler.html">QTerminationHandler</a> class. The default implementation displays a standard <a href="qmessagebox.html">QMessageBox</a> alerting th euser to the termination and the specified reason.</p>
 <p>The dialog appears whenever the <a href="qterminationhandlerprovider.html">QTerminationHandlerProvider</a> class emits the <a href="qterminationhandlerprovider.html#applicationTerminated">QTerminationHandlerProvider::applicationTerminated</a>() signal.</p>
 <p>Invoking this method will disable the default termination handler dialog.</p>
 <h3 class="fn"><a name="disableVolumeDialog"></a>void StandardDialogs::disableVolumeDialog ()</h3>

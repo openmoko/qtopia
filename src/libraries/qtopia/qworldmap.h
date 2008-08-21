@@ -59,6 +59,8 @@ public:
     bool isReadOnly() const;
     QTimeZone zone() const;
 
+    virtual bool event(QEvent *event);
+
 public slots:
     void selectNewZone();
     void toggleZoom();

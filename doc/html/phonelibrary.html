@@ -135,7 +135,7 @@
 <p>The example VoIP implementation that comes with Qtopia, <tt>sipagent</tt>, demonstrates how to write such a service and integrate it with the rest of Qtopia.</p>
 <p>Because telephony services do not normally have a user interface associated with them, it is necessary to register the daemon as a running task to prevent Qtopia from telling it to exit soon after startup. You should place a line of code in your startup logic such as the following:</p>
 <pre>    QtopiaApplication::instance()-&gt;registerRunningTask( &quot;Telephony&quot;, obj );</pre>
-<p>where <tt>obj</tt> is a <a href="./qobject.html">QObject</a> in your application that will stay in existence while the telephony service is running (the <a href="qtelephonyservice.html">QTelephonyService</a> instance may be a good candidate).</p>
+<p>where <tt>obj</tt> is a <a href="qobject.html">QObject</a> in your application that will stay in existence while the telephony service is running (the <a href="qtelephonyservice.html">QTelephonyService</a> instance may be a good candidate).</p>
 <a name="modem-services"></a>
 <h2>Modem Services</h2>
 <p>AT-based GSM <tt>modem</tt> telephony services have special support in Qtopia. Most of the time, Qtopia's implementation will be sufficient, but there are slight variations in GSM modems that may need additional support.</p>

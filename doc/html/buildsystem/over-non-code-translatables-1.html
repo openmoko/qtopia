@@ -17,7 +17,7 @@
 <ul>
 <li>zone.tab<p>This is a special case used to extract city names from the timezone database</p>
 </li>
-<li><a href="../qsettings.html">QSettings</a><p>Many of Qtopia's configuration files deal with translated values. These config files are in the <a href="../qsettings.html">QSettings</a> format.</p>
+<li><a href="qsettings.html">QSettings</a><p>Many of Qtopia's configuration files deal with translated values. These config files are in the <a href="qsettings.html">QSettings</a> format.</p>
 </li>
 </ul>
 <p>A translatable settings file looks like this:</p>
@@ -36,7 +36,7 @@
 <pre>    File=QtopiaApplications</pre>
 <p>This line instructs the build system to store the translations in a file called <tt>QtopiaApplications.ts</tt>. The files in Qtopia are generally stored in a few global .ts files but third party applications will need to use their own files.</p>
 <pre>    Context=Calendar</pre>
-<p>This line specifies the context to use for the translations. When <a href="../qobject.html#tr">QObject::tr</a>() is called an implicit context is used but <a href="../qcoreapplication.html#translate">QApplication::translate</a>() allows the context to be set. This must be somewhat unique so that translators do not have to deal with unrelated strings when translating content.</p>
+<p>This line specifies the context to use for the translations. When <a href="qobject.html#tr">QObject::tr</a>() is called an implicit context is used but <a href="qcoreapplication.html#translate">QApplication::translate</a>() allows the context to be set. This must be somewhat unique so that translators do not have to deal with unrelated strings when translating content.</p>
 <pre>    Comment[Desktop Entry/Name]=Use soft hyphen (char U00AD) to indicate hyphenation</pre>
 <p>This line will put a comment in the .ts file for translators. In this case, the value <tt>Name</tt> in the <tt>[Desktop Entry]</tt> section is given a comment.</p>
 <pre>    Name[]=Cal\xad\x65n\xad\x64\x61r</pre>

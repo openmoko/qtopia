@@ -48,15 +48,26 @@ public slots:
 
     void adjustMicrophoneVolume(int volume);
 
+    void changeAmpModeVS();
+
+    void setAmp(bool);
+    void set1973Amp(bool);
+
+    void toggleAmpMode();
+
 private slots:
     void registerService();
+    void setCallDomain();
     void initVolumes();
-
 private:
     void adjustVolume(int leftChannel, int rightChannel, AdjustType);
 
+    int m_leftChannelVolume;
+    int m_rightChannelVolume;
+
     QtopiaIpcAdaptor *adaptor;
     QValueSpaceObject *vsoVolumeObject;
+
 
 protected:
     snd_mixer_t *mixerFd;

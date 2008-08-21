@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QModemServicePlugin Class Reference</h1>
 <p>The QModemServicePlugin class defines a base class for implementing vendor-specific modem plug-ins. <a href="#details">More...</a></p>
-<pre>    #include &lt;QModemServicePlugin&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a> and <a href="qmodemserviceplugininterface.html">QModemServicePluginInterface</a>.</p>
+<pre>    #include &lt;QModemServicePlugin&gt;</pre><p>Inherits <a href="qobject.html">QObject</a> and <a href="qmodemserviceplugininterface.html">QModemServicePluginInterface</a>.</p>
 <ul>
 <li><a href="qmodemserviceplugin-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -27,18 +27,18 @@
 <li><div class="fn"/>virtual bool <b><a href="qmodemserviceplugin.html#supports">supports</a></b> ( const QString &amp; <i>manufacturer</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 <li><div class="fn"/>2 public functions inherited from <a href="qmodemserviceplugininterface.html#public-functions">QModemServicePluginInterface</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -49,18 +49,18 @@
 <p>See also <a href="qmodemserviceplugininterface.html">QModemServicePluginInterface</a> and <a href="qmodemservice.html">QModemService</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QModemServicePlugin"></a>QModemServicePlugin::QModemServicePlugin ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QModemServicePlugin"></a>QModemServicePlugin::QModemServicePlugin ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Create a vendor-specific modem plug-in instance and attach it to <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QModemServicePlugin"></a>QModemServicePlugin::~QModemServicePlugin ()</h3>
 <p>Destruct a vendor-specific modem plug-in instance.</p>
-<h3 class="fn"><a name="create"></a><a href="qmodemservice.html">QModemService</a> * QModemServicePlugin::create ( const <a href="./qstring.html">QString</a> &amp; <i>service</i>, <a href="qserialiodevicemultiplexer.html">QSerialIODeviceMultiplexer</a> * <i>mux</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="create"></a><a href="qmodemservice.html">QModemService</a> * QModemServicePlugin::create ( const <a href="qstring.html">QString</a> &amp; <i>service</i>, <a href="qserialiodevicemultiplexer.html">QSerialIODeviceMultiplexer</a> * <i>mux</i>, <a href="qobject.html">QObject</a> * <i>parent</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Create a vendor-specific modem service handler called <i>service</i> and attach it to <i>parent</i>. The <i>mux</i> parameter specifies the serial device multiplexer to use for accessing the modem.</p>
 <p>The default implementation returns null.</p>
 <p>Reimplemented from <a href="qmodemserviceplugininterface.html#create">QModemServicePluginInterface</a>.</p>
 <p>See also <a href="qmodemserviceplugin.html#supports">supports</a>().</p>
-<h3 class="fn"><a name="keys"></a><a href="./qstringlist.html">QStringList</a> QModemServicePlugin::keys () const</h3>
+<h3 class="fn"><a name="keys"></a><a href="qstringlist.html">QStringList</a> QModemServicePlugin::keys () const</h3>
 <p>Returns the list of keys for this plug-in.</p>
-<h3 class="fn"><a name="supports"></a>bool QModemServicePlugin::supports ( const <a href="./qstring.html">QString</a> &amp; <i>manufacturer</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<h3 class="fn"><a name="supports"></a>bool QModemServicePlugin::supports ( const <a href="qstring.html">QString</a> &amp; <i>manufacturer</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns true if this plug-in supports the given <i>manufacturer</i> string. The caller obtains the string by issuing <tt>AT+CGMI</tt> to the modem. If the plug-in supports <i>manufacturer</i>, the caller will then call <a href="qmodemserviceplugin.html#create">create</a>(). This function will typically contain code such as the following:</p>
 <pre>    return manufacturer.contains( &quot;VENDORID&quot; );</pre>
 <p>where <tt>VENDORID</tt> is a vendor-specific identifier that will appear in the output of <tt>AT+CGMI</tt> only for that vendor's modems.</p>

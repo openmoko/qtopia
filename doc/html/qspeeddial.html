@@ -37,29 +37,29 @@
 <p>See also <a href="qspeeddiallist.html">QSpeedDialList</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="addWithDialog"></a><a href="./qstring.html">QString</a> QSpeedDial::addWithDialog ( const <a href="./qstring.html">QString</a> &amp; <i>label</i>, const <a href="./qstring.html">QString</a> &amp; <i>icon</i>, const <a href="qtopiaservicerequest.html">QtopiaServiceRequest</a> &amp; <i>action</i>, <a href="./qwidget.html">QWidget</a> * <i>parent</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="addWithDialog"></a><a href="qstring.html">QString</a> QSpeedDial::addWithDialog ( const <a href="qstring.html">QString</a> &amp; <i>label</i>, const <a href="qstring.html">QString</a> &amp; <i>icon</i>, const <a href="qtopiaservicerequest.html">QtopiaServiceRequest</a> &amp; <i>action</i>, <a href="qwidget.html">QWidget</a> * <i>parent</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Provides a dialog that allows the user to select an input for action <i>action</i>, using <i>label</i> and <i>icon</i> as the display label and icon respectively. The dialog has the given <i>parent</i>.</p>
 <p>Returns the input that the user selected, and assigns the input to the action.</p>
 <p>If the user cancels the dialog, a null string is returned.</p>
 <p>See also <a href="qspeeddial.html#set">set</a>().</p>
-<h3 class="fn"><a name="assignedInputs"></a><a href="./qlist.html">QList</a>&lt;<a href="./qstring.html">QString</a>&gt; QSpeedDial::assignedInputs ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="assignedInputs"></a><a href="qlist.html">QList</a>&lt;<a href="qstring.html">QString</a>&gt; QSpeedDial::assignedInputs ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a list of the currently assigned Speed Dial inputs.</p>
 <p>This function was introduced in Qtopia 4.3.</p>
 <p>See also <a href="qspeeddial.html#possibleInputs">possibleInputs</a>().</p>
-<h3 class="fn"><a name="find"></a><a href="qtopiaservicedescription.html">QtopiaServiceDescription</a> * QSpeedDial::find ( const <a href="./qstring.html">QString</a> &amp; <i>input</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="find"></a><a href="qtopiaservicedescription.html">QtopiaServiceDescription</a> * QSpeedDial::find ( const <a href="qstring.html">QString</a> &amp; <i>input</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a <a href="qtopiaservicedescription.html">QtopiaServiceDescription</a> for the given Speed Dial <i>input</i>.</p>
-<h3 class="fn"><a name="possibleInputs"></a><a href="./qlist.html">QList</a>&lt;<a href="./qstring.html">QString</a>&gt; QSpeedDial::possibleInputs ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="possibleInputs"></a><a href="qlist.html">QList</a>&lt;<a href="qstring.html">QString</a>&gt; QSpeedDial::possibleInputs ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a list of possible Speed Dial inputs, some of which may be assigned already.</p>
 <p>This function was introduced in Qtopia 4.3.</p>
 <p>See also <a href="qspeeddial.html#assignedInputs">assignedInputs</a>().</p>
-<h3 class="fn"><a name="remove"></a>void QSpeedDial::remove ( const <a href="./qstring.html">QString</a> &amp; <i>input</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="remove"></a>void QSpeedDial::remove ( const <a href="qstring.html">QString</a> &amp; <i>input</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Removes the action currently associated with the given Speed Dial <i>input</i>.</p>
-<h3 class="fn"><a name="selectWithDialog"></a><a href="./qstring.html">QString</a> QSpeedDial::selectWithDialog ( <a href="./qwidget.html">QWidget</a> * <i>parent</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="selectWithDialog"></a><a href="qstring.html">QString</a> QSpeedDial::selectWithDialog ( <a href="qwidget.html">QWidget</a> * <i>parent</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Provides a dialog that allows the user to select an existing speed dial item. The dialog has the given <i>parent</i>.</p>
 <p>This dialog may be useful for example to provide a list of &quot;Favourites&quot;.</p>
 <p>Returns the speed dial selected.</p>
 <p>If the user cancels the dialog, a null pointer is returned.</p>
-<h3 class="fn"><a name="set"></a>void QSpeedDial::set ( const <a href="./qstring.html">QString</a> &amp; <i>input</i>, const <a href="qtopiaservicedescription.html">QtopiaServiceDescription</a> &amp; <i>r</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="set"></a>void QSpeedDial::set ( const <a href="qstring.html">QString</a> &amp; <i>input</i>, const <a href="qtopiaservicedescription.html">QtopiaServiceDescription</a> &amp; <i>r</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Assigns the given <a href="qtopiaservicedescription.html">QtopiaServiceDescription</a>, <i>r</i>, as the action to perform when the given Speed Dial <i>input</i>, is detected.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
