@@ -145,6 +145,9 @@ private slots:
 private:
     Ficgta01VibrateAccessory* m_vibratorService;
     Ficgta01PhoneBook* m_phoneBook;
+
+    bool m_phoneBookIsReady;
+    bool m_smsIsReady;
 };
 
 class  Ficgta01VibrateAccessory : public QVibrateAccessoryProvider

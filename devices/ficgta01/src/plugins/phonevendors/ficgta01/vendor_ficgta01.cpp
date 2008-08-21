@@ -411,6 +411,8 @@ Ficgta01ModemService::Ficgta01ModemService
     : QModemService( service, mux, parent )
     , m_vibratorService( 0 )
     , m_phoneBook( 0 )
+    , m_phoneBookIsReady( false )
+    , m_smsIsReady( false )
 {
     connect( this, SIGNAL(resetModem()), this, SLOT(reset()) );
 
@@ -650,15 +652,30 @@ void Ficgta01ModemService::cstatNotification( const QString& msg )
     // SMS
     // RDY (Ready when both PHB and SMS have reported they are ready)
     QString entity = msg.mid(8, 3);
+    uint status = msg.mid(13).toInt();
 
-    if (entity == "RDY" ) {
-        uint status = msg.mid(13).toInt();
-        if (status == 1) {
-            post("simready"); 
+    // Something is not ready, ignore
+    if (status != 1)
+        return;
 
-            if (m_phoneBook)
-                m_phoneBook->sendPhoneBooksReady();
-        }
+    // We are already ready, ignore
+    if (m_phoneBookIsReady && m_smsIsReady)
+        return;
+
+    if (entity == "PHB")
+        m_phoneBookIsReady = true;
+    else if (entity == "SMS")
+        m_smsIsReady = true;
+    else if (entity == "RDY") {
+        m_smsIsReady = true;
+        m_phoneBookIsReady = true;
+    }
+
+    if  (m_smsIsReady && m_phoneBookIsReady) {
+        post("simready"); 
+
+        if (m_phoneBook)
+            m_phoneBook->sendPhoneBooksReady();
     }
 }
 
