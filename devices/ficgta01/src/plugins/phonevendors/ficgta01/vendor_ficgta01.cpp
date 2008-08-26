@@ -654,21 +654,17 @@ void Ficgta01ModemService::cstatNotification( const QString& msg )
     QString entity = msg.mid(8, 3);
     uint status = msg.mid(13).toInt();
 
-    // Something is not ready, ignore
-    if (status != 1)
-        return;
-
     // We are already ready, ignore
     if (m_phoneBookIsReady && m_smsIsReady)
         return;
 
     if (entity == "PHB")
-        m_phoneBookIsReady = true;
+        m_phoneBookIsReady = status;
     else if (entity == "SMS")
-        m_smsIsReady = true;
+        m_smsIsReady = status;
     else if (entity == "RDY") {
-        m_smsIsReady = true;
-        m_phoneBookIsReady = true;
+        m_smsIsReady = status;
+        m_phoneBookIsReady = status;
     }
 
     if  (m_smsIsReady && m_phoneBookIsReady) {
