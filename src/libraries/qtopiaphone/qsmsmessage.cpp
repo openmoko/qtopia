@@ -1872,9 +1872,7 @@ QString QPDUMessage::address(bool SCAddress)
 
         skipOctet();
         if ( !SCAddress ) {
-            if ( at != SMS_Address_AlphaNumeric ) {
-                len = len / 2 + (len % 2);
-            }
+            len = len / 2 + (len % 2);
         } else {
             len--;
         }
