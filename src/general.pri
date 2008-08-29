@@ -54,8 +54,8 @@ PROJECTS*=\
     3rdparty/libraries/sqlite
 
 # Public unit tests for Openmoko
-PROJECTS*=\
-    tests/pdutest
+#PROJECTS*=\
+#    tests/pdutest
 
 build_qtopia_sqlite:PROJECTS*=\
     3rdparty/applications/sqlite
