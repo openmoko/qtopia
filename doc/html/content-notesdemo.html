@@ -20,7 +20,7 @@
 <li><a href="content-notesdemo-main-cpp.html">content/notesdemo/main.cpp</a></li>
 <li><a href="content-notesdemo-notesdemo-pro.html">content/notesdemo/notesdemo.pro</a></li>
 </ul>
-<p>The Notes application tutorial shows how to use a <a href="qdocumentselector.html">QDocumentSelector</a> and a <a href="./qtextedit.html">QTextEdit</a> to create a simple text editing application. It also demonstrates using a <a href="./qstackedlayout.html">QStackedLayout</a> to switch between widgets, and using a <a href="qcontent.html">QContent</a> to read and write a user document.</p>
+<p>The Notes application tutorial shows how to use a <a href="qdocumentselector.html">QDocumentSelector</a> and a <a href="qtextedit.html">QTextEdit</a> to create a simple text editing application. It also demonstrates using a <a href="qstackedlayout.html">QStackedLayout</a> to switch between widgets, and using a <a href="qcontent.html">QContent</a> to read and write a user document.</p>
 <p align="center"><img src="images/tut-contentnotesapp.png" /></p><p>The Notes application displays a list of text documents which can be edited starting with a new document selection. When a document is selected the display switches to a text editor with the contents of the document. Exiting the editor will return the application to the documents list, if the editor was not canceled the changes to the document are saved.</p>
 <a name="notesdemo-class-definition"></a>
 <h2>NotesDemo Class Definition</h2>
@@ -46,7 +46,7 @@
         QTextEdit *editor;
         QContent currentDocument;
     };</pre>
-<p>The NotesDemo class inherits from the <a href="./qdialog.html">QDialog</a> class, we inherit from a <a href="./qdialog.html">QDialog</a> instead of a <a href="./qwidget.html">QWidget</a> in this case so we can override the <a href="./qdialog.html#done">QDialog::done</a>() slot and use it to navigate back from the editor to the document selector.</p>
+<p>The NotesDemo class inherits from the <a href="qdialog.html">QDialog</a> class, we inherit from a <a href="qdialog.html">QDialog</a> instead of a <a href="qwidget.html">QWidget</a> in this case so we can override the <a href="qdialog.html#done">QDialog::done</a>() slot and use it to navigate back from the editor to the document selector.</p>
 <p>There are two private slots: <tt>newDocument()</tt> and <tt>openDocument()</tt> which are connected to the document selector and are called when the user makes a selection. We then have some private methods for reading (<tt>readContent()</tt>) and writing (<tt>writeContent()</tt>) the selected documents.</p>
 <a name="notesdemo-class-implementation"></a>
 <h2>NotesDemo Class Implementation</h2>
@@ -65,7 +65,7 @@
                  this, SLOT(newDocument()) );
         connect( documentSelector, SIGNAL(documentSelected(QContent)),
                  this, SLOT(openDocument(QContent)) );</pre>
-<p>Finally we construct the <a href="./qtextedit.html">QTextEdit</a> widget and add both widgets to a new layout. We use a <a href="./qstackedlayout.html">QStackedLayout</a> here so that only one of the two widgets is ever visible at once, the <a href="qdocumentselector.html">QDocumentSelector</a> is added first so it will be visible initially.</p>
+<p>Finally we construct the <a href="qtextedit.html">QTextEdit</a> widget and add both widgets to a new layout. We use a <a href="qstackedlayout.html">QStackedLayout</a> here so that only one of the two widgets is ever visible at once, the <a href="qdocumentselector.html">QDocumentSelector</a> is added first so it will be visible initially.</p>
 <pre>        editor = new QTextEdit;
 
         layout = new QStackedLayout( this );
@@ -73,7 +73,7 @@
         layout-&gt;addWidget( documentSelector );
         layout-&gt;addWidget( editor );
     }</pre>
-<p>The <tt>newDocument()</tt> slot is called when a user chooses to create a new document. We respond to this by creating a new <a href="qcontent.html">QContent</a> with the type <tt>text/plain</tt> and a name based on the current date/time, setting it as the current document and then displaying the <a href="./qtextedit.html">QTextEdit</a>. At this point the <a href="qcontent.html">QContent</a> has just been initialized, we'll wait until the user has edited the document before saving anything to the document system.</p>
+<p>The <tt>newDocument()</tt> slot is called when a user chooses to create a new document. We respond to this by creating a new <a href="qcontent.html">QContent</a> with the type <tt>text/plain</tt> and a name based on the current date/time, setting it as the current document and then displaying the <a href="qtextedit.html">QTextEdit</a>. At this point the <a href="qcontent.html">QContent</a> has just been initialized, we'll wait until the user has edited the document before saving anything to the document system.</p>
 <pre>    void NotesDemo::newDocument()
     {
         currentDocument = QContent();
@@ -83,7 +83,7 @@
 
         layout-&gt;setCurrentWidget( editor );
     }</pre>
-<p>The <tt>openDocument()</tt> slot is called when a user selects an existing document. In this case we set the selected document as the current document and attempt to read the text from it. Only if the read succeeds will we display the <a href="./qtextedit.html">QTextEdit</a> with the document text.</p>
+<p>The <tt>openDocument()</tt> slot is called when a user selects an existing document. In this case we set the selected document as the current document and attempt to read the text from it. Only if the read succeeds will we display the <a href="qtextedit.html">QTextEdit</a> with the document text.</p>
 <pre>    void NotesDemo::openDocument( const QContent &amp;document )
     {
         currentDocument = document;
@@ -92,11 +92,11 @@
             layout-&gt;setCurrentWidget( editor );
         }
     }</pre>
-<p>When the user closes the <a href="./qtextedit.html">QTextEdit</a> we want to go back to the <a href="qdocumentselector.html">QDocumentSelector</a>, saving the changes made if the dialog was accepted. To do this we override the <a href="./qdialog.html#done">QDialog::done</a>() slot.</p>
+<p>When the user closes the <a href="qtextedit.html">QTextEdit</a> we want to go back to the <a href="qdocumentselector.html">QDocumentSelector</a>, saving the changes made if the dialog was accepted. To do this we override the <a href="qdialog.html#done">QDialog::done</a>() slot.</p>
 <pre>    void NotesDemo::done( int result )
     {
         if ( layout-&gt;currentWidget() == editor ) {</pre>
-<p>If the <a href="./qtextedit.html">QTextEdit</a> was accepted attempt to write it's contents to the current document. If the write is successful then we'll commit our changes to the current document to the document system.</p>
+<p>If the <a href="qtextedit.html">QTextEdit</a> was accepted attempt to write it's contents to the current document. If the write is successful then we'll commit our changes to the current document to the document system.</p>
 <pre>            if ( result == QDialog::Accepted ) {
                 if ( !writeContent(editor-&gt;document(), &amp;currentDocument ) ) {
                     qWarning() &lt;&lt; &quot;Writing the content failed&quot;;
@@ -104,16 +104,16 @@
                     qWarning() &lt;&lt; &quot;Committing the new content failed&quot;;
                 }
             }</pre>
-<p>Then saved or not we clear the <a href="./qtextedit.html">QTextEdit</a> and return to the <a href="qdocumentselector.html">QDocumentSelector</a>.</p>
+<p>Then saved or not we clear the <a href="qtextedit.html">QTextEdit</a> and return to the <a href="qdocumentselector.html">QDocumentSelector</a>.</p>
 <pre>            editor-&gt;document()-&gt;clear();
 
             layout-&gt;setCurrentWidget( documentSelector );</pre>
-<p>If the <a href="qdocumentselector.html">QDocumentSelector</a> is the currently visible widget then we want the <a href="./qdialog.html">QDialog</a> to perform it's usual response to the <tt>done()</tt> slot and close.</p>
+<p>If the <a href="qdocumentselector.html">QDocumentSelector</a> is the currently visible widget then we want the <a href="qdialog.html">QDialog</a> to perform it's usual response to the <tt>done()</tt> slot and close.</p>
 <pre>        } else {
             QDialog::done( result );
         }
     }</pre>
-<p>To read the contents of a text document we request a new read only <a href="./qiodevice.html">QIODevice</a> from <a href="qcontent.html#open">QContent::open</a>(), if the document could not be opened a null pointer is returned instead.</p>
+<p>To read the contents of a text document we request a new read only <a href="qiodevice.html">QIODevice</a> from <a href="qcontent.html#open">QContent::open</a>(), if the document could not be opened a null pointer is returned instead.</p>
 <pre>    bool NotesDemo::readContent( QTextDocument *document, QContent *content )
     {
         QIODevice *ioDevice = content-&gt;open( QIODevice::ReadOnly );
@@ -124,13 +124,13 @@
         QByteArray bytes = ioDevice-&gt;readAll();
 
         document-&gt;setPlainText( QString::fromAscii( bytes ) );</pre>
-<p>The caller takes ownership of the <a href="./qiodevice.html">QIODevice</a> returned by <a href="qcontent.html#open">QContent::open</a>() so when we're done we need to close the <a href="./qiodevice.html">QIODevice</a> and delete it.</p>
+<p>The caller takes ownership of the <a href="qiodevice.html">QIODevice</a> returned by <a href="qcontent.html#open">QContent::open</a>() so when we're done we need to close the <a href="qiodevice.html">QIODevice</a> and delete it.</p>
 <pre>        ioDevice-&gt;close();
         delete ioDevice;
 
         return true;
     }</pre>
-<p>We can also write to a document using an <a href="./qiodevice.html">QIODevice</a> returned by <a href="qcontent.html#open">QContent::open</a>(). If the <a href="qcontent.html">QContent</a> does not belong to an existing document but has a valid name and type assigned (as is the case with the current document following a call to <tt>newDocument()</tt>) a new document will be created for the <a href="qcontent.html">QContent</a> when it's opened in write mode.</p>
+<p>We can also write to a document using an <a href="qiodevice.html">QIODevice</a> returned by <a href="qcontent.html#open">QContent::open</a>(). If the <a href="qcontent.html">QContent</a> does not belong to an existing document but has a valid name and type assigned (as is the case with the current document following a call to <tt>newDocument()</tt>) a new document will be created for the <a href="qcontent.html">QContent</a> when it's opened in write mode.</p>
 <pre>    bool NotesDemo::writeContent( QTextDocument *document, QContent *content )
     {
         QIODevice *ioDevice = content-&gt;open( QIODevice::WriteOnly );

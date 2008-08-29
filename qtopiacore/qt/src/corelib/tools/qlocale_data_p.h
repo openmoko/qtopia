@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -247,7 +247,7 @@ static const QLocalePrivate locale_data[] = {
     {      5,   148,    44,   160,    59,    37,    48,    45,   101,   106,   117,    39,     9,   595,   644,   254,   276 }, // Afrikaans/Namibia
     {      6,     2,    44,    46,    59,    37,    48,    45,   101,   134,   143,    45,    53,   737,   787,   335,   366 }, // Albanian/Albania
     {      7,    69,    46,    44,    59,    37,    48,    45,   101,    29,   162,    20,    66,   867,   982,   431,   499 }, // Amharic/Ethiopia
-    {      8,   186,  1643,  1644,    59,  1642,  1632,    45,   101,   192,   201,    20,    78,  1145,  1145,   570,   570 }, // Arabic/SaudiArabia
+    {      8,   186,  1643,  1644,    59,  1642,  1632,    45,   101,   192,   201,    20,    78,  1145,  1145,   668,   570 }, // Arabic/SaudiArabia
     {      8,     3,  1643,  1644,    59,  1642,    48,    45,   101,   192,   201,    20,    78,  1145,  1145,   668,   570 }, // Arabic/Algeria
     {      8,    17,  1643,  1644,    59,  1642,  1632,    45,   101,   192,   201,    20,    78,  1145,  1145,   668,   570 }, // Arabic/Bahrain
     {      8,    64,  1643,  1644,    59,  1642,  1632,    45,   101,   192,   201,    20,    78,  1145,  1145,   668,   570 }, // Arabic/Egypt

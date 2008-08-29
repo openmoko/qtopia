@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -897,7 +897,7 @@ void QMdiSubWindowPrivate::removeBaseWidget()
         return;
 
     Q_Q(QMdiSubWindow);
-    q->removeEventFilter(baseWidget);
+    baseWidget->removeEventFilter(q);
     if (QLayout *layout = q->layout())
         layout->removeWidget(baseWidget);
     if (baseWidget->windowTitle() == q->windowTitle()) {
@@ -1742,7 +1742,7 @@ void QMdiSubWindowPrivate::removeButtonsFromMenuBar()
     ignoreWindowTitleChange = false;
 
     QWidget *topLevelWindow = q->window();
-    q->removeEventFilter(topLevelWindow);
+    topLevelWindow->removeEventFilter(q);
     if (baseWidget && !drawTitleBarWhenMaximized())
         topLevelWindow->setWindowModified(false);
 }

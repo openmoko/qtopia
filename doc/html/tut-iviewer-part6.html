@@ -42,7 +42,7 @@
     }</pre>
 <p>That's should do it.</p>
 <p><i>Note: The application window is by default in maximized state.</i></p>
-<p>Now, fullscreen mode can be enabled by chosing it in the menu. To disable fullscreen mode, the same action has to be selected from the menu, which is hidden by the fullscreen mode. It is not very user-friendly. So a shortcut will be provided to enable/disable the fullscreen mode. This shortcut should be the select key ( <a href="./qt.html#key-enum">Qt::Key_Select</a> ). In order to do that, the keyPressEvent method has to be modified so that it will handle the select key:</p>
+<p>Now, fullscreen mode can be enabled by chosing it in the menu. To disable fullscreen mode, the same action has to be selected from the menu, which is hidden by the fullscreen mode. It is not very user-friendly. So a shortcut will be provided to enable/disable the fullscreen mode. This shortcut should be the select key ( <a href="qt.html#Key-enum">Qt::Key_Select</a> ). In order to do that, the keyPressEvent method has to be modified so that it will handle the select key:</p>
 <pre>    void ImageScreen::keyPressEvent (QKeyEvent *event)
     {
         switch (event-&gt;key()) {

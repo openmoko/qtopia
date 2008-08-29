@@ -27,18 +27,18 @@
 <li><div class="fn"/>void <b><a href="messagesservice.html#viewNewMessages">viewNewMessages</a></b> ( bool <i>userRequest</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>1 protected function inherited from <a href="qtopiaabstractservice.html#protected-functions">QtopiaAbstractService</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -47,10 +47,10 @@
 <p>The <i>Messages</i> service enables applications to request the display of messages of various types.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="composeMessage"></a>void MessagesService::composeMessage ( <a href="qmailmessage.html#MessageType-enum">QMailMessage::MessageType</a> <i>type</i>, QMailAddressList <i>to</i>, <a href="./qstring.html">QString</a> <i>subject</i>, <a href="./qstring.html">QString</a> <i>text</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="composeMessage"></a>void MessagesService::composeMessage ( <a href="qmailmessage.html#MessageType-enum">QMailMessage::MessageType</a> <i>type</i>, QMailAddressList <i>to</i>, <a href="qstring.html">QString</a> <i>subject</i>, <a href="qstring.html">QString</a> <i>text</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Compose a message of type <i>type</i>, with the supplied properties. If <i>type</i> is <tt>QMailMessage::AnyType</tt>, the type will be determined by inspecting the types of the addresses in <i>to</i>. The message will be addressed to each of the recipients in <i>to</i>, the subject will be preset to <i>subject</i>, and the message text will be preset to <i>text</i>.</p>
 <p>This slot corresponds to the QCop service message <tt>Messages::composeMessage(QMailMessage::MessageType, QMailAddressList, QString, QString)</tt>.</p>
-<h3 class="fn"><a name="composeMessage-2"></a>void MessagesService::composeMessage ( <a href="qmailmessage.html#MessageType-enum">QMailMessage::MessageType</a> <i>type</i>, QMailAddressList <i>to</i>, <a href="./qstring.html">QString</a> <i>subject</i>, <a href="./qstring.html">QString</a> <i>text</i>, <a href="qcontentset.html#QContentList-typedef">QContentList</a> <i>attachments</i>, <a href="qmailmessage.html#AttachmentsAction-enum">QMailMessage::AttachmentsAction</a> <i>action</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="composeMessage-2"></a>void MessagesService::composeMessage ( <a href="qmailmessage.html#MessageType-enum">QMailMessage::MessageType</a> <i>type</i>, QMailAddressList <i>to</i>, <a href="qstring.html">QString</a> <i>subject</i>, <a href="qstring.html">QString</a> <i>text</i>, <a href="qcontentset.html#QContentList-typedef">QContentList</a> <i>attachments</i>, <a href="qmailmessage.html#AttachmentsAction-enum">QMailMessage::AttachmentsAction</a> <i>action</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Compose a message of type <i>type</i>, with the supplied properties. If <i>type</i> is <tt>QMailMessage::AnyType</tt>, the type will be determined by inspecting the types of the addresses in <i>to</i>, and by the existence of attachments. The message will be addressed to each of the recipients in <i>to</i>, the message subject will be set to <i>subject</i>, and the message text will be preset to <i>text</i>. All the documents listed in <i>attachments</i> will be added to the message as attachments. If <i>action</i> is <tt>MessagesService::LinkToAttachments</tt>, the attachments will be created as links to the source document; otherwise, the data of the documents will be stored directly in the message parts. If <i>action</i> is <tt>MessagesService::CopyAndDeleteAttachments</tt>, the source document will be deleted after the data is copied.</p>
 <p>This slot corresponds to the QCop service message <tt>Messages::composeMessage(QMailMessage::MessageType, QMailAddressList, QString, QString, QContentList, QMailMessage::AttachmentsAction)</tt>.</p>

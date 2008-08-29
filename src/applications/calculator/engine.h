@@ -108,7 +108,7 @@ private:
     QString currentType,wantedType;
     int braceCount;
 
-    QLabel *memMark,*kMark;
+    QLabel *memMark;
     Data *mem;
     Data *recoveredDStack;
     Instruction *kDesc;

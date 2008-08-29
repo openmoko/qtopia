@@ -72,13 +72,15 @@ QTOPIABASE_EXPORT void qpe_setBrightness(int b)
     qWarning() << "setBrightness" << b <<  qpe_sysBrightnessSteps();
 
     int brightessSteps = qpe_sysBrightnessSteps();
-    // dim(1) or bright (-1) or blank (0)? 
+    if(b > brightessSteps)
+        b = brightessSteps;
+
     if(b == 1) {
+        // dim
         b = brightessSteps / 4;
     } else if (b == -1) {
+        //bright
         b = brightessSteps;
-    } else if(b == 0) {
-    } else if(b == brightessSteps) {
     }
 
     QFile brightness(neo1973BacklightClassFile());

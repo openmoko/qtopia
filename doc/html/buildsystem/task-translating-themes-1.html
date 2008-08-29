@@ -14,12 +14,12 @@
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">Translating Themes<br /><span class="subtitle"></span>
 </h1>
 <p>Translatable themes are processed with theme_lupdate. This script is similar in operation to nct_lupdate but it is specially designed to handle the specific elements of themes.</p>
-<p>A translatable theme configuration file is a <a href="../qsettings.html">QSettings</a>-format file so it matches the other files that nct_lupdate handles.</p>
+<p>A translatable theme configuration file is a <a href="qsettings.html">QSettings</a>-format file so it matches the other files that nct_lupdate handles.</p>
 <p>The .xml files in a theme are parsed for constructs like this:</p>
 <pre>    &lt;text name=&quot;calls&quot; size=&quot;7&quot; rect=&quot;8,44,70x36&quot; color=&quot;HighlightedText&quot; format=&quot;RichText&quot; align=&quot;hcenter&quot; interactive=&quot;yes&quot;&gt;
         &lt;tr&gt;&lt;trtext&gt;%1 missed call(s)&lt;/trtext&gt;&lt;trarg&gt;@/Communications/Calls/MissedCalls&lt;/trarg&gt;&lt;/tr&gt;
     &lt;/text&gt;</pre>
-<p>The important part is the tags between <tt>&lt;tr&gt;</tt> and <tt>&lt;/tr&gt;</tt>. The <tt>&lt;trtext&gt;</tt> tag is used as the translation source. The <tt>&lt;trarg&gt;</tt> part is not translated. It is present so that the positional <tt>%1</tt> can be replaced. It is similar to the <a href="../qstring.html#arg">QString::arg</a>() function.</p>
+<p>The important part is the tags between <tt>&lt;tr&gt;</tt> and <tt>&lt;/tr&gt;</tt>. The <tt>&lt;trtext&gt;</tt> tag is used as the translation source. The <tt>&lt;trarg&gt;</tt> part is not translated. It is present so that the positional <tt>%1</tt> can be replaced. It is similar to the <a href="qstring.html#arg">QString::arg</a>() function.</p>
 <pre>    int count = 2;
     QString string = tr(&quot;%1 missed call(s)&quot;).arg(count);</pre>
 <p>See also <a href="tasks.html">Tasks</a>, <a href="over-internationalization-build-system-1.html">Internationalization (build system)</a>, and <a href="over-non-code-translatables-1.html">Non-code Translatables</a>.</p>

@@ -72,16 +72,16 @@ void Navigator::keyPressEvent( QKeyEvent* e )
     // Record direction and start viewport movement
     switch( e->key() ) {
     case Qt::Key_Right:
-        moveViewportBy( MOVE_STEP, 0 );
+        moveViewportBy(int(MOVE_STEP / reduction_ratio), 0);
         break;
     case Qt::Key_Left:
-        moveViewportBy( -MOVE_STEP, 0 );
+        moveViewportBy(int(-MOVE_STEP / reduction_ratio), 0);
         break;
     case Qt::Key_Up:
-        moveViewportBy( 0, -MOVE_STEP );
+        moveViewportBy(0, int(-MOVE_STEP / reduction_ratio));
         break;
     case Qt::Key_Down:
-        moveViewportBy( 0, MOVE_STEP );
+        moveViewportBy(0, int(MOVE_STEP / reduction_ratio));
         break;
     default:
         // Ignore
@@ -94,12 +94,9 @@ void Navigator::mousePressEvent( QMouseEvent* e )
 {
     // If stylus pressed
     if( e->button() == Qt::LeftButton ) {
-        // If pressed within vieport
-        if( reduced_viewport.contains( e->pos() ) ) {
-            // Record position and allow viewport to be moved
-            mouse_position = e->pos();
-            moving_viewport = true;
-        }
+        // Record position and allow viewport to be moved
+        mouse_position = e->pos();
+        moving_viewport = true;
     }
 }
 
@@ -114,7 +111,7 @@ void Navigator::mouseMoveEvent( QMouseEvent* e )
     // If viewport can be moved and mouse is in space
     if( moving_viewport ) {
         // Calculate displacement and move viewport
-        QPoint delta( e->pos() - mouse_position );
+        QPoint delta(mouse_position - e->pos());
         moveViewportBy( delta.x(), delta.y() );
         mouse_position = e->pos();
     }
@@ -186,10 +183,6 @@ void Navigator::calculateReduced()
 
 void Navigator::moveViewportBy( int dx, int dy )
 {
-    // Scale dx dy up by reversing reduction
-    dx = (int)( dx / reduction_ratio );
-    dy = (int)( dy / reduction_ratio );
-
     // If viewport is wider than space, don't move horizontally
     // Otherwise, restrict dx to within actual space
     if( actual_viewport.width() >= actual_space.width() ) dx = 0;

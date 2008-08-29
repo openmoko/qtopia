@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -600,6 +600,10 @@ void QWizardPrivate::init()
         buttonDefaultTexts.insert(wstyle, texts);
     }
 
+#if !defined(QT_NO_STYLE_WINDOWSVISTA)
+    vistaHelper = new QVistaHelper(q);
+#endif
+
     // create these buttons right away; create the other buttons as necessary
     ensureButton(QWizard::BackButton);
     ensureButton(QWizard::NextButton);
@@ -626,7 +630,6 @@ void QWizardPrivate::init()
                                                            fallbackProperties[i].changedSignal));
 
 #if !defined(QT_NO_STYLE_WINDOWSVISTA)
-    vistaHelper = new QVistaHelper(q);
     wasCompositionEnabled = vistaHelper->isCompositionEnabled();
     vistaHelper->backButton()->move(
         0, vistaHelper->topOffset() - qMin(vistaHelper->topOffset(), vistaHelper->topPadding()));

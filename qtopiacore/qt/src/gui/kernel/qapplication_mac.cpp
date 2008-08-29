@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -697,7 +697,7 @@ void qt_event_request_showsheet(QWidget *w)
     PostEventToQueue(GetMainEventQueue(), request_showsheet_pending, kEventPriorityStandard);
 }
 
-static void qt_send_window_change_event(QWidget *widget)
+static void qt_post_window_change_event(QWidget *widget)
 {
     qt_widget_private(widget)->needWindowChange = true;
     QEvent *glWindowChangeEvent = new QEvent(QEvent::MacGLWindowChange);
@@ -705,7 +705,7 @@ static void qt_send_window_change_event(QWidget *widget)
 }
 
 /*
-    Updates all child and grandchild OpenGL widgets for the give widget.
+    Posts updates to all child and grandchild OpenGL widgets for the given widget.
 */
 static void qt_mac_update_child_gl_widgets(QWidget *widget)
 {
@@ -718,12 +718,30 @@ static void qt_mac_update_child_gl_widgets(QWidget *widget)
     QList<QWidgetPrivate::GlWidgetInfo>::iterator it = glWidgets.begin();
 
     for (;it != end; ++it) {
-        qt_send_window_change_event(it->widget);
+        qt_post_window_change_event(it->widget);
     }
 }
 
 /*
-    Updates all OpenGL widgets within the window that the given widget intersects.
+    Sends updates to all child and grandchild gl widgets that have updates pending.
+*/
+void qt_mac_send_posted_gl_updates(QWidget *widget)
+{
+    QList<QWidgetPrivate::GlWidgetInfo> &glWidgets = qt_widget_private(widget)->glWidgets;
+    QList<QWidgetPrivate::GlWidgetInfo>::iterator end = glWidgets.end();
+    QList<QWidgetPrivate::GlWidgetInfo>::iterator it = glWidgets.begin();
+
+    for (;it != end; ++it) {
+        QWidget *glWidget = it->widget;
+        if (qt_widget_private(glWidget)->needWindowChange) {
+            QEvent glChangeEvent(QEvent::MacGLWindowChange);
+            QApplication::sendEvent(glWidget, &glChangeEvent);
+        }
+    }
+}
+
+/*
+    Posts updates to all OpenGL widgets within the window that the given widget intersects.
 */
 static void qt_mac_update_intersected_gl_widgets(QWidget *widget)
 {
@@ -744,13 +762,13 @@ static void qt_mac_update_intersected_gl_widgets(QWidget *widget)
         QWidget *glWidget = it->widget;
         const QRect globalGlWidgetRect = QRect(glWidget->mapToGlobal(QPoint(0, 0)), glWidget->size());
         if (globalWidgetRect.intersects(globalGlWidgetRect)) {
-            qt_send_window_change_event(glWidget);
+            qt_post_window_change_event(glWidget);
             it->lastUpdateWidget = widget;
         } else if (it->lastUpdateWidget == widget) {
             // Update the gl wigets that the widget intersected the last time around, 
             // and that we are not intersecting now. This prevents paint errors when the 
             // intersecting widget leaves a gl widget.
-            qt_send_window_change_event(glWidget);
+            qt_post_window_change_event(glWidget);
             it->lastUpdateWidget = 0;            
         }
     }
@@ -781,9 +799,9 @@ Q_GUI_EXPORT void qt_event_request_window_change(QWidget *widget)
     // don't remove this line!
     qt_event_request_window_change();
     
-    // Send update request on gl widgets unconditionally. 
+    // Post update request on gl widgets unconditionally. 
     if (qt_widget_private(widget)->isGLWidget == true) {
-        qt_send_window_change_event(widget);
+        qt_post_window_change_event(widget);
         return;
     }
 

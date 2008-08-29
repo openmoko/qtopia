@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QAtChat Class Reference</h1>
 <p>The QAtChat class provides communication with AT-command-based modems. <a href="#details">More...</a></p>
-<pre>    #include &lt;QAtChat&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QAtChat&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qatchat-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -39,7 +39,7 @@
 <li><div class="fn"/>void <b><a href="qatchat.html#suspend">suspend</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -49,16 +49,16 @@
 <li><div class="fn"/>void <b><a href="qatchat.html#pduNotification">pduNotification</a></b> ( const QString &amp; <i>type</i>, const QByteArray &amp; <i>pdu</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -72,7 +72,7 @@
 <p>QAtChat objects can also be used to receive unsolicited notifications from the modem device. The caller registers a slot with <a href="qatchat.html#registerNotificationType">registerNotificationType</a>() which is invoked whenever a particular unsolicited notification prefix is encountered in the device's input stream. The following example registers for unsolicited <tt>+CSSI:</tt> notifications from <tt>device</tt>:</p>
 <pre>    QAtChat *atchat = device-&gt;atchat();
     atchat()-&gt;registerNotificationType(&quot;+CSSI:&quot;, this, SLOT(cssi(QString)));</pre>
-<p>When the corresponding slot is invoked for an unsolicited notification, the entire notification, including the prefix, is passed to the slot as a <a href="./qstring.html">QString</a> parameter. The <a href="qatresultparser.html">QAtResultParser</a> class can be used to assist in parsing complex unsolicited notification strings.</p>
+<p>When the corresponding slot is invoked for an unsolicited notification, the entire notification, including the prefix, is passed to the slot as a <a href="qstring.html">QString</a> parameter. The <a href="qatresultparser.html">QAtResultParser</a> class can be used to assist in parsing complex unsolicited notification strings.</p>
 <p>See also <a href="qserialiodevice.html">QSerialIODevice</a>, <a href="qatresult.html">QAtResult</a>, and <a href="qatresultparser.html">QAtResultParser</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -81,15 +81,15 @@
 <p>This method calls <a href="qserialiodevice.html#abortDial">QSerialIODevice::abortDial</a>() to perform the abort, which by default sends an empty line to the modem.</p>
 <p>Modem-specific multiplexer plug-ins can override <a href="qserialiodevice.html#abortDial">QSerialIODevice::abortDial</a>() to implement alternative abort strategies. The <a href="qatchat.html#send">send</a>() method may be useful to implement such strategies.</p>
 <p>See also <a href="qatchat.html#send">send</a>().</p>
-<h3 class="fn"><a name="callNotification"></a>void QAtChat::callNotification ( const <a href="./qstring.html">QString</a> &amp; <i>type</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="callNotification"></a>void QAtChat::callNotification ( const <a href="qstring.html">QString</a> &amp; <i>type</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when a call-related notification such as <tt>CONNECT</tt>, <tt>NO CARRIER</tt>, <tt>BUSY</tt>, etc occurs, but which was not associated with a corresponding <tt>ATD</tt> command. The <i>type</i> parameter is the text of the notification.</p>
-<h3 class="fn"><a name="chat"></a>void QAtChat::chat ( const <a href="./qstring.html">QString</a> &amp; <i>command</i> )</h3>
+<h3 class="fn"><a name="chat"></a>void QAtChat::chat ( const <a href="qstring.html">QString</a> &amp; <i>command</i> )</h3>
 <p>Sends <i>command</i> to the underlying device. If the command fails, the caller will not be notified.</p>
 <p>This version of chat() is useful for commands that the caller is reasonably certain will be understood by the modem, or it is not a serious problem if the command is not understood.</p>
 <p>The following example turns on unsolicited <tt>+CRING</tt> notifications for <tt>device</tt>:</p>
 <pre>    QAtChat *atchat = device-&gt;atchat();
     atchat-&gt;chat(&quot;AT+CRC=1&quot;);</pre>
-<h3 class="fn"><a name="chat-2"></a>void QAtChat::chat ( const <a href="./qstring.html">QString</a> &amp; <i>command</i>, <a href="./qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i>, <a href="qatresult-userdata.html">QAtResult::UserData</a> * <i>data</i> = 0 )</h3>
+<h3 class="fn"><a name="chat-2"></a>void QAtChat::chat ( const <a href="qstring.html">QString</a> &amp; <i>command</i>, <a href="qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i>, <a href="qatresult-userdata.html">QAtResult::UserData</a> * <i>data</i> = 0 )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Sends <i>command</i> to the underlying device. When the command finishes, notify <i>slot</i> on <i>target</i>.</p>
 <p>The optional <i>data</i> parameter can be used to pass extra user data that will be made available to the target slot in the <a href="qatresult.html#userData">QAtResult::userData</a>() field.</p>
@@ -98,7 +98,7 @@
     atchat-&gt;chat(&quot;AT+CGMI&quot;, this, SLOT(cgmi(bool,QAtResult)));</pre>
 <p>Results from an AT command are reported to <i>slot</i> in two parameters. The first parameter is a simple boolean parameter that allows the slot to quickly determine if the command succeeded (true) or failed (false). The second parameter is a <a href="qatresult.html">QAtResult</a> object that contains detailed information about the command response, or the reason for command failure. The <a href="qatresultparser.html">QAtResultParser</a> class can be used to assist in parsing complex responses to AT commands.</p>
 <p>See also <a href="qatresult.html">QAtResult</a> and <a href="qatresultparser.html">QAtResultParser</a>.</p>
-<h3 class="fn"><a name="chatPDU"></a>void QAtChat::chatPDU ( const <a href="./qstring.html">QString</a> &amp; <i>command</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>pdu</i>, <a href="./qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i>, <a href="qatresult-userdata.html">QAtResult::UserData</a> * <i>data</i> = 0 )</h3>
+<h3 class="fn"><a name="chatPDU"></a>void QAtChat::chatPDU ( const <a href="qstring.html">QString</a> &amp; <i>command</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>pdu</i>, <a href="qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i>, <a href="qatresult-userdata.html">QAtResult::UserData</a> * <i>data</i> = 0 )</h3>
 <p>Sends <i>command</i> to the underlying device, followed by <i>pdu</i> on the next line. When the command finishes, notify <i>slot</i> on <i>target</i>.</p>
 <p>The <i>pdu</i> will be transmitted in hexadecimal, followed by a CTRL-Z.</p>
 <p>The optional <i>data</i> parameter can be used to pass extra user data that will be made available to the target slot in the <a href="qatresult.html#userData">QAtResult::userData</a>() field.</p>
@@ -111,31 +111,31 @@
 <p>Returns the current link dead detection timeout in milliseconds. If this object sends a command to the link and it does not receive a response within the specified time, it will emit the <a href="qatchat.html#dead">dead</a>() signal. If the value is -1 (the default), the link dead detection timeout will be disabled.</p>
 <p>When the link dead detection timeout expires, all pending commands will fail with <a href="qatresult.html#ResultCode-enum">QAtResult::Dead</a> as the result code.</p>
 <p>See also <a href="qatchat.html#setDeadTimeout">setDeadTimeout</a>() and <a href="qatchat.html#dead">dead</a>().</p>
-<h3 class="fn"><a name="pduNotification"></a>void QAtChat::pduNotification ( const <a href="./qstring.html">QString</a> &amp; <i>type</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>pdu</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="pduNotification"></a>void QAtChat::pduNotification ( const <a href="qstring.html">QString</a> &amp; <i>type</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>pdu</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when a PDU notification such as <tt>+CMT</tt>, <tt>+CDS</tt>, or <tt>+CBM</tt> arrives. The <i>type</i> parameter contains the type and PDU length (e.g&#x2e; <tt>+CBM: 88</tt>), and the <i>pdu</i> parameter contains the binary data for the PDU.</p>
-<h3 class="fn"><a name="registerErrorPrefix"></a>void QAtChat::registerErrorPrefix ( const <a href="./qstring.html">QString</a> &amp; <i>type</i> )</h3>
+<h3 class="fn"><a name="registerErrorPrefix"></a>void QAtChat::registerErrorPrefix ( const <a href="qstring.html">QString</a> &amp; <i>type</i> )</h3>
 <p>Registers <i>type</i> as a prefix for error strings. Any line of data from the modem that starts with <i>type</i> will be recorded as a synonym for <tt>ERROR</tt>. This is to support modems that have non-standard error strings.</p>
 <p>This function was introduced in Qtopia 4.2&#x2e;1</p>
-<h3 class="fn"><a name="registerNotificationType"></a>void QAtChat::registerNotificationType ( const <a href="./qstring.html">QString</a> &amp; <i>type</i>, <a href="./qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i>, bool <i>mayBeCommand</i> = false )</h3>
+<h3 class="fn"><a name="registerNotificationType"></a>void QAtChat::registerNotificationType ( const <a href="qstring.html">QString</a> &amp; <i>type</i>, <a href="qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i>, bool <i>mayBeCommand</i> = false )</h3>
 <p>Registers <i>type</i> as an unsolicited notification on this object. Whenever a line is received from the modem that starts with <i>type</i>, the indicated <i>slot</i> on <i>target</i> will be called. The slot has the signature <tt>notification(const QString&amp;)</tt>. The entire notification, including the <i>type</i> prefix, will be passed to the slot.</p>
 <p>If <i>mayBeCommand</i> is true, then the notification type may sometimes appear as a command result. When it does, the command's completion slot should be called, not the unsolicited notification slot. An example is <tt>+CREG:</tt>, which can appear in response to an <tt>AT+CREG</tt> command, or as an unsolicited notification.</p>
 <p>The following example registers for unsolicited <tt>+CSSI:</tt> notifications from <tt>device</tt>:</p>
 <pre>    QAtChat *atchat = device-&gt;atchat();
     atchat()-&gt;registerNotificationType(&quot;+CSSI:&quot;, this, SLOT(cssi(QString)));</pre>
-<p>When the <tt>cssi()</tt> slot is invoked for the <tt>+CSSI:</tt> unsolicited notification, the entire notification, including the prefix, is passed to the slot as a <a href="./qstring.html">QString</a> parameter. The <a href="qatresultparser.html">QAtResultParser</a> class can be used to assist in parsing complex unsolicited notification strings.</p>
+<p>When the <tt>cssi()</tt> slot is invoked for the <tt>+CSSI:</tt> unsolicited notification, the entire notification, including the prefix, is passed to the slot as a <a href="qstring.html">QString</a> parameter. The <a href="qatresultparser.html">QAtResultParser</a> class can be used to assist in parsing complex unsolicited notification strings.</p>
 <p>See also <a href="qatresultparser.html">QAtResultParser</a>.</p>
-<h3 class="fn"><a name="registerWakeupCommand"></a>void QAtChat::registerWakeupCommand ( const <a href="./qstring.html">QString</a> &amp; <i>cmd</i>, int <i>wakeupTime</i> )</h3>
+<h3 class="fn"><a name="registerWakeupCommand"></a>void QAtChat::registerWakeupCommand ( const <a href="qstring.html">QString</a> &amp; <i>cmd</i>, int <i>wakeupTime</i> )</h3>
 <p>Registers <i>cmd</i> as a command to be sent to wake up the modem if no commands have been sent in the last <i>wakeupTime</i> milliseconds.</p>
 <p>This function was introduced in Qtopia 4.3&#x2e;1.</p>
-<h3 class="fn"><a name="requestNextLine"></a>void QAtChat::requestNextLine ( <a href="./qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i> )</h3>
-<p>Requests that the next line from the modem be delivered to <i>slot</i> on <i>target</i>. This is used to collect up extra lines of data on an unsolicited response. The slot takes a single <a href="./qstring.html">QString</a> parameter.</p>
+<h3 class="fn"><a name="requestNextLine"></a>void QAtChat::requestNextLine ( <a href="qobject.html">QObject</a> * <i>target</i>, const char * <i>slot</i> )</h3>
+<p>Requests that the next line from the modem be delivered to <i>slot</i> on <i>target</i>. This is used to collect up extra lines of data on an unsolicited response. The slot takes a single <a href="qstring.html">QString</a> parameter.</p>
 <h3 class="fn"><a name="resume"></a>void QAtChat::resume ()</h3>
 <p>Resumes the AT chat process after a suspension. Any data that is currently in the buffer will be processed for unsolicited notifications.</p>
 <p>See also <a href="qatchat.html#suspend">suspend</a>().</p>
 <h3 class="fn"><a name="retryOnNonEcho"></a>int QAtChat::retryOnNonEcho () const</h3>
 <p>Returns the retry on non-echo timeout. The default is -1.</p>
 <p>See also <a href="qatchat.html#setRetryOnNonEcho">setRetryOnNonEcho</a>().</p>
-<h3 class="fn"><a name="send"></a>void QAtChat::send ( const <a href="./qstring.html">QString</a> &amp; <i>command</i> )</h3>
+<h3 class="fn"><a name="send"></a>void QAtChat::send ( const <a href="qstring.html">QString</a> &amp; <i>command</i> )</h3>
 <p>Sends <i>command</i> directly to the modem without waiting for a response, and without waiting for any existing commands to complete. This is typically used by modem-specific multiplexer plug-ins that have overridden <a href="qserialiodevice.html#abortDial">QSerialIODevice::abortDial</a>() to send <tt>ATH</tt> or some other command that is different from the default <a href="qatchat.html#abortDial">abortDial</a>() behavior.</p>
 <p>See also <a href="qatchat.html#abortDial">abortDial</a>().</p>
 <h3 class="fn"><a name="setCPINTerminator"></a>void QAtChat::setCPINTerminator ()</h3>

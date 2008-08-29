@@ -35,7 +35,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>7 public functions inherited from <a href="qdplugin.html#public-functions">QDPlugin</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="../qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -43,7 +43,7 @@
 <li><div class="fn"/>void <b><a href="qdlinkplugin.html#setState">setState</a></b> ( QDLinkPlugin * <i>plugin</i>, int <i>state</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="../qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -51,15 +51,15 @@
 <li><div class="fn"/>void <b><a href="qdlinkplugin.html#setupSocket">setupSocket</a></b> ( QIODevice * <i>device</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>7 protected functions inherited from <a href="../qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="../qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="../qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="../qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="../qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="../qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -77,8 +77,8 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QDLinkPlugin"></a>QDLinkPlugin::QDLinkPlugin ( <a href="../qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Construct a <a href="qdlinkplugin.html">QDLinkPlugin</a> with <i>parent</i> as the owning <a href="../qobject.html">QObject</a>.</p>
+<h3 class="fn"><a name="QDLinkPlugin"></a>QDLinkPlugin::QDLinkPlugin ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Construct a <a href="qdlinkplugin.html">QDLinkPlugin</a> with <i>parent</i> as the owning <a href="qobject.html">QObject</a>.</p>
 <h3 class="fn"><a name="dtor.QDLinkPlugin"></a>QDLinkPlugin::~QDLinkPlugin ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destructor.</p>
 <h3 class="fn"><a name="ping_interval"></a>int QDLinkPlugin::ping_interval ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
@@ -88,10 +88,10 @@
 <p>Returns true if <a href="qdsync-helper-ack-1.html">HELPER_ACK</a> commands should be sent, false otherwise.</p>
 <h3 class="fn"><a name="setState"></a>void QDLinkPlugin::setState ( QDLinkPlugin * <i>plugin</i>, int <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal should be emitted by the <i>plugin</i> to indicate changes in <i>state</i> using a constant from the <a href="qdlinkplugin.html#State-enum">QDLinkPlugin::State</a> enum.</p>
-<h3 class="fn"><a name="setupSocket"></a>void QDLinkPlugin::setupSocket ( <a href="../qiodevice.html">QIODevice</a> * <i>device</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="setupSocket"></a>void QDLinkPlugin::setupSocket ( <a href="qiodevice.html">QIODevice</a> * <i>device</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Call this function after you have created your <i>device</i> to initialize the socket. Note that the <i>device</i> will be moved to a separate thread so you should not interact with it except via signals. For the proxy device that you can interact with see <a href="qdlinkplugin.html#socket">QDLinkPlugin::socket</a>().</p>
-<p>Ownership of <i>device</i> is taken by <a href="qdlinkplugin.html">QDLinkPlugin</a> and it will be destroyed when the plugin is destroyed but you can delete it yourself using the <a href="../qobject.html#deleteLater">QObject::deleteLater</a>() function.</p>
-<h3 class="fn"><a name="socket"></a><a href="../qiodevice.html">QIODevice</a> * QDLinkPlugin::socket ()</h3>
+<p>Ownership of <i>device</i> is taken by <a href="qdlinkplugin.html">QDLinkPlugin</a> and it will be destroyed when the plugin is destroyed but you can delete it yourself using the <a href="qobject.html#deleteLater">QObject::deleteLater</a>() function.</p>
+<h3 class="fn"><a name="socket"></a><a href="qiodevice.html">QIODevice</a> * QDLinkPlugin::socket ()</h3>
 <p>Returns the socket for connections to use or 0 if the socket has not been initialized.</p>
 <h3 class="fn"><a name="stop"></a>void QDLinkPlugin::stop ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Tear down the link. The <a href="qdlinkplugin.html#socket">socket</a>() function should return 0 once this function has been called.</p>

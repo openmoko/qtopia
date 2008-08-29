@@ -151,6 +151,7 @@ void QDSyncTask::systemSuspending()
         qLog(QDSync) << "Stopping QDSync daemons";
         QCopEnvelope e("QPE/Application/qdsync", "stopDaemons()");
     }
+    ::sleep(1);
 }
 
 void QDSyncTask::systemWaking()

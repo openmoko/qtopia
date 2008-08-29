@@ -25,6 +25,14 @@
 #include <private/qobexclientsession_p.h>
 #include <private/qobexserversession_p.h>
 
+#ifdef QTOPIA_INFRARED
+#include <qirsocket.h>
+#endif
+
+#ifdef QTOPIA_BLUETOOTH
+#include <qbluetoothrfcommsocket.h>
+#endif
+
 #include <QIODevice>
 #include <QApplication>
 
@@ -153,6 +161,17 @@ QObexSocket::QObexSocket(QIODevice *device, QObject *parent)
     }
 
     OBEX_SetUserData(self, this);
+
+    // tweak the MTU for common transports
+#ifdef QTOPIA_INFRARED
+    if (qobject_cast<QIrSocket *>(device))
+        OBEX_SetTransportMTU(self, OBEX_IRDA_OPT_MTU, OBEX_IRDA_OPT_MTU);
+#endif
+
+#ifdef QTOPIA_BLUETOOTH
+    if (qobject_cast<QBluetoothRfcommSocket *>(device))
+        OBEX_SetTransportMTU(self, OBEX_MAXIMUM_MTU, OBEX_MAXIMUM_MTU);
+#endif
 
     obex_ctrans_t cust;
     q_custom_context *context = new q_custom_context;

@@ -37,10 +37,6 @@ MyLcdDisplay::MyLcdDisplay(QWidget *p)
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    QFont smallFont(QApplication::font());
-    smallFont.setPointSize( 10 );
-    smallFont.setBold(true);
-
     bigFont.setFamily("dejavu");
     bigFont.setPointSize(11);
     setFont(bigFont);
@@ -52,6 +48,15 @@ MyLcdDisplay::MyLcdDisplay(QWidget *p)
     } else { //pda or touchscreen
         setSizePolicy(QSizePolicy(QSizePolicy::MinimumExpanding,QSizePolicy::Fixed));
     }
+}
+
+/*
+    QAbstractScrollArea::minimumSizeHint() is too big. Override it.
+*/
+QSize MyLcdDisplay::minimumSizeHint() const
+{
+    QSize sz = QScrollArea::minimumSizeHint();
+    return QSize(1,1);
 }
 
 MyLcdDisplay::~MyLcdDisplay() {
@@ -89,8 +94,7 @@ void MyLcdDisplay::readStack() {
     verticalOffset=0; // top margin
     int horizontalOffset = 10; // right margin
     if (!stateOk) {
-        lcdPainter->setFont(smallFont);
-        QRect r = QFontMetrics(smallFont).boundingRect( 5, 5, 
+        QRect r = QFontMetrics(QApplication::font()).boundingRect( 5, 5,
                 visibleWidth-horizontalOffset, 80, 
                 layoutDirection() == Qt::LeftToRight ? Qt::AlignRight : Qt::AlignLeft, 
                 systemEngine->errorString);
@@ -98,7 +102,6 @@ void MyLcdDisplay::readStack() {
         lcdPainter->drawText( r, Qt::AlignRight, systemEngine->errorString );
         verticalOffset=25;
     } else {
-        lcdPainter->setFont(bigFont);
         if (Qtopia::mousePreferred()) {
             QPixmap *tmp;
             if (systemEngine->dStack.isEmpty())

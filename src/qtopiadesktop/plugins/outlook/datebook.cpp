@@ -42,7 +42,17 @@ public:
     {
         TRACE(OutlookSyncPlugin) << "OutlookDatebookSync::isValidObject";
         Outlook::_AppointmentItemPtr item( dispatch );
-        return ( item->GetClass() == Outlook::olAppointment );
+        LOG() << "The item class is" << dump_item_class(item->GetClass()) << "expecting" << dump_item_class(Outlook::olAppointment);
+        if ( item->GetClass() == Outlook::olAppointment ) {
+            PREPARE_MAPI(Appointment);
+            // If we don't have MAPI we can't detect birthday/anniversary events
+            if ( mc && mc->IsBirthday() ) {
+                LOG() << "The item is a birthday/anniversary";
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     void getProperties( IDispatchPtr dispatch, QString &entryid, QDateTime &lastModified )
@@ -58,14 +68,14 @@ public:
         lastModified = date_to_qdatetime(item->GetLastModificationTime());
     }
 
-    void dump_item( IDispatchPtr dispatch, QTextStream &stream )
+    void dump_item( IDispatchPtr dispatch, QXmlStreamWriter &stream )
     {
         Q_ASSERT( dispatch );
         Outlook::_AppointmentItemPtr item( dispatch );
         dump_item( item, stream, false );
     }
 
-    void dump_item( const Outlook::_AppointmentItemPtr &item, QTextStream &stream, bool dump_exception )
+    void dump_item( const Outlook::_AppointmentItemPtr &item, QXmlStreamWriter &stream, bool dump_exception )
     {
         TRACE(OutlookSyncPlugin) << "OutlookDatebookSync::dump_item";
 
@@ -86,7 +96,7 @@ public:
 
         PREPARE_MAPI(Appointment);
 
-        stream << "<Appointment>\n";
+        stream.writeStartElement("Appointment");
         DUMP_STRING(Identifier,EntryID);
         DUMP_STRING(Description,Subject);
         DUMP_STRING(Location,Location);
@@ -98,15 +108,16 @@ public:
             }
         }
         DUMP_EXPR(TimeZone,timezone);
-        stream << "<When>\n";
-        // For some reason item->GetAllDayEvent() is always false when pulling data from Outlook.
-        // To work around this we check if the start and end times are 00:00:00
-        // (which is what Outlook sets for all day events). This breaks timed
-        // events that start and stop at midnight... perhaps such events are rare enough to ignore.
-        //if ( item->GetAllDayEvent() ) {
-        if ( date_to_qdatetime(item->GetStart()).time() == QTime(0, 0, 0) && date_to_qdatetime(item->GetEnd()).time() == QTime(0, 0, 0) ) {
+        stream.writeStartElement("When");
+        if ( item->GetAllDayEvent() ) {
             DUMP_DATE(StartDate,Start);
-            DUMP_DATE(EndDate,End);
+            // We can't just dump the end date because Outlook does it differently to Qtopia.
+            // Qtopia expects something like "starts 7/10/08, ends 7/10/08" but Outlook
+            // has given us "starts 7/10/08 00:00:00, ends 8/10/08 00:00:00".
+            // Simply remove one day from the end date to get something Qtopia won't barf over.
+            QDate dt = date_to_qdatetime(item->GetEnd()).date();
+            dt = dt.addDays(-1);
+            DUMP_EXPR(EndDate,escape(dateToString(dt)));
         } else {
             QDateTime dt = date_to_qdatetime(item->GetStart());
             bool utc = !timezone.isEmpty();
@@ -118,15 +129,15 @@ public:
                 dt = dt.toUTC();
             DUMP_EXPR(End,escape(dateTimeToString(dt, utc)));
         }
-        stream << "</When>\n";
-        stream << "<Alarm>\n";
+        stream.writeEndElement();
+        stream.writeStartElement("Alarm");
         if ( item->GetReminderSet() ) {
             DUMP_EXPR(Type,item->GetReminderPlaySound()?"Audible":"Visible");
             DUMP_INT(Delay,ReminderMinutesBeforeStart);
         }
-        stream << "</Alarm>\n";
+        stream.writeEndElement();
         if ( !dump_exception ) {
-            stream << "<Repeat>\n";
+            stream.writeStartElement("Repeat");
             if ( recstate != Outlook::olApptNotRecurring && item->GetIsRecurring() ) {
                 Q_ASSERT(recstate == Outlook::olApptMaster);
                 Outlook::RecurrencePatternPtr recpat = item->GetRecurrencePattern();
@@ -150,23 +161,27 @@ public:
                     type = "Yearly";
                 Q_ASSERT(!type.isEmpty());
                 LOG() << "Type" << type << "Instance" << recpat->GetInstance();
-                stream << "<Type>" << type << "</Type>\n";
+                stream.writeStartElement("Type");
+                stream.writeCharacters(type);
+                stream.writeEndElement();
 
                 int frequency = recpat->GetInterval();
                 LOG() << "recpat->GetInterval" << frequency;
                 if ( rectype == Outlook::olRecursDaily && recpat->GetDayOfWeekMask() )
                     frequency = 1;
-                stream << "<Frequency>" << frequency << "</Frequency>\n";
+                stream.writeStartElement("Frequency");
+                stream.writeCharacters(QString::number(frequency));
+                stream.writeEndElement();
 
-                stream << "<Until>";
+                stream.writeStartElement("Until");
                 if ( !recpat->GetNoEndDate() ) {
                     LOG() << "recpat->GetPatternEndDate" << date_to_qdatetime(recpat->GetPatternEndDate()).date();
-                    stream << dateToString(date_to_qdatetime(recpat->GetPatternEndDate()).date());
+                    stream.writeCharacters(dateToString(date_to_qdatetime(recpat->GetPatternEndDate()).date()));
                 }
-                stream << "</Until>\n";
+                stream.writeEndElement();
 
                 if ( type == "Weekly" || type == "MonthlyDay" || type == "MonthlyEndDay" ) {
-                    stream << "<WeekMask>";
+                    stream.writeStartElement("WeekMask");
                     if ( recpat->GetDayOfWeekMask() ) {
                         int mask = recpat->GetDayOfWeekMask();
                         LOG() << "recpat->GetDayOfWeekMask" << mask;
@@ -185,18 +200,18 @@ public:
                             list << "Saturday";
                         if ( mask & Outlook::olSunday )
                             list << "Sunday";
-                        stream << list.join(" ");
+                        stream.writeCharacters(list.join(" "));
                     } else {
                         LOG() << "recpat->GetDayOfWeekMask" << 0;
                     }
-                    stream << "</WeekMask>\n";
+                    stream.writeEndElement();
                 }
 
                 Outlook::ExceptionsPtr exceptions = recpat->GetExceptions();
                 if ( exceptions ) {
                     int expcount = exceptions->GetCount();
                     for ( int i = 0; i < expcount; i++ ) {
-                        stream << "<Exception>\n";
+                        stream.writeStartElement("Exception");
 
                         long item_to_get = i+1;
                         Outlook::ExceptionPtr exception = exceptions->Item(item_to_get);
@@ -204,24 +219,24 @@ public:
 
                         DUMP_DATE_ITEM(OriginalDate,OriginalDate,exception);
                         if ( exception->GetDeleted() ) {
-                            stream << "<Appointment></Appointment>\n";
+                            stream.writeEmptyElement("Appointment");
                         } else {
                             Outlook::_AppointmentItemPtr exceptionItem = exception->GetAppointmentItem();
                             dump_item( exceptionItem, stream, true );
                         }
 
-                        stream << "</Exception>\n";
+                        stream.writeEndElement();
                     }
                 }
             }
-            stream << "</Repeat>\n";
+            stream.writeEndElement();
         }
         DUMP_MAPI(Notes,Body);
-        stream << "<Categories>\n";
+        stream.writeStartElement("Categories");
         foreach ( const QString &category, bstr_to_qstring(item->GetCategories()).split(", ", QString::SkipEmptyParts) )
             DUMP_EXPR(Category,category);
-        stream << "</Categories>\n";
-        stream << "</Appointment>\n";
+        stream.writeEndElement();
+        stream.writeEndElement();
     }
 
     QString read_item( IDispatchPtr dispatch, const QByteArray &record )
@@ -238,6 +253,10 @@ public:
 
         Outlook::UserPropertiesPtr props = item->GetUserProperties();
         Q_ASSERT(props);
+
+        // We need to clear the recurrence pattern now or we will fail to update recurring events
+        if ( !dump_exception )
+            item->ClearRecurrencePattern();
 
         enum State {
             Idle, When, Alarm, Repeat, Exception, Categories
@@ -284,7 +303,6 @@ public:
                     if ( !dump_exception ) {
                         if ( key == "Repeat" ) {
                             state = Repeat;
-                            item->ClearRecurrencePattern();
                         }
                         if ( state == Repeat && key == "Type" ) {
                             recpat = item->GetRecurrencePattern();
@@ -298,7 +316,7 @@ public:
                         state = Categories;
                     break;
                 case QXmlStreamReader::Characters:
-                    value = unescape(reader.text().toString());
+                    value += reader.text().toString();
                     break;
                 case QXmlStreamReader::EndElement:
                     key = reader.qualifiedName().toString();
@@ -312,7 +330,16 @@ public:
                         if ( allday ) {
                             item->PutAllDayEvent( true );
                             READ_DATE(StartDate,Start);
-                            READ_DATE(EndDate,End);
+                            // We can't just read the end date because Outlook does it differently to Qtopia.
+                            // Qtopia gives us something like "starts 7/10/08, ends 7/10/08" but Outlook
+                            // expects "starts 7/10/08 00:00:00, ends 8/10/08 00:00:00".
+                            // Simply add one day to the end date to get something Outlook won't barf over.
+                            if ( key == "EndDate" ) {
+                                QDate dt = stringToDate(value);
+                                QDateTime actual( dt.addDays(1), QTime(0,0,0) );
+                                LOG() << "item->PutEnd" << actual;
+                                item->PutEnd( qdatetime_to_date(actual) );
+                            }
                         } else {
                             item->PutAllDayEvent( false );
                             if ( key == "Start" ) {

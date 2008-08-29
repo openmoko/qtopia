@@ -33,6 +33,7 @@ public:
     ~MyLcdDisplay();
 
     QSize sizeHint() const;
+    QSize minimumSizeHint() const;
 
 public slots:
     void readStack();
@@ -47,7 +48,7 @@ private:
     int dataLeft,verticalOffset;
     QStack<QString*> *niStack;
     QStack<Data*> *ndStack;
-    QFont bigFont, smallFont;
+    QFont bigFont;
 };
 
 #endif

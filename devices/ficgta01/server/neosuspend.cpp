@@ -26,6 +26,9 @@
 #include <QProcess>
 #include <stdio.h>
 #include <stdlib.h>
+#include <QDesktopWidget>
+#include <QTimer>
+
 
 #include "systemsuspend.h"
 
@@ -42,6 +45,7 @@ public:
     virtual bool canSuspend() const;
     virtual bool suspend();
     virtual bool wake();
+private slots:
 };
 
 QTOPIA_DEMAND_TASK(NeoSuspend, NeoSuspend);
@@ -63,31 +67,24 @@ bool NeoSuspend::suspend()
 {
     qLog(PowerManagement)<<"NeoSuspend::suspend()";
 
-    QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService", "setAmpMode(bool)");
-    e << false;
-
-//     QProcess apm;
-//     apm.start("apm", QStringList() << "-s");
-//     apm.waitForFinished(-1);
-
-      QFile powerStateFile("/sys/power/state");
-     if( !powerStateFile.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
-         qWarning()<<"File not opened";
-     } else {
-         QTextStream out(&powerStateFile);
-         out << "mem";
-         powerStateFile.close();
-     }
-
+      QProcess apm;
+      apm.start("apm", QStringList() << "-s");
+      apm.waitForFinished(-1);
+/*      QFile powerStateFile("/sys/power/state");
+    if( !powerStateFile.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate)) {
+        qWarning()<<"File not opened";
+    } else {
+        QTextStream out(&powerStateFile);
+        out << "mem";
+        powerStateFile.close();
+    }
+*/
     return true;
 }
 
 bool NeoSuspend::wake()
 {
-    qLog(PowerManagement)<<" NeoSuspend::wake()";
-
-    QtopiaIpcEnvelope e("QPE/AudioVolumeManager/Ficgta01VolumeService", "setAmpMode(bool)");
-    e << true;
+    QWSServer::instance()->refresh();
 
     QtopiaIpcEnvelope("QPE/Card", "mtabChanged()" ); // might have changed while asleep
 
@@ -107,8 +104,6 @@ bool NeoSuspend::wake()
         QtopiaIpcEnvelope("QPE/NetworkState", "updateNetwork()"); //might have changed
     }
 #endif
-
     return true;
 }
 #endif
-

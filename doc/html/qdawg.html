@@ -66,26 +66,26 @@
         }
         return false;
     }</pre>
-<p>In addition to simple look-up of a single word, the QDawg can be traversed to find lists of words with certain sets of characters, such as the characters associated with phone keys or handwriting. For example, given a <a href="./qstringlist.html">QStringList</a> where each string is a list of letter in decreasing order of likelihood, an efficient algorithm could be written for finding the best word by traversing the QDawg just once.</p>
+<p>In addition to simple look-up of a single word, the QDawg can be traversed to find lists of words with certain sets of characters, such as the characters associated with phone keys or handwriting. For example, given a <a href="qstringlist.html">QStringList</a> where each string is a list of letter in decreasing order of likelihood, an efficient algorithm could be written for finding the best word by traversing the QDawg just once.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QDawg"></a>QDawg::QDawg ()</h3>
 <p>Constructs a new empty <a href="qdawg.html">QDawg</a>. The next step is usually to add all words with <a href="qdawg.html#createFromWords">createFromWords</a>() or use <a href="qdawg.html#readFile">readFile</a>() to retrieve existing words.</p>
 <h3 class="fn"><a name="dtor.QDawg"></a>QDawg::~QDawg ()</h3>
 <p>Destroys the <a href="qdawg.html">QDawg</a>. If it was attached to a file with <a href="qdawg.html#readFile">readFile</a>(), it is detached.</p>
-<h3 class="fn"><a name="allWords"></a><a href="./qstringlist.html">QStringList</a> QDawg::allWords () const</h3>
+<h3 class="fn"><a name="allWords"></a><a href="qstringlist.html">QStringList</a> QDawg::allWords () const</h3>
 <p>Returns a list of all the words in the <a href="qdawg.html">QDawg</a>, in alphabetical order.</p>
-<h3 class="fn"><a name="contains"></a>bool QDawg::contains ( const <a href="./qstring.html">QString</a> &amp; <i>s</i> ) const</h3>
+<h3 class="fn"><a name="contains"></a>bool QDawg::contains ( const <a href="qstring.html">QString</a> &amp; <i>s</i> ) const</h3>
 <p>Returns true if the <a href="qdawg.html">QDawg</a> contains the word <i>s</i>; otherwise returns false.</p>
 <h3 class="fn"><a name="countWords"></a>int QDawg::countWords () const</h3>
 <p>Iterates over the whole graph and returns the total number of words found in the <a href="qdawg.html">QDawg</a>.</p>
-<h3 class="fn"><a name="createFromWords"></a>void QDawg::createFromWords ( const <a href="./qstringlist.html">QStringList</a> &amp; <i>list</i> )</h3>
+<h3 class="fn"><a name="createFromWords"></a>void QDawg::createFromWords ( const <a href="qstringlist.html">QStringList</a> &amp; <i>list</i> )</h3>
 <p>Replaces all the words in the <a href="qdawg.html">QDawg</a> with the words in the <i>list</i>.</p>
-<h3 class="fn"><a name="read"></a>bool QDawg::read ( <a href="./qiodevice.html">QIODevice</a> * <i>dev</i> )</h3>
+<h3 class="fn"><a name="read"></a>bool QDawg::read ( <a href="qiodevice.html">QIODevice</a> * <i>dev</i> )</h3>
 <p>Replaces all the words in the <a href="qdawg.html">QDawg</a> with the <a href="qdawg.html">QDawg</a> read from <i>dev</i>. The file is <i>not</i> memory-mapped. Use <a href="qdawg.html#readFile">readFile</a>() wherever possible, for better performance.</p>
 <p>Returns true if successful. If not successful, the <a href="qdawg.html">QDawg</a> is left unchanged and false is returned.</p>
 <p>See also <a href="qdawg.html#write">write</a>().</p>
-<h3 class="fn"><a name="readFile"></a>bool QDawg::readFile ( const <a href="./qstring.html">QString</a> &amp; <i>filename</i> )</h3>
+<h3 class="fn"><a name="readFile"></a>bool QDawg::readFile ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> )</h3>
 <p>Replaces all the words in the <a href="qdawg.html">QDawg</a> with the <a href="qdawg.html">QDawg</a> in <i>filename</i>. Note that the file is memory-mapped if possible.</p>
 <p>Returns true if successful. If not successful, the <a href="qdawg.html">QDawg</a> is left unchanged and false is returned.</p>
 <p>See also <a href="qdawg.html#write">write</a>().</p>
@@ -93,11 +93,11 @@
 <p>Returns the root <a href="qdawg-node.html">Node</a> of the <a href="qdawg.html">QDawg</a>, or 0 if the <a href="qdawg.html">QDawg</a> is empty.</p>
 <p>The root is the starting point for all traversals.</p>
 <p>Note that this root node has a <a href="qdawg-node.html#letter">Node::letter</a>(), and subsequent nodes returned by <a href="qdawg-node.html#next">Node::next</a>(), just like any other Node.</p>
-<h3 class="fn"><a name="write"></a>bool QDawg::write ( <a href="./qiodevice.html">QIODevice</a> * <i>dev</i> ) const</h3>
+<h3 class="fn"><a name="write"></a>bool QDawg::write ( <a href="qiodevice.html">QIODevice</a> * <i>dev</i> ) const</h3>
 <p>Writes the <a href="qdawg.html">QDawg</a> to <i>dev</i>, in a custom QDAWG format.</p>
 <p>Returns true if successful.</p>
 <p><b>Warning:</b> <a href="qdawg.html">QDawg</a> memory maps QDAWG files. The safe method for writing to QDAWG files is to write the data to a new file and move the new file to the old file name. <a href="qdawg.html">QDawg</a> objects using the old file will continue using that file.</p>
-<h3 class="fn"><a name="writeByteSwapped"></a>bool QDawg::writeByteSwapped ( <a href="./qiodevice.html">QIODevice</a> * <i>dev</i> ) const</h3>
+<h3 class="fn"><a name="writeByteSwapped"></a>bool QDawg::writeByteSwapped ( <a href="qiodevice.html">QIODevice</a> * <i>dev</i> ) const</h3>
 <p>Writes the <a href="qdawg.html">QDawg</a> to <i>dev</i>, in a custom QDAWG format, with bytes reversed from the endianness of the host. This allows a host of one endianness to write a QDAWG file readable on a target device with reverse endianness.</p>
 <p>Returns true if successful.</p>
 <p /><address><hr /><div align="center">

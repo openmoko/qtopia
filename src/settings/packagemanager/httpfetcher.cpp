@@ -247,7 +247,8 @@ void HttpInfoReceiver::packageComplete()
     NetworkPackageController *npc = qobject_cast<NetworkPackageController*>(fetcher->pkgController);
     Q_ASSERT( npc );
 
-    //filter out packages based on whether they are sxe compatible 
+     reader->updateInstalledSize();
+    //filter out packages based on whether they are sxe compatible
 #ifdef QT_NO_SXE
     if ( reader->package().type.toLower() == "sxe-only" )
     {

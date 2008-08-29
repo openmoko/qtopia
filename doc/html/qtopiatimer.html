@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QtopiaTimer Class Reference</h1>
 <p>The QtopiaTimer class provides timers that can pause automatically when the screen is off. <a href="#details">More...</a></p>
-<pre>    #include &lt;QtopiaTimer&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QtopiaTimer&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qtopiatimer-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -35,7 +35,7 @@
 <li><div class="fn"/>Type <b><a href="qtopiatimer.html#type">type</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -45,7 +45,7 @@
 <li><div class="fn"/>void <b><a href="qtopiatimer.html#stop">stop</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -53,35 +53,35 @@
 <li><div class="fn"/>void <b><a href="qtopiatimer.html#timeout">timeout</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
 <p>The QtopiaTimer class provides timers that can pause automatically when the screen is off.</p>
-<p>The use of this class is similar to <a href="./qtimer.html">QTimer</a> as the API is the same, except <a href="qtopiatimer.html#setInterval">setInterval</a>() and <a href="qtopiatimer.html#start">start</a>() now have an optional argument that is the <a href="qtopiatimer.html#type">type</a>() of pausing behavior to use.</p>
+<p>The use of this class is similar to <a href="qtimer.html">QTimer</a> as the API is the same, except <a href="qtopiatimer.html#setInterval">setInterval</a>() and <a href="qtopiatimer.html#start">start</a>() now have an optional argument that is the <a href="qtopiatimer.html#type">type</a>() of pausing behavior to use.</p>
 <p>When the type is <a href="qtopiatimer.html#Type-enum">PauseWhenInactive</a>, the timer will pause while the screen is off. This allows applications to more easily suspend repetitive processing when the user is not able to interact with the application.</p>
-<p>See also <a href="./qtimer.html">QTimer</a>.</p>
+<p>See also <a href="qtimer.html">QTimer</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
 <h3 class="fn"><a name="Type-enum"></a>enum QtopiaTimer::Type</h3>
 <p>This enum type specifies the behavior that <a href="qtopiatimer.html">QtopiaTimer</a> uses.</p>
 <p><table border="1" cellpadding="2" cellspacing="1" width="100%">
 <tr><th width="25%">Constant</th><th width="15%">Value</th><th width="60%">Description</th></tr>
-<tr><td valign="top"><tt>QtopiaTimer::Normal</tt></td><td align="center" valign="top"><tt>0x0000</tt></td><td valign="top">operate as a <a href="./qtimer.html">QTimer</a>.</td></tr>
+<tr><td valign="top"><tt>QtopiaTimer::Normal</tt></td><td align="center" valign="top"><tt>0x0000</tt></td><td valign="top">operate as a <a href="qtimer.html">QTimer</a>.</td></tr>
 <tr><td valign="top"><tt>QtopiaTimer::PauseWhenInactive</tt></td><td align="center" valign="top"><tt>0x0001</tt></td><td valign="top">pause while the screen turns off.</td></tr>
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QtopiaTimer"></a>QtopiaTimer::QtopiaTimer ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QtopiaTimer"></a>QtopiaTimer::QtopiaTimer ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Creates a new <a href="qtopiatimer.html">QtopiaTimer</a> instance with the specified <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QtopiaTimer"></a>QtopiaTimer::~QtopiaTimer ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the <a href="qtopiatimer.html">QtopiaTimer</a> instance.</p>

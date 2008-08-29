@@ -76,32 +76,32 @@
 <p>Constructs a copy of the <i>other</i> <a href="qtimezone.html">QTimeZone</a>.</p>
 <h3 class="fn"><a name="dtor.QTimeZone"></a>QTimeZone::~QTimeZone ()</h3>
 <p>Destruct <a href="qtimezone.html">QTimeZone</a>.</p>
-<h3 class="fn"><a name="area"></a><a href="./qstring.html">QString</a> QTimeZone::area () const</h3>
+<h3 class="fn"><a name="area"></a><a href="qstring.html">QString</a> QTimeZone::area () const</h3>
 <p>Returns the translated greater area of this time zone, e.g&#x2e; Europe.</p>
-<h3 class="fn"><a name="city"></a><a href="./qstring.html">QString</a> QTimeZone::city () const</h3>
+<h3 class="fn"><a name="city"></a><a href="qstring.html">QString</a> QTimeZone::city () const</h3>
 <p>Returns the translated city of this time zone, e.g&#x2e; Oslo, or a null string if no specific city is identified.</p>
-<h3 class="fn"><a name="convert"></a><a href="./qdatetime.html">QDateTime</a> QTimeZone::convert ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>dt</i>, const QTimeZone &amp; <i>dtTz</i> ) const</h3>
+<h3 class="fn"><a name="convert"></a><a href="qdatetime.html">QDateTime</a> QTimeZone::convert ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>dt</i>, const QTimeZone &amp; <i>dtTz</i> ) const</h3>
 <p>Return the date and time <i>dt</i> in time zone <i>dtTz</i> as the date and time in this time zone.</p>
-<h3 class="fn"><a name="countryCode"></a><a href="./qstring.html">QString</a> QTimeZone::countryCode ()</h3>
+<h3 class="fn"><a name="countryCode"></a><a href="qstring.html">QString</a> QTimeZone::countryCode ()</h3>
 <p>Returns the ISO 3166 2-character country code.</p>
 <h3 class="fn"><a name="current"></a>QTimeZone QTimeZone::current ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the current system time zone.</p>
-<h3 class="fn"><a name="description"></a><a href="./qstring.html">QString</a> QTimeZone::description () const</h3>
+<h3 class="fn"><a name="description"></a><a href="qstring.html">QString</a> QTimeZone::description () const</h3>
 <p>Returns the translated description of this time zone.</p>
-<h3 class="fn"><a name="dstAbbreviation"></a><a href="./qstring.html">QString</a> QTimeZone::dstAbbreviation () const</h3>
+<h3 class="fn"><a name="dstAbbreviation"></a><a href="qstring.html">QString</a> QTimeZone::dstAbbreviation () const</h3>
 <p>Returns the Daylight Savings Time (DST) time zone abbreviation.</p>
-<h3 class="fn"><a name="findFromMinutesEast"></a>QTimeZone QTimeZone::findFromMinutesEast ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>t</i>, int <i>mineast</i>, bool <i>isdst</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="findFromMinutesEast"></a>QTimeZone QTimeZone::findFromMinutesEast ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>t</i>, int <i>mineast</i>, bool <i>isdst</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a time zone that, at time <i>t</i>, is <i>mineast</i> minutes ahead of GMT, and is observing Daylight Time according to <i>isdst</i>.</p>
 <p>Usually, the returned timezone will be a UNIX GMT time zone offset (eg. &quot;GMT-10&quot; for 10 hours East of GMT), however, if no such timezone exists (eg. for half-hour time zones), a city time zone will be returned.</p>
-<h3 class="fn"><a name="fromCurrent"></a><a href="./qdatetime.html">QDateTime</a> QTimeZone::fromCurrent ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>curT</i> ) const</h3>
+<h3 class="fn"><a name="fromCurrent"></a><a href="qdatetime.html">QDateTime</a> QTimeZone::fromCurrent ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>curT</i> ) const</h3>
 <p>Returns the date and time <i>curT</i> in the current time zone as the date and time in this time zone.</p>
 <p>See also <a href="qtimezone.html#current">current</a>().</p>
-<h3 class="fn"><a name="fromUtc"></a><a href="./qdatetime.html">QDateTime</a> QTimeZone::fromUtc ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>utc</i> ) const</h3>
+<h3 class="fn"><a name="fromUtc"></a><a href="qdatetime.html">QDateTime</a> QTimeZone::fromUtc ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>utc</i> ) const</h3>
 <p>Returns the UTC date and time <i>utc</i> as a date and time in this time zone.</p>
-<h3 class="fn"><a name="id"></a><a href="./qstring.html">QString</a> QTimeZone::id () const</h3>
+<h3 class="fn"><a name="id"></a><a href="qstring.html">QString</a> QTimeZone::id () const</h3>
 <p>Return the time zone identifier, for example, Europe/London</p>
 <p>See also <a href="qtimezone.html#setId">setId</a>().</p>
-<h3 class="fn"><a name="ids"></a><a href="./qstringlist.html">QStringList</a> QTimeZone::ids ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="ids"></a><a href="qstringlist.html">QStringList</a> QTimeZone::ids ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a list of all time zone ids known to the system.</p>
 <h3 class="fn"><a name="isValid"></a>bool QTimeZone::isValid () const</h3>
 <p>Returns true if this is a valid time zone, otherwise false.</p>
@@ -109,23 +109,23 @@
 <p>Returns the latitude of the <a href="qtimezone.html#city">city</a>() of this timezone, in seconds of a degree.</p>
 <h3 class="fn"><a name="longitude"></a>int QTimeZone::longitude () const</h3>
 <p>Returns the longitude of the <a href="qtimezone.html#city">city</a>() of this timezone, in seconds of a degree.</p>
-<h3 class="fn"><a name="name"></a><a href="./qstring.html">QString</a> QTimeZone::name () const</h3>
+<h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QTimeZone::name () const</h3>
 <p>Returns either the <a href="qtimezone.html#city">city</a>() for this time zone, or some other string meaningful to the user (eg. &quot;GMT+10&quot; meaning 10 hours East of GMT).</p>
 <h3 class="fn"><a name="setId"></a>void QTimeZone::setId ( const char * <i>id</i> )</h3>
 <p>Sets the time zone id of this <a href="qtimezone.html">QTimeZone</a> to <i>id</i>.</p>
 <p>See also <a href="qtimezone.html#id">id</a>().</p>
-<h3 class="fn"><a name="standardAbbreviation"></a><a href="./qstring.html">QString</a> QTimeZone::standardAbbreviation () const</h3>
+<h3 class="fn"><a name="standardAbbreviation"></a><a href="qstring.html">QString</a> QTimeZone::standardAbbreviation () const</h3>
 <p>Returns the time zone abbreviation, e.g&#x2e; EST</p>
-<h3 class="fn"><a name="toCurrent"></a><a href="./qdatetime.html">QDateTime</a> QTimeZone::toCurrent ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>dt</i> ) const</h3>
+<h3 class="fn"><a name="toCurrent"></a><a href="qdatetime.html">QDateTime</a> QTimeZone::toCurrent ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>dt</i> ) const</h3>
 <p>Returns the date and time <i>dt</i> in this time zone as the date and time in the current system time zone.</p>
 <p>See also <a href="qtimezone.html#current">current</a>().</p>
-<h3 class="fn"><a name="toTime_t"></a><a href="./qtglobal.html#uint-typedef">uint</a> QTimeZone::toTime_t ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>dt</i> ) const</h3>
+<h3 class="fn"><a name="toTime_t"></a><a href="qtglobal.html#uint-typedef">uint</a> QTimeZone::toTime_t ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>dt</i> ) const</h3>
 <p>Returns the date and time <i>dt</i> in this time zone, as the number of seconds since 1 January 1970.</p>
-<h3 class="fn"><a name="toUtc"></a><a href="./qdatetime.html">QDateTime</a> QTimeZone::toUtc ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>dt</i> ) const</h3>
+<h3 class="fn"><a name="toUtc"></a><a href="qdatetime.html">QDateTime</a> QTimeZone::toUtc ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>dt</i> ) const</h3>
 <p>Returns the date and time <i>dt</i> in this time zone as a date and time in UTC.</p>
 <h3 class="fn"><a name="utc"></a>QTimeZone QTimeZone::utc ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Return a time zone located at the UTC reference.</p>
-<h3 class="fn"><a name="utcDateTime"></a><a href="./qdatetime.html">QDateTime</a> QTimeZone::utcDateTime ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="utcDateTime"></a><a href="qdatetime.html">QDateTime</a> QTimeZone::utcDateTime ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Return the current system UTC date and time.</p>
 <h3 class="fn"><a name="operator-not-eq"></a>bool QTimeZone::operator!= ( const QTimeZone &amp; <i>c</i> ) const</h3>
 <p>Returns true if <i>c</i> is not equal to this, otherwise false.</p>

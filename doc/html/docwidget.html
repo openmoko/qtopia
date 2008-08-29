@@ -24,7 +24,7 @@
     {
         if ( !current.isNull() ) {
             if ( !current.save( data ) ) {
-                <span class="comment">//</span> error
+                <span class="comment">// error</span>
                 return;
             }
         }
@@ -32,27 +32,27 @@
         current = QContent( filename );
 
         if ( !current.load( data ) ) {
-            <span class="comment">//</span> error
+            <span class="comment">// error</span>
         }
     }</pre>
 <a name="registering-mime-types"></a>
 <h3>Registering MIME types</h3>
-<p>Document-oriented applications declare the MIME types that they support by adding a line to their <tt>.desktop</tt> file specifying each supported type separated by semi-colons, if multiple types are supported the list must be enclosed in quotes:</p>
-<pre>        MimeType=&quot;type/subtype;type/subtype;...&quot;</pre>
+<p>Document-oriented applications declare the MIME types that they support by adding a line to their <tt>.desktop</tt> file specifying each supported type separated by commas. A list may alternately be separated by semi-colons, but if this is done the list must be enclosed in double quotes otherwise a semi-colon will be interpreted as a comment character.</p>
+<pre>        MimeType=type/subtype,type/subtype,...</pre>
 <p>The subtype can be &quot;*&quot;, indicating that this application can process all forms of the given type. Such an application is only invoked if no other more specific application is available.</p>
 <p>Optionally an icon and a DRM permission may be specified for a MIME type when registering it. This is done by adding the <tt>MimeTypeIcons</tt> and <tt>MimeTypePermissions</tt> lines to the <tt>.desktop</tt> file.</p>
-<p>The <tt>MimeTypeIcons</tt> line is a semi-colon separated list of icon paths, the list must contain either a single icon path or the same number of paths as MIME types on the MimeType line. If a single icon path is given it is repeated for each MIME type, otherwise the icons are paired with MIME type according to their positions in the list.</p>
+<p>The <tt>MimeTypeIcons</tt> line is a comma separated list of icon paths, the list must contain either a single icon path or the same number of paths as MIME types on the MimeType line. If a single icon path is given it is repeated for each MIME type, otherwise the icons are paired with MIME type according to their positions in the list.</p>
 <p>The <tt>MimeTypePermissions</tt> line has the same semantics as the <tt>MimeTypeIcons</tt> line but defines a DRM permission that must be verified before an application is invoked to open a document. The possible permission values are the names of the primary enumeration values in <a href="qdrmrights.html#Permission-enum">QDrmRights::Permission</a>. The <tt>MimeTypePermissions</tt> line is part of the <tt>DRM</tt> group.</p>
 <p>An example of an application with only one icon and open permission for multiple MIME types:</p>
-<pre>        MimeType=&quot;image/jpeg;image/png&quot;
-        MimeTypeIcons=&quot;imageviewer/ImageViewer&quot;
+<pre>        MimeType=image/jpeg,image/png
+        MimeTypeIcons=imageviewer/ImageViewer
         [DRM]
-        MimeTypePermissions=&quot;Display&quot;</pre>
+        MimeTypePermissions=Display</pre>
 <p>An example of an application with multiple MIME type icons and open permissions:</p>
-<pre>        MimeType=&quot;audio/mpeg;video/mpeg;image/jpeg;image/png&quot;
-        MimeTypeIcons=&quot;mediaviewer/AudioPlayer;mediaviewer/VideoPlayer;mediaviewer/ImageViewer&quot;
+<pre>        MimeType=audio/mpeg,video/mpeg,image/jpeg,image/png
+        MimeTypeIcons=mediaviewer/AudioPlayer,mediaviewer/VideoPlayer,mediaviewer/ImageViewer
         [DRM]
-        MimeTypePermissions=&quot;Play;Play;Display;Display&quot;</pre>
+        MimeTypePermissions=Play,Play,Display,Display</pre>
 <p>A complete listing of .desktop file entries can be found in the <a href="desktopfiles.html">Desktop File Standard</a></p>
 <a name="run-time-registration"></a>
 <h3>Run-time registration</h3>

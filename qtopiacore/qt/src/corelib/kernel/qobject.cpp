@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -1130,6 +1130,7 @@ bool QObject::event(QEvent *e)
             } catch (...) {
                 QReadLocker locker(QObjectPrivate::readWriteLock());
                 if (QObjectPrivate::isValidObject(this)) {
+                    Q_D(QObject);
                     d->currentSender = previousSender;
                     d->currentSenderSignalIdStart = previousFrom;
                     d->currentSenderSignalIdEnd = previousTo;
@@ -1139,6 +1140,7 @@ bool QObject::event(QEvent *e)
 #endif
             QReadLocker locker(QObjectPrivate::readWriteLock());
             if (QObjectPrivate::isValidObject(this)) {
+                Q_D(QObject);
                 d->currentSender = previousSender;
                 d->currentSenderSignalIdStart = previousFrom;
                 d->currentSenderSignalIdEnd = previousTo;
@@ -2605,10 +2607,10 @@ bool QObject::connect(const QObject *sender, const char *signal,
     method.
 
     Equivalent to connect(\a sender, \a signal, \c this, \a method, \a type).
-    
+
     Every connection you make emits a signal, so duplicate connections emit
     two signals. You can break a connection using disconnect().
-    
+
     \sa disconnect()
 */
 

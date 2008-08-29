@@ -21,7 +21,7 @@ LOG=0
 LOG_FILE="/tmp/qtopia-network.log"
 TMP_FILE="/tmp/ppp-intern-network.temp"
 PPPD="/usr/sbin/pppd";
-RESOLVCONF="/mnt/user/etc/resolv.conf"
+RESOLVCONF="/etc/resolv.conf"
 ####################
 
 
@@ -65,7 +65,9 @@ install()
             #install a new peer file
             print_debug "installing $2 to /etc/ppp/peers"
             ##ADD CODE HERE##
-            mkdir /etc/ppp/peers
+            if [ ! -e /etc/ppp/peers ]; then
+                mkdir /etc/ppp/peers
+             fi
             cp -f $2 /etc/ppp/peers
             ;;
         dns)
@@ -97,7 +99,7 @@ install()
 start()
 {
     print_debug "starting pppd using parameters: $*"
-    $PPPD $* &
+    "$PPPD" "$*" &
 }
 
 # Stops pppd

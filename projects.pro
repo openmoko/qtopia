@@ -77,7 +77,7 @@ build_qtopia {
         echo $${LITERAL_QUOTE}Qtopia has been built.$$LITERAL_QUOTE $$LINE_SEP\
         echo $$LITERAL_QUOTE$$LITERAL_QUOTE $$LINE_SEP\
         echo $${LITERAL_QUOTE}You must now install Qtopia by running $${LITERAL_SQUOTE}make install$${LITERAL_SQUOTE}.$$LITERAL_QUOTE $$LINE_SEP\
-        echo $${LITERAL_QUOTE}This will put the files requried to run Qtopia into the image:$$LITERAL_QUOTE $$LINE_SEP\
+        echo $${LITERAL_QUOTE}This will put the files required to run Qtopia into the image:$$LITERAL_QUOTE $$LINE_SEP\
         echo $${LITERAL_QUOTE}$(INSTALL_ROOT)$$LITERAL_QUOTE $$LINE_SEP\
         echo $$LITERAL_QUOTE$$LITERAL_QUOTE
     runlast(qtopia_all.commands+=\$$qtopia_all_extra_commands)

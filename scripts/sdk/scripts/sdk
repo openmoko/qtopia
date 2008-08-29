@@ -28,6 +28,9 @@ ph_ok()
 ph_net()
 {
   # Bring up network to device
+if  ping -c 1 -i 2 $PHONEIP >/dev/null 2>&1 ; then
+    return 0;
+  fi
 
   sudo modprobe usbnet >/dev/null 2>&1
   export DEVNODE=`device_devnode`
@@ -85,7 +88,7 @@ ph_source()
     ARCH="$DEVICE" 
   fi
 
-  source /opt/Qtopia/SDK/scripts/devel-$ARCH.sh
+  . /opt/Qtopia/SDK/scripts/devel-$ARCH.sh
 }
 
 #---------------------------------------------------------------
@@ -97,7 +100,7 @@ ph_config()
   echo
   #Set ARCH to new option passed in and source environment
   ARCH=$CONFIG
-  source /opt/Qtopia/SDK/scripts/devel-$ARCH.sh
+  . /opt/Qtopia/SDK/scripts/devel-$ARCH.sh
 
   if [ "$ARCH" = "x86" ] ; then
     #This just makes output align in quiet mode
@@ -215,7 +218,7 @@ fi
 			sudo cp -f pkg/$PKG $QPKWEBSERVER
 			sudo chmod 644 $QPKWEBSERVER/$PKG
 	done;
-  sudo /opt/Qtopia/SDK/scripts/mkPackages $QPKWEBSERVER --descriptors http://$HOSTIP/
+  sudo /opt/Qtopia/SDK/scripts/mkPackages $QPKWEBSERVER --descriptors http://$HOSTIP
 
   if [ "$ARCH" = "x86" ] ;then
     PATH=/opt/Qtopia/SDK/$QPEVER/x86/image/bin:$PATH

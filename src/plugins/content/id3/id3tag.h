@@ -104,6 +104,8 @@ private:
     void readExtendedHeaders();
     void readFrameHeaders();
 
+    bool isValidFrame(const Id3Frame::Header &header) const;
+
     Header header;
 
     QList< QPair< quint32, qint64 > > frames;
@@ -115,6 +117,9 @@ private:
     QBuffer tagBuffer;
 
     bool unsynchroniseFrames;
+
+    bool isSyncSafe;
+    bool isNotSyncSafe;
 };
 
 #endif

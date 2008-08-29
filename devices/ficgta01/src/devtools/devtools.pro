@@ -35,6 +35,10 @@ desktop.files+=$$QTOPIA_DEPOT_PATH/devices/ficgta01/src/devtools/desktop/bt-powe
 desktop.files+=$$QTOPIA_DEPOT_PATH/devices/ficgta01/src/devtools/desktop/bt-poweroff.desktop
 desktop.files+=$$QTOPIA_DEPOT_PATH/devices/ficgta01/src/devtools/desktop/get-ssh-key.desktop
 desktop.files+=$$QTOPIA_DEPOT_PATH/devices/ficgta01/src/devtools/desktop/fast-charge.desktop
+desktop.files+=$$QTOPIA_DEPOT_PATH/devices/ficgta01/src/devtools/desktop/gps-poweron.desktop
+desktop.files+=$$QTOPIA_DEPOT_PATH/devices/ficgta01/src/devtools/desktop/gps-poweroff.desktop
+desktop.files+=$$QTOPIA_DEPOT_PATH/devices/ficgta01/src/devtools/desktop/gsm-poweron.desktop
+desktop.files+=$$QTOPIA_DEPOT_PATH/devices/ficgta01/src/devtools/desktop/gsm-poweroff.desktop
 
 desktop.path=/apps/Devtools
 desktop.depends+=install_docapi_f_dir

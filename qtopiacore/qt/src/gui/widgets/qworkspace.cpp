@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -2618,10 +2618,13 @@ QWorkspaceChild::QWorkspaceChild(QWidget* window, QWorkspace *parent, Qt::Window
 
 QWorkspaceChild::~QWorkspaceChild()
 {
-    if (iconw)
-        delete iconw->parentWidget();
-
     QWorkspace *workspace = qobject_cast<QWorkspace*>(parentWidget());
+    if (iconw) {
+        if (workspace)
+            workspace->d_func()->removeIcon(iconw->parentWidget());
+        delete iconw->parentWidget();
+    }
+
     if (workspace) {
         workspace->d_func()->focus.removeAll(this);
         if (workspace->d_func()->active == this)

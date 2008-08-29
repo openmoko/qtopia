@@ -32,7 +32,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -41,17 +41,17 @@
 </ul>
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -79,7 +79,7 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QBootSourceAccessory"></a>QBootSourceAccessory::QBootSourceAccessory ( const <a href="./qstring.html">QString</a> &amp; <i>id</i> = QString(), <a href="./qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QAbstractIpcInterface::Mode</a> <i>mode</i> = Client )</h3>
+<h3 class="fn"><a name="QBootSourceAccessory"></a>QBootSourceAccessory::QBootSourceAccessory ( const <a href="qstring.html">QString</a> &amp; <i>id</i> = QString(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QAbstractIpcInterface::Mode</a> <i>mode</i> = Client )</h3>
 <p>Construct a new boot source accessory object for the given provider <i>id</i> and attaches it to <i>parent</i>. The object will be created in client mode if <i>mode</i> is Client, or server mode otherwise.</p>
 <p>If <i>id</i> is empty, this class will use the default accessory provider that supports the boot source interface. If there is more than one service that supports the boot source interface, the caller should enumerate them with <a href="qhardwaremanager.html#providers">QHardwareManager::providers</a>() and create separate <a href="qbootsourceaccessory.html">QBootSourceAccessory</a> objects for each.</p>
 <p>See also <a href="qhardwaremanager.html#providers">QHardwareManager::providers</a>().</p>

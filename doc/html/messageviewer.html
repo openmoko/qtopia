@@ -28,7 +28,7 @@
 </ul>
 <p>The MessageViewer example shows how to create a Qtopia application which accesses messages stored by the Qtopia Messaging library. The example application searches for, and displays the properties of messages stored by Qtopia, but uses Qtopia services to delegate the display of the messages to another application.</p>
 <p align="center"><img src="images/messageviewer-example.png" alt="Screenshot of the MessageViewer example" /></p><p>The example application uses the Qtopia PIM library's Contacts listing to list the messages stored on the device, by contact. The application starts by allowing the user to select a contact from those stored on the device. Once a contact has been selected, a list of all the messages exchanged with that contact is displayed. When a message is selected from this list, the application creates a <a href="qtopiaservicerequest.html">QtopiaServiceRequest</a> to request that another application display the content of the selected message.</p>
-<p>The application is structured as a stack of widgets, contained by a <a href="./qstackedwidget.html">QStackedWidget</a>. We need two widgets in our stack: one to select a contact from a list, and another to select a message from a list.</p>
+<p>The application is structured as a stack of widgets, contained by a <a href="qstackedwidget.html">QStackedWidget</a>. We need two widgets in our stack: one to select a contact from a list, and another to select a message from a list.</p>
 <p>The contact selector widget uses a <a href="qcontactlistview.html">QContactListView</a> to present a list of available contacts:</p>
 <pre>    class ContactSelector : public QWidget
     {
@@ -108,8 +108,8 @@
         QLabel* label;
         QListView* listView;
     };</pre>
-<p>The MessageSelector uses a <a href="./qlistview.html">QListView</a> to present a listing of messages associated with a specific contact. To do this, we need to create a model of message data that the <a href="./qlistview.html">QListView</a> will present. Our class therefore contains a model object, of type MessageModel, and an object of type MessageDelegate, whose responsibility is to render each element in the list view using the data of each message.</p>
-<p>The MessageModel class is derived from <a href="./qstandarditemmodel.html">QStandardItemModel</a>, which is extended with a simple interface. With setContact(), we supply the model with a <a href="qcontact.html">QContact</a>, and it creates a listing of messages associated with that contact. It also provides the utility function messageId() which we use to extract the identifier of a message from the listing, given an index into the model.</p>
+<p>The MessageSelector uses a <a href="qlistview.html">QListView</a> to present a listing of messages associated with a specific contact. To do this, we need to create a model of message data that the <a href="qlistview.html">QListView</a> will present. Our class therefore contains a model object, of type MessageModel, and an object of type MessageDelegate, whose responsibility is to render each element in the list view using the data of each message.</p>
+<p>The MessageModel class is derived from <a href="qstandarditemmodel.html">QStandardItemModel</a>, which is extended with a simple interface. With setContact(), we supply the model with a <a href="qcontact.html">QContact</a>, and it creates a listing of messages associated with that contact. It also provides the utility function messageId() which we use to extract the identifier of a message from the listing, given an index into the model.</p>
 <pre>    class MessageModel : public QStandardItemModel
     {
         Q_OBJECT
@@ -123,7 +123,7 @@
         QMailId messageId(const QModelIndex&amp; index);
     };</pre>
 <p>The Qtopia Messaging library uses <a href="qmailid.html">QMailId</a> objects to identify messages stored in the system. <a href="qmailid.html">QMailId</a> objects can be default-constructed to an uninitialised state that does not identify any message, or they can contain the identifier for any message stored in the device. When we wish to view a message, the identifier for that message is all that we will need in order to request that another application display the message.</p>
-<p>The MessageModel class uses a helper class to contain the data elements relevant to each individual message that we will list. The helper class, MessageItem, is derived from <a href="./qstandarditem.html">QStandardItem</a>:</p>
+<p>The MessageModel class uses a helper class to contain the data elements relevant to each individual message that we will list. The helper class, MessageItem, is derived from <a href="qstandarditem.html">QStandardItem</a>:</p>
 <pre>    class MessageItem : public QStandardItem
     {
     public:
@@ -141,36 +141,36 @@
     {
         clear();
 
-        <span class="comment">//</span> Locate messages whose sender is this contact
+        <span class="comment">// Locate messages whose sender is this contact</span>
         QMailMessageKey msgsFrom;
 
-        <span class="comment">//</span> Locate messages whose recipients list contains this contact
+        <span class="comment">// Locate messages whose recipients list contains this contact</span>
         QMailMessageKey msgsTo;</pre>
 <p>The contact may have numerous phone numbers, so we pass over the list of phone numbers stored for this contact, and for each phone number, we add another filter criterion to our query. For messages we received from the contact, we add a <a href="qmailmessagekey.html">QMailMessageKey</a> matching where the message's <tt>Sender</tt> property is equal to the current phone number (note that the <tt>Equal</tt> relation is the default, so we don't need to specify it explicitly.) For messages that we sent to the contact, we add a <a href="qmailmessagekey.html">QMailMessageKey</a> matching where the message's <tt>Recipients</tt> property contains the current number. Unlike <tt>Sender</tt>, a messages's <tt>Recipients</tt> property can contain multiple contact's addresses, so we need to use the <tt>Contains</tt> relation instead of the default <tt>Equal</tt>.</p>
-<pre>        <span class="comment">//</span> Match on any of contact's phone numbers
+<pre>        <span class="comment">// Match on any of contact's phone numbers</span>
         foreach(const QString&amp; number, contact.phoneNumbers().values()) {
             msgsFrom |= QMailMessageKey(QMailMessageKey::Sender, number);
             msgsTo |= QMailMessageKey(QMailMessageKey::Recipients, number, QMailMessageKey::Contains);
         }</pre>
 <p>We also want to locate messages exchanged with this contact using email, so we add further criteria to our filters for each email address that is stored for this contact:</p>
-<pre>        <span class="comment">//</span> Match on any of contact's email addresses
+<pre>        <span class="comment">// Match on any of contact's email addresses</span>
         foreach(const QString&amp; address, contact.emailList()) {
             msgsFrom |= QMailMessageKey(QMailMessageKey::Sender, address);
             msgsTo |= QMailMessageKey(QMailMessageKey::Recipients, address, QMailMessageKey::Contains);
         }</pre>
 <p>Now we have created the message filters we want, we use the <a href="qmailstore.html#queryMessages">QMailStore::queryMessages</a>() function to locate the matching messages. This function applies the criteria of the supplied <a href="qmailmessagekey.html">QMailMessageKey</a> to each message stored by the Qtopia Messaging library, and returns a list containing the <a href="qmailid.html">QMailId</a> of each matching message. An overload of the function takes a second parameter: a <a href="qmailmessagesortkey.html">QMailMessageSortKey</a> which determines the order in which the matching messages are returned. We will use this option to sort the messages into reverse chronological order.</p>
-<pre>        <span class="comment">//</span> Sort messages by timestamp, newest to oldest
+<pre>        <span class="comment">// Sort messages by timestamp, newest to oldest</span>
         QMailMessageSortKey sort(QMailMessageSortKey::TimeStamp, Qt::DescendingOrder);
 
-        <span class="comment">//</span> Fetch the messages matching either of our queries, and return them sorted
+        <span class="comment">// Fetch the messages matching either of our queries, and return them sorted</span>
         QMailIdList matches(QMailStore::instance()-&gt;queryMessages(msgsFrom | msgsTo, sort));</pre>
 <p>We then take each <a href="qmailid.html">QMailId</a> from the list, and create a new MessageItem object from each one, to add to our model:</p>
-<pre>        <span class="comment">//</span> Add each returned message to our data model
+<pre>        <span class="comment">// Add each returned message to our data model</span>
         foreach (const QMailId&amp; id, matches)
             appendRow(new MessageItem(id));
     }</pre>
-<p>The MessageItem class stores the data we need to present each message in our <a href="./qlistview.html">QListView</a>. In order to present a useful listing of the message, we need to extract some data from the message. We do this using the <a href="qmailmessage.html">QMailMessage</a> class. This class has an constructor taking a <a href="qmailid.html">QMailId</a> and, optionally, a MailDataSelection value specifying whether to load the body of the message, or only the header. Since we only need summary information to present the message in the list view, we only want to load the header data for the message identified by the <a href="qmailid.html">QMailId</a>.</p>
-<p>Once we have loaded the message information, we extract some useful elements (such as the message subject, the message timestamp, and the type of the message), and store those items for the <a href="./qlistview.html">QListView</a> delegate to use when rendering the message item:</p>
+<p>The MessageItem class stores the data we need to present each message in our <a href="qlistview.html">QListView</a>. In order to present a useful listing of the message, we need to extract some data from the message. We do this using the <a href="qmailmessage.html">QMailMessage</a> class. This class has an constructor taking a <a href="qmailid.html">QMailId</a> and, optionally, a MailDataSelection value specifying whether to load the body of the message, or only the header. Since we only need summary information to present the message in the list view, we only want to load the header data for the message identified by the <a href="qmailid.html">QMailId</a>.</p>
+<p>Once we have loaded the message information, we extract some useful elements (such as the message subject, the message timestamp, and the type of the message), and store those items for the <a href="qlistview.html">QListView</a> delegate to use when rendering the message item:</p>
 <pre>    MessageItem::MessageItem(const QMailId&amp; id)
         : QStandardItem(), id(id)
     {
@@ -180,10 +180,10 @@
         static QIcon mmsIcon(&quot;:icon/multimedia&quot;);
         static QIcon emailIcon(&quot;:icon/email&quot;);
 
-        <span class="comment">//</span> Load the header for this message
+        <span class="comment">// Load the header for this message</span>
         QMailMessage message(id, QMailMessage::Header);
 
-        <span class="comment">//</span> Determine the properties we want to display
+        <span class="comment">// Determine the properties we want to display</span>
         QIcon* messageIcon = &amp;smsIcon;
         if (message.messageType() == QMailMessage::Mms)
             messageIcon = &amp;mmsIcon;
@@ -199,7 +199,7 @@
         QString time(QTimeString::localHM(messageTime.time(), QTimeString::Short));
         QString sublabel(QString(&quot;%1 %2 %3&quot;).arg(action).arg(date).arg(time));
 
-        <span class="comment">//</span> Configure this item
+        <span class="comment">// Configure this item</span>
         setIcon(sent ? sentMessageIcon : receivedMessageIcon);
         setText(message.subject());
         setData(sublabel, MessageDelegate::SubLabelRole);
@@ -214,10 +214,10 @@
     {
         setupUi(this);
 
-        <span class="comment">//</span> Necessary to create the menu (which contains our help entry):
+        <span class="comment">// Necessary to create the menu (which contains our help entry):</span>
         (void)QSoftMenuBar::menuFor(this);
 
-        <span class="comment">//</span> Connect our components
+        <span class="comment">// Connect our components</span>
         connect(contactSelector, SIGNAL(contactSelected(QContact)), messageSelector, SLOT(listMessages(QContact)));
         connect(messageSelector, SIGNAL(listPrepared()), this, SLOT(showMessageList()));
         connect(messageSelector, SIGNAL(messageSelected(QMailId)), this, SLOT(viewMessage(QMailId)));
@@ -263,7 +263,7 @@
 <p>Finally, we handle the event where the user selects a message from our list. Rather than displaying the message ourself, we will use the <a href="qtopiaservicerequest.html">QtopiaServiceRequest</a> mechanism to request that another application handle this task for us. The <tt>Messages</tt> service exports a <tt>viewMessage</tt> function, which takes a <a href="qmailid.html">QMailId</a> object as a parameter; we respond to the user's selection by invoking this service with the identifier of the message that they selected:</p>
 <pre>    void MessageViewer::viewMessage(const QMailId&amp; id)
     {
-        <span class="comment">//</span> Request that some application display the selected message
+        <span class="comment">// Request that some application display the selected message</span>
         QtopiaServiceRequest req( &quot;Messages&quot;, &quot;viewMessage(QMailId)&quot; );
         req &lt;&lt; id;
         req.send();

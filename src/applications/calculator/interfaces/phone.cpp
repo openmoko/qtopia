@@ -35,7 +35,7 @@
 static const int KEY_HOLD_TIME = 300;
 
 FormPhone::FormPhone(QWidget *parent)
-    : CalcUserInterface(parent)
+    : CalcUserInterface(parent), negate_action(0)
 {
     setupUi(this);
     if ( layoutDirection() == Qt::LeftToRight ) {
@@ -164,6 +164,7 @@ void FormPhone::showEvent ( QShowEvent *e ) {
 
 void FormPhone::plus(){
     systemEngine->pushInstruction("Add");
+    if (negate_action) negate_action->setVisible(false);
     lastInstruction=1;
     firstNumber = false;
 #if defined(QTOPIA_PHONE)
@@ -175,6 +176,7 @@ void FormPhone::plus(){
 }
 void FormPhone::minus(){
     systemEngine->pushInstruction("Subtract");
+    if (negate_action) negate_action->setVisible(false);
     lastInstruction=2;
     firstNumber = false;
 #if defined(QTOPIA_PHONE)
@@ -186,6 +188,7 @@ void FormPhone::minus(){
 }
 void FormPhone::times(){
     systemEngine->pushInstruction("Multiply");
+    if (negate_action) negate_action->setVisible(false);
     lastInstruction=3;
     firstNumber = false;
 #if defined(QTOPIA_PHONE)
@@ -197,6 +200,7 @@ void FormPhone::times(){
 }
 void FormPhone::div(){
     systemEngine->pushInstruction("Divide");
+    if (negate_action) negate_action->setVisible(false);
     lastInstruction=0;
     firstNumber = false;
 #if defined(QTOPIA_PHONE)
@@ -215,6 +219,7 @@ void FormPhone::eval(){
 #endif
     ) {
         systemEngine->evaluate();
+        if (negate_action) negate_action->setVisible(false);
         firstNumber = true;
 #if defined(QTOPIA_PHONE)
         QSoftMenuBar::setLabel(this, Qt::Key_Select, QSoftMenuBar::NoLabel);
@@ -257,6 +262,7 @@ void FormPhone::changeResetButtonText ( ResetState drs ) {
         QSoftMenuBar::setLabel(this, Qt::Key_Back, QSoftMenuBar::BackSpace);
 #endif
     }
+    if (negate_action) negate_action->setVisible(true);
 }
 
 void FormPhone::keyReleaseEvent(QKeyEvent *e){
@@ -383,3 +389,7 @@ void FormPhone::timerEvent(QTimerEvent *e){
 #endif
 }
 
+void FormPhone::negateAction(QAction* action)
+{
+    negate_action = action;
+}

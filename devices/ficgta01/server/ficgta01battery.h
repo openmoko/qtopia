@@ -28,7 +28,7 @@
 #include <QSocketNotifier>
 
 class QPowerSourceProvider;
-
+class QValueSpaceItem;
 
 class Ficgta01Battery : public QObject
 {
@@ -40,24 +40,24 @@ protected:
     virtual void timerEvent(QTimerEvent *);
 
 private:
-    bool APMEnabled() const;
     int percentCharge;
+    bool charging;
+    bool cableEnabled;
 
     QPowerSourceProvider *ac;
-    QPowerSourceProvider *battery;
     QPowerSourceProvider *backup;
+    QPowerSourceProvider *battery;
 
-    QSocketNotifier *powerNotify;
-    int  kbdFDpower;
-    void openDetect();
     int getBatteryLevel();
     bool batteryIsFull();
-
+    QValueSpaceItem *vsUsbCable;
+    
 private Q_SLOTS:
     
     void updateFicStatus();
-    void apmFileChanged(const QString & file);
-    void readPowerKbdData();
+
+    void cableChanged();
+    void checkChargeState();
     
 };
 

@@ -70,7 +70,7 @@ class QtopiaSqlPrivate : public QObject {
         void installSorting( QSqlDatabase &db);
         friend class QtopiaSql;
     private slots:
-        void disksChanged ();
+        void disksChanged (QtopiaSqlMigratePlugin *plugin = 0);
         void threadTerminated();
         void cardMessage(const QString &message,const QByteArray &data);
         void systemMessage(const QString &message,const QByteArray &data);

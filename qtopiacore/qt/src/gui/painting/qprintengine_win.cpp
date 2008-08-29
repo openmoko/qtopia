@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -397,13 +397,17 @@ void QAlphaPaintEngine::flushAndInit(bool init)
                   1.0f / (qreal(d->m_pdev->logicalDpiY()) / qreal(qt_defaultDpi())));
         painter()->setTransform(mtx);
         painter()->drawPicture(0, 0, *d->m_pic);
-
         d->m_cliprgn = QRegion();
         d->resetState(painter());
 
         QVector<QRect> rects = d->m_alphargn.rects();
-        for (int i=0; i<rects.count(); ++i)
-            d->drawAlphaImage(rects.at(i));
+        if (rects.count() > 10) {
+            d->drawAlphaImage(d->m_alphargn.boundingRect());
+        } else {
+            for (int i=0; i<rects.count(); ++i)
+                d->drawAlphaImage(rects.at(i));
+        }
+
         d->m_alphargn = QRegion();
 
         painter()->restore();

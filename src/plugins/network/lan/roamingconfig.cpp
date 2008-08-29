@@ -148,11 +148,27 @@ void RoamingPage::listActivated(QListWidgetItem* item)
         item->setFont( f );
         item->setText( item->text() );
         currentSelection = item;
-    }else if ( item == currentSelection ) {
+    }else if ( currentSelection ) {
         ui.header->setText( tr("Order of selection") );
-        QFont f = item->font();
+        QFont f = currentSelection->font();
         f.setBold( false );
         currentSelection->setFont( f );
+        if ( item != currentSelection) {
+            int oldRow = ui.knownNetworks->row(currentSelection);
+            int newRow = ui.knownNetworks->row(item);
+            if (oldRow>newRow) {
+                ui.knownNetworks->takeItem(oldRow);
+                ui.knownNetworks->insertItem(newRow+1, currentSelection);
+                ui.knownNetworks->takeItem(newRow);
+                ui.knownNetworks->insertItem(oldRow, item);
+            } else {
+                ui.knownNetworks->takeItem(oldRow);
+                ui.knownNetworks->insertItem(newRow, currentSelection);
+                ui.knownNetworks->takeItem(newRow-1);
+                ui.knownNetworks->insertItem(oldRow, item);
+            }
+            ui.knownNetworks->setCurrentRow(newRow);
+        }
         currentSelection = 0;
     }
 #else

@@ -37,33 +37,33 @@
 <p>See also <a href="services.html">Services</a> and <a href="qtopiaservicerequest.html">QtopiaServiceRequest</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="app"></a><a href="./qstring.html">QString</a> QtopiaService::app ( const <a href="./qstring.html">QString</a> &amp; <i>service</i>, const <a href="./qstring.html">QString</a> &amp; <i>appname</i> = QString() )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="app"></a><a href="qstring.html">QString</a> QtopiaService::app ( const <a href="qstring.html">QString</a> &amp; <i>service</i>, const <a href="qstring.html">QString</a> &amp; <i>appname</i> = QString() )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the application providing the <i>service</i> or a null string if there is no such service.</p>
 <p>If <i>appname</i> is provided, a specific binding to that application may be used rather than the global binding.</p>
 <p>See also <a href="qtopiaservice.html#apps">apps</a>().</p>
-<h3 class="fn"><a name="appConfig"></a><a href="./qstring.html">QString</a> QtopiaService::appConfig ( const <a href="./qstring.html">QString</a> &amp; <i>service</i>, const <a href="./qstring.html">QString</a> &amp; <i>appname</i> = QString() )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns the <a href="./qsettings.html">QSettings</a> file defining the facilities available from the applications providing the <i>service</i>, or a null string if there is no such service.</p>
-<p>The <a href="./qsettings.html">QSettings</a> can be used to extract more detailed application-specific information about the application providing the service.</p>
+<h3 class="fn"><a name="appConfig"></a><a href="qstring.html">QString</a> QtopiaService::appConfig ( const <a href="qstring.html">QString</a> &amp; <i>service</i>, const <a href="qstring.html">QString</a> &amp; <i>appname</i> = QString() )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the <a href="qsettings.html">QSettings</a> file defining the facilities available from the applications providing the <i>service</i>, or a null string if there is no such service.</p>
+<p>The <a href="qsettings.html">QSettings</a> can be used to extract more detailed application-specific information about the application providing the service.</p>
 <p>Note: The application always provides at least the services defined in the <a href="qtopiaservice.html#config">config</a>() file - the information in the appConfig() is application-specific.</p>
 <p>If <i>appname</i> is provided, a specific binding to that application may be used rather than the global binding.</p>
 <p>See also <a href="qtopiaservice.html#config">config</a>().</p>
-<h3 class="fn"><a name="apps"></a><a href="./qstringlist.html">QStringList</a> QtopiaService::apps ( const <a href="./qstring.html">QString</a> &amp; <i>service</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="apps"></a><a href="qstringlist.html">QStringList</a> QtopiaService::apps ( const <a href="qstring.html">QString</a> &amp; <i>service</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns all applications that offer the <i>service</i>, or a null string if there is no such service offered.</p>
 <p>See also <a href="qtopiaservice.html#app">app</a>().</p>
-<h3 class="fn"><a name="binding"></a><a href="./qstring.html">QString</a> QtopiaService::binding ( const <a href="./qstring.html">QString</a> &amp; <i>service</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns the name of the <a href="./qsettings.html">QSettings</a> file defining the bindings which the user has selected for the <i>service</i>.</p>
-<h3 class="fn"><a name="channel"></a><a href="./qstring.html">QString</a> QtopiaService::channel ( const <a href="./qstring.html">QString</a> &amp; <i>service</i>, const <a href="./qstring.html">QString</a> &amp; <i>appname</i> = QString() )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="binding"></a><a href="qstring.html">QString</a> QtopiaService::binding ( const <a href="qstring.html">QString</a> &amp; <i>service</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the name of the <a href="qsettings.html">QSettings</a> file defining the bindings which the user has selected for the <i>service</i>.</p>
+<h3 class="fn"><a name="channel"></a><a href="qstring.html">QString</a> QtopiaService::channel ( const <a href="qstring.html">QString</a> &amp; <i>service</i>, const <a href="qstring.html">QString</a> &amp; <i>appname</i> = QString() )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the QCop channel for the given <i>service</i>, or a null string if there is no such service.</p>
 <p>If <i>appname</i> is provided, a specific binding to that application may be used rather than the global binding.</p>
 <p>See also <a href="qtopiaservice.html#channels">channels</a>().</p>
-<h3 class="fn"><a name="channels"></a><a href="./qstringlist.html">QStringList</a> QtopiaService::channels ( const <a href="./qstring.html">QString</a> &amp; <i>service</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="channels"></a><a href="qstringlist.html">QStringList</a> QtopiaService::channels ( const <a href="qstring.html">QString</a> &amp; <i>service</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the QCop channels for applications that offer <i>service</i>.</p>
 <p>See also <a href="qtopiaservice.html#channel">channel</a>().</p>
-<h3 class="fn"><a name="config"></a><a href="./qstring.html">QString</a> QtopiaService::config ( const <a href="./qstring.html">QString</a> &amp; <i>service</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
-<p>Returns the name of the <a href="./qsettings.html">QSettings</a> file defining the facilities available from the applications providing the <i>service</i>, or a null string if there is no such service.</p>
+<h3 class="fn"><a name="config"></a><a href="qstring.html">QString</a> QtopiaService::config ( const <a href="qstring.html">QString</a> &amp; <i>service</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<p>Returns the name of the <a href="qsettings.html">QSettings</a> file defining the facilities available from the applications providing the <i>service</i>, or a null string if there is no such service.</p>
 <p>Applications providing the service may have additional configuration defined in the <a href="qtopiaservice.html#appConfig">appConfig</a>() file.</p>
 <p>See also <a href="qtopiaservice.html#appConfig">appConfig</a>().</p>
-<h3 class="fn"><a name="list"></a><a href="./qstringlist.html">QStringList</a> QtopiaService::list ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="list"></a><a href="qstringlist.html">QStringList</a> QtopiaService::list ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a list of available services.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

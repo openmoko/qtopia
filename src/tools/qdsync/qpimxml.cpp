@@ -493,8 +493,8 @@ void QPimXmlStreamReader::readCustomFieldElements(QPimRecord &record)
             QMapIterator<QString, QString> it(orig);
             while(it.hasNext()) {
                 it.next();
-                // e.g. replace, but not remove.
-                if (result.contains(it.key()))
+                // non-destructive.
+                if (!result.contains(it.key()))
                     result.insert(it.key(), it.value());
             }
         }
@@ -732,7 +732,8 @@ QTask QPimXmlStreamReader::readTask(QString &serverId, const QTaskModel *model)
         else
             task.setPercentCompleted(0);
     }
-    task.setNotes(readTextElement(t_Notes));
+    if (readStartElement(t_Notes))
+        task.setNotes(readTextElement(t_Notes));
 
     readCategoryElements(task);
     readCustomFieldElements(task);
@@ -783,8 +784,8 @@ void QPimXmlStreamReader::readBaseAppointmentFields(QAppointment &appointment)
                 appointment.clearAlarm();
             else
                 appointment.setAlarm(delay, f);
-            readEndElement();
         }
+        readEndElement();
     }
 }
 
@@ -877,7 +878,8 @@ QAppointment QPimXmlStreamReader::readAppointment(QString &serverId, QList<QPimX
         }
         readEndElement();
     }
-    appointment.setNotes(readTextElement(t_Notes));
+    if (readStartElement(t_Notes))
+        appointment.setNotes(readTextElement(t_Notes));
     readCategoryElements(appointment);
     readCustomFieldElements(appointment);
 

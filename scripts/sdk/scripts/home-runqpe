@@ -6,7 +6,7 @@ QPEVER=`version`
 
 export QTOPIA_PHONE_DEVICE="sim:127.0.0.1"
 
-source /opt/Qtopia/SDK/scripts/devel-x86.sh
+. /opt/Qtopia/SDK/scripts/devel-x86.sh
 
 if [ ! -z "$QPEHOME" ]; then
     HOME=$QPEHOME

@@ -296,11 +296,16 @@ TextEdit::TextEdit( QWidget *parent, Qt::WFlags f )
     QSettings cfg("Trolltech","TextEdit");
     cfg.beginGroup("View");
     defaultFontSize = cfg.value("FontSize", 0.0).toDouble();
+    originalFontSize = cfg.value("OriginalFontSize", 0.0).toDouble();
 
     if (defaultFontSize == 0.0) {
         QSettings gcfg("Trolltech","qpe");
         gcfg.beginGroup("Font");
         defaultFontSize = gcfg.value("FontSize[]", 7.0).toDouble();
+    }
+    if (originalFontSize == 0.0) {
+        originalFontSize = defaultFontSize;
+        cfg.setValue("OriginalFontSize",originalFontSize);
     }
     setupFontSizes();
 
@@ -369,6 +374,8 @@ TextEdit::setupFontSizes(void)
     }
     if (!fontSizes.contains(defaultFontSize))
         fontSizes << defaultFontSize;
+    if (!fontSizes.contains(originalFontSize))
+        fontSizes << originalFontSize;
     qSort(fontSizes.begin(), fontSizes.end());
 }
 
@@ -377,6 +384,8 @@ void TextEdit::zoomIn()
     qreal fsize;
     if (editor->document())
         fsize = editor->document()->defaultFont().pointSizeF();
+    else
+        fsize = defaultFontSize;
 
     int index = fontSizes.indexOf(fsize);
     setFontSize(fontSizes.at(index + 1));
@@ -388,6 +397,8 @@ void TextEdit::zoomOut()
     qreal fsize;
     if (editor->document())
         fsize = editor->document()->defaultFont().pointSizeF();
+    else
+        fsize = defaultFontSize;
 
     int index = fontSizes.indexOf(fsize);
     setFontSize(fontSizes.at(index - 1));

@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QSimIconReader Class Reference</h1>
 <p>The QSimIconReader class provides access to icons on a SIM. <a href="#details">More...</a></p>
-<pre>    #include &lt;QSimIconReader&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QSimIconReader&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qsimiconreader-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -27,7 +27,7 @@
 <li><div class="fn"/>void <b><a href="qsimiconreader.html#requestIcon">requestIcon</a></b> ( int <i>iconId</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -36,16 +36,16 @@
 <li><div class="fn"/>void <b><a href="qsimiconreader.html#iconNotFound">iconNotFound</a></b> ( int <i>iconId</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -56,15 +56,15 @@
 <p>See also <a href="qbinarysimfile.html">QBinarySimFile</a> and <a href="qsimtoolkit.html">QSimToolkit</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QSimIconReader"></a>QSimIconReader::QSimIconReader ( const <a href="./qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QSimIconReader"></a>QSimIconReader::QSimIconReader ( const <a href="qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Construct a new SIM icon reader and attach it to <i>parent</i>. The icon files will be read from <i>service</i>.</p>
 <h3 class="fn"><a name="dtor.QSimIconReader"></a>QSimIconReader::~QSimIconReader ()</h3>
 <p>Destroy this SIM icon reader.</p>
 <h3 class="fn"><a name="haveIcon"></a>bool QSimIconReader::haveIcon ( int <i>iconId</i> ) const</h3>
 <p>Returns true if we have already required icon <i>iconId</i>; false otherwise. If this function returns true, then the return value from <a href="qsimiconreader.html#icon">icon</a>() for <i>iconId</i> will be a valid image.</p>
 <p>See also <a href="qsimiconreader.html#icon">icon</a>() and <a href="qsimiconreader.html#requestIcon">requestIcon</a>().</p>
-<h3 class="fn"><a name="icon"></a><a href="./qimage.html">QImage</a> QSimIconReader::icon ( int <i>iconId</i> ) const</h3>
-<p>Returns the cached icon image associated with <i>iconId</i>. If the icon has not been requested yet, this will return a null <a href="./qimage.html">QImage</a>.</p>
+<h3 class="fn"><a name="icon"></a><a href="qimage.html">QImage</a> QSimIconReader::icon ( int <i>iconId</i> ) const</h3>
+<p>Returns the cached icon image associated with <i>iconId</i>. If the icon has not been requested yet, this will return a null <a href="qimage.html">QImage</a>.</p>
 <p>See also <a href="qsimiconreader.html#haveIcon">haveIcon</a>() and <a href="qsimiconreader.html#requestIcon">requestIcon</a>().</p>
 <h3 class="fn"><a name="iconAvailable"></a>void QSimIconReader::iconAvailable ( int <i>iconId</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when the icon associated with <i>iconId</i> is available via the <a href="qsimiconreader.html#icon">icon</a>() function.</p>

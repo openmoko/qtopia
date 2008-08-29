@@ -156,7 +156,7 @@ QFile *CustomPushService::createReceivingFile(const QString &name)
     if (sepIndex != -1)
         fileName = fileName.mid(sepIndex + 1);
     if (fileName.isEmpty())
-        fileName = "unnamed";
+        fileName = tr("unnamed");
 
     // assuming incomingDirectory() ends with a dir separator
     QFile *file = new QFile(incomingDirectory() + fileName);
@@ -1399,6 +1399,9 @@ void ObexPushServiceProvider::start()
         if (!sdpRecord.isNull())
             m_sdpRecordHandle = registerRecord(sdpRecord);
     }
+
+    if (sdpRecord.isNull())
+        qWarning() << "ObexPushServiceProvider: cannot read" << sdpRecordFile.fileName();
 
     if (m_sdpRecordHandle == 0) {
         emit started(true, tr("Error registering with SDP server"));

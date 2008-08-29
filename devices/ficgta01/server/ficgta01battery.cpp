@@ -33,154 +33,61 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <QValueSpaceItem>
+#include <QtopiaIpcEnvelope>
 
 
-struct Ficgta01Detect {
-    unsigned int   dummy1;
-    unsigned int   dummy2;
-    unsigned short type;
-    unsigned short code;
-    unsigned int   value;
-};
+// /sys/devices/platform/bq27000-battery.0/power_supply/bat
 
 Ficgta01Battery::Ficgta01Battery(QObject *parent)
-: QObject(parent), ac(0), battery(0), backup(0)
+: QObject(parent),
+  ac(0),
+  battery(0),
+  charging(0),
+  percentCharge(0),
+  cableEnabled(0),
+  vsUsbCable(0)
 {
-    bool apm = APMEnabled();
-qWarning()<<"Ficgta01Battery::Ficgta01Battery";
 
-    QtopiaServerApplication::taskValueSpaceSetAttribute("Ficgta01Battery",
-                                                        "APMAvailable", apm);
-
-    if(!apm) return;
+    qWarning()<<"Ficgta01Battery::Ficgta01Battery";
 
     ac = new QPowerSourceProvider(QPowerSource::Wall, "PrimaryAC", this);
     battery = new QPowerSourceProvider(QPowerSource::Battery, "Ficgta01Battery", this);
-    backup = new QPowerSourceProvider(QPowerSource::Wall, "BackupAC", this);
 
-    QFileMonitor *fileMon;
-    fileMon = new QFileMonitor( "/proc/apm", QFileMonitor::Auto, this);
-    connect(fileMon, SIGNAL( fileChanged ( const QString & )),
-            this,SLOT(apmFileChanged(const QString &)));
+
+    vsUsbCable = new QValueSpaceItem("/Hardware/UsbGadget/cableConnected", this);
+    connect( vsUsbCable, SIGNAL(contentsChanged()), SLOT(cableChanged()));
+
+    battery->setAvailability(QPowerSource::Available);
+
+    checkChargeState();
 
     startTimer(60 * 1000);
-    openDetect();
+
     QTimer::singleShot( 10 * 1000, this, SLOT(updateFicStatus()));
-}
-
-void Ficgta01Battery::apmFileChanged(const QString & file)
-{
-    qWarning()<<"apmFileChanged(const QString & file)"<<file;
-    updateFicStatus();
-}
-
-void Ficgta01Battery::openDetect()
-{
-    kbdFDpower = ::open("/dev/input/event2", O_RDONLY|O_NDELAY, 0);
-    if (kbdFDpower >= 0) {
-        powerNotify = new QSocketNotifier( kbdFDpower, QSocketNotifier::Read, this );
-        connect( powerNotify, SIGNAL(activated(int)), this, SLOT(readPowerKbdData()));
-    } else {
-        qWarning("Cannot open /dev/input/event2 for keypad (%s)", strerror(errno));
-        //     err = 1;
-    }
-
-//    if(err !=0)
-//        return;
-
 }
 
 void Ficgta01Battery::updateFicStatus()
 {
-    bool ok = false;
 
-    int acs = 0xff; // AC status
-    int bs = 0xff; // Battery status
-    int bf = 0xff; // Battery flag
-    int pc = -1; // Remaining battery (percentage)
     int min = -1; // Remaining battery (minutes)
 
-    FILE *f = fopen("/proc/apm", "r");
+    // apm on freerunner is borked.
 
-    if ( f  ) {
-        //I 1.13 1.2 0x02 0x00 0xff 0xff 49% 147 sec
-        char u;
-        fscanf(f, "%*[^ ] %*d.%*d 0x%*x 0x%x 0x%x 0x%x %d%% %i %c",
-                &acs, &bs, &bf, &pc, &min, &u);
-        fclose(f);
-        qLog(PowerManagement) << "Fic"<<acs << bs << bf << pc << min << u;
+    batteryIsFull();
 
-        // Wall sources
-        if(0x00 == acs) {
-            // Off line
-            ac->setAvailability(QPowerSource::NotAvailable);
-            backup->setAvailability(QPowerSource::NotAvailable);
-            qLog(PowerManagement)<<"ac not"<<"backup not";
-        } else if(0x01 == acs) {
-            ac->setAvailability(QPowerSource::Available);
-            backup->setAvailability(QPowerSource::NotAvailable);
-            qLog(PowerManagement)<<"ac avail"<<"backup not";
-        } else if(0x02 == acs) {
-            ac->setAvailability(QPowerSource::NotAvailable);
-            backup->setAvailability(QPowerSource::Available);
-            qLog(PowerManagement)<<"ac not"<<"backup avail";
-        } else {
-            ac->setAvailability(QPowerSource::Failed);
-            backup->setAvailability(QPowerSource::Failed);
-            qLog(PowerManagement)<<"ac failed"<<"backuip failed";
-        }
-
-        // Battery source
-              battery->setCharge(-1);
-        if(bf == 0x80) {
-            battery->setAvailability(QPowerSource::NotAvailable);
-             qLog(PowerManagement)<<"battery not";
-        } else {
-            battery->setAvailability(QPowerSource::Available);
-             qLog(PowerManagement)<<"battery avail";
-            switch ( u ) {
-                case 'm': break;
-                case 's': min /= 60; break; // ok
-                default: min = -1; // unknown
-            }
-            bool charging = false;
-            if(pc != -1) {
-                battery->setCharge(pc);
-                qLog(PowerManagement)<<"setCharge"<<pc;
-            } else if(bf & 0x01) {
-                qLog(PowerManagement)<<"High";
-                battery->setCharge(100);
-            } else if(bf & 0x02) {
-                qLog(PowerManagement)<<"Low";
-                battery->setCharge(25);
-            } else if(bf & 0x04) {
-                qLog(PowerManagement)<<"Critical";
-                battery->setCharge(5);
-            } else if(bf & 0x08) {
-                qLog(PowerManagement)<<"Charging";
-                if(batteryIsFull()) {
-                    charging = false;
-                } else {
-                    charging = true;
-                }
-                battery->setCharge(percentCharge);
-            } else if(bf & 0xFF) {
-                qLog(PowerManagement)<<"Critical/Unknown";
-                battery->setCharge(5);
-            } else {
-                qLog(PowerManagement)<<"setCharge -1";
-                battery->setCharge(-1);
-            }
-            battery->setCharging( charging);
-            battery->setTimeRemaining(min);
-        }
+    if(cableEnabled) {
+        ac->setAvailability(QPowerSource::Available);
     } else {
-        ac->setAvailability(QPowerSource::Failed);
-        battery->setAvailability(QPowerSource::Failed);
-        backup->setAvailability(QPowerSource::Failed);
-        qLog(PowerManagement)<<"APM QPowerSource Failed";
-
+        ac->setAvailability(QPowerSource::NotAvailable);
     }
+
+    battery->setCharge( percentCharge);
+
+    qLog(PowerManagement) << __PRETTY_FUNCTION__ << cableEnabled << percentCharge;
+
+    battery->setCharging( cableEnabled);
+    battery->setTimeRemaining(min);
 }
 
 /*! \internal */
@@ -190,53 +97,37 @@ void Ficgta01Battery::timerEvent(QTimerEvent *)
 }
 
 /*! \internal */
-bool Ficgta01Battery::APMEnabled() const
+void Ficgta01Battery::cableChanged()
 {
-    int apm_install_flags;
-    FILE *f = fopen("/proc/apm", "r");
-    if ( f ) {
-        //I 1.13 1.2 0x02 0x00 0xff 0xff 49% 147 sec
-        fscanf(f, "%*[^ ] %*d.%*d 0x%x 0x%*x 0x%*x 0x%*x %*d%% %*i %*c",
-                &apm_install_flags);
-        fclose(f);
+    bool ch = vsUsbCable->value().toBool();
+    qLog(PowerManagement) << __PRETTY_FUNCTION__ << ch;
+    cableEnabled = ch;
+    charging = ch;
 
-        if (!(apm_install_flags & 0x08)) //!APM_BIOS_DISABLED
-        {
-			qLog(PowerManagement)<<"FIC APM Enabled";
-            return true;
-        }
-    }
-	qLog(PowerManagement)<<"FIC APM Disabled";
-    return false;
+    QTimer::singleShot( 1000, this, SLOT(updateFicStatus()));
 }
 
 
-void Ficgta01Battery::readPowerKbdData()
-{
-    Ficgta01Detect event;
-
-    int n = read(kbdFDpower, &event, sizeof(Ficgta01Detect));
-    if(n != (int)sizeof(Ficgta01Detect)) {
-        return;
-    }
-    switch(event.code) {
-    case 0x164: //usb/power plug up = out.down = in
-               QTimer::singleShot( 1000, this, SLOT(updateFicStatus()));
-        break;
-    }
-}
-
+/*! \internal */
 int Ficgta01Battery::getBatteryLevel()
 {
+    qLog(PowerManagement) << __PRETTY_FUNCTION__;
     int voltage = 0;
+    QString batteryVoltage;
     QString inStr;
-    QFile battvolt( "/sys/bus/i2c/devices/0-0008/battvolt");
+    if ( QFileInfo("/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073").exists()) {
+        batteryVoltage = "/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/battvolt";
+    } else {
+        batteryVoltage = "/sys/devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/battvolt";
+    }
+
+    QFile battvolt( batteryVoltage);
     battvolt.open(QIODevice::ReadOnly | QIODevice::Text);
     QTextStream in(&battvolt);
     in >> inStr;
     voltage = inStr.toInt();
     battvolt.close();
-
+    qLog(PowerManagement)<<"voltage"<< inStr;
 
     // lets use 3400 as empty, for all intensive purposes,
     // 2 minutes left of battery life till neo shuts off might
@@ -258,11 +149,50 @@ int Ficgta01Battery::getBatteryLevel()
     return voltage;
 }
 
+
+/*! \internal */
 bool Ficgta01Battery::batteryIsFull()
 {
+    qLog(PowerManagement) << __PRETTY_FUNCTION__;
     if(getBatteryLevel() + 3400 > 4200)
         return true;
     return false;
+}
+
+
+void Ficgta01Battery::checkChargeState()
+{
+    qLog(PowerManagement) << __PRETTY_FUNCTION__;
+    QString chgState;
+    if (QFileInfo("/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/chgstate").exists()) {
+        //freerunner
+        chgState = "/sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/chgstate";
+    } else {
+        //1973
+        chgState = "/sys/devices/platform/s3c2410-i2c/i2c-adapter/i2c-0/0-0008/chgstate";
+    }
+
+    QString inStr;
+    QFile chgstate( chgState);
+    chgstate.open(QIODevice::ReadOnly | QIODevice::Text);
+    QTextStream in(&chgstate);
+    in >> inStr;
+    chgstate.close();
+    qLog(PowerManagement) << inStr;
+
+    if (inStr.contains("enabled")) {
+        cableEnabled = true;
+    } else {
+        cableEnabled = false;
+    }
+
+    charging = cableEnabled;
+    cableEnabled = cableEnabled;
+    battery->setCharging(cableEnabled);
+
+    QtopiaIpcEnvelope e2("QPE/Neo1973Hardware", "cableConnected(bool)");
+    e2 << cableEnabled;
+    updateFicStatus();
 }
 
 QTOPIA_TASK(Ficgta01Battery, Ficgta01Battery);

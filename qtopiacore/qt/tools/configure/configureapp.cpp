@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -2625,22 +2625,21 @@ Configure::ProjectType Configure::projectType( const QString& proFileName )
 
 #if !defined(EVAL)
 
-bool Configure::showLicense(QString orgLicenseFile)
+bool Configure::showLicense(QString licenseFile)
 {
     if (dictionary["LICENSE_CONFIRMED"] == "yes") {
         cout << "You have already accepted the terms of the license." << endl << endl;
         return true;
     }
 
-    QString licenseFile = orgLicenseFile;
     QString theLicense;
-    if (dictionary["EDITION"] == "OpenSource") {
+    if (dictionary["EDITION"] == "OpenSource" || dictionary["EDITION"] == "Snapshot") {
         theLicense = "GNU General Public License (GPL) version 2 or 3";
     } else {
         // the first line of the license file tells us which license it is
         QFile file(licenseFile);
         if (!file.open(QFile::ReadOnly)) {
-            cout << "Failed to load LICENSE file" << endl;
+            cout << "Failed to load LICENSE file";
             return false;
         }
         theLicense = file.readLine().trimmed();
@@ -2651,7 +2650,7 @@ bool Configure::showLicense(QString orgLicenseFile)
         cout << "You are licensed to use this software under the terms of" << endl
              << "the " << theLicense << "." << endl
              << endl;
-        if (dictionary["EDITION"] == "OpenSource") {
+        if (dictionary["EDITION"] == "OpenSource" || dictionary["EDITION"] == "Snapshot") {
             cout << "Type '2' to view the GNU General Public License version 2 (GPLv2)." << endl;
             cout << "Type '3' to view the GNU General Public License version 3 (GPLv3)." << endl;
         } else {
@@ -2669,11 +2668,11 @@ bool Configure::showLicense(QString orgLicenseFile)
         } else if (accept == 'n') {
             return false;
         } else {
-            if (dictionary["EDITION"] == "OpenSource") {
+            if (dictionary["EDITION"] == "OpenSource" || dictionary["EDITION"] == "Snapshot") {
                 if (accept == '3')
-                    licenseFile = orgLicenseFile + "3";
+                    licenseFile += "3";
                 else
-                    licenseFile = orgLicenseFile + "2";
+                    licenseFile += "2";
             }
             // Get console line height, to fill the screen properly
             int i = 0, screenHeight = 25; // default
@@ -2687,7 +2686,7 @@ bool Configure::showLicense(QString orgLicenseFile)
             // Prompt the license content to the user
             QFile file(licenseFile);
             if (!file.open(QFile::ReadOnly)) {
-                cout << "Failed to load LICENSE file" << endl;
+                cout << "Failed to load LICENSE file";
                 return false;
             }
             QStringList licenseContent = QString(file.readAll()).split('\n');
@@ -2711,6 +2710,20 @@ void Configure::readLicense()
         cout << endl << "This is the Qt/Windows Open Source Edition." << endl;
         licenseInfo["LICENSEE"] = "Open Source";
         dictionary["EDITION"] = "OpenSource";
+        dictionary["QT_EDITION"] = "QT_EDITION_OPENSOURCE";
+        cout << endl;
+        if (!showLicense(dictionary["LICENSE FILE"])) {
+            cout << "Configuration aborted since license was not accepted";
+            dictionary["DONE"] = "error";
+            return;
+        }
+        return;
+    }
+    dictionary["LICENSE FILE"] = sourcePath + "/LICENSE.SNAPSHOT.OPENSOURCE.GPL";
+    if (QFile::exists(dictionary["LICENSE FILE"] + "2") || QFile::exists(dictionary["LICENSE FILE"] + "3")) {
+        cout << endl << "This is the " << dictionary["PLATFORM NAME"] << " Open Source Snapshot Edition." << endl;
+        licenseInfo["LICENSEE"] = "Snapshot";
+        dictionary["EDITION"] = "Snapshot";
         dictionary["QT_EDITION"] = "QT_EDITION_OPENSOURCE";
         cout << endl;
         if (!showLicense(dictionary["LICENSE FILE"])) {

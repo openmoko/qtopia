@@ -24,18 +24,18 @@
 <li><div class="fn"/>void <b><a href="webaccessservice.html#openURL">openURL</a></b> ( const QString &amp; <i>url</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>1 protected function inherited from <a href="qtopiaabstractservice.html#protected-functions">QtopiaAbstractService</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -49,7 +49,7 @@
 <p>This is used by SIM toolkit applications to implement the &quot;Close the existing browser session and launch new browser session&quot; functionality required by 3GPP TS 11.14. This service call will be immediately followed by a call to <a href="webaccessservice.html#openURL">openURL</a>() to specify the new URL to display.</p>
 <p>This slot corresponds to the QCop service message <tt>WebAccess::clearSession()</tt>.</p>
 <p>See also <a href="qsimtoolkit.html">QSimToolkit</a> and <a href="webaccessservice.html#openURL">openURL</a>().</p>
-<h3 class="fn"><a name="openURL"></a>void WebAccessService::openURL ( const <a href="./qstring.html">QString</a> &amp; <i>url</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="openURL"></a>void WebAccessService::openURL ( const <a href="qstring.html">QString</a> &amp; <i>url</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Retrieve the resource specified by <i>url</i> and either display it to the user, invoke further services to display the resource, or notify the user that no facility exists for displaying the resource. If the resource cannot be retrieved, the service notifies the user.</p>
 <p>If <i>url</i> is an empty string, the user's default home page should be shown.</p>
 <p>This slot corresponds to the QCop service message <tt>WebAccess::openURL(QString)</tt>.</p>

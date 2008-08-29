@@ -58,6 +58,8 @@ public:
     // Pre: image was loaded from file
     QByteArray format() const { return _format; }
 
+    QString saveType() const;
+
     // Return true if save is supported for the current format
     // Pre: image was loaded from file
     bool isSaveSupported() const;
@@ -70,7 +72,7 @@ public:
     // Return true if save successful
     // If save not supported, ignore overwrite and save using default format
     // Pre: image was loaded from file
-    QContent save( const QImage&, bool overwrite = true );
+    bool save( const QImage&, QContent *content);
 
     // Return level closest to given reduction factor
     // Levels are numbered 0 .. n-1, 0 being the original image

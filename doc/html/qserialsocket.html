@@ -27,8 +27,8 @@
 </ul>
 <ul>
 <li><div class="fn"/>16 public functions inherited from <a href="qserialiodevice.html#public-functions">QSerialIODevice</a></li>
-<li><div class="fn"/>32 public functions inherited from <a href="./qiodevice.html#public-functions">QIODevice</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>32 public functions inherited from <a href="qiodevice.html#public-functions">QIODevice</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -37,19 +37,19 @@
 </ul>
 <ul>
 <li><div class="fn"/>4 signals inherited from <a href="qserialiodevice.html#signals">QSerialIODevice</a></li>
-<li><div class="fn"/>3 signals inherited from <a href="./qiodevice.html#signals">QIODevice</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>3 signals inherited from <a href="qiodevice.html#signals">QIODevice</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>5 protected functions inherited from <a href="./qiodevice.html#protected-functions">QIODevice</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>5 protected functions inherited from <a href="qiodevice.html#protected-functions">QIODevice</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 <li><div class="fn"/>1 protected slot inherited from <a href="qserialiodevice.html#protected-slots">QSerialIODevice</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -60,16 +60,16 @@
 <p>See also <a href="qserialsocketserver.html">QSerialSocketServer</a>, <a href="qserialiodevice.html">QSerialIODevice</a>, and <a href="qphonecall.html">QPhoneCall</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QSerialSocket"></a>QSerialSocket::QSerialSocket ( const <a href="./qstring.html">QString</a> &amp; <i>host</i>, <a href="./qtglobal.html#quint16-typedef">quint16</a> <i>port</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QSerialSocket"></a>QSerialSocket::QSerialSocket ( const <a href="qstring.html">QString</a> &amp; <i>host</i>, <a href="qtglobal.html#quint16-typedef">quint16</a> <i>port</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Construct a serial-over-sockets session object and attach it to <i>parent</i>. The session will connect to <i>port</i> on <i>host</i>.</p>
 <h3 class="fn"><a name="dtor.QSerialSocket"></a>QSerialSocket::~QSerialSocket ()</h3>
 <p>Destroy this socket-based serial port abstraction.</p>
 <h3 class="fn"><a name="close"></a>void QSerialSocket::close ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Closes this serial I/O device. The socket will remain connected until this object is destroyed.</p>
-<p>Reimplemented from <a href="./qiodevice.html#close">QIODevice</a>.</p>
+<p>Reimplemented from <a href="qiodevice.html#close">QIODevice</a>.</p>
 <h3 class="fn"><a name="closed"></a>void QSerialSocket::closed ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when the socket is closed by the other end of the connection.</p>
-<h3 class="fn"><a name="open"></a>bool QSerialSocket::open ( <a href="./qiodevice.html#openmode-typedef">OpenMode</a> <i>mode</i> )</h3>
+<h3 class="fn"><a name="open"></a>bool QSerialSocket::open ( <a href="qiodevice.html#OpenMode-typedef">OpenMode</a> <i>mode</i> )</h3>
 <p>Opens this serial I/O device in <i>mode</i>. This just sets the device to open. The actual connect is done during the constructor. Returns true if the device can be opened; false otherwise.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

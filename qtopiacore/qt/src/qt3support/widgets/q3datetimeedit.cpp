@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -250,7 +250,7 @@ public:
     }
     void setSectionSelection(int sec, int selstart, int selend)
     {
-        if (sec < 0 || sec > (int)sections.count())
+        if (sec < 0 || sec >= sections.count())
             return;
         sections[sec].setSelectionStart(selstart);
         sections[sec].setSelectionEnd(selend);
@@ -352,13 +352,13 @@ public:
 
     int mapSection(int sec)
     {
-        return sections[sec].index();
+        return (sec >= 0 && sec < sections.count() ? sections[sec].index() : -1);
     }
 
 protected:
     void applyFocusSelection()
     {
-        if (focusSec > -1) {
+        if (focusSec > -1 && focusSec < sections.count()) {
             int selstart = sections[focusSec].selectionStart();
             int selend = sections[focusSec].selectionEnd();
             parag->setSelection(Q3TextDocument::Standard, selstart, selend);

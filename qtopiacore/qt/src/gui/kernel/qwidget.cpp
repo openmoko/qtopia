@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -6058,7 +6058,23 @@ bool QWidget::isAncestorOf(const QWidget *child) const
     return false;
 }
 
-
+#if defined(Q_WS_WIN)
+inline void setDisabledStyle(QWidget *w, bool setStyle)
+{
+    // set/reset WS_DISABLED style.
+    if(w && w->isWindow() && w->isVisible() && w->isEnabled()) {
+        LONG dwStyle = GetWindowLong(w->winId(), GWL_STYLE);
+        if (setStyle)
+            dwStyle |= WS_DISABLED;
+        else
+            dwStyle &= ~WS_DISABLED;
+        SetWindowLong(w->winId(), GWL_STYLE, dwStyle);
+        // we might need to repaint in some situations (eg. menu)
+        if (setStyle)
+            w->repaint();
+    }
+}
+#endif
 
 /*****************************************************************************
   QWidget event handling
@@ -6453,6 +6469,9 @@ bool QWidget::event(QEvent *event)
                     QApplication::sendEvent(o, event);
                 }
             }
+#if defined(Q_WS_WIN)
+            setDisabledStyle(this, (event->type() == QEvent::WindowBlocked));
+#endif
         }
         break;
 #ifndef QT_NO_TOOLTIP

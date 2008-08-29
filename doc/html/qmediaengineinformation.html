@@ -39,7 +39,7 @@
         public:
             Info()
             {
-                <span class="comment">//</span> do stuff, make sessionbuilders
+                <span class="comment">// do stuff, make sessionbuilders</span>
             }
 
             ~Info() {}
@@ -47,7 +47,7 @@
             QString name() const { return &quot;Example&quot;; }
             QString version() const { return &quot;1.0.0&quot;; }
 
-            int idleTime() const return { 10 * 1000; }  <span class="comment">//</span> 10 seconds
+            int idleTime() const return { 10 * 1000; }  <span class="comment">// 10 seconds</span>
 
             QMediaSessionBuilderList sessionBuilders() const { return m_sessionBuilderList; }
 
@@ -63,12 +63,12 @@
 <p>Returns true if the engine uses a audio output device that is not able to be shared with other engines or processes.</p>
 <h3 class="fn"><a name="idleTime"></a>int QMediaEngineInformation::idleTime () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Return the number of milliseconds before the engine should be suspended. Suspension based on idle time is optional, a value of -1 will indicate to the Media Server that this Engine should never be suspended based on a timeout.</p>
-<h3 class="fn"><a name="name"></a><a href="./qstring.html">QString</a> QMediaEngineInformation::name () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QMediaEngineInformation::name () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the name of the Media Engine.</p>
 <h3 class="fn"><a name="sessionBuilders"></a>QMediaSessionBuilderList QMediaEngineInformation::sessionBuilders () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Return the list of QMediaSessionBuilders that are used by this Engine. The Media Server uses the type of the builders to appropriately route session creation requests to Media Engines.</p>
 <p>See also <a href="qmediasessionbuilder.html">QMediaSessionBuilder</a>.</p>
-<h3 class="fn"><a name="version"></a><a href="./qstring.html">QString</a> QMediaEngineInformation::version () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="version"></a><a href="qstring.html">QString</a> QMediaEngineInformation::version () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the version string of the Media Engine.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

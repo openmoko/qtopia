@@ -47,7 +47,7 @@ public:
 
 QMailFolder::QMailFolder()
 {
-	d = new QMailFolderPrivate();
+    d = new QMailFolderPrivate();
 }
 
 /*!
@@ -58,7 +58,7 @@ QMailFolder::QMailFolder()
 
 QMailFolder::QMailFolder(const QMailId& id)
 {
-	*this = QMailStore::instance()->folder(id);
+    *this = QMailStore::instance()->folder(id);
 }
 
 

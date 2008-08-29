@@ -42,11 +42,13 @@ Message::Message():
 Message::Message(GstMessage* message):
     m_message(message)
 {
+    gst_message_ref(m_message);
 }
 
 Message::~Message()
 {
-//    gst_message_unref(m_message); // should count?
+    if (m_message != 0)
+        gst_message_unref(m_message);
 }
 
 GstMessage* Message::rawMessage() const

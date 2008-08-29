@@ -716,6 +716,7 @@ void PhoneLauncher::sysMessage(const QString& message, const QByteArray &data)
 {
     QDataStream stream( data );
     if ( message == "showHomeScreen()" ) {
+        hideAll();
         showHomeScreen(0);
     } else if ( message == QLatin1String("showPhoneLauncher()")) {
         showPhoneLauncher();

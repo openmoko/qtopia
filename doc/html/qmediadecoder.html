@@ -34,8 +34,8 @@
 </ul>
 <ul>
 <li><div class="fn"/>3 public functions inherited from <a href="qmediadevice.html#public-functions">QMediaDevice</a></li>
-<li><div class="fn"/>32 public functions inherited from <a href="./qiodevice.html#public-functions">QIODevice</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>32 public functions inherited from <a href="qiodevice.html#public-functions">QIODevice</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -47,18 +47,18 @@
 <li><div class="fn"/>void <b><a href="qmediadecoder.html#volumeMuted">volumeMuted</a></b> ( bool <i>muted</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>3 signals inherited from <a href="./qiodevice.html#signals">QIODevice</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>3 signals inherited from <a href="qiodevice.html#signals">QIODevice</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>5 protected functions inherited from <a href="./qiodevice.html#protected-functions">QIODevice</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>5 protected functions inherited from <a href="qiodevice.html#protected-functions">QIODevice</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -70,20 +70,20 @@
 <p>Destroy the <a href="qmediadecoder.html">QMediaDecoder</a> object.</p>
 <h3 class="fn"><a name="isMuted"></a>bool QMediaDecoder::isMuted ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Return the mute state of the decoder.</p>
-<h3 class="fn"><a name="length"></a><a href="./qtglobal.html#quint64-typedef">quint64</a> QMediaDecoder::length ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="length"></a><a href="qtglobal.html#quint64-typedef">quint64</a> QMediaDecoder::length ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Return the length of the decoded data, to date if total not available.</p>
-<h3 class="fn"><a name="lengthChanged"></a>void QMediaDecoder::lengthChanged ( <a href="./qtglobal.html#quint32-typedef">quint32</a> <i>ms</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="lengthChanged"></a>void QMediaDecoder::lengthChanged ( <a href="qtglobal.html#quint32-typedef">quint32</a> <i>ms</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signals the length information of the media has changed to <i>ms</i> milliseconds.</p>
 <h3 class="fn"><a name="pause"></a>void QMediaDecoder::pause ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Pause decoding data.</p>
 <h3 class="fn"><a name="playerStateChanged"></a>void QMediaDecoder::playerStateChanged ( <a href="qtopiamedia.html#State-enum">QtopiaMedia::State</a> <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signals the current <i>state</i> of the <a href="qmediadecoder.html">QMediaDecoder</a></p>
 <p>See also <a href="qtopiamedia.html#State-enum">QtopiaMedia::State</a>.</p>
-<h3 class="fn"><a name="positionChanged"></a>void QMediaDecoder::positionChanged ( <a href="./qtglobal.html#quint32-typedef">quint32</a> <i>ms</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="positionChanged"></a>void QMediaDecoder::positionChanged ( <a href="qtglobal.html#quint32-typedef">quint32</a> <i>ms</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signals a change in the current position <i>ms</i> of the media in milliseconds.</p>
-<h3 class="fn"><a name="seek"></a>bool QMediaDecoder::seek ( <a href="./qtglobal.html#qint64-typedef">qint64</a> <i>ms</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="seek"></a>bool QMediaDecoder::seek ( <a href="qtglobal.html#qint64-typedef">qint64</a> <i>ms</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Seek to the absolute position <i>ms</i> from the beginning of the file.</p>
-<p>Reimplemented from <a href="./qiodevice.html#seek">QIODevice</a>.</p>
+<p>Reimplemented from <a href="qiodevice.html#seek">QIODevice</a>.</p>
 <h3 class="fn"><a name="setMuted"></a>void QMediaDecoder::setMuted ( bool <i>mute</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Set the <i>mute</i> state of the data, the decoder should continue to process audio data but not produce output, if the volume is muted.</p>
 <p>See also <a href="qmediadecoder.html#isMuted">isMuted</a>().</p>

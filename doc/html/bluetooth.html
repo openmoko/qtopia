@@ -53,8 +53,9 @@
 <a name="software-requirements"></a>
 <h3>Software Requirements</h3>
 <p>Qtopia 4.3 requires BlueZ Bluetooth framework Version 3.19. This means both the bluez-libs-3.19 and bluez-utils-3.19 must be installed on your system. For more information about installing BlueZ, please refer to the BlueZ website at http://www.bluez.org.</p>
+<p>Note that bluez-utils needs to be compiled with XML support as Qtopia uses its XML service record description feature. Versions 3.27 and earlier of bluez-utils require the expat or GLib libraries to enable this feature, and later versions use GLib only.</p>
 <p>BlueZ uses the DBUS communications protocol to expose a rich and complex API. Qtopia uses this API to manage Bluetooth devices. Thus Qtopia requires DBUS to be configured and running in order to successfully communicate with hcid. Qtopia does not link to the BlueZ libraries, however correct version of the bluez-lib package must be installed as it is used by bluez-utils.</p>
-<p>Qtopia requires</p>
+<p>Qtopia requires:</p>
 <ul>
 <li>the BlueZ hcid daemon to be running. In addition, depending on your BlueZ configuration, the sdpd daemon should be running as well.</li>
 <li>the Headset and Audio services to be disabled in Bluez. This can be done via configuring Bluez with with<pre>    --disable-audio</pre>
@@ -102,7 +103,7 @@
 </ol>
 <a name="object-push-profile-opp"></a>
 <h3>Object Push Profile (OPP)</h3>
-<p>Qtopia fully supports the Bluetooth Object Push Profile in both client and server modes. This functionality can be found in the <a href="qobexpushclient.html">QObexPushClient</a> and <a href="qobexpushservice.html">QObexPushService</a> classes respectively. Qtopia depends on the 3rdparty OpenOBEX library for all OBEX services, including OPP.</p>
+<p>Qtopia fully supports the Bluetooth Object Push Profile in both client and server modes. This functionality can be found in the <a href="qobexpushclient.html">QObexPushClient</a> and <a href="qobexpushservice.html">QObexPushService</a> classes respectively. Qtopia depends on the 3rdparty <a href="legal-openobex.html">OpenOBEX</a> library for all OBEX services, including OPP.</p>
 <p>The user can send and receive files over Bluetooth. If a file is received, the user can monitor the progress of the file transfer, and choose to accept or discard the file received. If a business card is received, the user has the option of saving it in his or her address book or discarding.</p>
 <p>The user should also see the BluetoothPush service documentation.</p>
 <a name="dial-up-networking-profile-dun"></a>
@@ -115,8 +116,9 @@
 <a name="handsfree-profile-hfag"></a>
 <h3>Handsfree Profile (HFAG)</h3>
 <p>Qtopia provides a reference implementation of the Handsfree Audio Gateway profile (HFAG) This profile allows the user of Bluetooth devices that support the Handsfree (HF) profile by Qtopia based devices. Handsfree profile is frequently found in Bluetooth based car hands-free kits, and also in Bluetooth headsets. Handsfree profile is in principle very similar to the Headset profile, but provides many more capabilities, including direct dialing, last number redial, three-way calling, and other more advanced features.</p>
-<p>Qtopia provides only a reference implementation for the the Handsfree Audio Gateway profile. Handsfree profile requires the audio gateway to route all audio to the handsfree device. The profile also requires the audio stream to be able to be switched between several audio devices mid-stream. Such support is frequently device and hardware dependent.</p>
+<p>Qtopia provides only a reference implementation for the Handsfree Audio Gateway profile. Handsfree profile requires the audio gateway to route all audio to the handsfree device. The profile also requires the audio stream to be able to be switched between several audio devices mid-stream. Such support is frequently device and hardware dependent.</p>
 <p>For more details, please see the next section.</p>
+<p><b>Note</b>: Users of Qtopia Platform Edition must install the <tt>atinterface</tt> project (under <tt>src/tools/atinterface</tt>) in order to use the reference implementation of the Handsfree Audio Gateway profile. (The <tt>atinterface</tt> project is included by default in Qtopia Phone Edition.)</p>
 <a name="linux-btsco-kernel-module"></a>
 <h3>Linux btsco kernel module</h3>
 <p>The Handsfree and Headset profiles depend on the Linux btsco kernel module being installed. This module works by creating an ALSA sound card device. The device can then be used by ALSA aware applications. All audio data is then sent over a Bluetooth connection to the remote device.</p>

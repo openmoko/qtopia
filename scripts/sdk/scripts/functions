@@ -1,3 +1,24 @@
+
+TOOLCHAIN=/opt/toolchains/arm920t-eabi
+#TOOLCHAIN=/opt/toolchains/arm920t
+USE_TB=1
+TB_CC_PREFIX=arm-linux-
+TB_CC_VER=auto
+TB_SYS=neo:eabi
+export PKG_CONFIG_PREFIX=$TOOLCHAIN/arm-angstrom-linux-gnueabi
+export PKG_CONFIG_PATH=$PKG_CONFIG_PREFIX/lib/pkgconfig
+# device functions appended
+# all devices that want sdk connection must implement this!!
+# usb vendor and product info
+
+VENDOR=1457
+PRODUCT=5122
+
+if [ ! -e /opt/toolchains/arm920t-eabi ]; then
+	 mkdir /opt/toolchains
+	 ln -s /usr/local/arm920t-eabi /opt/toolchains/arm920t-eabi
+fi
+DEFAULTIP=192.168.0.202
 # Extra functions appended to /opt/Qtopia/SDK/scripts/functions for SDK
 
 device_devnode()
@@ -51,3 +72,4 @@ export HOSTDEVNODE=`host_devnode`
 export HOSTIP=`hostip`
 export PHONEIP=`phoneip`
 export DEVICE=`which_device`
+export QWS_DISPLAY=QVFb:mmWidth43:mmHeight58:0

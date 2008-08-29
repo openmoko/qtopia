@@ -691,6 +691,20 @@ bool SandboxInstallJob::setupSandbox()
             QStringList domainList = package->domain.split(",");
             foreach ( QString dom, domainList )
                 applyDomainRules( binPath, dom );
+
+            if  (LidsUtils::isLidsEnabled() && LidsUtils::maxRulesExceeded())
+            {
+                if (reporter)
+                {
+                    QString detailedMessage("Maximum number of LIDS rules exceeded");
+                    //Reminder: change error message to Cannot install package,
+                    //maximum number of packages reached
+                    reporter->reportError(tr( "Error occurred during installation" ),
+                                            detailedMessage);
+                }
+                return false;
+            }
+
             reloadRules();
 #endif
         }

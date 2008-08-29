@@ -16,21 +16,21 @@
 <p>The Qtopia server consists of a variety of components and widgets which are loaded and executed during the startup phase of Qtopia.</p>
 <pre>    main( int argc, char **argv )
     {
-        <span class="comment">//</span>...
-        <span class="comment">//</span> step 1
+        <span class="comment">//...</span>
+        <span class="comment">// step 1</span>
         QtopiaServerApplication::startup( argc, argv, QList&lt;ByteArray&gt; &lt;&lt; &quot;startup&quot; );
 
-        <span class="comment">//</span>...
-        <span class="comment">//</span> step 2
+        <span class="comment">//...</span>
+        <span class="comment">// step 2</span>
         QAbstractServerInterface *interface =
                 qtopiaWidget&lt;QAbstractServerInterface&gt;(0,Qt::FramelessWindowHint);
         if ( interface )
             interface-&gt;show();
 
-        <span class="comment">//</span>...
-        <span class="comment">//</span> step 3
+        <span class="comment">//...</span>
+        <span class="comment">// step 3</span>
         QtopiaApplication::exec();
-        <span class="comment">//</span>...
+        <span class="comment">//...</span>
     }</pre>
 <p>The above main function gives a brief summary what the server is doing. This function is not complete and does not reflect the actual implementation. However it demonstrates the general order during the startup phase.</p>
 <ol type="1">

@@ -2,10 +2,9 @@ qtopia_project(qtopia app)
 TARGET=btsettings
 CONFIG+=qtopia_main
 
-FORMS = settings.ui \
-        remotedeviceinfo.ui
+FORMS =       remotedeviceinfo.ui
 
-HEADERS		= btsettings.h \
+HEADERS	    = btsettings.h \
               btsettings_p.h \
               settingsdisplay.h \
               mydevicesdisplay.h \
@@ -13,7 +12,7 @@ HEADERS		= btsettings.h \
               pairingagent.h \
               remotedeviceinfodialog.h
 
-SOURCES		= btsettings.cpp \
+SOURCES	    = btsettings.cpp \
               settingsdisplay.cpp \
               mydevicesdisplay.cpp \
               localservicesdialog.cpp \

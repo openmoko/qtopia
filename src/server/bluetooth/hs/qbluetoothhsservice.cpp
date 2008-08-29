@@ -172,6 +172,14 @@ void QBluetoothHeadsetService::start()
             m_data->m_sdpRecordHandle = registerRecord(sdpRecord);
     }
 
+    if (sdpRecord.isNull())
+        qWarning() << "QBluetoothHeadsetService: cannot read" << sdpRecordFile.fileName();
+
+    if (m_data->m_sdpRecordHandle == 0) {
+        emit started(true, tr("Error registering with SDP server"));
+        return;
+    }
+
     // start the server
     if (!m_data->m_server->listen(QBluetoothAddress::any,
                 QBluetoothSdpRecord::rfcommChannel(sdpRecord))) {

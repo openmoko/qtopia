@@ -19,7 +19,7 @@
 <a name="creating-a-text-input-filter"></a>
 <h2>Creating a Text Input Filter</h2>
 <p>This is a very simple example of how to write a composing input method, the code described can be found in <tt>&lt;qtopia-root-dir&gt;/examples/inputmethods/composing</tt>.</p>
-<p>Qtopia Core provides the <a href="./qwsinputmethod.html">QWSInputMethod</a> class to allow modification of keyboard or pointer input to generate text. At a minimum you will need to provide an implementation for one of the two <tt>filter</tt> functions available depending on whether you intend to filter mouse or keyboard input. You will also need to provide an implementation for the <tt>reset</tt> function.</p>
+<p>Qtopia Core provides the <a href="qwsinputmethod.html">QWSInputMethod</a> class to allow modification of keyboard or pointer input to generate text. At a minimum you will need to provide an implementation for one of the two <tt>filter</tt> functions available depending on whether you intend to filter mouse or keyboard input. You will also need to provide an implementation for the <tt>reset</tt> function.</p>
 <p>In our example we filter keyboard so that pressing the <tt>shift</tt> key will change the case of the most recently typed letter.</p>
 <pre>    #include &lt;Qt/qwindowsystem_qws.h&gt;
     #include &lt;qtopia/inputmethodinterface.h&gt;
@@ -78,7 +78,7 @@
 </ul>
 <p>The function for this example only filters when <tt>active</tt> and the key is <i>A-Z</i> or <i>Shift</i>.</p>
 <p>The call to <tt>sendPreeditString</tt> sends text to the current text input widget and indicates to the input widget that it has not been confirmed by the user. Generally Qt text input widget will underline pre-edit text. <tt>sendCommitString</tt> sends text to the current text input widget and indicates to the widget that the text has been confirmed by the user. For our input method pressing <i>Shift</i> will send the previous text again with a different text. Pressing the keys <i>A-Z</i> will confirm the text for the last key pressed and send a new pre-edit text. Any other key will result in the input method resetting, which will clear the pre-edit text.</p>
-<p>See also: <a href="./qwsinputmethod.html#sendPreeditString">QWSInputMethod::sendPreeditString</a>(), <a href="./qwsinputmethod.html#sendCommitString">QWSInputMethod::sendCommitString</a>() for more information.</p>
+<p>See also: <a href="qwsinputmethod.html#sendPreeditString">QWSInputMethod::sendPreeditString</a>(), <a href="qwsinputmethod.html#sendCommitString">QWSInputMethod::sendCommitString</a>() for more information.</p>
 <pre>    void ComposeIM::reset()
     {
         if (!lastText.isEmpty())
@@ -105,7 +105,7 @@
         }
         isActive = b;
     }</pre>
-<p>The remaining functions merely manage the state of the input method. It is possible to use this class in a stand-alone Qtopia Core application by constructing it and passing it to <a href="./qwsserver.html#setCurrentInputMethod">QWSServer::setCurrentInputMethod</a>(). We will now show how to integrate the class into a Qtopia Platform Input Method plug-in.</p>
+<p>The remaining functions merely manage the state of the input method. It is possible to use this class in a stand-alone Qtopia Core application by constructing it and passing it to <a href="qwsserver.html#setCurrentInputMethod">QWSServer::setCurrentInputMethod</a>(). We will now show how to integrate the class into a Qtopia Platform Input Method plug-in.</p>
 <a name="creating-the-containing-plug-in"></a>
 <h2>Creating the Containing Plug-in</h2>
 <p>Qtopia platform allows for input methods to be loaded via plug-ins. This means you can extend the input capabilities of Qtopia Platform after it has been installed. However since Qtopia Platform provides for a range of different methods to provide text input, the plug-in also needs to describe the capabilities and requirements of the input method.</p>
@@ -154,7 +154,7 @@
 </ul>
 </td></tr>
 <tr valign="top" class="odd"><td><tt>reset</tt></td><td>called when the plug-in is unloaded or needs to be returned to its initial state by the server. It resets the plug-in to its state at construction.</td></tr>
-<tr valign="top" class="even"><td><tt>inputModifier</tt></td><td>Returns the <a href="./qwsinputmethod.html">QWSInputMethod</a> object if the plug-in modifes keyboard or mouse input to generate text for a text input widget.</td></tr>
+<tr valign="top" class="even"><td><tt>inputModifier</tt></td><td>Returns the <a href="qwsinputmethod.html">QWSInputMethod</a> object if the plug-in modifes keyboard or mouse input to generate text for a text input widget.</td></tr>
 </table></p>
 <p><b>Note:</b> While <tt>setHint</tt> does not have to be re-implemented it is highly recommended. Qtopia platform calls this function with a:</p>
 <ul>
@@ -174,7 +174,7 @@
 <pre>    ComposeImpl::ComposeImpl(QObject *parent)
         : QtopiaInputMethod(parent), input(0), ref(0)
         {
-        <span class="comment">//</span> construct icon
+        <span class="comment">// construct icon</span>
         }</pre>
 <p><b>Note:</b> It is important to construct the plug-in with an appropriate parent and to set the value of <i>ref</i> to 0 in the constructor.</p>
 <pre>    QWSInputMethod *ComposeImpl::inputModifier( )
@@ -183,7 +183,7 @@
             input = new ComposeIM( );
         return input;
     }</pre>
-<p>Returns the <a href="./qwsinputmethod.html">QWSInputMethod</a> provided by the plug-in. If it has not constructed one already it should construct it now.</p>
+<p>Returns the <a href="qwsinputmethod.html">QWSInputMethod</a> provided by the plug-in. If it has not constructed one already it should construct it now.</p>
 <pre>    void ComposeImpl::setHint(const QString &amp;hint, bool)
     {
         inputModifier();

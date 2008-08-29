@@ -44,3 +44,17 @@ q_atomic_test_and_set_int:
         
 	.size q_atomic_test_and_set_int, . - q_atomic_test_and_set_int
         
+
+        .globl q_atomic_fetch_and_add_int
+        .type q_atomic_fetch_and_add_int, @function
+        .section .text, "ax"
+        .align 16
+
+q_atomic_fetch_and_add_int:
+
+        lock
+        xaddl %esi,(%rdi)
+        movl %esi, %eax
+        ret
+
+        .size q_atomic_fetch_and_add_int,.-q_atomic_fetch_and_add_int

@@ -19,6 +19,7 @@
 **
 ****************************************************************************/
 #include <qtopia/private/qcontentsetengine_p.h>
+#include <QTimerEvent>
 
 /*!
     \class QContentSetEngine
@@ -152,31 +153,70 @@ QContentSortCriteria QContentSetEngine::convertSortOrder( const QStringList &sor
 
     Inserts a \a content object into the set.  Inserted content is always visible irregardless of the filtering
     criteria of the set.
- */
+*/
 
 /*!
     \fn QContentSetEngine::removeContent( const QContent &content )
 
     Removes a \a content object from the set.
- */
+*/
 
 /*!
     \fn QContentSetEngine::clear()
 
     Removes all content from the set and clears the filtering criteria.
- */
+*/
+
+/*!
+    \fn QContentSetEngine::commitChanges()
+
+    Commits any changes made to a content set.
+*/
+
+/*!
+    Flushes a pending update.
+*/
+void QContentSetEngine::flush()
+{
+    if (m_flushTimerId != -1) {
+        killTimer(m_flushTimerId);
+
+        m_flushTimerId = -1;
+
+        commitChanges();
+
+        if (m_updateMode == QContentSet::Synchronous)
+            emit contentChanged();
+    }
+}
+
+/*!
+    Schedules a flush of the content set.
+
+    The flush will occur either on returning to the event loop or on the next call to count() if
+    the content set is synchronous, whichever happens first.
+*/
+void QContentSetEngine::update()
+{
+    if (m_flushTimerId == -1) {
+        m_flushTimerId = startTimer(0);
+
+        if (m_updateMode == QContentSet::Synchronous)
+            emit reset();
+    }
+}
 
 /*!
     \fn QContentSetEngine::contains( const QContent &content ) const
 
     Returns true if the given \a content is in the set.
- */
+*/
 
 /*!
     \fn QContentSetEngine::sortOrder() const
 
     Returns the sort order of the set.
- */
+*/
 
 /*!
     \fn QContentSetEngine::filter() const
@@ -188,13 +228,13 @@ QContentSortCriteria QContentSetEngine::convertSortOrder( const QStringList &sor
     \fn QContentSetEngine::contentAboutToBeRemoved( int start, int end )
 
     Signals that content between the \a start and \a end indexes are about to be removed from the set.
- */
+*/
 
 /*!
     \fn QContentSetEngine::contentAboutToBeInserted( int start, int end )
 
     Signals that content is about to inserted into the set between the \a start and \a end indexes.
- */
+*/
 
 /*!
     \fn QContentSetEngine::contentInserted()
@@ -206,19 +246,13 @@ QContentSortCriteria QContentSetEngine::convertSortOrder( const QStringList &sor
     \fn QContentSetEngine::contentRemoved()
 
     Signals that the content removal indicated by the \l contentAboutToBeRemoved() signal has completed.
- */
-
-/*!
-    \fn QContentSetEngine::contentChanged( const QContentIdList &ids, QContent::ChangeType type )
-
-    Signals that content in the set with the given \a ids has changed where the type of change is indicated by \a type.
- */
+*/
 
 /*!
     \fn QContentSetEngine::contentChanged()
 
     Signals that the contents of the set have changed in some manner.
- */
+*/
 
 /*!
     \fn QContentSetEngine::reset()
@@ -227,14 +261,14 @@ QContentSortCriteria QContentSetEngine::convertSortOrder( const QStringList &sor
 */
 
 /*!
-    \fn QContentSetEngine::sortCriteriaChanged( const QContentSortCriteria &sort )
+    \fn QContentSetEngine::sortCriteriaChanged(const QContentSortCriteria &sort)
 
     Indicates the content set's \a sort criteria has changed.
 
     Implementing classes should re-sort the set response to this event.
 
     \sa sortCriteria(), setSortCriteria()
- */
+*/
 
 /*!
     \fn QContentSetEngine::sortCriteria() const
@@ -298,4 +332,19 @@ void QContentSetEngine::finishUpdate()
     m_updateInProgress = false;
 
     emit updateFinished();
+}
+
+void QContentSetEngine::timerEvent(QTimerEvent *event)
+{
+    if (event->timerId() == m_flushTimerId) {
+        event->accept();
+
+        killTimer(m_flushTimerId);
+
+        m_flushTimerId = -1;
+
+        commitChanges();
+    } else {
+        QObject::timerEvent(event);
+    }
 }

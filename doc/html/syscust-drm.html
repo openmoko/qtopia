@@ -26,7 +26,7 @@
 <p>A complete DRM agent integration is typically composed of three parts, a plug-in to the content system, a license and settings management application, and a Qtopia service. The <a href="qdrmagentplugin.html">QDrmAgentPlugin</a> interface allows all three components to be delivered in a single plug-in library.</p>
 <a name="license-management-and-settings-application"></a>
 <h3>License Management and Settings Application</h3>
-<p>Qtopia includes the 'Licenses' application as a common utility for DRM agents to host license management and settings widgets. It is composed of a single <a href="./qtabwidget.html">QTabWidget</a> in which each tab contains a different widget from the set created by a calls to <a href="qdrmagentplugin.html#createManagerWidgets">QDrmAgentPlugin::createManagerWidgets</a>() for each loaded agent plug-in. Widgets are grouped according to the agent which created them and in the order returned.</p>
+<p>Qtopia includes the 'Licenses' application as a common utility for DRM agents to host license management and settings widgets. It is composed of a single <a href="qtabwidget.html">QTabWidget</a> in which each tab contains a different widget from the set created by a calls to <a href="qdrmagentplugin.html#createManagerWidgets">QDrmAgentPlugin::createManagerWidgets</a>() for each loaded agent plug-in. Widgets are grouped according to the agent which created them and in the order returned.</p>
 <p>The source for the Licenses application is located at:</p>
 <pre>    src/settings/drmbrowser/</pre>
 <a name="drm-services"></a>

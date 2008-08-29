@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">PkIM Class Reference</h1>
 <p>The PkIM class provides an input method based on a standard telephone keypad. Also provides full screen handwriting input. <a href="#details">More...</a></p>
-<pre>    #include &lt;PkIM&gt;</pre><p>Inherits <a href="./qwsinputmethod.html">QWSInputMethod</a>.</p>
+<pre>    #include &lt;PkIM&gt;</pre><p>Inherits <a href="qwsinputmethod.html">QWSInputMethod</a>.</p>
 <ul>
 <li><a href="pkim-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -31,8 +31,8 @@
 <li><div class="fn"/>void <b><a href="pkim.html#setStatusWidget">setStatusWidget</a></b> ( QLabel * <i>l</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>6 public functions inherited from <a href="./qwsinputmethod.html#public-functions">QWSInputMethod</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>6 public functions inherited from <a href="qwsinputmethod.html#public-functions">QWSInputMethod</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -40,7 +40,7 @@
 <li><div class="fn"/>void <b><a href="pkim.html#stateChanged">stateChanged</a></b> ( int <i>state</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -49,8 +49,8 @@
 <li><div class="fn"/>virtual void <b><a href="pkim.html#updateHandler">updateHandler</a></b> ( int <i>type</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qwsinputmethod.html#protected-functions">QWSInputMethod</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qwsinputmethod.html#protected-functions">QWSInputMethod</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 </ul>
 <a name="protected-slots"></a>
 <h3>Protected Slots</h3>
@@ -59,11 +59,11 @@
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -78,15 +78,15 @@
 <h3 class="fn"><a name="passwordHint"></a>bool PkIM::passwordHint () const</h3>
 <p>Returns the current password hint status. Input methods may react to this in different ways, and at their own discretion, but common actions include obscuring preedit text or not using dictionaries.</p>
 <p>See also <a href="pkim.html#setPasswordHint">setPasswordHint</a>().</p>
-<h3 class="fn"><a name="processAuxiliaryHints"></a>void PkIM::processAuxiliaryHints ( <a href="./qstringlist.html">QStringList</a> <i>inputHint</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="processAuxiliaryHints"></a>void PkIM::processAuxiliaryHints ( <a href="qstringlist.html">QStringList</a> <i>inputHint</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>This helper function takes the <i>inputHint</i>, processes any additional hint information and changes the internal state of the input method accordingly. <b>Note:</b> This function requires the primary input hint as well as the auixilliary hints in order to resolve ambiguity introduced by the &quot;propernouns&quot; hint.</p>
 <p>See also <a href="pkim.html#setHint">setHint</a>().</p>
 <h3 class="fn"><a name="restrictToHint"></a>bool PkIM::restrictToHint () const</h3>
 <p>Returns true if the input method is restricted to s single mode based of the current input hint. Otherwise returns false.</p>
 <p>See also <a href="pkim.html#setRestrictToHint">setRestrictToHint</a>().</p>
-<h3 class="fn"><a name="sendMatchedCharacters"></a>void PkIM::sendMatchedCharacters ( const <a href="./qlist.html">QList</a>&lt;<a href="qfspenmatch-guess.html">QFSPenMatch::Guess</a>&gt; &amp; <i>cl</i> )&nbsp;&nbsp;<tt> [protected slot]</tt></h3>
+<h3 class="fn"><a name="sendMatchedCharacters"></a>void PkIM::sendMatchedCharacters ( const <a href="qlist.html">QList</a>&lt;<a href="qfspenmatch-guess.html">QFSPenMatch::Guess</a>&gt; &amp; <i>cl</i> )&nbsp;&nbsp;<tt> [protected slot]</tt></h3>
 <p>Adds the characters in the character list <i>cl</i> to its current state. This may result in sending key events or adding letters to the currently composed word.</p>
-<h3 class="fn"><a name="setHint"></a>void PkIM::setHint ( const <a href="./qstring.html">QString</a> &amp; <i>s</i> )</h3>
+<h3 class="fn"><a name="setHint"></a>void PkIM::setHint ( const <a href="qstring.html">QString</a> &amp; <i>s</i> )</h3>
 <p>Sets the mode of the input method to the hint <i>s</i>. If the hint starts with only will take the remaining string as the hint and restrict the mode to the one that best matches that hint.</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Hint</th><th>Description</th></tr></thead>
@@ -114,15 +114,15 @@
 <h3 class="fn"><a name="setRestrictToHint"></a>void PkIM::setRestrictToHint ( bool <i>b</i> )</h3>
 <p>If <i>b</i> is true will restrict the mode of the input method to the current mode.</p>
 <p>See also <a href="pkim.html#restrictToHint">restrictToHint</a>().</p>
-<h3 class="fn"><a name="setStatusWidget"></a>void PkIM::setStatusWidget ( <a href="./qlabel.html">QLabel</a> * <i>l</i> )</h3>
+<h3 class="fn"><a name="setStatusWidget"></a>void PkIM::setStatusWidget ( <a href="qlabel.html">QLabel</a> * <i>l</i> )</h3>
 <p>Sets the widget used to display the current status to <i>l</i>. The input method will update the icon for the widget to reflect the input method mode</p>
 <h3 class="fn"><a name="stateChanged"></a>void PkIM::stateChanged ( int <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when the state of the input method changes. It is used by the server to update icon state and visability appropriately.</p>
 <p>If the input method is filtering <i>state</i> will be <a href="qtopiainputmethod.html#State-enum">QtopiaInputMethod::Ready</a>. Otherwise <i>state</i> will be <a href="qtopiainputmethod.html#State-enum">QtopiaInputMethod::Sleeping</a>.</p>
 <h3 class="fn"><a name="updateHandler"></a>void PkIM::updateHandler ( int <i>type</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
-<p>This function handles update information from the server. <i>type</i> describes what has updated, as described in <a href="./qwsinputmethod.html">QWSInputMethod</a>.</p>
-<p>Reimplemented from <a href="./qwsinputmethod.html#updateHandler">QWSInputMethod</a>.</p>
-<p>See also <a href="./qwsinputmethod.html#updateHandler">QWSInputMethod::updateHandler</a>().</p>
+<p>This function handles update information from the server. <i>type</i> describes what has updated, as described in <a href="qwsinputmethod.html">QWSInputMethod</a>.</p>
+<p>Reimplemented from <a href="qwsinputmethod.html#updateHandler">QWSInputMethod</a>.</p>
+<p>See also <a href="qwsinputmethod.html#updateHandler">QWSInputMethod::updateHandler</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>

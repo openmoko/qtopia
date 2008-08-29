@@ -96,32 +96,22 @@ private:
 QSqlContentSetEngine::QSqlContentSetEngine( const QContentFilter &filter, const QContentSortCriteria &order, QContentSet::UpdateMode mode, QSqlContentStore *store )
     : QContentSetEngine( filter, order, mode )
     , m_store( store )
+    , m_filter(filter)
+    , m_order(order)
     , m_updateThread( 0 )
     , m_count( 0 )
     , m_primaryOffset( 0 )
     , m_secondaryCutoff( 0 )
-    , m_refreshPending( mode == QContentSet::Synchronous )
-    , m_resetPending( mode == QContentSet::Synchronous )
+    , m_sortChanged(false)
+    , m_contentChanged(filter.isValid())
     , m_deletePending( false )
     , m_explicitIdSource( 0 )
 {
-
-    if( updateMode() == QContentSet::Synchronous )
-        connect( this, SIGNAL(performRefresh()), this, SLOT(performReset()), Qt::QueuedConnection );
-    else
-    {
-        connect( this, SIGNAL(performRefresh()), this, SLOT(performUpdate()), Qt::QueuedConnection );
-        connect( this, SIGNAL(updateFinished()), this, SIGNAL(contentChanged()) );
-
-        if( filter.isValid() )
-            refresh();
-    }
-
 #ifndef QTOPIA_CONTENT_INSTALLER
     connect(qApp, SIGNAL(contentChanged(QContentIdList,QContent::ChangeType)),
-            this, SLOT(contentChangedEvent(QContentIdList,QContent::ChangeType)));
+            this, SLOT(contentChangedEvent()));
     connect(QContentUpdateManager::instance(), SIGNAL(refreshRequested()),
-            this, SLOT(refresh()));
+            this, SLOT(contentChangedEvent()));
 #endif
 }
 
@@ -146,9 +136,6 @@ QSqlContentSetEngine::~QSqlContentSetEngine()
  */
 int QSqlContentSetEngine::count() const
 {
-    if( m_resetPending && updateMode() == QContentSet::Synchronous )
-        const_cast< QSqlContentSetEngine * >( this )->performReset();
-
     return m_count;
 }
 
@@ -157,9 +144,10 @@ int QSqlContentSetEngine::count() const
  */
 void QSqlContentSetEngine::filterChanged( const QContentFilter &filter )
 {
-    Q_UNUSED( filter );
+    QMutexLocker locker( &m_databaseSetMutex );
 
-    refresh();
+    m_contentChanged = true;
+    m_filter = filter;
 }
 
 /*!
@@ -167,9 +155,10 @@ void QSqlContentSetEngine::filterChanged( const QContentFilter &filter )
  */
 void QSqlContentSetEngine::sortCriteriaChanged( const QContentSortCriteria &sort )
 {
-    Q_UNUSED( sort );
+    QMutexLocker locker( &m_databaseSetMutex );
 
-    refresh( true );
+    m_sortChanged = true;
+    m_order = sort;
 }
 
 /*!
@@ -194,25 +183,20 @@ void QSqlContentSetEngine::insertContent( const QContent &content )
         m_primaryIds.insert( index, id );
         insertRange( index, 1 );
         m_count++;
-        emit reset();
     }
     else
     {
-        {
-            QMutexLocker locker( &m_databaseSetMutex );
+        QMutexLocker locker( &m_databaseSetMutex );
 
-            const QContentSortCriteria sort = sortCriteria();
+        const QContentSortCriteria sort = sortCriteria();
 
-            int index;
+        int index;
 
-            for( index = 0; index < m_explicit.count() && sort.greaterThan( content, m_explicit.at( index ).second ); index++ );
+        for( index = 0; index < m_explicit.count() && sort.greaterThan( content, m_explicit.at( index ).second ); index++ );
 
-            m_explicit.insert( index, QPair< quint64, QContent >( m_explicitIdSource++, content ) );
+        m_explicit.insert( index, QPair< quint64, QContent >( m_explicitIdSource++, content ) );
 
-            m_refreshPending = true;
-        }
-
-        emit performRefresh();
+        m_contentChanged = true;
     }
 }
 
@@ -241,11 +225,12 @@ void QSqlContentSetEngine::removeContent( const QContent &content )
             m_primaryIds.removeAt( index );
             removeRange( index, 1 );
             m_count--;
-            emit reset();
         }
     }
     else
     {
+        QMutexLocker locker( &m_databaseSetMutex );
+
         int index = 0;
 
         for( ; index < m_explicit.count(); index++ )
@@ -257,9 +242,7 @@ void QSqlContentSetEngine::removeContent( const QContent &content )
 
         m_explicit.removeAt( index );
 
-        m_refreshPending = true;
-
-        emit performRefresh();
+        m_contentChanged = true;
     }
 }
 
@@ -271,12 +254,24 @@ void QSqlContentSetEngine::clear()
     {
         QMutexLocker locker( &m_databaseSetMutex );
         m_explicit.clear();
+
+        m_contentChanged = true;
     }
 
     setSortCriteria( QContentSortCriteria() );
     setFilter( QContentFilter() );
+}
 
-    refresh( true );
+/*!
+    \reimp
+*/
+void QSqlContentSetEngine::commitChanges()
+{
+    if (updateMode() == QContentSet::Synchronous)
+        performReset();
+    else
+        performUpdate();
+
 }
 
 /*!
@@ -287,8 +282,15 @@ bool QSqlContentSetEngine::contains( const QContent &content ) const
     if( filter().test( content ) )
         return true;
 
+    QList< QPair< quint64, QContent > > explicits;
+
+    {
+        QMutexLocker locker(&m_databaseSetMutex);
+        explicits = m_explicit;
+    }
+
     for( int i = 0; i < m_explicit.count(); i++ )
-        if( m_explicit.at( i ).second == content )
+        if( explicits.at( i ).second == content )
             return true;
 
     return false;
@@ -296,63 +298,62 @@ bool QSqlContentSetEngine::contains( const QContent &content ) const
 
 void QSqlContentSetEngine::performReset()
 {
-    if( m_refreshPending )
+    if (!m_sortChanged && !m_contentChanged)
+        return;
+
+    clearCache();
+    m_primaryIds.clear();
+
+    m_count = 0;
+
+    QList< QContentIdList > contentIdLists;
+    QList< QtopiaDatabaseId > databaseIds = QtopiaSql::instance()->databaseIds();
+
+    int total = 0;
+
+    const QContentFilter criteria = m_filter;
+    const QContentSortCriteria sort = m_order;
+
+    foreach( QtopiaDatabaseId databaseId, databaseIds )
     {
-        m_resetPending = false;
-        m_refreshPending = false;
+        QContentIdList contentIdList = m_store->matches( databaseId, criteria, sort );
 
-        m_primaryIds.clear();
-
-        m_count = 0;
-
-        QList< QContentIdList > contentIdLists;
-        QList< QtopiaDatabaseId > databaseIds = QtopiaSql::instance()->databaseIds();
-
-        int total = 0;
-
-        const QContentFilter criteria = filter();
-        const QContentSortCriteria sort = sortCriteria();
-
-        foreach( QtopiaDatabaseId databaseId, databaseIds )
+        if( !contentIdList.isEmpty() )
         {
-            QContentIdList contentIdList = m_store->matches( databaseId, criteria, sort );
+            contentIdLists.append( m_store->matches( databaseId, criteria, sort ) );
 
-            if( !contentIdList.isEmpty() )
-            {
-                contentIdLists.append( m_store->matches( databaseId, criteria, sort ) );
-
-                total += contentIdLists.last().count();
-            }
-        }
-
-        qSort( m_explicit.begin(), m_explicit.end(), QContentSetExplicitLessThan( sort ) );
-
-        QContentIdList explicitIds;
-
-        QPair< quint64, QContent > e;
-
-        foreach( e, m_explicit )
-            explicitIds.append( QContentId( QtopiaDatabaseId(-1), e.first ) );
-
-        if( !explicitIds.isEmpty() )
-        {
-            contentIdLists.append( explicitIds );
             total += contentIdLists.last().count();
         }
-
-        if( contentIdLists.count() == 1 )
-        {
-            m_primaryIds = contentIdLists.first();
-        }
-        else if( contentIdLists.count() > 1 )
-        {
-            m_primaryIds = sortIds( sort, contentIdLists, m_explicit );
-        }
-
-        m_count = m_primaryIds.count();
-
-        emit contentChanged();
     }
+
+    if (m_sortChanged)
+        qSort( m_explicit.begin(), m_explicit.end(), QContentSetExplicitLessThan( sort ) );
+
+    QContentIdList explicitIds;
+
+    QPair< quint64, QContent > e;
+
+    foreach( e, m_explicit )
+        explicitIds.append( QContentId( QtopiaDatabaseId(-1), e.first ) );
+
+    if( !explicitIds.isEmpty() )
+    {
+        contentIdLists.append( explicitIds );
+        total += contentIdLists.last().count();
+    }
+
+    if( contentIdLists.count() == 1 )
+    {
+        m_primaryIds = contentIdLists.first();
+    }
+    else if( contentIdLists.count() > 1 )
+    {
+        m_primaryIds = sortIds( sort, contentIdLists, m_explicit );
+    }
+
+    m_count = m_primaryIds.count();
+    m_sortChanged = false;
+    m_contentChanged = false;
 }
 
 QContent QSqlContentSetEngine::explicitContent( quint64 id ) const
@@ -405,6 +406,7 @@ int QSqlContentSetEngine::expectedIndexOf( const QContentSortCriteria &sort, con
     return index;
 };
 
+
 /*!
     Requeries the content of the set.
  */
@@ -417,38 +419,11 @@ void QSqlContentSetEngine::performUpdate()
         m_updateThread->start();
 }
 
-/*!
-    Trigger a refresh of the content set contents.  If \a reset is true the reset() signal will be
-    emitted and content replaced, otherwise the set will be synchronized with an updated set of data
-    emitting the content inserted/removed signals where there are changes.
-*/
-void QSqlContentSetEngine::refresh( bool reset )
+void QSqlContentSetEngine::contentChangedEvent()
 {
-    if( !m_refreshPending )
-        emit performRefresh();
+    QMutexLocker locker(&m_databaseSetMutex);
 
-    m_refreshPending = true;
-
-    if( !m_resetPending )
-    {
-        if( updateMode() == QContentSet::Synchronous )
-        {
-            clearCache();
-
-            m_resetPending = true;
-
-            emit this->reset();
-        }
-        else
-            m_resetPending = reset;
-    }
-}
-
-void QSqlContentSetEngine::contentChangedEvent( const QContentIdList &ids, QContent::ChangeType change )
-{
-    refresh();
-
-    emit contentChanged( ids, change );
+    m_contentChanged = true;
 }
 
 /*!
@@ -492,23 +467,25 @@ int QSqlContentSetEngine::valueCount() const
 
 QList< QContent > QSqlContentSetEngine::values( int index, int count )
 {
-    QMutexLocker locker( &m_databaseSetMutex );
-
-    int primaryCount = count;
-    int secondaryCount = qMin( count, m_secondaryCutoff - index );
-
     QContentIdList contentIds;
 
-    if( secondaryCount > 0 )
     {
-        contentIds = m_secondaryIds.mid( index, secondaryCount );
+        QMutexLocker locker( &m_databaseSetMutex );
 
-        primaryCount -= secondaryCount;
-        index += secondaryCount;
+        int primaryCount = count;
+        int secondaryCount = qMin( count, m_secondaryCutoff - index );
+
+        if( secondaryCount > 0 )
+        {
+            contentIds = m_secondaryIds.mid( index, secondaryCount );
+
+            primaryCount -= secondaryCount;
+            index += secondaryCount;
+        }
+
+        if( primaryCount > 0 )
+            contentIds += m_primaryIds.mid( index - m_secondaryCutoff + m_primaryOffset, primaryCount );
     }
-
-    if( primaryCount > 0 )
-        contentIds += m_primaryIds.mid( index - m_secondaryCutoff + m_primaryOffset, primaryCount );
 
     QList< QContent > values = m_store->contentFromIds( contentIds );
 
@@ -527,27 +504,25 @@ bool QSqlContentSetEngine::update()
     QContentFilter criteria;
     QContentSortCriteria sort;
     QList< QPair< quint64, QContent > > explicits;
-    bool refreshPending = false;
-    bool resetPending = false;
+    bool sortChanged = false;
+    bool contentChanged = false;
 
     {
         QMutexLocker locker( &m_databaseSetMutex );
 
-        if( m_deletePending || (!m_resetPending && !m_refreshPending) )
+        if (m_deletePending || (!m_sortChanged && !m_contentChanged))
             return false;
 
-        criteria = filter();
-        sort = sortCriteria();
+        criteria = m_filter;
+        sort = m_order;
 
         explicits = m_explicit;
 
-        refreshPending = m_refreshPending;
+        sortChanged = m_sortChanged;
+        contentChanged = m_contentChanged;
 
-        m_refreshPending = false;
-
-        resetPending = m_resetPending;
-
-        m_resetPending = false;
+        m_sortChanged = false;
+        m_contentChanged = false;
     }
 
     QSqlContentSetUpdateProxy updateProxy;
@@ -556,15 +531,11 @@ bool QSqlContentSetEngine::update()
     connect( &updateProxy, SIGNAL(remove(int,int,int,int)), this, SLOT(updateRemove(int,int,int,int)), Qt::QueuedConnection );
     connect( &updateProxy, SIGNAL(refresh(int,int)), this, SLOT(updateRefresh(int,int)), Qt::QueuedConnection );
 
-    if( resetPending )
-    {
-        qSort( explicits.begin(), explicits.end(), QContentSetExplicitLessThan( sort ) );
-    }
+    if (sortChanged)
+        qSort(explicits.begin(), explicits.end(), QContentSetExplicitLessThan(sort));
 
-    if( refreshPending || resetPending )
-    {
-        synchronizeSets( criteria, sort, explicits, &updateProxy );
-    }
+    if (sortChanged || contentChanged)
+        synchronizeSets(criteria, sort, explicits, &updateProxy);
 
     return !m_deletePending;
 }

@@ -120,6 +120,8 @@ GridItem::~GridItem()
     if ( mSelectedMovie ) {
         delete mSelectedMovie;
     }
+    if ( mRenderer )
+        delete mRenderer;
 }
 
 /*!

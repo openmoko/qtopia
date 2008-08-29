@@ -27,17 +27,11 @@
 
 class QtopiaSvgIconEnginePrivate;
 
-#if QT_VERSION < 0x040300
-class QtopiaSvgIconEngine : public QIconEngine
-#else
 class QtopiaSvgIconEngine : public QIconEngineV2
-#endif
 {
 public:
     QtopiaSvgIconEngine();
-#if QT_VERSION >= 0x040300
     QtopiaSvgIconEngine(const QtopiaSvgIconEngine &other);
-#endif
     virtual ~QtopiaSvgIconEngine();
     virtual void paint(QPainter *painter, const QRect &rect,
                        QIcon::Mode mode, QIcon::State state);
@@ -51,12 +45,10 @@ public:
     virtual void addFile(const QString &fileName, const QSize &size,
                          QIcon::Mode mode, QIcon::State state);
 
-#if QT_VERSION >= 0x040300
     QString key() const;
     QIconEngineV2 *clone() const;
     bool read(QDataStream &in);
     bool write(QDataStream &out) const;
-#endif
 
 private:
     QSharedDataPointer<QtopiaSvgIconEnginePrivate> d;

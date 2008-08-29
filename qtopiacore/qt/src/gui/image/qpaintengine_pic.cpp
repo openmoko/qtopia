@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -165,7 +165,13 @@ void QPicturePaintEngine::updatePen(const QPen &pen)
 #endif
     int pos;
     SERIALIZE_CMD(QPicturePrivate::PdcSetPen);
-    d->s << pen;
+    if (d->pic_d->dont_stream_pixmaps) {
+        int index = d->pic_d->pen_list.size();
+        d->pic_d->pen_list.append(pen);
+        d->s << index;
+    } else {
+        d->s << pen;
+    }
     writeCmdLength(pos, QRect(), false);
 }
 
@@ -213,7 +219,13 @@ void QPicturePaintEngine::updateBrush(const QBrush &brush)
 #endif
     int pos;
     SERIALIZE_CMD(QPicturePrivate::PdcSetBrush);
-    d->s << brush;
+    if (d->pic_d->dont_stream_pixmaps) {
+        int index = d->pic_d->brush_list.size();
+        d->pic_d->brush_list.append(brush);
+        d->s << index;
+    } else {
+        d->s << brush;
+    }
     writeCmdLength(pos, QRect(), false);
 }
 

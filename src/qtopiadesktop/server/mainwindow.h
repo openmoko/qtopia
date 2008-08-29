@@ -61,6 +61,7 @@ signals:
     void import();
     void sync();
     void syncall();
+    void syncallslow();
     void backuprestore();
     void settings();
     void manual();

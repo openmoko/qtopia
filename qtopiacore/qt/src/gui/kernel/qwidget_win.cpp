@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -1684,10 +1684,13 @@ void QWidget::setMask(const QRegion &region)
 
 void QWidgetPrivate::setMask_sys(const QRegion &region)
 {
+    // from qregion_win.cpp
+    extern HRGN qt_tryCreateRegion(QRegion::RegionType type, int left, int top, int right, int bottom);
+    
     Q_Q(QWidget);
     // Since SetWindowRegion takes ownership, and we need to translate,
     // we take a copy.
-    HRGN wr = CreateRectRgn(0,0,0,0);
+    HRGN wr = qt_tryCreateRegion(QRegion::Rectangle, 0,0,0,0);
     CombineRgn(wr, region.handle(), 0, RGN_COPY);
 
     QPoint offset = (q->isWindow()

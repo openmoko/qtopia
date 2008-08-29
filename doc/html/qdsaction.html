@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QDSAction Class Reference</h1>
 <p>The QDSAction class provides an interface for requesting Qtopia Data Sharing (QDS) services. <a href="#details">More...</a></p>
-<pre>    #include &lt;QDSAction&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QDSAction&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qdsaction-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -44,7 +44,7 @@
 <li><div class="fn"/>const QDSAction &amp; <b><a href="qdsaction.html#operator-eq">operator=</a></b> ( const QDSAction &amp; <i>other</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -54,16 +54,16 @@
 <li><div class="fn"/>void <b><a href="qdsaction.html#response-2">response</a></b> ( const QUniqueId &amp; <i>actionId</i>, const QDSData &amp; <i>responseData</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -84,25 +84,25 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QDSAction"></a>QDSAction::QDSAction ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QDSAction"></a>QDSAction::QDSAction ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs an empty <a href="qdsaction.html">QDSAction</a> object and attaches it to <i>parent</i>.</p>
 <h3 class="fn"><a name="QDSAction-2"></a>QDSAction::QDSAction ( const QDSAction &amp; <i>other</i> )</h3>
 <p>Constructs a deep copy of <i>other</i>.</p>
-<h3 class="fn"><a name="QDSAction-3"></a>QDSAction::QDSAction ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, const <a href="./qstring.html">QString</a> &amp; <i>service</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QDSAction-3"></a>QDSAction::QDSAction ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qstring.html">QString</a> &amp; <i>service</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs a <a href="qdsaction.html">QDSAction</a> object for the QDS service <i>name</i> and the Qtopia service <i>service</i>. The action is attached to <i>parent</i>.</p>
-<h3 class="fn"><a name="QDSAction-4"></a>QDSAction::QDSAction ( const <a href="qdsserviceinfo.html">QDSServiceInfo</a> &amp; <i>serviceInfo</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QDSAction-4"></a>QDSAction::QDSAction ( const <a href="qdsserviceinfo.html">QDSServiceInfo</a> &amp; <i>serviceInfo</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs a <a href="qdsaction.html">QDSAction</a> object for the service described in <i>serviceInfo</i> and attaches to <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QDSAction"></a>QDSAction::~QDSAction ()</h3>
 <p>Destroys the action.</p>
-<h3 class="fn"><a name="error"></a>void QDSAction::error ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>actionId</i>, const <a href="./qstring.html">QString</a> &amp; <i>message</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="error"></a>void QDSAction::error ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>actionId</i>, const <a href="qstring.html">QString</a> &amp; <i>message</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted when an error message <i>message</i> is received for the action identified by <i>actionId</i>.</p>
-<h3 class="fn"><a name="errorMessage"></a><a href="./qstring.html">QString</a> QDSAction::errorMessage () const</h3>
+<h3 class="fn"><a name="errorMessage"></a><a href="qstring.html">QString</a> QDSAction::errorMessage () const</h3>
 <p>Returns any error message generated during the request. Errors are reported from either <a href="qdsaction.html">QDSAction</a> or the provider application, and are reported through QDSData::error() or the return value of QDSData::exec(). If no error has been reported a null string will be returned.</p>
 <h3 class="fn"><a name="exec"></a>int QDSAction::exec ()</h3>
 <p>Synchronously performs the QDS service request. The return value provides the result of the request, see <a href="qdsaction.html#ResponseCode-enum">QDSAction::ResponseCode</a>.</p>
 <p>This method should only be used for QDS services which don't have request data, as discussed in <a href="qdsserviceinfo.html">QDSServiceInfo</a>, otherwise an error will be generated.</p>
 <p><b>Warning:</b> This call will block until a response has been received from the QDS service or the request times out.</p>
-<h3 class="fn"><a name="exec-2"></a>int QDSAction::exec ( const <a href="qdsdata.html">QDSData</a> &amp; <i>requestData</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>auxiliary</i> = QByteArray() )</h3>
+<h3 class="fn"><a name="exec-2"></a>int QDSAction::exec ( const <a href="qdsdata.html">QDSData</a> &amp; <i>requestData</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>auxiliary</i> = QByteArray() )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Synchronously performs the QDS service request with <i>requestData</i>. The return value provides the result of the request, see <a href="qdsaction.html#ResponseCode-enum">QDSAction::ResponseCode</a>.</p>
 <p>The request may also contain <i>auxiliary</i> data for supplementary information which may be required for the request but does not conceptually belong to <i>requestData</i>.</p>
@@ -114,7 +114,7 @@
 <p>Asynchronously initiates the QDS service request. Depending on the outcome of the request, the response from the QDS service provider is given by one of QDSData::response() or QDSData::error() signals.</p>
 <p>This method should only be used for QDS services which don't have request data, as discussed in <a href="qdsserviceinfo.html">QDSServiceInfo</a>, otherwise an error will be generated.</p>
 <p>Returns true on successful completion of the request; otherwise returns false.</p>
-<h3 class="fn"><a name="invoke-2"></a>bool QDSAction::invoke ( const <a href="qdsdata.html">QDSData</a> &amp; <i>requestData</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>auxiliary</i> = QByteArray() )</h3>
+<h3 class="fn"><a name="invoke-2"></a>bool QDSAction::invoke ( const <a href="qdsdata.html">QDSData</a> &amp; <i>requestData</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>auxiliary</i> = QByteArray() )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Asynchronously initiates the QDS service request with <i>requestData</i>. Depending on the outcome of the request, the response from the QDS service provider is given by one of QDSData::response() or QDSData::error() signals.</p>
 <p>The request may also contain <i>auxiliary</i> data for supplementary information, which may be required for the request but does not conceptually belong to <i>requestData</i>.</p>

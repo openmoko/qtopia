@@ -56,7 +56,7 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QUniqueId class provides an identifier that is unique and yet can be stored efficiently.</p>
-<p>The unique identifiers are 32 bits and are unique within the device they is created upon. If you require an identifier that is unique across multiple devices use <a href="./quuid.html">QUuid</a> instead. The QUniqueId objects are composed of an 8 bit context representing the data source that created them and a 24 bit index component. The unique identifiers are intended for record identifiers such as user contacts. Given the limited space of identifiers they are unsuitable for use as identifiers that might get created on the order of thousands per day.</p>
+<p>The unique identifiers are 32 bits and are unique within the device they is created upon. If you require an identifier that is unique across multiple devices use <a href="quuid.html">QUuid</a> instead. The QUniqueId objects are composed of an 8 bit context representing the data source that created them and a 24 bit index component. The unique identifiers are intended for record identifiers such as user contacts. Given the limited space of identifiers they are unsuitable for use as identifiers that might get created on the order of thousands per day.</p>
 <p>The context identifier should be generated with a program such as <i>uuidgen</i> and represent the data store or context within which the identifier is generated. For example SQL, and SIM card storage for QContacts each have their own context.</p>
 <p>See also <a href="quniqueidgenerator.html">QUniqueIdGenerator</a>.</p>
 <hr />
@@ -65,19 +65,19 @@
 <p>Constructs a null <a href="quniqueid.html">QUniqueId</a>.</p>
 <h3 class="fn"><a name="QUniqueId-2"></a>QUniqueId::QUniqueId ( const QUniqueId &amp; <i>other</i> )</h3>
 <p>Constructs a copy of <i>other</i>.</p>
-<h3 class="fn"><a name="QUniqueId-3"></a>QUniqueId::QUniqueId ( const <a href="./qstring.html">QString</a> &amp; <i>string</i> )</h3>
+<h3 class="fn"><a name="QUniqueId-3"></a>QUniqueId::QUniqueId ( const <a href="qstring.html">QString</a> &amp; <i>string</i> )</h3>
 <p>Constructs a <a href="quniqueid.html">QUniqueId</a> based on the given <i>string</i>.</p>
-<h3 class="fn"><a name="QUniqueId-4"></a>QUniqueId::QUniqueId ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>array</i> )</h3>
+<h3 class="fn"><a name="QUniqueId-4"></a>QUniqueId::QUniqueId ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>array</i> )</h3>
 <p>Constructs a <a href="quniqueid.html">QUniqueId</a> based on the given <i>array</i>.</p>
-<h3 class="fn"><a name="context"></a><a href="./quuid.html">QUuid</a> QUniqueId::context () const</h3>
+<h3 class="fn"><a name="context"></a><a href="quuid.html">QUuid</a> QUniqueId::context () const</h3>
 <p>Returns the context component of the identifier.</p>
 <p>See also <a href="quniqueid.html#index">index</a>().</p>
-<h3 class="fn"><a name="fromLocalContextDataStream"></a><a href="./qdatastream.html">QDataStream</a> &amp; QUniqueId::fromLocalContextDataStream ( <a href="./qdatastream.html">QDataStream</a> &amp; <i>stream</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="fromLocalContextDataStream"></a><a href="qdatastream.html">QDataStream</a> &amp; QUniqueId::fromLocalContextDataStream ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Reads the identifier from the given <i>stream</i>, and returns a reference to the stream. This function is not suitable for streaming data from another device or from a file that may have been transferred from another device.</p>
-<h3 class="fn"><a name="fromUInt"></a>QUniqueId QUniqueId::fromUInt ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>value</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="fromUInt"></a>QUniqueId QUniqueId::fromUInt ( <a href="qtglobal.html#uint-typedef">uint</a> <i>value</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Converts the packed <i>value</i> to a <a href="quniqueid.html">QUniqueId</a>,</p>
 <p>See also <a href="quniqueid.html#toUInt">toUInt</a>().</p>
-<h3 class="fn"><a name="index"></a><a href="./qtglobal.html#uint-typedef">uint</a> QUniqueId::index () const</h3>
+<h3 class="fn"><a name="index"></a><a href="qtglobal.html#uint-typedef">uint</a> QUniqueId::index () const</h3>
 <p>Returns the index component of the identifier.</p>
 <p>See also <a href="quniqueid.html#context">context</a>().</p>
 <h3 class="fn"><a name="isNull"></a>bool QUniqueId::isNull () const</h3>
@@ -86,24 +86,24 @@
 <p>Returns true if this is a temporary identifier, otherwise returns false.</p>
 <p>Temporary identifiers are scoped so as not to conflict with other identifiers.</p>
 <p>They are suitable for working with data sets when the identifiers are not intended to be permanent.</p>
-<h3 class="fn"><a name="mappedContext"></a><a href="./qtglobal.html#uint-typedef">uint</a> QUniqueId::mappedContext () const</h3>
+<h3 class="fn"><a name="mappedContext"></a><a href="qtglobal.html#uint-typedef">uint</a> QUniqueId::mappedContext () const</h3>
 <p>Returns a locally mapped integer value for the context of the id. This is useful for efficiently checking if a <a href="quniqueid.html">QUniqueId</a> was generated from an equivalent <a href="quniqueidgenerator.html">QUniqueIdGenerator</a>.</p>
 <p>See also <a href="quniqueidgenerator.html#mappedContext">QUniqueIdGenerator::mappedContext</a>().</p>
-<h3 class="fn"><a name="toByteArray"></a><a href="./qbytearray.html">QByteArray</a> QUniqueId::toByteArray () const</h3>
-<p>Converts the identifier to a byte array. The byte array contains the expanded form of the context. This allows the identifier to be backed up independent of the internal mapping of context <a href="./quuid.html">QUuid</a> to the internal context component.</p>
+<h3 class="fn"><a name="toByteArray"></a><a href="qbytearray.html">QByteArray</a> QUniqueId::toByteArray () const</h3>
+<p>Converts the identifier to a byte array. The byte array contains the expanded form of the context. This allows the identifier to be backed up independent of the internal mapping of context <a href="quuid.html">QUuid</a> to the internal context component.</p>
 <p>See also <a href="quniqueid.html#toLocalContextByteArray">toLocalContextByteArray</a>().</p>
-<h3 class="fn"><a name="toLocalContextByteArray"></a><a href="./qbytearray.html">QByteArray</a> QUniqueId::toLocalContextByteArray () const</h3>
-<p>Converts the identifier to a byte array. The mapped representation of the context will be written rather than the expanded <a href="./quuid.html">QUuid</a>. If the tracking or generating file is reset this byte array won't be usable to gain the original id.</p>
+<h3 class="fn"><a name="toLocalContextByteArray"></a><a href="qbytearray.html">QByteArray</a> QUniqueId::toLocalContextByteArray () const</h3>
+<p>Converts the identifier to a byte array. The mapped representation of the context will be written rather than the expanded <a href="quuid.html">QUuid</a>. If the tracking or generating file is reset this byte array won't be usable to gain the original id.</p>
 <p>See also <a href="quniqueid.html#toByteArray">toByteArray</a>().</p>
-<h3 class="fn"><a name="toLocalContextDataStream"></a><a href="./qdatastream.html">QDataStream</a> &amp; QUniqueId::toLocalContextDataStream ( <a href="./qdatastream.html">QDataStream</a> &amp; <i>stream</i> ) const&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="toLocalContextDataStream"></a><a href="qdatastream.html">QDataStream</a> &amp; QUniqueId::toLocalContextDataStream ( <a href="qdatastream.html">QDataStream</a> &amp; <i>stream</i> ) const&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Writes the identifier to the given <i>stream</i>, and returns a reference to the stream. This function is not suitable for streaming data to another device or to a file that may be transferred to another device.</p>
-<h3 class="fn"><a name="toLocalContextString"></a><a href="./qstring.html">QString</a> QUniqueId::toLocalContextString () const</h3>
+<h3 class="fn"><a name="toLocalContextString"></a><a href="qstring.html">QString</a> QUniqueId::toLocalContextString () const</h3>
 <p>Converts the identifier to a string. This string will only include <i>latin1</i> characters, and will contains the mapped context. If the tracking or generating file is reset this string won't be usable to gain the original id.</p>
 <p>See also <a href="quniqueid.html#toString">toString</a>().</p>
-<h3 class="fn"><a name="toString"></a><a href="./qstring.html">QString</a> QUniqueId::toString () const</h3>
-<p>Converts the identifier to a string. This string will only include <i>latin1</i> characters and contains the expanded form of the context. This allows the identifier to be backed up independent of the internal mapping of context <a href="./quuid.html">QUuid</a> to the internal context component.</p>
+<h3 class="fn"><a name="toString"></a><a href="qstring.html">QString</a> QUniqueId::toString () const</h3>
+<p>Converts the identifier to a string. This string will only include <i>latin1</i> characters and contains the expanded form of the context. This allows the identifier to be backed up independent of the internal mapping of context <a href="quuid.html">QUuid</a> to the internal context component.</p>
 <p>See also <a href="quniqueid.html#toLocalContextString">toLocalContextString</a>().</p>
-<h3 class="fn"><a name="toUInt"></a><a href="./qtglobal.html#uint-typedef">uint</a> QUniqueId::toUInt () const</h3>
+<h3 class="fn"><a name="toUInt"></a><a href="qtglobal.html#uint-typedef">uint</a> QUniqueId::toUInt () const</h3>
 <p>Converts the identifier to a packed value containing both the context and index components of the identifier.</p>
 <p>See also <a href="quniqueid.html#fromUInt">fromUInt</a>().</p>
 <h3 class="fn"><a name="operator-not-eq"></a>bool QUniqueId::operator!= ( const QUniqueId &amp; <i>i</i> ) const</h3>

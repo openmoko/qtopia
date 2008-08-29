@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QBluetoothLocalDevice Class Reference</h1>
 <p>The QBluetoothLocalDevice class represents a local bluetooth device. <a href="#details">More...</a></p>
-<pre>    #include &lt;QBluetoothLocalDevice&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QBluetoothLocalDevice&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qbluetoothlocaldevice-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -69,7 +69,7 @@
 <li><div class="fn"/>QBluetoothReply&lt;QString&gt; <b><a href="qbluetoothlocaldevice.html#version">version</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -78,7 +78,7 @@
 <li><div class="fn"/>bool <b><a href="qbluetoothlocaldevice.html#discoverRemoteDevices">discoverRemoteDevices</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -106,15 +106,15 @@
 <li><div class="fn"/>void <b><a href="qbluetoothlocaldevice.html#stateChanged">stateChanged</a></b> ( QBluetoothLocalDevice::State <i>state</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -127,7 +127,7 @@
 
     QBluetoothReply&lt;QDateTime&gt; result = local.lastSeen(remoteDevice);
     if (result.isError()) {
-        <span class="comment">//</span> handle error
+        <span class="comment">// handle error</span>
         return;
     }
 
@@ -180,17 +180,17 @@
 <p>The <b>Connectable</b> state is entered by using the bringUp() method. The <b>Discoverable</b> state is entered by using the <a href="qbluetoothlocaldevice.html#setDiscoverable">setDiscoverable</a>() method. The <b>Off</b> state is entered by using the bringDown() method.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QBluetoothLocalDevice"></a>QBluetoothLocalDevice::QBluetoothLocalDevice ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QBluetoothLocalDevice"></a>QBluetoothLocalDevice::QBluetoothLocalDevice ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Constructs a <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> with the default adaptor, obtained from QBluetoothLocalDeviceManager::defaultAdaptor(). This is equivalent to:</p>
 <pre>    QBluetoothLocalDeviceManager mgr;
     QString device = mgr.defaultDevice();
     QBluetoothLocalDevice localDevice(device);</pre>
-<p>The <i>parent</i> parameter specifies the <a href="./qobject.html">QObject</a> parent.</p>
-<h3 class="fn"><a name="QBluetoothLocalDevice-2"></a>QBluetoothLocalDevice::QBluetoothLocalDevice ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>address</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs a <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> with <i>address</i> paremeter representing the bluetooth address of the local device. The <i>parent</i> parameter specifies the <a href="./qobject.html">QObject</a> parent.</p>
+<p>The <i>parent</i> parameter specifies the <a href="qobject.html">QObject</a> parent.</p>
+<h3 class="fn"><a name="QBluetoothLocalDevice-2"></a>QBluetoothLocalDevice::QBluetoothLocalDevice ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>address</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs a <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> with <i>address</i> paremeter representing the bluetooth address of the local device. The <i>parent</i> parameter specifies the <a href="qobject.html">QObject</a> parent.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#deviceName">deviceName</a>().</p>
-<h3 class="fn"><a name="QBluetoothLocalDevice-3"></a>QBluetoothLocalDevice::QBluetoothLocalDevice ( const <a href="./qstring.html">QString</a> &amp; <i>devName</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs a <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> with <i>devName</i>, which represents a system internal device name for the device, typically hci&lt;0-7&gt;. The <i>parent</i> parameter specifies the <a href="./qobject.html">QObject</a> parent.</p>
+<h3 class="fn"><a name="QBluetoothLocalDevice-3"></a>QBluetoothLocalDevice::QBluetoothLocalDevice ( const <a href="qstring.html">QString</a> &amp; <i>devName</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs a <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> with <i>devName</i>, which represents a system internal device name for the device, typically hci&lt;0-7&gt;. The <i>parent</i> parameter specifies the <a href="qobject.html">QObject</a> parent.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#deviceName">deviceName</a>().</p>
 <h3 class="fn"><a name="dtor.QBluetoothLocalDevice"></a>QBluetoothLocalDevice::~QBluetoothLocalDevice ()</h3>
 <p>Deconstructs a <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a> object.</p>
@@ -205,17 +205,17 @@
 <p>Attempts to cancel the pairing process. In case of error, an error signal will be emitted. In the case of success, a <a href="qbluetoothlocaldevice.html#pairingFailed">pairingFailed</a>() signal will be emitted and <a href="qbluetoothlocaldevice.html#error">error</a>() set to <a href="qbluetoothlocaldevice.html#Error-enum">QBluetoothLocalDevice::AuthenticationCancelled</a>. The address of the remote device is given by <i>addr</i>.</p>
 <p>Returns true if the request could be queued, false otherwise.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#pairingFailed">pairingFailed</a>() and <a href="qbluetoothlocaldevice.html#error">error</a>().</p>
-<h3 class="fn"><a name="company"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="./qstring.html">QString</a>&gt; QBluetoothLocalDevice::company () const</h3>
+<h3 class="fn"><a name="company"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="qstring.html">QString</a>&gt; QBluetoothLocalDevice::company () const</h3>
 <p>Returns the company name of the device (e.g&#x2e; the brand of the device).</p>
 <p>Note that the underlying HCI daemon requires the IEEE standard oui.txt file in order to read the company information correctly. This file can be downloaded from the IEEE site. The HCI daemon expects the file to be placed at <tt>/usr/share/misc/oui.txt</tt>.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#manufacturer">manufacturer</a>(), <a href="qbluetoothlocaldevice.html#version">version</a>(), and <a href="qbluetoothlocaldevice.html#revision">revision</a>().</p>
 <h3 class="fn"><a name="connectable"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;bool&gt; QBluetoothLocalDevice::connectable () const</h3>
 <p>Returns true if other devices can connect to the local device, i.e&#x2e; page scan is enabled.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#setConnectable">setConnectable</a>() and <a href="qbluetoothlocaldevice.html#discoverable">discoverable</a>().</p>
-<h3 class="fn"><a name="connections"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="./qlist.html">QList</a>&lt;<a href="qbluetoothaddress.html">QBluetoothAddress</a>&gt; &gt; QBluetoothLocalDevice::connections () const</h3>
+<h3 class="fn"><a name="connections"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="qlist.html">QList</a>&lt;<a href="qbluetoothaddress.html">QBluetoothAddress</a>&gt; &gt; QBluetoothLocalDevice::connections () const</h3>
 <p>Returns a list of all remote devices which are currently connected to the local device.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#isConnected">isConnected</a>().</p>
-<h3 class="fn"><a name="deviceName"></a><a href="./qstring.html">QString</a> QBluetoothLocalDevice::deviceName () const</h3>
+<h3 class="fn"><a name="deviceName"></a><a href="qstring.html">QString</a> QBluetoothLocalDevice::deviceName () const</h3>
 <p>Returns the system device name of this device. This is of the form <b>hciX</b>.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#address">address</a>().</p>
 <h3 class="fn"><a name="disconnectRemoteDevice"></a>bool QBluetoothLocalDevice::disconnectRemoteDevice ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> )</h3>
@@ -230,10 +230,10 @@
 <p>Returns true if other devices can discover the local device, i.e&#x2e; inquiry scan is enabled.</p>
 <p>Note that if the device is in <b>Discoverable</b> state, it is also in <b>Connectable</b> state.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#setDiscoverable">setDiscoverable</a>() and <a href="qbluetoothlocaldevice.html#connectable">connectable</a>().</p>
-<h3 class="fn"><a name="discoverableTimeout"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="./qtglobal.html#uint-typedef">uint</a>&gt; QBluetoothLocalDevice::discoverableTimeout () const</h3>
+<h3 class="fn"><a name="discoverableTimeout"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="qtglobal.html#uint-typedef">uint</a>&gt; QBluetoothLocalDevice::discoverableTimeout () const</h3>
 <p>Returns the discoverable timeout set for the device. A value of 0 signifies that the timeout is indefinite.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#discoverable">discoverable</a>() and <a href="qbluetoothlocaldevice.html#setDiscoverable">setDiscoverable</a>().</p>
-<h3 class="fn"><a name="discoverableTimeoutChanged"></a>void QBluetoothLocalDevice::discoverableTimeoutChanged ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>timeout</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="discoverableTimeoutChanged"></a>void QBluetoothLocalDevice::discoverableTimeoutChanged ( <a href="qtglobal.html#uint-typedef">uint</a> <i>timeout</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever a discoverable timeout for a device has been changed. The <i>timeout</i> parameter holds the new timeout.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#discoverableTimeout">discoverableTimeout</a>() and <a href="qbluetoothlocaldevice.html#setDiscoverable">setDiscoverable</a>().</p>
 <h3 class="fn"><a name="discoveryCancelled"></a>void QBluetoothLocalDevice::discoveryCancelled ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -248,11 +248,11 @@
 <h3 class="fn"><a name="error"></a><a href="qbluetoothlocaldevice.html#Error-enum">QBluetoothLocalDevice::Error</a> QBluetoothLocalDevice::error () const</h3>
 <p>Returns the last error that has occurred.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#errorString">errorString</a>().</p>
-<h3 class="fn"><a name="error-2"></a>void QBluetoothLocalDevice::error ( <a href="qbluetoothlocaldevice.html#Error-enum">QBluetoothLocalDevice::Error</a> <i>error</i>, const <a href="./qstring.html">QString</a> &amp; <i>msg</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="error-2"></a>void QBluetoothLocalDevice::error ( <a href="qbluetoothlocaldevice.html#Error-enum">QBluetoothLocalDevice::Error</a> <i>error</i>, const <a href="qstring.html">QString</a> &amp; <i>msg</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>This signal is emitted whenever an error has occurred. The <i>error</i> variable contains the error that has occurred. The <i>msg</i> variable contains the error message.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#error">error</a>().</p>
-<h3 class="fn"><a name="errorString"></a><a href="./qstring.html">QString</a> QBluetoothLocalDevice::errorString () const</h3>
+<h3 class="fn"><a name="errorString"></a><a href="qstring.html">QString</a> QBluetoothLocalDevice::errorString () const</h3>
 <p>Returns the human readable form of the last error that has occurred.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#error">error</a>().</p>
 <h3 class="fn"><a name="isConnected"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;bool&gt; QBluetoothLocalDevice::isConnected ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> ) const</h3>
@@ -269,28 +269,28 @@
 <p>See also <a href="qbluetoothlocaldevice.html#connectable">connectable</a>(), <a href="qbluetoothlocaldevice.html#setConnectable">setConnectable</a>(), and <a href="qbluetoothlocaldevice.html#turnOff">turnOff</a>().</p>
 <h3 class="fn"><a name="isValid"></a>bool QBluetoothLocalDevice::isValid () const</h3>
 <p>Returns whether the instance is valid.</p>
-<h3 class="fn"><a name="knownDevices"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="./qlist.html">QList</a>&lt;<a href="qbluetoothaddress.html">QBluetoothAddress</a>&gt; &gt; QBluetoothLocalDevice::knownDevices () const</h3>
+<h3 class="fn"><a name="knownDevices"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="qlist.html">QList</a>&lt;<a href="qbluetoothaddress.html">QBluetoothAddress</a>&gt; &gt; QBluetoothLocalDevice::knownDevices () const</h3>
 <p>Lists the addresses of all known devices, ones that have paired, seen or used.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#lastUsed">lastUsed</a>() and <a href="qbluetoothlocaldevice.html#lastSeen">lastSeen</a>().</p>
-<h3 class="fn"><a name="knownDevices-2"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="./qlist.html">QList</a>&lt;<a href="qbluetoothaddress.html">QBluetoothAddress</a>&gt; &gt; QBluetoothLocalDevice::knownDevices ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>date</i> ) const</h3>
+<h3 class="fn"><a name="knownDevices-2"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="qlist.html">QList</a>&lt;<a href="qbluetoothaddress.html">QBluetoothAddress</a>&gt; &gt; QBluetoothLocalDevice::knownDevices ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>date</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Lists the addresses of all known devices, ones that have paired, seen or used after the given <i>date</i>.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#lastUsed">lastUsed</a>() and <a href="qbluetoothlocaldevice.html#lastSeen">lastSeen</a>().</p>
-<h3 class="fn"><a name="lastSeen"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="./qdatetime.html">QDateTime</a>&gt; QBluetoothLocalDevice::lastSeen ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> ) const</h3>
-<p>Returns the date the remote device with address <i>addr</i> was last seen by the local device adaptor. In the case the device has never been seen, returns an invalid <a href="./qdatetime.html">QDateTime</a>. If an error occurs, this method returns an invalid <a href="./qdatetime.html">QDateTime</a> and sets the <a href="qbluetoothlocaldevice.html#error">error</a>() accordingly.</p>
+<h3 class="fn"><a name="lastSeen"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="qdatetime.html">QDateTime</a>&gt; QBluetoothLocalDevice::lastSeen ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> ) const</h3>
+<p>Returns the date the remote device with address <i>addr</i> was last seen by the local device adaptor. In the case the device has never been seen, returns an invalid <a href="qdatetime.html">QDateTime</a>. If an error occurs, this method returns an invalid <a href="qdatetime.html">QDateTime</a> and sets the <a href="qbluetoothlocaldevice.html#error">error</a>() accordingly.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#lastUsed">lastUsed</a>().</p>
-<h3 class="fn"><a name="lastUsed"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="./qdatetime.html">QDateTime</a>&gt; QBluetoothLocalDevice::lastUsed ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> ) const</h3>
-<p>Returns the date the remote device with address <i>addr</i> was last used by the local device adaptor. In the case the device has never been used, returns an invalid <a href="./qdatetime.html">QDateTime</a>. If an error occurs, this method returns an invalid <a href="./qdatetime.html">QDateTime</a> and sets the <a href="qbluetoothlocaldevice.html#error">error</a>() accordingly.</p>
+<h3 class="fn"><a name="lastUsed"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="qdatetime.html">QDateTime</a>&gt; QBluetoothLocalDevice::lastUsed ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> ) const</h3>
+<p>Returns the date the remote device with address <i>addr</i> was last used by the local device adaptor. In the case the device has never been used, returns an invalid <a href="qdatetime.html">QDateTime</a>. If an error occurs, this method returns an invalid <a href="qdatetime.html">QDateTime</a> and sets the <a href="qbluetoothlocaldevice.html#error">error</a>() accordingly.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#lastSeen">lastSeen</a>().</p>
-<h3 class="fn"><a name="manufacturer"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="./qstring.html">QString</a>&gt; QBluetoothLocalDevice::manufacturer () const</h3>
+<h3 class="fn"><a name="manufacturer"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="qstring.html">QString</a>&gt; QBluetoothLocalDevice::manufacturer () const</h3>
 <p>Returns the manufacturer of the device.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#version">version</a>(), <a href="qbluetoothlocaldevice.html#revision">revision</a>(), and <a href="qbluetoothlocaldevice.html#company">company</a>().</p>
-<h3 class="fn"><a name="name"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="./qstring.html">QString</a>&gt; QBluetoothLocalDevice::name () const</h3>
+<h3 class="fn"><a name="name"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="qstring.html">QString</a>&gt; QBluetoothLocalDevice::name () const</h3>
 <p>Returns the human readable name of the device.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#setName">setName</a>() and <a href="qbluetoothlocaldevice.html#nameChanged">nameChanged</a>().</p>
-<h3 class="fn"><a name="nameChanged"></a>void QBluetoothLocalDevice::nameChanged ( const <a href="./qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="nameChanged"></a>void QBluetoothLocalDevice::nameChanged ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever a device name has been changed. The <i>name</i> variable contains the new name. Note that this signal can be triggered by external events (such as another program changing the device name).</p>
-<h3 class="fn"><a name="pairedDevices"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="./qlist.html">QList</a>&lt;<a href="qbluetoothaddress.html">QBluetoothAddress</a>&gt; &gt; QBluetoothLocalDevice::pairedDevices () const</h3>
+<h3 class="fn"><a name="pairedDevices"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="qlist.html">QList</a>&lt;<a href="qbluetoothaddress.html">QBluetoothAddress</a>&gt; &gt; QBluetoothLocalDevice::pairedDevices () const</h3>
 <p>Returns a list of Bluetooth device addresses which are currently paired to this device. Pairing establishes a secret key which is used for encryption of all communication between the two devices. The encryption key is based on a PIN which must be entered on both devices.</p>
 <p>Note that each device maintains its own list of paired devices and thus it is possible that while the local device trusts the peer, the peer might not trust the local device.</p>
 <p>The function will return a list of paired device addresses. If an error occurred during a request, the return value will be an error, and <a href="qbluetoothlocaldevice.html#error">error</a>() will be set accordingly.</p>
@@ -301,16 +301,16 @@
 <p>This signal is emitted whenever a pairing request has failed. The <i>addr</i> parameter holds the address of the remote device.</p>
 <h3 class="fn"><a name="pairingRemoved"></a>void QBluetoothLocalDevice::pairingRemoved ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever a pairing has been removed. The <i>addr</i> parameter holds the address of the remote device. Note that this signal could be triggered by external events.</p>
-<h3 class="fn"><a name="pinCodeLength"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="./qtglobal.html#uchar-typedef">uchar</a>&gt; QBluetoothLocalDevice::pinCodeLength ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> ) const</h3>
+<h3 class="fn"><a name="pinCodeLength"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="qtglobal.html#uchar-typedef">uchar</a>&gt; QBluetoothLocalDevice::pinCodeLength ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> ) const</h3>
 <p>Returns the pin code length used when the device was paired to <i>addr</i>. If the device is not paired, an invalid <a href="qbluetoothreply.html">QBluetoothReply</a> is returned.</p>
-<h3 class="fn"><a name="remoteAlias"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="./qstring.html">QString</a>&gt; QBluetoothLocalDevice::remoteAlias ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> ) const</h3>
+<h3 class="fn"><a name="remoteAlias"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="qstring.html">QString</a>&gt; QBluetoothLocalDevice::remoteAlias ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> ) const</h3>
 <p>Returns the alias for a remote device. If the alias is set, it should be used in preference to the device display name. On success, returns the alias as a string. The address of the remote device is given by <i>addr</i>.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#setRemoteAlias">setRemoteAlias</a>() and <a href="qbluetoothlocaldevice.html#removeRemoteAlias">removeRemoteAlias</a>().</p>
-<h3 class="fn"><a name="remoteAliasChanged"></a>void QBluetoothLocalDevice::remoteAliasChanged ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i>, const <a href="./qstring.html">QString</a> &amp; <i>alias</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="remoteAliasChanged"></a>void QBluetoothLocalDevice::remoteAliasChanged ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i>, const <a href="qstring.html">QString</a> &amp; <i>alias</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever a remote device's alias has been changed. The <i>addr</i> contains the address of the remote device, and <i>alias</i> contains the new alias. This signal can be triggered externally.</p>
 <h3 class="fn"><a name="remoteAliasRemoved"></a>void QBluetoothLocalDevice::remoteAliasRemoved ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever a remote device's alias has been removed. The <i>addr</i> contains the address of the remote device. This signal can be triggered externally.</p>
-<h3 class="fn"><a name="remoteClassUpdated"></a>void QBluetoothLocalDevice::remoteClassUpdated ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i>, <a href="qbluetooth.html#DeviceMajor-enum">QBluetooth::DeviceMajor</a> <i>major</i>, <a href="./qtglobal.html#quint8-typedef">quint8</a> <i>minor</i>, <a href="qbluetooth.html#ServiceClass-enum">QBluetooth::ServiceClasses</a> <i>serviceClasses</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="remoteClassUpdated"></a>void QBluetoothLocalDevice::remoteClassUpdated ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i>, <a href="qbluetooth.html#DeviceMajor-enum">QBluetooth::DeviceMajor</a> <i>major</i>, <a href="qtglobal.html#quint8-typedef">quint8</a> <i>minor</i>, <a href="qbluetooth.html#ServiceClass-enum">QBluetooth::ServiceClasses</a> <i>serviceClasses</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever a remote device's class has changed. The <i>addr</i> parameter holds the address of the device, the <i>major</i>, <i>minor</i> and <i>serviceClasses</i> parameters hold the Device Major, Device Minor and Device Service Classes information, respectively.</p>
 <h3 class="fn"><a name="remoteDeviceConnected"></a>void QBluetoothLocalDevice::remoteDeviceConnected ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever a remote device has connected to the local device. The <i>addr</i> parameter holds the address of the remote device. Note that this signal can be triggered externally.</p>
@@ -325,13 +325,13 @@
 <h3 class="fn"><a name="remoteDeviceFound"></a>void QBluetoothLocalDevice::remoteDeviceFound ( const <a href="qbluetoothremotedevice.html">QBluetoothRemoteDevice</a> &amp; <i>device</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever a device is discovered. The <i>device</i> parameter contains the remote device discovered. Note that this signal can be triggered by other instances of <a href="qbluetoothlocaldevice.html">QBluetoothLocalDevice</a>.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#remoteDevicesFound">remoteDevicesFound</a>().</p>
-<h3 class="fn"><a name="remoteDevicesFound"></a>void QBluetoothLocalDevice::remoteDevicesFound ( const <a href="./qlist.html">QList</a>&lt;<a href="qbluetoothremotedevice.html">QBluetoothRemoteDevice</a>&gt; &amp; <i>list</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="remoteDevicesFound"></a>void QBluetoothLocalDevice::remoteDevicesFound ( const <a href="qlist.html">QList</a>&lt;<a href="qbluetoothremotedevice.html">QBluetoothRemoteDevice</a>&gt; &amp; <i>list</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever a discovery procedure has finished. It returns all devices discovered by the procedure. The <i>list</i> contains the list of all remote devices found.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#remoteDeviceFound">remoteDeviceFound</a>().</p>
 <h3 class="fn"><a name="remoteNameFailed"></a>void QBluetoothLocalDevice::remoteNameFailed ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever a request for a remote device's name has failed. The <i>addr</i> parameter holds the address of the device.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#remoteNameUpdated">remoteNameUpdated</a>().</p>
-<h3 class="fn"><a name="remoteNameUpdated"></a>void QBluetoothLocalDevice::remoteNameUpdated ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i>, const <a href="./qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="remoteNameUpdated"></a>void QBluetoothLocalDevice::remoteNameUpdated ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i>, const <a href="qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever the remote device's name has been changed. This can occur when a never seen device has been discovered and the name was obtained (in this case its bluetooth address should be used for display purposes until this signal is emitted), or if the device name has changed since last communication. The <i>addr</i> parameter holds the address of the Bluetooth device. The <i>name</i> contains the new name.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#remoteNameFailed">remoteNameFailed</a>().</p>
 <h3 class="fn"><a name="removePairing"></a>bool QBluetoothLocalDevice::removePairing ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> )</h3>
@@ -343,24 +343,24 @@
 <h3 class="fn"><a name="requestPairing"></a>bool QBluetoothLocalDevice::requestPairing ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i> )</h3>
 <p>Requests the local device to pair to a remote device found at address <i>addr</i>. This method returns true if the pairing request could be started and false otherwise.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#pairedDevices">pairedDevices</a>(), <a href="qbluetoothlocaldevice.html#pairingCreated">pairingCreated</a>(), <a href="qbluetoothlocaldevice.html#pairingFailed">pairingFailed</a>(), and <a href="qbluetoothpasskeyagent.html">QBluetoothPasskeyAgent</a>.</p>
-<h3 class="fn"><a name="revision"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="./qstring.html">QString</a>&gt; QBluetoothLocalDevice::revision () const</h3>
+<h3 class="fn"><a name="revision"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="qstring.html">QString</a>&gt; QBluetoothLocalDevice::revision () const</h3>
 <p>Returns the device revision. This is generally manufacturer-specific.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#manufacturer">manufacturer</a>(), <a href="qbluetoothlocaldevice.html#version">version</a>(), and <a href="qbluetoothlocaldevice.html#company">company</a>().</p>
 <h3 class="fn"><a name="setConnectable"></a>bool QBluetoothLocalDevice::setConnectable ()</h3>
 <p>Sets the device into <b>Connectable</b> state. Other devices can connect to the local device, but not discover its existence.</p>
 <p>Returns true if the request could be queued, and false otherwise. The <a href="qbluetoothlocaldevice.html#stateChanged">stateChanged</a>() signal will be sent once the device has changed state. An <a href="qbluetoothlocaldevice.html#error">error</a>() signal will be sent if the state change failed.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#connectable">connectable</a>() and <a href="qbluetoothlocaldevice.html#stateChanged">stateChanged</a>().</p>
-<h3 class="fn"><a name="setDiscoverable"></a>bool QBluetoothLocalDevice::setDiscoverable ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>timeout</i> = 0 )</h3>
+<h3 class="fn"><a name="setDiscoverable"></a>bool QBluetoothLocalDevice::setDiscoverable ( <a href="qtglobal.html#uint-typedef">uint</a> <i>timeout</i> = 0 )</h3>
 <p>Sets the device into <b>Discoverable</b> state. The <i>timeout</i> value is used to specify how long the device will remain discoverable. If the timeout value of 0 is specified, the device will remain discoverable indefinitely.</p>
 <p>Returns true if the request could be queued, and false otherwise. The <a href="qbluetoothlocaldevice.html#stateChanged">stateChanged</a>() signal will be sent once the device has changed state. An <a href="qbluetoothlocaldevice.html#error">error</a>() signal will be sent if the state change failed.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#discoverableTimeout">discoverableTimeout</a>(), <a href="qbluetoothlocaldevice.html#discoverable">discoverable</a>(), and <a href="qbluetoothlocaldevice.html#stateChanged">stateChanged</a>().</p>
-<h3 class="fn"><a name="setName"></a>bool QBluetoothLocalDevice::setName ( const <a href="./qstring.html">QString</a> &amp; <i>name</i> )</h3>
+<h3 class="fn"><a name="setName"></a>bool QBluetoothLocalDevice::setName ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )</h3>
 <p>Sets the human readable name of this device to <i>name</i>. Returns true if the call succeeded, and false otherwise. In addition, nameChanged signal will be sent once the name has been changed.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#name">name</a>() and <a href="qbluetoothlocaldevice.html#nameChanged">nameChanged</a>().</p>
 <h3 class="fn"><a name="setPeriodicDiscoveryEnabled"></a>bool QBluetoothLocalDevice::setPeriodicDiscoveryEnabled ( bool <i>enabled</i> )</h3>
 <p>Enables or Disables the Periodic Discovery Mode according to <i>enabled</i>. When in Periodic Discovery Mode the device will periodically run a device inquiry and report the results. Returns true if the mode change operation succeeded, and false otherwise.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#isPeriodicDiscoveryEnabled">isPeriodicDiscoveryEnabled</a>().</p>
-<h3 class="fn"><a name="setRemoteAlias"></a>bool QBluetoothLocalDevice::setRemoteAlias ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i>, const <a href="./qstring.html">QString</a> &amp; <i>alias</i> )</h3>
+<h3 class="fn"><a name="setRemoteAlias"></a>bool QBluetoothLocalDevice::setRemoteAlias ( const <a href="qbluetoothaddress.html">QBluetoothAddress</a> &amp; <i>addr</i>, const <a href="qstring.html">QString</a> &amp; <i>alias</i> )</h3>
 <p>Sets the alias for a remote device given by <i>addr</i> to alias <i>alias</i>. Returns true if the alias could be set, and false otherwise.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#remoteAlias">remoteAlias</a>() and <a href="qbluetoothlocaldevice.html#removeRemoteAlias">removeRemoteAlias</a>().</p>
 <h3 class="fn"><a name="stateChanged"></a>void QBluetoothLocalDevice::stateChanged ( <a href="qbluetoothlocaldevice.html#State-enum">QBluetoothLocalDevice::State</a> <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -374,7 +374,7 @@
 <p>Updates the information about the remote device, based on the local device cache. Some information is generally not provided by the local adaptor until a low-level connection is made to the remote device. Thus devices which are found by <a href="qbluetoothlocaldevice.html#discoverRemoteDevices">discoverRemoteDevices</a>() will not contain the full information about the device. The remote device is given by <i>device</i>.</p>
 <p>Returns true on successful completion of the request; otherwise returns false.</p>
 <p>See also <a href="qbluetoothlocaldevice.html#discoverRemoteDevices">discoverRemoteDevices</a>() and <a href="qbluetoothlocaldevice.html#remoteDevicesFound">remoteDevicesFound</a>().</p>
-<h3 class="fn"><a name="version"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="./qstring.html">QString</a>&gt; QBluetoothLocalDevice::version () const</h3>
+<h3 class="fn"><a name="version"></a><a href="qbluetoothreply.html">QBluetoothReply</a>&lt;<a href="qstring.html">QString</a>&gt; QBluetoothLocalDevice::version () const</h3>
 <p>Returns the Bluetooth protocol version this device supports. This can for instance be 1.0, 1.1, 1.2, 2.0&#x2e;.&#x2e;</p>
 <p>See also <a href="qbluetoothlocaldevice.html#manufacturer">manufacturer</a>(), <a href="qbluetoothlocaldevice.html#revision">revision</a>(), and <a href="qbluetoothlocaldevice.html#company">company</a>().</p>
 <p /><address><hr /><div align="center">

@@ -29,7 +29,7 @@
 <p>Here is an example of how an application would create a system category to assign to content items.</p>
 <pre>    QCategoryManager cats(&quot;Documents&quot;);
     bool ok = cats.ensureSystemCategory(&quot;com.trolltech.Camera&quot;, &quot;Camera&quot;);
-    Q_ASSERT(ok); <span class="comment">//</span> only fails if there's a problem with the database
+    Q_ASSERT(ok); <span class="comment">// only fails if there's a problem with the database</span>
 
     QContent newPhoto;
     newPhoto.setCategories( QStringList() &lt;&lt; &quot;com.trolltech.Camera&quot; );</pre>
@@ -37,7 +37,7 @@
 <pre>    QCategoryManager cats(&quot;Documents&quot;);
     QString id = cats.add(&quot;Camera&quot;);
     bool ok = cats.ensureSystemCategory(id, &quot;Camera&quot;);
-    Q_ASSERT(ok); <span class="comment">//</span> fails</pre>
+    Q_ASSERT(ok); <span class="comment">// fails</span></pre>
 <p>To handle translation of the system category you will need to take additional steps. See <a href="buildsystem/task-translating-categories-1.html">Translating Categories</a> for details.</p>
 <a name="scoping"></a>
 <h2>Scoping</h2>

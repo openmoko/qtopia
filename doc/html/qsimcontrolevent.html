@@ -80,38 +80,38 @@
 <p>Construct a new SIM control object as a copy of <i>value</i>.</p>
 <h3 class="fn"><a name="dtor.QSimControlEvent"></a>QSimControlEvent::~QSimControlEvent ()</h3>
 <p>Destruct a SIM control object.</p>
-<h3 class="fn"><a name="addExtensionField"></a>void QSimControlEvent::addExtensionField ( int <i>tag</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="addExtensionField"></a>void QSimControlEvent::addExtensionField ( int <i>tag</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>value</i> )</h3>
 <p>Adds an extension field to the data from <a href="qsimcontrolevent.html#extensionData">extensionData</a>(). The field will have the specified <i>tag</i> and contents given by <i>value</i>.</p>
 <p>See also <a href="qsimcontrolevent.html#extensionField">extensionField</a>().</p>
-<h3 class="fn"><a name="extensionData"></a><a href="./qbytearray.html">QByteArray</a> QSimControlEvent::extensionData () const</h3>
+<h3 class="fn"><a name="extensionData"></a><a href="qbytearray.html">QByteArray</a> QSimControlEvent::extensionData () const</h3>
 <p>Returns the extension data for this SIM control event. The extension data is appended after all other fields, and consists of zero or more BER tag-length-value field specifications.</p>
 <p>See also <a href="qsimcontrolevent.html#setExtensionData">setExtensionData</a>() and <a href="qsimcontrolevent.html#extensionField">extensionField</a>().</p>
-<h3 class="fn"><a name="extensionField"></a><a href="./qbytearray.html">QByteArray</a> QSimControlEvent::extensionField ( int <i>tag</i> ) const</h3>
+<h3 class="fn"><a name="extensionField"></a><a href="qbytearray.html">QByteArray</a> QSimControlEvent::extensionField ( int <i>tag</i> ) const</h3>
 <p>Returns the contents of an extension field. The <i>tag</i> is an 8-bit value, from 3GPP TS 11.14, that specifies the particular field the caller is interested in. The most significant bit of <i>tag</i> is ignored when searching for the field, as it contains the &quot;must comprehend&quot; status from 3GPP TS 11.14, and is not important for locating the desired field.</p>
 <p>This is a simpler method than <a href="qsimcontrolevent.html#extensionData">extensionData</a>() for accessing values within the extension data.</p>
 <p>See also <a href="qsimcontrolevent.html#addExtensionField">addExtensionField</a>().</p>
-<h3 class="fn"><a name="fromPdu"></a>QSimControlEvent QSimControlEvent::fromPdu ( <a href="qsimcontrolevent.html#Type-enum">QSimControlEvent::Type</a> <i>type</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>pdu</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="fromPdu"></a>QSimControlEvent QSimControlEvent::fromPdu ( <a href="qsimcontrolevent.html#Type-enum">QSimControlEvent::Type</a> <i>type</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>pdu</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a SIM control event object corresponding to the data in <i>pdu</i>. The <i>type</i> indicates the type of SIM control event that is being decoded from <i>pdu</i>: <tt>Call</tt> or <tt>Sms</tt>. The data is decoded as described in 3GPP TS 11.14.</p>
 <p>See also <a href="qsimcontrolevent.html#toPdu">toPdu</a>().</p>
 <h3 class="fn"><a name="result"></a><a href="qsimcontrolevent.html#Result-enum">QSimControlEvent::Result</a> QSimControlEvent::result () const</h3>
 <p>Returns the result of this SIM control event.</p>
 <p>See also <a href="qsimcontrolevent.html#setResult">setResult</a>().</p>
-<h3 class="fn"><a name="setExtensionData"></a>void QSimControlEvent::setExtensionData ( <a href="./qbytearray.html">QByteArray</a> <i>value</i> )</h3>
+<h3 class="fn"><a name="setExtensionData"></a>void QSimControlEvent::setExtensionData ( <a href="qbytearray.html">QByteArray</a> <i>value</i> )</h3>
 <p>Sets the extension data for this SIM control event to <i>value</i>. The extension data is appended after all other fields, and consists of zero or more BER tag-length-value field specifications.</p>
 <p>See also <a href="qsimcontrolevent.html#extensionData">extensionData</a>() and <a href="qsimcontrolevent.html#addExtensionField">addExtensionField</a>().</p>
 <h3 class="fn"><a name="setResult"></a>void QSimControlEvent::setResult ( <a href="qsimcontrolevent.html#Result-enum">QSimControlEvent::Result</a> <i>value</i> )</h3>
 <p>Sets the result of this SIM control event to <i>value</i>. The default value is <tt>Allowed</tt>.</p>
 <p>See also <a href="qsimcontrolevent.html#result">result</a>().</p>
-<h3 class="fn"><a name="setText"></a>void QSimControlEvent::setText ( const <a href="./qstring.html">QString</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="setText"></a>void QSimControlEvent::setText ( const <a href="qstring.html">QString</a> &amp; <i>value</i> )</h3>
 <p>Sets the text string associated with this SIM control event to <i>value</i>.</p>
 <p>See also <a href="qsimcontrolevent.html#text">text</a>().</p>
 <h3 class="fn"><a name="setType"></a>void QSimControlEvent::setType ( <a href="qsimcontrolevent.html#Type-enum">QSimControlEvent::Type</a> <i>value</i> )</h3>
 <p>Sets the type of this SIM control event to <i>value</i>.</p>
 <p>See also <a href="qsimcontrolevent.html#type">type</a>().</p>
-<h3 class="fn"><a name="text"></a><a href="./qstring.html">QString</a> QSimControlEvent::text () const</h3>
+<h3 class="fn"><a name="text"></a><a href="qstring.html">QString</a> QSimControlEvent::text () const</h3>
 <p>Returns the text string associated with this SIM control event. If this string is not empty, it should be displayed to the user to inform them of the SIM control operation.</p>
 <p>See also <a href="qsimcontrolevent.html#setText">setText</a>().</p>
-<h3 class="fn"><a name="toPdu"></a><a href="./qbytearray.html">QByteArray</a> QSimControlEvent::toPdu () const</h3>
+<h3 class="fn"><a name="toPdu"></a><a href="qbytearray.html">QByteArray</a> QSimControlEvent::toPdu () const</h3>
 <p>Returns the PDU form of this SIM control event, encoded as described in 3GPP TS 11.14.</p>
 <p>See also <a href="qsimcontrolevent.html#fromPdu">fromPdu</a>().</p>
 <h3 class="fn"><a name="type"></a><a href="qsimcontrolevent.html#Type-enum">QSimControlEvent::Type</a> QSimControlEvent::type () const</h3>

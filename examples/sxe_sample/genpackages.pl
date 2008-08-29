@@ -7,7 +7,6 @@ use Cwd;
 
 my @files = qw/
     main.cpp
-    malpkg.control
     malpkg.cpp
     malpkg.h
     malpkg.html
@@ -21,7 +20,7 @@ my @domains;
 {
     # supress warnings about the commas
     no warnings;
-    @domains = qw' window,docapi window,pim graphics window,beaming window';
+    @domains = qw' untrusted untrusted trusted';
 }
 my $projroot = getcwd();
 my $proj_def;
@@ -91,7 +90,7 @@ for my $pkdir ( @projects )
     {
         my $this_def = $proj_def;
         $this_def =~ s/malpkg/mal$pkdir/g ;
-        $this_def =~ s/pkg.domain=graphics/pkg.domain=${domains[$dom]}/ ;
+        $this_def =~ s/pkg.domain=untrusted/pkg.domain=${domains[$dom]}/ ;
         $this_def =~ s/(help.files=mal)$pkdir(.html)/$1pkg$2/; 
 
         open PRO, ">$proj_file" or die "open $projroot/$proj_file : $!\n";

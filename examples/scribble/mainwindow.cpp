@@ -205,7 +205,6 @@ bool MainWindow::maybeSave()
                              "Save it?</qt>"),
                           QMessageBox::Warning,
                           QMessageBox::Yes | QMessageBox::Default,
-                          QMessageBox::No,
                           QMessageBox::Cancel | QMessageBox::Escape, 0);
 
          int result = QtopiaApplication::execDialog(box, true);
@@ -214,9 +213,6 @@ bool MainWindow::maybeSave()
             case QMessageBox::Yes:
                   return save();
                   break;
-            case QMessageBox::Cancel:
-                 return false;
-                 break;
           };
     }
     return true;

@@ -32,7 +32,7 @@
 <p>The database handles simultaneous query attempts from multiple applications by blocking new queries while existing queries are running. However, Qtopia's applications and libraries are designed to only create short-lived/temporary SQL queries.</p>
 <a name="internationalization"></a>
 <h3>Internationalization</h3>
-<p>Qtopia supports a number of languages and so strings should be stored in a Unicode-compatible encoding such as UTF8 or UTF16. A localized string comparison operation must be provided by the database as <tt>localeAwareCompare</tt> needs to be equivalent to the <tt>QString::localeAwareCompare()</tt> function. The <a href="./3rdparty.html">SQLite</a> version of this function is as follows:</p>
+<p>Qtopia supports a number of languages and so strings should be stored in a Unicode-compatible encoding such as UTF8 or UTF16. A localized string comparison operation must be provided by the database as <tt>localeAwareCompare</tt> needs to be equivalent to the <tt>QString::localeAwareCompare()</tt> function. The <a href="legal-sqlite.html">SQLite</a> version of this function is as follows:</p>
 <pre>    int sqliteLocaleAwareCompare(void *, int ll, const void *l, int rl, const void *r)
     {
         QString left = QString::fromUtf16((const ushort *)l, ll);
@@ -41,10 +41,10 @@
     }</pre>
 <a name="sql-language-support"></a>
 <h3>SQL Language Support</h3>
-<p>Much of Qtopia 4 was developed with the <a href="./3rdparty.html">SQLite</a> database in mind. So while it is intended that embedded SQL statements are not dependent on any specific implementation it is possible there will be incompatibilities with SQL databases that do not support the <a href="./3rdparty.html">SQLite</a> SQL language subset. Any incompatiblities will be addressed in the affected libraries and applications as they are identified. An exception to this is the creation of tables and constraints which is explained in the section Ensuring Table Schemas.</p>
+<p>Much of Qtopia 4 was developed with the <a href="legal-sqlite.html">SQLite</a> database in mind. So while it is intended that embedded SQL statements are not dependent on any specific implementation it is possible there will be incompatibilities with SQL databases that do not support the <a href="legal-sqlite.html">SQLite</a> SQL language subset. Any incompatiblities will be addressed in the affected libraries and applications as they are identified. An exception to this is the creation of tables and constraints which is explained in the section Ensuring Table Schemas.</p>
 <a name="performance-and-size"></a>
 <h3>Performance and Size</h3>
-<p>Qtopia is intended for use on embedded devices and it is important that the database has small implementation and dataset sizes in addition to good performance. Currently <a href="./3rdparty.html">SQLite</a> Version 3 is being used with Qtopia and provides a benchmark for size and performance requirement as follows:</p>
+<p>Qtopia is intended for use on embedded devices and it is important that the database has small implementation and dataset sizes in addition to good performance. Currently <a href="legal-sqlite.html">SQLite</a> Version 3 is being used with Qtopia and provides a benchmark for size and performance requirement as follows:</p>
 <ul>
 <li>table sizes are expected to be at most 10000 items</li>
 <li>performance must be acceptable on a 200Mhz device</li>
@@ -54,7 +54,7 @@
 <h2>Integration</h2>
 <a name="qsql"></a>
 <h3>QSql</h3>
-<p>Qtopia uses the <a href="./qsql.html">QSql</a> classes provided by Qt and so a Qt SQL database driver is required for access to the database. If the access to the database is not provided by one of the existing Qt SQL database drivers a new SQL database driver will need to be implemented. Additional documentation on SQL database drivers for Qt can be found at <a href="./sql-driver.html">Qt SQL Module - Drivers</a>.</p>
+<p>Qtopia uses the <a href="qsql.html">QSql</a> classes provided by Qt and so a Qt SQL database driver is required for access to the database. If the access to the database is not provided by one of the existing Qt SQL database drivers a new SQL database driver will need to be implemented. Additional documentation on SQL database drivers for Qt can be found at <a href="sql-driver.html">Qt SQL Module - Drivers</a>.</p>
 <a name="specifying-the-sql-database-driver"></a>
 <h3>Specifying the SQL Database Driver</h3>
 <p>Code related to specifying a Qtopia driver as well as many other driver-specific code can be found in:</p>

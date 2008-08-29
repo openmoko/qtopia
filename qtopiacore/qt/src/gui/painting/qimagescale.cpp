@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -1031,6 +1031,7 @@ QImage qSmoothScaleImage(const QImage &src, int dw, int dh)
     buffer = QImage(dw, dh, src.format());
     if (buffer.isNull()) {
         qWarning("QImage: out of memory, returning null");
+        qimageFreeScaleInfo(scaleinfo);
         return QImage();
     }
 

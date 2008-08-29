@@ -42,7 +42,8 @@ QStringList DotDesktopContentPlugin::keys() const
 
 QList< QDrmRights::Permission > extractPermissions( const QString &permissionList )
 {
-    QStringList permissionStrings = permissionList.toLower().split( ';' );
+    QStringList permissionStrings = permissionList.toLower()
+            .split(QLatin1Char(';'), QString::SkipEmptyParts);
 
     QList< QDrmRights::Permission > permissions;
 
@@ -125,16 +126,26 @@ bool DotDesktopContentPlugin::installContent( const QString &filePath, QContent 
     QStringList mimeIcons;
     QList< QDrmRights::Permission > mimePermissions;
 
-    if( settings.contains( QLatin1String("MimeType") ))
-        mimeTypes = settings.value( QLatin1String("MimeType") ).toString().toLower().split( ';' );
+    if (settings.contains(QLatin1String("MimeType"))) {
+        mimeTypes = settings.value(QLatin1String("MimeType"))
+                .toString().toLower().split(QLatin1Char(';'), QString::SkipEmptyParts);
 
-    if( settings.contains( QLatin1String("MimeTypeIcons") ))
-        mimeIcons = settings.value( QLatin1String("MimeTypeIcons") ).toString().split( ';' );
+        if (mimeTypes.count() == 1)
+            mimeTypes = mimeTypes.first().split(QLatin1Char(','));
+    }
+
+    if (settings.contains(QLatin1String("MimeTypeIcons"))) {
+        mimeIcons = settings.value(QLatin1String("MimeTypeIcons"))
+                .toString().split(QLatin1Char(';'), QString::SkipEmptyParts);
+
+        if (mimeIcons.count() == 1)
+            mimeIcons = mimeIcons.first().split(QLatin1Char(','), QString::SkipEmptyParts);
+    }
 
     settings.endGroup();
     settings.beginGroup( QLatin1String( "DRM" ) );
 
-    if( settings.contains( QLatin1String("MimeTypePermissions") ))
+    if (settings.contains( QLatin1String("MimeTypePermissions")))
         mimePermissions = extractPermissions( settings.value( QLatin1String("MimeTypePermissions") ).toString() );
 
     settings.endGroup();
@@ -166,7 +177,13 @@ bool DotDesktopContentPlugin::installContent( const QString &filePath, QContent 
         categories.append( folder );
 #endif
 
-    foreach( QString id, settings.value( QLatin1String("Categories") ).toString().split( QLatin1Char( ';' ), QString::SkipEmptyParts ) ) {
+    QStringList categoryIds = settings.value(QLatin1String("Categories"))
+            .toString().split(QLatin1Char(';'), QString::SkipEmptyParts);
+
+    if (categoryIds.count() == 1)
+        categoryIds = categoryIds.first().split(QLatin1Char(','), QString::SkipEmptyParts);
+
+    foreach (QString id, categoryIds) {
         if ( !catMan.exists(id) ) {
             if ( id.startsWith("_") ) {
                 // It's a "system" category but we don't know about it. Add it anyway and hope for a translation.

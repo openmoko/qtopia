@@ -41,7 +41,7 @@ PinyinMatch::~PinyinMatch()
 }
 
 PinyinIM::PinyinIM()
-    : QWSInputMethod(), microX(20), microY(20), pinyinPicker(0), charPicker(0), symbolPicker(0)
+    : QWSInputMethod(), isActive(false), microX(20), microY(20), pinyinPicker(0), charPicker(0), symbolPicker(0)
 {
     QTranslatableSettings cfg(Qtopia::defaultButtonsFile(), QSettings::IniFormat); // No tr
     cfg.beginGroup("LocaleTextButtons"); // No tr

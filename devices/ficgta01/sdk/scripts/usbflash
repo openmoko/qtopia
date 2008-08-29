@@ -23,7 +23,7 @@ function flash_kernel()
 {
 echo "flashing kernel $1 to the Neo"
 sleep 2
-  sudo ./dfu-util -d 0x$VENDOR:0x$PRODUCT -a 3 -R -D $1
+  sudo ./dfu-util -d 0x$VENDOR:0x$PRODUCT -a "kernel" -R -D $1
 }
 
 
@@ -37,7 +37,7 @@ echo "flashing image $1 to the Neo"
 sleep 2
 
 #  sudo ./dfu-util -a 5 -R -D $1
- sudo dfu-util -d 0x$VENDOR:0x$PRODUCT -a 5 -R -D $1
+ sudo dfu-util -d 0x$VENDOR:0x$PRODUCT -a "rootfs" -R -D $1
 }
 
 function find_product()

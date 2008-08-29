@@ -67,7 +67,7 @@
 <p>Returns the <a href="qfilesystem.html">QFileSystem</a> which contains the default application storage path.</p>
 <p>The default application storage path can be obtained by calling <tt>QFileSystem::applicationsFileSystem().applicationsPath()</tt>.</p>
 <p>See also <a href="qfilesystem.html#applicationsPath">applicationsPath</a>().</p>
-<h3 class="fn"><a name="applicationsPath"></a>const <a href="./qstring.html">QString</a> &amp; QFileSystem::applicationsPath () const</h3>
+<h3 class="fn"><a name="applicationsPath"></a>const <a href="qstring.html">QString</a> &amp; QFileSystem::applicationsPath () const</h3>
 <p>Returns the path of the applications directory, eg. /home/Applications.</p>
 <h3 class="fn"><a name="availBlocks"></a>long QFileSystem::availBlocks () const</h3>
 <p>Returns the number of available blocks on the file system</p>
@@ -75,7 +75,7 @@
 <p>Returns the size of each block on the file system.</p>
 <h3 class="fn"><a name="contentDatabase"></a>bool QFileSystem::contentDatabase () const</h3>
 <p>Returns flag indicating if the file system has it's own content database stored.</p>
-<h3 class="fn"><a name="disk"></a>const <a href="./qstring.html">QString</a> &amp; QFileSystem::disk () const</h3>
+<h3 class="fn"><a name="disk"></a>const <a href="qstring.html">QString</a> &amp; QFileSystem::disk () const</h3>
 <p>Returns the file system name, eg. /dev/hda3</p>
 <h3 class="fn"><a name="documents"></a>bool QFileSystem::documents () const</h3>
 <p>Returns flag indicating if the file system can contain documents.</p>
@@ -83,9 +83,9 @@
 <p>Returns the <a href="qfilesystem.html">QFileSystem</a> which contains the default document storage path.</p>
 <p>The default document storage path can be obtained by calling <tt>QFileSystem::documentsFileSystem().documentsPath()</tt>.</p>
 <p>See also <a href="qfilesystem.html#documentsPath">documentsPath</a>().</p>
-<h3 class="fn"><a name="documentsPath"></a>const <a href="./qstring.html">QString</a> &amp; QFileSystem::documentsPath () const</h3>
+<h3 class="fn"><a name="documentsPath"></a>const <a href="qstring.html">QString</a> &amp; QFileSystem::documentsPath () const</h3>
 <p>Returns the path of the documents directory, eg. /home/Documents.</p>
-<h3 class="fn"><a name="fromFileName"></a>QFileSystem QFileSystem::fromFileName ( const <a href="./qstring.html">QString</a> &amp; <i>fileName</i>, bool <i>connectedOnly</i> = true )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="fromFileName"></a>QFileSystem QFileSystem::fromFileName ( const <a href="qstring.html">QString</a> &amp; <i>fileName</i>, bool <i>connectedOnly</i> = true )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a <a href="qfilesystem.html">QFileSystem</a> object describing the file system on which the file with the name <i>fileName</i> is located.</p>
 <p>If <i>connectedOnly</i> is true the <a href="qfilesystem.html">QFileSystem</a> will only be returned if it is currently connected.</p>
 <h3 class="fn"><a name="isConnected"></a>bool QFileSystem::isConnected () const</h3>
@@ -96,13 +96,13 @@
 <p>Returns flag indicating if the file system can be removed. For example, a CF card would be removable, but the internal memory would not.</p>
 <h3 class="fn"><a name="isWritable"></a>bool QFileSystem::isWritable () const</h3>
 <p>Returns flag indicating if the file system is mounted as writable or read-only. Returns false if read-only, true if read and write.</p>
-<h3 class="fn"><a name="name"></a>const <a href="./qstring.html">QString</a> &amp; QFileSystem::name () const</h3>
+<h3 class="fn"><a name="name"></a>const <a href="qstring.html">QString</a> &amp; QFileSystem::name () const</h3>
 <p>Returns the translated, human readable name for the mount directory.</p>
-<h3 class="fn"><a name="options"></a>const <a href="./qstring.html">QString</a> &amp; QFileSystem::options () const</h3>
+<h3 class="fn"><a name="options"></a>const <a href="qstring.html">QString</a> &amp; QFileSystem::options () const</h3>
 <p>Returns the mount options</p>
-<h3 class="fn"><a name="path"></a>const <a href="./qstring.html">QString</a> &amp; QFileSystem::path () const</h3>
+<h3 class="fn"><a name="path"></a>const <a href="qstring.html">QString</a> &amp; QFileSystem::path () const</h3>
 <p>Returns the mount path, eg. /home</p>
-<h3 class="fn"><a name="prevPath"></a>const <a href="./qstring.html">QString</a> &amp; QFileSystem::prevPath () const</h3>
+<h3 class="fn"><a name="prevPath"></a>const <a href="qstring.html">QString</a> &amp; QFileSystem::prevPath () const</h3>
 <p>Returns the previous mount path, eg. /home This is useful when a filesystem has been unmounted.</p>
 <h3 class="fn"><a name="totalBlocks"></a>long QFileSystem::totalBlocks () const</h3>
 <p>Returns the total number of blocks on the file system</p>

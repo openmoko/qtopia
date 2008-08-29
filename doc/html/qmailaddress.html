@@ -57,27 +57,27 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QMailAddress"></a>QMailAddress::QMailAddress ()</h3>
 <p>Constructs an empty <a href="qmailaddress.html">QMailAddress</a> object.</p>
-<h3 class="fn"><a name="QMailAddress-2"></a>QMailAddress::QMailAddress ( const <a href="./qstring.html">QString</a> &amp; <i>addressText</i> )</h3>
+<h3 class="fn"><a name="QMailAddress-2"></a>QMailAddress::QMailAddress ( const <a href="qstring.html">QString</a> &amp; <i>addressText</i> )</h3>
 <p>Constructs a <a href="qmailaddress.html">QMailAddress</a> object, extracting the name and address components from <i>addressText</i>.</p>
-<h3 class="fn"><a name="QMailAddress-3"></a>QMailAddress::QMailAddress ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, const <a href="./qstring.html">QString</a> &amp; <i>address</i> )</h3>
+<h3 class="fn"><a name="QMailAddress-3"></a>QMailAddress::QMailAddress ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qstring.html">QString</a> &amp; <i>address</i> )</h3>
 <p>Constructs a <a href="qmailaddress.html">QMailAddress</a> object with the given <i>name</i> and <i>address</i>.</p>
 <h3 class="fn"><a name="dtor.QMailAddress"></a>QMailAddress::~QMailAddress ()</h3>
 <p>Destroys a <a href="qmailaddress.html">QMailAddress</a> object.</p>
-<h3 class="fn"><a name="address"></a><a href="./qstring.html">QString</a> QMailAddress::address () const</h3>
+<h3 class="fn"><a name="address"></a><a href="qstring.html">QString</a> QMailAddress::address () const</h3>
 <p>Returns the address component of a mail address string.</p>
-<h3 class="fn"><a name="displayName"></a><a href="./qstring.html">QString</a> QMailAddress::displayName () const</h3>
+<h3 class="fn"><a name="displayName"></a><a href="qstring.html">QString</a> QMailAddress::displayName () const</h3>
 <p>Returns a name to represent the address. If the address matches that of a stored Contact then the display name will be the contact's label. If no matching Contact is found, the name component of the address will be returned.</p>
 <p>See also <a href="qmailaddress.html#matchContact">matchContact</a>().</p>
-<h3 class="fn"><a name="displayName-2"></a><a href="./qstring.html">QString</a> QMailAddress::displayName ( <a href="qcontactmodel.html">QContactModel</a> &amp; <i>fromModel</i> ) const</h3>
+<h3 class="fn"><a name="displayName-2"></a><a href="qstring.html">QString</a> QMailAddress::displayName ( <a href="qcontactmodel.html">QContactModel</a> &amp; <i>fromModel</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a name to represent the address by querying the existing <a href="qcontactmodel.html">QContactModel</a> <i>fromModel</i>. If the address matches that of a stored Contact then the display name will be the contact's label. If no matching Contact is found, the name component of the address will be returned.</p>
 <p>See also <a href="qmailaddress.html#matchContact">matchContact</a>().</p>
-<h3 class="fn"><a name="fromStringList"></a><a href="./qlist.html">QList</a>&lt;QMailAddress&gt; QMailAddress::fromStringList ( const <a href="./qstring.html">QString</a> &amp; <i>list</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="fromStringList"></a><a href="qlist.html">QList</a>&lt;QMailAddress&gt; QMailAddress::fromStringList ( const <a href="qstring.html">QString</a> &amp; <i>list</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a list containing a <a href="qmailaddress.html">QMailAddress</a> object constructed from each comma-separated address in <i>list</i>.</p>
-<h3 class="fn"><a name="fromStringList-2"></a><a href="./qlist.html">QList</a>&lt;QMailAddress&gt; QMailAddress::fromStringList ( const <a href="./qstringlist.html">QStringList</a> &amp; <i>list</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="fromStringList-2"></a><a href="qlist.html">QList</a>&lt;QMailAddress&gt; QMailAddress::fromStringList ( const <a href="qstringlist.html">QStringList</a> &amp; <i>list</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns a list containing a <a href="qmailaddress.html">QMailAddress</a> object constructed from each address string in <i>list</i>.</p>
-<h3 class="fn"><a name="groupMembers"></a><a href="./qlist.html">QList</a>&lt;QMailAddress&gt; QMailAddress::groupMembers () const</h3>
+<h3 class="fn"><a name="groupMembers"></a><a href="qlist.html">QList</a>&lt;QMailAddress&gt; QMailAddress::groupMembers () const</h3>
 <p>Returns a list containing the individual addresses that comprise the address group. If the address is not a group address, an empty list is returned.</p>
 <p>See also <a href="qmailaddress.html#isGroup">isGroup</a>().</p>
 <h3 class="fn"><a name="isEmailAddress"></a>bool QMailAddress::isEmailAddress () const</h3>
@@ -100,15 +100,15 @@
 <h3 class="fn"><a name="matchesExistingContact"></a>bool QMailAddress::matchesExistingContact () const</h3>
 <p>Returns true if there exists a stored Contact whose email address or phone number matches the address component of the address text; otherwise returns false.</p>
 <p>See also <a href="qmailaddress.html#matchContact">matchContact</a>().</p>
-<h3 class="fn"><a name="name"></a><a href="./qstring.html">QString</a> QMailAddress::name () const</h3>
+<h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QMailAddress::name () const</h3>
 <p>Returns the name component of a mail address string.</p>
-<h3 class="fn"><a name="removeComments"></a><a href="./qstring.html">QString</a> QMailAddress::removeComments ( const <a href="./qstring.html">QString</a> &amp; <i>input</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="removeComments"></a><a href="qstring.html">QString</a> QMailAddress::removeComments ( const <a href="qstring.html">QString</a> &amp; <i>input</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the content of <i>input</i> with any comment sections removed. Any subsequent leading or trailing whitespace is then also removed.</p>
-<h3 class="fn"><a name="removeWhitespace"></a><a href="./qstring.html">QString</a> QMailAddress::removeWhitespace ( const <a href="./qstring.html">QString</a> &amp; <i>input</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="removeWhitespace"></a><a href="qstring.html">QString</a> QMailAddress::removeWhitespace ( const <a href="qstring.html">QString</a> &amp; <i>input</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the content of <i>input</i> with any whitespace characters removed. Whitespace within quotes or comment sections is preserved.</p>
-<h3 class="fn"><a name="toString"></a><a href="./qstring.html">QString</a> QMailAddress::toString () const</h3>
+<h3 class="fn"><a name="toString"></a><a href="qstring.html">QString</a> QMailAddress::toString () const</h3>
 <p>Returns a string containing the name and address in a standardised format.</p>
-<h3 class="fn"><a name="toStringList"></a><a href="./qstringlist.html">QStringList</a> QMailAddress::toStringList ( const <a href="./qlist.html">QList</a>&lt;QMailAddress&gt; &amp; <i>list</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="toStringList"></a><a href="qstringlist.html">QStringList</a> QMailAddress::toStringList ( const <a href="qlist.html">QList</a>&lt;QMailAddress&gt; &amp; <i>list</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a string list containing the result of calling <a href="qmailaddress.html#toString">toString</a>() on each address in <i>list</i>.</p>
 <p>See also <a href="qmailaddress.html#toString">toString</a>().</p>
 <p /><address><hr /><div align="center">

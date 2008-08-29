@@ -4,7 +4,7 @@ if [ -r /opt/Qtopia/SDK/scripts/functions ]; then
     . /opt/Qtopia/SDK/scripts/functions
     QPEVER=$(version)
 fi
-echo $DEVICE
+#echo $DEVICE
 
 # TEMPDIR=$(mktemp -d /tmp/updatedevice.XXXXXX)
 
@@ -19,39 +19,25 @@ die()
 prepare_device()
 {
     scp /opt/Qtopia/extras/flash-status-flashing.gif root@$PHONEIP:/tmp 
-    ssh root@$PHONEIP "if ps -C qpe | grep qpe > /dev/null; then /etc/init.d/qpe stop; fi"
-
-    ssh root@$PHONEIP "/usr/bin/fbv -c -e /tmp/flash-status-flashing.gif &" 
-
-    echo ""    
-    ssh root@$PHONEIP 'if [ -e /opt/Qtopia ]; then cd /opt/Qtopia; rm -rf * ; fi'
-
+ #   ssh root@$PHONEIP "/usr/bin/fbv -c -e /tmp/flash-status-flashing.gif &" 
 }
 
 install_image()
 {
-echo "untar $DEVICE"
-    ssh root@$PHONEIP "cd /opt/Qtopia; tar -xpzf /qtopia-$DEVICE-update.tar.gz"
-    RESULT=$?
 
-    ssh root@$PHONEIP "rm -f /qtopia-$DEVICE-update.tar.gz"
+cat $QTOPIA_IMAGE | ssh "root@$PHONEIP" '(set -x;rm -f /tmp/restart-qtopia;killall qpe;/usr/bin/fbv -c -e /tmp/flash-status-flashing.gif &;sleep 2;mkdir -p /opt/Qtopia;rm -rf /opt/Qtopia/*; cd /opt/Qtopia;gunzip |tar xvf -)'
+
+ RESULT=$?
 
     if [ $RESULT -ne 0 ]; then
-				sleep 60
+        sleep 60
     fi
-    ssh root@$PHONEIP "/etc/init.d/qpe start &" || die install_image restart
-    ssh root@$PHONEIP "rm -f /tmp/flash-status-flashing.gif" 
-}
-
-upload_image()
-{
-    echo "uploading $QTOPIA_IMAGE to /"
-    scp $QTOPIA_IMAGE root@$PHONEIP:/ 
 }
 
 restart_image()
 {
-    ssh root@$PHONEIP '/etc/init.d/qpe start &' || die install_image reboot
+   ssh root@$PHONEIP '/etc/init.d/qpe start &' || die install_image reboot
+   ssh root@$PHONEIP "rm -f /tmp/flash-status-flashing.gif" 
    rm -rf $TEMPDIR
 }
 
@@ -95,20 +81,11 @@ fi
 # Flash Process
 echo "Starting Flash process, please wait..."
 
-#extract_image
-#echo "extract process completed"
-
 prepare_device
 echo "device prep stage complete."
 
-upload_image
-echo "uploading image stage complete."
-
-install_image
-echo "Installing image completed"
-
-echo
 echo "Flashing begins..........please wait....."
+install_image
 restart_image
 echo "Image installed, phone will automatically restart Qtopia"
 echo

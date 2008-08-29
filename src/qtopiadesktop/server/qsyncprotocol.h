@@ -94,8 +94,10 @@ private:
     QString clientid;
     QString datasource;
 
-    QDateTime nextSync;
-    QDateTime lastSync;
+    QDateTime m_clientLastSync;
+    QDateTime m_clientNextSync;
+    QDateTime m_serverLastSync;
+    QDateTime m_serverNextSync;
 
     bool pendingServerChanges;
     bool pendingClientChanges;

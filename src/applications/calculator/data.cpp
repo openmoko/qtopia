@@ -52,7 +52,7 @@ QString Data::getFormattedOutput() {
 
 QPixmap* Data::draw() {
     QString currentOutput = getFormattedOutput();
-    static QFont myFont = QFont( "dejavu", 9, QFont::Bold );
+    static QFont myFont = QFont( "dejavu", 10, QFont::Bold );
     if (cachedOutput != currentOutput) {
         delete cache;
         cache = 0;

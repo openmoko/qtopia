@@ -755,6 +755,10 @@ void QModemCall::setState( QPhoneCall::State value )
         // Remove the modem identifier from the value space.
         if ( d->modemIdentifier != 0 )
             d->modemIdObject->removeAttribute( identifier() );
+
+        // If this was an incoming call, then stop the ring timers for it.
+        if ( state() == QPhoneCall::Incoming )
+            provider()->stopRingTimers();
     }
     QPhoneCallImpl::setState( value );
 }

@@ -58,21 +58,18 @@ public:
 
     virtual void clear();
 
+    virtual void commitChanges();
+
     virtual bool contains( const QContent &content ) const;
 
-signals:
-    void performRefresh();
-
 protected:
-
     virtual void filterChanged( const QContentFilter &filter );
     virtual void sortCriteriaChanged( const QContentSortCriteria &sort );
 
 private slots:
     void performUpdate();
     void performReset();
-    void refresh( bool reset = false );
-    void contentChangedEvent( const QContentIdList &ids, QContent::ChangeType type );
+    void contentChangedEvent();
 
     void updateInsert( int index, int count, int primaryIndex, int secondaryIndex );
     void updateRemove( int index, int count, int primaryIndex, int secondaryIndex );
@@ -82,8 +79,8 @@ private slots:
 private:
     virtual int valueCount() const;
     virtual QList< QContent > values( int index, int count );
-    int expectedIndexOf( const QContentSortCriteria &sort, const QContent &content ) const;
     QContent contentFromId( QContentId contentId ) const;
+    int expectedIndexOf( const QContentSortCriteria &sort, const QContent &content ) const;
     QContent explicitContent( quint64 id ) const;
 
     bool update();
@@ -99,10 +96,13 @@ private:
 
     QSqlContentStore *m_store;
 
+    QContentFilter m_filter;
+    QContentSortCriteria m_order;
+
     QList< QContentId > m_primaryIds;
     QList< QContentId > m_secondaryIds;
     QList< QPair< quint64, QContent > > m_explicit;
-    QMutex m_databaseSetMutex;
+    mutable QMutex m_databaseSetMutex;
     QMutex m_syncMutex;
     QWaitCondition m_syncCondition;
     QSqlContentSetUpdateThread *m_updateThread;
@@ -111,8 +111,8 @@ private:
     int m_primaryOffset;
     int m_secondaryCutoff;
 
-    bool m_refreshPending;
-    bool m_resetPending;
+    bool m_sortChanged;
+    bool m_contentChanged;
     bool m_deletePending;
 
     quint64 m_explicitIdSource;

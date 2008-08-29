@@ -1588,6 +1588,7 @@ void KeyboardWidget::pressAndHoldChar(const QChar &c)
         acceptWord();
         m_dontAddPreeditSpace = false;
         emit commit("\n");
+        clear();
     }
     else {
         KeyOccurance occurance;
@@ -1803,6 +1804,25 @@ void KeyboardWidget::pressAndHold()
 /*
    If the last character was an explicit character, we will remove just it.
    Otherwise we remove the entire word.
+
+   The rational for this behavior is in regards to how the user
+   discovers their error.  If the user doesn't see the word they
+   want on the screen as the set of choices, they have no reliable
+   way of working out which character they typed wrong.  Hence
+   Starting over is the most reasonable choice.  Given the goal
+   is to be fast, retyping the word correctly should be faster than
+   deleting half the word to correct.
+
+   The counter argument for this rational is two fold.  The first
+   is that people can sometimes realize their error without screen
+   feedback.  Secondly the error might not be their typing, but missing
+   the 'select a word' area, putting in an unintended letter at the end
+   (happened to the author of this paragraph five times so far).
+   Finally, if 'backing' is easy as a button press rather than a stroke
+   then its actually pretty easy to back up to the point where the error
+   is obvious.
+
+   For now leaving as the 'remove whole word' behavior.
 */
 void KeyboardWidget::doBackspace()
 {

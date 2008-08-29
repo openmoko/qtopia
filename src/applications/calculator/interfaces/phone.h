@@ -29,6 +29,7 @@
 
 #include <qtopiaglobal.h>
 #include <qsoftmenubar.h>
+#include <QAction>
 
 #include "../engine.h"
 #include "../doubledata.h"
@@ -60,6 +61,8 @@ public slots:
 
     void changeResetButtonText(ResetState);
 
+    void negateAction(QAction* action);
+
 signals:
     void close();
 
@@ -81,6 +84,7 @@ private:
     bool lockEvaluation;
 
     QSignalMapper *signalMapper;
+    QAction* negate_action;
 };
 
 #endif //PHONEIMPL_H

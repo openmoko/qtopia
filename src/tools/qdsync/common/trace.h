@@ -88,7 +88,6 @@ private:
 };
 
 template<class T> inline int _trace_opt(const T &) { return 1; }
-enum _TraceUncategorized { _TraceLog=true }; // So "uncategorized" TRACE() works.
 /* Catch compile time enums (at most one symbol) */
 template<> inline int _trace_opt<int>(const int & v) { return v; }
 
@@ -98,6 +97,13 @@ template<> inline int _trace_opt<int>(const int & v) { return v; }
 	static inline bool enabled() { return expr; }\
 	static inline _Trace trace() { return _Trace(#dbgcat, dbgcat##_TraceLog::enabled); }\
     };
+
+// So that TRACE() can work.
+class _TraceLog {
+public: \
+    static inline bool enabled() { return true; }
+    static inline _Trace trace() { return _Trace("", _TraceLog::enabled); }
+};
 
 #ifdef QTOPIA_DESKTOP
 // Circular dependency :(
@@ -111,14 +117,17 @@ template<> inline int _trace_opt<int>(const int & v) { return v; }
 #else
 #include <qtopialog.h>
 
-QLOG_OPTION_VOLATILE(QDSync,qtopiaLogRequested("QDSync"))
-TRACE_OPTION(QDSync,qtopiaLogRequested("QDSync"))
+#define QD_LOG_OPTION(x)\
+    QLOG_OPTION_VOLATILE(QDSync_##x,qtopiaLogRequested("QDSync_" #x))\
+    TRACE_OPTION(QDSync_##x,qtopiaLogRequested("QDSync_" #x))
 
-#define QD_LOG_OPTION(x)
+// So that TRACE() can work.
+QLOG_OPTION_VOLATILE(QDSync_,qtopiaLogRequested("QDSync_"));
+TRACE_OPTION(QDSync_,qtopiaLogRequested("QDSync_"));
 
 #define TRACE(dbgcat)\
-    /*qLog(TRACE) << "TRACE(" << "QDSync" << ") called in file" << __FILE__ << "line" << __LINE__;*/\
-    _Trace _trace_object = QDSync_TraceLog::trace();\
+    /*qLog(TRACE) << "TRACE(" << #dbgcat << ") called in file" << __FILE__ << "line" << __LINE__;*/\
+    _Trace _trace_object = QDSync_##dbgcat##_TraceLog::trace();\
     if (!_trace_object.enabled()); else _trace_object.methodLog()
 
 #endif

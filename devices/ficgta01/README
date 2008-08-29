@@ -1,6 +1,6 @@
 This device configuration profile is for the FIC Neo1973. 
 
-It contains a local overlay for OpenEmbedded build of Openmoko, using the OpenMoko Makefile written 
+It contains a local overlay for OpenEmbedded build of Openmoko, using the Openmoko Makefile written 
 by Rod Whitby <rod@whitby.id.au>, in the oe/ 
 
 You can either configure Qtopia with -device ficgta01 and use a binary toolchain, or use the 

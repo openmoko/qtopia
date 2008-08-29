@@ -125,7 +125,7 @@
         if (!m_rfcommServer)
             m_rfcommServer = new QBluetoothRfcommServer(this);
 
-        <span class="comment">//</span> Read the SDP record that we want to register for this service.
+        <span class="comment">// Read the SDP record that we want to register for this service.</span>
         QFile file(Qtopia::qtopiaDir() + &quot;/etc/bluetooth/sdp/SerialPortSDPRecord.xml&quot;);
         if (!file.exists()) {
             emit started(true, tr(&quot;Cannot find SDP record file&quot;));
@@ -138,8 +138,8 @@
         QBluetoothSdpRecord record = QBluetoothSdpRecord::fromDevice(&amp;file);
         file.close();
 
-        <span class="comment">//</span> QBluetoothAbstractService::registerRecord() registers a SDP record and
-        <span class="comment">//</span> returns the service record handle for the newly registered service.
+        <span class="comment">// QBluetoothAbstractService::registerRecord() registers a SDP record and</span>
+        <span class="comment">// returns the service record handle for the newly registered service.</span>
         m_sdpRecordHandle = registerRecord(record);
         if (m_sdpRecordHandle == 0) {
             emit started(true, tr(&quot;Error registering the SDP service&quot;));
@@ -149,8 +149,8 @@
         int rfcommChannel = QBluetoothSdpRecord::rfcommChannel(record);
 
         if (!startRfcommServer(rfcommChannel)) {
-            <span class="comment">//</span> The server could not be started, so clean up and unregister the
-            <span class="comment">//</span> SDP record using QBluetoothAbstractService::unregisterRecord().
+            <span class="comment">// The server could not be started, so clean up and unregister the</span>
+            <span class="comment">// SDP record using QBluetoothAbstractService::unregisterRecord().</span>
             unregisterRecord(m_sdpRecordHandle);
             m_sdpRecordHandle = 0;
 

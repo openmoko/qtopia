@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -1065,6 +1065,19 @@ QList<QMdiSubWindow *> QMdiAreaPrivate::subWindowList(QMdiArea::WindowOrder orde
 }
 
 /*!
+    \internal
+*/
+void QMdiAreaPrivate::disconnectSubWindow(QObject *subWindow)
+{
+    if (!subWindow)
+        return;
+
+    Q_Q(QMdiArea);
+    QObject::disconnect(subWindow, 0, q, 0);
+    subWindow->removeEventFilter(q);
+}
+
+/*!
     Constructs an empty mdi area. \a parent is passed to QWidget's
     constructor.
 */
@@ -1416,6 +1429,7 @@ void QMdiArea::removeSubWindow(QWidget *widget)
             qWarning("QMdiArea::removeSubWindow: window is not inside workspace");
             return;
         }
+        d->disconnectSubWindow(child);
         d->childWindows.removeAll(child);
         d->indicesToStackedChildren.removeAll(index);
         d->updateActiveWindow(index);
@@ -1623,6 +1637,7 @@ bool QMdiArea::viewportEvent(QEvent *event)
                     if (mdiChild && mdiChild->isMaximized())
                         d->showActiveWindowMaximized = true;
                 }
+                d->disconnectSubWindow(child);
                 d->childWindows.removeAt(i);
                 d->indicesToStackedChildren.removeAll(i);
                 d->updateActiveWindow(i);

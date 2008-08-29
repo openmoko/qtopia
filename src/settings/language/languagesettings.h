@@ -39,6 +39,7 @@ public:
     virtual ~LanguageSettings();
 
     void setConfirm(bool cfm=true);
+    static QStringList dictLanguages();
 
 protected:
     void accept();
@@ -63,7 +64,6 @@ private:
     bool confirmChange;
 
     static QStringList langs;
-    static QStringList dictLanguages();
     LanguageModel *model;
     QListView *listView;
     QAction *a_input;

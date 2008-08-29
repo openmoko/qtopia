@@ -44,16 +44,16 @@
 <hr />
 <h2>Detailed Description</h2>
 <p>The QMailTimeStamp class manages message time stamps.</p>
-<p>QMailTimeStamp provides functions for creating and manipulating the time stamps of messages. QMailTimeStamp can be created from time stamp strings, or from <a href="./qdatetime.html">QDateTime</a> objects. The time stamp information can be extracted in UTC time, local time, or as a formatted string.</p>
+<p>QMailTimeStamp provides functions for creating and manipulating the time stamps of messages. QMailTimeStamp can be created from time stamp strings, or from <a href="qdatetime.html">QDateTime</a> objects. The time stamp information can be extracted in UTC time, local time, or as a formatted string.</p>
 <p>QMailTimeStamp maintains the timezone information of a time stamp, so it can be used to convert time stamp information between UTC time and localized time values.</p>
-<p>See also <a href="./qdatetime.html">QDateTime</a> and <a href="qmailmessage.html">QMailMessage</a>.</p>
+<p>See also <a href="qdatetime.html">QDateTime</a> and <a href="qmailmessage.html">QMailMessage</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QMailTimeStamp"></a>QMailTimeStamp::QMailTimeStamp ()</h3>
 <p>Constructs a null <a href="qmailtimestamp.html">QMailTimeStamp</a> object. A null timestamp is invalid.</p>
-<h3 class="fn"><a name="QMailTimeStamp-2"></a>QMailTimeStamp::QMailTimeStamp ( const <a href="./qstring.html">QString</a> &amp; <i>timeText</i> )</h3>
+<h3 class="fn"><a name="QMailTimeStamp-2"></a>QMailTimeStamp::QMailTimeStamp ( const <a href="qstring.html">QString</a> &amp; <i>timeText</i> )</h3>
 <p>Constructs a <a href="qmailtimestamp.html">QMailTimeStamp</a> object by parsing <i>timeText</i>.</p>
-<h3 class="fn"><a name="QMailTimeStamp-3"></a>QMailTimeStamp::QMailTimeStamp ( const <a href="./qdatetime.html">QDateTime</a> &amp; <i>dateTime</i> )</h3>
+<h3 class="fn"><a name="QMailTimeStamp-3"></a>QMailTimeStamp::QMailTimeStamp ( const <a href="qdatetime.html">QDateTime</a> &amp; <i>dateTime</i> )</h3>
 <p>Constructs a <a href="qmailtimestamp.html">QMailTimeStamp</a> object from the given <i>dateTime</i>.</p>
 <h3 class="fn"><a name="dtor.QMailTimeStamp"></a>QMailTimeStamp::~QMailTimeStamp ()</h3>
 <p>Destroys a <a href="qmailtimestamp.html">QMailTimeStamp</a> object.</p>
@@ -63,14 +63,14 @@
 <p>Returns true if the timestamp has not been initialized to contain a value.</p>
 <h3 class="fn"><a name="isValid"></a>bool QMailTimeStamp::isValid () const</h3>
 <p>Returns true if the timestamp is valid; otherwise returns false;</p>
-<h3 class="fn"><a name="toLocalTime"></a><a href="./qdatetime.html">QDateTime</a> QMailTimeStamp::toLocalTime () const</h3>
-<p>Returns a <a href="./qdatetime.html">QDateTime</a> containing the time stamp converted to the local time zone.</p>
-<h3 class="fn"><a name="toString"></a><a href="./qstring.html">QString</a> QMailTimeStamp::toString () const</h3>
+<h3 class="fn"><a name="toLocalTime"></a><a href="qdatetime.html">QDateTime</a> QMailTimeStamp::toLocalTime () const</h3>
+<p>Returns a <a href="qdatetime.html">QDateTime</a> containing the time stamp converted to the local time zone.</p>
+<h3 class="fn"><a name="toString"></a><a href="qstring.html">QString</a> QMailTimeStamp::toString () const</h3>
 <p>Returns the time stamp information in a standardised format.</p>
 <p>The format used is &quot;day_name, day_of_month month_name year hours:minutes:seconds utc_offset&quot;.</p>
 <p>For example: &quot;Wed, 17 May 2006 20:45:00 +0100&quot;.</p>
-<h3 class="fn"><a name="toUTCx"></a><a href="./qdatetime.html">QDateTime</a> QMailTimeStamp::toUTC () const</h3>
-<p>Returns a <a href="./qdatetime.html">QDateTime</a> containing the time stamp in UTC time.</p>
+<h3 class="fn"><a name="toUTCx"></a><a href="qdatetime.html">QDateTime</a> QMailTimeStamp::toUTC () const</h3>
+<p>Returns a <a href="qdatetime.html">QDateTime</a> containing the time stamp in UTC time.</p>
 <h3 class="fn"><a name="operator-not-eq"></a>bool QMailTimeStamp::operator!= ( const QMailTimeStamp &amp; <i>other</i> ) const</h3>
 <p>Returns true if this time stamp is different from <i>other</i>; otherwise returns false.</p>
 <p>Two time stamps are different if either the date, the time, or the time zone components are different.</p>

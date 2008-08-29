@@ -50,13 +50,11 @@ public:
 private:
     void appendSearchDirs(QList<QByteArray> &dirs, const QString& dir, const char *subdir) const;
 
-#if QT_VERSION >= 0x040300
     QAbstractFileEngine *findArchivedResourceFile(const QString &path) const;
     QAbstractFileEngine *findArchivedImage(const QString &path) const;
     QAbstractFileEngine *findArchivedIcon(const QString &path) const;
     QString loadArchive(const QString &) const;
     mutable QMap<QString, QString> m_registeredArchives;
-#endif
 
     QString findDiskResourceFile(const QString &path) const;
     QString findDiskSound(const QString &path) const;

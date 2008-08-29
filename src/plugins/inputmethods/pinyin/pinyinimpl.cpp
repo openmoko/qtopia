@@ -74,7 +74,7 @@ void PinyinImpl::setHint(const QString &hint, bool)
 {
     inputModifier();
     if (hint.isEmpty() || hint == "numbers" || hint == "phone") {
-        if (input->active()) {
+        if (input && input->active()) {
             input->setActive(false);
             emit stateChanged();
         }

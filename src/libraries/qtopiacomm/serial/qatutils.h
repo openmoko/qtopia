@@ -53,6 +53,7 @@ public:
     static QString stripNumber( const QString& number );
     static bool octalEscapes();
     static void setOctalEscapes( bool value );
+    static QString decodeString( const QString& value, uint dcs );
 
 };
 

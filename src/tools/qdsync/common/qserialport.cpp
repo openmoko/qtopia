@@ -977,7 +977,7 @@ QSerialPort *QSerialPort::create( const QString& name, int defaultRate,
     QSerialPort *device = new QSerialPort( dev, rate );
     device->setFlowControl( flowControl );
     if ( !device->open( ReadWrite ) ) {
-        WARNING() << "Failed opening " << dev;
+        WARNING() << "Failed opening " << dev << __FILE__ << __LINE__;
         delete device;
         return 0;
     } else {

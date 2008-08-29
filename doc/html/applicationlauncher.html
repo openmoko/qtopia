@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">ApplicationLauncher Class Reference</h1>
 <p>The ApplicationLauncher class is responsible for fundamental application management and IPC routing within Qtopia. <a href="#details">More...</a></p>
-<pre>    #include &lt;ApplicationLauncher&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
+<pre>    #include &lt;ApplicationLauncher&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="applicationlauncher-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -26,7 +26,7 @@
 <li><div class="fn"/>ApplicationTypeLauncher::ApplicationState <b><a href="applicationlauncher.html#state">state</a></b> ( const QString &amp; <i>app</i> ) const</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -36,16 +36,16 @@
 <li><div class="fn"/>void <b><a href="applicationlauncher.html#applicationTerminated">applicationTerminated</a></b> ( const QString &amp; <i>application</i>, ApplicationTypeLauncher::TerminationReason <i>reason</i>, bool <i>filtered</i> = false )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -76,20 +76,20 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="applicationNotFound"></a>void ApplicationLauncher::applicationNotFound ( const <a href="./qstring.html">QString</a> &amp; <i>application</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="applicationNotFound"></a>void ApplicationLauncher::applicationNotFound ( const <a href="qstring.html">QString</a> &amp; <i>application</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever a non-existant <i>application</i> is asked to launch. The corresponding call to <a href="applicationlauncher.html#launch">launch</a>() will also return false.</p>
-<h3 class="fn"><a name="applicationStateChanged"></a>void ApplicationLauncher::applicationStateChanged ( const <a href="./qstring.html">QString</a> &amp; <i>application</i>, <a href="applicationtypelauncher.html#ApplicationState-enum">ApplicationTypeLauncher::ApplicationState</a> <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="applicationStateChanged"></a>void ApplicationLauncher::applicationStateChanged ( const <a href="qstring.html">QString</a> &amp; <i>application</i>, <a href="applicationtypelauncher.html#ApplicationState-enum">ApplicationTypeLauncher::ApplicationState</a> <i>state</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the <i>application</i> state changes to <i>state</i>.</p>
-<h3 class="fn"><a name="applicationTerminated"></a>void ApplicationLauncher::applicationTerminated ( const <a href="./qstring.html">QString</a> &amp; <i>application</i>, <a href="applicationtypelauncher.html#TerminationReason-enum">ApplicationTypeLauncher::TerminationReason</a> <i>reason</i>, bool <i>filtered</i> = false )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="applicationTerminated"></a>void ApplicationLauncher::applicationTerminated ( const <a href="qstring.html">QString</a> &amp; <i>application</i>, <a href="applicationtypelauncher.html#TerminationReason-enum">ApplicationTypeLauncher::TerminationReason</a> <i>reason</i>, bool <i>filtered</i> = false )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the <i>application</i> terminates. <i>reason</i> will be set to the termination reason. If <i>filtered</i> is true, an <a href="applicationterminationhandler.html">ApplicationTerminationHandler</a> instance has filtered the termination.</p>
-<h3 class="fn"><a name="applications"></a><a href="./qstringlist.html">QStringList</a> ApplicationLauncher::applications () const</h3>
+<h3 class="fn"><a name="applications"></a><a href="qstringlist.html">QStringList</a> ApplicationLauncher::applications () const</h3>
 <p>Return the list of starting and running applications. The list order represents the order in which the applications were launched.</p>
-<h3 class="fn"><a name="canLaunch"></a>bool ApplicationLauncher::canLaunch ( const <a href="./qstring.html">QString</a> &amp; <i>app</i> )</h3>
+<h3 class="fn"><a name="canLaunch"></a>bool ApplicationLauncher::canLaunch ( const <a href="qstring.html">QString</a> &amp; <i>app</i> )</h3>
 <p>Returns true if application <i>app</i> can be launched. Returns false otherwise. When true is returned, it means an instance of a subclass of <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> instance exists that knows how to launch the application. The subsequent attempt to launch the application may still fail.</p>
 <p>Note that true is also returned if <i>app</i> is already running.</p>
-<h3 class="fn"><a name="launch"></a>bool ApplicationLauncher::launch ( const <a href="./qstring.html">QString</a> &amp; <i>app</i> )</h3>
+<h3 class="fn"><a name="launch"></a>bool ApplicationLauncher::launch ( const <a href="qstring.html">QString</a> &amp; <i>app</i> )</h3>
 <p>Attempts to launch application <i>app</i>. Returns true if <i>app</i> is launched successfully. Also returns true if <i>app</i> is already running. Returns false if no launcher can be found that knows how to launch <i>app</i>.</p>
-<h3 class="fn"><a name="state"></a><a href="applicationtypelauncher.html#ApplicationState-enum">ApplicationTypeLauncher::ApplicationState</a> ApplicationLauncher::state ( const <a href="./qstring.html">QString</a> &amp; <i>app</i> ) const</h3>
+<h3 class="fn"><a name="state"></a><a href="applicationtypelauncher.html#ApplicationState-enum">ApplicationTypeLauncher::ApplicationState</a> ApplicationLauncher::state ( const <a href="qstring.html">QString</a> &amp; <i>app</i> ) const</h3>
 <p>Returns the current state of the application, <i>app</i>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

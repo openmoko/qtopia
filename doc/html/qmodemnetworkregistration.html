@@ -29,7 +29,7 @@
 <li><div class="fn"/>8 public functions inherited from <a href="qnetworkregistration.html#public-functions">QNetworkRegistration</a></li>
 <li><div class="fn"/>1 public function inherited from <a href="qcomminterface.html#public-functions">QCommInterface</a></li>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -38,7 +38,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>2 public slots inherited from <a href="qnetworkregistration.html#public-slots">QNetworkRegistration</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -46,7 +46,7 @@
 <li><div class="fn"/>QString <b><a href="qmodemnetworkregistration.html#operatorNameForId">operatorNameForId</a></b> ( const QString &amp; <i>id</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -56,7 +56,7 @@
 <ul>
 <li><div class="fn"/>4 protected functions inherited from <a href="qnetworkregistrationserver.html#protected-functions">QNetworkRegistrationServer</a></li>
 <li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 </ul>
 <a name="protected-slots"></a>
 <h3>Protected Slots</h3>
@@ -67,12 +67,12 @@
 <h3>Additional Inherited Members</h3>
 <ul>
 <li><div class="fn"/>8 properties inherited from <a href="qnetworkregistration.html#properties">QNetworkRegistration</a></li>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>6 signals inherited from <a href="qnetworkregistration.html#signals">QNetworkRegistration</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -87,18 +87,18 @@
 <p>Construct an AT-based modem network registration object for <i>service</i>.</p>
 <h3 class="fn"><a name="dtor.QModemNetworkRegistration"></a>QModemNetworkRegistration::~QModemNetworkRegistration ()</h3>
 <p>Destroy this AT-based modem network registration object.</p>
-<h3 class="fn"><a name="operatorNameForId"></a><a href="./qstring.html">QString</a> QModemNetworkRegistration::operatorNameForId ( const <a href="./qstring.html">QString</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="operatorNameForId"></a><a href="qstring.html">QString</a> QModemNetworkRegistration::operatorNameForId ( const <a href="qstring.html">QString</a> &amp; <i>id</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Convert an operator identifier <i>id</i> into the corresponding operator name.</p>
 <h3 class="fn"><a name="queryRegistration"></a>void QModemNetworkRegistration::queryRegistration ()&nbsp;&nbsp;<tt> [protected slot]</tt></h3>
 <p>Query the current network registration state with <tt>AT+CREG?</tt>. This is typically used at the end of the initialization process that is performed in <a href="qmodemnetworkregistration.html#resetModem">resetModem</a>().</p>
 <h3 class="fn"><a name="resetModem"></a>void QModemNetworkRegistration::resetModem ()&nbsp;&nbsp;<tt> [virtual protected slot]</tt></h3>
 <p>Issue commands to reset the modem's network registration functionality. The default implementation issues <tt>AT+CREG=2</tt> and <tt>AT+COPS=3,0</tt> and then calls <a href="qmodemnetworkregistration.html#queryRegistration">queryRegistration</a>().</p>
 <p>This may be overridden for modems that need different commands to initialize network registration. The <a href="qmodemnetworkregistration.html#queryRegistration">queryRegistration</a>() function must be called at the end of the modem-specific initialization.</p>
-<h3 class="fn"><a name="setCurrentOperator"></a>void QModemNetworkRegistration::setCurrentOperator ( <a href="qtelephony.html#OperatorMode-enum">QTelephony::OperatorMode</a> <i>mode</i>, const <a href="./qstring.html">QString</a> &amp; <i>id</i>, const <a href="./qstring.html">QString</a> &amp; <i>technology</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="setCurrentOperator"></a>void QModemNetworkRegistration::setCurrentOperator ( <a href="qtelephony.html#OperatorMode-enum">QTelephony::OperatorMode</a> <i>mode</i>, const <a href="qstring.html">QString</a> &amp; <i>id</i>, const <a href="qstring.html">QString</a> &amp; <i>technology</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Sets the current network operator information to <i>mode</i>, <i>id</i>, and <i>technology</i>. The server will respond with the <a href="qnetworkregistration.html#setCurrentOperatorResult">setCurrentOperatorResult</a>() signal when the request completes.</p>
 <p>The <a href="qmodemnetworkregistration.html#setCurrentOperatorCommand">setCurrentOperatorCommand</a>() method is used to create the AT command for changing the operator.</p>
 <p>Reimplemented from <a href="qnetworkregistration.html#setCurrentOperator">QNetworkRegistration</a>.</p>
-<h3 class="fn"><a name="setCurrentOperatorCommand"></a><a href="./qstring.html">QString</a> QModemNetworkRegistration::setCurrentOperatorCommand ( <a href="qtelephony.html#OperatorMode-enum">QTelephony::OperatorMode</a> <i>mode</i>, const <a href="./qstring.html">QString</a> &amp; <i>id</i>, const <a href="./qstring.html">QString</a> &amp; <i>technology</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="setCurrentOperatorCommand"></a><a href="qstring.html">QString</a> QModemNetworkRegistration::setCurrentOperatorCommand ( <a href="qtelephony.html#OperatorMode-enum">QTelephony::OperatorMode</a> <i>mode</i>, const <a href="qstring.html">QString</a> &amp; <i>id</i>, const <a href="qstring.html">QString</a> &amp; <i>technology</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Returns the AT command to use to effect a <a href="qmodemnetworkregistration.html#setCurrentOperator">setCurrentOperator</a>() request for <i>mode</i>, <i>id</i>, and <i>technology</i>.</p>
 <p>This implementation formats a <tt>AT+COPS</tt> command according to 3GPP TS 27.007. That is, <tt>AT+COPS=mode,[format[,oper[,AcT]]]</tt>. The <tt>AcT</tt> field is only present if <a href="qmodemnetworkregistration.html#supportsOperatorTechnology">supportsOperatorTechnology</a>() returns true. Modem vendor plug-ins should override this method if the syntax of their modem's <tt>AT+COPS</tt> command is different.</p>
 <p>See also <a href="qmodemnetworkregistration.html#setCurrentOperator">setCurrentOperator</a>().</p>

@@ -34,23 +34,23 @@ class QTOPIAMAIL_EXPORT QMailId
 {
 public:
     QMailId();
-	explicit QMailId(const quint64& id);
+    explicit QMailId(const quint64& id);
     QMailId(const QMailId& other);
     virtual ~QMailId();
 
     bool isValid() const;
-    
-	operator QVariant() const;
+
+    operator QVariant() const;
 
     bool operator!=( const QMailId& other ) const;
     bool operator==( const QMailId& other ) const;
     QMailId& operator=(const QMailId& other);
-	bool operator <(const QMailId& other) const;
+    bool operator <(const QMailId& other) const;
 
-	template <typename Stream> void serialize(Stream &stream) const;
+    template <typename Stream> void serialize(Stream &stream) const;
     template <typename Stream> void deserialize(Stream &stream);
 
-	quint64 toULongLong() const;
+    quint64 toULongLong() const;
 
 private:
     QSharedDataPointer<QMailIdPrivate> d;

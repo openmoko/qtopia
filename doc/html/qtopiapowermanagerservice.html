@@ -27,18 +27,18 @@
 <li><div class="fn"/>void <b><a href="qtopiapowermanagerservice.html#setIntervals">setIntervals</a></b> ( int <i>dim</i>, int <i>lightOff</i>, int <i>suspend</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>1 protected function inherited from <a href="qtopiaabstractservice.html#protected-functions">QtopiaAbstractService</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -55,7 +55,7 @@
 <p>This slot corresponds to the QCop service message <tt>QtopiaPowerManager::setBacklight(int,int)</tt>.</p>
 <p>Once the brightnes has been updated, the <tt>brightnessChanged(int)</tt> message will be sent to the <tt>Qtopia/PowerStatus</tt> channel.</p>
 <p>If <i>brightness</i> is -3, then the backlight will be forced on. If <i>brightness</i> is -2, then the backlight will be toggled from its current state. If <i>brightness</i> is -1, then the backlight will be set to its default state.</p>
-<h3 class="fn"><a name="setConstraint"></a>void QtopiaPowerManagerService::setConstraint ( int <i>constraint</i>, <a href="./qstring.html">QString</a> <i>app</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="setConstraint"></a>void QtopiaPowerManagerService::setConstraint ( int <i>constraint</i>, <a href="qstring.html">QString</a> <i>app</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Apply the power management constraint <i>constraint</i> for the application <i>app</i>. The <i>constraint</i> value is one of the values from <a href="qtopiaapplication.html#PowerConstraint-enum">QtopiaApplication::PowerConstraint</a>.</p>
 <p>Normally client applications will use <a href="qtopiaapplication.html#setPowerConstraint">QtopiaApplication::setPowerConstraint</a>().</p>
 <p>This slot corresponds to the QCop service message <tt>QtopiaPowerManagerService::setConstraint(int,QString)</tt>.</p>

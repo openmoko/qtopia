@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -922,6 +922,8 @@ void QTessellatorPrivate::removeEdges()
         if (v->flags & LineBeforeEnds) {
             QDEBUG() << "    removing edge" << vertices.prevPos(v);
             int pos = scanline.findEdge(vertices.prevPos(v));
+            if (pos == -1)
+                continue;
             scanline.edges[pos]->mark = true;
             if (pos > 0)
                 scanline.edges[pos - 1]->intersect_right = true;
@@ -932,6 +934,8 @@ void QTessellatorPrivate::removeEdges()
         if (v->flags & LineAfterEnds) {
             QDEBUG() << "    removing edge" << vertices.position(v);
             int pos = scanline.findEdge(vertices.position(v));
+            if (pos == -1)
+                continue;
             scanline.edges[pos]->mark = true;
             if (pos > 0)
                 scanline.edges[pos - 1]->intersect_right = true;

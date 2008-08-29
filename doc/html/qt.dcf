@@ -3512,7 +3512,7 @@
         <keyword ref="qdirectpainter.html#flush">flush</keyword>
         <keyword ref="qdirectpainter.html#frameBuffer">frameBuffer</keyword>
         <keyword ref="qdirectpainter.html#geometry">geometry</keyword>
-        <keyword ref="qdirectpainter.html#linestep">linestep</keyword>
+        <keyword ref="qdirectpainter.html#linestepx">linestep</keyword>
         <keyword ref="qdirectpainter.html#lock">lock</keyword>
         <keyword ref="qdirectpainter.html#lower">lower</keyword>
         <keyword ref="qdirectpainter.html#raise">raise</keyword>
@@ -8939,6 +8939,10 @@
         <keyword ref="qpair.html#first-var">first</keyword>
         <keyword ref="qpair.html#second-var">second</keyword>
         <keyword ref="qpair.html#qMakePair">qMakePair</keyword>
+        <keyword ref="qpair.html#operator-lt">operator&lt;</keyword>
+        <keyword ref="qpair.html#operator-lt-eq">operator&lt;=</keyword>
+        <keyword ref="qpair.html#operator-gt">operator&gt;</keyword>
+        <keyword ref="qpair.html#operator-gt-eq">operator&gt;=</keyword>
         <section ref="qpair-members.html" title="List of all members"/>
     </section>
     <section ref="qpalette.html" title="QPalette Class Reference">
@@ -9154,8 +9158,6 @@
         <keyword ref="qpixmap.html#operator-QVariant">operator QVariant</keyword>
         <keyword ref="qpixmap.html#operator-not">operator!</keyword>
         <keyword ref="qpixmap.html#operator-eq">operator=</keyword>
-        <keyword ref="qpixmap.html#operator-lt-lt">operator&lt;&lt;</keyword>
-        <keyword ref="qpixmap.html#operator-gt-gt">operator&gt;&gt;</keyword>
         <section ref="qpixmap-members.html" title="List of all members"/>
         <section ref="qpixmap-obsolete.html" title="Obsolete members"/>
         <section ref="qpixmap-qt3.html" title="Qt 3 support members"/>
@@ -9911,7 +9913,7 @@
         <keyword ref="qscreen.html#instance">instance</keyword>
         <keyword ref="qscreen.html#isInterlaced">isInterlaced</keyword>
         <keyword ref="qscreen.html#isTransformed">isTransformed</keyword>
-        <keyword ref="qscreen.html#linestep">linestep</keyword>
+        <keyword ref="qscreen.html#linestepx">linestep</keyword>
         <keyword ref="qscreen.html#mapFromDevice">mapFromDevice</keyword>
         <keyword ref="qscreen.html#mapToDevice">mapToDevice</keyword>
         <keyword ref="qscreen.html#numCols">numCols</keyword>
@@ -10393,7 +10395,9 @@
         <keyword ref="qsize.html#operator-2a">operator*</keyword>
         <keyword ref="qsize.html#operator-2b">operator+</keyword>
         <keyword ref="qsize.html#operator-">operator-</keyword>
+        <keyword ref="qsize.html#operator-lt-lt">operator&lt;&lt;</keyword>
         <keyword ref="qsize.html#operator-eq-eq">operator==</keyword>
+        <keyword ref="qsize.html#operator-gt-gt">operator&gt;&gt;</keyword>
         <section ref="qsize-members.html" title="List of all members"/>
     </section>
     <section ref="qsizef.html" title="QSizeF Class Reference">
@@ -11546,10 +11550,6 @@
         <keyword ref="qstringref.html#toString">toString</keyword>
         <keyword ref="qstringref.html#unicode">unicode</keyword>
         <keyword ref="qstringref.html#operator-eq">operator=</keyword>
-        <keyword ref="qstringref.html#operator-lt">operator&lt;</keyword>
-        <keyword ref="qstringref.html#operator-lt-eq">operator&lt;=</keyword>
-        <keyword ref="qstringref.html#operator-gt">operator&gt;</keyword>
-        <keyword ref="qstringref.html#operator-gt-eq">operator&gt;=</keyword>
         <section ref="qstringref-members.html" title="List of all members"/>
     </section>
     <section ref="qstyle.html" title="QStyle Class Reference">
@@ -17582,8 +17582,8 @@
     <section ref="focus.html" title="Keyboard Focus">
         <keyword ref="focus.html">Keyboard Focus</keyword>
     </section>
-    <section ref="known-issues.html" title="Known Issues in 4.3&#x2e;4">
-        <keyword ref="known-issues.html">Known Issues in 4.3&#x2e;4</keyword>
+    <section ref="known-issues.html" title="Known Issues in 4.3&#x2e;5">
+        <keyword ref="known-issues.html">Known Issues in 4.3&#x2e;5</keyword>
     </section>
     <section ref="layout.html" title="Layout Classes">
         <keyword ref="layout.html">Layout Classes</keyword>

@@ -31,7 +31,7 @@
 <li><div class="fn"/><b><a href="qpresence.html#monitoredUris-prop">monitoredUris</a></b> : const QStringList</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 </ul>
 <a name="public-functions"></a>
 <h3>Public Functions</h3>
@@ -46,7 +46,7 @@
 <ul>
 <li><div class="fn"/>1 public function inherited from <a href="qcomminterface.html#public-functions">QCommInterface</a></li>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -56,7 +56,7 @@
 <li><div class="fn"/>virtual bool <b><a href="qpresence.html#stopMonitoring">stopMonitoring</a></b> ( const QString &amp; <i>uri</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -66,7 +66,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -75,13 +75,13 @@
 </ul>
 <ul>
 <li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -101,7 +101,7 @@
 </table></p>
 <hr />
 <h2>Property Documentation</h2>
-<h3 class="fn"><a name="allMonitoredUris-prop"></a>allMonitoredUris : const <a href="./qstringlist.html">QStringList</a></h3>
+<h3 class="fn"><a name="allMonitoredUris-prop"></a>allMonitoredUris : const <a href="qstringlist.html">QStringList</a></h3>
 <p>This property holds the list of all uri's that are being monitored in the system, even by other applications.</p>
 <p>Access functions:</p>
 <ul>
@@ -114,7 +114,7 @@
 <li><div class="fn"/><b>QPresence::Status localPresence () const</b></li>
 <li><div class="fn"/><b>virtual void setLocalPresence ( QPresence::Status <i>status</i> )</b></li>
 </ul>
-<h3 class="fn"><a name="monitoredUris-prop"></a>monitoredUris : const <a href="./qstringlist.html">QStringList</a></h3>
+<h3 class="fn"><a name="monitoredUris-prop"></a>monitoredUris : const <a href="qstringlist.html">QStringList</a></h3>
 <p>This property holds the list of uri's that are being monitored by this client object.</p>
 <p>Access functions:</p>
 <ul>
@@ -122,28 +122,28 @@
 </ul>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QPresence"></a>QPresence::QPresence ( const <a href="./qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="./qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
+<h3 class="fn"><a name="QPresence"></a>QPresence::QPresence ( const <a href="qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
 <p>Construct a new presence monitoring object for <i>service</i> and attach it to <i>parent</i>. The object will be created in client mode if <i>mode</i> is Client, or server mode otherwise.</p>
 <h3 class="fn"><a name="dtor.QPresence"></a>QPresence::~QPresence ()</h3>
 <p>Destroy this presence monitoring object. Any remaining monitor requests will be stopped.</p>
 <h3 class="fn"><a name="localPresenceChanged"></a>void QPresence::localPresenceChanged ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when the <a href="qpresence.html#localPresence-prop">localPresence</a>() value changes.</p>
 <p>See also <a href="qpresence.html#localPresence-prop">localPresence</a>() and <a href="qpresence.html#localPresence-prop">setLocalPresence</a>().</p>
-<h3 class="fn"><a name="monitoredPresence"></a>void QPresence::monitoredPresence ( const <a href="./qstring.html">QString</a> &amp; <i>uri</i>, <a href="qpresence.html#Status-enum">QPresence::Status</a> <i>status</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="monitoredPresence"></a>void QPresence::monitoredPresence ( const <a href="qstring.html">QString</a> &amp; <i>uri</i>, <a href="qpresence.html#Status-enum">QPresence::Status</a> <i>status</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when the monitored presence <i>status</i> on <i>uri</i> changes. This signal may be emitted for uri's that are being monitored by other applications. The <i>uri</i> should be checked by the caller against the expected values from <a href="qpresence.html#monitoredUris-prop">monitoredUris</a>().</p>
 <p>See also <a href="qpresence.html#startMonitoring">startMonitoring</a>() and <a href="qpresence.html#stopMonitoring">stopMonitoring</a>().</p>
-<h3 class="fn"><a name="monitoredUriStatus"></a><a href="qpresence.html#Status-enum">QPresence::Status</a> QPresence::monitoredUriStatus ( const <a href="./qstring.html">QString</a> &amp; <i>uri</i> ) const</h3>
+<h3 class="fn"><a name="monitoredUriStatus"></a><a href="qpresence.html#Status-enum">QPresence::Status</a> QPresence::monitoredUriStatus ( const <a href="qstring.html">QString</a> &amp; <i>uri</i> ) const</h3>
 <p>Returns the current monitoring status associated with <i>uri</i>.</p>
 <p>See also <a href="qpresence.html#monitoredUris-prop">monitoredUris</a>() and <a href="qpresence.html#allMonitoredUris-prop">allMonitoredUris</a>().</p>
-<h3 class="fn"><a name="startMonitoring"></a>bool QPresence::startMonitoring ( const <a href="./qstring.html">QString</a> &amp; <i>uri</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="startMonitoring"></a>bool QPresence::startMonitoring ( const <a href="qstring.html">QString</a> &amp; <i>uri</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Start monitoring <i>uri</i> for presence changes. The <a href="qpresence.html#monitoredPresence">monitoredPresence</a>() signal will be emitted whenever the status changes. Returns false if the <i>uri</i> was already being monitored by this object.</p>
 <p>Server implementations that inherit from <a href="qpresence.html">QPresence</a> should call this base implementation before performing any other action.</p>
 <p>See also <a href="qpresence.html#monitoredPresence">monitoredPresence</a>() and <a href="qpresence.html#stopMonitoring">stopMonitoring</a>().</p>
-<h3 class="fn"><a name="stopMonitoring"></a>bool QPresence::stopMonitoring ( const <a href="./qstring.html">QString</a> &amp; <i>uri</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="stopMonitoring"></a>bool QPresence::stopMonitoring ( const <a href="qstring.html">QString</a> &amp; <i>uri</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Stop monitoring <i>uri</i> for presence changes. Returns false if <i>uri</i> was not currently being monitored by this object, or there are still remaining references to <i>uri</i> in the system. Monitoring will be implicitly stopped when this object is destroyed.</p>
 <p>Server implementations that inherit from <a href="qpresence.html">QPresence</a> should call this base implementation before performing any other action.</p>
 <p>See also <a href="qpresence.html#monitoredPresence">monitoredPresence</a>() and <a href="qpresence.html#startMonitoring">startMonitoring</a>().</p>
-<h3 class="fn"><a name="updateMonitoredPresence"></a>void QPresence::updateMonitoredPresence ( const <a href="./qstring.html">QString</a> &amp; <i>uri</i>, <a href="qpresence.html#Status-enum">QPresence::Status</a> <i>status</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="updateMonitoredPresence"></a>void QPresence::updateMonitoredPresence ( const <a href="qstring.html">QString</a> &amp; <i>uri</i>, <a href="qpresence.html#Status-enum">QPresence::Status</a> <i>status</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Called from server implementations to update the monitoring <i>status</i> of <i>uri</i>. This function will update the global state as seen by <a href="qpresence.html#monitoredUriStatus">monitoredUriStatus</a>() and then emits <a href="qpresence.html#monitoredPresence">monitoredPresence</a>().</p>
 <p>See also <a href="qpresence.html#monitoredPresence">monitoredPresence</a>(), <a href="qpresence.html#startMonitoring">startMonitoring</a>(), and <a href="qpresence.html#stopMonitoring">stopMonitoring</a>().</p>
 <p /><address><hr /><div align="center">

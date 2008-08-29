@@ -31,10 +31,10 @@
 <p>See also <a href="qmodemserviceplugin.html">QModemServicePlugin</a> and <a href="qmodemservice.html">QModemService</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="create"></a><a href="qmodemservice.html">QModemService</a> * QModemServicePluginInterface::create ( const <a href="./qstring.html">QString</a> &amp; <i>service</i>, <a href="qserialiodevicemultiplexer.html">QSerialIODeviceMultiplexer</a> * <i>mux</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="create"></a><a href="qmodemservice.html">QModemService</a> * QModemServicePluginInterface::create ( const <a href="qstring.html">QString</a> &amp; <i>service</i>, <a href="qserialiodevicemultiplexer.html">QSerialIODeviceMultiplexer</a> * <i>mux</i>, <a href="qobject.html">QObject</a> * <i>parent</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Create a vendor-specific modem service handler called <i>service</i> and attach it to <i>parent</i>. The <i>mux</i> parameter specifies the serial device multiplexer to use for accessing the modem.</p>
 <p>See also <a href="qmodemserviceplugininterface.html#supports">supports</a>().</p>
-<h3 class="fn"><a name="supports"></a>bool QModemServicePluginInterface::supports ( const <a href="./qstring.html">QString</a> &amp; <i>manufacturer</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="supports"></a>bool QModemServicePluginInterface::supports ( const <a href="qstring.html">QString</a> &amp; <i>manufacturer</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns true if this plug-in supports the given <i>manufacturer</i> string; otherwise returns false. The caller obtains the string by issuing <tt>AT+CGMI</tt> to the modem. If the plug-in supports <i>manufacturer</i>, the caller will then call <a href="qmodemserviceplugininterface.html#create">create</a>(). This function will typically contain code such as the following:</p>
 <pre>    return manufacturer.contains( &quot;VENDORID&quot; );</pre>
 <p>where <tt>VENDORID</tt> is a vendor-specific identifier that will appear in the output of <tt>AT+CGMI</tt> only for that vendor's modems.</p>

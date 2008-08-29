@@ -26,7 +26,7 @@
 
     QTOPIA_ADD_APPLICATION(QTOPIA_TARGET,Example)
     QTOPIA_MAIN</pre>
-<p>The first argument to <a href="../qtopiaapplication.html#QTOPIA_ADD_APPLICATION">QTOPIA_ADD_APPLICATION</a>() must be a literal string that matches the binary name (ie. the value of TARGET from the .pro file). The build system defines <a href="def-qtopia-target-1.html">QTOPIA_TARGET</a> with the value of TARGET and it is recommended to use this macro. The second argument to <a href="../qtopiaapplication.html#QTOPIA_ADD_APPLICATION">QTOPIA_ADD_APPLICATION</a>() should be the name of your class. If you use the wrong value you will get a compile failure.</p>
+<p>The first argument to <a href="qtopiaapplication.html#QTOPIA_ADD_APPLICATION">QTOPIA_ADD_APPLICATION</a>() must be a literal string that matches the binary name (ie. the value of TARGET from the .pro file). The build system defines <a href="def-qtopia-target-1.html">QTOPIA_TARGET</a> with the value of TARGET and it is recommended to use this macro. The second argument to <a href="qtopiaapplication.html#QTOPIA_ADD_APPLICATION">QTOPIA_ADD_APPLICATION</a>() should be the name of your class. If you use the wrong value you will get a compile failure.</p>
 <p>Building for either quicklaunch or singleexec requires these macros but the build system cannot easily tell if you have used them and the penalty for a wrong guess could be disastrous. Therefore you must use the <a href="conf-qtopia-main-1.html">qtopia_main</a> CONFIG value if you use these macros or the build system will assume your app is not quicklaunch-compatible. If your app uses these macros but does not handle quicklaunch or singleexec you can use the <a href="conf-no-quicklaunch-1.html">no_quicklaunch</a> or <a href="conf-no-singleexec-1.html">no_singleexec</a> CONFIG values.</p>
 <p>Some applications cannot use the macros (eg. If you need to use a custom application class). This prevents the use of quicklauncher but you can still work with singleexec if you make some changes to your code. You need to use the <a href="conf-singleexec-main-1.html">singleexec_main</a> CONFIG value and have a main.cpp that looks something like this (from examples/manual_main/main.cpp):</p>
 <pre>    #include &quot;example.h&quot;
@@ -39,18 +39,18 @@
     #define MAIN_FUNC main
     #endif
 
-<span class="comment">    //</span> This is the storage for the SXE key that uniquely identified this applicaiton.
-<span class="comment">    //</span> make will fail without this!
+<span class="comment">    // This is the storage for the SXE key that uniquely identified this applicaiton.</span>
+<span class="comment">    // make will fail without this</span>!
     QSXE_APP_KEY
 
     int MAIN_FUNC( int argc, char **argv )
     {
-        <span class="comment">//</span> This is required to load the SXE key into memory
+        <span class="comment">// This is required to load the SXE key into memory</span>
         QSXE_SET_APP_KEY(argv[0]);
 
         QtopiaApplication a( argc, argv );
 
-        <span class="comment">//</span> Set the preferred document system connection type
+        <span class="comment">// Set the preferred document system connection type</span>
         QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION();
 
         Example *mw = new Example();
@@ -64,9 +64,9 @@
         delete mw;
         return rv;
     }</pre>
-<p>Note that the second argument to <a href="../qtopiaapplication.html#QTOPIA_ADD_APPLICATION">QTOPIA_ADD_APPLICATION</a>() is appended to main_ so that the main function has a unique name.</p>
+<p>Note that the second argument to <a href="qtopiaapplication.html#QTOPIA_ADD_APPLICATION">QTOPIA_ADD_APPLICATION</a>() is appended to main_ so that the main function has a unique name.</p>
 <p>Note that packages cannot contain quicklaunched applications. See <a href="over-packages-overview-1.html#package-limitations">Package Limitations</a> for more informtation.</p>
-<p>See also <a href="overviews.html">Overviews</a>, <a href="conf-qtopia-main-1.html">qtopia_main</a>, <a href="conf-no-quicklaunch-1.html">no_quicklaunch</a>, <a href="conf-singleexec-main-1.html">singleexec_main</a>, <a href="conf-no-singleexec-1.html">no_singleexec</a>, <a href="def-qtopia-target-1.html">QTOPIA_TARGET</a>, <a href="../qtopiaapplication.html#QTOPIA_ADD_APPLICATION">QTOPIA_ADD_APPLICATION</a>(), <a href="../sxeprograminfo.html#QSXE_APP_KEY">QSXE_APP_KEY</a>, <a href="../qtopiaapplication.html#QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION">QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION</a>(), <a href="../quicklaunch.html">Quicklauncher</a>, <a href="../single-exec.html">Qtopia Single Exec</a>, and <a href="over-project-files-1.html">Project Files</a>.</p>
+<p>See also <a href="overviews.html">Overviews</a>, <a href="conf-qtopia-main-1.html">qtopia_main</a>, <a href="conf-no-quicklaunch-1.html">no_quicklaunch</a>, <a href="conf-singleexec-main-1.html">singleexec_main</a>, <a href="conf-no-singleexec-1.html">no_singleexec</a>, <a href="def-qtopia-target-1.html">QTOPIA_TARGET</a>, <a href="qtopiaapplication.html#QTOPIA_ADD_APPLICATION">QTOPIA_ADD_APPLICATION</a>(), <a href="sxeprograminfo.html#QSXE_APP_KEY">QSXE_APP_KEY</a>, <a href="qtopiaapplication.html#QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION">QTOPIA_SET_DOCUMENT_SYSTEM_CONNECTION</a>(), <a href="quicklaunch.html">Quicklauncher</a>, <a href="single-exec.html">Qtopia Single Exec</a>, and <a href="over-project-files-1.html">Project Files</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2007 Trolltech</td>

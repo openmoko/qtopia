@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QDeviceIndicators Class Reference</h1>
 <p>The QDeviceIndicators class allows applications to query, enable and disable indicator lights on a device. <a href="#details">More...</a></p>
-<pre>    #include &lt;QDeviceIndicators&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QDeviceIndicators&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qdeviceindicators-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -34,7 +34,7 @@
 <li><div class="fn"/>QStringList <b><a href="qdeviceindicators.html#supportedIndicators">supportedIndicators</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -42,16 +42,16 @@
 <li><div class="fn"/>void <b><a href="qdeviceindicators.html#indicatorStateChanged">indicatorStateChanged</a></b> ( const QString &amp; <i>name</i>, IndicatorState <i>newState</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -71,23 +71,23 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QDeviceIndicators"></a>QDeviceIndicators::QDeviceIndicators ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QDeviceIndicators"></a>QDeviceIndicators::QDeviceIndicators ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Create a new <a href="qdeviceindicators.html">QDeviceIndicators</a> instance with the provided <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QDeviceIndicators"></a>QDeviceIndicators::~QDeviceIndicators ()&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Destroys the instance.</p>
-<h3 class="fn"><a name="indicatorState"></a><a href="qdeviceindicators.html#IndicatorState-enum">IndicatorState</a> QDeviceIndicators::indicatorState ( const <a href="./qstring.html">QString</a> &amp; <i>name</i> )</h3>
+<h3 class="fn"><a name="indicatorState"></a><a href="qdeviceindicators.html#IndicatorState-enum">IndicatorState</a> QDeviceIndicators::indicatorState ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )</h3>
 <p>Returns the current indicator state for <i>name</i>.</p>
 <p>See also <a href="qdeviceindicators.html#setIndicatorState">setIndicatorState</a>().</p>
-<h3 class="fn"><a name="indicatorStateChanged"></a>void QDeviceIndicators::indicatorStateChanged ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, <a href="qdeviceindicators.html#IndicatorState-enum">IndicatorState</a> <i>newState</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="indicatorStateChanged"></a>void QDeviceIndicators::indicatorStateChanged ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, <a href="qdeviceindicators.html#IndicatorState-enum">IndicatorState</a> <i>newState</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Emitted whenever the indicator <i>name</i> changes state. <i>newState</i> will be set to the new indicator state.</p>
-<h3 class="fn"><a name="isIndicatorStateSupported"></a>bool QDeviceIndicators::isIndicatorStateSupported ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, <a href="qdeviceindicators.html#IndicatorState-enum">IndicatorState</a> <i>state</i> )</h3>
+<h3 class="fn"><a name="isIndicatorStateSupported"></a>bool QDeviceIndicators::isIndicatorStateSupported ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, <a href="qdeviceindicators.html#IndicatorState-enum">IndicatorState</a> <i>state</i> )</h3>
 <p>Returns true if the indicator <i>name</i> supports the given <i>state</i>.</p>
-<h3 class="fn"><a name="isIndicatorSupported"></a>bool QDeviceIndicators::isIndicatorSupported ( const <a href="./qstring.html">QString</a> &amp; <i>name</i> )</h3>
+<h3 class="fn"><a name="isIndicatorSupported"></a>bool QDeviceIndicators::isIndicatorSupported ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )</h3>
 <p>Returns true if the indicator <i>name</i> is supported by the device.</p>
-<h3 class="fn"><a name="setIndicatorState"></a>void QDeviceIndicators::setIndicatorState ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, <a href="qdeviceindicators.html#IndicatorState-enum">IndicatorState</a> <i>state</i> )</h3>
+<h3 class="fn"><a name="setIndicatorState"></a>void QDeviceIndicators::setIndicatorState ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, <a href="qdeviceindicators.html#IndicatorState-enum">IndicatorState</a> <i>state</i> )</h3>
 <p>Attempts to change the indicator <i>name</i> to the provided <i>state</i>. Setting an indicator is an asynchronous event. If necessary, callers should monitor the <a href="qdeviceindicators.html#indicatorStateChanged">indicatorStateChanged</a>() signal to determine when the state change occurs.</p>
 <p>See also <a href="qdeviceindicators.html#indicatorState">indicatorState</a>().</p>
-<h3 class="fn"><a name="supportedIndicators"></a><a href="./qstringlist.html">QStringList</a> QDeviceIndicators::supportedIndicators () const</h3>
+<h3 class="fn"><a name="supportedIndicators"></a><a href="qstringlist.html">QStringList</a> QDeviceIndicators::supportedIndicators () const</h3>
 <p>Returns the list of all indicators supported by the device.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

@@ -33,7 +33,7 @@
         menu-&gt;addAction(_renameAction);
         ...
     }</pre>
-<p>The onRenameImage slot needs to launch an input dialog. When the dialog is accepted, the image will be renamed. Qtopia does not support the <a href="./qinputdialog.html">QInputDialog</a>, so a custom input dialog should be created. This is fairly easy. Our input dialog derives from a <a href="./qdialog.html">QDialog</a>.</p>
+<p>The onRenameImage slot needs to launch an input dialog. When the dialog is accepted, the image will be renamed. Qtopia does not support the <a href="qinputdialog.html">QInputDialog</a>, so a custom input dialog should be created. This is fairly easy. Our input dialog derives from a <a href="qdialog.html">QDialog</a>.</p>
 <pre>    #ifndef INPUTDIALOG_H
     #define INPUTDIALOG_H
 
@@ -55,7 +55,7 @@
 
     #endif</pre>
 <p>The <tt>setText()</tt> method puts the name of the image into the dialog. The <tt>text()</tt> method will retrieve the new name for the image.</p>
-<p>The dialog consists of only one widget: a <a href="./qlineedit.html">QLineEdit</a>, which is arranged in a <a href="./qvboxlayout.html">QVBoxLayout</a>. Using the <tt>setText()</tt> method, the text will be set on the <a href="./qlineedit.html">QLineEdit</a>. The <tt>text()</tt> method retrieves the text from the <a href="./qlineedit.html">QLineEdit</a>. There is currently no verification of the input. This feature could be added later.</p>
+<p>The dialog consists of only one widget: a <a href="qlineedit.html">QLineEdit</a>, which is arranged in a <a href="qvboxlayout.html">QVBoxLayout</a>. Using the <tt>setText()</tt> method, the text will be set on the <a href="qlineedit.html">QLineEdit</a>. The <tt>text()</tt> method retrieves the text from the <a href="qlineedit.html">QLineEdit</a>. There is currently no verification of the input. This feature could be added later.</p>
 <pre>    #include &quot;inputdialog.h&quot;
 
     #include &lt;QVBoxLayout&gt;
@@ -79,7 +79,7 @@
     {
         return _edit-&gt;text();
     }</pre>
-<p>In the <tt>onRenameImage()</tt> method, the content object is first retrieved according to the selected row and the InputDialog() is created. Then the image name is set as the dialog text. The dialog is launched with the <tt>QtopiaApplication::execDialog()</tt> method. If the dialog is accepted, the <tt>execDialog()</tt> method returns a <a href="./qdialog.html#dialogcode-enum">QDialog::Accepted</a> and the new name can be retrieved from the dialog. The new name is set on the content and the changes are commited. The commit function must be called to commit the changes. At the end, the dialog is deleted. Storing the dialog for later usage could be another option. <tt>QtopiaApplication::execDialog(dlg)</tt> call is used to place the dialog on the bottom of the screen, just above the soft menubar, so it looks much more like a phone interface. (the <tt>Dialog.exec()</tt> method could have been used but it would have placed the dialog according to Qt dialog behaviour, i.e&#x2e; on the center of the screen with a minimal size.</p>
+<p>In the <tt>onRenameImage()</tt> method, the content object is first retrieved according to the selected row and the InputDialog() is created. Then the image name is set as the dialog text. The dialog is launched with the <tt>QtopiaApplication::execDialog()</tt> method. If the dialog is accepted, the <tt>execDialog()</tt> method returns a <a href="qdialog.html#DialogCode-enum">QDialog::Accepted</a> and the new name can be retrieved from the dialog. The new name is set on the content and the changes are commited. The commit function must be called to commit the changes. At the end, the dialog is deleted. Storing the dialog for later usage could be another option. <tt>QtopiaApplication::execDialog(dlg)</tt> call is used to place the dialog on the bottom of the screen, just above the soft menubar, so it looks much more like a phone interface. (the <tt>Dialog.exec()</tt> method could have been used but it would have placed the dialog according to Qt dialog behaviour, i.e&#x2e; on the center of the screen with a minimal size.</p>
 <pre>    void ListScreen::onRenameImage()
     {
         QContent c   = _cs-&gt;content(currentIndex().row());
@@ -97,7 +97,7 @@
         }
         delete dlg;
     }</pre>
-<p>To edit the content, the select key has to be pressed. As the dialog is in key navigation mode, &quot;select&quot; has to be pressed to select the <a href="./qlineedit.html">QLineEdit</a> and then &quot;edit&quot; to go into the edit mode. After finishing editing, &quot;ok&quot; must be pressed to go back to the navigation mode. Then, pressing back accepts the dialog. Pressing Cancel in the options menu will cancel the dialog.</p>
+<p>To edit the content, the select key has to be pressed. As the dialog is in key navigation mode, &quot;select&quot; has to be pressed to select the <a href="qlineedit.html">QLineEdit</a> and then &quot;edit&quot; to go into the edit mode. After finishing editing, &quot;ok&quot; must be pressed to go back to the navigation mode. Then, pressing back accepts the dialog. Pressing Cancel in the options menu will cancel the dialog.</p>
 <p>Here the sequence:</p>
 <ul>
 <li>1.launch dialog (navigation mode)</li>
@@ -111,7 +111,7 @@
 <h3>Enhancing the Rename Dialog</h3>
 <p>The Ok and Cancel behaviour of the dialog can not be achieved currently. This is due to the fact that the delete and cut/copy/paste functions must be supported with the softkeys. But a more user-friendly interface can be found..&#x2e;</p>
 <p>The input dialog must be changed: the edit widget will be introducted as the focus proxy of the dialog. This means that when the dialog receives focus, it forwards the focus to the edit widget. By doing that, the edit widget does not have to be selected any more in order to go to the edit state.</p>
-<p>In addition, the key events will be intercepted and if a <a href="./qt.html#key-enum">Qt::Key_Select</a> arrives (which is used to go out of the edit mode normally), the button will be accepted:</p>
+<p>In addition, the key events will be intercepted and if a <a href="qt.html#Key-enum">Qt::Key_Select</a> arrives (which is used to go out of the edit mode normally), the button will be accepted:</p>
 <p>For the input dialog constructor:</p>
 <pre>    InputDialog::InputDialog(QWidget *parent)
     : QDialog(parent)
@@ -171,7 +171,7 @@
 <p>Time to compile and restart the application. Now there are two new options (rename and delete) that can be tried out.</p>
 <a name="summary"></a>
 <h3>Summary</h3>
-<p>This part talked about ways to implement a custom dialog and to change the default implementation in order to have a dialog behaving nicely. The use of the <a href="./qmessagebox.html">QMessageBox</a> class and the use of the <a href="qcontent.html">QContent</a> class have been explained.</p>
+<p>This part talked about ways to implement a custom dialog and to change the default implementation in order to have a dialog behaving nicely. The use of the <a href="qmessagebox.html">QMessageBox</a> class and the use of the <a href="qcontent.html">QContent</a> class have been explained.</p>
 <p><a href="tut-iviewer-part3.html">Prev</a>|<a href="#top">Top</a>|<a href="tut-iviewer-part1.html">Start Page</a>|<a href="tut-iviewer-part5.html">Next</a></p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

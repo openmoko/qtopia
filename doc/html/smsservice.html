@@ -32,18 +32,18 @@
 <li><div class="fn"/>void <b><a href="smsservice.html#writeSms-3">writeSms</a></b> ( const QString &amp; <i>name</i>, const QString &amp; <i>number</i>, const QString &amp; <i>filename</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>1 protected function inherited from <a href="qtopiaabstractservice.html#protected-functions">QtopiaAbstractService</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -60,10 +60,10 @@
 <p>Direct the <i>SMS</i> services to handle the MMS push notification <i>request</i>.</p>
 <p>This slot corresponds to a QDS service with request data containing the serialization of an <tt>MMSMessage</tt>, and no response data.</p>
 <p>This slot corresponds to the QCop service message <tt>SMS::pushMmsMessage(QDSActionRequest)</tt>.</p>
-<h3 class="fn"><a name="smsVCard"></a>void SMSService::smsVCard ( const <a href="./qstring.html">QString</a> &amp; <i>filename</i>, const <a href="./qstring.html">QString</a> &amp; <i>description</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="smsVCard"></a>void SMSService::smsVCard ( const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qstring.html">QString</a> &amp; <i>description</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Direct the <i>SMS</i> service to interact with the user to compose a new SMS message for sending the vcard data in <i>filename</i>. The <i>description</i> argument provides an optional descriptive text message.</p>
 <p>This slot corresponds to the QCop service message <tt>SMS::smsVCard(QString,QString)</tt>.</p>
-<h3 class="fn"><a name="smsVCard-2"></a>void SMSService::smsVCard ( const <a href="./qstring.html">QString</a> &amp; <i>channel</i>, const <a href="./qstring.html">QString</a> &amp; <i>id</i>, const <a href="./qstring.html">QString</a> &amp; <i>filename</i>, const <a href="./qstring.html">QString</a> &amp; <i>description</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="smsVCard-2"></a>void SMSService::smsVCard ( const <a href="qstring.html">QString</a> &amp; <i>channel</i>, const <a href="qstring.html">QString</a> &amp; <i>id</i>, const <a href="qstring.html">QString</a> &amp; <i>filename</i>, const <a href="qstring.html">QString</a> &amp; <i>description</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This function is deprecated.</p>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Direct the <i>SMS</i> service to interact with the user to compose a new SMS message for sending the vcard data in <i>filename</i>. The <i>description</i> argument provides an optional descriptive text message. The <i>channel</i> and <i>id</i> are not used.</p>
@@ -85,11 +85,11 @@
 <h3 class="fn"><a name="writeSms"></a>void SMSService::writeSms ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Direct the <i>SMS</i> service to interact with the user to compose a new SMS message, and then, if confirmed by the user, send the message.</p>
 <p>This slot corresponds to the QCop service message <tt>SMS::writeSms()</tt>.</p>
-<h3 class="fn"><a name="writeSms-2"></a>void SMSService::writeSms ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, const <a href="./qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="writeSms-2"></a>void SMSService::writeSms ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Direct the <i>SMS</i> service to interact with the user to compose a new SMS message, and then, if confirmed by the user, send the message. The message is sent to <i>name</i> at <i>number</i>.</p>
 <p>This slot corresponds to the QCop service message <tt>SMS::writeSms(QString,QString)</tt>.</p>
-<h3 class="fn"><a name="writeSms-3"></a>void SMSService::writeSms ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, const <a href="./qstring.html">QString</a> &amp; <i>number</i>, const <a href="./qstring.html">QString</a> &amp; <i>filename</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="writeSms-3"></a>void SMSService::writeSms ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qstring.html">QString</a> &amp; <i>number</i>, const <a href="qstring.html">QString</a> &amp; <i>filename</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Direct the <i>SMS</i> service to interact with the user to compose a new SMS message, and then, if confirmed by the user, send the message. The message is sent to <i>name</i> at <i>number</i>. The initial body of the message will be read from <i>filename</i>. After the file is read, it will be removed.</p>
 <p>This slot corresponds to the QCop service message <tt>SMS::writeSms(QString,QString,QString)</tt>.</p>

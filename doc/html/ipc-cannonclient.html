@@ -33,7 +33,7 @@
         void missed();
         void hit();
     };</pre>
-<p>The CannonResultListener class is a <a href="./qobject.html">QObject</a> with two slots. These slots simply print a message depending on the slot being called and destroy the CannonResultListener by calling deleteLater(). This will cause the application to exit.</p>
+<p>The CannonResultListener class is a <a href="qobject.html">QObject</a> with two slots. These slots simply print a message depending on the slot being called and destroy the CannonResultListener by calling deleteLater(). This will cause the application to exit.</p>
 <a name="cannonresultlistener-class-implementation"></a>
 <h2>CannonResultListener Class Implementation</h2>
 <p>The <tt>missed()</tt> slot is called whenever a message of the same type arrives on the IPC channel. This slot prints a message and destroys the listener.</p>

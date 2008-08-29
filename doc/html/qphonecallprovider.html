@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QPhoneCallProvider Class Reference</h1>
 <p>The QPhoneCallProvider class implements a mechanism for phone call providers to hook into the telephony system. <a href="#details">More...</a></p>
-<pre>    #include &lt;QPhoneCallProvider&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QPhoneCallProvider&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <p>Inherited by <a href="qmodemcallprovider.html">QModemCallProvider</a>.</p>
 <ul>
 <li><a href="qphonecallprovider-members.html">List of all members, including inherited members</a></li>
@@ -30,7 +30,7 @@
 <li><div class="fn"/>QString <b><a href="qphonecallprovider.html#service">service</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -38,7 +38,7 @@
 <li><div class="fn"/>void <b><a href="qphonecallprovider.html#callStatesChanged">callStatesChanged</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -49,15 +49,15 @@
 <li><div class="fn"/>void <b><a href="qphonecallprovider.html#setCallTypes">setCallTypes</a></b> ( const QStringList &amp; <i>types</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -71,7 +71,7 @@
 <p>See also <a href="qphonecallimpl.html">QPhoneCallImpl</a>, <a href="qphonecallmanager.html">QPhoneCallManager</a>, <a href="qphonecall.html">QPhoneCall</a>, and <a href="qmodemcallprovider.html">QModemCallProvider</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QPhoneCallProvider"></a>QPhoneCallProvider::QPhoneCallProvider ( const <a href="./qstring.html">QString</a> &amp; <i>service</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> )</h3>
+<h3 class="fn"><a name="QPhoneCallProvider"></a>QPhoneCallProvider::QPhoneCallProvider ( const <a href="qstring.html">QString</a> &amp; <i>service</i>, <a href="qobject.html">QObject</a> * <i>parent</i> )</h3>
 <p>Constructs a new phone call provider for <i>service</i> and attaches it to <i>parent</i>.</p>
 <p>In a subclass, the constructor will typically contain a call to <a href="qphonecallprovider.html#setCallTypes">setCallTypes</a>() to advertise the list of call types that the provider supports. The list is advertised in the Qtopia value space and can be queried by client applications using <a href="qphonecallmanager.html#callTypes">QPhoneCallManager::callTypes</a>().</p>
 <p>The following example demonstrates the recommended contents for the constructor in a subclass of QPhoneCallProvider():</p>
@@ -90,10 +90,10 @@
 <h3 class="fn"><a name="callStatesChanged"></a>void QPhoneCallProvider::callStatesChanged ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when one or more calls within this provider have changed state.</p>
 <p>See also <a href="qphonecallimpl.html#stateChanged">QPhoneCallImpl::stateChanged</a>().</p>
-<h3 class="fn"><a name="calls"></a><a href="./qlist.html">QList</a>&lt;<a href="qphonecallimpl.html">QPhoneCallImpl</a> *&gt; QPhoneCallProvider::calls () const</h3>
+<h3 class="fn"><a name="calls"></a><a href="qlist.html">QList</a>&lt;<a href="qphonecallimpl.html">QPhoneCallImpl</a> *&gt; QPhoneCallProvider::calls () const</h3>
 <p>Returns the list of all phone calls associated with this provider.</p>
 <p>See also <a href="qphonecallprovider.html#create">create</a>() and <a href="qphonecallprovider.html#findCall">findCall</a>().</p>
-<h3 class="fn"><a name="create"></a><a href="qphonecallimpl.html">QPhoneCallImpl</a> * QPhoneCallProvider::create ( const <a href="./qstring.html">QString</a> &amp; <i>identifier</i>, const <a href="./qstring.html">QString</a> &amp; <i>callType</i> )&nbsp;&nbsp;<tt> [pure virtual protected]</tt></h3>
+<h3 class="fn"><a name="create"></a><a href="qphonecallimpl.html">QPhoneCallImpl</a> * QPhoneCallProvider::create ( const <a href="qstring.html">QString</a> &amp; <i>identifier</i>, const <a href="qstring.html">QString</a> &amp; <i>callType</i> )&nbsp;&nbsp;<tt> [pure virtual protected]</tt></h3>
 <p>Creates a new phone call implementation object for a call of type <i>callType</i>, and assigns it the specified <i>identifier</i>. The object constructed will be of a subtype of <a href="qphonecallimpl.html">QPhoneCallImpl</a>. The typical implementation in the subclass is as follows:</p>
 <pre>    return new QMyPhoneCallImpl( this, identifier, callType );</pre>
 <p>This function is called when a dial request is received from a client application. It will be followed by a call to <a href="qphonecallimpl.html#dial">QPhoneCallImpl::dial</a>().</p>
@@ -105,15 +105,15 @@
 <h3 class="fn"><a name="endStateTransaction"></a>void QPhoneCallProvider::endStateTransaction ()</h3>
 <p>Ends a state change transaction and transmits any queued notifications.</p>
 <p>See also <a href="qphonecallprovider.html#beginStateTransaction">beginStateTransaction</a>() and <a href="qphonecallimpl.html#setState">QPhoneCallImpl::setState</a>().</p>
-<h3 class="fn"><a name="findCall"></a><a href="qphonecallimpl.html">QPhoneCallImpl</a> * QPhoneCallProvider::findCall ( const <a href="./qstring.html">QString</a> &amp; <i>identifier</i> ) const</h3>
+<h3 class="fn"><a name="findCall"></a><a href="qphonecallimpl.html">QPhoneCallImpl</a> * QPhoneCallProvider::findCall ( const <a href="qstring.html">QString</a> &amp; <i>identifier</i> ) const</h3>
 <p>Returns a call with a specific <i>identifier</i>. Returns null if there is no such call.</p>
 <p>See also <a href="qphonecallprovider.html#calls">calls</a>().</p>
 <h3 class="fn"><a name="registerCall"></a>void QPhoneCallProvider::registerCall ( <a href="qphonecallimpl.html">QPhoneCallImpl</a> * <i>call</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Called when <i>call</i> is first registered with this provider. This function is called automatically by the constructor for <a href="qphonecallimpl.html">QPhoneCallImpl</a>.</p>
 <p>See also <a href="qphonecallprovider.html#deregisterCall">deregisterCall</a>().</p>
-<h3 class="fn"><a name="service"></a><a href="./qstring.html">QString</a> QPhoneCallProvider::service () const</h3>
+<h3 class="fn"><a name="service"></a><a href="qstring.html">QString</a> QPhoneCallProvider::service () const</h3>
 <p>Returns the name of the service that this provider is associated with.</p>
-<h3 class="fn"><a name="setCallTypes"></a>void QPhoneCallProvider::setCallTypes ( const <a href="./qstringlist.html">QStringList</a> &amp; <i>types</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="setCallTypes"></a>void QPhoneCallProvider::setCallTypes ( const <a href="qstringlist.html">QStringList</a> &amp; <i>types</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Sets the list of supported call <i>types</i> for this provider. The list is advertised in the Qtopia value space, and can be queried by client applications using <a href="qphonecallmanager.html#callTypes">QPhoneCallManager::callTypes</a>().</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

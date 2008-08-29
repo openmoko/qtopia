@@ -26,6 +26,9 @@
 #include <pwd.h>
 #include <time.h>
 
+#include <trace.h>
+QD_LOG_OPTION(SyncAuthentication)
+
 #include "syncauthentication.h"
 #include "log.h"
 
@@ -60,7 +63,7 @@ bool SyncAuthentication::isAuthorized( const QHostAddress & /*peeraddress*/ )
 
 bool SyncAuthentication::checkUser( const QByteArray &user )
 {
-    TRACE(QDSync) << "SyncAuthentication::checkUser" << user << "vs" << loginName();
+    TRACE(SyncAuthentication) << "SyncAuthentication::checkUser" << user << "vs" << loginName();
     return ( user == loginName() );
 }
 
@@ -69,7 +72,7 @@ bool SyncAuthentication::checkUser( const QByteArray &user )
 static QMessageBox *message = 0;
 static bool _checkPassword( const QByteArray &password )
 {
-    TRACE(QDSync) << "::_checkPassword";
+    TRACE(SyncAuthentication) << "::_checkPassword";
     static int lastdenial = 0;
     static int denials = 0;
     int now = ::time(0);
@@ -168,11 +171,11 @@ static bool _checkPassword( const QByteArray &password )
 
 bool SyncAuthentication::checkPassword( const QByteArray &password )
 {
-    TRACE(QDSync) << "SyncAuthentication::checkPassword" << password;
+    TRACE(SyncAuthentication) << "SyncAuthentication::checkPassword" << password;
 
     static bool recursive = false;
     if ( recursive ) {
-        WARNING() << "***** Recursive call to checkPassword!";
+        WARNING() << "***** Recursive call to checkPassword!" << __FILE__ << __LINE__;
         return false;
     }
     recursive = true;
@@ -193,7 +196,7 @@ bool SyncAuthentication::checkPassword( const QByteArray &password )
 
 void SyncAuthentication::clearDialogs()
 {
-    TRACE(QDSync) << "SyncAuthentication::clearDialogs";
+    TRACE(SyncAuthentication) << "SyncAuthentication::clearDialogs";
     if ( message ) {
         message->reject();
         message->deleteLater();

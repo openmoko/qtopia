@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -2210,7 +2210,7 @@ QMakeProject::doProjectExpand(QString func, QList<QStringList> args_list,
                             if(*(i_data+x+1) == mapped_quotes[i].in) {
                                 *(i_data+x) = mapped_quotes[i].out;
                                 if(x < i_len-2)
-                                    memmove(i_data+x+1, i_data+x+2, (i_len-x)*sizeof(QChar));
+                                    memmove(i_data+x+1, i_data+x+2, (i_len-x-2)*sizeof(QChar));
                                 --i_len;
                                 break;
                             }

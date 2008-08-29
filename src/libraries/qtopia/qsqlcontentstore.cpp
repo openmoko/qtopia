@@ -1023,7 +1023,7 @@ int QSqlContentStore::contentCount( const QContentFilter &filter )
             + buildWhereClause( filter, &parameters, &insertAt, &joins );
 
     QString selectString
-            = QLatin1String( "SELECT count(*) FROM " )
+            = QLatin1String( "SELECT count(DISTINCT content.cid) FROM " )
             + buildFrom( filter, joins )
             + whereString;
 
@@ -1069,7 +1069,7 @@ QContentIdList QSqlContentStore::matches( const QContentFilter &filter, const QC
 
     QString orderString = buildOrderBy( order, &parameters, &insertAt, &joins );
     QString selectString
-            = QLatin1String( "SELECT content.cid FROM " )
+            = QLatin1String( "SELECT DISTINCT content.cid FROM " )
             + buildFrom( filter, joins )
             + whereString
             + orderString;
@@ -1112,7 +1112,7 @@ QContentIdList QSqlContentStore::matches( QtopiaDatabaseId databaseId, const QCo
             + buildWhereClause( filter, &parameters, &insertAt, &joins );
     QString orderString = buildOrderBy( order, &parameters, &insertAt, &joins );
     QString selectString
-            = QLatin1String( "SELECT content.cid FROM " )
+            = QLatin1String( "SELECT DISTINCT content.cid FROM " )
             + buildFrom( filter, joins )
             + whereString
             + orderString;

@@ -48,7 +48,7 @@
 <h2>Detailed Description</h2>
 <p>The QDSData class encapsulates data shared by Qtopia Data Sharing (QDS) services.</p>
 <p>The QDSData class is used by QDS services as an efficient means of sharing data between client and provider applications. The data is implicitly shared between QDSData objects, and can be stored persistently.</p>
-<p>For larger data sizes, methods which use <a href="./qfile.html">QFile</a> and <a href="./qiodevice.html">QIODevice</a> are recommended.</p>
+<p>For larger data sizes, methods which use <a href="qfile.html">QFile</a> and <a href="qiodevice.html">QIODevice</a> are recommended.</p>
 <p>See also <a href="qdsaction.html">QDSAction</a>, <a href="qdsactionrequest.html">QDSActionRequest</a>, and <a href="datasharing.html">Qtopia Data Sharing (QDS)</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
@@ -58,34 +58,34 @@
 <p>Constructs a deep copy of <i>other</i>.</p>
 <h3 class="fn"><a name="QDSData-3"></a>QDSData::QDSData ( const <a href="quniqueid.html">QUniqueId</a> &amp; <i>key</i> )</h3>
 <p>Constructs a data object from <i>key</i> <i>key</i> should be a key previously created by <a href="qdsdata.html#store">QDSData::store</a>().</p>
-<h3 class="fn"><a name="QDSData-4"></a>QDSData::QDSData ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>data</i>, const <a href="qmimetype.html">QMimeType</a> &amp; <i>type</i> )</h3>
+<h3 class="fn"><a name="QDSData-4"></a>QDSData::QDSData ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i>, const <a href="qmimetype.html">QMimeType</a> &amp; <i>type</i> )</h3>
 <p>Constructs a data object with <i>data</i> of <i>type</i>.</p>
-<h3 class="fn"><a name="QDSData-5"></a>QDSData::QDSData ( const <a href="./qstring.html">QString</a> &amp; <i>data</i>, const <a href="qmimetype.html">QMimeType</a> &amp; <i>type</i> )</h3>
+<h3 class="fn"><a name="QDSData-5"></a>QDSData::QDSData ( const <a href="qstring.html">QString</a> &amp; <i>data</i>, const <a href="qmimetype.html">QMimeType</a> &amp; <i>type</i> )</h3>
 <p>Constructs a data object with <i>data</i> of <i>type</i>. <i>data</i> should not contain non-Latin1 characters as it is converted to a Latin1 representation.</p>
-<h3 class="fn"><a name="QDSData-6"></a>QDSData::QDSData ( <a href="./qfile.html">QFile</a> &amp; <i>data</i>, const <a href="qmimetype.html">QMimeType</a> &amp; <i>type</i> )</h3>
+<h3 class="fn"><a name="QDSData-6"></a>QDSData::QDSData ( <a href="qfile.html">QFile</a> &amp; <i>data</i>, const <a href="qmimetype.html">QMimeType</a> &amp; <i>type</i> )</h3>
 <p>Constructs a data object with <i>data</i> of <i>type</i>. The data in <i>data</i> is copied into the QDS data store.</p>
 <h3 class="fn"><a name="dtor.QDSData"></a>QDSData::~QDSData ()</h3>
 <p>Destroys the <a href="qdsdata.html">QDSData</a> object.</p>
-<h3 class="fn"><a name="data"></a><a href="./qbytearray.html">QByteArray</a> QDSData::data () const</h3>
-<p>Returns the data as a <a href="./qbytearray.html">QByteArray</a>.</p>
+<h3 class="fn"><a name="data"></a><a href="qbytearray.html">QByteArray</a> QDSData::data () const</h3>
+<p>Returns the data as a <a href="qbytearray.html">QByteArray</a>.</p>
 <h3 class="fn"><a name="isValid"></a>bool QDSData::isValid () const</h3>
 <p>Returns true if the data object is valid; otherwise returns false.</p>
-<h3 class="fn"><a name="modify"></a>bool QDSData::modify ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>data</i> )</h3>
+<h3 class="fn"><a name="modify"></a>bool QDSData::modify ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i> )</h3>
 <p>Replaces the data with <i>data</i>. It is assumed that <i>data</i> is of the same data type as the original data.</p>
 <p>Returns true on successful completion of the request; otherwise returns false.</p>
-<h3 class="fn"><a name="modify-2"></a>bool QDSData::modify ( const <a href="./qstring.html">QString</a> &amp; <i>data</i> )</h3>
+<h3 class="fn"><a name="modify-2"></a>bool QDSData::modify ( const <a href="qstring.html">QString</a> &amp; <i>data</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Replaces the data with <i>data</i>. It is assumed that <i>data</i> is of the same data type as the original data.</p>
-<h3 class="fn"><a name="modify-3"></a>bool QDSData::modify ( <a href="./qfile.html">QFile</a> &amp; <i>data</i> )</h3>
+<h3 class="fn"><a name="modify-3"></a>bool QDSData::modify ( <a href="qfile.html">QFile</a> &amp; <i>data</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Replaces the data with <i>data</i>. It is assumed that <i>data</i> is of the same data type as the original data.</p>
-<h3 class="fn"><a name="modify-4"></a>bool QDSData::modify ( const <a href="./qbytearray.html">QByteArray</a> &amp; <i>data</i>, const <a href="qmimetype.html">QMimeType</a> &amp; <i>type</i> )</h3>
+<h3 class="fn"><a name="modify-4"></a>bool QDSData::modify ( const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i>, const <a href="qmimetype.html">QMimeType</a> &amp; <i>type</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Replaces the data with <i>data</i> of <i>type</i>.</p>
-<h3 class="fn"><a name="modify-5"></a>bool QDSData::modify ( const <a href="./qstring.html">QString</a> &amp; <i>data</i>, const <a href="qmimetype.html">QMimeType</a> &amp; <i>type</i> )</h3>
+<h3 class="fn"><a name="modify-5"></a>bool QDSData::modify ( const <a href="qstring.html">QString</a> &amp; <i>data</i>, const <a href="qmimetype.html">QMimeType</a> &amp; <i>type</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Replaces the data with <i>data</i> of <i>type</i>.</p>
-<h3 class="fn"><a name="modify-6"></a>bool QDSData::modify ( <a href="./qfile.html">QFile</a> &amp; <i>data</i>, const <a href="qmimetype.html">QMimeType</a> &amp; <i>type</i> )</h3>
+<h3 class="fn"><a name="modify-6"></a>bool QDSData::modify ( <a href="qfile.html">QFile</a> &amp; <i>data</i>, const <a href="qmimetype.html">QMimeType</a> &amp; <i>type</i> )</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Replaces the data with <i>data</i> of <i>type</i>.</p>
 <h3 class="fn"><a name="remove"></a>bool QDSData::remove ()</h3>
@@ -95,11 +95,11 @@
 <p>Adds the data to the persistent data store, and returns a key for accessing the data in the future.</p>
 <p>If the data was incorrectly stored, the returned key will be null.</p>
 <p>The persistent data is reference counted so all applications who wish to access the data from the data store should call this method.</p>
-<h3 class="fn"><a name="toIODevice"></a><a href="./qiodevice.html">QIODevice</a> * QDSData::toIODevice () const</h3>
-<p>Provides direct read-only access to the data using the <a href="./qiodevice.html">QIODevice</a> interface. The caller owns the returned <a href="./qiodevice.html">QIODevice</a> pointer, and must delete it when finished.</p>
-<p>The pointer can be used to access the data using a <a href="./qdatastream.html">QDataStream</a>.</p>
-<h3 class="fn"><a name="toString"></a><a href="./qstring.html">QString</a> QDSData::toString () const</h3>
-<p>Returns the data as a <a href="./qstring.html">QString</a>.</p>
+<h3 class="fn"><a name="toIODevice"></a><a href="qiodevice.html">QIODevice</a> * QDSData::toIODevice () const</h3>
+<p>Provides direct read-only access to the data using the <a href="qiodevice.html">QIODevice</a> interface. The caller owns the returned <a href="qiodevice.html">QIODevice</a> pointer, and must delete it when finished.</p>
+<p>The pointer can be used to access the data using a <a href="qdatastream.html">QDataStream</a>.</p>
+<h3 class="fn"><a name="toString"></a><a href="qstring.html">QString</a> QDSData::toString () const</h3>
+<p>Returns the data as a <a href="qstring.html">QString</a>.</p>
 <h3 class="fn"><a name="type"></a><a href="qmimetype.html">QMimeType</a> QDSData::type () const</h3>
 <p>Returns the data type.</p>
 <h3 class="fn"><a name="operator-not-eq"></a>bool QDSData::operator!= ( const QDSData &amp; <i>other</i> ) const</h3>

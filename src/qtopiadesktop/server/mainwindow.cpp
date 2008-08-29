@@ -187,6 +187,8 @@ void MainWindow::setupMenuAndToolbars()
     //}
     QAction *syncAllAction = toolsMenu->addAction( QIcon(":image/syncall"),
             tr("Sync &All"), this, SIGNAL(syncall()) );
+    QAction *slowSyncAction = toolsMenu->addAction( QIcon(":image/syncall"),
+            tr("Sync &All (slow)"), this, SIGNAL(syncallslow()) );
     toolsMenu->addAction( tr("&Backup/Restore"), this, SIGNAL(backuprestore()) );
     toolsMenu->addSeparator();
     toolsMenu->addAction( tr("&Settings"), this, SIGNAL(settings()),

@@ -30,7 +30,7 @@
 </li>
 </ul>
 <p>The info screen shall display information about the selected image. For every information item, a complex read-only form can now be implemented to display the items label and value. But luckily Qt has a more flexible and efficient way. The information will be presented using a html table where each row will be an information item.</p>
-<p>In a new infoscreen.h file, the class InfoScreen is declared. It derives this time from a <a href="./qtextedit.html">QTextEdit</a>. The <tt>createActions()</tt>, <tt>createMenu()</tt> and <tt>setupUi()</tt> methods are added and the IViewer is passed as parent to the constructor. In addition, a <tt>setImage(const QContent&amp; content)</tt> method is created in the class.</p>
+<p>In a new infoscreen.h file, the class InfoScreen is declared. It derives this time from a <a href="qtextedit.html">QTextEdit</a>. The <tt>createActions()</tt>, <tt>createMenu()</tt> and <tt>setupUi()</tt> methods are added and the IViewer is passed as parent to the constructor. In addition, a <tt>setImage(const QContent&amp; content)</tt> method is created in the class.</p>
 <p>File: infoscreen.h</p>
 <pre>    #ifndef INFOSCREEN_H
     #define INFOSCREEN_H
@@ -57,7 +57,7 @@
     };
     #endif</pre>
 <p>The infoscreen.cpp file will contains the skeleton from the header. The <tt>setupUi()</tt>, <tt>createActions()</tt>, and <tt>createMenu()</tt> methods must be called in the constructor.</p>
-<p>The <a href="./qtextedit.html">QTextEdit</a> is set to read only in the <tt>setupUi()</tt> method.</p>
+<p>The <a href="qtextedit.html">QTextEdit</a> is set to read only in the <tt>setupUi()</tt> method.</p>
 <pre>    void InfoScreen::setupUi()
     {
         setReadOnly(true);

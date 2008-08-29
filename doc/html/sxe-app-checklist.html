@@ -22,12 +22,12 @@
 <li>To correctly key an application, a couple of SXE related macros need to be used. The simplest and preferred way to do this is to use the <a href="qtopiaapplication.html#QTOPIA_MAIN">QTOPIA_MAIN</a> macro which implicitly calls the SXE macros:<pre>    QTOPIA_ADD_APPLICATION(QTOPIA_TARGET,Example)
     QTOPIA_MAIN</pre>
 <p>otherwise an application can explicitly use the <a href="sxeprograminfo.html#QSXE_APP_KEY">QSXE_APP_KEY</a> and <a href="sxeprograminfo.html#QSXE_SET_APP_KEY">QSXE_SET_APP_KEY</a>() macros as shown below:</p>
-<pre><span class="comment">    //</span> make will fail without this!
+<pre><span class="comment">    // make will fail without this</span>!
     QSXE_APP_KEY
 
     int MAIN_FUNC( int argc, char **argv )
     {
-        <span class="comment">//</span> This is required to load the SXE key into memory
+        <span class="comment">// This is required to load the SXE key into memory</span>
         QSXE_SET_APP_KEY(argv[0]);
 
         QtopiaApplication a( argc, argv );
@@ -50,7 +50,7 @@
 <p>There are a number of caveats to be aware of when installing qpk packages on an SXE configured Qtopia.</p>
 <ul>
 <li>SXE is only supports the download and running of games, packages are limited to the set of functionality outlined in <a href="sxe-requirements.html">SXE - Aims and Limitations</a>.</li>
-<li>Packages have write access to their own sandbox directory and read-only access to system libraries and other miscellaneous files. An exception to this is the bin directory inside the sandbox which is read-only from the package's point of view. Packages do not have access to the /tmp directory therefore any data or temporary files should be created using <a href="qtopia.html#sandboxDir">Qtopia::sandboxDir</a>() which returns the package's sandbox directory. There may be issues when using classes like QUniqueID and QUniqueIDGenerator which implicitly uses files outside the sandbox. Likewise using it is advised that <a href="./qtemporaryfile.html">QTemporaryFile</a> not be used.</li>
+<li>Packages have write access to their own sandbox directory and read-only access to system libraries and other miscellaneous files. An exception to this is the bin directory inside the sandbox which is read-only from the package's point of view. Packages do not have access to the /tmp directory therefore any data or temporary files should be created using <a href="qtopia.html#sandboxDir">Qtopia::sandboxDir</a>() which returns the package's sandbox directory. There may be issues when using classes like QUniqueID and QUniqueIDGenerator which implicitly uses files outside the sandbox. Likewise using it is advised that <a href="qtemporaryfile.html">QTemporaryFile</a> not be used.</li>
 <li>Settings files will automatically be created for a package in it's own directory, see <a href="sxe-qpk.html#qpk-settings">Qpk Packages</a> for details.</li>
 <li>Packages are not allowed to run scripts.</li>
 <li>Packages created by both non-SXE and SXE configured builds of Qtopia can be installed onto an SXE enabled device, provided the aforementioned <a href="#sxe-requirements">requirements</a> are met.</li>

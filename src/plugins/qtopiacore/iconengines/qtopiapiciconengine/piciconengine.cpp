@@ -34,21 +34,11 @@
 #include <qstringlist.h>
 #include <qiodevice.h>
 
-//#define DEBUG_PIC_ICONENGINE
-
-#if QT_VERSION < 0x040300
-class QtopiaPicIconPlugin : public QIconEnginePlugin
-#else
 class QtopiaPicIconPlugin : public QIconEnginePluginV2
-#endif
 {
 public:
     QStringList keys() const;
-#if QT_VERSION < 0x040300
-    QIconEngine *create(const QString &filename);
-#else
     QIconEngineV2 *create(const QString &filename);
-#endif
 };
 
 QStringList QtopiaPicIconPlugin::keys() const
@@ -56,11 +46,7 @@ QStringList QtopiaPicIconPlugin::keys() const
     return QStringList() << "pic";
 }
 
-#if QT_VERSION < 0x040300
-QIconEngine *QtopiaPicIconPlugin::create(const QString &file)
-#else
 QIconEngineV2 *QtopiaPicIconPlugin::create(const QString &file)
-#endif
 {
     QtopiaPicIconEngine *engine = new QtopiaPicIconEngine();
     engine->addFile(file, QSize(), QIcon::Normal, QIcon::On);
@@ -111,7 +97,6 @@ QtopiaPicIconEngine::QtopiaPicIconEngine()
 {
 }
 
-#if QT_VERSION >= 0x040300
 QtopiaPicIconEngine::QtopiaPicIconEngine(const QtopiaPicIconEngine &other)
     : QIconEngineV2(other), d(new QtopiaPicIconEnginePrivate)
 {
@@ -119,7 +104,6 @@ QtopiaPicIconEngine::QtopiaPicIconEngine(const QtopiaPicIconEngine &other)
     if (other.d->pixmaps)
         d->pixmaps = new QMap<QString,QPixmap>(*other.d->pixmaps);
 }
-#endif
 
 QtopiaPicIconEngine::~QtopiaPicIconEngine()
 {
@@ -234,7 +218,6 @@ void QtopiaPicIconEngine::paint(QPainter *painter, const QRect &rect,
     painter->drawPixmap(rect, pixmap(rect.size(), mode, state));
 }
 
-#if QT_VERSION >= 0x040300
 QString QtopiaPicIconEngine::key() const
 {
     return QLatin1String("pic");
@@ -290,4 +273,3 @@ bool QtopiaPicIconEngine::write(QDataStream &out) const
     }
     return true;
 }
-#endif

@@ -88,17 +88,17 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="drawArea"></a>void QWindowDecorationInterface::drawArea ( <a href="qwindowdecorationinterface.html#Area-enum">Area</a> <i>area</i>, <a href="./qpainter.html">QPainter</a> * <i>p</i>, const <a href="qwindowdecorationinterface-windowdata.html">WindowData</a> * <i>wd</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Draw the specified <i>area</i> using <a href="./qpainter.html">QPainter</a> <i>p</i> for the window defined by <i>wd</i>.</p>
-<h3 class="fn"><a name="drawButton"></a>void QWindowDecorationInterface::drawButton ( <a href="qwindowdecorationinterface.html#Button-enum">Button</a> <i>button</i>, <a href="./qpainter.html">QPainter</a> * <i>painter</i>, const <a href="qwindowdecorationinterface-windowdata.html">WindowData</a> * <i>wd</i>, int <i>x</i>, int <i>y</i>, int <i>w</i>, int <i>h</i>, <a href="./qdecoration.html#decorationstate-enum">QDecoration::DecorationState</a> <i>state</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Draw <i>button</i> with <a href="./qpainter.html">QPainter</a> <i>painter</i> for the window defined by <i>wd</i> within the bounds supplied by <i>x</i>, <i>y</i>, <i>w</i>, <i>h</i> in the specified <i>state</i>.</p>
-<h3 class="fn"><a name="icon"></a><a href="./qpixmap.html">QPixmap</a> QWindowDecorationInterface::icon () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="drawArea"></a>void QWindowDecorationInterface::drawArea ( <a href="qwindowdecorationinterface.html#Area-enum">Area</a> <i>area</i>, <a href="qpainter.html">QPainter</a> * <i>p</i>, const <a href="qwindowdecorationinterface-windowdata.html">WindowData</a> * <i>wd</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Draw the specified <i>area</i> using <a href="qpainter.html">QPainter</a> <i>p</i> for the window defined by <i>wd</i>.</p>
+<h3 class="fn"><a name="drawButton"></a>void QWindowDecorationInterface::drawButton ( <a href="qwindowdecorationinterface.html#Button-enum">Button</a> <i>button</i>, <a href="qpainter.html">QPainter</a> * <i>painter</i>, const <a href="qwindowdecorationinterface-windowdata.html">WindowData</a> * <i>wd</i>, int <i>x</i>, int <i>y</i>, int <i>w</i>, int <i>h</i>, <a href="qdecoration.html#DecorationState-enum">QDecoration::DecorationState</a> <i>state</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Draw <i>button</i> with <a href="qpainter.html">QPainter</a> <i>painter</i> for the window defined by <i>wd</i> within the bounds supplied by <i>x</i>, <i>y</i>, <i>w</i>, <i>h</i> in the specified <i>state</i>.</p>
+<h3 class="fn"><a name="icon"></a><a href="qpixmap.html">QPixmap</a> QWindowDecorationInterface::icon () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the icon of the decoration. This may be displayed in the appearance settings dialog.</p>
-<h3 class="fn"><a name="mask"></a><a href="./qregion.html">QRegion</a> QWindowDecorationInterface::mask ( const <a href="qwindowdecorationinterface-windowdata.html">WindowData</a> * <i>wd</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
-<p>Returns the mask of the decoration including all borders and the title for the window defined by <i>wd</i> as a <a href="./qregion.html">QRegion</a>. The window decorations do not necessarily need to be rectangular, however the title bar must be rectangular and must be the width of the window. This ensures the title is drawn correctly for maximized windows.</p>
+<h3 class="fn"><a name="mask"></a><a href="qregion.html">QRegion</a> QWindowDecorationInterface::mask ( const <a href="qwindowdecorationinterface-windowdata.html">WindowData</a> * <i>wd</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
+<p>Returns the mask of the decoration including all borders and the title for the window defined by <i>wd</i> as a <a href="qregion.html">QRegion</a>. The window decorations do not necessarily need to be rectangular, however the title bar must be rectangular and must be the width of the window. This ensures the title is drawn correctly for maximized windows.</p>
 <h3 class="fn"><a name="metric"></a>int QWindowDecorationInterface::metric ( <a href="qwindowdecorationinterface.html#Metric-enum">Metric</a> <i>metric</i>, const <a href="qwindowdecorationinterface-windowdata.html">WindowData</a> * <i>wd</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Returns the <i>metric</i> for the window defined by <i>wd</i>.</p>
-<h3 class="fn"><a name="name"></a><a href="./qstring.html">QString</a> QWindowDecorationInterface::name () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QWindowDecorationInterface::name () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns the name of the decoration. This will be displayed in the appearance settings dialog.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

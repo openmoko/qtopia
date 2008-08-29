@@ -52,14 +52,14 @@
 <p>Constructs a new invalid bluetooth address.</p>
 <h3 class="fn"><a name="QBluetoothAddress-2"></a>QBluetoothAddress::QBluetoothAddress ( const QBluetoothAddress &amp; <i>other</i> )</h3>
 <p>Constructs a copy of a bluetooth address from <i>other</i>.</p>
-<h3 class="fn"><a name="QBluetoothAddress-3"></a>QBluetoothAddress::QBluetoothAddress ( const <a href="./qstring.html">QString</a> &amp; <i>addr</i> )</h3>
+<h3 class="fn"><a name="QBluetoothAddress-3"></a>QBluetoothAddress::QBluetoothAddress ( const <a href="qstring.html">QString</a> &amp; <i>addr</i> )</h3>
 <p>Constructs a bluetooth address based on string representation given by <i>addr</i>. The string should be in the format of XX:XX:XX:XX:XX:XX where XX represents a hexadecimal number. If the string is in an invalid format, an invalid bluetooth address is constructed.</p>
 <h3 class="fn"><a name="dtor.QBluetoothAddress"></a>QBluetoothAddress::~QBluetoothAddress ()</h3>
 <p>Destroys a Bluetooth address.</p>
 <h3 class="fn"><a name="isValid"></a>bool QBluetoothAddress::isValid () const</h3>
 <p>Returns whether the address is valid.</p>
-<h3 class="fn"><a name="toString"></a><a href="./qstring.html">QString</a> QBluetoothAddress::toString () const</h3>
-<p>Converts the Bluetooth address into a <a href="./qstring.html">QString</a>. The format will be of the form XX:XX:XX:XX:XX:XX where XX is a hexadecimal number. If the address is invalid, a null string is returned.</p>
+<h3 class="fn"><a name="toString"></a><a href="qstring.html">QString</a> QBluetoothAddress::toString () const</h3>
+<p>Converts the Bluetooth address into a <a href="qstring.html">QString</a>. The format will be of the form XX:XX:XX:XX:XX:XX where XX is a hexadecimal number. If the address is invalid, a null string is returned.</p>
 <h3 class="fn"><a name="operator-not-eq"></a>bool QBluetoothAddress::operator!= ( const QBluetoothAddress &amp; <i>other</i> ) const</h3>
 <p>Compares the current address to <i>other</i>. Returns true if the addresses are not equal, false if they are.</p>
 <h3 class="fn"><a name="operator-eq"></a>QBluetoothAddress &amp; QBluetoothAddress::operator= ( const QBluetoothAddress &amp; <i>other</i> )</h3>

@@ -1365,8 +1365,8 @@ static void outputHeaderPart(QDataStream& out, const QByteArray& text, int* line
                 // We need to insert some artifical whitespace
                 out << DataString('\t');
             } else {
-                // Append the breaking whitespace
-                out << DataString(text[lastIndex]);
+                // Append the breaking whitespace (ensure it does not get CRLF-ified)
+                out << DataString(QByteArray(1, text[lastIndex]));
                 ++lastIndex;
             }
 

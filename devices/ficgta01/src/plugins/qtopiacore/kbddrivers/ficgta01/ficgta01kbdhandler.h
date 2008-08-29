@@ -35,35 +35,66 @@
 #ifdef Q_WS_QWS
 #include <QWSKeyboardHandler>
 
-
 class QSocketNotifier;
+
+
+/**
+ * Start of a generic implementation to deal with the linux input event
+ * handling. Open devices by physical address and later by name, product id
+ * and vendor id
+ */
+class FicLinuxInputEventHandler : public QObject
+{
+    Q_OBJECT
+
+public:
+    FicLinuxInputEventHandler(QObject* parent);
+    bool openByPhysicalBus(const QByteArray&);
+    bool openByName(const QByteArray&);
+    bool openById(const struct input_id&);
+
+Q_SIGNALS:
+    void inputEvent(struct input_event&);
+
+private slots:
+    void readData();
+
+private:
+    bool internalOpen(unsigned request, int length, const QByteArray&, struct input_id const * = 0);
+
+private:
+    int m_fd;
+    QSocketNotifier* m_notifier;
+};
+
+
+
 class Ficgta01KbdHandler : public QObject, public QWSKeyboardHandler
 {
     Q_OBJECT
+
 public:
     Ficgta01KbdHandler();
-//    ~Ficgta01KbdHandler();
+    ~Ficgta01KbdHandler();
 
 private:
     QSocketNotifier *auxNotify;
     QSocketNotifier *powerNotify;
-    int  kbdFDpower;
-    int  kbdFDaux;
     bool shift;
     QTimer *keytimer;
 
     QtopiaIpcAdaptor *mgr;
     QValueSpaceItem *m_headset;
-
-private Q_SLOTS:
-    void readAuxKbdData();
-    void readPowerKbdData();
+     
+    FicLinuxInputEventHandler *auxHandler;
+    FicLinuxInputEventHandler *powerHandler;
+     
+    private slots:
+    void inputEvent(struct input_event&);
     void timerUpdate();
-
 };
 #endif
 
-
 #endif // QT_QWS_FICGTA01
 
-#endif // FICGTA01KBDHANDLER_H
+#endif

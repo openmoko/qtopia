@@ -36,6 +36,7 @@ class LidsUtils
 {
     public:
         static bool isLidsEnabled();
+        static bool maxRulesExceeded();
 };
 
 namespace ScriptRunner

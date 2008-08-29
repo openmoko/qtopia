@@ -270,7 +270,7 @@ void WordPredict::addLetter(char l)
 {
     m_points << m_layout[(int)l].center();
     m_mPoints << Perfect;
-    reduction->addPossibleCharacters(QByteArray(1,l));
+    reduction->addPossibleCharacters(QByteArray(1, l));
     m_latestDfp[(int)l] = 0;
 
     updateWords();

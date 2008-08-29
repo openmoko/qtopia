@@ -20,7 +20,7 @@
 <li><a href="content-filtering-main-cpp.html">content/filtering/main.cpp</a></li>
 <li><a href="content-filtering-filtering-pro.html">content/filtering/filtering.pro</a></li>
 </ul>
-<p>The Content Filtering tutorial demonstrates some of the different ways the filtering criteria can be applied to a <a href="qcontentset.html">QContentSet</a>. It also demonstrates using a <a href="qcontentsetmodel.html">QContentSetModel</a> to display the contents of a <a href="qcontentset.html">QContentSet</a> in a <a href="./qlistview.html">QListView</a> and handling key events from a <a href="qsoftmenubar.html">QSoftMenuBar</a>.</p>
+<p>The Content Filtering tutorial demonstrates some of the different ways the filtering criteria can be applied to a <a href="qcontentset.html">QContentSet</a>. It also demonstrates using a <a href="qcontentsetmodel.html">QContentSetModel</a> to display the contents of a <a href="qcontentset.html">QContentSet</a> in a <a href="qlistview.html">QListView</a> and handling key events from a <a href="qsoftmenubar.html">QSoftMenuBar</a>.</p>
 <p align="center"><img src="images/tut-contentfiltering.png" /></p><p>The Content Filtering application displays a series of filtered views of content in the Document System. Users navigate through the views using the next label on the soft menu bar. The views are in order; all applications, applications in the <tt>Games</tt> category, documents with either the <tt>image/jpeg</tt> or <tt>image/png</tt> MIME type, and applications in the <tt>Games</tt> category and <tt>image/jpeg</tt> or <tt>image/png</tt> documents.</p>
 <a name="filterdemo-class-definition"></a>
 <h2>FilterDemo Class Definition</h2>
@@ -39,17 +39,17 @@
         int index;
         QContentSet contentSet;
     };</pre>
-<p>The <tt>FilterDemo</tt> class inherits from the only widget in the application; a <a href="./qlistview.html">QListView</a>. It has a single event handler <tt>keyPressEvent()</tt> for handling the soft menu bar key presses, and another method <tt>nextFilter()</tt> for iterating through the different filters.</p>
+<p>The <tt>FilterDemo</tt> class inherits from the only widget in the application; a <a href="qlistview.html">QListView</a>. It has a single event handler <tt>keyPressEvent()</tt> for handling the soft menu bar key presses, and another method <tt>nextFilter()</tt> for iterating through the different filters.</p>
 <a name="filterdemo-class-implementation"></a>
 <h2>FilterDemo Class Implementation</h2>
-<p>The FilterDemo constructor begins by initializing the <a href="./qlistview.html">QListView</a>, the only thing we want to do here is set the horizontal scroll bar policy so the horizontal scroll bar is never shown.</p>
+<p>The FilterDemo constructor begins by initializing the <a href="qlistview.html">QListView</a>, the only thing we want to do here is set the horizontal scroll bar policy so the horizontal scroll bar is never shown.</p>
 <pre>    FilterDemo::FilterDemo( QWidget *parent, Qt::WindowFlags flags )
         : QListView( parent )
         , index( 0 )
     {
         setWindowFlags( flags );
         setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );</pre>
-<p>In order to display the <a href="qcontentset.html">QContentSet</a> in the <a href="./qlistview.html">QListView</a> we need to construct a new <a href="qcontentsetmodel.html">QContentSetModel</a>. There's no setup required so we simply create it and set it as the model for the <a href="./qlistview.html">QListView</a>.</p>
+<p>In order to display the <a href="qcontentset.html">QContentSet</a> in the <a href="qlistview.html">QListView</a> we need to construct a new <a href="qcontentsetmodel.html">QContentSetModel</a>. There's no setup required so we simply create it and set it as the model for the <a href="qlistview.html">QListView</a>.</p>
 <pre>        setModel( new QContentSetModel( &amp;contentSet, this ) );</pre>
 <p>Next we want to initialize the <a href="qsoftmenubar.html">QSoftMenuBar</a>. We'll remove the label on the Select button as there is no select action and change the label on the Back button to Next.</p>
 <pre>        QSoftMenuBar::menuFor( this );
@@ -58,7 +58,7 @@
 <p>Finally we'll display the first filtered view.</p>
 <pre>        nextFilter();
     }</pre>
-<p>The <tt>keyPressEvent()</tt> event handler processes the key press events for the FilterDemo widget including those from the <a href="qsoftmenubar.html">QSoftMenuBar</a>. When the Back key is pressed it will call the <tt>nextFilter()</tt> method and accept the key event. If any other key is pressed or <tt>nextFilter()</tt> returns false it will let <a href="./qlistview.html">QListView</a> handle the event, if handled by <a href="./qlistview.html">QListView</a> the Back key will close the application.</p>
+<p>The <tt>keyPressEvent()</tt> event handler processes the key press events for the FilterDemo widget including those from the <a href="qsoftmenubar.html">QSoftMenuBar</a>. When the Back key is pressed it will call the <tt>nextFilter()</tt> method and accept the key event. If any other key is pressed or <tt>nextFilter()</tt> returns false it will let <a href="qlistview.html">QListView</a> handle the event, if handled by <a href="qlistview.html">QListView</a> the Back key will close the application.</p>
 <pre>    void FilterDemo::keyPressEvent( QKeyEvent *event )
     {
         if ( event-&gt;key() == Qt::Key_Back &amp;&amp; nextFilter() ) {

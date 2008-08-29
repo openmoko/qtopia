@@ -55,14 +55,10 @@ private slots:
 
     void insertContent( int setId, int start, int end );
 
-    void contentChanged( int setId );
     void contentChanged( int setId, int start, int end );
-    void contentChanged( int setId, const QContentIdList &contentIds, QContent::ChangeType type );
 
     void updateStarted( int setId );
     void updateFinished( int setId );
-
-    void reset( int setId );
 
 private:
     QMap< int, QContentStoreServerSet * > m_contentSets;

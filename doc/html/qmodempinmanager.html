@@ -27,7 +27,7 @@
 <ul>
 <li><div class="fn"/>1 public function inherited from <a href="qcomminterface.html#public-functions">QCommInterface</a></li>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -38,19 +38,19 @@
 </ul>
 <ul>
 <li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>7 public slots inherited from <a href="qpinmanager.html#public-slots">QPinManager</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>4 signals inherited from <a href="qpinmanager.html#signals">QPinManager</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -73,13 +73,13 @@
 <p>Destroy this modem pin manager.</p>
 <h3 class="fn"><a name="emptyPinIsReady"></a>bool QModemPinManager::emptyPinIsReady () const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Returns true if an empty string in response to <tt>AT+CPIN?</tt> should be treated the same as <tt>READY</tt>; false otherwise. This is provided to work around bugs on some modems. Such modems should inherit <a href="qmodempinmanager.html">QModemPinManager</a> and override this method to return true. The default return value is false.</p>
-<h3 class="fn"><a name="needPin"></a>void QModemPinManager::needPin ( const <a href="./qstring.html">QString</a> &amp; <i>type</i>, <a href="./qobject.html">QObject</a> * <i>target</i>, const char * <i>pinSlot</i>, const char * <i>cancelSlot</i> )</h3>
-<p>Ask for a specific <i>type</i> of pin and deliver it to <i>pinSlot</i> on <i>target</i>. The slot takes a single <a href="./qstring.html">QString</a> argument for the pin. If the user cancels the request, then invoke <i>cancelSlot</i> on <i>target</i>.</p>
+<h3 class="fn"><a name="needPin"></a>void QModemPinManager::needPin ( const <a href="qstring.html">QString</a> &amp; <i>type</i>, <a href="qobject.html">QObject</a> * <i>target</i>, const char * <i>pinSlot</i>, const char * <i>cancelSlot</i> )</h3>
+<p>Ask for a specific <i>type</i> of pin and deliver it to <i>pinSlot</i> on <i>target</i>. The slot takes a single <a href="qstring.html">QString</a> argument for the pin. If the user cancels the request, then invoke <i>cancelSlot</i> on <i>target</i>.</p>
 <p>This method is typically used with <tt>AT+CPWD</tt>, <tt>AT+CLCK</tt>, and commands that require <tt>SIM PIN2</tt>.</p>
 <p>If <i>type</i> indicates a puk (e.g&#x2e; <tt>SIM PUK2</tt>), then this method will ask for both a puk and a new pin and then deliver the new pin to <i>pinSlot</i> once the puk has been verified. If repeated attempts to enter a puk fail, then <i>cancelSlot</i> will be notified.</p>
 <h3 class="fn"><a name="pinMaximum"></a>int QModemPinManager::pinMaximum () const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Returns the maximum size of a pin. The default implementation returns 32.</p>
-<h3 class="fn"><a name="pinTypeToCode"></a><a href="./qstring.html">QString</a> QModemPinManager::pinTypeToCode ( const <a href="./qstring.html">QString</a> &amp; <i>type</i> ) const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="pinTypeToCode"></a><a href="qstring.html">QString</a> QModemPinManager::pinTypeToCode ( const <a href="qstring.html">QString</a> &amp; <i>type</i> ) const&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Convert a pin <i>type</i> such as <tt>SIM PIN</tt>, <tt>PH-SIM PIN</tt>, etc, into the two-letter code to be used with <tt>AT+CPWD</tt>. Returns an empty string if <i>type</i> is not recognized. This method can be overridden by modems that have more pin types than those defined by 3GPP TS 27.007.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

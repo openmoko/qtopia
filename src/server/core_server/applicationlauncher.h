@@ -190,6 +190,8 @@ public:
     virtual QString name() {
 	return QString("SimpleExeApplicationLauncher");
     }
+protected:
+    void setupPackageLaunch(const QString &exec, QProcess *proc);
 
 private:
     static QStringList applicationExecutable(const QString &app);
@@ -199,7 +201,7 @@ private:
 
 #ifndef QT_NO_SXE
 class SandboxedExeApplicationLauncherPrivate;
-class SandboxedExeApplicationLauncher: public ExeApplicationLauncher
+class SandboxedExeApplicationLauncher: public SimpleExeApplicationLauncher
 {
 Q_OBJECT
 public:
@@ -212,7 +214,7 @@ public:
 	return QString("SandboxedExeApplicationLauncher");
     }
 private slots:
-    void init(); 
+    void init();
 private:
     static QStringList applicationExecutable(const QString &app);
 
@@ -247,7 +249,7 @@ private slots:
     void appExited(int);
     void appError(QProcess::ProcessError error);
 
-private: 
+private:
     QStringList applicationExecutable(const QString &app);
     ConsoleApplicationLauncherPrivate *d;
 };

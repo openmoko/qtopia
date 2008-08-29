@@ -28,7 +28,7 @@
 <li><div class="fn"/>1 public function inherited from <a href="qphonebook.html#public-functions">QPhoneBook</a></li>
 <li><div class="fn"/>1 public function inherited from <a href="qcomminterface.html#public-functions">QCommInterface</a></li>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -40,7 +40,7 @@
 </ul>
 <ul>
 <li><div class="fn"/>10 public slots inherited from <a href="qphonebook.html#public-slots">QPhoneBook</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -50,17 +50,17 @@
 </ul>
 <ul>
 <li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>5 signals inherited from <a href="qphonebook.html#signals">QPhoneBook</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -85,12 +85,12 @@
 <h3 class="fn"><a name="phoneBooksReady"></a>void QModemPhoneBook::phoneBooksReady ()&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Indicate that the modem is now ready to accept phone book related commands. See <a href="qmodemphonebook.html#hasModemPhoneBookCache">hasModemPhoneBookCache</a>() for more information.</p>
 <p>See also <a href="qmodemphonebook.html#hasModemPhoneBookCache">hasModemPhoneBookCache</a>().</p>
-<h3 class="fn"><a name="preload"></a>void QModemPhoneBook::preload ( const <a href="./qstring.html">QString</a> &amp; <i>store</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="preload"></a>void QModemPhoneBook::preload ( const <a href="qstring.html">QString</a> &amp; <i>store</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Attempt to preload the contents of <i>store</i>, in anticipation that it will be needed sometime in the future. This is typically used for the &quot;SM&quot; store so that the contacts list appears to load quickly for the user.</p>
-<h3 class="fn"><a name="stringCodec"></a><a href="./qtextcodec.html">QTextCodec</a> * QModemPhoneBook::stringCodec () const</h3>
+<h3 class="fn"><a name="stringCodec"></a><a href="qtextcodec.html">QTextCodec</a> * QModemPhoneBook::stringCodec () const</h3>
 <p>Returns the codec being used by the phone book subsystem to decode strings from the modem. This may be useful in other interfaces that need to decode strings. The value is based on the response to the <tt>AT+CSCS?</tt> command.</p>
 <p>See also <a href="qmodemphonebook.html#updateCodec">updateCodec</a>().</p>
-<h3 class="fn"><a name="updateCodec"></a>void QModemPhoneBook::updateCodec ( const <a href="./qstring.html">QString</a> &amp; <i>gsmCharset</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="updateCodec"></a>void QModemPhoneBook::updateCodec ( const <a href="qstring.html">QString</a> &amp; <i>gsmCharset</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Inform the modem SIM phone book handler that the <tt>AT+CSCS</tt> character set has been changed to <i>gsmCharset</i>.</p>
 <p>See also <a href="qmodemphonebook.html#stringCodec">stringCodec</a>().</p>
 <p /><address><hr /><div align="center">

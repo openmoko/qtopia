@@ -45,14 +45,10 @@ signals:
 
     void insertContent( int setId, int start, int end );
 
-    void contentChanged( int setId );
     void contentChanged( int setId, int start, int end );
-    void contentChanged( int setId, const QContentIdList &contentIds, QContent::ChangeType type );
 
     void updateStarted( int setId );
     void updateFinished( int setId );
-
-    void reset( int setId );
 
 private slots:
     void contentAboutToBeRemoved( int start, int end );
@@ -61,14 +57,10 @@ private slots:
     void contentAboutToBeInserted( int start, int end );
     void contentInserted();
 
-    void contentChanged();
     void contentChanged( int start, int end );
-    void contentChanged( const QContentIdList &contentIds, QContent::ChangeType type );
 
     void updateStarted();
     void updateFinished();
-
-    void reset();
 
 private:
     int m_setId;
@@ -95,20 +87,14 @@ QContentStoreServerSet::QContentStoreServerSet( int setId, QContentSetEngine *se
     connect( set, SIGNAL(contentRemoved()), this, SLOT(contentRemoved()) );
     connect( set, SIGNAL(contentInserted()), this, SLOT(contentInserted()) );
     connect( set, SIGNAL(contentChanged(int,int)), this, SLOT(contentChanged(int,int)) );
-    connect( set, SIGNAL(contentChanged(QContentIdList,QContent::ChangeType)), this, SLOT(contentChanged(QContentIdList,QContent::ChangeType)) );
-    connect( set, SIGNAL(contentChanged()), this, SLOT(contentChanged()) );
     connect( set, SIGNAL(updateStarted()), this, SLOT(updateStarted()) );
-    connect( set, SIGNAL(updateFinished()), this, SLOT(updateFinished()) ); 
-    connect( set, SIGNAL(reset()), this, SLOT(reset()) );
+    connect( set, SIGNAL(updateFinished()), this, SLOT(updateFinished()) );
 
     connect( this, SIGNAL(removeContent(int,int,int)), parent, SLOT(removeContent(int,int,int)) );
     connect( this, SIGNAL(insertContent(int,int,int)), parent, SLOT(insertContent(int,int,int)) );
-    connect( this, SIGNAL(contentChanged(int)), parent, SLOT(contentChanged(int)) );
     connect( this, SIGNAL(contentChanged(int,int,int)), parent, SLOT(contentChanged(int,int,int)) );
-    connect( this, SIGNAL(contentChanged(int,QContentIdList,QContent::ChangeType)), parent, SLOT(contentChanged(int,QContentIdList,QContent::ChangeType)) );
     connect( this, SIGNAL(updateStarted(int)), parent, SLOT(updateStarted(int)) );
     connect( this, SIGNAL(updateFinished(int)), parent, SLOT(updateFinished(int)) );
-    connect( this, SIGNAL(reset(int)), parent, SLOT(reset(int)) );
 }
 
 int QContentStoreServerSet::setId() const
@@ -158,19 +144,9 @@ void QContentStoreServerSet::contentInserted()
     emit insertContent( m_setId, m_pendingStart, m_pendingEnd );
 }
 
-void QContentStoreServerSet::contentChanged()
-{
-    emit contentChanged( m_setId );
-}
-
 void QContentStoreServerSet::contentChanged( int start, int end )
 {
     emit contentChanged( m_setId, start, end );
-}
-
-void QContentStoreServerSet::contentChanged( const QContentIdList &contentIds, QContent::ChangeType type )
-{
-    emit contentChanged( m_setId, contentIds, type );
 }
 
 void QContentStoreServerSet::updateStarted()
@@ -181,11 +157,6 @@ void QContentStoreServerSet::updateStarted()
 void QContentStoreServerSet::updateFinished()
 {
     emit updateFinished( m_setId );
-}
-
-void QContentStoreServerSet::reset()
-{
-    emit reset( m_setId );
 }
 
 QContentStoreServer::QContentStoreServer( QObject *parent )
@@ -366,18 +337,18 @@ QDocumentServerMessage QContentStoreServer::invokeMethod( const QDocumentServerM
         return message.createReply( QVariant::fromValue( QContentStore::instance()->contentCount(
                 qvariant_cast< QContentFilter >( arguments[ 0 ] ) ) ) );
     }
-    else if( signature == "createContentSet(QContentSet::UpdateMode)" )
+    else if( signature == "createContentSet(QContentFilter,QContentSortCriteria,QContentSet::UpdateMode)" )
     {
-        Q_ASSERT( arguments.count() == 1 );
+        Q_ASSERT( arguments.count() == 3 );
 
         static int setIds = 0;
 
         int setId = setIds++;
 
         QContentSetEngine *contentSet = QContentStore::instance()->contentSet(
-                QContentFilter(),
-                QContentSortCriteria(),
-                qvariant_cast< QContentSet::UpdateMode >( arguments[ 0 ] ) );
+                qvariant_cast<QContentFilter>(arguments[0]),
+                qvariant_cast<QContentSortCriteria>(arguments[1]),
+                qvariant_cast<QContentSet::UpdateMode>(arguments[2]));
 
         if( contentSet )
         {
@@ -586,6 +557,24 @@ void QContentStoreServer::invokeSlot( const QDocumentServerMessage &message )
         if( contentSet )
             contentSet->set()->removeContent( qvariant_cast< QContent >( arguments[ 1 ] ) );
     }
+    else if (signature == "clearContentSet(int)")
+    {
+        Q_ASSERT(arguments.count() == 1);
+
+        int setId = arguments[0].toInt();
+
+        if (QContentStoreServerSet *contentSet = m_contentSets.value(setId, 0))
+            contentSet->set()->clear();
+    }
+    else if (signature == "commitContentSet(int)" )
+    {
+        Q_ASSERT(arguments.count() == 1);
+
+        int setId = arguments[0].toInt();
+
+        if (QContentStoreServerSet *contentSet = m_contentSets.value(setId, 0))
+            contentSet->set()->commitChanges();
+    }
     else if( signature == "batchCommitContent(QContentList)" )
     {
         Q_ASSERT( arguments.count() == 1 );
@@ -635,20 +624,9 @@ void QContentStoreServer::insertContent( int setId, int start, int end )
     emitSignalWithArgumentList( "insertContentIntoSet(int,int,int)", QVariantList() << setId << start << end );
 }
 
-void QContentStoreServer::contentChanged( int setId )
-{
-    emitSignalWithArgumentList( "contentSetChanged(int)", QVariantList() << setId );
-}
-
 void QContentStoreServer::contentChanged( int setId, int start, int end )
 {
     emitSignalWithArgumentList( "contentSetChanged(int,int,int)", QVariantList() << setId << start << end );
-}
-
-void QContentStoreServer::contentChanged( int setId, const QContentIdList &contentIds, QContent::ChangeType type )
-{
-    emitSignalWithArgumentList( "contentSetChanged(int,QContentIdList,QContent::ChangeType)",
-                                QVariantList() << setId << QVariant::fromValue( contentIds ) << QVariant::fromValue( type ) );
 }
 
 void QContentStoreServer::updateStarted( int setId )
@@ -661,11 +639,6 @@ void QContentStoreServer::updateFinished( int setId )
 {
     emitSignalWithArgumentList( "contentSetUpdateFinished(int)",
                                 QVariantList() << setId );
-}
-
-void QContentStoreServer::reset( int setId )
-{
-    emitSignalWithArgumentList( "contentSetReset(int)", QVariantList() << setId );
 }
 
 QContentStoreSocketServer::QContentStoreSocketServer( QObject *parent )

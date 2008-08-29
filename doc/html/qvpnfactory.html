@@ -42,15 +42,15 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QVPNFactory"></a>QVPNFactory::QVPNFactory ()</h3>
 <p>Constructs a factory for virtual private network objects.</p>
-<h3 class="fn"><a name="create"></a><a href="qvpnclient.html">QVPNClient</a> * QVPNFactory::create ( <a href="qvpnclient.html#Type-enum">QVPNClient::Type</a> <i>type</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="create"></a><a href="qvpnclient.html">QVPNClient</a> * QVPNFactory::create ( <a href="qvpnclient.html#Type-enum">QVPNClient::Type</a> <i>type</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Requests a new virtual private network of <i>type</i> with the given <i>parent</i>. The returned VPN is a newly created and requires detailed configuration. If <i>type</i> is unknown this function returns a null pointer.</p>
-<h3 class="fn"><a name="instance"></a><a href="qvpnclient.html">QVPNClient</a> * QVPNFactory::instance ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>vpnID</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="instance"></a><a href="qvpnclient.html">QVPNClient</a> * QVPNFactory::instance ( <a href="qtglobal.html#uint-typedef">uint</a> <i>vpnID</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
 <p>Instanciates a <a href="qvpnclient.html">QVPNClient</a> object for the virtual private network specified by <i>vpnID</i> with the given <i>parent</i>. If no VPN with <i>vpnID</i> exists this function returns a null pointer.</p>
-<h3 class="fn"><a name="name"></a><a href="./qstring.html">QString</a> QVPNFactory::name ( <a href="./qtglobal.html#uint-typedef">uint</a> <i>vpnID</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QVPNFactory::name ( <a href="qtglobal.html#uint-typedef">uint</a> <i>vpnID</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the user-visible name of the VPN specified by <i>vpnID</i>. The function returns an empty string if vpnID is not a valid id.</p>
-<h3 class="fn"><a name="types"></a><a href="./qset.html">QSet</a>&lt;<a href="qvpnclient.html#Type-enum">QVPNClient::Type</a>&gt; QVPNFactory::types ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="types"></a><a href="qset.html">QSet</a>&lt;<a href="qvpnclient.html#Type-enum">QVPNClient::Type</a>&gt; QVPNFactory::types ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a list of all possible/supported virtual private network types.</p>
-<h3 class="fn"><a name="vpnIDs"></a><a href="./qset.html">QSet</a>&lt;<a href="./qtglobal.html#uint-typedef">uint</a>&gt; QVPNFactory::vpnIDs ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="vpnIDs"></a><a href="qset.html">QSet</a>&lt;<a href="qtglobal.html#uint-typedef">uint</a>&gt; QVPNFactory::vpnIDs ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a list of all known virtual private networks.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

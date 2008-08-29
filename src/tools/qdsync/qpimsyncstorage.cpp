@@ -252,6 +252,9 @@ void QAppointmentSyncStorage::fetchChangesSince(const QDateTime &since)
     // created
     foreach(const QUniqueId &id, changes) {
         QAppointment a = model->appointment(id);
+        // virtual events are not sent
+        if (a.parentDependency().isNull())
+            continue;
         if (a.isException()) {
             if (!exceptions.contains(a.exceptionParent()))
                 exceptions.insert(a.exceptionParent(), 0);
@@ -277,6 +280,9 @@ void QAppointmentSyncStorage::fetchChangesSince(const QDateTime &since)
     // removed. (removing can lead to modified)
     foreach(const QUniqueId &id, changes) {
         QAppointment a = model->appointment(id);
+        // virtual events are not sent
+        if (a.parentDependency().isNull())
+            continue;
         if (a.isException()) {
             if (!exceptions.contains(a.exceptionParent()))
                 exceptions.insert(a.exceptionParent(), 0);
@@ -291,6 +297,9 @@ void QAppointmentSyncStorage::fetchChangesSince(const QDateTime &since)
     changes = model->modified(since);
     foreach(const QUniqueId &id, changes) {
         QAppointment a = model->appointment(id);
+        // virtual events are not sent
+        if (a.parentDependency().isNull())
+            continue;
         if (a.isException()) {
             if (!exceptions.contains(a.exceptionParent()))
                 exceptions.insert(a.exceptionParent(), 0);

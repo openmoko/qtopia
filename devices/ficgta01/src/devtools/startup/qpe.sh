@@ -62,24 +62,17 @@ while [ -e /tmp/restart-qtopia ]; do
 #    chvol SYSTEM 100
 #    chvol CALL 60
 
-#crappy workaround for some weird suspend bug
-rm /dev/ttySAC0
-mknod /dev/ttySAC0 c 204 64 -m 660
-chgrp dialout /dev/ttySAC0
-
 # power gsm on
-if [ -e /sys/bus/platform/devices/gta01-pm-gsm.0 ]; then
-    echo "1" > /sys/bus/platform/devices/gta01-pm-gsm.0/power_on
-    echo "1" > /sys/bus/platform/devices/gta01-pm-bt.0/power_on
-else
-    echo "1" > /sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
-    echo "1" > /sys/bus/platform/devices/neo1973-pm-bt.0/power_on
+    echo 1 > /sys/bus/platform/devices/neo1973-pm-gsm.0/power_on
+    echo 1 > /sys/bus/platform/devices/neo1973-pm-bt.0/power_on
 
+# fix for gta02 bt
+if [ -e /sys/devices/platform/s3c2440-i2c ]; then
     echo 3300 > /sys/devices/platform/s3c2440-i2c/i2c-adapter/i2c-0/0-0073/voltage_ldo4
     echo 1 > /sys/bus/platform/drivers/neo1973-pm-bt/neo1973-pm-bt.0/reset
     echo 0 > /sys/bus/platform/drivers/neo1973-pm-bt/neo1973-pm-bt.0/reset
-
 fi
+
 
 
 	echo "starting clock" > $HOME/log

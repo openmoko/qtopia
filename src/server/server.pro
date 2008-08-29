@@ -93,7 +93,6 @@ SERVER_HEADERS+=\
     core_server/timeupdateservice.h \
     core_server/qdeviceindicatorsprovider.h \
     infrastructure/signalstrength/defaultsignal.h \
-    core_server/dbmigratetask.h \
     core_server/virtualkeyboardservice.h \
     core_server/windowmanagement.h \
     standarddevicefeatures.h \
@@ -121,7 +120,6 @@ SERVER_SOURCES+=\
     core_server/qdeviceindicatorsprovider.cpp \
     simplebuiltins.cpp \
     processctrl/qdsync/qdsynctask.cpp\
-    core_server/dbmigratetask.cpp \
     infrastructure/signalstrength/defaultsignal.cpp \
     core_server/virtualkeyboardservice.cpp \
     standarddevicefeatures.cpp
@@ -529,8 +527,10 @@ enable_modem {
 
 # This is documented in src/build/doc/src/deviceprofiles.qdoc
 !isEmpty(DEVICE_CONFIG_PATH) {
+    INCLUDEPATH+=$$DEVICE_CONFIG_PATH/server
     SERVER_HEADERS+=$$files($$DEVICE_CONFIG_PATH/server/*.h)
     SERVER_SOURCES+=$$files($$DEVICE_CONFIG_PATH/server/*.cpp)
+    SERVER_FORMS+=$$files($$DEVICE_CONFIG_PATH/server/*.ui)
 }
 
 enable_sxe:depends(libraries/qtopiasecurity)

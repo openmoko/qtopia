@@ -784,6 +784,9 @@ void SimpleExeApplicationLauncher::launch(const QString &app)
     QStringList exes = applicationExecutable(app);
     for(int ii = 0; ii < exes.count(); ++ii) {
         if(QFile::exists(exes.at(ii))) {
+            if (exes.at(ii).startsWith(Qtopia::packagePath()))
+                setupPackageLaunch(exes.at(ii), proc);
+
             proc->start(exes.at(ii), args);
             addStartingApplication(app, proc);
             return; // Found and done
@@ -804,6 +807,28 @@ SimpleExeApplicationLauncher::applicationExecutable(const QString &app)
         rv.append(paths.at(ii) + "bin/" + app);
 
     return rv;
+}
+
+/*! \internal */
+void SimpleExeApplicationLauncher::setupPackageLaunch(const QString &exec, QProcess *proc)
+{
+    QString packageDir=QFile::symLinkTarget(exec).left( Qtopia::packagePath().length() + 32 );
+
+    //XDG_CONFIG_HOME sets the location to search for user scope QSettings files
+    //(see qsettings source file)
+    QStringList env = QProcess::systemEnvironment();
+    env.append( QString("XDG_CONFIG_HOME=") + packageDir + "/Settings" );
+
+    QRegExp rx("^LD_LIBRARY_PATH.*");
+    int idx = env.indexOf( rx );
+    if ( idx <= -1 )
+        env.append( QString("LD_LIBRARY_PATH") + "=" + packageDir + "/lib" );
+    else if ( idx > -1 )
+        env.replace( idx, env.at(idx) + ":" + packageDir + "/lib" );
+
+    proc->setEnvironment( env );
+
+    proc->setWorkingDirectory( packageDir );
 }
 
 #ifndef QT_NO_SXE
@@ -1002,23 +1027,7 @@ void SandboxedExeApplicationLauncher::launch(const QString &app)
                ++iter;
             }
             args.append( "-noshow" );
-            QString sandboxDir=QFile::symLinkTarget(exes.at(ii)).left( Qtopia::packagePath().length() + 32 );
-
-            //XDG_CONFIG_HOME sets the location to search for user scope QSettings files
-            //(see qsettings source file)
-            QStringList env = QProcess::systemEnvironment();
-            env.append( QString("XDG_CONFIG_HOME=") + sandboxDir + "/Settings" );
-
-            QRegExp rx("^LD_LIBRARY_PATH.*");
-            int idx = env.indexOf( rx );
-            if ( idx <= -1 )
-                env.append( QString("LD_LIBRARY_PATH") + "=" + sandboxDir + "/lib" );
-            else if ( idx > -1 )
-                env.replace( idx, env.at(idx) + ":" + sandboxDir + "/lib" );
-
-            proc->setEnvironment( env );
-
-            proc->setWorkingDirectory( sandboxDir );
+            setupPackageLaunch(exes.at(ii), proc);
             proc->start( d->rlimiterExecutable(), args);
             addStartingApplication(app, proc);
             return; // Found and done

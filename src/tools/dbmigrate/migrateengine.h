@@ -23,17 +23,28 @@
 #include <QSqlDatabase>
 #include <QTextStream>
 #ifndef QTOPIA_CONTENT_INSTALLER
+#include <private/qtopiasqlmigrateplugin_p.h>
 #include <QtopiaAbstractService>
 #include <QDSActionRequest>
 #include <QTimer>
 #endif
 
+#ifndef QTOPIA_CONTENT_INSTALLER
+class QDBMigrationEngine : public QObject, public QtopiaSqlMigratePlugin
+{
+    Q_OBJECT
+    Q_INTERFACES(QtopiaSqlMigratePlugin)
+#else
 class QDBMigrationEngine
 {
+#endif
 public:
+    QDBMigrationEngine();
+
+    bool migrate(QSqlDatabase *database);
+
     int tableVersion(const QString &tableName);
     bool setTableVersion(const QString &tableName, int versionNum);
-    bool doMigrate(const QStringList &args);
     bool copyTable(const QString &from, const QString &to);
     bool ensureSchema(const QString &table, bool transact=false) {return ensureSchema(QStringList() << table, transact);}
     bool ensureSchema(const QStringList &list, bool transact=false);
@@ -49,26 +60,13 @@ private:
     bool verifyLocale( const QSqlDatabase &database );
     QByteArray transformString( const QString &string ) const;
 
+    QDBMigrationEngine *mi;
+
     QSqlDatabase db;
     bool failed;
 };
 
-#ifndef QTOPIA_CONTENT_INSTALLER
-class MigrationEngineService : public QtopiaAbstractService
-{
-    Q_OBJECT
-public:
-    MigrationEngineService( QObject *parent );
-public slots:
-    void doMigrate( const QDSActionRequest &request );
-    void ensureTableExists( const QDSActionRequest &request );
-private:
-    QTimer unregistrationTimer;
-private slots:
-    void unregister();
-};
-#endif
 
-#define CHECK(result) {if(QDBMigrationEngine::instance()->check((result), __LINE__, __FILE__, #result) == false) return false; }
-#define EXEC(query) {if(QDBMigrationEngine::instance()->exec((query), __LINE__, __FILE__) == false) return false; }
+#define CHECK(result) {if(mi->check((result), __LINE__, __FILE__, #result) == false) return false; }
+#define EXEC(query) {if(mi->exec((query), __LINE__, __FILE__) == false) return false; }
 

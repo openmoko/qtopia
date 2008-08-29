@@ -1516,11 +1516,27 @@ void WSearchPage::changePriority( QListWidgetItem* item )
         currentSelection = item;
         QSoftMenuBar::setLabel( knownNetworks, Qt::Key_Back, QSoftMenuBar::NoLabel );
         QSoftMenuBar::setLabel( knownNetworks, Qt::Key_Back, QSoftMenuBar::NoLabel );
-    }else if ( item == currentSelection ) {
+    }else if ( currentSelection ) {
         descr->setText( tr("Network priority:") );
-        QFont f = item->font();
+        QFont f = currentSelection->font();
         f.setBold( false );
         currentSelection->setFont( f );
+        if ( item != currentSelection) {
+            int oldRow = knownNetworks->row(currentSelection);
+            int newRow = knownNetworks->row(item);
+            if (oldRow>newRow) {
+                knownNetworks->takeItem(oldRow);
+                knownNetworks->insertItem(newRow+1, currentSelection);
+                knownNetworks->takeItem(newRow);
+                knownNetworks->insertItem(oldRow, item);
+            } else {
+                knownNetworks->takeItem(oldRow);
+                knownNetworks->insertItem(newRow, currentSelection);
+                knownNetworks->takeItem(newRow-1);
+                knownNetworks->insertItem(oldRow, item);
+            }
+            knownNetworks->setCurrentRow(newRow);
+        }
         currentSelection = 0;
         QSoftMenuBar::setLabel( knownNetworks, Qt::Key_Back, QSoftMenuBar::Back );
     }

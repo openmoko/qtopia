@@ -544,6 +544,9 @@ bool QCategoryManager::setGlobal(const QString &id, bool global)
 */
 QString QCategoryManager::add( const QString &trLabel, const QString &icon, bool forceGlobal )
 {
+    if (trLabel == unfiledLabel())
+        return QString();
+
     QString id=trLabel;
     if ( id.isEmpty() ) {
         id = "empty";
@@ -588,7 +591,7 @@ QString QCategoryManager::add( const QString &trLabel, const QString &icon, bool
 */
 bool QCategoryManager::addCategory( const QString &id, const QString &trLabel, const QString &icon, bool forceGlobal, bool isSystem )
 {
-    if (id.isEmpty() || trLabel.isEmpty() || contains(id))
+    if (id.isEmpty() || trLabel.isEmpty() || trLabel == unfiledLabel() || exists(id))
         return false;
 
     d->categoriesLoaded = false;
@@ -614,7 +617,7 @@ bool QCategoryManager::addCategory( const QString &id, const QString &trLabel, c
 bool QCategoryManager::ensureSystemCategory( const QString &id, const QString &trLabel, const QString &icon, bool forceGlobal )
 {
     // You cannot create a system category id starting with "user." as that is reserved for user categories
-    if (id.isEmpty() || trLabel.isEmpty() || id.startsWith("user.") )
+    if (id.isEmpty() || trLabel.isEmpty() || id.startsWith("user.") || trLabel == unfiledLabel())
         return false;
 
     if( !d->categoriesLoaded )
@@ -670,15 +673,14 @@ bool QCategoryManager::remove( const QString &id )
 */
 bool QCategoryManager::setLabel( const QString &id, const QString &trLabel )
 {
-    if( QCategoryStore::instance()->setCategoryLabel( id, trLabel ) )
-    {
+    if (trLabel != unfiledLabel() && QCategoryStore::instance()->setCategoryLabel(id, trLabel)) {
         if( d->categories.contains( id ) )
             d->categoriesLoaded = false;
 
         return true;
-    }
-    else
+    } else {
         return false;
+    }
 }
 
 /*!
@@ -735,7 +737,9 @@ bool QCategoryManager::contains(const QString &id) const
 */
 bool QCategoryManager::exists( const QString &id ) const
 {
-    return contains( id ) ? true : QCategoryStore::instance()->categoryExists( id );
+    return id == QLatin1String("Unfiled")
+        || contains(id)
+        || QCategoryStore::instance()->categoryExists(id);
 }
 
 /*!

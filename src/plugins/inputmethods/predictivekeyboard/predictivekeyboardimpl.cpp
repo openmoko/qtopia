@@ -47,6 +47,27 @@
 #include "predictivekeyboard.h"
 #include "keyboard.h"
 
+/* XPM */
+static const char * kb_xpm[] = {
+"28 13 4 1",
+"       c None",
+".      c #4C4C4C",
+"+      c #FFF7DD",
+"@      c #D6CFBA",
+" .......................... ",
+" .+++.+++.+++.+++.+++.++++. ",
+" .+@@.+@@.+@@.+@@.+@@.+@@@. ",
+" .......................... ",
+" .+++++.+++.+++.+++.++++++. ",
+" .+@@@@.+@@.+@@.+@@.+@@@@@. ",
+" .......................... ",
+" .++++++.+++.+++.+++.+++++. ",
+" .+@@@@@.+@@.+@@.+@@.+@@@@. ",
+" .......................... ",
+" .++++.++++++++++++++.++++. ",
+" .+@@@.+@@@@@@@@@@@@@.+@@@. ",
+" .......................... "};
+
 PredictiveKeyboardInputMethod::PredictiveKeyboardInputMethod(QObject *parent)
     : QtopiaInputMethod(parent), input(0)
 {
@@ -79,7 +100,7 @@ void PredictiveKeyboardInputMethod::reset()
 QIcon PredictiveKeyboardInputMethod::icon() const
 {
     QIcon i;
-    i.addPixmap(QPixmap());
+    i.addPixmap(QPixmap((const char **)kb_xpm));
     return i;
 }
 

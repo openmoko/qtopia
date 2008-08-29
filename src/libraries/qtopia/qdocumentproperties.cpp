@@ -48,6 +48,7 @@
 #include <QPushButton>
 #include <QDebug>
 #include <QFormLayout>
+#include <QCoreApplication>
 
 #include <stdlib.h>
 
@@ -244,7 +245,10 @@ void QDocumentPropertiesWidget::applyChanges()
             changed = true;
         }
     }
-    if ( !d->fastLoad && d->locationCombo && d->locationCombo->isChanged() ) {
+
+    if (!lnk.isValid()) {
+        lnk.setMedia(d->locationCombo->documentPath());
+    } else if (!d->fastLoad && d->locationCombo && d->locationCombo->isChanged()) {
         moveLnk();
     } else if ( changed ) {
         lnk.commit();
@@ -342,13 +346,58 @@ QString QDocumentPropertiesWidget::safePath( const QString &name, const QString 
  */
 bool QDocumentPropertiesWidget::moveLnk()
 {
-    if( !lnk.moveTo( safePath( d->docname->text(), d->locationCombo->documentPath(), lnk.type(), lnk.fileName() ) ) )
-    {
-        QMessageBox::warning( this, tr("Details"), tr("<qt>Moving Document failed.</qt>") );
-        return false;
+    bool moved = false;
+    bool error = true;
+
+    QString path = safePath(
+            d->docname->text(), d->locationCombo->documentPath(), lnk.type(), lnk.fileName());
+
+    QFile destination(path);
+    QFile source(lnk.fileName());
+
+    if (destination.open(QIODevice::WriteOnly)) {
+        if (source.open(QIODevice::ReadWrite)) {
+            char buffer[65536];
+
+            error = false;
+
+            while (!error && !source.atEnd()) {
+                int size = source.read(buffer, 65536);
+
+                if (size == destination.write(buffer, size))
+                    QCoreApplication::processEvents();
+                else
+                    error = true;
+            }
+
+            moved = !error && source.atEnd();
+
+
+            source.close();
+        }
+
+        destination.close();
     }
-    else
-        return true;
+
+    if (moved) {
+        lnk.setFile(path);
+
+        if (lnk.commit()) {
+            source.remove();
+        } else {
+            error = true;
+            moved = false;
+
+            destination.remove();
+        }
+    } else {
+        destination.remove();
+    }
+
+    if (error)
+        QMessageBox::warning(this, tr("Details"), tr("<qt>Moving Document failed.</qt>"));
+
+    return moved;
 }
 
 /*!

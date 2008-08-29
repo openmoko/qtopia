@@ -34,21 +34,11 @@
 #include <qstringlist.h>
 #include <qiodevice.h>
 
-//#define DEBUG_SVG_ICONENGINE
-
-#if QT_VERSION < 0x040300
-class QtopiaSvgIconPlugin : public QIconEnginePlugin
-#else
 class QtopiaSvgIconPlugin : public QIconEnginePluginV2
-#endif
 {
 public:
     QStringList keys() const;
-#if QT_VERSION < 0x040300
-    QIconEngine *create(const QString &filename);
-#else
     QIconEngineV2 *create(const QString &filename);
-#endif
 };
 
 QStringList QtopiaSvgIconPlugin::keys() const
@@ -56,11 +46,7 @@ QStringList QtopiaSvgIconPlugin::keys() const
     return QStringList() << "svg";
 }
 
-#if QT_VERSION < 0x040300
-QIconEngine *QtopiaSvgIconPlugin::create(const QString &file)
-#else
 QIconEngineV2 *QtopiaSvgIconPlugin::create(const QString &file)
-#endif
 {
     QtopiaSvgIconEngine *engine = new QtopiaSvgIconEngine();
     engine->addFile(file, QSize(), QIcon::Normal, QIcon::On);
@@ -105,7 +91,6 @@ QtopiaSvgIconEngine::QtopiaSvgIconEngine()
 {
 }
 
-#if QT_VERSION >= 0x040300
 QtopiaSvgIconEngine::QtopiaSvgIconEngine(const QtopiaSvgIconEngine &other)
     : QIconEngineV2(other), d(new QtopiaSvgIconEnginePrivate)
 {
@@ -113,7 +98,6 @@ QtopiaSvgIconEngine::QtopiaSvgIconEngine(const QtopiaSvgIconEngine &other)
     if (other.d->pixmaps)
         d->pixmaps = new QMap<QString,QPixmap>(*other.d->pixmaps);
 }
-#endif
 
 QtopiaSvgIconEngine::~QtopiaSvgIconEngine()
 {
@@ -219,7 +203,6 @@ void QtopiaSvgIconEngine::paint(QPainter *painter, const QRect &rect,
     painter->drawPixmap(rect, pixmap(rect.size(), mode, state));
 }
 
-#if QT_VERSION >= 0x040300
 QString QtopiaSvgIconEngine::key() const
 {
     return QLatin1String("svg");
@@ -275,4 +258,3 @@ bool QtopiaSvgIconEngine::write(QDataStream &out) const
     }
     return true;
 }
-#endif

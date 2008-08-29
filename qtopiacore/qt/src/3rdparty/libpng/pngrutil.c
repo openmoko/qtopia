@@ -2210,10 +2210,16 @@ png_handle_unknown(png_structp png_ptr, png_infop info_ptr, png_uint_32 length)
            length = (png_uint_32)65535L;
        }
 #endif
-       png_strcpy((png_charp)chunk.name, (png_charp)png_ptr->chunk_name);
-       chunk.data = (png_bytep)png_malloc(png_ptr, length);
+       png_memcpy((png_charp)chunk.name, (png_charp)png_ptr->chunk_name, png_sizeof(chunk.name));
+       chunk.name[png_sizeof(chunk.name)-1] = '\0';
        chunk.size = (png_size_t)length;
-       png_crc_read(png_ptr, (png_bytep)chunk.data, length);
+       if (length == 0)
+         chunk.data = NULL;
+       else
+       {
+         chunk.data = (png_bytep)png_malloc(png_ptr, length);
+         png_crc_read(png_ptr, (png_bytep)chunk.data, length);
+       }
 #if defined(PNG_READ_USER_CHUNKS_SUPPORTED)
        if(png_ptr->read_user_chunk_fn != NULL)
        {
@@ -2224,7 +2230,7 @@ png_handle_unknown(png_structp png_ptr, png_infop info_ptr, png_uint_32 length)
                 if(png_handle_as_unknown(png_ptr, png_ptr->chunk_name) !=
                      PNG_HANDLE_CHUNK_ALWAYS)
                  {
-                   png_free(png_ptr, chunk.data);
+                   if(chunk.data) png_free(png_ptr, chunk.data);
                    png_chunk_error(png_ptr, "unknown critical chunk");
                  }
              png_set_unknown_chunks(png_ptr, info_ptr, &chunk, 1);
@@ -2233,7 +2239,7 @@ png_handle_unknown(png_structp png_ptr, png_infop info_ptr, png_uint_32 length)
        else
 #endif
           png_set_unknown_chunks(png_ptr, info_ptr, &chunk, 1);
-       png_free(png_ptr, chunk.data);
+       if(chunk.data) png_free(png_ptr, chunk.data);
    }
    else
 #endif

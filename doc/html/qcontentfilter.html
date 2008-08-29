@@ -148,9 +148,9 @@
 <p>Constructs an invalid <tt>QContentFilter</tt> which will not pass any content.</p>
 <h3 class="fn"><a name="QContentFilter-2"></a>QContentFilter::QContentFilter ( const QContentFilter &amp; <i>other</i> )</h3>
 <p>Constructs a copy of the filter <i>other</i>.</p>
-<h3 class="fn"><a name="QContentFilter-3"></a>QContentFilter::QContentFilter ( <a href="qcontentfilter.html#FilterType-enum">FilterType</a> <i>type</i>, const <a href="./qstring.html">QString</a> &amp; <i>argument</i> )</h3>
+<h3 class="fn"><a name="QContentFilter-3"></a>QContentFilter::QContentFilter ( <a href="qcontentfilter.html#FilterType-enum">FilterType</a> <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>argument</i> )</h3>
 <p>Constructs a filter with the <a href="qcontentfilter.html#FilterType-enum">FilterType</a> <i>type</i> and the value to match <i>argument</i>.</p>
-<h3 class="fn"><a name="QContentFilter-4"></a>QContentFilter::QContentFilter ( <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, const <a href="./qstring.html">QString</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="QContentFilter-4"></a>QContentFilter::QContentFilter ( <a href="qcontent.html#Property-enum">QContent::Property</a> <i>property</i>, const <a href="qstring.html">QString</a> &amp; <i>value</i> )</h3>
 <p>Constructs a filter which passes content whose property <i>property</i> matches <i>value</i>.</p>
 <h3 class="fn"><a name="QContentFilter-5"></a>QContentFilter::QContentFilter ( <a href="qcontent.html#Role-enum">QContent::Role</a> <i>role</i> )</h3>
 <p>Constructs a filter that passes content with the given content <i>role</i>.</p>
@@ -160,25 +160,25 @@
 <p>Constructs a filter that passes content matching the given category <i>filter</i>.</p>
 <h3 class="fn"><a name="dtor.QContentFilter"></a>QContentFilter::~QContentFilter ()</h3>
 <p>Destroys a <tt>QContentFilter</tt>.</p>
-<h3 class="fn"><a name="argumentMatches"></a><a href="./qstringlist.html">QStringList</a> QContentFilter::argumentMatches ( <a href="qcontentfilter.html#FilterType-enum">FilterType</a> <i>type</i>, const <a href="./qstring.html">QString</a> &amp; <i>scope</i> ) const</h3>
+<h3 class="fn"><a name="argumentMatches"></a><a href="qstringlist.html">QStringList</a> QContentFilter::argumentMatches ( <a href="qcontentfilter.html#FilterType-enum">FilterType</a> <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>scope</i> ) const</h3>
 <p>Returns a list of filter arguments of <a href="qcontentfilter.html#FilterType-enum">FilterType</a> <i>type</i> that can be used to further narrow the matches returned by a <a href="qcontentfilter.html">QContentFilter</a>.</p>
 <p>The <i>scope</i> is used to optionally restrict matches to a sub group of arguments matching the filter. The scope of a <a href="qcontentfilter.html#FilterType-enum">MimeType</a> filter is the mime major type, so for example the <tt>image</tt> scope will return arguments like <tt>image/jpeg</tt>, and <tt>image/png</tt>. For Category filters scope simply refers to the category scope, and for Synthetic filters it is the property group and key in the form <tt>[group]/[key]</tt>.</p>
-<h3 class="fn"><a name="arguments"></a><a href="./qstringlist.html">QStringList</a> QContentFilter::arguments ( <a href="qcontentfilter.html#FilterType-enum">FilterType</a> <i>type</i> ) const</h3>
+<h3 class="fn"><a name="arguments"></a><a href="qstringlist.html">QStringList</a> QContentFilter::arguments ( <a href="qcontentfilter.html#FilterType-enum">FilterType</a> <i>type</i> ) const</h3>
 <p>Returns the filter arguments of <a href="qcontentfilter.html#FilterType-enum">FilterType</a> <i>type</i>, not including sub filters.</p>
 <p>See also <a href="qcontentfilter.html#types">types</a>() and <a href="qcontentfilter.html#subFilters">subFilters</a>().</p>
-<h3 class="fn"><a name="category"></a>QContentFilter QContentFilter::category ( const <a href="./qstring.html">QString</a> &amp; <i>categoryId</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="category"></a>QContentFilter QContentFilter::category ( const <a href="qstring.html">QString</a> &amp; <i>categoryId</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Constructs a content filter that filters for content belonging to the category with the id <i>categoryId</i>.</p>
 <h3 class="fn"><a name="clear"></a>void QContentFilter::clear ()</h3>
 <p>Clears the contents of a filter, invalidating it.</p>
 <p>See also <a href="qcontentfilter.html#isValid">isValid</a>().</p>
-<h3 class="fn"><a name="fileName"></a>QContentFilter QContentFilter::fileName ( const <a href="./qstring.html">QString</a> &amp; <i>fileName</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="fileName"></a>QContentFilter QContentFilter::fileName ( const <a href="qstring.html">QString</a> &amp; <i>fileName</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Constructs a content filter that filters for content with a <a href="qcontent.html#fileName">file name</a> value that matches <i>fileName</i>.</p>
 <h3 class="fn"><a name="isValid"></a>bool QContentFilter::isValid () const</h3>
 <p>Returns true if the filter is valid. A <tt>QContentFilter</tt> constructed with no arguments is invalid.</p>
 <p>See also <a href="qcontentfilter.html#clear">clear</a>().</p>
-<h3 class="fn"><a name="mimeType"></a>QContentFilter QContentFilter::mimeType ( const <a href="./qstring.html">QString</a> &amp; <i>mimeType</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="mimeType"></a>QContentFilter QContentFilter::mimeType ( const <a href="qstring.html">QString</a> &amp; <i>mimeType</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Constructs a content filter that filters for content with a <a href="qcontent.html#type">mime type</a> value that matches <i>mimeType</i>.</p>
-<h3 class="fn"><a name="name"></a>QContentFilter QContentFilter::name ( const <a href="./qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="name"></a>QContentFilter QContentFilter::name ( const <a href="qstring.html">QString</a> &amp; <i>name</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Constructs a content filter that filters for content with a <a href="qcontent.html#name">name</a> value that matches <i>name</i>.</p>
 <h3 class="fn"><a name="negated"></a>bool QContentFilter::negated () const</h3>
 <p>Returns true if the filter has been negated.</p>
@@ -186,17 +186,17 @@
 <h3 class="fn"><a name="operand"></a><a href="qcontentfilter.html#Operand-enum">Operand</a> QContentFilter::operand () const</h3>
 <p>Returns the operand used to combine the filter arguments and sub filters.</p>
 <p>See also <a href="qcontentfilter.html#types">types</a>(), <a href="qcontentfilter.html#arguments">arguments</a>(), and <a href="qcontentfilter.html#subFilters">subFilters</a>().</p>
-<h3 class="fn"><a name="property"></a>QContentFilter QContentFilter::property ( const <a href="./qstring.html">QString</a> &amp; <i>group</i>, const <a href="./qstring.html">QString</a> &amp; <i>key</i>, const <a href="./qstring.html">QString</a> &amp; <i>value</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="property"></a>QContentFilter QContentFilter::property ( const <a href="qstring.html">QString</a> &amp; <i>group</i>, const <a href="qstring.html">QString</a> &amp; <i>key</i>, const <a href="qstring.html">QString</a> &amp; <i>value</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Constructs a content filter that filters for content with the given <a href="qcontent.html#property">property</a> <i>group</i> and <i>key</i> that matches <i>value</i>.</p>
-<h3 class="fn"><a name="property-2"></a>QContentFilter QContentFilter::property ( const <a href="./qstring.html">QString</a> &amp; <i>key</i>, const <a href="./qstring.html">QString</a> &amp; <i>value</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="property-2"></a>QContentFilter QContentFilter::property ( const <a href="qstring.html">QString</a> &amp; <i>key</i>, const <a href="qstring.html">QString</a> &amp; <i>value</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Constructs a content filter that filters for content with the given <a href="qcontent.html#property">property</a> <i>key</i> and no group that matches <i>value</i>.</p>
-<h3 class="fn"><a name="subFilters"></a><a href="./qlist.html">QList</a>&lt;QContentFilter&gt; QContentFilter::subFilters () const</h3>
+<h3 class="fn"><a name="subFilters"></a><a href="qlist.html">QList</a>&lt;QContentFilter&gt; QContentFilter::subFilters () const</h3>
 <p>Returns any sub filters the the filter is composed of.</p>
 <p>See also <a href="qcontentfilter.html#types">types</a>() and <a href="qcontentfilter.html#arguments">arguments</a>().</p>
 <h3 class="fn"><a name="test"></a>bool QContentFilter::test ( const <a href="qcontent.html">QContent</a> &amp; <i>content</i> ) const</h3>
 <p>Returns true if a <a href="qcontent.html">QContent</a> object <i>content</i> passes the filter; otherwise returns false.</p>
-<h3 class="fn"><a name="types"></a><a href="./qlist.html">QList</a>&lt;<a href="qcontentfilter.html#FilterType-enum">FilterType</a>&gt; QContentFilter::types () const</h3>
+<h3 class="fn"><a name="types"></a><a href="qlist.html">QList</a>&lt;<a href="qcontentfilter.html#FilterType-enum">FilterType</a>&gt; QContentFilter::types () const</h3>
 <p>Returns a list of filter types common to the arguments the filter is composed of, not including sub filters.</p>
 <p>See also <a href="qcontentfilter.html#arguments">arguments</a>() and <a href="qcontentfilter.html#subFilters">subFilters</a>().</p>
 <h3 class="fn"><a name="operator-not-eq"></a>bool QContentFilter::operator!= ( const QContentFilter &amp; <i>other</i> ) const</h3>

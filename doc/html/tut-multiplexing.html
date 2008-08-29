@@ -61,14 +61,14 @@
 
     bool ModifiedGsm0710MultiplexerPlugin::detect( QSerialIODevice *device )
     {
-        <span class="comment">//</span> Determine if the module supports a frame size of 256.
+        <span class="comment">// Determine if the module supports a frame size of 256.</span>
         return QGsm0710Multiplexer::cmuxChat( device, 256 );
     }
 
     QSerialIODeviceMultiplexer *ModifiedGsm0710MultiplexerPlugin::create
             ( QSerialIODevice *device )
     {
-        <span class="comment">//</span> Create the GSM 07.10 multiplexer with a frame size of 256.
+        <span class="comment">// Create the GSM 07.10 multiplexer with a frame size of 256.</span>
         return new QGsm0710Multiplexer( device, 256 );
     }
 
@@ -101,20 +101,20 @@
 
     QSerialIODeviceMultiplexer *MultiPortMultiplexerPlugin::create( QSerialIODevice *device )
     {
-        <span class="comment">//</span> The primary AT command device, /dev/mux0, is configured
-        <span class="comment">//</span> in the custom.h file as QTOPIA_PHONE_DEVICE and then passed
-        <span class="comment">//</span> down to us in the &quot;device&quot; parameter.
+        <span class="comment">// The primary AT command device, /dev/mux0, is configured</span>
+        <span class="comment">// in the custom.h file as QTOPIA_PHONE_DEVICE and then passed</span>
+        <span class="comment">// down to us in the &quot;device&quot; parameter.</span>
         QMultiPortMultiplexer *mux = new QMultiPortMultiplexer( device );
 
-        <span class="comment">//</span> Add the secondary channel.
+        <span class="comment">// Add the secondary channel.</span>
         QSerialPort *secondary = QSerialPort::create( &quot;/dev/mux1&quot; );
         mux-&gt;addChannel( &quot;secondary&quot;, secondary );
 
-        <span class="comment">//</span> Add the data channel.
+        <span class="comment">// Add the data channel.</span>
         QSerialPort *data = QSerialPort::create( &quot;/dev/mux2&quot; );
         mux-&gt;addChannel( &quot;data&quot;, data );
 
-        <span class="comment">//</span> Add the data setup channel, which is the same as &quot;data&quot;.
+        <span class="comment">// Add the data setup channel, which is the same as &quot;data&quot;.</span>
         mux-&gt;addChannel( &quot;datasetup&quot;, data );
         return mux;
     }

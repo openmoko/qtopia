@@ -42,26 +42,26 @@
 <h2>Member Function Documentation</h2>
 <h3 class="fn"><a name="QSMSMessagePart"></a>QSMSMessagePart::QSMSMessagePart ()</h3>
 <p>Constructs an empty SMS message part.</p>
-<h3 class="fn"><a name="QSMSMessagePart-2"></a>QSMSMessagePart::QSMSMessagePart ( const <a href="./qstring.html">QString</a> &amp; <i>text</i> )</h3>
+<h3 class="fn"><a name="QSMSMessagePart-2"></a>QSMSMessagePart::QSMSMessagePart ( const <a href="qstring.html">QString</a> &amp; <i>text</i> )</h3>
 <p>Constructs a new plain text SMS message part from the string <i>text</i>.</p>
-<h3 class="fn"><a name="QSMSMessagePart-3"></a>QSMSMessagePart::QSMSMessagePart ( const <a href="./qstring.html">QString</a> &amp; <i>mimeType</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>data</i> )</h3>
+<h3 class="fn"><a name="QSMSMessagePart-3"></a>QSMSMessagePart::QSMSMessagePart ( const <a href="qstring.html">QString</a> &amp; <i>mimeType</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i> )</h3>
 <p>Constructs a new binary SMS message part with the specified <i>mimeType</i> and <i>data</i>.</p>
-<h3 class="fn"><a name="QSMSMessagePart-4"></a>QSMSMessagePart::QSMSMessagePart ( const <a href="./qstring.html">QString</a> &amp; <i>mimeType</i>, const <a href="./qbytearray.html">QByteArray</a> &amp; <i>data</i>, <a href="./qtglobal.html#uint-typedef">uint</a> <i>position</i> )</h3>
+<h3 class="fn"><a name="QSMSMessagePart-4"></a>QSMSMessagePart::QSMSMessagePart ( const <a href="qstring.html">QString</a> &amp; <i>mimeType</i>, const <a href="qbytearray.html">QByteArray</a> &amp; <i>data</i>, <a href="qtglobal.html#uint-typedef">uint</a> <i>position</i> )</h3>
 <p>Constructs a new binary SMS message part with the specified <i>mimeType</i> and <i>data</i>. The part is intended to be displayed at <i>position</i> within a subsequent text part.</p>
 <h3 class="fn"><a name="QSMSMessagePart-5"></a>QSMSMessagePart::QSMSMessagePart ( const QSMSMessagePart &amp; <i>part</i> )</h3>
 <p>Constructs a copy of <i>part</i>.</p>
 <h3 class="fn"><a name="dtor.QSMSMessagePart"></a>QSMSMessagePart::~QSMSMessagePart ()</h3>
 <p>Destructs the <a href="qsmsmessagepart.html">QSMSMessagePart</a>.</p>
-<h3 class="fn"><a name="data"></a>const <a href="./qbytearray.html">QByteArray</a> &amp; QSMSMessagePart::data () const</h3>
-<p>Returns the binary data associated with this SMS message part. Returns and empty <a href="./qbytearray.html">QByteArray</a> if it is not a binary part.</p>
+<h3 class="fn"><a name="data"></a>const <a href="qbytearray.html">QByteArray</a> &amp; QSMSMessagePart::data () const</h3>
+<p>Returns the binary data associated with this SMS message part. Returns and empty <a href="qbytearray.html">QByteArray</a> if it is not a binary part.</p>
 <h3 class="fn"><a name="isText"></a>bool QSMSMessagePart::isText () const</h3>
 <p>Returns true if this SMS message part is plain text; or false if binary.</p>
-<h3 class="fn"><a name="mimeType"></a><a href="./qstring.html">QString</a> QSMSMessagePart::mimeType () const</h3>
-<p>Returns the MIME type associated with this SMS message part, or <a href="./porting4.html">QString</a>() if it is not a binary part.</p>
-<h3 class="fn"><a name="position"></a><a href="./qtglobal.html#uint-typedef">uint</a> QSMSMessagePart::position () const</h3>
+<h3 class="fn"><a name="mimeType"></a><a href="qstring.html">QString</a> QSMSMessagePart::mimeType () const</h3>
+<p>Returns the MIME type associated with this SMS message part, or <a href="porting4.html">QString</a>() if it is not a binary part.</p>
+<h3 class="fn"><a name="position"></a><a href="qtglobal.html#uint-typedef">uint</a> QSMSMessagePart::position () const</h3>
 <p>Returns the text position to display this SMS message part at.</p>
-<h3 class="fn"><a name="text"></a><a href="./qstring.html">QString</a> QSMSMessagePart::text () const</h3>
-<p>Returns the plain text contents of this SMS message part, or <a href="./porting4.html">QString</a>() if it is not a text part.</p>
+<h3 class="fn"><a name="text"></a><a href="qstring.html">QString</a> QSMSMessagePart::text () const</h3>
+<p>Returns the plain text contents of this SMS message part, or <a href="porting4.html">QString</a>() if it is not a text part.</p>
 <h3 class="fn"><a name="operator-eq"></a>QSMSMessagePart &amp; QSMSMessagePart::operator= ( const QSMSMessagePart &amp; <i>part</i> )</h3>
 <p>Assigns a copy of <i>part</i> to this object.</p>
 <p /><address><hr /><div align="center">

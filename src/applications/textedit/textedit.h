@@ -117,6 +117,7 @@ private:
     QAction *zin, *zout;
     bool zinE, zoutE;
     qreal defaultFontSize;
+    qreal originalFontSize;
     QList<qreal> fontSizes;
     QString calculateName(QString);
 };

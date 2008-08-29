@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QtopiaIpcEnvelope Class Reference</h1>
 <p>The QtopiaIpcEnvelope class encapsulates and sends QCop messages. <a href="#details">More...</a></p>
-<pre>    #include &lt;QtopiaIpcEnvelope&gt;</pre><p>Inherits <a href="./qdatastream.html">QDataStream</a>.</p>
+<pre>    #include &lt;QtopiaIpcEnvelope&gt;</pre><p>Inherits <a href="qdatastream.html">QDataStream</a>.</p>
 <ul>
 <li><a href="qtopiaipcenvelope-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -24,7 +24,7 @@
 <li><div class="fn"/><b><a href="qtopiaipcenvelope.html#dtor.QtopiaIpcEnvelope">~QtopiaIpcEnvelope</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>40 public functions inherited from <a href="./qdatastream.html#public-functions">QDataStream</a></li>
+<li><div class="fn"/>40 public functions inherited from <a href="qdatastream.html#public-functions">QDataStream</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -55,7 +55,7 @@
 <p>See also <a href="qtopiachannel.html">QtopiaChannel</a>, <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a>, and <a href="qtopiaservicerequest.html">QtopiaServiceRequest</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QtopiaIpcEnvelope"></a>QtopiaIpcEnvelope::QtopiaIpcEnvelope ( const <a href="./qstring.html">QString</a> &amp; <i>channel</i>, const <a href="./qstring.html">QString</a> &amp; <i>message</i> )</h3>
+<h3 class="fn"><a name="QtopiaIpcEnvelope"></a>QtopiaIpcEnvelope::QtopiaIpcEnvelope ( const <a href="qstring.html">QString</a> &amp; <i>channel</i>, const <a href="qstring.html">QString</a> &amp; <i>message</i> )</h3>
 <p>Constructs a <a href="qtopiaipcenvelope.html">QtopiaIpcEnvelope</a> to write <i>message</i> to <i>channel</i>. If <i>message</i> has parameters then use operator&lt;&lt;() to add the parameters to the envelope.</p>
 <h3 class="fn"><a name="dtor.QtopiaIpcEnvelope"></a>QtopiaIpcEnvelope::~QtopiaIpcEnvelope ()</h3>
 <p>Writes the message and then destroys the <a href="qtopiaipcenvelope.html">QtopiaIpcEnvelope</a>.</p>

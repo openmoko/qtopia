@@ -46,7 +46,9 @@
 #include <QUuid>
 #include <QVariant>
 #include <QtopiaService>
+#ifndef QTOPIA_NO_SVG
 #include <QSvgRenderer>
+#endif
 #include <QPixmapCache>
 #include <QPicture>
 
@@ -3288,6 +3290,7 @@ QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const
         imgName.remove(0, 5 /*strlen("i18n/") */ );
     }
 
+#ifndef QTOPIA_NO_SVG
     if (filename.endsWith(".svg")) {
         int w = width ? width : geometry().width();
         int h = height ? height : geometry().height();
@@ -3363,6 +3366,7 @@ QPixmap ThemePixmapItem::loadImage(const QString &filename, int colorRole, const
         EXIT
         return pm;
     }
+#endif
 
     if (colorRole != QPalette::NColorRoles || alpha != 255) {
         QColor colour = getColor(col, colorRole);
@@ -3507,7 +3511,7 @@ void ThemePixmapItem::scaleImage( const QString &key, int width, int height )
     for ( int i = 0; i < 3; i++ ) {
         QTagMap<Image> &map = d->images[i];
         QString filename = map[key].filename;
-
+#ifndef QTOPIA_NO_SVG
         if (map[key].pixmap.width() == width && map[key].pixmap.height() == height)
             continue;
 
@@ -3515,7 +3519,9 @@ void ThemePixmapItem::scaleImage( const QString &key, int width, int height )
             QColor colour = color( QLatin1String("color") );
             int alpha = attribute( QLatin1String("alpha") );
             map[key].pixmap = loadImage( map[key].filename, QPalette::NColorRoles, colour, alpha, width, height );
-        } else if (!filename.isEmpty() && !map[key].pixmap.isNull()) {
+        } else if (!filename.isEmpty() && !map[key].pixmap.isNull())
+#endif
+        {
             map[key].pixmap = scalePixmap( map[key].pixmap, width, height );
         }
     }

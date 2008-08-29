@@ -11,7 +11,7 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">Qt/Mac-Specific Issues<br /><span class="subtitle"></span>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 class="title">Qt/Mac-Specific Issues<br /><span class="subtitle"></span>
 </h1>
 <p>This file outlines known issues and possible workarounds for limitations on Mac OS X with Qt. Contact Trolltech support if you find additional issues which are not covered here.</p>
 <p>See also the document <a href="qtmac-as-native.html">Qt/Mac is Mac OS X Native</a>.</p>
@@ -59,7 +59,7 @@
 <a name="bundle-based-libraries"></a>
 <h4>Bundle-Based Libraries</h4>
 <p>If you want to incorporate dynamic libraries as part of your Mac OS X application bundle (the application directory), then you place these into a directory called Frameworks, a subdirectory of the application bundle.</p>
-<p>The application finds these dynamic libraries if the libraries have an install name of &quot;<a href="mailto:@executable_path">@executable_path</a>/../Frameworks/libname.dylib.</p>
+<p>The application finds these dynamic libraries if the libraries have an install name of &quot;@executable_path/../Frameworks/libname.dylib.</p>
 <p>If you use <tt>qmake</tt> and Makefiles, use the <tt>QMAKE_LFLAGS_SONAME</tt> setting:</p>
 <pre> QMAKE_LFLAGS_SONAME  = -Wl,-install_name,@executable_path/../Frameworks/</pre>
 <p>Alternatively you can modify the intall name using the install_name_tool(1) command line tool. See its manpage for more information.</p>
@@ -152,6 +152,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.4</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.5</div></td>
 </tr></table></div></address></body>
 </html>

@@ -37,16 +37,16 @@ public:
     \ingroup messaginglibrary
 
     The QMailID class represents the message store identifiers for QMailMessages and QMailFolders.
-    A QMailId can be either valid or invalid. A message or folder with a valid ID is expected 
-    to exist on the store and have a quint64 value greater than 0. 
-    
+    A QMailId can be either valid or invalid. A message or folder with a valid ID is expected
+    to exist on the store and have a quint64 value greater than 0.
+
     \sa QMailMessage
 */
 
 Q_IMPLEMENT_USER_METATYPE(QMailId);
 
 /*!
-   Constructs a new invalid QMailId. 
+   Constructs a new invalid QMailId.
 */
 
 QMailId::QMailId()
@@ -62,7 +62,7 @@ QMailId::QMailId()
 QMailId::QMailId(const quint64& id)
 {
     d = new QMailIdPrivate();
-    d->id = id;  
+    d->id = id;
 }
 
 /*!
@@ -98,16 +98,16 @@ bool QMailId::isValid() const
 
 quint64 QMailId::toULongLong() const
 {
-	return d->id;
+    return d->id;
 }
 
 /*!
-  Returns the QVariant representation of this QMailId. 
+  Returns the QVariant representation of this QMailId.
 */
 
 QMailId::operator QVariant() const
 {
-	return QVariant::fromValue(*this);
+    return QVariant::fromValue(*this);
 }
 
 /*!
@@ -143,7 +143,7 @@ bool QMailId::operator< (const QMailId& other) const
     Assignes the value of this QMailId to the value of the QMailId \a other.
 */
 
-QMailId& QMailId::operator=(const QMailId& other) 
+QMailId& QMailId::operator=(const QMailId& other)
 {
     d = other.d;
     return *this;

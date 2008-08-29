@@ -2,7 +2,7 @@
 <!DOCTYPE html
     PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- /home/test1/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.4/src/gui/embedded/qdirectpainter_qws.cpp -->
+<!-- /home/test1/tmp/qtopia/qt//qtopia-core-opensource-src-4.3.5/src/gui/embedded/qdirectpainter_qws.cpp -->
 <head>
   <title>Qt 4.3: QDirectPainter Class Reference</title>
   <link href="classic.css" rel="stylesheet" type="text/css" />
@@ -12,7 +12,7 @@
 <tr>
 <td align="left" valign="top" width="32"><a href="http://www.trolltech.com/products/qt"><img src="images/qt-logo.png" align="left" width="32" height="32" border="0" /></a></td>
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="mainclasses.html"><font color="#004faf">Main&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped&nbsp;Classes</font></a>&nbsp;&middot; <a href="modules.html"><font color="#004faf">Modules</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
-<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 align="center">QDirectPainter Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
+<td align="right" valign="top" width="230"><a href="http://www.trolltech.com"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></a></td></tr></table><h1 class="title">QDirectPainter Class Reference<br /><span class="small-subtitle">[<a href="qtgui.html">QtGui</a> module]</span>
 </h1>
 <p>The QDirectPainter class provides direct access to the underlying hardware in Qtopia Core. <a href="#details">More...</a></p>
 <pre> #include &lt;QDirectPainter&gt;</pre><p><b>This class is under development and is subject to change.</b></p>
@@ -52,7 +52,7 @@
 <h3>Static Public Members</h3>
 <ul>
 <li><div class="fn"/>uchar * <b><a href="qdirectpainter.html#frameBuffer">frameBuffer</a></b> ()</li>
-<li><div class="fn"/>int <b><a href="qdirectpainter.html#linestep">linestep</a></b> ()</li>
+<li><div class="fn"/>int <b><a href="qdirectpainter.html#linestepx">linestep</a></b> ()</li>
 <li><div class="fn"/>void <b><a href="qdirectpainter.html#lock">lock</a></b> ()</li>
 <li><div class="fn"/>int <b><a href="qdirectpainter.html#screenDepth">screenDepth</a></b> ()</li>
 <li><div class="fn"/>int <b><a href="qdirectpainter.html#screenHeight">screenHeight</a></b> ()</li>
@@ -91,7 +91,7 @@
 <h3>Rendering</h3>
 <p>To draw on a given region, the application must first get hold of a pointer to the framebuffer. In most cases, this pointer can be retrieved using the <a href="qdirectpainter.html#frameBuffer">QDirectPainter::frameBuffer</a>() function. But note that if the current screen has subscreens, you must query the screen driver instead to identify the correct subscreen. A pointer to the current screen driver can always be retrieved using the static <a href="qscreen.html#instance">QScreen::instance</a>() function. Then use <a href="qscreen.html">QScreen</a>'s <a href="qscreen.html#subScreenIndexAt">subScreenIndexAt()</a> and <a href="qscreen.html#subScreens">subScreens()</a> functions to access the correct subscreen, and the subscreen's <a href="qscreen.html#base">base()</a> function to retrieve a pointer to the framebuffer.</p>
 <p>Depending on the hardware, it might be necessary to lock the framebuffer for exclusive use while writing to it. This is possible using the <a href="qdirectpainter.html#lock">lock</a>() and <a href="qdirectpainter.html#unlock">unlock</a>() functions. Note that calling <a href="qdirectpainter.html#lock">lock</a>() will prevent all other applications from working until <a href="qdirectpainter.html#unlock">unlock</a>() is called.</p>
-<p>In addition, QDirectPainter provides several functions returning information about the framebuffer: the <a href="qdirectpainter.html#linestep">linestep</a>() function returns the length (in bytes) of each scanline of the framebuffer while the <a href="qdirectpainter.html#screenDepth">screenDepth</a>(), <a href="qdirectpainter.html#screenWidth">screenWidth</a>() and <a href="qdirectpainter.html#screenHeight">screenHeight</a>() function return the screen metrics.</p>
+<p>In addition, QDirectPainter provides several functions returning information about the framebuffer: the <a href="qdirectpainter.html#linestepx">linestep</a>() function returns the length (in bytes) of each scanline of the framebuffer while the <a href="qdirectpainter.html#screenDepth">screenDepth</a>(), <a href="qdirectpainter.html#screenWidth">screenWidth</a>() and <a href="qdirectpainter.html#screenHeight">screenHeight</a>() function return the screen metrics.</p>
 <p>See also <a href="qscreen.html">QScreen</a>, <a href="qwsembedwidget.html">QWSEmbedWidget</a>, and <a href="qtopiacore-architecture.html">Qtopia Core Architecture</a>.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -133,12 +133,12 @@
 <p>Returns a pointer to the beginning of the display memory.</p>
 <p>Note that it is the application's responsibility to limit itself to modifying only the reserved region.</p>
 <p>Do not use this pointer if the current screen has subscreens, query the screen driver instead: A pointer to the current screen driver can always be retrieved using the static <a href="qscreen.html#instance">QScreen::instance</a>() function. Then use <a href="qscreen.html">QScreen</a>'s <a href="qscreen.html#subScreenIndexAt">subScreenIndexAt()</a> and <a href="qscreen.html#subScreens">subScreens()</a> functions to access the correct subscreen, and the subscreen's <a href="qscreen.html#base">base()</a> function to retrieve a pointer to the framebuffer.</p>
-<p>See also <a href="qdirectpainter.html#requestedRegion">requestedRegion</a>(), <a href="qdirectpainter.html#allocatedRegion">allocatedRegion</a>(), and <a href="qdirectpainter.html#linestep">linestep</a>().</p>
+<p>See also <a href="qdirectpainter.html#requestedRegion">requestedRegion</a>(), <a href="qdirectpainter.html#allocatedRegion">allocatedRegion</a>(), and <a href="qdirectpainter.html#linestepx">linestep</a>().</p>
 <h3 class="fn"><a name="geometry"></a><a href="qrect.html">QRect</a> QDirectPainter::geometry () const</h3>
 <p>Returns the bounding rectangle of the requested region.</p>
 <p>This function was introduced in Qt 4.2.</p>
 <p>See also <a href="qdirectpainter.html#setGeometry">setGeometry</a>() and <a href="qdirectpainter.html#requestedRegion">requestedRegion</a>().</p>
-<h3 class="fn"><a name="linestep"></a>int QDirectPainter::linestep ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="linestepx"></a>int QDirectPainter::linestep ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the length (in bytes) of each scanline of the framebuffer.</p>
 <p>See also <a href="qdirectpainter.html#frameBuffer">frameBuffer</a>().</p>
 <h3 class="fn"><a name="lock"></a>void QDirectPainter::lock ()&nbsp;&nbsp;<tt> [static]</tt></h3>
@@ -205,6 +205,6 @@
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td width="30%">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>
 <td width="40%" align="center"><a href="trademarks.html">Trademarks</a></td>
-<td width="30%" align="right"><div align="right">Qt 4.3.4</div></td>
+<td width="30%" align="right"><div align="right">Qt 4.3.5</div></td>
 </tr></table></div></address></body>
 </html>

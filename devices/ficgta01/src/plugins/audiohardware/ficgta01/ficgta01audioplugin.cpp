@@ -62,7 +62,7 @@ enum NeoAudioScenario {
     Scenario_GSMBluetooth,
     Scenario_GSMSpeakerout,
     Scenario_CaptureHandset,
-    Scenatio_CaptureHeadset
+    Scenario_CaptureHeadset
 };
 
 static const char* mode_to_string[] = {
@@ -75,7 +75,7 @@ static const char* mode_to_string[] = {
     "captureheadset",
 };
 
-static bool setAudioMode(enum NeoAudioScenario scenario)
+static bool setAudioScenario(NeoAudioScenario audioScenario)
 {
     QString confDir;
     if (QDir("/usr/share/openmoko/scenarios").exists())
@@ -85,12 +85,12 @@ static bool setAudioMode(enum NeoAudioScenario scenario)
     else
         confDir = "/etc/";
 
-    const char* mode = mode_to_string[static_cast<int>(scenario)];
+    const char* mode = mode_to_string[static_cast<int>(audioScenario)];
     QString cmd = "/usr/sbin/alsactl -f " + confDir + mode + ".state restore";
     qLog(AudioState)<< "cmd=" << cmd;
     int result = system(cmd.toLocal8Bit());
 
-    qLog(AudioState)<< "setAudioMode " << QString("%1%2.state").arg(confDir).arg(mode);
+    qLog(AudioState)<< "setAudioScenario " << QString("%1%2.state").arg(confDir).arg(mode);
     if(result == 0)
        return true;
 
@@ -249,7 +249,7 @@ bool BluetoothAudioState::enter(QAudio::AudioCapability)
 
     if (m_currAudioGateway || resetCurrAudioGateway()) {
         m_currAudioGateway->connectAudio();
-        m_isActive = setAudioMode(Scenario_GSMBluetooth);
+        m_isActive = setAudioScenario(Scenario_GSMBluetooth);
     }
 
     return m_isActive;
@@ -319,7 +319,7 @@ bool HandsetAudioState::enter(QAudio::AudioCapability)
 {
     qLog(AudioState) << __PRETTY_FUNCTION__ << "isPhone" << m_isPhone;
 
-    return setAudioMode(Scenario_GSMHandset);
+    return setAudioScenario(Scenario_GSMHandset);
 }
 
 bool HandsetAudioState::leave()
@@ -377,7 +377,7 @@ bool MediaSpeakerAudioState::enter(QAudio::AudioCapability)
 {
     qLog(AudioState) << __PRETTY_FUNCTION__ << m_isPhone;
 
-    return setAudioMode(Scenario_StereoOut);
+    return setAudioScenario(Scenario_StereoOut);
 }
 
 bool MediaSpeakerAudioState::leave()
@@ -438,7 +438,7 @@ bool MediaCaptureAudioState::enter(QAudio::AudioCapability)
 {
     qLog(AudioState) << __PRETTY_FUNCTION__ << m_isPhone;
 
-    return setAudioMode(Scenario_CaptureHandset);
+    return setAudioScenario(Scenario_CaptureHandset);
 }
 
 bool MediaCaptureAudioState::leave()
@@ -485,7 +485,7 @@ HeadphonesAudioState::HeadphonesAudioState(bool isPhone, QObject *parent)
     }
 
     m_info.setDisplayName(tr("Headphones"));
-    m_info.setPriority(25);
+    m_info.setPriority(50);
 
     m_headset = new QValueSpaceItem("/Hardware/Accessories/PortableHandsfree/Present", this);
     connect(m_headset, SIGNAL(contentsChanged()), SLOT(onHeadsetModified()));
@@ -589,7 +589,7 @@ bool SpeakerphoneAudioState::enter(QAudio::AudioCapability)
 {
     qLog(AudioState)<< __PRETTY_FUNCTION__;
 
-    return setAudioMode(Scenario_GSMSpeakerout);
+    return setAudioScenario(Scenario_GSMSpeakerout);
 }
 
 bool SpeakerphoneAudioState::leave()
@@ -646,7 +646,7 @@ bool RingtoneAudioState::enter(QAudio::AudioCapability)
 {
     qLog(AudioState) << __PRETTY_FUNCTION__;
 
-    return setAudioMode(Scenario_StereoOut);
+    return setAudioScenario(Scenario_StereoOut);
 }
 
 bool RingtoneAudioState::leave()

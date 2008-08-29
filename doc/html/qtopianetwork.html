@@ -92,28 +92,28 @@
 <p>The Type type is a typedef for <a href="qflags.html">QFlags</a>&lt;TypeFlag&gt;. It stores an OR combination of TypeFlag values.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="availableNetworkConfigs"></a><a href="./qstringlist.html">QStringList</a> QtopiaNetwork::availableNetworkConfigs ( <a href="qtopianetwork.html#TypeFlag-enum">QtopiaNetwork::Type</a> <i>type</i> = QtopiaNetwork::Any, const <a href="./qstring.html">QString</a> &amp; <i>path</i> = QString() )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="availableNetworkConfigs"></a><a href="qstringlist.html">QStringList</a> QtopiaNetwork::availableNetworkConfigs ( <a href="qtopianetwork.html#TypeFlag-enum">QtopiaNetwork::Type</a> <i>type</i> = QtopiaNetwork::Any, const <a href="qstring.html">QString</a> &amp; <i>path</i> = QString() )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns a list of all known Qtopia network interface handles which match <i>type</i>. A handle uniquely identifies a Qtopia network interfaces and is the absolute path to the configuration file that contains the settings for a particular <a href="qtopianetworkinterface.html">QtopiaNetworkInterface</a>. <i>path</i> specifies the directory where the lookup takes place.</p>
 <p>Note that the lookup is independent of the state of an interface. It always returns all Qtopia network interfaces which are online and offline.</p>
 <p>If <i>type</i> is set to <tt>QtopiaNetwork::Any</tt> it returns all known NetworkInterfaces. If <i>path</i> is empty the lookup will take place in <a href="qtopianetwork.html#settingsDir">settingsDir</a>().</p>
-<h3 class="fn"><a name="loadPlugin"></a><a href="./qpointer.html">QPointer</a>&lt;<a href="qtopianetworkinterface.html">QtopiaNetworkInterface</a>&gt; QtopiaNetwork::loadPlugin ( const <a href="./qstring.html">QString</a> &amp; <i>handle</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="loadPlugin"></a><a href="qpointer.html">QPointer</a>&lt;<a href="qtopianetworkinterface.html">QtopiaNetworkInterface</a>&gt; QtopiaNetwork::loadPlugin ( const <a href="qstring.html">QString</a> &amp; <i>handle</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Loads the appropriate network plug-in for the interface with <i>handle</i>; or 0 if no suitable plug-in can be found.</p>
 <p>Only use this function if you intend to configure the returned <a href="qtopianetworkinterface.html">QtopiaNetworkInterface</a> via <a href="qtopianetworkinterface.html#configuration">QtopiaNetworkInterface::configuration</a>(). Any other use may trigger undesired behaviour whereby the loaded network interface instance may overshadow the instance created by the <a href="qtopianetworkserver.html">QtopiaNetworkServer</a>. For more details see the <a href="qtopianetworkinterface.html">QtopiaNetworkInterface</a> general class documentation.</p>
 <h3 class="fn"><a name="online"></a>bool QtopiaNetwork::online ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns true if any known network interface is online/connected. This can be used to check the general connectivity status of the Qtopia environment. A device is considered to be online if it is in the state <tt>QtopiaNetwork::Up</tt>, <tt>QtopiaNetwork::Demand</tt> or <tt>QtopiaNetwork::Pending</tt>.</p>
 <p>More detailed state updates on a per device base can be obtained by using <a href="qnetworkdevice.html">QNetworkDevice</a> and overal state change notifications across all network devices are provided by <a href="qnetworkstate.html">QNetworkState</a>.</p>
-<h3 class="fn"><a name="setDefaultGateway"></a>void QtopiaNetwork::setDefaultGateway ( const <a href="./qstring.html">QString</a> &amp; <i>handle</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="setDefaultGateway"></a>void QtopiaNetwork::setDefaultGateway ( const <a href="qstring.html">QString</a> &amp; <i>handle</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>The network interface identified by <i>handle</i> becomes the new default gateway. If the device is connected to more than one network at a time this can be used to choose a preferred network for data transfers.</p>
-<h3 class="fn"><a name="settingsDir"></a><a href="./qstring.html">QString</a> QtopiaNetwork::settingsDir ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="settingsDir"></a><a href="qstring.html">QString</a> QtopiaNetwork::settingsDir ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns the default directory for network interface configurations; <tt>$HOME/Applications/Network/config</tt>.</p>
 <h3 class="fn"><a name="shutdown"></a>void QtopiaNetwork::shutdown ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Stops all active network interfaces.</p>
-<h3 class="fn"><a name="startInterface"></a>void QtopiaNetwork::startInterface ( const <a href="./qstring.html">QString</a> &amp; <i>handle</i>, const <a href="./qvariant.html">QVariant</a> &amp; <i>options</i> = QVariant() )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="startInterface"></a>void QtopiaNetwork::startInterface ( const <a href="qstring.html">QString</a> &amp; <i>handle</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>options</i> = QVariant() )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Starts that the network interface identified by <i>handle</i>. If the interface is running already this function does nothing.</p>
 <p><i>options</i> is used internally by some network plug-ins. It allows to specify additional parameters which are specific to particular network plug-ins. Otherwise this parameter can safely be ignored.</p>
-<h3 class="fn"><a name="stopInterface"></a>void QtopiaNetwork::stopInterface ( const <a href="./qstring.html">QString</a> &amp; <i>handle</i>, bool <i>deleteIface</i> = false )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="stopInterface"></a>void QtopiaNetwork::stopInterface ( const <a href="qstring.html">QString</a> &amp; <i>handle</i>, bool <i>deleteIface</i> = false )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Stops the network interface identified by <i>handle</i>. If <i>deleteIface</i> is true the server will delete all configuration information associated to this interface.</p>
-<h3 class="fn"><a name="unsetDefaultGateway"></a>void QtopiaNetwork::unsetDefaultGateway ( const <a href="./qstring.html">QString</a> &amp; <i>handle</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="unsetDefaultGateway"></a>void QtopiaNetwork::unsetDefaultGateway ( const <a href="qstring.html">QString</a> &amp; <i>handle</i> )&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Qtopia will set the default gateway to an interface that is not equal to <i>handle</i>. This is useful if <i>handle</i> goes offline and the caller doesn't care what interface should become the new default gateway.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

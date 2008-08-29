@@ -31,6 +31,7 @@
 
 class QStringList;
 class QtopiaSqlPrivate;
+class QtopiaSqlMigratePlugin;
 
 // create table support required?
 // named db support required (qtopia name of default db?)
@@ -66,6 +67,7 @@ public:
 
     void logQuery(const QSqlQuery &q);
 private:
+    void attachDB(const QString &path, const QString &dbPath, QtopiaSqlMigratePlugin *plugin);
     QtopiaSql();
     void closeDatabase();
     QSqlDatabase *connectDatabase(const QString &connName);
@@ -75,8 +77,9 @@ private:
     void connectDiskChannel();
 
     QtopiaSqlPrivate *d();
-    
+
     friend class QtopiaApplication;
+    friend class QtopiaSqlPrivate;
 };
 
 #endif

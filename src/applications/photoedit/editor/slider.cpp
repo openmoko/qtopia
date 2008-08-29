@@ -38,12 +38,28 @@ Slider::Slider( int min, int max, int step, int value, QWidget* parent )
 
 void Slider::keyPressEvent( QKeyEvent* e )
 {
-    QSlider::keyPressEvent( e );
+    switch (e->key()) {
+    case Qt::Key_Select:
+    case Qt::Key_Back:
+        QSlider::keyPressEvent( e );
 
-    if( ( e->key() == Qt::Key_Select || e->key() == Qt::Key_Back ) )
-    {
-         emit selected();
+        emit selected();
+    case Qt::Key_Up:
+    case Qt::Key_Down:
+        e->accept();
+        break;
+    default:
+        QSlider::keyPressEvent( e );
+    }
+}
 
-         e->accept();
+void Slider::focusOutEvent(QFocusEvent *event)
+{
+    switch (event->reason()) {
+    case Qt::MouseFocusReason:
+    case Qt::TabFocusReason:
+        hide();
+    default:
+        QSlider::focusOutEvent(event);
     }
 }

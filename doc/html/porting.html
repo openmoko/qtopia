@@ -65,6 +65,7 @@
 </ul>
 <li><a href="#porting-to-qtopia-4-3-2">Porting to Qtopia 4.3&#x2e;2</a></li>
 <ul><li><a href="#server-file-changes">Server file changes</a></li>
+<li><a href="#dbmigrate-changes">DBMigrate changes</a></li>
 </ul>
 </ul>
 <a name="overview"></a>
@@ -95,9 +96,9 @@
 <p>Primarily, porting changes will relate to the changes in the Qt API. Qtopia does <i>not</i> support the <a href="http://doc.trolltech.com/4.1/qt3support.html">Qt 3 Support</a> module, so the task of porting from Qtopia 2 to Qtopia 4 takes more work than porting from Qt 2 to Qt 4, however the key documents remain:</p>
 <ul>
 <li><a href="http://doc.trolltech.com/3.3/porting.html">Porting Qt 2 to Qt 3</a></li>
-<li><a href="./porting4.html">Porting Qt 3 to Qt 4</a></li>
-<li><a href="./qtopiacore-porting-device.html">Porting Qtopia Core to a New Architecture</a></li>
-<li><a href="./qtopiacore-porting-operatingsystem.html">Porting Qtopia Core to Another Operating System</a></li>
+<li><a href="porting4.html">Porting Qt 3 to Qt 4</a></li>
+<li><a href="qtopiacore-porting-device.html">Porting Qtopia Core to a New Architecture</a></li>
+<li><a href="qtopiacore-porting-operatingsystem.html">Porting Qtopia Core to Another Operating System</a></li>
 <li><a href="porting2to4.html">Porting to Qtopia 4</a></li>
 </ul>
 <a name="porting-to-qtopia-4-2-0"></a>
@@ -140,7 +141,7 @@
 <p>OTA SMS and WAP Push messages are now dispatched using the QDS service system. See <a href="ota.html">OTA Support</a> for more information.</p>
 <a name="network-api"></a>
 <h3>Network API</h3>
-<p>The Network APIs have been extended by moving device specific information from <a href="qnetworkstate.html">QNetworkState</a> to the new class <a href="qnetworkdevice.html">QNetworkDevice</a>. In addition <a href="./qnetworkinterface.html">QNetworkInterface</a> (introduced by Qt 4.2) replaces <a href="./qhostaddress.html">QHostAddress</a> throughout the Network API's.</p>
+<p>The Network APIs have been extended by moving device specific information from <a href="qnetworkstate.html">QNetworkState</a> to the new class <a href="qnetworkdevice.html">QNetworkDevice</a>. In addition <a href="qnetworkinterface.html">QNetworkInterface</a> (introduced by Qt 4.2) replaces <a href="qhostaddress.html">QHostAddress</a> throughout the Network API's.</p>
 <p>The table below lists the function conversions for porting to Qtopia 4.2&#x2e;0&#x2e;</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Qtopia 4.1&#x2e;x</th><th>Qtopia 4.2&#x2e;0</th></tr></thead>
@@ -172,10 +173,10 @@
 <tr valign="top" class="even"><td><tt>QCopServiceSelector</tt></td><td><a href="qtopiaserviceselector.html">QtopiaServiceSelector</a></td></tr>
 </table></p>
 <p>The functionality remains essentially the same. See the documentation for the individual classes for more information.</p>
-<p>In addition, it is recommended that code that used <a href="./qcopchannel.html">QCopChannel</a> should be updated to use <a href="qtopiachannel.html">QtopiaChannel</a> instead. <a href="./qcopchannel.html">QCopChannel</a> still exists as part of Qtopia Core, but future versions of Qtopia may implement <a href="qtopiachannel.html">QtopiaChannel</a> differently.</p>
+<p>In addition, it is recommended that code that used <a href="qcopchannel.html">QCopChannel</a> should be updated to use <a href="qtopiachannel.html">QtopiaChannel</a> instead. <a href="qcopchannel.html">QCopChannel</a> still exists as part of Qtopia Core, but future versions of Qtopia may implement <a href="qtopiachannel.html">QtopiaChannel</a> differently.</p>
 <a name="content"></a>
 <h3>Content</h3>
-<p><a href="qcontentfilter.html">QContentFilter</a> changed from a typedef of <a href="./qmultihash.html">QMultiHash</a>&lt; QContentSet::FilterType, <a href="./qstring.html">QString</a> &gt; to a new class with a different API and is no longer a member of <a href="qcontentset.html">QContentSet</a>. Basic filters in Qtopia 4.2 are still formed of a FilterType/<a href="./qstring.html">QString</a> pair but are combined using the logical operators And (&amp;) and Or (|) and can be negated using the negation (~) operator. The FilterType enum is also now a member of <a href="qcontentfilter.html">QContentFilter</a> and not <a href="qcontentset.html">QContentSet</a>, and the addCriteria() members of <a href="qcontentset.html">QContentSet</a> take an additional argument; a <a href="qcontentfilter.html#Operand-enum">QContentFilter::Operand</a> which specifices how the new criteria should be combined with any existing criteria.</p>
+<p><a href="qcontentfilter.html">QContentFilter</a> changed from a typedef of <a href="qmultihash.html">QMultiHash</a>&lt; QContentSet::FilterType, <a href="qstring.html">QString</a> &gt; to a new class with a different API and is no longer a member of <a href="qcontentset.html">QContentSet</a>. Basic filters in Qtopia 4.2 are still formed of a FilterType/<a href="qstring.html">QString</a> pair but are combined using the logical operators And (&amp;) and Or (|) and can be negated using the negation (~) operator. The FilterType enum is also now a member of <a href="qcontentfilter.html">QContentFilter</a> and not <a href="qcontentset.html">QContentSet</a>, and the addCriteria() members of <a href="qcontentset.html">QContentSet</a> take an additional argument; a <a href="qcontentfilter.html#Operand-enum">QContentFilter::Operand</a> which specifices how the new criteria should be combined with any existing criteria.</p>
 <p>The API of <a href="qdocumentselector.html">QDocumentSelector</a> has changed which has resulted in some methods being removed or replaced, the functional equivalents are listed in the table below:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Qtopia 4.1&#x2e;x</th><th>Qtopia 4.2&#x2e;0</th></tr></thead>
@@ -190,7 +191,7 @@
 <tr valign="top" class="odd"><td><tt>selectedDocument(false)</tt></td><td><a href="qdocumentselector.html#currentDocument">currentDocument()</a></td></tr>
 <tr valign="top" class="even"><td><tt>setDocuments(QContentSet)</tt></td><td><a href="qdocumentselector.html#setFilter">setFilter(QContentFilter)</a></td></tr>
 </table></p>
-<p>The <a href="qcontent.html#QContentId-typedef">QContentId</a> typedef has changed from a quint64 to a <a href="./qpair.html">QPair</a>&lt; <a href="qcontent.html#QtopiaDatabaseId-typedef">QtopiaDatabaseId</a>, quint64 &gt;.</p>
+<p>The <a href="qcontent.html#QContentId-typedef">QContentId</a> typedef has changed from a quint64 to a <a href="qpair.html">QPair</a>&lt; <a href="qcontent.html#QtopiaDatabaseId-typedef">QtopiaDatabaseId</a>, quint64 &gt;.</p>
 <p>The <tt>model()</tt> member of <a href="qcontentset.html">QContentSet</a> has been removed, a model for a <a href="qcontentset.html">QContentSet</a> can now by constructing a new <a href="qcontentsetmodel.html">QContentSetModel</a> and passing a pointer to the content set as an argument.</p>
 <p><a href="qcontent.html#UsageMode-typedef">QContent::UsageMode</a> has been renamed <a href="qcontent.html#Role-enum">QContent::Role</a>, <a href="qcontent.html#UsageMode-typedef">QContent::UsageMode</a> has been retained as a typedef of <a href="qcontent.html#Role-enum">QContent::Role</a> for compatability but is deprecated and should not be used in new code. Likewise <a href="qcontent.html#usageMode">QContent::usageMode</a>() has been replaced by <a href="qcontent.html#role">QContent::role</a>().</p>
 <a name="drm-api"></a>
@@ -213,7 +214,7 @@
 <p>Some lower-level functionality has been moved from parts of Qtopia's libraries into libqtopiabase. All Qtopia projects implicitly depend on this library but if you are not using Qt-style includes (See <a href="porting2to4.html#qtopia-4-headers">Qtopia 4 Headers</a>) you may have compile problems. In particular several headers that could previously be included with <tt>&lt;qtopia/header.h&gt;</tt> are now only available via <tt>&lt;header.h&gt;</tt> (or <tt>&lt;qtopiabase/header.h&gt;</tt> in cases where the header has a conflicting name).</p>
 <a name="porting-to-qtopia-4-2-1"></a>
 <h2>Porting to Qtopia 4.2&#x2e;1</h2>
-<p>The QObexPushService::aboutToDelete signal has been removed. Please use the <a href="./qobject.html#destroyed">QObject::destroyed</a>() signal instead.</p>
+<p>The QObexPushService::aboutToDelete signal has been removed. Please use the <a href="qobject.html#destroyed">QObject::destroyed</a>() signal instead.</p>
 <a name="porting-to-qtopia-4-2-2"></a>
 <h2>Porting to Qtopia 4.2&#x2e;2</h2>
 <a name="api"></a>
@@ -251,7 +252,7 @@
 <li>The QSDAPSearchResult class has been renamed to <a href="qbluetoothsdpqueryresult.html">QBluetoothSdpQueryResult</a></li>
 <li>The QSDAP class has been renamed to <a href="qbluetoothsdpquery.html">QBluetoothSdpQuery</a></li>
 <li>The <a href="qobexpushclient.html">QObexPushClient</a> and <a href="qobexpushservice.html">QObexPushService</a> classes no longer delete the provided QObexSocket object. The socket object should be deleted by the programmer when it is no longer required.</li>
-<li>The <a href="qobexpushclient.html">QObexPushClient</a> and <a href="qobexpushservice.html">QObexPushService</a> classes' setAutoDelete() and autoDelete() functions have been removed. To replicate the auto-delete functionality, connect <a href="qobexpushclient.html#done">QObexPushClient::done</a>() or <a href="qobexpushservice.html#done">QObexPushService::done</a>() to <a href="./qobject.html#deleteLater">QObject::deleteLater</a>().</li>
+<li>The <a href="qobexpushclient.html">QObexPushClient</a> and <a href="qobexpushservice.html">QObexPushService</a> classes' setAutoDelete() and autoDelete() functions have been removed. To replicate the auto-delete functionality, connect <a href="qobexpushclient.html#done">QObexPushClient::done</a>() or <a href="qobexpushservice.html#done">QObexPushService::done</a>() to <a href="qobject.html#deleteLater">QObject::deleteLater</a>().</li>
 <li>The <a href="qobexpushclient.html">QObexPushClient</a> and <a href="qobexpushservice.html">QObexPushService</a> classes' state() and error() functions now return enumeration values from their own classes rather than from the <a href="qobex.html">QObex</a> namespace</li>
 <li>The <a href="qobex.html">QObex</a> namespace has been removed</li>
 <li>The <a href="qobexpushclient.html#abort">QObexPushClient::abort</a>() now only aborts the current command instead of performing a hard abort and closing itself.</li>
@@ -333,24 +334,24 @@
 <p>More details about the change can be found in the class documentation for <a href="qphoneprofile.html">QPhoneProfile</a>.</p>
 <a name="openssl"></a>
 <h3>OpenSSL</h3>
-<p>Qt 4.3 introduced SSL support based on <a href="#openssl">OpenSSL</a>. In the process the new class <a href="./qsslsocket.html">QSslSocket</a> has been added to Qt 4.3&#x2e; Qtopia 4.3 makes use of this new class and subsequently the previous solution QtSslSocket has been removed from libqtopiacomm.</p>
+<p>Qt 4.3 introduced SSL support based on <a href="#openssl">OpenSSL</a>. In the process the new class <a href="qsslsocket.html">QSslSocket</a> has been added to Qt 4.3&#x2e; Qtopia 4.3 makes use of this new class and subsequently the previous solution QtSslSocket has been removed from libqtopiacomm.</p>
 <a name="qwizard"></a>
 <h3>QWizard</h3>
-<p>In Qtopia 4.2, there is a <a href="./qwizard.html">QWizard</a> class in the Qtopia libraries. In Qtopia 4.3 and subsequent releases, a rewritten class of the same name is part of the Qtopia Core libraries.</p>
-<p>When porting code that used the 4.2 <a href="./qwizard.html">QWizard</a>, the most significant difference is that now pages in the wizard are of type <a href="./qwizardpage.html">QWizardPage</a> (they were just any <a href="./qwidget.html">QWidget</a> in 4.2). Your compiler will report clearly where you need to change <a href="./qwidget.html">QWidget</a> to <a href="./qwizardpage.html">QWizardPage</a>.</p>
+<p>In Qtopia 4.2, there is a <a href="qwizard.html">QWizard</a> class in the Qtopia libraries. In Qtopia 4.3 and subsequent releases, a rewritten class of the same name is part of the Qtopia Core libraries.</p>
+<p>When porting code that used the 4.2 <a href="qwizard.html">QWizard</a>, the most significant difference is that now pages in the wizard are of type <a href="qwizardpage.html">QWizardPage</a> (they were just any <a href="qwidget.html">QWidget</a> in 4.2). Your compiler will report clearly where you need to change <a href="qwidget.html">QWidget</a> to <a href="qwizardpage.html">QWizardPage</a>.</p>
 <p>Approximate equivalents for methods are:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
 <thead><tr valign="top" class="qt-style"><th>Qtopia 4.2</th><th>Qtopia 4.3</th></tr></thead>
 <tr valign="top" class="odd"><td><tt>aboutToShowPage(int)</tt> (signal)</td><td>QWizard::initializePage(int) (virtual)</td></tr>
-<tr valign="top" class="even"><td><tt>setNextText(QString)</tt></td><td>QWizard::setButtonText(<a href="./qwizard.html#wizardbutton-enum">QWizard::NextButton</a>,<a href="./qstring.html">QString</a>)</td></tr>
-<tr valign="top" class="odd"><td><tt>nextText()</tt></td><td>QWizard::buttonText(<a href="./qwizard.html#wizardbutton-enum">QWizard::NextButton</a>)</td></tr>
-<tr valign="top" class="even"><td><tt>setPrevText(QString)</tt></td><td>QWizard::setButtonText(<a href="./qwizard.html#wizardbutton-enum">QWizard::BackButton</a>,<a href="./qstring.html">QString</a>)</td></tr>
-<tr valign="top" class="odd"><td><tt>prevText()</tt></td><td>QWizard::buttonText(<a href="./qwizard.html#wizardbutton-enum">QWizard::BackButton</a>)</td></tr>
-<tr valign="top" class="even"><td><tt>setNextEnabled()</tt></td><td>Manage the QWizard::button(<a href="./qwizard.html#wizardbutton-enum">QWizard::NextButton</a>) directly</td></tr>
-<tr valign="top" class="odd"><td><tt>setPrevEnabled()</tt></td><td>Manage the QWizard::button(<a href="./qwizard.html#wizardbutton-enum">QWizard::BackButton</a>) directly</td></tr>
-<tr valign="top" class="even"><td><tt>connectPageEnabler()</tt></td><td><a href="./qwizard.html#nextId">QWizard::nextId</a>() (virtual) or <a href="./qwizardpage.html#nextId">QWizardPage::nextId</a>() (virtual)</td></tr>
-<tr valign="top" class="odd"><td><tt>setAppropriate()</tt></td><td><a href="./qwizard.html#nextId">QWizard::nextId</a>() (virtual) or <a href="./qwizardpage.html#nextId">QWizardPage::nextId</a>() (virtual)</td></tr>
-<tr valign="top" class="even"><td><tt>showPage()</tt></td><td><a href="./qwizard.html#restart">QWizard::restart</a>(), <a href="./qwizard.html#next">QWizard::next</a>() or QWizardPage::back()</td></tr>
+<tr valign="top" class="even"><td><tt>setNextText(QString)</tt></td><td>QWizard::setButtonText(<a href="qwizard.html#WizardButton-enum">QWizard::NextButton</a>,<a href="qstring.html">QString</a>)</td></tr>
+<tr valign="top" class="odd"><td><tt>nextText()</tt></td><td>QWizard::buttonText(<a href="qwizard.html#WizardButton-enum">QWizard::NextButton</a>)</td></tr>
+<tr valign="top" class="even"><td><tt>setPrevText(QString)</tt></td><td>QWizard::setButtonText(<a href="qwizard.html#WizardButton-enum">QWizard::BackButton</a>,<a href="qstring.html">QString</a>)</td></tr>
+<tr valign="top" class="odd"><td><tt>prevText()</tt></td><td>QWizard::buttonText(<a href="qwizard.html#WizardButton-enum">QWizard::BackButton</a>)</td></tr>
+<tr valign="top" class="even"><td><tt>setNextEnabled()</tt></td><td>Manage the QWizard::button(<a href="qwizard.html#WizardButton-enum">QWizard::NextButton</a>) directly</td></tr>
+<tr valign="top" class="odd"><td><tt>setPrevEnabled()</tt></td><td>Manage the QWizard::button(<a href="qwizard.html#WizardButton-enum">QWizard::BackButton</a>) directly</td></tr>
+<tr valign="top" class="even"><td><tt>connectPageEnabler()</tt></td><td><a href="qwizard.html#nextId">QWizard::nextId</a>() (virtual) or <a href="qwizardpage.html#nextId">QWizardPage::nextId</a>() (virtual)</td></tr>
+<tr valign="top" class="odd"><td><tt>setAppropriate()</tt></td><td><a href="qwizard.html#nextId">QWizard::nextId</a>() (virtual) or <a href="qwizardpage.html#nextId">QWizardPage::nextId</a>() (virtual)</td></tr>
+<tr valign="top" class="even"><td><tt>showPage()</tt></td><td><a href="qwizard.html#restart">QWizard::restart</a>(), <a href="qwizard.html#next">QWizard::next</a>() or QWizardPage::back()</td></tr>
 </table></p>
 <a name="qoccurrencemodel"></a>
 <h3>QOccurrenceModel</h3>
@@ -365,7 +366,7 @@
 <p>The addition of the <tt>QPimDelegate</tt> class means that <tt>QTaskDelegate</tt> and <tt>QContactDelegate</tt> are no longer based on <tt>QAbstractItemDelegate</tt>. Instead, they are based on <tt>QPimDelegate</tt> and now have a different appearance.</p>
 <a name="qtopiasendvia"></a>
 <h3>QtopiaSendVia</h3>
-<p>The <a href="qtopiasendvia.html#sendFile">QtopiaSendVia::sendFile</a>() function that accepted a filename string, a MIME type string and a <tt>bool</tt> in 4.2 now accepts an additional <a href="./qstring.html">QString</a> argument for the file description.</p>
+<p>The <a href="qtopiasendvia.html#sendFile">QtopiaSendVia::sendFile</a>() function that accepted a filename string, a MIME type string and a <tt>bool</tt> in 4.2 now accepts an additional <a href="qstring.html">QString</a> argument for the file description.</p>
 <a name="qbluetoothaudiogateway"></a>
 <h3>QBluetoothAudioGateway</h3>
 <p>The following functions have been removed:</p>
@@ -390,7 +391,7 @@
 <p>The <tt>QBluetoothAbstractSocket::BindError</tt> enumeration value has been removed.</p>
 <a name="obex-api-and-obex-related-classes-in-bluetooth-and-irda-apis"></a>
 <h3>OBEX API and OBEX-related classes in Bluetooth and IrDA APIs</h3>
-<p><tt>QObexSocket</tt> and its subclasses, <tt>QBluetoothObexSocket</tt> and <tt>QIrObexSocket</tt>, have been removed. In Qtopia 4.2, these classes provided a way to specify the transport to be used for a <a href="qobexpushclient.html">QObexPushClient</a> or <a href="qobexpushservice.html">QObexPushService</a>; in Qtopia 4.3, they are no longer necessary as <a href="qobexpushclient.html">QObexPushClient</a> and <a href="qobexpushservice.html">QObexPushService</a> now accept <a href="./qiodevice.html">QIODevice</a> pointers instead of <tt>QObexSocket</tt> pointers for this purpose. This means the developer can use any <a href="./qiodevice.html">QIODevice</a> subclass such as <a href="qbluetoothrfcommsocket.html">QBluetoothRfcommSocket</a>, <a href="qirsocket.html">QIrSocket</a> or <a href="./qtcpsocket.html">QTcpSocket</a> to specify the transport layer for a OBEX Object Push client or service.</p>
+<p><tt>QObexSocket</tt> and its subclasses, <tt>QBluetoothObexSocket</tt> and <tt>QIrObexSocket</tt>, have been removed. In Qtopia 4.2, these classes provided a way to specify the transport to be used for a <a href="qobexpushclient.html">QObexPushClient</a> or <a href="qobexpushservice.html">QObexPushService</a>; in Qtopia 4.3, they are no longer necessary as <a href="qobexpushclient.html">QObexPushClient</a> and <a href="qobexpushservice.html">QObexPushService</a> now accept <a href="qiodevice.html">QIODevice</a> pointers instead of <tt>QObexSocket</tt> pointers for this purpose. This means the developer can use any <a href="qiodevice.html">QIODevice</a> subclass such as <a href="qbluetoothrfcommsocket.html">QBluetoothRfcommSocket</a>, <a href="qirsocket.html">QIrSocket</a> or <a href="qtcpsocket.html">QTcpSocket</a> to specify the transport layer for a OBEX Object Push client or service.</p>
 <p>These changes also mean that <tt>QObexServer</tt>, <tt>QBluetoothObexServer</tt> and <tt>QIrObexServer</tt> are no longer necessary and have been removed. The developer can directly use <a href="qbluetoothrfcommserver.html">QBluetoothRfcommServer</a> and <a href="qirserver.html">QIrServer</a> instead.</p>
 <p>To port existing code to the 4.3 API:</p>
 <p><table align="center" cellpadding="2" cellspacing="1" border="0">
@@ -400,7 +401,7 @@
 </table></p>
 <p>Changes to the <a href="qobexpushclient.html">QObexPushClient</a> API:</p>
 <ul>
-<li>The constructor accepts a <a href="./qiodevice.html">QIODevice</a> pointer instead of a QObexSocket pointer, as shown above.</li>
+<li>The constructor accepts a <a href="qiodevice.html">QIODevice</a> pointer instead of a QObexSocket pointer, as shown above.</li>
 <li>The QObexPushClient::State enumeration has been removed. Use <a href="qobexpushclient.html#Command-enum">QObexPushClient::Command</a> and <a href="qobexpushclient.html#currentCommand">QObexPushClient::currentCommand</a>() to determine whether a command is in progress.</li>
 <li><tt>LinkError</tt> is now <tt>ConnectionError</tt>.</li>
 <li><tt>TransportConnectionError</tt> has been removed; use <tt>ConnectionError</tt> instead.</li>
@@ -408,10 +409,10 @@
 </ul>
 <p>Changes to the <a href="qobexpushservice.html">QObexPushService</a> API:</p>
 <ul>
-<li>The constructor accepts a <a href="./qiodevice.html">QIODevice</a> pointer instead of a QObexSocket pointer, as shown above.</li>
-<li><tt>acceptFile()</tt> arguments have changed, and it now returns a <a href="./qiodevice.html">QIODevice</a> pointer instead of a <tt>bool</tt>; this means <tt>setIncomingDirectory()</tt> and <tt>incomingDirectory()</tt> are no longer necessary and have been removed.</li>
+<li>The constructor accepts a <a href="qiodevice.html">QIODevice</a> pointer instead of a QObexSocket pointer, as shown above.</li>
+<li><tt>acceptFile()</tt> arguments have changed, and it now returns a <a href="qiodevice.html">QIODevice</a> pointer instead of a <tt>bool</tt>; this means <tt>setIncomingDirectory()</tt> and <tt>incomingDirectory()</tt> are no longer necessary and have been removed.</li>
 <li><tt>close()</tt> has been removed.</li>
-<li><tt>socket()</tt> has been removed. Use <tt>sessionDevice()</tt> to get the <a href="./qiodevice.html">QIODevice</a> provided in the constructor.</li>
+<li><tt>socket()</tt> has been removed. Use <tt>sessionDevice()</tt> to get the <a href="qiodevice.html">QIODevice</a> provided in the constructor.</li>
 <li><tt>LinkError</tt> is now <tt>ConnectionError</tt>.</li>
 <li>Some signals have been renamed:<ul>
 <li><tt>putRequest()</tt> is now <tt>putRequested()</tt> and the arguments have changed</li>
@@ -532,7 +533,7 @@
 <a name="qtopiaipcadaptor-changes"></a>
 <h3>QtopiaIpcAdaptor changes</h3>
 <p>In previous versions of Qtopia, a class that inherited from <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a> that used the <tt>connect()</tt> method without qualification would get <a href="qtopiaipcadaptor.html#connect">QtopiaIpcAdaptor::connect</a>() instead of <tt>QObject::connect()</tt>. This would sometimes cause hard to find problems where the user intended to connect to a regular signal but was actually connecting to an IPC message.</p>
-<p>The <tt>MESSAGE(x)</tt> macro in <tt>qtopiaipcadaptor.h</tt> has been changed so that it is not the same as the <tt>SIGNAL(x)</tt> macro. This allows <a href="qtopiaipcadaptor.html#connect">QtopiaIpcAdaptor::connect</a>() to correctly determine when it should fall back to <a href="./qobject.html#connect">QObject::connect</a>() when called from a subclass of <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a>.</p>
+<p>The <tt>MESSAGE(x)</tt> macro in <tt>qtopiaipcadaptor.h</tt> has been changed so that it is not the same as the <tt>SIGNAL(x)</tt> macro. This allows <a href="qtopiaipcadaptor.html#connect">QtopiaIpcAdaptor::connect</a>() to correctly determine when it should fall back to <a href="qobject.html#connect">QObject::connect</a>() when called from a subclass of <a href="qtopiaipcadaptor.html">QtopiaIpcAdaptor</a>.</p>
 <p>From 4.3&#x2e;1 onwards it is required that <tt>MESSAGE(x)</tt> be used when connecting to an IPC message rather than an actual signal. The &quot;No such signal&quot; error may be generated if previous code used <tt>SIGNAL(x)</tt> to refer to an IPC message.</p>
 <p>This change introduces a slight binary incompatibility between 4.3&#x2e;0 and 4.3&#x2e;1: third-party code that uses <a href="qtopiaipcadaptor.html#connect">QtopiaIpcAdaptor::connect</a>() will need to be recompiled to pick up the new definition for <tt>MESSAGE(x)</tt>.</p>
 <a name="names-changes"></a>
@@ -583,6 +584,11 @@
 <tr valign="top" class="odd"><td>server/phone/themedhomescreen.{cpp|h}</td><td>server/phone/homescreen/themed/themedhomescreen.{cpp|h}</td></tr>
 <tr valign="top" class="even"><td>server/phone/videoringtone.{cpp|h}</td><td>server/phone/telephony/videoringtone/videoringtone.{cpp|h}</td></tr>
 </table></p>
+<a name="dbmigrate-changes"></a>
+<h3>DBMigrate changes</h3>
+<p>The dbmigrate application has been deprecated and replaced with a plug-in of the same name. The plug-in is run in process and as such does not suffer the same synchronization and time-out issues as the DBMigrate service did.</p>
+<p>This isn't expected to effect non Qtopia code but if required the command line and service interfaces of the dbmigrate application are still available from a new project in <tt>src/tools/dbmigrateservice</tt>.</p>
+<p>This change also obsoletes the DBMigrate server task which has been removed from the server. Any references to DBMigrate in <tt>Tasks.cfg</tt> files are now obsolete and should be removed.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">
 <td align="left">Copyright &copy; 2008 <a href="trolltech.html">Trolltech</a></td>

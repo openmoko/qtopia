@@ -113,7 +113,11 @@ void InputWidget::init( int fromRow, int fromCol )
     // First column
     PBBS = new QPushButton;
     PBBS->setSizePolicy(sizePolicy());
-    PBBS->setText( tr("<-") );
+    /* This is a directional marker - not to be translated */
+    if (QApplication::layoutDirection() == Qt::LeftToRight)
+        PBBS->setText("<-");
+    else
+        PBBS->setText("-<");
     InputWidgetLayout->addWidget( PBBS, fromRow, fromCol );
 
     PB7 = new QPushButton;

@@ -52,6 +52,7 @@ public:
     virtual bool contains( const QContent & ) const{ return false; }
 
 protected:
+    virtual void commitChanges(){}
     virtual void filterChanged( const QContentFilter & ){}
     virtual void sortCriteriaChanged( const QContentSortCriteria & ){}
 
@@ -344,14 +345,23 @@ void QContentSet::init()
                 this, SIGNAL(contentAboutToBeInserted(int,int)) );
         connect( d  , SIGNAL(contentChanged(int,int)),
                 this, SIGNAL(contentChanged(int,int)) );
-        connect( d  , SIGNAL(contentChanged(QContentIdList,QContent::ChangeType)),
-                this, SIGNAL(changed(QContentIdList,QContent::ChangeType)) );
         connect( d  , SIGNAL(contentRemoved()),
                 this, SIGNAL(contentRemoved()) );
         connect( d  , SIGNAL(contentInserted()),
                 this, SIGNAL(contentInserted()) );
         connect( d  , SIGNAL(contentChanged()),
                 this, SIGNAL(changed()) );
+
+#ifndef QTOPIA_CONTENT_INSTALLER
+    connect(qApp, SIGNAL(contentChanged(QContentIdList,QContent::ChangeType)),
+            d, SLOT(update()));
+    connect(qApp, SIGNAL(contentChanged(QContentIdList,QContent::ChangeType)),
+            this, SIGNAL(changed(QContentIdList,QContent::ChangeType)) );
+    connect(QContentUpdateManager::instance(), SIGNAL(refreshRequested()),
+            d, SLOT(update()));
+#endif
+
+        d->update();
     }
     else
     {
@@ -375,6 +385,7 @@ QContentSet::~QContentSet()
 void QContentSet::setSortCriteria( const QContentSortCriteria &criteria )
 {
     d->setSortCriteria( criteria );
+    d->update();
 }
 
 /*!
@@ -448,6 +459,7 @@ bool QContentSet::contains( const QContent &content ) const
 void QContentSet::add( const QContent &content )
 {
     d->insertContent( content );
+    d->update();
 }
 
 /*!
@@ -460,6 +472,7 @@ void QContentSet::add( const QContent &content )
 void QContentSet::remove( const QContent &content )
 {
     d->removeContent( content );
+    d->update();
 }
 
 /*!
@@ -472,6 +485,7 @@ void QContentSet::remove( const QContent &content )
 void QContentSet::clear()
 {
     d->clear();
+    d->update();
 }
 
 /*!
@@ -658,6 +672,9 @@ QContentId QContentSet::contentId( int index ) const
 */
 bool QContentSet::isEmpty() const
 {
+    if (d->updatePending() && d->updateMode() == Synchronous)
+        const_cast<QContentSetEngine *>(d)->flush();
+
     return d->isEmpty();
 }
 
@@ -673,6 +690,7 @@ void QContentSet::appendFrom( QContentSet& other )
     {
         add(other.content(i));
     }
+    d->update();
 }
 
 /*!
@@ -680,6 +698,9 @@ void QContentSet::appendFrom( QContentSet& other )
 */
 int QContentSet::count() const
 {
+    if (d->updatePending() && d->updateMode() == Synchronous)
+        const_cast<QContentSetEngine *>(d)->flush();
+
     return d->count();
 }
 
@@ -751,6 +772,7 @@ QContentSet &QContentSet::operator=(const QContentSet& contentset)
 {
     d->setFilter( contentset.filter() );
     d->setSortCriteria( contentset.sortCriteria() );
+    d->update();
 
     return *this;
 }
@@ -772,6 +794,7 @@ QContentSet::UpdateMode QContentSet::updateMode() const
 void QContentSet::clearFilter()
 {
     d->setFilter( QContentFilter() );
+    d->update();
 }
 
 /*!
@@ -796,6 +819,7 @@ void QContentSet::addCriteria( QContentFilter::FilterType kind, const QString &f
     {
         d->setFilter( d->filter() | QContentFilter( kind, filter ) );
     }
+    d->update();
 }
 
 /*!
@@ -819,6 +843,7 @@ void QContentSet::addCriteria(const QContentFilter& filter, QContentFilter::Oper
     {
         d->setFilter( d->filter() | filter );
     }
+    d->update();
 }
 
 /*!
@@ -829,6 +854,7 @@ void QContentSet::addCriteria(const QContentFilter& filter, QContentFilter::Oper
 void QContentSet::setCriteria(QContentFilter::FilterType kind, const QString &filter)
 {
     d->setFilter( QContentFilter( kind, filter ) );
+    d->update();
 }
 
 /*!
@@ -847,6 +873,7 @@ void QContentSet::setCriteria(QContentFilter::FilterType kind, const QString &fi
 void QContentSet::setCriteria(const QContentFilter& filter)
 {
     d->setFilter( filter );
+    d->update();
 }
 
 /*!
@@ -886,6 +913,7 @@ QContentFilter QContentSet::filter() const
 void QContentSet::setSortOrder( const QStringList &sortOrder )
 {
     d->setSortOrder( sortOrder );
+    d->update();
 }
 
 /*!

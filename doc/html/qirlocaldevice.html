@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QIrLocalDevice Class Reference</h1>
 <p>The QIrLocalDevice class encapsulates a local Infrared (IrDA) device. <a href="#details">More...</a></p>
-<pre>    #include &lt;QIrLocalDevice&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QIrLocalDevice&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qirlocaldevice-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -29,7 +29,7 @@
 <li><div class="fn"/>QVariant <b><a href="qirlocaldevice.html#queryRemoteAttribute">queryRemoteAttribute</a></b> ( const QIrRemoteDevice &amp; <i>remote</i>, const QString &amp; <i>className</i>, const QString &amp; <i>attribName</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -37,7 +37,7 @@
 <li><div class="fn"/>bool <b><a href="qirlocaldevice.html#discoverRemoteDevices">discoverRemoteDevices</a></b> ( QIr::DeviceClasses <i>classes</i> = QIr::All )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -48,7 +48,7 @@
 <li><div class="fn"/>void <b><a href="qirlocaldevice.html#remoteDevicesFound">remoteDevicesFound</a></b> ( const QList&lt;QIrRemoteDevice&gt; &amp; <i>devices</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -56,14 +56,14 @@
 <li><div class="fn"/>QStringList <b><a href="qirlocaldevice.html#devices">devices</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -76,7 +76,7 @@
 <p>See also <a href="qiriasdatabase.html">QIrIasDatabase</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QIrLocalDevice"></a>QIrLocalDevice::QIrLocalDevice ( const <a href="./qstring.html">QString</a> &amp; <i>device</i> )</h3>
+<h3 class="fn"><a name="QIrLocalDevice"></a>QIrLocalDevice::QIrLocalDevice ( const <a href="qstring.html">QString</a> &amp; <i>device</i> )</h3>
 <p>Constructs a local device for the given device name <i>device</i>. The <i>device</i> is usually of the form irdaN, e.g&#x2e; irda0.</p>
 <p>See also <a href="qirlocaldevice.html#devices">devices</a>().</p>
 <h3 class="fn"><a name="dtor.QIrLocalDevice"></a>QIrLocalDevice::~QIrLocalDevice ()</h3>
@@ -89,9 +89,9 @@
 <p>Tries to bring up the infrared device. Returns true if the device could be brought up successfully, and false otherwise.</p>
 <p>NOTE: Under linux this function requires administrator privileges.</p>
 <p>See also <a href="qirlocaldevice.html#isUp">isUp</a>() and <a href="qirlocaldevice.html#bringDown">bringDown</a>().</p>
-<h3 class="fn"><a name="deviceName"></a>const <a href="./qstring.html">QString</a> &amp; QIrLocalDevice::deviceName () const</h3>
+<h3 class="fn"><a name="deviceName"></a>const <a href="qstring.html">QString</a> &amp; QIrLocalDevice::deviceName () const</h3>
 <p>Returns the device name of the infrared device. E.g&#x2e; irda0.</p>
-<h3 class="fn"><a name="devices"></a><a href="./qstringlist.html">QStringList</a> QIrLocalDevice::devices ()&nbsp;&nbsp;<tt> [static]</tt></h3>
+<h3 class="fn"><a name="devices"></a><a href="qstringlist.html">QStringList</a> QIrLocalDevice::devices ()&nbsp;&nbsp;<tt> [static]</tt></h3>
 <p>Returns all the infrared devices found on this system. The contents of the list could be passed to the <a href="qirlocaldevice.html">QIrLocalDevice</a> constructor.</p>
 <h3 class="fn"><a name="discoverRemoteDevices"></a>bool QIrLocalDevice::discoverRemoteDevices ( <a href="qir.html#DeviceClass-enum">QIr::DeviceClasses</a> <i>classes</i> = QIr::All )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Starts a discovery of remote infrared devices. The <i>classes</i> parameter specifies a filtering set. Thus a client can request that only remote devices which have at least one device class present in the filter set be discovered.</p>
@@ -107,7 +107,7 @@
 <h3 class="fn"><a name="isUp"></a>bool QIrLocalDevice::isUp () const</h3>
 <p>Returns true if the infrared device is up and running.</p>
 <p>See also <a href="qirlocaldevice.html#bringUp">bringUp</a>() and <a href="qirlocaldevice.html#bringDown">bringDown</a>().</p>
-<h3 class="fn"><a name="queryRemoteAttribute"></a><a href="./qvariant.html">QVariant</a> QIrLocalDevice::queryRemoteAttribute ( const <a href="qirremotedevice.html">QIrRemoteDevice</a> &amp; <i>remote</i>, const <a href="./qstring.html">QString</a> &amp; <i>className</i>, const <a href="./qstring.html">QString</a> &amp; <i>attribName</i> )</h3>
+<h3 class="fn"><a name="queryRemoteAttribute"></a><a href="qvariant.html">QVariant</a> QIrLocalDevice::queryRemoteAttribute ( const <a href="qirremotedevice.html">QIrRemoteDevice</a> &amp; <i>remote</i>, const <a href="qstring.html">QString</a> &amp; <i>className</i>, const <a href="qstring.html">QString</a> &amp; <i>attribName</i> )</h3>
 <p>Tries to query the remote device given by <i>remote</i> for an IAS Database entry with class name given by <i>className</i> and attribute name given by <i>attribName</i>. Returns a valid attribute if the device has an attribute specified, returns false if the device could not be contacted or the attribute does not exist.</p>
 <pre>    QIrIasAttribute ret =
             dev.queryRemoteAttribute(remote, &quot;OBEX&quot;, &quot;IrDA:TinyTP:LsapSel&quot;);</pre>
@@ -116,7 +116,7 @@
 <h3 class="fn"><a name="remoteDeviceFound"></a>void QIrLocalDevice::remoteDeviceFound ( const <a href="qirremotedevice.html">QIrRemoteDevice</a> &amp; <i>device</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted during the discovery procedure. The <i>device</i> parameter holds the remote device found. Clients can subscribe to this signal if they wish to receive information about one device at a time. The can subscribe to the <a href="qirlocaldevice.html#remoteDevicesFound">remoteDevicesFound</a>() signal if they wish to receive all the devices wholesale.</p>
 <p>See also <a href="qirlocaldevice.html#discoveryStarted">discoveryStarted</a>(), <a href="qirlocaldevice.html#discoveryCompleted">discoveryCompleted</a>(), and <a href="qirlocaldevice.html#remoteDevicesFound">remoteDevicesFound</a>().</p>
-<h3 class="fn"><a name="remoteDevicesFound"></a>void QIrLocalDevice::remoteDevicesFound ( const <a href="./qlist.html">QList</a>&lt;<a href="qirremotedevice.html">QIrRemoteDevice</a>&gt; &amp; <i>devices</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="remoteDevicesFound"></a>void QIrLocalDevice::remoteDevicesFound ( const <a href="qlist.html">QList</a>&lt;<a href="qirremotedevice.html">QIrRemoteDevice</a>&gt; &amp; <i>devices</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted during the discovery procedure. The <i>devices</i> parameter holds the list of remote devices found. Clients can subscribe to this signal if they wish to receive information about all devices at once. They could subscribe to the <a href="qirlocaldevice.html#remoteDeviceFound">remoteDeviceFound</a>() signal if they wished to receive the information piecemeal.</p>
 <p>See also <a href="qirlocaldevice.html#discoveryStarted">discoveryStarted</a>(), <a href="qirlocaldevice.html#discoveryCompleted">discoveryCompleted</a>(), and <a href="qirlocaldevice.html#remoteDeviceFound">remoteDeviceFound</a>().</p>
 <p /><address><hr /><div align="center">

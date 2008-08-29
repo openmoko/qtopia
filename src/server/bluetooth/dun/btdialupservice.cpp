@@ -27,14 +27,14 @@
 
 /*!
   \class BtDialupServiceTask
-  \brief The BtDialupServiceTask class provides server side support for the Bluetooth 
+  \brief The BtDialupServiceTask class provides server side support for the Bluetooth
   DUN profile.
   \ingroup QtopiaServer::Task::Bluetooth
 
-  This task listens for incoming Bluetooth DUN connections, forwards the request to 
-  Qtopia's modem emulator and manages the life time of these connections. This task relies 
+  This task listens for incoming Bluetooth DUN connections, forwards the request to
+  Qtopia's modem emulator and manages the life time of these connections. This task relies
   on QBluetoothSerialPortService.
-  
+
   The BtDialupServiceTask class provides the \c {BtDialupServiceTask} task.
   This class is part of the Qtopia server and cannot be used by other QtopiaApplications.
 
@@ -52,6 +52,8 @@ BtDialupServiceTask::BtDialupServiceTask( QObject* parent )
     QFile file(Qtopia::qtopiaDir() + "etc/bluetooth/sdp/dun.xml");
     file.open(QIODevice::ReadOnly);
     QBluetoothSdpRecord record = QBluetoothSdpRecord::fromDevice(&file);
+    if (record.isNull())
+        qWarning() << "BtDialupServiceTask: cannot read" << file.fileName();
 
     provider = new QBluetoothSerialPortService( QLatin1String("DialupNetworking"),
             tr("Dial-up Networking"),

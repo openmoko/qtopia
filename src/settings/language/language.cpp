@@ -22,6 +22,7 @@
 #include "languagesettings.h"
 #include "langmodel.h"
 
+#include <QtopiaApplication>
 #include <qtopianamespace.h>
 #include <qtopialog.h>
 #include <qtopiaipcenvelope.h>
@@ -30,6 +31,8 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QListView>
+#include <QCheckBox>
+#include <QPushButton>
 #include <QDir>
 #include <QMenu>
 
@@ -55,10 +58,62 @@ QStringList LanguageSettings::dictLanguages()
     return langs;
 }
 
+class TouchScreenAcceptDlg : public QDialog
+{
+    Q_OBJECT
+public:
+
+    TouchScreenAcceptDlg(const QModelIndex& index, bool allowActivation,
+        const QString lang, QWidget* parent = 0, Qt::WindowFlags flags = 0)
+        : QDialog(parent, flags), change(false), dictionaryState(false)
+    {
+        setWindowTitle( tr("Options") );
+        QVBoxLayout* vbox = new QVBoxLayout(this);
+ 
+        checkbox = new QCheckBox(tr("Use for Input"));
+        checkbox->setEnabled(LanguageSettings::dictLanguages().contains(lang));
+        bool useForInput = index.data(Qt::UserRole).toBool();
+        checkbox->setChecked(useForInput);
+        dictionaryState = useForInput;
+        vbox->addWidget(checkbox);
+
+        checkbox->setEnabled(allowActivation); //the current lang is used as primary dictionary
+
+        if (allowActivation) {
+            QPushButton* btn = new QPushButton(tr("Activate"));
+            vbox->addWidget(btn);
+            connect(btn, SIGNAL(clicked()), this, SLOT(activateLanguage()));
+        }
+    }
+
+    bool inputToggled() const
+    {
+        return dictionaryState != checkbox->isChecked();
+    }
+
+    bool languageActivated() const
+    {
+        return change;
+    }
+
+private slots:
+    void activateLanguage()
+    {
+        change = true;
+        accept();
+    }
+
+private:
+    QCheckBox* checkbox;
+    bool change;
+    bool dictionaryState;
+
+};
+
 #include "langname.h"
 
 LanguageSettings::LanguageSettings( QWidget* parent, Qt::WFlags fl )
-    : QDialog( parent, fl ), confirmChange(true)
+    : QDialog( parent, fl ), confirmChange(true), a_input(0)
 {
     setupUi(this);
     setModal( true );
@@ -118,13 +173,16 @@ LanguageSettings::LanguageSettings( QWidget* parent, Qt::WFlags fl )
     connect(selectionModel,SIGNAL(currentChanged(QModelIndex,QModelIndex)),
             this, SLOT(applyLanguage(QModelIndex)));
     connect(listView,SIGNAL(activated(QModelIndex)), this, SLOT(newLanguageSelected()));
-    a_input = new QAction( tr("Use for input"), this );
-    connect( a_input, SIGNAL(triggered(bool)), this, SLOT(inputToggled()) );
-    a_input->setCheckable(true);
-    updateActions(listView->currentIndex());
 
-    QMenu *menu = QSoftMenuBar::menuFor(this);
-    menu->addAction(a_input);
+    if (!Qtopia::mousePreferred()) {
+        a_input = new QAction( tr("Use for input"), this );
+        connect( a_input, SIGNAL(triggered(bool)), this, SLOT(inputToggled()) );
+        a_input->setCheckable(true);
+        updateActions(listView->currentIndex());
+
+        QMenu *menu = QSoftMenuBar::menuFor(this);
+        menu->addAction(a_input);
+    }
 }
 
 LanguageSettings::~LanguageSettings()
@@ -142,7 +200,7 @@ void LanguageSettings::inputToggled(const QModelIndex &index)
     inputLanguages.removeAll(lang);
     bool selected = model->data(index,Qt::UserRole).toBool();
     if (!selected && dictLanguages().contains(lang)) {
-        inputLanguages.prepend(lang);
+        inputLanguages.append(lang);
         model->setData(index, QVariant(true), Qt::UserRole);
     } else {
         model->setData(index, QVariant(false), Qt::UserRole);
@@ -153,12 +211,16 @@ void LanguageSettings::inputToggled(const QModelIndex &index)
 
 void LanguageSettings::updateActions(const QModelIndex& index)
 {
-    if (!index.isValid())
+    if (!index.isValid() || Qtopia::mousePreferred())
         return;
     QString lang = langAvail.at( listView->currentIndex().row() );
     bool dictLang = dictLanguages().contains(lang);
 
-    a_input->setEnabled(dictLang);
+    QSettings config("Trolltech","locale");
+    config.beginGroup( "Language" );
+    QString clang = config.value( "Language" ).toString();
+
+    a_input->setEnabled(dictLang && clang!=lang);
     a_input->setVisible(dictLang);
     a_input->setChecked(inputLanguages.contains(lang));
 }
@@ -195,11 +257,26 @@ void LanguageSettings::newLanguageSelected()
     config.beginGroup( "Language" );
     QString lang = config.value( "Language" ).toString();
 
-    if (lang == chosenLanguage) {
-        accept();
-        return;
+    if ( Qtopia::mousePreferred() )
+    {
+        TouchScreenAcceptDlg dlg(listView->currentIndex(), lang!=chosenLanguage, chosenLanguage, this);
+        QtopiaApplication::execDialog( &dlg, true );
+        if (dlg.result() == QDialog::Rejected) {
+            return;
+        } else {
+            if (dlg.inputToggled())
+                inputToggled();
+            if (!dlg.languageActivated())
+                return;
+        }
     }
 
+
+    if (lang == chosenLanguage) {
+        if ( !Qtopia::mousePreferred() )
+            accept();
+        return;
+    }
 
     if( lang != chosenLanguage && confirmChange
         && QMessageBox::warning( this, tr("Language Change"),
@@ -302,3 +379,5 @@ void LanguageSettings::done(int r)
     QDialog::done(r);
     close();
 }
+
+#include "language.moc"

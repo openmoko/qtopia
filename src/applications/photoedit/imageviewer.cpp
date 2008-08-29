@@ -29,22 +29,19 @@
 #include <QtDebug>
 #include <QDrmContent>
 
+Q_DECLARE_METATYPE(QList<QImage>);
+
 class ImageViewerLoader : public QObject
 {
     Q_OBJECT
 public:
-    ImageViewerLoader( ImageViewerPrivate *viewer_d );
+    ImageViewerLoader();
 
 public slots:
     void setContent( const QContent &content );
-    void fetchRect( const QRect &rect, const QRect &source );
 
 signals:
-    void rectAvailable( const QRect &rect, const QImage &image );
-
-private:
-    ImageViewerPrivate *d;
-    QImage m_image;
+    void imageLoaded(const QContent &content, const QList<QImage> &images, const QSize &size, qreal prescaling);
 };
 
 class ImageViewerPrivate : public QThread
@@ -59,7 +56,6 @@ public:
     QDrmContent drmContent;
     QByteArray format;
     QSize size;
-    bool canView;
     ImageViewer::ScaleMode scaleMode;
     qreal prescaling;
     qreal scaleX;
@@ -68,20 +64,17 @@ public:
     QSize scaledSize;
     QSize transformedSize;
     QRect screenRect;
-    QPixmap pixmap;
-    QRect pixmapRect;
-    int updateTimerId;
+    QList<QImage> images;
+
     QPoint lastMousePos;
     QMutex syncMutex;
     QWaitCondition syncCondition;
 
     void calculateScale();
     void calculateTransform();
-    void calculateScreenRect();
 
 signals:
     void setContent( const QContent &content );
-    void fetchRect( const QRect &rect, const QRect &source );
 
 protected:
     void run();
@@ -89,108 +82,81 @@ protected:
     friend class ImageViewer;
 };
 
-ImageViewerLoader::ImageViewerLoader( ImageViewerPrivate *viewer_d )
-    : d( viewer_d )
+ImageViewerLoader::ImageViewerLoader()
 {
 }
 
 void ImageViewerLoader::setContent( const QContent &content )
 {
-    static const int maxArea = 6144000;
-
-    m_image = QImage();
-
-    d->content = content;
+    static const int maxArea = 2304000;
 
     QIODevice *device = 0;
     QImageReader reader;
 
-    d->format     = QByteArray();
-    d->size       = QSize();
-    d->prescaling = 1.0;
-    d->canView    = false;
-
     int area = 0;
 
-    QDrmContent drmContent( QDrmRights::Display, QDrmContent::NoLicenseOptions );
+    QSize size;
+    qreal prescaling = 1.0;
+    bool canView = false;
 
-    if( !content.isNull() && drmContent.requestLicense( content ) && (device = content.open()) != 0 )
-    {
+    QDrmContent drmContent(QDrmRights::Display, QDrmContent::NoLicenseOptions);
+
+    if(!content.isNull() && drmContent.requestLicense(content) && (device = content.open()) != 0) {
         reader.setDevice( device );
 
-        d->format     = reader.format();
-        d->size       = reader.size();
-        d->prescaling = 1.0;
+        size = reader.size();
+        area = size.width() * size.height();
 
-        area = d->size.width() * d->size.height();
-
-        d->canView  = reader.canRead() && area <= maxArea || reader.supportsOption( QImageIOHandler::ScaledSize );
+        canView  = reader.canRead()
+                && area <= maxArea || reader.supportsOption(QImageIOHandler::ScaledSize);
     }
 
-    while( d->canView && area > maxArea )
-    {
-        d->prescaling /= 2.0;
+    while (canView && area > maxArea) {
+        prescaling /= 2.0;
 
-        area = qRound( area * d->prescaling * d->prescaling );
+        area = qRound(area * prescaling * prescaling);
     }
 
-    {
-        QMutexLocker locker( &d->syncMutex );
+    QImage image;
 
-        d->syncCondition.wakeAll();
+    if (canView) {
+        if (prescaling < 1.0)
+            reader.setScaledSize(size * prescaling);
+
+        reader.read(&image);
     }
 
-    if( d->canView )
-    {
-        if( d->prescaling < 1.0 )
-            reader.setScaledSize( d->size * d->prescaling );
-
-        reader.read( &m_image );
-    }
-
-    if( device )
+    if (device)
         device->close();
 
     delete device;
-}
 
-void ImageViewerLoader::fetchRect( const QRect &rect, const QRect &source )
-{
-    if( source.size() == m_image.size() )
-    {
-        QImage transformedImage = m_image.scaled( rect.size(), Qt::KeepAspectRatio, Qt::SmoothTransformation );
+    QList<QImage> images;
 
-        emit rectAvailable( rect, transformedImage );
-    }
-    else
-    {
-        QImage transformedImage( rect.size(), m_image.format() );
+    if (!image.isNull()) {
+        images.append(image);
 
-        {
-            QPainter painter( &transformedImage );
+        while (qMax(image.width(), image.height()) > 120
+            && qMin(image.width(), image.height()) > 10) {
+            image = image.scaled(image.size() / 2, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
-            painter.setRenderHint( QPainter::Antialiasing );
-            painter.setRenderHint( QPainter::SmoothPixmapTransform );
-
-            painter.drawImage( QRect( QPoint( 0, 0 ), rect.size() ), m_image, source );
-
-            painter.end();
+            if (!image.isNull()) {
+                images.append(image);
+            }
         }
-
-        emit rectAvailable( rect, transformedImage );
     }
+
+    emit imageLoaded(content, images, size, prescaling);
 }
 
 ImageViewerPrivate::ImageViewerPrivate( ImageViewer *viewer )
     : q( viewer )
-    , drmContent( QDrmRights::Display )
-    , canView( false )
+    , drmContent(QDrmRights::Display, QDrmContent::Reactivate)
     , scaleMode( ImageViewer::ScaleToFit )
     , prescaling( 1.0 )
     , scaleX( 1.0 )
     , scaleY( 1.0 )
     , rotation( 0.0 )
-    , updateTimerId( -1 )
 {
 }
 
@@ -253,67 +219,31 @@ void ImageViewerPrivate::calculateTransform()
     QScrollBar *hScroll = q->horizontalScrollBar();
     QScrollBar *vScroll = q->verticalScrollBar();
 
-    if( canView )
-    {
-        int hValue = hScroll->value();
-        int vValue = vScroll->value();
+    int hValue = hScroll->value();
+    int vValue = vScroll->value();
 
-        QSize dSize = transformedSize - oldTransformedSize;
+    QSize dSize = transformedSize - oldTransformedSize;
 
-        hValue += dSize.width() / 2;
-        vValue += dSize.height() / 2;
+    hValue += dSize.width() / 2;
+    vValue += dSize.height() / 2;
 
-        dSize = transformedSize - q->size();
+    dSize = transformedSize - q->size();
 
-        hScroll->setRange( 0, dSize.width() );
-        vScroll->setRange( 0, dSize.height() );
-        hScroll->setValue( hValue );
-        vScroll->setValue( vValue );
-    }
-    else
-    {
-        hScroll->setRange( 0, 0 );
-        vScroll->setRange( 0, 0 );
-    }
-
-    calculateScreenRect();
-}
-
-void ImageViewerPrivate::calculateScreenRect()
-{
-    if( canView )
-    {
-        QTransform transform;
-
-        transform.translate( -q->horizontalScrollBar()->value() + qMax( transformedSize.width(),  q->width() )  / 2,
-                             -q->verticalScrollBar()->value()   + qMax( transformedSize.height(), q->height() ) / 2 );
-        transform.rotate( rotation );
-        transform.translate( -scaledSize.width() / 2, -scaledSize.height() / 2 );
-
-        QTransform inverse = transform.inverted();
-
-        QRect untransformedRect( 0, 0, q->width(), q->height() );
-
-        screenRect = inverse.mapRect( untransformedRect );
-
-        screenRect = screenRect.intersected( QRect( QPoint( 0, 0 ), scaledSize ) );
-    }
-    else
-        screenRect = QRect();
+    hScroll->setRange( 0, dSize.width() );
+    vScroll->setRange( 0, dSize.height() );
+    hScroll->setValue( hValue );
+    vScroll->setValue( vValue );
 }
 
 void ImageViewerPrivate::run()
 {
-    ImageViewerLoader loader( this );
+    ImageViewerLoader loader;
 
     connect( this,  SIGNAL(setContent(QContent)),
              &loader, SLOT(setContent(QContent)) );
 
-    connect( this,  SIGNAL(fetchRect(QRect,QRect)),
-             &loader, SLOT(fetchRect(QRect,QRect)) );
-
-    connect( &loader, SIGNAL(rectAvailable(QRect,QImage)),
-             q,         SLOT(rectAvailable(QRect,QImage)) );
+    connect( &loader, SIGNAL(imageLoaded(QContent,QList<QImage>,QSize,qreal)),
+             q,         SLOT(imageLoaded(QContent,QList<QImage>,QSize,qreal)) );
 
     {
         QMutexLocker locker( &syncMutex );
@@ -324,13 +254,14 @@ void ImageViewerPrivate::run()
     exec();
 }
 
+
+
 ImageViewer::ImageViewer( QWidget *parent )
     : QAbstractScrollArea( parent )
     , d( new ImageViewerPrivate( this ) )
 {
-    static const int qRectMetaId = qRegisterMetaType<QRect>();
-
-    Q_UNUSED( qRectMetaId );
+    static const int qImageListMetaId = qRegisterMetaType<QList<QImage> >();
+    Q_UNUSED(qImageListMetaId);
 
     d->drmContent.setFocusWidget( this );
 
@@ -360,36 +291,14 @@ ImageViewer::~ImageViewer()
 
 void ImageViewer::setContent( const QContent &content )
 {
-    d->pixmap = QPixmap();
-    d->pixmapRect = QRect();
+    d->images.clear();
 
-    QContent c;
+    QDrmContent drmContent(QDrmRights::Display, QDrmContent::Activate);
 
-    if( content.isNull() )
-        d->drmContent.releaseLicense();
-    else if( d->drmContent.requestLicense( content ) )
-        c = content;
-
-    {
-        QMutexLocker locker( &d->syncMutex );
-
-        d->setContent( c );
-
-        d->syncCondition.wait( &d->syncMutex );
-    }
-
-    horizontalScrollBar()->setRange( 0, 0 );
-    verticalScrollBar()->setRange( 0, 0 );
-
-    if( d->scaleMode != FixedScale )
-        d->calculateScale();
+    if (!content.isNull() && drmContent.requestLicense(content))
+        d->setContent(content);
     else
-        d->calculateTransform();
-
-    if( d->canView && d->updateTimerId == -1 )
-        d->updateTimerId = startTimer( 0 );
-
-    viewport()->update();
+        d->setContent(QContent());
 }
 
 QContent ImageViewer::content() const
@@ -433,25 +342,13 @@ void ImageViewer::setScale( qreal sx, qreal sy )
 
     if( sx != d->scaleX && d->scaleY != sy  )
     {
-        if( d->scaleX != 0.0 && d->scaleY != 0.0 && d->pixmapRect.isValid() )
-        {
-            QTransform transform;
-
-            transform.scale( sx / d->scaleX, sy / d->scaleY );
-
-            d->pixmapRect = transform.mapRect( d->pixmapRect );
-
-            viewport()->update();
-        }
-
         d->scaleX = sx;
         d->scaleY = sy;
 
         d->calculateTransform();
-
-        if( d->updateTimerId == -1 && d->canView )
-            d->updateTimerId = startTimer( 0 );
     }
+
+    viewport()->update();
 }
 
 qreal ImageViewer::rotation() const
@@ -468,9 +365,6 @@ void ImageViewer::setRotation( qreal rotation )
         d->rotation = rotation;
 
        d->calculateTransform();
-
-        if( d->updateTimerId == -1 && d->canView )
-            d->updateTimerId = startTimer( 0 );
 
         viewport()->update();
     }
@@ -489,17 +383,22 @@ void ImageViewer::setScaleMode( ScaleMode mode )
     {
         d->calculateScale();
 
-        if( d->updateTimerId == -1 && d->canView )
-            d->updateTimerId = startTimer( 0 );
-
         viewport()->update();
     }
 }
 
 void ImageViewer::paintEvent( QPaintEvent *event )
 {
-    if( d->canView )
-    {
+    QImage image;
+
+    for (int i = d->images.count() - 1;
+        i >= 0
+        && (image.height() < d->scaledSize.height() || image.width() < d->scaledSize.width());
+        --i) {
+        image = d->images.at(i);
+    }
+
+    if (!image.isNull()) {
         QPainter painter( viewport() );
 
         painter.setClipRegion( event->region() );
@@ -513,73 +412,14 @@ void ImageViewer::paintEvent( QPaintEvent *event )
 
         painter.setWorldTransform( transform, true );
 
-        if( !d->pixmap.isNull() && d->pixmapRect.intersects( d->screenRect ) )
-        {
-            if( !d->pixmapRect.contains( d->screenRect ) )
-            {
-                QBrush brush( palette().windowText().color(), Qt::DiagCrossPattern );
-
-                QRect unfilledRect = d->screenRect;
-
-                if( unfilledRect.left() < d->pixmapRect.left() )
-                {
-                    QRect hatchRect( 
-                        unfilledRect.left(),
-                        unfilledRect.top(),
-                        d->pixmapRect.left() - unfilledRect.left(),
-                        unfilledRect.height() );
-
-                    painter.fillRect( hatchRect, brush );
-
-                    unfilledRect.adjust( hatchRect.width(), 0, 0, 0 );
-                }
-                if( unfilledRect.top() < d->pixmapRect.top() )
-                {
-                    QRect hatchRect( 
-                        unfilledRect.left(),
-                        unfilledRect.top(),
-                        unfilledRect.width(),
-                        d->pixmapRect.top() - unfilledRect.top() );
-
-                    painter.fillRect( hatchRect, brush );
-
-                    unfilledRect.adjust( 0, hatchRect.height(), 0, 0 );
-                }
-                if( unfilledRect.right() > d->pixmapRect.right() )
-                {
-                    QRect hatchRect( 
-                        d->pixmapRect.right(),
-                        unfilledRect.top(),
-                        unfilledRect.right() - d->pixmapRect.right(),
-                        unfilledRect.height() );
-
-                    painter.fillRect( hatchRect, brush );
-
-                    unfilledRect.adjust( 0, 0, -hatchRect.width(), 0 );
-                }
-                if( unfilledRect.bottom() > d->pixmapRect.bottom() )
-                {
-                    QRect hatchRect( 
-                        unfilledRect.left(),
-                        d->pixmapRect.bottom(),
-                        unfilledRect.width(),
-                        unfilledRect.bottom() - d->pixmapRect.bottom());
-
-                    painter.fillRect( hatchRect, brush );
-                }
-            }
-
-            painter.drawPixmap( d->pixmapRect, d->pixmap );
-        }
-        else
-        {
-            painter.fillRect( d->screenRect, QBrush( palette().windowText().color(), Qt::DiagCrossPattern ) );
-        }
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setRenderHint(QPainter::SmoothPixmapTransform);
+        painter.drawImage(QRect(QPoint(0,0), d->scaledSize), image);
 
         event->accept();
-    }
-    else
+    } else {
         QAbstractScrollArea::paintEvent( event );
+    }
 }
 
 void ImageViewer::resizeEvent( QResizeEvent *event )
@@ -605,8 +445,6 @@ void ImageViewer::resizeEvent( QResizeEvent *event )
 
     if( d->scaleMode != FixedScale )
         d->calculateScale();
-    else
-        d->calculateScreenRect();
 
     QAbstractScrollArea::resizeEvent( event );
 }
@@ -645,102 +483,33 @@ void ImageViewer::mouseReleaseEvent( QMouseEvent *event )
         d->lastMousePos = QPoint();
 }
 
-void ImageViewer::timerEvent( QTimerEvent *event )
-{
-    if( event->timerId() == d->updateTimerId )
-    {
-        killTimer( event->timerId() );
-
-        d->updateTimerId = -2;
-
-        int maxDimension = qMax( width(), height() ) * 3;
-
-        QSize sectionSize( 
-                qMin( maxDimension,  d->scaledSize.width() ),
-                qMin( maxDimension, d->scaledSize.height() ) );
-
-        QPoint sectionPos(
-                qMax( qMin( d->scaledSize.width()  - sectionSize.width(),  d->screenRect.x() - 2 * width()  / 2 ), 0 ),
-                qMax( qMin( d->scaledSize.height() - sectionSize.height(), d->screenRect.y() - 2 * height() / 2 ), 0 ) );
-
-        QRect sectionRect( sectionPos, sectionSize );
-
-        QTransform transform;
-        transform.scale( d->prescaling / d->scaleX, d->prescaling / d->scaleY );
-
-        QRect sourceRect = transform.mapRect( sectionRect );
-
-        emit d->fetchRect( sectionRect, sourceRect );
-
-        event->accept();
-    }
-    else
-        QAbstractScrollArea::timerEvent( event );
-}
-
 void ImageViewer::scrollContentsBy( int dx, int dy )
 {
     QAbstractScrollArea::scrollContentsBy( dx, dy );
-
-    d->calculateScreenRect();
-
-    if( d->updateTimerId == -1 )
-    {
-        QRect borderRect = d->screenRect;
-
-        borderRect.adjust( -20, -20, 20, 20 );
-
-        borderRect = borderRect.intersected( QRect( QPoint( 0, 0 ), d->scaledSize ) );
-
-        if( borderRect.isValid() && (
-            borderRect.top()    < d->pixmapRect.top()    || 
-            borderRect.left()   < d->pixmapRect.left()   ||
-            borderRect.bottom() > d->pixmapRect.bottom() ||
-            borderRect.right()  > d->pixmapRect.right()  ) )
-            d->updateTimerId = startTimer( 0 );
-    }
 }
 
 void ImageViewer::licenseExpired()
 {
     setContent( QContent() );
 
+    d->images.clear();
+
     emit imageInvalidated();
 }
 
-void ImageViewer::rectAvailable( const QRect &rect, const QImage &image )
+void ImageViewer::imageLoaded(const QContent &content, const QList<QImage> &images, const QSize &size, qreal prescaling)
 {
-    if( !image.isNull() )
-    {
-        if( d->drmContent.renderState() != QDrmContent::Started )
-            d->drmContent.renderStarted();
+    d->content = content;
+    d->images = images;
+    d->size = size;
+    d->prescaling = prescaling;
 
-        d->pixmap = QPixmap();
-        d->pixmap = QPixmap::fromImage( image );
-        d->pixmapRect = rect;
+    if (d->drmContent.requestLicense(content)) {
+        d->drmContent.renderStarted();
 
-        QRect borderRect = d->screenRect;
-
-        borderRect.adjust( -20, -20, 20, 20 );
-
-        borderRect = borderRect.intersected( QRect( QPoint( 0, 0 ), d->scaledSize ) );
-
-        if( borderRect.isValid() && (
-            borderRect.top()    < d->pixmapRect.top()    || 
-            borderRect.left()   < d->pixmapRect.left()   ||
-            borderRect.bottom() > d->pixmapRect.bottom() ||
-            borderRect.right()  > d->pixmapRect.right()  ) )
-            d->updateTimerId = startTimer( 0 );
-        else
-            d->updateTimerId = -1;
-
-    }
-    else
-    {
-        d->pixmap = QPixmap();
-        d->pixmapRect = QRect();
-
-        d->updateTimerId = -1;
+        emit imageChanged();
+    } else {
+        licenseExpired();
     }
 
     viewport()->update();

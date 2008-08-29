@@ -105,17 +105,15 @@ PlaybinSession::PlaybinSession
 
 PlaybinSession::~PlaybinSession()
 {
-    delete d->busHelper;
-    if (d->bus)
-        gst_object_unref(GST_OBJECT(d->bus));
-
-    if (d->playbin != 0)
-    {
+    if (d->playbin != 0) {
         stop();
+
+        delete d->busHelper;
+        delete d->sinkWidget;
+        gst_object_unref(GST_OBJECT(d->bus));
         gst_object_unref(GST_OBJECT(d->playbin));
     }
 
-    delete d->sinkWidget;
     delete d->videoControlServer;
 
     delete d;
@@ -399,10 +397,7 @@ void PlaybinSession::getStreamsInfo()
 void PlaybinSession::readySession()
 {
     d->playbin = gst_element_factory_make("playbin", NULL);
-    if (d->playbin != 0)
-    {
-        g_object_set(G_OBJECT(d->playbin), "uri", d->url.toString().toLocal8Bit().constData(), NULL);
-
+    if (d->playbin != 0) {
         // Pre-set video element, even if no video
 #if defined(Q_WS_QWS)
         d->sinkWidget = new DirectPainterWidget;
@@ -413,13 +408,16 @@ void PlaybinSession::readySession()
 
         // Sort out messages
         d->bus = gst_element_get_bus(d->playbin);
-
         d->busHelper = new BusHelper(d->bus, this);
-
         connect(d->busHelper, SIGNAL(message(Message)), SLOT(busMessage(Message)));
 
+        // Initial volume
         g_object_get(G_OBJECT(d->playbin), "volume", &d->volume, NULL);
 
+        // URI for media
+        g_object_set(G_OBJECT(d->playbin), "uri", d->url.toString().toLocal8Bit().constData(), NULL);
+
+        // Force to preroll
         if (gst_element_set_state(d->playbin, GST_STATE_READY) == GST_STATE_CHANGE_FAILURE)
             qWarning() << "GStreamer; Unable to ready in ctor -" << d->url.toString();
     }

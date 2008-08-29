@@ -27,17 +27,11 @@
 
 class QtopiaPicIconEnginePrivate;
 
-#if QT_VERSION < 0x040300
-class QtopiaPicIconEngine : public QIconEngine
-#else
 class QtopiaPicIconEngine : public QIconEngineV2
-#endif
 {
 public:
     QtopiaPicIconEngine();
-#if QT_VERSION >= 0x040300
     QtopiaPicIconEngine(const QtopiaPicIconEngine &other);
-#endif
     virtual ~QtopiaPicIconEngine();
     virtual void paint(QPainter *painter, const QRect &rect,
                        QIcon::Mode mode, QIcon::State state);
@@ -51,12 +45,10 @@ public:
     virtual void addFile(const QString &fileName, const QSize &size,
                          QIcon::Mode mode, QIcon::State state);
 
-#if QT_VERSION >= 0x040300
     QString key() const;
     QIconEngineV2 *clone() const;
     bool read(QDataStream &in);
     bool write(QDataStream &out) const;
-#endif
 
 private:
     QSharedDataPointer<QtopiaPicIconEnginePrivate> d;

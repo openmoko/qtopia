@@ -14,6 +14,9 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="../index.html"><font color="#004faf">Qtopia Home</font></a>&nbsp;&middot; <a href="index.html"><font color="#004faf">Index</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">Classes</font></a>&nbsp;&middot; <a href="headers.html"><font color="#004faf">Headers</font></a>&nbsp;&middot; <a href="overviews.html"><font color="#004faf">Overviews</font></a> </td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">&lt;qlog.h&gt; - &lt;qlog.h&gt;<br /><span class="subtitle"></span>
 </h1>
+<p>The &lt;qlog.h&gt; header enables categorized logging. <a href="#details">More...</a></p>
+<ul>
+</ul>
 <a name="Macros"></a>
 <h3>Macros</h3>
 <ul>
@@ -28,9 +31,9 @@
 <hr />
 <h2>Macro Documentation</h2>
 <h3 class="fn"><a name="QLOG_ENABLE"></a>QLOG_ENABLE (  <i>CATEGORY</i> )</h3>
-<p>Register a category for unconditional logging. This enables <a href="../debug-qtopia.html">qLog</a>(<i>CATEGORY</i>).</p>
+<p>Register a category for unconditional logging. This enables <a href="debug-qtopia.html">qLog</a>(<i>CATEGORY</i>).</p>
 <h3 class="fn"><a name="QLOG_OPTION"></a>QLOG_OPTION (  <i>CATEGORY</i>,  <i>FUNCTION</i> )</h3>
-<p>Register a category for conditional logging. This enables <a href="../debug-qtopia.html">qLog</a>(<i>CATEGORY</i>) but the log messages are not displayed unless <i>CATEGORY</i> is enabled (as determined by <i>FUNCTION</i>.</p>
+<p>Register a category for conditional logging. This enables <a href="debug-qtopia.html">qLog</a>(<i>CATEGORY</i>) but the log messages are not displayed unless <i>CATEGORY</i> is enabled (as determined by <i>FUNCTION</i>.</p>
 <p>It is typical to avoid using this macro directly, instead relying on a wrapper define.</p>
 <pre>    bool myCheckFunction( const char *category );
     #define MYLOG_OPTION(CATEGORY) QLOG_OPTION(CATEGORY,myCheckFunction(#CATEGORY))</pre>

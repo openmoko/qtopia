@@ -46,11 +46,11 @@
         _cs  = new QContentSet(QContentFilter::MimeType, &quot;image/png&quot;, this);
         _csm = new QContentSetModel(_cs, this);
     }</pre>
-<p>The <a href="qcontentset.html">QContentSet</a> represents a set of <a href="qcontent.html">QContent</a> defined over the mime type &quot;image/png&quot;. The content model is a <a href="./qabstractlistmodel.html">QAbstractListModel</a> which could be set directly to the <a href="./qlistwidget.html">QListWidget</a>, if the setModel(..&#x2e;) method were not private in <a href="./qlistwidget.html">QListWidget</a>. This is done, because the <a href="./qlistwidget.html">QListWidget</a> shall only be used with the <a href="./qlistwidgetitem.html">QListWidgetItem</a> class. The corresponding view class has to be used in order to use a model. See <a href="http://doc.trolltech.com/qtopia4.3/model-view-programming.html">model-view programming</a>.</p>
-<p><b>Testing the View class</b> To test, the <a href="./qlistwidget.html">QListWidget</a> must be replaced with a <a href="./qlistview.html">QListView</a> class everywhere and setModel(_csm) must be added to the ListScreen::setupContent() method. As long as some png files are present in the $HOME/Documents folder, it should show the list of files and their mime type icons. In an imageviewer, thumbnails should be shown rather than mimetype icons. The model will be tweaked later. For now, it is fine to just use the model as a list of Content objects, from which necessary information can be retrieved.</p>
+<p>The <a href="qcontentset.html">QContentSet</a> represents a set of <a href="qcontent.html">QContent</a> defined over the mime type &quot;image/png&quot;. The content model is a <a href="qabstractlistmodel.html">QAbstractListModel</a> which could be set directly to the <a href="qlistwidget.html">QListWidget</a>, if the setModel(..&#x2e;) method were not private in <a href="qlistwidget.html">QListWidget</a>. This is done, because the <a href="qlistwidget.html">QListWidget</a> shall only be used with the <a href="qlistwidgetitem.html">QListWidgetItem</a> class. The corresponding view class has to be used in order to use a model. See <a href="http://doc.trolltech.com/qtopia4.3/model-view-programming.html">model-view programming</a>.</p>
+<p><b>Testing the View class</b> To test, the <a href="qlistwidget.html">QListWidget</a> must be replaced with a <a href="qlistview.html">QListView</a> class everywhere and setModel(_csm) must be added to the ListScreen::setupContent() method. As long as some png files are present in the $HOME/Documents folder, it should show the list of files and their mime type icons. In an imageviewer, thumbnails should be shown rather than mimetype icons. The model will be tweaked later. For now, it is fine to just use the model as a list of Content objects, from which necessary information can be retrieved.</p>
 <a name="populating-the-list"></a>
 <h4>Populating the list</h4>
-<p>To populate the list, the list is first cleared and then filled with data from the content set items. For each content, a <a href="./qlistwidgetitem.html">QListWidgetItem</a> is created. The icon for the list item is set based on the content file information. The text of the item is taken from the content name. It provides the image name, without the extension.</p>
+<p>To populate the list, the list is first cleared and then filled with data from the content set items. For each content, a <a href="qlistwidgetitem.html">QListWidgetItem</a> is created. The icon for the list item is set based on the content file information. The text of the item is taken from the content name. It provides the image name, without the extension.</p>
 <pre>    void ListScreen::populate()
     {
         clear();
@@ -65,7 +65,7 @@
             setCurrentItem(i);
         }
     }</pre>
-<p>If at least one item populates the list, the first item is set as the current item. The list has a concept of current item and selected items. To ensure that the current item is also the selected item, the selection mode <tt>setSelectionMode(QAbstractItemView::SingleSelection)</tt> is set in a separate setupUi() method, which is called from the constructor. (See <a href="./qabstractitemview.html">QAbstractItemView</a>).</p>
+<p>If at least one item populates the list, the first item is set as the current item. The list has a concept of current item and selected items. To ensure that the current item is also the selected item, the selection mode <tt>setSelectionMode(QAbstractItemView::SingleSelection)</tt> is set in a separate setupUi() method, which is called from the constructor. (See <a href="qabstractitemview.html">QAbstractItemView</a>).</p>
 <pre>    void ListScreen::setupUi()
     {
         setSelectionMode(QAbstractItemView::SingleSelection);
@@ -79,7 +79,7 @@
 <p>The next part will handle some actions..&#x2e;</p>
 <a name="providing-actions-to-the-list-screen"></a>
 <h3>Providing Actions to the list screen</h3>
-<p>From the specification, the list screen shall contain several actions (see <a href="./qaction.html">QAction</a>). To add the actions, they first have to be created and then added to the menu (see <a href="./qmenu.html">QMenu</a>). The first action will be &quot;Open&quot;. This action needs to be connected to a slot, called &quot;onOpenImage()&quot;, then the slot has to be added to the header file. It is necessary to add <a href="./qobject.html#Q_OBJECT">Q_OBJECT</a> to the class for meta object creation.</p>
+<p>From the specification, the list screen shall contain several actions (see <a href="qaction.html">QAction</a>). To add the actions, they first have to be created and then added to the menu (see <a href="qmenu.html">QMenu</a>). The first action will be &quot;Open&quot;. This action needs to be connected to a slot, called &quot;onOpenImage()&quot;, then the slot has to be added to the header file. It is necessary to add <a href="qobject.html#Q_OBJECT">Q_OBJECT</a> to the class for meta object creation.</p>
 <p>File: listscreen.cpp</p>
 <pre>    void ListScreen::createActions()
     {
@@ -117,7 +117,7 @@
 <p>In this list screen, it would be nice to open the image directly when the &quot;Select&quot; key (usually the center button on the direction pad) is pressed. There are two options here.</p>
 <ul>
 <li>1. connect to signal <tt>activated(const QModelIndex &amp;)</tt> of the list widget</li>
-<li>2. override the <tt>keyPressed(QKeyEvent *event)</tt> method to intercept the <a href="./qt.html#key-enum">Qt::Key_Select</a> key.</li>
+<li>2. override the <tt>keyPressed(QKeyEvent *event)</tt> method to intercept the <a href="qt.html#Key-enum">Qt::Key_Select</a> key.</li>
 </ul>
 <p>Both will be described.</p>
 <a name="opening-image-using-signals-and-slots"></a>
@@ -132,7 +132,7 @@
     }</pre>
 <a name="opening-image-using-key-events"></a>
 <h3>Opening image using key Events</h3>
-<p>As seen previously, the <tt>keyPressed(QKeyEvent)</tt> method has to be override to handle the <a href="./qt.html#key-enum">Qt::Key_Select</a> key. The keyPressed method is defined in the <a href="./qwidget.html">QWidget</a> class. There is also the partner method keyReleased. Both take a <a href="./qkeyevent.html">QKeyEvent</a> as parameter.</p>
+<p>As seen previously, the <tt>keyPressed(QKeyEvent)</tt> method has to be override to handle the <a href="qt.html#Key-enum">Qt::Key_Select</a> key. The keyPressed method is defined in the <a href="qwidget.html">QWidget</a> class. There is also the partner method keyReleased. Both take a <a href="qkeyevent.html">QKeyEvent</a> as parameter.</p>
 <pre>    void ListScreen::keyPressEvent(QKeyEvent* event)
     {
         switch (event-&gt;key()) {
@@ -144,7 +144,7 @@
             break;
         }
     }</pre>
-<p>It is important to forward the keyevent to the base class for the other keys, as the <a href="./qlistwidget.html">QListWidget</a> needs them.</p>
+<p>It is important to forward the keyevent to the base class for the other keys, as the <a href="qlistwidget.html">QListWidget</a> needs them.</p>
 <a name="summary"></a>
 <h3>Summary</h3>
 <p>Now, the Image Viewer is a small application, which lists all png files from the content store. It shows the files in a list with their thumbnails. The image can also be identified when &quot;open image&quot; is selected from the menu or via the select key.</p>

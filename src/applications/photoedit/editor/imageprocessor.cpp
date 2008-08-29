@@ -188,9 +188,17 @@ QSize ImageProcessor::size() const
 
 bool ImageProcessor::isChanged() const
 {
-    return !image_io->image().isNull() && (
-        transformation_matrix != Matrix() || brightness_factor ||
-        viewport != QRect( QPoint( 0, 0 ), image_io->size() ) );
+    return !image_io->image().isNull()
+        && (transformation_matrix != m_checkpoint.transformation_matrix
+        || brightness_factor != m_checkpoint.brightness_factor
+        || viewport != m_checkpoint.viewport);
+}
+
+void ImageProcessor::setCheckpoint()
+{
+    m_checkpoint.transformation_matrix = transformation_matrix;
+    m_checkpoint.brightness_factor = brightness_factor;
+    m_checkpoint.viewport = viewport;
 }
 
 void ImageProcessor::setZoom( double factor )
@@ -229,6 +237,11 @@ void ImageProcessor::reset()
     zoom_factor = 1.0;
     transformation_matrix = Matrix();
     viewport = QRect( QPoint( 0, 0 ), image_io->size() );
+
+    m_checkpoint.brightness_factor = 0;
+    m_checkpoint.transformation_matrix = Matrix();
+    m_checkpoint.viewport = QRect( QPoint( 0, 0 ), image_io->size() );
+
     emit changed();
 }
 

@@ -1242,13 +1242,36 @@ bool Qtopia::hasKey(int key)
 }
 
 /*!
-  \obsolete
-  Executes the application identified by \a app, passing \a
-  document if it isn't null.
+    \obsolete
+    Executes the application identified by \a app, passing \a document if it isn't null.
 
-  Please use the QContent system instead.
+    QContent should be used to execute applications instead.
 
-  \sa QContent::execute()
+    A specific application may be launched by calling the \l {QContent::execute()}{execute()}
+    member of a QContent object representing the application.
+
+    \code
+    QContent content(app);
+    content.execute();
+    \endcode
+
+    To open a document using a specific application the file name of the document should be passed
+    as the first argument of QContent::execute().
+
+    \code
+    QContent content(app);
+    content.execute(QStringList() << document);
+    \endcode
+
+    A document may be opened in the default application for its type by calling the
+    \l {QContent::execute()}{execute()} member of a QContent object representing the document.
+
+    \code
+    QContent content(document);
+    content.execute();
+    \endcode
+
+    \sa QContent::execute()
 */
 #ifndef QTOPIA_HOST
 void Qtopia::execute( const QString &app, const QString& document )

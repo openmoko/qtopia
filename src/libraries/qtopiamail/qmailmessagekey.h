@@ -45,7 +45,7 @@ public:
         Contains
      };
 
-	enum Property
+    enum Property
     {
         Id = 0x0001,
         Type = 0x0002,
@@ -53,11 +53,11 @@ public:
         Sender = 0x0008,
         Recipients = 0x0010,
         Subject = 0x0020,
-        TimeStamp = 0x0040, 
+        TimeStamp = 0x0040,
         Status = 0x0080,
         FromAccount = 0x0100,
         FromMailbox = 0x0200,
-        ServerUid = 0x0400,      
+        ServerUid = 0x0400,
         Size = 0x0800,
     };
     Q_DECLARE_FLAGS(Properties,Property)
@@ -83,8 +83,8 @@ public:
     bool isEmpty() const;
 
 private:
-	friend class QMailStore;
-	friend class QMailStorePrivate;
+    friend class QMailStore;
+    friend class QMailStorePrivate;
 
 private:
     QSharedDataPointer<QMailMessageKeyPrivate> d;

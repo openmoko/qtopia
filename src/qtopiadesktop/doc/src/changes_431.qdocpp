@@ -31,6 +31,18 @@ This page describes changes to Qtopia Sync Agent 4.3.1.
    Contact, potentially causing problems.
 \o Items created in Outlook are duplicated at every sync.
 \o Tasks modified on the server are not changed on the device.
+\o Appointments with no alarms are not read correctly (Repeat, Notes, Categories
+   and Custom Fields from Outlook are not seen by Qtopia).
+\o Certain characters appearing in text (eg. the elipsis character) can cause Qtopia
+   Sync Agent to crash due to a text encoding bug.
+\o Long notes are not transferred in full (the beginning part of the note is cut off).
+\o The clocks on the desktop and device must match or some items may not be synchronized.
+\o All day events do not synchronize correctly between Qtopia and Outlook.
+\o Outlook items that are not known to Qtopia Sync Agent but have a last modified timestamp
+   that is before the sync timestamp are not transferred. This can be observed by importing
+   items from a .pst file (they may not sync).
+\o Changing a recurring event in Qtopia to a non-recurring event causes Qtopia Sync Agent to crash.
+\o Birthdays and anniversaries are duplicated in the calendar.
 \endlist
 
 */

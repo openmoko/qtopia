@@ -74,7 +74,6 @@ protected:
     virtual QModemCallProvider::AtdBehavior atdBehavior() const;
     virtual void abortDial( uint modemIdentifier, QPhoneCall::Scope scope );
     virtual bool partOfHoldGroup( const QString& callType ) const;
-    void deregisterCall( QPhoneCallImpl *call );
 
     virtual QString dialServiceCommand( const QDialOptions& options ) const;
     virtual QString dialVoiceCommand( const QDialOptions& options ) const;

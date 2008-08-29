@@ -78,6 +78,8 @@ public slots:
     // Rotate image clockwise 90 degrees
     void rotate();
 
+    void setCheckpoint();
+
 private slots:
     // Reset transformations
     void reset();
@@ -98,6 +100,13 @@ private:
     double brightness_factor;
     double zoom_factor;
     Matrix transformation_matrix;
+
+    struct
+    {
+        QRect viewport;
+        double brightness_factor;
+        Matrix transformation_matrix;
+    } m_checkpoint;
 
     mutable QPixmap _preview;
 };

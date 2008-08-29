@@ -78,7 +78,7 @@ private:
 
 void OutputThreadPrivate::run()
 {
-    unsigned long   timeout = ULONG_MAX;
+    unsigned long   timeout = 30000;
 
     quit = false;
 
@@ -101,35 +101,42 @@ void OutputThreadPrivate::run()
     do
     {
         QMutexLocker    conditionLock(&mutex);
+
         int             sc = activeSessions.size();
 
-        if (sc == 0)
-            condition.wait(&mutex, timeout);
-        else
-        {
+        if (sc == 0) {
+            if(!condition.wait(&mutex, timeout) && opened) {
+                audioOutput->close();
+                opened = false;
+                timeout = ULONG_MAX;
+            }
+        } else {
+            bool    first = true;
             int     mixLength = 0;
             char    working[default_frame_size];
 
-            for (int i = 0; i < sc; --sc)
-            {
+            for (int i = 0; i < sc; ++i) {
                 QMediaDevice* input = activeSessions.at(i);
                 QMediaDevice::Info const& info = input->dataType();
 
                 int read = readFromDevice(input, info, working);
 
-                if (read > 0)
-                {
-                    if (info.volume > 0)
-                        mixLength = qMax(resampleAndMix(info, working, read, i++ == 0), mixLength);
+                if (read > 0) {
+                    if (info.volume > 0) {
+                        mixLength = qMax(resampleAndMix(info, working, read, first), mixLength);
+                        first = false;
+                    }
                 }
-                else
+                else {
                     activeSessions.removeAt(i);
+                    --sc;
+                }
             }
 
             if (mixLength > 0)
                 audioOutput->write(mixbuf, mixLength);
 
-            timeout = activeSessions.size() > 0 ? 0 : ULONG_MAX;
+            timeout = activeSessions.size() > 0 ? 0 : 30000;
         }
 
     } while (!quit);
@@ -223,6 +230,7 @@ int OutputThreadPrivate::resampleAndMix
 
         converted = (dataAmt / iss / deviceInfo.channels) * rdr * oss * inputInfo.channels;
 
+        int offset = 0;
         while (dataAmt > 0)
         {
             int     requiredSrcSamples = rsr;
@@ -273,14 +281,41 @@ int OutputThreadPrivate::resampleAndMix
                 dataAmt -= iss * deviceInfo.channels;
             }
 
-            for (int i = requiredDstSamples * inputInfo.channels; i > 0; --i)
-            {
-                qint32 samplei = (sample[i % inputInfo.channels] / rsr) * deviceInfo.volume / MAX_VOLUME;
+            if(deviceInfo.frequency ==  8000 && inputInfo.frequency == 44100)
+                offset++;
+            if(offset > requiredDstSamples*inputInfo.channels-1) {
+                // Handle special cases of 8000Hz to 11025 or 22050 or 44100!
+                qint32 samplei = 0, ss = 0;
+                offset = 0;
+                for (int i = requiredDstSamples * inputInfo.channels; i > 0; --i)
+                {
+                    samplei = (sample[i % inputInfo.channels] / rsr) * deviceInfo.volume / MAX_VOLUME;
+                    if (first) {
+                        setNextSamplePart(dst, samplei, oss);
+                    } else {
+                        qint32 ss = (samplei + getNextSamplePart(mix, oss)) / 2;
+                        setNextSamplePart(dst, ss, oss);
+                    }
+                }
+                for (int i = requiredDstSamples * inputInfo.channels; i > 0; --i)
+                {
+                    if (first) {
+                        setNextSamplePart(dst, samplei, oss);
+                    } else {
+                        setNextSamplePart(dst, ss, oss);
+                    }
+                    converted+=2;
+                }
+            } else {
+                for (int i = requiredDstSamples * inputInfo.channels; i > 0; --i)
+                {
+                    qint32 samplei = (sample[i % inputInfo.channels] / rsr) * deviceInfo.volume / MAX_VOLUME;
 
-                if (first)
-                    setNextSamplePart(dst, samplei, oss);
-                else
-                    setNextSamplePart(dst, (samplei + getNextSamplePart(mix, oss)) / 2, oss);
+                    if (first)
+                        setNextSamplePart(dst, samplei, oss);
+                    else
+                        setNextSamplePart(dst, (samplei + getNextSamplePart(mix, oss)) / 2, oss);
+                }
             }
         }
     }
@@ -359,6 +394,11 @@ void OutputThread::close()
 void OutputThread::deviceReady()
 {
     QMutexLocker    lock(&d->mutex);
+
+    if(!d->opened) {
+        d->audioOutput->open(QIODevice::ReadWrite | QIODevice::Unbuffered);
+        d->opened = true;
+    }
 
     d->activeSessions.append(qobject_cast<QMediaDevice*>(sender()));
 

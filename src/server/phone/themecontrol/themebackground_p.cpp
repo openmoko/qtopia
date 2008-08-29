@@ -24,7 +24,9 @@
 
 #include <custom.h>
 #include <QPainter>
+#ifndef QTOPIA_NO_SVG
 #include <QSvgRenderer>
+#endif
 #include <qtopiachannel.h>
 #include <QSettings>
 #ifdef QTOPIA_ENABLE_EXPORTED_BACKGROUNDS
@@ -160,6 +162,7 @@ ThemeBackgroundImagePlugin::ThemeBackgroundImagePlugin(int _screen)
 
 void ThemeBackgroundImagePlugin::renderSvg(int w, int h, Qt::AspectRatioMode mode)
 {
+#ifndef QTOPIA_NO_SVG
     QSvgRenderer r(imgName);
     QSize svgSize = r.defaultSize();
     svgSize.scale(w, h, mode);
@@ -167,6 +170,7 @@ void ThemeBackgroundImagePlugin::renderSvg(int w, int h, Qt::AspectRatioMode mod
     bg.fill(QColor(0,0,0,0));
     QPainter p(&bg);
     r.render(&p);
+#endif
 }
 
 void ThemeBackgroundImagePlugin::resize(int w, int h)
@@ -183,8 +187,10 @@ void ThemeBackgroundImagePlugin::resize(int w, int h)
         if (dpMode == Center || dpMode == Tile) {
             bg.load(imgName);
 
+#ifndef QTOPIA_NO_SVG
             if (imgName.endsWith(".svg"))
                 renderSvg(bg.width(), bg.height(), Qt::KeepAspectRatio);
+#endif
         } else {
             // gussing viewport size
             QRect availableRect = QtopiaApplication::desktop()->availableGeometry(screen);
@@ -196,9 +202,12 @@ void ThemeBackgroundImagePlugin::resize(int w, int h)
             else if (dpMode == Stretch) mode = Qt::IgnoreAspectRatio;
             else if (dpMode == Scale) mode = Qt::KeepAspectRatio;
 
+#ifndef QTOPIA_NO_SVG
             if (imgName.endsWith(".svg")) {
                 renderSvg(width, height, mode);
-            } else {
+            } else
+#endif
+            {
                 QPixmap p;
                 p.load(imgName);
                 bg = p.scaled(QSize(width, height), mode);

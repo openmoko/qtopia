@@ -106,31 +106,31 @@
 <p>Constructs an empty <a href="qdsserviceinfo.html">QDSServiceInfo</a> object.</p>
 <h3 class="fn"><a name="QDSServiceInfo-2"></a>QDSServiceInfo::QDSServiceInfo ( const QDSServiceInfo &amp; <i>other</i> )</h3>
 <p>Constructs a deep copy of <i>other</i>.</p>
-<h3 class="fn"><a name="QDSServiceInfo-3"></a>QDSServiceInfo::QDSServiceInfo ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, const <a href="./qstring.html">QString</a> &amp; <i>service</i> )</h3>
+<h3 class="fn"><a name="QDSServiceInfo-3"></a>QDSServiceInfo::QDSServiceInfo ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qstring.html">QString</a> &amp; <i>service</i> )</h3>
 <p>Constructs a <a href="qdsserviceinfo.html">QDSServiceInfo</a> object for the QDS service <i>name</i> and the Qtopia service <i>service</i>.</p>
 <h3 class="fn"><a name="dtor.QDSServiceInfo"></a>QDSServiceInfo::~QDSServiceInfo ()</h3>
 <p>Destroys the <a href="qdsserviceinfo.html">QDSServiceInfo</a> object.</p>
-<h3 class="fn"><a name="attributes"></a><a href="./qstringlist.html">QStringList</a> QDSServiceInfo::attributes () const</h3>
+<h3 class="fn"><a name="attributes"></a><a href="qstringlist.html">QStringList</a> QDSServiceInfo::attributes () const</h3>
 <p>Returns the attributes of the service.</p>
-<h3 class="fn"><a name="description"></a><a href="./qstring.html">QString</a> QDSServiceInfo::description () const</h3>
+<h3 class="fn"><a name="description"></a><a href="qstring.html">QString</a> QDSServiceInfo::description () const</h3>
 <p>Returns the description of the service.</p>
-<h3 class="fn"><a name="icon"></a><a href="./qstring.html">QString</a> QDSServiceInfo::icon () const</h3>
+<h3 class="fn"><a name="icon"></a><a href="qstring.html">QString</a> QDSServiceInfo::icon () const</h3>
 <p>Returns the icon of the service.</p>
 <h3 class="fn"><a name="isAvailable"></a>bool QDSServiceInfo::isAvailable () const</h3>
 <p>Returns true if the QDS service is available; otherwise returns false. The QDS service is available if all dependent features are currently available in <a href="qtopiafeatures.html">QtopiaFeatures</a>. A QDS service must be available for a <a href="qdsaction.html">QDSAction</a> request to be successful.</p>
 <h3 class="fn"><a name="isValid"></a>bool QDSServiceInfo::isValid () const</h3>
 <p>Returns true if the <a href="qdsserviceinfo.html">QDSServiceInfo</a> object describes a valid QDS service; otherwise returns false. For this to be true a correctly formatted service file is required.</p>
-<h3 class="fn"><a name="name"></a><a href="./qstring.html">QString</a> QDSServiceInfo::name () const</h3>
+<h3 class="fn"><a name="name"></a><a href="qstring.html">QString</a> QDSServiceInfo::name () const</h3>
 <p>Returns the name of the service.</p>
-<h3 class="fn"><a name="requestDataTypes"></a><a href="./qstringlist.html">QStringList</a> QDSServiceInfo::requestDataTypes () const</h3>
+<h3 class="fn"><a name="requestDataTypes"></a><a href="qstringlist.html">QStringList</a> QDSServiceInfo::requestDataTypes () const</h3>
 <p>Returns the IDs for supported request data types.</p>
 <p>See also <a href="qdsserviceinfo.html#supportsRequestDataType">supportsRequestDataType</a>() and <a href="qdsserviceinfo.html#responseDataTypes">responseDataTypes</a>().</p>
-<h3 class="fn"><a name="responseDataTypes"></a><a href="./qstringlist.html">QStringList</a> QDSServiceInfo::responseDataTypes () const</h3>
+<h3 class="fn"><a name="responseDataTypes"></a><a href="qstringlist.html">QStringList</a> QDSServiceInfo::responseDataTypes () const</h3>
 <p>Returns the IDs for supported response data types.</p>
 <p>See also <a href="qdsserviceinfo.html#supportsResponseDataType">supportsResponseDataType</a>() and <a href="qdsserviceinfo.html#requestDataTypes">requestDataTypes</a>().</p>
-<h3 class="fn"><a name="serviceId"></a><a href="./qstring.html">QString</a> QDSServiceInfo::serviceId () const</h3>
+<h3 class="fn"><a name="serviceId"></a><a href="qstring.html">QString</a> QDSServiceInfo::serviceId () const</h3>
 <p>Returns the QDS service ID.</p>
-<h3 class="fn"><a name="serviceName"></a><a href="./qstring.html">QString</a> QDSServiceInfo::serviceName () const</h3>
+<h3 class="fn"><a name="serviceName"></a><a href="qstring.html">QString</a> QDSServiceInfo::serviceName () const</h3>
 <p>Returns the translated name of the QDS service.</p>
 <h3 class="fn"><a name="supportsRequestDataType"></a>bool QDSServiceInfo::supportsRequestDataType ( const <a href="qmimetype.html">QMimeType</a> &amp; <i>type</i> = QMimeType( QString() ) ) const</h3>
 <p>Returns true if the described service supports request data of <i>type</i>.</p>

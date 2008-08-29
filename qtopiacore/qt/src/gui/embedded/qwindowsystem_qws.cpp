@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -1384,6 +1384,7 @@ void QWSServerPrivate::initServer(int flags)
     focusw = 0;
     mouseGrabber = 0;
     mouseGrabbing = false;
+    inputMethodMouseGrabbed = false;
     keyboardGrabber = 0;
     keyboardGrabbing = false;
 #ifndef QT_NO_QWS_CURSOR
@@ -2264,7 +2265,7 @@ void QWSServerPrivate::sendMouseEventUnfiltered(const QPoint &pos, int state, in
 
     //If grabbing window disappears, grab is still active until
     //after mouse release.
-    if ( qwsServerPrivate->mouseGrabber && !imMouse ) {
+    if ( qwsServerPrivate->mouseGrabber && (!imMouse || qwsServerPrivate->inputMethodMouseGrabbed)) {
         win = qwsServerPrivate->mouseGrabber;
         winClient = win ? win->client() : 0;
     }
@@ -2289,7 +2290,11 @@ void QWSServerPrivate::sendMouseEventUnfiltered(const QPoint &pos, int state, in
 
     if ((state&btnMask) && !qwsServerPrivate->mouseGrabbing) {
         qwsServerPrivate->mouseGrabber = win;
+        if (imMouse)
+            qwsServerPrivate->inputMethodMouseGrabbed = true;
     }
+    if (!(state&btnMask))
+        qwsServerPrivate->inputMethodMouseGrabbed = false;
 
     event.simpleData.x_root=pos.x();
     event.simpleData.y_root=pos.y();

@@ -31,7 +31,7 @@
 <ul>
 <li><div class="fn"/>5 public functions inherited from <a href="applicationtypelauncher.html#public-functions">ApplicationTypeLauncher</a></li>
 <li><div class="fn"/>1 public function inherited from <a href="applicationipcrouter-routedestination.html#public-functions">ApplicationIpcRouter::RouteDestination</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="macros"></a>
 <h3>Macros</h3>
@@ -40,14 +40,14 @@
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>2 signals inherited from <a href="applicationtypelauncher.html#signals">ApplicationTypeLauncher</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -62,7 +62,7 @@
 </table></p>
 <p>The BuiltinApplicationLauncher class provides the <a href="applicationtypelauncher.html">ApplicationTypeLauncher</a> implementation for simple applications compiled into the Qtopia Server - known as builtin applications.</p>
 <p>A builtin application must consist of a single, toplevel widget. Generally builtins do not implement services, but they may. If multiple builtins implement the same service, or the Qtopia Server and a builtin implements the same service, the behaviour is undefined.</p>
-<p>Adding a builtin application is a simple case of linking it into the Qtopia Server, and adding a <a href="builtinapplicationlauncher.html#QTOPIA_SIMPLE_BUILTIN">QTOPIA_SIMPLE_BUILTIN</a>() macro to your code. The <a href="builtinapplicationlauncher.html#QTOPIA_SIMPLE_BUILTIN">QTOPIA_SIMPLE_BUILTIN</a>() macro registers the builtin application with the BuiltinApplicationLauncher class. The macro takes the application name, and a simple static function that &quot;launches&quot; the application and returns a <a href="./qwidget.html">QWidget</a> pointer as paramters.</p>
+<p>Adding a builtin application is a simple case of linking it into the Qtopia Server, and adding a <a href="builtinapplicationlauncher.html#QTOPIA_SIMPLE_BUILTIN">QTOPIA_SIMPLE_BUILTIN</a>() macro to your code. The <a href="builtinapplicationlauncher.html#QTOPIA_SIMPLE_BUILTIN">QTOPIA_SIMPLE_BUILTIN</a>() macro registers the builtin application with the BuiltinApplicationLauncher class. The macro takes the application name, and a simple static function that &quot;launches&quot; the application and returns a <a href="qwidget.html">QWidget</a> pointer as paramters.</p>
 <p><i>Note:</i> Builtins may not currently implement services. This functionality is planned for future versions of Qtopia.</p>
 <hr />
 <h2>Member Type Documentation</h2>
@@ -81,7 +81,7 @@
 <p>Add a new builtin application to the server. <i>ApplicationName</i> must be the name of the application and <i>createFunc</i> a static function, of type <a href="builtinapplicationlauncher.html#BuiltinFunc-typedef">BuiltinApplicationLauncher::BuiltinFunc</a>, that creates the applications. For example, the following code adds a simple builtin named &quot;TestBuiltin&quot; to the server.</p>
 <pre>    class TestBuiltinWindow : public QWidget
     {
-       <span class="comment">//</span> ...
+       <span class="comment">// ...</span>
     };
     static QWidget *testBuiltinFunc()
     {

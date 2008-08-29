@@ -17,7 +17,7 @@
 <h2>Application Architecture</h2>
 <p>After talking so much time about functionality, its time to step back and look at the whole picture, the application architecture in general.</p>
 <p>A simple application has been created with some screens. A screen is identified as a widget or a dialog. The phone UI consists of a title area on the top and a soft menu bar at the bottom. The image Viewer application fills the central area.</p>
-<p>A <a href="./qstackedwidget.html">QStackedWidget</a> is used as the central widget to manage the different screens. The screens are lazily created and added to the stack. Calling <tt>setCurrrentWidget(...)</tt> on the stack make a screen visible. The softmenubar labels can be changed by using: <tt>QSoftMenuBar::setLabel()</tt>.</p>
+<p>A <a href="qstackedwidget.html">QStackedWidget</a> is used as the central widget to manage the different screens. The screens are lazily created and added to the stack. Calling <tt>setCurrrentWidget(...)</tt> on the stack make a screen visible. The softmenubar labels can be changed by using: <tt>QSoftMenuBar::setLabel()</tt>.</p>
 <p>Every screen comes with a set of actions and a menu. In order to navigate back, hard-coded screens are used as target.</p>
 <p>Other applications can now be created and it is probable that most of them would be similar to this application. This makes a good candidate for a pattern.</p>
 <p><a href="tut-iviewer-part6.html">Prev</a>|<a href="#top">Top</a>|<a href="tut-iviewer-part1.html">Start Page</a></p>

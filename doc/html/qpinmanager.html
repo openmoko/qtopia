@@ -32,7 +32,7 @@
 <ul>
 <li><div class="fn"/>1 public function inherited from <a href="qcomminterface.html#public-functions">QCommInterface</a></li>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -46,7 +46,7 @@
 <li><div class="fn"/>virtual void <b><a href="qpinmanager.html#setLockStatus">setLockStatus</a></b> ( const QString &amp; <i>type</i>, const QString &amp; <i>password</i>, bool <i>enabled</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -58,16 +58,16 @@
 </ul>
 <ul>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 <li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -106,31 +106,31 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QPinManager"></a>QPinManager::QPinManager ( const <a href="./qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="./qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
+<h3 class="fn"><a name="QPinManager"></a>QPinManager::QPinManager ( const <a href="qstring.html">QString</a> &amp; <i>service</i> = QString(), <a href="qobject.html">QObject</a> * <i>parent</i> = 0, <a href="qabstractipcinterface.html#Mode-enum">QCommInterface::Mode</a> <i>mode</i> = Client )</h3>
 <p>Construct a new pin manager object for <i>service</i> and attach it to <i>parent</i>. The object will be created in client mode if <i>mode</i> is Client, or server mode otherwise.</p>
 <h3 class="fn"><a name="dtor.QPinManager"></a>QPinManager::~QPinManager ()</h3>
 <p>Destroy this pin manager object.</p>
-<h3 class="fn"><a name="cancelPin"></a>void QPinManager::cancelPin ( const <a href="./qstring.html">QString</a> &amp; <i>type</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="cancelPin"></a>void QPinManager::cancelPin ( const <a href="qstring.html">QString</a> &amp; <i>type</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Indicate that the user has canceled entry of the pin of a specified <i>type</i>. The operation that was waiting on the pin will be aborted with an error.</p>
 <p>See also <a href="qpinmanager.html#enterPin">enterPin</a>().</p>
-<h3 class="fn"><a name="changePin"></a>void QPinManager::changePin ( const <a href="./qstring.html">QString</a> &amp; <i>type</i>, const <a href="./qstring.html">QString</a> &amp; <i>oldPin</i>, const <a href="./qstring.html">QString</a> &amp; <i>newPin</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="changePin"></a>void QPinManager::changePin ( const <a href="qstring.html">QString</a> &amp; <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>oldPin</i>, const <a href="qstring.html">QString</a> &amp; <i>newPin</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Change a pin of a specific <i>type</i> from <i>oldPin</i> to <i>newPin</i>. The manager will respond by emitting the <a href="qpinmanager.html#changePinResult">changePinResult</a>() signal.</p>
 <p>See also <a href="qpinmanager.html#changePinResult">changePinResult</a>().</p>
-<h3 class="fn"><a name="changePinResult"></a>void QPinManager::changePinResult ( const <a href="./qstring.html">QString</a> &amp; <i>type</i>, bool <i>valid</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="changePinResult"></a>void QPinManager::changePinResult ( const <a href="qstring.html">QString</a> &amp; <i>type</i>, bool <i>valid</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted in response to a <a href="qpinmanager.html#changePin">changePin</a>() request for <i>type</i>. The <i>valid</i> flag indicates whether the request succeeded or failed.</p>
 <p>See also <a href="qpinmanager.html#changePin">changePin</a>().</p>
-<h3 class="fn"><a name="enterPin"></a>void QPinManager::enterPin ( const <a href="./qstring.html">QString</a> &amp; <i>type</i>, const <a href="./qstring.html">QString</a> &amp; <i>pin</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="enterPin"></a>void QPinManager::enterPin ( const <a href="qstring.html">QString</a> &amp; <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>pin</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Enter a <i>pin</i> of a specific <i>type</i>. This is typically sent in response to a <a href="qpinmanager.html#pinStatus">pinStatus</a>() signal that indicates <a href="qpinmanager.html#Status-enum">NeedPin</a>.</p>
 <p>If the pin is valid, then the manager will respond with a <a href="qpinmanager.html#pinStatus">pinStatus</a>() signal indicating a status of Valid. If the pin is invalid, then the manager will response with a <a href="qpinmanager.html#pinStatus">pinStatus</a>() signal indicating a status of <a href="qpinmanager.html#Status-enum">NeedPin</a> or <a href="qpinmanager.html#Status-enum">NeedPuk</a>.</p>
 <p>See also <a href="qpinmanager.html#pinStatus">pinStatus</a>() and <a href="qpinmanager.html#cancelPin">cancelPin</a>().</p>
-<h3 class="fn"><a name="enterPuk"></a>void QPinManager::enterPuk ( const <a href="./qstring.html">QString</a> &amp; <i>type</i>, const <a href="./qstring.html">QString</a> &amp; <i>puk</i>, const <a href="./qstring.html">QString</a> &amp; <i>newPin</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="enterPuk"></a>void QPinManager::enterPuk ( const <a href="qstring.html">QString</a> &amp; <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>puk</i>, const <a href="qstring.html">QString</a> &amp; <i>newPin</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Enter a <i>puk</i> of a specific <i>type</i>, and change the associated pin to <i>newPin</i>. This is typically sent in response to a <a href="qpinmanager.html#pinStatus">pinStatus</a>() signal that indicates <a href="qpinmanager.html#Status-enum">NeedPuk</a>.</p>
 <p>If the puk is valid, then the manager will respond with a <a href="qpinmanager.html#pinStatus">pinStatus</a>() signal indicating a status of Valid. If the puk is invalid, then the manager will response with a <a href="qpinmanager.html#pinStatus">pinStatus</a>() signal indicating a status of <a href="qpinmanager.html#Status-enum">NeedPuk</a> or Locked.</p>
 <p>See also <a href="qpinmanager.html#pinStatus">pinStatus</a>().</p>
-<h3 class="fn"><a name="lockStatus"></a>void QPinManager::lockStatus ( const <a href="./qstring.html">QString</a> &amp; <i>type</i>, bool <i>enabled</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="lockStatus"></a>void QPinManager::lockStatus ( const <a href="qstring.html">QString</a> &amp; <i>type</i>, bool <i>enabled</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted in response to <a href="qpinmanager.html#requestLockStatus">requestLockStatus</a>() for <i>type</i>. If <i>enabled</i> is true, then the feature will be locked and a pin is required whenever the feature is used. If <i>enabled</i> is false, then the feature will be available at any time without a pin.</p>
 <p>See also <a href="qpinmanager.html#setLockStatus">setLockStatus</a>() and <a href="qpinmanager.html#requestLockStatus">requestLockStatus</a>().</p>
-<h3 class="fn"><a name="pinStatus"></a>void QPinManager::pinStatus ( const <a href="./qstring.html">QString</a> &amp; <i>type</i>, <a href="qpinmanager.html#Status-enum">QPinManager::Status</a> <i>status</i>, const <a href="qpinoptions.html">QPinOptions</a> &amp; <i>options</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="pinStatus"></a>void QPinManager::pinStatus ( const <a href="qstring.html">QString</a> &amp; <i>type</i>, <a href="qpinmanager.html#Status-enum">QPinManager::Status</a> <i>status</i>, const <a href="qpinoptions.html">QPinOptions</a> &amp; <i>options</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted to indicate the <i>status</i> of a pin with the specified <i>type</i>. If the status is <a href="qpinmanager.html#Status-enum">NeedPin</a>, then the user interface should ask for the pin and return it via <a href="qpinmanager.html#enterPin">enterPin</a>(). If the status is <a href="qpinmanager.html#Status-enum">NeedPuk</a>, then the user interface should ask for a puk and a new pin, and return them via <a href="qpinmanager.html#enterPuk">enterPuk</a>(). For both <a href="qpinmanager.html#Status-enum">NeedPin</a> and <a href="qpinmanager.html#Status-enum">NeedPuk</a>, the function <a href="qpinmanager.html#cancelPin">cancelPin</a>() can be called to cancel the pin entry.</p>
 <p>If the status is <a href="qpinmanager.html#Status-enum">NeedPin</a> or <a href="qpinmanager.html#Status-enum">NeedPuk</a>, then <i>options</i> provides additional information that may affect the type of user interface to use when asking the user for the pin or puk.</p>
 <p>The <i>type</i> will be <tt>READY</tt> and <i>status</i> will be <tt>Valid</tt> when the SIM has been given sufficient pin's and puk's to return it to a ready state.</p>
@@ -138,15 +138,15 @@
 <h3 class="fn"><a name="querySimPinStatus"></a>void QPinManager::querySimPinStatus ()&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Query the status of the main <tt>SIM PIN</tt>. The service will respond with a <a href="qpinmanager.html#pinStatus">pinStatus</a>() signal indicating the current status. This method is typically used during system start up.</p>
 <p>See also <a href="qpinmanager.html#pinStatus">pinStatus</a>().</p>
-<h3 class="fn"><a name="requestLockStatus"></a>void QPinManager::requestLockStatus ( const <a href="./qstring.html">QString</a> &amp; <i>type</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="requestLockStatus"></a>void QPinManager::requestLockStatus ( const <a href="qstring.html">QString</a> &amp; <i>type</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Request the lock status of a pin with a specific <i>type</i>. The manager will respond by emitting the <a href="qpinmanager.html#lockStatus">lockStatus</a>() signal.</p>
 <p>See also <a href="qpinmanager.html#lockStatus">lockStatus</a>() and <a href="qpinmanager.html#setLockStatus">setLockStatus</a>().</p>
-<h3 class="fn"><a name="setLockStatus"></a>void QPinManager::setLockStatus ( const <a href="./qstring.html">QString</a> &amp; <i>type</i>, const <a href="./qstring.html">QString</a> &amp; <i>password</i>, bool <i>enabled</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
+<h3 class="fn"><a name="setLockStatus"></a>void QPinManager::setLockStatus ( const <a href="qstring.html">QString</a> &amp; <i>type</i>, const <a href="qstring.html">QString</a> &amp; <i>password</i>, bool <i>enabled</i> )&nbsp;&nbsp;<tt> [virtual slot]</tt></h3>
 <p>Sets the lock status of a pin with a specific <i>type</i> to <i>enabled</i>. If <i>enabled</i> is true, then the feature will be locked and a pin is required whenever the feature is used. If <i>enabled</i> is false, then the feature will be available at any time without a pin.</p>
 <p>The <i>password</i> parameter is the password corresponding to the lock, to turn it on or off.</p>
 <p>The manager will respond by emitting the <a href="qpinmanager.html#setLockStatusResult">setLockStatusResult</a>() signal.</p>
 <p>See also <a href="qpinmanager.html#lockStatus">lockStatus</a>(), <a href="qpinmanager.html#setLockStatusResult">setLockStatusResult</a>(), and <a href="qpinmanager.html#requestLockStatus">requestLockStatus</a>().</p>
-<h3 class="fn"><a name="setLockStatusResult"></a>void QPinManager::setLockStatusResult ( const <a href="./qstring.html">QString</a> &amp; <i>type</i>, bool <i>valid</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="setLockStatusResult"></a>void QPinManager::setLockStatusResult ( const <a href="qstring.html">QString</a> &amp; <i>type</i>, bool <i>valid</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted in response to <a href="qpinmanager.html#setLockStatus">setLockStatus</a>() for <i>type</i>. The <i>valid</i> flag indicates whether the request succeeded or failed.</p>
 <p>See also <a href="qpinmanager.html#setLockStatus">setLockStatus</a>().</p>
 <p /><address><hr /><div align="center">

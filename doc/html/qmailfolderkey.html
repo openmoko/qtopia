@@ -87,7 +87,7 @@
 <p>A default-constructed key (one for which <a href="qmailfolderkey.html#isEmpty">isEmpty</a>() returns true) matches all folders. The logical negation of an empty key also matches all folders.</p>
 <p>The result of combining an empty key with a non-empty key is the same as the original non-empty key. This is true regardless of whether the combination is formed by a logical AND or a logical OR operation.</p>
 <p>The result of combining two empty keys is an empty key.</p>
-<h3 class="fn"><a name="QMailFolderKey-2"></a>QMailFolderKey::QMailFolderKey ( const <a href="qmailfolderkey.html#Property-enum">Property</a> &amp; <i>p</i>, const <a href="./qvariant.html">QVariant</a> &amp; <i>value</i>, const <a href="qmailfolderkey.html#Operand-enum">Operand</a> &amp; <i>c</i> = Equal )</h3>
+<h3 class="fn"><a name="QMailFolderKey-2"></a>QMailFolderKey::QMailFolderKey ( const <a href="qmailfolderkey.html#Property-enum">Property</a> &amp; <i>p</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>value</i>, const <a href="qmailfolderkey.html#Operand-enum">Operand</a> &amp; <i>c</i> = Equal )</h3>
 <p>Construct a <a href="qmailfolderkey.html">QMailFolderKey</a> which defines a query parameter where QMailFolder::Property <i>p</i> is compared using comparison operator <i>c</i> with a value <i>value</i>.</p>
 <h3 class="fn"><a name="QMailFolderKey-3"></a>QMailFolderKey::QMailFolderKey ( const QMailIdList &amp; <i>ids</i> )</h3>
 <p>Construct a <a href="qmailfolderkey.html">QMailFolderKey</a> which defines a query parameter where folder id's matching those in <i>ids</i> are returned.</p>

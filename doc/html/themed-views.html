@@ -81,7 +81,7 @@
 <p>In the above example the &quot;newmessages&quot; rect element will only be active(visible) when the valuespace key /Communications/Messages/NewMessages returns a value &gt; 0.</p>
 <a name="specifying-colors"></a>
 <h3>Specifying Colors</h3>
-<p>Colors can be specifed by either their hex color code of the form #RRGGBB, by their Qt <a href="./qcolorgroup.html">QColorGroup</a> color roles:</p>
+<p>Colors can be specifed by either their hex color code of the form #RRGGBB, by their Qt <a href="qcolorgroup.html">QColorGroup</a> color roles:</p>
 <ul>
 <li><tt>None</tt> - do not paint/blend with any color.</li>
 <li><tt>Background</tt> - general background color.</li>
@@ -173,30 +173,30 @@
 <pre>    class ThemedButton : public QPushButton
     {
     private:
-        ThemedView* view; <span class="comment">//</span> contains the loaded theme
-        bool buttonPressed; <span class="comment">//</span> contains a flag indicating whether the button is currently pressed or not
+        ThemedView* view; <span class="comment">// contains the loaded theme</span>
+        bool buttonPressed; <span class="comment">// contains a flag indicating whether the button is currently pressed or not</span>
     protected:
         void paintEvent(QPaintEvent* e)
         {
-            <span class="comment">//</span> find our template
+            <span class="comment">// find our template</span>
             QString templateName = buttonPressed ? &quot;buttonnormal&quot; : &quot;buttonclicked&quot;;
             ThemeTemplateItem* template = (ThemeTemplateItem*)view-&gt;findItem(templateName, ThemedView::Template);
             Q_ASSERT(template != 0);
 
-            <span class="comment">//</span> create an instance of the template
-            ThemeTemplateInstanceItem* instance = template-&gt;createInstance(QString::number( (int)this )); <span class="comment">//</span> pass a uid to createInstace, used as value for vspath
-            <span class="comment">//</span> paint the template instance to this widget
+            <span class="comment">// create an instance of the template</span>
+            ThemeTemplateInstanceItem* instance = template-&gt;createInstance(QString::number( (int)this )); <span class="comment">// pass a uid to createInstace, used as value for vspath</span>
+            <span class="comment">// paint the template instance to this widget</span>
             QPainter p(this);
             view-&gt;paint(&amp;p, e-&gt;rect(), instance);
 
-            <span class="comment">//</span> cleaup
+            <span class="comment">// cleaup</span>
             delete instance;
         }
     };</pre>
 <p>The createInstance() line needs further explanation. The <a href="themetemplateitem.html#createInstance">ThemeTemplateItem::createInstance</a>() takes a unique identifier which is used as the vspath value for the template instance. This means each template has its own unique value space path for expressions to operate on. In this case the base valuespace path will be &quot;/UIComponents/&lt;uid&gt;/&quot; and so the text items in the template will refer to &quot;/UIComponents/&lt;uid&gt;/NormalText&quot; and &quot;/UIComponents/&lt;uid&gt;/PressedText&quot; where uid is in this case the this pointer of the class converted to a string.</p>
 <a name="lists"></a>
 <h3>Lists</h3>
-<p>Themed Views have the ability to display themed lists using <a href="./qlistview.html">QListView</a>, theme expressions, templates and the Qt model/view. See the documentation of <a href="themelistmodel.html">ThemeListModel</a> for more details.</p>
+<p>Themed Views have the ability to display themed lists using <a href="qlistview.html">QListView</a>, theme expressions, templates and the Qt model/view. See the documentation of <a href="themelistmodel.html">ThemeListModel</a> for more details.</p>
 <p>See also <a href="themed-view-elements.html#themetemplateelement">themetemplateelement</a> and <a href="themetemplateitem.html">ThemeTemplateItem</a>.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

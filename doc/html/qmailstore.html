@@ -14,7 +14,7 @@
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QMailStore Class Reference</h1>
 <p>The QMailStore class represents the main interface for storage and retrieval of messages and folders on the message store. <a href="#details">More...</a></p>
 <pre>    #include &lt;QMailStore&gt;</pre><p><b>This class is under development and is subject to change.</b></p>
-<p>Inherits <a href="./qobject.html">QObject</a>.</p>
+<p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qmailstore-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -48,7 +48,7 @@
 <li><div class="fn"/>bool <b><a href="qmailstore.html#updateMessages-2">updateMessages</a></b> ( const QMailMessageKey &amp; <i>key</i>, const QMailMessage::Status <i>status</i>, bool <i>set</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -61,7 +61,7 @@
 <li><div class="fn"/>void <b><a href="qmailstore.html#messagesUpdated">messagesUpdated</a></b> ( const QMailIdList &amp; <i>ids</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <a name="static-public-members"></a>
 <h3>Static Public Members</h3>
@@ -69,15 +69,15 @@
 <li><div class="fn"/>QMailStore * <b><a href="qmailstore.html#instance">instance</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -122,12 +122,12 @@
 <p>Returns an instance of the <a href="qmailstore.html">QMailStore</a> object.</p>
 <h3 class="fn"><a name="message"></a><a href="qmailmessage.html">QMailMessage</a> QMailStore::message ( const <a href="qmailid.html">QMailId</a> &amp; <i>id</i> ) const</h3>
 <p>Returns the <a href="qmailmessage.html">QMailMessage</a> defined by a <a href="qmailid.html">QMailId</a> <i>id</i> from the message store.</p>
-<h3 class="fn"><a name="message-2"></a><a href="qmailmessage.html">QMailMessage</a> QMailStore::message ( const <a href="./qstring.html">QString</a> &amp; <i>uid</i>, const <a href="./qstring.html">QString</a> &amp; <i>account</i> ) const</h3>
+<h3 class="fn"><a name="message-2"></a><a href="qmailmessage.html">QMailMessage</a> QMailStore::message ( const <a href="qstring.html">QString</a> &amp; <i>uid</i>, const <a href="qstring.html">QString</a> &amp; <i>account</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns the <a href="qmailmessage.html">QMailMessage</a> defined by the unique identifier <i>uid</i> from the account <i>account</i>.</p>
 <h3 class="fn"><a name="messageHeader"></a><a href="qmailmessage.html">QMailMessage</a> QMailStore::messageHeader ( const <a href="qmailid.html">QMailId</a> &amp; <i>id</i> ) const</h3>
 <p>Returns the <a href="qmailmessage.html">QMailMessage</a> header defined by a <a href="qmailid.html">QMailId</a> <i>id</i> from the message store.</p>
-<h3 class="fn"><a name="messageHeader-2"></a><a href="qmailmessage.html">QMailMessage</a> QMailStore::messageHeader ( const <a href="./qstring.html">QString</a> &amp; <i>uid</i>, const <a href="./qstring.html">QString</a> &amp; <i>account</i> ) const</h3>
+<h3 class="fn"><a name="messageHeader-2"></a><a href="qmailmessage.html">QMailMessage</a> QMailStore::messageHeader ( const <a href="qstring.html">QString</a> &amp; <i>uid</i>, const <a href="qstring.html">QString</a> &amp; <i>account</i> ) const</h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Returns the <a href="qmailmessage.html">QMailMessage</a> header defined by the unique identifier <i>uid</i> from the account <i>account</i>.</p>
 <h3 class="fn"><a name="messageHeaders"></a>QMailMessageList QMailStore::messageHeaders ( const <a href="qmailmessagekey.html">QMailMessageKey</a> &amp; <i>key</i>, const <a href="qmailmessagekey.html#Property-enum">QMailMessageKey::Properties</a> &amp; <i>properties</i>, const <a href="qmailstore.html#ReturnOption-enum">ReturnOption</a> &amp; <i>option</i> = ReturnAll ) const</h3>

@@ -36,10 +36,10 @@
 <h2>Configuration</h2>
 <p>Package Manager can be configured with a file called <tt>PackageManager.conf</tt> located in the &lt;qtopia-root-dir&gt;/devices/etc/default/Trolltech directory. The file has the following format:</p>
 <pre>    [server foo]
-    URL=http:<span class="comment">//</span>path/to/foo's/package/feed
+    URL=http:<span class="comment">//path/to/foo's/package/feed</span>
 
     [server bar]
-    URL=http:<span class="comment">//</span>path/to/bar's/package/feed
+    URL=http:<span class="comment">//path/to/bar's/package/feed</span>
 
     [Configuration]
     MaxPackagesList=50
@@ -60,7 +60,7 @@
 <tr valign="top" class="even"><td>RestrictedOrganization</td><td>Defines organizations for settings files which downloaded applications should not use.</td></tr>
 </table></p>
 <p>The limitations on the packages.list and descriptor are intended to limit the cost to the user if he/she connects to a server whose packages.list is excessively large.</p>
-<p>Settings files for applications typically specify an organization ( see <a href="./qsettings.html">QSettings</a>). Organizations which are already in use should be specified in the RestrictedOrganizations field. Packages that contain settings files which correspond to this organization won't be able to be installed. This is to more so prevent 3rd party developers accidentally using an in-use organization rather than for security reasons.</p>
+<p>Settings files for applications typically specify an organization ( see <a href="qsettings.html">QSettings</a>). Organizations which are already in use should be specified in the RestrictedOrganizations field. Packages that contain settings files which correspond to this organization won't be able to be installed. This is to more so prevent 3rd party developers accidentally using an in-use organization rather than for security reasons.</p>
 <p>For developmental purposes downloaded applications can be trusted or untrusted. To prevent installation of trusted applications, the Sensitive domain needs to be set.</p>
 <p>The file <a href="syscust-docstorage.html#package-storage-conf">Storage.conf</a> can be used to specify which directory that all packages are installed to.</p>
 <a name="package-compatibility"></a>

@@ -32,11 +32,11 @@
 <p>See also <a href="qmailviewerplugin.html">QMailViewerPlugin</a>, <a href="qmailviewerinterface.html">QMailViewerInterface</a>, and <a href="qmailviewerfactory.html">QMailViewerFactory</a>.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="create"></a><a href="qmailviewerinterface.html">QMailViewerInterface</a> * QMailViewerPluginInterface::create ( <a href="./qwidget.html">QWidget</a> * <i>parent</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="create"></a><a href="qmailviewerinterface.html">QMailViewerInterface</a> * QMailViewerPluginInterface::create ( <a href="qwidget.html">QWidget</a> * <i>parent</i> )&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Creates an instance of the message viewer class provided by the plug-in, setting the returned object to have the parent widget <i>parent</i>.</p>
 <h3 class="fn"><a name="isSupported"></a>bool QMailViewerPluginInterface::isSupported ( <a href="qmailviewerfactory.html#ContentType-enum">QMailViewerFactory::ContentType</a> <i>type</i> ) const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns true if the viewer provided by this plug-in can display a mail message with <i>type</i> content; otherwise returns false.</p>
-<h3 class="fn"><a name="key"></a><a href="./qstring.html">QString</a> QMailViewerPluginInterface::key () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
+<h3 class="fn"><a name="key"></a><a href="qstring.html">QString</a> QMailViewerPluginInterface::key () const&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Returns a string identifying this plug-in.</p>
 <p /><address><hr /><div align="center">
 <table width="100%" cellspacing="0" border="0"><tr class="address">

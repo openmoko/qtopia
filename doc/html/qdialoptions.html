@@ -118,7 +118,7 @@
 <p>Makes a copy of <i>other</i>.</p>
 <h3 class="fn"><a name="dtor.QDialOptions"></a>QDialOptions::~QDialOptions ()</h3>
 <p>Deletes this dial options object.</p>
-<h3 class="fn"><a name="apn"></a><a href="./qstring.html">QString</a> QDialOptions::apn () const</h3>
+<h3 class="fn"><a name="apn"></a><a href="qstring.html">QString</a> QDialOptions::apn () const</h3>
 <p>Returns the access point name for GPRS sessions.</p>
 <p>See also <a href="qdialoptions.html#setApn">setApn</a>().</p>
 <h3 class="fn"><a name="bearer"></a><a href="qdialoptions.html#Bearer-enum">QDialOptions::Bearer</a> QDialOptions::bearer () const</h3>
@@ -136,35 +136,35 @@
 <h3 class="fn"><a name="contextId"></a>int QDialOptions::contextId () const</h3>
 <p>Returns the context identifier for GPRS sessions. Returns zero if the session is not GPRS.</p>
 <p>See also <a href="qdialoptions.html#setContextId">setContextId</a>().</p>
-<h3 class="fn"><a name="extensionOption"></a><a href="./qvariant.html">QVariant</a> QDialOptions::extensionOption ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, const <a href="./qvariant.html">QVariant</a> &amp; <i>def</i> = QVariant() ) const</h3>
+<h3 class="fn"><a name="extensionOption"></a><a href="qvariant.html">QVariant</a> QDialOptions::extensionOption ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>def</i> = QVariant() ) const</h3>
 <p>Returns the value of the extension option called <i>name</i>. If the option is not present, <i>def</i> will be returned as the default value.</p>
 <p>See also <a href="qdialoptions.html#setExtensionOption">setExtensionOption</a>().</p>
 <h3 class="fn"><a name="gsmSpeed"></a>int QDialOptions::gsmSpeed () const</h3>
 <p>Returns the explicit 3GPP TS 27.007 bearer speed value. The default value of -1 indicates that the system will use a bearer speed value compatible with the explicit bit rate specified by <a href="qdialoptions.html#speed">speed</a>().</p>
 <p>See also <a href="qdialoptions.html#setGsmSpeed">setGsmSpeed</a>().</p>
-<h3 class="fn"><a name="ipArgs"></a><a href="./qstringlist.html">QStringList</a> QDialOptions::ipArgs () const</h3>
+<h3 class="fn"><a name="ipArgs"></a><a href="qstringlist.html">QStringList</a> QDialOptions::ipArgs () const</h3>
 <p>Returns the list of command-line options to be passed to pppd.</p>
 <p>See also <a href="qdialoptions.html#setIpArgs">setIpArgs</a>().</p>
-<h3 class="fn"><a name="ipConnectScript"></a><a href="./qstring.html">QString</a> QDialOptions::ipConnectScript () const</h3>
+<h3 class="fn"><a name="ipConnectScript"></a><a href="qstring.html">QString</a> QDialOptions::ipConnectScript () const</h3>
 <p>Returns the filename for the connect script.</p>
 <p>See also <a href="qdialoptions.html#setIpConnectScript">setIpConnectScript</a>().</p>
 <h3 class="fn"><a name="ipDemandDialing"></a>bool QDialOptions::ipDemandDialing () const</h3>
 <p>Returns true if the demand-dialing flag is set; otherwise returns false. If the demand-dialing flag is set to true, then it indicates that pppd should be started, but the dial process should not happen yet. The dial will happen only when pppd detects TCP/IP network activity.</p>
 <p>If the demand-dialing flag is set to false, then it indicates that pppd should be started and the dial process should be initiated immediately.</p>
 <p>See also <a href="qdialoptions.html#setIpDemandDialing">setIpDemandDialing</a>().</p>
-<h3 class="fn"><a name="ipDisconnectScript"></a><a href="./qstring.html">QString</a> QDialOptions::ipDisconnectScript () const</h3>
+<h3 class="fn"><a name="ipDisconnectScript"></a><a href="qstring.html">QString</a> QDialOptions::ipDisconnectScript () const</h3>
 <p>Returns the filename for the disconnect script.</p>
 <p>See also <a href="qdialoptions.html#setIpDisconnectScript">setIpDisconnectScript</a>().</p>
-<h3 class="fn"><a name="ipProgramName"></a><a href="./qstring.html">QString</a> QDialOptions::ipProgramName () const</h3>
+<h3 class="fn"><a name="ipProgramName"></a><a href="qstring.html">QString</a> QDialOptions::ipProgramName () const</h3>
 <p>Returns the full pathname of the pppd binary to be executed. The default value is <tt>/usr/sbin/pppd</tt>.</p>
 <p>See also <a href="qdialoptions.html#setIpProgramName">setIpProgramName</a>().</p>
-<h3 class="fn"><a name="number"></a><a href="./qstring.html">QString</a> QDialOptions::number () const</h3>
+<h3 class="fn"><a name="number"></a><a href="qstring.html">QString</a> QDialOptions::number () const</h3>
 <p>Returns the phone number to be dialed. The default is the empty string.</p>
 <p>See also <a href="qdialoptions.html#setNumber">setNumber</a>().</p>
-<h3 class="fn"><a name="pdpType"></a><a href="./qstring.html">QString</a> QDialOptions::pdpType () const</h3>
+<h3 class="fn"><a name="pdpType"></a><a href="qstring.html">QString</a> QDialOptions::pdpType () const</h3>
 <p>Returns the PDP type for GPRS sessions.</p>
 <p>See also <a href="qdialoptions.html#setPdpType">setPdpType</a>().</p>
-<h3 class="fn"><a name="setApn"></a>void QDialOptions::setApn ( const <a href="./qstring.html">QString</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="setApn"></a>void QDialOptions::setApn ( const <a href="qstring.html">QString</a> &amp; <i>value</i> )</h3>
 <p>Sets the access point for GPRS sessions to <i>value</i>. The <a href="qdialoptions.html#contextId">contextId</a>() must be non-zero for the APN to be used when setting up a GPRS session.</p>
 <p>See also <a href="qdialoptions.html#apn">apn</a>().</p>
 <h3 class="fn"><a name="setBearer"></a>void QDialOptions::setBearer ( <a href="qdialoptions.html#Bearer-enum">QDialOptions::Bearer</a> <i>value</i> )</h3>
@@ -182,7 +182,7 @@
 <h3 class="fn"><a name="setContextId"></a>void QDialOptions::setContextId ( int <i>value</i> )</h3>
 <p>Sets the context identifier for GPRS sessions to <i>value</i>.</p>
 <p>See also <a href="qdialoptions.html#contextId">contextId</a>().</p>
-<h3 class="fn"><a name="setExtensionOption"></a>void QDialOptions::setExtensionOption ( const <a href="./qstring.html">QString</a> &amp; <i>name</i>, const <a href="./qvariant.html">QVariant</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="setExtensionOption"></a>void QDialOptions::setExtensionOption ( const <a href="qstring.html">QString</a> &amp; <i>name</i>, const <a href="qvariant.html">QVariant</a> &amp; <i>value</i> )</h3>
 <p>Sets the extension option <i>name</i> to <i>value</i>. Extension options are used to set dial features beyond those defined by the GSM standards. Non-GSM telephony implementations might need such extension options.</p>
 <p>The options are passed to the telephony implementation, which will obey the options it understands and ignore the rest. If the telephony implementation expects an option to be present, and it isn't, then the implementation should choose a reasonable default based on the type of call being made.</p>
 <p>See also <a href="qdialoptions.html#extensionOption">extensionOption</a>().</p>
@@ -190,27 +190,27 @@
 <p>Sets the explicit 3GPP TS 27.007 bearer speed to <i>value</i>. The argument should be one of values from 3GPP TS 27.007's documentation of the <tt>AT+CBST</tt> command. If the value is set to -1, then the system will use a bearer speed value compatible with the explicit bit rate specified by <a href="qdialoptions.html#speed">speed</a>().</p>
 <p>This function should only be used when the caller is absolutely certain which bearer speed value they want, and they are certain that the underlying modem supports that value. The <a href="qdialoptions.html#setSpeed">setSpeed</a>() function is a better interface because it can determine the appropriate low-level bearer speed value from the capabilities of the modem.</p>
 <p>See also <a href="qdialoptions.html#gsmSpeed">gsmSpeed</a>().</p>
-<h3 class="fn"><a name="setIpArgs"></a>void QDialOptions::setIpArgs ( const <a href="./qstringlist.html">QStringList</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="setIpArgs"></a>void QDialOptions::setIpArgs ( const <a href="qstringlist.html">QStringList</a> &amp; <i>value</i> )</h3>
 <p>Sets the list of command-line options to be passed to pppd to <i>value</i>.</p>
 <p>The list should not include the tty device name or port speed that normally appear at the start of the pppd command-line. These options will be added automatically by the system.</p>
 <p>The list should also not include the <tt>connect</tt> or <tt>disconnect</tt> options, as they will be set based on the information in connectScript() and disconnectScript().</p>
 <p>See also <a href="qdialoptions.html#ipArgs">ipArgs</a>().</p>
-<h3 class="fn"><a name="setIpConnectScript"></a>void QDialOptions::setIpConnectScript ( const <a href="./qstring.html">QString</a> &amp; <i>filename</i> )</h3>
+<h3 class="fn"><a name="setIpConnectScript"></a>void QDialOptions::setIpConnectScript ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> )</h3>
 <p>Sets the <i>filename</i> for the connect script. The contents of the file must be formatted according to the chat(1) manual page.</p>
 <p>See also <a href="qdialoptions.html#ipConnectScript">ipConnectScript</a>().</p>
 <h3 class="fn"><a name="setIpDemandDialing"></a>void QDialOptions::setIpDemandDialing ( bool <i>value</i> )</h3>
 <p>Sets the demand-dialing flag to <i>value</i>.</p>
 <p>See also <a href="qdialoptions.html#ipDemandDialing">ipDemandDialing</a>().</p>
-<h3 class="fn"><a name="setIpDisconnectScript"></a>void QDialOptions::setIpDisconnectScript ( const <a href="./qstring.html">QString</a> &amp; <i>filename</i> )</h3>
+<h3 class="fn"><a name="setIpDisconnectScript"></a>void QDialOptions::setIpDisconnectScript ( const <a href="qstring.html">QString</a> &amp; <i>filename</i> )</h3>
 <p>Sets the <i>filename</i> for the disconnect script. The contents of the file must be formatted according to the chat(1) manual page.</p>
 <p>See also <a href="qdialoptions.html#ipDisconnectScript">ipDisconnectScript</a>().</p>
-<h3 class="fn"><a name="setIpProgramName"></a>void QDialOptions::setIpProgramName ( const <a href="./qstring.html">QString</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="setIpProgramName"></a>void QDialOptions::setIpProgramName ( const <a href="qstring.html">QString</a> &amp; <i>value</i> )</h3>
 <p>Sets the full pathname of the pppd binary to <i>value</i>.</p>
 <p>See also <a href="qdialoptions.html#ipProgramName">ipProgramName</a>().</p>
-<h3 class="fn"><a name="setNumber"></a>void QDialOptions::setNumber ( const <a href="./qstring.html">QString</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="setNumber"></a>void QDialOptions::setNumber ( const <a href="qstring.html">QString</a> &amp; <i>value</i> )</h3>
 <p>Sets the phone number to be dialed to <i>value</i>.</p>
 <p>See also <a href="qdialoptions.html#number">number</a>().</p>
-<h3 class="fn"><a name="setPdpType"></a>void QDialOptions::setPdpType ( const <a href="./qstring.html">QString</a> &amp; <i>value</i> )</h3>
+<h3 class="fn"><a name="setPdpType"></a>void QDialOptions::setPdpType ( const <a href="qstring.html">QString</a> &amp; <i>value</i> )</h3>
 <p>Sets the PDP type for GPRS sessions to <i>value</i>. The <a href="qdialoptions.html#contextId">contextId</a>() must be non-zero for the type to be used when setting up a GPRS session.</p>
 <p>See also <a href="qdialoptions.html#pdpType">pdpType</a>().</p>
 <h3 class="fn"><a name="setSpeed"></a>void QDialOptions::setSpeed ( int <i>value</i> )</h3>

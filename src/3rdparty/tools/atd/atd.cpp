@@ -31,19 +31,6 @@
 #include <dirent.h>
 #include <syslog.h>
 
-/*!
- \page atdlegal.html
- \title atd
- \brief License information for atd.
- \ingroup qtopia3rdparty
- \legalese
- The atd program is based on Russ Nelson's lightweight At daemon.
- The At daemon will run a program at a specified time.
- It is distributed under the terms of the GNU General Public License.
- \endlegalese
-*/
-
-
 #if defined(QT_QWS_SL5XXX)
 #include <asm/sharp_apm.h>
 #include <asm/hardware.h>

@@ -839,6 +839,7 @@ if [ -z "\$\$QPEDIR" ]; then\\
     exit 1;\\
 fi;\\
 QPEDIR=`cd \$\$QPEDIR; /bin/pwd | sed 's/\\/\$\$//'`;\\
+PWD=`/bin/pwd`;\\
 shadowdir=`echo \$\$PWD | perl -ne 's,$depotpath,'\$\$QPEDIR',;\\
                                     print'`;\\
 if [ "\$\$shadowdir" != "\$\$PWD" -a -d "\$\$shadowdir" ]; then\\

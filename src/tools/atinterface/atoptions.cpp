@@ -51,6 +51,7 @@ void AtOptions::factoryDefaults()
     clip = false;
     qcam = false;
     cind = 0;
+    cmer = 1;
     qsq = false;
     qbc = false;
     creg = 0;

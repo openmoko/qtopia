@@ -89,6 +89,10 @@ public:
 
     void removeContentFromSet( int setId, const QContent &content );
 
+    void clearContentSet(int setId);
+
+    void commitContentSet(int setId);
+
     bool contentSetContains( int setId, const QContent &content );
 
     bool contentValid( QContentId contentId );

@@ -26,6 +26,7 @@ PROJECTS*=\
     settings/worldtime \
     tools/content_installer \
     tools/dbmigrate \
+    tools/dbmigrateservice \
     tools/device_updater \
     tools/device_updater/plugin \
     tools/printserver \
@@ -49,9 +50,12 @@ PROJECTS*=\
     3rdparty/libraries/md5 \
     3rdparty/libraries/openobex \
     3rdparty/libraries/pthread \
-    3rdparty/libraries/tar \
+    3rdparty/libraries/tar\
     3rdparty/libraries/zlib\
-    3rdparty/libraries/sqlite
+    3rdparty/libraries/sqlite\
+    3rdparty/libraries/dlmalloc\
+    3rdparty/libraries/vobject\
+    3rdparty/libraries/g711
 
 # Public unit tests for Openmoko
 PROJECTS*=\
@@ -136,10 +140,7 @@ phone {
     PROJECTS*=tools/phonesim tools/phonesim/lib tools/phonesim_target
     CONFIG+=qtopiatest_use_phonesim
 
-    enable_voip:PROJECTS*=\
-        3rdparty/libraries/dissipate2\
-        tools/sipagent \
-        settings/sipsettings
+
 }
 
 !x11 {
@@ -229,10 +230,6 @@ enable_qtopiamedia {
 }
 
 !no_quicklaunch|enable_singleexec:PROJECTS*=tools/quicklauncher
-
-build_libamr:PROJECTS*=\
-    3rdparty/libraries/amr\
-    3rdparty/plugins/codecs/libamr
 
 enable_bluetooth:PROJECTS*=\
     settings/btsettings \

@@ -256,11 +256,26 @@ void Calculator::cut() {
 void Calculator::paste() {
     QString t = cb->text();
     if (!t.isEmpty()) {
+        //pushing negative sign first does nothing since the stack assumes 0 at start
+        //we have to negate at the end.
+        bool negated = (t[0] == QChar('-'));
+        if (negated) {
+            if (t.count() == 1) //not a number
+                return;
+            t = t.mid(1);
+        }
+
         for (int i=0; i<t.length(); i++) {
             if ( t[i].isPrint() && !t[i].isSpace() ) {
                 systemEngine->push(t[i].toLatin1());
             }
         }
+        if (negated)
+            systemEngine->pushInstruction("Negate");
+
+        if (!Qtopia::mousePreferred() && systemEngine->numOps()%2 == 0)
+            //FormPhone blocks evaluation -> enforce it here
+            systemEngine->evaluate();
     }
 }
 void Calculator::clipboardChanged()
@@ -275,4 +290,9 @@ void Calculator::showEvent(QShowEvent * e)
     systemEngine->dualReset();
     QtopiaApplication::hideInputMethod();
     QWidget::showEvent( e );
+}
+
+void Calculator::negate()
+{
+    systemEngine->pushInstruction("Negate");
 }

@@ -30,35 +30,35 @@
 
 class QMailFolderPrivate;
 
-class QTOPIAMAIL_EXPORT QMailFolder 
+class QTOPIAMAIL_EXPORT QMailFolder
 {
 public:
-	QMailFolder(const QMailId& id);
+    QMailFolder(const QMailId& id);
     QMailFolder(const QString& name, const QMailId& parentFolderId = QMailId());
     QMailFolder(const QMailFolder& other);
     virtual ~QMailFolder();
-    
+
     QMailId id() const;
-    
+
     QString name() const;
     void setName(const QString& name);
-    
-    QMailId parentId() const;   
-    void setParentId(const QMailId& id); 
-    
+
+    QMailId parentId() const;
+    void setParentId(const QMailId& id);
+
     bool isRoot() const;
-    
-    QMailFolder& operator=(const QMailFolder& other);  
- 
+
+    QMailFolder& operator=(const QMailFolder& other);
+
 private:
-	QMailFolder();
+    QMailFolder();
     void setId(const QMailId& id);
 
 private:
-	friend class QMailStore;
-	friend class QMailStorePrivate;
+    friend class QMailStore;
+    friend class QMailStorePrivate;
 
-private: 
+private:
     QSharedDataPointer<QMailFolderPrivate> d;
 
 };

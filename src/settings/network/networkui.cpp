@@ -325,6 +325,7 @@ void NetworkUI::init()
     table->setEditTriggers( QAbstractItemView::NoEditTriggers  );
     table->setAlternatingRowColors( true );
     table->setShowGrid( false );
+    table->horizontalHeader()->setResizeMode(0, QHeaderView::ResizeToContents);
     table->horizontalHeader()->setStretchLastSection( true );
     table->verticalHeader()->hide();
     table->horizontalHeader()->hide();
@@ -931,9 +932,9 @@ void NetworkUI::tabChanged( int index )
     \brief Provides network configuration services.
 
     The \i NetworkSetup service allows applications to configure various details of the
-    network. 
+    network.
 
-    Client applications can request the \i NetworkSetupService with the 
+    Client applications can request the \i NetworkSetupService with the
     following code:
 
     \code
@@ -1006,7 +1007,7 @@ void NetworkSetupService::pushWapNetworkSettings
 }
 
 /*!
-  This function provides OTA network configuration support according to Nokia's OTA settings 
+  This function provides OTA network configuration support according to Nokia's OTA settings
   specification 7. \a request contains the new OTA settings to be used.
   The payload is defined by the QDS NetworkSetup service (\c{QPEDIR/etc/qds/NetworkSetup)
   */

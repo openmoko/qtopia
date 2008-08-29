@@ -84,6 +84,7 @@ namespace QMAPI {
         ~Appointment();
 
         QString Body();
+        bool IsBirthday();
 
     private:
         AppointmentPrivate *d;

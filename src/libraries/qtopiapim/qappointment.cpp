@@ -89,6 +89,23 @@ static QDateTime trimSeconds( const QDateTime &dt )
   \brief The QAppointment class holds the data of a calendar appointment.
 
   This data includes descriptive data of the appointment and scheduling information.
+  Appointments can also repeat and have exceptions to their repeat rules. 
+  Repetition of appointments is defined by the appointment's repeatRule(),
+  frequency(), weekFlags() and start().  The repeat rule defines what
+  type of repetition the appointment has and how to interpret the
+  other aspect of repetition information.  For instance Daily indicates
+  that the appointment repeats every N days, where N is provided by the
+  frequency() of the appointment.  Whereas Weekly would indicate every
+  N weeks, where N is the frequency() and the weekFlags() function
+  indicates on which days of the week the appointment occurs.
+
+  The start date is used to determine the Instance of the occurrence.  For
+  example if the start date of the appointment is the 16th of April,
+  then for the purposes of the repeat MonthlyDate rule, the Instance is
+  16.  This differs from some other systems that explicitly store the
+  Instance information separate from the start information.  In Qtopia
+  the start of an appointment must always be a valid occurrence for the
+  appointments repetition behavior.
 
   \sa {Pim Library}
 */

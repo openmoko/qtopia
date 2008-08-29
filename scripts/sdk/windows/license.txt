@@ -6,4 +6,4 @@ Development Kit.  If you have not agreed to the license terms contained in
 the license agreement presented to you by Trolltech ASA you are prohibited
 from using this product.
 
-Copyright 2007  All rights reserved.  Trolltech ASA
+Copyright 2008  All rights reserved.  Trolltech ASA

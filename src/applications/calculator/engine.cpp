@@ -82,18 +82,20 @@ Engine::Engine():QObject() {
     mem = recoveredDStack = 0;
     kDesc = 0;
     lcd = 0;
-    memMark = kMark = 0;
+    memMark = 0;
     braceCount = previousInstructionsPrecedence = 0;
     currentType = wantedType = "NONE"; // No tr
 
     // Register the common instructions
 
-    // System instructions - null, open/close braces
+    // System instructions - null, open/close braces, negation
     Instruction *da = new Instruction();
     registerInstruction(da);
     da = new iBraceOpen();
     registerInstruction(da);
     da = new iBraceOpenImpl();
+    registerInstruction(da);
+    da = new iDoubleNegate();
     registerInstruction(da);
 
     if (Qtopia::mousePreferred()) {
@@ -110,8 +112,6 @@ Engine::Engine():QObject() {
         da = new iDivideDoubleDouble();
         registerInstruction(da);
         da = new iDoubleCopy();
-        registerInstruction(da);
-        da = new iDoubleNegate();
         registerInstruction(da);
 #ifdef ENABLE_FRACTION
         da = new iNegateFractionFraction();
@@ -556,11 +556,11 @@ void Engine::memorySave() {
 
     executeInstructionOnStack("Factory"); // No tr
     if (mem->getFormattedOutput() != dStack.top()->getFormattedOutput()) {
-        memMark->show();
+        if (memMark) memMark->show();
     } else {
         delete mem;
         mem = 0;
-        memMark->hide();
+        if (memMark) memMark->hide();
     }
     delete dStack.pop();
 
@@ -599,7 +599,7 @@ void Engine::memoryReset() {
         delete mem;
         mem = 0;
     }
-    memMark->hide();
+    if (memMark) memMark->hide();
 }
 
 void Engine::setError(Error e, bool resetStack){
@@ -665,19 +665,19 @@ void Engine::setError(QString s, bool resetStack) {
 void Engine::setDisplay(MyLcdDisplay *l) {
     lcd = l;
 
+    if ( memMark )
+        delete memMark;
+
+    QFont f ("dejavu", 9, QFont::Bold, true);
     memMark = new QLabel( "m", lcd );
+    QFontMetrics metrics(f);
+    QRect bound = metrics.boundingRect(QChar('m'));
     memMark->setBackgroundRole( QPalette::Base );
-    memMark->setFont( QFont( "dejavu", 10, QFont::Bold, true ) );
-    memMark->resize( 12, 12 );
+    memMark->setFrameShape(QFrame::NoFrame);
+    memMark->setFont(f);
+    memMark->resize(bound.width()+1, bound.height() + 1);
     memMark->move( 4, 2 );
     memMark->hide();
-
-    kMark = new QLabel( "k", lcd );
-    kMark->setBackgroundRole( QPalette::Base );
-    kMark->setFont( QFont( "dejavu", 10, QFont::Bold, true ) );
-    kMark->resize( 12, 12 );
-    kMark->move( 4, 14 );
-    kMark->hide();
 }
 
 void Engine::executeInstructionOnStack(QString name) {
@@ -730,7 +730,10 @@ void Engine::setAccType(QString type) {
     changeResetState(drs);
 }
 QString Engine::getDisplay() {
-    return dStack.top()->getFormattedOutput();
+    if (dStack.count()>0)
+        return dStack.top()->getFormattedOutput();
+    else 
+        return errorString;
 }
 
 void Engine::changeState(State s) {

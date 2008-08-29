@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -79,9 +79,6 @@
 #  include <private/qfontengine_p.h>
 #elif defined(Q_WS_MAC)
 #  include <private/qt_mac_p.h>
-#  if Q_BYTE_ORDER == Q_BIG_ENDIAN
-#    define BITMAPS_ARE_MSB
-#  endif
 #elif defined(Q_WS_QWS)
 #  if !defined(QT_NO_FREETYPE)
 #    include <private/qfontengine_ft_p.h>
@@ -3242,6 +3239,9 @@ void QRasterPaintEngine::drawLines(const QLineF *lines, int lineCount)
             d->rasterizer.setSpanData(&d->penData);
 
             for (int i = 0; i < lineCount; ++i) {
+                if (lines[i].p1() == lines[i].p2())
+                    continue;
+
                 const QRectF objectRect(lines[i].p1(), lines[i].p2());
                 resolveGradientBoundsConditional(objectRect, &d->penData);
                 QLineF line = d->matrix.map(lines[i]);
@@ -3455,14 +3455,10 @@ void QRasterPaintEnginePrivate::drawBitmap(const QPointF &pos, const QPixmap &pm
 
     int x_offset = xmin - qRound(pos.x());
 
-#if defined (BITMAPS_ARE_MSB)
     QImage::Format format = image.format();
-#endif
     for (int y = ymin; y < ymax; ++y) {
         const uchar *src = image.scanLine(y - qRound(pos.y()));
-#if defined (BITMAPS_ARE_MSB)
         if (format == QImage::Format_MonoLSB) {
-#endif
             for (int x = 0; x < xmax - xmin; ++x) {
                 int src_x = x + x_offset;
                 uchar pixel = src[src_x >> 3];
@@ -3488,7 +3484,6 @@ void QRasterPaintEnginePrivate::drawBitmap(const QPointF &pos, const QPixmap &pm
                     }
                 }
             }
-#if defined (BITMAPS_ARE_MSB)
         } else {
             for (int x = 0; x < xmax - xmin; ++x) {
                 int src_x = x + x_offset;
@@ -3516,7 +3511,6 @@ void QRasterPaintEnginePrivate::drawBitmap(const QPointF &pos, const QPixmap &pm
                 }
             }
         }
-#endif
     }
     if (n) {
         fg->blend(n, spans, fg);
@@ -4951,13 +4945,9 @@ static void draw_text_item_win(const QPointF &_pos, const QTextItemInt &ti, HDC 
     SetBkMode(hdc, TRANSPARENT);
 
     bool has_kerning = ti.f && ti.f->kerning();
-
-    SelectObject(hdc, fe->hfont);
-
+    HGDIOBJ old_font = SelectObject(hdc, fe->hfont);
     unsigned int options = (fe->ttf && !convertToText) ? ETO_GLYPH_INDEX : 0;
-
     wchar_t *convertedGlyphs = (wchar_t *)ti.chars;
-
     QGlyphLayout *glyphs = ti.glyphs;
 
     if (!(ti.flags & QTextItem::RightToLeft) && fe->useTextOutA) {
@@ -5019,8 +5009,10 @@ static void draw_text_item_win(const QPointF &_pos, const QTextItemInt &ti, HDC 
             matrix.translate(baseline_pos.x(), baseline_pos.y());
             ti.fontEngine->getGlyphPositions(ti.glyphs, ti.num_glyphs, matrix, ti.flags,
                 _glyphs, positions);
-            if (_glyphs.size() == 0)
+            if (_glyphs.size() == 0) {
+                SelectObject(hdc, old_font);
                 return;
+            }
 
             convertToText = convertToText && ti.num_glyphs == _glyphs.size();
 
@@ -5064,6 +5056,7 @@ static void draw_text_item_win(const QPointF &_pos, const QTextItemInt &ti, HDC 
             // nothing
         });
     }
+    SelectObject(hdc, old_font);
 }
 
 void qt_draw_text_item(const QPointF &pos, const QTextItemInt &ti, HDC hdc,

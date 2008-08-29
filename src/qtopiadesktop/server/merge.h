@@ -70,13 +70,13 @@ public:
     virtual ~QSyncMerge();
 
 
-    QDateTime lastSync(const QString &id, const QString &source) const;
-    void recordLastSync(const QString &id, const QString &source, const QDateTime &);
+    void lastSync(const QString &id, const QString &source, QDateTime &clientLastSync, QDateTime &serverLastSync);
+    void recordLastSync(const QString &id, const QString &source, const QDateTime &clientLastSync, const QDateTime &serverLastSync);
 
     void clearChanges();
 
 
-    QList<Conflict> conflicts() const;
+    QList<Conflict> conflicts();
 
     bool resolveClient(const Conflict &);
     bool resolveServer(const Conflict &);
@@ -93,22 +93,21 @@ public:
     bool resolveAllClient();
     bool resolveAllServer();
 
-    QList<Change> serverDiff() const;
-    QList<Change> clientDiff() const;
+    QList<Change> serverDiff();
+    QList<Change> clientDiff();
 
 
     enum ChangeSource {
         Server,
         Client
     };
-    QString parseIdentifiers(QByteArray &, ChangeSource, bool revert=false) const;
-    bool canMap(const QString &ident, ChangeSource source) const
+    QString parseIdentifiers(QByteArray &, ChangeSource, bool revert=false);
+    bool canMap(const QString &ident, ChangeSource source)
     { return !map(ident, source).isEmpty(); }
-    QString map(const QString &, ChangeSource) const;
+    QString map(const QString &, ChangeSource);
 
-    // TODO, sync plugins really should be specified to restrict mapping,
-    // this will break if we implement more than two ends of sync
     void clearIdentifierMap();
+    void setDatasource(const QString &datasource);
 
 public slots:
     void setServerReferenceSchema(const QByteArray &);
@@ -128,7 +127,7 @@ public slots:
 private:
     MergeItem *referenceItem();
 
-    void readConflict(Change &client, Change &server, const QSqlQuery &q) const;
+    void readConflict(Change &client, Change &server, const QSqlQuery &q);
     bool resolveBiased(const Conflict &conflict, bool);
 
     void addServerChange(Change::Type, const MergeItem &);

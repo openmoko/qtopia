@@ -46,7 +46,7 @@ public:
     class Argument
     {
     public:
-		QMailFolderKey::Property property;
+        QMailFolderKey::Property property;
         QMailFolderKey::Operand op;
         QVariantList valueList;
         bool operator==(const Argument& other) const
@@ -54,11 +54,11 @@ public:
             return property == other.property &&
                    op == other.op &&
                    valueList == other.valueList;
-        }   
+        }
     };
 
 public:
-    QMailFolderKeyPrivate() : QSharedData(), 
+    QMailFolderKeyPrivate() : QSharedData(),
                               logicalOp(None),
                               negated(false)
     {};

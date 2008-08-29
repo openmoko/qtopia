@@ -64,7 +64,7 @@ DefaultSignal::DefaultSignal(QObject *parent)
         for(int ii = 0; m_accessories && ii < accs.count(); ++ii)
             accessoryAdded(accs.at(ii));
     } else {
-        m_signalSource = new QSignalSource(m_primary);
+        m_signalSource = new QSignalSource(m_primary, this);
         initSignalSource();
     }
         
@@ -90,7 +90,7 @@ void DefaultSignal::initSignalSource()
 
 void DefaultSignal::accessoryAdded( const QString& acc )
 {
-    QSignalSource *ps = new QSignalSource(acc);
+    QSignalSource *ps = new QSignalSource(acc, this);
 #if QTOPIA_CELL
     if ( ps->type() == QLatin1String("modem") ) {
 #elif QTOPIA_VOIP
@@ -104,6 +104,8 @@ void DefaultSignal::accessoryAdded( const QString& acc )
         m_accessories = 0;
         initSignalSource();
         syncSignalSource();
+    } else {
+        delete ps;
     }
 }
 

@@ -49,8 +49,11 @@ public:
         : m_filter( filter )
         , m_sortCriteria( sort )
         , m_updateMode( mode )
+        , m_flushTimerId(-1)
         , m_updateInProgress( false )
     {
+        if (updateMode() == QContentSet::Asynchronous)
+            connect(this, SIGNAL(updateFinished()), this, SIGNAL(contentChanged()));
     }
 
     virtual ~QContentSetEngine();
@@ -70,6 +73,10 @@ public:
 
     virtual void clear() = 0;
 
+    bool updatePending() const { return m_flushTimerId != -1; }
+    void flush();
+    virtual void commitChanges() = 0;
+
     virtual bool contains( const QContent &content ) const = 0;
 
     QStringList sortOrder() const{ return m_sortOrder; }
@@ -82,13 +89,15 @@ public:
 
     bool updateInProgress() const{ return m_updateInProgress; }
 
+public slots:
+    void update();
+
 signals:
     void contentAboutToBeRemoved( int start, int end );
     void contentAboutToBeInserted( int start, int end );
     void contentInserted();
     void contentRemoved();
     void contentChanged( int start, int end );
-    void contentChanged( const QContentIdList &ids, QContent::ChangeType type );
     void contentChanged();
 
     void updateStarted();
@@ -101,6 +110,8 @@ protected:
     virtual void sortCriteriaChanged( const QContentSortCriteria &sort ) = 0;
     virtual void filterChanged( const QContentFilter &filter ) = 0;
 
+    void timerEvent(QTimerEvent *event);
+
 protected slots:
     void startUpdate();
     void finishUpdate();
@@ -110,6 +121,7 @@ private:
     QStringList m_sortOrder;
     QContentSortCriteria m_sortCriteria;
     QContentSet::UpdateMode m_updateMode;
+    int m_flushTimerId;
     bool m_updateInProgress;
 };
 

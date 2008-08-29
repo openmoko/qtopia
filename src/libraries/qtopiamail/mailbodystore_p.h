@@ -40,20 +40,20 @@ class QMailMessage;
 class MailBodyStore
 {
 public:
-	MailBodyStore();
-	~MailBodyStore();
-	
-	bool insert(const QMailMessage& m, QString* newFile);
-	bool remove(const QString& fileName);
-	bool update(const QString& fileName, const QMailMessage& data);
-	bool load(const QString& fileName, QMailMessage* out) const;
+    MailBodyStore();
+    ~MailBodyStore();
+
+    bool insert(const QMailMessage& m, QString* newFile);
+    bool remove(const QString& fileName);
+    bool update(const QString& fileName, const QMailMessage& data);
+    bool load(const QString& fileName, QMailMessage* out) const;
 
 private:
-	QString generateUniqueFileName() const;
-	QString randomString(int length) const;
+    QString generateUniqueFileName() const;
+    QString randomString(int length) const;
 
 private:
-	QString _storePath;
+    QString _storePath;
 };
 
 #endif //__MAILBODYSTORE_H

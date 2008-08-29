@@ -13,7 +13,7 @@
 ** (or its successors, if any) and the KDE Free Qt Foundation. In
 ** addition, as a special exception, Trolltech gives you certain
 ** additional rights. These rights are described in the Trolltech GPL
-** Exception version 1.1, which can be found at
+** Exception version 1.2, which can be found at
 ** http://www.trolltech.com/products/qt/gplexception/ and in the file
 ** GPL_EXCEPTION.txt in this package.
 **
@@ -60,6 +60,8 @@
 #include "QtCore/qobjectdefs.h"
 #include "QtGui/qpicture.h"
 #include "QtGui/qpixmap.h"
+#include "QtGui/qpen.h"
+#include "QtGui/qbrush.h"
 #include "QtCore/qrect.h"
 #include "private/qobject_p.h"
 
@@ -157,6 +159,8 @@ public:
     QPaintEngine *paintEngine;
     bool dont_stream_pixmaps;
     QList<QPixmap> pixmap_list;
+    QList<QBrush> brush_list;
+    QList<QPen> pen_list;
 
     QPicture *q_ptr;
 };

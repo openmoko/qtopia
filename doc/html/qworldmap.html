@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QWorldmap Class Reference</h1>
 <p>The QWorldmap widget displays a worldmap for time zone selection <a href="#details">More...</a></p>
-<pre>    #include &lt;QWorldmap&gt;</pre><p>Inherits <a href="./qabstractscrollarea.html">QAbstractScrollArea</a>.</p>
+<pre>    #include &lt;QWorldmap&gt;</pre><p>Inherits <a href="qabstractscrollarea.html">QAbstractScrollArea</a>.</p>
 <p>Inherited by <a href="worldmaphswidget.html">WorldmapHSWidget</a>.</p>
 <ul>
 <li><a href="qworldmap-members.html">List of all members, including inherited members</a></li>
@@ -23,6 +23,7 @@
 <ul>
 <li><div class="fn"/><b><a href="qworldmap.html#QWorldmap">QWorldmap</a></b> ( QWidget * <i>parent</i> = 0 )</li>
 <li><div class="fn"/><b><a href="qworldmap.html#dtor.QWorldmap">~QWorldmap</a></b> ()</li>
+<li><div class="fn"/>virtual bool <b><a href="qworldmap.html#event">event</a></b> ( QEvent * <i>event</i> )</li>
 <li><div class="fn"/>virtual int <b><a href="qworldmap.html#heightForWidth">heightForWidth</a></b> ( int <i>w</i> ) const</li>
 <li><div class="fn"/>bool <b><a href="qworldmap.html#isDaylight">isDaylight</a></b> () const</li>
 <li><div class="fn"/>bool <b><a href="qworldmap.html#isReadOnly">isReadOnly</a></b> () const</li>
@@ -30,11 +31,11 @@
 <li><div class="fn"/>QTimeZone <b><a href="qworldmap.html#zone">zone</a></b> () const</li>
 </ul>
 <ul>
-<li><div class="fn"/>15 public functions inherited from <a href="./qabstractscrollarea.html#public-functions">QAbstractScrollArea</a></li>
-<li><div class="fn"/>13 public functions inherited from <a href="./qframe.html#public-functions">QFrame</a></li>
-<li><div class="fn"/>201 public functions inherited from <a href="./qwidget.html#public-functions">QWidget</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
-<li><div class="fn"/>12 public functions inherited from <a href="./qpaintdevice.html#public-functions">QPaintDevice</a></li>
+<li><div class="fn"/>15 public functions inherited from <a href="qabstractscrollarea.html#public-functions">QAbstractScrollArea</a></li>
+<li><div class="fn"/>13 public functions inherited from <a href="qframe.html#public-functions">QFrame</a></li>
+<li><div class="fn"/>201 public functions inherited from <a href="qwidget.html#public-functions">QWidget</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>12 public functions inherited from <a href="qpaintdevice.html#public-functions">QPaintDevice</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -49,8 +50,8 @@
 <li><div class="fn"/>void <b><a href="qworldmap.html#toggleZoom">toggleZoom</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>19 public slots inherited from <a href="./qwidget.html#public-slots">QWidget</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>19 public slots inherited from <a href="qwidget.html#public-slots">QWidget</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -61,26 +62,26 @@
 <li><div class="fn"/>void <b><a href="qworldmap.html#selecting">selecting</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="./qwidget.html#signals">QWidget</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qwidget.html#signals">QWidget</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>2 properties inherited from <a href="./qabstractscrollarea.html#properties">QAbstractScrollArea</a></li>
-<li><div class="fn"/>6 properties inherited from <a href="./qframe.html#properties">QFrame</a></li>
-<li><div class="fn"/>56 properties inherited from <a href="./qwidget.html#properties">QWidget</a></li>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qwidget.html#static-public-members">QWidget</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>16 protected functions inherited from <a href="./qabstractscrollarea.html#protected-functions">QAbstractScrollArea</a></li>
-<li><div class="fn"/>38 protected functions inherited from <a href="./qwidget.html#protected-functions">QWidget</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>1 protected function inherited from <a href="./qpaintdevice.html#protected-functions">QPaintDevice</a></li>
-<li><div class="fn"/>1 protected slot inherited from <a href="./qabstractscrollarea.html#protected-slots">QAbstractScrollArea</a></li>
-<li><div class="fn"/>1 protected slot inherited from <a href="./qwidget.html#protected-slots">QWidget</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
-<li><div class="fn"/>1 protected type inherited from <a href="./qpaintdevice.html#protected-variables">QPaintDevice</a></li>
+<li><div class="fn"/>2 properties inherited from <a href="qabstractscrollarea.html#properties">QAbstractScrollArea</a></li>
+<li><div class="fn"/>6 properties inherited from <a href="qframe.html#properties">QFrame</a></li>
+<li><div class="fn"/>56 properties inherited from <a href="qwidget.html#properties">QWidget</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qwidget.html#static-public-members">QWidget</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>16 protected functions inherited from <a href="qabstractscrollarea.html#protected-functions">QAbstractScrollArea</a></li>
+<li><div class="fn"/>38 protected functions inherited from <a href="qwidget.html#protected-functions">QWidget</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>1 protected function inherited from <a href="qpaintdevice.html#protected-functions">QPaintDevice</a></li>
+<li><div class="fn"/>1 protected slot inherited from <a href="qabstractscrollarea.html#protected-slots">QAbstractScrollArea</a></li>
+<li><div class="fn"/>1 protected slot inherited from <a href="qwidget.html#protected-slots">QWidget</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 protected type inherited from <a href="qpaintdevice.html#protected-variables">QPaintDevice</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -89,15 +90,16 @@
 <p>The QWorldmap widget displays a worldmap for time zone selection. <a href="qworldmap.html#selectNewZone">selectNewZone</a>() is used to select one of the available time zones from the map.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QWorldmap"></a>QWorldmap::QWorldmap ( <a href="./qwidget.html">QWidget</a> * <i>parent</i> = 0 )</h3>
+<h3 class="fn"><a name="QWorldmap"></a>QWorldmap::QWorldmap ( <a href="qwidget.html">QWidget</a> * <i>parent</i> = 0 )</h3>
 <p>Creates a world map widget and attaches it to <i>parent</i>.</p>
 <h3 class="fn"><a name="dtor.QWorldmap"></a>QWorldmap::~QWorldmap ()</h3>
 <p>Destroys this world map.</p>
 <h3 class="fn"><a name="buttonSelected"></a>void QWorldmap::buttonSelected ()&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>Signal that is emitted when the user selects a new time zone via the slect button used in touchscreen mode.</p>
+<h3 class="fn"><a name="event"></a>bool QWorldmap::event ( <a href="qevent.html">QEvent</a> * <i>event</i> )&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <h3 class="fn"><a name="heightForWidth"></a>int QWorldmap::heightForWidth ( int <i>w</i> ) const&nbsp;&nbsp;<tt> [virtual]</tt></h3>
 <p>Determines the height of the widget for a given width <i>w</i>.</p>
-<p>Reimplemented from <a href="./qwidget.html#heightForWidth">QWidget</a>.</p>
+<p>Reimplemented from <a href="qwidget.html#heightForWidth">QWidget</a>.</p>
 <h3 class="fn"><a name="isDaylight"></a>bool QWorldmap::isDaylight () const</h3>
 <p>Returns true if daylight is highlighted on the map</p>
 <p>See also <a href="qworldmap.html#setDaylight">QWorldmap::setDaylight</a>().</p>
@@ -129,7 +131,7 @@
 <h3 class="fn"><a name="setZone"></a>void QWorldmap::setZone ( const <a href="qtimezone.html">QTimeZone</a> &amp; <i>zone</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Sets the current time zone to <i>zone</i>.</p>
 <p>See also <a href="qworldmap.html#zone">zone</a>().</p>
-<h3 class="fn"><a name="setZone-2"></a>void QWorldmap::setZone ( const <a href="./qpoint.html">QPoint</a> &amp; <i>pos</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
+<h3 class="fn"><a name="setZone-2"></a>void QWorldmap::setZone ( const <a href="qpoint.html">QPoint</a> &amp; <i>pos</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>This is an overloaded member function, provided for convenience.</p>
 <p>Sets the current time zone to city closest to <i>pos</i>.</p>
 <h3 class="fn"><a name="toggleZoom"></a>void QWorldmap::toggleZoom ()&nbsp;&nbsp;<tt> [slot]</tt></h3>

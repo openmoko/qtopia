@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">QObexServerSession Class Reference</h1>
 <p>The QObexServerSession class provides an abstract base class for implementing an OBEX server. <a href="#details">More...</a></p>
-<pre>    #include &lt;QObexServerSession&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
+<pre>    #include &lt;QObexServerSession&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="qobexserversession-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -31,7 +31,7 @@
 <li><div class="fn"/>QIODevice * <b><a href="qobexserversession.html#sessionDevice">sessionDevice</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -41,7 +41,7 @@
 <li><div class="fn"/>void <b><a href="qobexserversession.html#finalResponseSent">finalResponseSent</a></b> ( QObex::Request <i>request</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -52,7 +52,7 @@
 <li><div class="fn"/>void <b><a href="qobexserversession.html#setNextResponseHeader">setNextResponseHeader</a></b> ( const QObexHeader &amp; <i>header</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 </ul>
 <a name="protected-slots"></a>
 <h3>Protected Slots</h3>
@@ -66,18 +66,18 @@
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
 <h2>Detailed Description</h2>
 <p>The QObexServerSession class provides an abstract base class for implementing an OBEX server.</p>
 <p>To implement an OBEX server, subclass QObexServerSession and override the protected slots that correspond to the requests to be handled by your server, as shown below.</p>
-<p>QObexServerSession can accept OBEX client requests over any transport that is provided through a subclass of <a href="./qiodevice.html">QIODevice</a>. For example, <a href="qbluetoothrfcommsocket.html">QBluetoothRfcommSocket</a>, <a href="qirsocket.html">QIrSocket</a> and <a href="./qtcpsocket.html">QTcpSocket</a> are all subclasses of <a href="./qiodevice.html">QIODevice</a>, and objects of these subclasses can passed to the QObexServerSession constructor to run OBEX servers over RFCOMM, IrDA or TCP, respectively.</p>
+<p>QObexServerSession can accept OBEX client requests over any transport that is provided through a subclass of <a href="qiodevice.html">QIODevice</a>. For example, <a href="qbluetoothrfcommsocket.html">QBluetoothRfcommSocket</a>, <a href="qirsocket.html">QIrSocket</a> and <a href="qtcpsocket.html">QTcpSocket</a> are all subclasses of <a href="qiodevice.html">QIODevice</a>, and objects of these subclasses can passed to the QObexServerSession constructor to run OBEX servers over RFCOMM, IrDA or TCP, respectively.</p>
 <ul><li><a href="#receiving-client-requests">Receiving client requests</a></li>
 <li><a href="#handling-and-requests">Handling <tt>Put</tt> and <tt>Get</tt> requests</a></li>
 <li><a href="#handling-errors-and-requests">Handling errors and <tt>Abort</tt> requests</a></li>
@@ -100,8 +100,8 @@
         {
             qDebug() &lt;&lt; &quot;Received a CONNECT request&quot;;
 
-            <span class="comment">//</span> Return QObex::Success to allow the request, or return
-            <span class="comment">//</span> some other response code to deny the request.
+            <span class="comment">// Return QObex::Success to allow the request, or return</span>
+            <span class="comment">// some other response code to deny the request.</span>
             return QObex::Success;
         }
     };</pre>
@@ -126,7 +126,7 @@
     protected slots:
         QObex::ResponseCode put(const QObexHeader &amp;header)
         {
-            <span class="comment">//</span> Reject the PUT request if the requested file cannot be opened
+            <span class="comment">// Reject the PUT request if the requested file cannot be opened</span>
             QString incomingFilename = header.filename();
             m_incomingFile = new QFile(incomingFilename);
 
@@ -142,8 +142,8 @@
         QObex::ResponseCode dataAvailable(const char *data, qint64 size)
         {
             if (size &gt; 0) {
-                <span class="comment">//</span> Write the new data to file. If the data cannot be written, reject
-                <span class="comment">//</span> the request.
+                <span class="comment">// Write the new data to file. If the data cannot be written, reject</span>
+                <span class="comment">// the request.</span>
                 if (m_incomingFile-&gt;write(data, size) &lt; 0) {
                     m_incomingFile-&gt;close();
                     return QObex::InternalServerError;
@@ -182,10 +182,10 @@
     protected:
         QObex::ResponseCode provideData(const char **data, qint64 *size)
         {
-            <span class="comment">//</span> Read another data chunk from the file.
-            <span class="comment">//</span> The read data is stored in m_lastSentBytes so that it remains
-            <span class="comment">//</span> valid until the next call to provideData(), or until the
-            <span class="comment">//</span> request is finished.
+            <span class="comment">// Read another data chunk from the file.</span>
+            <span class="comment">// The read data is stored in m_lastSentBytes so that it remains</span>
+            <span class="comment">// valid until the next call to provideData(), or until the</span>
+            <span class="comment">// request is finished.</span>
             m_lastSentBytes = m_requestedFile.read(1024);
 
             if (m_lastSentBytes.size() &gt; 0) {
@@ -207,12 +207,12 @@
 <p>The <a href="qobexserversession.html#error">error</a>() function is also called when an OBEX client sends an <tt>Abort</tt> request to cancel a multi-packet request such as <tt>Put</tt> or <tt>Get</tt>. When an <tt>Abort</tt> request is received, the server will automatically respond with <a href="qobex.html#ResponseCode-enum">QObex::Success</a> and call <a href="qobexserversession.html#error">error</a>() with the error argument set to <a href="qobexserversession.html#Error-enum">QObexServerSession::Aborted</a>. Therefore, if a server supports the <tt>Put</tt> or <tt>Get</tt> requests, it should override <a href="qobexserversession.html#error">error</a>() so that it can be notified of <tt>Abort</tt> requests and perform any clean-up actions that might be necessary.</p>
 <a name="handling-socket-disconnections"></a>
 <h3>Handling socket disconnections</h3>
-<p>You should ensure that the <a href="./qiodevice.html">QIODevice</a> provided in the constructor emits <a href="./qiodevice.html#aboutToClose">QIODevice::aboutToClose</a>() or <a href="./qobject.html#destroyed">QObject::destroyed</a>() when the associated transport connection is disconnected. If one of these signals are emitted, QObexServerSession will know the transport connection has been lost, and will call <a href="qobexserversession.html#error">error</a>() with the argument set to <a href="qobexserversession.html#Error-enum">ConnectionError</a>.</p>
-<p>This is particularly an issue for socket classes such as <a href="./qtcpsocket.html">QTcpSocket</a> that do not emit <a href="./qiodevice.html#aboutToClose">QIODevice::aboutToClose</a>() when a <tt>disconnected()</tt> signal is emitted. In these cases, QObexServerSession will not know that the transport has been disconnected. To avoid this, you can make the socket emit <a href="./qiodevice.html#aboutToClose">QIODevice::aboutToClose</a>() when it is disconnected:</p>
-<pre><span class="comment">    //</span> make the socket emit aboutToClose() when disconnected() is emitted
+<p>You should ensure that the <a href="qiodevice.html">QIODevice</a> provided in the constructor emits <a href="qiodevice.html#aboutToClose">QIODevice::aboutToClose</a>() or <a href="qobject.html#destroyed">QObject::destroyed</a>() when the associated transport connection is disconnected. If one of these signals are emitted, QObexServerSession will know the transport connection has been lost, and will call <a href="qobexserversession.html#error">error</a>() with the argument set to <a href="qobexserversession.html#Error-enum">ConnectionError</a>.</p>
+<p>This is particularly an issue for socket classes such as <a href="qtcpsocket.html">QTcpSocket</a> that do not emit <a href="qiodevice.html#aboutToClose">QIODevice::aboutToClose</a>() when a <tt>disconnected()</tt> signal is emitted. In these cases, QObexServerSession will not know that the transport has been disconnected. To avoid this, you can make the socket emit <a href="qiodevice.html#aboutToClose">QIODevice::aboutToClose</a>() when it is disconnected:</p>
+<pre><span class="comment">    // make the socket emit aboutToClose() when disconnected() is emitted</span>
     QObject::connect(socket, SIGNAL(disconnected()), socket, SIGNAL(aboutToClose()));</pre>
 <p>Or, if the socket can be discarded as soon as it is disconnected:</p>
-<pre><span class="comment">    //</span> delete the socket when the transport is disconnected
+<pre><span class="comment">    // delete the socket when the transport is disconnected</span>
     QObject::connect(socket, SIGNAL(disconnected()), socket, SLOT(deleteLater()));</pre>
 <p>See also <a href="qobexclientsession.html">QObexClientSession</a>.</p>
 <hr />
@@ -229,8 +229,8 @@
 </table></p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="QObexServerSession"></a>QObexServerSession::QObexServerSession ( <a href="./qiodevice.html">QIODevice</a> * <i>device</i>, <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs an OBEX server session that uses <i>device</i> for the transport connection. The <i>parent</i> is the <a href="./qobject.html">QObject</a> parent.</p>
+<h3 class="fn"><a name="QObexServerSession"></a>QObexServerSession::QObexServerSession ( <a href="qiodevice.html">QIODevice</a> * <i>device</i>, <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs an OBEX server session that uses <i>device</i> for the transport connection. The <i>parent</i> is the <a href="qobject.html">QObject</a> parent.</p>
 <p>The <i>device</i> must be opened, or else the service will be unable to receive any client requests.</p>
 <h3 class="fn"><a name="dtor.QObexServerSession"></a>QObexServerSession::~QObexServerSession ()&nbsp;&nbsp;<tt> [pure virtual]</tt></h3>
 <p>Destroys the server session.</p>
@@ -250,7 +250,7 @@
 <h3 class="fn"><a name="connect"></a><a href="qobex.html#ResponseCode-enum">QObex::ResponseCode</a> QObexServerSession::connect ( const <a href="qobexheader.html">QObexHeader</a> &amp; <i>header</i> )&nbsp;&nbsp;<tt> [protected slot]</tt></h3>
 <p>Called when a <tt>Connect</tt> request is received with <i>header</i>.</p>
 <p>If your server supports <tt>Connect</tt> requests, override this slot and return <a href="qobex.html#ResponseCode-enum">QObex::Success</a> to allow the request to continue. If you return any other response code, the request will be denied. The default implementation returns <a href="qobex.html#ResponseCode-enum">QObex::NotImplemented</a>.</p>
-<h3 class="fn"><a name="dataAvailable"></a><a href="qobex.html#ResponseCode-enum">QObex::ResponseCode</a> QObexServerSession::dataAvailable ( const char * <i>data</i>, <a href="./qtglobal.html#qint64-typedef">qint64</a> <i>size</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="dataAvailable"></a><a href="qobex.html#ResponseCode-enum">QObex::ResponseCode</a> QObexServerSession::dataAvailable ( const char * <i>data</i>, <a href="qtglobal.html#qint64-typedef">qint64</a> <i>size</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Called each time the server receives body data for a <tt>Put</tt> request. The <i>data</i> is the received data and <i>size</i> is the data length. If <i>size</i> is 0, then all body data has been received.</p>
 <p>If your server supports <tt>Put</tt> requests, override this function to read and store the data. The data will not be buffered and made available elsewhere, so it must be read at this point. Return <a href="qobex.html#ResponseCode-enum">QObex::Success</a> to allow the request to continue, or any other response code to stop the request.</p>
 <p>The default implementation returns <a href="qobex.html#ResponseCode-enum">QObex::InternalServerError</a>.</p>
@@ -259,7 +259,7 @@
 <p>Called when a <tt>Disconnect</tt> request is received with <i>header</i>.</p>
 <p>If your server supports <tt>Disconnect</tt> requests, override this slot and return <a href="qobex.html#ResponseCode-enum">QObex::Success</a> to allow the request to continue. If you return any other response code, the request will be denied. The default implementation returns <a href="qobex.html#ResponseCode-enum">QObex::NotImplemented</a>.</p>
 <p><b>Note:</b> Clients may terminate the transport connection without sending a <tt>Disconnect</tt> request, so you should not necessarily expect to receive this request.</p>
-<h3 class="fn"><a name="error"></a>void QObexServerSession::error ( <a href="qobexserversession.html#Error-enum">QObexServerSession::Error</a> <i>error</i>, const <a href="./qstring.html">QString</a> &amp; <i>errorString</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="error"></a>void QObexServerSession::error ( <a href="qobexserversession.html#Error-enum">QObexServerSession::Error</a> <i>error</i>, const <a href="qstring.html">QString</a> &amp; <i>errorString</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Called when an error occurs while running the server. The <i>error</i> is the error that has occurred, and <i>errorString</i> is a human-readable description of the error.</p>
 <p>Override this to provide custom error handling functionality. The default implementation prints the warning to the console, and also calls <a href="qobexserversession.html#close">close</a>() if the error is <a href="qobexserversession.html#Error-enum">QObexServerSession::ConnectionError</a>.</p>
 <h3 class="fn"><a name="finalResponseSent"></a>void QObexServerSession::finalResponseSent ( <a href="qobex.html#Request-enum">QObex::Request</a> <i>request</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
@@ -270,7 +270,7 @@
 <p>If your server supports <tt>Get</tt> requests, override this slot and return <a href="qobex.html#ResponseCode-enum">QObex::Success</a> to allow the request to continue. If you return any other response code, the request will be denied. The default implementation returns <a href="qobex.html#ResponseCode-enum">QObex::NotImplemented</a>.</p>
 <p>If you override this slot, you should also override <a href="qobexserversession.html#provideData">provideData</a>() to provide the body data that will be sent back to the client, and also override <a href="qobexserversession.html#error">error</a>() so you can be notified if the client aborts the request.</p>
 <p>See also <a href="qobexserversession.html#provideData">provideData</a>() and <a href="qobexserversession.html#error">error</a>().</p>
-<h3 class="fn"><a name="provideData"></a><a href="qobex.html#ResponseCode-enum">QObex::ResponseCode</a> QObexServerSession::provideData ( const char ** <i>data</i>, <a href="./qtglobal.html#qint64-typedef">qint64</a> * <i>size</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
+<h3 class="fn"><a name="provideData"></a><a href="qobex.html#ResponseCode-enum">QObex::ResponseCode</a> QObexServerSession::provideData ( const char ** <i>data</i>, <a href="qtglobal.html#qint64-typedef">qint64</a> * <i>size</i> )&nbsp;&nbsp;<tt> [virtual protected]</tt></h3>
 <p>Called each time the server is required to send body data back to the client for a <tt>Get</tt> request.</p>
 <p>If your server supports <tt>Get</tt> requests, override this function and set <i>data</i> to the body data to be sent and <i>size</i> to the length of the data. If all body data has been sent, set <i>size</i> to zero. Return <a href="qobex.html#ResponseCode-enum">QObex::Success</a> to allow the request to continue, or any other response code to stop the request.</p>
 <p>The default implementation returns <a href="qobex.html#ResponseCode-enum">QObex::InternalServerError</a>.</p>
@@ -284,7 +284,7 @@
 <h3 class="fn"><a name="putDelete"></a><a href="qobex.html#ResponseCode-enum">QObex::ResponseCode</a> QObexServerSession::putDelete ( const <a href="qobexheader.html">QObexHeader</a> &amp; <i>header</i> )&nbsp;&nbsp;<tt> [protected slot]</tt></h3>
 <p>Called when a <tt>Put-Delete</tt> request is received with <i>header</i>.</p>
 <p>If your server supports <tt>Put-Delete</tt> requests, override this slot and return <a href="qobex.html#ResponseCode-enum">QObex::Success</a> to allow the request to continue. If you return any other response code, the request will be denied. The default implementation returns <a href="qobex.html#ResponseCode-enum">QObex::NotImplemented</a>.</p>
-<h3 class="fn"><a name="sessionDevice"></a><a href="./qiodevice.html">QIODevice</a> * QObexServerSession::sessionDevice ()</h3>
+<h3 class="fn"><a name="sessionDevice"></a><a href="qiodevice.html">QIODevice</a> * QObexServerSession::sessionDevice ()</h3>
 <p>Returns the device used by this server session, as provided in the constructor.</p>
 <h3 class="fn"><a name="setNextResponseHeader"></a>void QObexServerSession::setNextResponseHeader ( const <a href="qobexheader.html">QObexHeader</a> &amp; <i>header</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Sets the session to send <i>header</i> in the next server response for the current request.</p>

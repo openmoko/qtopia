@@ -1504,8 +1504,13 @@ png_push_handle_unknown(png_structp png_ptr, png_infop info_ptr, png_uint_32
 #endif
 
        png_strcpy((png_charp)chunk.name, (png_charp)png_ptr->chunk_name);
-       chunk.data = (png_bytep)png_malloc(png_ptr, length);
-       png_crc_read(png_ptr, chunk.data, length);
+       if (length == 0)
+           chunk.data = NULL;
+       else
+       {
+           chunk.data = (png_bytep)png_malloc(png_ptr, length);
+           png_crc_read(png_ptr, chunk.data, length);
+       }
        chunk.size = length;
 #if defined(PNG_READ_USER_CHUNKS_SUPPORTED)
        if(png_ptr->read_user_chunk_fn != NULL)
@@ -1523,7 +1528,7 @@ png_push_handle_unknown(png_structp png_ptr, png_infop info_ptr, png_uint_32
        else
 #endif
           png_set_unknown_chunks(png_ptr, info_ptr, &chunk, 1);
-       png_free(png_ptr, chunk.data);
+       if (chunk.data) png_free(png_ptr, chunk.data);
    }
    else
 #endif

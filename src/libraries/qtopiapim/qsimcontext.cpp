@@ -519,6 +519,7 @@ void QContactSimContext::readSimIdentity()
 
 void QContactSimSyncer::simIdentityChanged(const QString &value, const QDateTime &inserted)
 {
+    qLog(PIM) << "Notified of sim identity change" << value;
     mActiveCard = value;
 
     mInsertTime = inserted;
@@ -531,6 +532,7 @@ void QContactSimSyncer::simIdentityChanged(const QString &value, const QDateTime
 
 void QContactSimSyncer::updatePhoneBook( const QString &store, const QList<QPhoneBookEntry> &list )
 {
+    qLog(PIM) << "Notified of sim phonebook contents change" << list.count();
     if (store != mSimType)
         return;
 
@@ -544,6 +546,7 @@ void QContactSimSyncer::updatePhoneBook( const QString &store, const QList<QPhon
 
 void QContactSimSyncer::updatePhoneBookLimits( const QString &store, const QPhoneBookLimits &value )
 {
+    qLog(PIM) << "Notified of sim phonebook limits change";
     if (store != mSimType)
         return;
 
@@ -560,6 +563,7 @@ void QContactSimSyncer::updatePhoneBookLimits( const QString &store, const QPhon
 
 void QContactSimSyncer::updateSqlEntries()
 {
+    qLog(PIM) << "Sync sim phonebook contents to SQL database";
     int context = QPimSqlIO::sourceContext(mSource);
 
     QDateTime syncTime;

@@ -37,6 +37,7 @@ signals:
 protected:
     // Emit selected if select key pressed
     void keyPressEvent( QKeyEvent* );
+    void focusOutEvent(QFocusEvent *event);
 };
 
 #endif

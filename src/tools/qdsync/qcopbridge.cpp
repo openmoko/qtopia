@@ -18,6 +18,9 @@
 ** WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 **
 ****************************************************************************/
+#include <trace.h>
+QD_LOG_OPTION(QCopBridge)
+
 #include "qcopbridge.h"
 #include "syncauthentication.h"
 #include "serialport.h"
@@ -82,7 +85,7 @@ QCopBridge::QCopBridge( QObject *parent )
 
 QCopBridge::~QCopBridge()
 {
-    TRACE(QDSync) << "QCopBridge::~QCopBridge";
+    TRACE(QCopBridge) << "QCopBridge::~QCopBridge";
     foreach ( QCopBridgePI *pi, d->connections ) {
         delete pi;
     }
@@ -113,14 +116,14 @@ bool QCopBridge::startSerial( const QString &port )
 
 void QCopBridge::serialServerDied()
 {
-    TRACE(QDSync) << "QCopBridge::serialServerDied";
+    TRACE(QCopBridge) << "QCopBridge::serialServerDied";
     d->serialServer = 0;
     QTimer::singleShot( 5000, this, SLOT(startSerialConnection()) );
 }
 
 void QCopBridge::startSerialConnection()
 {
-    TRACE(QDSync) << "QCopBridge::startSerialConnection";
+    TRACE(QCopBridge) << "QCopBridge::startSerialConnection";
     //d->serialServer = 0;
     if ( d->serialPort.isEmpty() )
         return;
@@ -137,7 +140,7 @@ void QCopBridge::startSerialConnection()
 
 void QCopBridge::newTcpConnection()
 {
-    TRACE(QDSync) << "QCopBridge::newTcpConnection";
+    TRACE(QCopBridge) << "QCopBridge::newTcpConnection";
     while ( d->tcpServer->hasPendingConnections() ) {
         QTcpSocket *socket = d->tcpServer->nextPendingConnection();
         Q_ASSERT(socket);
@@ -154,16 +157,13 @@ void QCopBridge::newSocket( QIODevice *socket )
     connect( pi, SIGNAL(gotConnection()), this, SIGNAL(gotConnection()) );
     d->connections << pi;
 
-    // Don't let the device sleep when it's connected (redundant?)
-#if QTOPIA_VERSION >= 0x040200
-#else
-    QtopiaApplication::setTemporaryScreenSaverMode( QtopiaApplication::DisableSuspend );
-#endif
+    // Don't let the device sleep when it's connected
+    QtopiaApplication::setPowerConstraint( QtopiaApplication::DisableSuspend );
 }
 
 void QCopBridge::newSerialConnection()
 {
-    TRACE(QDSync) << "QCopBridge::newSerialConnection";
+    TRACE(QCopBridge) << "QCopBridge::newSerialConnection";
     if ( d->serialServer ) {
         USERLOG("Got QCop Connection (Serial)");
         newSocket( d->serialServer );
@@ -172,7 +172,7 @@ void QCopBridge::newSerialConnection()
 
 void QCopBridge::disconnected( QCopBridgePI *pi )
 {
-    TRACE(QDSync) << "QCopBridge::disconnected";
+    TRACE(QCopBridge) << "QCopBridge::disconnected";
     d->connections.removeAll( pi );
     QIODevice *socket = pi->socket();
     if ( socket == d->serialServer ) {
@@ -183,23 +183,19 @@ void QCopBridge::disconnected( QCopBridgePI *pi )
     socket->deleteLater();
     delete pi;
 
-    // Let the device sleep again when no more connections exist
-#if QTOPIA_VERSION >= 0x040200
-#else
-    if ( d->connections.count() == 0 )
-        QtopiaApplication::setTemporaryScreenSaverMode( QtopiaApplication::Enable );
-#endif
-
-    if ( d->connections.count() == 0 )
+    if ( d->connections.count() == 0 ) {
+        // Let the device sleep again when no more connections exist
+        QtopiaApplication::setPowerConstraint( QtopiaApplication::Enable );
         emit lostConnection();
+    }
 }
 
 void QCopBridge::desktopMessage( const QString &message, const QByteArray &data )
 {
     if ( message == "forwardedMessage(QString,QString,QByteArray)" ) {
-        TRACE(QDSync) << "QCopBridge::desktopMessage";
+        TRACE(QCopBridge) << "QCopBridge::desktopMessage";
         // Don't do all of this work if the LOG() statement isn't going to do anything
-        if ( QDSync_TraceLog::enabled() ) {
+        if ( QDSync_QCopBridge_TraceLog::enabled() ) {
             QDataStream stream( data );
             QString channel;
             QString message;
@@ -231,7 +227,7 @@ public:
 QCopBridgePI::QCopBridgePI( QIODevice *socket, QObject *parent )
     : QObject( parent )
 {
-    TRACE(QDSync) << "QCopBridgePI::QCopBridgePI";
+    TRACE(QCopBridge) << "QCopBridgePI::QCopBridgePI";
     d = new QCopBridgePIPrivate;
     d->helper = new QDLinkHelper( socket, this );
     connect( d->helper, SIGNAL(timeout()), this, SLOT(helperTimeout()) );
@@ -281,7 +277,7 @@ QIODevice *QCopBridgePI::socket()
 
 void QCopBridgePI::read()
 {
-    TRACE(QDSync) << "QCopBridge::read";
+    TRACE(QCopBridge) << "QCopBridge::read";
     while ( d->socket && d->socket->canReadLine() ) {
         if ( d->killTimer->isActive() ) {
             LOG() << "stopping kill timer";
@@ -294,7 +290,7 @@ void QCopBridgePI::read()
 
 void QCopBridgePI::send( const QByteArray &line, int _line )
 {
-    TRACE(QDSync) << "QCopBridge::send";
+    TRACE(QCopBridge) << "QCopBridge::send";
     if ( _line != -1 ) LOG() << line << "from line" << _line;
     if ( !d->socket ) return;
     QTextStream stream( d->socket );
@@ -308,7 +304,7 @@ void QCopBridgePI::process( const QByteArray &line )
     // command token
     QByteArray cmd = msg[0].toUpper();
 
-    TRACE(QDSync) << "QCopBridgePI::process" << line;
+    TRACE(QCopBridge) << "QCopBridgePI::process" << line;
 
     // argument token
     QByteArray arg;
@@ -432,7 +428,7 @@ void QCopBridgePI::process( const QByteArray &line )
 
 void QCopBridgePI::sendDesktopMessage( const QString &channel, const QString &msg, const QByteArray &data )
 {
-    TRACE(QDSync) << "QCopBridge::sendDesktopMessage" << channel << msg << data;
+    TRACE(QCopBridge) << "QCopBridge::sendDesktopMessage" << channel << msg << data;
     QTextStream stream( d->socket );
     stream << "CALLB " << channel << " " << msg << " "
            << data.toBase64() << endl;
@@ -440,9 +436,10 @@ void QCopBridgePI::sendDesktopMessage( const QString &channel, const QString &ms
 
 void QCopBridgePI::socketDisconnected()
 {
-    TRACE(QDSync) << "QCopBridgePI::socketDisconnected";
+    TRACE(QCopBridge) << "QCopBridgePI::socketDisconnected";
     // This could trigger some code called from the socket!
     SyncAuthentication::clearDialogs();
+    Qtopia4Sync::instance()->abort();
     if ( d->socket ) {
         d->socket = 0;
         emit disconnected( this );
@@ -451,13 +448,13 @@ void QCopBridgePI::socketDisconnected()
 
 void QCopBridgePI::helperTimeout()
 {
-    TRACE(QDSync) << "QCopBridgePI::helperTimeout";
+    TRACE(QCopBridge) << "QCopBridgePI::helperTimeout";
     socketDisconnected();
 }
 
 void QCopBridgePI::killTimerTimeout()
 {
-    TRACE(QDSync) << "QCopBridgePI::killTimerTimeout";
+    TRACE(QCopBridge) << "QCopBridgePI::killTimerTimeout";
     socketDisconnected();
 }
 

@@ -26,7 +26,7 @@
 <ul>
 <li><div class="fn"/>1 public function inherited from <a href="qcomminterface.html#public-functions">QCommInterface</a></li>
 <li><div class="fn"/>4 public functions inherited from <a href="qabstractipcinterface.html#public-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="protected-functions"></a>
 <h3>Protected Functions</h3>
@@ -36,19 +36,19 @@
 </ul>
 <ul>
 <li><div class="fn"/>14 protected functions inherited from <a href="qabstractipcinterface.html#protected-functions">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
 <li><div class="fn"/>2 public slots inherited from <a href="qservicenumbers.html#public-slots">QServiceNumbers</a></li>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 <li><div class="fn"/>2 signals inherited from <a href="qservicenumbers.html#signals">QServiceNumbers</a></li>
 <li><div class="fn"/>1 signal inherited from <a href="qabstractipcinterface.html#signals">QAbstractIpcInterface</a></li>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -66,7 +66,7 @@
 <h3 class="fn"><a name="requestServiceNumberFromFile"></a>void QModemServiceNumbers::requestServiceNumberFromFile ( <a href="qservicenumbers.html#NumberId-enum">QServiceNumbers::NumberId</a> <i>id</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Request the service number <i>id</i> from a local configuration file. This is called by modem vendor plug-ins in their <a href="qservicenumbers.html#requestServiceNumber">requestServiceNumber</a>() override if they do not have an appropriate AT command for accessing the requested service number.</p>
 <p>See also <a href="qservicenumbers.html#requestServiceNumber">requestServiceNumber</a>() and <a href="qmodemservicenumbers.html#setServiceNumberInFile">setServiceNumberInFile</a>().</p>
-<h3 class="fn"><a name="setServiceNumberInFile"></a>void QModemServiceNumbers::setServiceNumberInFile ( <a href="qservicenumbers.html#NumberId-enum">QServiceNumbers::NumberId</a> <i>id</i>, const <a href="./qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
+<h3 class="fn"><a name="setServiceNumberInFile"></a>void QModemServiceNumbers::setServiceNumberInFile ( <a href="qservicenumbers.html#NumberId-enum">QServiceNumbers::NumberId</a> <i>id</i>, const <a href="qstring.html">QString</a> &amp; <i>number</i> )&nbsp;&nbsp;<tt> [protected]</tt></h3>
 <p>Sets the service number <i>id</i> to <i>number</i> in a local configuration file. This is called by modem vendor plug-ins in their <a href="qservicenumbers.html#setServiceNumber">setServiceNumber</a>() override if they do not have an appropriate AT command for setting the requested service number.</p>
 <p>See also <a href="qservicenumbers.html#setServiceNumber">setServiceNumber</a>() and <a href="qmodemservicenumbers.html#requestServiceNumberFromFile">requestServiceNumberFromFile</a>().</p>
 <p /><address><hr /><div align="center">

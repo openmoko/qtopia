@@ -29,6 +29,7 @@
 #include <trace.h>
 
 #include <QVariant>
+#include <QXmlStreamWriter>
 
 class OutlookThread;
 class OutlookThreadObject;
@@ -67,15 +68,15 @@ public:
     QString dateTimeToString( const QDateTime &datetime, bool utc = false );
     QDateTime stringToDateTime( const QString &string, bool utc = false );
     QString escape( const QString &string );
-    QString unescape( const QString &string );
 
     bool getIdentifier( const QByteArray &record, QString &id, bool &local );
+    QString dump_item_class( Outlook::OlObjectClass item_class );
 
     virtual Outlook::OlDefaultFolders folderEnum() = 0;
     virtual Outlook::OlItemType itemEnum() = 0;
     virtual bool isValidObject( IDispatchPtr dispatch ) = 0;
     virtual void getProperties( IDispatchPtr dispatch, QString &entryid, QDateTime &lastModified ) = 0;
-    virtual void dump_item( IDispatchPtr dispatch, QTextStream &stream ) = 0;
+    virtual void dump_item( IDispatchPtr dispatch, QXmlStreamWriter &stream ) = 0;
     virtual QString read_item( IDispatchPtr dispatch, const QByteArray &record ) = 0;
     virtual void delete_item( IDispatchPtr dispatch ) = 0;
     virtual void init_item( IDispatchPtr dispatch );
@@ -138,15 +139,15 @@ public:
 
 #define DUMP_STRING(Field,Method)\
     do {\
-        stream << "<" #Field ">";\
+        stream.writeStartElement(#Field);\
         try {\
             QString value = bstr_to_qstring(item->Get##Method());\
             LOG() << "item->Get" #Method << value;\
-            stream << escape(value);\
+            stream.writeCharacters(escape(value));\
         } catch (...) {\
             WARNING() << "item->Get" #Method << "!!! EXCEPTION !!!";\
         }\
-        stream << "</" #Field ">\n";\
+        stream.writeEndElement();\
     } while ( 0 )
 
 #define DUMP_STRING_ATTRIB(Field,Method,attrib,expression)\
@@ -154,118 +155,126 @@ public:
         try {\
             QString value = bstr_to_qstring(item->Get##Method());\
             LOG() << "item->Get" #Method << value;\
-            stream << "<" #Field;\
-            QString attr = QString("\"%1\"").arg(expression);\
-            stream << " " #attrib "=" << attr;\
-            stream << ">" << escape(value) << "</" #Field ">\n";\
+            stream.writeStartElement(#Field);\
+            stream.writeAttribute(#attrib, expression);\
+            stream.writeCharacters(escape(value));\
+            stream.writeEndElement();\
         } catch (...) {\
             WARNING() << "item->Get" #Method << "!!! EXCEPTION !!!";\
-            stream << "<" #Field "></" #Field ">\n";\
+            stream.writeEmptyElement(#Field);\
         }\
     } while ( 0 )
 
 #define DUMP_INT(Field,Method)\
     do {\
-        stream << "<" #Field ">";\
+        stream.writeStartElement(#Field);\
         try {\
             int value = item->Get##Method();\
             LOG() << "item->Get" #Method << value;\
-            stream << value;\
+            stream.writeCharacters(QString::number(value));\
         } catch (...) {\
             WARNING() << "item->Get" #Method << "!!! EXCEPTION !!!";\
         }\
-        stream << "</" #Field ">\n";\
+        stream.writeEndElement();\
     } while ( 0 )
 
 #define DUMP_DATE(Field,Method)\
     do {\
-        stream << "<" #Field ">";\
+        stream.writeStartElement(#Field);\
         try {\
             QDateTime value = date_to_qdatetime(item->Get##Method());\
             LOG() << "item->Get" #Method << value;\
             if ( value.isValid() )\
-                stream << escape(dateToString(value.date()));\
+                stream.writeCharacters(dateToString(value.date()));\
         } catch (...) {\
             WARNING() << "item->Get" #Method << "!!! EXCEPTION !!!";\
         }\
-        stream << "</" #Field ">\n";\
+        stream.writeEndElement();\
     } while ( 0 )
 
 #define DUMP_DATE_ITEM(Field,Method,item)\
     do {\
-        stream << "<" #Field ">";\
+        stream.writeStartElement(#Field);\
         try {\
             QDateTime value = date_to_qdatetime(item->Get##Method());\
             LOG() << "item->Get" #Method << value;\
             if ( value.isValid() )\
-                stream << escape(dateToString(value.date()));\
+                stream.writeCharacters(dateToString(value.date()));\
         } catch (...) {\
             WARNING() << "item->Get" #Method << "!!! EXCEPTION !!!";\
         }\
-        stream << "</" #Field ">\n";\
+        stream.writeEndElement();\
     } while ( 0 )
 
 #define DUMP_DATETIME(Field,Method)\
     do {\
-        stream << "<" #Field ">";\
+        stream.writeStartElement(#Field);\
         try {\
             QDateTime value = date_to_qdatetime(item->Get##Method());\
             LOG() << "item->Get" #Method << value;\
             if ( value.isValid() )\
-                stream << escape(dateTimeToString(value));\
+                stream.writeCharacters(dateTimeToString(value));\
         } catch (...) {\
             WARNING() << "item->Get" #Method << "!!! EXCEPTION !!!";\
         }\
-        stream << "</" #Field ">\n";\
+        stream.writeEndElement();\
     } while ( 0 )
 
 #define DUMP_EXPR(Field,expression)\
     do {\
-        stream << "<" #Field ">";\
+        stream.writeStartElement(#Field);\
         try {\
             QString value = expression;\
             LOG() << #expression << value;\
-            stream << escape(value);\
+            stream.writeCharacters(escape(value));\
         } catch (...) {\
             WARNING() << #expression << "!!! EXCEPTION !!!";\
         }\
-        stream << "</" #Field ">\n";\
+        stream.writeEndElement();\
     } while ( 0 )
 
 #define DUMP_CUSTOM(Field,CustomField)\
     do {\
-        stream << "<" #Field ">";\
+        stream.writeStartElement(#Field);\
         try {\
             Outlook::UserPropertyPtr up = props->Find(#CustomField);\
             if ( up ) {\
                 QString value = variant_to_qstring(up->GetValue());\
-                stream << escape(value);\
+                stream.writeCharacters(escape(value));\
             }\
         } catch (...) {\
             WARNING() << "props->Find" #CustomField << "!!! EXCEPTION !!!";\
         }\
-        stream << "</" #Field ">\n";\
+        stream.writeEndElement();\
     } while ( 0 )
 
 #define DUMP_MAPI(Field,Method)\
     do {\
-        stream << "<" #Field ">";\
+        stream.writeStartElement(#Field);\
         try {\
             QString value = mc?mc->##Method():bstr_to_qstring(item->Get##Method());\
             LOG() << "item->Get" #Method << value;\
-            stream << escape(value);\
+            stream.writeCharacters(escape(value));\
         } catch (...) {\
             WARNING() << "item->Get" #Method << "!!! EXCEPTION !!!";\
         }\
-        stream << "</" #Field ">\n";\
+        stream.writeEndElement();\
     } while ( 0 )
 
 #define DUMP_CUSTOM_MAP(qtopiaUserProps)\
     do {\
-        stream << "<CustomFields>\n";\
-        for ( QMap<QString,QString>::const_iterator it = qtopiaUserProps.constBegin(); it != qtopiaUserProps.constEnd(); ++it )\
-            stream << "<CustomField>\n<Key>" << escape(it.key()) << "</Key>\n<Value>" << escape(it.value()) << "</Value>\n</CustomField>\n";\
-        stream << "</CustomFields>\n";\
+        stream.writeStartElement("CustomFields");\
+        for ( QMap<QString,QString>::const_iterator it = qtopiaUserProps.constBegin(); it != qtopiaUserProps.constEnd(); ++it ) {\
+            stream.writeStartElement("CustomField");\
+            stream.writeStartElement("Key");\
+            stream.writeCharacters(escape(it.key()));\
+            stream.writeEndElement();\
+            stream.writeStartElement("Value");\
+            stream.writeCharacters(escape(it.value()));\
+            stream.writeEndElement();\
+            stream.writeEndElement();\
+        }\
+        stream.writeEndElement();\
     } while ( 0 )
 
 #define PREPARE_MAPI(type)\
@@ -290,7 +299,7 @@ public:
         try {\
             if ( item->Get##Method() == OValue ) {\
                 LOG() << "item->Get" #Method << OValue;\
-                stream << #EValue;\
+                stream.writeCharacters(#EValue);\
             }\
         } catch (...) {\
             WARNING() << "item->Get" #Method << "!!! EXCEPTION !!!";\
@@ -302,7 +311,7 @@ public:
         try {\
             if ( item->Get##Method() == OValue ) {\
                 LOG() << "item->Get" #Method << OValue;\
-                stream << EValue;\
+                stream.writeCharacters(EValue);\
             }\
         } catch (...) {\
             WARNING() << "item->Get" #Method << "!!! EXCEPTION !!!";\

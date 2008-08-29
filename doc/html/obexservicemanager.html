@@ -13,7 +13,7 @@
 <td width="1">&nbsp;&nbsp;</td><td class="postheader" valign="center"><a href="index.html"><font color="#004faf">Home</font></a>&nbsp;&middot; <a href="classes.html"><font color="#004faf">All&nbsp;Classes</font></a>&nbsp;&middot; <a href="groups.html"><font color="#004faf">Grouped Classes</font></a>&nbsp;&middot; <a href="annotated.html"><font color="#004faf">Annotated</font></a>&nbsp;&middot; <a href="functions.html"><font color="#004faf">Functions</font></a></td>
 <td align="right" valign="top" width="230"><img src="images/trolltech-logo.png" align="right" width="203" height="32" border="0" /></td></tr></table><h1 class="title">ObexServiceManager Class Reference</h1>
 <p>The ObexServiceManager class is responsible for managing OBEX related services over Bluetooth and Infrared. <a href="#details">More...</a></p>
-<pre>    #include &lt;ObexServiceManager&gt;</pre><p>Inherits <a href="./qobject.html">QObject</a>.</p>
+<pre>    #include &lt;ObexServiceManager&gt;</pre><p>Inherits <a href="qobject.html">QObject</a>.</p>
 <ul>
 <li><a href="obexservicemanager-members.html">List of all members, including inherited members</a></li>
 </ul>
@@ -24,7 +24,7 @@
 <li><div class="fn"/><b><a href="obexservicemanager.html#dtor.ObexServiceManager">~ObexServiceManager</a></b> ()</li>
 </ul>
 <ul>
-<li><div class="fn"/>29 public functions inherited from <a href="./qobject.html#public-functions">QObject</a></li>
+<li><div class="fn"/>29 public functions inherited from <a href="qobject.html#public-functions">QObject</a></li>
 </ul>
 <a name="public-slots"></a>
 <h3>Public Slots</h3>
@@ -32,7 +32,7 @@
 <li><div class="fn"/>void <b><a href="obexservicemanager.html#abortTransfer">abortTransfer</a></b> ( int <i>id</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 public slot inherited from <a href="./qobject.html#public-slots">QObject</a></li>
+<li><div class="fn"/>1 public slot inherited from <a href="qobject.html#public-slots">QObject</a></li>
 </ul>
 <a name="signals"></a>
 <h3>Signals</h3>
@@ -43,15 +43,15 @@
 <li><div class="fn"/>void <b><a href="obexservicemanager.html#sendInitiated">sendInitiated</a></b> ( int <i>id</i>, const QString &amp; <i>fileName</i>, const QString &amp; <i>mimeType</i>, const QString &amp; <i>description</i> )</li>
 </ul>
 <ul>
-<li><div class="fn"/>1 signal inherited from <a href="./qobject.html#signals">QObject</a></li>
+<li><div class="fn"/>1 signal inherited from <a href="qobject.html#signals">QObject</a></li>
 </ul>
 <h3>Additional Inherited Members</h3>
 <ul>
-<li><div class="fn"/>1 property inherited from <a href="./qobject.html#properties">QObject</a></li>
-<li><div class="fn"/>1 public type inherited from <a href="./qobject.html#public-variables">QObject</a></li>
-<li><div class="fn"/>4 static public members inherited from <a href="./qobject.html#static-public-members">QObject</a></li>
-<li><div class="fn"/>7 protected functions inherited from <a href="./qobject.html#protected-functions">QObject</a></li>
-<li><div class="fn"/>2 protected variables inherited from <a href="./qobject.html#protected-variables">QObject</a></li>
+<li><div class="fn"/>1 property inherited from <a href="qobject.html#properties">QObject</a></li>
+<li><div class="fn"/>1 public type inherited from <a href="qobject.html#public-variables">QObject</a></li>
+<li><div class="fn"/>4 static public members inherited from <a href="qobject.html#static-public-members">QObject</a></li>
+<li><div class="fn"/>7 protected functions inherited from <a href="qobject.html#protected-functions">QObject</a></li>
+<li><div class="fn"/>2 protected variables inherited from <a href="qobject.html#protected-variables">QObject</a></li>
 </ul>
 <a name="details"></a>
 <hr />
@@ -61,21 +61,21 @@
 <p>This class is part of the Qtopia server and cannot be used by other Qtopia applications.</p>
 <hr />
 <h2>Member Function Documentation</h2>
-<h3 class="fn"><a name="ObexServiceManager"></a>ObexServiceManager::ObexServiceManager ( <a href="./qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
-<p>Constructs an <a href="obexservicemanager.html">ObexServiceManager</a>. The <i>parent</i> argument contains the <a href="./qobject.html">QObject</a> parent.</p>
+<h3 class="fn"><a name="ObexServiceManager"></a>ObexServiceManager::ObexServiceManager ( <a href="qobject.html">QObject</a> * <i>parent</i> = 0 )</h3>
+<p>Constructs an <a href="obexservicemanager.html">ObexServiceManager</a>. The <i>parent</i> argument contains the <a href="qobject.html">QObject</a> parent.</p>
 <h3 class="fn"><a name="dtor.ObexServiceManager"></a>ObexServiceManager::~ObexServiceManager ()</h3>
 <p>Destructor.</p>
 <h3 class="fn"><a name="abortTransfer"></a>void ObexServiceManager::abortTransfer ( int <i>id</i> )&nbsp;&nbsp;<tt> [slot]</tt></h3>
 <p>Aborts the request identified by <i>id</i> if the request is currently in progress. Otherwise, this method does nothing.</p>
 <h3 class="fn"><a name="completed"></a>void ObexServiceManager::completed ( int <i>id</i>, bool <i>error</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted to report the completion of an operation. The <i>id</i> parameter contains the unique id of the request completed. The <i>error</i> parameter is set to true if the operation finished due to an error, and false otherwise.</p>
-<h3 class="fn"><a name="progress"></a>void ObexServiceManager::progress ( int <i>id</i>, <a href="./qtglobal.html#qint64-typedef">qint64</a> <i>bytes</i>, <a href="./qtglobal.html#qint64-typedef">qint64</a> <i>total</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="progress"></a>void ObexServiceManager::progress ( int <i>id</i>, <a href="qtglobal.html#qint64-typedef">qint64</a> <i>bytes</i>, <a href="qtglobal.html#qint64-typedef">qint64</a> <i>total</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted to report progress of an operation. The <i>id</i> parameter contains the unique id of the request. The <i>bytes</i> parameter contains the number of bytes sent. The <i>total</i> contains the total number of bytes. If the total is not known, it will be set to 0.</p>
-<h3 class="fn"><a name="receiveInitiated"></a>void ObexServiceManager::receiveInitiated ( int <i>id</i>, const <a href="./qstring.html">QString</a> &amp; <i>fileName</i>, const <a href="./qstring.html">QString</a> &amp; <i>mimeType</i>, const <a href="./qstring.html">QString</a> &amp; <i>description</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="receiveInitiated"></a>void ObexServiceManager::receiveInitiated ( int <i>id</i>, const <a href="qstring.html">QString</a> &amp; <i>fileName</i>, const <a href="qstring.html">QString</a> &amp; <i>mimeType</i>, const <a href="qstring.html">QString</a> &amp; <i>description</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is sent whenever an object is being received. The <i>id</i> parameter contains a unique id of the request. The <i>fileName</i> parameter contains the fileName of the object being received. This file name will be in an incoming directory (the inbox.) The <i>mimeType</i> contains the MIME type of the object being received. The <i>description</i> contains the description of the object.</p>
 <p>One can track the progress of the request by using the <a href="obexservicemanager.html#completed">completed</a>() and <a href="obexservicemanager.html#progress">progress</a>() signals.</p>
 <p>See also <a href="obexservicemanager.html#completed">completed</a>() and <a href="obexservicemanager.html#progress">progress</a>().</p>
-<h3 class="fn"><a name="sendInitiated"></a>void ObexServiceManager::sendInitiated ( int <i>id</i>, const <a href="./qstring.html">QString</a> &amp; <i>fileName</i>, const <a href="./qstring.html">QString</a> &amp; <i>mimeType</i>, const <a href="./qstring.html">QString</a> &amp; <i>description</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
+<h3 class="fn"><a name="sendInitiated"></a>void ObexServiceManager::sendInitiated ( int <i>id</i>, const <a href="qstring.html">QString</a> &amp; <i>fileName</i>, const <a href="qstring.html">QString</a> &amp; <i>mimeType</i>, const <a href="qstring.html">QString</a> &amp; <i>description</i> )&nbsp;&nbsp;<tt> [signal]</tt></h3>
 <p>This signal is emitted whenever an object is being sent by the local device. The <i>id</i> parameter contains a unique id of the request. The <i>fileName</i> parameter contains the file name of the object being send. The <i>mimeType</i> contains the MIME type of the object being received. The <i>description</i> is a user-friendly name for the file (for example, if the file has another name under Qtopia's content system).</p>
 <p>One can track the progress of the request by using the <a href="obexservicemanager.html#completed">completed</a>() and <a href="obexservicemanager.html#progress">progress</a>() signals.</p>
 <p>See also <a href="obexservicemanager.html#completed">completed</a>() and <a href="obexservicemanager.html#progress">progress</a>().</p>

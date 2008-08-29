@@ -72,13 +72,13 @@
         static const int iconSize(qApp-&gt;style()-&gt;pixelMetric(QStyle::PM_ListViewIconSize));
         static const int smallIconSize(qApp-&gt;style()-&gt;pixelMetric(QStyle::PM_SmallIconSize));
 
-        <span class="comment">//</span> Find the paintable elements of the item
+        <span class="comment">// Find the paintable elements of the item</span>
         QIcon icon(qvariant_cast&lt;QIcon&gt;(index.model()-&gt;data(index, Qt::DecorationRole)));
         QIcon typeIcon(qvariant_cast&lt;QIcon&gt;(index.model()-&gt;data(index, SecondaryDecorationRole)));
         QString headerText(qvariant_cast&lt;QString&gt;(index.model()-&gt;data(index, Qt::DisplayRole)));
         QString subText(qvariant_cast&lt;QString&gt;(index.model()-&gt;data(index, SubLabelRole)));
 
-        <span class="comment">//</span> Find the painting properties we need
+        <span class="comment">// Find the painting properties we need</span>
         const bool sel((option.state &amp; QStyle::State_Selected) == QStyle::State_Selected);
         QBrush baseBrush(sel ? option.palette.highlight() : option.palette.base());
         QBrush textBrush(sel ? option.palette.highlightedText() : option.palette.text());
@@ -92,7 +92,7 @@
         painter-&gt;save();
         painter-&gt;setClipRect(option.rect);
 
-        <span class="comment">//</span> Draw the background gradient if selected
+        <span class="comment">// Draw the background gradient if selected</span>
         if (sel)
         {
             QPalette::ColorGroup cg((option.state &amp; QStyle::State_Enabled) ? QPalette::Normal : QPalette::Disabled);
@@ -124,7 +124,7 @@
             painter-&gt;drawPixmap(option.rect.topLeft(), pm);
         }
 
-        <span class="comment">//</span> Find the icon rectangles for this item
+        <span class="comment">// Find the icon rectangles for this item</span>
         QRect textRect(option.rect);
         QRect iconRect(option.rect);
         QRect secondaryRect(option.rect);
@@ -146,7 +146,7 @@
             textRect.setRight(secondaryRect.left());
         }
 
-        <span class="comment">//</span> Find the text rectangles
+        <span class="comment">// Find the text rectangles</span>
         QFontMetrics fm(main);
         QRect headerRect(textRect);
         headerRect.setTop(headerRect.top() + 1);
@@ -157,14 +157,14 @@
         subRect.setTop(subRect.bottom() - sfm.lineSpacing() + 1);
         subRect.setHeight(sfm.lineSpacing());
 
-        <span class="comment">//</span> Paint the icons
+        <span class="comment">// Paint the icons</span>
         QPoint drawOffset(iconRect.left() + ((iconRect.width() - iconSize)/2), iconRect.top() + ((iconRect.height() - iconSize) / 2));
         painter-&gt;drawPixmap(drawOffset, icon.pixmap(QSize(iconSize, iconSize)));
 
         drawOffset = QPoint(secondaryRect.left() + ((secondaryRect.width() - smallIconSize)/2), secondaryRect.top() + ((secondaryRect.height() - smallIconSize) / 2));
         painter-&gt;drawPixmap(drawOffset, typeIcon.pixmap(QSize(smallIconSize, smallIconSize)));
 
-        <span class="comment">//</span> Paint the text elements
+        <span class="comment">// Paint the text elements</span>
         painter-&gt;setBrush(baseBrush);
         painter-&gt;setPen(textBrush.color());
 

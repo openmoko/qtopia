@@ -62,6 +62,7 @@ using namespace QMAPI;
         const GUID name = { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }
 #define DEFINE_OLEGUID(name, l, w1, w2) DEFINE_GUID(name, l, w1, w2, 0xC0,0,0,0,0,0,0,0x46)
 DEFINE_OLEGUID(OUTLOOK_GUID, 0x00062004, 0, 0); // {00062004-0000-0000-C000-000000000046}
+DEFINE_OLEGUID(BIRTHDAY_GUID, 0x00062008, 0, 0); // {00062008-0000-0000-C000-000000000046}
 
 #ifdef QMAPI_DEBUG
 #include "mapidebug.cpp"
@@ -115,8 +116,10 @@ namespace QMAPI {
         ~SessionPrivate();
 
         Session *q;
-        LPMAPINAMEID names[3];
-        bool namesInit;
+        LPMAPINAMEID emailNames[3];
+        bool emailNamesInit;
+        LPMAPINAMEID birthdayNames[1];
+        bool birthdayNamesInit;
     };
 
 };
@@ -138,6 +141,7 @@ namespace QMAPI {
     {
     public:
         QString Body;
+        bool IsBirthday;
     };
 
     class TaskPrivate
@@ -151,7 +155,7 @@ namespace QMAPI {
 // =====================================================================
 
 SessionPrivate::SessionPrivate( Session *_q )
-    : q( _q ), namesInit( true )
+    : q( _q ), emailNamesInit( true ), birthdayNamesInit( true )
 {
 }
 
@@ -214,20 +218,20 @@ QMAPI::Contact *Session::openContact( IUnknown *obj )
     hr = obj->QueryInterface(IID_IMessage, (void**)&lpMsg);
     CLEANUP(( FAILED(hr) || !lpMsg ), "Didn't get an IID_IMessage");
 
-    if ( d->namesInit ) {
-        d->namesInit = false;
+    if ( d->emailNamesInit ) {
+        d->emailNamesInit = false;
 
         for ( int i = 0; i < 3; i++ ) {
-            d->names[i] = new MAPINAMEID;
-            d->names[i]->lpguid = (LPGUID)&OUTLOOK_GUID;
-            d->names[i]->ulKind = MNID_ID;
+            d->emailNames[i] = new MAPINAMEID;
+            d->emailNames[i]->lpguid = (LPGUID)&OUTLOOK_GUID;
+            d->emailNames[i]->ulKind = MNID_ID;
         }
-        d->names[0]->Kind.lID = 0x8083; // Email1Address
-        d->names[1]->Kind.lID = 0x8093; // Email2Address
-        d->names[2]->Kind.lID = 0x80A3; // Email3Address
+        d->emailNames[0]->Kind.lID = 0x8083; // Email1Address
+        d->emailNames[1]->Kind.lID = 0x8093; // Email2Address
+        d->emailNames[2]->Kind.lID = 0x80A3; // Email3Address
     }
 
-    hr = lpMsg->GetIDsFromNames( 3, d->names, 0, &lpProps );
+    hr = lpMsg->GetIDsFromNames( 3, d->emailNames, 0, &lpProps );
     CLEANUP(( FAILED(hr) || !lpProps || lpProps->cValues != 3 ), "Can't get properties");
 
     propCount = 5;
@@ -235,7 +239,7 @@ QMAPI::Contact *Session::openContact( IUnknown *obj )
         ULONG tag = lpProps->aulPropTag[i];
         if ( PROP_TYPE(tag) == PT_ERROR ) {
             // FIXME user notification?
-            WARNING() << "Can't get email addresses!";
+            WARNING() << "Can't resolve the email address named properties!";
             propCount = 2;
             break;
         }
@@ -289,19 +293,46 @@ QMAPI::Appointment *Session::openAppointment( IUnknown *obj, bool isException )
 
     HRESULT hr;
     LPMESSAGE lpMsg = 0;
+    LPSPropTagArray lpProps = 0;
     ULONG ulSz;
     LPSPropValue lpValues = 0;
-    SizedSPropTagArray(2,props);
-    int propCount = 2;
+    SizedSPropTagArray(3,props);
+    int propCount;
     QString messageClass;
     bool messageClassOk;
 
     hr = obj->QueryInterface(IID_IMessage, (void**)&lpMsg);
     CLEANUP(( FAILED(hr) || !lpMsg ), "Didn't get an IID_IMessage");
 
+    if ( d->birthdayNamesInit ) {
+        d->birthdayNamesInit = false;
+
+        for ( int i = 0; i < 1; i++ ) {
+            d->birthdayNames[i] = new MAPINAMEID;
+            d->birthdayNames[i]->lpguid = (LPGUID)&BIRTHDAY_GUID;
+            d->birthdayNames[i]->ulKind = MNID_ID;
+        }
+        d->birthdayNames[0]->Kind.lID = 0x8586; // Contact name (for birthdays and anniversaries)
+    }
+
+    hr = lpMsg->GetIDsFromNames( 1, d->birthdayNames, 0, &lpProps );
+    CLEANUP(( FAILED(hr) || !lpProps || lpProps->cValues != 1 ), "Can't get properties");
+
+    propCount = 3;
+    for ( int i = 0; i < 1; i++ ) {
+        ULONG tag = lpProps->aulPropTag[i];
+        if ( PROP_TYPE(tag) == PT_ERROR ) {
+            // FIXME user notification?
+            WARNING() << "Can't resolve the birthday named property!";
+            propCount = 2;
+            break;
+        }
+    }
+
     props.cValues = propCount;
     props.aulPropTag[0] = PR_MESSAGE_CLASS;
     props.aulPropTag[1] = PR_BODY;
+    props.aulPropTag[2] = lpProps->aulPropTag[0];
 
     // Get the properties
     hr = lpMsg->GetProps( (LPSPropTagArray)&props, MAPI_UNICODE, &ulSz, &lpValues );
@@ -319,13 +350,17 @@ QMAPI::Appointment *Session::openAppointment( IUnknown *obj, bool isException )
         goto cleanup;
     }
 
-
     ret = new QMAPI::Appointment( this );
     if ( PROP_TYPE(lpValues[1].ulPropTag) != PT_ERROR )
         ret->d->Body = value(&lpValues[1]).toString();
+    if ( PROP_TYPE(lpValues[2].ulPropTag) != PT_ERROR )
+        ret->d->IsBirthday = true;
+    else
+        ret->d->IsBirthday = false;
 
 cleanup:
     if ( lpValues ) MAPIFreeBuffer( lpValues );
+    if ( lpProps ) MAPIFreeBuffer( lpProps );
     if ( lpMsg ) lpMsg->Release();
 
     return ret;
@@ -425,6 +460,11 @@ Appointment::~Appointment()
 QString Appointment::Body()
 {
     return d->Body;
+}
+
+bool Appointment::IsBirthday()
+{
+    return d->IsBirthday;
 }
 
 // =====================================================================

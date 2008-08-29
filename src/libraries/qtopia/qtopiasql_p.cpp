@@ -23,6 +23,8 @@
 #include <qtopia/private/qtopiasql_p.h>
 #ifndef QTOPIA_CONTENT_INSTALLER
 #include <QApplication>
+#include <qtopiasqlmigrateplugin_p.h>
+#include <QPluginManager>
 #endif
 #include <QtopiaChannel>
 #include <QtopiaIpcEnvelope>
@@ -119,8 +121,12 @@ void QtopiaSqlPrivate::systemMessage(const QString &message, const QByteArray &d
     }
 }
 
-void QtopiaSqlPrivate::disksChanged ()
+void QtopiaSqlPrivate::disksChanged(QtopiaSqlMigratePlugin *migratePlugin)
 {
+#ifdef QTOPIA_CONTENT_INSTALLER
+    Q_UNUSED(migratePlugin);
+#endif
+
 #ifndef QTOPIA_HOST
     // update the "databases" array after rescanning QStorageMetaInfo
     qLog(Sql) << "disks changed... update database info";
@@ -153,6 +159,8 @@ void QtopiaSqlPrivate::disksChanged ()
         fileSystems = QStorageMetaInfo::instance()->fileSystems(&f, false);
     }
 
+    QPluginManager *pluginManager = 0;
+
     foreach ( const QFileSystem *fs, fileSystems ) {
         // Have I seen this database already?
         if( !fs->isConnected() && fs->contentDatabase() ) {
@@ -167,10 +175,17 @@ void QtopiaSqlPrivate::disksChanged ()
             if ( databaseId != quint32(-1) && databaseId != 0 ) {
                 continue;
             }
+
+            if (!pluginManager && !migratePlugin && QApplication::type() == QApplication::GuiServer) {
+                pluginManager = new QPluginManager(QLatin1String("qtopiasqlmigrate"));
+                migratePlugin = qobject_cast<QtopiaSqlMigratePlugin *>(
+                        pluginManager->instance(QLatin1String("dbmigrate")));
+            }
+
             // qLog(Sql) << "fs->path() =" << fs->path() << "fs->isRemovable() =" << fs->isRemovable() << "fs->isWritable() =" << fs->isWritable();
             if ( !fs->isRemovable() && fs->isWritable() ) {
                 // Simple case, just attach normally
-                QtopiaSql::instance()->attachDB(fs->path());
+                QtopiaSql::instance()->attachDB(fs->path(), databaseFile(fs->path()), migratePlugin);
             } else {
                 QString dbPath = databaseFile(fs->path());
                 bool dbExists = QFile::exists(dbPath);
@@ -219,7 +234,7 @@ void QtopiaSqlPrivate::disksChanged ()
 
                 // Finally, attach to the database
                 qLog(Sql) << "Attaching database" << dbPath << "for path" << fs->path();
-                QtopiaSql::instance()->attachDB(fs->path(), dbPath);
+                QtopiaSql::instance()->attachDB(fs->path(), dbPath, migratePlugin);
             }
 
             // Media may have been removed while dbmigrate was occuring, in this case we want to detach the database
@@ -236,6 +251,7 @@ void QtopiaSqlPrivate::disksChanged ()
         }
     }
 
+    delete pluginManager;
     delete storage;
 #endif
 }

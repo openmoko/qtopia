@@ -239,6 +239,7 @@ class QListView;
 QtopiaServiceSelector::QtopiaServiceSelector(QWidget* parent) : QDialog(parent)
 {
     setModal(true);
+    setWindowTitle("Select Service");
 
     QVBoxLayout *vbl = new QVBoxLayout(this);
     vbl->setSpacing(0);
@@ -254,6 +255,8 @@ QtopiaServiceSelector::QtopiaServiceSelector(QWidget* parent) : QDialog(parent)
 
     actionlist = new QListWidget();
     vbl->addWidget(actionlist);
+    actionlist->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    QMenu* menu = QSoftMenuBar::menuFor(actionlist);
 
     QListWidgetItem* item = new QListWidgetItem(tr("No action"), actionlist);
     item->setIcon(QIcon(":icon/reset"));

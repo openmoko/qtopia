@@ -28,6 +28,7 @@
 
 #include "cruxussimplesession.h"
 
+#include <qtopialog.h>
 
 
 namespace cruxus
@@ -106,8 +107,12 @@ SimpleSession::~SimpleSession()
 
 void SimpleSession::start()
 {
+    qLog(Media) <<"SimpleSession::start() begin "<<this;
+
     if (d->state == QtopiaMedia::Playing || d->state == QtopiaMedia::Error)
         return;
+
+    qLog(Media) <<"SimpleSession::start() kickoff "<<this;
 
     if (!d->opened) {
         if (!d->source->open(QIODevice::ReadOnly) ||
@@ -134,23 +139,37 @@ void SimpleSession::start()
 
 void SimpleSession::pause()
 {
+    qLog(Media) <<"SimpleSession::pause() "<<this;
+
     if (d->connected)
         d->coder->pause();
 }
 
 void SimpleSession::stop()
 {
+    qLog(Media) <<"SimpleSession::stop() "<<this;
+
     if (d->connected)
         d->coder->stop();
 }
 
 void SimpleSession::suspend()
 {
+    qLog(Media) <<"SimpleSession::suspend() "<<this;
+
     pause();
+
+    if (d->opened) {
+        d->source->close();
+        d->sink->close();
+        d->opened = false;
+    }
 }
 
 void SimpleSession::resume()
 {
+    qLog(Media) <<"SimpleSession::resume() "<<this;
+
     start();
 }
 

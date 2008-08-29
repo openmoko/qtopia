@@ -31,7 +31,7 @@ class QMailMessageSortKeyPrivate;
 class QTOPIAMAIL_EXPORT QMailMessageSortKey
 {
 public:
-	enum Property
+    enum Property
     {
         Id,
         Type,
@@ -43,7 +43,7 @@ public:
         Status,
         FromAccount,
         FromMailbox,
-        ServerUid,      
+        ServerUid,
         Size
     };
 
@@ -65,9 +65,9 @@ public:
     bool isEmpty() const;
 
 private:
-	friend class QMailStore;
-	friend class QMailStorePrivate;	
-    
+    friend class QMailStore;
+    friend class QMailStorePrivate;
+
 private:
     QSharedDataPointer<QMailMessageSortKeyPrivate> d;
 
