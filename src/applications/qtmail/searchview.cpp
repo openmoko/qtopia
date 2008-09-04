@@ -58,10 +58,14 @@ SearchView::SearchView(bool query,  QWidget* parent, Qt::WFlags fl )
         setWindowTitle( tr("Query") );
         nameLabel->show();
         nameLine->show();
+        QSoftMenuBar::setLabel( this, Qt::Key_Back, QString(), tr("Query"),
+                                QSoftMenuBar::AnyFocus );
     } else {
         setWindowTitle( tr("Search") );
         nameLabel->hide();
         nameLine->hide();
+        QSoftMenuBar::setLabel( this, Qt::Key_Back, QString(), tr("Search"),
+                                QSoftMenuBar::AnyFocus );
     }
 
     init();
