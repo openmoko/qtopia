@@ -392,6 +392,7 @@ void RingControl::initSoundControl()
     if (ringToneDoc.isEmpty())
         ringToneDoc = profile.systemCallTone().fileName();
 
+#ifdef MEDIA_SERVER
     if(d->ringtonecontrol && d->ringtonecontrol->sound()->fileName() != ringToneDoc) {
         delete d->ringtonecontrol->sound();
         delete d->ringtonecontrol;
@@ -402,6 +403,7 @@ void RingControl::initSoundControl()
         d->ringtonecontrol = new QSoundControl(new QSound(ringToneDoc));
         connect(d->ringtonecontrol, SIGNAL(done()), this, SLOT(nextRing()) );
     }
+#endif
 
     // Attempt to find a good messagetone. Fallback to the ones provided
     // by the  system
@@ -409,6 +411,7 @@ void RingControl::initSoundControl()
     if (ringToneDoc.isEmpty())
         ringToneDoc = profile.systemMessageTone().fileName();
 
+#ifdef MEDIA_SERVER
     if(d->msgtonecontrol && d->msgtonecontrol->sound()->fileName() != ringToneDoc) {
 	delete d->msgtonecontrol->sound();
 	delete d->msgtonecontrol;
@@ -419,6 +422,7 @@ void RingControl::initSoundControl()
         d->msgtonecontrol = new QSoundControl(new QSound(ringToneDoc));
         connect(d->msgtonecontrol, SIGNAL(done()), this, SLOT(nextRing()) );
     }
+#endif
 }
 
 void RingControl::startRinging(RingType t)
@@ -830,8 +834,10 @@ void RingControl::setSoundPriority(bool priorityPlay)
     if (priorityPlay != d->priorityPlay)
     {
 #ifndef MEDIA_SERVER
+#if defined(Q_WS_QWS)
         if (d->soundclient)
             d->soundclient->playPriorityOnly(priorityPlay);
+#endif
 #endif
         d->priorityPlay = priorityPlay;
     }
