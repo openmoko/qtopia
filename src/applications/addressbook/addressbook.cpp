@@ -2145,28 +2145,59 @@ void AddressbookWindow::updateDependentAppointments(const QContact& src, AbEdito
     }
 }
 
+/*!
+  Return true if the contact \a cnt can be added into the contacts list.
+  This method may open a warning dialog to ask confirmation from the user.
+*/
+bool AddressbookWindow::acceptEntry( const QContact &cnt )
+{
+    // Check if we already have a contact with the same name 
+    bool nameConflict = false;
+    for (int i=0; i < mModel->rowCount(); ++i) {
+        if (mModel->contact(i).label() == cnt.label()) {
+            nameConflict = true;
+            break;
+        }
+    }
+    // If so we ask the user for confirmation
+    if (nameConflict) {
+        switch (QMessageBox::warning(0, tr("Contact name conflict"),
+                tr("A contact with the same name is already present."),
+                tr("Continue"), tr("Cancel"), 0, 0, 1))
+            {
+                case 0:
+                    return true;
+                case 1:
+                    return false;
+            }
+    }
+    // We should never reach this point
+    return true;
+}
+
 void AddressbookWindow::newEntry( const QContact &cnt )
 {
 
     QContact entry = cnt;
     AbEditor *abEditor = editor(cnt.uid());
-
     abEditor->setEntry( entry, true );
-
-    if( abEditor->exec() == QDialog::Accepted )
-    {
-        setFocus();
-        QContact newEntry(abEditor->entry());
-
-        NameLearner learner(newEntry);
-        QUniqueId ui = mModel->addContact(newEntry);
-        newEntry.setUid(ui);
-        if(newPersonal)
-            mModel->setPersonalDetails(ui);
-        updateDependentAppointments(newEntry, abEditor);
-        setCurrentContact(newEntry);
-        updateContextMenu();
-    }
+    // We show the editor dialog until the new contact is accepted
+    // or the user cancel the action.
+    do {
+        if( abEditor->exec() != QDialog::Accepted )
+            return; // Canceled
+    } while(!acceptEntry(abEditor->entry()));
+    
+    setFocus();
+    QContact newEntry(abEditor->entry());
+    NameLearner learner(newEntry);
+    QUniqueId ui = mModel->addContact(newEntry);
+    newEntry.setUid(ui);
+    if(newPersonal)
+        mModel->setPersonalDetails(ui);
+    updateDependentAppointments(newEntry, abEditor);
+    setCurrentContact(newEntry);
+    updateContextMenu();
 }
 
 void AddressbookWindow::editEntry( const QContact &cnt )

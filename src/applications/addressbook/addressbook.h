@@ -66,6 +66,7 @@ public:
 
 protected:
     void resizeEvent(QResizeEvent * e);
+    bool acceptEntry(const QContact &cnt);
     void newEntry();
     void newEntry(const QContact &cnt);
     void editEntry(const QContact &cnt);
