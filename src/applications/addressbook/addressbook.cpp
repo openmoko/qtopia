@@ -446,9 +446,11 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
     /* groups */
     contextMenu->addAction(actionShowGroups);
     contextMenu->addAction(actionAddGroup);
-#if defined(QTOPIA_TELEPHONY)
-    contextMenu->addAction(actionSetRingTone);
-#endif
+    
+// Uncomment to bring the SetRingTone action back
+//#if defined(QTOPIA_TELEPHONY)
+//    contextMenu->addAction(actionSetRingTone);
+//#endif
     contextMenu->addAction(actionRemoveGroup);
     contextMenu->addAction(actionRenameGroup);
     contextMenu->addAction(actionRemoveFromGroup);
@@ -2171,7 +2173,6 @@ bool AddressbookWindow::acceptEntry( const QContact &cnt )
                     return false;
             }
     }
-    // We should never reach this point
     return true;
 }
 
