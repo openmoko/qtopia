@@ -368,7 +368,7 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
     actionAddGroup = new QAction(newIcon, tr("New group"), this);
     actionAddGroup->setWhatsThis(tr("Add new contact group."));
 
-#if defined(QTOPIA_TELEPHONY)
+#if defined(QTOPIA_PER_CONTACT_RINGTONE)
     actionSetRingTone = new QAction(QIcon(), tr("Set group ringtone...", "Set ringtone to current contact group"), this);
     actionSetRingTone->setWhatsThis(tr("Set a ringtone that is played when an incoming call comes in from this group members."));
 #endif
@@ -447,10 +447,9 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
     contextMenu->addAction(actionShowGroups);
     contextMenu->addAction(actionAddGroup);
     
-// Uncomment to bring the SetRingTone action back
-//#if defined(QTOPIA_TELEPHONY)
-//    contextMenu->addAction(actionSetRingTone);
-//#endif
+#if defined(QTOPIA_PER_CONTACT_RINGTONE)
+    contextMenu->addAction(actionSetRingTone);
+#endif
     contextMenu->addAction(actionRemoveGroup);
     contextMenu->addAction(actionRenameGroup);
     contextMenu->addAction(actionRemoveFromGroup);
@@ -1072,7 +1071,7 @@ void AddressbookWindow::updateContextMenuIfDirty()
     /* group actions */
     actionShowGroups->setVisible( showingContacts );
     actionAddGroup->setVisible( showingGroups );
-#if defined(QTOPIA_TELEPHONY)
+#if defined(QTOPIA_PER_CONTACT_RINGTONE)
     actionSetRingTone->setVisible( showingGroups );
 #endif
     actionRemoveGroup->setVisible( groupSelected && !groupSystem);
@@ -1210,7 +1209,7 @@ void AddressbookWindow::createGroupListView()
         connect(mGroupsListView, SIGNAL(backClicked()), this, SLOT(previousView()));
 
         connect(actionAddGroup, SIGNAL(triggered()), mGroupsListView, SLOT(addGroup()));
-#if defined(QTOPIA_TELEPHONY)
+#if defined(QTOPIA_PER_CONTACT_RINGTONE)
         connect(actionSetRingTone, SIGNAL(triggered()), mGroupsListView, SLOT(setGroupRingTone()));
 #endif
         connect(actionRemoveGroup, SIGNAL(triggered()), mGroupsListView, SLOT(removeCurrentGroup()));

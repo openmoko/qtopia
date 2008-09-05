@@ -217,7 +217,7 @@ private:
             *actionRenameGroup,
             *actionRemoveFromGroup,
             *actionAddMembers;
-#if defined(QTOPIA_TELEPHONY)
+#if defined(QTOPIA_PER_CONTACT_RINGTONE)
     QAction *actionSetRingTone;
 #endif
 
