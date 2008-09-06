@@ -75,17 +75,22 @@ ContactListPane::ContactListPane(QWidget *w, QContactModel* model)
 
     mLayout->addWidget(mListView);
 
-    // Don't show find bar for QThumbStyle
-    if (!style()->inherits("QThumbStyle")) {
+    // Show the find bar if we should show it.
+    QSettings cfg("Trolltech", "Contacts");
+    cfg.beginGroup("default");
+    if (cfg.value("EnableFindBar", !style()->inherits("QThumbStyle")).toBool()) {
 #ifndef GREENPHONE_EFFECTS
         mTextProxy = new QTextEntryProxy(this, mListView);
 #else
         mTextProxy = new QTextEntryProxy(this, mSmoothListView);
 #endif
+        mTextProxy->setFocusPolicy(Qt::ClickFocus);
+
         int mFindHeight = mTextProxy->sizeHint().height();
         mFindIcon = new QLabel;
         mFindIcon->setPixmap(QIcon(":icon/find").pixmap(mFindHeight-2, mFindHeight-2));
         mFindIcon->setMargin(2);
+        mFindIcon->setFocusPolicy(Qt::NoFocus);
 
         QHBoxLayout *findLayout = new QHBoxLayout;
         findLayout->addWidget(mFindIcon);
@@ -98,7 +103,7 @@ ContactListPane::ContactListPane(QWidget *w, QContactModel* model)
         connect( mTextProxy, SIGNAL(textChanged(QString)),
                 this, SLOT(search(QString)) );
 
-        QtopiaApplication::setInputMethodHint( mListView, QtopiaApplication::Text );
+        QtopiaApplication::setInputMethodHint( mTextProxy, QtopiaApplication::Text );
     }
 #ifdef GREENPHONE_EFFECTS
     mListView->setVisible(false);

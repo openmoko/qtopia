@@ -339,6 +339,7 @@ AddressbookWindow::AddressbookWindow( QWidget *parent, Qt::WFlags f )
     connect(mListView, SIGNAL(backClicked()), this, SLOT(close()));
 
     centralView->addWidget(mListView);
+    centralView->setFocus();
 
     // Cache some icons for the menu actions
     QIcon newIcon(":icon/new");
