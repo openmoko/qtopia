@@ -99,6 +99,8 @@ QTextEntryProxy::QTextEntryProxy(QWidget *parent, QWidget *target)
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     setFocusPolicy(Qt::NoFocus);
     setTarget(target);
+
+    installEventFilter(this);
 }
 
 /*!
@@ -309,7 +311,7 @@ void QTextEntryProxy::paintEvent(QPaintEvent *event)
 
 bool QTextEntryProxy::eventFilter(QObject *obj, QEvent *event)
 {
-    if(obj == d->target)
+    if(obj == d->target || obj == this)
     {
         if(event->type() == QEvent::InputMethod)
         {
