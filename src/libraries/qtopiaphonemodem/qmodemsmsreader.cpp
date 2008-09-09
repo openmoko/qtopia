@@ -520,6 +520,7 @@ void QModemSMSReader::cpmsDone( bool ok, const QAtResult& result )
     // the "SMSMemoryFull" indicator on modems that don't have
     // a proprietry way of detecting the full state.
     QAtResultParser parser( result );
+    uint totalused = 0;
     QModemIndicators *indicators = d->service->indicators();
     if ( parser.next( "+CPMS:" ) ) {
         if ( parser.line().startsWith( QChar('"') ) )
@@ -535,9 +536,10 @@ void QModemSMSReader::cpmsDone( bool ok, const QAtResult& result )
         // Update the local value space with the actual counts.
         setValue( "usedMessages", (int)used, Delayed );
         setValue( "totalMessages", (int)total );
+        totalused += used;
     }
 
-    if (ok) {
+    if (ok && totalused > 0) {
         listMessages();
     } else {
         qLog(Modem) << __PRETTY_FUNCTION__ << "Giving up on CPMS.... it keeps failing. how to escalate?";
