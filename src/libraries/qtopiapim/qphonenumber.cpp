@@ -223,7 +223,7 @@ static IDDRule const rules[] = {
     {"Iraq",                    964,    2,  1,   0,   1},
     {"Ireland",                 353,    2,  1,   0,   1},
     {"Israel",                  972,    1,  0,   0,   1},
-    {"Italy",                   390,    2,  1,   0,   1},
+    {"Italy",                    39,    0,  0,  -1,   1},
     {"Ivory Coast",             225,    0,  0,   0,   1},
 
     {"Jamaica",                1876,    0,  0,   1,   1},
