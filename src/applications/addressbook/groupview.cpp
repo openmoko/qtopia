@@ -254,6 +254,8 @@ void GroupView::addGroup()
         QString id = d->categories->idForLabel(name);
         if ( id.isEmpty() )
             id = d->categories->add(name);
+        else
+            QMessageBox::warning(0, tr("Can't create group"), tr("A group with the same name is already present."));
         setCurrentGroup(id);
     }
 }
