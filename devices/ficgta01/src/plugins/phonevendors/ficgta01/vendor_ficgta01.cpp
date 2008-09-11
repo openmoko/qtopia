@@ -462,6 +462,9 @@ Ficgta01ModemService::Ficgta01ModemService
 
     chat("AT+COPS=0");
 
+    // Setup the default text codec to UCS2 for none English langs
+    chat( "AT+CSCS=\"UCS2\"" );
+
     // Turn on status notification messages for finding out when
     // the SIM/phonebook/SMS is ready to use.
     primaryAtChat()->registerNotificationType
