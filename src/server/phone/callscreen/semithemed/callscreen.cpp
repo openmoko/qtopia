@@ -65,6 +65,9 @@
 
 #include <QSimToolkit>
 
+#include <QPhoneProfile>
+#include <QPhoneProfileManager>
+
 #include "delayedwaitdialog.h"
 
 static const int  MAX_JOINED_CALLS = 5;
@@ -1104,10 +1107,14 @@ void CallScreen::stateChanged()
             item->setValue("State", tr( " (Disconnected)", "describing call state, make sure keeping the space in the beginning") );
         }
     }
+    
+    // Get the current profile
+    QPhoneProfileManager* profileManager = new QPhoneProfileManager(this);
+    QPhoneProfile currentProfile = profileManager->activeProfile();
 
     // update available m_actions.
     m_actionAnswer->setVisible(m_control->hasIncomingCall());
-    m_actionSendBusy->setVisible(m_control->hasIncomingCall());
+    m_actionSendBusy->setVisible(m_control->hasIncomingCall() && currentProfile.volume() > 0);
     m_actionMute->setVisible(m_control->hasIncomingCall());
     m_actionHold->setVisible(m_activeCount && !m_holdCount && !m_incoming && !dialing);
     m_actionResume->setVisible(m_holdCount && !m_incoming && !dialing);
@@ -1173,6 +1180,10 @@ void CallScreen::stateChanged()
     else
         m_dtmfActiveCall = QString();
     update();
+    
+    // If there is no ring tone, we skip the muteRing action
+    if (currentProfile.volume() == 0)
+        muteRingSelected();
 }
 
 /*!
