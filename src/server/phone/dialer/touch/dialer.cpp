@@ -259,6 +259,8 @@ void Dialer::msgReceived(const QString& str, const QByteArray&)
         saveToContact();
     } else if( str == "dial()" ) {
         numberSelected();
+    } else if( str == "clear()" ) {
+        clear();
     }
 }
 
@@ -327,6 +329,12 @@ void Dialer::themeLoaded( const QString & )
         newAction = new QAction( QIcon( ":image/addressbook/AddressBook" ),
                 tr( "Save to Contacts" ), m_actions );
         connect( newAction, SIGNAL(triggered()), this, SLOT(saveToContact()) );
+        ++actionCount;
+    }
+    if( !findItem( "clearnumber", ThemedView::Item, ThemeItem::All, false ) ) {
+        newAction = new QAction( QIcon( ":icon/clearall" ),
+                tr( "Clear Number" ), m_actions );
+        connect( newAction, SIGNAL(triggered()), this, SLOT(clear()) );
         ++actionCount;
     }
     if( actionCount > 0 )
