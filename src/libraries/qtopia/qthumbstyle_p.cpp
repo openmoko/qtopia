@@ -294,8 +294,7 @@ void QThumbStyle::polish(QWidget *widget)
 
     QTextEdit *te = qobject_cast<QTextEdit*>(widget);
     if (te && te->document()) {
-        // We'd like links to be about 0.7cm high (~20pt)
-        QString sheet("a { color: palette(link); font-size:20pt; }; a:visited { color: palette(link-visited); font-size:20pt; };");
+        QString sheet("a { color: palette(link); font-size:8pt; }; a:visited { color: palette(link-visited); font-size:8pt; };");
         te->document()->setDefaultStyleSheet(sheet);
     }
 }
