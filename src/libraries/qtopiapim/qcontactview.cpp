@@ -581,6 +581,7 @@ void QContactSelector::init()
 
     if(!style()->inherits("QThumbStyle")) {
         d->proxy = new QTextEntryProxy(this, d->view);
+        d->proxy->setTrimText(true);
         int mFindHeight = d->proxy->sizeHint().height();
         QLabel *findIcon = new QLabel;
         findIcon->setPixmap(QIcon(":icon/find").pixmap(mFindHeight-2, mFindHeight-2));

@@ -35,12 +35,17 @@
 class QTextEntryProxyData
 {
 public:
-    QTextEntryProxyData() : target(NULL) {}
+    QTextEntryProxyData()
+        : target(NULL)
+        , shouldTrimText(false)
+    {}
+
     QString text;
     QString imText;
     // worry about honoring IM format later. for now, just underline.
     QRect microFocus;
     QWidget *target;
+    bool shouldTrimText;
 };
 
 /*!
@@ -208,6 +213,9 @@ bool QTextEntryProxy::processKeyPressEvent(QKeyEvent *event)
 */
 QString QTextEntryProxy::text() const
 {
+    if (d->shouldTrimText)
+        return d->text.trimmed();
+
     return d->text;
 }
 
@@ -354,4 +362,12 @@ void QTextEntryProxy::targetDestroyed(QObject * /*obj*/)
     disconnect(d->target, SIGNAL(destroyed(QObject*)), this, SLOT(targetDestroyed(QObject*)));
     d->target->removeEventFilter(this);
     d->target = NULL;
+}
+
+/*!
+    Should the result of \sa text() be trimmed?
+*/
+void QTextEntryProxy::setTrimText(bool trim)
+{
+    d->shouldTrimText = trim;
 }

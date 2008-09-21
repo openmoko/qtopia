@@ -41,6 +41,7 @@ public:
     QString text() const;
     void clear();
     void setTarget ( QWidget * target );
+    void setTrimText( bool );
     
 signals:
     void textChanged(const QString &);

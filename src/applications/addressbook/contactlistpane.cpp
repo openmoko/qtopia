@@ -84,6 +84,7 @@ ContactListPane::ContactListPane(QWidget *w, QContactModel* model)
 #else
         mTextProxy = new QTextEntryProxy(this, mSmoothListView);
 #endif
+        mTextProxy->setTrimText(true);
         mTextProxy->setFocusPolicy(Qt::ClickFocus);
 
         int mFindHeight = mTextProxy->sizeHint().height();
