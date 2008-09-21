@@ -579,13 +579,18 @@ void QContactSelector::init()
 
     l->addWidget( d->view );
 
-    if(!style()->inherits("QThumbStyle")) {
+    // Show the find bar if we should show it.
+    QSettings cfg("Trolltech", "Contacts");
+    cfg.beginGroup("default");
+    if (cfg.value("EnableFindBar", !style()->inherits("QThumbStyle")).toBool()) {
         d->proxy = new QTextEntryProxy(this, d->view);
         d->proxy->setTrimText(true);
+        d->proxy->setFocusPolicy(Qt::ClickFocus);
         int mFindHeight = d->proxy->sizeHint().height();
         QLabel *findIcon = new QLabel;
         findIcon->setPixmap(QIcon(":icon/find").pixmap(mFindHeight-2, mFindHeight-2));
         findIcon->setMargin(2);
+        findIcon->setFocusPolicy(Qt::NoFocus);
 
         QHBoxLayout *findLayout = new QHBoxLayout;
         findLayout->addWidget(findIcon);
@@ -595,6 +600,8 @@ void QContactSelector::init()
 
         connect( d->proxy, SIGNAL(textChanged(QString)),
              this, SLOT(filterList(QString)) );
+
+        QtopiaApplication::setInputMethodHint(d->proxy, QtopiaApplication::Text);
     } else
         d->proxy = 0;
 
@@ -799,6 +806,18 @@ void QContactSelector::completed()
         else if (d->proxy)
             emit textSelected(d->proxy->text());
     }
+}
+
+/*!
+  \reimp
+*/
+void QContactSelector::showEvent(QShowEvent* event)
+{
+    // On show we want to give focus to the listview and not to the
+    // QTextEntryProxy. If the QTextEntryProxy gets the focus a keyboard
+    // might pop up and would occupy plenty of space.
+    QDialog::showEvent(event);    
+    d->view->setFocus();
 }
 
 /*!

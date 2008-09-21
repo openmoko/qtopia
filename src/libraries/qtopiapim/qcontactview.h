@@ -163,6 +163,9 @@ private slots:
     void contactModelReset();
     void completed();
 
+protected:
+    void showEvent(QShowEvent*);
+
 private:
     void init();
     QContactSelectorPrivate *d;
