@@ -634,17 +634,6 @@ void GsmKeyActions::modifyDial( QDialOptions& options, bool& handledAlready )
         }
     }
     options.setNumber( number );
-
-    // If the number starts with '*' or '#', and ends with a '#', then
-    // assume that this is a supplementary service request to be sent
-    // to the network.  TODO: USSD data?
-    if ( ( number.startsWith( QChar('*') ) ||
-           number.startsWith( QChar('#') ) ) &&
-         number.endsWith( QChar('#') ) ) {
-        d->supp->sendSupplementaryServiceData( number );
-        handledAlready = true;
-        return;
-    }
 }
 
 void GsmKeyActions::filterKeys( const QString& input, bool& filtered )
