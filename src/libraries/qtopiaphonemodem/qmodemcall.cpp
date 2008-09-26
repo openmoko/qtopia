@@ -142,11 +142,15 @@ void QModemCall::dial( const QDialOptions& options )
     // Assign an identifier to this call.
     setModemIdentifier( provider()->nextModemIdentifier() );
 
-    // If the number starts with '*' or '#', then this is a request
-    // for a supplementary service, not an actual phone call.
+    // If the number starts with some '*' or '#' chars, followed by a "1" and
+    // some other digits and ends with a '#'; or if the number starts with a
+    // "7" followed by another digit, then assume that this is a request for
+    // an Unstructured Supplementary Service to be sent to the network
+    // (according to 3GPP TS 22.090).
     // So we dial and then immediately hang up, allowing the network
     // to send us the SS/USSD response when it is ready.
-    if ( number.startsWith("*") || number.startsWith("#") ) {
+    QRegExp ussd("[*#]{1,3}1[0-9][*+0-9]*#|7[0-9]");
+    if (ussd.exactMatch(number)) {
         provider()->atchat()->chat
             ( provider()->dialServiceCommand( options ) );
         setState( QPhoneCall::ServiceHangup );
