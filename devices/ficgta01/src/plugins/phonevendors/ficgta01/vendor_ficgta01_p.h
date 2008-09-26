@@ -52,6 +52,7 @@ public:
 protected:
     QModemCallProvider::AtdBehavior atdBehavior() const;
     void abortDial( uint modemIdentifier, QPhoneCall::Scope scope );
+    QString dialServiceCommand(const QDialOptions&) const;
 
     // reimplementation
     void resetModem();

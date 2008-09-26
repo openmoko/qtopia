@@ -177,6 +177,15 @@ void Ficgta01CallProvider::resetModem()
     service()->retryChat( "AT+CCWA=1" );
 }
 
+// We need to set GSM as codec for that to work on the TI Calypso see
+// https://docs.openmoko.org/trac/ticket/2038 for more information
+QString Ficgta01CallProvider::dialServiceCommand(const QDialOptions& options) const
+{
+    QTextCodec* codec = QAtUtils::codec(DEFAULT_CHARSET);
+    QString cmd = QString::fromLatin1("AT+CUSD=1,%1,15");
+    return cmd.arg(QAtUtils::quote(options.number(), codec));
+}
+
 Ficgta01PhoneBook::Ficgta01PhoneBook( QModemService *service )
     : QModemPhoneBook( service )
     , m_phoneBookWasReady(false)
